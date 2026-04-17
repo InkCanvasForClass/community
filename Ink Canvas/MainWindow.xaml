@@ -45,6 +45,8 @@
                 <ResourceDictionary Source="MainWindow_cs/MW_Eraser.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
+            <SolidColorBrush x:Key="NavButtonActiveBackground" Color="#3b82f6"/>
+
             <c:IsEnabledToOpacityConverter x:Key="IsEnabledToOpacityConverter" />
             <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <c:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
@@ -170,47 +172,44 @@
                                     <Setter Property="Background" Value="#27272a"/>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
-                                    <Setter Property="Background" Value="#3b82f6"/>
+                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
                                 </Trigger>
                                 <!-- 使用多个DataTrigger替代动态绑定 -->
                                 <DataTrigger Binding="{Binding Tag}" Value="startup">
-                                    <Setter Property="Background" Value="#3b82f6"/>
+                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Tag}" Value="canvas">
-                                    <Setter Property="Background" Value="#3b82f6"/>
+                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Tag}" Value="gesture">
-                                    <Setter Property="Background" Value="#3b82f6"/>
+                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Tag}" Value="inkrecognition">
-                                    <Setter Property="Background" Value="#3b82f6"/>
+                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Tag}" Value="crashaction">
-                                    <Setter Property="Background" Value="#3b82f6"/>
+                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Tag}" Value="ppt">
-                                    <Setter Property="Background" Value="#3b82f6"/>
+                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Tag}" Value="advanced">
-                                    <Setter Property="Background" Value="#3b82f6"/>
+                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Tag}" Value="automation">
-                                    <Setter Property="Background" Value="#3b82f6"/>
+                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Tag}" Value="randomwindow">
-                                    <Setter Property="Background" Value="#3b82f6"/>
+                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Tag}" Value="theme">
-                                    <Setter Property="Background" Value="#3b82f6"/>
+                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Tag}" Value="shortcuts">
-                                    <Setter Property="Background" Value="#3b82f6"/>
+                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Tag}" Value="about">
-                                    <Setter Property="Background" Value="#3b82f6"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="plugins">
-                                    <Setter Property="Background" Value="#3b82f6"/>
+                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
                                 </DataTrigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
