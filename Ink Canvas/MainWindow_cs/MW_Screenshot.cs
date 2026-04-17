@@ -353,7 +353,7 @@ namespace Ink_Canvas
                 await Task.Delay(150);
             }
 
-            BtnWhiteBoardAdd_Click(null, EventArgs.Empty);
+            BtnWhiteBoardAdd_Click(null, new RoutedEventArgs());
 
             await InsertBitmapSourceToCanvas(bitmapSourceForClipboard);
         }

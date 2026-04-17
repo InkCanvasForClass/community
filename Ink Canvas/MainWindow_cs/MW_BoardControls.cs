@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 
@@ -426,7 +427,10 @@ namespace Ink_Canvas
         /// <remarks>
         /// 该方法在切换前会取消当前选中元素（同时保留并恢复编辑模式）、调用视频呈现器的离开页前钩子、保存当前页的笔迹与元素、清空画布；切换到前一页后恢复该页内容、调用视频呈现器的页已更改钩子并刷新页面索引显示。
         /// </remarks>
-        private void BtnWhiteBoardSwitchPrevious_Click(object sender, MouseButtonEventArgs e)
+        private void BoardBtnWhiteBoardSwitchPrevious_MouseUp(object sender, MouseButtonEventArgs e)
+            => BtnWhiteBoardSwitchPrevious_Click(sender, e);
+
+        private void BtnWhiteBoardSwitchPrevious_Click(object sender, RoutedEventArgs e)
         {
             if (CurrentWhiteboardIndex <= 1) return;
 
@@ -458,7 +462,10 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">触发事件的源对象（通常为按钮）。</param>
         /// <param name="e">事件参数。</param>
-        private void BtnWhiteBoardSwitchNext_Click(object sender, MouseButtonEventArgs e)
+        private void BoardBtnWhiteBoardSwitchNext_MouseUp(object sender, MouseButtonEventArgs e)
+            => BtnWhiteBoardSwitchNext_Click(sender, e);
+
+        private void BtnWhiteBoardSwitchNext_Click(object sender, RoutedEventArgs e)
         {
             if (CurrentWhiteboardIndex < WhiteboardTotalCount &&
                 Settings.Automation.IsAutoSaveStrokesAtClear &&
@@ -505,7 +512,10 @@ namespace Ink_Canvas
         /// - 将当前页面的历史保存到时间轴并清空画布，然后在白板集合中插入一个空白页面（其历史为 null），随后恢复该页面并触发页面变更回调。  
         /// - 更新页码显示并在达到上限时禁用添加按钮；若侧边页列表可见，则刷新该列表。  
         /// </remarks>
-        private void BtnWhiteBoardAdd_Click(object sender, MouseButtonEventArgs e)
+        private void BoardBtnWhiteBoardAdd_MouseUp(object sender, MouseButtonEventArgs e)
+            => BtnWhiteBoardAdd_Click(sender, e);
+
+        private void BtnWhiteBoardAdd_Click(object sender, RoutedEventArgs e)
         {
             if (WhiteboardTotalCount >= 99) return;
             if (Settings.Automation.IsAutoSaveStrokesAtClear &&

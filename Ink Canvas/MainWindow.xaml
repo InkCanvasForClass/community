@@ -4509,7 +4509,7 @@
                                                                  Label="上一页"
                                                                  IconGeometry="F1 M24,24z M0,0z M7.40091,10.456L14.5033,3.35357 12.3198,1.17001 1.48978,12 12.3198,22.83 14.5033,20.6465 7.40089,13.544 22.5102,13.544 22.5102,10.456 7.40091,10.456z"
                                                                  IsEnabledBinding="{Binding ElementName=BtnWhiteBoardSwitchPrevious, Path=IsEnabled}"
-                                                                 ButtonMouseUp="BtnWhiteBoardSwitchPrevious_Click" />
+                                                                 ButtonMouseUp="BoardBtnWhiteBoardSwitchPrevious_MouseUp" />
                                     <Border Width="75" Height="50" MouseUp="BtnWhiteBoardPageIndex_Click"
                                             Name="BtnLeftPageListWB"
                                             BorderThickness="1,1,1,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}" Background="{DynamicResource BoardFloatBarBackground}"
@@ -4587,7 +4587,7 @@
                                                                  Label="下一页"
                                                                  IconGeometry="F1 M24,24z M0,0z M16.5991,10.456L9.49667,3.35357 11.6802,1.17001 22.5102,12 11.6802,22.83 9.49667,20.6465 16.5991,13.544 1.48978,13.544 1.48978,10.456 16.5991,10.456z"
                                                                  IsEnabledBinding="{Binding ElementName=BtnWhiteBoardSwitchNext, Path=IsEnabled}"
-                                                                 ButtonMouseUp="BtnWhiteBoardSwitchNext_Click" />
+                                                                 ButtonMouseUp="BoardBtnWhiteBoardSwitchNext_MouseUp" />
                                 </ikw:SimpleStackPanel>
                             </Border>
                             <Border Width="60" Height="50"
@@ -5715,7 +5715,7 @@
                                                                  Position="Single"
                                                                  Label="{i18n:I18n Key=Board_NewPage}"
                                                                  IconGeometry="F0 M24,24z M0,0z M7.39778,13.723L10.7693,13.723 10.7693,10.3514 13.2307,10.3514 13.2307,13.723 16.6022,13.723 16.6022,16.1843 13.2307,16.1843 13.2307,19.5559 10.7693,19.5559 10.7693,16.1843 7.39778,16.1843 7.39778,13.723z M3.1391,1.17001L3.1391,22.83 20.8609,22.83 20.8609,6.66948 15.3614,1.17002 3.1391,1.17001z M12.9846,3.13911L5.10819,3.1391 5.10819,20.8609 18.8918,20.8609 18.8918,9.04638 12.9846,9.04638 12.9846,3.13911z M18.484,7.07729L14.9536,3.54692 14.9536,7.07729 18.484,7.07729z"
-                                                                 ButtonMouseUp="BtnWhiteBoardAdd_Click" />
+                                                                 ButtonMouseUp="BoardBtnWhiteBoardAdd_MouseUp" />
                             <Border CornerRadius="5,5,5,5" Background="{DynamicResource BoardFloatBarBackground}" Margin="0,0,0,0">
                                 <ikw:SimpleStackPanel Orientation="Horizontal">
                                     <controls:BoardToolbarButton x:Name="BtnRightWhiteBoardSwitchPrevious"
@@ -5723,7 +5723,7 @@
                                                                  Label="{i18n:I18n Key=Board_PreviousPage}"
                                                                  IconGeometry="F1 M24,24z M0,0z M7.40091,10.456L14.5033,3.35357 12.3198,1.17001 1.48978,12 12.3198,22.83 14.5033,20.6465 7.40089,13.544 22.5102,13.544 22.5102,10.456 7.40091,10.456z"
                                                                  IsEnabledBinding="{Binding ElementName=BtnWhiteBoardSwitchPrevious, Path=IsEnabled}"
-                                                                 ButtonMouseUp="BtnWhiteBoardSwitchPrevious_Click" />
+                                                                 ButtonMouseUp="BoardBtnWhiteBoardSwitchPrevious_MouseUp" />
                                     <Border Width="75" Height="50" MouseUp="BtnWhiteBoardPageIndex_Click"
                                             Name="BtnRightPageListWB"
                                             BorderThickness="1,1,1,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}" Background="{DynamicResource BoardFloatBarBackground}"
@@ -5801,7 +5801,7 @@
                                                                  Label="{i18n:I18n Key=Board_NextPage}"
                                                                  IconGeometry="F1 M24,24z M0,0z M16.5991,10.456L9.49667,3.35357 11.6802,1.17001 22.5102,12 11.6802,22.83 9.49667,20.6465 16.5991,13.544 1.48978,13.544 1.48978,10.456 16.5991,10.456z"
                                                                  IsEnabledBinding="{Binding ElementName=BtnWhiteBoardSwitchNext, Path=IsEnabled}"
-                                                                 ButtonMouseUp="BtnWhiteBoardSwitchNext_Click" />
+                                                                 ButtonMouseUp="BoardBtnWhiteBoardSwitchNext_MouseUp" />
                                 </ikw:SimpleStackPanel>
                             </Border>
                         </ikw:SimpleStackPanel>
