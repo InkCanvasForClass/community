@@ -718,6 +718,18 @@ namespace Ink_Canvas
                                     var endP = new Point(result.Centroid.X + result.ShapeWidth / 2,
                                         result.Centroid.Y + result.ShapeHeight / 2);
 
+                                    // WinRT 返回的热点顺序/方向不稳定时，用点集反推 IACore 风格椭圆参数（中心/长短轴/方向/四个端点）
+                                    var hasEllipseParams = TryEstimateEllipseParamsFromStrokes(
+                                        result.StrokesToRemove,
+                                        out var ellipseCentroid,
+                                        out var ellipseA,
+                                        out var ellipseB,
+                                        out var ellipseThetaRad,
+                                        out var ellipseMajor0,
+                                        out var ellipseMajor1,
+                                        out var ellipseMinor0,
+                                        out var ellipseMinor1);
+
                                     foreach (var circle in circles)
                                         //判断是否画同心椭圆
                                         if (Math.Abs(result.Centroid.X - circle.Centroid.X) / a < 0.2 &&
@@ -805,13 +817,17 @@ namespace Ink_Canvas
                                             }
                                         }
 
-                                    //纠正垂直与水平关系
-                                    var newPoints = FixPointsDirection(p[0], p[2]);
-                                    p[0] = newPoints[0];
-                                    p[2] = newPoints[1];
-                                    newPoints = FixPointsDirection(p[1], p[3]);
-                                    p[1] = newPoints[0];
-                                    p[3] = newPoints[1];
+                                    // 用反推参数替换中心与长短轴（比 WinRT 的包围盒更接近 IACore，且不会竖横翻转）
+                                    if (hasEllipseParams)
+                                    {
+                                        result.Centroid = ellipseCentroid;
+                                        a = ellipseA;
+                                        b = ellipseB;
+                                        iniP = new Point(result.Centroid.X - a, result.Centroid.Y - b);
+                                        endP = new Point(result.Centroid.X + a, result.Centroid.Y + b);
+                                        // 用端点重写热点，保证后续回退分支也一致
+                                        p = new PointCollection { ellipseMajor0, ellipseMinor0, ellipseMajor1, ellipseMinor1 };
+                                    }
 
                                     var pointList = GenerateEllipseGeometry(iniP, endP);
                                     var point = new StylusPointCollection(pointList);
@@ -823,9 +839,8 @@ namespace Ink_Canvas
                                     if (needRotation)
                                     {
                                         var m = new Matrix();
-                                        var fe = e.Source as FrameworkElement;
-                                        var tanTheta = (p[2].Y - p[0].Y) / (p[2].X - p[0].X);
-                                        var theta = Math.Atan(tanTheta);
+                                        // 优先使用反推参数角度；否则用端点向量角度（使用 Atan2 避免斜率无穷）
+                                        var theta = hasEllipseParams ? ellipseThetaRad : Math.Atan2(p[2].Y - p[0].Y, p[2].X - p[0].X);
                                         m.RotateAt(theta * 180.0 / Math.PI, result.Centroid.X, result.Centroid.Y);
                                         stroke.Transform(m, false);
                                     }
@@ -2280,6 +2295,124 @@ namespace Ink_Canvas
             }
 
             return new Point[2] { p1, p2 };
+        }
+
+        /// <summary>
+        /// 用点集拟合出 IACore 风格椭圆参数（中心/长短半轴/方向/四个端点）。
+        /// 解决 WinRT 返回热点顺序不稳定导致椭圆纠正角度翻转的问题。
+        /// </summary>
+        private static bool TryEstimateEllipseParamsFromStrokes(
+            StrokeCollection strokes,
+            out Point centroid,
+            out double a,
+            out double b,
+            out double thetaRad,
+            out Point major0,
+            out Point major1,
+            out Point minor0,
+            out Point minor1)
+        {
+            centroid = default;
+            a = b = 0;
+            thetaRad = 0;
+            major0 = major1 = minor0 = minor1 = default;
+
+            if (strokes == null || strokes.Count == 0) return false;
+
+            var pts = new List<Point>(256);
+            foreach (var s in strokes)
+            {
+                if (s?.StylusPoints == null) continue;
+                foreach (var sp in s.StylusPoints)
+                    pts.Add(sp.ToPoint());
+            }
+
+            if (pts.Count < 12) return false;
+
+            double mx = 0, my = 0;
+            for (int i = 0; i < pts.Count; i++)
+            {
+                mx += pts[i].X;
+                my += pts[i].Y;
+            }
+            mx /= pts.Count;
+            my /= pts.Count;
+            centroid = new Point(mx, my);
+
+            double sxx = 0, syy = 0, sxy = 0;
+            for (int i = 0; i < pts.Count; i++)
+            {
+                var dx = pts[i].X - mx;
+                var dy = pts[i].Y - my;
+                sxx += dx * dx;
+                syy += dy * dy;
+                sxy += dx * dy;
+            }
+
+            if (sxx + syy < 1e-6) return false;
+
+            thetaRad = 0.5 * Math.Atan2(2.0 * sxy, sxx - syy);
+            if (double.IsNaN(thetaRad) || double.IsInfinity(thetaRad)) return false;
+
+            // 主轴单位向量 v1=(cos,sin)，次轴 v2=(-sin,cos)
+            var cos = Math.Cos(thetaRad);
+            var sin = Math.Sin(thetaRad);
+
+            // 投影收集，用分位数抑制离群点
+            var us = new double[pts.Count];
+            var vs = new double[pts.Count];
+            double maxU = double.MinValue, minU = double.MaxValue;
+            double maxV = double.MinValue, minV = double.MaxValue;
+            for (int i = 0; i < pts.Count; i++)
+            {
+                var dx = pts[i].X - mx;
+                var dy = pts[i].Y - my;
+                var u = dx * cos + dy * sin;
+                var v = -dx * sin + dy * cos;
+                us[i] = u;
+                vs[i] = v;
+                if (u > maxU) maxU = u;
+                if (u < minU) minU = u;
+                if (v > maxV) maxV = v;
+                if (v < minV) minV = v;
+            }
+
+            Array.Sort(us);
+            Array.Sort(vs);
+
+            int hi = (int)Math.Round((pts.Count - 1) * 0.98);
+            int lo = (int)Math.Round((pts.Count - 1) * 0.02);
+            hi = Math.Max(0, Math.Min(pts.Count - 1, hi));
+            lo = Math.Max(0, Math.Min(pts.Count - 1, lo));
+
+            var uHi = us[hi];
+            var uLo = us[lo];
+            var vHi = vs[hi];
+            var vLo = vs[lo];
+
+            var aCandidate = Math.Max(Math.Abs(uHi), Math.Abs(uLo));
+            var bCandidate = Math.Max(Math.Abs(vHi), Math.Abs(vLo));
+            if (aCandidate < 1e-3) aCandidate = Math.Max(Math.Abs(maxU), Math.Abs(minU));
+            if (bCandidate < 1e-3) bCandidate = Math.Max(Math.Abs(maxV), Math.Abs(minV));
+
+            a = aCandidate;
+            b = bCandidate;
+
+            // 保证 a 为长半轴
+            if (b > a)
+            {
+                var t = a; a = b; b = t;
+                thetaRad += Math.PI / 2;
+                cos = Math.Cos(thetaRad);
+                sin = Math.Sin(thetaRad);
+            }
+
+            major0 = new Point(mx - a * cos, my - a * sin);
+            major1 = new Point(mx + a * cos, my + a * sin);
+            minor0 = new Point(mx + b * sin, my - b * cos);
+            minor1 = new Point(mx - b * sin, my + b * cos);
+
+            return a > 1e-2 && b > 1e-2;
         }
 
         public StylusPointCollection GenerateFakePressureTriangle(StylusPointCollection points)
