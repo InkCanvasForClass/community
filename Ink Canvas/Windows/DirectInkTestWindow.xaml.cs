@@ -17,15 +17,15 @@ namespace Ink_Canvas.Windows
         {
             // 启用鼠标、触摸和触控笔输入 (WPF 默认全支持，但 UWP DirectInk 需要显式开启)
             DirectInkCanvas.InkPresenter.InputDeviceTypes =
-                Windows.UI.Core.CoreInputDeviceTypes.Mouse |
-                Windows.UI.Core.CoreInputDeviceTypes.Pen |
-                Windows.UI.Core.CoreInputDeviceTypes.Touch;
+                global::Windows.UI.Core.CoreInputDeviceTypes.Mouse |
+                global::Windows.UI.Core.CoreInputDeviceTypes.Pen |
+                global::Windows.UI.Core.CoreInputDeviceTypes.Touch;
 
             // 设置默认画笔属性
-            SetPenColor(Windows.UI.Colors.Black);
+            SetPenColor(global::Windows.UI.Colors.Black);
         }
 
-        private void SetPenColor(Windows.UI.Color color)
+        private void SetPenColor(global::Windows.UI.Color color)
         {
             var drawingAttributes = new InkDrawingAttributes();
             drawingAttributes.Color = color;
@@ -48,13 +48,13 @@ namespace Ink_Canvas.Windows
 
         private void BtnColorRed_Click(object sender, RoutedEventArgs e)
         {
-            SetPenColor(Windows.UI.Colors.Red);
+            SetPenColor(global::Windows.UI.Colors.Red);
             DirectInkCanvas.InkPresenter.InputProcessingConfiguration.Mode = InkInputProcessingMode.Inking;
         }
 
         private void BtnColorBlack_Click(object sender, RoutedEventArgs e)
         {
-            SetPenColor(Windows.UI.Colors.Black);
+            SetPenColor(global::Windows.UI.Colors.Black);
             DirectInkCanvas.InkPresenter.InputProcessingConfiguration.Mode = InkInputProcessingMode.Inking;
         }
 
