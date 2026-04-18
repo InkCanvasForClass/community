@@ -14,7 +14,10 @@
         </Grid.RowDefinitions>
         
         <!-- 工具栏 -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Background="#FFF0F0F0" Padding="10">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Background="#FFF0F0F0">
+            <StackPanel.Margin>
+                <Thickness>10</Thickness>
+            </StackPanel.Margin>
             <Button x:Name="BtnPen" Content="书写模式" Padding="10,5" Margin="0,0,10,0" Click="BtnPen_Click"/>
             <Button x:Name="BtnEraser" Content="橡皮擦模式" Padding="10,5" Margin="0,0,10,0" Click="BtnEraser_Click"/>
             <Button x:Name="BtnColorRed" Content="红色" Padding="10,5" Margin="0,0,10,0" Click="BtnColorRed_Click"/>
