@@ -17,14 +17,14 @@ class MyHTMLParser(HTMLParser):
     def handle_endtag(self, tag):
         if tag == 'a' and self.in_snippet:
             self.in_snippet = False
-            self.snippets.append("".join(self.current_snippet))
+            self.snippets.append(''.join(self.current_snippet))
             self.current_snippet = []
 
     def handle_data(self, data):
         if self.in_snippet:
             self.current_snippet.append(data)
 
-url = "https://html.duckduckgo.com/html/?q=site:github.com+%22UpdateDefaultDrawingAttributes%22+%22Microsoft.Toolkit.Win32%22"
+url = 'https://html.duckduckgo.com/html/?q=site:github.com+%22InkPresenter%22+%22UpdateDefaultDrawingAttributes%22+%22Wpf%22'
 req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
 try:
     with urllib.request.urlopen(req) as response:
@@ -32,6 +32,6 @@ try:
         parser = MyHTMLParser()
         parser.feed(html)
         for i, s in enumerate(parser.snippets):
-            print(f"Snippet {i}: {s}")
+            print(f'Snippet {i}: {s}')
 except Exception as e:
     print(e)

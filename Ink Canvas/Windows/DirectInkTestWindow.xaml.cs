@@ -34,8 +34,9 @@ namespace Ink_Canvas.Windows
             uwpDrawingAttributes.IgnorePressure = false; // 启用压感
             uwpDrawingAttributes.FitToCurve = true; // 启用硬件级平滑拟合
             
-            // 将 Wrapper 类型显式转换为原生 UWP InkPresenter 类型，以调用 UpdateDefaultDrawingAttributes
-            var nativePresenter = (global::Windows.UI.Input.Inking.InkPresenter)DirectInkCanvas.InkPresenter;
+            // 使用反射获取包装类中的原生 UWP InkPresenter 实例
+            var propInfo = DirectInkCanvas.InkPresenter.GetType().GetProperty("UwpInstance", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var nativePresenter = (global::Windows.UI.Input.Inking.InkPresenter)propInfo.GetValue(DirectInkCanvas.InkPresenter);
             nativePresenter.UpdateDefaultDrawingAttributes(uwpDrawingAttributes);
         }
 
