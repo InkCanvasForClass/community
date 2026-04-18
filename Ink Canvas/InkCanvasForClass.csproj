@@ -74,7 +74,6 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
     <Title>InkCanvasForClass</Title>
     <Version>1.7</Version>
     <Authors>CJK_mkp</Authors>
