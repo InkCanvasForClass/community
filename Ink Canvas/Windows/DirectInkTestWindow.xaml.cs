@@ -34,32 +34,31 @@ namespace Ink_Canvas.Windows
             uwpDrawingAttributes.IgnorePressure = false; // 启用压感
             uwpDrawingAttributes.FitToCurve = true; // 启用硬件级平滑拟合
             
-            // XAML Island 包装类的 API 方法需要使用强类型的 Interop 参数或扩展方法
-            DirectInkCanvas.InkPresenter.UpdateDefaultDrawingAttributes(
-                new Microsoft.Toolkit.Win32.UI.Controls.Interop.WinRT.InkDrawingAttributes(uwpDrawingAttributes)
-            );
+            // 将 Wrapper 类型显式转换为原生 UWP InkPresenter 类型，以调用 UpdateDefaultDrawingAttributes
+            var nativePresenter = (global::Windows.UI.Input.Inking.InkPresenter)DirectInkCanvas.InkPresenter;
+            nativePresenter.UpdateDefaultDrawingAttributes(uwpDrawingAttributes);
         }
 
         private void BtnPen_Click(object sender, RoutedEventArgs e)
         {
-            DirectInkCanvas.InkPresenter.InputProcessingConfiguration.Mode = Microsoft.Toolkit.Win32.UI.Controls.Interop.WinRT.InkInputProcessingMode.Inking;
+            DirectInkCanvas.InkPresenter.InputProcessingConfiguration.Mode = global::Windows.UI.Input.Inking.InkInputProcessingMode.Inking;
         }
 
         private void BtnEraser_Click(object sender, RoutedEventArgs e)
         {
-            DirectInkCanvas.InkPresenter.InputProcessingConfiguration.Mode = Microsoft.Toolkit.Win32.UI.Controls.Interop.WinRT.InkInputProcessingMode.Erasing;
+            DirectInkCanvas.InkPresenter.InputProcessingConfiguration.Mode = global::Windows.UI.Input.Inking.InkInputProcessingMode.Erasing;
         }
 
         private void BtnColorRed_Click(object sender, RoutedEventArgs e)
         {
             SetPenColor(global::Windows.UI.Colors.Red);
-            DirectInkCanvas.InkPresenter.InputProcessingConfiguration.Mode = Microsoft.Toolkit.Win32.UI.Controls.Interop.WinRT.InkInputProcessingMode.Inking;
+            DirectInkCanvas.InkPresenter.InputProcessingConfiguration.Mode = global::Windows.UI.Input.Inking.InkInputProcessingMode.Inking;
         }
 
         private void BtnColorBlack_Click(object sender, RoutedEventArgs e)
         {
             SetPenColor(global::Windows.UI.Colors.Black);
-            DirectInkCanvas.InkPresenter.InputProcessingConfiguration.Mode = Microsoft.Toolkit.Win32.UI.Controls.Interop.WinRT.InkInputProcessingMode.Inking;
+            DirectInkCanvas.InkPresenter.InputProcessingConfiguration.Mode = global::Windows.UI.Input.Inking.InkInputProcessingMode.Inking;
         }
 
         private void BtnClear_Click(object sender, RoutedEventArgs e)
