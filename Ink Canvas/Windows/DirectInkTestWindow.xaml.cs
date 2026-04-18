@@ -29,35 +29,36 @@ namespace Ink_Canvas.Windows
 
         private void SetPenColor(global::Windows.UI.Color color)
         {
-            var drawingAttributes = new Microsoft.Toolkit.Win32.UI.Controls.Interop.WinRT.InkDrawingAttributes();
-            drawingAttributes.Color = color;
-            drawingAttributes.Size = new global::Windows.Foundation.Size(5, 5);
-            drawingAttributes.IgnorePressure = false; // 启用压感
-            drawingAttributes.FitToCurve = true; // 启用硬件级平滑拟合
+            var uwpDrawingAttributes = new global::Windows.UI.Input.Inking.InkDrawingAttributes();
+            uwpDrawingAttributes.Color = color;
+            uwpDrawingAttributes.Size = new global::Windows.Foundation.Size(5, 5);
+            uwpDrawingAttributes.IgnorePressure = false; // 启用压感
+            uwpDrawingAttributes.FitToCurve = true; // 启用硬件级平滑拟合
             
-            DirectInkCanvas.InkPresenter.UpdateDefaultDrawingAttributes(drawingAttributes);
+            var interopAttributes = new Microsoft.Toolkit.Win32.UI.Controls.Interop.WinRT.InkDrawingAttributes(uwpDrawingAttributes);
+            DirectInkCanvas.InkPresenter.UpdateDefaultDrawingAttributes(interopAttributes);
         }
 
         private void BtnPen_Click(object sender, RoutedEventArgs e)
         {
-            DirectInkCanvas.InkPresenter.InputProcessingConfiguration.Mode = Microsoft.Toolkit.Win32.UI.Controls.Interop.WinRT.InkInputProcessingMode.Inking;
+            DirectInkCanvas.InkPresenter.InputProcessingConfiguration.Mode = global::Windows.UI.Input.Inking.InkInputProcessingMode.Inking;
         }
 
         private void BtnEraser_Click(object sender, RoutedEventArgs e)
         {
-            DirectInkCanvas.InkPresenter.InputProcessingConfiguration.Mode = Microsoft.Toolkit.Win32.UI.Controls.Interop.WinRT.InkInputProcessingMode.Erasing;
+            DirectInkCanvas.InkPresenter.InputProcessingConfiguration.Mode = global::Windows.UI.Input.Inking.InkInputProcessingMode.Erasing;
         }
 
         private void BtnColorRed_Click(object sender, RoutedEventArgs e)
         {
             SetPenColor(global::Windows.UI.Colors.Red);
-            DirectInkCanvas.InkPresenter.InputProcessingConfiguration.Mode = Microsoft.Toolkit.Win32.UI.Controls.Interop.WinRT.InkInputProcessingMode.Inking;
+            DirectInkCanvas.InkPresenter.InputProcessingConfiguration.Mode = global::Windows.UI.Input.Inking.InkInputProcessingMode.Inking;
         }
 
         private void BtnColorBlack_Click(object sender, RoutedEventArgs e)
         {
             SetPenColor(global::Windows.UI.Colors.Black);
-            DirectInkCanvas.InkPresenter.InputProcessingConfiguration.Mode = Microsoft.Toolkit.Win32.UI.Controls.Interop.WinRT.InkInputProcessingMode.Inking;
+            DirectInkCanvas.InkPresenter.InputProcessingConfiguration.Mode = global::Windows.UI.Input.Inking.InkInputProcessingMode.Inking;
         }
 
         private void BtnClear_Click(object sender, RoutedEventArgs e)
