@@ -576,6 +576,12 @@
   <data name="InkRecog_ShapeEngineHint" xml:space="preserve">
     <value> 自动：64 位进程使用 WinRT（Windows 10+），32 位使用 IACore。可强制指定 IACore 或 WinRT。</value>
   </data>
+  <data name="InkRecog_HandwritingBeautify" xml:space="preserve">
+    <value>手写体纠正</value>
+  </data>
+  <data name="InkRecog_HandwritingBeautifyHint" xml:space="preserve">
+    <value># 开启后，将对手写笔画进行更平滑、更工整的纠正处理（基于 WinRT）。</value>
+  </data>
   <data name="InkRecog_ShapeEngineAuto" xml:space="preserve">
     <value>自动</value>
   </data>
@@ -1037,6 +1043,12 @@
   </data>
   <data name="Canvas_GroupTitle" xml:space="preserve">
     <value>画板</value>
+  </data>
+  <data name="Canvas_DisableHardwareAcceleration" xml:space="preserve">
+    <value>关闭硬件加速</value>
+  </data>
+  <data name="Canvas_DisableHardwareAccelerationHint" xml:space="preserve">
+    <value># 关闭后可提升兼容性，但可能降低性能；部分效果可能需要重启程序后完全生效。</value>
   </data>
   <data name="Canvas_ShowCursor" xml:space="preserve">
     <value>显示画笔光标</value>
