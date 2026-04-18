@@ -28,7 +28,8 @@
     <Configurations>Debug;Release</Configurations>
     <Platforms>AnyCPU;x86;x64;ARM64</Platforms>
     <!-- 引入 XAML Islands 需要指定 Windows 10 SDK 版本 -->
-    <TargetPlatformVersion>10.0.19041.0</TargetPlatformVersion>
+    <TargetPlatformVersion>10.0</TargetPlatformVersion>
+    <TargetPlatformMinVersion>10.0</TargetPlatformMinVersion>
     <AssetTargetFallback>true</AssetTargetFallback>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

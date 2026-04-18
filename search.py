@@ -1,5 +1,5 @@
 import urllib.request
-url = 'https://html.duckduckgo.com/html/?q=%22Unrecognized+Element%22+%22maxversiontested%22'
+url = 'https://html.duckduckgo.com/html/?q=%22Error+reading+assets+file%22+%22Imports+contains+an+invalid+framework%3A+%27unsupported%27%22'
 req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
 try:
     with urllib.request.urlopen(req) as response:
