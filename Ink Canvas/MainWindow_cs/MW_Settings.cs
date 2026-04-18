@@ -688,46 +688,6 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 处理开机启动开关状态更改事件
-        /// </summary>
-        /// <param name="sender">事件发送者</param>
-        /// <param name="e">路由事件参数</param>
-        /// <remarks>
-        /// 当开机启动开关状态更改时：
-        /// 1. 如果开启，删除旧的启动项并创建新的启动项
-        /// 2. 如果关闭，删除所有启动项
-        /// </remarks>
-        private void ToggleSwitchRunAtStartup_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!isLoaded) return;
-            if (ToggleSwitchRunAtStartup.IsOn)
-            {
-                StartAutomaticallyDel("InkCanvas");
-                StartAutomaticallyCreate("Ink Canvas Annotation");
-            }
-            else
-            {
-                StartAutomaticallyDel("InkCanvas");
-                StartAutomaticallyDel("Ink Canvas Annotation");
-            }
-        }
-
-        /// <summary>
-        /// 处理启动时折叠开关状态更改事件
-        /// </summary>
-        /// <param name="sender">事件发送者</param>
-        /// <param name="e">路由事件参数</param>
-        /// <remarks>
-        /// 当启动时折叠开关状态更改时，保存设置到文件
-        /// </remarks>
-        private void ToggleSwitchFoldAtStartup_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!isLoaded) return;
-            Settings.Startup.IsFoldAtStartup = ToggleSwitchFoldAtStartup.IsOn;
-            SaveSettingsToFile();
-        }
-
-        /// <summary>
         /// 处理PowerPoint支持开关状态更改事件
         /// </summary>
         /// <param name="sender">事件发送者</param>
@@ -3917,8 +3877,6 @@ namespace Ink_Canvas
                 SaveSettingsToFile();
                 LoadSettings(isStartup: false, skipAutoUpdateCheck: true);
                 isLoaded = true;
-
-                ToggleSwitchRunAtStartup.IsOn = false;
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
@@ -4203,14 +4161,6 @@ namespace Ink_Canvas
             if (!isLoaded) return;
             Settings.Advanced.IsSecondConfirmWhenShutdownApp = ToggleSwitchIsSecondConfimeWhenShutdownApp.IsOn;
             SaveSettingsToFile();
-        }
-
-        private void ToggleSwitchWindowMode_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!isLoaded) return;
-            Settings.Advanced.WindowMode = ToggleSwitchWindowMode.IsOn;
-            SaveSettingsToFile();
-            SetWindowMode();
         }
 
         private void ToggleSwitchIsAutoBackupBeforeUpdate_Toggled(object sender, RoutedEventArgs e)

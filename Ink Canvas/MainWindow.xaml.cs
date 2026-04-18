@@ -329,11 +329,9 @@ namespace Ink_Canvas
                 BlackBoardRightSidePageListScrollViewer.ReleaseTouchCapture(e.TouchDevice);
                 e.Handled = true;
             };
-            // 初始化无焦点模式开关
-            ToggleSwitchNoFocusMode.IsOn = Settings.Advanced.IsNoFocusMode;
+            // 应用无焦点模式设置
             ApplyNoFocusMode();
-            // 初始化窗口置顶开关
-            ToggleSwitchAlwaysOnTop.IsOn = Settings.Advanced.IsAlwaysOnTop;
+            // 应用窗口置顶设置
             ApplyAlwaysOnTop();
 
             // 添加窗口激活事件处理，确保置顶状态在窗口重新激活时得到保持
@@ -1367,16 +1365,17 @@ namespace Ink_Canvas
                 }), DispatcherPriority.Loaded);
             }
 
-            // 确保开关和设置同步
-            ToggleSwitchNoFocusMode.IsOn = Settings.Advanced.IsNoFocusMode;
+            // 应用无焦点模式设置
             ApplyNoFocusMode();
-            ToggleSwitchAlwaysOnTop.IsOn = Settings.Advanced.IsAlwaysOnTop;
+            // 应用窗口置顶设置
             ApplyAlwaysOnTop();
 
-            // 初始化UIA置顶开关
-            ToggleSwitchUIAccessTopMost.IsOn = Settings.Advanced.EnableUIAccessTopMost;
-
+            // 设置UIA置顶状态
             App.IsUIAccessTopMostEnabled = Settings.Advanced.EnableUIAccessTopMost;
+            if (Settings.Advanced.EnableUIAccessTopMost && Settings.Advanced.IsAlwaysOnTop)
+            {
+                ApplyUIAccessTopMost();
+            }
 
             // 初始化橡皮擦自动切换回批注模式开关
             if (ToggleSwitchEnableEraserAutoSwitchBack != null)
@@ -1618,7 +1617,7 @@ namespace Ink_Canvas
         /// 如果该设置为 true，将窗口置为普通状态并调整到主屏幕的左上角(0,0)及主屏幕分辨率的宽高，使窗口覆盖整个主屏幕；
         /// 否则将窗口设为最大化状态。
         /// </remarks>
-        private void SetWindowMode()
+        public void SetWindowMode()
         {
             if (Settings.Advanced.WindowMode)
             {
@@ -2997,7 +2996,7 @@ namespace Ink_Canvas
             }
         }
 
-        private void ApplyNoFocusMode()
+        public void ApplyNoFocusMode()
         {
             var hwnd = new WindowInteropHelper(this).Handle;
             int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
@@ -3017,7 +3016,7 @@ namespace Ink_Canvas
             }
         }
 
-        private void ApplyAlwaysOnTop()
+        public void ApplyAlwaysOnTop()
         {
             try
             {
@@ -3207,51 +3206,6 @@ namespace Ink_Canvas
                     ApplyAlwaysOnTop(); // 确保取消置顶
                 }
             }
-        }
-
-        private void ToggleSwitchNoFocusMode_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!isLoaded) return;
-            var toggle = sender as ToggleSwitch;
-            Settings.Advanced.IsNoFocusMode = toggle != null && toggle.IsOn;
-            SaveSettingsToFile();
-
-            if (isTemporarilyDisablingNoFocusMode)
-            {
-                isTemporarilyDisablingNoFocusMode = false;
-            }
-
-            ApplyNoFocusMode();
-
-            // 如果启用了窗口置顶，需要重新应用置顶设置以处理无焦点模式的变化
-            if (Settings.Advanced.IsAlwaysOnTop)
-            {
-                ApplyAlwaysOnTop();
-            }
-
-        }
-
-        private void ToggleSwitchAlwaysOnTop_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!isLoaded) return;
-            var toggle = sender as ToggleSwitch;
-            Settings.Advanced.IsAlwaysOnTop = toggle != null && toggle.IsOn;
-            SaveSettingsToFile();
-            ApplyAlwaysOnTop();
-        }
-
-        private void ToggleSwitchUIAccessTopMost_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!isLoaded) return;
-            var toggle = sender as ToggleSwitch;
-            bool newValue = toggle != null && toggle.IsOn;
-
-            Settings.Advanced.EnableUIAccessTopMost = newValue;
-            SaveSettingsToFile();
-            ApplyUIAccessTopMost();
-
-            App.IsUIAccessTopMostEnabled = newValue;
-
         }
 
         private void Window_Activated(object sender, EventArgs e)
@@ -4630,7 +4584,7 @@ namespace Ink_Canvas
         /// <summary>
         /// 应用UIA置顶功能
         /// </summary>
-        private void ApplyUIAccessTopMost()
+        public void ApplyUIAccessTopMost()
         {
             try
             {
@@ -4651,8 +4605,8 @@ namespace Ink_Canvas
                                 App.watchdogProcess = null;
                             }
 
+                            App.StartWatchdogIfNeeded();
 
-                            // 调用UIAccess DLL
                             if (Environment.Is64BitProcess)
                             {
                                 PrepareUIAccessX64();
@@ -4662,7 +4616,6 @@ namespace Ink_Canvas
                                 PrepareUIAccessX86();
                             }
 
-                            App.StartWatchdogIfNeeded();
                             timerKillProcess.Start();
                         }
                         catch (Exception ex)

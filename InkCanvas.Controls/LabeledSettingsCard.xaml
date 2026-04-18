@@ -1,0 +1,16 @@
+<UserControl x:Class="Ink_Canvas.Controls.LabeledSettingsCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf">
+    <ui:SettingsCard x:Name="SettingsCard"
+                     Description="{Binding Description, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                     Header="{Binding Header, RelativeSource={RelativeSource AncestorType=UserControl}}">
+        <ui:ToggleSwitch x:Name="ToggleSwitch"
+                         OnContent="{DynamicResource Common_On}"
+                         OffContent="{DynamicResource Common_Off}"
+                         IsOn="{Binding IsOn, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
+                         FontWeight="Bold"
+                         Toggled="ToggleSwitch_Toggled"/>
+    </ui:SettingsCard>
+</UserControl>

@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using Sentry;
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -32,6 +33,20 @@ namespace Ink_Canvas
     public partial class App : Application
     {
         Mutex mutex;
+
+        public void ReleaseMutexForRestart()
+        {
+            try
+            {
+                if (mutex != null)
+                {
+                    mutex.ReleaseMutex();
+                    mutex.Dispose();
+                    mutex = null;
+                }
+            }
+            catch { }
+        }
 
         public static string[] StartArgs;
         public static string RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
@@ -696,6 +711,16 @@ namespace Ink_Canvas
         {
             appStartTime = DateTime.Now;
             appStartupStartTime = DateTime.Now;
+
+            var resourceSet = Strings.ResourceManager.GetResourceSet(CultureInfo.CurrentUICulture, true, true);
+            if (resourceSet != null)
+            {
+                foreach (System.Collections.DictionaryEntry entry in resourceSet)
+                {
+                    if (entry.Key is string key && entry.Value is string value)
+                        Current.Resources[key] = value;
+                }
+            }
 
             // 根据设置决定是否显示启动画面
             if (ShouldShowSplashScreen() && !IsLaunchByFileOrUri(e.Args))

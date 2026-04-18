@@ -656,11 +656,6 @@
                                                    FontSize="26" />
                                     </GroupBox.Header>
                                     <ikw:SimpleStackPanel Spacing="6">
-                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchNoFocusMode" Label="{i18n:I18n Key=Startup_NoFocusMode}" IsOn="True" Toggled="ToggleSwitchNoFocusMode_Toggled"/>
-                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchWindowMode" Label="{i18n:I18n Key=Startup_NoBorderMode}" IsOn="True" Toggled="ToggleSwitchWindowMode_Toggled"/>
-                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchAlwaysOnTop" Label="{i18n:I18n Key=Startup_TopMost}" IsOn="True" Toggled="ToggleSwitchAlwaysOnTop_Toggled"/>
-                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchUIAccessTopMost" Label="{i18n:I18n Key=Startup_UIATopMost}" IsOn="False" Toggled="ToggleSwitchUIAccessTopMost_Toggled"
-                                                                      Hint="{i18n:I18n Key=Startup_UIAccessTopMostHint}" ShowWhen="{Binding IsOn, ElementName=ToggleSwitchAlwaysOnTop}" />
                                         <controls:LabeledToggleSwitch x:Name="ToggleSwitchIsAutoUpdate" Label="{i18n:I18n Key=Header_AutoUpdate}" IsOn="True" Toggled="ToggleSwitchIsAutoUpdate_Toggled"/>
                                         <controls:LabeledToggleSwitch x:Name="ToggleSwitchIsAutoUpdateWithSilence" Label="{i18n:I18n Key=Header_SilentUpdate}" IsOn="True" Toggled="ToggleSwitchIsAutoUpdateWithSilence_Toggled"
                                                                       Hint="{i18n:I18n Key=Startup_SilentUpdateHint}" ShowWhen="{Binding IsOn, ElementName=ToggleSwitchIsAutoUpdate}"/>
@@ -741,8 +736,6 @@
                                                 </ikw:SimpleStackPanel>
                                             </ikw:SimpleStackPanel>
                                         </Border>
-                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchRunAtStartup" Label="{i18n:I18n Key=Startup_RunAtStartup}" IsOn="True" Toggled="ToggleSwitchRunAtStartup_Toggled"/>
-                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchFoldAtStartup" Label="{i18n:I18n Key=Startup_FoldAtStartup}" IsOn="True" Toggled="ToggleSwitchFoldAtStartup_Toggled"/>
                                         <!--<ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchAutoHideCanvas" Header="自动隐藏画板" Toggled="ToggleSwitchAutoHideCanvas_Toggled"/>
                                         <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchAutoEnterModeFinger" Header="自动进入手指模式" Toggled="ToggleSwitchAutoEnterModeFinger_Toggled"/>-->
                                     </ikw:SimpleStackPanel>

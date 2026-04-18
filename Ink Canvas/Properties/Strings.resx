@@ -273,6 +273,27 @@
   <data name="Startup_UIATopMostHint" xml:space="preserve">
     <value># 开启UIA置顶后，软件需要管理员启动才能置顶…</value>
   </data>
+  <data name="Startup_TopMostMode" xml:space="preserve">
+    <value>置顶模式</value>
+  </data>
+  <data name="Startup_TopMostMode_Normal" xml:space="preserve">
+    <value>普通置顶</value>
+  </data>
+  <data name="Startup_TopMostMode_UIA" xml:space="preserve">
+    <value>UIA置顶（需要管理员权限）</value>
+  </data>
+  <data name="Startup_TopMostMode_UIA_RestartRequired" xml:space="preserve">
+    <value>切换到UIA置顶模式需要重启软件才能生效，是否立即重启？</value>
+  </data>
+  <data name="Startup_TopMostMode_Normal_RestartRequired" xml:space="preserve">
+    <value>切换到普通置顶模式需要重启软件才能生效，是否立即重启？</value>
+  </data>
+  <data name="Startup_TopMostMode_RestartAsAdmin" xml:space="preserve">
+    <value>重启到管理员模式</value>
+  </data>
+  <data name="Startup_TopMostMode_RestartAsNormal" xml:space="preserve">
+    <value>切换到非管理员模式</value>
+  </data>
   <data name="Header_AutoUpdate" xml:space="preserve">
     <value>自动检查更新</value>
   </data>

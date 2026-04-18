@@ -258,6 +258,27 @@
   <data name="Startup_UIATopMostHint" xml:space="preserve">
     <value># UIA topmost requires admin to take effect.</value>
   </data>
+  <data name="Startup_TopMostMode" xml:space="preserve">
+    <value>Topmost Mode</value>
+  </data>
+  <data name="Startup_TopMostMode_Normal" xml:space="preserve">
+    <value>Normal Topmost</value>
+  </data>
+  <data name="Startup_TopMostMode_UIA" xml:space="preserve">
+    <value>UIA Topmost (Requires Admin)</value>
+  </data>
+  <data name="Startup_TopMostMode_UIA_RestartRequired" xml:space="preserve">
+    <value>Switching to UIA topmost mode requires a restart to take effect. Restart now?</value>
+  </data>
+  <data name="Startup_TopMostMode_Normal_RestartRequired" xml:space="preserve">
+    <value>Switching to normal topmost mode requires a restart to take effect. Restart now?</value>
+  </data>
+  <data name="Startup_TopMostMode_RestartAsAdmin" xml:space="preserve">
+    <value>Restart as Administrator</value>
+  </data>
+  <data name="Startup_TopMostMode_RestartAsNormal" xml:space="preserve">
+    <value>Switch to Non-Admin Mode</value>
+  </data>
   <data name="Header_AutoUpdate" xml:space="preserve">
     <value>Auto-update</value>
   </data>

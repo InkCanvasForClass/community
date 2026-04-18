@@ -216,24 +216,6 @@ namespace Ink_Canvas
             {
             }
 
-            try
-            {
-                if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Startup) +
-                                "\\Ink Canvas Annotation.lnk"))
-                {
-                    ToggleSwitchRunAtStartup.IsOn = true;
-                }
-                else
-                {
-                    ToggleSwitchRunAtStartup.IsOn = false;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
-                ToggleSwitchRunAtStartup.IsOn = false;
-            }
-
             if (Settings.Startup != null)
             {
                 if (isStartup)
@@ -242,11 +224,6 @@ namespace Ink_Canvas
                     {
                         DelAutoSavedFiles.DeleteFilesOlder(Settings.Automation.AutoSavedStrokesLocation,
                             Settings.Automation.AutoDelSavedFilesDaysThreshold);
-                    }
-
-                    if (Settings.Startup.IsFoldAtStartup && !App.StartWithBoardMode)
-                    {
-                        FoldFloatingBar_MouseUp(Fold_Icon, null);
                     }
                 }
 
@@ -331,8 +308,6 @@ namespace Ink_Canvas
                     AutoUpdateWithSilenceStartTimeComboBox, AutoUpdateWithSilenceEndTimeComboBox);
                 AutoUpdateWithSilenceStartTimeComboBox.SelectedItem = Settings.Startup.AutoUpdateWithSilenceStartTime;
                 AutoUpdateWithSilenceEndTimeComboBox.SelectedItem = Settings.Startup.AutoUpdateWithSilenceEndTime;
-
-                ToggleSwitchFoldAtStartup.IsOn = Settings.Startup.IsFoldAtStartup;
             }
             else
             {
@@ -1003,7 +978,6 @@ namespace Ink_Canvas
                 ToggleSwitchIsLogEnabled.IsOn = Settings.Advanced.IsLogEnabled;
                 ToggleSwitchIsSaveLogByDate.IsOn = Settings.Advanced.IsSaveLogByDate;
                 ToggleSwitchIsSecondConfimeWhenShutdownApp.IsOn = Settings.Advanced.IsSecondConfirmWhenShutdownApp;
-                ToggleSwitchWindowMode.IsOn = Settings.Advanced.WindowMode;
                 ToggleSwitchIsSpecialScreen.IsOn = Settings.Advanced.IsSpecialScreen;
                 ToggleSwitchIsEnableUriScheme.IsOn = Settings.Advanced.IsEnableUriScheme;
                 ToggleSwitchIsQuadIR.IsOn = Settings.Advanced.IsQuadIR;
