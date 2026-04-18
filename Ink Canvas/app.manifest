@@ -41,7 +41,7 @@
 
       <!-- Windows 10 -->
       <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}" />
-      <maxversiontested Id="10.0.19041.0"/>
+      <maxversiontested Id="10.0.18362.0"/>
 
     </application>
   </compatibility>
@@ -76,7 +76,7 @@
   </application>
 
   <!-- Enable themes for Windows common controls and dialogs (Windows XP and later) -->
-
+  <!--
   <dependency>
     <dependentAssembly>
       <assemblyIdentity
@@ -89,6 +89,7 @@
         />
     </dependentAssembly>
   </dependency>
+  -->
   
 
 </assembly>
