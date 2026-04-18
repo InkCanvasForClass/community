@@ -1111,6 +1111,10 @@ namespace Ink_Canvas
             };
 
             mainWindow.Show();
+            
+            // 启动 DirectInk DX12 测试画板
+            var testWindow = new Windows.DirectInkTestWindow();
+            testWindow.Show();
 
             // 处理启动时的URI参数
             string startupUriArg = e.Args.FirstOrDefault(a => a.StartsWith("icc:", StringComparison.OrdinalIgnoreCase));

@@ -1,0 +1,28 @@
+<Window x:Class="Ink_Canvas.Windows.DirectInkTestWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:Microsoft.Toolkit.Wpf.UI.Controls;assembly=Microsoft.Toolkit.Wpf.UI.Controls"
+        mc:Ignorable="d"
+        Title="DirectInk DX12 测试画板" Height="600" Width="800"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- 工具栏 -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Background="#FFF0F0F0" Padding="10">
+            <Button x:Name="BtnPen" Content="书写模式" Padding="10,5" Margin="0,0,10,0" Click="BtnPen_Click"/>
+            <Button x:Name="BtnEraser" Content="橡皮擦模式" Padding="10,5" Margin="0,0,10,0" Click="BtnEraser_Click"/>
+            <Button x:Name="BtnColorRed" Content="红色" Padding="10,5" Margin="0,0,10,0" Click="BtnColorRed_Click"/>
+            <Button x:Name="BtnColorBlack" Content="黑色" Padding="10,5" Margin="0,0,10,0" Click="BtnColorBlack_Click"/>
+            <Button x:Name="BtnClear" Content="清空画板" Padding="10,5" Margin="0,0,10,0" Click="BtnClear_Click"/>
+        </StackPanel>
+
+        <!-- DirectInk 硬件加速画板 (XAML Island) -->
+        <controls:InkCanvas x:Name="DirectInkCanvas" Grid.Row="1" />
+    </Grid>
+</Window>
