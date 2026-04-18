@@ -236,7 +236,7 @@ jobs:
       - name: Check if exe file is generated
         id: check-exe
         run: |
-          $exePath = "Ink Canvas\bin\Release\${{ matrix.architecture }}\net472\InkCanvasForClass.exe"
+          $exePath = "Ink Canvas\bin\Release\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\InkCanvasForClass.exe"
           
           if (Test-Path $exePath) {
             echo "build_success=true" >> $env:GITHUB_OUTPUT
@@ -284,7 +284,7 @@ jobs:
           New-Item -ItemType Directory -Path "release" -Force
           
           # 复制发布文件（使用架构特定的路径）
-          Copy-Item "Ink Canvas\bin\Release\$architecture\net472\*" "release/" -Recurse -Force
+          Copy-Item "Ink Canvas\bin\Release\$architecture\net6.0-windows10.0.19041.0\*" "release/" -Recurse -Force
           
           # 创建压缩包
           Compress-Archive -Path "release/*" -DestinationPath $archiveName -Force
@@ -750,5 +750,5 @@ jobs:
             /repos/InkCanvasForClass/community/contents/AutomaticUpdateVersionControl.txt \
             -f message="Update AutomaticUpdateVersionControl.txt" \
             -f content="$CONTENT" \
-            -f branch="beta" \
+            -f branch="net6" \
             ${SHA:+-f sha="$SHA"}

@@ -55,13 +55,13 @@
 4. 如果上述方法不能解决你的问题，请参考这个链接[【点击此处以跳转】](https://www.inkeys.top/tutorial/ppt-com.html)
 
 ### 程序无法正常启动
-请检查你的电脑上是否安装了 `.Net Framework 4.7.2` 或更高版本。若没有，请[前往官网](https://dotnet.microsoft.com/zh-cn/download/dotnet-framework/thank-you/net472-offline-installer "下载 .Net Framework 4.7.2")下载安装。
+请检查你的电脑上是否安装了 `.Net Runtime 6.0` 或更高版本。若没有，请[前往官网](https://dotnet.microsoft.com/zh-cn/download/dotnet/6.0)下载安装。
 
 如果仍无法运行，请[安装 `Microsoft Office`](https://www.coolhub.top/archives/11)。
 
 ## ✏️ 贡献指南
 
-**请注意，在贡献代码时，_务必_ 将所有代码提交到 _beta_ 分支，以保证beta版本总是新于main版本。**
+**请注意，在贡献代码时，_务必_ 将所有代码提交到 _net6_ 分支，以保证net6版本总是新于main版本。**
 
 ## TODO LIST
 1. 预备2.0版本开发
