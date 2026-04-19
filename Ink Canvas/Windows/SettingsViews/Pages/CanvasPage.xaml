@@ -60,8 +60,8 @@
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EraseTool}" />
                         </ui:SettingsCard.HeaderIcon>
-                        <ComboBox x:Name="ComboBoxEraserSize" Width="160"
-                                  SelectedIndex="2"
+                        <ComboBox x:Name="ComboBoxEraserSize"
+                                  SelectedIndex="1"
                                   SelectionChanged="ComboBoxEraserSize_SelectionChanged">
                             <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_VerySmall}" />
                             <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_Small}" />
@@ -108,7 +108,7 @@
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AreaChart}" />
                         </ui:SettingsCard.HeaderIcon>
-                        <ComboBox x:Name="ComboBoxHyperbolaAsymptoteOption" Width="160"
+                        <ComboBox x:Name="ComboBoxHyperbolaAsymptoteOption"
                                   SelectedIndex="0"
                                   SelectionChanged="ComboBoxHyperbolaAsymptoteOption_SelectionChanged">
                             <ComboBoxItem Content="{i18n:I18n Key=Canvas_Yes}" />
@@ -128,6 +128,7 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.InkingTool}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxCurveSmoothingMode"
+                                  SelectedIndex="0"
                                   SelectionChanged="ComboBoxCurveSmoothingMode_SelectionChanged">
                             <ComboBoxItem Content="{i18n:I18n Key=Canvas_AdvancedBezierSmoothing}" Tag="2" />
                             <ComboBoxItem Content="{i18n:I18n Key=Canvas_WPFBezierSmoothing}" Tag="1" />
