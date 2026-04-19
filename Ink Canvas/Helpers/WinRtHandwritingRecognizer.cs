@@ -29,31 +29,13 @@ namespace Ink_Canvas.Helpers
         public static bool IsApiAvailable =>
             OSVersion.GetOperatingSystem() >= OSVersionExtension.OperatingSystem.Windows10;
 
+        /// <summary>
+        /// 启动阶段不再预热线程内 WinRT 手写管线。历史上曾用 <see cref="WinRtInkShapeRecognizer.CreateMinimalWarmupStrokeCollection"/> 跑全链路，
+        /// 会显著拖慢启动；与更早的「空 <see cref="StrokeCollection"/>」一样，此处不再在 Idle 上做任何工作。
+        /// 首次真正需要手写识别时由 <see cref="RecognizeHandwritingAsync"/> 承担冷启动成本。
+        /// </summary>
         public static void Warmup()
         {
-            if (!IsApiAvailable || !Environment.Is64BitProcess) return;
-            try
-            {
-                var d = Application.Current?.Dispatcher;
-                if (d == null) return;
-                d.BeginInvoke(new Action(async () =>
-                {
-                    try
-                    {
-                        await RecognizeHandwritingAsync(
-                            WinRtInkShapeRecognizer.CreateMinimalWarmupStrokeCollection(),
-                            verboseTrace: false).ConfigureAwait(true);
-                    }
-                    catch
-                    {
-                        // ignore
-                    }
-                }));
-            }
-            catch
-            {
-                // ignore
-            }
         }
 
         /// <summary>
