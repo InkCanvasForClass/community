@@ -3734,6 +3734,9 @@ namespace Ink_Canvas
         {
             try
             {
+                if (!IsLoaded)
+                    return;
+
                 if (Settings.ModeSettings.IsPPTOnlyMode)
                 {
                     if (TrayTemporaryShowUntilUtc.HasValue && DateTime.UtcNow < TrayTemporaryShowUntilUtc.Value)
