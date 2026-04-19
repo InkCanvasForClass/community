@@ -32,8 +32,8 @@
                                 <EllipseGeometry Center="48,48" RadiusX="48" RadiusY="48" />
                             </Image.Clip>
                         </Image>
-                        <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" FontSize="18" FontWeight="Bold" Foreground="#fde047" />
-                        <TextBlock Text="{Binding Role}" HorizontalAlignment="Center" FontSize="12" Foreground="White" />
+                        <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" FontSize="18" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding Role}" HorizontalAlignment="Center" FontSize="12" TextElement.Foreground="{DynamicResource {x:Static ui:ThemeKeys.AccentTextFillColorPrimaryBrushKey}}"/>
                     </ikw:SimpleStackPanel>
                 </DataTemplate>
                 <DataTemplate x:Key="ContributorAvatarTemplate">
@@ -45,7 +45,7 @@
                                 <EllipseGeometry Center="24,24" RadiusX="24" RadiusY="24" />
                             </Image.Clip>
                         </Image>
-                        <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" FontSize="12" Foreground="White" />
+                        <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" FontSize="12"/>
                     </ikw:SimpleStackPanel>
                 </DataTemplate>
             </FrameworkElement.Resources>
