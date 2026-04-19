@@ -564,6 +564,12 @@
   <data name="InkRecog_EnableInkRecognition" xml:space="preserve">
     <value>启用墨迹识别</value>
   </data>
+  <data name="InkRecog_HandwritingBeautify" xml:space="preserve">
+    <value>WinRT识别转手写体字形</value>
+  </data>
+  <data name="InkRecog_HandwritingBeautifyHint" xml:space="preserve">
+    <value>#开启后，调用墨迹纠正API时：先WinRT识别手写词，再将识别成功的文字用手写风格字体(默认Ink Free/楷体等，可在设置JSON的handwritingCorrectionFontFamily调整）转成字形轮廓墨迹替换原笔画。需64位与WinRT。</value>
+  </data>
   <data name="InkRecog_ShapeEngine" xml:space="preserve">
     <value>识别引擎</value>
   </data>

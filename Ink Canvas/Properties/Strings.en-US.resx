@@ -549,6 +549,12 @@
   <data name="InkRecog_EnableInkRecognition" xml:space="preserve">
     <value>Enable ink recognition</value>
   </data>
+  <data name="InkRecog_HandwritingBeautify" xml:space="preserve">
+    <value>WinRT recognition to handwriting glyphs</value>
+  </data>
+  <data name="InkRecog_HandwritingBeautifyHint" xml:space="preserve">
+    <value># When enabled, ink correction API: first recognizes handwritten words via WinRT, then replaces original strokes with glyph outlines rendered in a handwriting-style font (default Ink Free/KaiTi etc., configurable via handwritingCorrectionFontFamily in settings JSON). Requires 64-bit and WinRT.</value>
+  </data>
   <data name="InkRecog_BlockRectFakePressure" xml:space="preserve">
     <value>Block fake pressure on corrected rectangles</value>
   </data>
