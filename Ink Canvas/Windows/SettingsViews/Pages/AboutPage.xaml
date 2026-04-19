@@ -1,17 +1,194 @@
-<ui:Page
-    x:Class="Ink_Canvas.Windows.SettingsViews.Pages.AboutPage"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-    xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-    Title="关于"
-    mc:Ignorable="d">
-    <Grid>
-        <StackPanel Margin="24">
-            <TextBlock Text="关于 InkCanvasForClass" Style="{DynamicResource TitleTextBlockStyle}" Margin="0,0,0,16" />
-            <TextBlock Text="这里是关于页面" Style="{DynamicResource BodyTextBlockStyle}" />
-        </StackPanel>
-    </Grid>
+﻿<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.AboutPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
+      xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+      xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
+      xmlns:sys="clr-namespace:System;assembly=mscorlib"
+      mc:Ignorable="d"
+
+      Title="关于">
+
+    <ScrollViewer PanningMode="VerticalFirst">
+        <Grid Margin="59,0,59,0">
+            <FrameworkElement.Resources>
+                <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
+                <Style x:Key="SettingsSectionHeaderTextBlockStyle"
+                    BasedOn="{StaticResource BodyStrongTextBlockStyle}"
+                    TargetType="TextBlock">
+                    <Style.Setters>
+                        <Setter Property="Margin" Value="1,30,0,6" />
+                    </Style.Setters>
+                </Style>
+                <DataTemplate x:Key="DeveloperAvatarTemplate">
+                    <ikw:SimpleStackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                        <Image Source="{Binding AvatarPath}"
+                               VerticalAlignment="Center" HorizontalAlignment="Center"
+                               RenderOptions.BitmapScalingMode="HighQuality" Width="96" Height="96" Margin="0,0,0,6">
+                            <Image.Clip>
+                                <EllipseGeometry Center="48,48" RadiusX="48" RadiusY="48" />
+                            </Image.Clip>
+                        </Image>
+                        <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" FontSize="18" FontWeight="Bold" Foreground="#fde047" />
+                        <TextBlock Text="{Binding Role}" HorizontalAlignment="Center" FontSize="12" Foreground="White" />
+                    </ikw:SimpleStackPanel>
+                </DataTemplate>
+                <DataTemplate x:Key="ContributorAvatarTemplate">
+                    <ikw:SimpleStackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                        <Image Source="{Binding AvatarPath}"
+                               VerticalAlignment="Center" HorizontalAlignment="Center"
+                               RenderOptions.BitmapScalingMode="HighQuality" Width="48" Height="48" Margin="0,0,0,4">
+                            <Image.Clip>
+                                <EllipseGeometry Center="24,24" RadiusX="24" RadiusY="24" />
+                            </Image.Clip>
+                        </Image>
+                        <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" FontSize="12" Foreground="White" />
+                    </ikw:SimpleStackPanel>
+                </DataTemplate>
+            </FrameworkElement.Resources>
+            <Grid>
+                <ikw:SimpleStackPanel MaxWidth="1000"
+                    HorizontalAlignment="Stretch"
+                    Spacing="{StaticResource SettingsCardSpacing}">
+
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="{i18n:I18n Key=About_Title}" />
+
+                    <ui:SettingsCard Header="{i18n:I18n Key=About_VersionLabel}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Info}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <TextBlock x:Name="AppVersionTextBlock" Text="1.X.X.X" FontWeight="Bold" VerticalAlignment="Center" />
+                    </ui:SettingsCard>
+
+                    <ui:SettingsExpander Header="{i18n:I18n Key=About_DeviceInfo}">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Devices}" />
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="{i18n:I18n Key=About_DeviceIdLabel}">
+                                <TextBlock x:Name="DeviceIdTextBlock" Text="{i18n:I18n Key=About_DeviceInfo_Loading}" />
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=About_UsageFrequencyLabel}">
+                                <TextBlock x:Name="UsageFrequencyTextBlock" Text="{i18n:I18n Key=About_DeviceInfo_Loading}" />
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=About_UpdatePriorityLabel}">
+                                <TextBlock x:Name="UpdatePriorityTextBlock" Text="{i18n:I18n Key=About_DeviceInfo_Loading}" />
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=About_LaunchCountLabel}">
+                                <TextBlock x:Name="LaunchCountTextBlock" Text="{i18n:I18n Key=About_DeviceInfo_Loading}" />
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=About_TotalUsageLabel}">
+                                <TextBlock x:Name="TotalUsageTextBlock" Text="{i18n:I18n Key=About_DeviceInfo_Loading}" />
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="">
+                                <Button x:Name="RefreshDeviceInfoButton" Content="{i18n:I18n Key=About_RefreshDeviceInfo}"
+                                        Click="RefreshDeviceInfo_Click" />
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
+
+                    <ui:SettingsExpander Header="{i18n:I18n Key=About_PrivacyAndTelemetry}">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Shield}" />
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard ContentAlignment="Left">
+                                <CheckBox x:Name="CheckBoxTelemetryPrivacyAccepted"
+                                          Content="{i18n:I18n Key=About_PrivacyAgreement}"
+                                          Checked="CheckBoxTelemetryPrivacyAccepted_Checked"
+                                          Unchecked="CheckBoxTelemetryPrivacyAccepted_Checked" />
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=About_TelemetryLabel}">
+                                <ComboBox x:Name="ComboBoxTelemetryUploadLevel"
+                                          SelectionChanged="ComboBoxTelemetryUploadLevel_SelectionChanged">
+                                    <ComboBoxItem Tag="0" Content="{i18n:I18n Key=About_Telemetry_Off}" />
+                                    <ComboBoxItem Tag="1" Content="{i18n:I18n Key=About_Telemetry_Basic}" />
+                                    <ComboBoxItem Tag="2" Content="{i18n:I18n Key=About_Telemetry_Optional}" />
+                                </ComboBox>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
+
+                    <Border Background="{DynamicResource {x:Static ui:ThemeKeys.LayerFillColorDefaultBrushKey}}"
+                            BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.CardStrokeColorDefaultBrushKey}}"
+                            CornerRadius="4" BorderThickness="1" Padding="12,10" TextElement.FontSize="14">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8"
+                                                  TextElement.Foreground="{DynamicResource {x:Static ui:ThemeKeys.AccentTextFillColorPrimaryBrushKey}}"
+                                                  Margin="0,3,0,0">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Info}" FontSize="24"/>
+                                <TextBlock FontSize="16" VerticalAlignment="Center" FontWeight="SemiBold"
+                                           Text="{i18n:I18n Key=About_LicenseTitle}" />
+                            </ikw:SimpleStackPanel>
+
+                            <ikw:SimpleStackPanel Orientation="Vertical" Spacing="12" Grid.Row="1" Margin="5,10">
+                                <FrameworkElement.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="LineHeight" Value="21"/>
+                                        <Setter Property="TextWrapping" Value="Wrap"/>
+                                    </Style>
+                                </FrameworkElement.Resources>
+
+                                <TextBlock Text="GNU General Public License v3.0" FontSize="20" FontWeight="Bold"/>
+                                <TextBlock Text="{i18n:I18n Key=About_LicenseBody}" FontSize="11"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <Separator Opacity="0.2"/>
+                            </ikw:SimpleStackPanel>
+
+                            <ikw:SimpleStackPanel Grid.Row="2" Orientation="Horizontal" Spacing="10">
+                                <ui:HyperlinkButton Content="ICC CE" NavigateUri="https://github.com/InkCanvasForClass/community/"/>
+                                <ui:HyperlinkButton Content="ICA" NavigateUri="https://github.com/ChangSakura/Ink-Canvas"/>
+                                <ui:HyperlinkButton Content="Ink Canvas" NavigateUri="https://github.com/WXRIW/Ink-Canvas"/>
+                            </ikw:SimpleStackPanel>
+                        </Grid>
+                    </Border>
+
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="{i18n:I18n Key=About_DevelopersLabel}" />
+
+                    <ItemsControl x:Name="DeveloperItemsControl"
+                                  ItemTemplate="{StaticResource DeveloperAvatarTemplate}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" ItemWidth="130" Margin="0,0,0,8" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+
+                    <Separator Margin="0,8" />
+
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="{i18n:I18n Key=About_ThanksContributors}" />
+
+                    <ItemsControl x:Name="ContributorItemsControl"
+                                  ItemTemplate="{StaticResource ContributorAvatarTemplate}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" ItemWidth="96" Margin="0,0,0,8" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+
+                    <Separator Margin="0,8" />
+
+                    <ikw:SimpleStackPanel Spacing="3" Orientation="Vertical" Margin="0,0,0,24">
+                        <TextBlock Text="{i18n:I18n Key=About_Copyright}" FontWeight="Bold" TextWrapping="Wrap" />
+                        <TextBlock Text="{i18n:I18n Key=About_OpenSourceSlogan}" FontWeight="Bold"
+                                   TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </ikw:SimpleStackPanel>
+
+                </ikw:SimpleStackPanel>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
 </ui:Page>

@@ -1722,6 +1722,12 @@
   <data name="About_PrivacyCheckboxSuffix" xml:space="preserve">
     <value> privacy statement</value>
   </data>
+  <data name="About_PrivacyAndTelemetry" xml:space="preserve">
+    <value>Privacy &amp; Telemetry</value>
+  </data>
+  <data name="About_PrivacyAgreement" xml:space="preserve">
+    <value>I have read and agree to the privacy statement</value>
+  </data>
   <data name="About_TelemetryLabel" xml:space="preserve">
     <value>Anonymous usage data upload:</value>
   </data>

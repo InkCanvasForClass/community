@@ -1,0 +1,403 @@
+using Ink_Canvas.Helpers;
+using Ink_Canvas.Windows.SettingsViews.Helpers;
+using System;
+using System.Diagnostics;
+using System.Windows;
+using System.Windows.Controls;
+
+namespace Ink_Canvas.Windows.SettingsViews.Pages
+{
+    public partial class CanvasPage : iNKORE.UI.WPF.Modern.Controls.Page
+    {
+        private bool _isLoaded = false;
+
+        public CanvasPage()
+        {
+            InitializeComponent();
+            Loaded += CanvasPage_Loaded;
+        }
+
+        private void CanvasPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            LoadSettings();
+            _isLoaded = true;
+        }
+
+        private void LoadSettings()
+        {
+            _isLoaded = false;
+
+            try
+            {
+                var settings = SettingsManager.Settings;
+                if (settings.Canvas != null)
+                {
+                    CardShowCursor.IsOn = settings.Canvas.IsShowCursor;
+                    CardEnablePressureTouchMode.IsOn = settings.Canvas.EnablePressureTouchMode;
+                    CardDisablePressure.IsOn = settings.Canvas.DisablePressure;
+                    ComboBoxEraserSize.SelectedIndex = settings.Canvas.EraserSize;
+                    CardHideStrokeWhenSelecting.IsOn = settings.Canvas.HideStrokeWhenSelecting;
+                    CardClearCanvasAndClearTimeMachine.IsOn = settings.Canvas.ClearCanvasAndClearTimeMachine;
+                    CardClearCanvasAlsoClearImages.IsOn = settings.Canvas.ClearCanvasAlsoClearImages;
+                    CardCompressPicturesUploaded.IsOn = settings.Canvas.IsCompressPicturesUploaded;
+                    CardLaunchSeewoVideoShowcaseForWhiteboardBooth.IsOn = settings.Canvas.LaunchSeewoVideoShowcaseForWhiteboardBooth;
+                    ComboBoxHyperbolaAsymptoteOption.SelectedIndex = (int)settings.Canvas.HyperbolaAsymptoteOption;
+                    CardShowCircleCenter.IsOn = settings.Canvas.ShowCircleCenter;
+                    CardFitToCurve.IsOn = settings.Canvas.FitToCurve;
+                    CardAdvancedBezierSmoothing.IsOn = settings.Canvas.UseAdvancedBezierSmoothing;
+                    CardEnableInkFade.IsOn = settings.Canvas.EnableInkFade;
+                    InkFadeTimeSlider.Value = settings.Canvas.InkFadeTime;
+                    CardHideInkFadeControlInPenMenu.IsOn = settings.Canvas.HideInkFadeControlInPenMenu;
+                    CardBrushAutoRestore.IsOn = settings.Canvas.EnableBrushAutoRestore;
+                    BrushAutoRestoreTimesTextBox.Text = settings.Canvas.BrushAutoRestoreTimes ?? string.Empty;
+                    LoadBrushAutoRestoreColor(settings.Canvas.BrushAutoRestoreColor);
+                    BrushAutoRestoreWidthSlider.Value = settings.Canvas.BrushAutoRestoreWidth > 0 ? settings.Canvas.BrushAutoRestoreWidth : 5;
+                    BrushAutoRestoreAlphaSlider.Value = settings.Canvas.BrushAutoRestoreAlpha;
+                    CardEnableEraserAutoSwitchBack.IsOn = settings.Canvas.EnableEraserAutoSwitchBack;
+                    EraserAutoSwitchBackDelaySlider.Value = settings.Canvas.EraserAutoSwitchBackDelaySeconds;
+                    CardAutoStraightenLine.IsOn = settings.Canvas.AutoStraightenLine;
+                    AutoStraightenLineThresholdSlider.Value = settings.Canvas.AutoStraightenLineThreshold;
+                    CardHighPrecisionLineStraighten.IsOn = settings.Canvas.HighPrecisionLineStraighten;
+                    CardLineEndpointSnapping.IsOn = settings.Canvas.LineEndpointSnapping;
+                }
+
+                if (settings.InkToShape != null)
+                {
+                    CardEnableInkToShape.IsOn = settings.InkToShape.IsInkToShapeEnabled;
+                    int eng = settings.InkToShape.ShapeRecognitionEngine;
+                    if (eng < 0) eng = 0;
+                    if (eng > 2) eng = 2;
+                    ComboBoxShapeRecognitionEngine.SelectedIndex = eng;
+                    CardEnableWinRtHandwritingStrokeBeautify.IsOn = settings.InkToShape.EnableWinRtHandwritingStrokeBeautify;
+                    CardEnableInkToShapeNoFakePressureRectangle.IsOn = settings.InkToShape.IsInkToShapeNoFakePressureRectangle;
+                    CardEnableInkToShapeNoFakePressureTriangle.IsOn = settings.InkToShape.IsInkToShapeNoFakePressureTriangle;
+                    ToggleCheckboxEnableInkToShapeTriangle.IsChecked = settings.InkToShape.IsInkToShapeTriangle;
+                    ToggleCheckboxEnableInkToShapeRectangle.IsChecked = settings.InkToShape.IsInkToShapeRectangle;
+                    ToggleCheckboxEnableInkToShapeRounded.IsChecked = settings.InkToShape.IsInkToShapeRounded;
+                    LineStraightenSensitivitySlider.Value = settings.InkToShape.LineStraightenSensitivity;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"加载画板设置时出错: {ex.Message}");
+            }
+
+            _isLoaded = true;
+        }
+
+        private void LoadBrushAutoRestoreColor(string hex)
+        {
+            try
+            {
+                foreach (var item in ComboBoxBrushAutoRestoreColor.Items)
+                {
+                    if (item is ComboBoxItem cbi && cbi.Tag != null &&
+                        string.Equals(cbi.Tag.ToString(), hex, StringComparison.OrdinalIgnoreCase))
+                    {
+                        ComboBoxBrushAutoRestoreColor.SelectedItem = cbi;
+                        return;
+                    }
+                }
+                ComboBoxBrushAutoRestoreColor.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"加载画笔恢复颜色时出错: {ex.Message}");
+            }
+        }
+
+        #region 画板设置事件处理
+
+        private void ToggleSwitchShowCursor_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.IsShowCursor = CardShowCursor.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchEnablePressureTouchMode_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.EnablePressureTouchMode = CardEnablePressureTouchMode.IsOn;
+            if (SettingsManager.Settings.Canvas.EnablePressureTouchMode && SettingsManager.Settings.Canvas.DisablePressure)
+            {
+                SettingsManager.Settings.Canvas.DisablePressure = false;
+                CardDisablePressure.IsOn = false;
+            }
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchDisablePressure_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.DisablePressure = CardDisablePressure.IsOn;
+            if (SettingsManager.Settings.Canvas.DisablePressure && SettingsManager.Settings.Canvas.EnablePressureTouchMode)
+            {
+                SettingsManager.Settings.Canvas.EnablePressureTouchMode = false;
+                CardEnablePressureTouchMode.IsOn = false;
+            }
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ComboBoxEraserSize_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.EraserSize = ComboBoxEraserSize.SelectedIndex;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchHideStrokeWhenSelecting_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.HideStrokeWhenSelecting = CardHideStrokeWhenSelecting.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchClearCanvasAndClearTimeMachine_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.ClearCanvasAndClearTimeMachine = CardClearCanvasAndClearTimeMachine.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchClearCanvasAlsoClearImages_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.ClearCanvasAlsoClearImages = CardClearCanvasAlsoClearImages.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchCompressPicturesUploaded_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.IsCompressPicturesUploaded = CardCompressPicturesUploaded.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchLaunchSeewoVideoShowcaseForWhiteboardBooth_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.LaunchSeewoVideoShowcaseForWhiteboardBooth = CardLaunchSeewoVideoShowcaseForWhiteboardBooth.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ComboBoxHyperbolaAsymptoteOption_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.HyperbolaAsymptoteOption = (OptionalOperation)ComboBoxHyperbolaAsymptoteOption.SelectedIndex;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchShowCircleCenter_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.ShowCircleCenter = CardShowCircleCenter.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchFitToCurve_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.FitToCurve = CardFitToCurve.IsOn;
+            if (CardFitToCurve.IsOn)
+            {
+                SettingsManager.Settings.Canvas.UseAdvancedBezierSmoothing = false;
+                CardAdvancedBezierSmoothing.IsOn = false;
+            }
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchAdvancedBezierSmoothing_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.UseAdvancedBezierSmoothing = CardAdvancedBezierSmoothing.IsOn;
+            if (CardAdvancedBezierSmoothing.IsOn)
+            {
+                SettingsManager.Settings.Canvas.FitToCurve = false;
+                CardFitToCurve.IsOn = false;
+            }
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchEnableInkFade_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.EnableInkFade = CardEnableInkFade.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void InkFadeTimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.InkFadeTime = (int)e.NewValue;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchHideInkFadeControlInPenMenu_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.HideInkFadeControlInPenMenu = CardHideInkFadeControlInPenMenu.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchBrushAutoRestore_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.EnableBrushAutoRestore = CardBrushAutoRestore.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void BrushAutoRestoreTimesTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.BrushAutoRestoreTimes = BrushAutoRestoreTimesTextBox.Text ?? string.Empty;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ComboBoxBrushAutoRestoreColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            if (ComboBoxBrushAutoRestoreColor.SelectedItem is ComboBoxItem item)
+            {
+                string hex = item.Tag as string ?? string.Empty;
+                SettingsManager.Settings.Canvas.BrushAutoRestoreColor = hex;
+                SettingsManager.SaveSettingsToFile();
+            }
+        }
+
+        private void BrushAutoRestoreWidthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.BrushAutoRestoreWidth = e.NewValue;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void BrushAutoRestoreAlphaSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.BrushAutoRestoreAlpha = (int)e.NewValue;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchEnableEraserAutoSwitchBack_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.EnableEraserAutoSwitchBack = CardEnableEraserAutoSwitchBack.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void EraserAutoSwitchBackDelaySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.EraserAutoSwitchBackDelaySeconds = (int)e.NewValue;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        #endregion
+
+        #region 墨迹识别事件处理
+
+        private void ToggleSwitchEnableInkToShape_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.InkToShape.IsInkToShapeEnabled = CardEnableInkToShape.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ComboBoxShapeRecognitionEngine_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded || ComboBoxShapeRecognitionEngine == null) return;
+            int idx = ComboBoxShapeRecognitionEngine.SelectedIndex;
+            if (idx < 0) idx = 0;
+            if (idx > 2) idx = 2;
+            SettingsManager.Settings.InkToShape.ShapeRecognitionEngine = idx;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchEnableWinRtHandwritingStrokeBeautify_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.InkToShape.EnableWinRtHandwritingStrokeBeautify = CardEnableWinRtHandwritingStrokeBeautify.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchEnableInkToShapeNoFakePressureRectangle_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.InkToShape.IsInkToShapeNoFakePressureRectangle = CardEnableInkToShapeNoFakePressureRectangle.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchEnableInkToShapeNoFakePressureTriangle_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.InkToShape.IsInkToShapeNoFakePressureTriangle = CardEnableInkToShapeNoFakePressureTriangle.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleCheckboxEnableInkToShapeTriangle_CheckedChanged(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.InkToShape.IsInkToShapeTriangle = (bool)ToggleCheckboxEnableInkToShapeTriangle.IsChecked;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleCheckboxEnableInkToShapeRectangle_CheckedChanged(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.InkToShape.IsInkToShapeRectangle = (bool)ToggleCheckboxEnableInkToShapeRectangle.IsChecked;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleCheckboxEnableInkToShapeRounded_CheckedChanged(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.InkToShape.IsInkToShapeRounded = (bool)ToggleCheckboxEnableInkToShapeRounded.IsChecked;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchAutoStraightenLine_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.AutoStraightenLine = CardAutoStraightenLine.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void AutoStraightenLineThresholdSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.AutoStraightenLineThreshold = (int)e.NewValue;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void LineStraightenSensitivitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.InkToShape.LineStraightenSensitivity = e.NewValue;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchHighPrecisionLineStraighten_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.HighPrecisionLineStraighten = CardHighPrecisionLineStraighten.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchLineEndpointSnapping_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.LineEndpointSnapping = CardLineEndpointSnapping.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void LineEndpointSnappingThresholdSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.LineEndpointSnappingThreshold = (int)e.NewValue;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        #endregion
+    }
+}

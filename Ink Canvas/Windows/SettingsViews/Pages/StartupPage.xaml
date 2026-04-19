@@ -10,7 +10,8 @@
       xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
-      mc:Ignorable="d" 
+      xmlns:c="clr-namespace:Ink_Canvas.Converter"
+      mc:Ignorable="d"
       
       Title="启动">
 
@@ -18,6 +19,7 @@
         <Grid Margin="59,0,59,0">
             <FrameworkElement.Resources>
             <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
+            <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <Style x:Key="SettingsSectionHeaderTextBlockStyle"
                 BasedOn="{StaticResource BodyStrongTextBlockStyle}"
                 TargetType="TextBlock">
@@ -113,22 +115,17 @@
                             Icon="{x:Static ui:SegoeFluentIcons.ChevronLeft}"
                             SwitchName="ToggleSwitchFoldAtStartup"
                             Toggled="ToggleSwitchFoldAtStartup_Toggled" />
-                
-                    <!-- 模式设置 -->
-                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="模式设置" />
 
-                    <ui:SettingsExpander Description="{i18n:I18n Key=Settings_ModeDesc}"
-                            Header="{i18n:I18n Key=Settings_ModeDesc_1}">
-                        <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
-                        </ui:SettingsExpander.HeaderIcon>
-                        <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="仅PPT模式">
-                                <ui:ToggleSwitch Name="ToggleSwitchPPTOnlyMode" OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Toggled="ToggleSwitchPPTOnlyMode_Toggled" />
-                            </ui:SettingsCard>
-                        </ui:SettingsExpander.Items>
-                    </ui:SettingsExpander>
+                    <!-- 运行模式 -->
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="{i18n:I18n Key=Settings_ModeDesc_1}" />
+
+                    <controls:LabeledSettingsCard x:Name="CardPPTOnlyMode"
+                            Header="{i18n:I18n Key=Mode_PPTOnly}"
+                            Description="{i18n:I18n Key=Settings_ModeDesc}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Settings}"
+                            SwitchName="ToggleSwitchPPTOnlyMode"
+                            Toggled="ToggleSwitchPPTOnlyMode_Toggled" />
 
                     <!-- 底部空白 -->
                     <Rectangle Height="48" />

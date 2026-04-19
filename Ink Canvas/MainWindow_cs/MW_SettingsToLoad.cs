@@ -37,7 +37,6 @@ namespace Ink_Canvas
         /// <param name="skipAutoUpdateCheck">指示是否跳过自动更新检查；为 true 时不会在加载设置后执行自动更新检测。</param>
         private void LoadSettings(bool isStartup = false, bool skipAutoUpdateCheck = false)
         {
-            AppVersionTextBlock.Text = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             try
             {
                 if (File.Exists(App.RootPath + settingsFileName))
@@ -184,32 +183,6 @@ namespace Ink_Canvas
             {
                 if (Settings?.Startup != null)
                 {
-                    if (ComboBoxTelemetryUploadLevel != null)
-                    {
-                        int idx = 0;
-                        switch (Settings.Startup.TelemetryUploadLevel)
-                        {
-                            case TelemetryUploadLevel.None:
-                                idx = 0;
-                                break;
-                            case TelemetryUploadLevel.Basic:
-                                idx = 1;
-                                break;
-                            case TelemetryUploadLevel.Extended:
-                                idx = 2;
-                                break;
-                            default:
-                                idx = 0;
-                                break;
-                        }
-
-                        ComboBoxTelemetryUploadLevel.SelectedIndex = idx;
-                    }
-
-                    if (CheckBoxTelemetryPrivacyAccepted != null)
-                    {
-                        CheckBoxTelemetryPrivacyAccepted.IsChecked = Settings.Startup.HasAcceptedTelemetryPrivacy;
-                    }
                 }
             }
             catch
@@ -241,9 +214,6 @@ namespace Ink_Canvas
                 }
 
                 // 设置自动更新相关选项
-                ToggleSwitchIsAutoUpdate.IsOn = Settings.Startup.IsAutoUpdate;
-
-                // 只有在启用了自动更新功能时才检查更新
                 if (Settings.Startup.IsAutoUpdate && !skipAutoUpdateCheck)
                 {
                     if (isStartup)
@@ -251,63 +221,12 @@ namespace Ink_Canvas
                         LogHelper.WriteLogToFile("AutoUpdate | Running auto-update check at startup");
                         AutoUpdate();
                     }
-                    // 当设置被修改时也检查更新（非启动时）
                     else
                     {
                         LogHelper.WriteLogToFile("AutoUpdate | Running auto-update check after settings change");
                         AutoUpdate();
                     }
                 }
-
-                if (Settings.Startup.IsAutoUpdateWithSilence)
-                {
-                    ToggleSwitchIsAutoUpdateWithSilence.IsOn = true;
-                }
-
-                // 初始化更新通道选择
-                foreach (var radioButton in UpdateChannelSelector.Items)
-                {
-                    if (radioButton is RadioButton rb)
-                    {
-                        if (rb.Tag.ToString() == Settings.Startup.UpdateChannel.ToString())
-                        {
-                            rb.IsChecked = true;
-                            break;
-                        }
-                    }
-                }
-
-                // 初始化更新包架构
-                if (UpdatePackageArchitectureSelector != null)
-                {
-                    _isChangingUpdatePackageArchInternally = true;
-                    try
-                    {
-                        string wantTag = Settings.Startup.UpdatePackageArchitecture == UpdatePackageArchitecture.X64 ? "X64" : "X86";
-                        foreach (var item in UpdatePackageArchitectureSelector.Items)
-                        {
-                            if (item is RadioButton rb && rb.Tag != null &&
-                                string.Equals(rb.Tag.ToString(), wantTag, StringComparison.OrdinalIgnoreCase))
-                            {
-                                rb.IsChecked = true;
-                                break;
-                            }
-                        }
-                    }
-                    finally
-                    {
-                        _isChangingUpdatePackageArchInternally = false;
-                    }
-                }
-
-                AutoUpdateTimePeriodBlock.Visibility = Settings.Startup.IsAutoUpdateWithSilence
-                    ? Visibility.Visible
-                    : Visibility.Collapsed;
-
-                AutoUpdateWithSilenceTimeComboBox.InitializeAutoUpdateWithSilenceTimeComboBoxOptions(
-                    AutoUpdateWithSilenceStartTimeComboBox, AutoUpdateWithSilenceEndTimeComboBox);
-                AutoUpdateWithSilenceStartTimeComboBox.SelectedItem = Settings.Startup.AutoUpdateWithSilenceStartTime;
-                AutoUpdateWithSilenceEndTimeComboBox.SelectedItem = Settings.Startup.AutoUpdateWithSilenceEndTime;
             }
             else
             {
@@ -789,7 +708,6 @@ namespace Ink_Canvas
                 if (BoardInkAlphaSlider != null) BoardInkAlphaSlider.Value = alpha;
 
 
-                ComboBoxHyperbolaAsymptoteOption.SelectedIndex = (int)Settings.Canvas.HyperbolaAsymptoteOption;
 
                 if (Settings.Canvas.UsingWhiteboard)
                 {
@@ -810,24 +728,17 @@ namespace Ink_Canvas
 
                 if (Settings.Canvas.IsShowCursor)
                 {
-                    ToggleSwitchShowCursor.IsOn = true;
                     inkCanvas.ForceCursor = true;
                 }
                 else
                 {
-                    ToggleSwitchShowCursor.IsOn = false;
                     inkCanvas.ForceCursor = false;
                 }
 
-                // 初始化压感触屏模式开关状态
-                ToggleSwitchEnablePressureTouchMode.IsOn = Settings.Canvas.EnablePressureTouchMode;
 
                 // 初始化屏蔽压感开关状态
-                ToggleSwitchDisablePressure.IsOn = Settings.Canvas.DisablePressure;
                 inkCanvas.DefaultDrawingAttributes.IgnorePressure = Settings.Canvas.DisablePressure;
 
-                ToggleSwitchLaunchSeewoVideoShowcaseForWhiteboardBooth.IsOn =
-                    Settings.Canvas.LaunchSeewoVideoShowcaseForWhiteboardBooth;
 
                 if (Settings.Canvas.EnableVelocityBrushTip)
                 {
@@ -842,14 +753,9 @@ namespace Ink_Canvas
                 ComboBoxPenStyle.SelectedIndex = penStyleUi;
                 BoardComboBoxPenStyle.SelectedIndex = penStyleUi;
 
-                ComboBoxEraserSize.SelectedIndex = Settings.Canvas.EraserSize;
                 ComboBoxEraserSizeFloatingBar.SelectedIndex = Settings.Canvas.EraserSize;
                 BoardComboBoxEraserSize.SelectedIndex = Settings.Canvas.EraserSize;
 
-                ToggleSwitchClearCanvasAndClearTimeMachine.IsOn =
-                    Settings.Canvas.ClearCanvasAndClearTimeMachine;
-                ToggleSwitchClearCanvasAlsoClearImages.IsOn = Settings.Canvas.ClearCanvasAlsoClearImages;
-                ToggleSwitchShowCircleCenter.IsOn = Settings.Canvas.ShowCircleCenter;
 
                 switch (Settings.Canvas.EraserShapeType)
                 {
@@ -903,28 +809,21 @@ namespace Ink_Canvas
 
                 CheckEraserTypeTab();
 
-                ToggleSwitchHideStrokeWhenSelecting.IsOn = Settings.Canvas.HideStrokeWhenSelecting;
 
                 // 初始化贝塞尔曲线平滑设置
                 if (Settings.Canvas.UseAdvancedBezierSmoothing)
                 {
                     // 如果启用高级贝塞尔平滑，则禁用原来的FitToCurve
-                    ToggleSwitchAdvancedBezierSmoothing.IsOn = true;
-                    ToggleSwitchFitToCurve.IsOn = false;
                     drawingAttributes.FitToCurve = false;
                 }
                 else if (Settings.Canvas.FitToCurve)
                 {
                     // 如果启用原来的FitToCurve，则禁用高级贝塞尔平滑
-                    ToggleSwitchFitToCurve.IsOn = true;
-                    ToggleSwitchAdvancedBezierSmoothing.IsOn = false;
                     drawingAttributes.FitToCurve = true;
                 }
                 else
                 {
                     // 两者都禁用
-                    ToggleSwitchFitToCurve.IsOn = false;
-                    ToggleSwitchAdvancedBezierSmoothing.IsOn = false;
                     drawingAttributes.FitToCurve = false;
                 }
 
@@ -946,16 +845,10 @@ namespace Ink_Canvas
                 */
 
                 // 初始化直线自动拉直相关设置
-                ToggleSwitchAutoStraightenLine.IsOn = Settings.Canvas.AutoStraightenLine;
-                AutoStraightenLineThresholdSlider.Value = Settings.Canvas.AutoStraightenLineThreshold;
                 // 直线拉直灵敏度也在这里初始化，即使它存储在InkToShape中
-                LineStraightenSensitivitySlider.Value = Settings.InkToShape.LineStraightenSensitivity;
                 // 初始化高精度直线拉直设置
-                ToggleSwitchHighPrecisionLineStraighten.IsOn = Settings.Canvas.HighPrecisionLineStraighten;
 
                 // 初始化直线端点吸附相关设置
-                ToggleSwitchLineEndpointSnapping.IsOn = Settings.Canvas.LineEndpointSnapping;
-                ToggleSwitchCompressPicturesUploaded.IsOn = Settings.Canvas.IsCompressPicturesUploaded;
             }
             else
             {
@@ -1032,30 +925,13 @@ namespace Ink_Canvas
             // InkToShape
             if (Settings.InkToShape != null)
             {
-                ToggleSwitchEnableInkToShape.IsOn = Settings.InkToShape.IsInkToShapeEnabled;
 
-                if (ComboBoxShapeRecognitionEngine != null)
-                {
-                    int eng = Settings.InkToShape.ShapeRecognitionEngine;
-                    if (eng < 0 || eng > 2) eng = 0;
-                    ComboBoxShapeRecognitionEngine.SelectedIndex = eng;
-                }
 
-                if (ToggleSwitchEnableWinRtHandwritingStrokeBeautify != null)
-                    ToggleSwitchEnableWinRtHandwritingStrokeBeautify.IsOn =
-                        Settings.InkToShape.EnableWinRtHandwritingStrokeBeautify;
 
-                ToggleSwitchEnableInkToShapeNoFakePressureRectangle.IsOn =
-                    Settings.InkToShape.IsInkToShapeNoFakePressureRectangle;
 
-                ToggleSwitchEnableInkToShapeNoFakePressureTriangle.IsOn =
-                    Settings.InkToShape.IsInkToShapeNoFakePressureTriangle;
 
-                ToggleCheckboxEnableInkToShapeTriangle.IsChecked = Settings.InkToShape.IsInkToShapeTriangle;
 
-                ToggleCheckboxEnableInkToShapeRectangle.IsChecked = Settings.InkToShape.IsInkToShapeRectangle;
 
-                ToggleCheckboxEnableInkToShapeRounded.IsChecked = Settings.InkToShape.IsInkToShapeRounded;
 
                 // 直线拉直灵敏度在Canvas部分已经初始化，这里不再重复
             }
@@ -1315,73 +1191,12 @@ namespace Ink_Canvas
         {
             try
             {
-                // 同步设置面板中的开关状态
-                if (ToggleSwitchBrushAutoRestore != null)
-                {
-                    ToggleSwitchBrushAutoRestore.IsOn = Settings.Canvas.EnableBrushAutoRestore;
-                }
 
-                // 同步时间点输入框
-                if (BrushAutoRestoreTimesTextBox != null)
-                {
-                    BrushAutoRestoreTimesTextBox.Text = Settings.Canvas.BrushAutoRestoreTimes ?? string.Empty;
-                }
 
-                // 同步颜色下拉框
-                if (ComboBoxBrushAutoRestoreColor != null)
-                {
-                    if (string.IsNullOrWhiteSpace(Settings.Canvas.BrushAutoRestoreColor))
-                    {
-                        Settings.Canvas.BrushAutoRestoreColor = "#FFFF0000";
-                    }
 
-                    bool found = false;
-                    foreach (ComboBoxItem item in ComboBoxBrushAutoRestoreColor.Items)
-                    {
-                        if (item.Tag != null && item.Tag.ToString() == Settings.Canvas.BrushAutoRestoreColor)
-                        {
-                            ComboBoxBrushAutoRestoreColor.SelectionChanged -= ComboBoxBrushAutoRestoreColor_SelectionChanged;
-                            try
-                            {
-                                ComboBoxBrushAutoRestoreColor.SelectedItem = item;
-                            }
-                            finally
-                            {
-                                ComboBoxBrushAutoRestoreColor.SelectionChanged += ComboBoxBrushAutoRestoreColor_SelectionChanged;
-                            }
-                            found = true;
-                            break;
-                        }
-                    }
 
-                    if (!found && ComboBoxBrushAutoRestoreColor.Items.Count > 0)
-                    {
-                        ComboBoxBrushAutoRestoreColor.SelectionChanged -= ComboBoxBrushAutoRestoreColor_SelectionChanged;
-                        try
-                        {
-                            ComboBoxBrushAutoRestoreColor.SelectedIndex = 0;
-                            Settings.Canvas.BrushAutoRestoreColor = "#FFFF0000";
-                        }
-                        finally
-                        {
-                            ComboBoxBrushAutoRestoreColor.SelectionChanged += ComboBoxBrushAutoRestoreColor_SelectionChanged;
-                        }
-                    }
-                }
 
-                // 同步粗细滑块
-                if (BrushAutoRestoreWidthSlider != null)
-                {
-                    BrushAutoRestoreWidthSlider.Value = Settings.Canvas.BrushAutoRestoreWidth > 0
-                        ? Settings.Canvas.BrushAutoRestoreWidth
-                        : 5;
-                }
 
-                // 同步透明度滑块
-                if (BrushAutoRestoreAlphaSlider != null)
-                {
-                    BrushAutoRestoreAlphaSlider.Value = Settings.Canvas.BrushAutoRestoreAlpha;
-                }
 
                 // 如果功能已启用，初始化并启动定时器
                 if (Settings.Canvas.EnableBrushAutoRestore)
@@ -1405,11 +1220,6 @@ namespace Ink_Canvas
         {
             try
             {
-                // 同步设置面板中的开关状态
-                if (ToggleSwitchEnableInkFade != null)
-                {
-                    ToggleSwitchEnableInkFade.IsOn = Settings.Canvas.EnableInkFade;
-                }
 
                 // 同步批注子面板中的开关状态
                 if (ToggleSwitchInkFadeInPanel != null)
@@ -1423,11 +1233,6 @@ namespace Ink_Canvas
                     ToggleSwitchInkFadeInPanel2.IsOn = Settings.Canvas.EnableInkFade;
                 }
 
-                // 同步滑块值
-                if (InkFadeTimeSlider != null)
-                {
-                    InkFadeTimeSlider.Value = Settings.Canvas.InkFadeTime;
-                }
 
 
 
@@ -1438,11 +1243,6 @@ namespace Ink_Canvas
                     _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
                 }
 
-                // 同步在笔工具菜单中隐藏墨迹渐隐控制开关的设置
-                if (ToggleSwitchHideInkFadeControlInPenMenu != null)
-                {
-                    ToggleSwitchHideInkFadeControlInPenMenu.IsOn = Settings.Canvas.HideInkFadeControlInPenMenu;
-                }
 
                 // 根据设置更新墨迹渐隐控制开关的可见性
                 UpdateInkFadeControlVisibility();

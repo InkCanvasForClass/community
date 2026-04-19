@@ -115,7 +115,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 if (settings.ModeSettings != null)
                 {
-                    ToggleSwitchPPTOnlyMode.IsOn = settings.ModeSettings.IsPPTOnlyMode;
+                    CardPPTOnlyMode.IsOn = settings.ModeSettings.IsPPTOnlyMode;
                 }
             }
             catch (Exception ex)
@@ -361,7 +361,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                bool newState = ToggleSwitchPPTOnlyMode.IsOn;
+                bool newState = CardPPTOnlyMode.IsOn;
 
                 var window = Application.Current.MainWindow;
                 if (window != null)

@@ -147,86 +147,39 @@
                     </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
 
-                <!-- 页面2 -->
+                <!-- 更新设置 -->
                 <ui:NavigationViewItem
-                    x:Name="Page2Item"
-                    Content="页面 2"
-                    Tag="Page2Page">
+                    x:Name="UpdatePageItem"
+                    Content="更新"
+                    Tag="UpdatePage"
+                    ToolTipService.ToolTip="更新设置">
                     <ui:NavigationViewItem.Icon>
-                        <ui:SymbolIcon Symbol="Document" />
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}"/>
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
-                <!-- 设计设置 -->
+                <!-- 画板设置 -->
                 <ui:NavigationViewItem
-                    x:Name="DesignItem"
-                    Content="设计"
-                    Tag="DesignPage"
-                    SelectsOnInvoked="True">
+                    x:Name="CanvasPageItem"
+                    Content="画板"
+                    Tag="CanvasPage"
+                    ToolTipService.ToolTip="画板与墨迹设置">
                     <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Design}"/>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
                     </ui:NavigationViewItem.Icon>
-                    <ui:NavigationViewItem.MenuItems>
-                        <ui:NavigationViewItem
-                            x:Name="IconographyItem"
-                            Content="图标"
-                            Tag="IconographyPage"
-                            ToolTipService.ToolTip="图标设置">
-                            <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AllApps}"/>
-                            </ui:NavigationViewItem.Icon>
-                        </ui:NavigationViewItem>
-                        <ui:NavigationViewItem
-                            x:Name="TypographyItem"
-                            Content="排版"
-                            Tag="TypographyPage"
-                            ToolTipService.ToolTip="排版设置">
-                            <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Font}"/>
-                            </ui:NavigationViewItem.Icon>
-                        </ui:NavigationViewItem>
-                    </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
 
-                <!-- 外观设置 -->
+                <!-- Debug -->
                 <ui:NavigationViewItem
-                    x:Name="AppearanceItem"
-                    Content="外观"
-                    Tag="AppearancePage"
-                    SelectsOnInvoked="True">
+                    x:Name="DebugPageItem"
+                    Content="Debug"
+                    Tag="DebugPage"
+                    ToolTipService.ToolTip="Debug">
                     <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Color}"/>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}"/>
                     </ui:NavigationViewItem.Icon>
-                    <ui:NavigationViewItem.MenuItems>
-                        <ui:NavigationViewItem
-                            x:Name="ThemeItem"
-                            Content="主题"
-                            Tag="ThemePage"
-                            ToolTipService.ToolTip="主题设置">
-                            <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.DarkTheme_24_Regular}"/>
-                            </ui:NavigationViewItem.Icon>
-                        </ui:NavigationViewItem>
-                        <ui:NavigationViewItem
-                            x:Name="ColorsItem"
-                            Content="颜色"
-                            Tag="ColorsPage"
-                            ToolTipService.ToolTip="颜色设置">
-                            <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Highlight}"/>
-                            </ui:NavigationViewItem.Icon>
-                        </ui:NavigationViewItem>
-                        <ui:NavigationViewItem
-                            x:Name="FontsItem"
-                            Content="字体"
-                            Tag="FontsPage"
-                            ToolTipService.ToolTip="字体设置">
-                            <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Font}"/>
-                            </ui:NavigationViewItem.Icon>
-                        </ui:NavigationViewItem>
-                    </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
+
                 <ui:NavigationViewItemHeader Content="插件设置"/>
                 <ui:NavigationViewItem
                     x:Name="PluginItem"

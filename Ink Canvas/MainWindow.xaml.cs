@@ -1183,7 +1183,6 @@ namespace Ink_Canvas
             LoadSettings(true);
             ApplyLanguageFromSettings();
             AutoBackupManager.Initialize(Settings);
-            CheckUpdateChannelAndTelemetryConsistency();
 
             // 初始化上传队列（恢复上次的上传队列）
             try
@@ -1275,8 +1274,6 @@ namespace Ink_Canvas
             }
 
             // HasNewUpdateWindow hasNewUpdateWindow = new HasNewUpdateWindow();
-            if (Environment.Is64BitProcess) GroupBoxInkRecognition.Visibility = Visibility.Collapsed;
-
             // 根据设置应用主题
             switch (Settings.Appearance.Theme)
             {
@@ -1378,16 +1375,6 @@ namespace Ink_Canvas
             if (Settings.Advanced.EnableUIAccessTopMost && Settings.Advanced.IsAlwaysOnTop)
             {
                 ApplyUIAccessTopMost();
-            }
-
-            // 初始化橡皮擦自动切换回批注模式开关
-            if (ToggleSwitchEnableEraserAutoSwitchBack != null)
-            {
-                ToggleSwitchEnableEraserAutoSwitchBack.IsOn = Settings.Canvas.EnableEraserAutoSwitchBack;
-            }
-            if (EraserAutoSwitchBackDelaySlider != null)
-            {
-                EraserAutoSwitchBackDelaySlider.Value = Settings.Canvas.EraserAutoSwitchBackDelaySeconds;
             }
 
             // 初始化剪贴板监控
@@ -1875,7 +1862,7 @@ namespace Ink_Canvas
         }
 
         // 使用多线路组下载更新
-        private async Task<bool> DownloadUpdateWithFallback(string version, AutoUpdateHelper.UpdateLineGroup primaryGroup, UpdateChannel channel)
+        internal async Task<bool> DownloadUpdateWithFallback(string version, AutoUpdateHelper.UpdateLineGroup primaryGroup, UpdateChannel channel)
         {
             try
             {
@@ -1905,7 +1892,7 @@ namespace Ink_Canvas
             }
         }
 
-        private async void AutoUpdate()
+        public async void AutoUpdate()
         {
             if (!string.IsNullOrEmpty(Settings.Startup.AutoUpdatePauseUntilDate))
             {
@@ -2366,10 +2353,7 @@ namespace Ink_Canvas
 
         private void NavAbout_Click(object sender, RoutedEventArgs e)
         {
-            // 切换到关于页面
             ShowSettingsSection("about");
-            // 刷新设备信息
-            RefreshDeviceInfo();
         }
 
         // 个性化设置
@@ -2392,88 +2376,6 @@ namespace Ink_Canvas
             // 设置蒙版为不可点击，并清除背景
             BorderSettingsMask.IsHitTestVisible = false;
             BorderSettingsMask.Background = null; // 确保清除蒙层背景
-        }
-
-        /// <summary>
-        /// 刷新设备信息按钮点击事件
-        /// </summary>
-        private void RefreshDeviceInfo_Click(object sender, RoutedEventArgs e)
-        {
-            RefreshDeviceInfo();
-        }
-
-        /// <summary>
-        /// 刷新设备信息显示
-        /// </summary>
-        private void RefreshDeviceInfo()
-        {
-            try
-            {
-                // 获取设备ID
-                string deviceId = DeviceIdentifier.GetDeviceId();
-                DeviceIdTextBlock.Text = deviceId;
-
-                // 获取使用频率
-                var usageFrequency = DeviceIdentifier.GetUsageFrequency();
-                string frequencyText;
-                switch (usageFrequency)
-                {
-                    case DeviceIdentifier.UsageFrequency.High:
-                        frequencyText = "高频用户";
-                        break;
-                    case DeviceIdentifier.UsageFrequency.Medium:
-                        frequencyText = "中频用户";
-                        break;
-                    case DeviceIdentifier.UsageFrequency.Low:
-                        frequencyText = "低频用户";
-                        break;
-                    default:
-                        frequencyText = "未知";
-                        break;
-                }
-                UsageFrequencyTextBlock.Text = frequencyText;
-
-                // 获取更新优先级
-                var updatePriority = DeviceIdentifier.GetUpdatePriority();
-                string priorityText;
-                switch (updatePriority)
-                {
-                    case DeviceIdentifier.UpdatePriority.High:
-                        priorityText = "高优先级（优先推送更新）";
-                        break;
-                    case DeviceIdentifier.UpdatePriority.Medium:
-                        priorityText = "中优先级（正常推送更新）";
-                        break;
-                    case DeviceIdentifier.UpdatePriority.Low:
-                        priorityText = "低优先级（延迟推送更新）";
-                        break;
-                    default:
-                        priorityText = "未知";
-                        break;
-                }
-                UpdatePriorityTextBlock.Text = priorityText;
-
-                // 获取使用统计（秒级精度）
-                var (launchCount, totalSeconds, avgSessionSeconds, _) = DeviceIdentifier.GetUsageStats();
-                LaunchCountTextBlock.Text = launchCount.ToString();
-
-                // 使用新的格式化方法显示秒级精度的使用时长
-                string totalUsageText = DeviceIdentifier.FormatDuration(totalSeconds);
-                TotalUsageTextBlock.Text = totalUsageText;
-
-                LogHelper.WriteLogToFile($"MainWindow | 设备信息已刷新 - ID: {deviceId}, 频率: {frequencyText}, 优先级: {priorityText}");
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"MainWindow | 刷新设备信息失败: {ex.Message}", LogHelper.LogType.Error);
-
-                // 显示错误信息
-                DeviceIdTextBlock.Text = "获取失败";
-                UsageFrequencyTextBlock.Text = "获取失败";
-                UpdatePriorityTextBlock.Text = "获取失败";
-                LaunchCountTextBlock.Text = "获取失败";
-                TotalUsageTextBlock.Text = "获取失败";
-            }
         }
 
         // 折叠侧边栏
@@ -2534,14 +2436,8 @@ namespace Ink_Canvas
                 case "startup":
                     targetGroupBox = GroupBoxStartup;
                     break;
-                case "canvas":
-                    targetGroupBox = GroupBoxCanvas;
-                    break;
                 case "gesture":
                     targetGroupBox = GroupBoxGesture;
-                    break;
-                case "inkrecognition":
-                    targetGroupBox = GroupBoxInkRecognition;
                     break;
                 case "crashaction":
                     targetGroupBox = GroupBoxCrashAction;
@@ -2564,9 +2460,6 @@ namespace Ink_Canvas
                 case "shortcuts":
                     // 快捷键设置部分可能尚未实现
                     targetGroupBox = null;
-                    break;
-                case "about":
-                    targetGroupBox = GroupBoxAbout;
                     break;
                 default:
                     // 默认滚动到顶部
@@ -3181,29 +3074,40 @@ namespace Ink_Canvas
         }
         #endregion
 
-        #region 墨迹渐隐功能
-        /// <summary>
-        /// 墨迹渐隐开关切换事件处理
-        /// </summary>
-        private void ToggleSwitchEnableInkFade_Toggled(object sender, RoutedEventArgs e)
+
+        private void ToggleSwitchEnableInkToShape_Toggled(object sender, RoutedEventArgs e)
         {
             try
             {
-                Settings.Canvas.EnableInkFade = ToggleSwitchEnableInkFade.IsOn;
-                _inkFadeManager.IsEnabled = Settings.Canvas.EnableInkFade;
+                var toggle = sender as ToggleSwitch;
+                if (toggle == null) return;
+                Settings.InkToShape.IsInkToShapeEnabled = toggle.IsOn;
+                SaveSettingsToFile();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"切换墨迹纠正功能时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
 
-                // 同步批注子面板中的开关状态
-                if (ToggleSwitchInkFadeInPanel != null)
+        private void ToggleSwitchInkFadeInPanel_Toggled(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var toggle = sender as ToggleSwitch;
+                if (toggle == null) return;
+                Settings.Canvas.EnableInkFade = toggle.IsOn;
+                if (_inkFadeManager != null)
                 {
-                    ToggleSwitchInkFadeInPanel.IsOn = Settings.Canvas.EnableInkFade;
+                    _inkFadeManager.IsEnabled = Settings.Canvas.EnableInkFade;
                 }
 
-                // 同步普通画笔面板中的开关状态
                 if (ToggleSwitchInkFadeInPanel2 != null)
                 {
                     ToggleSwitchInkFadeInPanel2.IsOn = Settings.Canvas.EnableInkFade;
                 }
 
+                SaveSettingsToFile();
             }
             catch (Exception ex)
             {
@@ -3211,259 +3115,29 @@ namespace Ink_Canvas
             }
         }
 
-        /// <summary>
-        /// 墨迹渐隐时间滑块值改变事件处理
-        /// </summary>
-        private void InkFadeTimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            try
-            {
-                Settings.Canvas.InkFadeTime = (int)e.NewValue;
-                if (_inkFadeManager != null)
-                {
-                    _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
-                }
-                LogHelper.WriteLogToFile($"墨迹渐隐时间已更新为 {Settings.Canvas.InkFadeTime}ms", LogHelper.LogType.Event);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"更新墨迹渐隐时间时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-
-
-        /// <summary>
-        /// 批注子面板中墨迹渐隐开关切换事件处理
-        /// </summary>
-        private void ToggleSwitchInkFadeInPanel_Toggled(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                Settings.Canvas.EnableInkFade = ToggleSwitchInkFadeInPanel.IsOn;
-                _inkFadeManager.IsEnabled = Settings.Canvas.EnableInkFade;
-
-                // 同步设置面板中的开关状态
-                if (ToggleSwitchEnableInkFade != null)
-                {
-                    ToggleSwitchEnableInkFade.IsOn = Settings.Canvas.EnableInkFade;
-                }
-
-                // 同步普通画笔面板中的开关状态
-                if (ToggleSwitchInkFadeInPanel2 != null)
-                {
-                    ToggleSwitchInkFadeInPanel2.IsOn = Settings.Canvas.EnableInkFade;
-                }
-
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"批注子面板中切换墨迹渐隐功能时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 在笔工具菜单中隐藏墨迹渐隐控制开关切换事件处理
-        /// <summary>
-        /// 切换“在笔工具菜单中隐藏墨迹渐隐控制开关”设置并立即应用该更改。
-        /// </summary>
-        /// <remarks>
-        /// 当控件切换时，方法会更新 Settings.Canvas.HideInkFadeControlInPenMenu 的值、将设置写回配置文件、刷新墨迹渐隐控件的可见性，并记录事件日志或错误日志。
-        /// </remarks>
-        private void ToggleSwitchHideInkFadeControlInPenMenu_Toggled(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (isLoaded)
-                {
-                    Settings.Canvas.HideInkFadeControlInPenMenu = ToggleSwitchHideInkFadeControlInPenMenu.IsOn;
-                    SaveSettingsToFile();
-                }
-
-                // 立即更新墨迹渐隐控制开关的可见性
-                UpdateInkFadeControlVisibility();
-
-                LogHelper.WriteLogToFile($"在笔工具菜单中隐藏墨迹渐隐控制开关已{(Settings.Canvas.HideInkFadeControlInPenMenu ? "启用" : "禁用")}", LogHelper.LogType.Event);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"切换在笔工具菜单中隐藏墨迹渐隐控制开关时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 橡皮擦自动切换回批注模式开关切换事件处理
-        /// </summary>
-        private void ToggleSwitchEnableEraserAutoSwitchBack_Toggled(object sender, RoutedEventArgs e)
+        private void ComboBoxEraserSizeFloatingBar_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             try
             {
                 if (!isLoaded) return;
-                Settings.Canvas.EnableEraserAutoSwitchBack = ToggleSwitchEnableEraserAutoSwitchBack.IsOn;
+                var comboBox = sender as System.Windows.Controls.ComboBox;
+                if (comboBox == null) return;
+
+                Settings.Canvas.EraserSize = comboBox.SelectedIndex;
                 SaveSettingsToFile();
 
-                // 如果禁用，停止计时器
-                if (!Settings.Canvas.EnableEraserAutoSwitchBack)
+                if (comboBox.Name == "ComboBoxEraserSizeFloatingBar" && BoardComboBoxEraserSize != null)
                 {
-                    StopEraserAutoSwitchBackTimer();
+                    BoardComboBoxEraserSize.SelectedIndex = comboBox.SelectedIndex;
                 }
-
-                LogHelper.WriteLogToFile($"橡皮擦自动切换回批注模式已{(Settings.Canvas.EnableEraserAutoSwitchBack ? "启用" : "禁用")}", LogHelper.LogType.Event);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"切换橡皮擦自动切换回批注模式时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 橡皮擦自动切换延迟时间滑块值改变事件处理
-        /// </summary>
-        private void EraserAutoSwitchBackDelaySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            try
-            {
-                if (!isLoaded) return;
-                Settings.Canvas.EraserAutoSwitchBackDelaySeconds = (int)e.NewValue;
-                SaveSettingsToFile();
-
-                // 如果计时器正在运行，重新启动以应用新的延迟时间
-                if (_eraserAutoSwitchBackTimer != null && _eraserAutoSwitchBackTimer.IsEnabled)
+                else if (comboBox.Name == "BoardComboBoxEraserSize" && ComboBoxEraserSizeFloatingBar != null)
                 {
-                    StartEraserAutoSwitchBackTimer();
-                }
-
-                LogHelper.WriteLogToFile($"橡皮擦自动切换延迟时间已更新为 {Settings.Canvas.EraserAutoSwitchBackDelaySeconds} 秒", LogHelper.LogType.Event);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"更新橡皮擦自动切换延迟时间时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 根据开关状态启用或禁用画笔自动恢复：更新设置并保存，启用时初始化并安排恢复定时器，禁用时停止计时器。
-        /// </summary>
-        private void ToggleSwitchBrushAutoRestore_Toggled(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (!isLoaded) return;
-                Settings.Canvas.EnableBrushAutoRestore = ToggleSwitchBrushAutoRestore.IsOn;
-                SaveSettingsToFile();
-
-                if (Settings.Canvas.EnableBrushAutoRestore)
-                {
-                    InitBrushAutoRestoreTimer();
-                    ScheduleBrushAutoRestore();
-                }
-                else
-                {
-                    if (_brushAutoRestoreTimer != null)
-                    {
-                        _brushAutoRestoreTimer.Stop();
-                    }
+                    ComboBoxEraserSizeFloatingBar.SelectedIndex = comboBox.SelectedIndex;
                 }
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"切换画笔自动恢复功能时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 当“画笔自动恢复次数”文本改变时更新并保存设置；若启用画笔自动恢复，则重新调度自动恢复定时器。
-        /// </summary>
-        /// <remarks>
-        /// 在窗口未完成加载或 Settings.Canvas 为 null 时不执行任何操作；方法内部会捕获并记录异常，不向调用方抛出异常。
-        /// </remarks>
-        private void BrushAutoRestoreTimesTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            try
-            {
-                if (!isLoaded) return;
-                if (Settings?.Canvas == null) return;
-
-                Settings.Canvas.BrushAutoRestoreTimes = BrushAutoRestoreTimesTextBox.Text ?? string.Empty;
-                SaveSettingsToFile();
-                if (Settings.Canvas.EnableBrushAutoRestore)
-                {
-                    ScheduleBrushAutoRestore();
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"BrushAutoRestoreTimes: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 响应画笔自动恢复颜色下拉框的选择变更并将选中项保存为设置中的目标颜色。
-        /// </summary>
-        /// <remarks>
-        /// 当窗口已加载且 Settings.Canvas 可用时，将选中 ComboBoxItem 的 Tag（十六进制颜色字符串）写入 Settings.Canvas.BrushAutoRestoreColor 并持久化到设置文件；若发生异常则记录错误日志。
-        /// </remarks>
-        private void ComboBoxBrushAutoRestoreColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            try
-            {
-                if (!isLoaded) return;
-                if (Settings?.Canvas == null) return;
-
-                if (ComboBoxBrushAutoRestoreColor.SelectedItem is ComboBoxItem item)
-                {
-                    string hex = item.Tag as string ?? string.Empty;
-                    Settings.Canvas.BrushAutoRestoreColor = hex;
-                    SaveSettingsToFile();
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"更新画笔自动恢复目标颜色时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 将画笔自动恢复的目标粗细设置为滑块的新值并将更改保存到设置文件。
-        /// </summary>
-        /// <param name="sender">触发事件的滑块控件（通常为 BrushAutoRestoreWidthSlider）。</param>
-        /// <param name="e">包含滑块的新值的事件参数；使用 <c>e.NewValue</c> 作为目标粗细。</param>
-        /// <remarks>
-        /// 如果窗口尚未完成加载或 Settings.Canvas 为 null，则不执行任何操作。
-        /// </remarks>
-        private void BrushAutoRestoreWidthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            try
-            {
-                if (!isLoaded) return;
-                if (Settings?.Canvas == null) return;
-
-                Settings.Canvas.BrushAutoRestoreWidth = e.NewValue;
-                SaveSettingsToFile();
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"更新画笔自动恢复目标粗细时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 在画笔自动恢复透明度滑块的值发生变化时，将新的透明度值保存到 Settings.Canvas.BrushAutoRestoreAlpha 并持久化到设置文件。
-        /// </summary>
-        /// <param name="e">来自滑块的事件参数；使用 <c>e.NewValue</c> 的整数值作为新的透明度目标。</param>
-        private void BrushAutoRestoreAlphaSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            try
-            {
-                if (!isLoaded) return;
-                if (Settings?.Canvas == null) return;
-
-                Settings.Canvas.BrushAutoRestoreAlpha = (int)e.NewValue;
-                SaveSettingsToFile();
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"更新画笔自动恢复目标透明度时出错: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"切换橡皮擦大小时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -3684,8 +3358,6 @@ namespace Ink_Canvas
             }
         }
 
-        #endregion
-
 
         /// <summary>
         /// 初始化文件关联状态显示
@@ -3812,10 +3484,6 @@ namespace Ink_Canvas
                 // 获取所有滑块控件并添加触摸支持
                 var sliders = new List<Slider>
                 {
-                    InkFadeTimeSlider,
-                    AutoStraightenLineThresholdSlider,
-                    LineStraightenSensitivitySlider,
-                    LineEndpointSnappingThresholdSlider,
                     ViewboxFloatingBarScaleTransformValueSlider,
                     ViewboxFloatingBarOpacityValueSlider,
                     ViewboxFloatingBarOpacityInPPTValueSlider,
@@ -3842,9 +3510,7 @@ namespace Ink_Canvas
                     InkAlphaSlider,
                     HighlighterWidthSlider,
                     MLAvoidanceHistorySlider,
-                    MLAvoidanceWeightSlider,
-                    BrushAutoRestoreWidthSlider,
-                    BrushAutoRestoreAlphaSlider
+                    MLAvoidanceWeightSlider
                 };
 
                 foreach (var slider in sliders)

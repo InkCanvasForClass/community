@@ -1,0 +1,361 @@
+<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.CanvasPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
+      xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+      xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
+      xmlns:sys="clr-namespace:System;assembly=mscorlib"
+      xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+      xmlns:c="clr-namespace:Ink_Canvas.Converter"
+      mc:Ignorable="d"
+
+      Title="画板">
+
+    <ScrollViewer PanningMode="VerticalFirst">
+        <Grid Margin="59,0,59,0">
+            <FrameworkElement.Resources>
+                <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
+                <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+                <Style x:Key="SettingsSectionHeaderTextBlockStyle"
+                       BasedOn="{StaticResource BodyStrongTextBlockStyle}"
+                       TargetType="TextBlock">
+                    <Style.Setters>
+                        <Setter Property="Margin" Value="1,30,0,6" />
+                    </Style.Setters>
+                </Style>
+            </FrameworkElement.Resources>
+            <Grid>
+                <ikw:SimpleStackPanel MaxWidth="1000"
+                    HorizontalAlignment="Stretch"
+                    Spacing="{StaticResource SettingsCardSpacing}">
+
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="{i18n:I18n Key=Canvas_GroupTitle}" />
+
+                    <controls:LabeledSettingsCard x:Name="CardShowCursor"
+                            Header="{i18n:I18n Key=Canvas_ShowCursor}"
+                            Icon="{x:Static ui:SegoeFluentIcons.PointerHand}"
+                            SwitchName="ToggleSwitchShowCursor"
+                            Toggled="ToggleSwitchShowCursor_Toggled" />
+
+                    <controls:LabeledSettingsCard x:Name="CardEnablePressureTouchMode"
+                            Header="{i18n:I18n Key=Canvas_EnablePressureTouch}"
+                            Description="{i18n:I18n Key=Canvas_EnablePressureTouchHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Touch}"
+                            SwitchName="ToggleSwitchEnablePressureTouchMode"
+                            Toggled="ToggleSwitchEnablePressureTouchMode_Toggled" />
+
+                    <controls:LabeledSettingsCard x:Name="CardDisablePressure"
+                            Header="{i18n:I18n Key=Canvas_DisablePressure}"
+                            Description="{i18n:I18n Key=Canvas_DisablePressureHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
+                            SwitchName="ToggleSwitchDisablePressure"
+                            Toggled="ToggleSwitchDisablePressure_Toggled" />
+
+                    <ui:SettingsCard Header="{i18n:I18n Key=Canvas_EraserSize}"
+                            Description="{i18n:I18n Key=Canvas_EraserSizeHint}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EraseTool}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ComboBox x:Name="ComboBoxEraserSize" Width="160"
+                                  SelectedIndex="2"
+                                  SelectionChanged="ComboBoxEraserSize_SelectionChanged">
+                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_VerySmall}" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_Small}" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_Medium}" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_Large}" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_VeryLarge}" />
+                        </ComboBox>
+                    </ui:SettingsCard>
+
+                    <controls:LabeledSettingsCard x:Name="CardHideStrokeWhenSelecting"
+                            Header="{i18n:I18n Key=Canvas_HideStrokeWhenSelecting}"
+                            Description="{i18n:I18n Key=Canvas_HideStrokeWhenSelectingHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Hide}"
+                            SwitchName="ToggleSwitchHideStrokeWhenSelecting"
+                            Toggled="ToggleSwitchHideStrokeWhenSelecting_Toggled" />
+
+                    <controls:LabeledSettingsCard x:Name="CardClearCanvasAndClearTimeMachine"
+                            Header="{i18n:I18n Key=Canvas_ClearInkAlsoClearHistory}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Delete}"
+                            SwitchName="ToggleSwitchClearCanvasAndClearTimeMachine"
+                            Toggled="ToggleSwitchClearCanvasAndClearTimeMachine_Toggled" />
+
+                    <controls:LabeledSettingsCard x:Name="CardClearCanvasAlsoClearImages"
+                            Header="{i18n:I18n Key=Canvas_ClearCanvasAlsoClearImages}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Photo}"
+                            SwitchName="ToggleSwitchClearCanvasAlsoClearImages"
+                            Toggled="ToggleSwitchClearCanvasAlsoClearImages_Toggled" />
+
+                    <controls:LabeledSettingsCard x:Name="CardCompressPicturesUploaded"
+                            Header="{i18n:I18n Key=Canvas_CompressPicturesUploaded}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Clear}"
+                            SwitchName="ToggleSwitchCompressPicturesUploaded"
+                            Toggled="ToggleSwitchCompressPicturesUploaded_Toggled" />
+
+                    <controls:LabeledSettingsCard x:Name="CardLaunchSeewoVideoShowcaseForWhiteboardBooth"
+                            Header="{i18n:I18n Key=Canvas_LaunchSeewoVideoShowcaseForWhiteboardBooth}"
+                            Description="{i18n:I18n Key=Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Video}"
+                            SwitchName="ToggleSwitchLaunchSeewoVideoShowcaseForWhiteboardBooth"
+                            Toggled="ToggleSwitchLaunchSeewoVideoShowcaseForWhiteboardBooth_Toggled" />
+
+                    <ui:SettingsCard Header="{i18n:I18n Key=Canvas_KeepHyperbolaAsymptote}"
+                            Description="{i18n:I18n Key=Canvas_HyperbolaAsymptoteHint}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AreaChart}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ComboBox x:Name="ComboBoxHyperbolaAsymptoteOption" Width="160"
+                                  SelectedIndex="0"
+                                  SelectionChanged="ComboBoxHyperbolaAsymptoteOption_SelectionChanged">
+                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_Yes}" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_No}" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_AskEachTime}" />
+                        </ComboBox>
+                    </ui:SettingsCard>
+
+                    <controls:LabeledSettingsCard x:Name="CardShowCircleCenter"
+                            Header="{i18n:I18n Key=Canvas_ShowCircleCenter}"
+                            Icon="{x:Static ui:SegoeFluentIcons.CircleRing}"
+                            SwitchName="ToggleSwitchShowCircleCenter"
+                            Toggled="ToggleSwitchShowCircleCenter_Toggled" />
+
+                    <controls:LabeledSettingsCard x:Name="CardFitToCurve"
+                            Header="{i18n:I18n Key=Canvas_WPFBezierSmoothing}"
+                            Icon="{x:Static ui:SegoeFluentIcons.InkingTool}"
+                            SwitchName="ToggleSwitchFitToCurve"
+                            Toggled="ToggleSwitchFitToCurve_Toggled" />
+
+                    <controls:LabeledSettingsCard x:Name="CardAdvancedBezierSmoothing"
+                            Header="{i18n:I18n Key=Canvas_AdvancedBezierSmoothing}"
+                            Icon="{x:Static ui:SegoeFluentIcons.InkingTool}"
+                            SwitchName="ToggleSwitchAdvancedBezierSmoothing"
+                            Toggled="ToggleSwitchAdvancedBezierSmoothing_Toggled" />
+
+                    <controls:LabeledSettingsCard x:Name="CardEnableInkFade"
+                            Header="{i18n:I18n Key=Canvas_EnableInkFade}"
+                            Description="{i18n:I18n Key=Canvas_EnableInkFadeHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Color}"
+                            SwitchName="ToggleSwitchEnableInkFade"
+                            Toggled="ToggleSwitchEnableInkFade_Toggled" />
+
+                    <ui:SettingsCard Header="{i18n:I18n Key=Canvas_InkFadeTime}"
+                            Visibility="{Binding IsOn, ElementName=CardEnableInkFade, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Stopwatch}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
+                            <Slider x:Name="InkFadeTimeSlider" Width="150" Minimum="1000" Maximum="10000"
+                                    Value="3000" TickFrequency="1000" IsSnapToTickEnabled="True"
+                                    ValueChanged="InkFadeTimeSlider_ValueChanged" />
+                            <TextBlock Text="{Binding Value, ElementName=InkFadeTimeSlider, StringFormat={}{0:0}ms}"
+                                       VerticalAlignment="Center" FontSize="14" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <controls:LabeledSettingsCard x:Name="CardHideInkFadeControlInPenMenu"
+                            Header="{i18n:I18n Key=Canvas_HideInkFadeInPenMenu}"
+                            Description="{i18n:I18n Key=Canvas_HideInkFadeInPenMenuHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Hide}"
+                            SwitchName="ToggleSwitchHideInkFadeControlInPenMenu"
+                            Toggled="ToggleSwitchHideInkFadeControlInPenMenu_Toggled" />
+
+                    <controls:LabeledSettingsCard x:Name="CardBrushAutoRestore"
+                            Header="{i18n:I18n Key=Canvas_BrushAutoRestore}"
+                            Description="{i18n:I18n Key=Canvas_BrushAutoRestoreHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Refresh}"
+                            SwitchName="ToggleSwitchBrushAutoRestore"
+                            Toggled="ToggleSwitchBrushAutoRestore_Toggled" />
+
+                    <ui:SettingsExpander Header="{i18n:I18n Key=Canvas_BrushAutoRestore}"
+                            Visibility="{Binding IsOn, ElementName=CardBrushAutoRestore, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="{i18n:I18n Key=Canvas_AutoRestoreTimePoints}">
+                                <TextBox x:Name="BrushAutoRestoreTimesTextBox" Width="260"
+                                         TextChanged="BrushAutoRestoreTimesTextBox_TextChanged" />
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=Canvas_RestoreColor}">
+                                <ComboBox x:Name="ComboBoxBrushAutoRestoreColor" Width="200"
+                                          SelectionChanged="ComboBoxBrushAutoRestoreColor_SelectionChanged">
+                                    <ComboBoxItem Content="{i18n:I18n Key=Canvas_Color_Default}" Tag="#FFFF0000" />
+                                    <ComboBoxItem Content="{i18n:I18n Key=Canvas_Color_Black}" Tag="#FF000000" />
+                                    <ComboBoxItem Content="{i18n:I18n Key=Canvas_Color_White}" Tag="#FFFFFFFF" />
+                                    <ComboBoxItem Content="{i18n:I18n Key=Canvas_Color_Red}" Tag="#FFFF0000" />
+                                    <ComboBoxItem Content="{i18n:I18n Key=Canvas_Color_Yellow}" Tag="#FFFFFF00" />
+                                    <ComboBoxItem Content="{i18n:I18n Key=Canvas_Color_Blue}" Tag="#FF2563EB" />
+                                    <ComboBoxItem Content="{i18n:I18n Key=Canvas_Color_Green}" Tag="#FF16A34A" />
+                                    <ComboBoxItem Content="{i18n:I18n Key=Canvas_Color_Orange}" Tag="#FFFB9650" />
+                                    <ComboBoxItem Content="{i18n:I18n Key=Canvas_Color_Purple}" Tag="#FF9333EA" />
+                                </ComboBox>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=Canvas_RestoreWidth}">
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
+                                    <Slider x:Name="BrushAutoRestoreWidthSlider" Width="200" Minimum="1" Maximum="20"
+                                            TickFrequency="1" IsSnapToTickEnabled="True" Value="5"
+                                            ValueChanged="BrushAutoRestoreWidthSlider_ValueChanged" />
+                                    <TextBlock Text="{Binding Value, ElementName=BrushAutoRestoreWidthSlider, StringFormat={}{0:0}px}"
+                                               FontSize="12" VerticalAlignment="Center" />
+                                </ikw:SimpleStackPanel>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=Canvas_RestoreOpacity}">
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
+                                    <Slider x:Name="BrushAutoRestoreAlphaSlider" Width="200" Minimum="0" Maximum="255"
+                                            TickFrequency="5" IsSnapToTickEnabled="True"
+                                            ValueChanged="BrushAutoRestoreAlphaSlider_ValueChanged" />
+                                    <TextBlock Text="{Binding Value, ElementName=BrushAutoRestoreAlphaSlider, StringFormat={}{0:0}}"
+                                               FontSize="12" VerticalAlignment="Center" />
+                                </ikw:SimpleStackPanel>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
+
+                    <controls:LabeledSettingsCard x:Name="CardEnableEraserAutoSwitchBack"
+                            Header="{i18n:I18n Key=Canvas_SwitchBackAfterEraser}"
+                            Description="{i18n:I18n Key=Canvas_SwitchBackAfterEraserHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Switch}"
+                            SwitchName="ToggleSwitchEnableEraserAutoSwitchBack"
+                            Toggled="ToggleSwitchEnableEraserAutoSwitchBack_Toggled" />
+
+                    <ui:SettingsCard Header="{i18n:I18n Key=Canvas_SwitchBackDelay}"
+                            Description="{i18n:I18n Key=Canvas_SwitchBackDelayHint}"
+                            Visibility="{Binding IsOn, ElementName=CardEnableEraserAutoSwitchBack, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
+                            <Slider x:Name="EraserAutoSwitchBackDelaySlider" Width="150" Minimum="1" Maximum="60"
+                                    Value="10" TickFrequency="1" IsSnapToTickEnabled="True"
+                                    ValueChanged="EraserAutoSwitchBackDelaySlider_ValueChanged" />
+                            <TextBlock Text="{Binding Value, ElementName=EraserAutoSwitchBackDelaySlider, StringFormat={}{0:0}秒}"
+                                       VerticalAlignment="Center" FontSize="14" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="{i18n:I18n Key=InkRecog_Title}" />
+
+                    <controls:LabeledSettingsCard x:Name="CardEnableInkToShape"
+                            Header="{i18n:I18n Key=InkRecog_EnableInkRecognition}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Draw}"
+                            SwitchName="ToggleSwitchEnableInkToShape"
+                            Toggled="ToggleSwitchEnableInkToShape_Toggled" />
+
+                    <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_ShapeEngine}"
+                            Description="{i18n:I18n Key=InkRecog_ShapeEngineHint}">
+                        <ComboBox x:Name="ComboBoxShapeRecognitionEngine" Width="160"
+                                  SelectionChanged="ComboBoxShapeRecognitionEngine_SelectionChanged">
+                            <ComboBoxItem Content="{i18n:I18n Key=InkRecog_ShapeEngineAuto}" />
+                            <ComboBoxItem Content="{i18n:I18n Key=InkRecog_ShapeEngineIACore}" />
+                            <ComboBoxItem Content="{i18n:I18n Key=InkRecog_ShapeEngineWinRT}" />
+                        </ComboBox>
+                    </ui:SettingsCard>
+
+                    <controls:LabeledSettingsCard x:Name="CardEnableWinRtHandwritingStrokeBeautify"
+                            Header="{i18n:I18n Key=InkRecog_HandwritingBeautify}"
+                            Description="{i18n:I18n Key=InkRecog_HandwritingBeautifyHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.PenWorkspace}"
+                            SwitchName="ToggleSwitchEnableWinRtHandwritingStrokeBeautify"
+                            Toggled="ToggleSwitchEnableWinRtHandwritingStrokeBeautify_Toggled" />
+
+                    <controls:LabeledSettingsCard x:Name="CardEnableInkToShapeNoFakePressureRectangle"
+                            Header="{i18n:I18n Key=InkRecog_BlockRectFakePressure}"
+                            ShowWhen="{Binding IsOn, ElementName=CardEnableInkToShape}"
+                            Icon="{x:Static ui:SegoeFluentIcons.RectangularClipping}"
+                            SwitchName="ToggleSwitchEnableInkToShapeNoFakePressureRectangle"
+                            Toggled="ToggleSwitchEnableInkToShapeNoFakePressureRectangle_Toggled" />
+
+                    <controls:LabeledSettingsCard x:Name="CardEnableInkToShapeNoFakePressureTriangle"
+                            Header="{i18n:I18n Key=InkRecog_BlockTriFakePressure}"
+                            ShowWhen="{Binding IsOn, ElementName=CardEnableInkToShape}"
+                            Icon="{x:Static ui:SegoeFluentIcons.IncidentTriangle}"
+                            SwitchName="ToggleSwitchEnableInkToShapeNoFakePressureTriangle"
+                            Toggled="ToggleSwitchEnableInkToShapeNoFakePressureTriangle_Toggled" />
+
+                    <ui:SettingsExpander Header="形状修正"
+                            Visibility="{Binding IsOn, ElementName=CardEnableInkToShape, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_FixTriangle}">
+                                <CheckBox x:Name="ToggleCheckboxEnableInkToShapeTriangle" IsChecked="True"
+                                          Checked="ToggleCheckboxEnableInkToShapeTriangle_CheckedChanged"
+                                          Unchecked="ToggleCheckboxEnableInkToShapeTriangle_CheckedChanged" />
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_FixRectangle}">
+                                <CheckBox x:Name="ToggleCheckboxEnableInkToShapeRectangle" IsChecked="True"
+                                          Checked="ToggleCheckboxEnableInkToShapeRectangle_CheckedChanged"
+                                          Unchecked="ToggleCheckboxEnableInkToShapeRectangle_CheckedChanged" />
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_FixEllipse}">
+                                <CheckBox x:Name="ToggleCheckboxEnableInkToShapeRounded" IsChecked="True"
+                                          Checked="ToggleCheckboxEnableInkToShapeRounded_CheckedChanged"
+                                          Unchecked="ToggleCheckboxEnableInkToShapeRounded_CheckedChanged" />
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
+
+                    <controls:LabeledSettingsCard x:Name="CardAutoStraightenLine"
+                            Header="{i18n:I18n Key=InkRecog_AutoStraightLine}"
+                            Icon="{x:Static ui:SegoeFluentIcons.LineDisplay}"
+                            SwitchName="ToggleSwitchAutoStraightenLine"
+                            Toggled="ToggleSwitchAutoStraightenLine_Toggled" />
+
+                    <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_LengthThreshold}"
+                            Visibility="{Binding IsOn, ElementName=CardAutoStraightenLine, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
+                            <Slider x:Name="AutoStraightenLineThresholdSlider" Width="150" Minimum="30" Maximum="300"
+                                    Value="80" TickFrequency="30" IsSnapToTickEnabled="True"
+                                    ValueChanged="AutoStraightenLineThresholdSlider_ValueChanged" />
+                            <TextBlock Text="{Binding Value, ElementName=AutoStraightenLineThresholdSlider, StringFormat={}{0:0}}"
+                                       VerticalAlignment="Center" FontSize="14" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_Sensitivity}"
+                            Visibility="{Binding IsOn, ElementName=CardAutoStraightenLine, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
+                            <Slider x:Name="LineStraightenSensitivitySlider" Width="150" Minimum="0.05" Maximum="2.0"
+                                    Value="0.20" TickFrequency="0.05" IsSnapToTickEnabled="True"
+                                    ValueChanged="LineStraightenSensitivitySlider_ValueChanged" />
+                            <TextBlock Text="{Binding Value, ElementName=LineStraightenSensitivitySlider, StringFormat={}{0:F2}}"
+                                       VerticalAlignment="Center" FontSize="14" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <controls:LabeledSettingsCard x:Name="CardHighPrecisionLineStraighten"
+                            Header="{i18n:I18n Key=InkRecog_HighPrecisionStraighten}"
+                            Description="{i18n:I18n Key=InkRecog_HighPrecisionHint}"
+                            ShowWhen="{Binding IsOn, ElementName=CardAutoStraightenLine}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Bullseye}"
+                            SwitchName="ToggleSwitchHighPrecisionLineStraighten"
+                            Toggled="ToggleSwitchHighPrecisionLineStraighten_Toggled" />
+
+                    <controls:LabeledSettingsCard x:Name="CardLineEndpointSnapping"
+                            Header="{i18n:I18n Key=InkRecog_LineEndpointSnapping}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Link}"
+                            SwitchName="ToggleSwitchLineEndpointSnapping"
+                            Toggled="ToggleSwitchLineEndpointSnapping_Toggled" />
+
+                    <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_SnappingDistance}"
+                            Description="{i18n:I18n Key=InkRecog_LineEndpointSnappingHint}"
+                            Visibility="{Binding IsOn, ElementName=CardLineEndpointSnapping, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
+                            <Slider x:Name="LineEndpointSnappingThresholdSlider" Width="150" Minimum="5" Maximum="50"
+                                    Value="15" TickFrequency="5" IsSnapToTickEnabled="True"
+                                    ValueChanged="LineEndpointSnappingThresholdSlider_ValueChanged" />
+                            <TextBlock Text="{Binding Value, ElementName=LineEndpointSnappingThresholdSlider, StringFormat={}{0:0}}"
+                                       VerticalAlignment="Center" FontSize="14" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <Rectangle Height="48" />
+
+                </ikw:SimpleStackPanel>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</ui:Page>

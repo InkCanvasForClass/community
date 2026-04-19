@@ -1388,6 +1388,11 @@ namespace Ink_Canvas
             }
         }
 
+        public void StartSilentUpdateTimer()
+        {
+            timerCheckAutoUpdateWithSilence.Start();
+        }
+
         /// <summary>
         /// 初始化橡皮擦自动切换回批注模式计时器
         /// </summary>
