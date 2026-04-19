@@ -123,17 +123,17 @@
                             SwitchName="ToggleSwitchShowCircleCenter"
                             Toggled="ToggleSwitchShowCircleCenter_Toggled" />
 
-                    <controls:LabeledSettingsCard x:Name="CardFitToCurve"
-                            Header="{i18n:I18n Key=Canvas_WPFBezierSmoothing}"
-                            Icon="{x:Static ui:SegoeFluentIcons.InkingTool}"
-                            SwitchName="ToggleSwitchFitToCurve"
-                            Toggled="ToggleSwitchFitToCurve_Toggled" />
-
-                    <controls:LabeledSettingsCard x:Name="CardAdvancedBezierSmoothing"
-                            Header="{i18n:I18n Key=Canvas_AdvancedBezierSmoothing}"
-                            Icon="{x:Static ui:SegoeFluentIcons.InkingTool}"
-                            SwitchName="ToggleSwitchAdvancedBezierSmoothing"
-                            Toggled="ToggleSwitchAdvancedBezierSmoothing_Toggled" />
+                    <ui:SettingsCard Header="{i18n:I18n Key=Canvas_CurveSmoothingMode}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.InkingTool}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ComboBox x:Name="ComboBoxCurveSmoothingMode"
+                                  SelectionChanged="ComboBoxCurveSmoothingMode_SelectionChanged">
+                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_AdvancedBezierSmoothing}" Tag="2" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_WPFBezierSmoothing}" Tag="1" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_CurveSmoothing_Off}" Tag="0" />
+                        </ComboBox>
+                    </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardEnableInkFade"
                             Header="{i18n:I18n Key=Canvas_EnableInkFade}"

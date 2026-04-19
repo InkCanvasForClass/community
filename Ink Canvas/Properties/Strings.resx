@@ -1074,6 +1074,12 @@
   <data name="Canvas_AdvancedBezierSmoothing" xml:space="preserve">
     <value>使用高级曲线平滑（推荐）</value>
   </data>
+  <data name="Canvas_CurveSmoothingMode" xml:space="preserve">
+    <value>曲线平滑模式</value>
+  </data>
+  <data name="Canvas_CurveSmoothing_Off" xml:space="preserve">
+    <value>关闭</value>
+  </data>
   <data name="Canvas_EnableInkFade" xml:space="preserve">
     <value>启用墨迹渐隐功能</value>
   </data>

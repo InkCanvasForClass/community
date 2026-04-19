@@ -43,8 +43,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     CardLaunchSeewoVideoShowcaseForWhiteboardBooth.IsOn = settings.Canvas.LaunchSeewoVideoShowcaseForWhiteboardBooth;
                     ComboBoxHyperbolaAsymptoteOption.SelectedIndex = (int)settings.Canvas.HyperbolaAsymptoteOption;
                     CardShowCircleCenter.IsOn = settings.Canvas.ShowCircleCenter;
-                    CardFitToCurve.IsOn = settings.Canvas.FitToCurve;
-                    CardAdvancedBezierSmoothing.IsOn = settings.Canvas.UseAdvancedBezierSmoothing;
+                    int curveMode = 0;
+                    if (settings.Canvas.UseAdvancedBezierSmoothing) curveMode = 2;
+                    else if (settings.Canvas.FitToCurve) curveMode = 1;
+                    ComboBoxCurveSmoothingMode.SelectedIndex = curveMode;
                     CardEnableInkFade.IsOn = settings.Canvas.EnableInkFade;
                     InkFadeTimeSlider.Value = settings.Canvas.InkFadeTime;
                     CardHideInkFadeControlInPenMenu.IsOn = settings.Canvas.HideInkFadeControlInPenMenu;
@@ -195,26 +197,26 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.SaveSettingsToFile();
         }
 
-        private void ToggleSwitchFitToCurve_Toggled(object sender, RoutedEventArgs e)
+        private void ComboBoxCurveSmoothingMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.FitToCurve = CardFitToCurve.IsOn;
-            if (CardFitToCurve.IsOn)
+            var item = ComboBoxCurveSmoothingMode?.SelectedItem as ComboBoxItem;
+            if (item == null) return;
+            var tag = item.Tag?.ToString() ?? "0";
+            switch (tag)
             {
-                SettingsManager.Settings.Canvas.UseAdvancedBezierSmoothing = false;
-                CardAdvancedBezierSmoothing.IsOn = false;
-            }
-            SettingsManager.SaveSettingsToFile();
-        }
-
-        private void ToggleSwitchAdvancedBezierSmoothing_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.UseAdvancedBezierSmoothing = CardAdvancedBezierSmoothing.IsOn;
-            if (CardAdvancedBezierSmoothing.IsOn)
-            {
-                SettingsManager.Settings.Canvas.FitToCurve = false;
-                CardFitToCurve.IsOn = false;
+                case "1":
+                    SettingsManager.Settings.Canvas.FitToCurve = true;
+                    SettingsManager.Settings.Canvas.UseAdvancedBezierSmoothing = false;
+                    break;
+                case "2":
+                    SettingsManager.Settings.Canvas.FitToCurve = false;
+                    SettingsManager.Settings.Canvas.UseAdvancedBezierSmoothing = true;
+                    break;
+                default:
+                    SettingsManager.Settings.Canvas.FitToCurve = false;
+                    SettingsManager.Settings.Canvas.UseAdvancedBezierSmoothing = false;
+                    break;
             }
             SettingsManager.SaveSettingsToFile();
         }

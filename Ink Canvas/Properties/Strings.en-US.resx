@@ -1032,6 +1032,12 @@
   <data name="Canvas_AdvancedBezierSmoothing" xml:space="preserve">
     <value>Use advanced curve smoothing (recommended)</value>
   </data>
+  <data name="Canvas_CurveSmoothingMode" xml:space="preserve">
+    <value>Curve smoothing mode</value>
+  </data>
+  <data name="Canvas_CurveSmoothing_Off" xml:space="preserve">
+    <value>Off</value>
+  </data>
   <data name="Canvas_EnableInkFade" xml:space="preserve">
     <value>Enable ink fade</value>
   </data>
