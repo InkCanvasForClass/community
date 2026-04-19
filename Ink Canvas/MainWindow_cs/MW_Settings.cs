@@ -1,5 +1,6 @@
 using H.NotifyIcon;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Newtonsoft.Json;
 using OSVersionExtension;
 using System;
@@ -5113,22 +5114,7 @@ namespace Ink_Canvas
         /// <remarks>
         /// 在写入前会确保目标目录/文件具有写入权限（使用 ProcessProtectionManager）。任何写入失败或异常都会被吞掉，调用方不会收到异常抛出。
         /// </remarks>
-        public static void SaveSettingsToFile()
-        {
-            var text = JsonConvert.SerializeObject(Settings, Formatting.Indented);
-            try
-            {
-                string configsDir = Path.Combine(App.RootPath, "Configs");
-                if (!Directory.Exists(configsDir))
-                {
-                    ProcessProtectionManager.WithWriteAccess(configsDir, () => Directory.CreateDirectory(configsDir));
-                }
-
-                var path = App.RootPath + settingsFileName;
-                ProcessProtectionManager.WithWriteAccess(path, () => File.WriteAllText(path, text));
-            }
-            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
-        }
+        public static void SaveSettingsToFile() => SettingsManager.SaveSettingsToFile();
 
         private void SCManipulationBoundaryFeedback(object sender, ManipulationBoundaryFeedbackEventArgs e)
         {

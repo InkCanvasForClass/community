@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
+      xmlns:helpers="clr-namespace:Ink_Canvas.Windows.SettingsViews.Helpers"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
@@ -62,8 +63,8 @@
                                 OffContent="{DynamicResource Common_Off}"
                                 Toggled="ToggleSwitchAlwaysOnTop_Toggled" />
                         <ui:SettingsExpander.ItemTemplate>
-                            <local:TopMostModeTemplateSelector>
-                                <local:TopMostModeTemplateSelector.SelectionTemplate>
+                            <helpers:TopMostModeTemplateSelector>
+                                <helpers:TopMostModeTemplateSelector.SelectionTemplate>
                                     <DataTemplate>
                                         <ui:SettingsCard Header="{i18n:I18n Key=Startup_TopMostMode}">
                                             <StackPanel Orientation="Horizontal">
@@ -79,8 +80,8 @@
                                             </StackPanel>
                                         </ui:SettingsCard>
                                     </DataTemplate>
-                                </local:TopMostModeTemplateSelector.SelectionTemplate>
-                                <local:TopMostModeTemplateSelector.ButtonTemplate>
+                                </helpers:TopMostModeTemplateSelector.SelectionTemplate>
+                                <helpers:TopMostModeTemplateSelector.ButtonTemplate>
                                     <DataTemplate>
                                         <ui:SettingsCard Header="{Binding ButtonHeader}">
                                             <Button Content="{Binding ButtonContent}"
@@ -88,8 +89,8 @@
                                                     Tag="{Binding RestartAsAdmin}" />
                                         </ui:SettingsCard>
                                     </DataTemplate>
-                                </local:TopMostModeTemplateSelector.ButtonTemplate>
-                            </local:TopMostModeTemplateSelector>
+                                </helpers:TopMostModeTemplateSelector.ButtonTemplate>
+                            </helpers:TopMostModeTemplateSelector>
                         </ui:SettingsExpander.ItemTemplate>
                     </ui:SettingsExpander>
                 

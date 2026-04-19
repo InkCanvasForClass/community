@@ -1,5 +1,6 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Windows.SettingsViews.Helpers;
 using iNKORE.UI.WPF.Modern;
 using System;
 using System.Diagnostics;
@@ -416,9 +417,9 @@ namespace Ink_Canvas
                 {
                     BorderSettings.Visibility = Visibility.Collapsed;
                     isOpeningOrHidingSettingsPane = false;
-                    if (isTemporarilyDisablingNoFocusMode)
+                    if (WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode)
                     {
-                        isTemporarilyDisablingNoFocusMode = false;
+                        WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode = false;
                         ApplyNoFocusMode();
                     }
                 };
@@ -3080,9 +3081,9 @@ namespace Ink_Canvas
             // 如果当前在设置面板中，需要先恢复无焦点模式状态
             if (BorderSettings.Visibility == Visibility.Visible)
             {
-                if (isTemporarilyDisablingNoFocusMode)
+                if (WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode)
                 {
-                    isTemporarilyDisablingNoFocusMode = false;
+                    WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode = false;
                     ApplyNoFocusMode();
                 }
                 SaveSettingsToFile();
@@ -3102,9 +3103,9 @@ namespace Ink_Canvas
         {
             if (BorderSettings.Visibility == Visibility.Visible)
             {
-                if (isTemporarilyDisablingNoFocusMode)
+                if (WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode)
                 {
-                    isTemporarilyDisablingNoFocusMode = false;
+                    WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode = false;
                     ApplyNoFocusMode();
                 }
                 SaveSettingsToFile();
@@ -3178,7 +3179,7 @@ namespace Ink_Canvas
                 wasNoFocusModeBeforeSettings = Settings.Advanced.IsNoFocusMode;
                 if (wasNoFocusModeBeforeSettings)
                 {
-                    isTemporarilyDisablingNoFocusMode = true;
+                    WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode = true;
                     ApplyNoFocusMode();
                 }
 

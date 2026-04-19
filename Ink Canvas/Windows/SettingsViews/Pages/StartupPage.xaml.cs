@@ -1,4 +1,4 @@
-using Ink_Canvas.Controls;
+using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -72,18 +72,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void LoadSettings()
         {
-            if (MainWindow.Settings == null) return;
-
             _isLoaded = false;
             _isAdmin = IsRunningAsAdmin();
 
             try
             {
-                if (MainWindow.Settings.Advanced != null)
+                var settings = SettingsManager.Settings;
+                if (settings.Advanced != null)
                 {
-                    CardNoFocusMode.IsOn = MainWindow.Settings.Advanced.IsNoFocusMode;
-                    CardWindowMode.IsOn = MainWindow.Settings.Advanced.WindowMode;
-                    ToggleSwitchAlwaysOnTop.IsOn = MainWindow.Settings.Advanced.IsAlwaysOnTop;
+                    CardNoFocusMode.IsOn = settings.Advanced.IsNoFocusMode;
+                    CardWindowMode.IsOn = settings.Advanced.WindowMode;
+                    ToggleSwitchAlwaysOnTop.IsOn = settings.Advanced.IsAlwaysOnTop;
 
                     _topMostModeItems.Clear();
                     _topMostModeItems.Add(new TopMostModeSelectionItem());
@@ -106,18 +105,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     ExpanderAlwaysOnTop.ItemsSource = _topMostModeItems;
                 }
 
-                bool runAtStartup = System.IO.File.Exists(
-                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.Startup) + "\\Ink Canvas Annotation.lnk");
+                bool runAtStartup = AutoStartHelper.IsAutoStartEnabled("Ink Canvas Annotation");
                 CardRunAtStartup.IsOn = runAtStartup;
 
-                if (MainWindow.Settings.Startup != null)
+                if (settings.Startup != null)
                 {
-                    CardFoldAtStartup.IsOn = MainWindow.Settings.Startup.IsFoldAtStartup;
+                    CardFoldAtStartup.IsOn = settings.Startup.IsFoldAtStartup;
                 }
 
-                if (MainWindow.Settings.ModeSettings != null)
+                if (settings.ModeSettings != null)
                 {
-                    ToggleSwitchPPTOnlyMode.IsOn = MainWindow.Settings.ModeSettings.IsPPTOnlyMode;
+                    ToggleSwitchPPTOnlyMode.IsOn = settings.ModeSettings.IsPPTOnlyMode;
                 }
             }
             catch (Exception ex)
@@ -138,7 +136,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _radioNormal.IsEnabled = _isAdmin;
             _radioUIA.IsEnabled = _isAdmin;
 
-            if (_isAdmin && MainWindow.Settings.Advanced.EnableUIAccessTopMost)
+            if (_isAdmin && SettingsManager.Settings.Advanced.EnableUIAccessTopMost)
                 _radioUIA.IsChecked = true;
             else
                 _radioNormal.IsChecked = true;
@@ -168,20 +166,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 bool newState = CardNoFocusMode.IsOn;
 
-                if (MainWindow.Settings.Advanced != null)
-                {
-                    MainWindow.Settings.Advanced.IsNoFocusMode = newState;
-                    MainWindow.SaveSettingsToFile();
-                }
+                SettingsManager.Settings.Advanced.IsNoFocusMode = newState;
+                SettingsManager.SaveSettingsToFile();
 
-                var mainWindow = Application.Current.MainWindow as MainWindow;
-                if (mainWindow != null)
+                var window = Application.Current.MainWindow;
+                if (window != null)
                 {
-                    mainWindow.ApplyNoFocusMode();
+                    WindowSettingsHelper.ApplyNoFocusMode(window);
 
-                    if (MainWindow.Settings.Advanced.IsAlwaysOnTop)
+                    if (SettingsManager.Settings.Advanced.IsAlwaysOnTop)
                     {
-                        mainWindow.ApplyAlwaysOnTop();
+                        WindowSettingsHelper.ApplyAlwaysOnTop(window);
                     }
                 }
             }
@@ -199,16 +194,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 bool newState = CardWindowMode.IsOn;
 
-                if (MainWindow.Settings.Advanced != null)
-                {
-                    MainWindow.Settings.Advanced.WindowMode = newState;
-                    MainWindow.SaveSettingsToFile();
-                }
+                SettingsManager.Settings.Advanced.WindowMode = newState;
+                SettingsManager.SaveSettingsToFile();
 
-                var mainWindow = Application.Current.MainWindow as MainWindow;
-                if (mainWindow != null)
+                var window = Application.Current.MainWindow;
+                if (window != null)
                 {
-                    mainWindow.SetWindowMode();
+                    WindowSettingsHelper.SetWindowMode(window);
                 }
             }
             catch (Exception ex)
@@ -225,23 +217,20 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 bool newState = ToggleSwitchAlwaysOnTop.IsOn;
 
-                if (MainWindow.Settings.Advanced != null)
-                {
-                    MainWindow.Settings.Advanced.IsAlwaysOnTop = newState;
-                    MainWindow.SaveSettingsToFile();
-                }
+                SettingsManager.Settings.Advanced.IsAlwaysOnTop = newState;
+                SettingsManager.SaveSettingsToFile();
 
-                var mainWindow = Application.Current.MainWindow as MainWindow;
-                if (mainWindow != null)
+                var window = Application.Current.MainWindow;
+                if (window != null)
                 {
-                    mainWindow.ApplyAlwaysOnTop();
+                    WindowSettingsHelper.ApplyAlwaysOnTop(window);
 
-                    if (!newState && MainWindow.Settings.Advanced.EnableUIAccessTopMost)
+                    if (!newState && SettingsManager.Settings.Advanced.EnableUIAccessTopMost)
                     {
-                        MainWindow.Settings.Advanced.EnableUIAccessTopMost = false;
+                        SettingsManager.Settings.Advanced.EnableUIAccessTopMost = false;
                         App.IsUIAccessTopMostEnabled = false;
-                        mainWindow.ApplyUIAccessTopMost();
-                        MainWindow.SaveSettingsToFile();
+                        WindowSettingsHelper.ApplyUIAccessTopMost(window);
+                        SettingsManager.SaveSettingsToFile();
                         if (_radioNormal != null) _radioNormal.IsChecked = true;
                     }
                 }
@@ -258,11 +247,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                if (MainWindow.Settings.Advanced != null)
-                {
-                    MainWindow.Settings.Advanced.EnableUIAccessTopMost = false;
-                    MainWindow.SaveSettingsToFile();
-                }
+                SettingsManager.Settings.Advanced.EnableUIAccessTopMost = false;
+                SettingsManager.SaveSettingsToFile();
 
                 App.IsUIAccessTopMostEnabled = false;
 
@@ -286,18 +272,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                if (MainWindow.Settings.Advanced != null)
+                SettingsManager.Settings.Advanced.EnableUIAccessTopMost = true;
+
+                if (!SettingsManager.Settings.Advanced.IsAlwaysOnTop)
                 {
-                    MainWindow.Settings.Advanced.EnableUIAccessTopMost = true;
-
-                    if (!MainWindow.Settings.Advanced.IsAlwaysOnTop)
-                    {
-                        MainWindow.Settings.Advanced.IsAlwaysOnTop = true;
-                        ToggleSwitchAlwaysOnTop.IsOn = true;
-                    }
-
-                    MainWindow.SaveSettingsToFile();
+                    SettingsManager.Settings.Advanced.IsAlwaysOnTop = true;
+                    ToggleSwitchAlwaysOnTop.IsOn = true;
                 }
+
+                SettingsManager.SaveSettingsToFile();
 
                 var msg = Properties.Strings.GetString("Startup_TopMostMode_UIA_RestartRequired");
                 var result = System.Windows.MessageBox.Show(msg, "Ink Canvas", MessageBoxButton.YesNo, MessageBoxImage.Question);
@@ -336,13 +319,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 if (newState)
                 {
-                    MainWindow.StartAutomaticallyDel("InkCanvas");
-                    MainWindow.StartAutomaticallyCreate("Ink Canvas Annotation");
+                    AutoStartHelper.StartAutomaticallyDel("InkCanvas");
+                    AutoStartHelper.StartAutomaticallyCreate("Ink Canvas Annotation");
                 }
                 else
                 {
-                    MainWindow.StartAutomaticallyDel("InkCanvas");
-                    MainWindow.StartAutomaticallyDel("Ink Canvas Annotation");
+                    AutoStartHelper.StartAutomaticallyDel("InkCanvas");
+                    AutoStartHelper.StartAutomaticallyDel("Ink Canvas Annotation");
                 }
             }
             catch (Exception ex)
@@ -359,11 +342,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 bool newState = CardFoldAtStartup.IsOn;
 
-                if (MainWindow.Settings.Startup != null)
-                {
-                    MainWindow.Settings.Startup.IsFoldAtStartup = newState;
-                    MainWindow.SaveSettingsToFile();
-                }
+                SettingsManager.Settings.Startup.IsFoldAtStartup = newState;
+                SettingsManager.SaveSettingsToFile();
             }
             catch (Exception ex)
             {
@@ -383,7 +363,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 bool newState = ToggleSwitchPPTOnlyMode.IsOn;
 
-                Windows.SettingsViews.MainWindowSettingsHelper.InvokeToggleSwitchToggled("ToggleSwitchMode", newState);
+                var window = Application.Current.MainWindow;
+                if (window != null)
+                {
+                    WindowSettingsHelper.ApplyPptOnlyMode(window, newState);
+                }
             }
             catch (Exception ex)
             {

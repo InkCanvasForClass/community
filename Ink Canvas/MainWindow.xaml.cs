@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Ink_Canvas.Windows;
 using iNKORE.UI.WPF.Modern;
 using iNKORE.UI.WPF.Modern.Controls;
@@ -66,8 +67,6 @@ namespace Ink_Canvas
         private WindowOverviewModel _windowOverviewModel;
 
         // 设置面板相关状态
-        private bool isTemporarilyDisablingNoFocusMode = false;
-
         private bool _isApplyingLanguageFromSettings;
         private bool _isReloadingForLanguageChange;
 
@@ -202,6 +201,10 @@ namespace Ink_Canvas
             }
 
             InitTimers();
+
+            WindowSettingsHelper.OnStopKillProcessTimer = () => timerKillProcess.Stop();
+            WindowSettingsHelper.OnStartKillProcessTimer = () => timerKillProcess.Start();
+            WindowSettingsHelper.OnPptOnlyModeChanged = (enabled) => CheckMainWindowVisibility();
             timeMachine.OnRedoStateChanged += TimeMachine_OnRedoStateChanged;
             timeMachine.OnUndoStateChanged += TimeMachine_OnUndoStateChanged;
             inkCanvas.Strokes.StrokesChanged += StrokesOnStrokesChanged;
@@ -1161,8 +1164,8 @@ namespace Ink_Canvas
 
         #region Definations and Loading
 
-        public static Settings Settings = new Settings();
-        public static string settingsFileName = Path.Combine("Configs", "Settings.json");
+        public static Settings Settings { get => SettingsManager.Settings; set => SettingsManager.Settings = value; }
+        public static string settingsFileName => SettingsManager.SettingsFileName;
         private bool isLoaded;
         private bool _suppressChickenSoupSourceSelectionChanged;
         private bool forcePointEraser;
@@ -1619,18 +1622,7 @@ namespace Ink_Canvas
         /// </remarks>
         public void SetWindowMode()
         {
-            if (Settings.Advanced.WindowMode)
-            {
-                WindowState = WindowState.Normal;
-                Left = 0.0;
-                Top = 0.0;
-                Height = SystemParameters.PrimaryScreenHeight;
-                Width = SystemParameters.PrimaryScreenWidth;
-            }
-            else // 全屏
-            {
-                WindowState = WindowState.Maximized;
-            }
+            WindowSettingsHelper.SetWindowMode(this);
         }
 
         private bool _allowCloseAfterExitVerification;
@@ -2948,9 +2940,6 @@ namespace Ink_Canvas
             public IntPtr dwExtraInfo;
         }
 
-        private LowLevelKeyboardProc _keyboardProc;
-        private IntPtr _keyboardHookId = IntPtr.Zero;
-
         private const int GWL_EXSTYLE = -20;
         private const int WS_EX_NOACTIVATE = 0x08000000;
         private const int WS_EX_TOPMOST = 0x00000008;
@@ -2962,228 +2951,49 @@ namespace Ink_Canvas
         private const uint SWP_SHOWWINDOW = 0x0040;
         private const uint SWP_NOOWNERZORDER = 0x0200;
 
-        // 添加定时器来维护置顶状态
-        private DispatcherTimer topmostMaintenanceTimer;
         private DispatcherTimer autoSaveStrokesTimer;
-        private bool isTopmostMaintenanceEnabled;
-
-        private IntPtr KeyboardHookProc(int nCode, IntPtr wParam, IntPtr lParam)
-        {
-            return CallNextHookEx(_keyboardHookId, nCode, wParam, lParam);
-        }
 
         private void InstallKeyboardHook()
         {
-            if (_keyboardHookId == IntPtr.Zero)
-            {
-                _keyboardProc = KeyboardHookProc;
-                _keyboardHookId = SetWindowsHookEx(WH_KEYBOARD_LL, _keyboardProc,
-                    GetModuleHandle(null), 0);
-                if (_keyboardHookId == IntPtr.Zero)
-                {
-                    LogHelper.WriteLogToFile("安装低级键盘钩子失败", LogHelper.LogType.Error);
-                }
-            }
+            WindowSettingsHelper.InstallKeyboardHook();
         }
 
         private void UninstallKeyboardHook()
         {
-            if (_keyboardHookId != IntPtr.Zero)
-            {
-                UnhookWindowsHookEx(_keyboardHookId);
-                _keyboardHookId = IntPtr.Zero;
-                _keyboardProc = null;
-            }
+            WindowSettingsHelper.UninstallKeyboardHook();
         }
 
         public void ApplyNoFocusMode()
         {
-            var hwnd = new WindowInteropHelper(this).Handle;
-            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-
-            bool shouldBeNoFocus = isTemporarilyDisablingNoFocusMode ?
-                false : Settings.Advanced.IsNoFocusMode;
-
-            if (shouldBeNoFocus)
-            {
-                SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_NOACTIVATE);
-                InstallKeyboardHook();
-            }
-            else
-            {
-                SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_NOACTIVATE);
-                UninstallKeyboardHook();
-            }
+            WindowSettingsHelper.ApplyNoFocusMode(this);
         }
 
         public void ApplyAlwaysOnTop()
         {
-            try
-            {
-                var hwnd = new WindowInteropHelper(this).Handle;
-                if (Settings.Advanced.IsAlwaysOnTop)
-                {
-                    Topmost = true;
-
-                    // 1. 设置窗口样式为置顶
-                    int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-                    SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
-
-                    // 2. 使用SetWindowPos确保窗口在最顶层
-                    SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
-
-                    // 3. 如果启用了无焦点模式且未启用UIA置顶，需要特殊处理
-                    if (Settings.Advanced.IsNoFocusMode && !Settings.Advanced.EnableUIAccessTopMost)
-                    {
-                        // 启动置顶维护定时器
-                        StartTopmostMaintenance();
-                    }
-                    else
-                    {
-                        // 停止置顶维护定时器
-                        StopTopmostMaintenance();
-                    }
-                }
-                else
-                {
-                    // 取消置顶时
-                    // 1. 先使用Win32 API取消置顶
-                    SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0,
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
-
-                    // 2. 移除置顶窗口样式
-                    int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-                    SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_TOPMOST);
-
-                    // 3. 停止置顶维护定时器
-                    StopTopmostMaintenance();
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"应用窗口置顶失败: {ex.Message}", LogHelper.LogType.Error);
-            }
+            WindowSettingsHelper.ApplyAlwaysOnTop(this);
         }
 
-        /// <summary>
-        /// 启动置顶维护定时器
-        /// </summary>
         private void StartTopmostMaintenance()
         {
-            if (Settings.Advanced.EnableUIAccessTopMost)
-            {
-                return;
-            }
-
-            if (isTopmostMaintenanceEnabled) return;
-
-            if (topmostMaintenanceTimer == null)
-            {
-                topmostMaintenanceTimer = new DispatcherTimer();
-                topmostMaintenanceTimer.Interval = TimeSpan.FromMilliseconds(500); // 每500ms检查一次
-                topmostMaintenanceTimer.Tick += TopmostMaintenanceTimer_Tick;
-            }
-
-            topmostMaintenanceTimer.Start();
-            isTopmostMaintenanceEnabled = true;
-            LogHelper.WriteLogToFile("启动置顶维护定时器", LogHelper.LogType.Trace);
+            WindowSettingsHelper.PauseTopmostMaintenance();
         }
 
-        /// <summary>
-        /// 停止置顶维护定时器
-        /// </summary>
         private void StopTopmostMaintenance()
         {
-            if (topmostMaintenanceTimer != null && isTopmostMaintenanceEnabled)
-            {
-                topmostMaintenanceTimer.Stop();
-                isTopmostMaintenanceEnabled = false;
-                LogHelper.WriteLogToFile("停止置顶维护定时器", LogHelper.LogType.Trace);
-            }
+            WindowSettingsHelper.PauseTopmostMaintenance();
         }
 
         public void PauseTopmostMaintenance()
         {
-            if (topmostMaintenanceTimer != null && isTopmostMaintenanceEnabled)
-            {
-                topmostMaintenanceTimer.Stop();
-            }
+            WindowSettingsHelper.PauseTopmostMaintenance();
         }
 
         public void ResumeTopmostMaintenance()
         {
-            if (Settings.Advanced.IsAlwaysOnTop &&
-                Settings.Advanced.IsNoFocusMode &&
-                !Settings.Advanced.EnableUIAccessTopMost)
-            {
-                if (topmostMaintenanceTimer != null && !isTopmostMaintenanceEnabled)
-                {
-                    topmostMaintenanceTimer.Start();
-                    isTopmostMaintenanceEnabled = true;
-                }
-            }
+            WindowSettingsHelper.ResumeTopmostMaintenance(this);
         }
 
-        /// <summary>
-        /// 置顶维护定时器事件
-        /// </summary>
-        private void TopmostMaintenanceTimer_Tick(object sender, EventArgs e)
-        {
-            try
-            {
-                if (Settings.Advanced.EnableUIAccessTopMost)
-                {
-                    StopTopmostMaintenance();
-                    return;
-                }
 
-                if (!Settings.Advanced.IsAlwaysOnTop || !Settings.Advanced.IsNoFocusMode)
-                {
-                    StopTopmostMaintenance();
-                    return;
-                }
-
-                var hwnd = new WindowInteropHelper(this).Handle;
-                if (hwnd == IntPtr.Zero) return;
-
-                // 检查窗口是否仍然可见且不是最小化状态
-                if (!IsWindow(hwnd) || !IsWindowVisible(hwnd) || IsIconic(hwnd))
-                {
-                    return;
-                }
-
-                // 检查是否有子窗口在前景
-                var foregroundWindow = GetForegroundWindow();
-                if (foregroundWindow != hwnd)
-                {
-                    // 检查前景窗口是否是当前应用程序的子窗口
-                    var foregroundWindowProcessId = GetWindowThreadProcessId(foregroundWindow, out uint processId);
-                    var currentProcessId = GetCurrentProcessId();
-
-                    if (processId == currentProcessId)
-                    {
-                        // 如果有子窗口在前景，暂停置顶维护
-                        return;
-                    }
-
-                    // 如果窗口不在最顶层且没有子窗口，重新设置置顶
-                    SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
-
-                    // 确保窗口样式正确
-                    int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-                    if ((exStyle & WS_EX_TOPMOST) == 0)
-                    {
-                        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"置顶维护定时器出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
 
         /// <summary>
         /// 根据窗口置顶设置和当前模式设置窗口的Topmost属性
@@ -3191,21 +3001,7 @@ namespace Ink_Canvas
         /// <param name="shouldBeTopmost">当前模式是否需要窗口置顶</param>
         public void SetTopmostBasedOnSettings(bool shouldBeTopmost)
         {
-            if (Settings.Advanced.IsAlwaysOnTop)
-            {
-                // 如果启用了窗口置顶设置，则始终置顶
-                Topmost = true;
-                ApplyAlwaysOnTop();
-            }
-            else
-            {
-                // 如果未启用窗口置顶设置，则根据当前模式决定
-                Topmost = shouldBeTopmost;
-                if (!shouldBeTopmost)
-                {
-                    ApplyAlwaysOnTop(); // 确保取消置顶
-                }
-            }
+            WindowSettingsHelper.SetTopmostBasedOnSettings(this, shouldBeTopmost);
         }
 
         private void Window_Activated(object sender, EventArgs e)
@@ -4586,57 +4382,7 @@ namespace Ink_Canvas
         /// </summary>
         public void ApplyUIAccessTopMost()
         {
-            try
-            {
-                if (Settings.Advanced.EnableUIAccessTopMost && Settings.Advanced.IsAlwaysOnTop)
-                {
-                    // 检查是否以管理员权限运行
-                    var identity = WindowsIdentity.GetCurrent();
-                    var principal = new WindowsPrincipal(identity);
-
-                    if (principal.IsInRole(WindowsBuiltInRole.Administrator))
-                    {
-                        try
-                        {
-                            timerKillProcess.Stop();
-                            if (App.watchdogProcess != null && !App.watchdogProcess.HasExited)
-                            {
-                                App.watchdogProcess.Kill();
-                                App.watchdogProcess = null;
-                            }
-
-                            App.StartWatchdogIfNeeded();
-
-                            if (Environment.Is64BitProcess)
-                            {
-                                PrepareUIAccessX64();
-                            }
-                            else
-                            {
-                                PrepareUIAccessX86();
-                            }
-
-                            timerKillProcess.Start();
-                        }
-                        catch (Exception ex)
-                        {
-                            LogHelper.WriteLogToFile($"启用UIA置顶功能时出错: {ex.Message}", LogHelper.LogType.Error);
-                        }
-                    }
-                    else
-                    {
-                        LogHelper.WriteLogToFile("UIA置顶功能需要管理员权限", LogHelper.LogType.Warning);
-                    }
-                }
-                else
-                {
-                    LogHelper.WriteLogToFile("UIA置顶功能已禁用", LogHelper.LogType.Trace);
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"应用UIA置顶功能时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
+            WindowSettingsHelper.ApplyUIAccessTopMost(this);
         }
 
         internal void OpenQuickDrawFromHotkey()

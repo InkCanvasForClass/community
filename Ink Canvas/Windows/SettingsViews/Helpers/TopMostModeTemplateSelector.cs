@@ -1,7 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 
-namespace Ink_Canvas.Windows.SettingsViews.Pages
+namespace Ink_Canvas.Windows.SettingsViews.Helpers
 {
     public class TopMostModeSelectionItem
     {
