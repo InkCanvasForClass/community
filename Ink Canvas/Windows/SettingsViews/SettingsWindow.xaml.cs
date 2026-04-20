@@ -27,6 +27,8 @@ namespace Ink_Canvas.Windows.SettingsViews
         // 标记窗口是否曾经最大化过
         private bool _wasMaximized = false;
 
+        private bool _isNavigating = false;
+
         public SettingsWindow()
         {
             InitializeComponent();
@@ -208,7 +210,11 @@ namespace Ink_Canvas.Windows.SettingsViews
         #region 导航逻辑优化（含页面缓存）
         private void OnNavigationViewSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
-            // 处理自带的设置项导航
+            if (_isNavigating)
+            {
+                return;
+            }
+
             if (args.IsSettingsSelected)
             {
                 NavigateToPage("Settings");
@@ -244,19 +250,23 @@ namespace Ink_Canvas.Windows.SettingsViews
 
             try
             {
-                // 页面缓存：已创建的页面直接复用，保留状态，避免重复初始化
+                _isNavigating = true;
+
                 if (!_pages.TryGetValue(pageTag, out var cachedPage))
                 {
                     cachedPage = Activator.CreateInstance(pageType);
                     _pages.Add(pageTag, cachedPage);
                 }
 
-                // 导航到缓存页面
                 rootFrame.Navigate(cachedPage.GetType(), cachedPage);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"导航到页面时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                _isNavigating = false;
             }
         }
 
@@ -267,7 +277,11 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         private void OnRootFrameNavigated(object sender, NavigationEventArgs e)
         {
-            // 导航后同步导航项选中状态
+            if (_isNavigating)
+            {
+                return;
+            }
+
             Type currentPageType = rootFrame.SourcePageType;
 
             // 处理设置项的选中状态
