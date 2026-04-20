@@ -1113,6 +1113,17 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"Failed to register InkCanvasService: {ex.Message}", LogHelper.LogType.Error);
             }
 
+            try
+            {
+                var appRestartService = new Plugins.AppRestartService();
+                Plugins.PluginManager.Instance.RegisterService<Plugins.IAppRestartService>(appRestartService);
+                LogHelper.WriteLogToFile("AppRestartService registered for plugins");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"Failed to register AppRestartService: {ex.Message}", LogHelper.LogType.Error);
+            }
+
             // 主窗口加载完成后关闭启动画面
             mainWindow.Loaded += (s, args) =>
             {

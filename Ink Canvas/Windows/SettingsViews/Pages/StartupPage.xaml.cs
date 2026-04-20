@@ -1,8 +1,8 @@
+using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Security.Principal;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -28,52 +28,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _isLoaded = true;
         }
 
-        private static bool IsRunningAsAdmin()
-        {
-            try
-            {
-                var identity = WindowsIdentity.GetCurrent();
-                var principal = new WindowsPrincipal(identity);
-                return principal.IsInRole(WindowsBuiltInRole.Administrator);
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        private void RestartApp(bool asAdmin)
-        {
-            try
-            {
-                App.IsAppExitByUser = true;
-
-                (Application.Current as App)?.ReleaseMutexForRestart();
-
-                string exePath = Process.GetCurrentProcess().MainModule.FileName;
-
-                if (asAdmin)
-                {
-                    var psi = new ProcessStartInfo(exePath) { UseShellExecute = true, Verb = "runas" };
-                    Process.Start(psi);
-                }
-                else
-                {
-                    Process.Start("explorer.exe", "\"" + exePath + "\"");
-                }
-
-                Application.Current.Shutdown();
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"重启应用时出错: {ex.Message}");
-            }
-        }
-
         private void LoadSettings()
         {
             _isLoaded = false;
-            _isAdmin = IsRunningAsAdmin();
+            _isAdmin = AppRestartHelper.IsRunningAsAdmin();
 
             try
             {
@@ -257,7 +215,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    RestartApp(_isAdmin);
+                    AppRestartHelper.RestartWithCurrentPrivileges();
                 }
             }
             catch (Exception ex)
@@ -288,7 +246,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (result == MessageBoxResult.Yes)
                 {
                     App.IsUIAccessTopMostEnabled = true;
-                    RestartApp(true);
+                    AppRestartHelper.RestartAsAdmin();
                 }
             }
             catch (Exception ex)
@@ -301,7 +259,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (sender is Button btn && btn.Tag is bool asAdmin)
             {
-                RestartApp(asAdmin);
+                AppRestartHelper.RestartApp(asAdmin);
             }
         }
 
