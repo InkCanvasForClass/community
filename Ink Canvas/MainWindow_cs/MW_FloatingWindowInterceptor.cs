@@ -47,7 +47,6 @@ namespace Ink_Canvas
                 if (!isLoaded) return;
 
                 // 设置主开关状态
-                ToggleSwitchFloatingWindowInterceptorEnabled.IsOn = Settings.Automation.FloatingWindowInterceptor.IsEnabled;
 
                 // 设置各个拦截规则的状态
                 foreach (var kvp in Settings.Automation.FloatingWindowInterceptor.InterceptRules)
@@ -77,7 +76,6 @@ namespace Ink_Canvas
             try
             {
                 var isEnabled = Settings.Automation.FloatingWindowInterceptor.IsEnabled;
-                FloatingWindowInterceptorGrid.Visibility = isEnabled ? Visibility.Visible : Visibility.Collapsed;
 
                 // 计算启用的规则数量
                 var enabledRulesCount = Settings.Automation.FloatingWindowInterceptor.InterceptRules.Where(kvp => kvp.Value).Count();
@@ -87,13 +85,9 @@ namespace Ink_Canvas
                 if (_floatingWindowInterceptorManager != null)
                 {
                     var stats = _floatingWindowInterceptorManager.GetStatistics();
-                    TextBlockFloatingWindowInterceptorStatus.Text = stats.IsRunning
-                        ? $"拦截器运行中 - 已启用 {enabledRulesCount}/{totalRulesCount} 个规则"
-                        : $"拦截器未启动 - 已启用 {enabledRulesCount}/{totalRulesCount} 个规则";
                 }
                 else
                 {
-                    TextBlockFloatingWindowInterceptorStatus.Text = $"拦截器未初始化 - 已启用 {enabledRulesCount}/{totalRulesCount} 个规则";
                 }
             }
             catch (Exception ex)
@@ -153,7 +147,6 @@ namespace Ink_Canvas
 
             try
             {
-                Settings.Automation.FloatingWindowInterceptor.IsEnabled = ToggleSwitchFloatingWindowInterceptorEnabled.IsOn;
 
                 if (_floatingWindowInterceptorManager != null)
                 {
@@ -182,7 +175,6 @@ namespace Ink_Canvas
         private void ToggleSwitchSeewoWhiteboard3Floating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoWhiteboard3Floating, ToggleSwitchSeewoWhiteboard3Floating.IsOn);
         }
 
         /// <summary>
@@ -191,7 +183,6 @@ namespace Ink_Canvas
         private void ToggleSwitchSeewoWhiteboard5Floating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoWhiteboard5Floating, ToggleSwitchSeewoWhiteboard5Floating.IsOn);
         }
 
         /// <summary>
@@ -200,7 +191,6 @@ namespace Ink_Canvas
         private void ToggleSwitchSeewoWhiteboard5CFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoWhiteboard5CFloating, ToggleSwitchSeewoWhiteboard5CFloating.IsOn);
         }
 
         /// <summary>
@@ -209,7 +199,6 @@ namespace Ink_Canvas
         private void ToggleSwitchSeewoPincoSideBarFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoPincoSideBarFloating, ToggleSwitchSeewoPincoSideBarFloating.IsOn);
         }
 
         /// <summary>
@@ -218,7 +207,6 @@ namespace Ink_Canvas
         private void ToggleSwitchSeewoPincoDrawingFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoPincoDrawingFloating, ToggleSwitchSeewoPincoDrawingFloating.IsOn);
         }
 
         /// <summary>
@@ -227,7 +215,6 @@ namespace Ink_Canvas
         private void ToggleSwitchSeewoPPTFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoPPTFloating, ToggleSwitchSeewoPPTFloating.IsOn);
         }
 
         /// <summary>
@@ -236,7 +223,6 @@ namespace Ink_Canvas
         private void ToggleSwitchAiClassFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            SetInterceptRule(FloatingWindowInterceptor.InterceptType.AiClassFloating, ToggleSwitchAiClassFloating.IsOn);
         }
 
         /// <summary>
@@ -245,7 +231,6 @@ namespace Ink_Canvas
         private void ToggleSwitchHiteAnnotationFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            SetInterceptRule(FloatingWindowInterceptor.InterceptType.HiteAnnotationFloating, ToggleSwitchHiteAnnotationFloating.IsOn);
         }
 
         /// <summary>
@@ -254,7 +239,6 @@ namespace Ink_Canvas
         private void ToggleSwitchChangYanFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            SetInterceptRule(FloatingWindowInterceptor.InterceptType.ChangYanFloating, ToggleSwitchChangYanFloating.IsOn);
         }
 
         /// <summary>
@@ -263,7 +247,6 @@ namespace Ink_Canvas
         private void ToggleSwitchChangYanPptFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            SetInterceptRule(FloatingWindowInterceptor.InterceptType.ChangYanPptFloating, ToggleSwitchChangYanPptFloating.IsOn);
         }
 
         /// <summary>
@@ -272,7 +255,6 @@ namespace Ink_Canvas
         private void ToggleSwitchIntelligentClassFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            SetInterceptRule(FloatingWindowInterceptor.InterceptType.IntelligentClassFloating, ToggleSwitchIntelligentClassFloating.IsOn);
         }
 
         /// <summary>
@@ -281,7 +263,6 @@ namespace Ink_Canvas
         private void ToggleSwitchSeewoDesktopAnnotationFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoDesktopAnnotationFloating, ToggleSwitchSeewoDesktopAnnotationFloating.IsOn);
         }
 
         /// <summary>
@@ -290,7 +271,6 @@ namespace Ink_Canvas
         private void ToggleSwitchSeewoDesktopSideBarFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoDesktopSideBarFloating, ToggleSwitchSeewoDesktopSideBarFloating.IsOn);
         }
 
         /// <summary>

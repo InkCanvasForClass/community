@@ -1,4 +1,4 @@
-using Ink_Canvas.Helpers;
+﻿using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Ink_Canvas.Windows;
 using iNKORE.UI.WPF.Modern;
@@ -471,17 +471,6 @@ namespace Ink_Canvas
 
                 if (timerContainer.HorizontalAlignment == HorizontalAlignment.Center &&
                     timerContainer.VerticalAlignment == VerticalAlignment.Center)
-                {
-                    var timerPoint = timerContainer.TransformToAncestor(this).Transform(new Point(0, 0));
-                    x = timerPoint.X;
-                    y = timerPoint.Y;
-                }
-                else
-                {
-                    var timerMargin = timerContainer.Margin;
-                    x = double.IsNaN(timerMargin.Left) ? 0 : timerMargin.Left;
-                    y = double.IsNaN(timerMargin.Top) ? 0 : timerMargin.Top;
-                }
 
                 minimizedContainer.Margin = new Thickness(x, y, 0, 0);
                 minimizedContainer.HorizontalAlignment = HorizontalAlignment.Left;
@@ -637,7 +626,6 @@ namespace Ink_Canvas
             string n = hex.Trim().ToLowerInvariant();
             if (n.StartsWith("#")) n = n.Substring(1);
             if (n.Length == 8) n = n.Substring(2, 6); // 去掉 AA
-            else if (n.Length != 6) n = "";
 
             if (n.Length == 6)
             {
@@ -705,24 +693,10 @@ namespace Ink_Canvas
                 if (currentMode == 0)
                 {
                     if (rgbColor == Colors.White) lastDesktopInkColor = 5;
-                    else if (rgbColor == Color.FromRgb(251, 150, 80)) lastDesktopInkColor = 8;
-                    else if (rgbColor == Colors.Yellow) lastDesktopInkColor = 4;
-                    else if (rgbColor == Colors.Black) lastDesktopInkColor = 0;
-                    else if (rgbColor == Color.FromRgb(37, 99, 235)) lastDesktopInkColor = 3;
-                    else if (rgbColor == Colors.Red) lastDesktopInkColor = 1;
-                    else if (rgbColor == Colors.Green || rgbColor == Color.FromRgb(22, 163, 74)) lastDesktopInkColor = 2;
-                    else if (rgbColor == Color.FromRgb(147, 51, 234)) lastDesktopInkColor = 6;
                 }
                 else
                 {
                     if (rgbColor == Colors.White) lastBoardInkColor = 5;
-                    else if (rgbColor == Color.FromRgb(251, 150, 80)) lastBoardInkColor = 8;
-                    else if (rgbColor == Colors.Yellow) lastBoardInkColor = 4;
-                    else if (rgbColor == Colors.Black) lastBoardInkColor = 0;
-                    else if (rgbColor == Color.FromRgb(37, 99, 235)) lastBoardInkColor = 3;
-                    else if (rgbColor == Colors.Red) lastBoardInkColor = 1;
-                    else if (rgbColor == Colors.Green || rgbColor == Color.FromRgb(22, 163, 74)) lastBoardInkColor = 2;
-                    else if (rgbColor == Color.FromRgb(147, 51, 234)) lastBoardInkColor = 6;
                 }
 
                 var colorWithAlpha = Color.FromArgb(color.A, color.R, color.G, color.B);
@@ -1123,7 +1097,6 @@ namespace Ink_Canvas
                     inkCanvas1.EditingMode == InkCanvasEditingMode.Select ||
                     drawingShapeMode != 0)
                     inkCanvas1.ForceCursor = true;
-                else
                     inkCanvas1.ForceCursor = false;
             }
             else
@@ -1200,7 +1173,7 @@ namespace Ink_Canvas
             // 检查保存路径是否可用，不可用则修正
             try
             {
-                string savePath = Settings.Automation.AutoSavedStrokesLocation;
+                var savePath = Settings.Automation.AutoSavedStrokesLocation;
                 bool needFix = false;
                 if (string.IsNullOrWhiteSpace(savePath) || !Directory.Exists(savePath))
                 {
@@ -1223,7 +1196,6 @@ namespace Ink_Canvas
                 if (needFix)
                 {
                     string newPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Saves");
-                    Settings.Automation.AutoSavedStrokesLocation = newPath;
                     if (!Directory.Exists(newPath))
                         Directory.CreateDirectory(newPath);
                     SaveSettingsToFile();
@@ -1338,9 +1310,6 @@ namespace Ink_Canvas
 
             // 恢复崩溃后操作设置
             if (App.CrashAction == App.CrashActionType.SilentRestart)
-                RadioCrashSilentRestart.IsChecked = true;
-            else
-                RadioCrashNoAction.IsChecked = true;
 
             // 显示快抽悬浮按钮
             ShowQuickDrawFloatingButton();
@@ -1448,12 +1417,7 @@ namespace Ink_Canvas
                                 BtnPPTSlideShowEnd.Visibility == Visibility.Visible &&
                                 PPTTimeCapsule != null)
                             {
-                                MinimizedTimerContainer.Visibility = Visibility.Collapsed;
-                            }
-                            else
-                            {
-                                MinimizedTimerContainer.Visibility = Visibility.Visible;
-                                MinimizedTimerControl.Visibility = Visibility.Visible;
+                                PPTTimeCapsule.Visibility = Visibility.Collapsed;
                             }
                         }
                     };
@@ -1493,7 +1457,6 @@ namespace Ink_Canvas
         {
             try
             {
-                if (ComboBoxLanguage == null || Settings?.Appearance == null) return;
 
                 var preferredLanguage = Settings.Appearance.Language ?? string.Empty;
                 int index;
@@ -1518,7 +1481,6 @@ namespace Ink_Canvas
                 _isApplyingLanguageFromSettings = true;
                 try
                 {
-                    ComboBoxLanguage.SelectedIndex = index;
                 }
                 finally
                 {
@@ -1555,7 +1517,6 @@ namespace Ink_Canvas
                     if (!isFloatingBarFolded)
                     {
                         if (isInPPTPresentationMode) ViewboxFloatingBarMarginAnimation(60);
-                        else ViewboxFloatingBarMarginAnimation(100, true);
                     }
                 });
             }).Start();
@@ -1593,7 +1554,6 @@ namespace Ink_Canvas
                         if (!isFloatingBarFolded)
                         {
                             if (isInPPTPresentationMode) ViewboxFloatingBarMarginAnimation(60);
-                            else ViewboxFloatingBarMarginAnimation(100, true);
                         }
                     });
                 }).Start();
@@ -2125,12 +2085,10 @@ namespace Ink_Canvas
         // 新增：崩溃后操作设置按钮事件
         private void RadioCrashAction_Checked(object sender, RoutedEventArgs e)
         {
-            if (RadioCrashSilentRestart != null && RadioCrashSilentRestart.IsChecked == true)
             {
                 App.CrashAction = App.CrashActionType.SilentRestart;
                 Settings.Startup.CrashAction = 0;
             }
-            else if (RadioCrashNoAction != null && RadioCrashNoAction.IsChecked == true)
             {
                 App.CrashAction = App.CrashActionType.NoAction;
                 Settings.Startup.CrashAction = 1;
@@ -2434,28 +2392,21 @@ namespace Ink_Canvas
             switch (sectionTag.ToLower())
             {
                 case "startup":
-                    targetGroupBox = GroupBoxStartup;
                     break;
                 case "gesture":
-                    targetGroupBox = GroupBoxGesture;
                     break;
                 case "crashaction":
-                    targetGroupBox = GroupBoxCrashAction;
                     break;
                 case "ppt":
-                    targetGroupBox = GroupBoxPPT;
                     break;
                 case "advanced":
-                    targetGroupBox = GroupBoxAdvanced;
                     break;
                 case "automation":
-                    targetGroupBox = GroupBoxAutomation;
                     break;
                 case "randomwindow":
                     targetGroupBox = GroupBoxRandWindow;
                     break;
                 case "theme":
-                    targetGroupBox = GroupBoxAppearanceNewUI;
                     break;
                 case "shortcuts":
                     // 快捷键设置部分可能尚未实现
@@ -3223,9 +3174,7 @@ namespace Ink_Canvas
             try
             {
                 if (!isLoaded) return;
-                if (ComboBoxPPTTimeCapsulePosition != null)
                 {
-                    Settings.PowerPointSettings.PPTTimeCapsulePosition = ComboBoxPPTTimeCapsulePosition.SelectedIndex;
                     SaveSettingsToFile();
 
                     // 如果当前在PPT放映模式，需要立即更新时间胶囊的位置
@@ -3234,7 +3183,6 @@ namespace Ink_Canvas
                         UpdatePPTTimeCapsulePosition();
                     }
 
-                    LogHelper.WriteLogToFile($"PPT时间胶囊位置已更改为: {ComboBoxPPTTimeCapsulePosition.SelectedIndex}", LogHelper.LogType.Event);
                 }
             }
             catch (Exception ex)
@@ -3280,11 +3228,12 @@ namespace Ink_Canvas
                     BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
                 {
                     PPTTimeCapsuleContainer.Visibility = Visibility.Visible;
-                    UpdatePPTTimeCapsulePosition();
+                    PPTTimeCapsule.Visibility = Visibility.Visible;
                 }
                 else
                 {
                     PPTTimeCapsuleContainer.Visibility = Visibility.Collapsed;
+                    PPTTimeCapsule.Visibility = Visibility.Collapsed;
                 }
             }
             catch (Exception ex)
@@ -3369,19 +3318,13 @@ namespace Ink_Canvas
                 bool isRegistered = FileAssociationManager.IsFileAssociationRegistered();
                 if (isRegistered)
                 {
-                    TextBlockFileAssociationStatus.Text = "✓ .icstk文件关联已注册";
-                    TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightGreen);
                 }
                 else
                 {
-                    TextBlockFileAssociationStatus.Text = "✗ .icstk文件关联未注册";
-                    TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightCoral);
                 }
             }
             catch (Exception ex)
             {
-                TextBlockFileAssociationStatus.Text = "✗ 检查文件关联状态时出错";
-                TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightCoral);
                 LogHelper.WriteLogToFile($"初始化文件关联状态显示时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
@@ -3484,21 +3427,6 @@ namespace Ink_Canvas
                 // 获取所有滑块控件并添加触摸支持
                 var sliders = new List<Slider>
                 {
-                    ViewboxFloatingBarScaleTransformValueSlider,
-                    ViewboxFloatingBarOpacityValueSlider,
-                    ViewboxFloatingBarOpacityInPPTValueSlider,
-                    PPTButtonLeftPositionValueSlider,
-                    PPTButtonRightPositionValueSlider,
-                    PPTButtonLBPositionValueSlider,
-                    PPTButtonRBPositionValueSlider,
-                    PPTLSButtonOpacityValueSlider,
-                    PPTRSButtonOpacityValueSlider,
-                    PPTLBButtonOpacityValueSlider,
-                    PPTRBButtonOpacityValueSlider,
-                    TouchMultiplierSlider,
-                    NibModeBoundsWidthSlider,
-                    FingerModeBoundsWidthSlider,
-                    SideControlMinimumAutomationSlider,
                     RandWindowOnceCloseLatencySlider,
                     RandWindowOnceMaxStudentsSlider,
                     TimerVolumeSlider,
@@ -3919,12 +3847,10 @@ namespace Ink_Canvas
                 if (_isApplyingLanguageFromSettings) return;
                 if (_isReloadingForLanguageChange) return;
                 if (Settings?.Appearance == null) return;
-                if (ComboBoxLanguage == null) return;
 
-                var index = ComboBoxLanguage.SelectedIndex;
                 string language;
 
-                switch (index)
+                switch ((sender as System.Windows.Controls.ComboBox)?.SelectedIndex ?? -1)
                 {
                     case 1:
                         language = "zh-CN";

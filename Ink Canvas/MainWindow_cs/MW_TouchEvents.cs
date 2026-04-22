@@ -1,4 +1,4 @@
-using Ink_Canvas.Helpers;
+﻿using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -233,8 +233,6 @@ namespace Ink_Canvas
                 if (palmEraserWasEnabledBeforeMultiTouch)
                 {
                     Settings.Canvas.EnablePalmEraser = true;
-                    if (ToggleSwitchEnablePalmEraser != null)
-                        ToggleSwitchEnablePalmEraser.IsOn = true;
                 }
             }
             else
@@ -259,8 +257,6 @@ namespace Ink_Canvas
 
                 palmEraserWasEnabledBeforeMultiTouch = Settings.Canvas.EnablePalmEraser;
                 Settings.Canvas.EnablePalmEraser = false;
-                if (ToggleSwitchEnablePalmEraser != null)
-                    ToggleSwitchEnablePalmEraser.IsOn = false;
             }
         }
 

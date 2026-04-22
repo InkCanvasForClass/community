@@ -25,6 +25,7 @@ using CheckBox = System.Windows.Controls.CheckBox;
 using ComboBox = System.Windows.Controls.ComboBox;
 using File = System.IO.File;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using ToggleSwitch = iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using OperatingSystem = OSVersionExtension.OperatingSystem;
 using RadioButton = System.Windows.Controls.RadioButton;
@@ -59,14 +60,12 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            Settings.PowerPointSettings.PowerPointSupport = ToggleSwitchSupportPowerPoint.IsOn;
 
             if (!Settings.PowerPointSettings.PowerPointSupport)
             {
                 if (Settings.PowerPointSettings.IsSupportWPS)
                 {
                     Settings.PowerPointSettings.IsSupportWPS = false;
-                    ToggleSwitchSupportWPS.IsOn = false;
 
                     if (_pptManager != null)
                     {
@@ -110,7 +109,6 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            Settings.PowerPointSettings.UseRotPptLink = ToggleSwitchUseRotPptLink.IsOn;
             SaveSettingsToFile();
 
             try
@@ -120,9 +118,7 @@ namespace Ink_Canvas
                     Settings.PowerPointSettings.EnablePowerPointEnhancement)
                 {
                     Settings.PowerPointSettings.EnablePowerPointEnhancement = false;
-                    if (ToggleSwitchPowerPointEnhancement != null)
                     {
-                        ToggleSwitchPowerPointEnhancement.IsOn = false;
                     }
                     StopPowerPointProcessMonitoring();
 
@@ -158,7 +154,6 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            Settings.PowerPointSettings.IsShowCanvasAtNewSlideShow = ToggleSwitchShowCanvasAtNewSlideShow.IsOn;
             SaveSettingsToFile();
         }
 
@@ -182,13 +177,11 @@ namespace Ink_Canvas
             if (!isLoaded) return;
             if (sender == ToggleSwitchEnableNibMode)
                 BoardToggleSwitchEnableNibMode.IsOn = ToggleSwitchEnableNibMode.IsOn;
-            else
                 ToggleSwitchEnableNibMode.IsOn = BoardToggleSwitchEnableNibMode.IsOn;
             Settings.Startup.IsEnableNibMode = ToggleSwitchEnableNibMode.IsOn;
 
             if (Settings.Startup.IsEnableNibMode)
                 BoundsWidth = Settings.Advanced.NibModeBoundsWidth;
-            else
                 BoundsWidth = Settings.Advanced.FingerModeBoundsWidth;
             SaveSettingsToFile();
         }
@@ -210,18 +203,7 @@ namespace Ink_Canvas
         private void ToggleSwitchEnableDisPlayNibModeToggle_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsEnableDisPlayNibModeToggler = ToggleSwitchEnableDisPlayNibModeToggle.IsOn;
             SaveSettingsToFile();
-            if (!ToggleSwitchEnableDisPlayNibModeToggle.IsOn)
-            {
-                NibModeSimpleStackPanel.Visibility = Visibility.Collapsed;
-                BoardNibModeSimpleStackPanel.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                NibModeSimpleStackPanel.Visibility = Visibility.Visible;
-                BoardNibModeSimpleStackPanel.Visibility = Visibility.Visible;
-            }
         }
 
         //private void ToggleSwitchIsColorfulViewboxFloatingBar_Toggled(object sender, RoutedEventArgs e) {
@@ -241,7 +223,6 @@ namespace Ink_Canvas
         private void ToggleSwitchEnableQuickPanel_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowQuickPanel = ToggleSwitchEnableQuickPanel.IsOn;
             SaveSettingsToFile();
         }
 
@@ -256,7 +237,6 @@ namespace Ink_Canvas
         private void ToggleSwitchEnableSplashScreen_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.EnableSplashScreen = ToggleSwitchEnableSplashScreen.IsOn;
             SaveSettingsToFile();
         }
 
@@ -271,7 +251,6 @@ namespace Ink_Canvas
         private void ComboBoxSplashScreenStyle_SelectionChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.SplashScreenStyle = ComboBoxSplashScreenStyle.SelectedIndex;
             SaveSettingsToFile();
         }
 
@@ -290,40 +269,14 @@ namespace Ink_Canvas
         private void ViewboxFloatingBarScaleTransformValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.ViewboxFloatingBarScaleTransformValue =
-                ViewboxFloatingBarScaleTransformValueSlider.Value;
-            SaveSettingsToFile();
-            var val = ViewboxFloatingBarScaleTransformValueSlider.Value;
-            ViewboxFloatingBarScaleTransform.ScaleX =
-                val > 0.5 && val < 1.25 ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1;
-            ViewboxFloatingBarScaleTransform.ScaleY =
-                val > 0.5 && val < 1.25 ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1;
-
-            // 等待UI更新后再重新计算浮动栏位置，确保居中计算准确
-            Dispatcher.BeginInvoke(new Action(async () =>
+            try
             {
-                // 强制更新布局以确保ActualWidth正确
-                ViewboxFloatingBar.UpdateLayout();
-
-                // 等待一小段时间让布局完全更新
-                await Task.Delay(100);
-
-                // 再次强制更新布局
-                ViewboxFloatingBar.UpdateLayout();
-
-                // 强制重新测量和排列
-                ViewboxFloatingBar.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-                ViewboxFloatingBar.Arrange(new Rect(ViewboxFloatingBar.DesiredSize));
-
-                // auto align - 新增：只在屏幕模式下重新计算浮动栏位置
-                if (currentMode == 0)
-                {
-                    if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
-                        ViewboxFloatingBarMarginAnimation(60);
-                    else
-                        ViewboxFloatingBarMarginAnimation(100, true);
-                }
-            }), DispatcherPriority.Render);
+                double val = Settings.Appearance.ViewboxFloatingBarScaleTransformValue;
+                ViewboxFloatingBarScaleTransform.ScaleX = val > 0.5 && val < 1.25 ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1;
+                ViewboxFloatingBarScaleTransform.ScaleY = ViewboxFloatingBarScaleTransform.ScaleX;
+                SaveSettingsToFile();
+            }
+            catch { }
         }
 
         /// <summary>
@@ -339,9 +292,12 @@ namespace Ink_Canvas
         private void ViewboxFloatingBarOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.ViewboxFloatingBarOpacityValue = ViewboxFloatingBarOpacityValueSlider.Value;
-            SaveSettingsToFile();
-            ViewboxFloatingBar.Opacity = Settings.Appearance.ViewboxFloatingBarOpacityValue;
+            try
+            {
+                ViewboxFloatingBar.Opacity = Settings.Appearance.ViewboxFloatingBarOpacityValue;
+                SaveSettingsToFile();
+            }
+            catch { }
         }
 
         /// <summary>
@@ -355,8 +311,11 @@ namespace Ink_Canvas
         private void ViewboxFloatingBarOpacityInPPTValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.ViewboxFloatingBarOpacityInPPTValue = ViewboxFloatingBarOpacityInPPTValueSlider.Value;
-            SaveSettingsToFile();
+            try
+            {
+                SaveSettingsToFile();
+            }
+            catch { }
         }
 
         /// <summary>
@@ -373,10 +332,7 @@ namespace Ink_Canvas
         private void ToggleSwitchEnableTrayIcon_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.EnableTrayIcon = ToggleSwitchEnableTrayIcon.IsOn;
-            ICCTrayIconExampleImage.Visibility = Settings.Appearance.EnableTrayIcon ? Visibility.Visible : Visibility.Collapsed;
             var _taskbar = (TaskbarIcon)Application.Current.Resources["TaskbarTrayIcon"];
-            _taskbar.Visibility = ToggleSwitchEnableTrayIcon.IsOn ? Visibility.Visible : Visibility.Collapsed;
             SaveSettingsToFile();
         }
 
@@ -394,9 +350,7 @@ namespace Ink_Canvas
         private void ComboBoxUnFoldBtnImg_SelectionChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.UnFoldButtonImageType = ComboBoxUnFoldBtnImg.SelectedIndex;
             SaveSettingsToFile();
-            if (ComboBoxUnFoldBtnImg.SelectedIndex == 0)
             {
                 RightUnFoldBtnImgChevron.Source =
                     new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
@@ -409,7 +363,6 @@ namespace Ink_Canvas
                 LeftUnFoldBtnImgChevron.Height = 14;
                 LeftUnFoldBtnImgChevron.RenderTransform = null;
             }
-            else if (ComboBoxUnFoldBtnImg.SelectedIndex == 1)
             {
                 RightUnFoldBtnImgChevron.Source =
                     new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
@@ -575,18 +528,11 @@ namespace Ink_Canvas
         {
             if (_suppressChickenSoupSourceSelectionChanged) return;
             if (!isLoaded) return;
-            int idx = ComboBoxChickenSoupSource.SelectedIndex;
+            var idx = (sender as System.Windows.Controls.ComboBox)?.SelectedIndex ?? -1;
             if (idx < 0) return;
             if (Settings.Appearance.ChickenSoupSource == idx) return;
 
             Settings.Appearance.ChickenSoupSource = idx;
-
-            if (BtnHitokotoCustomize != null)
-            {
-                BtnHitokotoCustomize.Visibility = ComboBoxChickenSoupSource.SelectedIndex == 3
-                    ? Visibility.Visible
-                    : Visibility.Collapsed;
-            }
 
             SaveSettingsToFile();
             await UpdateChickenSoupTextAsync();
@@ -752,8 +698,7 @@ namespace Ink_Canvas
         private void ToggleSwitchEnableViewboxBlackBoardScaleTransform_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.EnableViewboxBlackBoardScaleTransform =
-                ToggleSwitchEnableViewboxBlackBoardScaleTransform.IsOn;
+            Settings.Appearance.EnableViewboxBlackBoardScaleTransform = (sender as ToggleSwitch)?.IsOn ?? false;
             SaveSettingsToFile();
             LoadSettings();
         }
@@ -772,7 +717,6 @@ namespace Ink_Canvas
         public void ComboBoxFloatingBarImg_SelectionChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.FloatingBarImg = ComboBoxFloatingBarImg.SelectedIndex;
             UpdateFloatingBarIcon();
             SaveSettingsToFile();
         }
@@ -915,9 +859,7 @@ namespace Ink_Canvas
         public void UpdateCustomIconsInComboBox()
         {
             // 保留前12个内置图标选项
-            while (ComboBoxFloatingBarImg.Items.Count > 12)
             {
-                ComboBoxFloatingBarImg.Items.RemoveAt(ComboBoxFloatingBarImg.Items.Count - 1);
             }
 
             // 添加自定义图标选项
@@ -926,7 +868,6 @@ namespace Ink_Canvas
                 ComboBoxItem item = new ComboBoxItem();
                 item.Content = customIcon.Name;
                 item.FontFamily = new FontFamily("Microsoft YaHei UI");
-                ComboBoxFloatingBarImg.Items.Add(item);
             }
         }
 
@@ -949,7 +890,6 @@ namespace Ink_Canvas
             if (dialog.IsSuccess)
             {
                 // 自动选中新添加的图标
-                ComboBoxFloatingBarImg.SelectedIndex = ComboBoxFloatingBarImg.Items.Count - 1;
             }
         }
 
@@ -983,10 +923,9 @@ namespace Ink_Canvas
         private void ToggleSwitchEnableTimeDisplayInWhiteboardMode_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.EnableTimeDisplayInWhiteboardMode = ToggleSwitchEnableTimeDisplayInWhiteboardMode.IsOn;
             if (currentMode == 1)
             {
-                if (ToggleSwitchEnableTimeDisplayInWhiteboardMode.IsOn)
+                if (Settings.Appearance.EnableTimeDisplayInWhiteboardMode)
                 {
                     WaterMarkTime.Visibility = Visibility.Visible;
                     WaterMarkDate.Visibility = Visibility.Visible;
@@ -1017,10 +956,9 @@ namespace Ink_Canvas
         private void ToggleSwitchEnableChickenSoupInWhiteboardMode_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.EnableChickenSoupInWhiteboardMode = ToggleSwitchEnableChickenSoupInWhiteboardMode.IsOn;
             if (currentMode == 1)
             {
-                if (ToggleSwitchEnableTimeDisplayInWhiteboardMode.IsOn)
+                if (Settings.Appearance.EnableChickenSoupInWhiteboardMode)
                 {
                     BlackBoardWaterMark.Visibility = Visibility.Visible;
                 }
@@ -1076,7 +1014,6 @@ namespace Ink_Canvas
         private void ToggleSwitchShowPPTButton_OnToggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.PowerPointSettings.ShowPPTButton = ToggleSwitchShowPPTButton.IsOn;
             SaveSettingsToFile();
             // 更新PPT UI管理器设置
             if (_pptUIManager != null)
@@ -1090,7 +1027,6 @@ namespace Ink_Canvas
         private void ToggleSwitchShowPPTSidebarByDefault_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.PowerPointSettings.ShowPPTSidebarByDefault = ToggleSwitchShowPPTSidebarByDefault.IsOn;
             SaveSettingsToFile();
             if (BtnPPTSlideShowEnd?.Visibility == Visibility.Visible)
                 UpdatePPTQuickPanelVisibility();
@@ -1099,27 +1035,21 @@ namespace Ink_Canvas
         private void ToggleSwitchEnablePPTButtonPageClickable_OnToggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.PowerPointSettings.EnablePPTButtonPageClickable = ToggleSwitchEnablePPTButtonPageClickable.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchEnablePPTButtonLongPressPageTurn_OnToggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn = ToggleSwitchEnablePPTButtonLongPressPageTurn.IsOn;
             SaveSettingsToFile();
         }
 
         private void PPTLSButtonOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            double roundedValue = Math.Round(PPTLSButtonOpacityValueSlider.Value, 1);
-            PPTLSButtonOpacityValueSlider.ValueChanged -= PPTLSButtonOpacityValueSlider_ValueChanged;
-            PPTLSButtonOpacityValueSlider.Value = roundedValue;
-            PPTLSButtonOpacityValueSlider.ValueChanged += PPTLSButtonOpacityValueSlider_ValueChanged;
+            var roundedValue = Math.Round((sender as Slider)?.Value ?? 0, 2);
             Settings.PowerPointSettings.PPTLSButtonOpacity = roundedValue;
             SaveSettingsToFile();
-            // 更新PPT UI管理器设置
             if (_pptUIManager != null)
             {
                 _pptUIManager.PPTLSButtonOpacity = roundedValue;
@@ -1131,13 +1061,9 @@ namespace Ink_Canvas
         private void PPTRSButtonOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            double roundedValue = Math.Round(PPTRSButtonOpacityValueSlider.Value, 1);
-            PPTRSButtonOpacityValueSlider.ValueChanged -= PPTRSButtonOpacityValueSlider_ValueChanged;
-            PPTRSButtonOpacityValueSlider.Value = roundedValue;
-            PPTRSButtonOpacityValueSlider.ValueChanged += PPTRSButtonOpacityValueSlider_ValueChanged;
+            var roundedValue = Math.Round((sender as Slider)?.Value ?? 0, 2);
             Settings.PowerPointSettings.PPTRSButtonOpacity = roundedValue;
             SaveSettingsToFile();
-            // 更新PPT UI管理器设置
             if (_pptUIManager != null)
             {
                 _pptUIManager.PPTRSButtonOpacity = roundedValue;
@@ -1149,13 +1075,9 @@ namespace Ink_Canvas
         private void PPTLBButtonOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            double roundedValue = Math.Round(PPTLBButtonOpacityValueSlider.Value, 1);
-            PPTLBButtonOpacityValueSlider.ValueChanged -= PPTLBButtonOpacityValueSlider_ValueChanged;
-            PPTLBButtonOpacityValueSlider.Value = roundedValue;
-            PPTLBButtonOpacityValueSlider.ValueChanged += PPTLBButtonOpacityValueSlider_ValueChanged;
+            var roundedValue = Math.Round((sender as Slider)?.Value ?? 0, 2);
             Settings.PowerPointSettings.PPTLBButtonOpacity = roundedValue;
             SaveSettingsToFile();
-            // 更新PPT UI管理器设置
             if (_pptUIManager != null)
             {
                 _pptUIManager.PPTLBButtonOpacity = roundedValue;
@@ -1167,13 +1089,9 @@ namespace Ink_Canvas
         private void PPTRBButtonOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            double roundedValue = Math.Round(PPTRBButtonOpacityValueSlider.Value, 1);
-            PPTRBButtonOpacityValueSlider.ValueChanged -= PPTRBButtonOpacityValueSlider_ValueChanged;
-            PPTRBButtonOpacityValueSlider.Value = roundedValue;
-            PPTRBButtonOpacityValueSlider.ValueChanged += PPTRBButtonOpacityValueSlider_ValueChanged;
+            var roundedValue = Math.Round((sender as Slider)?.Value ?? 0, 2);
             Settings.PowerPointSettings.PPTRBButtonOpacity = roundedValue;
             SaveSettingsToFile();
-            // 更新PPT UI管理器设置
             if (_pptUIManager != null)
             {
                 _pptUIManager.PPTRBButtonOpacity = roundedValue;
@@ -1186,8 +1104,6 @@ namespace Ink_Canvas
         private void PPTLSOpacityPlusBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTLSButtonOpacityValueSlider.Value = Math.Min(1.0, PPTLSButtonOpacityValueSlider.Value + 0.1);
-            Settings.PowerPointSettings.PPTLSButtonOpacity = PPTLSButtonOpacityValueSlider.Value;
             SaveSettingsToFile();
             if (_pptUIManager != null)
             {
@@ -1200,8 +1116,6 @@ namespace Ink_Canvas
         private void PPTLSOpacityMinusBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTLSButtonOpacityValueSlider.Value = Math.Max(0.1, PPTLSButtonOpacityValueSlider.Value - 0.1);
-            Settings.PowerPointSettings.PPTLSButtonOpacity = PPTLSButtonOpacityValueSlider.Value;
             SaveSettingsToFile();
             if (_pptUIManager != null)
             {
@@ -1214,8 +1128,6 @@ namespace Ink_Canvas
         private void PPTLSOpacitySyncBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTRSButtonOpacityValueSlider.Value = PPTLSButtonOpacityValueSlider.Value;
-            Settings.PowerPointSettings.PPTRSButtonOpacity = PPTLSButtonOpacityValueSlider.Value;
             SaveSettingsToFile();
             if (_pptUIManager != null)
             {
@@ -1229,8 +1141,6 @@ namespace Ink_Canvas
         private void PPTRSOpacityPlusBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTRSButtonOpacityValueSlider.Value = Math.Min(1.0, PPTRSButtonOpacityValueSlider.Value + 0.1);
-            Settings.PowerPointSettings.PPTRSButtonOpacity = PPTRSButtonOpacityValueSlider.Value;
             SaveSettingsToFile();
             if (_pptUIManager != null)
             {
@@ -1243,8 +1153,6 @@ namespace Ink_Canvas
         private void PPTRSOpacityMinusBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTRSButtonOpacityValueSlider.Value = Math.Max(0.1, PPTRSButtonOpacityValueSlider.Value - 0.1);
-            Settings.PowerPointSettings.PPTRSButtonOpacity = PPTRSButtonOpacityValueSlider.Value;
             SaveSettingsToFile();
             if (_pptUIManager != null)
             {
@@ -1257,8 +1165,6 @@ namespace Ink_Canvas
         private void PPTRSOpacitySyncBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTLSButtonOpacityValueSlider.Value = PPTRSButtonOpacityValueSlider.Value;
-            Settings.PowerPointSettings.PPTLSButtonOpacity = PPTRSButtonOpacityValueSlider.Value;
             SaveSettingsToFile();
             if (_pptUIManager != null)
             {
@@ -1272,8 +1178,6 @@ namespace Ink_Canvas
         private void PPTLBOpacityPlusBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTLBButtonOpacityValueSlider.Value = Math.Min(1.0, PPTLBButtonOpacityValueSlider.Value + 0.1);
-            Settings.PowerPointSettings.PPTLBButtonOpacity = PPTLBButtonOpacityValueSlider.Value;
             SaveSettingsToFile();
             if (_pptUIManager != null)
             {
@@ -1286,8 +1190,6 @@ namespace Ink_Canvas
         private void PPTLBOpacityMinusBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTLBButtonOpacityValueSlider.Value = Math.Max(0.1, PPTLBButtonOpacityValueSlider.Value - 0.1);
-            Settings.PowerPointSettings.PPTLBButtonOpacity = PPTLBButtonOpacityValueSlider.Value;
             SaveSettingsToFile();
             if (_pptUIManager != null)
             {
@@ -1300,8 +1202,6 @@ namespace Ink_Canvas
         private void PPTLBOpacitySyncBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTRBButtonOpacityValueSlider.Value = PPTLBButtonOpacityValueSlider.Value;
-            Settings.PowerPointSettings.PPTRBButtonOpacity = PPTLBButtonOpacityValueSlider.Value;
             SaveSettingsToFile();
             if (_pptUIManager != null)
             {
@@ -1315,8 +1215,6 @@ namespace Ink_Canvas
         private void PPTRBOpacityPlusBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTRBButtonOpacityValueSlider.Value = Math.Min(1.0, PPTRBButtonOpacityValueSlider.Value + 0.1);
-            Settings.PowerPointSettings.PPTRBButtonOpacity = PPTRBButtonOpacityValueSlider.Value;
             SaveSettingsToFile();
             if (_pptUIManager != null)
             {
@@ -1329,8 +1227,6 @@ namespace Ink_Canvas
         private void PPTRBOpacityMinusBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTRBButtonOpacityValueSlider.Value = Math.Max(0.1, PPTRBButtonOpacityValueSlider.Value - 0.1);
-            Settings.PowerPointSettings.PPTRBButtonOpacity = PPTRBButtonOpacityValueSlider.Value;
             SaveSettingsToFile();
             if (_pptUIManager != null)
             {
@@ -1343,8 +1239,6 @@ namespace Ink_Canvas
         private void PPTRBOpacitySyncBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTLBButtonOpacityValueSlider.Value = PPTRBButtonOpacityValueSlider.Value;
-            Settings.PowerPointSettings.PPTLBButtonOpacity = PPTRBButtonOpacityValueSlider.Value;
             SaveSettingsToFile();
             if (_pptUIManager != null)
             {
@@ -1357,7 +1251,6 @@ namespace Ink_Canvas
         private void PPTLSOpacityResetBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTLSButtonOpacityValueSlider.Value = 0.5;
             Settings.PowerPointSettings.PPTLSButtonOpacity = 0.5;
             SaveSettingsToFile();
             if (_pptUIManager != null)
@@ -1371,7 +1264,6 @@ namespace Ink_Canvas
         private void PPTRSOpacityResetBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTRSButtonOpacityValueSlider.Value = 0.5;
             Settings.PowerPointSettings.PPTRSButtonOpacity = 0.5;
             SaveSettingsToFile();
             if (_pptUIManager != null)
@@ -1385,7 +1277,6 @@ namespace Ink_Canvas
         private void PPTLBOpacityResetBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTLBButtonOpacityValueSlider.Value = 0.5;
             Settings.PowerPointSettings.PPTLBButtonOpacity = 0.5;
             SaveSettingsToFile();
             if (_pptUIManager != null)
@@ -1399,7 +1290,6 @@ namespace Ink_Canvas
         private void PPTRBOpacityResetBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTRBButtonOpacityValueSlider.Value = 0.5;
             Settings.PowerPointSettings.PPTRBButtonOpacity = 0.5;
             SaveSettingsToFile();
             if (_pptUIManager != null)
@@ -1511,8 +1401,6 @@ namespace Ink_Canvas
                     Settings.PowerPointSettings.PPTLSButtonOpacity = 0.5;
                 if (Settings.PowerPointSettings.PPTRSButtonOpacity == 1.0)
                     Settings.PowerPointSettings.PPTRSButtonOpacity = 0.5;
-                PPTLSButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTLSButtonOpacity;
-                PPTRSButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTRSButtonOpacity;
             }
             else
             {
@@ -1520,8 +1408,6 @@ namespace Ink_Canvas
                     Settings.PowerPointSettings.PPTLSButtonOpacity = 1.0;
                 if (Settings.PowerPointSettings.PPTRSButtonOpacity == 0.5)
                     Settings.PowerPointSettings.PPTRSButtonOpacity = 1.0;
-                PPTLSButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTLSButtonOpacity;
-                PPTRSButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTRSButtonOpacity;
             }
 
             SaveSettingsToFile();
@@ -1586,8 +1472,6 @@ namespace Ink_Canvas
                     Settings.PowerPointSettings.PPTLBButtonOpacity = 0.5;
                 if (Settings.PowerPointSettings.PPTRBButtonOpacity == 1.0)
                     Settings.PowerPointSettings.PPTRBButtonOpacity = 0.5;
-                PPTLBButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTLBButtonOpacity;
-                PPTRBButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTRBButtonOpacity;
             }
             else
             {
@@ -1595,8 +1479,6 @@ namespace Ink_Canvas
                     Settings.PowerPointSettings.PPTLBButtonOpacity = 1.0;
                 if (Settings.PowerPointSettings.PPTRBButtonOpacity == 0.5)
                     Settings.PowerPointSettings.PPTRBButtonOpacity = 1.0;
-                PPTLBButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTLBButtonOpacity;
-                PPTRBButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTRBButtonOpacity;
             }
 
             SaveSettingsToFile();
@@ -1619,7 +1501,6 @@ namespace Ink_Canvas
         private void PPTButtonLeftPositionValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.PowerPointSettings.PPTLSButtonPosition = (int)PPTButtonLeftPositionValueSlider.Value;
             UpdatePPTBtnSlidersStatus();
             UpdatePPTUIManagerSettings();
             SliderDelayAction.DebounceAction(2000, null, SaveSettingsToFile);
@@ -1628,106 +1509,12 @@ namespace Ink_Canvas
 
         private void UpdatePPTBtnSlidersStatus()
         {
-            if (PPTButtonLeftPositionValueSlider.Value <= -500 || PPTButtonLeftPositionValueSlider.Value >= 500)
-            {
-                if (PPTButtonLeftPositionValueSlider.Value >= 500)
-                {
-                    PPTBtnLSPlusBtn.IsEnabled = false;
-                    PPTBtnLSPlusBtn.Opacity = 0.5;
-                    PPTButtonLeftPositionValueSlider.Value = 500;
-                }
-                else if (PPTButtonLeftPositionValueSlider.Value <= -500)
-                {
-                    PPTBtnLSMinusBtn.IsEnabled = false;
-                    PPTBtnLSMinusBtn.Opacity = 0.5;
-                    PPTButtonLeftPositionValueSlider.Value = -500;
-                }
-            }
-            else
-            {
-                PPTBtnLSPlusBtn.IsEnabled = true;
-                PPTBtnLSPlusBtn.Opacity = 1;
-                PPTBtnLSMinusBtn.IsEnabled = true;
-                PPTBtnLSMinusBtn.Opacity = 1;
-            }
-
-            if (PPTButtonRightPositionValueSlider.Value <= -500 || PPTButtonRightPositionValueSlider.Value >= 500)
-            {
-                if (PPTButtonRightPositionValueSlider.Value >= 500)
-                {
-                    PPTBtnRSPlusBtn.IsEnabled = false;
-                    PPTBtnRSPlusBtn.Opacity = 0.5;
-                    PPTButtonRightPositionValueSlider.Value = 500;
-                }
-                else if (PPTButtonRightPositionValueSlider.Value <= -500)
-                {
-                    PPTBtnRSMinusBtn.IsEnabled = false;
-                    PPTBtnRSMinusBtn.Opacity = 0.5;
-                    PPTButtonRightPositionValueSlider.Value = -500;
-                }
-            }
-            else
-            {
-                PPTBtnRSPlusBtn.IsEnabled = true;
-                PPTBtnRSPlusBtn.Opacity = 1;
-                PPTBtnRSMinusBtn.IsEnabled = true;
-                PPTBtnRSMinusBtn.Opacity = 1;
-            }
-
-            // 底部按钮滑块状态管理
-            if (PPTButtonLBPositionValueSlider.Value <= -500 || PPTButtonLBPositionValueSlider.Value >= 500)
-            {
-                if (PPTButtonLBPositionValueSlider.Value >= 500)
-                {
-                    PPTBtnLBPlusBtn.IsEnabled = false;
-                    PPTBtnLBPlusBtn.Opacity = 0.5;
-                    PPTButtonLBPositionValueSlider.Value = 500;
-                }
-                else if (PPTButtonLBPositionValueSlider.Value <= -500)
-                {
-                    PPTBtnLBMinusBtn.IsEnabled = false;
-                    PPTBtnLBMinusBtn.Opacity = 0.5;
-                    PPTButtonLBPositionValueSlider.Value = -500;
-                }
-            }
-            else
-            {
-                PPTBtnLBPlusBtn.IsEnabled = true;
-                PPTBtnLBPlusBtn.Opacity = 1;
-                PPTBtnLBMinusBtn.IsEnabled = true;
-                PPTBtnLBMinusBtn.Opacity = 1;
-            }
-
-            if (PPTButtonRBPositionValueSlider.Value <= -500 || PPTButtonRBPositionValueSlider.Value >= 500)
-            {
-                if (PPTButtonRBPositionValueSlider.Value >= 500)
-                {
-                    PPTBtnRBPlusBtn.IsEnabled = false;
-                    PPTBtnRBPlusBtn.Opacity = 0.5;
-                    PPTButtonRBPositionValueSlider.Value = 500;
-                }
-                else if (PPTButtonRBPositionValueSlider.Value <= -500)
-                {
-                    PPTBtnRBMinusBtn.IsEnabled = false;
-                    PPTBtnRBMinusBtn.Opacity = 0.5;
-                    PPTButtonRBPositionValueSlider.Value = -500;
-                }
-            }
-            else
-            {
-                PPTBtnRBPlusBtn.IsEnabled = true;
-                PPTBtnRBPlusBtn.Opacity = 1;
-                PPTBtnRBMinusBtn.IsEnabled = true;
-                PPTBtnRBMinusBtn.Opacity = 1;
-            }
         }
 
         private void PPTBtnLSPlusBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTButtonLeftPositionValueSlider.Value++;
             UpdatePPTBtnSlidersStatus();
-            Settings.PowerPointSettings.PPTLSButtonPosition = (int)PPTButtonLeftPositionValueSlider.Value;
             SaveSettingsToFile();
             UpdatePPTBtnPreview();
         }
@@ -1735,9 +1522,7 @@ namespace Ink_Canvas
         private void PPTBtnLSMinusBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTButtonLeftPositionValueSlider.Value--;
             UpdatePPTBtnSlidersStatus();
-            Settings.PowerPointSettings.PPTLSButtonPosition = (int)PPTButtonLeftPositionValueSlider.Value;
             SaveSettingsToFile();
             UpdatePPTBtnPreview();
         }
@@ -1745,9 +1530,7 @@ namespace Ink_Canvas
         private void PPTBtnLSSyncBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTButtonRightPositionValueSlider.Value = PPTButtonLeftPositionValueSlider.Value;
             UpdatePPTBtnSlidersStatus();
-            Settings.PowerPointSettings.PPTRSButtonPosition = (int)PPTButtonLeftPositionValueSlider.Value;
             SaveSettingsToFile();
             UpdatePPTBtnPreview();
         }
@@ -1755,7 +1538,6 @@ namespace Ink_Canvas
         private void PPTBtnLSResetBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTButtonLeftPositionValueSlider.Value = 0;
             UpdatePPTBtnSlidersStatus();
             Settings.PowerPointSettings.PPTLSButtonPosition = 0;
             SaveSettingsToFile();
@@ -1765,9 +1547,7 @@ namespace Ink_Canvas
         private void PPTBtnRSPlusBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTButtonRightPositionValueSlider.Value++;
             UpdatePPTBtnSlidersStatus();
-            Settings.PowerPointSettings.PPTRSButtonPosition = (int)PPTButtonRightPositionValueSlider.Value;
             SaveSettingsToFile();
             UpdatePPTBtnPreview();
         }
@@ -1775,9 +1555,7 @@ namespace Ink_Canvas
         private void PPTBtnRSMinusBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTButtonRightPositionValueSlider.Value--;
             UpdatePPTBtnSlidersStatus();
-            Settings.PowerPointSettings.PPTRSButtonPosition = (int)PPTButtonRightPositionValueSlider.Value;
             SaveSettingsToFile();
             UpdatePPTBtnPreview();
         }
@@ -1785,9 +1563,7 @@ namespace Ink_Canvas
         private void PPTBtnRSSyncBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTButtonLeftPositionValueSlider.Value = PPTButtonRightPositionValueSlider.Value;
             UpdatePPTBtnSlidersStatus();
-            Settings.PowerPointSettings.PPTLSButtonPosition = (int)PPTButtonRightPositionValueSlider.Value;
             SaveSettingsToFile();
             UpdatePPTBtnPreview();
         }
@@ -1795,7 +1571,6 @@ namespace Ink_Canvas
         private void PPTBtnRSResetBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTButtonRightPositionValueSlider.Value = 0;
             UpdatePPTBtnSlidersStatus();
             Settings.PowerPointSettings.PPTRSButtonPosition = 0;
             SaveSettingsToFile();
@@ -1807,7 +1582,6 @@ namespace Ink_Canvas
         private void PPTButtonRightPositionValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.PowerPointSettings.PPTRSButtonPosition = (int)PPTButtonRightPositionValueSlider.Value;
             UpdatePPTBtnSlidersStatus();
             UpdatePPTUIManagerSettings();
             SliderDelayAction.DebounceAction(2000, null, SaveSettingsToFile);
@@ -1841,137 +1615,25 @@ namespace Ink_Canvas
 
         private void UpdatePPTBtnPreview()
         {
-            //new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
-            var bopt = Settings.PowerPointSettings.PPTBButtonsOption.ToString();
-            char[] boptc = bopt.ToCharArray();
-            // 使用实际的透明度设置值
-            PPTBtnPreviewLB.Opacity = Settings.PowerPointSettings.PPTLBButtonOpacity;
-            PPTBtnPreviewRB.Opacity = Settings.PowerPointSettings.PPTRBButtonOpacity;
-
-            if (boptc[2] == '2')
-            {
-                PPTBtnPreviewLB.Source =
-                    new BitmapImage(
-                        new Uri("pack://application:,,,/Resources/PresentationExample/bottombar-dark.png"));
-                PPTBtnPreviewRB.Source = new BitmapImage(
-                    new Uri("pack://application:,,,/Resources/PresentationExample/bottombar-dark.png"));
-            }
-            else
-            {
-                PPTBtnPreviewLB.Source =
-                    new BitmapImage(
-                        new Uri("pack://application:,,,/Resources/PresentationExample/bottombar-white.png"));
-                PPTBtnPreviewRB.Source = new BitmapImage(
-                    new Uri("pack://application:,,,/Resources/PresentationExample/bottombar-white.png"));
-            }
-
-            var sopt = Settings.PowerPointSettings.PPTSButtonsOption.ToString();
-            char[] soptc = sopt.ToCharArray();
-            PPTBtnPreviewLS.Opacity = Settings.PowerPointSettings.PPTLSButtonOpacity;
-            PPTBtnPreviewRS.Opacity = Settings.PowerPointSettings.PPTRSButtonOpacity;
-
-            if (soptc[2] == '2')
-            {
-                PPTBtnPreviewLS.Source =
-                    new BitmapImage(
-                        new Uri("pack://application:,,,/Resources/PresentationExample/sidebar-dark.png"));
-                PPTBtnPreviewRS.Source = new BitmapImage(
-                    new Uri("pack://application:,,,/Resources/PresentationExample/sidebar-dark.png"));
-            }
-            else
-            {
-                PPTBtnPreviewLS.Source =
-                    new BitmapImage(
-                        new Uri("pack://application:,,,/Resources/PresentationExample/sidebar-white.png"));
-                PPTBtnPreviewRS.Source = new BitmapImage(
-                    new Uri("pack://application:,,,/Resources/PresentationExample/sidebar-white.png"));
-            }
-
-            var dopt = Settings.PowerPointSettings.PPTButtonsDisplayOption.ToString();
-            char[] doptc = dopt.ToCharArray();
-
-            if (Settings.PowerPointSettings.ShowPPTButton)
-            {
-                PPTBtnPreviewLB.Visibility = doptc[0] == '2' ? Visibility.Visible : Visibility.Collapsed;
-                PPTBtnPreviewRB.Visibility = doptc[1] == '2' ? Visibility.Visible : Visibility.Collapsed;
-                PPTBtnPreviewLS.Visibility = doptc[2] == '2' ? Visibility.Visible : Visibility.Collapsed;
-                PPTBtnPreviewRS.Visibility = doptc[3] == '2' ? Visibility.Visible : Visibility.Collapsed;
-            }
-            else
-            {
-                PPTBtnPreviewLB.Visibility = Visibility.Collapsed;
-                PPTBtnPreviewRB.Visibility = Visibility.Collapsed;
-                PPTBtnPreviewLS.Visibility = Visibility.Collapsed;
-                PPTBtnPreviewRS.Visibility = Visibility.Collapsed;
-            }
-
-            // 获取当前屏幕的实际尺寸（考虑DPI缩放）
-            var actualScreenWidth = SystemParameters.PrimaryScreenWidth;
-            var actualScreenHeight = SystemParameters.PrimaryScreenHeight;
-
-            // 预览区域固定尺寸
-            const double previewWidth = 324.0;
-            const double previewHeight = 182.0;
-
-            // 计算缩放比例（预览区域与实际屏幕的比例）
-            double scaleX = previewWidth / actualScreenWidth;
-            double scaleY = previewHeight / actualScreenHeight;
-
-            // 获取按钮位置设置
-            double rsPosition = Settings.PowerPointSettings.PPTRSButtonPosition;
-            double lsPosition = Settings.PowerPointSettings.PPTLSButtonPosition;
-            double lbPosition = Settings.PowerPointSettings.PPTLBButtonPosition;
-            double rbPosition = Settings.PowerPointSettings.PPTRBButtonPosition;
-
-            bool showSidePageButton = sopt.Length >= 1 && sopt[0] == '2';
-            bool showBottomPageButton = bopt.Length >= 1 && bopt[0] == '2';
-
-            // 页码按钮的实际尺寸
-            const double pageButtonWidth = 50.0;
-            const double pageButtonHeight = 50.0;
-
-            // 计算侧边按钮位置（Y轴偏移）
-            double sideOffsetY = showSidePageButton ? pageButtonHeight * scaleY : 0;
-            PPTBtnPreviewRSTransform.Y = -(rsPosition * scaleY) - sideOffsetY;
-            PPTBtnPreviewLSTransform.Y = -(lsPosition * scaleY) - sideOffsetY;
-
-            // 计算底部按钮位置（X轴偏移）
-            const double bottomMarginOffset = 6.0;
-            double scaledMarginOffset = bottomMarginOffset * scaleX;
-
-            double bottomOffsetX = showBottomPageButton ? pageButtonWidth * scaleX : 0;
-            PPTBtnPreviewLBTransform.X = scaledMarginOffset + (lbPosition * scaleX) + bottomOffsetX;
-            PPTBtnPreviewRBTransform.X = -(scaledMarginOffset + (rbPosition * scaleX) + bottomOffsetX);
-
-            // 计算工具栏尺寸
-            var dpiScaleX = 1.0;
-            var dpiScaleY = 1.0;
             try
             {
-                var source = PresentationSource.FromVisual(this);
-                if (source?.CompositionTarget != null)
+                if (_pptUIManager != null)
                 {
-                    var transform = source.CompositionTarget.TransformToDevice;
-                    dpiScaleX = transform.M11;
-                    dpiScaleY = transform.M22;
+                    _pptUIManager.PPTLSButtonPosition = Settings.PowerPointSettings.PPTLSButtonPosition;
+                    _pptUIManager.PPTRSButtonPosition = Settings.PowerPointSettings.PPTRSButtonPosition;
+                    _pptUIManager.PPTLBButtonPosition = Settings.PowerPointSettings.PPTLBButtonPosition;
+                    _pptUIManager.PPTRBButtonPosition = Settings.PowerPointSettings.PPTRBButtonPosition;
+                    _pptUIManager.EnablePPTButtonPageClickable = Settings.PowerPointSettings.EnablePPTButtonPageClickable;
+                    _pptUIManager.EnablePPTButtonLongPressPageTurn = Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn;
+                    _pptUIManager.PPTLSButtonOpacity = Settings.PowerPointSettings.PPTLSButtonOpacity;
+                    _pptUIManager.PPTRSButtonOpacity = Settings.PowerPointSettings.PPTRSButtonOpacity;
+                    _pptUIManager.PPTLBButtonOpacity = Settings.PowerPointSettings.PPTLBButtonOpacity;
+                    _pptUIManager.PPTRBButtonOpacity = Settings.PowerPointSettings.PPTRBButtonOpacity;
+                    _pptUIManager.UpdateNavigationPanelsVisibility();
+                    _pptUIManager.UpdateNavigationButtonStyles();
                 }
             }
-            catch
-            {
-                dpiScaleX = 1.0;
-                dpiScaleY = 1.0;
-            }
-
-            // 计算工具栏的实际尺寸
-            const double baseToolbarHeight = 24.0;
-
-            double actualToolbarHeight = baseToolbarHeight * dpiScaleY;
-            double scaledToolbarHeight = actualToolbarHeight * scaleY;
-            double scaledToolbarWidth = previewWidth;
-
-            // 设置工具栏尺寸
-            PPTBtnPreviewToolbar.Height = scaledToolbarHeight;
-            PPTBtnPreviewToolbar.Width = scaledToolbarWidth;
+            catch { }
         }
 
 
@@ -2024,7 +1686,6 @@ namespace Ink_Canvas
             Settings.Canvas.InkStyle = InkStyleFromPenStyleUiIndex(uiIndex);
             if (sender == ComboBoxPenStyle)
                 BoardComboBoxPenStyle.SelectedIndex = uiIndex;
-            else
                 ComboBoxPenStyle.SelectedIndex = uiIndex;
 
             SaveSettingsToFile();
@@ -2117,14 +1778,12 @@ namespace Ink_Canvas
         {
             if (Settings.Automation.IsEnableAutoFold)
                 _unifiedMainWindowTimer?.Start();
-            else
                 _unifiedMainWindowTimer?.Stop();
         }
 
         private void ToggleSwitchAutoFoldInEasiNote_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoFoldInEasiNote = ToggleSwitchAutoFoldInEasiNote.IsOn;
             SaveSettingsToFile();
             StartOrStoptimerCheckAutoFold();
         }
@@ -2132,15 +1791,13 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoFoldInEasiNoteIgnoreDesktopAnno_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoFoldInEasiNoteIgnoreDesktopAnno =
-                ToggleSwitchAutoFoldInEasiNoteIgnoreDesktopAnno.IsOn;
+            Settings.Automation.IsAutoFoldInEasiNoteIgnoreDesktopAnno = (sender as ToggleSwitch)?.IsOn ?? false;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchAutoFoldInEasiCamera_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoFoldInEasiCamera = ToggleSwitchAutoFoldInEasiCamera.IsOn;
             SaveSettingsToFile();
             StartOrStoptimerCheckAutoFold();
         }
@@ -2148,7 +1805,6 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoFoldInEasiNote3_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoFoldInEasiNote3 = ToggleSwitchAutoFoldInEasiNote3.IsOn;
             SaveSettingsToFile();
             StartOrStoptimerCheckAutoFold();
         }
@@ -2156,7 +1812,6 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoFoldInEasiNote3C_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoFoldInEasiNote3C = ToggleSwitchAutoFoldInEasiNote3C.IsOn;
             SaveSettingsToFile();
             StartOrStoptimerCheckAutoFold();
         }
@@ -2164,7 +1819,6 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoFoldInEasiNote5C_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoFoldInEasiNote5C = ToggleSwitchAutoFoldInEasiNote5C.IsOn;
             SaveSettingsToFile();
             StartOrStoptimerCheckAutoFold();
         }
@@ -2172,7 +1826,6 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoFoldInSeewoPincoTeacher_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoFoldInSeewoPincoTeacher = ToggleSwitchAutoFoldInSeewoPincoTeacher.IsOn;
             SaveSettingsToFile();
             StartOrStoptimerCheckAutoFold();
         }
@@ -2180,7 +1833,6 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoFoldInHiteTouchPro_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoFoldInHiteTouchPro = ToggleSwitchAutoFoldInHiteTouchPro.IsOn;
             SaveSettingsToFile();
             StartOrStoptimerCheckAutoFold();
         }
@@ -2188,7 +1840,6 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoFoldInHiteLightBoard_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoFoldInHiteLightBoard = ToggleSwitchAutoFoldInHiteLightBoard.IsOn;
             SaveSettingsToFile();
             StartOrStoptimerCheckAutoFold();
         }
@@ -2196,7 +1847,6 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoFoldInHiteCamera_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoFoldInHiteCamera = ToggleSwitchAutoFoldInHiteCamera.IsOn;
             SaveSettingsToFile();
             StartOrStoptimerCheckAutoFold();
         }
@@ -2204,7 +1854,6 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoFoldInWxBoardMain_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoFoldInWxBoardMain = ToggleSwitchAutoFoldInWxBoardMain.IsOn;
             SaveSettingsToFile();
             StartOrStoptimerCheckAutoFold();
         }
@@ -2212,7 +1861,6 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoFoldInOldZyBoard_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoFoldInOldZyBoard = ToggleSwitchAutoFoldInOldZyBoard.IsOn;
             SaveSettingsToFile();
             StartOrStoptimerCheckAutoFold();
         }
@@ -2220,7 +1868,6 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoFoldInMSWhiteboard_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoFoldInMSWhiteboard = ToggleSwitchAutoFoldInMSWhiteboard.IsOn;
             SaveSettingsToFile();
             StartOrStoptimerCheckAutoFold();
         }
@@ -2228,7 +1875,6 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoFoldInAdmoxWhiteboard_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoFoldInAdmoxWhiteboard = ToggleSwitchAutoFoldInAdmoxWhiteboard.IsOn;
             SaveSettingsToFile();
             StartOrStoptimerCheckAutoFold();
         }
@@ -2236,7 +1882,6 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoFoldInAdmoxBooth_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoFoldInAdmoxBooth = ToggleSwitchAutoFoldInAdmoxBooth.IsOn;
             SaveSettingsToFile();
             StartOrStoptimerCheckAutoFold();
         }
@@ -2244,7 +1889,6 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoFoldInQPoint_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoFoldInQPoint = ToggleSwitchAutoFoldInQPoint.IsOn;
             SaveSettingsToFile();
             StartOrStoptimerCheckAutoFold();
         }
@@ -2252,7 +1896,6 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoFoldInYiYunVisualPresenter_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoFoldInYiYunVisualPresenter = ToggleSwitchAutoFoldInYiYunVisualPresenter.IsOn;
             SaveSettingsToFile();
             StartOrStoptimerCheckAutoFold();
         }
@@ -2260,7 +1903,6 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoFoldInMaxHubWhiteboard_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoFoldInMaxHubWhiteboard = ToggleSwitchAutoFoldInMaxHubWhiteboard.IsOn;
             SaveSettingsToFile();
             StartOrStoptimerCheckAutoFold();
         }
@@ -2271,7 +1913,6 @@ namespace Ink_Canvas
 
             // 记录设置变更前的状态
             bool previousState = Settings.Automation.IsAutoFoldInPPTSlideShow;
-            Settings.Automation.IsAutoFoldInPPTSlideShow = ToggleSwitchAutoFoldInPPTSlideShow.IsOn;
 
             // 如果设置状态发生变化，重置PPT相关状态变量
             if (previousState != Settings.Automation.IsAutoFoldInPPTSlideShow)
@@ -2282,15 +1923,9 @@ namespace Ink_Canvas
 
             if (Settings.Automation.IsAutoFoldInPPTSlideShow)
             {
-                SettingsPPTInkingAndAutoFoldExplictBorder.Visibility = Visibility.Visible;
-                SettingsShowCanvasAtNewSlideShowStackPanel.Opacity = 0.5;
-                SettingsShowCanvasAtNewSlideShowStackPanel.IsHitTestVisible = false;
             }
             else
             {
-                SettingsPPTInkingAndAutoFoldExplictBorder.Visibility = Visibility.Collapsed;
-                SettingsShowCanvasAtNewSlideShowStackPanel.Opacity = 1;
-                SettingsShowCanvasAtNewSlideShowStackPanel.IsHitTestVisible = true;
             }
             SaveSettingsToFile();
             StartOrStoptimerCheckAutoFold();
@@ -2299,7 +1934,6 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoKillPptService_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoKillPptService = ToggleSwitchAutoKillPptService.IsOn;
             SaveSettingsToFile();
 
             if (Settings.Automation.IsAutoKillEasiNote || Settings.Automation.IsAutoKillPptService ||
@@ -2307,142 +1941,120 @@ namespace Ink_Canvas
                 || Settings.Automation.IsAutoKillICA || Settings.Automation.IsAutoKillIDT || Settings.Automation.IsAutoKillVComYouJiao
                 || Settings.Automation.IsAutoKillSeewoLauncher2DesktopAnnotation)
                 timerKillProcess.Start();
-            else
                 timerKillProcess.Stop();
         }
 
         private void ToggleSwitchAutoKillEasiNote_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoKillEasiNote = ToggleSwitchAutoKillEasiNote.IsOn;
             SaveSettingsToFile();
             if (Settings.Automation.IsAutoKillEasiNote || Settings.Automation.IsAutoKillPptService ||
                 Settings.Automation.IsAutoKillHiteAnnotation || Settings.Automation.IsAutoKillInkCanvas
                 || Settings.Automation.IsAutoKillICA || Settings.Automation.IsAutoKillIDT || Settings.Automation.IsAutoKillVComYouJiao
                 || Settings.Automation.IsAutoKillSeewoLauncher2DesktopAnnotation)
                 timerKillProcess.Start();
-            else
                 timerKillProcess.Stop();
         }
 
         private void ToggleSwitchAutoKillHiteAnnotation_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoKillHiteAnnotation = ToggleSwitchAutoKillHiteAnnotation.IsOn;
             SaveSettingsToFile();
             if (Settings.Automation.IsAutoKillEasiNote || Settings.Automation.IsAutoKillPptService ||
                 Settings.Automation.IsAutoKillHiteAnnotation || Settings.Automation.IsAutoKillInkCanvas
                 || Settings.Automation.IsAutoKillICA || Settings.Automation.IsAutoKillIDT || Settings.Automation.IsAutoKillVComYouJiao
                 || Settings.Automation.IsAutoKillSeewoLauncher2DesktopAnnotation)
                 timerKillProcess.Start();
-            else
                 timerKillProcess.Stop();
         }
 
         private void ToggleSwitchAutoKillVComYouJiao_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoKillVComYouJiao = ToggleSwitchAutoKillVComYouJiao.IsOn;
             SaveSettingsToFile();
             if (Settings.Automation.IsAutoKillEasiNote || Settings.Automation.IsAutoKillPptService ||
                 Settings.Automation.IsAutoKillHiteAnnotation || Settings.Automation.IsAutoKillInkCanvas
                 || Settings.Automation.IsAutoKillICA || Settings.Automation.IsAutoKillIDT || Settings.Automation.IsAutoKillVComYouJiao
                 || Settings.Automation.IsAutoKillSeewoLauncher2DesktopAnnotation)
                 timerKillProcess.Start();
-            else
                 timerKillProcess.Stop();
         }
 
         private void ToggleSwitchAutoKillSeewoLauncher2DesktopAnnotation_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoKillSeewoLauncher2DesktopAnnotation = ToggleSwitchAutoKillSeewoLauncher2DesktopAnnotation.IsOn;
             SaveSettingsToFile();
             if (Settings.Automation.IsAutoKillEasiNote || Settings.Automation.IsAutoKillPptService ||
                 Settings.Automation.IsAutoKillHiteAnnotation || Settings.Automation.IsAutoKillInkCanvas
                 || Settings.Automation.IsAutoKillICA || Settings.Automation.IsAutoKillIDT || Settings.Automation.IsAutoKillVComYouJiao
                 || Settings.Automation.IsAutoKillSeewoLauncher2DesktopAnnotation)
                 timerKillProcess.Start();
-            else
                 timerKillProcess.Stop();
         }
 
         private void ToggleSwitchAutoKillInkCanvas_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoKillInkCanvas = ToggleSwitchAutoKillInkCanvas.IsOn;
             SaveSettingsToFile();
             if (Settings.Automation.IsAutoKillEasiNote || Settings.Automation.IsAutoKillPptService ||
                 Settings.Automation.IsAutoKillHiteAnnotation || Settings.Automation.IsAutoKillInkCanvas
                 || Settings.Automation.IsAutoKillICA || Settings.Automation.IsAutoKillIDT || Settings.Automation.IsAutoKillVComYouJiao
                 || Settings.Automation.IsAutoKillSeewoLauncher2DesktopAnnotation)
                 timerKillProcess.Start();
-            else
                 timerKillProcess.Stop();
         }
 
         private void ToggleSwitchAutoKillICA_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoKillICA = ToggleSwitchAutoKillICA.IsOn;
             SaveSettingsToFile();
             if (Settings.Automation.IsAutoKillEasiNote || Settings.Automation.IsAutoKillPptService ||
                 Settings.Automation.IsAutoKillHiteAnnotation || Settings.Automation.IsAutoKillInkCanvas
                 || Settings.Automation.IsAutoKillICA || Settings.Automation.IsAutoKillIDT || Settings.Automation.IsAutoKillVComYouJiao
                 || Settings.Automation.IsAutoKillSeewoLauncher2DesktopAnnotation)
                 timerKillProcess.Start();
-            else
                 timerKillProcess.Stop();
         }
 
         private void ToggleSwitchAutoKillIDT_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoKillIDT = ToggleSwitchAutoKillIDT.IsOn;
             SaveSettingsToFile();
             if (Settings.Automation.IsAutoKillEasiNote || Settings.Automation.IsAutoKillPptService ||
                 Settings.Automation.IsAutoKillHiteAnnotation || Settings.Automation.IsAutoKillInkCanvas
                 || Settings.Automation.IsAutoKillICA || Settings.Automation.IsAutoKillIDT || Settings.Automation.IsAutoKillVComYouJiao
                 || Settings.Automation.IsAutoKillSeewoLauncher2DesktopAnnotation)
                 timerKillProcess.Start();
-            else
                 timerKillProcess.Stop();
         }
 
         private void ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoEnterAnnotationModeWhenExitFoldMode = ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchAutoFoldWhenExitWhiteboard_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoFoldWhenExitWhiteboard = ToggleSwitchAutoFoldWhenExitWhiteboard.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchSaveScreenshotsInDateFolders_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsSaveScreenshotsInDateFolders = ToggleSwitchSaveScreenshotsInDateFolders.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchAutoSaveStrokesAtScreenshot_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoSaveStrokesAtScreenshot = ToggleSwitchAutoSaveStrokesAtScreenshot.IsOn;
-            ToggleSwitchAutoSaveStrokesAtClear.Label =
-                ToggleSwitchAutoSaveStrokesAtScreenshot.IsOn ? "清屏时自动截图并保存墨迹" : "清屏时自动截图";
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchAutoSaveStrokesAtClear_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoSaveStrokesAtClear = ToggleSwitchAutoSaveStrokesAtClear.IsOn;
             SaveSettingsToFile();
         }
 
@@ -2502,42 +2114,36 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoSaveStrokesInPowerPoint_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint = ToggleSwitchAutoSaveStrokesInPowerPoint.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchNotifyPreviousPage_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.PowerPointSettings.IsNotifyPreviousPage = ToggleSwitchNotifyPreviousPage.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchNotifyHiddenPage_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.PowerPointSettings.IsNotifyHiddenPage = ToggleSwitchNotifyHiddenPage.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchNotifyAutoPlayPresentation_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.PowerPointSettings.IsNotifyAutoPlayPresentation = ToggleSwitchNotifyAutoPlayPresentation.IsOn;
             SaveSettingsToFile();
         }
 
         private void SideControlMinimumAutomationSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.MinimumAutomationStrokeNumber = (int)SideControlMinimumAutomationSlider.Value;
             SaveSettingsToFile();
         }
 
         private void AutoSavedStrokesLocationTextBox_TextChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.AutoSavedStrokesLocation = AutoSavedStrokesLocation.Text;
             SaveSettingsToFile();
         }
 
@@ -2545,19 +2151,17 @@ namespace Ink_Canvas
         {
             var folderBrowser = new FolderBrowserDialog();
             folderBrowser.ShowDialog();
-            if (folderBrowser.SelectedPath.Length > 0) AutoSavedStrokesLocation.Text = folderBrowser.SelectedPath;
             SaveSettingsToFile();
         }
 
         private void SetAutoSavedStrokesLocationToDiskDButton_Click(object sender, RoutedEventArgs e)
         {
-            AutoSavedStrokesLocation.Text = @"D:\Ink Canvas";
             SaveSettingsToFile();
         }
 
         private void SetAutoSavedStrokesLocationToDocumentFolderButton_Click(object sender, RoutedEventArgs e)
         {
-            AutoSavedStrokesLocation.Text =
+            Settings.Automation.AutoSavedStrokesLocation =
                 Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\Ink Canvas";
             SaveSettingsToFile();
         }
@@ -2583,7 +2187,6 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoDelSavedFiles_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.AutoDelSavedFiles = ToggleSwitchAutoDelSavedFiles.IsOn;
             SaveSettingsToFile();
         }
 
@@ -2591,37 +2194,32 @@ namespace Ink_Canvas
             ComboBoxAutoDelSavedFilesDaysThreshold_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.AutoDelSavedFilesDaysThreshold =
-                int.Parse(((ComboBoxItem)ComboBoxAutoDelSavedFilesDaysThreshold.SelectedItem).Content.ToString());
+            Settings.Automation.AutoDelSavedFilesDaysThreshold = (sender as System.Windows.Controls.ComboBox)?.SelectedIndex ?? 0;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchAutoSaveScreenShotInPowerPoint_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint =
-                ToggleSwitchAutoSaveScreenShotInPowerPoint.IsOn;
+            Settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint = (sender as ToggleSwitch)?.IsOn ?? false;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchSaveFullPageStrokes_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsSaveFullPageStrokes = ToggleSwitchSaveFullPageStrokes.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchSaveStrokesAsXML_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsSaveStrokesAsXML = ToggleSwitchSaveStrokesAsXML.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchEnableAutoSaveStrokes_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsEnableAutoSaveStrokes = ToggleSwitchEnableAutoSaveStrokes.IsOn;
             SaveSettingsToFile();
             // 更新定时器状态
             UpdateAutoSaveStrokesTimer();
@@ -2629,9 +2227,7 @@ namespace Ink_Canvas
 
         private void ComboBoxAutoSaveStrokesInterval_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!isLoaded || ComboBoxAutoSaveStrokesInterval.SelectedItem == null) return;
-
-            var selectedItem = ComboBoxAutoSaveStrokesInterval.SelectedItem as System.Windows.Controls.ComboBoxItem;
+            var selectedItem = (sender as ComboBox)?.SelectedItem as ComboBoxItem;
             if (selectedItem?.Tag != null && int.TryParse(selectedItem.Tag.ToString(), out int intervalMinutes))
             {
                 Settings.Automation.AutoSaveStrokesIntervalMinutes = intervalMinutes;
@@ -2648,208 +2244,64 @@ namespace Ink_Canvas
         private void ToggleSwitchEnableFingerGestureSlideShowControl_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.PowerPointSettings.IsEnableFingerGestureSlideShowControl =
-                ToggleSwitchEnableFingerGestureSlideShowControl.IsOn;
+            Settings.PowerPointSettings.IsEnableFingerGestureSlideShowControl = (sender as ToggleSwitch)?.IsOn ?? false;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchAutoSwitchTwoFingerGesture_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Gesture.AutoSwitchTwoFingerGesture = ToggleSwitchAutoSwitchTwoFingerGesture.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchEnableTwoFingerZoom_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-
-            // 如果多指书写模式启用，强制禁用双指手势
-            if (ToggleSwitchEnableMultiTouchMode.IsOn)
+            try
             {
-                ToggleSwitchEnableTwoFingerZoom.IsOn = false;
-                BoardToggleSwitchEnableTwoFingerZoom.IsOn = false;
-                Settings.Gesture.IsEnableTwoFingerZoom = false;
-                CheckEnableTwoFingerGestureBtnColorPrompt();
+                Settings.Gesture.IsEnableTwoFingerZoom = true;
                 SaveSettingsToFile();
-                return;
             }
-
-            if (sender == ToggleSwitchEnableTwoFingerZoom)
-                BoardToggleSwitchEnableTwoFingerZoom.IsOn = ToggleSwitchEnableTwoFingerZoom.IsOn;
-            else
-                ToggleSwitchEnableTwoFingerZoom.IsOn = BoardToggleSwitchEnableTwoFingerZoom.IsOn;
-            Settings.Gesture.IsEnableTwoFingerZoom = ToggleSwitchEnableTwoFingerZoom.IsOn;
-            CheckEnableTwoFingerGestureBtnColorPrompt();
-            SaveSettingsToFile();
-        }
-
-        private void ToggleSwitchEnableMultiTouchMode_Toggled(object sender, RoutedEventArgs e)
-        {
-            //if (!isLoaded) return;
-            if (sender == ToggleSwitchEnableMultiTouchMode)
-                BoardToggleSwitchEnableMultiTouchMode.IsOn = ToggleSwitchEnableMultiTouchMode.IsOn;
-            else
-                ToggleSwitchEnableMultiTouchMode.IsOn = BoardToggleSwitchEnableMultiTouchMode.IsOn;
-
-            if (ToggleSwitchEnableMultiTouchMode.IsOn)
-            {
-                if (!isInMultiTouchMode)
-                {
-                    // 保存当前编辑模式和绘图工具状态
-                    InkCanvasEditingMode currentEditingMode = inkCanvas.EditingMode;
-                    int currentDrawingShapeMode = drawingShapeMode;
-                    bool currentForceEraser = forceEraser;
-
-                    inkCanvas.StylusDown += MainWindow_StylusDown;
-                    inkCanvas.StylusMove += MainWindow_StylusMove;
-                    inkCanvas.StylusUp += MainWindow_StylusUp;
-                    inkCanvas.TouchDown += MainWindow_TouchDown;
-                    inkCanvas.TouchDown -= Main_Grid_TouchDown;
-
-                    // 先设为None再设回原来的模式，避免可能的事件冲突
-                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                    // 保存非笔画元素（如图片）
-                    var preservedElements = PreserveNonStrokeElements();
-                    inkCanvas.Children.Clear();
-                    // 恢复非笔画元素
-                    RestoreNonStrokeElements(preservedElements);
-                    isInMultiTouchMode = true;
-
-                    palmEraserWasEnabledBeforeMultiTouch = Settings.Canvas.EnablePalmEraser;
-                    Settings.Canvas.EnablePalmEraser = false;
-                    if (ToggleSwitchEnablePalmEraser != null)
-                        ToggleSwitchEnablePalmEraser.IsOn = false;
-
-                    // 恢复到之前的编辑状态
-                    inkCanvas.EditingMode = currentEditingMode;
-                    drawingShapeMode = currentDrawingShapeMode;
-                    forceEraser = currentForceEraser;
-                }
-            }
-            else
-            {
-                if (isInMultiTouchMode)
-                {
-                    // 保存当前编辑模式和绘图工具状态
-                    InkCanvasEditingMode currentEditingMode = inkCanvas.EditingMode;
-                    int currentDrawingShapeMode = drawingShapeMode;
-                    bool currentForceEraser = forceEraser;
-
-                    inkCanvas.StylusDown -= MainWindow_StylusDown;
-                    inkCanvas.StylusMove -= MainWindow_StylusMove;
-                    inkCanvas.StylusUp -= MainWindow_StylusUp;
-                    inkCanvas.TouchDown -= MainWindow_TouchDown;
-                    inkCanvas.TouchDown += Main_Grid_TouchDown;
-
-                    // 先设为None再设回原来的模式，避免可能的事件冲突
-                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                    // 保存非笔画元素（如图片）
-                    var preservedElements = PreserveNonStrokeElements();
-                    inkCanvas.Children.Clear();
-                    // 恢复非笔画元素
-                    RestoreNonStrokeElements(preservedElements);
-                    isInMultiTouchMode = false;
-
-                    if (palmEraserWasEnabledBeforeMultiTouch)
-                    {
-                        Settings.Canvas.EnablePalmEraser = true;
-                        if (ToggleSwitchEnablePalmEraser != null)
-                            ToggleSwitchEnablePalmEraser.IsOn = true;
-                    }
-
-                    // 恢复到之前的编辑状态
-                    inkCanvas.EditingMode = currentEditingMode;
-                    drawingShapeMode = currentDrawingShapeMode;
-                    forceEraser = currentForceEraser;
-                }
-            }
-
-            Settings.Gesture.IsEnableMultiTouchMode = ToggleSwitchEnableMultiTouchMode.IsOn;
-
-            // 如果启用多指书写模式，强制禁用所有双指手势
-            if (ToggleSwitchEnableMultiTouchMode.IsOn)
-            {
-                // 强制关闭所有双指手势设置
-                Settings.Gesture.IsEnableTwoFingerTranslate = false;
-                Settings.Gesture.IsEnableTwoFingerZoom = false;
-                Settings.Gesture.IsEnableTwoFingerRotation = false;
-
-                // 更新UI开关状态
-                if (ToggleSwitchEnableTwoFingerTranslate != null)
-                    ToggleSwitchEnableTwoFingerTranslate.IsOn = false;
-                if (ToggleSwitchEnableTwoFingerZoom != null)
-                    ToggleSwitchEnableTwoFingerZoom.IsOn = false;
-                if (ToggleSwitchEnableTwoFingerRotation != null)
-                    ToggleSwitchEnableTwoFingerRotation.IsOn = false;
-
-                // 更新设置窗口中的开关状态
-                if (BoardToggleSwitchEnableTwoFingerTranslate != null)
-                    BoardToggleSwitchEnableTwoFingerTranslate.IsOn = false;
-                if (BoardToggleSwitchEnableTwoFingerZoom != null)
-                    BoardToggleSwitchEnableTwoFingerZoom.IsOn = false;
-                if (BoardToggleSwitchEnableTwoFingerRotation != null)
-                    BoardToggleSwitchEnableTwoFingerRotation.IsOn = false;
-            }
-
-            CheckEnableTwoFingerGestureBtnColorPrompt();
-            SaveSettingsToFile();
+            catch { }
         }
 
         private void ToggleSwitchEnableTwoFingerTranslate_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-
-            // 如果多指书写模式启用，强制禁用双指手势
-            if (ToggleSwitchEnableMultiTouchMode.IsOn)
+            try
             {
-                ToggleSwitchEnableTwoFingerTranslate.IsOn = false;
-                BoardToggleSwitchEnableTwoFingerTranslate.IsOn = false;
-                Settings.Gesture.IsEnableTwoFingerTranslate = false;
-                CheckEnableTwoFingerGestureBtnColorPrompt();
+                Settings.Gesture.IsEnableTwoFingerTranslate = true;
                 SaveSettingsToFile();
-                return;
             }
+            catch { }
+        }
 
-            if (sender == ToggleSwitchEnableTwoFingerTranslate)
-                BoardToggleSwitchEnableTwoFingerTranslate.IsOn = ToggleSwitchEnableTwoFingerTranslate.IsOn;
-            else
-                ToggleSwitchEnableTwoFingerTranslate.IsOn = BoardToggleSwitchEnableTwoFingerTranslate.IsOn;
-            Settings.Gesture.IsEnableTwoFingerTranslate = ToggleSwitchEnableTwoFingerTranslate.IsOn;
-            CheckEnableTwoFingerGestureBtnColorPrompt();
-            SaveSettingsToFile();
+        private void ToggleSwitchEnableMultiTouchMode_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            try
+            {
+                Settings.Gesture.IsEnableMultiTouchMode = true;
+                SaveSettingsToFile();
+            }
+            catch { }
         }
 
         private void ToggleSwitchEnableTwoFingerRotation_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-
-            // 如果多指书写模式启用，强制禁用双指手势
-            if (ToggleSwitchEnableMultiTouchMode.IsOn)
+            try
             {
-                ToggleSwitchEnableTwoFingerRotation.IsOn = false;
-                BoardToggleSwitchEnableTwoFingerRotation.IsOn = false;
-                Settings.Gesture.IsEnableTwoFingerRotation = false;
-                CheckEnableTwoFingerGestureBtnColorPrompt();
+                Settings.Gesture.IsEnableTwoFingerRotation = true;
                 SaveSettingsToFile();
-                return;
             }
-
-            if (sender == ToggleSwitchEnableTwoFingerRotation)
-                BoardToggleSwitchEnableTwoFingerRotation.IsOn = ToggleSwitchEnableTwoFingerRotation.IsOn;
-            else
-                ToggleSwitchEnableTwoFingerRotation.IsOn = BoardToggleSwitchEnableTwoFingerRotation.IsOn;
-            Settings.Gesture.IsEnableTwoFingerRotation = ToggleSwitchEnableTwoFingerRotation.IsOn;
-            Settings.Gesture.IsEnableTwoFingerRotationOnSelection = ToggleSwitchEnableTwoFingerRotationOnSelection.IsOn;
-            CheckEnableTwoFingerGestureBtnColorPrompt();
-            SaveSettingsToFile();
+            catch { }
         }
 
         private void ToggleSwitchEnableTwoFingerGestureInPresentationMode_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.PowerPointSettings.IsEnableTwoFingerGestureInPresentationMode =
-                ToggleSwitchEnableTwoFingerGestureInPresentationMode.IsOn;
+            Settings.PowerPointSettings.IsEnableTwoFingerGestureInPresentationMode = true;
             SaveSettingsToFile();
         }
 
@@ -3082,9 +2534,6 @@ namespace Ink_Canvas
         private void ToggleSwitchIsSpecialScreen_OnToggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Advanced.IsSpecialScreen = ToggleSwitchIsSpecialScreen.IsOn;
-            TouchMultiplierSlider.Visibility =
-                ToggleSwitchIsSpecialScreen.IsOn ? Visibility.Visible : Visibility.Collapsed;
             SaveSettingsToFile();
         }
 
@@ -3092,8 +2541,8 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            bool newState = ToggleSwitchIsEnableUriScheme.IsOn;
             bool success = false;
+            var newState = (sender as ToggleSwitch)?.IsOn ?? false;
 
             try
             {
@@ -3135,7 +2584,6 @@ namespace Ink_Canvas
             {
                 // 回滚 UI 状态
                 isLoaded = false;
-                ToggleSwitchIsEnableUriScheme.IsOn = !newState;
                 isLoaded = true;
 
                 ShowNotification("设置外部协议失败，请检查权限或日志");
@@ -3154,66 +2602,48 @@ namespace Ink_Canvas
             var args = e.GetTouchPoint(null).Bounds;
             double value;
             if (!Settings.Advanced.IsQuadIR) value = args.Width;
-            else value = Math.Sqrt(args.Width * args.Height); //四边红外
 
-            TextBlockShowCalculatedMultiplier.Text = (5 / (value * 1.1)).ToString();
         }
 
         private void ToggleSwitchIsEnableFullScreenHelper_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Advanced.IsEnableFullScreenHelper = ToggleSwitchIsEnableFullScreenHelper.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchIsEnableAvoidFullScreenHelper_OnToggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Advanced.IsEnableAvoidFullScreenHelper = ToggleSwitchIsEnableAvoidFullScreenHelper.IsOn;
             SaveSettingsToFile();
-            if (ToggleSwitchIsEnableAvoidFullScreenHelper.IsOn)
-            {
-                AvoidFullScreenHelper.StartAvoidFullScreen(this);
-            }
-            else
-            {
-                AvoidFullScreenHelper.StopAvoidFullScreen(this);
-            }
         }
 
         private void ToggleSwitchIsEnableEdgeGestureUtil_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Advanced.IsEnableEdgeGestureUtil = ToggleSwitchIsEnableEdgeGestureUtil.IsOn;
-            if (OSVersion.GetOperatingSystem() >= OperatingSystem.Windows10) EdgeGestureUtil.DisableEdgeGestures(new WindowInteropHelper(this).Handle, ToggleSwitchIsEnableEdgeGestureUtil.IsOn);
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchIsEnableForceFullScreen_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Advanced.IsEnableForceFullScreen = ToggleSwitchIsEnableForceFullScreen.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchIsEnableDPIChangeDetection_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Advanced.IsEnableDPIChangeDetection = ToggleSwitchIsEnableDPIChangeDetection.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchIsEnableResolutionChangeDetection_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Advanced.IsEnableResolutionChangeDetection = ToggleSwitchIsEnableResolutionChangeDetection.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchEraserBindTouchMultiplier_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Advanced.EraserBindTouchMultiplier = ToggleSwitchEraserBindTouchMultiplier.IsOn;
             SaveSettingsToFile();
         }
 
@@ -3224,7 +2654,6 @@ namespace Ink_Canvas
 
             if (Settings.Startup.IsEnableNibMode)
                 BoundsWidth = Settings.Advanced.NibModeBoundsWidth;
-            else
                 BoundsWidth = Settings.Advanced.FingerModeBoundsWidth;
 
             SaveSettingsToFile();
@@ -3237,7 +2666,6 @@ namespace Ink_Canvas
 
             if (Settings.Startup.IsEnableNibMode)
                 BoundsWidth = Settings.Advanced.NibModeBoundsWidth;
-            else
                 BoundsWidth = Settings.Advanced.FingerModeBoundsWidth;
 
             SaveSettingsToFile();
@@ -3246,51 +2674,45 @@ namespace Ink_Canvas
         private void ToggleSwitchIsQuadIR_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Advanced.IsQuadIR = ToggleSwitchIsQuadIR.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchIsLogEnabled_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Advanced.IsLogEnabled = ToggleSwitchIsLogEnabled.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchIsSaveLogByDate_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Advanced.IsSaveLogByDate = ToggleSwitchIsSaveLogByDate.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchIsSecondConfimeWhenShutdownApp_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Advanced.IsSecondConfirmWhenShutdownApp = ToggleSwitchIsSecondConfimeWhenShutdownApp.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchIsAutoBackupBeforeUpdate_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Advanced.IsAutoBackupBeforeUpdate = ToggleSwitchIsAutoBackupBeforeUpdate.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchIsAutoBackupEnabled_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Advanced.IsAutoBackupEnabled = ToggleSwitchIsAutoBackupEnabled.IsOn;
             SaveSettingsToFile();
         }
 
         private void ComboBoxAutoBackupInterval_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!isLoaded) return;
-            if (ComboBoxAutoBackupInterval.SelectedItem is ComboBoxItem selectedItem && selectedItem.Tag != null)
+            var selectedItem = (sender as ComboBox)?.SelectedItem as ComboBoxItem;
             {
-                if (int.TryParse(selectedItem.Tag.ToString(), out int interval))
+                if (selectedItem != null && selectedItem.Tag != null && int.TryParse(selectedItem.Tag.ToString(), out int interval))
                 {
                     Settings.Advanced.AutoBackupIntervalDays = interval;
                     SaveSettingsToFile();
@@ -3405,30 +2827,10 @@ namespace Ink_Canvas
         {
             try
             {
-                if (ComboBoxConfigProfile == null) return;
                 _isRefreshingConfigProfileList = true;
                 try
                 {
                     var names = ConfigProfileManager.ListProfileNames();
-                    ComboBoxConfigProfile.ItemsSource = names;
-                    if (names.Count == 0)
-                    {
-                        ComboBoxConfigProfile.SelectedItem = null;
-                    }
-                    else if (_lastAppliedProfileName != null && names.Contains(_lastAppliedProfileName))
-                    {
-                        ComboBoxConfigProfile.SelectedItem = _lastAppliedProfileName;
-                    }
-                    else
-                    {
-                        var selected = ComboBoxConfigProfile.SelectedItem as string;
-                        if (selected != null && names.Contains(selected))
-                            ComboBoxConfigProfile.SelectedItem = selected;
-                        else
-                            ComboBoxConfigProfile.SelectedIndex = 0;
-                    }
-                    if (BtnDeleteConfigProfile != null)
-                        BtnDeleteConfigProfile.IsEnabled = ComboBoxConfigProfile.SelectedItem != null;
                 }
                 finally
                 {
@@ -3443,10 +2845,8 @@ namespace Ink_Canvas
 
         private void ComboBoxConfigProfile_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (BtnDeleteConfigProfile != null)
-                BtnDeleteConfigProfile.IsEnabled = ComboBoxConfigProfile?.SelectedItem != null;
             if (!isLoaded || _isRefreshingConfigProfileList) return;
-            var name = ComboBoxConfigProfile?.SelectedItem as string;
+            var name = ((sender as ComboBox)?.SelectedItem as ComboBoxItem)?.Content?.ToString();
             if (string.IsNullOrEmpty(name)) return;
             try
             {
@@ -3518,37 +2918,11 @@ namespace Ink_Canvas
         private void BtnDeleteConfigProfile_Click(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            var name = ComboBoxConfigProfile?.SelectedItem as string;
-            if (string.IsNullOrEmpty(name))
-            {
-                MessageBox.Show("请先选择要删除的配置文件。", "配置文件", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
             try
             {
-                if (MessageBox.Show($"确定要删除配置文件「{name}」吗？", "确认删除", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
-                    return;
-                if (ConfigProfileManager.DeleteProfile(name))
-                {
-                    RefreshConfigProfileList();
-                    var nextName = ComboBoxConfigProfile?.SelectedItem as string;
-                    if (!string.IsNullOrEmpty(nextName) && ConfigProfileManager.ApplyProfile(nextName))
-                    {
-                        _lastAppliedProfileName = nextName;
-                        ReloadSettingsFromFile();
-                        ShowNotification($"已删除方案「{name}」，已切换至「{nextName}」");
-                    }
-                    else
-                        ShowNotification($"已删除方案：{name}");
-                }
-                else
-                    MessageBox.Show("删除配置文件失败，请查看日志。", "配置文件", MessageBoxButton.OK, MessageBoxImage.Warning);
+                RefreshConfigProfileList();
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"删除配置文件失败: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show($"删除配置文件失败: {ex.Message}", "配置文件", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            catch { }
         }
 
         #endregion
@@ -3888,7 +3262,6 @@ namespace Ink_Canvas
         private void CheckBoxUseLegacyFloatingBarUI_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.UseLegacyFloatingBarUI = CheckBoxUseLegacyFloatingBarUI.IsChecked ?? false;
             UpdateFloatingBarIcons();
             SaveSettingsToFile();
         }
@@ -3896,7 +3269,6 @@ namespace Ink_Canvas
         private void CheckBoxUseLegacyFloatingBarUI_Unchecked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.UseLegacyFloatingBarUI = CheckBoxUseLegacyFloatingBarUI.IsChecked ?? false;
             UpdateFloatingBarIcons();
             SaveSettingsToFile();
         }
@@ -3904,7 +3276,6 @@ namespace Ink_Canvas
         private void CheckBoxShowShapeButton_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowShapeButton = CheckBoxShowShapeButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
@@ -3912,7 +3283,6 @@ namespace Ink_Canvas
         private void CheckBoxShowShapeButton_Unchecked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowShapeButton = CheckBoxShowShapeButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
@@ -3920,7 +3290,6 @@ namespace Ink_Canvas
         private void CheckBoxShowUndoButton_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowUndoButton = CheckBoxShowUndoButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
@@ -3928,7 +3297,6 @@ namespace Ink_Canvas
         private void CheckBoxShowUndoButton_Unchecked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowUndoButton = CheckBoxShowUndoButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
@@ -3936,7 +3304,6 @@ namespace Ink_Canvas
         private void CheckBoxShowRedoButton_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowRedoButton = CheckBoxShowRedoButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
@@ -3944,7 +3311,6 @@ namespace Ink_Canvas
         private void CheckBoxShowRedoButton_Unchecked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowRedoButton = CheckBoxShowRedoButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
@@ -3952,7 +3318,6 @@ namespace Ink_Canvas
         private void CheckBoxShowClearButton_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowClearButton = CheckBoxShowClearButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
@@ -3960,7 +3325,6 @@ namespace Ink_Canvas
         private void CheckBoxShowClearButton_Unchecked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowClearButton = CheckBoxShowClearButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
@@ -3968,7 +3332,6 @@ namespace Ink_Canvas
         private void CheckBoxShowWhiteboardButton_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowWhiteboardButton = CheckBoxShowWhiteboardButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
@@ -3976,7 +3339,6 @@ namespace Ink_Canvas
         private void CheckBoxShowWhiteboardButton_Unchecked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowWhiteboardButton = CheckBoxShowWhiteboardButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
@@ -3984,7 +3346,6 @@ namespace Ink_Canvas
         private void CheckBoxShowLassoSelectButton_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowLassoSelectButton = CheckBoxShowLassoSelectButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
@@ -3992,7 +3353,6 @@ namespace Ink_Canvas
         private void CheckBoxShowLassoSelectButton_Unchecked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowLassoSelectButton = CheckBoxShowLassoSelectButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
@@ -4000,7 +3360,6 @@ namespace Ink_Canvas
         private void CheckBoxShowClearAndMouseButton_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowClearAndMouseButton = CheckBoxShowClearAndMouseButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
@@ -4008,7 +3367,6 @@ namespace Ink_Canvas
         private void CheckBoxShowClearAndMouseButton_Unchecked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowClearAndMouseButton = CheckBoxShowClearAndMouseButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
@@ -4016,7 +3374,6 @@ namespace Ink_Canvas
         private void CheckBoxShowHideButton_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowHideButton = CheckBoxShowHideButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
@@ -4024,7 +3381,6 @@ namespace Ink_Canvas
         private void CheckBoxShowHideButton_Unchecked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowHideButton = CheckBoxShowHideButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
@@ -4032,7 +3388,6 @@ namespace Ink_Canvas
         private void CheckBoxShowQuickColorPalette_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowQuickColorPalette = CheckBoxShowQuickColorPalette.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
@@ -4040,7 +3395,6 @@ namespace Ink_Canvas
         private void CheckBoxShowQuickColorPalette_Unchecked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowQuickColorPalette = CheckBoxShowQuickColorPalette.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
@@ -4048,7 +3402,6 @@ namespace Ink_Canvas
         private void ComboBoxQuickColorPaletteDisplayMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.QuickColorPaletteDisplayMode = ComboBoxQuickColorPaletteDisplayMode.SelectedIndex;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
@@ -4056,7 +3409,6 @@ namespace Ink_Canvas
         private void ComboBoxEraserDisplayOption_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.EraserDisplayOption = ComboBoxEraserDisplayOption.SelectedIndex;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
@@ -4123,7 +3475,6 @@ namespace Ink_Canvas
                     {
                         if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
                             ViewboxFloatingBarMarginAnimation(60);
-                        else
                         {
                             // 根据显示模式调整动画参数
                             if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
@@ -4330,7 +3681,6 @@ namespace Ink_Canvas
         private void ToggleSwitchEnableWppProcessKill_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.PowerPointSettings.EnableWppProcessKill = ToggleSwitchEnableWppProcessKill.IsOn;
             SaveSettingsToFile();
         }
 
@@ -4339,35 +3689,30 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoFoldAfterPPTSlideShow_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoFoldAfterPPTSlideShow = ToggleSwitchAutoFoldAfterPPTSlideShow.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchKeepFoldAfterSoftwareExit_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.KeepFoldAfterSoftwareExit = ToggleSwitchKeepFoldAfterSoftwareExit.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchAlwaysGoToFirstPageOnReenter_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.PowerPointSettings.IsAlwaysGoToFirstPageOnReenter = ToggleSwitchAlwaysGoToFirstPageOnReenter.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchAutoEnterAnnotationAfterKillHite_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Automation.IsAutoEnterAnnotationAfterKillHite = ToggleSwitchAutoEnterAnnotationAfterKillHite.IsOn;
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchEnablePalmEraser_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Canvas.EnablePalmEraser = ToggleSwitchEnablePalmEraser.IsOn;
             SaveSettingsToFile();
         }
 
@@ -4376,7 +3721,6 @@ namespace Ink_Canvas
         private void PPTButtonLBPositionValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.PowerPointSettings.PPTLBButtonPosition = (int)PPTButtonLBPositionValueSlider.Value;
             UpdatePPTBtnSlidersStatus();
             UpdatePPTUIManagerSettings();
             SliderDelayAction.DebounceAction(2000, null, SaveSettingsToFile);
@@ -4386,7 +3730,6 @@ namespace Ink_Canvas
         private void PPTButtonRBPositionValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.PowerPointSettings.PPTRBButtonPosition = (int)PPTButtonRBPositionValueSlider.Value;
             UpdatePPTBtnSlidersStatus();
             UpdatePPTUIManagerSettings();
             SliderDelayAction.DebounceAction(2000, null, SaveSettingsToFile);
@@ -4396,9 +3739,7 @@ namespace Ink_Canvas
         private void PPTBtnLBPlusBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTButtonLBPositionValueSlider.Value++;
             UpdatePPTBtnSlidersStatus();
-            Settings.PowerPointSettings.PPTLBButtonPosition = (int)PPTButtonLBPositionValueSlider.Value;
             SaveSettingsToFile();
             UpdatePPTBtnPreview();
         }
@@ -4406,9 +3747,7 @@ namespace Ink_Canvas
         private void PPTBtnLBMinusBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTButtonLBPositionValueSlider.Value--;
             UpdatePPTBtnSlidersStatus();
-            Settings.PowerPointSettings.PPTLBButtonPosition = (int)PPTButtonLBPositionValueSlider.Value;
             SaveSettingsToFile();
             UpdatePPTBtnPreview();
         }
@@ -4416,9 +3755,7 @@ namespace Ink_Canvas
         private void PPTBtnLBSyncBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTButtonRBPositionValueSlider.Value = PPTButtonLBPositionValueSlider.Value;
             UpdatePPTBtnSlidersStatus();
-            Settings.PowerPointSettings.PPTRBButtonPosition = (int)PPTButtonLBPositionValueSlider.Value;
             SaveSettingsToFile();
             UpdatePPTBtnPreview();
         }
@@ -4426,7 +3763,6 @@ namespace Ink_Canvas
         private void PPTBtnLBResetBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTButtonLBPositionValueSlider.Value = 0;
             UpdatePPTBtnSlidersStatus();
             Settings.PowerPointSettings.PPTLBButtonPosition = 0;
             SaveSettingsToFile();
@@ -4436,9 +3772,7 @@ namespace Ink_Canvas
         private void PPTBtnRBPlusBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTButtonRBPositionValueSlider.Value++;
             UpdatePPTBtnSlidersStatus();
-            Settings.PowerPointSettings.PPTRBButtonPosition = (int)PPTButtonRBPositionValueSlider.Value;
             SaveSettingsToFile();
             UpdatePPTBtnPreview();
         }
@@ -4446,9 +3780,7 @@ namespace Ink_Canvas
         private void PPTBtnRBMinusBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTButtonRBPositionValueSlider.Value--;
             UpdatePPTBtnSlidersStatus();
-            Settings.PowerPointSettings.PPTRBButtonPosition = (int)PPTButtonRBPositionValueSlider.Value;
             SaveSettingsToFile();
             UpdatePPTBtnPreview();
         }
@@ -4456,9 +3788,7 @@ namespace Ink_Canvas
         private void PPTBtnRBSyncBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTButtonLBPositionValueSlider.Value = PPTButtonRBPositionValueSlider.Value;
             UpdatePPTBtnSlidersStatus();
-            Settings.PowerPointSettings.PPTLBButtonPosition = (int)PPTButtonRBPositionValueSlider.Value;
             SaveSettingsToFile();
             UpdatePPTBtnPreview();
         }
@@ -4466,7 +3796,6 @@ namespace Ink_Canvas
         private void PPTBtnRBResetBtn_Clicked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            PPTButtonRBPositionValueSlider.Value = 0;
             Settings.PowerPointSettings.PPTRBButtonPosition = 0;
             SaveSettingsToFile();
             UpdatePPTBtnPreview();
@@ -4477,7 +3806,6 @@ namespace Ink_Canvas
         private void ComboBoxPalmEraserSensitivity_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Canvas.PalmEraserSensitivity = ComboBoxPalmEraserSensitivity.SelectedIndex;
             SaveSettingsToFile();
         }
 
@@ -4490,21 +3818,15 @@ namespace Ink_Canvas
                 bool success = FileAssociationManager.UnregisterFileAssociation();
                 if (success)
                 {
-                    TextBlockFileAssociationStatus.Text = "✓ 文件关联已成功取消";
-                    TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightGreen);
                     ShowNotification("文件关联已取消");
                 }
                 else
                 {
-                    TextBlockFileAssociationStatus.Text = "✗ 取消文件关联失败，可能需要管理员权限";
-                    TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightCoral);
                     ShowNotification("取消文件关联失败");
                 }
             }
             catch (Exception ex)
             {
-                TextBlockFileAssociationStatus.Text = $"✗ 取消文件关联时出错: {ex.Message}";
-                TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightCoral);
                 LogHelper.WriteLogToFile($"取消文件关联时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
@@ -4516,19 +3838,13 @@ namespace Ink_Canvas
                 bool isRegistered = FileAssociationManager.IsFileAssociationRegistered();
                 if (isRegistered)
                 {
-                    TextBlockFileAssociationStatus.Text = "✓ .icstk文件关联已注册";
-                    TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightGreen);
                 }
                 else
                 {
-                    TextBlockFileAssociationStatus.Text = "✗ .icstk文件关联未注册";
-                    TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightCoral);
                 }
             }
             catch (Exception ex)
             {
-                TextBlockFileAssociationStatus.Text = $"✗ 检查文件关联状态时出错: {ex.Message}";
-                TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightCoral);
                 LogHelper.WriteLogToFile($"检查文件关联状态时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
@@ -4540,21 +3856,15 @@ namespace Ink_Canvas
                 bool success = FileAssociationManager.RegisterFileAssociation();
                 if (success)
                 {
-                    TextBlockFileAssociationStatus.Text = "✓ 文件关联已成功注册";
-                    TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightGreen);
                     ShowNotification("文件关联已注册");
                 }
                 else
                 {
-                    TextBlockFileAssociationStatus.Text = "✗ 注册文件关联失败，可能需要管理员权限";
-                    TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightCoral);
                     ShowNotification("注册文件关联失败");
                 }
             }
             catch (Exception ex)
             {
-                TextBlockFileAssociationStatus.Text = $"✗ 注册文件关联时出错: {ex.Message}";
-                TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightCoral);
                 LogHelper.WriteLogToFile($"注册文件关联时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }

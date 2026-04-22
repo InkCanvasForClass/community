@@ -144,6 +144,51 @@
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Play}"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="AppearancePageItem"
+                            Content="外观"
+                            Tag="AppearancePage"
+                            ToolTipService.ToolTip="外观设置">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Color}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="GesturePageItem"
+                            Content="手势"
+                            Tag="GesturePage"
+                            ToolTipService.ToolTip="手势设置">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Touch}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="PPTPageItem"
+                            Content="PPT"
+                            Tag="PPTPage"
+                            ToolTipService.ToolTip="PPT设置">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Document}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="AdvancedPageItem"
+                            Content="高级"
+                            Tag="AdvancedPage"
+                            ToolTipService.ToolTip="高级设置">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="AutomationPageItem"
+                            Content="自动化"
+                            Tag="AutomationPage"
+                            ToolTipService.ToolTip="自动化设置">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Robot}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
 
