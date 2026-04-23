@@ -48,11 +48,14 @@
                             Icon="{x:Static ui:SegoeFluentIcons.QuietHours}"
                             SwitchName="ToggleSwitchIsAutoUpdateWithSilence"
                             ShowWhen="{Binding IsOn, ElementName=CardAutoUpdate}"
+                            d:Visibility="Visible"
                             Toggled="ToggleSwitchIsAutoUpdateWithSilence_Toggled" />
 
                     <ui:SettingsExpander x:Name="ExpanderSilentUpdateTime"
                             Header="{i18n:I18n Key=Startup_SilentUpdateTimePeriod}"
-                            Visibility="{Binding IsOn, ElementName=CardSilentUpdate, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            Visibility="{Binding IsOn, ElementName=CardSilentUpdate, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            d:Visibility="Visible"
+                            d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
                         </ui:SettingsExpander.HeaderIcon>

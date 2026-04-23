@@ -56,7 +56,8 @@
                     <!-- 窗口置顶 -->
                     <ui:SettingsExpander x:Name="ExpanderAlwaysOnTop"
                             Header="{i18n:I18n Key=Startup_TopMost}"
-                            Description="{i18n:I18n Key=Startup_TopMostHint}">
+                            Description="{i18n:I18n Key=Startup_TopMostHint}"
+                            d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}" />
                         </ui:SettingsExpander.HeaderIcon>

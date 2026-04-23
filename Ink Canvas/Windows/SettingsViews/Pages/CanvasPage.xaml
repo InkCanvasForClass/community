@@ -144,7 +144,8 @@
                             Toggled="ToggleSwitchEnableInkFade_Toggled" />
 
                     <ui:SettingsCard Header="{i18n:I18n Key=Canvas_InkFadeTime}"
-                            Visibility="{Binding IsOn, ElementName=CardEnableInkFade, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            Visibility="{Binding IsOn, ElementName=CardEnableInkFade, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            d:Visibility="Visible">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Stopwatch}" />
                         </ui:SettingsCard.HeaderIcon>
@@ -172,7 +173,9 @@
                             Toggled="ToggleSwitchBrushAutoRestore_Toggled" />
 
                     <ui:SettingsExpander Header="{i18n:I18n Key=Canvas_BrushAutoRestore}"
-                            Visibility="{Binding IsOn, ElementName=CardBrushAutoRestore, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            Visibility="{Binding IsOn, ElementName=CardBrushAutoRestore, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            d:Visibility="Visible"
+                            d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
                         </ui:SettingsExpander.HeaderIcon>
@@ -225,7 +228,8 @@
 
                     <ui:SettingsCard Header="{i18n:I18n Key=Canvas_SwitchBackDelay}"
                             Description="{i18n:I18n Key=Canvas_SwitchBackDelayHint}"
-                            Visibility="{Binding IsOn, ElementName=CardEnableEraserAutoSwitchBack, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            Visibility="{Binding IsOn, ElementName=CardEnableEraserAutoSwitchBack, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            d:Visibility="Visible">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
                             <Slider x:Name="EraserAutoSwitchBackDelaySlider" Width="150" Minimum="1" Maximum="60"
                                     Value="10" TickFrequency="1" IsSnapToTickEnabled="True"
@@ -264,6 +268,7 @@
                     <controls:LabeledSettingsCard x:Name="CardEnableInkToShapeNoFakePressureRectangle"
                             Header="{i18n:I18n Key=InkRecog_BlockRectFakePressure}"
                             ShowWhen="{Binding IsOn, ElementName=CardEnableInkToShape}"
+                            d:Visibility="Visible"
                             Icon="{x:Static ui:SegoeFluentIcons.RectangularClipping}"
                             SwitchName="ToggleSwitchEnableInkToShapeNoFakePressureRectangle"
                             Toggled="ToggleSwitchEnableInkToShapeNoFakePressureRectangle_Toggled" />
@@ -271,12 +276,15 @@
                     <controls:LabeledSettingsCard x:Name="CardEnableInkToShapeNoFakePressureTriangle"
                             Header="{i18n:I18n Key=InkRecog_BlockTriFakePressure}"
                             ShowWhen="{Binding IsOn, ElementName=CardEnableInkToShape}"
+                            d:Visibility="Visible"
                             Icon="{x:Static ui:SegoeFluentIcons.IncidentTriangle}"
                             SwitchName="ToggleSwitchEnableInkToShapeNoFakePressureTriangle"
                             Toggled="ToggleSwitchEnableInkToShapeNoFakePressureTriangle_Toggled" />
 
                     <ui:SettingsExpander Header="形状修正"
-                            Visibility="{Binding IsOn, ElementName=CardEnableInkToShape, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            Visibility="{Binding IsOn, ElementName=CardEnableInkToShape, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            d:Visibility="Visible"
+                            d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
                         </ui:SettingsExpander.HeaderIcon>
@@ -306,7 +314,8 @@
                             Toggled="ToggleSwitchAutoStraightenLine_Toggled" />
 
                     <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_LengthThreshold}"
-                            Visibility="{Binding IsOn, ElementName=CardAutoStraightenLine, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            Visibility="{Binding IsOn, ElementName=CardAutoStraightenLine, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            d:Visibility="Visible">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
                             <Slider x:Name="AutoStraightenLineThresholdSlider" Width="150" Minimum="30" Maximum="300"
                                     Value="80" TickFrequency="30" IsSnapToTickEnabled="True"
@@ -317,7 +326,8 @@
                     </ui:SettingsCard>
 
                     <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_Sensitivity}"
-                            Visibility="{Binding IsOn, ElementName=CardAutoStraightenLine, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            Visibility="{Binding IsOn, ElementName=CardAutoStraightenLine, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            d:Visibility="Visible">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
                             <Slider x:Name="LineStraightenSensitivitySlider" Width="150" Minimum="0.05" Maximum="2.0"
                                     Value="0.20" TickFrequency="0.05" IsSnapToTickEnabled="True"
@@ -331,6 +341,7 @@
                             Header="{i18n:I18n Key=InkRecog_HighPrecisionStraighten}"
                             Description="{i18n:I18n Key=InkRecog_HighPrecisionHint}"
                             ShowWhen="{Binding IsOn, ElementName=CardAutoStraightenLine}"
+                            d:Visibility="Visible"
                             Icon="{x:Static ui:SegoeFluentIcons.Bullseye}"
                             SwitchName="ToggleSwitchHighPrecisionLineStraighten"
                             Toggled="ToggleSwitchHighPrecisionLineStraighten_Toggled" />
@@ -343,7 +354,8 @@
 
                     <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_SnappingDistance}"
                             Description="{i18n:I18n Key=InkRecog_LineEndpointSnappingHint}"
-                            Visibility="{Binding IsOn, ElementName=CardLineEndpointSnapping, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            Visibility="{Binding IsOn, ElementName=CardLineEndpointSnapping, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            d:Visibility="Visible">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
                             <Slider x:Name="LineEndpointSnappingThresholdSlider" Width="150" Minimum="5" Maximum="50"
                                     Value="15" TickFrequency="5" IsSnapToTickEnabled="True"
