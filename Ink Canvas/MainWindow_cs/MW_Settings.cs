@@ -3065,18 +3065,6 @@ namespace Ink_Canvas
 
         #endregion
 
-        #region Ink To Shape
-
-
-
-
-
-
-
-
-
-        #endregion
-
         #region Advanced
 
         private void ToggleSwitchIsSpecialScreen_OnToggled(object sender, RoutedEventArgs e)

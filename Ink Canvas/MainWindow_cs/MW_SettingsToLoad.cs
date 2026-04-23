@@ -1015,22 +1015,15 @@ namespace Ink_Canvas
             }
 
             // ModeSettings
-            if (Settings.ModeSettings != null)
-            {
-                ToggleSwitchMode.IsOn = Settings.ModeSettings.IsPPTOnlyMode;
-
-                // 根据加载的配置状态执行相应的窗口显示/隐藏逻辑
-                if (isStartup && Settings.ModeSettings.IsPPTOnlyMode)
-                {
-                    // 启动时如果是仅PPT模式，隐藏主窗口
-                    Hide();
-                    LogHelper.WriteLogToFile("启动时检测到仅PPT模式，主窗口已隐藏", LogHelper.LogType.Event);
-                }
-            }
-            else
+            if (Settings.ModeSettings == null)
             {
                 Settings.ModeSettings = new ModeSettings();
-                ToggleSwitchMode.IsOn = false;
+            }
+
+            if (isStartup && Settings.ModeSettings.IsPPTOnlyMode)
+            {
+                Hide();
+                LogHelper.WriteLogToFile("启动时检测到仅PPT模式，主窗口已隐藏", LogHelper.LogType.Event);
             }
 
             // Automation

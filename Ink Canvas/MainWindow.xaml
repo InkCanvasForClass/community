@@ -626,16 +626,7 @@
                                         </ikw:SimpleStackPanel>
                                     </ikw:SimpleStackPanel>
                                 </Border>
-                                <GroupBox Name="GroupBoxModeSettings">
-                                    <GroupBox.Header>
-                                        <TextBlock Margin="0,12,0,0" Text="{i18n:I18n Key=Settings_Mode}" FontWeight="Bold" Foreground="#fafafa"
-                                                   FontSize="26" />
-                                    </GroupBox.Header>
-                                    <ikw:SimpleStackPanel Spacing="6" Margin="0,10,0,0">
-                                        <TextBlock TextWrapping="Wrap" Margin="0,0,0,10" Foreground="#fafafa" Text="{i18n:I18n Key=Settings_ModeDesc}"/>
-                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchMode" Label="{i18n:I18n Key=Mode_Normal}" OnContent="{i18n:I18n Key=Mode_PPTOnly}" OffContent="{i18n:I18n Key=Mode_PPTOnly}" IsOn="False" Toggled="ToggleSwitchMode_Toggled"/>
-                                    </ikw:SimpleStackPanel>
-                                </GroupBox>
+
                             
                                 <GroupBox Name="GroupBoxSettings">
                                     <GroupBox.Header>

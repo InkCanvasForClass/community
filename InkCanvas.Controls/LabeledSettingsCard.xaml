@@ -10,7 +10,6 @@
                          OnContent="{DynamicResource Common_On}"
                          OffContent="{DynamicResource Common_Off}"
                          IsOn="{Binding IsOn, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
-                         FontWeight="Bold"
                          Toggled="ToggleSwitch_Toggled"/>
     </ui:SettingsCard>
 </UserControl>

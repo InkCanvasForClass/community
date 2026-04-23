@@ -3755,42 +3755,7 @@ namespace Ink_Canvas
 
         #region 模式切换相关
 
-        /// <summary>
-        /// 模式切换开关事件处理
-        /// </summary>
-        private void ToggleSwitchMode_Toggled(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var toggle = sender as ToggleSwitch;
-                if (toggle != null)
-                {
-                    Settings.ModeSettings.IsPPTOnlyMode = toggle.IsOn;
 
-                    // 保存设置到文件
-                    SaveSettingsToFile();
-
-                    // 如果切换到仅PPT模式，立即隐藏主窗口
-                    if (Settings.ModeSettings.IsPPTOnlyMode)
-                    {
-                        Hide();
-                        LogHelper.WriteLogToFile("已切换到仅PPT模式，主窗口已隐藏", LogHelper.LogType.Event);
-                        EnsurePptOnlyVisibilityProbeTimer();
-                    }
-                    else
-                    {
-                        StopPptOnlyVisibilityProbeTimer();
-                        // 如果切换到正常模式，显示主窗口
-                        Show();
-                        LogHelper.WriteLogToFile("已切换到正常模式，主窗口已显示", LogHelper.LogType.Event);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"切换模式时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
 
         /// <summary>
         /// 检查是否应该显示主窗口（基于PPT模式和PPT放映状态）
