@@ -13,11 +13,8 @@
       Title="首页">
 
     <ScrollViewer Padding="59,0,59,0">
-        <!--  These styles can be referenced to create a consistent SettingsPage layout  -->
         <FrameworkElement.Resources>
-            <!--  Spacing between cards  -->
             <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
-            <!--  Style (inc. the correct spacing) of a section header  -->
             <Style x:Key="SettingsSectionHeaderTextBlockStyle"
                 BasedOn="{StaticResource BodyStrongTextBlockStyle}"
                 TargetType="TextBlock">
@@ -33,45 +30,27 @@
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                     Text="快速导航" />
 
-                <ui:SettingsCard
-                    Header="基本设置"
-                    Description="点击跳转到基本设置页面"
-                    IsClickEnabled="True"
-                    Click="SettingsCard_Basic_Click">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Home}"/>
-                    </ui:SettingsCard.HeaderIcon>
-                </ui:SettingsCard>
-
-                <ui:SettingsCard
-                    Header="页面 2"
-                    Description="点击跳转到页面 2"
-                    IsClickEnabled="True"
-                    Click="SettingsCard_Page2_Click">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:SymbolIcon Symbol="Document" />
-                    </ui:SettingsCard.HeaderIcon>
-                </ui:SettingsCard>
-
-                <ui:SettingsCard
-                    Header="设计设置"
-                    Description="点击跳转到设计设置页面"
-                    IsClickEnabled="True"
-                    Click="SettingsCard_Design_Click">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Design}"/>
-                    </ui:SettingsCard.HeaderIcon>
-                </ui:SettingsCard>
-
-                <ui:SettingsCard
-                    Header="外观设置"
-                    Description="点击跳转到外观设置页面"
-                    IsClickEnabled="True"
-                    Click="SettingsCard_Appearance_Click">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Color}"/>
-                    </ui:SettingsCard.HeaderIcon>
-                </ui:SettingsCard>
+                <ItemsControl x:Name="QuickNavItems">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <ikw:SimpleStackPanel Spacing="{StaticResource SettingsCardSpacing}" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <ui:SettingsCard
+                                Header="{Binding Header}"
+                                Description="{Binding Description}"
+                                IsClickEnabled="True"
+                                Click="QuickNavCard_Click"
+                                Tag="{Binding PageTag}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Glyph="{Binding IconGlyph}" />
+                                </ui:SettingsCard.HeaderIcon>
+                            </ui:SettingsCard>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </ikw:SimpleStackPanel>
         </Grid>
     </ScrollViewer>

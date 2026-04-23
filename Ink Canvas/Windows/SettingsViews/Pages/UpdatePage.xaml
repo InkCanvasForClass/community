@@ -63,13 +63,13 @@
                                         <ikw:SimpleStackPanel Orientation="Horizontal">
                                             <TextBlock Margin="0,0,10,0" VerticalAlignment="Center"
                                                 Text="{i18n:I18n Key=Startup_StartTime}" FontSize="14" />
-                                            <ComboBox x:Name="AutoUpdateWithSilenceStartTimeComboBox" Width="90"
+                                            <ComboBox x:Name="AutoUpdateWithSilenceStartTimeComboBox"
                                                 SelectionChanged="AutoUpdateWithSilenceStartTimeComboBox_SelectionChanged" />
                                         </ikw:SimpleStackPanel>
                                         <ikw:SimpleStackPanel Orientation="Horizontal">
                                             <TextBlock Margin="0,0,10,0" VerticalAlignment="Center"
                                                 Text="{i18n:I18n Key=Startup_EndTime}" FontSize="14" />
-                                            <ComboBox x:Name="AutoUpdateWithSilenceEndTimeComboBox" Width="90"
+                                            <ComboBox x:Name="AutoUpdateWithSilenceEndTimeComboBox"
                                                 SelectionChanged="AutoUpdateWithSilenceEndTimeComboBox_SelectionChanged" />
                                         </ikw:SimpleStackPanel>
                                     </ikw:SimpleStackPanel>
@@ -87,7 +87,7 @@
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.SyncFolder}" />
                         </ui:SettingsCard.HeaderIcon>
-                        <ComboBox x:Name="UpdateChannelSelector" Width="160"
+                        <ComboBox x:Name="UpdateChannelSelector"
                                   SelectionChanged="UpdateChannelSelector_SelectionChanged">
                             <ComboBoxItem Content="{i18n:I18n Key=Update_Release}" Tag="Release" />
                             <ComboBoxItem Content="{i18n:I18n Key=Update_Preview}" Tag="Preview" />
@@ -100,7 +100,7 @@
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}" />
                         </ui:SettingsCard.HeaderIcon>
-                        <ComboBox x:Name="UpdatePackageArchitectureSelector" Width="160"
+                        <ComboBox x:Name="UpdatePackageArchitectureSelector"
                                   SelectionChanged="UpdatePackageArchitectureSelector_SelectionChanged">
                             <ComboBoxItem Content="{i18n:I18n Key=Update_PackageArch_X86}" Tag="X86" />
                             <ComboBoxItem Content="{i18n:I18n Key=Update_PackageArch_X64}" Tag="X64" />

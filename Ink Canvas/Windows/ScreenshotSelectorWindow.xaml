@@ -1,4 +1,4 @@
-﻿<Window x:Class="Ink_Canvas.ScreenshotSelectorWindow"
+<Window x:Class="Ink_Canvas.ScreenshotSelectorWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="选择截图区域" 
@@ -258,7 +258,7 @@
                         <!-- 分辨率控制 -->
                         <StackPanel Orientation="Horizontal" Margin="4,0">
                             <TextBlock Text="分辨率:" Foreground="White" VerticalAlignment="Center" Margin="0,0,4,0" FontSize="12"/>
-                            <ComboBox Name="ResolutionComboBox" Width="120" Margin="2,0"
+                            <ComboBox Name="ResolutionComboBox" Margin="2,0"
                                      Background="#2d2d2d" Foreground="White" BorderBrush="#404040"
                                      SelectionChanged="ResolutionComboBox_SelectionChanged">
                                 <ComboBoxItem Content="640x480" Tag="640,480"/>

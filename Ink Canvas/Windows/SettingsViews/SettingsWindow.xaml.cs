@@ -481,5 +481,10 @@ namespace Ink_Canvas.Windows.SettingsViews
             }
         }
         #endregion
+
+        public NavigationView GetNavigationView()
+        {
+            return NavigationViewControl;
+        }
     }
 }

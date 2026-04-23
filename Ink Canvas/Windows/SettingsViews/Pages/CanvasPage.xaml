@@ -182,7 +182,7 @@
                                          TextChanged="BrushAutoRestoreTimesTextBox_TextChanged" />
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{i18n:I18n Key=Canvas_RestoreColor}">
-                                <ComboBox x:Name="ComboBoxBrushAutoRestoreColor" Width="200"
+                                <ComboBox x:Name="ComboBoxBrushAutoRestoreColor"
                                           SelectionChanged="ComboBoxBrushAutoRestoreColor_SelectionChanged">
                                     <ComboBoxItem Content="{i18n:I18n Key=Canvas_Color_Default}" Tag="#FFFF0000" />
                                     <ComboBoxItem Content="{i18n:I18n Key=Canvas_Color_Black}" Tag="#FF000000" />
@@ -246,7 +246,7 @@
 
                     <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_ShapeEngine}"
                             Description="{i18n:I18n Key=InkRecog_ShapeEngineHint}">
-                        <ComboBox x:Name="ComboBoxShapeRecognitionEngine" Width="160"
+                        <ComboBox x:Name="ComboBoxShapeRecognitionEngine"
                                   SelectionChanged="ComboBoxShapeRecognitionEngine_SelectionChanged">
                             <ComboBoxItem Content="{i18n:I18n Key=InkRecog_ShapeEngineAuto}" />
                             <ComboBoxItem Content="{i18n:I18n Key=InkRecog_ShapeEngineIACore}" />

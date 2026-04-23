@@ -106,7 +106,7 @@
                         </ikw:SimpleStackPanel>
                     </Border>
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8" Margin="0,16,0,0" HorizontalAlignment="Center">
-                        <ComboBox Name="ComboBoxCallerType" Width="120" Height="50" VerticalAlignment="Center"
+                        <ComboBox Name="ComboBoxCallerType" Height="50" VerticalAlignment="Center"
                                   IsEditable="False" IsReadOnly="True" SelectedIndex="0"
                                   Foreground="{DynamicResource RandWindowTextForeground}">
                             <ComboBoxItem>ClassIsland点名</ComboBoxItem>

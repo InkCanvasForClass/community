@@ -686,7 +686,7 @@
                                                              Visibility="{Binding ElementName=ToggleSwitchEnablePalmEraser, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">  
                                             <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Gesture_PalmSensitivity}" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,16,0" />
-                                            <ComboBox Name="ComboBoxPalmEraserSensitivity" Width="120" SelectionChanged="ComboBoxPalmEraserSensitivity_SelectionChanged">
+                                            <ComboBox Name="ComboBoxPalmEraserSensitivity" SelectionChanged="ComboBoxPalmEraserSensitivity_SelectionChanged">
                                                 <ComboBoxItem Content="{i18n:I18n Key=Gesture_PalmSensitivityLow}" />
                                                 <ComboBoxItem Content="{i18n:I18n Key=Gesture_PalmSensitivityMedium}" />
                                                 <ComboBoxItem Content="{i18n:I18n Key=Gesture_PalmSensitivityHigh}" />
@@ -2180,7 +2180,7 @@
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
                                             <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Backup_Interval}" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,16,0" />
-                                            <ComboBox x:Name="ComboBoxAutoBackupInterval" Width="100" Margin="0,0,16,0"
+                                            <ComboBox x:Name="ComboBoxAutoBackupInterval" Margin="0,0,16,0"
                                                       SelectionChanged="ComboBoxAutoBackupInterval_SelectionChanged">
                                                 <ComboBoxItem Content="{i18n:I18n Key=Backup_Interval_1Day}" Tag="1" />
                                                 <ComboBoxItem Content="{i18n:I18n Key=Backup_Interval_3Days}" Tag="3" />
@@ -2208,7 +2208,7 @@
                                             <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                                 <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=ConfigProfiles_Label}" VerticalAlignment="Center"
                                                            FontSize="14" Margin="0,0,8,0" />
-                                                <ComboBox x:Name="ComboBoxConfigProfile" Width="220" MinWidth="180"
+                                                <ComboBox x:Name="ComboBoxConfigProfile" MinWidth="180"
                                                           SelectionChanged="ComboBoxConfigProfile_SelectionChanged" />
                                             </ikw:SimpleStackPanel>
                                             <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
@@ -2857,7 +2857,7 @@
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                             <TextBlock Foreground="#a1a1aa" Text="{i18n:I18n Key=Storage_AutoSaveInterval}" VerticalAlignment="Center"
                                                        FontSize="12" Margin="0,0,16,0" />
-                                            <ComboBox Name="ComboBoxAutoSaveStrokesInterval" Width="120" 
+                                            <ComboBox Name="ComboBoxAutoSaveStrokesInterval"
                                                       SelectionChanged="ComboBoxAutoSaveStrokesInterval_SelectionChanged">
                                                 <ComboBoxItem Content="{i18n:I18n Key=Storage_AutoSaveInterval_1Min}" Tag="1" />
                                                 <ComboBoxItem Content="{i18n:I18n Key=Storage_AutoSaveInterval_3Min}" Tag="3" />
@@ -2996,7 +2996,7 @@
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,8,0,0">
                                             <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Random_ExternalTypeLabel}"
                                                        VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ComboBox Name="ComboBoxExternalCallerType" Width="150" Height="30" 
+                                            <ComboBox Name="ComboBoxExternalCallerType" Height="30"
                                                       IsEditable="False" IsReadOnly="True" SelectedIndex="0"
                                                       SelectionChanged="ComboBoxExternalCallerType_SelectionChanged">
                                                 <ComboBoxItem Content="{i18n:I18n Key=Random_ExternalType_ClassIsland}" />
