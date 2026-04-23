@@ -40,7 +40,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     CardClearCanvasAndClearTimeMachine.IsOn = settings.Canvas.ClearCanvasAndClearTimeMachine;
                     CardClearCanvasAlsoClearImages.IsOn = settings.Canvas.ClearCanvasAlsoClearImages;
                     CardCompressPicturesUploaded.IsOn = settings.Canvas.IsCompressPicturesUploaded;
-                    CardLaunchSeewoVideoShowcaseForWhiteboardBooth.IsOn = settings.Canvas.LaunchSeewoVideoShowcaseForWhiteboardBooth;
                     ComboBoxHyperbolaAsymptoteOption.SelectedIndex = (int)settings.Canvas.HyperbolaAsymptoteOption;
                     CardShowCircleCenter.IsOn = settings.Canvas.ShowCircleCenter;
                     int curveMode = 0;
@@ -173,13 +172,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.Canvas.IsCompressPicturesUploaded = CardCompressPicturesUploaded.IsOn;
-            SettingsManager.SaveSettingsToFile();
-        }
-
-        private void ToggleSwitchLaunchSeewoVideoShowcaseForWhiteboardBooth_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.LaunchSeewoVideoShowcaseForWhiteboardBooth = CardLaunchSeewoVideoShowcaseForWhiteboardBooth.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 
