@@ -54,7 +54,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="isBackupMain">为 true 时将导出结果保存到主备份槽（索引 0）；为 false 时保存到当前白板索引。</param>
         /// <remarks>
-        /// - 会提交画布上缺失于历史记录的 Image/MediaElement 和缺失的墨迹；
+        /// - 会提交画布上缺失于历史记录的 Image/MediaElement（但跳过 Tag 等于 VideoPresenterLiveFrameTag 的 Image）和缺失的墨迹；  
         /// - 导出后把结果存入 TimeMachineHistories 的相应索引，并保存当前多指书写模式到 savedMultiTouchModeStates；  
         /// - 导出后会清除时间机器的临时墨迹历史以释放内存。  
         /// - 此方法有副作用：修改 TimeMachineHistories、savedMultiTouchModeStates，并通过 timeMachine 的提交方法改变其内部历史状态。
@@ -85,6 +85,10 @@ namespace Ink_Canvas
             {
                 if (child is Image || child is MediaElement || child is PdfEmbeddedView)
                 {
+                    if (child is Image img && img.Tag is string tag && tag == VideoPresenterLiveFrameTag)
+                    {
+                        continue;
+                    }
                     if (!elementsInHistory.Contains(child))
                     {
                         timeMachine.CommitElementInsertHistory(child);
@@ -441,12 +445,14 @@ namespace Ink_Canvas
                 currentSelectedElement = null;
             }
 
+            VideoPresenter_BeforePageLeave();
             SaveStrokes();
 
             ClearStrokes(true);
             CurrentWhiteboardIndex--;
 
             RestoreStrokes();
+            VideoPresenter_OnPageChanged();
 
             UpdateIndexInfoDisplay();
         }
@@ -484,12 +490,14 @@ namespace Ink_Canvas
                 currentSelectedElement = null;
             }
 
+            VideoPresenter_BeforePageLeave();
             SaveStrokes();
 
             ClearStrokes(true);
             CurrentWhiteboardIndex++;
 
             RestoreStrokes();
+            VideoPresenter_OnPageChanged();
 
             UpdateIndexInfoDisplay();
         }
@@ -525,6 +533,7 @@ namespace Ink_Canvas
                 currentSelectedElement = null;
             }
 
+            VideoPresenter_BeforePageLeave();
             SaveStrokes();
             ClearStrokes(true);
 
@@ -540,9 +549,12 @@ namespace Ink_Canvas
                 }
             }
 
+            // 确保新页面的历史记录为空
             TimeMachineHistories[CurrentWhiteboardIndex] = null;
 
+            // 恢复新页面（这会清空画布，因为历史记录为null）
             RestoreStrokes();
+            VideoPresenter_OnPageChanged();
 
             UpdateIndexInfoDisplay();
 

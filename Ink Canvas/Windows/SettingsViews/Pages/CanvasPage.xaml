@@ -96,6 +96,13 @@
                             SwitchName="ToggleSwitchCompressPicturesUploaded"
                             Toggled="ToggleSwitchCompressPicturesUploaded_Toggled" />
 
+                    <controls:LabeledSettingsCard x:Name="CardLaunchSeewoVideoShowcaseForWhiteboardBooth"
+                            Header="{i18n:I18n Key=Canvas_LaunchSeewoVideoShowcaseForWhiteboardBooth}"
+                            Description="{i18n:I18n Key=Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Video}"
+                            SwitchName="ToggleSwitchLaunchSeewoVideoShowcaseForWhiteboardBooth"
+                            Toggled="ToggleSwitchLaunchSeewoVideoShowcaseForWhiteboardBooth_Toggled" />
+
                     <ui:SettingsCard Header="{i18n:I18n Key=Canvas_KeepHyperbolaAsymptote}"
                             Description="{i18n:I18n Key=Canvas_HyperbolaAsymptoteHint}">
                         <ui:SettingsCard.HeaderIcon>

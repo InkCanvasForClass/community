@@ -151,6 +151,10 @@ namespace Ink_Canvas
         [JsonProperty("enableVelocityBrushTip")]
         public bool EnableVelocityBrushTip { get; set; }
 
+        /// <summary>为 true 时，白板工具栏「展台」按钮启动希沃视频展台（sweclauncher），否则使用内置展台。</summary>
+        [JsonProperty("launchSeewoVideoShowcaseForWhiteboardBooth")]
+        public bool LaunchSeewoVideoShowcaseForWhiteboardBooth { get; set; } = false;
+
     }
 
     public enum OptionalOperation
