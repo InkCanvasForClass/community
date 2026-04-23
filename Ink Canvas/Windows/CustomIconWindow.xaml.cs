@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -41,6 +41,7 @@ namespace Ink_Canvas
                     MainWindow.Settings.Appearance.FloatingBarImg - 12 >= MainWindow.Settings.Appearance.CustomFloatingBarImgs.Count)
                 {
                     MainWindow.Settings.Appearance.FloatingBarImg = 0;
+                    mainWindow.ComboBoxFloatingBarImg.SelectedIndex = 0;
                     mainWindow.UpdateFloatingBarIcon();
                 }
 

@@ -116,41 +116,6 @@
                             SwitchName="ToggleSwitchFoldAtStartup"
                             Toggled="ToggleSwitchFoldAtStartup_Toggled" />
 
-                    <!-- 笔尖模式 -->
-                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=Startup_NibMode}" />
-
-                    <controls:LabeledSettingsCard x:Name="CardEnableNibMode"
-                            Header="{i18n:I18n Key=Startup_NibMode}"
-                            Description="{i18n:I18n Key=Startup_NibModeHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.PenTips}"
-                            SwitchName="ToggleSwitchEnableNibMode"
-                            Toggled="ToggleSwitchEnableNibMode_Toggled" />
-
-                    <!-- 崩溃处理 -->
-                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=Crash_Title}" />
-
-                    <ui:SettingsCard Header="{i18n:I18n Key=Crash_Title}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Warning}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <StackPanel Orientation="Horizontal">
-                            <RadioButton x:Name="RadioCrashSilentRestart"
-                                    GroupName="CrashAction"
-                                    Content="{i18n:I18n Key=Crash_SilentRestart}"
-                                    Checked="RadioCrashAction_Checked" />
-                            <RadioButton x:Name="RadioCrashNoAction"
-                                    GroupName="CrashAction"
-                                    Content="{i18n:I18n Key=Crash_NoAction}"
-                                    Checked="RadioCrashAction_Checked" />
-                        </StackPanel>
-                    </ui:SettingsCard>
-
-                    <TextBlock Text="{i18n:I18n Key=Crash_Hint}"
-                            Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                            TextWrapping="Wrap" Margin="0,0,0,4" />
-
                     <!-- 运行模式 -->
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{i18n:I18n Key=Settings_ModeDesc_1}" />

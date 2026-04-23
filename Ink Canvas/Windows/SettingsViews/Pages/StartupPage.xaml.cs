@@ -69,16 +69,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (settings.Startup != null)
                 {
                     CardFoldAtStartup.IsOn = settings.Startup.IsFoldAtStartup;
-                    CardEnableNibMode.IsOn = settings.Startup.IsEnableNibMode;
-
-                    if (settings.Startup.CrashAction == 0)
-                    {
-                        RadioCrashSilentRestart.IsChecked = true;
-                    }
-                    else
-                    {
-                        RadioCrashNoAction.IsChecked = true;
-                    }
                 }
 
                 if (settings.ModeSettings != null)
@@ -316,49 +306,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 Debug.WriteLine($"设置开机折叠时出错: {ex.Message}");
-            }
-        }
-
-        private void ToggleSwitchEnableNibMode_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-
-            try
-            {
-                bool newState = CardEnableNibMode.IsOn;
-                SettingsManager.Settings.Startup.IsEnableNibMode = newState;
-                SettingsManager.SaveSettingsToFile();
-
-                MainWindowSettingsHelper.InvokeToggleSwitchToggled("ToggleSwitchEnableNibMode", newState);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"设置笔尖模式时出错: {ex.Message}");
-            }
-        }
-
-        private void RadioCrashAction_Checked(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-
-            try
-            {
-                if (RadioCrashSilentRestart != null && RadioCrashSilentRestart.IsChecked == true)
-                {
-                    App.CrashAction = App.CrashActionType.SilentRestart;
-                    SettingsManager.Settings.Startup.CrashAction = 0;
-                }
-                else if (RadioCrashNoAction != null && RadioCrashNoAction.IsChecked == true)
-                {
-                    App.CrashAction = App.CrashActionType.NoAction;
-                    SettingsManager.Settings.Startup.CrashAction = 1;
-                }
-                SettingsManager.SaveSettingsToFile();
-                App.SyncCrashActionFromSettings();
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"设置崩溃后操作时出错: {ex.Message}");
             }
         }
 

@@ -284,6 +284,10 @@ namespace Ink_Canvas
         {
             try
             {
+                if (ComboBoxFloatingBarImg != null)
+                {
+                    ComboBoxFloatingBarImg.SelectedIndex = Settings.Appearance.FloatingBarImg;
+                }
             }
             catch (Exception)
             {

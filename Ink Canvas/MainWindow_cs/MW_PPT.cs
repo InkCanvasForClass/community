@@ -2021,12 +2021,14 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            Settings.PowerPointSettings.EnablePowerPointEnhancement = true;
+            Settings.PowerPointSettings.EnablePowerPointEnhancement = ToggleSwitchPowerPointEnhancement.IsOn;
 
             if (Settings.PowerPointSettings.EnablePowerPointEnhancement)
             {
                 Settings.PowerPointSettings.IsSupportWPS = false;
+                ToggleSwitchSupportWPS.IsOn = false;
 
+                // 更新PPT管理器的WPS支持设置
                 if (_pptManager != null)
                 {
                     _pptManager.IsSupportWPS = false;
@@ -2035,6 +2037,7 @@ namespace Ink_Canvas
 
             SaveSettingsToFile();
 
+            // 启动或停止PowerPoint进程守护
             if (Settings.PowerPointSettings.EnablePowerPointEnhancement)
             {
                 StartPowerPointProcessMonitoring();
@@ -2063,14 +2066,16 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            Settings.PowerPointSettings.IsSupportWPS = true;
+            Settings.PowerPointSettings.IsSupportWPS = ToggleSwitchSupportWPS.IsOn;
 
             if (Settings.PowerPointSettings.IsSupportWPS)
             {
                 if (!Settings.PowerPointSettings.PowerPointSupport)
                 {
                     Settings.PowerPointSettings.PowerPointSupport = true;
+                    ToggleSwitchSupportPowerPoint.IsOn = true;
 
+                    // 启动PPT监控
                     if (_pptManager == null)
                     {
                         InitializePPTManagers();
@@ -2081,6 +2086,7 @@ namespace Ink_Canvas
                 if (Settings.PowerPointSettings.EnablePowerPointEnhancement)
                 {
                     Settings.PowerPointSettings.EnablePowerPointEnhancement = false;
+                    ToggleSwitchPowerPointEnhancement.IsOn = false;
                     StopPowerPointProcessMonitoring();
                 }
             }
@@ -2099,7 +2105,7 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            Settings.PowerPointSettings.SkipAnimationsWhenGoNext = true;
+            Settings.PowerPointSettings.SkipAnimationsWhenGoNext = ToggleSwitchSkipAnimationsWhenGoNext.IsOn;
 
             if (_pptManager != null)
             {
