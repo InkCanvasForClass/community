@@ -1,25 +1,22 @@
 <ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.StartupPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
-      xmlns:helpers="clr-namespace:Ink_Canvas.Windows.SettingsViews.Helpers"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
-      xmlns:c="clr-namespace:Ink_Canvas.Converter"
       mc:Ignorable="d"
-      
+
       Title="启动">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
             <FrameworkElement.Resources>
             <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
-            <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <Style x:Key="SettingsSectionHeaderTextBlockStyle"
                 BasedOn="{StaticResource BodyStrongTextBlockStyle}"
                 TargetType="TextBlock">
@@ -32,70 +29,6 @@
                 <ikw:SimpleStackPanel MaxWidth="1000"
                     HorizontalAlignment="Stretch"
                     Spacing="{StaticResource SettingsCardSpacing}">
-                
-                    <!-- 窗口设置 -->
-                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="窗口设置" />
-                
-                    <!-- 窗口无焦点模式 -->
-                    <controls:LabeledSettingsCard x:Name="CardNoFocusMode"
-                            Header="{i18n:I18n Key=Startup_NoFocusMode}"
-                            Description="{i18n:I18n Key=Startup_NoFocusModeHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.View}"
-                            SwitchName="ToggleSwitchNoFocusMode"
-                            Toggled="ToggleSwitchNoFocusMode_Toggled" />
-                
-                    <!-- 窗口无边框模式 -->
-                    <controls:LabeledSettingsCard x:Name="CardWindowMode"
-                            Header="{i18n:I18n Key=Startup_NoBorderMode}"
-                            Description="{i18n:I18n Key=Startup_NoBorderModeHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.FullScreen}"
-                            SwitchName="ToggleSwitchWindowMode"
-                            Toggled="ToggleSwitchWindowMode_Toggled" />
-                
-                    <!-- 窗口置顶 -->
-                    <ui:SettingsExpander x:Name="ExpanderAlwaysOnTop"
-                            Header="{i18n:I18n Key=Startup_TopMost}"
-                            Description="{i18n:I18n Key=Startup_TopMostHint}"
-                            d:IsExpanded="True">
-                        <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}" />
-                        </ui:SettingsExpander.HeaderIcon>
-                        <ui:ToggleSwitch x:Name="ToggleSwitchAlwaysOnTop"
-                                OnContent="{DynamicResource Common_On}"
-                                OffContent="{DynamicResource Common_Off}"
-                                Toggled="ToggleSwitchAlwaysOnTop_Toggled" />
-                        <ui:SettingsExpander.ItemTemplate>
-                            <helpers:TopMostModeTemplateSelector>
-                                <helpers:TopMostModeTemplateSelector.SelectionTemplate>
-                                    <DataTemplate>
-                                        <ui:SettingsCard Header="{i18n:I18n Key=Startup_TopMostMode}">
-                                            <StackPanel Orientation="Horizontal">
-                                                <RadioButton Content="{i18n:I18n Key=Startup_TopMostMode_Normal}"
-                                                        GroupName="TopMostMode"
-                                                        Checked="RadioTopMostNormal_Checked"
-                                                        Loaded="RadioTopMostNormal_Loaded"
-                                                        Margin="0,0,16,0" />
-                                                <RadioButton Content="{i18n:I18n Key=Startup_TopMostMode_UIA}"
-                                                        GroupName="TopMostMode"
-                                                        Checked="RadioTopMostUIA_Checked"
-                                                        Loaded="RadioTopMostUIA_Loaded" />
-                                            </StackPanel>
-                                        </ui:SettingsCard>
-                                    </DataTemplate>
-                                </helpers:TopMostModeTemplateSelector.SelectionTemplate>
-                                <helpers:TopMostModeTemplateSelector.ButtonTemplate>
-                                    <DataTemplate>
-                                        <ui:SettingsCard Header="{Binding ButtonHeader}">
-                                            <Button Content="{Binding ButtonContent}"
-                                                    Click="BtnRestart_Click"
-                                                    Tag="{Binding RestartAsAdmin}" />
-                                        </ui:SettingsCard>
-                                    </DataTemplate>
-                                </helpers:TopMostModeTemplateSelector.ButtonTemplate>
-                            </helpers:TopMostModeTemplateSelector>
-                        </ui:SettingsExpander.ItemTemplate>
-                    </ui:SettingsExpander>
                 
                     <!-- 启动设置 -->
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"

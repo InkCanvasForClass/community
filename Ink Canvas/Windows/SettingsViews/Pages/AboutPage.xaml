@@ -65,7 +65,7 @@
                     </ui:SettingsCard>
 
                     <ui:SettingsExpander Header="{i18n:I18n Key=About_DeviceInfo}"
-                            d:IsExpanded="True">
+                            IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Devices}" />
                         </ui:SettingsExpander.HeaderIcon>
@@ -88,29 +88,6 @@
                             <ui:SettingsCard Header="">
                                 <Button x:Name="RefreshDeviceInfoButton" Content="{i18n:I18n Key=About_RefreshDeviceInfo}"
                                         Click="RefreshDeviceInfo_Click" />
-                            </ui:SettingsCard>
-                        </ui:SettingsExpander.Items>
-                    </ui:SettingsExpander>
-
-                    <ui:SettingsExpander Header="{i18n:I18n Key=About_PrivacyAndTelemetry}"
-                            d:IsExpanded="True">
-                        <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Shield}" />
-                        </ui:SettingsExpander.HeaderIcon>
-                        <ui:SettingsExpander.Items>
-                            <ui:SettingsCard ContentAlignment="Left">
-                                <CheckBox x:Name="CheckBoxTelemetryPrivacyAccepted"
-                                          Content="{i18n:I18n Key=About_PrivacyAgreement}"
-                                          Checked="CheckBoxTelemetryPrivacyAccepted_Checked"
-                                          Unchecked="CheckBoxTelemetryPrivacyAccepted_Checked" />
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="{i18n:I18n Key=About_TelemetryLabel}">
-                                <ComboBox x:Name="ComboBoxTelemetryUploadLevel"
-                                          SelectionChanged="ComboBoxTelemetryUploadLevel_SelectionChanged">
-                                    <ComboBoxItem Tag="0" Content="{i18n:I18n Key=About_Telemetry_Off}" />
-                                    <ComboBoxItem Tag="1" Content="{i18n:I18n Key=About_Telemetry_Basic}" />
-                                    <ComboBoxItem Tag="2" Content="{i18n:I18n Key=About_Telemetry_Optional}" />
-                                </ComboBox>
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>

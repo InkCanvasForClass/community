@@ -144,6 +144,37 @@
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Play}"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="PrivacyPageItem"
+                            Content="隐私"
+                            Tag="PrivacyPage"
+                            ToolTipService.ToolTip="隐私与遥测设置">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Shield}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                    </ui:NavigationViewItem.MenuItems>
+                </ui:NavigationViewItem>
+
+                <!-- 主界面 -->
+                <ui:NavigationViewItem
+                    x:Name="MainInterfaceItem"
+                    Content="主界面"
+                    Tag="MainInterfacePage"
+                    ToolTipService.ToolTip="主界面设置">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Desktop_20_Regular}" FontSize="20" Margin="-2"/>
+                    </ui:NavigationViewItem.Icon>
+                    <ui:NavigationViewItem.MenuItems>
+                        <ui:NavigationViewItem
+                            x:Name="WindowPageItem"
+                            Content="窗口"
+                            Tag="WindowPage"
+                            ToolTipService.ToolTip="窗口设置">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Window_20_Regular}" FontSize="20" Margin="-2"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
 

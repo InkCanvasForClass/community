@@ -174,8 +174,8 @@
 
                     <ui:SettingsExpander Header="{i18n:I18n Key=Canvas_BrushAutoRestore}"
                             Visibility="{Binding IsOn, ElementName=CardBrushAutoRestore, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            d:Visibility="Visible"
-                            d:IsExpanded="True">
+                            IsExpanded="{Binding IsOn, ElementName=CardBrushAutoRestore, Mode=OneWay}"
+                            d:Visibility="Visible">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
                         </ui:SettingsExpander.HeaderIcon>
@@ -283,8 +283,8 @@
 
                     <ui:SettingsExpander Header="形状修正"
                             Visibility="{Binding IsOn, ElementName=CardEnableInkToShape, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            d:Visibility="Visible"
-                            d:IsExpanded="True">
+                            IsExpanded="{Binding IsOn, ElementName=CardEnableInkToShape, Mode=OneWay}"
+                            d:Visibility="Visible">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
                         </ui:SettingsExpander.HeaderIcon>
