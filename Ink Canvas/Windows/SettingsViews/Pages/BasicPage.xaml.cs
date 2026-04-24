@@ -1,6 +1,9 @@
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using iNKORE.UI.WPF.Modern.Controls;
 using System.Collections.ObjectModel;
+using System.Reflection;
 using System.Windows;
+using System.Windows.Media;
 using SWC = System.Windows.Controls;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
@@ -11,6 +14,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         public string Description { get; set; }
         public string PageTag { get; set; }
         public string IconGlyph { get; set; }
+        public FontFamily IconFontFamily { get; set; }
     }
 
     public partial class BasicPage : SWC.Page
@@ -53,7 +57,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                                 string childTag = childItem.Tag as string;
                                 if (!string.IsNullOrEmpty(childTag))
                                 {
-                                    string glyph = ExtractIconGlyph(childItem);
+                                    (string glyph, FontFamily fontFamily) = ExtractIconInfo(childItem);
                                     string description = SWC.ToolTipService.GetToolTip(childItem) as string
                                         ?? $"点击跳转到{childItem.Content}";
 
@@ -62,7 +66,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                                         Header = childItem.Content?.ToString() ?? "",
                                         Description = description,
                                         PageTag = childTag,
-                                        IconGlyph = glyph
+                                        IconGlyph = glyph,
+                                        IconFontFamily = fontFamily
                                     });
                                 }
                             }
@@ -73,15 +78,39 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
         }
 
-        private string ExtractIconGlyph(NavigationViewItem navItem)
+        private (string glyph, FontFamily fontFamily) ExtractIconInfo(NavigationViewItem navItem)
         {
             if (navItem.Icon is FontIcon fontIcon)
-                return fontIcon.Glyph ?? "\uE713";
+            {
+                string glyph = fontIcon.Glyph ?? "\uE713";
+                FontFamily fontFamily = fontIcon.FontFamily ?? new FontFamily("Segoe Fluent Icons");
+
+                if (fontIcon.Icon != null)
+                {
+                    string iconStr = fontIcon.Icon.ToString();
+                    if (iconStr.Contains("_20_"))
+                    {
+                        string key24 = iconStr.Replace("_20_", "_24_");
+                        var field = typeof(FluentSystemIcons).GetField(key24, BindingFlags.Public | BindingFlags.Static);
+                        if (field != null)
+                        {
+                            var value = field.GetValue(null);
+                            if (value is FontIconData data24)
+                            {
+                                glyph = data24.Glyph ?? glyph;
+                                fontFamily = data24.FontFamily ?? fontFamily;
+                            }
+                        }
+                    }
+                }
+
+                return (glyph, fontFamily);
+            }
 
             if (navItem.Icon is SymbolIcon symbolIcon)
-                return char.ConvertFromUtf32((int)symbolIcon.Symbol);
+                return (char.ConvertFromUtf32((int)symbolIcon.Symbol), new FontFamily("Segoe Fluent Icons"));
 
-            return "\uE713";
+            return ("\uE713", new FontFamily("Segoe Fluent Icons"));
         }
 
         private void SubPageCard_Click(object sender, RoutedEventArgs e)

@@ -40,6 +40,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 {
                     CardNoFocusMode.IsOn = settings.Advanced.IsNoFocusMode;
                     CardWindowMode.IsOn = settings.Advanced.WindowMode;
+                    CardAvoidFullScreen.IsOn = settings.Advanced.IsEnableAvoidFullScreenHelper;
                     ToggleSwitchAlwaysOnTop.IsOn = settings.Advanced.IsAlwaysOnTop;
 
                     _topMostModeItems.Clear();
@@ -149,6 +150,35 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 Debug.WriteLine($"设置窗口无边框模式时出错: {ex.Message}");
+            }
+        }
+
+        private void ToggleSwitchAvoidFullScreen_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+
+            try
+            {
+                bool newState = CardAvoidFullScreen.IsOn;
+                SettingsManager.Settings.Advanced.IsEnableAvoidFullScreenHelper = newState;
+                SettingsManager.SaveSettingsToFile();
+
+                var window = Application.Current.MainWindow;
+                if (window != null)
+                {
+                    if (newState)
+                    {
+                        AvoidFullScreenHelper.StartAvoidFullScreen(window);
+                    }
+                    else
+                    {
+                        AvoidFullScreenHelper.StopAvoidFullScreen(window);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"设置避免全屏时出错: {ex.Message}");
             }
         }
 

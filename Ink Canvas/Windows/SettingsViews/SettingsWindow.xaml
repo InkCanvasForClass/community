@@ -189,6 +189,17 @@
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
+                <!-- 实验性选项 -->
+                <ui:NavigationViewItem
+                    x:Name="ExperimentalPageItem"
+                    Content="实验性选项"
+                    Tag="ExperimentalPage"
+                    ToolTipService.ToolTip="实验性选项">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Beaker_20_Regular}" FontSize="20" Margin="-2"/>
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
                 <!-- 画板设置 -->
                 <ui:NavigationViewItem
                     x:Name="CanvasPageItem"
@@ -235,6 +246,7 @@
             </ui:NavigationView.FooterMenuItems>
 
             <ui:Frame x:Name="rootFrame" Navigated="OnRootFrameNavigated" NavigationUIVisibility="Hidden" />
+            <!--我要玩原神-->
         </ui:NavigationView>
     </Grid>
 </Window>

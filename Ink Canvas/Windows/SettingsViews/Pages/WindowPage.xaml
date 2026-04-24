@@ -50,6 +50,13 @@
                             SwitchName="ToggleSwitchWindowMode"
                             Toggled="ToggleSwitchWindowMode_Toggled" />
 
+                    <controls:LabeledSettingsCard x:Name="CardAvoidFullScreen"
+                            Header="{i18n:I18n Key=Advanced_AvoidFullScreenHelper}"
+                            Description="{i18n:I18n Key=Advanced_AvoidFullScreenHelperHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Cancel}"
+                            SwitchName="ToggleSwitchAvoidFullScreen"
+                            Toggled="ToggleSwitchAvoidFullScreen_Toggled" />
+
                     <ui:SettingsExpander x:Name="ExpanderAlwaysOnTop"
                             Header="{i18n:I18n Key=Startup_TopMost}"
                             Description="{i18n:I18n Key=Startup_TopMostHint}"

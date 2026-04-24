@@ -45,7 +45,7 @@
                                 Click="SubPageCard_Click"
                                 Tag="{Binding PageTag}">
                                 <ui:SettingsCard.HeaderIcon>
-                                    <ui:FontIcon Glyph="{Binding IconGlyph}" />
+                                    <ui:FontIcon Glyph="{Binding IconGlyph}" FontFamily="{Binding IconFontFamily}" />
                                 </ui:SettingsCard.HeaderIcon>
                             </ui:SettingsCard>
                         </DataTemplate>

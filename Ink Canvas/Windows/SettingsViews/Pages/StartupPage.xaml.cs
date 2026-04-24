@@ -42,6 +42,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 {
                     CardPPTOnlyMode.IsOn = settings.ModeSettings.IsPPTOnlyMode;
                 }
+
+                CardExternalProtocol.IsOn = settings.Advanced.IsEnableUriScheme;
             }
             catch (Exception ex)
             {
@@ -92,6 +94,58 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 Debug.WriteLine($"设置开机折叠时出错: {ex.Message}");
+            }
+        }
+
+        private void ToggleSwitchExternalProtocol_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+
+            try
+            {
+                bool newState = CardExternalProtocol.IsOn;
+                bool success = false;
+
+                if (newState)
+                {
+                    if (!UriSchemeHelper.IsUriSchemeRegistered())
+                    {
+                        success = UriSchemeHelper.RegisterUriScheme();
+                    }
+                    else
+                    {
+                        success = true;
+                    }
+                }
+                else
+                {
+                    if (UriSchemeHelper.IsUriSchemeRegistered())
+                    {
+                        success = UriSchemeHelper.UnregisterUriScheme();
+                    }
+                    else
+                    {
+                        success = true;
+                    }
+                }
+
+                if (success)
+                {
+                    SettingsManager.Settings.Advanced.IsEnableUriScheme = newState;
+                    SettingsManager.SaveSettingsToFile();
+                }
+                else
+                {
+                    _isLoaded = false;
+                    CardExternalProtocol.IsOn = !newState;
+                    _isLoaded = true;
+
+                    LogHelper.WriteLogToFile("设置外部协议失败，请检查权限或日志", LogHelper.LogType.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"设置外部协议时出错: {ex.Message}");
             }
         }
 

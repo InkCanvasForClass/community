@@ -1023,6 +1023,12 @@
   <data name="Startup_FoldAtStartup" xml:space="preserve">
     <value>开机运行后收纳到侧边栏</value>
   </data>
+  <data name="Startup_ExternalProtocol" xml:space="preserve">
+    <value>外部协议调用 (icc://)</value>
+  </data>
+  <data name="Startup_ExternalProtocolHint" xml:space="preserve">
+    <value>通过 icc:// 协议从外部控制软件</value>
+  </data>
   <data name="Canvas_GroupTitle" xml:space="preserve">
     <value>画板和墨迹</value>
   </data>

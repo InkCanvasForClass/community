@@ -981,6 +981,12 @@
   <data name="Startup_FoldAtStartup" xml:space="preserve">
     <value>Dock to sidebar after startup</value>
   </data>
+  <data name="Startup_ExternalProtocol" xml:space="preserve">
+    <value>External protocol (icc://)</value>
+  </data>
+  <data name="Startup_ExternalProtocolHint" xml:space="preserve">
+    <value>Control via icc:// protocol</value>
+  </data>
   <data name="Canvas_GroupTitle" xml:space="preserve">
     <value>Canvas and ink</value>
   </data>

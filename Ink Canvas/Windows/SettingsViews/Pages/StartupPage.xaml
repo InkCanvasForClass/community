@@ -50,6 +50,14 @@
                             SwitchName="ToggleSwitchFoldAtStartup"
                             Toggled="ToggleSwitchFoldAtStartup_Toggled" />
 
+                    <!-- 外部协议调用 -->
+                    <controls:LabeledSettingsCard x:Name="CardExternalProtocol"
+                            Header="{i18n:I18n Key=Startup_ExternalProtocol}"
+                            Description="{i18n:I18n Key=Startup_ExternalProtocolHint}"
+                            Icon="{x:Static ui:FluentSystemIcons.Link_20_Regular}"
+                            SwitchName="ToggleSwitchExternalProtocol"
+                            Toggled="ToggleSwitchExternalProtocol_Toggled" />
+
                     <!-- 运行模式 -->
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{i18n:I18n Key=Settings_ModeDesc_1}" />

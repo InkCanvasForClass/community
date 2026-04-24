@@ -2885,7 +2885,7 @@ namespace Ink_Canvas
             Settings.Advanced.IsEnableEdgeGestureUtil = false;
             Settings.Advanced.EdgeGestureUtilOnlyAffectBlackboardMode = false;
             Settings.Advanced.IsEnableFullScreenHelper = false;
-            Settings.Advanced.IsEnableAvoidFullScreenHelper = false;
+            Settings.Advanced.IsEnableAvoidFullScreenHelper = true;
             Settings.Advanced.IsEnableForceFullScreen = false;
             Settings.Advanced.IsEnableDPIChangeDetection = false;
             Settings.Advanced.IsEnableResolutionChangeDetection = false;
@@ -3076,60 +3076,6 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
-        private void ToggleSwitchIsEnableUriScheme_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!isLoaded) return;
-
-            bool newState = ToggleSwitchIsEnableUriScheme.IsOn;
-            bool success = false;
-
-            try
-            {
-                if (newState)
-                {
-                    if (!UriSchemeHelper.IsUriSchemeRegistered())
-                    {
-                        success = UriSchemeHelper.RegisterUriScheme();
-                    }
-                    else
-                    {
-                        success = true;
-                    }
-                }
-                else
-                {
-                    if (UriSchemeHelper.IsUriSchemeRegistered())
-                    {
-                        success = UriSchemeHelper.UnregisterUriScheme();
-                    }
-                    else
-                    {
-                        success = true;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"切换URI Scheme状态失败: {ex.Message}", LogHelper.LogType.Error);
-                success = false;
-            }
-
-            if (success)
-            {
-                Settings.Advanced.IsEnableUriScheme = newState;
-                SaveSettingsToFile();
-            }
-            else
-            {
-                // 回滚 UI 状态
-                isLoaded = false;
-                ToggleSwitchIsEnableUriScheme.IsOn = !newState;
-                isLoaded = true;
-
-                ShowNotification("设置外部协议失败，请检查权限或日志");
-            }
-        }
-
         private void TouchMultiplierSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!isLoaded) return;
@@ -3145,57 +3091,6 @@ namespace Ink_Canvas
             else value = Math.Sqrt(args.Width * args.Height); //四边红外
 
             TextBlockShowCalculatedMultiplier.Text = (5 / (value * 1.1)).ToString();
-        }
-
-        private void ToggleSwitchIsEnableFullScreenHelper_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!isLoaded) return;
-            Settings.Advanced.IsEnableFullScreenHelper = ToggleSwitchIsEnableFullScreenHelper.IsOn;
-            SaveSettingsToFile();
-        }
-
-        private void ToggleSwitchIsEnableAvoidFullScreenHelper_OnToggled(object sender, RoutedEventArgs e)
-        {
-            if (!isLoaded) return;
-            Settings.Advanced.IsEnableAvoidFullScreenHelper = ToggleSwitchIsEnableAvoidFullScreenHelper.IsOn;
-            SaveSettingsToFile();
-            if (ToggleSwitchIsEnableAvoidFullScreenHelper.IsOn)
-            {
-                AvoidFullScreenHelper.StartAvoidFullScreen(this);
-            }
-            else
-            {
-                AvoidFullScreenHelper.StopAvoidFullScreen(this);
-            }
-        }
-
-        private void ToggleSwitchIsEnableEdgeGestureUtil_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!isLoaded) return;
-            Settings.Advanced.IsEnableEdgeGestureUtil = ToggleSwitchIsEnableEdgeGestureUtil.IsOn;
-            if (OSVersion.GetOperatingSystem() >= OperatingSystem.Windows10) EdgeGestureUtil.DisableEdgeGestures(new WindowInteropHelper(this).Handle, ToggleSwitchIsEnableEdgeGestureUtil.IsOn);
-            SaveSettingsToFile();
-        }
-
-        private void ToggleSwitchIsEnableForceFullScreen_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!isLoaded) return;
-            Settings.Advanced.IsEnableForceFullScreen = ToggleSwitchIsEnableForceFullScreen.IsOn;
-            SaveSettingsToFile();
-        }
-
-        private void ToggleSwitchIsEnableDPIChangeDetection_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!isLoaded) return;
-            Settings.Advanced.IsEnableDPIChangeDetection = ToggleSwitchIsEnableDPIChangeDetection.IsOn;
-            SaveSettingsToFile();
-        }
-
-        private void ToggleSwitchIsEnableResolutionChangeDetection_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!isLoaded) return;
-            Settings.Advanced.IsEnableResolutionChangeDetection = ToggleSwitchIsEnableResolutionChangeDetection.IsOn;
-            SaveSettingsToFile();
         }
 
         private void ToggleSwitchEraserBindTouchMultiplier_Toggled(object sender, RoutedEventArgs e)

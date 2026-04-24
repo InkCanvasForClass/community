@@ -703,7 +703,7 @@ namespace Ink_Canvas
         public bool IsSecondConfirmWhenShutdownApp { get; set; }
 
         [JsonProperty("isEnableAvoidFullScreenHelper")]
-        public bool IsEnableAvoidFullScreenHelper { get; set; }
+        public bool IsEnableAvoidFullScreenHelper { get; set; } = true;
 
         [JsonProperty("isAutoBackupBeforeUpdate")]
         public bool IsAutoBackupBeforeUpdate { get; set; } = true;
