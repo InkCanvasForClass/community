@@ -104,8 +104,12 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">执行路由事件参数</param>
-        private void KeyChangeToDrawTool(object sender, ExecutedRoutedEventArgs e)
+        private async void KeyChangeToDrawTool(object sender, ExecutedRoutedEventArgs e)
         {
+            if (isFloatingBarFolded)
+            {
+                await UnFoldFloatingBar(new object());
+            }
             PenIcon_Click(lastBorderMouseDownObject, null);
         }
 
@@ -150,15 +154,17 @@ namespace Ink_Canvas
         /// <param name="sender">发送者</param>
         /// <param name="e">执行路由事件参数</param>
         /// <remarks>仅当画布控件面板可见时生效，根据当前橡皮擦状态选择相应的橡皮擦模式</remarks>
-        private void KeyChangeToEraser(object sender, ExecutedRoutedEventArgs e)
+        private async void KeyChangeToEraser(object sender, ExecutedRoutedEventArgs e)
         {
-            if (StackPanelCanvasControls.Visibility == Visibility.Visible)
+            if (isFloatingBarFolded)
             {
-                if (Eraser_Icon.Background != null)
-                    EraserIconByStrokes_Click(lastBorderMouseDownObject, null);
-                else
-                    EraserIcon_Click(lastBorderMouseDownObject, null);
+                await UnFoldFloatingBar(new object());
             }
+
+            if (Eraser_Icon.Background != null)
+                EraserIconByStrokes_Click(lastBorderMouseDownObject, null);
+            else
+                EraserIcon_Click(lastBorderMouseDownObject, null);
         }
 
         /// <summary>
