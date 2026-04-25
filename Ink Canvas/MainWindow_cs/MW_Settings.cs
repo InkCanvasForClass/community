@@ -2442,8 +2442,15 @@ namespace Ink_Canvas
         private void ToggleSwitchDisableHardwareAcceleration_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-
-            Settings.Canvas.UseHardwareAcceleration = !ToggleSwitchDisableHardwareAcceleration.IsOn;
+            var isOnObj = sender?.GetType().GetProperty("IsOn")?.GetValue(sender);
+            if (isOnObj is bool isOn)
+            {
+                Settings.Canvas.UseHardwareAcceleration = !isOn;
+            }
+            else
+            {
+                return;
+            }
 
             _inkSmoothingManager?.UpdateConfig();
             SaveSettingsToFile();
