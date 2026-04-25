@@ -1506,7 +1506,7 @@ namespace Ink_Canvas
         {
             try
             {
-                if (IsNetCompatibilityChangeConfirmed())
+                if (IsNetCompatibilityChangePromptAcknowledged() || IsNetCompatibilityChangeConfirmed())
                 {
                     return;
                 }
@@ -1516,10 +1516,7 @@ namespace Ink_Canvas
                     "兼容性变更",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
-
-                // 用户关闭提示后即视为已知晓，持久化后下次启动不再弹出（与设置内「确认」按钮一致）。
-                PersistNetCompatibilityChangeConfirmation();
-                ApplyNetCompatibilityConfirmationGateToUpdateSettingsUi();
+                PersistNetCompatibilityChangePromptAcknowledgement();
             }
             catch (Exception ex)
             {
@@ -1547,6 +1544,46 @@ namespace Ink_Canvas
         private string GetNetCompatibilityConfirmationFlagPath()
         {
             return Path.Combine(App.RootPath, "Configs", "NetCompatibilityConfirmed.flag");
+        }
+
+        private string GetNetCompatibilityPromptAcknowledgedFlagPath()
+        {
+            return Path.Combine(App.RootPath, "Configs", "NetCompatibilityPromptAcknowledged.flag");
+        }
+
+        private bool IsNetCompatibilityChangePromptAcknowledged()
+        {
+            try
+            {
+                return File.Exists(GetNetCompatibilityPromptAcknowledgedFlagPath());
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"读取兼容性提示弹窗标记失败: {ex.Message}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
+        private void PersistNetCompatibilityChangePromptAcknowledgement()
+        {
+            try
+            {
+                var flagPath = GetNetCompatibilityPromptAcknowledgedFlagPath();
+                var dir = Path.GetDirectoryName(flagPath);
+                if (!string.IsNullOrWhiteSpace(dir) && !Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+
+                if (!File.Exists(flagPath))
+                {
+                    File.WriteAllText(flagPath, "acknowledged=true");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"写入兼容性提示弹窗标记失败: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private bool IsNetCompatibilityChangeConfirmed()
