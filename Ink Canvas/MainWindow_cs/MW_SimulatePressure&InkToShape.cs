@@ -520,6 +520,7 @@ namespace Ink_Canvas
                     && penType != 1
                     && e.Stroke?.DrawingAttributes != null
                     && !e.Stroke.DrawingAttributes.IsHighlighter
+                    && !e.Stroke.ContainsPropertyData(RealtimeVelocityBrushTipAppliedGuid)
                     && e.Stroke.StylusPoints.Count >= 3)
                 {
                     ApplyVelocityBrushTipFromSpeed(e.Stroke);
