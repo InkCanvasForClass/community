@@ -124,6 +124,9 @@ namespace Ink_Canvas.Helpers
                 return null;
 
             var da = stroke.DrawingAttributes;
+            if (da == null)
+                return null;
+
             var wda = new global::Windows.UI.Input.Inking.InkDrawingAttributes
             {
                 PenTip = global::Windows.UI.Input.Inking.PenTipShape.Circle,

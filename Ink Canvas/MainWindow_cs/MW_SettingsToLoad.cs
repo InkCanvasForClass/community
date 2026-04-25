@@ -699,22 +699,7 @@ namespace Ink_Canvas
                     drawingAttributes.FitToCurve = false;
                 }
 
-                // 注释掉新的墨迹平滑性能设置，因为UI控件还没有定义
-                /*
-                // 初始化新的墨迹平滑性能设置
-                ToggleSwitchAsyncInkSmoothing.IsOn = Settings.Canvas.UseAsyncInkSmoothing;
-                ToggleSwitchHardwareAcceleration.IsOn = Settings.Canvas.UseHardwareAcceleration;
-                ComboBoxInkSmoothingQuality.SelectedIndex = Settings.Canvas.InkSmoothingQuality;
-                SliderMaxConcurrentTasks.Value = Settings.Canvas.MaxConcurrentSmoothingTasks > 0 ?
-                    Settings.Canvas.MaxConcurrentSmoothingTasks : Environment.ProcessorCount;
-
-                // 检查硬件加速支持
-                if (!Helpers.InkSmoothingManager.IsHardwareAccelerationSupported())
-                {
-                    ToggleSwitchHardwareAcceleration.IsEnabled = false;
-                    // 可以添加提示文本说明硬件加速不可用
-                }
-                */
+                ToggleSwitchDisableHardwareAcceleration.IsOn = !Settings.Canvas.UseHardwareAcceleration;
 
                 // 初始化直线自动拉直相关设置
                 // 直线拉直灵敏度也在这里初始化，即使它存储在InkToShape中

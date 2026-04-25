@@ -996,6 +996,12 @@
   <data name="Canvas_GroupTitle" xml:space="preserve">
     <value>Canvas</value>
   </data>
+  <data name="Canvas_DisableHardwareAcceleration" xml:space="preserve">
+    <value>Disable hardware acceleration</value>
+  </data>
+  <data name="Canvas_DisableHardwareAccelerationHint" xml:space="preserve">
+    <value># Improves compatibility but may reduce performance; some effects may require an app restart to fully apply.</value>
+  </data>
   <data name="Canvas_ShowCursor" xml:space="preserve">
     <value>Show pen cursor</value>
   </data>

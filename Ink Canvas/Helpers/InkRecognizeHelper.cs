@@ -152,6 +152,9 @@ namespace Ink_Canvas.Helpers
 
             var node = legacy.InkDrawingNode;
             var shape = node.GetShape();
+            if (shape == null)
+                return InkShapeRecognitionResult.Empty;
+
             var hot = ClonePointCollection(node.HotPoints);
             return new InkShapeRecognitionResult(
                 node.GetShapeName(),
@@ -173,6 +176,9 @@ namespace Ink_Canvas.Helpers
 
         public static bool IsContainShapeType(string name)
         {
+            if (string.IsNullOrEmpty(name))
+                return false;
+
             if (name.Contains("Triangle") || name.Contains("Circle") ||
                 name.Contains("Rectangle") || name.Contains("Diamond") ||
                 name.Contains("Parallelogram") || name.Contains("Square")
