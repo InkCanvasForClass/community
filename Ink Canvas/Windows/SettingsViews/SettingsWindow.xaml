@@ -118,7 +118,7 @@
                     x:Name="HomeItem"
                     Content="首页"
                     Tag="HomePage"
-                    ToolTipService.ToolTip="首页">
+                    ToolTipService.ToolTip="快速导航">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Home}"/>
                     </ui:NavigationViewItem.Icon>

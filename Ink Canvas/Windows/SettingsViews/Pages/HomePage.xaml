@@ -30,7 +30,7 @@
                     Spacing="{StaticResource SettingsCardSpacing}">
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="快速导航" />
+                        Text="基本" />
 
                     <ui:SettingsCard Header="启动" Description="启动设置"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="StartupPage">
@@ -45,14 +45,18 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Shield}" />
                         </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
-
+                    
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="主界面" />
                     <ui:SettingsCard Header="窗口" Description="窗口设置"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="WindowPage">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}" />
                         </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
-
+                    
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="其他" />
                     <ui:SettingsCard Header="更新" Description="更新设置"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="UpdatePage">
                         <ui:SettingsCard.HeaderIcon>
