@@ -47,6 +47,7 @@ namespace Ink_Canvas
         private bool isMultiTouchTimerActive;
         private bool isPalmEraserActive;
         private bool palmEraserWasEnabledBeforeMultiTouch;
+        private InkCanvasEditingMode palmEraserPreviousEditingMode = InkCanvasEditingMode.Ink;
 
         /// <summary>
         /// 保存画布上的非笔画元素（如图片、媒体元素等）
@@ -846,6 +847,7 @@ namespace Ink_Canvas
 
                         if (Settings.Advanced.IsSpecialScreen)
                             boundWidth *= Settings.Advanced.TouchMultiplier;
+                        palmEraserPreviousEditingMode = inkCanvas.EditingMode;
                         inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
                         isPalmEraserActive = true;
 
@@ -1019,6 +1021,11 @@ namespace Ink_Canvas
                     {
                         isPalmEraserActive = false;
                         DisableEraserOverlay();
+                        if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
+                        {
+                            inkCanvas.EditingMode = palmEraserPreviousEditingMode;
+                            SetCursorBasedOnEditingMode(inkCanvas);
+                        }
                     }
                 }
             }
