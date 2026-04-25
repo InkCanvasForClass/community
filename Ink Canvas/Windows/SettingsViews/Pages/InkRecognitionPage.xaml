@@ -79,18 +79,21 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
                         </ui:SettingsExpander.HeaderIcon>
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_FixTriangle}">
+                            <ui:SettingsCard ContentAlignment="Left">
                                 <CheckBox x:Name="ToggleCheckboxEnableInkToShapeTriangle" IsChecked="True"
+                                          Content="{i18n:I18n Key=InkRecog_FixTriangle}"
                                           Checked="ToggleCheckboxEnableInkToShapeTriangle_CheckedChanged"
                                           Unchecked="ToggleCheckboxEnableInkToShapeTriangle_CheckedChanged" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_FixRectangle}">
+                            <ui:SettingsCard ContentAlignment="Left">
                                 <CheckBox x:Name="ToggleCheckboxEnableInkToShapeRectangle" IsChecked="True"
+                                          Content="{i18n:I18n Key=InkRecog_FixRectangle}"
                                           Checked="ToggleCheckboxEnableInkToShapeRectangle_CheckedChanged"
                                           Unchecked="ToggleCheckboxEnableInkToShapeRectangle_CheckedChanged" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_FixEllipse}">
+                            <ui:SettingsCard ContentAlignment="Left">
                                 <CheckBox x:Name="ToggleCheckboxEnableInkToShapeRounded" IsChecked="True"
+                                          Content="{i18n:I18n Key=InkRecog_FixEllipse}"
                                           Checked="ToggleCheckboxEnableInkToShapeRounded_CheckedChanged"
                                           Unchecked="ToggleCheckboxEnableInkToShapeRounded_CheckedChanged" />
                             </ui:SettingsCard>
@@ -128,9 +131,10 @@
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_HighPrecisionStraighten}"
                                     Description="{i18n:I18n Key=InkRecog_HighPrecisionHint}">
-                                <CheckBox x:Name="CheckboxHighPrecisionLineStraighten" IsChecked="False"
-                                          Checked="CheckboxHighPrecisionLineStraighten_CheckedChanged"
-                                          Unchecked="CheckboxHighPrecisionLineStraighten_CheckedChanged" />
+                                <ui:ToggleSwitch x:Name="ToggleSwitchHighPrecisionLineStraighten"
+                                        OnContent="{DynamicResource Common_On}"
+                                        OffContent="{DynamicResource Common_Off}"
+                                        Toggled="ToggleSwitchHighPrecisionLineStraighten_Toggled" />
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>

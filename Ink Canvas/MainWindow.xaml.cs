@@ -1166,6 +1166,21 @@ namespace Ink_Canvas
 
         public static Settings Settings { get => SettingsManager.Settings; set => SettingsManager.Settings = value; }
         public static string settingsFileName => SettingsManager.SettingsFileName;
+
+        public void UpdateInkSmoothingConfig()
+        {
+            _inkSmoothingManager?.UpdateConfig();
+        }
+
+        public void UpdatePickNameBackgroundsInComboBox()
+        {
+        }
+
+        public void UpdatePickNameBackgroundDisplay()
+        {
+        }
+
+        public string _lastAppliedProfileName;
         private bool isLoaded;
         private bool _suppressChickenSoupSourceSelectionChanged;
         private bool forcePointEraser;
@@ -2413,14 +2428,24 @@ namespace Ink_Canvas
                     targetGroupBox = GroupBoxPPT;
                     break;
                 case "advanced":
-                    targetGroupBox = GroupBoxAdvanced;
-                    break;
+                    {
+                        var sw = new Windows.SettingsViews.SettingsWindow();
+                        sw.Owner = this;
+                        sw.NavigateToPage("AdvancedPage");
+                        sw.ShowDialog();
+                        return;
+                    }
                 case "automation":
                     targetGroupBox = GroupBoxAutomation;
                     break;
                 case "randomwindow":
-                    targetGroupBox = GroupBoxRandWindow;
-                    break;
+                    {
+                        var sw = new Windows.SettingsViews.SettingsWindow();
+                        sw.Owner = this;
+                        sw.NavigateToPage("RandomDrawPage");
+                        sw.ShowDialog();
+                        return;
+                    }
                 case "theme":
                     {
                         var sw = new Windows.SettingsViews.SettingsWindow();
@@ -2563,8 +2588,13 @@ namespace Ink_Canvas
                     SetNavButtonTag("ppt");
                     break;
                 case "advanced":
-                    SetNavButtonTag("advanced");
-                    break;
+                    {
+                        var sw = new Windows.SettingsViews.SettingsWindow();
+                        sw.Owner = this;
+                        sw.NavigateToPage("AdvancedPage");
+                        sw.ShowDialog();
+                        return;
+                    }
                 case "automation":
                     SetNavButtonTag("automation");
                     break;
@@ -3470,22 +3500,13 @@ namespace Ink_Canvas
                     PPTRSButtonOpacityValueSlider,
                     PPTLBButtonOpacityValueSlider,
                     PPTRBButtonOpacityValueSlider,
-                    TouchMultiplierSlider,
-                    NibModeBoundsWidthSlider,
-                    FingerModeBoundsWidthSlider,
                     SideControlMinimumAutomationSlider,
-                    RandWindowOnceCloseLatencySlider,
-                    RandWindowOnceMaxStudentsSlider,
-                    TimerVolumeSlider,
-                    ProgressiveReminderVolumeSlider,
                     BoardInkWidthSlider,
                     BoardInkAlphaSlider,
                     BoardHighlighterWidthSlider,
                     InkWidthSlider,
                     InkAlphaSlider,
-                    HighlighterWidthSlider,
-                    MLAvoidanceHistorySlider,
-                    MLAvoidanceWeightSlider
+                    HighlighterWidthSlider
                 };
 
                 foreach (var slider in sliders)
@@ -3906,7 +3927,7 @@ namespace Ink_Canvas
         /// <summary>
         /// 显示快抽悬浮按钮
         /// </summary>
-        private void ShowQuickDrawFloatingButton()
+        public void ShowQuickDrawFloatingButton()
         {
             try
             {

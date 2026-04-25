@@ -50,7 +50,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 {
                     ToggleSwitchAutoStraightenLine.IsOn = settings.Canvas.AutoStraightenLine;
                     AutoStraightenLineThresholdSlider.Value = settings.Canvas.AutoStraightenLineThreshold;
-                    CheckboxHighPrecisionLineStraighten.IsChecked = settings.Canvas.HighPrecisionLineStraighten;
+                    ToggleSwitchHighPrecisionLineStraighten.IsOn = settings.Canvas.HighPrecisionLineStraighten;
                     ToggleSwitchLineEndpointSnapping.IsOn = settings.Canvas.LineEndpointSnapping;
                 }
             }
@@ -146,10 +146,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.SaveSettingsToFile();
         }
 
-        private void CheckboxHighPrecisionLineStraighten_CheckedChanged(object sender, RoutedEventArgs e)
+        private void ToggleSwitchHighPrecisionLineStraighten_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.HighPrecisionLineStraighten = (bool)CheckboxHighPrecisionLineStraighten.IsChecked;
+            SettingsManager.Settings.Canvas.HighPrecisionLineStraighten = ToggleSwitchHighPrecisionLineStraighten.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 

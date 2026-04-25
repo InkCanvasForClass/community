@@ -208,6 +208,17 @@
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
+                <!-- 高级设置 -->
+                <ui:NavigationViewItem
+                    x:Name="AdvancedPageItem"
+                    Content="高级"
+                    Tag="AdvancedPage"
+                    ToolTipService.ToolTip="高级设置">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
                 <!-- 画板设置 -->
                 <ui:NavigationViewItem
                     x:Name="CanvasPageItem"
@@ -237,6 +248,17 @@
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
+                </ui:NavigationViewItem>
+
+                <!-- 随机点名 -->
+                <ui:NavigationViewItem
+                    x:Name="RandomDrawPageItem"
+                    Content="随机点名"
+                    Tag="RandomDrawPage"
+                    ToolTipService.ToolTip="随机点名与计时器">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.People}"/>
+                    </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
                 <!-- Debug -->

@@ -78,6 +78,13 @@
                         </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
 
+                    <ui:SettingsCard Header="高级" Description="高级设置"
+                        IsClickEnabled="True" Click="QuickNavCard_Click" Tag="AdvancedPage">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
+                        </ui:SettingsCard.HeaderIcon>
+                    </ui:SettingsCard>
+
                     <ui:SettingsCard Header="画板" Description="画板设置"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="CanvasPage">
                         <ui:SettingsCard.HeaderIcon>
@@ -89,6 +96,13 @@
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="InkRecognitionPage">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Draw}" />
+                        </ui:SettingsCard.HeaderIcon>
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard Header="随机点名" Description="随机点名与计时器"
+                        IsClickEnabled="True" Click="QuickNavCard_Click" Tag="RandomDrawPage">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.People}" />
                         </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
 

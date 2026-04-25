@@ -699,8 +699,6 @@ namespace Ink_Canvas
                     drawingAttributes.FitToCurve = false;
                 }
 
-                ToggleSwitchDisableHardwareAcceleration.IsOn = !Settings.Canvas.UseHardwareAcceleration;
-
                 // 初始化直线自动拉直相关设置
                 // 直线拉直灵敏度也在这里初始化，即使它存储在InkToShape中
                 // 初始化高精度直线拉直设置
@@ -712,30 +710,9 @@ namespace Ink_Canvas
                 Settings.Canvas = new Canvas();
             }
 
-            // Advanced
+            // Advanced - UI initialization (settings loading moved to AdvancedPage)
             if (Settings.Advanced != null)
             {
-                TouchMultiplierSlider.Value = Settings.Advanced.TouchMultiplier;
-                FingerModeBoundsWidthSlider.Value = Settings.Advanced.FingerModeBoundsWidth;
-                NibModeBoundsWidthSlider.Value = Settings.Advanced.NibModeBoundsWidth;
-                ToggleSwitchIsLogEnabled.IsOn = Settings.Advanced.IsLogEnabled;
-                ToggleSwitchIsSaveLogByDate.IsOn = Settings.Advanced.IsSaveLogByDate;
-                ToggleSwitchIsSecondConfimeWhenShutdownApp.IsOn = Settings.Advanced.IsSecondConfirmWhenShutdownApp;
-                ToggleSwitchIsSpecialScreen.IsOn = Settings.Advanced.IsSpecialScreen;
-                ToggleSwitchIsQuadIR.IsOn = Settings.Advanced.IsQuadIR;
-                ToggleSwitchEraserBindTouchMultiplier.IsOn = Settings.Advanced.EraserBindTouchMultiplier;
-                ToggleSwitchIsAutoBackupBeforeUpdate.IsOn = Settings.Advanced.IsAutoBackupBeforeUpdate;
-                ToggleSwitchIsAutoBackupEnabled.IsOn = Settings.Advanced.IsAutoBackupEnabled;
-
-                // 设置备份间隔下拉框
-                foreach (ComboBoxItem item in ComboBoxAutoBackupInterval.Items)
-                {
-                    if (item.Tag != null && int.TryParse(item.Tag.ToString(), out int interval) && interval == Settings.Advanced.AutoBackupIntervalDays)
-                    {
-                        ComboBoxAutoBackupInterval.SelectedItem = item;
-                        break;
-                    }
-                }
                 if (Settings.Advanced.IsEnableFullScreenHelper)
                 {
                     FullScreenHelper.MarkFullscreenWindowTaskbarList(new WindowInteropHelper(this).Handle, true);
@@ -757,8 +734,6 @@ namespace Ink_Canvas
                     if (OSVersion.GetOperatingSystem() >= OperatingSystem.Windows10)
                         EdgeGestureUtil.DisableEdgeGestures(new WindowInteropHelper(this).Handle, true);
                 }
-                TouchMultiplierSlider.Visibility =
-                    ToggleSwitchIsSpecialScreen.IsOn ? Visibility.Visible : Visibility.Collapsed;
             }
             else
             {
@@ -776,78 +751,15 @@ namespace Ink_Canvas
                 Settings.InkToShape = new InkToShape();
             }
 
-            // RandSettings
+            // RandSettings - UI initialization (settings loading moved to RandomDrawPage)
             if (Settings.RandSettings != null)
             {
-                ToggleSwitchDisplayRandWindowNamesInputBtn.IsOn = Settings.RandSettings.DisplayRandWindowNamesInputBtn;
-                RandWindowOnceCloseLatencySlider.Value = Settings.RandSettings.RandWindowOnceCloseLatency;
-                RandWindowOnceMaxStudentsSlider.Value = Settings.RandSettings.RandWindowOnceMaxStudents;
-                ToggleSwitchShowRandomAndSingleDraw.IsOn = Settings.RandSettings.ShowRandomAndSingleDraw;
-                ToggleSwitchEnableQuickDraw.IsOn = Settings.RandSettings.EnableQuickDraw;
-                ToggleSwitchExternalCaller.IsOn = Settings.RandSettings.DirectCallCiRand;
-                ComboBoxExternalCallerType.SelectedIndex = Settings.RandSettings.ExternalCallerType;
                 BoardRandomDrawToolBtn.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
                 BoardSingleDrawToolBtn.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
-
-                // 计时器设置
-                ToggleSwitchUseLegacyTimerUI.IsOn = Settings.RandSettings.UseLegacyTimerUI;
-                ToggleSwitchUseNewStyleUI.IsOn = Settings.RandSettings.UseNewStyleUI;
-                ToggleSwitchEnableOvertimeCountUp.IsOn = Settings.RandSettings.EnableOvertimeCountUp;
-
-                // 新点名UI设置
-                ToggleSwitchUseNewRollCallUI.IsOn = Settings.RandSettings.UseNewRollCallUI;
-                ToggleSwitchEnableMLAvoidance.IsOn = Settings.RandSettings.EnableMLAvoidance;
-                MLAvoidanceHistorySlider.Value = Settings.RandSettings.MLAvoidanceHistoryCount;
-                MLAvoidanceWeightSlider.Value = Settings.RandSettings.MLAvoidanceWeight;
-
-                bool canEnableRedText = Settings.RandSettings.EnableOvertimeCountUp && Settings.RandSettings.EnableOvertimeRedText;
-                ToggleSwitchEnableOvertimeRedText.IsOn = canEnableRedText;
-                if (!canEnableRedText)
-                {
-                    Settings.RandSettings.EnableOvertimeRedText = false;
-                }
-
-                TimerVolumeSlider.Value = Settings.RandSettings.TimerVolume;
-
-                // 渐进提醒设置
-                ToggleSwitchEnableProgressiveReminder.IsOn = Settings.RandSettings.EnableProgressiveReminder;
-                ProgressiveReminderVolumeSlider.Value = Settings.RandSettings.ProgressiveReminderVolume;
-
-                // 加载自定义点名背景
-                UpdatePickNameBackgroundsInComboBox();
-
-                // 设置选择的背景索引
-                if (Settings.RandSettings.SelectedBackgroundIndex >= ComboBoxPickNameBackground.Items.Count)
-                {
-                    Settings.RandSettings.SelectedBackgroundIndex = 0;
-                }
-                ComboBoxPickNameBackground.SelectedIndex = Settings.RandSettings.SelectedBackgroundIndex;
             }
             else
             {
                 Settings.RandSettings = new RandSettings();
-                ToggleSwitchDisplayRandWindowNamesInputBtn.IsOn = Settings.RandSettings.DisplayRandWindowNamesInputBtn;
-                RandWindowOnceCloseLatencySlider.Value = Settings.RandSettings.RandWindowOnceCloseLatency;
-                RandWindowOnceMaxStudentsSlider.Value = Settings.RandSettings.RandWindowOnceMaxStudents;
-                ToggleSwitchEnableQuickDraw.IsOn = Settings.RandSettings.EnableQuickDraw;
-                ToggleSwitchExternalCaller.IsOn = Settings.RandSettings.DirectCallCiRand;
-                ComboBoxExternalCallerType.SelectedIndex = Settings.RandSettings.ExternalCallerType;
-                ToggleSwitchUseLegacyTimerUI.IsOn = Settings.RandSettings.UseLegacyTimerUI;
-                ToggleSwitchUseNewStyleUI.IsOn = Settings.RandSettings.UseNewStyleUI;
-                ToggleSwitchEnableOvertimeCountUp.IsOn = Settings.RandSettings.EnableOvertimeCountUp;
-
-                bool canEnableRedText = Settings.RandSettings.EnableOvertimeCountUp && Settings.RandSettings.EnableOvertimeRedText;
-                ToggleSwitchEnableOvertimeRedText.IsOn = canEnableRedText;
-                if (!canEnableRedText)
-                {
-                    Settings.RandSettings.EnableOvertimeRedText = false;
-                }
-
-                TimerVolumeSlider.Value = Settings.RandSettings.TimerVolume;
-
-                // 渐进提醒设置
-                ToggleSwitchEnableProgressiveReminder.IsOn = Settings.RandSettings.EnableProgressiveReminder;
-                ProgressiveReminderVolumeSlider.Value = Settings.RandSettings.ProgressiveReminderVolume;
             }
 
             // ModeSettings
@@ -1005,9 +917,6 @@ namespace Ink_Canvas
 
             // 加载画笔自动恢复设置
             LoadBrushAutoRestoreSettings();
-
-            // 刷新配置文件列表
-            try { RefreshConfigProfileList(); } catch (Exception ex) { LogHelper.WriteLogToFile($"刷新配置文件列表失败: {ex.Message}", LogHelper.LogType.Warning); }
         }
 
         /// <summary>

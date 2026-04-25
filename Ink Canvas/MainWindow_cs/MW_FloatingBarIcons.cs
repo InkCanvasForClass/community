@@ -3550,7 +3550,7 @@ namespace Ink_Canvas
             SyncPdfPageSidebarWithCanvas();
         }
 
-        internal int BoundsWidth = 5;
+        public int BoundsWidth = 5;
 
         private void BtnHideInkCanvas_Click(object sender, RoutedEventArgs e)
         {

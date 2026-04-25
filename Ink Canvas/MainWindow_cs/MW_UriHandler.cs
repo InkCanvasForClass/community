@@ -232,7 +232,6 @@ namespace Ink_Canvas
                 }
                 _lastAppliedProfileName = profileName.Trim();
                 ReloadSettingsFromFile();
-                RefreshConfigProfileList();
                 File.WriteAllText(resultPath, "ok", System.Text.Encoding.UTF8);
                 ShowNotification($"已通过 URI 切换至方案「{profileName}」");
                 LogHelper.WriteLogToFile($"URI 已切换配置方案: {profileName}", LogHelper.LogType.Event);
