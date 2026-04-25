@@ -54,7 +54,7 @@
                     <controls:LabeledSettingsCard x:Name="CardExternalProtocol"
                             Header="{i18n:I18n Key=Startup_ExternalProtocol}"
                             Description="{i18n:I18n Key=Startup_ExternalProtocolHint}"
-                            Icon="{x:Static ui:FluentSystemIcons.Link_20_Regular}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Link}"
                             SwitchName="ToggleSwitchExternalProtocol"
                             Toggled="ToggleSwitchExternalProtocol_Toggled" />
 

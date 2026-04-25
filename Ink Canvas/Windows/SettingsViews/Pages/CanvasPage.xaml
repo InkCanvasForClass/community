@@ -11,9 +11,7 @@
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       xmlns:c="clr-namespace:Ink_Canvas.Converter"
       mc:Ignorable="d"
-
       Title="画板">
-
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
             <FrameworkElement.Resources>
@@ -28,8 +26,7 @@
                 </Style>
             </FrameworkElement.Resources>
             <Grid>
-                <ikw:SimpleStackPanel MaxWidth="1000"
-                    HorizontalAlignment="Stretch"
+                <ikw:SimpleStackPanel MaxWidth="1000" HorizontalAlignment="Stretch"
                     Spacing="{StaticResource SettingsCardSpacing}">
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"

@@ -128,7 +128,7 @@
                 <ui:NavigationViewItem
                     x:Name="BasicItem"
                     Content="基本"
-                    Tag="BasicPage"
+                    Tag="StartupPage"
                     SelectsOnInvoked="True"
                     ToolTipService.ToolTip="基本设置">
                     <ui:NavigationViewItem.Icon>
@@ -160,10 +160,10 @@
                 <ui:NavigationViewItem
                     x:Name="MainInterfaceItem"
                     Content="主界面"
-                    Tag="MainInterfacePage"
+                    Tag="WindowPage"
                     ToolTipService.ToolTip="主界面设置">
                     <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Desktop_20_Regular}" FontSize="20" Margin="-2"/>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.TVMonitor}"/>
                     </ui:NavigationViewItem.Icon>
                     <ui:NavigationViewItem.MenuItems>
                         <ui:NavigationViewItem
@@ -172,7 +172,7 @@
                             Tag="WindowPage"
                             ToolTipService.ToolTip="窗口设置">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Window_20_Regular}" FontSize="20" Margin="-2"/>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
@@ -196,7 +196,7 @@
                     Tag="ExperimentalPage"
                     ToolTipService.ToolTip="实验性选项">
                     <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Beaker_20_Regular}" FontSize="20" Margin="-2"/>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}"/>
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 

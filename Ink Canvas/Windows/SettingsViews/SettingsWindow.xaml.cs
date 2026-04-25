@@ -37,10 +37,8 @@ namespace Ink_Canvas.Windows.SettingsViews
             _pageTypes = new Dictionary<string, Type>
             {
                 { "HomePage", typeof(HomePage) },
-                { "BasicPage", typeof(BasicPage) },
                 { "StartupPage", typeof(StartupPage) },
                 { "PrivacyPage", typeof(PrivacyPage) },
-                { "MainInterfacePage", typeof(MainInterfacePage) },
                 { "WindowPage", typeof(WindowPage) },
                 { "UpdatePage", typeof(UpdatePage) },
                 { "ExperimentalPage", typeof(ExperimentalPage) },
