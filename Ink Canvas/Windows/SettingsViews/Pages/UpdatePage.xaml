@@ -55,7 +55,7 @@
                             Header="{i18n:I18n Key=Startup_SilentUpdateTimePeriod}"
                             Visibility="{Binding IsOn, ElementName=CardSilentUpdate, Converter={StaticResource BooleanToVisibilityConverter}}"
                             IsExpanded="{Binding IsOn, ElementName=CardSilentUpdate, Mode=OneWay}"
-                            d:Visibility="Visible">
+                            d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
                         </ui:SettingsExpander.HeaderIcon>

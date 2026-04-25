@@ -74,7 +74,7 @@
                     <ui:SettingsExpander Header="形状修正"
                             Visibility="{Binding IsOn, ElementName=CardEnableInkToShape, Converter={StaticResource BooleanToVisibilityConverter}}"
                             IsExpanded="{Binding IsOn, ElementName=CardEnableInkToShape, Mode=OneWay}"
-                            d:Visibility="Visible">
+                            d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
                         </ui:SettingsExpander.HeaderIcon>
@@ -97,19 +97,16 @@
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
-                    <controls:LabeledSettingsCard x:Name="CardAutoStraightenLine"
+                    <ui:SettingsExpander x:Name="ExpanderAutoStraightenLine"
                             Header="{i18n:I18n Key=InkRecog_AutoStraightLine}"
-                            Icon="{x:Static ui:SegoeFluentIcons.LineDisplay}"
-                            SwitchName="ToggleSwitchAutoStraightenLine"
-                            Toggled="ToggleSwitchAutoStraightenLine_Toggled" />
-
-                    <ui:SettingsExpander Header="{i18n:I18n Key=InkRecog_AutoStraightLine}"
-                            Visibility="{Binding IsOn, ElementName=CardAutoStraightenLine, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            IsExpanded="{Binding IsOn, ElementName=CardAutoStraightenLine, Mode=OneWay}"
-                            d:Visibility="Visible">
+                            d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.LineDisplay}" />
                         </ui:SettingsExpander.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchAutoStraightenLine"
+                                OnContent="{DynamicResource Common_On}"
+                                OffContent="{DynamicResource Common_Off}"
+                                Toggled="ToggleSwitchAutoStraightenLine_Toggled" />
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_LengthThreshold}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
@@ -138,19 +135,16 @@
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
-                    <controls:LabeledSettingsCard x:Name="CardLineEndpointSnapping"
+                    <ui:SettingsExpander x:Name="ExpanderLineEndpointSnapping"
                             Header="{i18n:I18n Key=InkRecog_LineEndpointSnapping}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Link}"
-                            SwitchName="ToggleSwitchLineEndpointSnapping"
-                            Toggled="ToggleSwitchLineEndpointSnapping_Toggled" />
-
-                    <ui:SettingsExpander Header="{i18n:I18n Key=InkRecog_LineEndpointSnapping}"
-                            Visibility="{Binding IsOn, ElementName=CardLineEndpointSnapping, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            IsExpanded="{Binding IsOn, ElementName=CardLineEndpointSnapping, Mode=OneWay}"
-                            d:Visibility="Visible">
+                            d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />
                         </ui:SettingsExpander.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchLineEndpointSnapping"
+                                OnContent="{DynamicResource Common_On}"
+                                OffContent="{DynamicResource Common_Off}"
+                                Toggled="ToggleSwitchLineEndpointSnapping_Toggled" />
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_SnappingDistance}"
                                     Description="{i18n:I18n Key=InkRecog_LineEndpointSnappingHint}">

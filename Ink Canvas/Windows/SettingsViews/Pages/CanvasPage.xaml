@@ -133,20 +133,17 @@
                         </ComboBox>
                     </ui:SettingsCard>
 
-                    <controls:LabeledSettingsCard x:Name="CardEnableInkFade"
+                    <ui:SettingsExpander x:Name="ExpanderEnableInkFade"
                             Header="{i18n:I18n Key=Canvas_EnableInkFade}"
                             Description="{i18n:I18n Key=Canvas_EnableInkFadeHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Color}"
-                            SwitchName="ToggleSwitchEnableInkFade"
-                            Toggled="ToggleSwitchEnableInkFade_Toggled" />
-
-                    <ui:SettingsExpander Header="{i18n:I18n Key=Canvas_EnableInkFade}"
-                            Visibility="{Binding IsOn, ElementName=CardEnableInkFade, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            IsExpanded="{Binding IsOn, ElementName=CardEnableInkFade, Mode=OneWay}"
-                            d:Visibility="Visible">
+                            d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Color}" />
                         </ui:SettingsExpander.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchEnableInkFade"
+                                OnContent="{DynamicResource Common_On}"
+                                OffContent="{DynamicResource Common_Off}"
+                                Toggled="ToggleSwitchEnableInkFade_Toggled" />
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{i18n:I18n Key=Canvas_InkFadeTime}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
@@ -167,20 +164,17 @@
                             SwitchName="ToggleSwitchHideInkFadeControlInPenMenu"
                             Toggled="ToggleSwitchHideInkFadeControlInPenMenu_Toggled" />
 
-                    <controls:LabeledSettingsCard x:Name="CardBrushAutoRestore"
+                    <ui:SettingsExpander x:Name="ExpanderBrushAutoRestore"
                             Header="{i18n:I18n Key=Canvas_BrushAutoRestore}"
                             Description="{i18n:I18n Key=Canvas_BrushAutoRestoreHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Refresh}"
-                            SwitchName="ToggleSwitchBrushAutoRestore"
-                            Toggled="ToggleSwitchBrushAutoRestore_Toggled" />
-
-                    <ui:SettingsExpander Header="{i18n:I18n Key=Canvas_BrushAutoRestore}"
-                            Visibility="{Binding IsOn, ElementName=CardBrushAutoRestore, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            IsExpanded="{Binding IsOn, ElementName=CardBrushAutoRestore, Mode=OneWay}"
-                            d:Visibility="Visible">
+                            d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" />
                         </ui:SettingsExpander.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchBrushAutoRestore"
+                                OnContent="{DynamicResource Common_On}"
+                                OffContent="{DynamicResource Common_Off}"
+                                Toggled="ToggleSwitchBrushAutoRestore_Toggled" />
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{i18n:I18n Key=Canvas_AutoRestoreTimePoints}">
                                 <TextBox x:Name="BrushAutoRestoreTimesTextBox" Width="260"
@@ -221,20 +215,17 @@
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
-                    <controls:LabeledSettingsCard x:Name="CardEnableEraserAutoSwitchBack"
+                    <ui:SettingsExpander x:Name="ExpanderEnableEraserAutoSwitchBack"
                             Header="{i18n:I18n Key=Canvas_SwitchBackAfterEraser}"
                             Description="{i18n:I18n Key=Canvas_SwitchBackAfterEraserHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Switch}"
-                            SwitchName="ToggleSwitchEnableEraserAutoSwitchBack"
-                            Toggled="ToggleSwitchEnableEraserAutoSwitchBack_Toggled" />
-
-                    <ui:SettingsExpander Header="{i18n:I18n Key=Canvas_SwitchBackAfterEraser}"
-                            Visibility="{Binding IsOn, ElementName=CardEnableEraserAutoSwitchBack, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            IsExpanded="{Binding IsOn, ElementName=CardEnableEraserAutoSwitchBack, Mode=OneWay}"
-                            d:Visibility="Visible">
+                            d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Switch}" />
                         </ui:SettingsExpander.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchEnableEraserAutoSwitchBack"
+                                OnContent="{DynamicResource Common_On}"
+                                OffContent="{DynamicResource Common_Off}"
+                                Toggled="ToggleSwitchEnableEraserAutoSwitchBack_Toggled" />
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{i18n:I18n Key=Canvas_SwitchBackDelay}"
                                     Description="{i18n:I18n Key=Canvas_SwitchBackDelayHint}">
@@ -266,20 +257,17 @@
                             SwitchName="ToggleSwitchEnableTwoFingerRotationOnSelection"
                             Toggled="ToggleSwitchEnableTwoFingerRotationOnSelection_Toggled" />
 
-                    <controls:LabeledSettingsCard x:Name="CardEnablePalmEraser"
+                    <ui:SettingsExpander x:Name="ExpanderEnablePalmEraser"
                             Header="{i18n:I18n Key=Gesture_EnablePalmEraser}"
                             Description="{i18n:I18n Key=Gesture_PalmHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.EraseTool}"
-                            SwitchName="ToggleSwitchEnablePalmEraser"
-                            Toggled="ToggleSwitchEnablePalmEraser_Toggled" />
-
-                    <ui:SettingsExpander Header="{i18n:I18n Key=Gesture_EnablePalmEraser}"
-                            Visibility="{Binding IsOn, ElementName=CardEnablePalmEraser, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            IsExpanded="{Binding IsOn, ElementName=CardEnablePalmEraser, Mode=OneWay}"
-                            d:Visibility="Visible">
+                            d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EraseTool}" />
                         </ui:SettingsExpander.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchEnablePalmEraser"
+                                OnContent="{DynamicResource Common_On}"
+                                OffContent="{DynamicResource Common_Off}"
+                                Toggled="ToggleSwitchEnablePalmEraser_Toggled" />
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{i18n:I18n Key=Gesture_PalmSensitivity}">
                                 <ComboBox x:Name="ComboBoxPalmEraserSensitivity"

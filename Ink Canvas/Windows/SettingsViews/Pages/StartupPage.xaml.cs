@@ -50,14 +50,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 {
                     CardEnableNibMode.IsOn = settings.Startup.IsEnableNibMode;
 
-                    if (settings.Startup.CrashAction == 0)
-                    {
-                        RadioCrashSilentRestart.IsChecked = true;
-                    }
-                    else
-                    {
-                        RadioCrashNoAction.IsChecked = true;
-                    }
+                    ComboBoxCrashAction.SelectedIndex = settings.Startup.CrashAction;
                 }
             }
             catch (Exception ex)
@@ -203,21 +196,25 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         #region 崩溃后操作事件处理
 
-        private void RadioCrashAction_Checked(object sender, RoutedEventArgs e)
+        private void ComboBoxCrashAction_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!_isLoaded) return;
 
             try
             {
-                if (RadioCrashSilentRestart != null && RadioCrashSilentRestart.IsChecked == true)
+                var item = ComboBoxCrashAction?.SelectedItem as ComboBoxItem;
+                if (item == null) return;
+                var tag = item.Tag?.ToString() ?? "0";
+                switch (tag)
                 {
-                    App.CrashAction = App.CrashActionType.SilentRestart;
-                    SettingsManager.Settings.Startup.CrashAction = 0;
-                }
-                else if (RadioCrashNoAction != null && RadioCrashNoAction.IsChecked == true)
-                {
-                    App.CrashAction = App.CrashActionType.NoAction;
-                    SettingsManager.Settings.Startup.CrashAction = 1;
+                    case "0":
+                        App.CrashAction = App.CrashActionType.SilentRestart;
+                        SettingsManager.Settings.Startup.CrashAction = 0;
+                        break;
+                    case "1":
+                        App.CrashAction = App.CrashActionType.NoAction;
+                        SettingsManager.Settings.Startup.CrashAction = 1;
+                        break;
                 }
                 SettingsManager.SaveSettingsToFile();
                 App.SyncCrashActionFromSettings();

@@ -33,7 +33,8 @@
                         Text="{i18n:I18n Key=About_PrivacyAndTelemetry}" />
 
                     <ui:SettingsExpander Header="{i18n:I18n Key=About_PrivacyAndTelemetry}"
-                            IsExpanded="True">
+                            IsExpanded="True"
+                            d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Shield}" />
                         </ui:SettingsExpander.HeaderIcon>

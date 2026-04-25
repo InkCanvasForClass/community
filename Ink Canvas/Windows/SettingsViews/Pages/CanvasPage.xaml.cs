@@ -46,15 +46,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     if (settings.Canvas.UseAdvancedBezierSmoothing) curveMode = 2;
                     else if (settings.Canvas.FitToCurve) curveMode = 1;
                     ComboBoxCurveSmoothingMode.SelectedIndex = curveMode;
-                    CardEnableInkFade.IsOn = settings.Canvas.EnableInkFade;
+                    ToggleSwitchEnableInkFade.IsOn = settings.Canvas.EnableInkFade;
                     InkFadeTimeSlider.Value = settings.Canvas.InkFadeTime;
                     CardHideInkFadeControlInPenMenu.IsOn = settings.Canvas.HideInkFadeControlInPenMenu;
-                    CardBrushAutoRestore.IsOn = settings.Canvas.EnableBrushAutoRestore;
+                    ToggleSwitchBrushAutoRestore.IsOn = settings.Canvas.EnableBrushAutoRestore;
                     BrushAutoRestoreTimesTextBox.Text = settings.Canvas.BrushAutoRestoreTimes ?? string.Empty;
                     LoadBrushAutoRestoreColor(settings.Canvas.BrushAutoRestoreColor);
                     BrushAutoRestoreWidthSlider.Value = settings.Canvas.BrushAutoRestoreWidth > 0 ? settings.Canvas.BrushAutoRestoreWidth : 5;
                     BrushAutoRestoreAlphaSlider.Value = settings.Canvas.BrushAutoRestoreAlpha;
-                    CardEnableEraserAutoSwitchBack.IsOn = settings.Canvas.EnableEraserAutoSwitchBack;
+                    ToggleSwitchEnableEraserAutoSwitchBack.IsOn = settings.Canvas.EnableEraserAutoSwitchBack;
                     EraserAutoSwitchBackDelaySlider.Value = settings.Canvas.EraserAutoSwitchBackDelaySeconds;
                 }
 
@@ -66,7 +66,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 if (settings.Canvas != null)
                 {
-                    CardEnablePalmEraser.IsOn = settings.Canvas.EnablePalmEraser;
+                    ToggleSwitchEnablePalmEraser.IsOn = settings.Canvas.EnablePalmEraser;
                     ComboBoxPalmEraserSensitivity.SelectedIndex = settings.Canvas.PalmEraserSensitivity;
                 }
             }
@@ -76,6 +76,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
 
             _isLoaded = true;
+
+            ExpanderEnableInkFade.IsExpanded = ToggleSwitchEnableInkFade.IsOn;
+            ExpanderBrushAutoRestore.IsExpanded = ToggleSwitchBrushAutoRestore.IsOn;
+            ExpanderEnableEraserAutoSwitchBack.IsExpanded = ToggleSwitchEnableEraserAutoSwitchBack.IsOn;
+            ExpanderEnablePalmEraser.IsExpanded = ToggleSwitchEnablePalmEraser.IsOn;
         }
 
         private void LoadBrushAutoRestoreColor(string hex)
@@ -213,7 +218,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnableInkFade_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.EnableInkFade = CardEnableInkFade.IsOn;
+            SettingsManager.Settings.Canvas.EnableInkFade = ToggleSwitchEnableInkFade.IsOn;
+            ExpanderEnableInkFade.IsExpanded = ToggleSwitchEnableInkFade.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -234,7 +240,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchBrushAutoRestore_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.EnableBrushAutoRestore = CardBrushAutoRestore.IsOn;
+            SettingsManager.Settings.Canvas.EnableBrushAutoRestore = ToggleSwitchBrushAutoRestore.IsOn;
+            ExpanderBrushAutoRestore.IsExpanded = ToggleSwitchBrushAutoRestore.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -273,7 +280,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnableEraserAutoSwitchBack_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.EnableEraserAutoSwitchBack = CardEnableEraserAutoSwitchBack.IsOn;
+            SettingsManager.Settings.Canvas.EnableEraserAutoSwitchBack = ToggleSwitchEnableEraserAutoSwitchBack.IsOn;
+            ExpanderEnableEraserAutoSwitchBack.IsExpanded = ToggleSwitchEnableEraserAutoSwitchBack.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -301,7 +309,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnablePalmEraser_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.EnablePalmEraser = CardEnablePalmEraser.IsOn;
+            SettingsManager.Settings.Canvas.EnablePalmEraser = ToggleSwitchEnablePalmEraser.IsOn;
+            ExpanderEnablePalmEraser.IsExpanded = ToggleSwitchEnablePalmEraser.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 

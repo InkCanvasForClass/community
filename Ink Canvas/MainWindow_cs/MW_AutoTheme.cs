@@ -282,16 +282,6 @@ namespace Ink_Canvas
 
         private void UpdateFloatingBarIconComboBox()
         {
-            try
-            {
-                if (ComboBoxFloatingBarImg != null)
-                {
-                    ComboBoxFloatingBarImg.SelectedIndex = Settings.Appearance.FloatingBarImg;
-                }
-            }
-            catch (Exception)
-            {
-            }
         }
 
         private void RefreshStrokeSelectionIcons()

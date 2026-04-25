@@ -48,10 +48,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 if (settings.Canvas != null)
                 {
-                    CardAutoStraightenLine.IsOn = settings.Canvas.AutoStraightenLine;
+                    ToggleSwitchAutoStraightenLine.IsOn = settings.Canvas.AutoStraightenLine;
                     AutoStraightenLineThresholdSlider.Value = settings.Canvas.AutoStraightenLineThreshold;
                     CheckboxHighPrecisionLineStraighten.IsChecked = settings.Canvas.HighPrecisionLineStraighten;
-                    CardLineEndpointSnapping.IsOn = settings.Canvas.LineEndpointSnapping;
+                    ToggleSwitchLineEndpointSnapping.IsOn = settings.Canvas.LineEndpointSnapping;
                 }
             }
             catch (Exception ex)
@@ -60,6 +60,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
 
             _isLoaded = true;
+
+            ExpanderAutoStraightenLine.IsExpanded = ToggleSwitchAutoStraightenLine.IsOn;
+            ExpanderLineEndpointSnapping.IsExpanded = ToggleSwitchLineEndpointSnapping.IsOn;
         }
 
         private void ToggleSwitchEnableInkToShape_Toggled(object sender, RoutedEventArgs e)
@@ -124,7 +127,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchAutoStraightenLine_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.AutoStraightenLine = CardAutoStraightenLine.IsOn;
+            SettingsManager.Settings.Canvas.AutoStraightenLine = ToggleSwitchAutoStraightenLine.IsOn;
+            ExpanderAutoStraightenLine.IsExpanded = ToggleSwitchAutoStraightenLine.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -152,7 +156,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchLineEndpointSnapping_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.LineEndpointSnapping = CardLineEndpointSnapping.IsOn;
+            SettingsManager.Settings.Canvas.LineEndpointSnapping = ToggleSwitchLineEndpointSnapping.IsOn;
+            ExpanderLineEndpointSnapping.IsExpanded = ToggleSwitchLineEndpointSnapping.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 

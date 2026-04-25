@@ -249,7 +249,7 @@ namespace Ink_Canvas
                 }
             }
 
-            // Appearance
+            // Appearance - UI initialization (settings loading moved to AppearancePage)
             if (Settings.Appearance != null)
             {
                 if (!Settings.Appearance.IsEnableDisPlayNibModeToggler)
@@ -257,47 +257,16 @@ namespace Ink_Canvas
                     NibModeSimpleStackPanel.Visibility = Visibility.Collapsed;
                     BoardNibModeSimpleStackPanel.Visibility = Visibility.Collapsed;
                 }
-                else
-                {
-                    NibModeSimpleStackPanel.Visibility = Visibility.Visible;
-                    BoardNibModeSimpleStackPanel.Visibility = Visibility.Visible;
-                }
 
-                //if (Settings.Appearance.IsColorfulViewboxFloatingBar) // 浮动工具栏背景色
-                //{
-                //    LinearGradientBrush gradientBrush = new LinearGradientBrush();
-                //    gradientBrush.StartPoint = new Point(0, 0);
-                //    gradientBrush.EndPoint = new Point(1, 1);
-                //    GradientStop blueStop = new GradientStop(Color.FromArgb(0x95, 0x80, 0xB0, 0xFF), 0);
-                //    GradientStop greenStop = new GradientStop(Color.FromArgb(0x95, 0xC0, 0xFF, 0xC0), 1);
-                //    gradientBrush.GradientStops.Add(blueStop);
-                //    gradientBrush.GradientStops.Add(greenStop);
-                //    EnableTwoFingerGestureBorder.Background = gradientBrush;
-                //    BorderFloatingBarMainControls.Background = gradientBrush;
-                //    BorderFloatingBarMoveControls.Background = gradientBrush;
-                //    BorderFloatingBarExitPPTBtn.Background = gradientBrush;
-
-                //    ToggleSwitchColorfulViewboxFloatingBar.IsOn = true;
-                //} else {
-                //    EnableTwoFingerGestureBorder.Background = (Brush)FindResource("FloatBarBackground");
-                //    BorderFloatingBarMainControls.Background = (Brush)FindResource("FloatBarBackground");
-                //    BorderFloatingBarMoveControls.Background = (Brush)FindResource("FloatBarBackground");
-                //    BorderFloatingBarExitPPTBtn.Background = (Brush)FindResource("FloatBarBackground");
-
-                //    ToggleSwitchColorfulViewboxFloatingBar.IsOn = false;
-                //}
-
-                if (Settings.Appearance.ViewboxFloatingBarScaleTransformValue != 0) // 浮动工具栏 UI 缩放 85%
+                if (Settings.Appearance.ViewboxFloatingBarScaleTransformValue != 0)
                 {
                     double val = Settings.Appearance.ViewboxFloatingBarScaleTransformValue;
                     ViewboxFloatingBarScaleTransform.ScaleX =
                         (val > 0.5 && val < 1.25) ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1;
                     ViewboxFloatingBarScaleTransform.ScaleY =
                         (val > 0.5 && val < 1.25) ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1;
-                    ViewboxFloatingBarScaleTransformValueSlider.Value = val;
                 }
 
-                ComboBoxUnFoldBtnImg.SelectedIndex = Settings.Appearance.UnFoldButtonImageType;
                 switch (Settings.Appearance.UnFoldButtonImageType)
                 {
                     case 0:
@@ -326,69 +295,17 @@ namespace Ink_Canvas
                         break;
                 }
 
-                // 设置主题下拉框
-                ComboBoxTheme.SelectedIndex = Settings.Appearance.Theme;
-
-                _suppressChickenSoupSourceSelectionChanged = true;
-                try
-                {
-                    ComboBoxChickenSoupSource.SelectedIndex = Settings.Appearance.ChickenSoupSource;
-                }
-                finally
-                {
-                    Dispatcher.BeginInvoke(
-                        (Action)(() => { _suppressChickenSoupSourceSelectionChanged = false; }),
-                        DispatcherPriority.ContextIdle);
-                }
-
-                // 初始化自定义按钮的可见性（仅在选择API时显示）
-                if (BtnHitokotoCustomize != null)
-                {
-                    BtnHitokotoCustomize.Visibility = Settings.Appearance.ChickenSoupSource == 3
-                        ? Visibility.Visible
-                        : Visibility.Collapsed;
-                }
-
-
-                ToggleSwitchEnableQuickPanel.IsOn = Settings.Appearance.IsShowQuickPanel;
-
-                ToggleSwitchEnableSplashScreen.IsOn = Settings.Appearance.EnableSplashScreen;
-
-                ComboBoxSplashScreenStyle.SelectedIndex = Settings.Appearance.SplashScreenStyle;
-
-                ToggleSwitchEnableTrayIcon.IsOn = Settings.Appearance.EnableTrayIcon;
-                ICCTrayIconExampleImage.Visibility =
-                    Settings.Appearance.EnableTrayIcon ? Visibility.Visible : Visibility.Collapsed;
-                var _taskbar = (TaskbarIcon)Application.Current.Resources["TaskbarTrayIcon"];
-                _taskbar.Visibility = Settings.Appearance.EnableTrayIcon ? Visibility.Visible : Visibility.Collapsed;
-
                 ViewboxFloatingBar.Opacity = Settings.Appearance.ViewboxFloatingBarOpacityValue;
 
-                // 初始化浮动栏透明度滑块值
-                ViewboxFloatingBarOpacityValueSlider.Value = Settings.Appearance.ViewboxFloatingBarOpacityValue;
-                ViewboxFloatingBarOpacityInPPTValueSlider.Value = Settings.Appearance.ViewboxFloatingBarOpacityInPPTValue;
-
-                if (Settings.Appearance.EnableViewboxBlackBoardScaleTransform) // 画板 UI 缩放 80%
+                if (Settings.Appearance.EnableViewboxBlackBoardScaleTransform)
                 {
-                    //ViewboxBlackboardLeftSideScaleTransform.ScaleX = 0.8;
-                    //ViewboxBlackboardLeftSideScaleTransform.ScaleY = 0.8;
                     ViewboxBlackboardCenterSideScaleTransform.ScaleX = 0.8;
                     ViewboxBlackboardCenterSideScaleTransform.ScaleY = 0.8;
-                    //ViewboxBlackboardRightSideScaleTransform.ScaleX = 0.8;
-                    //ViewboxBlackboardRightSideScaleTransform.ScaleY = 0.8;
-
-                    ToggleSwitchEnableViewboxBlackBoardScaleTransform.IsOn = true;
                 }
                 else
                 {
-                    //ViewboxBlackboardLeftSideScaleTransform.ScaleX = 1;
-                    //ViewboxBlackboardLeftSideScaleTransform.ScaleY = 1;
                     ViewboxBlackboardCenterSideScaleTransform.ScaleX = 1;
                     ViewboxBlackboardCenterSideScaleTransform.ScaleY = 1;
-                    //ViewboxBlackboardRightSideScaleTransform.ScaleX = 1;
-                    //ViewboxBlackboardRightSideScaleTransform.ScaleY = 1;
-
-                    ToggleSwitchEnableViewboxBlackBoardScaleTransform.IsOn = false;
                 }
 
                 if (Settings.Appearance.IsTransparentButtonBackground)
@@ -397,57 +314,23 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    //Light
                     BtnExit.Background = BtnSwitchTheme.Content.ToString() == "深色"
                         ? new SolidColorBrush(StringToColor("#FFCCCCCC"))
-                        :
-                        //Dark
-                        new SolidColorBrush(StringToColor("#FF555555"));
+                        : new SolidColorBrush(StringToColor("#FF555555"));
                 }
 
-                // 更新自定义图标下拉列表
-                UpdateCustomIconsInComboBox();
-
-                // 设置选中的图标索引
-                // 如果索引超出范围(自定义图标可能已删除)，使用默认图标
-                if (Settings.Appearance.FloatingBarImg >= ComboBoxFloatingBarImg.Items.Count)
+                if (Settings.Appearance.FloatingBarImg >= 12 + Settings.Appearance.CustomFloatingBarImgs.Count)
                 {
                     Settings.Appearance.FloatingBarImg = 0;
                 }
 
-                ComboBoxFloatingBarImg.SelectedIndex = Settings.Appearance.FloatingBarImg;
-
-                // 更新浮动栏图标
                 UpdateFloatingBarIcon();
-
-                ToggleSwitchEnableTimeDisplayInWhiteboardMode.IsOn =
-                    Settings.Appearance.EnableTimeDisplayInWhiteboardMode;
-
-                ToggleSwitchEnableChickenSoupInWhiteboardMode.IsOn =
-                    Settings.Appearance.EnableChickenSoupInWhiteboardMode;
-
-                // 浮动栏按钮显示控制开关初始化
-                CheckBoxUseLegacyFloatingBarUI.IsChecked = Settings.Appearance.UseLegacyFloatingBarUI;
-                CheckBoxShowShapeButton.IsChecked = Settings.Appearance.IsShowShapeButton;
-                CheckBoxShowUndoButton.IsChecked = Settings.Appearance.IsShowUndoButton;
-                CheckBoxShowRedoButton.IsChecked = Settings.Appearance.IsShowRedoButton;
-                CheckBoxShowClearButton.IsChecked = Settings.Appearance.IsShowClearButton;
-                CheckBoxShowWhiteboardButton.IsChecked = Settings.Appearance.IsShowWhiteboardButton;
-                CheckBoxShowHideButton.IsChecked = Settings.Appearance.IsShowHideButton;
-                CheckBoxShowQuickColorPalette.IsChecked = Settings.Appearance.IsShowQuickColorPalette;
-                CheckBoxShowLassoSelectButton.IsChecked = Settings.Appearance.IsShowLassoSelectButton;
-                CheckBoxShowClearAndMouseButton.IsChecked = Settings.Appearance.IsShowClearAndMouseButton;
-                ComboBoxEraserDisplayOption.SelectedIndex = Settings.Appearance.EraserDisplayOption;
-                ComboBoxQuickColorPaletteDisplayMode.SelectedIndex = Settings.Appearance.QuickColorPaletteDisplayMode;
-
-                // 初始化快捷调色盘指示器
-                UpdateQuickColorPaletteIndicator(inkCanvas.DefaultDrawingAttributes.Color);
-
-                // 应用浮动栏按钮可见性设置
                 UpdateFloatingBarButtonsVisibility();
-
-                // 更新浮动栏图标
                 UpdateFloatingBarIcons();
+
+                var _taskbar = Application.Current.Resources["TaskbarTrayIcon"];
+                if (_taskbar is FrameworkElement fe)
+                    fe.Visibility = Settings.Appearance.EnableTrayIcon ? Visibility.Visible : Visibility.Collapsed;
 
                 SystemEvents_UserPreferenceChanged(null, null);
             }
@@ -900,15 +783,8 @@ namespace Ink_Canvas
             // InkToShape
             if (Settings.InkToShape != null)
             {
-
-
-
-
-
-
-
-
-                // 直线拉直灵敏度在Canvas部分已经初始化，这里不再重复
+                FloatingBarToggleSwitchEnableInkToShape.IsOn = Settings.InkToShape.IsInkToShapeEnabled;
+                BoardToggleSwitchEnableInkToShape.IsOn = Settings.InkToShape.IsInkToShapeEnabled;
             }
             else
             {

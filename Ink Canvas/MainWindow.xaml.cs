@@ -67,8 +67,8 @@ namespace Ink_Canvas
         private WindowOverviewModel _windowOverviewModel;
 
         // 设置面板相关状态
-        private bool _isApplyingLanguageFromSettings;
-        private bool _isReloadingForLanguageChange;
+        // _isApplyingLanguageFromSettings migrated to AppearancePage
+        internal bool _isReloadingForLanguageChange;
 
         // 全屏处理状态标志
         public bool isFullScreenApplied = false;
@@ -1487,36 +1487,13 @@ namespace Ink_Canvas
         {
             try
             {
-                if (ComboBoxLanguage == null || Settings?.Appearance == null) return;
+                if (Settings?.Appearance == null) return;
 
                 var preferredLanguage = Settings.Appearance.Language ?? string.Empty;
-                int index;
 
-                if (string.IsNullOrWhiteSpace(preferredLanguage))
+                if (!string.IsNullOrWhiteSpace(preferredLanguage))
                 {
-                    index = 0;
-                }
-                else if (string.Equals(preferredLanguage, "zh-CN", StringComparison.OrdinalIgnoreCase))
-                {
-                    index = 1;
-                }
-                else if (string.Equals(preferredLanguage, "en-US", StringComparison.OrdinalIgnoreCase))
-                {
-                    index = 2;
-                }
-                else
-                {
-                    index = 0;
-                }
-
-                _isApplyingLanguageFromSettings = true;
-                try
-                {
-                    ComboBoxLanguage.SelectedIndex = index;
-                }
-                finally
-                {
-                    _isApplyingLanguageFromSettings = false;
+                    LocalizationHelper.TrySetCulture(preferredLanguage);
                 }
             }
             catch (Exception ex)
@@ -2411,7 +2388,21 @@ namespace Ink_Canvas
             {
                 case "startup":
                 case "crashaction":
-                    break;
+                    {
+                        var sw = new Windows.SettingsViews.SettingsWindow();
+                        sw.Owner = this;
+                        sw.NavigateToPage("StartupPage");
+                        sw.ShowDialog();
+                        return;
+                    }
+                case "gesture":
+                    {
+                        var sw = new Windows.SettingsViews.SettingsWindow();
+                        sw.Owner = this;
+                        sw.NavigateToPage("CanvasPage");
+                        sw.ShowDialog();
+                        return;
+                    }
                 case "ppt":
                     targetGroupBox = GroupBoxPPT;
                     break;
@@ -2425,8 +2416,13 @@ namespace Ink_Canvas
                     targetGroupBox = GroupBoxRandWindow;
                     break;
                 case "theme":
-                    targetGroupBox = GroupBoxAppearanceNewUI;
-                    break;
+                    {
+                        var sw = new Windows.SettingsViews.SettingsWindow();
+                        sw.Owner = this;
+                        sw.NavigateToPage("AppearancePage");
+                        sw.ShowDialog();
+                        return;
+                    }
                 case "shortcuts":
                     // 快捷键设置部分可能尚未实现
                     targetGroupBox = null;
@@ -3051,7 +3047,13 @@ namespace Ink_Canvas
             {
                 var toggle = sender as ToggleSwitch;
                 if (toggle == null) return;
-                Settings.InkToShape.IsInkToShapeEnabled = toggle.IsOn;
+
+                if (sender == FloatingBarToggleSwitchEnableInkToShape)
+                    BoardToggleSwitchEnableInkToShape.IsOn = FloatingBarToggleSwitchEnableInkToShape.IsOn;
+                else
+                    FloatingBarToggleSwitchEnableInkToShape.IsOn = BoardToggleSwitchEnableInkToShape.IsOn;
+
+                Settings.InkToShape.IsInkToShapeEnabled = FloatingBarToggleSwitchEnableInkToShape.IsOn;
                 SaveSettingsToFile();
             }
             catch (Exception ex)
@@ -3454,9 +3456,6 @@ namespace Ink_Canvas
                 // 获取所有滑块控件并添加触摸支持
                 var sliders = new List<Slider>
                 {
-                    ViewboxFloatingBarScaleTransformValueSlider,
-                    ViewboxFloatingBarOpacityValueSlider,
-                    ViewboxFloatingBarOpacityInPPTValueSlider,
                     PPTButtonLeftPositionValueSlider,
                     PPTButtonRightPositionValueSlider,
                     PPTButtonLBPositionValueSlider,
@@ -3797,122 +3796,14 @@ namespace Ink_Canvas
 
         #region Theme Toggle
 
-        /// <summary>
-        /// 主题下拉框选择变化事件
-        /// </summary>
-        private void ComboBoxTheme_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!isLoaded) return;
+        // ComboBoxTheme_SelectionChanged and ComboBoxLanguage_SelectionChanged migrated to AppearancePage
 
-            try
-            {
-                System.Windows.Controls.ComboBox comboBox = sender as System.Windows.Controls.ComboBox;
-                if (comboBox != null)
-                {
-                    Settings.Appearance.Theme = comboBox.SelectedIndex;
-
-                    // 应用新主题
-                    ApplyTheme(comboBox.SelectedIndex);
-
-                    // 保存设置
-                    SaveSettingsToFile();
-
-                    // 显示通知
-                    string themeName;
-                    switch (comboBox.SelectedIndex)
-                    {
-                        case 0:
-                            themeName = "浅色主题";
-                            break;
-                        case 1:
-                            themeName = "深色主题";
-                            break;
-                        case 2:
-                            themeName = "跟随系统";
-                            break;
-                        default:
-                            themeName = "未知主题";
-                            break;
-                    }
-
-                    ShowNotification($"已切换到{themeName}");
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"切换主题时出错: {ex.Message}", LogHelper.LogType.Error);
-                ShowNotification("主题切换失败");
-            }
-        }
-
-
-        private void ComboBoxLanguage_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            try
-            {
-                if (!isLoaded) return;
-                if (_isApplyingLanguageFromSettings) return;
-                if (_isReloadingForLanguageChange) return;
-                if (Settings?.Appearance == null) return;
-                if (ComboBoxLanguage == null) return;
-
-                var index = ComboBoxLanguage.SelectedIndex;
-                string language;
-
-                switch (index)
-                {
-                    case 1:
-                        language = "zh-CN";
-                        break;
-                    case 2:
-                        language = "en-US";
-                        break;
-                    case 0:
-                    default:
-                        language = string.Empty;
-                        break;
-                }
-
-                Settings.Appearance.Language = language;
-                SaveSettingsToFile();
-
-                LocalizationHelper.TrySetCulture(language);
-
-                _isReloadingForLanguageChange = true;
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    try
-                    {
-                        var newWindow = new MainWindow
-                        {
-                            WindowState = WindowState,
-                            Left = Left,
-                            Top = Top
-                        };
-                        newWindow.Show();
-                        Close();
-                    }
-                    catch (Exception ex2)
-                    {
-                        LogHelper.WriteLogToFile($"重建主窗口以应用语言时出错: {ex2.Message}", LogHelper.LogType.Error);
-                        ShowNotification("已更新界面语言设置，重启应用后可完全生效。");
-                        _isReloadingForLanguageChange = false;
-                    }
-                }), DispatcherPriority.ApplicationIdle);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"切换界面语言时出错: {ex.Message}", LogHelper.LogType.Error);
-                ShowNotification("切换界面语言失败。");
-                _isReloadingForLanguageChange = false;
-            }
-        }
 
         /// <summary>
         /// 应用指定主题
         /// </summary>
         /// <param name="themeIndex">主题索引：0-浅色，1-深色，2-跟随系统</param>
-        private void ApplyTheme(int themeIndex)
+        internal void ApplyTheme(int themeIndex)
         {
             try
             {

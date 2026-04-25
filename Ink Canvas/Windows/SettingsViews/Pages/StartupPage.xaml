@@ -89,14 +89,11 @@
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Warning}" />
                         </ui:SettingsCard.HeaderIcon>
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
-                            <RadioButton x:Name="RadioCrashSilentRestart" GroupName="CrashAction"
-                                         Content="{i18n:I18n Key=Crash_SilentRestart}"
-                                         Checked="RadioCrashAction_Checked" />
-                            <RadioButton x:Name="RadioCrashNoAction" GroupName="CrashAction"
-                                         Content="{i18n:I18n Key=Crash_NoAction}"
-                                         Checked="RadioCrashAction_Checked" />
-                        </ikw:SimpleStackPanel>
+                        <ComboBox x:Name="ComboBoxCrashAction"
+                                  SelectionChanged="ComboBoxCrashAction_SelectionChanged">
+                            <ComboBoxItem Content="{i18n:I18n Key=Crash_SilentRestart}" Tag="0" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Crash_NoAction}" Tag="1" />
+                        </ComboBox>
                     </ui:SettingsCard>
 
                     <!-- 底部空白 -->

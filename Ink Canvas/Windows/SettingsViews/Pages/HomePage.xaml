@@ -54,6 +54,13 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}" />
                         </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
+
+                    <ui:SettingsCard Header="个性化" Description="个性化设置"
+                        IsClickEnabled="True" Click="QuickNavCard_Click" Tag="AppearancePage">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Personalize}" />
+                        </ui:SettingsCard.HeaderIcon>
+                    </ui:SettingsCard>
                     
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="其他" />

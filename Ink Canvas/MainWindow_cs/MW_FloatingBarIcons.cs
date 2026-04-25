@@ -3304,7 +3304,7 @@ namespace Ink_Canvas
                 StackPanelControl.Visibility = Visibility.Visible;
         }
 
-        private int currentMode;
+        internal int currentMode;
 
         // 退出批注模式时的全屏还原处理
         private void RestoreFullScreenOnExitAnnotationMode()

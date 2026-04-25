@@ -60,7 +60,8 @@
                     <ui:SettingsExpander x:Name="ExpanderAlwaysOnTop"
                             Header="{i18n:I18n Key=Startup_TopMost}"
                             Description="{i18n:I18n Key=Startup_TopMostHint}"
-                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchAlwaysOnTop, Mode=OneWay}">
+                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchAlwaysOnTop, Mode=OneWay}"
+                            d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}" />
                         </ui:SettingsExpander.HeaderIcon>

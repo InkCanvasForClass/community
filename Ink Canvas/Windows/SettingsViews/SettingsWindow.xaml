@@ -128,8 +128,7 @@
                 <ui:NavigationViewItem
                     x:Name="BasicItem"
                     Content="基本"
-                    Tag="StartupPage"
-                    SelectsOnInvoked="True"
+                    SelectsOnInvoked="False"
                     ToolTipService.ToolTip="基本设置">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Home}"/>
@@ -160,7 +159,7 @@
                 <ui:NavigationViewItem
                     x:Name="MainInterfaceItem"
                     Content="主界面"
-                    Tag="WindowPage"
+                    SelectsOnInvoked="False"
                     ToolTipService.ToolTip="主界面设置">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.TVMonitor}"/>
@@ -173,6 +172,15 @@
                             ToolTipService.ToolTip="窗口设置">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="AppearancePageItem"
+                            Content="个性化"
+                            Tag="AppearancePage"
+                            ToolTipService.ToolTip="个性化设置">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Personalize}"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
@@ -204,8 +212,7 @@
                 <ui:NavigationViewItem
                     x:Name="CanvasPageItem"
                     Content="画板"
-                    Tag="CanvasPage"
-                    SelectsOnInvoked="True"
+                    SelectsOnInvoked="False"
                     ToolTipService.ToolTip="画板与墨迹设置">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>

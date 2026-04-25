@@ -65,7 +65,8 @@
                     </ui:SettingsCard>
 
                     <ui:SettingsExpander Header="{i18n:I18n Key=About_DeviceInfo}"
-                            IsExpanded="True">
+                            IsExpanded="True"
+                            d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Devices}" />
                         </ui:SettingsExpander.HeaderIcon>
