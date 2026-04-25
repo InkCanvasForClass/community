@@ -8,6 +8,7 @@ namespace Ink_Canvas.Helpers
     {
         private static InkRecognitionManager _instance;
         private static readonly object _lock = new object();
+        private readonly object _initSync = new object();
 
         private ModernInkProcessor _modernProcessor;
         private ModernInkAnalyzer _modernAnalyzer;
@@ -31,35 +32,16 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        private InkRecognitionManager()
-        {
-            Initialize();
-        }
+        private InkRecognitionManager() { }
 
         private void Initialize()
         {
+            if (_isInitialized) return;
+
             try
             {
-                var tryModern = WinRtInkShapeRecognizer.IsApiAvailable && Environment.Is64BitProcess;
-
-                _isModernSystemAvailable = false;
-                if (tryModern)
-                {
-                    try
-                    {
-                        _modernProcessor = new ModernInkProcessor();
-                        _modernAnalyzer = new ModernInkAnalyzer();
-                        _isModernSystemAvailable = true;
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile("WinRT 墨迹初始化失败: " + ex.Message, LogHelper.LogType.Warning);
-                        _isModernSystemAvailable = false;
-                        _modernProcessor = null;
-                        _modernAnalyzer = null;
-                    }
-                }
-
+                // 启动阶段只做能力探测，不做 WinRT 组件实例化（避免冷启动延迟）
+                _isModernSystemAvailable = WinRtInkShapeRecognizer.IsApiAvailable && Environment.Is64BitProcess;
                 _isInitialized = true;
             }
             catch (Exception ex)
@@ -69,10 +51,43 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        private void EnsureInitialized()
+        {
+            if (_isInitialized) return;
+            lock (_initSync)
+            {
+                if (_isInitialized) return;
+                Initialize();
+            }
+        }
+
+        private void EnsureModernAnalyzerInitialized()
+        {
+            if (_modernAnalyzer != null || !_isModernSystemAvailable) return;
+
+            lock (_initSync)
+            {
+                if (_modernAnalyzer != null || !_isModernSystemAvailable) return;
+                try
+                {
+                    _modernProcessor ??= new ModernInkProcessor();
+                    _modernAnalyzer = new ModernInkAnalyzer();
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile("WinRT 墨迹模块懒加载失败: " + ex.Message, LogHelper.LogType.Warning);
+                    _isModernSystemAvailable = false;
+                    _modernProcessor = null;
+                    _modernAnalyzer = null;
+                }
+            }
+        }
+
         public Task<InkShapeRecognitionResult> RecognizeShapeAsync(
             StrokeCollection strokes,
             ShapeRecognitionEngineMode mode)
         {
+            EnsureInitialized();
             if (!_isInitialized || strokes == null || strokes.Count == 0)
                 return Task.FromResult(InkShapeRecognitionResult.Empty);
 
@@ -108,6 +123,7 @@ namespace Ink_Canvas.Helpers
             bool applyHandwritingBeautify = false,
             string handwritingFontFamilyList = null)
         {
+            EnsureInitialized();
             if (!_isInitialized)
             {
                 LogHelper.WriteLogToFile("[手写体] CorrectInkAsync 跳过：InkRecognitionManager 未初始化。", LogHelper.LogType.Info);
@@ -148,6 +164,7 @@ namespace Ink_Canvas.Helpers
                     return Task.FromResult(strokes);
                 }
 
+                EnsureModernAnalyzerInitialized();
                 if (_modernAnalyzer == null)
                 {
                     LogHelper.WriteLogToFile(
@@ -177,6 +194,7 @@ namespace Ink_Canvas.Helpers
             StrokeCollection strokes,
             ShapeRecognitionEngineMode mode)
         {
+            EnsureInitialized();
             if (!_isInitialized || strokes == null || strokes.Count == 0)
                 return Task.FromResult(HandwritingRecognitionResult.Empty);
 

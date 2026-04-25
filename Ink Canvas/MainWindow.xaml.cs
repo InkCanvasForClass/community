@@ -1319,13 +1319,19 @@ namespace Ink_Canvas
             BtnWhiteBoardSwitchPrevious.IsEnabled = CurrentWhiteboardIndex != 1;
             BorderInkReplayToolBox.Visibility = Visibility.Collapsed;
 
-            // 提前加载识别后端，优化第一笔等待时间
+            // 识别后端预热改为后台低优先级执行，避免启动主线程被 WinRT 初始化拖慢。
             if (ShapeRecognitionRouter.ShouldRunShapeRecognition(
                     Settings.InkToShape.IsInkToShapeEnabled,
                     ShapeRecognitionRouter.FromSettingsInt(Settings.InkToShape.ShapeRecognitionEngine)))
             {
-                InkRecognizeHelper.WarmupShapeRecognition(
-                    ShapeRecognitionRouter.FromSettingsInt(Settings.InkToShape.ShapeRecognitionEngine));
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    Task.Run(() =>
+                    {
+                        InkRecognizeHelper.WarmupShapeRecognition(
+                            ShapeRecognitionRouter.FromSettingsInt(Settings.InkToShape.ShapeRecognitionEngine));
+                    });
+                }), DispatcherPriority.ContextIdle);
             }
 
             SystemEvents.DisplaySettingsChanged += SystemEventsOnDisplaySettingsChanged;

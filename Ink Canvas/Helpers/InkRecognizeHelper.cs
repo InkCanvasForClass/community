@@ -103,7 +103,6 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                _ = InkRecognitionManager.Instance;
                 if (ShapeRecognitionRouter.ResolveUseWinRt(mode))
                 {
                     WinRtInkShapeRecognizer.Warmup();
