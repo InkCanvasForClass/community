@@ -32,28 +32,18 @@
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{i18n:I18n Key=Advanced_Title}" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Advanced_SpecialScreenMode}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ui:ToggleSwitch x:Name="ToggleSwitchIsSpecialScreen"
-                                         OnContent="{DynamicResource Common_On}"
-                                         OffContent="{DynamicResource Common_Off}"
-                                         IsOn="True"
-                                         Toggled="ToggleSwitchIsSpecialScreen_OnToggled"/>
-                    </ui:SettingsCard>
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchIsSpecialScreen"
+                        Header="{i18n:I18n Key=Advanced_SpecialScreenMode}"
+                        Icon="{x:Static ui:SegoeFluentIcons.Settings}"
+                        IsOn="True"
+                        Toggled="ToggleSwitchIsSpecialScreen_OnToggled"/>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Canvas_DisableHardwareAcceleration}"
-                                     Description="{i18n:I18n Key=Canvas_DisableHardwareAccelerationHint}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Process}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ui:ToggleSwitch x:Name="ToggleSwitchDisableHardwareAcceleration"
-                                         OnContent="{DynamicResource Common_On}"
-                                         OffContent="{DynamicResource Common_Off}"
-                                         IsOn="False"
-                                         Toggled="ToggleSwitchDisableHardwareAcceleration_Toggled"/>
-                    </ui:SettingsCard>
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchDisableHardwareAcceleration"
+                        Header="{i18n:I18n Key=Canvas_DisableHardwareAcceleration}"
+                        Description="{i18n:I18n Key=Canvas_DisableHardwareAccelerationHint}"
+                        Icon="{x:Static ui:SegoeFluentIcons.Settings}"
+                        IsOn="False"
+                        Toggled="ToggleSwitchDisableHardwareAcceleration_Toggled"/>
 
                     <ui:SettingsExpander x:Name="CardTouchMultiplier"
                                          Header="{i18n:I18n Key=Advanced_TouchMultiplier}"
@@ -83,17 +73,12 @@
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Advanced_EraserBindTouchMultiplier}"
-                                     Description="{i18n:I18n Key=Advanced_EraserBindTouchHint}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EraseTool}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ui:ToggleSwitch x:Name="ToggleSwitchEraserBindTouchMultiplier"
-                                         OnContent="{DynamicResource Common_On}"
-                                         OffContent="{DynamicResource Common_Off}"
-                                         IsOn="True"
-                                         Toggled="ToggleSwitchEraserBindTouchMultiplier_Toggled"/>
-                    </ui:SettingsCard>
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchEraserBindTouchMultiplier"
+                        Header="{i18n:I18n Key=Advanced_EraserBindTouchMultiplier}"
+                        Description="{i18n:I18n Key=Advanced_EraserBindTouchHint}"
+                        Icon="{x:Static ui:SegoeFluentIcons.EraseTool}"
+                        IsOn="True"
+                        Toggled="ToggleSwitchEraserBindTouchMultiplier_Toggled"/>
 
                     <ui:SettingsCard Header="{i18n:I18n Key=Advanced_NibModeBoundsWidthHeader}">
                         <Slider x:Name="NibModeBoundsWidthSlider"
@@ -111,50 +96,32 @@
                                 ValueChanged="FingerModeBoundsWidthSlider_ValueChanged" />
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Advanced_QuadIRMode}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FullScreen}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ui:ToggleSwitch x:Name="ToggleSwitchIsQuadIR"
-                                         OnContent="{DynamicResource Common_On}"
-                                         OffContent="{DynamicResource Common_Off}"
-                                         IsOn="True"
-                                         Toggled="ToggleSwitchIsQuadIR_Toggled"/>
-                    </ui:SettingsCard>
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchIsQuadIR"
+                        Header="{i18n:I18n Key=Advanced_QuadIRMode}"
+                        Icon="{x:Static ui:SegoeFluentIcons.FullScreen}"
+                        IsOn="True"
+                        Toggled="ToggleSwitchIsQuadIR_Toggled"/>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{i18n:I18n Key=Advanced_Logging}" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Advanced_Logging}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.OpenFile}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ui:ToggleSwitch x:Name="ToggleSwitchIsLogEnabled"
-                                         OnContent="{DynamicResource Common_On}"
-                                         OffContent="{DynamicResource Common_Off}"
-                                         IsOn="True"
-                                         Toggled="ToggleSwitchIsLogEnabled_Toggled"/>
-                    </ui:SettingsCard>
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchIsLogEnabled"
+                        Header="{i18n:I18n Key=Advanced_Logging}"
+                        Icon="{x:Static ui:SegoeFluentIcons.OpenFile}"
+                        IsOn="True"
+                        Toggled="ToggleSwitchIsLogEnabled_Toggled"/>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Advanced_LogByDate}"
-                                     Description="{i18n:I18n Key=Advanced_LogRotateHint}">
-                        <ui:ToggleSwitch x:Name="ToggleSwitchIsSaveLogByDate"
-                                         OnContent="{DynamicResource Common_On}"
-                                         OffContent="{DynamicResource Common_Off}"
-                                         IsOn="True"
-                                         Toggled="ToggleSwitchIsSaveLogByDate_Toggled"/>
-                    </ui:SettingsCard>
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchIsSaveLogByDate"
+                        Header="{i18n:I18n Key=Advanced_LogByDate}"
+                        Description="{i18n:I18n Key=Advanced_LogRotateHint}"
+                        IsOn="True"
+                        Toggled="ToggleSwitchIsSaveLogByDate_Toggled"/>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Advanced_ConfirmExit}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.SignOut}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ui:ToggleSwitch x:Name="ToggleSwitchIsSecondConfimeWhenShutdownApp"
-                                         OnContent="{DynamicResource Common_On}"
-                                         OffContent="{DynamicResource Common_Off}"
-                                         IsOn="True"
-                                         Toggled="ToggleSwitchIsSecondConfimeWhenShutdownApp_Toggled"/>
-                    </ui:SettingsCard>
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchIsSecondConfimeWhenShutdownApp"
+                        Header="{i18n:I18n Key=Advanced_ConfirmExit}"
+                        Icon="{x:Static ui:SegoeFluentIcons.SignOut}"
+                        IsOn="True"
+                        Toggled="ToggleSwitchIsSecondConfimeWhenShutdownApp_Toggled"/>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{i18n:I18n Key=Backup_Title}" />
@@ -163,21 +130,15 @@
                                Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                                TextWrapping="Wrap" Margin="1,0,0,4" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Backup_AutoBeforeUpdate}">
-                        <ui:ToggleSwitch x:Name="ToggleSwitchIsAutoBackupBeforeUpdate"
-                                         OnContent="{DynamicResource Common_On}"
-                                         OffContent="{DynamicResource Common_Off}"
-                                         IsOn="True"
-                                         Toggled="ToggleSwitchIsAutoBackupBeforeUpdate_Toggled"/>
-                    </ui:SettingsCard>
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchIsAutoBackupBeforeUpdate"
+                        Header="{i18n:I18n Key=Backup_AutoBeforeUpdate}"
+                        IsOn="True"
+                        Toggled="ToggleSwitchIsAutoBackupBeforeUpdate_Toggled"/>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Backup_AutoPeriodic}">
-                        <ui:ToggleSwitch x:Name="ToggleSwitchIsAutoBackupEnabled"
-                                         OnContent="{DynamicResource Common_On}"
-                                         OffContent="{DynamicResource Common_Off}"
-                                         IsOn="True"
-                                         Toggled="ToggleSwitchIsAutoBackupEnabled_Toggled"/>
-                    </ui:SettingsCard>
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchIsAutoBackupEnabled"
+                        Header="{i18n:I18n Key=Backup_AutoPeriodic}"
+                        IsOn="True"
+                        Toggled="ToggleSwitchIsAutoBackupEnabled_Toggled"/>
 
                     <ui:SettingsCard Header="{i18n:I18n Key=Backup_Interval}"
                                      Description="{i18n:I18n Key=Backup_Interval_DefaultHint}">

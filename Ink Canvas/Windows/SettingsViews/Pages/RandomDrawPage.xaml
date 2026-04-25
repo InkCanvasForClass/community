@@ -8,6 +8,7 @@
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
+      xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       mc:Ignorable="d"
       Title="{i18n:I18n Key=Random_Title}">
 
@@ -31,32 +32,26 @@
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{i18n:I18n Key=Random_Title}" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Random_ShowEditNamesButton}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ui:ToggleSwitch x:Name="ToggleSwitchDisplayRandWindowNamesInputBtn"
-                                          IsOn="True"
-                                          Toggled="ToggleSwitchDisplayRandWindowNamesInputBtn_OnToggled"/>
-                    </ui:SettingsCard>
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchDisplayRandWindowNamesInputBtn"
+                        Header="{i18n:I18n Key=Random_ShowEditNamesButton}"
+                        Icon="{x:Static ui:SegoeFluentIcons.Edit}"
+                        IsOn="True"
+                        Toggled="ToggleSwitchDisplayRandWindowNamesInputBtn_OnToggled"/>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Random_EnableButtons}">
-                        <ui:ToggleSwitch x:Name="ToggleSwitchShowRandomAndSingleDraw"
-                                          IsOn="True"
-                                          Toggled="ToggleSwitchShowRandomAndSingleDraw_Toggled"/>
-                    </ui:SettingsCard>
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchShowRandomAndSingleDraw"
+                        Header="{i18n:I18n Key=Random_EnableButtons}"
+                        IsOn="True"
+                        Toggled="ToggleSwitchShowRandomAndSingleDraw_Toggled"/>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Random_EnableQuickButton}">
-                        <ui:ToggleSwitch x:Name="ToggleSwitchEnableQuickDraw"
-                                          IsOn="True"
-                                          Toggled="ToggleSwitchEnableQuickDraw_Toggled"/>
-                    </ui:SettingsCard>
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchEnableQuickDraw"
+                        Header="{i18n:I18n Key=Random_EnableQuickButton}"
+                        IsOn="True"
+                        Toggled="ToggleSwitchEnableQuickDraw_Toggled"/>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Random_UseExternal}">
-                        <ui:ToggleSwitch x:Name="ToggleSwitchExternalCaller"
-                                          IsOn="False"
-                                          Toggled="ToggleSwitchExternalCaller_Toggled"/>
-                    </ui:SettingsCard>
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchExternalCaller"
+                        Header="{i18n:I18n Key=Random_UseExternal}"
+                        IsOn="False"
+                        Toggled="ToggleSwitchExternalCaller_Toggled"/>
 
                     <ui:SettingsCard Header="{i18n:I18n Key=Random_ExternalTypeLabel}">
                         <ComboBox x:Name="ComboBoxExternalCallerType"
@@ -103,17 +98,15 @@
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{i18n:I18n Key=Random_NewUI_Title}" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Random_NewUI_Enable}">
-                        <ui:ToggleSwitch x:Name="ToggleSwitchUseNewRollCallUI"
-                                          IsOn="True"
-                                          Toggled="ToggleSwitchUseNewRollCallUI_Toggled"/>
-                    </ui:SettingsCard>
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchUseNewRollCallUI"
+                        Header="{i18n:I18n Key=Random_NewUI_Enable}"
+                        IsOn="True"
+                        Toggled="ToggleSwitchUseNewRollCallUI_Toggled"/>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Random_ML_AvoidRepeat}">
-                        <ui:ToggleSwitch x:Name="ToggleSwitchEnableMLAvoidance"
-                                          IsOn="True"
-                                          Toggled="ToggleSwitchEnableMLAvoidance_Toggled"/>
-                    </ui:SettingsCard>
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchEnableMLAvoidance"
+                        Header="{i18n:I18n Key=Random_ML_AvoidRepeat}"
+                        IsOn="True"
+                        Toggled="ToggleSwitchEnableMLAvoidance_Toggled"/>
 
                     <ui:SettingsCard Header="{i18n:I18n Key=Random_ML_HistoryCount}">
                         <Slider x:Name="MLAvoidanceHistorySlider"
@@ -138,29 +131,25 @@
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{i18n:I18n Key=Timer_Title}" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Timer_UseLegacyButtons}">
-                        <ui:ToggleSwitch x:Name="ToggleSwitchUseLegacyTimerUI"
-                                          IsOn="False"
-                                          Toggled="ToggleSwitchUseLegacyTimerUI_Toggled"/>
-                    </ui:SettingsCard>
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchUseLegacyTimerUI"
+                        Header="{i18n:I18n Key=Timer_UseLegacyButtons}"
+                        IsOn="False"
+                        Toggled="ToggleSwitchUseLegacyTimerUI_Toggled"/>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Timer_NewUI}">
-                        <ui:ToggleSwitch x:Name="ToggleSwitchUseNewStyleUI"
-                                          IsOn="False"
-                                          Toggled="ToggleSwitchUseNewStyleUI_Toggled"/>
-                    </ui:SettingsCard>
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchUseNewStyleUI"
+                        Header="{i18n:I18n Key=Timer_NewUI}"
+                        IsOn="False"
+                        Toggled="ToggleSwitchUseNewStyleUI_Toggled"/>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Timer_EnableCountUp}">
-                        <ui:ToggleSwitch x:Name="ToggleSwitchEnableOvertimeCountUp"
-                                          IsOn="False"
-                                          Toggled="ToggleSwitchEnableOvertimeCountUp_Toggled"/>
-                    </ui:SettingsCard>
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchEnableOvertimeCountUp"
+                        Header="{i18n:I18n Key=Timer_EnableCountUp}"
+                        IsOn="False"
+                        Toggled="ToggleSwitchEnableOvertimeCountUp_Toggled"/>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Timer_OvertimeHighlight}">
-                        <ui:ToggleSwitch x:Name="ToggleSwitchEnableOvertimeRedText"
-                                          IsOn="True"
-                                          Toggled="ToggleSwitchEnableOvertimeRedText_Toggled"/>
-                    </ui:SettingsCard>
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchEnableOvertimeRedText"
+                        Header="{i18n:I18n Key=Timer_OvertimeHighlight}"
+                        IsOn="True"
+                        Toggled="ToggleSwitchEnableOvertimeRedText_Toggled"/>
 
                     <ui:SettingsCard Header="{i18n:I18n Key=Timer_Volume}">
                         <Slider x:Name="TimerVolumeSlider"
@@ -177,11 +166,10 @@
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Timer_Progressive}">
-                        <ui:ToggleSwitch x:Name="ToggleSwitchEnableProgressiveReminder"
-                                          IsOn="False"
-                                          Toggled="ToggleSwitchEnableProgressiveReminder_Toggled"/>
-                    </ui:SettingsCard>
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchEnableProgressiveReminder"
+                        Header="{i18n:I18n Key=Timer_Progressive}"
+                        IsOn="False"
+                        Toggled="ToggleSwitchEnableProgressiveReminder_Toggled"/>
 
                     <ui:SettingsCard Header="{i18n:I18n Key=Timer_ProgressiveVolume}">
                         <Slider x:Name="ProgressiveReminderVolumeSlider"
