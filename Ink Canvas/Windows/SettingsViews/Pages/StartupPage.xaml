@@ -69,6 +69,36 @@
                             SwitchName="ToggleSwitchPPTOnlyMode"
                             Toggled="ToggleSwitchPPTOnlyMode_Toggled" />
 
+                    <!-- 笔尖模式 -->
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="{i18n:I18n Key=Startup_EnableNibMode}" />
+
+                    <controls:LabeledSettingsCard x:Name="CardEnableNibMode"
+                            Header="{i18n:I18n Key=Startup_EnableNibMode}"
+                            Description="{i18n:I18n Key=Startup_EnableNibModeHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
+                            SwitchName="ToggleSwitchEnableNibMode"
+                            Toggled="ToggleSwitchEnableNibMode_Toggled" />
+
+                    <!-- 崩溃后操作 -->
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="{i18n:I18n Key=Crash_Title}" />
+
+                    <ui:SettingsCard Header="{i18n:I18n Key=Crash_Title}"
+                            Description="{i18n:I18n Key=Crash_Desc}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Warning}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
+                            <RadioButton x:Name="RadioCrashSilentRestart" GroupName="CrashAction"
+                                         Content="{i18n:I18n Key=Crash_SilentRestart}"
+                                         Checked="RadioCrashAction_Checked" />
+                            <RadioButton x:Name="RadioCrashNoAction" GroupName="CrashAction"
+                                         Content="{i18n:I18n Key=Crash_NoAction}"
+                                         Checked="RadioCrashAction_Checked" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
                     <!-- 底部空白 -->
                     <Rectangle Height="48" />
                 

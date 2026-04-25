@@ -1029,8 +1029,14 @@
   <data name="Startup_ExternalProtocolHint" xml:space="preserve">
     <value>通过 icc:// 协议从外部控制软件</value>
   </data>
+  <data name="Startup_EnableNibMode" xml:space="preserve">
+    <value>笔尖模式</value>
+  </data>
+  <data name="Startup_EnableNibModeHint" xml:space="preserve">
+    <value>启用后仅响应笔尖触摸，忽略手掌和手指</value>
+  </data>
   <data name="Canvas_GroupTitle" xml:space="preserve">
-    <value>画板和墨迹</value>
+    <value>画板</value>
   </data>
   <data name="Canvas_ShowCursor" xml:space="preserve">
     <value>显示画笔光标</value>

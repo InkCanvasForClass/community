@@ -166,17 +166,6 @@ namespace Ink_Canvas
 
         #region Startup
 
-        /// <summary>
-        /// 处理笔尖模式开关状态更改事件
-        /// </summary>
-        /// <param name="sender">事件发送者</param>
-        /// <param name="e">路由事件参数</param>
-        /// <remarks>
-        /// 当笔尖模式开关状态更改时：
-        /// 1. 同步更新两个笔尖模式开关的状态
-        /// 2. 保存笔尖模式设置
-        /// 3. 根据笔尖模式设置更新边界宽度
-        /// </remarks>
         private void ToggleSwitchEnableNibMode_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -2653,13 +2642,6 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
-        private void ToggleSwitchAutoSwitchTwoFingerGesture_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!isLoaded) return;
-            Settings.Gesture.AutoSwitchTwoFingerGesture = ToggleSwitchAutoSwitchTwoFingerGesture.IsOn;
-            SaveSettingsToFile();
-        }
-
         private void ToggleSwitchEnableTwoFingerZoom_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -2718,8 +2700,7 @@ namespace Ink_Canvas
 
                     palmEraserWasEnabledBeforeMultiTouch = Settings.Canvas.EnablePalmEraser;
                     Settings.Canvas.EnablePalmEraser = false;
-                    if (ToggleSwitchEnablePalmEraser != null)
-                        ToggleSwitchEnablePalmEraser.IsOn = false;
+                    SaveSettingsToFile();
 
                     // 恢复到之前的编辑状态
                     inkCanvas.EditingMode = currentEditingMode;
@@ -2754,8 +2735,7 @@ namespace Ink_Canvas
                     if (palmEraserWasEnabledBeforeMultiTouch)
                     {
                         Settings.Canvas.EnablePalmEraser = true;
-                        if (ToggleSwitchEnablePalmEraser != null)
-                            ToggleSwitchEnablePalmEraser.IsOn = true;
+                        SaveSettingsToFile();
                     }
 
                     // 恢复到之前的编辑状态
@@ -2840,7 +2820,6 @@ namespace Ink_Canvas
             else
                 ToggleSwitchEnableTwoFingerRotation.IsOn = BoardToggleSwitchEnableTwoFingerRotation.IsOn;
             Settings.Gesture.IsEnableTwoFingerRotation = ToggleSwitchEnableTwoFingerRotation.IsOn;
-            Settings.Gesture.IsEnableTwoFingerRotationOnSelection = ToggleSwitchEnableTwoFingerRotationOnSelection.IsOn;
             CheckEnableTwoFingerGestureBtnColorPrompt();
             SaveSettingsToFile();
         }
@@ -4247,13 +4226,6 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
-        private void ToggleSwitchEnablePalmEraser_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!isLoaded) return;
-            Settings.Canvas.EnablePalmEraser = ToggleSwitchEnablePalmEraser.IsOn;
-            SaveSettingsToFile();
-        }
-
         #region 底部按钮水平位置控制
 
         private void PPTButtonLBPositionValueSlider_ValueChanged(object sender, RoutedEventArgs e)
@@ -4356,13 +4328,6 @@ namespace Ink_Canvas
         }
 
         #endregion
-
-        private void ComboBoxPalmEraserSensitivity_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!isLoaded) return;
-            Settings.Canvas.PalmEraserSensitivity = ComboBoxPalmEraserSensitivity.SelectedIndex;
-            SaveSettingsToFile();
-        }
 
         #region 文件关联管理
 

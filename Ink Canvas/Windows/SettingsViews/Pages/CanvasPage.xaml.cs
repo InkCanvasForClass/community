@@ -1,4 +1,3 @@
-using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Diagnostics;
@@ -57,26 +56,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     BrushAutoRestoreAlphaSlider.Value = settings.Canvas.BrushAutoRestoreAlpha;
                     CardEnableEraserAutoSwitchBack.IsOn = settings.Canvas.EnableEraserAutoSwitchBack;
                     EraserAutoSwitchBackDelaySlider.Value = settings.Canvas.EraserAutoSwitchBackDelaySeconds;
-                    CardAutoStraightenLine.IsOn = settings.Canvas.AutoStraightenLine;
-                    AutoStraightenLineThresholdSlider.Value = settings.Canvas.AutoStraightenLineThreshold;
-                    CardHighPrecisionLineStraighten.IsOn = settings.Canvas.HighPrecisionLineStraighten;
-                    CardLineEndpointSnapping.IsOn = settings.Canvas.LineEndpointSnapping;
                 }
 
-                if (settings.InkToShape != null)
+                if (settings.Gesture != null)
                 {
-                    CardEnableInkToShape.IsOn = settings.InkToShape.IsInkToShapeEnabled;
-                    int eng = settings.InkToShape.ShapeRecognitionEngine;
-                    if (eng < 0) eng = 0;
-                    if (eng > 2) eng = 2;
-                    ComboBoxShapeRecognitionEngine.SelectedIndex = eng;
-                    CardEnableWinRtHandwritingStrokeBeautify.IsOn = settings.InkToShape.EnableWinRtHandwritingStrokeBeautify;
-                    CardEnableInkToShapeNoFakePressureRectangle.IsOn = settings.InkToShape.IsInkToShapeNoFakePressureRectangle;
-                    CardEnableInkToShapeNoFakePressureTriangle.IsOn = settings.InkToShape.IsInkToShapeNoFakePressureTriangle;
-                    ToggleCheckboxEnableInkToShapeTriangle.IsChecked = settings.InkToShape.IsInkToShapeTriangle;
-                    ToggleCheckboxEnableInkToShapeRectangle.IsChecked = settings.InkToShape.IsInkToShapeRectangle;
-                    ToggleCheckboxEnableInkToShapeRounded.IsChecked = settings.InkToShape.IsInkToShapeRounded;
-                    LineStraightenSensitivitySlider.Value = settings.InkToShape.LineStraightenSensitivity;
+                    CardAutoSwitchTwoFingerGesture.IsOn = settings.Gesture.AutoSwitchTwoFingerGesture;
+                    CardEnableTwoFingerRotationOnSelection.IsOn = settings.Gesture.IsEnableTwoFingerRotationOnSelection;
+                }
+
+                if (settings.Canvas != null)
+                {
+                    CardEnablePalmEraser.IsOn = settings.Canvas.EnablePalmEraser;
+                    ComboBoxPalmEraserSensitivity.SelectedIndex = settings.Canvas.PalmEraserSensitivity;
                 }
             }
             catch (Exception ex)
@@ -107,8 +98,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 Debug.WriteLine($"加载画笔恢复颜色时出错: {ex.Message}");
             }
         }
-
-        #region 画板设置事件处理
 
         private void ToggleSwitchShowCursor_Toggled(object sender, RoutedEventArgs e)
         {
@@ -295,111 +284,32 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.SaveSettingsToFile();
         }
 
-        #endregion
-
-        #region 墨迹识别事件处理
-
-        private void ToggleSwitchEnableInkToShape_Toggled(object sender, RoutedEventArgs e)
+        private void ToggleSwitchAutoSwitchTwoFingerGesture_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.InkToShape.IsInkToShapeEnabled = CardEnableInkToShape.IsOn;
+            SettingsManager.Settings.Gesture.AutoSwitchTwoFingerGesture = CardAutoSwitchTwoFingerGesture.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 
-        private void ComboBoxShapeRecognitionEngine_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!_isLoaded || ComboBoxShapeRecognitionEngine == null) return;
-            int idx = ComboBoxShapeRecognitionEngine.SelectedIndex;
-            if (idx < 0) idx = 0;
-            if (idx > 2) idx = 2;
-            SettingsManager.Settings.InkToShape.ShapeRecognitionEngine = idx;
-            SettingsManager.SaveSettingsToFile();
-        }
-
-        private void ToggleSwitchEnableWinRtHandwritingStrokeBeautify_Toggled(object sender, RoutedEventArgs e)
+        private void ToggleSwitchEnableTwoFingerRotationOnSelection_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.InkToShape.EnableWinRtHandwritingStrokeBeautify = CardEnableWinRtHandwritingStrokeBeautify.IsOn;
+            SettingsManager.Settings.Gesture.IsEnableTwoFingerRotationOnSelection = CardEnableTwoFingerRotationOnSelection.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 
-        private void ToggleSwitchEnableInkToShapeNoFakePressureRectangle_Toggled(object sender, RoutedEventArgs e)
+        private void ToggleSwitchEnablePalmEraser_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.InkToShape.IsInkToShapeNoFakePressureRectangle = CardEnableInkToShapeNoFakePressureRectangle.IsOn;
+            SettingsManager.Settings.Canvas.EnablePalmEraser = CardEnablePalmEraser.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 
-        private void ToggleSwitchEnableInkToShapeNoFakePressureTriangle_Toggled(object sender, RoutedEventArgs e)
+        private void ComboBoxPalmEraserSensitivity_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.InkToShape.IsInkToShapeNoFakePressureTriangle = CardEnableInkToShapeNoFakePressureTriangle.IsOn;
+            SettingsManager.Settings.Canvas.PalmEraserSensitivity = ComboBoxPalmEraserSensitivity.SelectedIndex;
             SettingsManager.SaveSettingsToFile();
         }
-
-        private void ToggleCheckboxEnableInkToShapeTriangle_CheckedChanged(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.InkToShape.IsInkToShapeTriangle = (bool)ToggleCheckboxEnableInkToShapeTriangle.IsChecked;
-            SettingsManager.SaveSettingsToFile();
-        }
-
-        private void ToggleCheckboxEnableInkToShapeRectangle_CheckedChanged(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.InkToShape.IsInkToShapeRectangle = (bool)ToggleCheckboxEnableInkToShapeRectangle.IsChecked;
-            SettingsManager.SaveSettingsToFile();
-        }
-
-        private void ToggleCheckboxEnableInkToShapeRounded_CheckedChanged(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.InkToShape.IsInkToShapeRounded = (bool)ToggleCheckboxEnableInkToShapeRounded.IsChecked;
-            SettingsManager.SaveSettingsToFile();
-        }
-
-        private void ToggleSwitchAutoStraightenLine_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.AutoStraightenLine = CardAutoStraightenLine.IsOn;
-            SettingsManager.SaveSettingsToFile();
-        }
-
-        private void AutoStraightenLineThresholdSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.AutoStraightenLineThreshold = (int)e.NewValue;
-            SettingsManager.SaveSettingsToFile();
-        }
-
-        private void LineStraightenSensitivitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.InkToShape.LineStraightenSensitivity = e.NewValue;
-            SettingsManager.SaveSettingsToFile();
-        }
-
-        private void ToggleSwitchHighPrecisionLineStraighten_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.HighPrecisionLineStraighten = CardHighPrecisionLineStraighten.IsOn;
-            SettingsManager.SaveSettingsToFile();
-        }
-
-        private void ToggleSwitchLineEndpointSnapping_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.LineEndpointSnapping = CardLineEndpointSnapping.IsOn;
-            SettingsManager.SaveSettingsToFile();
-        }
-
-        private void LineEndpointSnappingThresholdSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.LineEndpointSnappingThreshold = (int)e.NewValue;
-            SettingsManager.SaveSettingsToFile();
-        }
-
-        #endregion
     }
 }

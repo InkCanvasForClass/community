@@ -71,10 +71,17 @@
                         </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="画板" Description="画板与墨迹设置"
+                    <ui:SettingsCard Header="画板" Description="画板设置"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="CanvasPage">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
+                        </ui:SettingsCard.HeaderIcon>
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard Header="墨迹纠正" Description="墨迹纠正设置"
+                        IsClickEnabled="True" Click="QuickNavCard_Click" Tag="InkRecognitionPage">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Draw}" />
                         </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
 

@@ -987,8 +987,14 @@
   <data name="Startup_ExternalProtocolHint" xml:space="preserve">
     <value>Control via icc:// protocol</value>
   </data>
+  <data name="Startup_EnableNibMode" xml:space="preserve">
+    <value>Nib Mode</value>
+  </data>
+  <data name="Startup_EnableNibModeHint" xml:space="preserve">
+    <value>Only respond to pen tip touch, ignore palm and finger</value>
+  </data>
   <data name="Canvas_GroupTitle" xml:space="preserve">
-    <value>Canvas and ink</value>
+    <value>Canvas</value>
   </data>
   <data name="Canvas_ShowCursor" xml:space="preserve">
     <value>Show pen cursor</value>

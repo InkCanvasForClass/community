@@ -1336,12 +1336,6 @@ namespace Ink_Canvas
                 ScheduleStartupFoldAbsenceVerification();
             }
 
-            // 恢复崩溃后操作设置
-            if (App.CrashAction == App.CrashActionType.SilentRestart)
-                RadioCrashSilentRestart.IsChecked = true;
-            else
-                RadioCrashNoAction.IsChecked = true;
-
             // 显示快抽悬浮按钮
             ShowQuickDrawFloatingButton();
 
@@ -2122,24 +2116,6 @@ namespace Ink_Canvas
             }
         }
 
-        // 新增：崩溃后操作设置按钮事件
-        private void RadioCrashAction_Checked(object sender, RoutedEventArgs e)
-        {
-            if (RadioCrashSilentRestart != null && RadioCrashSilentRestart.IsChecked == true)
-            {
-                App.CrashAction = App.CrashActionType.SilentRestart;
-                Settings.Startup.CrashAction = 0;
-            }
-            else if (RadioCrashNoAction != null && RadioCrashNoAction.IsChecked == true)
-            {
-                App.CrashAction = App.CrashActionType.NoAction;
-                Settings.Startup.CrashAction = 1;
-            }
-            SaveSettingsToFile();
-            // 强制同步全局变量，防止后台逻辑未及时感知
-            App.SyncCrashActionFromSettings();
-        }
-
         // 添加一个辅助方法，根据当前编辑模式设置光标
         public void SetCursorBasedOnEditingMode(InkCanvas canvas)
         {
@@ -2434,13 +2410,7 @@ namespace Ink_Canvas
             switch (sectionTag.ToLower())
             {
                 case "startup":
-                    targetGroupBox = GroupBoxStartup;
-                    break;
-                case "gesture":
-                    targetGroupBox = GroupBoxGesture;
-                    break;
                 case "crashaction":
-                    targetGroupBox = GroupBoxCrashAction;
                     break;
                 case "ppt":
                     targetGroupBox = GroupBoxPPT;

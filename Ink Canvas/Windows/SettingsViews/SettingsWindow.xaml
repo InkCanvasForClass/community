@@ -205,10 +205,31 @@
                     x:Name="CanvasPageItem"
                     Content="画板"
                     Tag="CanvasPage"
+                    SelectsOnInvoked="True"
                     ToolTipService.ToolTip="画板与墨迹设置">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
                     </ui:NavigationViewItem.Icon>
+                    <ui:NavigationViewItem.MenuItems>
+                        <ui:NavigationViewItem
+                            x:Name="CanvasSubPageItem"
+                            Content="画板"
+                            Tag="CanvasPage"
+                            ToolTipService.ToolTip="画板设置">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="InkRecognitionPageItem"
+                            Content="墨迹纠正"
+                            Tag="InkRecognitionPage"
+                            ToolTipService.ToolTip="墨迹纠正设置">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Draw}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                    </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
 
                 <!-- Debug -->

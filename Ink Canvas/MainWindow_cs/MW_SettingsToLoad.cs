@@ -231,25 +231,21 @@ namespace Ink_Canvas
             else
             {
                 Settings.Startup = new Startup();
-                Settings.Startup.IsEnableNibMode = false; // 默认关闭笔尖模式
-                ToggleSwitchEnableNibMode.IsOn = false; // 默认关闭笔尖模式
-                BoardToggleSwitchEnableNibMode.IsOn = false; // 默认关闭笔尖模式
-                BoundsWidth = Settings.Advanced.FingerModeBoundsWidth; // 使用手指模式边界宽度
+                Settings.Startup.IsEnableNibMode = false;
+                ToggleSwitchEnableNibMode.IsOn = false;
+                BoardToggleSwitchEnableNibMode.IsOn = false;
+                BoundsWidth = Settings.Advanced.FingerModeBoundsWidth;
             }
 
-            // 恢复崩溃后操作设置
             if (Settings.Startup != null)
             {
-                // 恢复崩溃后操作选项
                 if (Settings.Startup.CrashAction == 0)
                 {
                     App.CrashAction = App.CrashActionType.SilentRestart;
-                    if (RadioCrashSilentRestart != null) RadioCrashSilentRestart.IsChecked = true;
                 }
                 else
                 {
                     App.CrashAction = App.CrashActionType.NoAction;
-                    if (RadioCrashNoAction != null) RadioCrashNoAction.IsChecked = true;
                 }
             }
 
@@ -658,13 +654,6 @@ namespace Ink_Canvas
                 ToggleSwitchEnableTwoFingerRotation.IsOn = Settings.Gesture.IsEnableTwoFingerRotation;
                 BoardToggleSwitchEnableTwoFingerRotation.IsOn = Settings.Gesture.IsEnableTwoFingerRotation;
 
-                ToggleSwitchAutoSwitchTwoFingerGesture.IsOn = Settings.Gesture.AutoSwitchTwoFingerGesture;
-
-                ToggleSwitchEnableTwoFingerRotation.IsOn = Settings.Gesture.IsEnableTwoFingerRotation;
-
-                ToggleSwitchEnableTwoFingerRotationOnSelection.IsOn =
-                    Settings.Gesture.IsEnableTwoFingerRotationOnSelection;
-
                 if (Settings.Gesture.AutoSwitchTwoFingerGesture)
                 {
                     if (Topmost)
@@ -853,13 +842,6 @@ namespace Ink_Canvas
             else
             {
                 Settings.Canvas = new Canvas();
-            }
-
-            // Palm Eraser
-            if (Settings.Canvas != null)
-            {
-                ToggleSwitchEnablePalmEraser.IsOn = Settings.Canvas.EnablePalmEraser;
-                ComboBoxPalmEraserSensitivity.SelectedIndex = Settings.Canvas.PalmEraserSensitivity;
             }
 
             // Advanced

@@ -640,63 +640,7 @@
                                                 Padding="15,5" Margin="0,10,0,0"/>
                                     </ikw:SimpleStackPanel>
                                 </GroupBox>
-                            
-                                <GroupBox Name="GroupBoxStartup">
-                                    <GroupBox.Header>
-                                        <TextBlock Margin="0,12,0,0" Text="{i18n:I18n Key=Startup_Start}" FontWeight="Bold" Foreground="#fafafa"
-                                                   FontSize="26" />
-                                    </GroupBox.Header>
-                                    <ikw:SimpleStackPanel Spacing="6">
-                                        <!--<ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchAutoHideCanvas" Header="自动隐藏画板" Toggled="ToggleSwitchAutoHideCanvas_Toggled"/>
-                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchAutoEnterModeFinger" Header="自动进入手指模式" Toggled="ToggleSwitchAutoEnterModeFinger_Toggled"/>-->
-                                    </ikw:SimpleStackPanel>
-                                </GroupBox>
-                                <GroupBox Name="GroupBoxCrashAction">
-                                    <GroupBox.Header>
-                                        <TextBlock Margin="0,12,0,0" Text="{i18n:I18n Key=Crash_Title}" FontWeight="Bold" Foreground="#fafafa"
-                                                   FontSize="26" />
-                                    </GroupBox.Header>
-                                    <ikw:SimpleStackPanel Spacing="6">
-                                        <TextBlock Text="{i18n:I18n Key=Crash_Desc}" Foreground="#a1a1aa" TextWrapping="Wrap" Width="420" />
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,4,0,0">
-                                            <RadioButton x:Name="RadioCrashSilentRestart" GroupName="CrashAction"
-                                                         Content="{i18n:I18n Key=Crash_SilentRestart}" FontSize="14" Margin="0,0,24,0"
-                                                         Checked="RadioCrashAction_Checked"/>
-                                            <RadioButton x:Name="RadioCrashNoAction" GroupName="CrashAction"
-                                                         Content="{i18n:I18n Key=Crash_NoAction}" FontSize="14"
-                                                         Checked="RadioCrashAction_Checked"/>
-                                        </StackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=Crash_Hint}" Foreground="#a1a1aa" TextWrapping="Wrap" Width="420" />
-                                    </ikw:SimpleStackPanel>      
-                                </GroupBox>
-                                <GroupBox Name="GroupBoxGesture">
-                                    <GroupBox.Header>
-                                        <TextBlock Margin="0,12,0,0" Text="{i18n:I18n Key=Gesture_Title}" FontWeight="Bold" Foreground="#fafafa"
-                                                   FontSize="26" />
-                                    </GroupBox.Header>
-                                    <ikw:SimpleStackPanel Spacing="6">
-                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchAutoSwitchTwoFingerGesture" Label="{i18n:I18n Key=Gesture_AutoToggleTwoFinger}" Hint="{i18n:I18n Key=Gesture_AutoToggleHint}" IsOn="True" Toggled="ToggleSwitchAutoSwitchTwoFingerGesture_Toggled"/>
-                                        <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
-                                              StrokeThickness="1" Margin="0,4,0,4" />
-                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableTwoFingerRotationOnSelection" Label="{i18n:I18n Key=Gesture_AllowRotateScale}" Hint="{i18n:I18n Key=Gesture_AllowRotateScaleHint}" IsOn="True" Toggled="ToggleSwitchEnableTwoFingerRotation_Toggled"/>
-                                        <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
-                                              StrokeThickness="1" Margin="0,4,0,4" />
-                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnablePalmEraser" Label="{i18n:I18n Key=Gesture_EnablePalmEraser}" Hint="{i18n:I18n Key=Gesture_PalmHint}" IsOn="False" Toggled="ToggleSwitchEnablePalmEraser_Toggled"/>  
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left"
-                                                             Visibility="{Binding ElementName=ToggleSwitchEnablePalmEraser, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">  
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Gesture_PalmSensitivity}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ComboBox Name="ComboBoxPalmEraserSensitivity" SelectionChanged="ComboBoxPalmEraserSensitivity_SelectionChanged">
-                                                <ComboBoxItem Content="{i18n:I18n Key=Gesture_PalmSensitivityLow}" />
-                                                <ComboBoxItem Content="{i18n:I18n Key=Gesture_PalmSensitivityMedium}" />
-                                                <ComboBoxItem Content="{i18n:I18n Key=Gesture_PalmSensitivityHigh}" />
-                                            </ComboBox>
-                                        </ikw:SimpleStackPanel>  
-                                        <TextBlock Text="{i18n:I18n Key=Gesture_PalmHint}"
-                                                   TextWrapping="Wrap" Foreground="#a1a1aa"
-                                                   Visibility="{Binding ElementName=ToggleSwitchEnablePalmEraser, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                    </ikw:SimpleStackPanel>      
-                                </GroupBox>
+
                                 <GroupBox Name="GroupBoxAppearanceNewUI">
                                     <GroupBox.Header>
                                         <TextBlock Margin="0,12,0,0" Text="{i18n:I18n Key=Theme_GroupTitle}" FontWeight="Bold" Foreground="#fafafa"

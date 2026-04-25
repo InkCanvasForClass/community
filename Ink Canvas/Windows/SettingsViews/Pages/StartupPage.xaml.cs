@@ -3,6 +3,7 @@ using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -44,6 +45,20 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 }
 
                 CardExternalProtocol.IsOn = settings.Advanced.IsEnableUriScheme;
+
+                if (settings.Startup != null)
+                {
+                    CardEnableNibMode.IsOn = settings.Startup.IsEnableNibMode;
+
+                    if (settings.Startup.CrashAction == 0)
+                    {
+                        RadioCrashSilentRestart.IsChecked = true;
+                    }
+                    else
+                    {
+                        RadioCrashNoAction.IsChecked = true;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -146,6 +161,70 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 Debug.WriteLine($"设置外部协议时出错: {ex.Message}");
+            }
+        }
+
+        #endregion
+
+        #region 笔尖模式事件处理
+
+        private void ToggleSwitchEnableNibMode_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+
+            try
+            {
+                bool newState = CardEnableNibMode.IsOn;
+                SettingsManager.Settings.Startup.IsEnableNibMode = newState;
+
+                var window = Application.Current.MainWindow;
+                if (window is MainWindow mw)
+                {
+                    if (mw.ToggleSwitchEnableNibMode != null)
+                        mw.ToggleSwitchEnableNibMode.IsOn = newState;
+                    if (mw.BoardToggleSwitchEnableNibMode != null)
+                        mw.BoardToggleSwitchEnableNibMode.IsOn = newState;
+
+                    if (newState)
+                        mw.BoundsWidth = SettingsManager.Settings.Advanced.NibModeBoundsWidth;
+                    else
+                        mw.BoundsWidth = SettingsManager.Settings.Advanced.FingerModeBoundsWidth;
+                }
+
+                SettingsManager.SaveSettingsToFile();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"设置笔尖模式时出错: {ex.Message}");
+            }
+        }
+
+        #endregion
+
+        #region 崩溃后操作事件处理
+
+        private void RadioCrashAction_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+
+            try
+            {
+                if (RadioCrashSilentRestart != null && RadioCrashSilentRestart.IsChecked == true)
+                {
+                    App.CrashAction = App.CrashActionType.SilentRestart;
+                    SettingsManager.Settings.Startup.CrashAction = 0;
+                }
+                else if (RadioCrashNoAction != null && RadioCrashNoAction.IsChecked == true)
+                {
+                    App.CrashAction = App.CrashActionType.NoAction;
+                    SettingsManager.Settings.Startup.CrashAction = 1;
+                }
+                SettingsManager.SaveSettingsToFile();
+                App.SyncCrashActionFromSettings();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"设置崩溃操作时出错: {ex.Message}");
             }
         }
 
