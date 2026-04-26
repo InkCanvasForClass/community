@@ -709,10 +709,11 @@ namespace Ink_Canvas
                 var fullScreenWindows = _windowOverviewModel.GetFullScreenWindows();
                 if (fullScreenWindows == null || fullScreenWindows.Count == 0) return false;
 
+                var foregroundHandle = ForegroundWindowInfo.GetForegroundWindowHandle();
+
                 foreach (var window in fullScreenWindows)
                 {
                     var windowProcessName = window.ProcessName;
-                    var windowRect = window.Rect;
 
                     if (windowProcessName == "EasiNote")
                     {
@@ -724,15 +725,18 @@ namespace Ink_Canvas
                                 string version = versionInfo.FileVersion;
                                 string prodName = versionInfo.ProductName;
 
-                                if (version.StartsWith("5.") && Settings.Automation.IsAutoFoldInEasiNote)
+                                if (version.StartsWith("5.") && Settings.Automation.IsAutoFoldInEasiNote &&
+                                    window.Handle == foregroundHandle)
                                 {
                                     return true;
                                 }
-                                else if (version.StartsWith("3.") && Settings.Automation.IsAutoFoldInEasiNote3)
+                                else if (version.StartsWith("3.") && Settings.Automation.IsAutoFoldInEasiNote3 &&
+                                         window.Handle == foregroundHandle)
                                 {
                                     return true;
                                 }
-                                else if (prodName.Contains("3C") && Settings.Automation.IsAutoFoldInEasiNote3C)
+                                else if (prodName.Contains("3C") && Settings.Automation.IsAutoFoldInEasiNote3C &&
+                                         window.Handle == foregroundHandle)
                                 {
                                     return true;
                                 }
@@ -840,19 +844,15 @@ namespace Ink_Canvas
 
             try
             {
-                // 从窗口预览模型中获取窗口列表（已按ZOrder排序，最上层在前）
                 var windows = _windowOverviewModel.Windows;
                 if (windows == null || windows.Count == 0) return false;
 
-                // 获取前台窗口（ZOrder最小的窗口，即最上层）
-                var foregroundWindow = windows.FirstOrDefault();
+                var foregroundHandle = ForegroundWindowInfo.GetForegroundWindowHandle();
+                var foregroundWindow = windows.FirstOrDefault(w => w.Handle == foregroundHandle);
                 if (foregroundWindow == null) return false;
 
                 var windowProcessName = foregroundWindow.ProcessName;
-                var windowTitle = foregroundWindow.Title;
-                var windowRect = foregroundWindow.Rect;
 
-                // 检查EasiNote
                 if (windowProcessName == "EasiNote")
                 {
                     if (foregroundWindow.ProcessPath != "Unknown")
@@ -863,25 +863,18 @@ namespace Ink_Canvas
                             string version = versionInfo.FileVersion;
                             string prodName = versionInfo.ProductName;
 
-                            if (version.StartsWith("5.") && Settings.Automation.IsAutoFoldInEasiNote)
+                            if (version.StartsWith("5.") && Settings.Automation.IsAutoFoldInEasiNote &&
+                                foregroundWindow.IsFullScreen)
                             {
-                                bool isAnnotationWindow = windowTitle.Length == 0 && windowRect.Height < 500;
-                                if (Settings.Automation.IsAutoFoldInEasiNoteIgnoreDesktopAnno && isAnnotationWindow)
-                                {
-                                    return true;
-                                }
-                                else if (!isAnnotationWindow)
-                                {
-                                    return true;
-                                }
+                                return true;
                             }
-                            else if (version.StartsWith("3.") && Settings.Automation.IsAutoFoldInEasiNote3)
+                            else if (version.StartsWith("3.") && Settings.Automation.IsAutoFoldInEasiNote3 &&
+                                     foregroundWindow.IsFullScreen)
                             {
                                 return true;
                             }
                             else if (prodName.Contains("3C") && Settings.Automation.IsAutoFoldInEasiNote3C &&
-                                     windowRect.Height >= SystemParameters.WorkArea.Height - 16 &&
-                                     windowRect.Width >= SystemParameters.WorkArea.Width - 16)
+                                     foregroundWindow.IsFullScreen)
                             {
                                 return true;
                             }
@@ -889,100 +882,78 @@ namespace Ink_Canvas
                         catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                     }
                 }
-                // 检查EasiCamera
                 else if (Settings.Automation.IsAutoFoldInEasiCamera && windowProcessName == "EasiCamera" &&
-                         windowRect.Height >= SystemParameters.WorkArea.Height - 16 &&
-                         windowRect.Width >= SystemParameters.WorkArea.Width - 16)
+                         foregroundWindow.IsFullScreen)
                 {
                     return true;
                 }
-                // 检查EasiNote5C
                 else if (Settings.Automation.IsAutoFoldInEasiNote5C && windowProcessName == "EasiNote5C" &&
-                         windowRect.Height >= SystemParameters.WorkArea.Height - 16 &&
-                         windowRect.Width >= SystemParameters.WorkArea.Width - 16)
+                         foregroundWindow.IsFullScreen)
                 {
                     return true;
                 }
-                // 检查SeewoPinco
                 else if (Settings.Automation.IsAutoFoldInSeewoPincoTeacher &&
-                         (windowProcessName == "BoardService" || windowProcessName == "seewoPincoTeacher"))
+                         (windowProcessName == "BoardService" || windowProcessName == "seewoPincoTeacher") &&
+                         foregroundWindow.IsFullScreen)
                 {
                     return true;
                 }
-                // 检查HiteCamera
                 else if (Settings.Automation.IsAutoFoldInHiteCamera && windowProcessName == "HiteCamera" &&
-                         windowRect.Height >= SystemParameters.WorkArea.Height - 16 &&
-                         windowRect.Width >= SystemParameters.WorkArea.Width - 16)
+                         foregroundWindow.IsFullScreen)
                 {
                     return true;
                 }
-                // 检查HiteTouchPro
                 else if (Settings.Automation.IsAutoFoldInHiteTouchPro && windowProcessName == "HiteTouchPro" &&
-                         windowRect.Height >= SystemParameters.WorkArea.Height - 16 &&
-                         windowRect.Width >= SystemParameters.WorkArea.Width - 16)
+                         foregroundWindow.IsFullScreen)
                 {
                     return true;
                 }
-                // 检查WxBoardMain
                 else if (Settings.Automation.IsAutoFoldInWxBoardMain && windowProcessName == "WxBoardMain" &&
-                         windowRect.Height >= SystemParameters.WorkArea.Height - 16 &&
-                         windowRect.Width >= SystemParameters.WorkArea.Width - 16)
+                         foregroundWindow.IsFullScreen)
                 {
                     return true;
                 }
-                // 检查MSWhiteboard
                 else if (Settings.Automation.IsAutoFoldInMSWhiteboard &&
-                         (windowProcessName == "MicrosoftWhiteboard" || windowProcessName == "msedgewebview2"))
+                         (windowProcessName == "MicrosoftWhiteboard" || windowProcessName == "msedgewebview2") &&
+                         foregroundWindow.IsFullScreen)
                 {
                     return true;
                 }
-                // 检查OldZyBoard
                 else if (Settings.Automation.IsAutoFoldInOldZyBoard &&
                          (WinTabWindowsChecker.IsWindowExisted("WhiteBoard - DrawingWindow") ||
-                          WinTabWindowsChecker.IsWindowExisted("InstantAnnotationWindow")))
+                          WinTabWindowsChecker.IsWindowExisted("InstantAnnotationWindow")) &&
+                         foregroundWindow.IsFullScreen)
                 {
                     return true;
                 }
-                // 检查HiteLightBoard
                 else if (Settings.Automation.IsAutoFoldInHiteLightBoard && windowProcessName == "HiteLightBoard" &&
-                         windowRect.Height >= SystemParameters.WorkArea.Height - 16 &&
-                         windowRect.Width >= SystemParameters.WorkArea.Width - 16)
+                         foregroundWindow.IsFullScreen)
                 {
                     return true;
                 }
-                // 检查AdmoxWhiteboard
                 else if (Settings.Automation.IsAutoFoldInAdmoxWhiteboard && windowProcessName == "Amdox.WhiteBoard" &&
-                         windowRect.Height >= SystemParameters.WorkArea.Height - 16 &&
-                         windowRect.Width >= SystemParameters.WorkArea.Width - 16)
+                         foregroundWindow.IsFullScreen)
                 {
                     return true;
                 }
-                // 检查AdmoxBooth
                 else if (Settings.Automation.IsAutoFoldInAdmoxBooth && windowProcessName == "Amdox.Booth" &&
-                         windowRect.Height >= SystemParameters.WorkArea.Height - 16 &&
-                         windowRect.Width >= SystemParameters.WorkArea.Width - 16)
+                         foregroundWindow.IsFullScreen)
                 {
                     return true;
                 }
-                // 检查QPoint
                 else if (Settings.Automation.IsAutoFoldInQPoint && windowProcessName == "QPoint" &&
-                         windowRect.Height >= SystemParameters.WorkArea.Height - 16 &&
-                         windowRect.Width >= SystemParameters.WorkArea.Width - 16)
+                         foregroundWindow.IsFullScreen)
                 {
                     return true;
                 }
-                // 检查YiYunVisualPresenter
                 else if (Settings.Automation.IsAutoFoldInYiYunVisualPresenter && windowProcessName == "YiYunVisualPresenter" &&
-                         windowRect.Height >= SystemParameters.WorkArea.Height - 16 &&
-                         windowRect.Width >= SystemParameters.WorkArea.Width - 16)
+                         foregroundWindow.IsFullScreen)
                 {
                     return true;
                 }
-                // 检查MaxHubWhiteboard
                 else if (Settings.Automation.IsAutoFoldInMaxHubWhiteboard && windowProcessName == "WhiteBoard" &&
                          WinTabWindowsChecker.IsWindowExisted("白板书写") &&
-                         windowRect.Height >= SystemParameters.WorkArea.Height - 16 &&
-                         windowRect.Width >= SystemParameters.WorkArea.Width - 16)
+                         foregroundWindow.IsFullScreen)
                 {
                     if (foregroundWindow.ProcessPath != "Unknown")
                     {
@@ -1023,19 +994,23 @@ namespace Ink_Canvas
         /// </remarks>
         private void timerCheckAutoFold_Elapsed(object sender, ElapsedEventArgs e)
         {
+            if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
             if (isFloatingBarChangingHideMode) return;
             try
             {
                 bool hasFullScreen = HasFullScreenWindowOfAutoFoldApps();
                 bool shouldAutoFold = CheckShouldAutoFoldByWindowPreview();
-                var windowProcessName = ForegroundWindowInfo.ProcessName();
-                var windowTitle = ForegroundWindowInfo.WindowTitle();
 
                 Thickness currentMargin = new Thickness();
-                Dispatcher.Invoke(() =>
+                try
                 {
-                    currentMargin = ViewboxFloatingBar.Margin;
-                });
+                    if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
+                    Dispatcher.Invoke(() => { currentMargin = ViewboxFloatingBar.Margin; });
+                }
+                catch (Exception)
+                {
+                    return;
+                }
 
                 if (hasFullScreen)
                 {
@@ -1052,38 +1027,7 @@ namespace Ink_Canvas
 
                 if (shouldAutoFold)
                 {
-                    if (windowProcessName == "EasiNote")
-                    {
-                        if (ForegroundWindowInfo.ProcessPath() != "Unknown")
-                        {
-                            var versionInfo = FileVersionInfo.GetVersionInfo(ForegroundWindowInfo.ProcessPath());
-                            string version = versionInfo.FileVersion;
-
-                            if (version.StartsWith("5.") && Settings.Automation.IsAutoFoldInEasiNote)
-                            {
-                                bool isAnnotationWindow = windowTitle.Length == 0 && ForegroundWindowInfo.WindowRect().Height < 500;
-                                if (Settings.Automation.IsAutoFoldInEasiNoteIgnoreDesktopAnno && isAnnotationWindow)
-                                {
-                                    if (!isFloatingBarFolded)
-                                    {
-                                        FoldFloatingBar_MouseUp(null, null);
-                                    }
-                                }
-                                else if (!isAnnotationWindow)
-                                {
-                                    if (!unfoldFloatingBarByUser && !isFloatingBarFolded)
-                                    {
-                                        FoldFloatingBar_MouseUp(null, null);
-                                    }
-                                    else if (unfoldFloatingBarByUser)
-                                    {
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    // 处理其他目标软件
-                    else if (!unfoldFloatingBarByUser && !isFloatingBarFolded)
+                    if (!unfoldFloatingBarByUser && !isFloatingBarFolded)
                     {
                         FoldFloatingBar_MouseUp(null, null);
                     }
@@ -1099,11 +1043,13 @@ namespace Ink_Canvas
                         {
                             unfoldFloatingBarByUser = false;
                         }
-                        else
-                        {
-                            UnFoldFloatingBar_MouseUp(new object(), null);
-                            unfoldFloatingBarByUser = false;
-                        }
+                            else
+                            {
+                                // schedule unfold if dispatcher still running
+                                if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
+                                UnFoldFloatingBar_MouseUp(new object(), null);
+                                unfoldFloatingBarByUser = false;
+                            }
                     }
                 }
             }
@@ -1221,8 +1167,11 @@ namespace Ink_Canvas
                 // 空闲状态的判定为不处于批注模式和画板模式
                 bool canSafelyUpdate = false;
 
-                Dispatcher.Invoke(() =>
+                try
                 {
+                    if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
+                    Dispatcher.Invoke(() =>
+                    {
                     try
                     {
                         // 判断是否处于批注模式（inkCanvas.EditingMode == InkCanvasEditingMode.Ink）
@@ -1244,12 +1193,18 @@ namespace Ink_Canvas
                         {
                             LogHelper.WriteLogToFile("AutoUpdate | Application is in ink or board mode, cannot update now");
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | Error checking application state: {ex.Message}", LogHelper.LogType.Error);
-                    }
-                });
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"AutoUpdate | Error checking application state: {ex.Message}", LogHelper.LogType.Error);
+                        }
+                    });
+                }
+                catch (Exception)
+                {
+                    // Dispatcher not available
+                    return;
+                }
 
                 if (canSafelyUpdate)
                 {
@@ -1262,10 +1217,12 @@ namespace Ink_Canvas
                     AutoUpdateHelper.InstallNewVersionApp(AvailableLatestVersion, true);
 
                     // 关闭应用程序
-                    Dispatcher.Invoke(() =>
+                    try
                     {
-                        Application.Current.Shutdown();
-                    });
+                        if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
+                        Dispatcher.Invoke(() => { Application.Current.Shutdown(); });
+                    }
+                    catch (Exception) { }
                 }
                 else
                 {
@@ -1412,6 +1369,98 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 在窗口关闭时停止并释放所有定时器与事件，防止在 Dispatcher 关闭期间还有后台线程调用 UI
+        /// </summary>
+        private void StopAllTimersAndHandlers()
+        {
+            try
+            {
+                // Stop and detach System.Timers.Timer
+                if (_unifiedMainWindowTimer != null)
+                {
+                    _unifiedMainWindowTimer.Stop();
+                    _unifiedMainWindowTimer.Elapsed -= OnUnifiedMainWindowTimerElapsed;
+                    _unifiedMainWindowTimer.Dispose();
+                    _unifiedMainWindowTimer = null;
+                }
+
+                if (timerKillProcess != null)
+                {
+                    timerKillProcess.Stop();
+                    timerKillProcess.Elapsed -= TimerKillProcess_Elapsed;
+                    timerKillProcess.Dispose();
+                    timerKillProcess = null;
+                }
+
+                if (timerCheckAutoUpdateWithSilence != null)
+                {
+                    timerCheckAutoUpdateWithSilence.Stop();
+                    timerCheckAutoUpdateWithSilence.Elapsed -= timerCheckAutoUpdateWithSilence_Elapsed;
+                    timerCheckAutoUpdateWithSilence.Dispose();
+                    timerCheckAutoUpdateWithSilence = null;
+                }
+
+                if (timerCheckAutoUpdateRetry != null)
+                {
+                    timerCheckAutoUpdateRetry.Stop();
+                    timerCheckAutoUpdateRetry.Elapsed -= timerCheckAutoUpdateRetry_Elapsed;
+                    timerCheckAutoUpdateRetry.Dispose();
+                    timerCheckAutoUpdateRetry = null;
+                }
+
+                if (timerDisplayTime != null)
+                {
+                    timerDisplayTime.Stop();
+                    timerDisplayTime.Elapsed -= TimerDisplayTime_Elapsed;
+                    timerDisplayTime.Dispose();
+                    timerDisplayTime = null;
+                }
+
+                if (timerDisplayDate != null)
+                {
+                    timerDisplayDate.Stop();
+                    timerDisplayDate.Elapsed -= TimerDisplayDate_Elapsed;
+                    timerDisplayDate.Dispose();
+                    timerDisplayDate = null;
+                }
+
+                if (timerNtpSync != null)
+                {
+                    timerNtpSync.Stop();
+                    timerNtpSync.Elapsed -= async (s, e) => await TimerNtpSync_ElapsedAsync();
+                    timerNtpSync.Dispose();
+                    timerNtpSync = null;
+                }
+
+                // DispatcherTimers run on UI thread
+                if (autoSaveStrokesTimer != null)
+                {
+                    autoSaveStrokesTimer.Stop();
+                    autoSaveStrokesTimer.Tick -= AutoSaveStrokesTimer_Tick;
+                    autoSaveStrokesTimer = null;
+                }
+
+                if (_eraserAutoSwitchBackTimer != null)
+                {
+                    _eraserAutoSwitchBackTimer.Stop();
+                    _eraserAutoSwitchBackTimer.Tick -= EraserAutoSwitchBackTimer_Tick;
+                    _eraserAutoSwitchBackTimer = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"StopAllTimers failed: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            // Stop timers and handlers to avoid background callbacks invoking Dispatcher after shutdown
+            StopAllTimersAndHandlers();
+            base.OnClosing(e);
+        }
+
+        /// <summary>
         /// 启动橡皮擦自动切换回批注模式计时器
         /// </summary>
         public void StartEraserAutoSwitchBackTimer()
@@ -1463,6 +1512,7 @@ namespace Ink_Canvas
         /// </summary>
         private void EraserAutoSwitchBackTimer_Tick(object sender, EventArgs e)
         {
+            if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
             try
             {
                 // 检查是否仍然在橡皮擦模式
@@ -1481,12 +1531,17 @@ namespace Ink_Canvas
                 }
 
                 // 切换到批注模式
-                Dispatcher.Invoke(() =>
+                try
                 {
-                    PenIcon_Click(null, null);
-                    StopEraserAutoSwitchBackTimer();
-                    LogHelper.WriteLogToFile("橡皮擦自动切换回批注模式", LogHelper.LogType.Event);
-                });
+                    if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
+                    Dispatcher.Invoke(() =>
+                    {
+                        PenIcon_Click(null, null);
+                        StopEraserAutoSwitchBackTimer();
+                        LogHelper.WriteLogToFile("橡皮擦自动切换回批注模式", LogHelper.LogType.Event);
+                    });
+                }
+                catch (Exception) { }
             }
             catch (Exception ex)
             {

@@ -37,7 +37,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var auto = SettingsManager.Settings.Automation;
 
             CardAutoFoldInEasiNote.IsOn = auto.IsAutoFoldInEasiNote;
-            CardAutoFoldInEasiNoteIgnoreDesktopAnno.IsOn = auto.IsAutoFoldInEasiNoteIgnoreDesktopAnno;
+            ExpanderAutoFoldInEasiNote.IsExpanded = auto.IsAutoFoldInEasiNote;
             CardAutoFoldInEasiCamera.IsOn = auto.IsAutoFoldInEasiCamera;
             CardAutoFoldInEasiNote3.IsOn = auto.IsAutoFoldInEasiNote3;
             CardAutoFoldInEasiNote3C.IsOn = auto.IsAutoFoldInEasiNote3C;
@@ -123,15 +123,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.Automation.IsAutoFoldInEasiNote = CardAutoFoldInEasiNote.IsOn;
+            ExpanderAutoFoldInEasiNote.IsExpanded = CardAutoFoldInEasiNote.IsOn;
             SettingsManager.SaveSettingsToFile();
             GetMainWindow()?.StartOrStoptimerCheckAutoFold();
-        }
-
-        private void ToggleSwitchAutoFoldInEasiNoteIgnoreDesktopAnno_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Automation.IsAutoFoldInEasiNoteIgnoreDesktopAnno = CardAutoFoldInEasiNoteIgnoreDesktopAnno.IsOn;
-            SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchAutoFoldInEasiCamera_Toggled(object sender, RoutedEventArgs e)

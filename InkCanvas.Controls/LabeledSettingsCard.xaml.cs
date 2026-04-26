@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
 
 namespace Ink_Canvas.Controls
@@ -37,13 +38,23 @@ namespace Ink_Canvas.Controls
 
         private static void OnIconChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is LabeledSettingsCard control && control.SettingsCard != null)
-            {
-                var iconData = (FontIconData?)e.NewValue;
-                control.SettingsCard.HeaderIcon = iconData.HasValue
-                    ? new iNKORE.UI.WPF.Modern.Controls.FontIcon(iconData.Value)
-                    : null;
-            }
+            if (d is LabeledSettingsCard control)
+                control.ApplyIcon();
+        }
+
+        public static readonly DependencyProperty IconSourceProperty = DependencyProperty.Register(
+            nameof(IconSource), typeof(ImageSource), typeof(LabeledSettingsCard), new PropertyMetadata(null, OnIconSourceChanged));
+
+        public ImageSource IconSource
+        {
+            get => (ImageSource)GetValue(IconSourceProperty);
+            set => SetValue(IconSourceProperty, value);
+        }
+
+        private static void OnIconSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is LabeledSettingsCard control)
+                control.ApplyIcon();
         }
 
         public static readonly DependencyProperty HeaderIconProperty = DependencyProperty.Register(
@@ -57,9 +68,34 @@ namespace Ink_Canvas.Controls
 
         private static void OnHeaderIconChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is LabeledSettingsCard control && control.SettingsCard != null)
+            if (d is LabeledSettingsCard control)
+                control.ApplyIcon();
+        }
+
+        private void ApplyIcon()
+        {
+            if (SettingsCard == null) return;
+
+            if (IconSource != null)
             {
-                control.SettingsCard.HeaderIcon = e.NewValue;
+                SettingsCard.HeaderIcon = new Image
+                {
+                    Source = IconSource,
+                    Width = 16,
+                    Height = 16,
+                };
+            }
+            else if (Icon.HasValue)
+            {
+                SettingsCard.HeaderIcon = new iNKORE.UI.WPF.Modern.Controls.FontIcon(Icon.Value);
+            }
+            else if (HeaderIcon != null)
+            {
+                SettingsCard.HeaderIcon = HeaderIcon;
+            }
+            else
+            {
+                SettingsCard.HeaderIcon = null;
             }
         }
 
@@ -114,10 +150,7 @@ namespace Ink_Canvas.Controls
         {
             if (!string.IsNullOrEmpty(SwitchName) && ToggleSwitch != null)
                 ToggleSwitch.Name = SwitchName;
-            if (Icon.HasValue && SettingsCard != null)
-                SettingsCard.HeaderIcon = new iNKORE.UI.WPF.Modern.Controls.FontIcon(Icon.Value);
-            else if (HeaderIcon != null && SettingsCard != null)
-                SettingsCard.HeaderIcon = HeaderIcon;
+            ApplyIcon();
         }
 
         private void ToggleSwitch_Toggled(object sender, RoutedEventArgs e)

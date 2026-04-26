@@ -16,6 +16,7 @@
         <Grid Margin="59,0,59,0">
             <FrameworkElement.Resources>
                 <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
+                <sys:Double x:Key="SettingsCardHeaderIconMaxSize">24</sys:Double>
                 <Style x:Key="SettingsSectionHeaderTextBlockStyle"
                     BasedOn="{StaticResource BodyStrongTextBlockStyle}"
                     TargetType="TextBlock">
@@ -25,185 +26,201 @@
                 </Style>
             </FrameworkElement.Resources>
             <Grid>
-                <ikw:SimpleStackPanel MaxWidth="1000"
+                <ikw:SimpleStackPanel MaxWidth="1600"
                     HorizontalAlignment="Stretch"
                     Spacing="{StaticResource SettingsCardSpacing}">
 
-                    <TextBlock Text="{i18n:I18n Key=AutoFold_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
+                    <TextBlock Text="{i18n:I18n Key=Automation_AutoFoldTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInEasiNote"
-                            Header="希沃白板"
-                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
-                            Toggled="ToggleSwitchAutoFoldInEasiNote_Toggled"/>
+                    <Grid >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="114514*" />
+                            <ColumnDefinition Width="114514*" />
+                        </Grid.ColumnDefinitions>
 
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInEasiNoteIgnoreDesktopAnno"
-                            Header="希沃白板 (忽略桌面批注)"
-                            Icon="{x:Static ui:SegoeFluentIcons.Clear}"
-                            Toggled="ToggleSwitchAutoFoldInEasiNoteIgnoreDesktopAnno_Toggled"/>
+                        <ui:SettingsExpander Header="{i18n:I18n Key=AutoFold_App_SeewoBoard5}"
+                            x:Name="ExpanderAutoFoldInEasiNote"
+                            d:IsExpanded="True"
+                            Grid.Column="0" VerticalAlignment="Top">
+                            <ui:SettingsExpander.HeaderIcon>
+                                <ui:ImageIcon Source="/Resources/Icons-png/EasiNote.png"/>
+                            </ui:SettingsExpander.HeaderIcon>
+                            <ui:ToggleSwitch x:Name="CardAutoFoldInEasiNote"
+                                OnContent="{DynamicResource Common_On}"
+                                OffContent="{DynamicResource Common_Off}"
+                                Toggled="ToggleSwitchAutoFoldInEasiNote_Toggled"/>
+                        </ui:SettingsExpander>
 
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInEasiCamera"
-                            Header="希沃视频展台"
-                            Icon="{x:Static ui:SegoeFluentIcons.Camera}"
-                            Toggled="ToggleSwitchAutoFoldInEasiCamera_Toggled"/>
+                        <controls:LabeledSettingsCard x:Name="CardAutoFoldInEasiCamera"
+                            Header="{i18n:I18n Key=AutoFold_App_SeewoCamera}"
+                            IconSource="/Resources/Icons-png/EasiCamera.png"
+                            Toggled="ToggleSwitchAutoFoldInEasiCamera_Toggled"
+                            Grid.Column="1" VerticalAlignment="Top"/>
+
+                    </Grid>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoFoldInEasiNote3"
-                            Header="EasiNote3"
-                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
+                            Header="{i18n:I18n Key=AutoFold_App_SeewoBoard3}"
+                            IconSource="/Resources/Icons-png/EasiNote3.png"
                             Toggled="ToggleSwitchAutoFoldInEasiNote3_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoFoldInEasiNote3C"
-                            Header="EasiNote3C"
-                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
+                            Header="{i18n:I18n Key=AutoFold_App_SeewoLightBoard}"
+                            IconSource="/Resources/Icons-png/EasiNote3C.png"
                             Toggled="ToggleSwitchAutoFoldInEasiNote3C_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoFoldInEasiNote5C"
-                            Header="EasiNote5C"
-                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
+                            Header="{i18n:I18n Key=AutoFold_App_SeewoLightBoard5C}"
+                            IconSource="/Resources/Icons-png/EasiNote5C.png"
                             Toggled="ToggleSwitchAutoFoldInEasiNote5C_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoFoldInSeewoPincoTeacher"
-                            Header="Seewo Pinco Teacher"
-                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
+                            Header="{i18n:I18n Key=AutoFold_App_SeewoPinco}"
+                            IconSource="/Resources/Icons-png/SeewoPinco.png"
                             Toggled="ToggleSwitchAutoFoldInSeewoPincoTeacher_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoFoldInHiteTouchPro"
-                            Header="鸿合 TouchPro"
-                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
+                            Header="{i18n:I18n Key=AutoFold_App_HiteBoard}"
+                            IconSource="/Resources/Icons-png/HiteBoard.png"
                             Toggled="ToggleSwitchAutoFoldInHiteTouchPro_Toggled"/>
 
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInHiteLightBoard"
-                            Header="鸿合 光能板"
-                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
-                            Toggled="ToggleSwitchAutoFoldInHiteLightBoard_Toggled"/>
-
                     <controls:LabeledSettingsCard x:Name="CardAutoFoldInHiteCamera"
-                            Header="鸿合 视频展台"
-                            Icon="{x:Static ui:SegoeFluentIcons.Camera}"
+                            Header="{i18n:I18n Key=AutoFold_App_HiteCamera}"
+                            IconSource="/Resources/Icons-png/HiteCamera.png"
                             Toggled="ToggleSwitchAutoFoldInHiteCamera_Toggled"/>
 
+                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInHiteLightBoard"
+                            Header="{i18n:I18n Key=AutoFold_App_HiteLightBoard}"
+                            IconSource="/Resources/Icons-png/HiteLightBoard.png"
+                            Toggled="ToggleSwitchAutoFoldInHiteLightBoard_Toggled"/>
+
                     <controls:LabeledSettingsCard x:Name="CardAutoFoldInWxBoardMain"
-                            Header="小白板"
-                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
+                            Header="{i18n:I18n Key=AutoFold_App_WenXiangBoard}"
+                            IconSource="/Resources/Icons-png/WenXiang.png"
                             Toggled="ToggleSwitchAutoFoldInWxBoardMain_Toggled"/>
 
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInOldZyBoard"
-                            Header="中银白板"
-                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
-                            Toggled="ToggleSwitchAutoFoldInOldZyBoard_Toggled"/>
-
                     <controls:LabeledSettingsCard x:Name="CardAutoFoldInMSWhiteboard"
-                            Header="Microsoft Whiteboard"
-                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
+                            Header="{i18n:I18n Key=AutoFold_App_MSWhiteboard}"
+                            IconSource="/Resources/Icons-png/Whiteboard.png"
                             Toggled="ToggleSwitchAutoFoldInMSWhiteboard_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoFoldInAdmoxWhiteboard"
-                            Header="Admox 白板"
-                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
+                            Header="{i18n:I18n Key=AutoFold_App_AdmoxBoard}"
+                            IconSource="/Resources/Icons-png/AdmoxWhiteboard.png"
                             Toggled="ToggleSwitchAutoFoldInAdmoxWhiteboard_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoFoldInAdmoxBooth"
-                            Header="Admox 展台"
-                            Icon="{x:Static ui:SegoeFluentIcons.Camera}"
+                            Header="{i18n:I18n Key=AutoFold_App_AdmoxBooth}"
+                            IconSource="/Resources/Icons-png/AdmoxBooth.png"
                             Toggled="ToggleSwitchAutoFoldInAdmoxBooth_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoFoldInQPoint"
-                            Header="QPoint"
-                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
+                            Header="{i18n:I18n Key=AutoFold_App_YiYunBoard}"
+                            IconSource="/Resources/Icons-png/YiYunWhiteboard.png"
                             Toggled="ToggleSwitchAutoFoldInQPoint_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoFoldInYiYunVisualPresenter"
-                            Header="易云展台"
-                            Icon="{x:Static ui:SegoeFluentIcons.Camera}"
+                            Header="{i18n:I18n Key=AutoFold_App_YiYunBooth}"
+                            IconSource="/Resources/Icons-png/YiYunVisualPresenter.png"
                             Toggled="ToggleSwitchAutoFoldInYiYunVisualPresenter_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoFoldInMaxHubWhiteboard"
-                            Header="MaxHub 白板"
-                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
+                            Header="{i18n:I18n Key=AutoFold_App_MaxHubBoard}"
+                            IconSource="/Resources/Icons-png/MaxHubWhiteboard.png"
                             Toggled="ToggleSwitchAutoFoldInMaxHubWhiteboard_Toggled"/>
 
+                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInOldZyBoard"
+                            Header="{i18n:I18n Key=AutoFold_OldZyBoard}"
+                            IconSource="/Resources/Icons-png/Donview.png"
+                            Toggled="ToggleSwitchAutoFoldInOldZyBoard_Toggled"/>
+
                     <controls:LabeledSettingsCard x:Name="CardAutoFoldInPPTSlideShow"
-                            Header="PPT 放映"
-                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
+                            Header="{i18n:I18n Key=Automation_AutoFoldInPPT}"
+                            IconSource="/Resources/Icons-png/PPTTools.png"
                             Toggled="ToggleSwitchAutoFoldInPPTSlideShow_Toggled"/>
 
                     <TextBlock Text="{i18n:I18n Key=AutoKill_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoKillPptService"
-                            Header="PPT 服务"
-                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
+                            Header="{i18n:I18n Key=AutoKill_PptTools}"
+                            Description="{i18n:I18n Key=AutoKill_PptToolsHint}"
+                            IconSource="/Resources/Icons-png/PPTTools.png"
                             Toggled="ToggleSwitchAutoKillPptService_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoKillEasiNote"
-                            Header="希沃白板"
-                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
+                            Header="{i18n:I18n Key=AutoKill_EasiNote5}"
+                            IconSource="/Resources/Icons-png/EasiNote.png"
                             Toggled="ToggleSwitchAutoKillEasiNote_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoKillHiteAnnotation"
-                            Header="鸿合批注"
-                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
+                            Header="{i18n:I18n Key=AutoKill_HiteAnnotation}"
+                            IconSource="/Resources/Icons-png/HiteAnnotation.png"
                             Toggled="ToggleSwitchAutoKillHiteAnnotation_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoKillVComYouJiao"
-                            Header="VCom 幼教"
+                            Header="{i18n:I18n Key=AutoKill_YouJiao}"
                             Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
                             Toggled="ToggleSwitchAutoKillVComYouJiao_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoKillSeewoLauncher2DesktopAnnotation"
-                            Header="希沃桌面批注"
-                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
+                            Header="{i18n:I18n Key=AutoKill_SeewoDesktop2Anno}"
+                            Description="{i18n:I18n Key=AutoKill_SeewoDesktop2AnnoHint}"
+                            IconSource="/Resources/Icons-png/Seewo2Annotation.png"
                             Toggled="ToggleSwitchAutoKillSeewoLauncher2DesktopAnnotation_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoKillInkCanvas"
-                            Header="InkCanvas"
+                            Header="{i18n:I18n Key=AutoKill_InkCanvasIC}"
                             Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
                             Toggled="ToggleSwitchAutoKillInkCanvas_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoKillICA"
-                            Header="ICA"
+                            Header="{i18n:I18n Key=AutoKill_ICA}"
                             Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
                             Toggled="ToggleSwitchAutoKillICA_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoKillIDT"
-                            Header="IDT"
+                            Header="{i18n:I18n Key=AutoKill_Inkeys}"
                             Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
                             Toggled="ToggleSwitchAutoKillIDT_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoEnterAnnotationAfterKillHite"
-                            Header="杀进程后进入批注模式"
-                            Icon="{x:Static ui:SegoeFluentIcons.Edit}"
+                            Header="{i18n:I18n Key=AutoKill_HiteAfterKillEnterAnnotation}"
+                            IconSource="/Resources/Icons-png/HiteAnnotation.png"
                             Toggled="ToggleSwitchAutoEnterAnnotationAfterKillHite_Toggled"/>
 
                     <TextBlock Text="{i18n:I18n Key=AutoFold_Mode}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoEnterAnnotationModeWhenExitFoldMode"
-                            Header="退出收纳时进入批注模式"
+                            Header="{i18n:I18n Key=FoldMode_AutoFoldAfterWhiteboard}"
                             Icon="{x:Static ui:SegoeFluentIcons.Edit}"
                             Toggled="ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoFoldWhenExitWhiteboard"
-                            Header="退出白板时自动收纳"
+                            Header="{i18n:I18n Key=FoldMode_AutoFoldAfterWhiteboard}"
                             Icon="{x:Static ui:SegoeFluentIcons.Back}"
                             Toggled="ToggleSwitchAutoFoldWhenExitWhiteboard_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoFoldAfterPPTSlideShow"
-                            Header="PPT 放映结束后自动收纳"
-                            Icon="{x:Static ui:SegoeFluentIcons.Back}"
+                            Header="{i18n:I18n Key=FoldMode_AutoFoldAfterPPT}"
+                            Description="{i18n:I18n Key=FoldMode_AutoFoldAfterPPTHint}"
+                            IconSource="/Resources/Icons-png/PPTTools.png"
                             Toggled="ToggleSwitchAutoFoldAfterPPTSlideShow_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardKeepFoldAfterSoftwareExit"
-                            Header="软件退出后保持收纳"
+                            Header="{i18n:I18n Key=Automation_KeepFoldAfterExit}"
+                            Description="{i18n:I18n Key=Automation_KeepFoldAfterExitHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.Pin}"
                             Toggled="ToggleSwitchKeepFoldAfterSoftwareExit_Toggled"/>
 
                     <TextBlock Text="{i18n:I18n Key=AutoSave_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
                     <controls:LabeledSettingsCard x:Name="CardSaveScreenshotsInDateFolders"
-                            Header="截图按日期分文件夹"
+                            Header="{i18n:I18n Key=Storage_AutoSaveInkOnScreenshot}"
                             Icon="{x:Static ui:SegoeFluentIcons.Folder}"
                             Toggled="ToggleSwitchSaveScreenshotsInDateFolders_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoSaveStrokesAtScreenshot"
-                            Header="截图时自动保存墨迹"
+                            Header="{i18n:I18n Key=Storage_AutoSaveInkOnScreenshot}"
                             Icon="{x:Static ui:SegoeFluentIcons.Save}"
                             Toggled="ToggleSwitchAutoSaveStrokesAtScreenshot_Toggled"/>
 
@@ -218,21 +235,22 @@
                             Toggled="ToggleSwitchSaveStrokesAsXML_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardEnableAutoSaveStrokes"
-                            Header="定时自动保存墨迹"
+                            Header="{i18n:I18n Key=Storage_AutoSaveInk}"
+                            Description="{i18n:I18n Key=Storage_AutoSaveHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.Save}"
                             Toggled="ToggleSwitchEnableAutoSaveStrokes_Toggled"/>
 
-                    <ui:SettingsCard Header="自动保存间隔">
+                    <ui:SettingsCard Header="{i18n:I18n Key=Storage_AutoSaveInterval}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.QuietHours}"/>
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxAutoSaveStrokesInterval"
                                   SelectionChanged="ComboBoxAutoSaveStrokesInterval_SelectionChanged">
-                            <ComboBoxItem Content="1 分钟" Tag="1"/>
-                            <ComboBoxItem Content="3 分钟" Tag="3"/>
-                            <ComboBoxItem Content="5 分钟" Tag="5"/>
-                            <ComboBoxItem Content="10 分钟" Tag="10"/>
-                            <ComboBoxItem Content="30 分钟" Tag="30"/>
+                            <ComboBoxItem Content="{i18n:I18n Key=Storage_AutoSaveInterval_1Min}" Tag="1"/>
+                            <ComboBoxItem Content="{i18n:I18n Key=Storage_AutoSaveInterval_3Min}" Tag="3"/>
+                            <ComboBoxItem Content="{i18n:I18n Key=Storage_AutoSaveInterval_5Min}" Tag="5"/>
+                            <ComboBoxItem Content="{i18n:I18n Key=Storage_AutoSaveInterval_10Min}" Tag="10"/>
+                            <ComboBoxItem Content="{i18n:I18n Key=Storage_AutoSaveInterval_30Min}" Tag="30"/>
                         </ComboBox>
                     </ui:SettingsCard>
 
@@ -282,27 +300,27 @@
                         </ui:SettingsExpander.HeaderIcon>
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="希沃白板 3">
-                                <ui:SettingsCard.HeaderIcon><ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"/></ui:SettingsCard.HeaderIcon>
+                                <ui:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote3.png"/></ui:SettingsCard.HeaderIcon>
                                 <controls:LabeledSettingsCard x:Name="CardSeewoWhiteboard3Floating" Toggled="ToggleSwitchSeewoWhiteboard3Floating_Toggled"/>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="希沃白板 5">
-                                <ui:SettingsCard.HeaderIcon><ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"/></ui:SettingsCard.HeaderIcon>
+                                <ui:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote.png"/></ui:SettingsCard.HeaderIcon>
                                 <controls:LabeledSettingsCard x:Name="CardSeewoWhiteboard5Floating" Toggled="ToggleSwitchSeewoWhiteboard5Floating_Toggled"/>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="希沃白板 5C">
-                                <ui:SettingsCard.HeaderIcon><ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"/></ui:SettingsCard.HeaderIcon>
+                                <ui:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote5C.png"/></ui:SettingsCard.HeaderIcon>
                                 <controls:LabeledSettingsCard x:Name="CardSeewoWhiteboard5CFloating" Toggled="ToggleSwitchSeewoWhiteboard5CFloating_Toggled"/>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="希沃品课侧栏">
-                                <ui:SettingsCard.HeaderIcon><ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"/></ui:SettingsCard.HeaderIcon>
+                                <ui:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/SeewoPinco.png"/></ui:SettingsCard.HeaderIcon>
                                 <controls:LabeledSettingsCard x:Name="CardSeewoPincoSideBarFloating" Toggled="ToggleSwitchSeewoPincoSideBarFloating_Toggled"/>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="希沃品课画笔">
-                                <ui:SettingsCard.HeaderIcon><ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/></ui:SettingsCard.HeaderIcon>
+                                <ui:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/SeewoPinco.png"/></ui:SettingsCard.HeaderIcon>
                                 <controls:LabeledSettingsCard x:Name="CardSeewoPincoDrawingFloating" Toggled="ToggleSwitchSeewoPincoDrawingFloating_Toggled"/>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="希沃PPT小工具">
-                                <ui:SettingsCard.HeaderIcon><ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"/></ui:SettingsCard.HeaderIcon>
+                                <ui:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/PPTTools.png"/></ui:SettingsCard.HeaderIcon>
                                 <controls:LabeledSettingsCard x:Name="CardSeewoPPTFloating" Toggled="ToggleSwitchSeewoPPTFloating_Toggled"/>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="AiClass">
@@ -310,7 +328,7 @@
                                 <controls:LabeledSettingsCard x:Name="CardAiClassFloating" Toggled="ToggleSwitchAiClassFloating_Toggled"/>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="鸿合屏幕书写">
-                                <ui:SettingsCard.HeaderIcon><ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/></ui:SettingsCard.HeaderIcon>
+                                <ui:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/HiteAnnotation.png"/></ui:SettingsCard.HeaderIcon>
                                 <controls:LabeledSettingsCard x:Name="CardHiteAnnotationFloating" Toggled="ToggleSwitchHiteAnnotationFloating_Toggled"/>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="畅言智慧课堂">
@@ -318,7 +336,7 @@
                                 <controls:LabeledSettingsCard x:Name="CardChangYanFloating" Toggled="ToggleSwitchChangYanFloating_Toggled"/>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="畅言PPT">
-                                <ui:SettingsCard.HeaderIcon><ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"/></ui:SettingsCard.HeaderIcon>
+                                <ui:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/PPTTools.png"/></ui:SettingsCard.HeaderIcon>
                                 <controls:LabeledSettingsCard x:Name="CardChangYanPptFloating" Toggled="ToggleSwitchChangYanPptFloating_Toggled"/>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="天喻教育云">
@@ -326,11 +344,11 @@
                                 <controls:LabeledSettingsCard x:Name="CardIntelligentClassFloating" Toggled="ToggleSwitchIntelligentClassFloating_Toggled"/>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="希沃桌面画笔">
-                                <ui:SettingsCard.HeaderIcon><ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/></ui:SettingsCard.HeaderIcon>
+                                <ui:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/Seewo2Annotation.png"/></ui:SettingsCard.HeaderIcon>
                                 <controls:LabeledSettingsCard x:Name="CardSeewoDesktopAnnotationFloating" Toggled="ToggleSwitchSeewoDesktopAnnotationFloating_Toggled"/>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="希沃桌面侧栏">
-                                <ui:SettingsCard.HeaderIcon><ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"/></ui:SettingsCard.HeaderIcon>
+                                <ui:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/Seewo2Annotation.png"/></ui:SettingsCard.HeaderIcon>
                                 <controls:LabeledSettingsCard x:Name="CardSeewoDesktopSideBarFloating" Toggled="ToggleSwitchSeewoDesktopSideBarFloating_Toggled"/>
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>

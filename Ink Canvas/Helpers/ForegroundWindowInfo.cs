@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -53,6 +53,11 @@ namespace Ink_Canvas.Helpers
 
         [DllImport("user32.dll")]
         private static extern IntPtr MonitorFromRect(ref RECT lprc, uint dwFlags);
+
+        public static IntPtr GetForegroundWindowHandle()
+        {
+            return GetForegroundWindow();
+        }
 
         public static string WindowTitle()
         {
