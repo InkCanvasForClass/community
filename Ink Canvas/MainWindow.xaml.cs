@@ -3786,6 +3786,11 @@ namespace Ink_Canvas
                     }
                 }
             }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("Close") || ex.Message.Contains("关闭") || ex.Message.Contains("Show") || ex.Message.Contains("Visibility"))
+            {
+                // 窗口已关闭，忽略此异常
+                LogHelper.WriteLogToFile($"检查主窗口可见性时发现窗口已关闭，忽略异常。", LogHelper.LogType.Trace);
+            }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"检查主窗口可见性时出错: {ex.Message}", LogHelper.LogType.Error);
