@@ -40,7 +40,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 // 启动阶段只做能力探测，不做 WinRT 组件实例化（避免冷启动延迟）
-                _isModernSystemAvailable = WinRtInkShapeRecognizer.IsApiAvailable && Environment.Is64BitProcess;
+                _isModernSystemAvailable = WinRtInkShapeRecognizer.IsApiAvailable;
                 _isInitialized = true;
             }
             catch (Exception ex)
@@ -153,14 +153,6 @@ namespace Ink_Canvas.Helpers
                     return Task.FromResult(strokes);
                 }
 
-                if (!Environment.Is64BitProcess)
-                {
-                    LogHelper.WriteLogToFile(
-                        "[手写体] CorrectInkAsync 跳过：非 64 位进程，WinRT 手写体替换不可用。笔画数=" + strokes.Count,
-                        LogHelper.LogType.Info);
-                    return Task.FromResult(strokes);
-                }
-
                 EnsureModernAnalyzerInitialized();
                 if (_modernProcessor == null)
                 {
@@ -185,7 +177,7 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// WinRT 手写体识别（需 64 位进程、Windows 10+ 及系统手写识别组件）。返回分词候选与包围框，供剪贴板或插件使用。
+        /// WinRT 手写体识别（需 Windows 10+ 及系统手写识别组件）。返回分词候选与包围框，供剪贴板或插件使用。
         /// </summary>
         public Task<HandwritingRecognitionResult> RecognizeHandwritingAsync(
             StrokeCollection strokes,
@@ -197,8 +189,7 @@ namespace Ink_Canvas.Helpers
 
             try
             {
-                if (!Environment.Is64BitProcess
-                    || !ShapeRecognitionRouter.ResolveUseWinRt(mode)
+                if (!ShapeRecognitionRouter.ResolveUseWinRt(mode)
                     || !WinRtHandwritingRecognizer.IsApiAvailable)
                     return Task.FromResult(HandwritingRecognitionResult.Empty);
 
@@ -224,7 +215,7 @@ namespace Ink_Canvas.Helpers
         public string GetSystemInfo()
         {
             return _isModernSystemAvailable
-                ? $"现代化64位墨迹识别系统 (Windows Runtime API) - 进程架构: {Environment.Is64BitProcess}"
+                ? $"现代化墨迹识别系统 (Windows Runtime API) - 进程架构: {Environment.Is64BitProcess}"
                 : $"传统墨迹识别系统 (IACore) - 进程架构: {Environment.Is64BitProcess}";
         }
 
