@@ -117,7 +117,7 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        /// <summary>WinRT 手写识别（64 位 + Windows 10+）。</summary>
+        /// <summary>WinRT 手写识别（Windows 10+）。</summary>
         public static Task<HandwritingRecognitionResult> RecognizeHandwritingUnifiedAsync(
             StrokeCollection strokes,
             ShapeRecognitionEngineMode mode) =>

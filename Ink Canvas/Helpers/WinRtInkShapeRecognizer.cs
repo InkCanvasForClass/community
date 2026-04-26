@@ -1,6 +1,7 @@
 using OSVersionExtension;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Ink;
@@ -11,6 +12,128 @@ using WinRtInkAnalyzer = global::Windows.UI.Input.Inking.Analysis.InkAnalyzer;
 
 namespace Ink_Canvas.Helpers
 {
+    internal class ModernInkAnalyzer : IDisposable
+    {
+        public static readonly Guid ShapeStrokePropertyGuid = new Guid("11111111-2222-3333-4444-555555555555");
+        
+        private global::Windows.UI.Input.Inking.Analysis.InkAnalyzer _internalAnalyzer;
+        private readonly Dictionary<Stroke, uint> _strokeIdMap = new Dictionary<Stroke, uint>();
+        private readonly Dictionary<uint, Stroke> _reverseIdMap = new Dictionary<uint, Stroke>();
+        private readonly object _syncLock = new object();
+
+        public ModernInkAnalyzer()
+        {
+            if (!WinRtInkShapeRecognizer.IsApiAvailable)
+                return;
+
+            _internalAnalyzer = new global::Windows.UI.Input.Inking.Analysis.InkAnalyzer();
+        }
+
+        private void AddStrokeInternal(Stroke stroke)
+        {
+            if (stroke.ContainsPropertyData(ShapeStrokePropertyGuid))
+                return;
+
+            var inkStroke = WinRtInkShapeRecognizer.CreateInkStrokeFromWpf(stroke);
+            if (inkStroke == null) return;
+
+            _internalAnalyzer.AddDataForStroke(inkStroke);
+            _internalAnalyzer.SetStrokeDataKind(
+                inkStroke.Id,
+                global::Windows.UI.Input.Inking.Analysis.InkAnalysisStrokeKind.Drawing);
+            
+            _strokeIdMap[stroke] = inkStroke.Id;
+            _reverseIdMap[inkStroke.Id] = stroke;
+        }
+
+        private CancellationTokenSource _cts;
+
+        public async Task<InkShapeRecognitionResult> AnalyzeAsync(StrokeCollection strokes)
+        {
+            if (_internalAnalyzer == null || strokes == null || strokes.Count == 0)
+                return InkShapeRecognitionResult.Empty;
+
+            _cts?.Cancel();
+            _cts = new CancellationTokenSource();
+            var token = _cts.Token;
+
+            try
+            {
+                lock (_syncLock)
+                {
+                    _internalAnalyzer.ClearDataForAllStrokes();
+                    _strokeIdMap.Clear();
+                    _reverseIdMap.Clear();
+
+                    foreach (var stroke in strokes)
+                    {
+                        AddStrokeInternal(stroke);
+                    }
+                }
+
+                if (_strokeIdMap.Count == 0)
+                    return InkShapeRecognitionResult.Empty;
+
+                var result = await _internalAnalyzer.AnalyzeAsync().AsTask(token).ConfigureAwait(true);
+
+                if (token.IsCancellationRequested) return InkShapeRecognitionResult.Empty;
+
+                // Use the internal method from WinRtInkShapeRecognizer to find the primary drawing
+                var drawing = WinRtInkShapeRecognizer.FindPrimaryDrawing(_internalAnalyzer);
+                if (drawing == null)
+                    return InkShapeRecognitionResult.Empty;
+
+                if (drawing.DrawingKind == global::Windows.UI.Input.Inking.Analysis.InkAnalysisDrawingKind.Drawing)
+                    return InkShapeRecognitionResult.Empty;
+
+                var name = WinRtInkShapeRecognizer.MapDrawingKindToShapeName(drawing.DrawingKind);
+                if (string.IsNullOrEmpty(name) || name == "Drawing")
+                    return InkShapeRecognitionResult.Empty;
+
+                var winPts = WinRtInkShapeRecognizer.CopyWinRtPoints(drawing);
+                var hot = WinRtInkShapeRecognizer.ToWpfPointCollection(winPts);
+                var c = drawing.Center;
+                var centroid = new SysPoint(c.X, c.Y);
+                WinRtInkShapeRecognizer.BoundsFromPoints(winPts, out double w, out double h);
+
+                var toRemove = new StrokeCollection();
+                lock (_syncLock)
+                {
+                    foreach (var id in drawing.GetStrokeIds())
+                    {
+                        if (_reverseIdMap.TryGetValue(id, out var stroke))
+                        {
+                            toRemove.Add(stroke);
+                        }
+                    }
+                }
+
+                if (toRemove.Count == 0)
+                    return InkShapeRecognitionResult.Empty;
+
+                return new InkShapeRecognitionResult(name, centroid, hot, w, h, toRemove);
+            }
+            catch (Exception)
+            {
+                return InkShapeRecognitionResult.Empty;
+            }
+        }
+
+        public Task<StrokeCollection> AnalyzeAndCorrectAsync(
+            StrokeCollection strokes,
+            string handwritingFontFamilyList)
+        {
+            return WinRtHandwritingRecognizer.ConvertRecognizedTextToHandwritingInkAsync(
+                strokes,
+                handwritingFontFamilyList);
+        }
+
+        public void Dispose()
+        {
+            _internalAnalyzer = null;
+        }
+    }
+
     /// <summary>基于 Windows.UI.Input.Inking.Analysis 的形状识别（适用于 64 位进程等场景）。</summary>
     internal static class WinRtInkShapeRecognizer
     {
@@ -150,8 +273,8 @@ namespace Ink_Canvas.Helpers
             return builder.CreateStroke(points);
         }
 
-        private static global::Windows.UI.Input.Inking.Analysis.InkAnalysisInkDrawing FindPrimaryDrawing(
-            WinRtInkAnalyzer analyzer)
+        internal static global::Windows.UI.Input.Inking.Analysis.InkAnalysisInkDrawing FindPrimaryDrawing(
+            global::Windows.UI.Input.Inking.Analysis.InkAnalyzer analyzer)
         {
             global::Windows.UI.Input.Inking.Analysis.InkAnalysisInkDrawing best = null;
             double bestArea = -1;
@@ -190,7 +313,7 @@ namespace Ink_Canvas.Helpers
             return w * h;
         }
 
-        private static global::Windows.Foundation.Point[] CopyWinRtPoints(
+        internal static global::Windows.Foundation.Point[] CopyWinRtPoints(
             global::Windows.UI.Input.Inking.Analysis.InkAnalysisInkDrawing drawing)
         {
             var src = drawing?.Points;
@@ -207,7 +330,7 @@ namespace Ink_Canvas.Helpers
             return arr;
         }
 
-        private static void BoundsFromPoints(
+        internal static void BoundsFromPoints(
             System.Collections.Generic.IReadOnlyList<global::Windows.Foundation.Point> points,
             out double w,
             out double h)
@@ -232,7 +355,7 @@ namespace Ink_Canvas.Helpers
             h = Math.Max(0, maxY - minY);
         }
 
-        private static PointCollection ToWpfPointCollection(
+        internal static PointCollection ToWpfPointCollection(
             System.Collections.Generic.IReadOnlyList<global::Windows.Foundation.Point> points)
         {
             var hot = new PointCollection();
@@ -246,7 +369,7 @@ namespace Ink_Canvas.Helpers
             return hot;
         }
 
-        private static string MapDrawingKindToShapeName(
+        internal static string MapDrawingKindToShapeName(
             global::Windows.UI.Input.Inking.Analysis.InkAnalysisDrawingKind kind)
         {
             switch (kind)

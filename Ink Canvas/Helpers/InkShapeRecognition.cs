@@ -17,13 +17,13 @@ namespace Ink_Canvas.Helpers
     public static class ShapeRecognitionRouter
     {
         /// <summary>
-        /// 自动模式：按当前进程位数选择——<c>64</c> 位进程用 WinRT，<c>32</c> 位进程（含 x86 目标在 WOW64 下运行）用 IACore。
+        /// 自动模式：在 Windows 10 及以上系统默认使用 WinRT，否则使用 IACore。
         /// </summary>
         public static bool ResolveUseWinRt(ShapeRecognitionEngineMode mode)
         {
             if (mode == ShapeRecognitionEngineMode.WinRT) return true;
             if (mode == ShapeRecognitionEngineMode.IACore) return false;
-            return Environment.Is64BitProcess;
+            return OSVersion.GetOperatingSystem() >= OSVersionExtension.OperatingSystem.Windows10;
         }
 
         public static bool ShouldRunShapeRecognition(bool inkToShapeEnabled, ShapeRecognitionEngineMode mode)
@@ -31,7 +31,7 @@ namespace Ink_Canvas.Helpers
             if (!inkToShapeEnabled) return false;
             if (ResolveUseWinRt(mode))
                 return OSVersion.GetOperatingSystem() >= OSVersionExtension.OperatingSystem.Windows10;
-            return !Environment.Is64BitProcess;
+            return true;
         }
 
         public static ShapeRecognitionEngineMode FromSettingsInt(int value)
