@@ -299,58 +299,58 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Filter}"/>
                         </ui:SettingsExpander.HeaderIcon>
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="希沃白板 3">
-                                <ui:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote3.png"/></ui:SettingsCard.HeaderIcon>
-                                <controls:LabeledSettingsCard x:Name="CardSeewoWhiteboard3Floating" Toggled="ToggleSwitchSeewoWhiteboard3Floating_Toggled"/>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="希沃白板 5">
-                                <ui:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote.png"/></ui:SettingsCard.HeaderIcon>
-                                <controls:LabeledSettingsCard x:Name="CardSeewoWhiteboard5Floating" Toggled="ToggleSwitchSeewoWhiteboard5Floating_Toggled"/>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="希沃白板 5C">
-                                <ui:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote5C.png"/></ui:SettingsCard.HeaderIcon>
-                                <controls:LabeledSettingsCard x:Name="CardSeewoWhiteboard5CFloating" Toggled="ToggleSwitchSeewoWhiteboard5CFloating_Toggled"/>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="希沃品课侧栏">
-                                <ui:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/SeewoPinco.png"/></ui:SettingsCard.HeaderIcon>
-                                <controls:LabeledSettingsCard x:Name="CardSeewoPincoSideBarFloating" Toggled="ToggleSwitchSeewoPincoSideBarFloating_Toggled"/>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="希沃品课画笔">
-                                <ui:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/SeewoPinco.png"/></ui:SettingsCard.HeaderIcon>
-                                <controls:LabeledSettingsCard x:Name="CardSeewoPincoDrawingFloating" Toggled="ToggleSwitchSeewoPincoDrawingFloating_Toggled"/>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="希沃PPT小工具">
-                                <ui:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/PPTTools.png"/></ui:SettingsCard.HeaderIcon>
-                                <controls:LabeledSettingsCard x:Name="CardSeewoPPTFloating" Toggled="ToggleSwitchSeewoPPTFloating_Toggled"/>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="AiClass">
-                                <ui:SettingsCard.HeaderIcon><ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"/></ui:SettingsCard.HeaderIcon>
-                                <controls:LabeledSettingsCard x:Name="CardAiClassFloating" Toggled="ToggleSwitchAiClassFloating_Toggled"/>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="鸿合屏幕书写">
-                                <ui:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/HiteAnnotation.png"/></ui:SettingsCard.HeaderIcon>
-                                <controls:LabeledSettingsCard x:Name="CardHiteAnnotationFloating" Toggled="ToggleSwitchHiteAnnotationFloating_Toggled"/>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="畅言智慧课堂">
-                                <ui:SettingsCard.HeaderIcon><ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"/></ui:SettingsCard.HeaderIcon>
-                                <controls:LabeledSettingsCard x:Name="CardChangYanFloating" Toggled="ToggleSwitchChangYanFloating_Toggled"/>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="畅言PPT">
-                                <ui:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/PPTTools.png"/></ui:SettingsCard.HeaderIcon>
-                                <controls:LabeledSettingsCard x:Name="CardChangYanPptFloating" Toggled="ToggleSwitchChangYanPptFloating_Toggled"/>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="天喻教育云">
-                                <ui:SettingsCard.HeaderIcon><ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"/></ui:SettingsCard.HeaderIcon>
-                                <controls:LabeledSettingsCard x:Name="CardIntelligentClassFloating" Toggled="ToggleSwitchIntelligentClassFloating_Toggled"/>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="希沃桌面画笔">
-                                <ui:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/Seewo2Annotation.png"/></ui:SettingsCard.HeaderIcon>
-                                <controls:LabeledSettingsCard x:Name="CardSeewoDesktopAnnotationFloating" Toggled="ToggleSwitchSeewoDesktopAnnotationFloating_Toggled"/>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="希沃桌面侧栏">
-                                <ui:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/Seewo2Annotation.png"/></ui:SettingsCard.HeaderIcon>
-                                <controls:LabeledSettingsCard x:Name="CardSeewoDesktopSideBarFloating" Toggled="ToggleSwitchSeewoDesktopSideBarFloating_Toggled"/>
-                            </ui:SettingsCard>
+                            <controls:LabeledSettingsCard x:Name="CardSeewoWhiteboard3Floating"
+                                Header="{i18n:I18n Key=FloatingInterceptor_App_SeewoBoard3}"
+                                IconSource="/Resources/Icons-png/EasiNote3.png"
+                                Toggled="ToggleSwitchSeewoWhiteboard3Floating_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardSeewoWhiteboard5Floating"
+                                Header="{i18n:I18n Key=FloatingInterceptor_App_SeewoBoard5}"
+                                IconSource="/Resources/Icons-png/EasiNote.png"
+                                Toggled="ToggleSwitchSeewoWhiteboard5Floating_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardSeewoWhiteboard5CFloating"
+                                Header="{i18n:I18n Key=FloatingInterceptor_App_SeewoBoard5C}"
+                                IconSource="/Resources/Icons-png/EasiNote5C.png"
+                                Toggled="ToggleSwitchSeewoWhiteboard5CFloating_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardSeewoPincoSideBarFloating"
+                                Header="{i18n:I18n Key=FloatingInterceptor_App_SeewoPinco}"
+                                IconSource="/Resources/Icons-png/SeewoPinco.png"
+                                Toggled="ToggleSwitchSeewoPincoSideBarFloating_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardSeewoPincoDrawingFloating"
+                                Header="{i18n:I18n Key=FloatingInterceptor_App_SeewoPincoDrawing}"
+                                IconSource="/Resources/Icons-png/SeewoPinco.png"
+                                Toggled="ToggleSwitchSeewoPincoDrawingFloating_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardSeewoPPTFloating"
+                                Header="{i18n:I18n Key=FloatingInterceptor_App_SeewoPPTTools}"
+                                IconSource="/Resources/Icons-png/PPTTools.png"
+                                Toggled="ToggleSwitchSeewoPPTFloating_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardAiClassFloating"
+                                Header="{i18n:I18n Key=FloatingInterceptor_App_AiClass}"
+                                IconSource="/Resources/Icons-png/AiClass.png"
+                                Toggled="ToggleSwitchAiClassFloating_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardHiteAnnotationFloating"
+                                Header="{i18n:I18n Key=FloatingInterceptor_App_HiteAnnotation}"
+                                IconSource="/Resources/Icons-png/HiteAnnotation.png"
+                                Toggled="ToggleSwitchHiteAnnotationFloating_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardChangYanFloating"
+                                Header="{i18n:I18n Key=FloatingInterceptor_App_ChangYanClass}"
+                                IconSource="/Resources/Icons-png/畅言智慧课堂.png"
+                                Toggled="ToggleSwitchChangYanFloating_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardChangYanPptFloating"
+                                Header="{i18n:I18n Key=FloatingInterceptor_App_ChangYanPPT}"
+                                IconSource="/Resources/Icons-png/畅言智慧课堂.png"
+                                Toggled="ToggleSwitchChangYanPptFloating_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardIntelligentClassFloating"
+                                Header="{i18n:I18n Key=FloatingInterceptor_App_IntelligentClass}"
+                                IconSource="/Resources/Icons-png/天喻教育云.png"
+                                Toggled="ToggleSwitchIntelligentClassFloating_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardSeewoDesktopAnnotationFloating"
+                                Header="{i18n:I18n Key=FloatingInterceptor_App_SeewoDesktopAnnotation}"
+                                IconSource="/Resources/Icons-png/Seewo2Annotation.png"
+                                Toggled="ToggleSwitchSeewoDesktopAnnotationFloating_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardSeewoDesktopSideBarFloating"
+                                Header="{i18n:I18n Key=FloatingInterceptor_App_SeewoDesktopSideBar}"
+                                IconSource="/Resources/Icons-png/Seewo2Annotation.png"
+                                Toggled="ToggleSwitchSeewoDesktopSideBarFloating_Toggled"/>
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
