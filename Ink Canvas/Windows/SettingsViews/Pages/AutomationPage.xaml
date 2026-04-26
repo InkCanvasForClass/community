@@ -34,112 +34,201 @@
 
                     <TextBlock Text="{i18n:I18n Key=Automation_AutoFoldTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
-                    <Grid >
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="114514*" />
-                            <ColumnDefinition Width="114514*" />
-                        </Grid.ColumnDefinitions>
+                    <ui:SettingsExpander Header="希沃"
+                            d:IsExpanded="True">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="{i18n:I18n Key=AutoFold_App_SeewoBoard5}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:ImageIcon Source="/Resources/Icons-png/EasiNote.png"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch x:Name="CardAutoFoldInEasiNote"
+                                        OnContent="{DynamicResource Common_On}"
+                                        OffContent="{DynamicResource Common_Off}"
+                                        Toggled="ToggleSwitchAutoFoldInEasiNote_Toggled"/>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=AutoFold_App_SeewoCamera}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:ImageIcon Source="/Resources/Icons-png/EasiCamera.png"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch x:Name="CardAutoFoldInEasiCamera"
+                                        OnContent="{DynamicResource Common_On}"
+                                        OffContent="{DynamicResource Common_Off}"
+                                        Toggled="ToggleSwitchAutoFoldInEasiCamera_Toggled"/>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=AutoFold_App_SeewoBoard3}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:ImageIcon Source="/Resources/Icons-png/EasiNote3.png"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch x:Name="CardAutoFoldInEasiNote3"
+                                        OnContent="{DynamicResource Common_On}"
+                                        OffContent="{DynamicResource Common_Off}"
+                                        Toggled="ToggleSwitchAutoFoldInEasiNote3_Toggled"/>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=AutoFold_App_SeewoLightBoard}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:ImageIcon Source="/Resources/Icons-png/EasiNote3C.png"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch x:Name="CardAutoFoldInEasiNote3C"
+                                        OnContent="{DynamicResource Common_On}"
+                                        OffContent="{DynamicResource Common_Off}"
+                                        Toggled="ToggleSwitchAutoFoldInEasiNote3C_Toggled"/>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=AutoFold_App_SeewoLightBoard5C}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:ImageIcon Source="/Resources/Icons-png/EasiNote5C.png"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch x:Name="CardAutoFoldInEasiNote5C"
+                                        OnContent="{DynamicResource Common_On}"
+                                        OffContent="{DynamicResource Common_Off}"
+                                        Toggled="ToggleSwitchAutoFoldInEasiNote5C_Toggled"/>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=AutoFold_App_SeewoPinco}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:ImageIcon Source="/Resources/Icons-png/SeewoPinco.png"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch x:Name="CardAutoFoldInSeewoPincoTeacher"
+                                        OnContent="{DynamicResource Common_On}"
+                                        OffContent="{DynamicResource Common_Off}"
+                                        Toggled="ToggleSwitchAutoFoldInSeewoPincoTeacher_Toggled"/>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
 
-                        <ui:SettingsExpander Header="{i18n:I18n Key=AutoFold_App_SeewoBoard5}"
-                            x:Name="ExpanderAutoFoldInEasiNote"
-                            d:IsExpanded="True"
-                            Grid.Column="0" VerticalAlignment="Top">
-                            <ui:SettingsExpander.HeaderIcon>
-                                <ui:ImageIcon Source="/Resources/Icons-png/EasiNote.png"/>
-                            </ui:SettingsExpander.HeaderIcon>
-                            <ui:ToggleSwitch x:Name="CardAutoFoldInEasiNote"
-                                OnContent="{DynamicResource Common_On}"
-                                OffContent="{DynamicResource Common_Off}"
-                                Toggled="ToggleSwitchAutoFoldInEasiNote_Toggled"/>
-                        </ui:SettingsExpander>
+                    <ui:SettingsExpander Header="鸿合"
+                            d:IsExpanded="True">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="{i18n:I18n Key=AutoFold_App_HiteBoard}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:ImageIcon Source="/Resources/Icons-png/HiteBoard.png"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch x:Name="CardAutoFoldInHiteTouchPro"
+                                        OnContent="{DynamicResource Common_On}"
+                                        OffContent="{DynamicResource Common_Off}"
+                                        Toggled="ToggleSwitchAutoFoldInHiteTouchPro_Toggled"/>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=AutoFold_App_HiteCamera}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:ImageIcon Source="/Resources/Icons-png/HiteCamera.png"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch x:Name="CardAutoFoldInHiteCamera"
+                                        OnContent="{DynamicResource Common_On}"
+                                        OffContent="{DynamicResource Common_Off}"
+                                        Toggled="ToggleSwitchAutoFoldInHiteCamera_Toggled"/>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=AutoFold_App_HiteLightBoard}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:ImageIcon Source="/Resources/Icons-png/HiteLightBoard.png"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch x:Name="CardAutoFoldInHiteLightBoard"
+                                        OnContent="{DynamicResource Common_On}"
+                                        OffContent="{DynamicResource Common_Off}"
+                                        Toggled="ToggleSwitchAutoFoldInHiteLightBoard_Toggled"/>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
 
-                        <controls:LabeledSettingsCard x:Name="CardAutoFoldInEasiCamera"
-                            Header="{i18n:I18n Key=AutoFold_App_SeewoCamera}"
-                            IconSource="/Resources/Icons-png/EasiCamera.png"
-                            Toggled="ToggleSwitchAutoFoldInEasiCamera_Toggled"
-                            Grid.Column="1" VerticalAlignment="Top"/>
+                    <ui:SettingsExpander Header="其他白板"
+                            d:IsExpanded="True">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="{i18n:I18n Key=AutoFold_App_WenXiangBoard}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:ImageIcon Source="/Resources/Icons-png/WenXiang.png"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch x:Name="CardAutoFoldInWxBoardMain"
+                                        OnContent="{DynamicResource Common_On}"
+                                        OffContent="{DynamicResource Common_Off}"
+                                        Toggled="ToggleSwitchAutoFoldInWxBoardMain_Toggled"/>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=AutoFold_App_MSWhiteboard}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:ImageIcon Source="/Resources/Icons-png/Whiteboard.png"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch x:Name="CardAutoFoldInMSWhiteboard"
+                                        OnContent="{DynamicResource Common_On}"
+                                        OffContent="{DynamicResource Common_Off}"
+                                        Toggled="ToggleSwitchAutoFoldInMSWhiteboard_Toggled"/>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=AutoFold_App_AdmoxBoard}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:ImageIcon Source="/Resources/Icons-png/AdmoxWhiteboard.png"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch x:Name="CardAutoFoldInAdmoxWhiteboard"
+                                        OnContent="{DynamicResource Common_On}"
+                                        OffContent="{DynamicResource Common_Off}"
+                                        Toggled="ToggleSwitchAutoFoldInAdmoxWhiteboard_Toggled"/>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=AutoFold_App_AdmoxBooth}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:ImageIcon Source="/Resources/Icons-png/AdmoxBooth.png"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch x:Name="CardAutoFoldInAdmoxBooth"
+                                        OnContent="{DynamicResource Common_On}"
+                                        OffContent="{DynamicResource Common_Off}"
+                                        Toggled="ToggleSwitchAutoFoldInAdmoxBooth_Toggled"/>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=AutoFold_App_YiYunBoard}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:ImageIcon Source="/Resources/Icons-png/YiYunWhiteboard.png"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch x:Name="CardAutoFoldInQPoint"
+                                        OnContent="{DynamicResource Common_On}"
+                                        OffContent="{DynamicResource Common_Off}"
+                                        Toggled="ToggleSwitchAutoFoldInQPoint_Toggled"/>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=AutoFold_App_YiYunBooth}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:ImageIcon Source="/Resources/Icons-png/YiYunVisualPresenter.png"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch x:Name="CardAutoFoldInYiYunVisualPresenter"
+                                        OnContent="{DynamicResource Common_On}"
+                                        OffContent="{DynamicResource Common_Off}"
+                                        Toggled="ToggleSwitchAutoFoldInYiYunVisualPresenter_Toggled"/>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=AutoFold_App_MaxHubBoard}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:ImageIcon Source="/Resources/Icons-png/MaxHubWhiteboard.png"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch x:Name="CardAutoFoldInMaxHubWhiteboard"
+                                        OnContent="{DynamicResource Common_On}"
+                                        OffContent="{DynamicResource Common_Off}"
+                                        Toggled="ToggleSwitchAutoFoldInMaxHubWhiteboard_Toggled"/>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=AutoFold_OldZyBoard}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:ImageIcon Source="/Resources/Icons-png/Donview.png"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch x:Name="CardAutoFoldInOldZyBoard"
+                                        OnContent="{DynamicResource Common_On}"
+                                        OffContent="{DynamicResource Common_Off}"
+                                        Toggled="ToggleSwitchAutoFoldInOldZyBoard_Toggled"/>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
 
-                    </Grid>
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInEasiNote3"
-                            Header="{i18n:I18n Key=AutoFold_App_SeewoBoard3}"
-                            IconSource="/Resources/Icons-png/EasiNote3.png"
-                            Toggled="ToggleSwitchAutoFoldInEasiNote3_Toggled"/>
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInEasiNote3C"
-                            Header="{i18n:I18n Key=AutoFold_App_SeewoLightBoard}"
-                            IconSource="/Resources/Icons-png/EasiNote3C.png"
-                            Toggled="ToggleSwitchAutoFoldInEasiNote3C_Toggled"/>
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInEasiNote5C"
-                            Header="{i18n:I18n Key=AutoFold_App_SeewoLightBoard5C}"
-                            IconSource="/Resources/Icons-png/EasiNote5C.png"
-                            Toggled="ToggleSwitchAutoFoldInEasiNote5C_Toggled"/>
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInSeewoPincoTeacher"
-                            Header="{i18n:I18n Key=AutoFold_App_SeewoPinco}"
-                            IconSource="/Resources/Icons-png/SeewoPinco.png"
-                            Toggled="ToggleSwitchAutoFoldInSeewoPincoTeacher_Toggled"/>
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInHiteTouchPro"
-                            Header="{i18n:I18n Key=AutoFold_App_HiteBoard}"
-                            IconSource="/Resources/Icons-png/HiteBoard.png"
-                            Toggled="ToggleSwitchAutoFoldInHiteTouchPro_Toggled"/>
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInHiteCamera"
-                            Header="{i18n:I18n Key=AutoFold_App_HiteCamera}"
-                            IconSource="/Resources/Icons-png/HiteCamera.png"
-                            Toggled="ToggleSwitchAutoFoldInHiteCamera_Toggled"/>
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInHiteLightBoard"
-                            Header="{i18n:I18n Key=AutoFold_App_HiteLightBoard}"
-                            IconSource="/Resources/Icons-png/HiteLightBoard.png"
-                            Toggled="ToggleSwitchAutoFoldInHiteLightBoard_Toggled"/>
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInWxBoardMain"
-                            Header="{i18n:I18n Key=AutoFold_App_WenXiangBoard}"
-                            IconSource="/Resources/Icons-png/WenXiang.png"
-                            Toggled="ToggleSwitchAutoFoldInWxBoardMain_Toggled"/>
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInMSWhiteboard"
-                            Header="{i18n:I18n Key=AutoFold_App_MSWhiteboard}"
-                            IconSource="/Resources/Icons-png/Whiteboard.png"
-                            Toggled="ToggleSwitchAutoFoldInMSWhiteboard_Toggled"/>
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInAdmoxWhiteboard"
-                            Header="{i18n:I18n Key=AutoFold_App_AdmoxBoard}"
-                            IconSource="/Resources/Icons-png/AdmoxWhiteboard.png"
-                            Toggled="ToggleSwitchAutoFoldInAdmoxWhiteboard_Toggled"/>
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInAdmoxBooth"
-                            Header="{i18n:I18n Key=AutoFold_App_AdmoxBooth}"
-                            IconSource="/Resources/Icons-png/AdmoxBooth.png"
-                            Toggled="ToggleSwitchAutoFoldInAdmoxBooth_Toggled"/>
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInQPoint"
-                            Header="{i18n:I18n Key=AutoFold_App_YiYunBoard}"
-                            IconSource="/Resources/Icons-png/YiYunWhiteboard.png"
-                            Toggled="ToggleSwitchAutoFoldInQPoint_Toggled"/>
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInYiYunVisualPresenter"
-                            Header="{i18n:I18n Key=AutoFold_App_YiYunBooth}"
-                            IconSource="/Resources/Icons-png/YiYunVisualPresenter.png"
-                            Toggled="ToggleSwitchAutoFoldInYiYunVisualPresenter_Toggled"/>
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInMaxHubWhiteboard"
-                            Header="{i18n:I18n Key=AutoFold_App_MaxHubBoard}"
-                            IconSource="/Resources/Icons-png/MaxHubWhiteboard.png"
-                            Toggled="ToggleSwitchAutoFoldInMaxHubWhiteboard_Toggled"/>
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInOldZyBoard"
-                            Header="{i18n:I18n Key=AutoFold_OldZyBoard}"
-                            IconSource="/Resources/Icons-png/Donview.png"
-                            Toggled="ToggleSwitchAutoFoldInOldZyBoard_Toggled"/>
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInPPTSlideShow"
-                            Header="{i18n:I18n Key=Automation_AutoFoldInPPT}"
-                            IconSource="/Resources/Icons-png/PPTTools.png"
-                            Toggled="ToggleSwitchAutoFoldInPPTSlideShow_Toggled"/>
+                    <ui:SettingsExpander Header="幻灯片"
+                            d:IsExpanded="True">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"/>
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:SettingsCard Header="{i18n:I18n Key=Automation_AutoFoldInPPT}">
+                            <ui:SettingsCard.HeaderIcon>
+                                <ui:ImageIcon Source="/Resources/Icons-png/PPTTools.png"/>
+                            </ui:SettingsCard.HeaderIcon>
+                            <ui:ToggleSwitch x:Name="CardAutoFoldInPPTSlideShow"
+                                    OnContent="{DynamicResource Common_On}"
+                                    OffContent="{DynamicResource Common_Off}"
+                                    Toggled="ToggleSwitchAutoFoldInPPTSlideShow_Toggled"/>
+                        </ui:SettingsCard>
+                    </ui:SettingsExpander>
 
                     <TextBlock Text="{i18n:I18n Key=AutoKill_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
@@ -287,16 +376,13 @@
                             Icon="{x:Static ui:SegoeFluentIcons.Save}"
                             Toggled="ToggleSwitchSaveFullPageStrokes_Toggled"/>
 
-                    <ui:SettingsExpander x:Name="ExpanderFloatingWindowInterceptor"
-                            Header="启用悬浮窗拦截"
+                    <TextBlock Text="悬浮窗拦截" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
+
+                    <ui:SettingsExpander Header="希沃"
                             d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Shield}"/>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
                         </ui:SettingsExpander.HeaderIcon>
-                        <ui:ToggleSwitch x:Name="ToggleSwitchFloatingWindowInterceptorEnabled"
-                                OnContent="{DynamicResource Common_On}"
-                                OffContent="{DynamicResource Common_Off}"
-                                Toggled="ToggleSwitchFloatingWindowInterceptorEnabled_Toggled"/>
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{i18n:I18n Key=FloatingInterceptor_App_SeewoBoard3}">
                                 <ui:SettingsCard.HeaderIcon>
@@ -352,6 +438,33 @@
                                         OffContent="{DynamicResource Common_Off}"
                                         Toggled="ToggleSwitchSeewoPPTFloating_Toggled"/>
                             </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=FloatingInterceptor_App_SeewoDesktopAnnotation}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:ImageIcon Source="/Resources/Icons-png/SeewoPinco.png"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch x:Name="ToggleSwitchSeewoDesktopAnnotationFloating"
+                                        OnContent="{DynamicResource Common_On}"
+                                        OffContent="{DynamicResource Common_Off}"
+                                        Toggled="ToggleSwitchSeewoDesktopAnnotationFloating_Toggled"/>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=FloatingInterceptor_App_SeewoDesktopSideBar}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:ImageIcon Source="/Resources/Icons-png/SeewoPinco.png"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <ui:ToggleSwitch x:Name="ToggleSwitchSeewoDesktopSideBarFloating"
+                                        OnContent="{DynamicResource Common_On}"
+                                        OffContent="{DynamicResource Common_Off}"
+                                        Toggled="ToggleSwitchSeewoDesktopSideBarFloating_Toggled"/>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
+
+                    <ui:SettingsExpander Header="其他"
+                            d:IsExpanded="True">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{i18n:I18n Key=FloatingInterceptor_App_AiClass}">
                                 <ui:SettingsCard.HeaderIcon>
                                     <ui:ImageIcon Source="/Resources/Icons-png/AiClass.png"/>
@@ -396,24 +509,6 @@
                                         OnContent="{DynamicResource Common_On}"
                                         OffContent="{DynamicResource Common_Off}"
                                         Toggled="ToggleSwitchIntelligentClassFloating_Toggled"/>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="{i18n:I18n Key=FloatingInterceptor_App_SeewoDesktopAnnotation}">
-                                <ui:SettingsCard.HeaderIcon>
-                                    <ui:ImageIcon Source="/Resources/Icons-png/Seewo2Annotation.png"/>
-                                </ui:SettingsCard.HeaderIcon>
-                                <ui:ToggleSwitch x:Name="ToggleSwitchSeewoDesktopAnnotationFloating"
-                                        OnContent="{DynamicResource Common_On}"
-                                        OffContent="{DynamicResource Common_Off}"
-                                        Toggled="ToggleSwitchSeewoDesktopAnnotationFloating_Toggled"/>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="{i18n:I18n Key=FloatingInterceptor_App_SeewoDesktopSideBar}">
-                                <ui:SettingsCard.HeaderIcon>
-                                    <ui:ImageIcon Source="/Resources/Icons-png/Seewo2Annotation.png"/>
-                                </ui:SettingsCard.HeaderIcon>
-                                <ui:ToggleSwitch x:Name="ToggleSwitchSeewoDesktopSideBarFloating"
-                                        OnContent="{DynamicResource Common_On}"
-                                        OffContent="{DynamicResource Common_Off}"
-                                        Toggled="ToggleSwitchSeewoDesktopSideBarFloating_Toggled"/>
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
