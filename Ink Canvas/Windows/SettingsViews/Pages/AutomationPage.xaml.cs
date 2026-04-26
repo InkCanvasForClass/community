@@ -96,22 +96,23 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SideControlMinimumAutomationSlider.Value = auto.MinimumAutomationStrokeNumber;
             CardSaveFullPageStrokes.IsOn = auto.IsSaveFullPageStrokes;
 
-            CardFloatingWindowInterceptorEnabled.IsOn = auto.FloatingWindowInterceptor.IsEnabled;
+            ToggleSwitchFloatingWindowInterceptorEnabled.IsOn = auto.FloatingWindowInterceptor.IsEnabled;
+            ExpanderFloatingWindowInterceptor.IsExpanded = auto.FloatingWindowInterceptor.IsEnabled;
             if (auto.FloatingWindowInterceptor.InterceptRules != null)
             {
-                CardSeewoWhiteboard3Floating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoWhiteboard3Floating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoWhiteboard3Floating"];
-                CardSeewoWhiteboard5Floating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoWhiteboard5Floating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoWhiteboard5Floating"];
-                CardSeewoWhiteboard5CFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoWhiteboard5CFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoWhiteboard5CFloating"];
-                CardSeewoPincoSideBarFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoPincoSideBarFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoPincoSideBarFloating"];
-                CardSeewoPincoDrawingFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoPincoDrawingFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoPincoDrawingFloating"];
-                CardSeewoPPTFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoPPTFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoPPTFloating"];
-                CardAiClassFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("AiClassFloating") && auto.FloatingWindowInterceptor.InterceptRules["AiClassFloating"];
-                CardHiteAnnotationFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("HiteAnnotationFloating") && auto.FloatingWindowInterceptor.InterceptRules["HiteAnnotationFloating"];
-                CardChangYanFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("ChangYanFloating") && auto.FloatingWindowInterceptor.InterceptRules["ChangYanFloating"];
-                CardChangYanPptFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("ChangYanPptFloating") && auto.FloatingWindowInterceptor.InterceptRules["ChangYanPptFloating"];
-                CardIntelligentClassFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("IntelligentClassFloating") && auto.FloatingWindowInterceptor.InterceptRules["IntelligentClassFloating"];
-                CardSeewoDesktopAnnotationFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoDesktopAnnotationFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoDesktopAnnotationFloating"];
-                CardSeewoDesktopSideBarFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoDesktopSideBarFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoDesktopSideBarFloating"];
+                ToggleSwitchSeewoWhiteboard3Floating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoWhiteboard3Floating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoWhiteboard3Floating"];
+                ToggleSwitchSeewoWhiteboard5Floating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoWhiteboard5Floating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoWhiteboard5Floating"];
+                ToggleSwitchSeewoWhiteboard5CFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoWhiteboard5CFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoWhiteboard5CFloating"];
+                ToggleSwitchSeewoPincoSideBarFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoPincoSideBarFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoPincoSideBarFloating"];
+                ToggleSwitchSeewoPincoDrawingFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoPincoDrawingFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoPincoDrawingFloating"];
+                ToggleSwitchSeewoPPTFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoPPTFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoPPTFloating"];
+                ToggleSwitchAiClassFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("AiClassFloating") && auto.FloatingWindowInterceptor.InterceptRules["AiClassFloating"];
+                ToggleSwitchHiteAnnotationFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("HiteAnnotationFloating") && auto.FloatingWindowInterceptor.InterceptRules["HiteAnnotationFloating"];
+                ToggleSwitchChangYanFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("ChangYanFloating") && auto.FloatingWindowInterceptor.InterceptRules["ChangYanFloating"];
+                ToggleSwitchChangYanPptFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("ChangYanPptFloating") && auto.FloatingWindowInterceptor.InterceptRules["ChangYanPptFloating"];
+                ToggleSwitchIntelligentClassFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("IntelligentClassFloating") && auto.FloatingWindowInterceptor.InterceptRules["IntelligentClassFloating"];
+                ToggleSwitchSeewoDesktopAnnotationFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoDesktopAnnotationFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoDesktopAnnotationFloating"];
+                ToggleSwitchSeewoDesktopSideBarFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoDesktopSideBarFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoDesktopSideBarFloating"];
             }
 
             _isLoaded = true;
@@ -480,7 +481,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             var mw = GetMainWindow();
             if (mw == null) return;
-            SettingsManager.Settings.Automation.FloatingWindowInterceptor.IsEnabled = CardFloatingWindowInterceptorEnabled.IsOn;
+            SettingsManager.Settings.Automation.FloatingWindowInterceptor.IsEnabled = ToggleSwitchFloatingWindowInterceptorEnabled.IsOn;
+            ExpanderFloatingWindowInterceptor.IsExpanded = ToggleSwitchFloatingWindowInterceptorEnabled.IsOn;
             if (mw._floatingWindowInterceptorManager != null)
             {
                 if (SettingsManager.Settings.Automation.FloatingWindowInterceptor.IsEnabled)
@@ -494,79 +496,79 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchSeewoWhiteboard3Floating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoWhiteboard3Floating, CardSeewoWhiteboard3Floating.IsOn);
+            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoWhiteboard3Floating, ToggleSwitchSeewoWhiteboard3Floating.IsOn);
         }
 
         private void ToggleSwitchSeewoWhiteboard5Floating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoWhiteboard5Floating, CardSeewoWhiteboard5Floating.IsOn);
+            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoWhiteboard5Floating, ToggleSwitchSeewoWhiteboard5Floating.IsOn);
         }
 
         private void ToggleSwitchSeewoWhiteboard5CFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoWhiteboard5CFloating, CardSeewoWhiteboard5CFloating.IsOn);
+            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoWhiteboard5CFloating, ToggleSwitchSeewoWhiteboard5CFloating.IsOn);
         }
 
         private void ToggleSwitchSeewoPincoSideBarFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoPincoSideBarFloating, CardSeewoPincoSideBarFloating.IsOn);
+            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoPincoSideBarFloating, ToggleSwitchSeewoPincoSideBarFloating.IsOn);
         }
 
         private void ToggleSwitchSeewoPincoDrawingFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoPincoDrawingFloating, CardSeewoPincoDrawingFloating.IsOn);
+            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoPincoDrawingFloating, ToggleSwitchSeewoPincoDrawingFloating.IsOn);
         }
 
         private void ToggleSwitchSeewoPPTFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoPPTFloating, CardSeewoPPTFloating.IsOn);
+            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoPPTFloating, ToggleSwitchSeewoPPTFloating.IsOn);
         }
 
         private void ToggleSwitchAiClassFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.AiClassFloating, CardAiClassFloating.IsOn);
+            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.AiClassFloating, ToggleSwitchAiClassFloating.IsOn);
         }
 
         private void ToggleSwitchHiteAnnotationFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.HiteAnnotationFloating, CardHiteAnnotationFloating.IsOn);
+            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.HiteAnnotationFloating, ToggleSwitchHiteAnnotationFloating.IsOn);
         }
 
         private void ToggleSwitchChangYanFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.ChangYanFloating, CardChangYanFloating.IsOn);
+            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.ChangYanFloating, ToggleSwitchChangYanFloating.IsOn);
         }
 
         private void ToggleSwitchChangYanPptFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.ChangYanPptFloating, CardChangYanPptFloating.IsOn);
+            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.ChangYanPptFloating, ToggleSwitchChangYanPptFloating.IsOn);
         }
 
         private void ToggleSwitchIntelligentClassFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.IntelligentClassFloating, CardIntelligentClassFloating.IsOn);
+            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.IntelligentClassFloating, ToggleSwitchIntelligentClassFloating.IsOn);
         }
 
         private void ToggleSwitchSeewoDesktopAnnotationFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoDesktopAnnotationFloating, CardSeewoDesktopAnnotationFloating.IsOn);
+            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoDesktopAnnotationFloating, ToggleSwitchSeewoDesktopAnnotationFloating.IsOn);
         }
 
         private void ToggleSwitchSeewoDesktopSideBarFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoDesktopSideBarFloating, CardSeewoDesktopSideBarFloating.IsOn);
+            GetMainWindow()?.SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoDesktopSideBarFloating, ToggleSwitchSeewoDesktopSideBarFloating.IsOn);
         }
 
         #endregion

@@ -8,6 +8,7 @@
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+      xmlns:c="clr-namespace:Ink_Canvas.Converter"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d"
       Title="{i18n:I18n Key=Nav_PPT_Settings}">
@@ -16,6 +17,7 @@
         <Grid Margin="59,0,59,0">
             <FrameworkElement.Resources>
                 <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
+                <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
                 <Style x:Key="SettingsSectionHeaderTextBlockStyle"
                     BasedOn="{StaticResource BodyStrongTextBlockStyle}"
                     TargetType="TextBlock">
