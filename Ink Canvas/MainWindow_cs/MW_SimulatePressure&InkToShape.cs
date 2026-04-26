@@ -30,6 +30,10 @@ namespace Ink_Canvas
     /// </remarks>
     public partial class MainWindow : Window
     {
+        private Helpers.ModernInkAnalyzer _modernInkAnalyzer;
+        private Helpers.ModernInkAnalyzer ModernInkAnalyzer => 
+            _modernInkAnalyzer ??= new Helpers.ModernInkAnalyzer(inkCanvas.Strokes);
+
         /// <summary>
         /// 存储新的笔画集合，用于形状识别
         /// </summary>
@@ -564,6 +568,7 @@ namespace Ink_Canvas
                             {
                                 DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
                             };
+                            straightStroke.AddPropertyData(Helpers.ModernInkAnalyzer.ShapeStrokePropertyGuid, true);
 
                             // Replace the original stroke with the straightened one
                             SetNewBackupOfStroke();
@@ -617,17 +622,26 @@ namespace Ink_Canvas
                             ProcessRectangleGuideLines(e.Stroke);
 
                             var shapeMode = ShapeRecognitionRouter.FromSettingsInt(Settings.InkToShape.ShapeRecognitionEngine);
-                            var strokeReco = new StrokeCollection();
-                            var result = await InkRecognizeHelper.RecognizeShapeUnifiedAsync(newStrokes, shapeMode);
-                            for (var i = newStrokes.Count - 1; i >= 0; i--)
+                            InkShapeRecognitionResult result = InkShapeRecognitionResult.Empty;
+                            
+                            if (ShapeRecognitionRouter.ResolveUseWinRt(shapeMode) && Helpers.WinRtInkShapeRecognizer.IsApiAvailable)
                             {
-                                strokeReco.Add(newStrokes[i]);
-                                var newResult = await InkRecognizeHelper.RecognizeShapeUnifiedAsync(strokeReco, shapeMode);
-                                if (newResult.IsSuccess &&
-                                    (newResult.ShapeName == "Circle" || newResult.ShapeName == "Ellipse"))
+                                result = await ModernInkAnalyzer.AnalyzeAsync();
+                            }
+                            else
+                            {
+                                var strokeReco = new StrokeCollection();
+                                result = await InkRecognizeHelper.RecognizeShapeUnifiedAsync(newStrokes, shapeMode);
+                                for (var i = newStrokes.Count - 1; i >= 0; i--)
                                 {
-                                    result = newResult;
-                                    break;
+                                    strokeReco.Add(newStrokes[i]);
+                                    var newResult = await InkRecognizeHelper.RecognizeShapeUnifiedAsync(strokeReco, shapeMode);
+                                    if (newResult.IsSuccess &&
+                                        (newResult.ShapeName == "Circle" || newResult.ShapeName == "Ellipse"))
+                                    {
+                                        result = newResult;
+                                        break;
+                                    }
                                 }
                             }
 
@@ -687,6 +701,7 @@ namespace Ink_Canvas
                                     {
                                         DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
                                     };
+                                    stroke.AddPropertyData(Helpers.ModernInkAnalyzer.ShapeStrokePropertyGuid, true);
                                     circles.Add(new Circle(result.Centroid, result.ShapeWidth / 2.0, stroke));
                                     SetNewBackupOfStroke();
                                     _currentCommitType = CommitReason.ShapeRecognition;
@@ -790,6 +805,7 @@ namespace Ink_Canvas
                                                 {
                                                     DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
                                                 };
+                                                _stroke.AddPropertyData(Helpers.ModernInkAnalyzer.ShapeStrokePropertyGuid, true);
                                                 var _dashedLineStroke =
                                                     GenerateDashedLineEllipseStrokeCollection(iniP, endP, true, false);
                                                 var strokes = new StrokeCollection {
@@ -836,6 +852,7 @@ namespace Ink_Canvas
                                     {
                                         DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
                                     };
+                                    stroke.AddPropertyData(Helpers.ModernInkAnalyzer.ShapeStrokePropertyGuid, true);
 
                                     if (needRotation)
                                     {
@@ -883,6 +900,7 @@ namespace Ink_Canvas
                                     {
                                         DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
                                     };
+                                    stroke.AddPropertyData(Helpers.ModernInkAnalyzer.ShapeStrokePropertyGuid, true);
                                     SetNewBackupOfStroke();
                                     _currentCommitType = CommitReason.ShapeRecognition;
                                     inkCanvas.Strokes.Remove(result.StrokesToRemove);
@@ -928,6 +946,7 @@ namespace Ink_Canvas
                                     {
                                         DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
                                     };
+                                    stroke.AddPropertyData(Helpers.ModernInkAnalyzer.ShapeStrokePropertyGuid, true);
                                     SetNewBackupOfStroke();
                                     _currentCommitType = CommitReason.ShapeRecognition;
                                     inkCanvas.Strokes.Remove(result.StrokesToRemove);
@@ -2835,6 +2854,7 @@ namespace Ink_Canvas
                 {
                     DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
                 };
+                rectangleStroke.AddPropertyData(Helpers.ModernInkAnalyzer.ShapeStrokePropertyGuid, true);
 
                 // 移除原有的四条直线
                 SetNewBackupOfStroke();

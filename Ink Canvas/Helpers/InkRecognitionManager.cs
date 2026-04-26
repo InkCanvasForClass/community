@@ -11,7 +11,6 @@ namespace Ink_Canvas.Helpers
         private readonly object _initSync = new object();
 
         private ModernInkProcessor _modernProcessor;
-        private ModernInkAnalyzer _modernAnalyzer;
         private bool _isModernSystemAvailable;
         private bool _isInitialized;
 
@@ -63,22 +62,20 @@ namespace Ink_Canvas.Helpers
 
         private void EnsureModernAnalyzerInitialized()
         {
-            if (_modernAnalyzer != null || !_isModernSystemAvailable) return;
+            if (_modernProcessor != null || !_isModernSystemAvailable) return;
 
             lock (_initSync)
             {
-                if (_modernAnalyzer != null || !_isModernSystemAvailable) return;
+                if (_modernProcessor != null || !_isModernSystemAvailable) return;
                 try
                 {
                     _modernProcessor ??= new ModernInkProcessor();
-                    _modernAnalyzer = new ModernInkAnalyzer();
                 }
                 catch (Exception ex)
                 {
                     LogHelper.WriteLogToFile("WinRT 墨迹模块懒加载失败: " + ex.Message, LogHelper.LogType.Warning);
                     _isModernSystemAvailable = false;
                     _modernProcessor = null;
-                    _modernAnalyzer = null;
                 }
             }
         }
@@ -165,10 +162,10 @@ namespace Ink_Canvas.Helpers
                 }
 
                 EnsureModernAnalyzerInitialized();
-                if (_modernAnalyzer == null)
+                if (_modernProcessor == null)
                 {
                     LogHelper.WriteLogToFile(
-                        "[手写体] CorrectInkAsync 跳过：ModernInkAnalyzer 未就绪（WinRT 初始化失败？）。笔画数=" +
+                        "[手写体] CorrectInkAsync 跳过：ModernInkProcessor 未就绪（WinRT 初始化失败？）。笔画数=" +
                         strokes.Count,
                         LogHelper.LogType.Warning);
                     return Task.FromResult(strokes);
@@ -178,7 +175,7 @@ namespace Ink_Canvas.Helpers
                     "[手写体] CorrectInkAsync 开始：笔画数=" + strokes.Count +
                     "，字体=" + (string.IsNullOrWhiteSpace(handwritingFontFamilyList) ? "(默认)" : handwritingFontFamilyList.Trim()),
                     LogHelper.LogType.Info);
-                return _modernAnalyzer.AnalyzeAndCorrectAsync(strokes, handwritingFontFamilyList);
+                return WinRtHandwritingRecognizer.ConvertRecognizedTextToHandwritingInkAsync(strokes, handwritingFontFamilyList);
             }
             catch (Exception ex)
             {
@@ -234,7 +231,6 @@ namespace Ink_Canvas.Helpers
         public void Dispose()
         {
             _modernProcessor?.Dispose();
-            _modernAnalyzer?.Dispose();
             _isInitialized = false;
         }
     }
@@ -250,22 +246,6 @@ namespace Ink_Canvas.Helpers
         public Task<InkShapeRecognitionResult> RecognizeShapeAsync(StrokeCollection strokes)
         {
             return WinRtInkShapeRecognizer.RecognizeShapeAsync(strokes);
-        }
-
-        public void Dispose()
-        {
-        }
-    }
-
-    internal sealed class ModernInkAnalyzer : IDisposable
-    {
-        public Task<StrokeCollection> AnalyzeAndCorrectAsync(
-            StrokeCollection strokes,
-            string handwritingFontFamilyList)
-        {
-            return WinRtHandwritingRecognizer.ConvertRecognizedTextToHandwritingInkAsync(
-                strokes,
-                handwritingFontFamilyList);
         }
 
         public void Dispose()
