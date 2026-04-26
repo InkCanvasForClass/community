@@ -30,6 +30,30 @@
                     Spacing="{StaticResource SettingsCardSpacing}">
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="操作" />
+
+                    <ui:SettingsCard Header="{i18n:I18n Key=Btn_Restart}" Description="{i18n:I18n Key=Home_RestartApp}"
+                        IsClickEnabled="True" Click="BtnRestart_Click">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" />
+                        </ui:SettingsCard.HeaderIcon>
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard Header="{i18n:I18n Key=Btn_Reset}" Description="{i18n:I18n Key=Home_ResetSettings}"
+                        IsClickEnabled="True" Click="BtnResetToSuggestion_Click">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Clear}" />
+                        </ui:SettingsCard.HeaderIcon>
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard Header="{i18n:I18n Key=Btn_Exit}" Description="{i18n:I18n Key=Home_ExitApp}"
+                        IsClickEnabled="True" Click="BtnExit_Click">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cancel}" />
+                        </ui:SettingsCard.HeaderIcon>
+                    </ui:SettingsCard>
+
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="基本" />
 
                     <ui:SettingsCard Header="启动" Description="启动设置"

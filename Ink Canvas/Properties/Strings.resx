@@ -222,6 +222,15 @@
   <data name="Btn_Exit" xml:space="preserve">
     <value>退出</value>
   </data>
+  <data name="Home_RestartApp" xml:space="preserve">
+    <value>重启应用程序</value>
+  </data>
+  <data name="Home_ResetSettings" xml:space="preserve">
+    <value>重置为推荐设置</value>
+  </data>
+  <data name="Home_ExitApp" xml:space="preserve">
+    <value>退出应用程序</value>
+  </data>
   <data name="Settings_Mode" xml:space="preserve">
     <value>模式设置</value>
   </data>

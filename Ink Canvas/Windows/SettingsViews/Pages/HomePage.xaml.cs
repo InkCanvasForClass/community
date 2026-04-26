@@ -17,5 +17,23 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 settingsWindow?.NavigateToPage(pageTag);
             }
         }
+
+        private void BtnRestart_Click(object sender, RoutedEventArgs e)
+        {
+            var mainWindow = Application.Current.MainWindow as MainWindow;
+            mainWindow?.BtnRestart_Click(sender, e);
+        }
+
+        private void BtnResetToSuggestion_Click(object sender, RoutedEventArgs e)
+        {
+            var mainWindow = Application.Current.MainWindow as MainWindow;
+            mainWindow?.BtnResetToSuggestion_Click(sender, e);
+        }
+
+        private void BtnExit_Click(object sender, RoutedEventArgs e)
+        {
+            var mainWindow = Application.Current.MainWindow as MainWindow;
+            mainWindow?.BtnExit_Click(sender, e);
+        }
     }
 }
