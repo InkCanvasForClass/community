@@ -122,13 +122,13 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding ElementName=ViewboxFloatingBarScaleTransformValueSlider, Path=Value}"
+                                       VerticalAlignment="Center" FontFamily="Consolas"/>
                             <Slider x:Name="ViewboxFloatingBarScaleTransformValueSlider" Minimum="0.5"
                                     Maximum="1.25" Width="168"
                                     IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
                                     TickPlacement="None" AutoToolTipPlacement="None"
                                     ValueChanged="ViewboxFloatingBarScaleTransformValueSlider_ValueChanged" />
-                            <TextBlock Text="{Binding ElementName=ViewboxFloatingBarScaleTransformValueSlider, Path=Value}"
-                                       VerticalAlignment="Center" FontFamily="Consolas" Width="40" />
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
@@ -137,13 +137,13 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EaseOfAccess}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding ElementName=ViewboxFloatingBarOpacityValueSlider, Path=Value, StringFormat={}{0:F2}}"
+                                       VerticalAlignment="Center" FontFamily="Consolas"/>
                             <Slider x:Name="ViewboxFloatingBarOpacityValueSlider" Minimum="0.3"
                                     Maximum="1" Width="168"
                                     IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
                                     TickPlacement="None" AutoToolTipPlacement="None"
                                     ValueChanged="ViewboxFloatingBarOpacityValueSlider_ValueChanged" />
-                            <TextBlock Text="{Binding ElementName=ViewboxFloatingBarOpacityValueSlider, Path=Value}"
-                                       VerticalAlignment="Center" FontFamily="Consolas" Width="40" />
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 

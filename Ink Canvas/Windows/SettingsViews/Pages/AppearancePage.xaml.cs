@@ -106,6 +106,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ComboBoxEraserDisplayOption.SelectedIndex = settings.Appearance.EraserDisplayOption;
 
             CardEnableTrayIcon.IsOn = settings.Appearance.EnableTrayIcon;
+
+            if (BtnHitokotoCustomize != null)
+                BtnHitokotoCustomize.Visibility = settings.Appearance.ChickenSoupSource == 3 ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private MainWindow GetMainWindow() => Application.Current.MainWindow as MainWindow;
@@ -232,6 +235,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 mw.ViewboxFloatingBarScaleTransform.ScaleX = val > 0.5 && val < 1.25 ? val : val <= 0.5 ? 0.5 : 1.25;
                 mw.ViewboxFloatingBarScaleTransform.ScaleY = val > 0.5 && val < 1.25 ? val : val <= 0.5 ? 0.5 : 1.25;
+                if (mw.BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                    mw.ViewboxFloatingBarMarginAnimation(60);
+                else
+                    mw.ViewboxFloatingBarMarginAnimation(100, true);
             }
         }
 
@@ -249,6 +256,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             SettingsManager.Settings.Appearance.ViewboxFloatingBarOpacityInPPTValue = ViewboxFloatingBarOpacityInPPTValueSlider.Value;
             SettingsManager.SaveSettingsToFile();
+            var mw = GetMainWindow();
+            if (mw != null && mw.currentMode == 2)
+            {
+                mw.ViewboxFloatingBar.Opacity = ViewboxFloatingBarOpacityInPPTValueSlider.Value;
+            }
         }
 
         #endregion

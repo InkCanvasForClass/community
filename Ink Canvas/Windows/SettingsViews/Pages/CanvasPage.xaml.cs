@@ -119,6 +119,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 SettingsManager.Settings.Canvas.DisablePressure = false;
                 CardDisablePressure.IsOn = false;
+                var mw = Application.Current.MainWindow as MainWindow;
+                if (mw != null && mw.inkCanvas != null)
+                    mw.inkCanvas.DefaultDrawingAttributes.IgnorePressure = false;
             }
             SettingsManager.SaveSettingsToFile();
         }
@@ -133,6 +136,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 CardEnablePressureTouchMode.IsOn = false;
             }
             SettingsManager.SaveSettingsToFile();
+            var mw = Application.Current.MainWindow as MainWindow;
+            if (mw != null && mw.inkCanvas != null)
+                mw.inkCanvas.DefaultDrawingAttributes.IgnorePressure = CardDisablePressure.IsOn;
         }
 
         private void ComboBoxEraserSize_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -140,6 +146,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             SettingsManager.Settings.Canvas.EraserSize = ComboBoxEraserSize.SelectedIndex;
             SettingsManager.SaveSettingsToFile();
+            var mw = Application.Current.MainWindow as MainWindow;
+            if (mw != null)
+            {
+                if (mw.ComboBoxEraserSizeFloatingBar != null)
+                    mw.ComboBoxEraserSizeFloatingBar.SelectedIndex = ComboBoxEraserSize.SelectedIndex;
+                if (mw.BoardComboBoxEraserSize != null)
+                    mw.BoardComboBoxEraserSize.SelectedIndex = ComboBoxEraserSize.SelectedIndex;
+            }
         }
 
         private void ToggleSwitchHideStrokeWhenSelecting_Toggled(object sender, RoutedEventArgs e)
@@ -221,6 +235,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.Settings.Canvas.EnableInkFade = ToggleSwitchEnableInkFade.IsOn;
             ExpanderEnableInkFade.IsExpanded = ToggleSwitchEnableInkFade.IsOn;
             SettingsManager.SaveSettingsToFile();
+            var mw = Application.Current.MainWindow as MainWindow;
+            if (mw != null)
+            {
+                mw.UpdateInkFadeManager(ToggleSwitchEnableInkFade.IsOn, SettingsManager.Settings.Canvas.InkFadeTime);
+                if (mw.ToggleSwitchInkFadeInPanel != null)
+                    mw.ToggleSwitchInkFadeInPanel.IsOn = ToggleSwitchEnableInkFade.IsOn;
+                if (mw.ToggleSwitchInkFadeInPanel2 != null)
+                    mw.ToggleSwitchInkFadeInPanel2.IsOn = ToggleSwitchEnableInkFade.IsOn;
+            }
         }
 
         private void InkFadeTimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -228,6 +251,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             SettingsManager.Settings.Canvas.InkFadeTime = (int)e.NewValue;
             SettingsManager.SaveSettingsToFile();
+            var mw = Application.Current.MainWindow as MainWindow;
+            if (mw != null && SettingsManager.Settings.Canvas.EnableInkFade)
+            {
+                mw.UpdateInkFadeManager(true, (int)e.NewValue);
+            }
         }
 
         private void ToggleSwitchHideInkFadeControlInPenMenu_Toggled(object sender, RoutedEventArgs e)

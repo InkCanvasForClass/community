@@ -82,6 +82,12 @@ namespace Ink_Canvas
         /// 进程终止定时器
         /// </summary>
         private Timer timerKillProcess = new Timer();
+
+        public void UpdateAutoKillProcessTimer(bool shouldRun)
+        {
+            if (shouldRun) timerKillProcess.Start();
+            else timerKillProcess.Stop();
+        }
         /// <summary>
         /// 统一的主窗口定时器
         /// </summary>
@@ -294,7 +300,7 @@ namespace Ink_Canvas
         /// 如果启用，则根据Settings.Automation.AutoSaveStrokesIntervalMinutes设置定时器间隔
         /// 最小间隔为1分钟
         /// </remarks>
-        private void UpdateAutoSaveStrokesTimer()
+        public void UpdateAutoSaveStrokesTimer()
         {
             if (autoSaveStrokesTimer == null) return;
 

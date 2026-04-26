@@ -186,6 +186,17 @@
                     </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
 
+                <!-- PowerPoint -->
+                <ui:NavigationViewItem
+                    x:Name="PowerPointPageItem"
+                    Content="PowerPoint"
+                    Tag="PowerPointPage"
+                    ToolTipService.ToolTip="PowerPoint 设置">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"/>
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
                 <!-- 更新设置 -->
                 <ui:NavigationViewItem
                     x:Name="UpdatePageItem"
@@ -216,6 +227,17 @@
                     ToolTipService.ToolTip="高级设置">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
+                <!-- 自动化 -->
+                <ui:NavigationViewItem
+                    x:Name="AutomationPageItem"
+                    Content="自动化"
+                    Tag="AutomationPage"
+                    ToolTipService.ToolTip="自动化设置">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}"/>
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 

@@ -61,7 +61,7 @@ namespace Ink_Canvas
         private InkFadeManager _inkFadeManager;
 
         // 悬浮窗拦截管理器
-        private FloatingWindowInterceptorManager _floatingWindowInterceptorManager;
+        public FloatingWindowInterceptorManager _floatingWindowInterceptorManager;
 
         // 窗口概览模型
         private WindowOverviewModel _windowOverviewModel;
@@ -1170,6 +1170,16 @@ namespace Ink_Canvas
         public void UpdateInkSmoothingConfig()
         {
             _inkSmoothingManager?.UpdateConfig();
+        }
+
+        public void UpdateInkFadeManager(bool isEnabled, int fadeTime = 0)
+        {
+            if (_inkFadeManager != null)
+            {
+                _inkFadeManager.IsEnabled = isEnabled;
+                if (fadeTime > 0)
+                    _inkFadeManager.UpdateFadeTime(fadeTime);
+            }
         }
 
         public void UpdatePickNameBackgroundsInComboBox()
@@ -2425,8 +2435,13 @@ namespace Ink_Canvas
                         return;
                     }
                 case "ppt":
-                    targetGroupBox = GroupBoxPPT;
-                    break;
+                    {
+                        var sw = new Windows.SettingsViews.SettingsWindow();
+                        sw.Owner = this;
+                        sw.NavigateToPage("PowerPointPage");
+                        sw.ShowDialog();
+                        return;
+                    }
                 case "advanced":
                     {
                         var sw = new Windows.SettingsViews.SettingsWindow();
@@ -2436,8 +2451,13 @@ namespace Ink_Canvas
                         return;
                     }
                 case "automation":
-                    targetGroupBox = GroupBoxAutomation;
-                    break;
+                    {
+                        var sw = new Windows.SettingsViews.SettingsWindow();
+                        sw.Owner = this;
+                        sw.NavigateToPage("AutomationPage");
+                        sw.ShowDialog();
+                        return;
+                    }
                 case "randomwindow":
                     {
                         var sw = new Windows.SettingsViews.SettingsWindow();
@@ -3231,18 +3251,18 @@ namespace Ink_Canvas
             try
             {
                 if (!isLoaded) return;
-                if (ComboBoxPPTTimeCapsulePosition != null)
+                var comboBox = sender as System.Windows.Controls.ComboBox;
+                if (comboBox != null)
                 {
-                    Settings.PowerPointSettings.PPTTimeCapsulePosition = ComboBoxPPTTimeCapsulePosition.SelectedIndex;
+                    Settings.PowerPointSettings.PPTTimeCapsulePosition = comboBox.SelectedIndex;
                     SaveSettingsToFile();
 
-                    // 如果当前在PPT放映模式，需要立即更新时间胶囊的位置
                     if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
                     {
                         UpdatePPTTimeCapsulePosition();
                     }
 
-                    LogHelper.WriteLogToFile($"PPT时间胶囊位置已更改为: {ComboBoxPPTTimeCapsulePosition.SelectedIndex}", LogHelper.LogType.Event);
+                    LogHelper.WriteLogToFile($"PPT时间胶囊位置已更改为: {comboBox.SelectedIndex}", LogHelper.LogType.Event);
                 }
             }
             catch (Exception ex)
@@ -3254,7 +3274,7 @@ namespace Ink_Canvas
         /// <summary>
         /// 更新PPT模式下手势按钮的显示状态
         /// </summary>
-        private void UpdateGestureButtonVisibilityInPPTMode()
+        public void UpdateGestureButtonVisibilityInPPTMode()
         {
             try
             {
@@ -3333,7 +3353,7 @@ namespace Ink_Canvas
         /// <summary>
         /// 更新PPT时间胶囊的位置
         /// </summary>
-        private void UpdatePPTTimeCapsulePosition()
+        public void UpdatePPTTimeCapsulePosition()
         {
             try
             {
@@ -3372,26 +3392,6 @@ namespace Ink_Canvas
         /// </summary>
         private void InitializeFileAssociationStatus()
         {
-            try
-            {
-                bool isRegistered = FileAssociationManager.IsFileAssociationRegistered();
-                if (isRegistered)
-                {
-                    TextBlockFileAssociationStatus.Text = "✓ .icstk文件关联已注册";
-                    TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightGreen);
-                }
-                else
-                {
-                    TextBlockFileAssociationStatus.Text = "✗ .icstk文件关联未注册";
-                    TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightCoral);
-                }
-            }
-            catch (Exception ex)
-            {
-                TextBlockFileAssociationStatus.Text = "✗ 检查文件关联状态时出错";
-                TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightCoral);
-                LogHelper.WriteLogToFile($"初始化文件关联状态显示时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
         }
 
         /// <summary>
@@ -3492,15 +3492,6 @@ namespace Ink_Canvas
                 // 获取所有滑块控件并添加触摸支持
                 var sliders = new List<Slider>
                 {
-                    PPTButtonLeftPositionValueSlider,
-                    PPTButtonRightPositionValueSlider,
-                    PPTButtonLBPositionValueSlider,
-                    PPTButtonRBPositionValueSlider,
-                    PPTLSButtonOpacityValueSlider,
-                    PPTRSButtonOpacityValueSlider,
-                    PPTLBButtonOpacityValueSlider,
-                    PPTRBButtonOpacityValueSlider,
-                    SideControlMinimumAutomationSlider,
                     BoardInkWidthSlider,
                     BoardInkAlphaSlider,
                     BoardHighlighterWidthSlider,

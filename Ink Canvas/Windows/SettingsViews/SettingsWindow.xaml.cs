@@ -44,6 +44,8 @@ namespace Ink_Canvas.Windows.SettingsViews
                 { "UpdatePage", typeof(UpdatePage) },
                 { "ExperimentalPage", typeof(ExperimentalPage) },
                 { "AdvancedPage", typeof(AdvancedPage) },
+                { "AutomationPage", typeof(AutomationPage) },
+                { "PowerPointPage", typeof(PowerPointPage) },
                 { "RandomDrawPage", typeof(RandomDrawPage) },
                 { "CanvasPage", typeof(CanvasPage) },
                 { "InkRecognitionPage", typeof(InkRecognitionPage) },

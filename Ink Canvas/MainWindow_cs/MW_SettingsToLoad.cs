@@ -342,181 +342,13 @@ namespace Ink_Canvas
             // PowerPointSettings
             if (Settings.PowerPointSettings != null)
             {
-
-
                 if (Settings.PowerPointSettings.PowerPointSupport)
                 {
-                    ToggleSwitchSupportPowerPoint.IsOn = true;
                     // PPT监控将在Window_Loaded中启动
                 }
-                else
-                {
-                    ToggleSwitchSupportPowerPoint.IsOn = false;
-                    // PPT监控将保持停止状态
-                }
-
-                ToggleSwitchShowCanvasAtNewSlideShow.IsOn = Settings.PowerPointSettings.IsShowCanvasAtNewSlideShow;
-
-                if (ToggleSwitchUseRotPptLink != null)
-                {
-                    ToggleSwitchUseRotPptLink.IsOn = Settings.PowerPointSettings.UseRotPptLink;
-                }
-
-                ToggleSwitchEnableTwoFingerGestureInPresentationMode.IsOn =
-                    Settings.PowerPointSettings.IsEnableTwoFingerGestureInPresentationMode;
-
-                ToggleSwitchEnableFingerGestureSlideShowControl.IsOn =
-                    Settings.PowerPointSettings.IsEnableFingerGestureSlideShowControl;
-
-                ToggleSwitchAutoSaveStrokesInPowerPoint.IsOn =
-                    Settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint;
-
-                ToggleSwitchNotifyPreviousPage.IsOn = Settings.PowerPointSettings.IsNotifyPreviousPage;
-
-                // PPT时间显示胶囊设置
-                if (ToggleSwitchEnablePPTTimeCapsule != null)
-                {
-                    ToggleSwitchEnablePPTTimeCapsule.IsOn = Settings.PowerPointSettings.EnablePPTTimeCapsule;
-                }
-                if (ComboBoxPPTTimeCapsulePosition != null)
-                {
-                    int position = Settings.PowerPointSettings.PPTTimeCapsulePosition;
-                    if (position < 0 || position > 2)
-                    {
-                        position = 1; // 默认右上角
-                    }
-                    ComboBoxPPTTimeCapsulePosition.SelectedIndex = position;
-                }
-                if (ToggleSwitchShowPPTSidebarByDefault != null)
-                {
-                    ToggleSwitchShowPPTSidebarByDefault.IsOn = Settings.PowerPointSettings.ShowPPTSidebarByDefault;
-                }
-
-                // -- new --
-                ToggleSwitchShowPPTButton.IsOn = Settings.PowerPointSettings.ShowPPTButton;
-
-                ToggleSwitchEnablePPTButtonPageClickable.IsOn =
-                    Settings.PowerPointSettings.EnablePPTButtonPageClickable;
-
-                ToggleSwitchEnablePPTButtonLongPressPageTurn.IsOn =
-                    Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn;
-
-                var dops = Settings.PowerPointSettings.PPTButtonsDisplayOption.ToString();
-                var dopsc = dops.ToCharArray();
-                if ((dopsc[0] == '1' || dopsc[0] == '2') && (dopsc[1] == '1' || dopsc[1] == '2') &&
-                    (dopsc[2] == '1' || dopsc[2] == '2') && (dopsc[3] == '1' || dopsc[3] == '2'))
-                {
-                    CheckboxEnableLBPPTButton.IsChecked = dopsc[0] == '2';
-                    CheckboxEnableRBPPTButton.IsChecked = dopsc[1] == '2';
-                    CheckboxEnableLSPPTButton.IsChecked = dopsc[2] == '2';
-                    CheckboxEnableRSPPTButton.IsChecked = dopsc[3] == '2';
-                }
-                else
-                {
-                    Settings.PowerPointSettings.PPTButtonsDisplayOption = 2222;
-                    CheckboxEnableLBPPTButton.IsChecked = true;
-                    CheckboxEnableRBPPTButton.IsChecked = true;
-                    CheckboxEnableLSPPTButton.IsChecked = true;
-                    CheckboxEnableRSPPTButton.IsChecked = true;
-                    SaveSettingsToFile();
-                }
-
-                var sops = Settings.PowerPointSettings.PPTSButtonsOption.ToString();
-                var sopsc = sops.ToCharArray();
-                if ((sopsc[0] == '1' || sopsc[0] == '2') && (sopsc[1] == '1' || sopsc[1] == '2') &&
-                    (sopsc[2] == '1' || sopsc[2] == '2'))
-                {
-                    CheckboxSPPTDisplayPage.IsChecked = sopsc[0] == '2';
-                    CheckboxSPPTHalfOpacity.IsChecked = sopsc[1] == '2';
-                    CheckboxSPPTBlackBackground.IsChecked = sopsc[2] == '2';
-                }
-                else
-                {
-                    Settings.PowerPointSettings.PPTSButtonsOption = 221;
-                    CheckboxSPPTDisplayPage.IsChecked = true;
-                    CheckboxSPPTHalfOpacity.IsChecked = true;
-                    CheckboxSPPTBlackBackground.IsChecked = false;
-                    SaveSettingsToFile();
-                }
-
-                var bops = Settings.PowerPointSettings.PPTBButtonsOption.ToString();
-                var bopsc = bops.ToCharArray();
-                if ((bopsc[0] == '1' || bopsc[0] == '2') && (bopsc[1] == '1' || bopsc[1] == '2') &&
-                    (bopsc[2] == '1' || bopsc[2] == '2'))
-                {
-                    CheckboxBPPTDisplayPage.IsChecked = bopsc[0] == '2';
-                    CheckboxBPPTHalfOpacity.IsChecked = bopsc[1] == '2';
-                    CheckboxBPPTBlackBackground.IsChecked = bopsc[2] == '2';
-                }
-                else
-                {
-                    Settings.PowerPointSettings.PPTBButtonsOption = 121;
-                    CheckboxBPPTDisplayPage.IsChecked = false;
-                    CheckboxBPPTHalfOpacity.IsChecked = true;
-                    CheckboxBPPTBlackBackground.IsChecked = false;
-                    SaveSettingsToFile();
-                }
-
-                PPTButtonLeftPositionValueSlider.Value = Settings.PowerPointSettings.PPTLSButtonPosition;
-
-                PPTButtonRightPositionValueSlider.Value = Settings.PowerPointSettings.PPTRSButtonPosition;
-
-                PPTButtonLBPositionValueSlider.Value = Settings.PowerPointSettings.PPTLBButtonPosition;
-
-                PPTButtonRBPositionValueSlider.Value = Settings.PowerPointSettings.PPTRBButtonPosition;
-
-                // 初始化PPT翻页按钮透明度滑块值，根据半透明选项设置默认值
-                // 重用之前定义的sopsc和bopsc变量
-                bool isSideHalfOpacity = sopsc.Length >= 2 && sopsc[1] == '2';
-                // 如果透明度为0或未设置，根据半透明选项设置默认值
-                if (Settings.PowerPointSettings.PPTLSButtonOpacity == 0.0 ||
-                    (Settings.PowerPointSettings.PPTLSButtonOpacity == 1.0 && isSideHalfOpacity))
-                {
-                    Settings.PowerPointSettings.PPTLSButtonOpacity = isSideHalfOpacity ? 0.5 : 1.0;
-                }
-                if (Settings.PowerPointSettings.PPTRSButtonOpacity == 0.0 ||
-                    (Settings.PowerPointSettings.PPTRSButtonOpacity == 1.0 && isSideHalfOpacity))
-                {
-                    Settings.PowerPointSettings.PPTRSButtonOpacity = isSideHalfOpacity ? 0.5 : 1.0;
-                }
-                PPTLSButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTLSButtonOpacity;
-                PPTRSButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTRSButtonOpacity;
-
-                bool isBottomHalfOpacity = bopsc.Length >= 2 && bopsc[1] == '2';
-                // 如果透明度为0或未设置，根据半透明选项设置默认值
-                if (Settings.PowerPointSettings.PPTLBButtonOpacity == 0.0 ||
-                    (Settings.PowerPointSettings.PPTLBButtonOpacity == 1.0 && isBottomHalfOpacity))
-                {
-                    Settings.PowerPointSettings.PPTLBButtonOpacity = isBottomHalfOpacity ? 0.5 : 1.0;
-                }
-                if (Settings.PowerPointSettings.PPTRBButtonOpacity == 0.0 ||
-                    (Settings.PowerPointSettings.PPTRBButtonOpacity == 1.0 && isBottomHalfOpacity))
-                {
-                    Settings.PowerPointSettings.PPTRBButtonOpacity = isBottomHalfOpacity ? 0.5 : 1.0;
-                }
-                PPTLBButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTLBButtonOpacity;
-                PPTRBButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTRBButtonOpacity;
 
                 UpdatePPTBtnSlidersStatus();
-
                 UpdatePPTBtnPreview();
-
-                // -- new --
-
-                ToggleSwitchNotifyHiddenPage.IsOn = Settings.PowerPointSettings.IsNotifyHiddenPage;
-
-                ToggleSwitchNotifyAutoPlayPresentation.IsOn = Settings.PowerPointSettings.IsNotifyAutoPlayPresentation;
-
-                ToggleSwitchSupportWPS.IsOn = Settings.PowerPointSettings.IsSupportWPS;
-
-                ToggleSwitchSkipAnimationsWhenGoNext.IsOn = Settings.PowerPointSettings.SkipAnimationsWhenGoNext;
-
-                ToggleSwitchPowerPointEnhancement.IsOn = Settings.PowerPointSettings.EnablePowerPointEnhancement;
-
-                ToggleSwitchAutoSaveScreenShotInPowerPoint.IsOn =
-                    Settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint;
-                ToggleSwitchEnableWppProcessKill.IsOn = Settings.PowerPointSettings.EnableWppProcessKill;
-                ToggleSwitchAlwaysGoToFirstPageOnReenter.IsOn = Settings.PowerPointSettings.IsAlwaysGoToFirstPageOnReenter;
             }
             else
             {
@@ -526,36 +358,17 @@ namespace Ink_Canvas
             // Gesture
             if (Settings.Gesture != null)
             {
-                ToggleSwitchEnableMultiTouchMode.IsOn = Settings.Gesture.IsEnableMultiTouchMode;
-
-                ToggleSwitchEnableTwoFingerZoom.IsOn = Settings.Gesture.IsEnableTwoFingerZoom;
-                BoardToggleSwitchEnableTwoFingerZoom.IsOn = Settings.Gesture.IsEnableTwoFingerZoom;
-
-                ToggleSwitchEnableTwoFingerTranslate.IsOn = Settings.Gesture.IsEnableTwoFingerTranslate;
-                BoardToggleSwitchEnableTwoFingerTranslate.IsOn = Settings.Gesture.IsEnableTwoFingerTranslate;
-
-                ToggleSwitchEnableTwoFingerRotation.IsOn = Settings.Gesture.IsEnableTwoFingerRotation;
-                BoardToggleSwitchEnableTwoFingerRotation.IsOn = Settings.Gesture.IsEnableTwoFingerRotation;
-
                 if (Settings.Gesture.AutoSwitchTwoFingerGesture)
                 {
                     if (Topmost)
                     {
-                        ToggleSwitchEnableTwoFingerTranslate.IsOn = false;
-                        BoardToggleSwitchEnableTwoFingerTranslate.IsOn = false;
                         Settings.Gesture.IsEnableTwoFingerTranslate = false;
-                        // if (!isInMultiTouchMode) ToggleSwitchEnableMultiTouchMode.IsOn = true;
                     }
                     else
                     {
-                        ToggleSwitchEnableTwoFingerTranslate.IsOn = true;
-                        BoardToggleSwitchEnableTwoFingerTranslate.IsOn = true;
                         Settings.Gesture.IsEnableTwoFingerTranslate = true;
-                        if (isInMultiTouchMode) ToggleSwitchEnableMultiTouchMode.IsOn = false;
                     }
                 }
-
-                CheckEnableTwoFingerGestureBtnColorPrompt();
             }
             else
             {
@@ -778,54 +591,6 @@ namespace Ink_Canvas
             if (Settings.Automation != null)
             {
                 StartOrStoptimerCheckAutoFold();
-                ToggleSwitchAutoFoldInEasiNote.IsOn = Settings.Automation.IsAutoFoldInEasiNote;
-
-                ToggleSwitchAutoFoldInEasiCamera.IsOn = Settings.Automation.IsAutoFoldInEasiCamera;
-
-                ToggleSwitchAutoFoldInEasiNote3C.IsOn = Settings.Automation.IsAutoFoldInEasiNote3C;
-
-                ToggleSwitchAutoFoldInEasiNote3.IsOn = Settings.Automation.IsAutoFoldInEasiNote3;
-
-                ToggleSwitchAutoFoldInEasiNote5C.IsOn = Settings.Automation.IsAutoFoldInEasiNote5C;
-
-                ToggleSwitchAutoFoldInSeewoPincoTeacher.IsOn = Settings.Automation.IsAutoFoldInSeewoPincoTeacher;
-
-                ToggleSwitchAutoFoldInHiteTouchPro.IsOn = Settings.Automation.IsAutoFoldInHiteTouchPro;
-
-                ToggleSwitchAutoFoldInHiteLightBoard.IsOn = Settings.Automation.IsAutoFoldInHiteLightBoard;
-
-                ToggleSwitchAutoFoldInHiteCamera.IsOn = Settings.Automation.IsAutoFoldInHiteCamera;
-
-                ToggleSwitchAutoFoldInWxBoardMain.IsOn = Settings.Automation.IsAutoFoldInWxBoardMain;
-
-                ToggleSwitchAutoFoldInOldZyBoard.IsOn = Settings.Automation.IsAutoFoldInOldZyBoard;
-
-                ToggleSwitchAutoFoldInMSWhiteboard.IsOn = Settings.Automation.IsAutoFoldInMSWhiteboard;
-
-                ToggleSwitchAutoFoldInAdmoxWhiteboard.IsOn = Settings.Automation.IsAutoFoldInAdmoxWhiteboard;
-
-                ToggleSwitchAutoFoldInAdmoxBooth.IsOn = Settings.Automation.IsAutoFoldInAdmoxBooth;
-
-                ToggleSwitchAutoFoldInQPoint.IsOn = Settings.Automation.IsAutoFoldInQPoint;
-
-                ToggleSwitchAutoFoldInYiYunVisualPresenter.IsOn = Settings.Automation.IsAutoFoldInYiYunVisualPresenter;
-
-                ToggleSwitchAutoFoldInMaxHubWhiteboard.IsOn = Settings.Automation.IsAutoFoldInMaxHubWhiteboard;
-
-                SettingsPPTInkingAndAutoFoldExplictBorder.Visibility = Visibility.Collapsed;
-                if (Settings.Automation.IsAutoFoldInPPTSlideShow)
-                {
-                    SettingsPPTInkingAndAutoFoldExplictBorder.Visibility = Visibility.Visible;
-                    SettingsShowCanvasAtNewSlideShowStackPanel.Opacity = 0.5;
-                    SettingsShowCanvasAtNewSlideShowStackPanel.IsHitTestVisible = false;
-                }
-
-
-                ToggleSwitchAutoFoldInPPTSlideShow.IsOn = Settings.Automation.IsAutoFoldInPPTSlideShow;
-
-                ToggleSwitchAutoFoldAfterPPTSlideShow.IsOn = Settings.Automation.IsAutoFoldAfterPPTSlideShow;
-
-                ToggleSwitchKeepFoldAfterSoftwareExit.IsOn = Settings.Automation.KeepFoldAfterSoftwareExit;
 
                 if (Settings.Automation.IsAutoKillEasiNote || Settings.Automation.IsAutoKillPptService ||
                     Settings.Automation.IsAutoKillHiteAnnotation || Settings.Automation.IsAutoKillInkCanvas
@@ -839,63 +604,6 @@ namespace Ink_Canvas
                 {
                     timerKillProcess.Stop();
                 }
-
-                ToggleSwitchAutoKillEasiNote.IsOn = Settings.Automation.IsAutoKillEasiNote;
-
-                ToggleSwitchAutoKillHiteAnnotation.IsOn = Settings.Automation.IsAutoKillHiteAnnotation;
-
-                ToggleSwitchAutoKillPptService.IsOn = Settings.Automation.IsAutoKillPptService;
-
-                ToggleSwitchAutoKillVComYouJiao.IsOn = Settings.Automation.IsAutoKillVComYouJiao;
-
-                ToggleSwitchAutoKillInkCanvas.IsOn = Settings.Automation.IsAutoKillInkCanvas;
-
-                ToggleSwitchAutoKillICA.IsOn = Settings.Automation.IsAutoKillICA;
-
-                ToggleSwitchAutoKillIDT.IsOn = Settings.Automation.IsAutoKillIDT;
-
-                ToggleSwitchAutoKillSeewoLauncher2DesktopAnnotation.IsOn =
-                    Settings.Automation.IsAutoKillSeewoLauncher2DesktopAnnotation;
-
-                ToggleSwitchAutoSaveStrokesAtClear.IsOn = Settings.Automation.IsAutoSaveStrokesAtClear;
-
-                ToggleSwitchSaveScreenshotsInDateFolders.IsOn = Settings.Automation.IsSaveScreenshotsInDateFolders;
-
-                ToggleSwitchAutoSaveStrokesAtScreenshot.IsOn = Settings.Automation.IsAutoSaveStrokesAtScreenshot;
-
-                ToggleSwitchSaveFullPageStrokes.IsOn = Settings.Automation.IsSaveFullPageStrokes;
-
-                ToggleSwitchSaveStrokesAsXML.IsOn = Settings.Automation.IsSaveStrokesAsXML;
-
-                // 加载定时保存墨迹设置
-                ToggleSwitchEnableAutoSaveStrokes.IsOn = Settings.Automation.IsEnableAutoSaveStrokes;
-                // 初始化保存间隔下拉框
-                if (ComboBoxAutoSaveStrokesInterval != null)
-                {
-                    int intervalMinutes = Settings.Automation.AutoSaveStrokesIntervalMinutes;
-                    if (intervalMinutes < 1) intervalMinutes = 5; // 默认5分钟
-                    foreach (System.Windows.Controls.ComboBoxItem item in ComboBoxAutoSaveStrokesInterval.Items)
-                    {
-                        if (item.Tag != null && int.TryParse(item.Tag.ToString(), out int tagValue) && tagValue == intervalMinutes)
-                        {
-                            ComboBoxAutoSaveStrokesInterval.SelectedItem = item;
-                            break;
-                        }
-                    }
-                }
-
-                SideControlMinimumAutomationSlider.Value = Settings.Automation.MinimumAutomationStrokeNumber;
-
-                AutoSavedStrokesLocation.Text = Settings.Automation.AutoSavedStrokesLocation;
-                ToggleSwitchAutoDelSavedFiles.IsOn = Settings.Automation.AutoDelSavedFiles;
-                ComboBoxAutoDelSavedFilesDaysThreshold.Text =
-                    Settings.Automation.AutoDelSavedFilesDaysThreshold.ToString();
-
-                // 加载退出收纳模式自动切换至批注模式设置
-                ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode.IsOn = Settings.Automation.IsAutoEnterAnnotationModeWhenExitFoldMode;
-
-                // 加载退出白板时自动收纳设置
-                ToggleSwitchAutoFoldWhenExitWhiteboard.IsOn = Settings.Automation.IsAutoFoldWhenExitWhiteboard;
             }
             else
             {

@@ -205,6 +205,7 @@ namespace Ink_Canvas
         /// 提供对内部PPT链接管理器的公共访问，用于外部代码与PowerPoint进行交互。
         /// </remarks>
         public IPPTLinkManager PPTManager => _pptManager;
+        public PPTUIManager PPTUIManager => _pptUIManager;
         #endregion
 
         #region PPT Manager Initialization
@@ -214,7 +215,7 @@ namespace Ink_Canvas
         /// <remarks>
         /// 清理并释放现有的 PPT 管理器与 COM/Interop 状态，创建并配置新的 PPT 管理器（ROT 或 COM 实现，取决于设置）、单一的 PPT 墨迹管理器及其自动保存行为，以及 PPT UI 管理器与其显示/按钮位置选项。方法内部会订阅必要的 PPT 事件并记录初始化过程中的错误或警告。同时初始化长按页翻页定时器以支持长按翻页功能。
         /// </remarks>
-        private void InitializePPTManagers()
+        public void InitializePPTManagers()
         {
             try
             {
@@ -298,7 +299,7 @@ namespace Ink_Canvas
         /// <remarks>
         /// 只有当Settings.PowerPointSettings.PowerPointSupport为true时才会启动监控，并记录启动事件日志。
         /// </remarks>
-        private void StartPPTMonitoring()
+        public void StartPPTMonitoring()
         {
             if (Settings.PowerPointSettings.PowerPointSupport)
             {
@@ -310,7 +311,7 @@ namespace Ink_Canvas
         /// <summary>
         /// 停止 PowerPoint 相关的监控：停止并清除用于延迟退出 PPT 模式的定时器，并停止 PPT 管理器的监控，同时记录事件日志。
         /// </summary>
-        private void StopPPTMonitoring()
+        public void StopPPTMonitoring()
         {
             try
             {
@@ -334,7 +335,7 @@ namespace Ink_Canvas
         /// <remarks>
         /// 仅在 PowerPoint 增强功能已启用且未使用 ROT 链接时生效；方法将创建 PowerPoint 应用（若不存在）并启动用于定期检查应用状态的定时器。
         /// </remarks>
-        private void StartPowerPointProcessMonitoring()
+        public void StartPowerPointProcessMonitoring()
         {
             try
             {
@@ -364,7 +365,7 @@ namespace Ink_Canvas
         /// <summary>
         /// 停止PowerPoint应用程序守护
         /// </summary>
-        private void StopPowerPointProcessMonitoring()
+        public void StopPowerPointProcessMonitoring()
         {
             try
             {
@@ -2021,14 +2022,14 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            Settings.PowerPointSettings.EnablePowerPointEnhancement = ToggleSwitchPowerPointEnhancement.IsOn;
+            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
+            if (toggle != null)
+                Settings.PowerPointSettings.EnablePowerPointEnhancement = toggle.IsOn;
 
             if (Settings.PowerPointSettings.EnablePowerPointEnhancement)
             {
                 Settings.PowerPointSettings.IsSupportWPS = false;
-                ToggleSwitchSupportWPS.IsOn = false;
 
-                // 更新PPT管理器的WPS支持设置
                 if (_pptManager != null)
                 {
                     _pptManager.IsSupportWPS = false;
@@ -2037,7 +2038,6 @@ namespace Ink_Canvas
 
             SaveSettingsToFile();
 
-            // 启动或停止PowerPoint进程守护
             if (Settings.PowerPointSettings.EnablePowerPointEnhancement)
             {
                 StartPowerPointProcessMonitoring();
@@ -2066,16 +2066,16 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            Settings.PowerPointSettings.IsSupportWPS = ToggleSwitchSupportWPS.IsOn;
+            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
+            if (toggle != null)
+                Settings.PowerPointSettings.IsSupportWPS = toggle.IsOn;
 
             if (Settings.PowerPointSettings.IsSupportWPS)
             {
                 if (!Settings.PowerPointSettings.PowerPointSupport)
                 {
                     Settings.PowerPointSettings.PowerPointSupport = true;
-                    ToggleSwitchSupportPowerPoint.IsOn = true;
 
-                    // 启动PPT监控
                     if (_pptManager == null)
                     {
                         InitializePPTManagers();
@@ -2086,12 +2086,10 @@ namespace Ink_Canvas
                 if (Settings.PowerPointSettings.EnablePowerPointEnhancement)
                 {
                     Settings.PowerPointSettings.EnablePowerPointEnhancement = false;
-                    ToggleSwitchPowerPointEnhancement.IsOn = false;
                     StopPowerPointProcessMonitoring();
                 }
             }
 
-            // 更新PPT管理器的WPS支持设置与翻页跳过动画设置
             if (_pptManager != null)
             {
                 _pptManager.IsSupportWPS = Settings.PowerPointSettings.IsSupportWPS;
@@ -2105,7 +2103,9 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            Settings.PowerPointSettings.SkipAnimationsWhenGoNext = ToggleSwitchSkipAnimationsWhenGoNext.IsOn;
+            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
+            if (toggle != null)
+                Settings.PowerPointSettings.SkipAnimationsWhenGoNext = toggle.IsOn;
 
             if (_pptManager != null)
             {
