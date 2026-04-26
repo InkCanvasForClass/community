@@ -134,23 +134,35 @@ namespace Ink_Canvas
             {
                 if (item.StrokeHasBeenCleared)
                 {
-                    foreach (var strokes in item.CurrentStroke)
-                        if (canvas.Strokes.Contains(strokes))
-                            canvas.Strokes.Remove(strokes);
+                    if (item.CurrentStroke != null)
+                    {
+                        foreach (var strokes in item.CurrentStroke)
+                            if (canvas.Strokes.Contains(strokes))
+                                canvas.Strokes.Remove(strokes);
+                    }
 
-                    foreach (var strokes in item.ReplacedStroke)
-                        if (!canvas.Strokes.Contains(strokes))
-                            canvas.Strokes.Add(strokes);
+                    if (item.ReplacedStroke != null)
+                    {
+                        foreach (var strokes in item.ReplacedStroke)
+                            if (!canvas.Strokes.Contains(strokes))
+                                canvas.Strokes.Add(strokes);
+                    }
                 }
                 else
                 {
-                    foreach (var strokes in item.CurrentStroke)
-                        if (!canvas.Strokes.Contains(strokes))
-                            canvas.Strokes.Add(strokes);
+                    if (item.CurrentStroke != null)
+                    {
+                        foreach (var strokes in item.CurrentStroke)
+                            if (!canvas.Strokes.Contains(strokes))
+                                canvas.Strokes.Add(strokes);
+                    }
 
-                    foreach (var strokes in item.ReplacedStroke)
-                        if (canvas.Strokes.Contains(strokes))
-                            canvas.Strokes.Remove(strokes);
+                    if (item.ReplacedStroke != null)
+                    {
+                        foreach (var strokes in item.ReplacedStroke)
+                            if (canvas.Strokes.Contains(strokes))
+                                canvas.Strokes.Remove(strokes);
+                    }
                 }
             }
             else if (item.CommitType == TimeMachineHistoryType.Manipulation)
