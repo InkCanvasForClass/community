@@ -31,8 +31,8 @@ namespace Ink_Canvas
     public partial class MainWindow : Window
     {
         private Helpers.ModernInkAnalyzer _modernInkAnalyzer;
-        private Helpers.ModernInkAnalyzer ModernInkAnalyzer => 
-            _modernInkAnalyzer ??= new Helpers.ModernInkAnalyzer(inkCanvas.Strokes);
+        private Helpers.ModernInkAnalyzer ModernInkAnalyzer =>
+            _modernInkAnalyzer ??= new Helpers.ModernInkAnalyzer();
 
         /// <summary>
         /// 存储新的笔画集合，用于形状识别
@@ -626,7 +626,7 @@ namespace Ink_Canvas
                             
                             if (ShapeRecognitionRouter.ResolveUseWinRt(shapeMode) && Helpers.WinRtInkShapeRecognizer.IsApiAvailable)
                             {
-                                result = await ModernInkAnalyzer.AnalyzeAsync();
+                                result = await ModernInkAnalyzer.AnalyzeAsync(newStrokes);
                             }
                             else
                             {

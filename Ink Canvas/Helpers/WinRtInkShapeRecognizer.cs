@@ -17,48 +17,16 @@ namespace Ink_Canvas.Helpers
         public static readonly Guid ShapeStrokePropertyGuid = new Guid("11111111-2222-3333-4444-555555555555");
         
         private global::Windows.UI.Input.Inking.Analysis.InkAnalyzer _internalAnalyzer;
-        private readonly StrokeCollection _strokeContainer;
         private readonly Dictionary<Stroke, uint> _strokeIdMap = new Dictionary<Stroke, uint>();
         private readonly Dictionary<uint, Stroke> _reverseIdMap = new Dictionary<uint, Stroke>();
         private readonly object _syncLock = new object();
 
-        public ModernInkAnalyzer(StrokeCollection container)
+        public ModernInkAnalyzer()
         {
             if (!WinRtInkShapeRecognizer.IsApiAvailable)
                 return;
 
             _internalAnalyzer = new global::Windows.UI.Input.Inking.Analysis.InkAnalyzer();
-            _strokeContainer = container;
-            _strokeContainer.StrokesChanged += OnStrokesChanged;
-
-            // Initial sync
-            foreach (var stroke in _strokeContainer)
-            {
-                AddStrokeInternal(stroke);
-            }
-        }
-
-        private void OnStrokesChanged(object sender, StrokeCollectionChangedEventArgs e)
-        {
-            if (_internalAnalyzer == null) return;
-
-            lock (_syncLock)
-            {
-                foreach (var stroke in e.Added)
-                {
-                    AddStrokeInternal(stroke);
-                }
-
-                foreach (var stroke in e.Removed)
-                {
-                    if (_strokeIdMap.TryGetValue(stroke, out var id))
-                    {
-                        _internalAnalyzer.RemoveDataForStroke(id);
-                        _strokeIdMap.Remove(stroke);
-                        _reverseIdMap.Remove(id);
-                    }
-                }
-            }
         }
 
         private void AddStrokeInternal(Stroke stroke)
@@ -80,9 +48,9 @@ namespace Ink_Canvas.Helpers
 
         private CancellationTokenSource _cts;
 
-        public async Task<InkShapeRecognitionResult> AnalyzeAsync()
+        public async Task<InkShapeRecognitionResult> AnalyzeAsync(StrokeCollection strokes)
         {
-            if (_internalAnalyzer == null)
+            if (_internalAnalyzer == null || strokes == null || strokes.Count == 0)
                 return InkShapeRecognitionResult.Empty;
 
             _cts?.Cancel();
@@ -91,6 +59,21 @@ namespace Ink_Canvas.Helpers
 
             try
             {
+                lock (_syncLock)
+                {
+                    _internalAnalyzer.ClearDataForAllStrokes();
+                    _strokeIdMap.Clear();
+                    _reverseIdMap.Clear();
+
+                    foreach (var stroke in strokes)
+                    {
+                        AddStrokeInternal(stroke);
+                    }
+                }
+
+                if (_strokeIdMap.Count == 0)
+                    return InkShapeRecognitionResult.Empty;
+
                 var result = await _internalAnalyzer.AnalyzeAsync().AsTask(token).ConfigureAwait(true);
 
                 if (token.IsCancellationRequested) return InkShapeRecognitionResult.Empty;
@@ -147,10 +130,6 @@ namespace Ink_Canvas.Helpers
 
         public void Dispose()
         {
-            if (_strokeContainer != null)
-            {
-                _strokeContainer.StrokesChanged -= OnStrokesChanged;
-            }
             _internalAnalyzer = null;
         }
     }
