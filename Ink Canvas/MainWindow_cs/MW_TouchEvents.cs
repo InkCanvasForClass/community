@@ -564,13 +564,23 @@ namespace Ink_Canvas
 
                     return;
                 }
-                if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
+                
+                if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint &&
+                    inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke &&
+                    inkCanvas.EditingMode != InkCanvasEditingMode.Select &&
+                    ShouldUseRealtimeVelocityBrushTip())
+                {
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                }
+                else if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint &&
+                         inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke &&
+                         inkCanvas.EditingMode != InkCanvasEditingMode.Select)
                 {
                     inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                 }
                 else
                 {
-                    LogHelper.WriteLogToFile("保持当前线擦模式");
+                    LogHelper.WriteLogToFile("保持当前模式");
                 }
             }
             inkCanvas.CaptureStylus();
@@ -888,6 +898,14 @@ namespace Ink_Canvas
                 // 设置起始点
                 if (NeedUpdateIniP()) iniP = e.GetTouchPoint(inkCanvas).Position;
 
+                return;
+            }
+            if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint &&
+                inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke &&
+                inkCanvas.EditingMode != InkCanvasEditingMode.Select &&
+                ShouldUseRealtimeVelocityBrushTip())
+            {
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
                 return;
             }
             if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
