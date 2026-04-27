@@ -31,27 +31,34 @@
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="操作" />
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <ui:SettingsCard Header="{i18n:I18n Key=Btn_Restart}" Description="{i18n:I18n Key=Home_RestartApp}"
+                        IsClickEnabled="True" Click="BtnRestart_Click" Grid.Column="0">
+                            <ui:SettingsCard.HeaderIcon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" />
+                            </ui:SettingsCard.HeaderIcon>
+                        </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Btn_Restart}" Description="{i18n:I18n Key=Home_RestartApp}"
-                        IsClickEnabled="True" Click="BtnRestart_Click">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <ui:SettingsCard Header="{i18n:I18n Key=Btn_Reset}" Description="{i18n:I18n Key=Home_ResetSettings}"
+                        IsClickEnabled="True" Click="BtnResetToSuggestion_Click" Grid.Column="1">
+                            <ui:SettingsCard.HeaderIcon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Clear}" />
+                            </ui:SettingsCard.HeaderIcon>
+                        </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Btn_Reset}" Description="{i18n:I18n Key=Home_ResetSettings}"
-                        IsClickEnabled="True" Click="BtnResetToSuggestion_Click">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Clear}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
-
-                    <ui:SettingsCard Header="{i18n:I18n Key=Btn_Exit}" Description="{i18n:I18n Key=Home_ExitApp}"
-                        IsClickEnabled="True" Click="BtnExit_Click">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cancel}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <ui:SettingsCard Header="{i18n:I18n Key=Btn_Exit}" Description="{i18n:I18n Key=Home_ExitApp}"
+                        IsClickEnabled="True" Click="BtnExit_Click" Grid.Column="2">
+                            <ui:SettingsCard.HeaderIcon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cancel}" />
+                            </ui:SettingsCard.HeaderIcon>
+                        </ui:SettingsCard>
+                    </Grid>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="基本" />
