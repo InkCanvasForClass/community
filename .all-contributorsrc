@@ -143,6 +143,15 @@
         "infra",
         "blog"
       ]
+    },
+    {
+      "login": "Hao3288",
+      "name": "NoobHao",
+      "avatar_url": "https://avatars.githubusercontent.com/u/119276078?v=4",
+      "profile": "https://github.com/Hao3288",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "repoType": "github"
