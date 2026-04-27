@@ -93,6 +93,7 @@
       <td align="center" valign="top" width="20%"><a href="https://github.com/PANDAJSR"><img src="https://avatars.githubusercontent.com/u/170189561?v=4?s=100" width="100px;" alt="PANDAJSR"/><br /><sub><b>PANDAJSR</b></sub></a><br /><a href="https://github.com/InkCanvasForClass/community/commits?author=PANDAJSR" title="Code">💻</a></td>
       <td align="center" valign="top" width="20%"><a href="http://lyxwx.top"><img src="https://avatars.githubusercontent.com/u/66517348?v=4?s=100" width="100px;" alt="流焰xwx"/><br /><sub><b>流焰xwx</b></sub></a><br /><a href="https://github.com/InkCanvasForClass/community/commits?author=LiuYan-xwx" title="Code">💻</a></td>
       <td align="center" valign="top" width="20%"><a href="https://github.com/Super-Yyt"><img src="https://avatars.githubusercontent.com/u/206630707?v=4?s=100" width="100px;" alt="Super-Yyt"/><br /><sub><b>Super-Yyt</b></sub></a><br /><a href="#infra-Super-Yyt" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="#blog-Super-Yyt" title="Blogposts">📝</a></td>
+      <td align="center" valign="top" width="20%"><a href="https://github.com/Hao3288"><img src="https://avatars.githubusercontent.com/u/119276078?v=4?s=100" width="100px;" alt="NoobHao"/><br /><sub><b>NoobHao</b></sub></a><br /><a href="https://github.com/InkCanvasForClass/community/commits?author=Hao3288" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
