@@ -297,7 +297,6 @@ namespace Ink_Canvas
             BoardPenPalette.Visibility = Visibility.Collapsed;
             BoardEraserSizePanel.Visibility = Visibility.Collapsed;
             EraserSizePanel.Visibility = Visibility.Collapsed;
-            BorderSettings.Visibility = Visibility.Collapsed;
             BoardBorderLeftPageListView.Visibility = Visibility.Collapsed;
             BoardBorderRightPageListView.Visibility = Visibility.Collapsed;
             BoardImageOptionsPanel.Visibility = Visibility.Collapsed;
@@ -391,43 +390,6 @@ namespace Ink_Canvas
             if (LogicalTreeHelper.FindLogicalNode(this, "BackgroundPalette") is Border bgPalette)
             {
                 AnimationsHelper.HideWithSlideAndFade(bgPalette);
-            }
-
-            if (BorderSettings.Visibility == Visibility.Visible)
-            {
-                // 设置蒙版为不可点击，并移除背景
-                BorderSettingsMask.IsHitTestVisible = false;
-                BorderSettingsMask.Background = null;
-                var sb = new Storyboard();
-
-                // 滑动动画
-                var slideAnimation = new DoubleAnimation
-                {
-                    From = 0, // 滑动距离
-                    To = BorderSettings.RenderTransform.Value.OffsetX - 490,
-                    Duration = TimeSpan.FromSeconds(0.6),
-                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
-                };
-                Storyboard.SetTargetProperty(slideAnimation,
-                    new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.X)"));
-
-                sb.Children.Add(slideAnimation);
-
-                sb.Completed += (s, _) =>
-                {
-                    BorderSettings.Visibility = Visibility.Collapsed;
-                    isOpeningOrHidingSettingsPane = false;
-                    if (WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode)
-                    {
-                        WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode = false;
-                        ApplyNoFocusMode();
-                    }
-                };
-
-                BorderSettings.RenderTransform = new TranslateTransform();
-
-                isOpeningOrHidingSettingsPane = true;
-                sb.Begin(BorderSettings);
             }
 
             AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
@@ -1101,10 +1063,8 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void SymbolIconSettings_Click(object sender, MouseButtonEventArgs e)
         {
-            if (isOpeningOrHidingSettingsPane) return;
             HideSubPanels();
             BtnSettings_Click(null, null);
-
         }
         /// <summary>
         /// 截图图标点击事件处理
@@ -3078,17 +3038,6 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"停止PPT监控时出错: {ex.Message}", LogHelper.LogType.Error);
             }
 
-            // 如果当前在设置面板中，需要先恢复无焦点模式状态
-            if (BorderSettings.Visibility == Visibility.Visible)
-            {
-                if (WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode)
-                {
-                    WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode = false;
-                    ApplyNoFocusMode();
-                }
-                SaveSettingsToFile();
-            }
-
             App.IsAppExitByUser = true;
             // 不设置 CloseIsFromButton = true，让它也经过确认流程
             Close();
@@ -3101,52 +3050,11 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         public void BtnRestart_Click(object sender, RoutedEventArgs e)
         {
-            if (BorderSettings.Visibility == Visibility.Visible)
-            {
-                if (WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode)
-                {
-                    WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode = false;
-                    ApplyNoFocusMode();
-                }
-                SaveSettingsToFile();
-            }
-
             Process.Start(System.Windows.Forms.Application.ExecutablePath, "-m");
             App.IsAppExitByUser = true;
             // 不设置 CloseIsFromButton = true，让它也经过确认流程
             Close();
         }
-
-        /// <summary>
-        /// 设置覆盖层点击事件处理，用于点击设置面板外部时关闭设置面板
-        /// </summary>
-        /// <param name="sender">发送者</param>
-        /// <param name="e">鼠标按钮事件参数</param>
-        private void SettingsOverlayClick(object sender, MouseButtonEventArgs e)
-        {
-            if (isOpeningOrHidingSettingsPane) return;
-
-            // 获取点击的位置
-            Point clickPoint = e.GetPosition(BorderSettingsMask);
-
-            // 获取BorderSettings的位置和大小
-            Point settingsPosition = BorderSettings.TranslatePoint(new Point(0, 0), BorderSettingsMask);
-            Rect settingsRect = new Rect(
-                settingsPosition.X,
-                settingsPosition.Y,
-                BorderSettings.ActualWidth,
-                BorderSettings.ActualHeight
-            );
-
-            // 如果点击位置不在设置界面内部，才关闭设置界面
-            if (!settingsRect.Contains(clickPoint))
-            {
-                BtnSettings_Click(null, null);
-            }
-        }
-
-        private bool isOpeningOrHidingSettingsPane;
-        private bool wasNoFocusModeBeforeSettings;
 
         /// <summary>
         /// 切换并打开设置面板；在需要时先进行安全密码校验，然后显示设置面板并启动打开动画，同时根据设置暂时调整无焦点模式与遮罩交互状态。
@@ -3155,60 +3063,25 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         internal async void BtnSettings_Click(object sender, RoutedEventArgs e)
         {
-            if (BorderSettings.Visibility == Visibility.Visible)
+            try
             {
-                HideSubPanels();
+                if (Ink_Canvas.Helpers.SecurityManager.IsPasswordRequiredForEnterSettings(Settings))
+                {
+                    bool ok = await Ink_Canvas.Helpers.SecurityManager.PromptAndVerifyAsync(Settings, this, "进入设置", "请输入安全密码以进入设置。");
+                    if (!ok) return;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                try
-                {
-                    if (Ink_Canvas.Helpers.SecurityManager.IsPasswordRequiredForEnterSettings(Settings))
-                    {
-                        bool ok = await Ink_Canvas.Helpers.SecurityManager.PromptAndVerifyAsync(Settings, this, "进入设置", "请输入安全密码以进入设置。");
-                        if (!ok) return;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"安全密码校验失败: {ex}", LogHelper.LogType.Error);
-                    return;
-                }
-
-                BorderSettings.Visibility = Visibility.Visible;
-                wasNoFocusModeBeforeSettings = Settings.Advanced.IsNoFocusMode;
-                if (wasNoFocusModeBeforeSettings)
-                {
-                    WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode = true;
-                    ApplyNoFocusMode();
-                }
-
-                // 设置蒙版为可点击，并添加半透明背景
-                BorderSettingsMask.IsHitTestVisible = true;
-                BorderSettingsMask.Background = new SolidColorBrush(Color.FromArgb(1, 0, 0, 0));
-                SettingsPanelScrollViewer.ScrollToTop();
-                var sb = new Storyboard();
-
-                // 滑动动画
-                var slideAnimation = new DoubleAnimation
-                {
-                    From = BorderSettings.RenderTransform.Value.OffsetX - 490, // 滑动距离
-                    To = 0,
-                    Duration = TimeSpan.FromSeconds(0.6),
-                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
-                };
-                Storyboard.SetTargetProperty(slideAnimation,
-                    new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.X)"));
-
-                sb.Children.Add(slideAnimation);
-
-                sb.Completed += (s, _) => { isOpeningOrHidingSettingsPane = false; };
-
-                BorderSettings.RenderTransform = new TranslateTransform();
-
-                isOpeningOrHidingSettingsPane = true;
-                sb.Begin(BorderSettings);
+                LogHelper.WriteLogToFile($"安全密码校验失败: {ex}", LogHelper.LogType.Error);
+                return;
             }
+
+            HideSubPanels();
+            var settingsWindow = new Windows.SettingsViews.SettingsWindow();
+            settingsWindow.Owner = this;
+            settingsWindow.Topmost = this.Topmost;
+            settingsWindow.ShowDialog();
         }
 
         private void BtnThickness_Click(object sender, RoutedEventArgs e) { }

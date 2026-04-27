@@ -386,6 +386,10 @@ namespace Ink_Canvas
                     {
                         operatingGuideWindow.RefreshTheme();
                     }
+                    else if (window is Windows.SettingsViews.SettingsWindow settingsWindow)
+                    {
+                        settingsWindow.RefreshTheme();
+                    }
                 }
 
                 TimerControl?.RefreshTheme();

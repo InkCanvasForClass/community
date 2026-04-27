@@ -1484,7 +1484,7 @@
     <value>自动收纳忽略桌面EN5批注窗口</value>
   </data>
   <data name="AutoFold_OldZyBoard" xml:space="preserve">
-    <value>进入“中原旧白板”时自动收纳</value>
+    <value>中原旧白板</value>
   </data>
   <data name="Automation_AutoFoldInPPT" xml:space="preserve">
     <value>播放PPT时自动收纳</value>

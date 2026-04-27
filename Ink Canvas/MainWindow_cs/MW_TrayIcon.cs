@@ -123,20 +123,6 @@ namespace Ink_Canvas
             return true;
         }
 
-        private bool IsLegacySettingsVisible(MainWindow mainWin)
-        {
-            try
-            {
-                var borderSettingsField = typeof(MainWindow).GetField("BorderSettings", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                var borderSettings = borderSettingsField?.GetValue(mainWin) as FrameworkElement;
-                return borderSettings?.Visibility == Visibility.Visible;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
         private void TempShowMainWindowTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
             var mainWin = Current.MainWindow as MainWindow;
@@ -220,11 +206,6 @@ namespace Ink_Canvas
         {
             var mainWin = Current.MainWindow as MainWindow;
             if (!EnsureMainWindowReadyForSettings(mainWin))
-            {
-                return;
-            }
-
-            if (IsLegacySettingsVisible(mainWin))
             {
                 return;
             }

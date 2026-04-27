@@ -1435,7 +1435,7 @@
     <value>Ignore EN5 desktop annotation window when auto folding</value>
   </data>
   <data name="AutoFold_OldZyBoard" xml:space="preserve">
-    <value>Auto fold when entering old ZhongYuan whiteboard</value>
+    <value>old ZhongYuan whiteboard</value>
   </data>
   <data name="Automation_AutoFoldInPPT" xml:space="preserve">
     <value>Auto fold while playing PPT</value>

@@ -28,7 +28,7 @@
                 </Style>
             </FrameworkElement.Resources>
             <Grid>
-                <ikw:SimpleStackPanel MaxWidth="1600"
+                <ikw:SimpleStackPanel MaxWidth="1000"
                     HorizontalAlignment="Stretch"
                     Spacing="{StaticResource SettingsCardSpacing}">
 
@@ -214,21 +214,33 @@
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
-                    <ui:SettingsExpander Header="幻灯片"
-                            d:IsExpanded="True">
-                        <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"/>
-                        </ui:SettingsExpander.HeaderIcon>
-                        <ui:SettingsCard Header="{i18n:I18n Key=Automation_AutoFoldInPPT}">
-                            <ui:SettingsCard.HeaderIcon>
-                                <ui:ImageIcon Source="/Resources/Icons-png/PPTTools.png"/>
-                            </ui:SettingsCard.HeaderIcon>
-                            <ui:ToggleSwitch x:Name="CardAutoFoldInPPTSlideShow"
+                    <ui:SettingsCard Header="{i18n:I18n Key=Automation_AutoFoldInPPT}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:ImageIcon Source="/Resources/Icons-png/Powerpoint.png"/>
+                        </ui:SettingsCard.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="CardAutoFoldInPPTSlideShow"
                                     OnContent="{DynamicResource Common_On}"
                                     OffContent="{DynamicResource Common_Off}"
                                     Toggled="ToggleSwitchAutoFoldInPPTSlideShow_Toggled"/>
-                        </ui:SettingsCard>
-                    </ui:SettingsExpander>
+                    </ui:SettingsCard>
+
+                    <controls:LabeledSettingsCard x:Name="CardAutoFoldWhenExitWhiteboard"
+                            Header="{i18n:I18n Key=FoldMode_AutoFoldAfterWhiteboard}"
+                            Description="{i18n:I18n Key=FoldMode_AutoFoldAfterWhiteboardHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Back}"
+                            Toggled="ToggleSwitchAutoFoldWhenExitWhiteboard_Toggled"/>
+
+                    <controls:LabeledSettingsCard x:Name="CardAutoFoldAfterPPTSlideShow"
+                            Header="{i18n:I18n Key=FoldMode_AutoFoldAfterPPT}"
+                            Description="{i18n:I18n Key=FoldMode_AutoFoldAfterPPTHint}"
+                            IconSource="/Resources/Icons-png/PPTTools.png"
+                            Toggled="ToggleSwitchAutoFoldAfterPPTSlideShow_Toggled"/>
+
+                    <controls:LabeledSettingsCard x:Name="CardKeepFoldAfterSoftwareExit"
+                            Header="{i18n:I18n Key=Automation_KeepFoldAfterExit}"
+                            Description="{i18n:I18n Key=Automation_KeepFoldAfterExitHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Pin}"
+                            Toggled="ToggleSwitchKeepFoldAfterSoftwareExit_Toggled"/>
 
                     <TextBlock Text="{i18n:I18n Key=AutoKill_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
@@ -250,7 +262,7 @@
 
                     <controls:LabeledSettingsCard x:Name="CardAutoKillVComYouJiao"
                             Header="{i18n:I18n Key=AutoKill_YouJiao}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
+                            IconSource="/Resources/Icons-png/VComYouJiao.png"
                             Toggled="ToggleSwitchAutoKillVComYouJiao_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoKillSeewoLauncher2DesktopAnnotation"
@@ -261,47 +273,31 @@
 
                     <controls:LabeledSettingsCard x:Name="CardAutoKillInkCanvas"
                             Header="{i18n:I18n Key=AutoKill_InkCanvasIC}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
+                            IconSource="/Resources/Icons-png/InkCanvas.png"
                             Toggled="ToggleSwitchAutoKillInkCanvas_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoKillICA"
                             Header="{i18n:I18n Key=AutoKill_ICA}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
+                            IconSource="/Resources/Icons-png/ICA.png"
                             Toggled="ToggleSwitchAutoKillICA_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoKillIDT"
                             Header="{i18n:I18n Key=AutoKill_Inkeys}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
+                            IconSource="/Resources/Icons-png/idt.png"
                             Toggled="ToggleSwitchAutoKillIDT_Toggled"/>
+
+                    <TextBlock Text="{i18n:I18n Key=AutoFold_Mode}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
+
+                    <controls:LabeledSettingsCard x:Name="CardAutoEnterAnnotationModeWhenExitFoldMode"
+                            Header="{i18n:I18n Key=FoldMode_ExitToAnnotation}"
+                            Description="{i18n:I18n Key=FoldMode_ExitToAnnotationHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Edit}"
+                            Toggled="ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoEnterAnnotationAfterKillHite"
                             Header="{i18n:I18n Key=AutoKill_HiteAfterKillEnterAnnotation}"
                             IconSource="/Resources/Icons-png/HiteAnnotation.png"
                             Toggled="ToggleSwitchAutoEnterAnnotationAfterKillHite_Toggled"/>
-
-                    <TextBlock Text="{i18n:I18n Key=AutoFold_Mode}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoEnterAnnotationModeWhenExitFoldMode"
-                            Header="{i18n:I18n Key=FoldMode_AutoFoldAfterWhiteboard}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Edit}"
-                            Toggled="ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode_Toggled"/>
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldWhenExitWhiteboard"
-                            Header="{i18n:I18n Key=FoldMode_AutoFoldAfterWhiteboard}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Back}"
-                            Toggled="ToggleSwitchAutoFoldWhenExitWhiteboard_Toggled"/>
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoFoldAfterPPTSlideShow"
-                            Header="{i18n:I18n Key=FoldMode_AutoFoldAfterPPT}"
-                            Description="{i18n:I18n Key=FoldMode_AutoFoldAfterPPTHint}"
-                            IconSource="/Resources/Icons-png/PPTTools.png"
-                            Toggled="ToggleSwitchAutoFoldAfterPPTSlideShow_Toggled"/>
-
-                    <controls:LabeledSettingsCard x:Name="CardKeepFoldAfterSoftwareExit"
-                            Header="{i18n:I18n Key=Automation_KeepFoldAfterExit}"
-                            Description="{i18n:I18n Key=Automation_KeepFoldAfterExitHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Pin}"
-                            Toggled="ToggleSwitchKeepFoldAfterSoftwareExit_Toggled"/>
 
                     <TextBlock Text="{i18n:I18n Key=AutoSave_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 

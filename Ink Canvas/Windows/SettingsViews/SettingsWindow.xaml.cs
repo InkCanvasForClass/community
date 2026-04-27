@@ -33,6 +33,8 @@ namespace Ink_Canvas.Windows.SettingsViews
         {
             InitializeComponent();
 
+            ApplyCurrentTheme();
+
             // 初始化内置页面映射
             _pageTypes = new Dictionary<string, Type>
             {
@@ -122,6 +124,27 @@ namespace Ink_Canvas.Windows.SettingsViews
                     UpdateAppTitleBarMargin();
                 }
             };
+        }
+
+        public void RefreshTheme()
+        {
+            ApplyCurrentTheme();
+        }
+
+        private void ApplyCurrentTheme()
+        {
+            try
+            {
+                int themeIndex = Helpers.SettingsManager.Settings.Appearance.Theme;
+                var elementTheme = themeIndex switch
+                {
+                    0 => iNKORE.UI.WPF.Modern.ElementTheme.Light,
+                    1 => iNKORE.UI.WPF.Modern.ElementTheme.Dark,
+                    _ => iNKORE.UI.WPF.Modern.ElementTheme.Default,
+                };
+                iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, elementTheme);
+            }
+            catch { }
         }
 
         #region 修复触摸屏鼠标指针消失问题
