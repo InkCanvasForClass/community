@@ -1736,9 +1736,20 @@ namespace Ink_Canvas
 
                 var windowHandle = new WindowInteropHelper(this).Handle;
                 var screen = Screen.FromHandle(windowHandle);
-                double screenWidth = screen.Bounds.Width / dpiScaleX, screenHeight = screen.Bounds.Height / dpiScaleY;
-                // 仅计算Windows任务栏高度，不考虑其他程序对工作区的影响
-                var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
+                double screenWidth, screenHeight;
+                double toolbarHeight;
+                if (Settings.Advanced.IsEnableAvoidFullScreenHelper && PosXCaculatedWithTaskbarHeight)
+                {
+                    screenWidth = screen.WorkingArea.Width / dpiScaleX;
+                    screenHeight = screen.WorkingArea.Height / dpiScaleY;
+                    toolbarHeight = 0;
+                }
+                else
+                {
+                    screenWidth = screen.Bounds.Width / dpiScaleX;
+                    screenHeight = screen.Bounds.Height / dpiScaleY;
+                    toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
+                }
 
                 // 使用更可靠的方法获取浮动栏宽度
                 double baseWidth = ViewboxFloatingBar.ActualWidth;
@@ -1881,9 +1892,20 @@ namespace Ink_Canvas
 
                 var windowHandle = new WindowInteropHelper(this).Handle;
                 var screen = Screen.FromHandle(windowHandle);
-                double screenWidth = screen.Bounds.Width / dpiScaleX, screenHeight = screen.Bounds.Height / dpiScaleY;
-                // 仅计算Windows任务栏高度，不考虑其他程序对工作区的影响
-                var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
+                double screenWidth, screenHeight;
+                double toolbarHeight;
+                if (Settings.Advanced.IsEnableAvoidFullScreenHelper)
+                {
+                    screenWidth = screen.WorkingArea.Width / dpiScaleX;
+                    screenHeight = screen.WorkingArea.Height / dpiScaleY;
+                    toolbarHeight = 0;
+                }
+                else
+                {
+                    screenWidth = screen.Bounds.Width / dpiScaleX;
+                    screenHeight = screen.Bounds.Height / dpiScaleY;
+                    toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
+                }
 
                 double baseWidth = ViewboxFloatingBar.ActualWidth;
 
