@@ -1791,7 +1791,7 @@
                                     </Border>
                                     <Border x:Name="BoardEraserByStrokes" Width="60" Height="55"
                                             MouseDown="Border_MouseDown"
-                                            Visibility="Collapsed"
+                                            Visibility="Collapsed" d:Visibility="Visible"
                                             MouseUp="BoardEraserIconByStrokes_Click" Background="{DynamicResource BoardFloatBarBackground}"
                                             Opacity="1">
                                         <Grid Margin="6,6,6,4">
@@ -2138,8 +2138,8 @@
                     </Grid>
                 </Viewbox>
                 <!-- 右下角 -->
-                <Viewbox x:Name="ViewboxBlackboardRightSide" Margin="3,0,0,0" Height="55" HorizontalAlignment="Right"
-                         VerticalAlignment="Bottom">
+                <Viewbox x:Name="ViewboxBlackboardRightSide" Margin="3,0,0,0" Height="55"
+                         HorizontalAlignment="Right" VerticalAlignment="Bottom">
                     <Grid Name="BlackboardRightSide" Visibility="Visible" Margin="0,0,0,3" Height="50"
                           HorizontalAlignment="Center" VerticalAlignment="Bottom">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="5">
