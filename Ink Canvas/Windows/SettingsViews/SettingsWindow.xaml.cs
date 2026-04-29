@@ -259,23 +259,26 @@ namespace Ink_Canvas.Windows.SettingsViews
                 string tag = selectedItem.Tag as string;
                 if (!string.IsNullOrEmpty(tag) && _pageTypes.ContainsKey(tag))
                 {
-                    // 如果是插件设置页面，设置当前插件
-                    if (_pluginPages.TryGetValue(tag, out var plugin))
-                    {
-                        PluginSettingsPage.CurrentPlugin = plugin;
-                    }
+                    Ink_Canvas.Plugins.PluginInfo pluginInfo = null;
+                    _pluginPages.TryGetValue(tag, out pluginInfo);
 
-                    // 避免重复导航到当前页面
-                    if (rootFrame.SourcePageType != _pageTypes[tag])
+                    object cachedPage = null;
+                    _pages.TryGetValue(tag, out cachedPage);
+
+                    if (cachedPage == null || rootFrame.Content != cachedPage)
                     {
-                        NavigateToPage(tag);
+                        NavigateToPage(tag, pluginInfo);
+                    }
+                    else if (cachedPage is PluginSettingsPage pluginSettingsPage && pluginInfo != null)
+                    {
+                        pluginSettingsPage.CurrentPlugin = pluginInfo;
                     }
                     NavigationViewControl.Header = selectedItem.Content;
                 }
             }
         }
 
-        public void NavigateToPage(string pageTag)
+        public void NavigateToPage(string pageTag, Ink_Canvas.Plugins.PluginInfo pluginInfo = null)
         {
             if (!_pageTypes.TryGetValue(pageTag, out Type pageType)) return;
 
@@ -289,7 +292,12 @@ namespace Ink_Canvas.Windows.SettingsViews
                     _pages.Add(pageTag, cachedPage);
                 }
 
-                rootFrame.Navigate(cachedPage.GetType(), cachedPage);
+                if (cachedPage is PluginSettingsPage pluginSettingsPage && pluginInfo != null)
+                {
+                    pluginSettingsPage.CurrentPlugin = pluginInfo;
+                }
+
+                rootFrame.Navigate(cachedPage);
             }
             catch (Exception ex)
             {

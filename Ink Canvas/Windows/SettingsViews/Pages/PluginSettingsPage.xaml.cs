@@ -8,14 +8,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
     public partial class PluginSettingsPage : iNKORE.UI.WPF.Modern.Controls.Page
     {
-        private static PluginInfo _currentPlugin;
+        private PluginInfo _currentPlugin;
 
-        public static PluginInfo CurrentPlugin
+        public PluginInfo CurrentPlugin
         {
             get { return _currentPlugin; }
             set
             {
                 _currentPlugin = value;
+                if (IsLoaded && _currentPlugin != null)
+                {
+                    LoadPluginSettings();
+                }
             }
         }
 
