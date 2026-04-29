@@ -332,41 +332,7 @@ namespace Ink_Canvas
         /// - 启用橡皮擦模式
         /// - 设置橡皮擦形状为圆形
         /// - 设置当前工具模式为按笔画擦除
-        /// - 禁用形状绘制模式
-        /// - 重置钢笔类型和属性
-        /// - 触发编辑模式变更事件
-        /// - 取消单指拖动模式
-        /// - 隐藏子面板
-        /// </remarks>
-        private void BoardEraserIconByStrokes_Click(object sender, RoutedEventArgs e)
-        {
-            //if (BoardEraserByStrokes.Background.ToString() == "#FF679CF4") {
-            //    AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardDeleteIcon);
-            //}
-            //else {
-            // 禁用高级橡皮擦系统
-            DisableEraserOverlay();
 
-            forceEraser = true;
-            forcePointEraser = false;
-
-            inkCanvas.EraserShape = new EllipseStylusShape(5, 5);
-            // 使用集中化的工具模式切换方法
-            SetCurrentToolMode(InkCanvasEditingMode.EraseByStroke);
-            drawingShapeMode = 0;
-
-            penType = 0;
-            drawingAttributes.IsHighlighter = false;
-            drawingAttributes.StylusTip = StylusTip.Ellipse;
-
-            inkCanvas_EditingModeChanged(inkCanvas, null);
-            CancelSingleFingerDragMode();
-
-            HideSubPanels("eraserByStrokes");
-            //}
-        }
-
-        /// <summary>
         /// 处理删除图标点击事件，清空画布内容
         /// </summary>
         /// <param name="sender">事件发送者</param>
