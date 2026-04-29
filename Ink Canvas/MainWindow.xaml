@@ -348,7 +348,7 @@
                 </Canvas>
             </Grid>
             <Border Name="BorderStrokeSelectionControl"
-                    HorizontalAlignment="Left" VerticalAlignment="Top" Margin="800,900,0,0"
+                    HorizontalAlignment="Left" VerticalAlignment="Top" Margin="800,400,0,0"
                     CornerRadius="5" Height="80"
                     Background="{DynamicResource FloatBarBackground}"
                     Visibility="{Binding ElementName=GridInkCanvasSelectionCover, Path=Visibility}"
