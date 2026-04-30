@@ -2201,9 +2201,9 @@ namespace Ink_Canvas.Helpers
             {
                 LogHelper.WriteLogToFile($"AutoUpdate | 开始修复版本，通道: {channel}");
 
-                // 获取远程版本号（自动选择最快线路组，始终下载远程版本，版本修复模式）
-                var (remoteVersion, group, _) = await CheckForUpdates(channel, true, true);
-                if (string.IsNullOrEmpty(remoteVersion) || group == null)
+                // 获取远程版本号（始终下载远程版本，版本修复模式）
+                var (remoteVersion, preferredGroup, _) = await CheckForUpdates(channel, true, true);
+                if (string.IsNullOrEmpty(remoteVersion))
                 {
                     LogHelper.WriteLogToFile("AutoUpdate | 修复版本时获取远程版本失败", LogHelper.LogType.Error);
                     return false;
@@ -2211,8 +2211,22 @@ namespace Ink_Canvas.Helpers
 
                 LogHelper.WriteLogToFile($"AutoUpdate | 修复版本远程版本: {remoteVersion}");
 
+                var availableGroups = await GetAvailableLineGroupsOrdered(channel);
+                if (availableGroups.Count == 0)
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | 修复版本时无可用线路组", LogHelper.LogType.Error);
+                    return false;
+                }
+
+                if (preferredGroup != null)
+                {
+                    availableGroups.RemoveAll(g => g.GroupName == preferredGroup.GroupName);
+                    availableGroups.Insert(0, preferredGroup);
+                    LogHelper.WriteLogToFile($"AutoUpdate | 修复版本下载优先使用线路组: {preferredGroup.GroupName}");
+                }
+
                 // 无论版本是否为最新，都下载远程版本
-                bool downloadResult = await DownloadSetupFile(remoteVersion, group);
+                bool downloadResult = await DownloadSetupFileWithFallback(remoteVersion, availableGroups);
                 if (!downloadResult)
                 {
                     LogHelper.WriteLogToFile("AutoUpdate | 修复版本时下载更新失败", LogHelper.LogType.Error);
