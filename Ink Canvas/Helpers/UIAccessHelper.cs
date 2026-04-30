@@ -32,7 +32,13 @@ namespace Ink_Canvas.Helpers
 
         // TOKEN_INFORMATION_CLASS
         private const int TokenSessionId = 12;
+        private const int TokenElevationType = 18;
         private const int TokenUIAccess = 26;
+
+        // TOKEN_ELEVATION_TYPE
+        private const int TokenElevationTypeDefault = 1;
+        private const int TokenElevationTypeFull = 2;
+        private const int TokenElevationTypeLimited = 3;
 
         private const uint PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
         private const uint TH32CS_SNAPPROCESS = 0x00000002;
@@ -277,6 +283,39 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        /// <summary>
+        /// 以普通用户权限（非提升）重启自身。
+        /// 通过获取 explorer.exe / ctfmon.exe 的非特权令牌，再用 CreateProcessWithTokenW 启动新进程，
+        /// 避免经由 explorer.exe 中转可能产生的 UAC 提示或丢失参数问题。
+        /// 成功时调用方应立即退出当前进程。
+        /// </summary>
+        /// <param name="extraArgs">追加到新进程的额外命令行参数。</param>
+        public static bool RestartAsNormalUser(string extraArgs = null)
+        {
+            try
+            {
+                if (!GetUserPrimaryToken(out IntPtr userToken))
+                {
+                    LogHelper.WriteLogToFile($"UIAccess | 获取用户令牌失败 (LastError={Marshal.GetLastWin32Error()})", LogHelper.LogType.Error);
+                    return false;
+                }
+
+                try
+                {
+                    return LaunchWithToken(userToken, extraArgs);
+                }
+                finally
+                {
+                    CloseHandle(userToken);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"UIAccess | RestartAsNormalUser 异常: {ex}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
         #endregion
 
         #region Token Manipulation
@@ -461,6 +500,82 @@ namespace Ink_Canvas.Helpers
                     }
 
                     return true;
+                }
+                finally { CloseHandle(hToken); }
+            }
+            finally { CloseHandle(hProc); }
+        }
+
+        /// <summary>
+        /// 从 explorer.exe / ctfmon.exe 取得普通用户（非提升）令牌的主令牌副本，用于降权启动。
+        /// 仅当当前进程为管理员时才能成功。
+        /// </summary>
+        private static bool GetUserPrimaryToken(out IntPtr userToken)
+        {
+            userToken = IntPtr.Zero;
+
+            string[] candidates = { "explorer.exe", "ctfmon.exe" };
+            foreach (var name in candidates)
+            {
+                IntPtr snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+                if (snapshot == INVALID_HANDLE_VALUE || snapshot == IntPtr.Zero) continue;
+
+                try
+                {
+                    var pe = new PROCESSENTRY32W { dwSize = (uint)Marshal.SizeOf(typeof(PROCESSENTRY32W)) };
+                    bool more = Process32FirstW(snapshot, ref pe);
+                    while (more)
+                    {
+                        if (string.Equals(pe.szExeFile, name, StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryDuplicateUserPrimaryToken(pe.th32ProcessID, out userToken))
+                            {
+                                LogHelper.WriteLogToFile($"UIAccess | 已从 {name} (PID={pe.th32ProcessID}) 取得用户令牌");
+                                return true;
+                            }
+                        }
+                        more = Process32NextW(snapshot, ref pe);
+                    }
+                }
+                finally { CloseHandle(snapshot); }
+            }
+
+            return false;
+        }
+
+        private static bool TryDuplicateUserPrimaryToken(uint pid, out IntPtr dupToken)
+        {
+            dupToken = IntPtr.Zero;
+
+            IntPtr hProc = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid);
+            if (hProc == IntPtr.Zero) return false;
+
+            try
+            {
+                if (!OpenProcessToken(hProc, TOKEN_QUERY | TOKEN_DUPLICATE, out IntPtr hToken))
+                    return false;
+
+                try
+                {
+                    // 仅接受非提升令牌（否则降权失败）
+                    IntPtr elevBuf = Marshal.AllocHGlobal(sizeof(int));
+                    try
+                    {
+                        if (!GetTokenInformation(hToken, TokenElevationType, elevBuf, sizeof(int), out _))
+                            return false;
+                        int elev = Marshal.ReadInt32(elevBuf);
+                        if (elev == TokenElevationTypeFull)
+                            return false; // 该进程是提升令牌，跳过
+                    }
+                    finally { Marshal.FreeHGlobal(elevBuf); }
+
+                    return DuplicateTokenEx(
+                        hToken,
+                        TOKEN_ASSIGN_PRIMARY | TOKEN_DUPLICATE | TOKEN_QUERY | TOKEN_ADJUST_DEFAULT | TOKEN_ADJUST_SESSIONID,
+                        IntPtr.Zero,
+                        SecurityAnonymous,
+                        TokenPrimary,
+                        out dupToken);
                 }
                 finally { CloseHandle(hToken); }
             }

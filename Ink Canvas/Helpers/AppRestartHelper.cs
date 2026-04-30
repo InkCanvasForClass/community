@@ -39,6 +39,13 @@ namespace Ink_Canvas.Helpers
                 }
                 else
                 {
+                    // 当前已是管理员时，直接通过用户令牌降权启动，避免经由 explorer 中转的延迟
+                    if (IsRunningAsAdmin() && UIAccessHelper.RestartAsNormalUser())
+                    {
+                        Application.Current.Shutdown();
+                        return;
+                    }
+
                     Process.Start("explorer.exe", "\"" + exePath + "\"");
                 }
 
