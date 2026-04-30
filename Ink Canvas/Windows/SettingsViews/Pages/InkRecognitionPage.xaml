@@ -112,21 +112,21 @@
                                 Toggled="ToggleSwitchAutoStraightenLine_Toggled" />
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_LengthThreshold}">
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
-                                    <Slider x:Name="AutoStraightenLineThresholdSlider" Width="150" Minimum="30" Maximum="300"
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="{Binding Value, ElementName=AutoStraightenLineThresholdSlider, StringFormat={}{0:0}}"
+                                               VerticalAlignment="Center" FontFamily="Consolas"/>
+                                    <Slider x:Name="AutoStraightenLineThresholdSlider" Width="200" Minimum="30" Maximum="300"
                                             Value="80" TickFrequency="30" IsSnapToTickEnabled="True"
                                             ValueChanged="AutoStraightenLineThresholdSlider_ValueChanged" />
-                                    <TextBlock Text="{Binding Value, ElementName=AutoStraightenLineThresholdSlider, StringFormat={}{0:0}}"
-                                               VerticalAlignment="Center" FontSize="14" />
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_Sensitivity}">
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
-                                    <Slider x:Name="LineStraightenSensitivitySlider" Width="150" Minimum="0.05" Maximum="2.0"
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="{Binding Value, ElementName=LineStraightenSensitivitySlider, StringFormat={}{0:F2}}"
+                                               VerticalAlignment="Center" FontFamily="Consolas"/>
+                                    <Slider x:Name="LineStraightenSensitivitySlider" Width="200" Minimum="0.05" Maximum="2.0"
                                             Value="0.20" TickFrequency="0.05" IsSnapToTickEnabled="True"
                                             ValueChanged="LineStraightenSensitivitySlider_ValueChanged" />
-                                    <TextBlock Text="{Binding Value, ElementName=LineStraightenSensitivitySlider, StringFormat={}{0:F2}}"
-                                               VerticalAlignment="Center" FontSize="14" />
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_HighPrecisionStraighten}"
@@ -152,12 +152,12 @@
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_SnappingDistance}"
                                     Description="{i18n:I18n Key=InkRecog_LineEndpointSnappingHint}">
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
-                                    <Slider x:Name="LineEndpointSnappingThresholdSlider" Width="150" Minimum="5" Maximum="50"
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="{Binding Value, ElementName=LineEndpointSnappingThresholdSlider, StringFormat={}{0:0}}"
+                                               VerticalAlignment="Center" FontFamily="Consolas"/>
+                                    <Slider x:Name="LineEndpointSnappingThresholdSlider" Width="200" Minimum="5" Maximum="50"
                                             Value="15" TickFrequency="5" IsSnapToTickEnabled="True"
                                             ValueChanged="LineEndpointSnappingThresholdSlider_ValueChanged" />
-                                    <TextBlock Text="{Binding Value, ElementName=LineEndpointSnappingThresholdSlider, StringFormat={}{0:0}}"
-                                               VerticalAlignment="Center" FontSize="14" />
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>

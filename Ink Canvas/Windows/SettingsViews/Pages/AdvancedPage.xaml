@@ -51,12 +51,16 @@
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Touch}" />
                         </ui:SettingsExpander.HeaderIcon>
-                        <Slider x:Name="TouchMultiplierSlider"
-                                Minimum="0" Maximum="2"
-                                Width="200"
-                                IsSnapToTickEnabled="True"
-                                TickFrequency="0.01" TickPlacement="None"
-                                ValueChanged="TouchMultiplierSlider_ValueChanged" />
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding Value, ElementName=TouchMultiplierSlider, StringFormat={}{0:F2}}"
+                                       VerticalAlignment="Center" FontFamily="Consolas"/>
+                            <Slider x:Name="TouchMultiplierSlider"
+                                    Minimum="0" Maximum="2"
+                                    Width="200"
+                                    IsSnapToTickEnabled="True"
+                                    TickFrequency="0.01" TickPlacement="None"
+                                    ValueChanged="TouchMultiplierSlider_ValueChanged" />
+                        </ikw:SimpleStackPanel>
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{i18n:I18n Key=Advanced_TouchMultiplierCalibrateHint}"
                                              ContentAlignment="Left">
@@ -81,19 +85,27 @@
                         Toggled="ToggleSwitchEraserBindTouchMultiplier_Toggled"/>
 
                     <ui:SettingsCard Header="{i18n:I18n Key=Advanced_NibModeBoundsWidthHeader}">
-                        <Slider x:Name="NibModeBoundsWidthSlider"
-                                Minimum="1" Maximum="50" Width="200"
-                                IsSnapToTickEnabled="True" TickFrequency="1" Value="5"
-                                TickPlacement="None"
-                                ValueChanged="NibModeBoundsWidthSlider_ValueChanged" />
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding Value, ElementName=NibModeBoundsWidthSlider}"
+                                       VerticalAlignment="Center" FontFamily="Consolas"/>
+                            <Slider x:Name="NibModeBoundsWidthSlider"
+                                    Minimum="1" Maximum="50" Width="200"
+                                    IsSnapToTickEnabled="True" TickFrequency="1" Value="5"
+                                    TickPlacement="None"
+                                    ValueChanged="NibModeBoundsWidthSlider_ValueChanged" />
+                        </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
                     <ui:SettingsCard Header="{i18n:I18n Key=Advanced_FingerModeBoundsWidthHeader}">
-                        <Slider x:Name="FingerModeBoundsWidthSlider"
-                                Minimum="1" Maximum="50" Width="200"
-                                IsSnapToTickEnabled="True" TickFrequency="1" Value="20"
-                                TickPlacement="None"
-                                ValueChanged="FingerModeBoundsWidthSlider_ValueChanged" />
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding Value, ElementName=FingerModeBoundsWidthSlider}"
+                                       VerticalAlignment="Center" FontFamily="Consolas"/>
+                            <Slider x:Name="FingerModeBoundsWidthSlider"
+                                    Minimum="1" Maximum="50" Width="200"
+                                    IsSnapToTickEnabled="True" TickFrequency="1" Value="20"
+                                    TickPlacement="None"
+                                    ValueChanged="FingerModeBoundsWidthSlider_ValueChanged" />
+                        </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchIsQuadIR"
