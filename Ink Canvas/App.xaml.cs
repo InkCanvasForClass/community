@@ -283,7 +283,7 @@ namespace Ink_Canvas
 
                 RegisterMainWindowDestroyHook();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
         }

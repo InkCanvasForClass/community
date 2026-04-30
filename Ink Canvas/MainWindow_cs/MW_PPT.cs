@@ -2436,24 +2436,35 @@ namespace Ink_Canvas
                 if (anchor != null)
                 {
                     _pptEnhancedPreviewPopup.PlacementTarget = anchor;
-                    if (anchor == PPTLBPageButton || anchor == PPTRBPageButton)
+                    _pptEnhancedPreviewPopup.HorizontalOffset = 0;
+                    _pptEnhancedPreviewPopup.VerticalOffset = 0;
+
+                    var anchorRef = anchor;
+                    _pptEnhancedPreviewPopup.CustomPopupPlacementCallback = (popupSize, targetSize, _) =>
                     {
-                        _pptEnhancedPreviewPopup.Placement = PlacementMode.Top;
-                        _pptEnhancedPreviewPopup.HorizontalOffset = 0;
-                        _pptEnhancedPreviewPopup.VerticalOffset = -10;
-                    }
-                    else if (anchor == PPTRSPageButton)
-                    {
-                        _pptEnhancedPreviewPopup.Placement = PlacementMode.Left;
-                        _pptEnhancedPreviewPopup.HorizontalOffset = -12;
-                        _pptEnhancedPreviewPopup.VerticalOffset = 0;
-                    }
-                    else
-                    {
-                        _pptEnhancedPreviewPopup.Placement = PlacementMode.Right;
-                        _pptEnhancedPreviewPopup.HorizontalOffset = 12;
-                        _pptEnhancedPreviewPopup.VerticalOffset = 0;
-                    }
+                        System.Windows.Point pt;
+                        PopupPrimaryAxis axis;
+                        if (anchorRef == PPTLBPageButton || anchorRef == PPTRBPageButton)
+                        {
+                            // 底部翻页按钮：弹窗位于按钮上方，水平居中
+                            pt = new System.Windows.Point((targetSize.Width - popupSize.Width) / 2, -popupSize.Height);
+                            axis = PopupPrimaryAxis.Horizontal;
+                        }
+                        else if (anchorRef == PPTRSPageButton)
+                        {
+                            // 右侧翻页按钮：弹窗位于按钮左侧，底边与按钮底边对齐（向上展开）
+                            pt = new System.Windows.Point(-popupSize.Width, targetSize.Height - popupSize.Height);
+                            axis = PopupPrimaryAxis.Vertical;
+                        }
+                        else
+                        {
+                            // 左侧翻页按钮（默认）：弹窗位于按钮右侧，底边与按钮底边对齐
+                            pt = new System.Windows.Point(targetSize.Width, targetSize.Height - popupSize.Height);
+                            axis = PopupPrimaryAxis.Vertical;
+                        }
+                        return new[] { new CustomPopupPlacement(pt, axis) };
+                    };
+                    _pptEnhancedPreviewPopup.Placement = PlacementMode.Custom;
                 }
 
                 _pptEnhancedPreviewPopup.IsOpen = true;
@@ -2494,44 +2505,111 @@ namespace Ink_Canvas
 
             var listBox = new ListBox
             {
-                Width = 220,
-                Height = 320,
+                Width = 248,
+                MaxHeight = 560,
                 Background = Brushes.Transparent,
                 BorderBrush = Brushes.Transparent,
                 BorderThickness = new Thickness(0),
+                Padding = new Thickness(6, 4, 6, 8),
                 SelectionMode = SelectionMode.Single
             };
-            listBox.SetValue(ScrollViewer.VerticalScrollBarVisibilityProperty, ScrollBarVisibility.Hidden);
+            listBox.SetValue(ScrollViewer.VerticalScrollBarVisibilityProperty, ScrollBarVisibility.Auto);
             listBox.SetValue(ScrollViewer.HorizontalScrollBarVisibilityProperty, ScrollBarVisibility.Disabled);
             listBox.MouseUp += PPTEnhancedPreviewListBox_OnMouseUp;
 
             var templateXaml = @"
-<DataTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'>
-  <Border Margin='6,5' Padding='0' Height='118' CornerRadius='6' BorderThickness='0' Background='Transparent'>
-    <Border BorderBrush='#7a8ea8' BorderThickness='0.6' CornerRadius='6' Background='Transparent' Padding='1'>
-      <Border CornerRadius='5' ClipToBounds='True' Background='Transparent'>
-        <Image Source='{Binding Thumbnail}' Stretch='UniformToFill'/>
-      </Border>
+<DataTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'
+              xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>
+  <Grid Margin='2,4'>
+    <Border CornerRadius='8' Background='Transparent' Padding='6'>
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width='28'/>
+          <ColumnDefinition Width='*'/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Column='0' VerticalAlignment='Center' HorizontalAlignment='Center'
+                   FontSize='12' FontWeight='SemiBold' Foreground='#71717a'
+                   Text='{Binding SlideNumber}'/>
+        <Border Grid.Column='1' CornerRadius='6' Background='#ffffff'
+                BorderBrush='#d4d4d8' BorderThickness='1' ClipToBounds='True'>
+          <Border.Effect>
+            <DropShadowEffect Color='#000000' BlurRadius='6' ShadowDepth='1' Opacity='0.08'/>
+          </Border.Effect>
+          <Viewbox Stretch='Uniform'>
+            <Image Source='{Binding Thumbnail}' Stretch='Uniform'/>
+          </Viewbox>
+        </Border>
+      </Grid>
     </Border>
-  </Border>
+  </Grid>
 </DataTemplate>";
             listBox.ItemTemplate = (DataTemplate)XamlReader.Parse(templateXaml);
+
             var itemStyleXaml = @"
 <Style xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'
        xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'
        TargetType='ListBoxItem'>
   <Setter Property='Background' Value='Transparent'/>
   <Setter Property='BorderThickness' Value='0'/>
+  <Setter Property='Padding' Value='0'/>
+  <Setter Property='HorizontalContentAlignment' Value='Stretch'/>
   <Setter Property='FocusVisualStyle' Value='{x:Null}'/>
   <Setter Property='Template'>
     <Setter.Value>
       <ControlTemplate TargetType='ListBoxItem'>
-        <ContentPresenter/>
+        <Border x:Name='Bd' CornerRadius='8' Background='Transparent'
+                BorderBrush='Transparent' BorderThickness='1.5'>
+          <ContentPresenter/>
+        </Border>
+        <ControlTemplate.Triggers>
+          <Trigger Property='IsMouseOver' Value='True'>
+            <Setter TargetName='Bd' Property='Background' Value='#f4f4f5'/>
+          </Trigger>
+          <Trigger Property='IsSelected' Value='True'>
+            <Setter TargetName='Bd' Property='Background' Value='#eff6ff'/>
+            <Setter TargetName='Bd' Property='BorderBrush' Value='#3b82f6'/>
+          </Trigger>
+        </ControlTemplate.Triggers>
       </ControlTemplate>
     </Setter.Value>
   </Setter>
 </Style>";
             listBox.ItemContainerStyle = (Style)XamlReader.Parse(itemStyleXaml);
+
+            var headerXaml = @"
+<Border xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'
+        Padding='14,10,14,8' BorderBrush='#e4e4e7' BorderThickness='0,0,0,1'>
+  <Grid>
+    <TextBlock VerticalAlignment='Center'
+               FontSize='13' FontWeight='SemiBold' Foreground='#18181b'/>
+    <TextBlock VerticalAlignment='Center' HorizontalAlignment='Right'
+               FontSize='11' Foreground='#71717a'/>
+  </Grid>
+</Border>";
+            var header = (Border)XamlReader.Parse(headerXaml);
+            var headerGrid = (Grid)header.Child;
+            ((TextBlock)headerGrid.Children[0]).Text = "幻灯片预览";
+            var countText = (TextBlock)headerGrid.Children[1];
+            listBox.Loaded += (s, e) =>
+            {
+                var items = listBox.ItemsSource as System.Collections.IList;
+                countText.Text = items != null ? $"共 {items.Count} 页" : string.Empty;
+            };
+
+            var rootXaml = @"
+<Border xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'
+        Background='#ffffff' CornerRadius='10' BorderBrush='#a1a1aa' BorderThickness='1'
+        Margin='12'>
+  <Border.Effect>
+    <DropShadowEffect Color='#000000' BlurRadius='18' ShadowDepth='2' Opacity='0.18'/>
+  </Border.Effect>
+  <DockPanel LastChildFill='True'/>
+</Border>";
+            var rootBorder = (Border)XamlReader.Parse(rootXaml);
+            var dock = (DockPanel)rootBorder.Child;
+            DockPanel.SetDock(header, Dock.Top);
+            dock.Children.Add(header);
+            dock.Children.Add(listBox);
 
             _pptEnhancedPreviewListBox = listBox;
             _pptEnhancedPreviewPopup = new Popup
@@ -2540,7 +2618,7 @@ namespace Ink_Canvas
                 StaysOpen = true,
                 Placement = PlacementMode.Right,
                 PopupAnimation = PopupAnimation.Fade,
-                Child = listBox
+                Child = rootBorder
             };
         }
 
@@ -2549,11 +2627,7 @@ namespace Ink_Canvas
             if (_pptEnhancedPreviewListBox?.SelectedItem is not PptEnhancedPreviewItem item) return;
             try
             {
-                if (_pptManager?.TryNavigateToSlide(item.SlideNumber) == true)
-                {
-                    LogHelper.WriteLogToFile($"PPT增强预览跳转成功：{item.SlideNumber}", LogHelper.LogType.Trace);
-                }
-                else
+                if (_pptManager?.TryNavigateToSlide(item.SlideNumber) != true)
                 {
                     LogHelper.WriteLogToFile($"PPT增强预览跳转失败：{item.SlideNumber}", LogHelper.LogType.Warning);
                 }
@@ -2602,7 +2676,7 @@ namespace Ink_Canvas
                     {
                         slide = slides[i];
                         var imagePath = Path.Combine(tempDir, $"slide_{i:0000}.png");
-                        slide.Export(imagePath, "PNG", 320, 180);
+                        slide.Export(imagePath, "PNG", 480, 270);
                         var image = LoadBitmapImage(imagePath);
                         if (image == null) continue;
 
