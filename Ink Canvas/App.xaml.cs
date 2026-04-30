@@ -231,6 +231,7 @@ namespace Ink_Canvas
         // 动态加载WMI监控
         private void TrySetupWmiMonitoring()
         {
+            object watcher = null;
             try
             {
                 // 检查System.Management程序集是否可用
@@ -254,7 +255,7 @@ namespace Ink_Canvas
                 string queryString = $"SELECT * FROM __InstanceDeletionEvent WITHIN 1 WHERE TargetInstance ISA 'Win32_Process' AND TargetInstance.ProcessId = {currentProcessId}";
 
                 // 创建ManagementEventWatcher实例
-                object watcher = Activator.CreateInstance(watcherType, queryString);
+                watcher = Activator.CreateInstance(watcherType, queryString);
 
                 // 获取EventArrived事件信息
                 var eventInfo = watcherType.GetEvent("EventArrived");
@@ -271,13 +272,45 @@ namespace Ink_Canvas
 
                 // 启动监听
                 var startMethod = watcherType.GetMethod("Start");
-                startMethod.Invoke(watcher, null);
+                if (startMethod == null)
+                {
+                    LogHelper.WriteLogToFile("未找到ManagementEventWatcher.Start方法，跳过WMI监控", LogHelper.LogType.Warning);
+                    return;
+                }
+
+                try
+                {
+                    startMethod.Invoke(watcher, null);
+                }
+                catch (TargetInvocationException tiex)
+                {
+                    var root = tiex.InnerException ?? tiex;
+                    string rootType = root.GetType().FullName;
+                    LogHelper.WriteLogToFile($"WMI监控启动失败: {rootType}: {root.Message}", LogHelper.LogType.Warning);
+                    return;
+                }
 
                 LogHelper.WriteLogToFile("已成功启动WMI进程监控");
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"动态加载WMI监控失败: {ex.Message}", LogHelper.LogType.Warning);
+                var root = ex is TargetInvocationException outerTie && outerTie.InnerException != null
+                    ? outerTie.InnerException
+                    : ex;
+                string rootType = root.GetType().FullName;
+                LogHelper.WriteLogToFile($"动态加载WMI监控失败: {rootType}: {root.Message}", LogHelper.LogType.Warning);
+                try
+                {
+                    if (watcher != null)
+                    {
+                        var stopMethod = watcher.GetType().GetMethod("Stop");
+                        stopMethod?.Invoke(watcher, null);
+                    }
+                }
+                catch
+                {
+                    // 忽略清理阶段异常，避免覆盖原始错误信息
+                }
             }
         }
 
