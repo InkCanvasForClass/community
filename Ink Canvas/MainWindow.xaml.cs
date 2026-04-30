@@ -1180,6 +1180,12 @@ namespace Ink_Canvas
             LoadSettings(true);
             ApplyLanguageFromSettings();
 
+            // 启动时根据设置恢复调试控制台显示状态
+            if (Settings?.Advanced != null && Settings.Advanced.IsDebugConsoleEnabled)
+            {
+                Helpers.DebugConsoleManager.Show();
+            }
+
             _ = TelemetryUploader.UploadTelemetryIfNeededAsync();
 
             LoadCustomBackgroundColor();

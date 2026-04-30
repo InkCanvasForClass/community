@@ -50,7 +50,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 { "RandomDrawPage", typeof(RandomDrawPage) },
                 { "CanvasPage", typeof(CanvasPage) },
                 { "InkRecognitionPage", typeof(InkRecognitionPage) },
-                { "DebugPage", typeof(IconographyPage) },
+                { "DebugPage", typeof(DebugPage) },
                 { "AboutPage", typeof(AboutPage) },
                 { "Settings", typeof(SettingsPage) },
                 { "PluginPage", typeof(PluginPage) },

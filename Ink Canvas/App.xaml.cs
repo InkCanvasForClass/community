@@ -261,7 +261,7 @@ namespace Ink_Canvas
                 Current.MainWindow.SourceInitialized -= MainWindow_SourceInitialized;
                 Current.MainWindow.SourceInitialized += MainWindow_SourceInitialized;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
         }
