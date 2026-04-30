@@ -1320,6 +1320,7 @@ namespace Ink_Canvas
             LogHelper.WriteLogToFile("Ink Canvas Loaded", LogHelper.LogType.Event);
 
             isLoaded = true;
+            EnsureRealtimeStylusPipelineBinding();
             BlackBoardLeftSidePageListView.ItemsSource = blackBoardSidePageListViewObservableCollection;
             BlackBoardRightSidePageListView.ItemsSource = blackBoardSidePageListViewObservableCollection;
 

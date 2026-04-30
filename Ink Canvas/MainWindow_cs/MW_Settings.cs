@@ -1,4 +1,4 @@
-﻿using H.NotifyIcon;
+using H.NotifyIcon;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Newtonsoft.Json;
@@ -517,6 +517,8 @@ namespace Ink_Canvas
             else
                 ComboBoxPenStyle.SelectedIndex = uiIndex;
 
+            EnsureRealtimeStylusPipelineBinding();
+
             SaveSettingsToFile();
         }
 
@@ -721,6 +723,7 @@ namespace Ink_Canvas
             }
 
             Settings.Gesture.IsEnableMultiTouchMode = ToggleSwitchEnableMultiTouchMode.IsOn;
+            EnsureRealtimeStylusPipelineBinding();
 
             // 如果启用多指书写模式，强制禁用所有双指手势
             if (ToggleSwitchEnableMultiTouchMode.IsOn)
