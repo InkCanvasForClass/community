@@ -50,6 +50,8 @@ namespace Ink_Canvas
         private InkCanvasEditingMode palmEraserPreviousEditingMode = InkCanvasEditingMode.Ink;
         private readonly Dictionary<int, RealtimeBrushTipState> _realtimeBrushTipStates = new Dictionary<int, RealtimeBrushTipState>();
         private readonly Guid RealtimeVelocityBrushTipAppliedGuid = new Guid("74E57D95-945F-4A8C-B52A-7D3EF2D4FD5B");
+        internal const int MouseRealtimeStrokeId = -100001;
+        private readonly HashSet<int> _activeRealtimeTouchStrokeIds = new HashSet<int>();
 
         private sealed class OneEuroFilter
         {
@@ -102,6 +104,7 @@ namespace Ink_Canvas
             public float LastRawY { get; set; }
             public long LastTimestampMs { get; set; }
             public float SmoothedSampleRateHz { get; set; } = 120f;
+            public bool SawPressureVariation { get; set; }
             public bool HasSeed { get; set; }
             public float LastSmoothX { get; set; }
             public float LastSmoothY { get; set; }
@@ -120,12 +123,65 @@ namespace Ink_Canvas
             return x;
         }
 
+        private static float WidthToPressure(float width, float baseWidth)
+        {
+            if (baseWidth <= 1e-4f) return 0.5f;
+            var scale = width / baseWidth;
+            return RealtimeClamp((scale - 0.42f) / 1.16f, 0.08f, 1f);
+        }
+
         private bool ShouldUseRealtimeVelocityBrushTip()
         {
             return Settings.Canvas.InkStyle == 3
                 && Settings.Canvas.VelocityBrushTipMix > 0
+                && !Settings.Canvas.DisablePressure;
+        }
+
+        private bool ShouldUseRealtimeVelocityBrushTipForTouch()
+        {
+            return Settings.Canvas.InkStyle == 3
+                && Settings.Canvas.VelocityBrushTipMix > 0
                 && !Settings.Canvas.DisablePressure
-                && penType == 0;
+                && drawingShapeMode == 0
+                && !isPalmEraserActive;
+        }
+
+        internal bool ShouldUseRealtimeVelocityBrushTipForMouse()
+        {
+            return ShouldUseRealtimeVelocityBrushTip()
+                   && drawingShapeMode == 0
+                   && !isPalmEraserActive;
+        }
+
+        private static bool IsTouchStylusDevice(StylusDevice stylusDevice)
+        {
+            return stylusDevice?.TabletDevice?.Type == TabletDeviceType.Touch;
+        }
+
+        internal void EnsureRealtimeStylusPipelineBinding()
+        {
+            if (inkCanvas == null) return;
+
+            inkCanvas.StylusDown -= MainWindow_StylusDown;
+            inkCanvas.StylusMove -= MainWindow_StylusMove;
+            inkCanvas.StylusUp -= MainWindow_StylusUp;
+
+            inkCanvas.StylusDown += MainWindow_StylusDown;
+            inkCanvas.StylusMove += MainWindow_StylusMove;
+            inkCanvas.StylusUp += MainWindow_StylusUp;
+
+            if (ShouldUseRealtimeVelocityBrushTip()
+                && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
+                && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
+                && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
+            {
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+            }
+            else if (!ShouldUseRealtimeVelocityBrushTip()
+                     && inkCanvas.EditingMode == InkCanvasEditingMode.None)
+            {
+                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+            }
         }
 
         private void InitializeRealtimeBrushTipState(int stylusId, StylusDownEventArgs e)
@@ -138,6 +194,27 @@ namespace Ink_Canvas
 
             var startPoint = e.GetPosition(this);
             _realtimeBrushTipStates[stylusId] = new RealtimeBrushTipState
+            {
+                LastRawX = (float)startPoint.X,
+                LastRawY = (float)startPoint.Y,
+                LastTimestampMs = RealtimeNowMs()
+            };
+        }
+
+        private void InitializeRealtimeBrushTipStateFromPoint(int strokeId, Point startPoint)
+        {
+            if (!ShouldUseRealtimeVelocityBrushTipForTouch() && strokeId != MouseRealtimeStrokeId)
+            {
+                _realtimeBrushTipStates.Remove(strokeId);
+                return;
+            }
+            if (!ShouldUseRealtimeVelocityBrushTipForMouse() && strokeId == MouseRealtimeStrokeId)
+            {
+                _realtimeBrushTipStates.Remove(strokeId);
+                return;
+            }
+
+            _realtimeBrushTipStates[strokeId] = new RealtimeBrushTipState
             {
                 LastRawX = (float)startPoint.X,
                 LastRawY = (float)startPoint.Y,
@@ -164,6 +241,8 @@ namespace Ink_Canvas
 
             var mix = RealtimeClamp((float)Settings.Canvas.VelocityBrushTipMix, 0f, 1f);
             var appended = false;
+            var baseWidth = (float)Math.Max(0.35,
+                strokeVisual.Stroke?.DrawingAttributes?.Width ?? inkCanvas.DefaultDrawingAttributes.Width);
 
             foreach (StylusPoint rawPoint in stylusPointCollection)
             {
@@ -183,11 +262,21 @@ namespace Ink_Canvas
                 var filteredX = state.FilterX.Filter(rawX, dt, speed);
                 var filteredY = state.FilterY.Filter(rawY, dt, speed);
 
-                var speedPressure = RealtimeBrushTipMixRatePressureFromSpeed(GetPointSpeed(
-                    new Point(state.LastRawX, state.LastRawY),
-                    new Point(rawX, rawY),
-                    new Point(filteredX, filteredY)));
-                var pressure = (1f - mix) * (float)rawPoint.PressureFactor + mix * speedPressure;
+                var hwPressure = RealtimeClamp((float)rawPoint.PressureFactor, 0f, 1f);
+                if (Math.Abs(hwPressure - 0.5f) > 0.02f)
+                    state.SawPressureVariation = true;
+                var usePressure = state.SawPressureVariation && hwPressure > 0f;
+
+                var width = baseWidth;
+                if (usePressure)
+                    width *= 0.25f + 0.75f * hwPressure;
+                var speedNormalization = 1800f + state.SmoothedSampleRateHz * 3.5f;
+                width *= RealtimeClamp(1.15f - (speed / speedNormalization), 0.45f, 1.25f);
+                var speedPressure = WidthToPressure(width, baseWidth);
+
+                var pressure = usePressure
+                    ? ((1f - mix) * hwPressure + mix * speedPressure)
+                    : speedPressure;
                 pressure = RealtimeClamp(pressure, 0.08f, 1f);
                 pressure = state.FilterPressure.Filter(pressure, dt, speed);
 
@@ -238,6 +327,89 @@ namespace Ink_Canvas
                     committedStroke.AddPropertyData(RealtimeVelocityBrushTipAppliedGuid, true);
             }
 
+            return true;
+        }
+
+        private bool TryAppendRealtimeVelocityBrushTipPoint(StrokeVisual strokeVisual, int strokeId, Point point, float rawPressure = 0.5f)
+        {
+            var allow = strokeId == MouseRealtimeStrokeId
+                ? ShouldUseRealtimeVelocityBrushTipForMouse()
+                : ShouldUseRealtimeVelocityBrushTipForTouch();
+            if (!allow || strokeVisual == null)
+                return false;
+            if (!_realtimeBrushTipStates.TryGetValue(strokeId, out var state))
+                return false;
+
+            var mix = RealtimeClamp((float)Settings.Canvas.VelocityBrushTipMix, 0f, 1f);
+            var nowMs = RealtimeNowMs();
+            var dtMs = Math.Max(1L, nowMs - state.LastTimestampMs);
+            var dt = dtMs / 1000f;
+            var sampleRate = 1f / Math.Max(1e-4f, dt);
+            state.SmoothedSampleRateHz = state.SmoothedSampleRateHz * 0.85f + sampleRate * 0.15f;
+            var baseWidth = (float)Math.Max(0.35,
+                strokeVisual.Stroke?.DrawingAttributes?.Width ?? inkCanvas.DefaultDrawingAttributes.Width);
+
+            var rawX = (float)point.X;
+            var rawY = (float)point.Y;
+            var dx = rawX - state.LastRawX;
+            var dy = rawY - state.LastRawY;
+            var dist = (float)Math.Sqrt(dx * dx + dy * dy);
+            var speed = dist / dt;
+
+            var filteredX = state.FilterX.Filter(rawX, dt, speed);
+            var filteredY = state.FilterY.Filter(rawY, dt, speed);
+
+            rawPressure = RealtimeClamp(rawPressure, 0f, 1f);
+            if (Math.Abs(rawPressure - 0.5f) > 0.02f)
+                state.SawPressureVariation = true;
+            var usePressure = state.SawPressureVariation && rawPressure > 0f;
+
+            var width = baseWidth;
+            if (usePressure)
+                width *= 0.25f + 0.75f * rawPressure;
+            var speedNormalization = 1800f + state.SmoothedSampleRateHz * 3.5f;
+            width *= RealtimeClamp(1.15f - (speed / speedNormalization), 0.45f, 1.25f);
+            var speedPressure = WidthToPressure(width, baseWidth);
+
+            var pressure = usePressure
+                ? ((1f - mix) * rawPressure + mix * speedPressure)
+                : speedPressure;
+            pressure = RealtimeClamp(pressure, 0.08f, 1f);
+            pressure = state.FilterPressure.Filter(pressure, dt, speed);
+
+            var minDist = state.SmoothedSampleRateHz > 160f ? 0.55f
+                : state.SmoothedSampleRateHz > 90f ? 0.4f
+                : 0.25f;
+            if (dist < minDist && state.HasSeed)
+            {
+                state.LastRawX = rawX;
+                state.LastRawY = rawY;
+                state.LastTimestampMs = nowMs;
+                return true;
+            }
+
+            if (!state.HasSeed)
+            {
+                state.HasSeed = true;
+                state.LastSmoothX = filteredX;
+                state.LastSmoothY = filteredY;
+                state.LastSmoothPressure = pressure;
+                strokeVisual.Add(new StylusPoint(filteredX, filteredY, pressure));
+            }
+            else
+            {
+                var midX = (state.LastSmoothX + filteredX) * 0.5f;
+                var midY = (state.LastSmoothY + filteredY) * 0.5f;
+                var midPressure = (state.LastSmoothPressure + pressure) * 0.5f;
+                strokeVisual.Add(new StylusPoint(midX, midY, midPressure));
+                state.LastSmoothX = filteredX;
+                state.LastSmoothY = filteredY;
+                state.LastSmoothPressure = pressure;
+            }
+
+            state.LastRawX = rawX;
+            state.LastRawY = rawY;
+            state.LastTimestampMs = nowMs;
             return true;
         }
 
@@ -531,6 +703,9 @@ namespace Ink_Canvas
         /// </remarks>
         private void MainWindow_StylusDown(object sender, StylusDownEventArgs e)
         {
+            if (IsTouchStylusDevice(e.StylusDevice))
+                return;
+
             // 检查手写笔点击是否发生在浮动栏区域，如果是则允许事件传播到浮动栏按钮
             var stylusPoint = e.GetPosition(this);
             var floatingBarBounds = ViewboxFloatingBar.TransformToAncestor(this).TransformBounds(
@@ -566,7 +741,9 @@ namespace Ink_Canvas
                 }
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
                 {
-                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                    inkCanvas.EditingMode = ShouldUseRealtimeVelocityBrushTip()
+                        ? InkCanvasEditingMode.None
+                        : InkCanvasEditingMode.Ink;
                 }
                 else
                 {
@@ -613,6 +790,9 @@ namespace Ink_Canvas
         /// </remarks>
         private async void MainWindow_StylusUp(object sender, StylusEventArgs e)
         {
+            if (IsTouchStylusDevice(e.StylusDevice))
+                return;
+
             if (drawingShapeMode != 0)
             {
                 // 重置触摸状态
@@ -727,6 +907,9 @@ namespace Ink_Canvas
         {
             try
             {
+                if (IsTouchStylusDevice(e.StylusDevice))
+                    return;
+
                 if (drawingShapeMode != 0)
                 {
                     if (isTouchDown)
@@ -754,7 +937,10 @@ namespace Ink_Canvas
                         strokeVisual.Add(new StylusPoint(stylusPoint.X, stylusPoint.Y, stylusPoint.PressureFactor));
                 }
 
-                strokeVisual.Redraw();
+                if (isHandledByRealtime)
+                    strokeVisual.ForceRedraw();
+                else
+                    strokeVisual.Redraw();
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
@@ -993,6 +1179,29 @@ namespace Ink_Canvas
             lastTouchDownTime = DateTime.Now;
             dec.Add(e.TouchDevice.Id);
 
+            if (ShouldUseRealtimeVelocityBrushTipForTouch()
+                && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
+                && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
+                && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
+            {
+                try
+                {
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    var touchId = e.TouchDevice.Id;
+                    var p = e.GetTouchPoint(inkCanvas).Position;
+                    _activeRealtimeTouchStrokeIds.Add(touchId);
+                    InitializeRealtimeBrushTipStateFromPoint(touchId, p);
+                    var sv = GetStrokeVisual(touchId);
+                    TryAppendRealtimeVelocityBrushTipPoint(sv, touchId, p);
+                    sv.ForceRedraw();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(ex);
+                }
+                return;
+            }
+
             if (Settings.Canvas.EnablePalmEraser && !isPalmEraserActive && drawingShapeMode == 0)
             {
                 var touchPoint = e.GetTouchPoint(inkCanvas);
@@ -1104,6 +1313,25 @@ namespace Ink_Canvas
                 var touchPoint = e.GetTouchPoint(inkCanvas);
                 EraserOverlay_PointerMove(sender, touchPoint.Position);
             }
+
+            if (!ShouldUseRealtimeVelocityBrushTipForTouch())
+                return;
+
+            var touchId = e.TouchDevice.Id;
+            if (!_activeRealtimeTouchStrokeIds.Contains(touchId))
+                return;
+
+            try
+            {
+                var p = e.GetTouchPoint(inkCanvas).Position;
+                var sv = GetStrokeVisual(touchId);
+                if (TryAppendRealtimeVelocityBrushTipPoint(sv, touchId, p))
+                    sv.ForceRedraw();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
         }
 
         /// <summary>
@@ -1130,6 +1358,38 @@ namespace Ink_Canvas
         /// </remarks>
         private void InkCanvas_PreviewTouchUp(object sender, TouchEventArgs e)
         {
+            var touchId = e.TouchDevice.Id;
+            if (_activeRealtimeTouchStrokeIds.Contains(touchId))
+            {
+                try
+                {
+                    var sv = GetStrokeVisual(touchId);
+                    sv?.ForceRedraw();
+                    var stroke = sv?.Stroke;
+                    if (stroke != null)
+                    {
+                        if (!stroke.ContainsPropertyData(RealtimeVelocityBrushTipAppliedGuid))
+                            stroke.AddPropertyData(RealtimeVelocityBrushTipAppliedGuid, true);
+                        inkCanvas.Strokes.Add(stroke);
+                        inkCanvas_StrokeCollected(inkCanvas, new InkCanvasStrokeCollectedEventArgs(stroke));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(ex);
+                }
+                finally
+                {
+                    if (VisualCanvasList.TryGetValue(touchId, out var visualCanvas) && inkCanvas.Children.Contains(visualCanvas))
+                        inkCanvas.Children.Remove(visualCanvas);
+                    StrokeVisualList.Remove(touchId);
+                    VisualCanvasList.Remove(touchId);
+                    TouchDownPointsList.Remove(touchId);
+                    CleanupRealtimeBrushTipState(touchId);
+                    _activeRealtimeTouchStrokeIds.Remove(touchId);
+                }
+            }
+
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint && !isPalmEraserActive)
             {
                 return;
