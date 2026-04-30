@@ -22,6 +22,9 @@ namespace Ink_Canvas.Helpers
 
         private static readonly string DeviceId;
         private static readonly object fileLock = new object();
+        private static UsageStats usageStatsCache;
+        private static DateTime usageStatsCacheTime;
+        private static readonly TimeSpan UsageStatsCacheDuration = TimeSpan.FromMinutes(2);
 
         static DeviceIdentifier()
         {
@@ -654,7 +657,7 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                var stats = LoadUsageStats();
+                var stats = GetUsageStatsCached();
                 return stats.SystemVersion;
             }
             catch (Exception ex)
@@ -773,7 +776,7 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                var stats = LoadUsageStats();
+                var stats = GetUsageStatsCached();
                 return stats.UpdatePriority;
             }
             catch (Exception ex)
@@ -790,7 +793,7 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                var stats = LoadUsageStats();
+                var stats = GetUsageStatsCached();
                 return stats.UsageFrequency;
             }
             catch (Exception ex)
@@ -892,6 +895,23 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        private static UsageStats GetUsageStatsCached(bool forceRefresh = false)
+        {
+            lock (fileLock)
+            {
+                if (!forceRefresh
+                    && usageStatsCache != null
+                    && (DateTime.Now - usageStatsCacheTime) < UsageStatsCacheDuration)
+                {
+                    return usageStatsCache;
+                }
+
+                usageStatsCache = LoadUsageStats();
+                usageStatsCacheTime = DateTime.Now;
+                return usageStatsCache;
+            }
+        }
+
         /// <summary>
         /// 保存使用统计
         /// </summary>
@@ -902,6 +922,9 @@ namespace Ink_Canvas.Helpers
 
             // 保存到备份文件
             SaveUsageStatsToFile(UsageStatsBackupPath, stats);
+
+            usageStatsCache = stats;
+            usageStatsCacheTime = DateTime.Now;
         }
 
 

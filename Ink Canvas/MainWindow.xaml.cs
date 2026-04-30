@@ -1190,6 +1190,7 @@ namespace Ink_Canvas
         private bool isLoaded;
         private bool _suppressChickenSoupSourceSelectionChanged;
         private bool forcePointEraser;
+        private bool _pendingStartupAutoUpdateCheck;
 
         /// <summary>
         /// 在窗口加载完成后初始化应用的核心子系统、UI 状态和运行时监控组件。
@@ -1203,90 +1204,11 @@ namespace Ink_Canvas
             //加载设置
             LoadSettings(true);
             ApplyLanguageFromSettings();
-            AutoBackupManager.Initialize(Settings);
-
-            // 初始化上传队列（恢复上次的上传队列）
-            try
-            {
-                UploadQueueHelper.InitializeAllQueues();
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[MainWindow] 初始化上传队列时出错: {ex.Message}", LogHelper.LogType.Error);
-                // 继续执行其他初始化操作，不中断整个加载过程
-            }
 
             _ = TelemetryUploader.UploadTelemetryIfNeededAsync();
 
-            // 检查保存路径是否可用，不可用则修正
-            try
-            {
-                string savePath = Settings.Automation.AutoSavedStrokesLocation;
-                bool needFix = false;
-                if (string.IsNullOrWhiteSpace(savePath) || !Directory.Exists(savePath))
-                {
-                    needFix = true;
-                }
-                else
-                {
-                    // 检查是否可写
-                    try
-                    {
-                        string testFile = Path.Combine(savePath, "test.tmp");
-                        File.WriteAllText(testFile, "test");
-                        File.Delete(testFile);
-                    }
-                    catch
-                    {
-                        needFix = true;
-                    }
-                }
-                if (needFix)
-                {
-                    string newPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Saves");
-                    Settings.Automation.AutoSavedStrokesLocation = newPath;
-                    if (!Directory.Exists(newPath))
-                        Directory.CreateDirectory(newPath);
-                    SaveSettingsToFile();
-                    LogHelper.WriteLogToFile($"自动修正保存路径为: {newPath}");
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"检测或修正保存路径时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-
-            // 加载自定义背景颜色
             LoadCustomBackgroundColor();
-
-            // 设置窗口模式
             SetWindowMode();
-
-            // 初始化PPT管理器
-            InitializePPTManagers();
-
-            // 如果启用PPT支持，开始监控
-            if (Settings.PowerPointSettings.PowerPointSupport)
-            {
-                StartPPTMonitoring();
-            }
-
-            // 初始化窗口概览模型
-            try
-            {
-                _windowOverviewModel = new WindowOverviewModel();
-                LogHelper.WriteLogToFile("窗口概览模型已初始化", LogHelper.LogType.Event);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"初始化窗口概览模型失败: {ex.Message}", LogHelper.LogType.Error);
-            }
-
-            // 如果启用PowerPoint联动增强功能，启动进程守护
-            if (Settings.PowerPointSettings.EnablePowerPointEnhancement)
-            {
-                StartPowerPointProcessMonitoring();
-            }
 
             // HasNewUpdateWindow hasNewUpdateWindow = new HasNewUpdateWindow();
             // 根据设置应用主题
@@ -1392,6 +1314,8 @@ namespace Ink_Canvas
             {
                 ApplyUIAccessTopMost();
             }
+
+            _ = RunDeferredStartupPhaseBAsync();
 
             // 初始化剪贴板监控
             InitializeClipboardMonitoring();
@@ -2463,6 +2387,95 @@ namespace Ink_Canvas
                 {
                     ApplyAlwaysOnTop();
                 }), DispatcherPriority.Loaded);
+            }
+        }
+
+        private async Task RunDeferredStartupPhaseBAsync()
+        {
+            await Task.Delay(1200);
+
+            try
+            {
+                AutoBackupManager.Initialize(Settings);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[MainWindow] 初始化自动备份管理器时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            try
+            {
+                UploadQueueHelper.InitializeAllQueues();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[MainWindow] 初始化上传队列时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            try
+            {
+                string savePath = Settings.Automation.AutoSavedStrokesLocation;
+                bool needFix = false;
+                if (string.IsNullOrWhiteSpace(savePath) || !Directory.Exists(savePath))
+                {
+                    needFix = true;
+                }
+                else
+                {
+                    try
+                    {
+                        string testFile = Path.Combine(savePath, "test.tmp");
+                        File.WriteAllText(testFile, "test");
+                        File.Delete(testFile);
+                    }
+                    catch
+                    {
+                        needFix = true;
+                    }
+                }
+
+                if (needFix)
+                {
+                    string newPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Saves");
+                    Settings.Automation.AutoSavedStrokesLocation = newPath;
+                    if (!Directory.Exists(newPath))
+                        Directory.CreateDirectory(newPath);
+                    SaveSettingsToFile();
+                    LogHelper.WriteLogToFile($"自动修正保存路径为: {newPath}");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"检测或修正保存路径时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            InitializePPTManagers();
+            if (Settings.PowerPointSettings.PowerPointSupport)
+            {
+                StartPPTMonitoring();
+            }
+
+            try
+            {
+                _windowOverviewModel = new WindowOverviewModel();
+                LogHelper.WriteLogToFile("窗口概览模型已初始化", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"初始化窗口概览模型失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            if (Settings.PowerPointSettings.EnablePowerPointEnhancement)
+            {
+                StartPowerPointProcessMonitoring();
+            }
+
+            if (_pendingStartupAutoUpdateCheck && Settings.Startup?.IsAutoUpdate == true)
+            {
+                _pendingStartupAutoUpdateCheck = false;
+                await Task.Delay(5000);
+                LogHelper.WriteLogToFile("AutoUpdate | Running deferred auto-update check after startup");
+                AutoUpdate();
             }
         }
 

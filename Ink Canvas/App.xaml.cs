@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Threading;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
@@ -77,6 +78,10 @@ namespace Ink_Canvas
         private static string lastErrorMessage = string.Empty;
         // 新增：是否已初始化崩溃监听器
         private static bool crashListenersInitialized;
+        private IntPtr processDestroyHook = IntPtr.Zero;
+        private IntPtr monitoredMainWindowHandle = IntPtr.Zero;
+        private bool mainWindowDestroyedLogged;
+        private WinEventDelegate processDestroyHookCallback;
         // 新增：启动画面相关
         private static SplashScreen _splashScreen;
         private static bool _isSplashScreenShown = false;
@@ -208,15 +213,13 @@ namespace Ink_Canvas
                 // 尝试注册Windows关闭消息监听
                 SetConsoleCtrlHandler(ConsoleCtrlHandler, true);
 
-                // 如果系统支持，添加Windows Management Instrumentation监听器
                 try
                 {
-                    // 使用反射动态加载和调用WMI
-                    TrySetupWmiMonitoring();
+                    TrySetupTerminationMonitoring();
                 }
-                catch (Exception wmiEx)
+                catch (Exception monitorEx)
                 {
-                    LogHelper.WriteLogToFile($"设置WMI进程监控失败: {wmiEx.Message}", LogHelper.LogType.Warning);
+                    LogHelper.WriteLogToFile($"设置终止监控失败: {monitorEx.Message}", LogHelper.LogType.Warning);
                 }
 
                 crashListenersInitialized = true;
@@ -228,113 +231,114 @@ namespace Ink_Canvas
             }
         }
 
-        // 动态加载WMI监控
-        private void TrySetupWmiMonitoring()
+        private void TrySetupTerminationMonitoring()
         {
-            object watcher = null;
             try
             {
-                // 检查System.Management程序集是否可用
-                var assemblyName = "System.Management, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
-                var assembly = Assembly.Load(assemblyName);
-                if (assembly == null)
-                {
-                    LogHelper.WriteLogToFile("未找到System.Management程序集，跳过WMI监控", LogHelper.LogType.Warning);
-                    return;
-                }
+                processDestroyHookCallback = OnWinEventMainWindowDestroyed;
 
-                // 使用反射创建WMI查询
-                var watcherType = assembly.GetType("System.Management.ManagementEventWatcher");
-                if (watcherType == null)
-                {
-                    LogHelper.WriteLogToFile("未找到ManagementEventWatcher类型，跳过WMI监控", LogHelper.LogType.Warning);
-                    return;
-                }
-
-                // 构建WMI查询字符串
-                string queryString = $"SELECT * FROM __InstanceDeletionEvent WITHIN 1 WHERE TargetInstance ISA 'Win32_Process' AND TargetInstance.ProcessId = {currentProcessId}";
-
-                // 创建ManagementEventWatcher实例
-                watcher = Activator.CreateInstance(watcherType, queryString);
-
-                // 获取EventArrived事件信息
-                var eventInfo = watcherType.GetEvent("EventArrived");
-                if (eventInfo == null)
-                {
-                    LogHelper.WriteLogToFile("未找到EventArrived事件，跳过WMI监控", LogHelper.LogType.Warning);
-                    return;
-                }
-
-                // 创建委托并订阅事件
-                Type delegateType = eventInfo.EventHandlerType;
-                var handler = Delegate.CreateDelegate(delegateType, this, GetType().GetMethod("WmiEventHandler", BindingFlags.NonPublic | BindingFlags.Instance));
-                eventInfo.AddEventHandler(watcher, handler);
-
-                // 启动监听
-                var startMethod = watcherType.GetMethod("Start");
-                if (startMethod == null)
-                {
-                    LogHelper.WriteLogToFile("未找到ManagementEventWatcher.Start方法，跳过WMI监控", LogHelper.LogType.Warning);
-                    return;
-                }
-
-                try
-                {
-                    startMethod.Invoke(watcher, null);
-                }
-                catch (TargetInvocationException tiex)
-                {
-                    var root = tiex.InnerException ?? tiex;
-                    string rootType = root.GetType().FullName;
-                    LogHelper.WriteLogToFile($"WMI监控启动失败: {rootType}: {root.Message}", LogHelper.LogType.Warning);
-                    return;
-                }
-
-                LogHelper.WriteLogToFile("已成功启动WMI进程监控");
+                // 等主窗口句柄可用后再开始监听
+                Dispatcher.BeginInvoke(new Action(BindMainWindowLifecycle), DispatcherPriority.ApplicationIdle);
             }
             catch (Exception ex)
             {
-                var root = ex is TargetInvocationException outerTie && outerTie.InnerException != null
-                    ? outerTie.InnerException
-                    : ex;
-                string rootType = root.GetType().FullName;
-                LogHelper.WriteLogToFile($"动态加载WMI监控失败: {rootType}: {root.Message}", LogHelper.LogType.Warning);
-                try
-                {
-                    if (watcher != null)
-                    {
-                        var stopMethod = watcher.GetType().GetMethod("Stop");
-                        stopMethod?.Invoke(watcher, null);
-                    }
-                }
-                catch
-                {
-                    // 忽略清理阶段异常，避免覆盖原始错误信息
-                }
+                LogHelper.WriteLogToFile($"初始化终止监控失败: {ex.GetType().FullName}: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
 
-        // WMI事件处理方法
-        private void WmiEventHandler(object sender, EventArgs e)
+        private void BindMainWindowLifecycle()
         {
             try
             {
-                // 尝试从事件参数中提取信息
-                dynamic eventArgs = e;
-                dynamic newEvent = eventArgs.NewEvent;
-                if (newEvent != null)
+                if (Current?.MainWindow == null)
                 {
-                    dynamic targetInstance = newEvent["TargetInstance"];
-                    if (targetInstance != null)
-                    {
-                        string processName = targetInstance["Name"]?.ToString() ?? "未知进程";
-                        WriteCrashLog($"WMI检测到进程{processName}(ID:{currentProcessId})已终止");
-                    }
+                    return;
                 }
+
+                Current.MainWindow.SourceInitialized -= MainWindow_SourceInitialized;
+                Current.MainWindow.SourceInitialized += MainWindow_SourceInitialized;
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"处理WMI事件时出错: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        private void MainWindow_SourceInitialized(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!(sender is Window window))
+                {
+                    return;
+                }
+
+                monitoredMainWindowHandle = new WindowInteropHelper(window).Handle;
+                if (monitoredMainWindowHandle == IntPtr.Zero)
+                {
+                    return;
+                }
+
+                RegisterMainWindowDestroyHook();
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+        private void RegisterMainWindowDestroyHook()
+        {
+            if (processDestroyHook != IntPtr.Zero || monitoredMainWindowHandle == IntPtr.Zero)
+            {
+                return;
+            }
+
+            processDestroyHook = SetWinEventHook(
+                EVENT_OBJECT_DESTROY,
+                EVENT_OBJECT_DESTROY,
+                IntPtr.Zero,
+                processDestroyHookCallback,
+                (uint)currentProcessId,
+                0,
+                WINEVENT_OUTOFCONTEXT);
+
+            if (processDestroyHook == IntPtr.Zero)
+            {
+                return;
+            }
+        }
+
+        private void OnWinEventMainWindowDestroyed(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)
+        {
+            if (eventType != EVENT_OBJECT_DESTROY || mainWindowDestroyedLogged)
+            {
+                return;
+            }
+
+            if (idObject != OBJID_WINDOW || idChild != CHILDID_SELF)
+            {
+                return;
+            }
+
+            if (hwnd != monitoredMainWindowHandle || hwnd == IntPtr.Zero)
+            {
+                return;
+            }
+
+            mainWindowDestroyedLogged = true;
+        }
+
+        private void CleanupTerminationMonitoring()
+        {
+            try
+            {
+                if (processDestroyHook != IntPtr.Zero)
+                {
+                    UnhookWinEvent(processDestroyHook);
+                    processDestroyHook = IntPtr.Zero;
+                }
+            }
+            catch
+            {
             }
         }
 
@@ -343,6 +347,19 @@ namespace Ink_Canvas
         private static extern bool SetConsoleCtrlHandler(ConsoleCtrlDelegate handler, bool add);
 
         private delegate bool ConsoleCtrlDelegate(int ctrlType);
+        private delegate void WinEventDelegate(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime);
+
+        private const uint EVENT_OBJECT_DESTROY = 0x8001;
+        private const uint WINEVENT_OUTOFCONTEXT = 0x0000;
+        private const int OBJID_WINDOW = 0;
+        private const int CHILDID_SELF = 0;
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr SetWinEventHook(uint eventMin, uint eventMax, IntPtr hmodWinEventProc, WinEventDelegate lpfnWinEventProc, uint idProcess, uint idThread, uint dwFlags);
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool UnhookWinEvent(IntPtr hWinEventHook);
 
         private static bool ConsoleCtrlHandler(int ctrlType)
         {
@@ -477,6 +494,7 @@ namespace Ink_Canvas
         // 处理进程退出事件
         private void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
+            CleanupTerminationMonitoring();
             TimeSpan runDuration = DateTime.Now - appStartTime;
             string durationText = FormatTimeSpan(runDuration);
             WriteCrashLog($"应用程序退出，运行时长: {durationText}");
@@ -758,16 +776,16 @@ namespace Ink_Canvas
             // 根据设置决定是否显示启动画面
             if (ShouldShowSplashScreen() && !IsLaunchByFileOrUri(e.Args))
             {
+                await Task.Delay(200);
                 ShowSplashScreen();
                 SetSplashMessage(Strings.GetString("Splash_Starting"));
                 SetSplashProgress(20);
-                await Task.Delay(500);
 
                 // 强制刷新UI，确保启动画面显示
                 Application.Current.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
             }
 
-            await Task.Delay(500);
+            await Task.Delay(200);
             RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
             LogHelper.NewLog(string.Format("Ink Canvas Starting (Version: {0})", Assembly.GetExecutingAssembly().GetName().Version));
@@ -803,7 +821,7 @@ namespace Ink_Canvas
             {
                 SetSplashMessage("正在初始化组件...");
                 SetSplashProgress(40);
-                await Task.Delay(500);
+                await Task.Delay(200);
             }
             try
             {
@@ -819,7 +837,6 @@ namespace Ink_Canvas
             {
                 SetSplashMessage("正在初始化组件...");
                 SetSplashProgress(50);
-                await Task.Delay(300);
             }
             try
             {
@@ -835,7 +852,7 @@ namespace Ink_Canvas
             {
                 SetSplashMessage("正在加载配置...");
                 SetSplashProgress(60);
-                await Task.Delay(500);
+                await Task.Delay(200);
             }
             DeviceIdentifier.RecordAppLaunch();
             try
@@ -1129,7 +1146,6 @@ namespace Ink_Canvas
             {
                 SetSplashMessage("正在初始化主界面...");
                 SetSplashProgress(80);
-                await Task.Delay(500);
             }
             var mainWindow = new MainWindow();
             MainWindow = mainWindow;
@@ -1541,6 +1557,7 @@ namespace Ink_Canvas
 
         private void App_Exit(object sender, ExitEventArgs e)
         {
+            CleanupTerminationMonitoring();
             // 卸载所有插件
             try
             {

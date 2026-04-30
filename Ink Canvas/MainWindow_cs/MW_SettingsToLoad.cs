@@ -216,8 +216,8 @@ namespace Ink_Canvas
                 {
                     if (isStartup)
                     {
-                        LogHelper.WriteLogToFile("AutoUpdate | Running auto-update check at startup");
-                        AutoUpdate();
+                        _pendingStartupAutoUpdateCheck = true;
+                        LogHelper.WriteLogToFile("AutoUpdate | Startup check deferred until UI is stable");
                     }
                     else
                     {
