@@ -1,6 +1,5 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;

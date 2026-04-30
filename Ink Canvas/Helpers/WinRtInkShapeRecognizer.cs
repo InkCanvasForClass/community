@@ -15,7 +15,7 @@ namespace Ink_Canvas.Helpers
     internal class ModernInkAnalyzer : IDisposable
     {
         public static readonly Guid ShapeStrokePropertyGuid = new Guid("11111111-2222-3333-4444-555555555555");
-        
+
         private global::Windows.UI.Input.Inking.Analysis.InkAnalyzer _internalAnalyzer;
         private readonly Dictionary<Stroke, uint> _strokeIdMap = new Dictionary<Stroke, uint>();
         private readonly Dictionary<uint, Stroke> _reverseIdMap = new Dictionary<uint, Stroke>();
@@ -41,7 +41,7 @@ namespace Ink_Canvas.Helpers
             _internalAnalyzer.SetStrokeDataKind(
                 inkStroke.Id,
                 global::Windows.UI.Input.Inking.Analysis.InkAnalysisStrokeKind.Drawing);
-            
+
             _strokeIdMap[stroke] = inkStroke.Id;
             _reverseIdMap[inkStroke.Id] = stroke;
         }

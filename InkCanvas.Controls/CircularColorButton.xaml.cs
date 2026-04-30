@@ -67,7 +67,7 @@ namespace Ink_Canvas.Controls
         {
             var button = (CircularColorButton)d;
             if (button.ButtonBorder == null || button.ColorOverlay == null) return;
-            
+
             var size = (double)e.NewValue;
             button.ButtonBorder.Width = size;
             button.ButtonBorder.Height = size;

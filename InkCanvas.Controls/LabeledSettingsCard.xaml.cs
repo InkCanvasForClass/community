@@ -1,7 +1,7 @@
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
 
 namespace Ink_Canvas.Controls
 {

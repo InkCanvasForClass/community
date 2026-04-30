@@ -623,7 +623,7 @@ namespace Ink_Canvas
 
                             var shapeMode = ShapeRecognitionRouter.FromSettingsInt(Settings.InkToShape.ShapeRecognitionEngine);
                             InkShapeRecognitionResult result = InkShapeRecognitionResult.Empty;
-                            
+
                             if (ShapeRecognitionRouter.ResolveUseWinRt(shapeMode) && Helpers.WinRtInkShapeRecognizer.IsApiAvailable)
                             {
                                 result = await ModernInkAnalyzer.AnalyzeAsync(newStrokes);

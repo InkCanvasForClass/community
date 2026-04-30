@@ -89,7 +89,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardAutoDelSavedFiles.IsOn = auto.AutoDelSavedFiles;
             ComboBoxAutoDelSavedFilesDaysThreshold.SelectedIndex = auto.AutoDelSavedFilesDaysThreshold switch
             {
-                7 => 0, 14 => 1, 30 => 2, 60 => 3, 90 => 4, _ => 2
+                7 => 0,
+                14 => 1,
+                30 => 2,
+                60 => 3,
+                90 => 4,
+                _ => 2
             };
 
             SideControlMinimumAutomationSlider.Value = auto.MinimumAutomationStrokeNumber;

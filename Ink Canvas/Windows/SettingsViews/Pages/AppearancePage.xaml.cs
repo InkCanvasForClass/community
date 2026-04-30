@@ -354,7 +354,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 var checkBox = new CheckBox
                 {
-                    Content = category.Value, Tag = category.Key, FontSize = 13,
+                    Content = category.Value,
+                    Tag = category.Key,
+                    FontSize = 13,
                     IsChecked = implicitAllCategories || savedHitokoto.Contains(category.Key),
                     Margin = new Thickness(0, 0, 0, 8)
                 };

@@ -47,7 +47,7 @@ namespace Ink_Canvas
         private void YesOrNoNotificationWindow_Loaded(object sender, RoutedEventArgs e)
         {
             _hwnd = new WindowInteropHelper(this).Handle;
-            
+
             Topmost = true;
             Activate();
             Focus();
@@ -71,13 +71,13 @@ namespace Ink_Canvas
                 if (_hwnd == IntPtr.Zero) return;
 
                 var foregroundWindow = GetForegroundWindow();
-                
+
                 if (foregroundWindow != _hwnd && IsWindowVisible(_hwnd))
                 {
                     Topmost = true;
                     Activate();
                     Focus();
-                    
+
                     SetWindowPos(_hwnd, HWND_TOPMOST, 0, 0, 0, 0,
                         SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
                 }

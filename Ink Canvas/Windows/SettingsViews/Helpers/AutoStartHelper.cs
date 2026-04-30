@@ -1,6 +1,5 @@
 using IWshRuntimeLibrary;
 using System;
-using System.IO;
 using File = System.IO.File;
 
 namespace Ink_Canvas.Windows.SettingsViews.Helpers

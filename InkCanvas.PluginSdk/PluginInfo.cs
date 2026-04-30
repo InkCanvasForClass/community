@@ -1,5 +1,3 @@
-using System;
-
 namespace Ink_Canvas.Plugins
 {
     public class PluginInfo

@@ -7,7 +7,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Threading;
 using ContentDialog = iNKORE.UI.WPF.Modern.Controls.ContentDialog;
 using MessageBox = System.Windows.MessageBox;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;

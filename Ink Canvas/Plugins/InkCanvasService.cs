@@ -1,7 +1,5 @@
-using Ink_Canvas.Plugins;
 using System;
 using System.Threading.Tasks;
-using System.Windows.Threading;
 
 namespace Ink_Canvas.Plugins
 {

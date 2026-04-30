@@ -6,7 +6,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Navigation;
-using System.Windows.Media;
 using MessageBox = System.Windows.MessageBox;
 using Screen = System.Windows.Forms.Screen;
 
@@ -495,7 +494,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                     if (settingsView != null)
                     {
                         var pageTag = string.Format("PluginSettings_{0}", plugin.Id);
-                        
+
                         _pageTypes[pageTag] = typeof(PluginSettingsPage);
                         _pluginPages[pageTag] = plugin;
 

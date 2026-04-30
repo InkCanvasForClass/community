@@ -1043,13 +1043,13 @@ namespace Ink_Canvas
                         {
                             unfoldFloatingBarByUser = false;
                         }
-                            else
-                            {
-                                // schedule unfold if dispatcher still running
-                                if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
-                                UnFoldFloatingBar_MouseUp(new object(), null);
-                                unfoldFloatingBarByUser = false;
-                            }
+                        else
+                        {
+                            // schedule unfold if dispatcher still running
+                            if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
+                            UnFoldFloatingBar_MouseUp(new object(), null);
+                            unfoldFloatingBarByUser = false;
+                        }
                     }
                 }
             }
@@ -1172,27 +1172,27 @@ namespace Ink_Canvas
                     if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
                     Dispatcher.Invoke(() =>
                     {
-                    try
-                    {
-                        // 判断是否处于批注模式（inkCanvas.EditingMode == InkCanvasEditingMode.Ink）
-                        // 判断是否处于画板模式（!Topmost）
-                        if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink && Topmost)
+                        try
                         {
-                            // 检查是否有未保存的内容或正在进行的操作
-                            if (!isHidingSubPanelsWhenInking)
+                            // 判断是否处于批注模式（inkCanvas.EditingMode == InkCanvasEditingMode.Ink）
+                            // 判断是否处于画板模式（!Topmost）
+                            if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink && Topmost)
                             {
-                                canSafelyUpdate = true;
-                                LogHelper.WriteLogToFile("AutoUpdate | Application is in a safe state for update - not in ink or board mode");
+                                // 检查是否有未保存的内容或正在进行的操作
+                                if (!isHidingSubPanelsWhenInking)
+                                {
+                                    canSafelyUpdate = true;
+                                    LogHelper.WriteLogToFile("AutoUpdate | Application is in a safe state for update - not in ink or board mode");
+                                }
+                                else
+                                {
+                                    LogHelper.WriteLogToFile("AutoUpdate | Application is currently performing operations");
+                                }
                             }
                             else
                             {
-                                LogHelper.WriteLogToFile("AutoUpdate | Application is currently performing operations");
+                                LogHelper.WriteLogToFile("AutoUpdate | Application is in ink or board mode, cannot update now");
                             }
-                        }
-                        else
-                        {
-                            LogHelper.WriteLogToFile("AutoUpdate | Application is in ink or board mode, cannot update now");
-                        }
                         }
                         catch (Exception ex)
                         {

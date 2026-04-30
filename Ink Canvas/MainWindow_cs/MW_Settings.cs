@@ -1,32 +1,17 @@
-using H.NotifyIcon;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
-using Newtonsoft.Json;
-using OSVersionExtension;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Net.Http;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using Application = System.Windows.Application;
-using CheckBox = System.Windows.Controls.CheckBox;
-using ComboBox = System.Windows.Controls.ComboBox;
-using File = System.IO.File;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
-using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
-using OperatingSystem = OSVersionExtension.OperatingSystem;
 using RadioButton = System.Windows.Controls.RadioButton;
 
 namespace Ink_Canvas

@@ -60,7 +60,7 @@ namespace Ink_Canvas.Plugins
                 Log(string.Format("Loading plugins from: {0}", _pluginsDirectory));
 
                 var pluginFiles = new List<string>();
-                
+
                 try
                 {
                     var topLevelFiles = Directory.GetFiles(_pluginsDirectory, "*.dll", SearchOption.TopDirectoryOnly);
@@ -123,7 +123,7 @@ namespace Ink_Canvas.Plugins
             Log(string.Format("Loading plugin: {0}", fileName));
 
             var alc = new PluginAssemblyLoadContext(pluginFile, isCollectible: true);
-            
+
             try
             {
                 var assembly = alc.LoadFromAssemblyPath(pluginFile);

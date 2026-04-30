@@ -1,6 +1,5 @@
 using Ink_Canvas.Helpers;
 using System;
-using System.Linq;
 using System.Windows;
 
 namespace Ink_Canvas
