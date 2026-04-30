@@ -1219,15 +1219,6 @@ namespace Ink_Canvas
 
                 try
                 {
-                    UIAccessDllExtractor.ExtractUIAccessDlls();
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"释放UIAccess DLL时出错: {ex.Message}", LogHelper.LogType.Error);
-                }
-
-                try
-                {
                     LogHelper.WriteLogToFile("开始注册.icstk文件关联");
                     FileAssociationManager.RegisterFileAssociation();
                     FileAssociationManager.ShowFileAssociationStatus();

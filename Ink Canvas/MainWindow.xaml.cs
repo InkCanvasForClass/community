@@ -39,12 +39,6 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
-        [DllImport("UIAccessDLL_x86.dll", EntryPoint = "PrepareUIAccess", CallingConvention = CallingConvention.Cdecl)]
-        public static extern Int32 PrepareUIAccessX86();
-
-        [DllImport("UIAccessDLL_x64.dll", EntryPoint = "PrepareUIAccess", CallingConvention = CallingConvention.Cdecl)]
-        public static extern Int32 PrepareUIAccessX64();
-
         // 每一页一个Canvas对象
         private List<System.Windows.Controls.Canvas> whiteboardPages = new List<System.Windows.Controls.Canvas>();
         private int currentPageIndex;
