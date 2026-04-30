@@ -1,0 +1,240 @@
+<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.StoragePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
+      xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+      xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
+      xmlns:sys="clr-namespace:System;assembly=mscorlib"
+      mc:Ignorable="d"
+      Title="{i18n:I18n Key=Storage_Title}">
+
+    <ScrollViewer PanningMode="VerticalFirst">
+        <Grid Margin="59,0,59,0">
+            <FrameworkElement.Resources>
+                <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
+                <Style x:Key="SettingsSectionHeaderTextBlockStyle"
+                    BasedOn="{StaticResource BodyStrongTextBlockStyle}"
+                    TargetType="TextBlock">
+                    <Style.Setters>
+                        <Setter Property="Margin" Value="1,30,0,6" />
+                    </Style.Setters>
+                </Style>
+            </FrameworkElement.Resources>
+
+            <ikw:SimpleStackPanel MaxWidth="1000"
+                HorizontalAlignment="Stretch"
+                Spacing="{StaticResource SettingsCardSpacing}">
+
+                <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                           Text="{i18n:I18n Key=Storage_Title}" />
+
+                <!-- 概览卡片 -->
+                <Border Background="{DynamicResource {x:Static ui:ThemeKeys.LayerFillColorDefaultBrushKey}}"
+                        BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.CardStrokeColorDefaultBrushKey}}"
+                        CornerRadius="4" BorderThickness="1" Padding="20,16">
+                    <ikw:SimpleStackPanel Spacing="12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ikw:SimpleStackPanel Orientation="Vertical" Spacing="2">
+                                <TextBlock Text="{i18n:I18n Key=Storage_TotalUsage}" FontSize="13"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                <TextBlock x:Name="TotalSizeTextBlock" Text="—"
+                                           FontSize="28" FontWeight="SemiBold"/>
+                            </ikw:SimpleStackPanel>
+                            <ikw:SimpleStackPanel Grid.Column="1" Orientation="Vertical"
+                                                  Spacing="2" HorizontalAlignment="Right">
+                                <TextBlock Text="{i18n:I18n Key=Storage_DiskPercent}" FontSize="13"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                           HorizontalAlignment="Right"/>
+                                <TextBlock x:Name="DiskPercentTextBlock" Text="—"
+                                           FontSize="20" FontWeight="SemiBold"
+                                           HorizontalAlignment="Right"/>
+                            </ikw:SimpleStackPanel>
+                        </Grid>
+
+                        <!-- 横向占比柱状图 -->
+                        <Border Height="14" CornerRadius="7"
+                                Background="{DynamicResource ControlStrokeColorDefaultBrush}"
+                                ClipToBounds="True">
+                            <Grid x:Name="UsageStackedBar">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition x:Name="BarCoreCol" Width="0*"/>
+                                    <ColumnDefinition x:Name="BarLogsCol" Width="0*"/>
+                                    <ColumnDefinition x:Name="BarInkCol" Width="0*"/>
+                                    <ColumnDefinition x:Name="BarBackupsCol" Width="0*"/>
+                                    <ColumnDefinition x:Name="BarCustomCol" Width="0*"/>
+                                    <ColumnDefinition x:Name="BarPluginsCol" Width="0*"/>
+                                    <ColumnDefinition x:Name="BarUpdateCol" Width="0*"/>
+                                    <ColumnDefinition x:Name="BarOtherCol" Width="0*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Rectangle Grid.Column="0" Fill="#3B82F6"/>
+                                <Rectangle Grid.Column="1" Fill="#10B981"/>
+                                <Rectangle Grid.Column="2" Fill="#F59E0B"/>
+                                <Rectangle Grid.Column="3" Fill="#8B5CF6"/>
+                                <Rectangle Grid.Column="4" Fill="#EC4899"/>
+                                <Rectangle Grid.Column="5" Fill="#06B6D4"/>
+                                <Rectangle Grid.Column="6" Fill="#EF4444"/>
+                                <Rectangle Grid.Column="7" Fill="#6B7280"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- 图例 -->
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="14">
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                                <Border Width="10" Height="10" CornerRadius="2" Background="#3B82F6"/>
+                                <TextBlock Text="{i18n:I18n Key=Storage_Legend_Core}" FontSize="12"/>
+                            </ikw:SimpleStackPanel>
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                                <Border Width="10" Height="10" CornerRadius="2" Background="#10B981"/>
+                                <TextBlock Text="{i18n:I18n Key=Storage_Legend_Logs}" FontSize="12"/>
+                            </ikw:SimpleStackPanel>
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                                <Border Width="10" Height="10" CornerRadius="2" Background="#F59E0B"/>
+                                <TextBlock Text="{i18n:I18n Key=Storage_Legend_Ink}" FontSize="12"/>
+                            </ikw:SimpleStackPanel>
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                                <Border Width="10" Height="10" CornerRadius="2" Background="#8B5CF6"/>
+                                <TextBlock Text="{i18n:I18n Key=Storage_Legend_Backups}" FontSize="12"/>
+                            </ikw:SimpleStackPanel>
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                                <Border Width="10" Height="10" CornerRadius="2" Background="#EC4899"/>
+                                <TextBlock Text="{i18n:I18n Key=Storage_Legend_Custom}" FontSize="12"/>
+                            </ikw:SimpleStackPanel>
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                                <Border Width="10" Height="10" CornerRadius="2" Background="#06B6D4"/>
+                                <TextBlock Text="{i18n:I18n Key=Storage_Legend_Plugins}" FontSize="12"/>
+                            </ikw:SimpleStackPanel>
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                                <Border Width="10" Height="10" CornerRadius="2" Background="#EF4444"/>
+                                <TextBlock Text="{i18n:I18n Key=Storage_Legend_Update}" FontSize="12"/>
+                            </ikw:SimpleStackPanel>
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                                <Border Width="10" Height="10" CornerRadius="2" Background="#6B7280"/>
+                                <TextBlock Text="{i18n:I18n Key=Storage_Legend_Other}" FontSize="12"/>
+                            </ikw:SimpleStackPanel>
+                        </ikw:SimpleStackPanel>
+                    </ikw:SimpleStackPanel>
+                </Border>
+
+                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+                    <Button x:Name="BtnRefresh" Content="{i18n:I18n Key=Storage_Refresh}" Click="BtnRefresh_Click"/>
+                    <Button x:Name="BtnOpenAppFolder" Content="{i18n:I18n Key=Storage_OpenAppFolder}" Click="BtnOpenAppFolder_Click"/>
+                </ikw:SimpleStackPanel>
+
+                <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                           Text="{i18n:I18n Key=Storage_CategoryDetails}" />
+
+                <!-- 核心文件 -->
+                <ui:SettingsExpander x:Name="CoreExpander"
+                                     Header="{i18n:I18n Key=Storage_Core_Header}"
+                                     Description="{i18n:I18n Key=Storage_Core_Desc}">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
+                    </ui:SettingsExpander.HeaderIcon>
+                    <TextBlock x:Name="CoreSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <ui:SettingsExpander.Items>
+                        <ui:SettingsCard Description="{i18n:I18n Key=Storage_Core_NotCleanable}"/>
+                    </ui:SettingsExpander.Items>
+                </ui:SettingsExpander>
+
+                <!-- 日志 -->
+                <ui:SettingsExpander x:Name="LogsExpander"
+                                     Header="{i18n:I18n Key=Storage_Logs_Header}"
+                                     Description="{i18n:I18n Key=Storage_Logs_Desc}">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.OpenFile}"/>
+                    </ui:SettingsExpander.HeaderIcon>
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <TextBlock x:Name="LogsSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <Button x:Name="BtnCleanLogs" Content="{i18n:I18n Key=Storage_Clean}" Click="BtnCleanLogs_Click"/>
+                    </ikw:SimpleStackPanel>
+                </ui:SettingsExpander>
+
+                <!-- 墨迹 -->
+                <ui:SettingsExpander x:Name="InkExpander"
+                                     Header="{i18n:I18n Key=Storage_Ink_Header}"
+                                     Description="{i18n:I18n Key=Storage_Ink_Desc}">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
+                    </ui:SettingsExpander.HeaderIcon>
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <TextBlock x:Name="InkSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <Button x:Name="BtnCleanInk" Content="{i18n:I18n Key=Storage_Clean}" Click="BtnCleanInk_Click"/>
+                    </ikw:SimpleStackPanel>
+                </ui:SettingsExpander>
+
+                <!-- 备份 -->
+                <ui:SettingsExpander x:Name="BackupsExpander"
+                                     Header="{i18n:I18n Key=Storage_Backups_Header}"
+                                     Description="{i18n:I18n Key=Storage_Backups_Desc}">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}"/>
+                    </ui:SettingsExpander.HeaderIcon>
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <TextBlock x:Name="BackupsSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <Button x:Name="BtnCleanBackups" Content="{i18n:I18n Key=Storage_Clean}" Click="BtnCleanBackups_Click"/>
+                    </ikw:SimpleStackPanel>
+                </ui:SettingsExpander>
+
+                <!-- 自定义文件 -->
+                <ui:SettingsExpander x:Name="CustomExpander"
+                                     Header="{i18n:I18n Key=Storage_Custom_Header}"
+                                     Description="{i18n:I18n Key=Storage_Custom_Desc}">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Photo}"/>
+                    </ui:SettingsExpander.HeaderIcon>
+                    <TextBlock x:Name="CustomSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <ui:SettingsExpander.Items>
+                        <ui:SettingsCard Description="{i18n:I18n Key=Storage_Custom_Hint}"/>
+                    </ui:SettingsExpander.Items>
+                </ui:SettingsExpander>
+
+                <!-- 插件 -->
+                <ui:SettingsExpander x:Name="PluginsExpander"
+                                     Header="{i18n:I18n Key=Storage_Plugins_Header}"
+                                     Description="{i18n:I18n Key=Storage_Plugins_Desc}">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Puzzle}"/>
+                    </ui:SettingsExpander.HeaderIcon>
+                    <TextBlock x:Name="PluginsSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <ui:SettingsExpander.Items>
+                        <ui:SettingsCard Description="{i18n:I18n Key=Storage_Plugins_Hint}"/>
+                    </ui:SettingsExpander.Items>
+                </ui:SettingsExpander>
+
+                <!-- 自动更新 -->
+                <ui:SettingsExpander x:Name="UpdateExpander"
+                                     Header="{i18n:I18n Key=Storage_Update_Header}"
+                                     Description="{i18n:I18n Key=Storage_Update_Desc}">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}"/>
+                    </ui:SettingsExpander.HeaderIcon>
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <TextBlock x:Name="UpdateSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <Button x:Name="BtnCleanUpdate" Content="{i18n:I18n Key=Storage_Clean}" Click="BtnCleanUpdate_Click"/>
+                    </ikw:SimpleStackPanel>
+                </ui:SettingsExpander>
+
+                <!-- 其他 -->
+                <ui:SettingsExpander x:Name="OtherExpander"
+                                     Header="{i18n:I18n Key=Storage_Other_Header}"
+                                     Description="{i18n:I18n Key=Storage_Other_Desc}">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.More}"/>
+                    </ui:SettingsExpander.HeaderIcon>
+                    <TextBlock x:Name="OtherSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </ui:SettingsExpander>
+
+                <Rectangle Height="48" />
+
+            </ikw:SimpleStackPanel>
+        </Grid>
+    </ScrollViewer>
+</ui:Page>

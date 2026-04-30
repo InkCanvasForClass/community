@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
     xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+    xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
     Title="InkCanvasForClass 设置"
     Width="1138" Height="750"
     MinWidth="270" MinHeight="220"
@@ -258,6 +259,17 @@
                     ToolTipService.ToolTip="高级设置">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
+                <!-- 存储管理 -->
+                <ui:NavigationViewItem
+                    x:Name="StoragePageItem"
+                    Content="{i18n:I18n Key=Storage_Title}"
+                    Tag="StoragePage"
+                    ToolTipService.ToolTip="{i18n:I18n Key=Storage_NavTooltip}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.HardDrive}"/>
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 

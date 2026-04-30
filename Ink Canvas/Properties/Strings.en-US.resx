@@ -2658,4 +2658,130 @@ Hide</value>
   <data name="Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint" xml:space="preserve">
     <value>When enabled, the whiteboard toolbar Booth button launches Seewo Video Showcase (must be installed). When disabled, the built-in booth is used.</value>
   </data>
+  <data name="Storage_Title" xml:space="preserve">
+    <value>Storage</value>
+  </data>
+  <data name="Storage_TotalUsage" xml:space="preserve">
+    <value>ICC CE total usage</value>
+  </data>
+  <data name="Storage_DiskPercent" xml:space="preserve">
+    <value>Disk percentage</value>
+  </data>
+  <data name="Storage_Calculating" xml:space="preserve">
+    <value>Calculating…</value>
+  </data>
+  <data name="Storage_CalculateFailed" xml:space="preserve">
+    <value>Calculation failed</value>
+  </data>
+  <data name="Storage_Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Storage_OpenAppFolder" xml:space="preserve">
+    <value>Open app folder</value>
+  </data>
+  <data name="Storage_CategoryDetails" xml:space="preserve">
+    <value>Category details</value>
+  </data>
+  <data name="Storage_Clean" xml:space="preserve">
+    <value>Clean</value>
+  </data>
+  <data name="Storage_Legend_Core" xml:space="preserve">
+    <value>Core</value>
+  </data>
+  <data name="Storage_Legend_Logs" xml:space="preserve">
+    <value>Logs</value>
+  </data>
+  <data name="Storage_Legend_Ink" xml:space="preserve">
+    <value>Ink</value>
+  </data>
+  <data name="Storage_Legend_Backups" xml:space="preserve">
+    <value>Backups</value>
+  </data>
+  <data name="Storage_Legend_Custom" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="Storage_Legend_Plugins" xml:space="preserve">
+    <value>Plugins</value>
+  </data>
+  <data name="Storage_Legend_Update" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="Storage_Legend_Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="Storage_Core_Header" xml:space="preserve">
+    <value>Core files</value>
+  </data>
+  <data name="Storage_Core_Desc" xml:space="preserve">
+    <value>Includes .json configs, .enc usage stats, .exe / .dll executables and .dat data files.</value>
+  </data>
+  <data name="Storage_Core_NotCleanable" xml:space="preserve">
+    <value>Core files cannot be cleaned to keep the application functional.</value>
+  </data>
+  <data name="Storage_Logs_Header" xml:space="preserve">
+    <value>Logs</value>
+  </data>
+  <data name="Storage_Logs_Desc" xml:space="preserve">
+    <value>.txt logs and crash reports under Logs / Crashs. Cleanable.</value>
+  </data>
+  <data name="Storage_Ink_Header" xml:space="preserve">
+    <value>Ink</value>
+  </data>
+  <data name="Storage_Ink_Desc" xml:space="preserve">
+    <value>.icstk / .xml / screenshot .png files under Saves.</value>
+  </data>
+  <data name="Storage_Backups_Header" xml:space="preserve">
+    <value>Backups</value>
+  </data>
+  <data name="Storage_Backups_Desc" xml:space="preserve">
+    <value>Settings / config backups (.json / .zip) under Backups.</value>
+  </data>
+  <data name="Storage_Custom_Header" xml:space="preserve">
+    <value>Custom files</value>
+  </data>
+  <data name="Storage_Custom_Desc" xml:space="preserve">
+    <value>Custom icons and roll-call backgrounds (icons / backgrounds, .png).</value>
+  </data>
+  <data name="Storage_Custom_Hint" xml:space="preserve">
+    <value>Custom files are added by the user and won't be auto-cleaned. Manage them in their dedicated UI.</value>
+  </data>
+  <data name="Storage_Plugins_Header" xml:space="preserve">
+    <value>Plugins</value>
+  </data>
+  <data name="Storage_Plugins_Desc" xml:space="preserve">
+    <value>.iccpp plugin packages under the plugins directory.</value>
+  </data>
+  <data name="Storage_Plugins_Hint" xml:space="preserve">
+    <value>Use the plugins page to uninstall plugins.</value>
+  </data>
+  <data name="Storage_Update_Header" xml:space="preserve">
+    <value>Auto update</value>
+  </data>
+  <data name="Storage_Update_Desc" xml:space="preserve">
+    <value>Installer packages and download cache under AutoUpdate. Refreshed each release.</value>
+  </data>
+  <data name="Storage_Other_Header" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="Storage_Other_Desc" xml:space="preserve">
+    <value>Files not classified into the categories above.</value>
+  </data>
+  <data name="Storage_Confirm_Title" xml:space="preserve">
+    <value>Confirm cleanup</value>
+  </data>
+  <data name="Storage_Confirm_Body" xml:space="preserve">
+    <value>All files in the "{0}" category will be permanently deleted. Continue?</value>
+  </data>
+  <data name="Storage_Confirm_Second_Title" xml:space="preserve">
+    <value>Confirm again</value>
+  </data>
+  <data name="Storage_Confirm_Second_Body" xml:space="preserve">
+    <value>Confirm again: are you sure you want to delete "{0}"?</value>
+  </data>
+  <data name="Storage_CleanFailed" xml:space="preserve">
+    <value>Cleanup failed: {0}</value>
+  </data>
+  <data name="Storage_NavTooltip" xml:space="preserve">
+    <value>View and clean storage used by ICC CE</value>
+  </data>
 </root>

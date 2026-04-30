@@ -2707,4 +2707,130 @@
   <data name="Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint" xml:space="preserve">
     <value>开启后，点击白板工具栏「展台」将打开希沃视频展台（需已安装）；关闭则使用内置展台。</value>
   </data>
+  <data name="Storage_Title" xml:space="preserve">
+    <value>存储管理</value>
+  </data>
+  <data name="Storage_TotalUsage" xml:space="preserve">
+    <value>ICC CE 总占用</value>
+  </data>
+  <data name="Storage_DiskPercent" xml:space="preserve">
+    <value>占磁盘比例</value>
+  </data>
+  <data name="Storage_Calculating" xml:space="preserve">
+    <value>计算中…</value>
+  </data>
+  <data name="Storage_CalculateFailed" xml:space="preserve">
+    <value>计算失败</value>
+  </data>
+  <data name="Storage_Refresh" xml:space="preserve">
+    <value>刷新</value>
+  </data>
+  <data name="Storage_OpenAppFolder" xml:space="preserve">
+    <value>打开应用目录</value>
+  </data>
+  <data name="Storage_CategoryDetails" xml:space="preserve">
+    <value>分类详情</value>
+  </data>
+  <data name="Storage_Clean" xml:space="preserve">
+    <value>清理</value>
+  </data>
+  <data name="Storage_Legend_Core" xml:space="preserve">
+    <value>核心文件</value>
+  </data>
+  <data name="Storage_Legend_Logs" xml:space="preserve">
+    <value>日志</value>
+  </data>
+  <data name="Storage_Legend_Ink" xml:space="preserve">
+    <value>墨迹</value>
+  </data>
+  <data name="Storage_Legend_Backups" xml:space="preserve">
+    <value>备份</value>
+  </data>
+  <data name="Storage_Legend_Custom" xml:space="preserve">
+    <value>自定义</value>
+  </data>
+  <data name="Storage_Legend_Plugins" xml:space="preserve">
+    <value>插件</value>
+  </data>
+  <data name="Storage_Legend_Update" xml:space="preserve">
+    <value>自动更新</value>
+  </data>
+  <data name="Storage_Legend_Other" xml:space="preserve">
+    <value>其他</value>
+  </data>
+  <data name="Storage_Core_Header" xml:space="preserve">
+    <value>核心文件</value>
+  </data>
+  <data name="Storage_Core_Desc" xml:space="preserve">
+    <value>包含 .json 配置文件、.enc 使用统计、.exe 主程序、.dll 文件、.dat 数据文件等</value>
+  </data>
+  <data name="Storage_Core_NotCleanable" xml:space="preserve">
+    <value>核心文件不可清理，以免影响应用正常运行。</value>
+  </data>
+  <data name="Storage_Logs_Header" xml:space="preserve">
+    <value>日志</value>
+  </data>
+  <data name="Storage_Logs_Desc" xml:space="preserve">
+    <value>位于 Logs / Crashs 目录下的 .txt 日志与崩溃报告，可清理</value>
+  </data>
+  <data name="Storage_Ink_Header" xml:space="preserve">
+    <value>墨迹</value>
+  </data>
+  <data name="Storage_Ink_Desc" xml:space="preserve">
+    <value>位于 Saves 目录下的 .icstk / .xml / 截图 .png 等墨迹文件</value>
+  </data>
+  <data name="Storage_Backups_Header" xml:space="preserve">
+    <value>备份</value>
+  </data>
+  <data name="Storage_Backups_Desc" xml:space="preserve">
+    <value>位于 Backups 目录的设置 / 配置备份（.json / .zip）</value>
+  </data>
+  <data name="Storage_Custom_Header" xml:space="preserve">
+    <value>自定义文件</value>
+  </data>
+  <data name="Storage_Custom_Desc" xml:space="preserve">
+    <value>自定义图标与点名背景图（icons / backgrounds 等 .png）</value>
+  </data>
+  <data name="Storage_Custom_Hint" xml:space="preserve">
+    <value>自定义文件由用户手动添加，不会自动清理，如需删除请前往对应管理界面。</value>
+  </data>
+  <data name="Storage_Plugins_Header" xml:space="preserve">
+    <value>插件</value>
+  </data>
+  <data name="Storage_Plugins_Desc" xml:space="preserve">
+    <value>位于 plugins 目录的 .iccpp 插件包</value>
+  </data>
+  <data name="Storage_Plugins_Hint" xml:space="preserve">
+    <value>插件请前往插件管理页面进行卸载。</value>
+  </data>
+  <data name="Storage_Update_Header" xml:space="preserve">
+    <value>自动更新</value>
+  </data>
+  <data name="Storage_Update_Desc" xml:space="preserve">
+    <value>AutoUpdate 目录中的安装包与下载缓存，每次新版本发布或更新时会被刷新</value>
+  </data>
+  <data name="Storage_Other_Header" xml:space="preserve">
+    <value>其他</value>
+  </data>
+  <data name="Storage_Other_Desc" xml:space="preserve">
+    <value>未归类至上述项目的其他文件</value>
+  </data>
+  <data name="Storage_Confirm_Title" xml:space="preserve">
+    <value>清理确认</value>
+  </data>
+  <data name="Storage_Confirm_Body" xml:space="preserve">
+    <value>将永久删除「{0}」分类下的所有文件，操作不可恢复。\n是否继续？</value>
+  </data>
+  <data name="Storage_Confirm_Second_Title" xml:space="preserve">
+    <value>二次确认</value>
+  </data>
+  <data name="Storage_Confirm_Second_Body" xml:space="preserve">
+    <value>再次确认：确定要删除「{0}」吗？</value>
+  </data>
+  <data name="Storage_CleanFailed" xml:space="preserve">
+    <value>清理失败：{0}</value>
+  </data>
+  <data name="Storage_NavTooltip" xml:space="preserve">
+    <value>查看与清理 ICC CE 占用的存储空间</value>
+  </data>
 </root>

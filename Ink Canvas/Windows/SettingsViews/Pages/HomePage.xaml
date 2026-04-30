@@ -132,6 +132,13 @@
                         </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
 
+                    <ui:SettingsCard Header="{i18n:I18n Key=Storage_Title}" Description="{i18n:I18n Key=Storage_NavTooltip}"
+                        IsClickEnabled="True" Click="QuickNavCard_Click" Tag="StoragePage">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.HardDrive}" />
+                        </ui:SettingsCard.HeaderIcon>
+                    </ui:SettingsCard>
+
                     <ui:SettingsCard Header="随机点名" Description="随机点名与计时器"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="RandomDrawPage">
                         <ui:SettingsCard.HeaderIcon>
