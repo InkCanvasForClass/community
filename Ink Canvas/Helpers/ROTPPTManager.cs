@@ -146,6 +146,8 @@ namespace Ink_Canvas.Helpers
         private bool _bindingEvents = false;
         private DateTime _updateTime;
         private int _lastPolledSlideNumber = -1;
+        private int _reconnectFailureCount = 0;
+        private DateTime _nextReconnectAttemptUtc = DateTime.MinValue;
         #endregion
 
         #region Constructor & Initialization
@@ -680,6 +682,7 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     if (_isModuleUnloading) return;
+                    if (DateTime.UtcNow < _nextReconnectAttemptUtc) return;
 
                     object bestApp = PPTROTConnectionHelper.GetAnyActivePowerPoint(PPTApplication, out int bestPriority, out int targetPriority);
                     bool needRebind = false;
@@ -702,23 +705,23 @@ namespace Ink_Canvas.Helpers
                     {
                         LogHelper.WriteLogToFile($"需要重新绑定: bestPriority={bestPriority}, targetPriority={targetPriority}", LogHelper.LogType.Trace);
 
-                        bool wait = (PPTApplication != null);
                         DisconnectFromPPT();
 
                         if (bestApp != null)
                         {
-                            if (wait) Thread.Sleep(1000);
-
                             try
                             {
                                 LogHelper.WriteLogToFile("使用dynamic类型连接", LogHelper.LogType.Trace);
                                 PPTApplication = bestApp;
                                 ConnectToPPT(null);
+                                _reconnectFailureCount = 0;
+                                _nextReconnectAttemptUtc = DateTime.MinValue;
                             }
                             catch (Exception ex)
                             {
                                 LogHelper.WriteLogToFile($"连接失败: {ex.Message}", LogHelper.LogType.Warning);
                                 PPTROTConnectionHelper.SafeReleaseComObject(bestApp);
+                                ApplyReconnectBackoff();
                             }
                         }
                     }
@@ -1282,6 +1285,9 @@ namespace Ink_Canvas.Helpers
 
         private void TryRaiseSlideShowBeginOnConnect()
         {
+            dynamic slideShowWindows = null;
+            dynamic slideShowWindow = null;
+
             try
             {
                 if (!IsConnected || !IsInSlideShow || PPTApplication == null)
@@ -1291,11 +1297,11 @@ namespace Ink_Canvas.Helpers
                     return;
 
                 dynamic app = PPTApplication;
-                dynamic slideShowWindows = app.SlideShowWindows;
+                slideShowWindows = app.SlideShowWindows;
                 if (slideShowWindows == null || slideShowWindows.Count == 0)
                     return;
 
-                dynamic slideShowWindow = slideShowWindows[1];
+                slideShowWindow = slideShowWindows[1];
                 if (slideShowWindow == null)
                     return;
 
@@ -1311,6 +1317,27 @@ namespace Ink_Canvas.Helpers
             {
                 LogHelper.WriteLogToFile($"TryRaiseSlideShowBeginOnConnect 异常: {ex}", LogHelper.LogType.Trace);
             }
+            finally
+            {
+                if (slideShowWindow != null && !PPTROTConnectionHelper.AreComObjectsEqual(_pptSlideShowWindow, slideShowWindow))
+                {
+                    SafeReleaseComObject(slideShowWindow);
+                }
+
+                if (slideShowWindows != null)
+                {
+                    SafeReleaseComObject(slideShowWindows);
+                }
+            }
+        }
+
+        private void ApplyReconnectBackoff()
+        {
+            _reconnectFailureCount = Math.Min(_reconnectFailureCount + 1, 4);
+            int delayMs = 250 * (1 << (_reconnectFailureCount - 1));
+            _nextReconnectAttemptUtc = DateTime.UtcNow.AddMilliseconds(delayMs);
+
+            LogHelper.WriteLogToFile($"重连失败，延迟 {delayMs}ms 后再尝试", LogHelper.LogType.Trace);
         }
 
         private void UnbindEvents()
