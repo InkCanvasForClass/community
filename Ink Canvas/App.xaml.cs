@@ -85,6 +85,7 @@ namespace Ink_Canvas
         // 新增：启动画面相关
         private static SplashScreen _splashScreen;
         private static bool _isSplashScreenShown = false;
+        private static System.Resources.ResourceSet _pendingLocalizedResourceSet;
 
         [DllImport("shell32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         private static extern int SetCurrentProcessExplicitAppUserModelID(string appId);
@@ -763,20 +764,14 @@ namespace Ink_Canvas
             appStartTime = DateTime.Now;
             appStartupStartTime = DateTime.Now;
 
-            var resourceSet = Strings.ResourceManager.GetResourceSet(CultureInfo.CurrentUICulture, true, true);
-            if (resourceSet != null)
-            {
-                foreach (System.Collections.DictionaryEntry entry in resourceSet)
-                {
-                    if (entry.Key is string key && entry.Value is string value)
-                        Current.Resources[key] = value;
-                }
-            }
+            TryApplyPreferredLanguageFromSettings();
+
+            _pendingLocalizedResourceSet = Strings.ResourceManager.GetResourceSet(CultureInfo.CurrentUICulture, true, true);
 
             // 根据设置决定是否显示启动画面
             if (ShouldShowSplashScreen() && !IsLaunchByFileOrUri(e.Args))
             {
-                await Task.Delay(200);
+                await Task.Delay(100);
                 ShowSplashScreen();
                 SetSplashMessage(Strings.GetString("Splash_Starting"));
                 SetSplashProgress(20);
@@ -785,7 +780,7 @@ namespace Ink_Canvas
                 Application.Current.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
             }
 
-            await Task.Delay(200);
+            await Task.Delay(100);
             RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
             LogHelper.NewLog(string.Format("Ink Canvas Starting (Version: {0})", Assembly.GetExecutingAssembly().GetName().Version));
@@ -821,15 +816,6 @@ namespace Ink_Canvas
             {
                 SetSplashMessage("正在初始化组件...");
                 SetSplashProgress(40);
-                await Task.Delay(200);
-            }
-            try
-            {
-                IACoreDllExtractor.ExtractIACoreDlls();
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"释放IACore DLL时出错: {ex.Message}", LogHelper.LogType.Error);
             }
 
             // 释放UIAccess DLL
@@ -838,21 +824,13 @@ namespace Ink_Canvas
                 SetSplashMessage("正在初始化组件...");
                 SetSplashProgress(50);
             }
-            try
-            {
-                UIAccessDllExtractor.ExtractUIAccessDlls();
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"释放UIAccess DLL时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
 
             // 记录应用启动（设备标识符）
             if (_isSplashScreenShown)
             {
                 SetSplashMessage("正在加载配置...");
                 SetSplashProgress(60);
-                await Task.Delay(200);
+                await Task.Delay(100);
             }
             DeviceIdentifier.RecordAppLaunch();
             try
@@ -1137,7 +1115,6 @@ namespace Ink_Canvas
             }
 
             _taskbar = (TaskbarIcon)FindResource("TaskbarTrayIcon");
-            _taskbar.ForceCreate();
 
             StartArgs = e.Args;
 
@@ -1209,6 +1186,19 @@ namespace Ink_Canvas
             };
 
             mainWindow.Show();
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(600);
+                Dispatcher.Invoke(() => _taskbar?.ForceCreate());
+            });
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (_pendingLocalizedResourceSet != null)
+                {
+                    LoadLocalizedResources(_pendingLocalizedResourceSet);
+                    _pendingLocalizedResourceSet = null;
+                }
+            }), DispatcherPriority.ApplicationIdle);
 
             // 处理启动时的URI参数
             string startupUriArg = e.Args.FirstOrDefault(a => a.StartsWith("icc:", StringComparison.OrdinalIgnoreCase));
@@ -1234,6 +1224,24 @@ namespace Ink_Canvas
             try
             {
                 await Task.Delay(1200);
+
+                try
+                {
+                    IACoreDllExtractor.ExtractIACoreDlls();
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"释放IACore DLL时出错: {ex.Message}", LogHelper.LogType.Error);
+                }
+
+                try
+                {
+                    UIAccessDllExtractor.ExtractUIAccessDlls();
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"释放UIAccess DLL时出错: {ex.Message}", LogHelper.LogType.Error);
+                }
 
                 try
                 {
@@ -1280,6 +1288,36 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"启动阶段任务执行失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void TryApplyPreferredLanguageFromSettings()
+        {
+            try
+            {
+                var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs", "Settings.json");
+                if (!File.Exists(settingsPath)) return;
+
+                var json = File.ReadAllText(settingsPath);
+                dynamic obj = JsonConvert.DeserializeObject(json);
+                string preferredLanguage = obj?["appearance"]?["language"]?.ToString();
+                if (!string.IsNullOrWhiteSpace(preferredLanguage))
+                {
+                    LocalizationHelper.TrySetCulture(preferredLanguage);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"启动时预加载语言失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void LoadLocalizedResources(System.Resources.ResourceSet resourceSet)
+        {
+            foreach (System.Collections.DictionaryEntry entry in resourceSet)
+            {
+                if (entry.Key is string key && entry.Value is string value)
+                    Current.Resources[key] = value;
             }
         }
 

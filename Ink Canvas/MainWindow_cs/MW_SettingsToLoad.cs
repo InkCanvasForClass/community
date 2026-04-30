@@ -649,7 +649,7 @@ namespace Ink_Canvas
                     ScheduleBrushAutoRestore();
                 }
 
-                LogHelper.WriteLogToFile("画笔自动恢复设置已加载", LogHelper.LogType.Event);
+                LogHelper.WriteLogToFile("画笔自动恢复设置已加载", LogHelper.LogType.Trace);
             }
             catch (Exception ex)
             {
@@ -691,7 +691,7 @@ namespace Ink_Canvas
                 // 根据设置更新墨迹渐隐控制开关的可见性
                 UpdateInkFadeControlVisibility();
 
-                LogHelper.WriteLogToFile("墨迹渐隐设置已加载", LogHelper.LogType.Event);
+                LogHelper.WriteLogToFile("墨迹渐隐设置已加载", LogHelper.LogType.Trace);
             }
             catch (Exception ex)
             {

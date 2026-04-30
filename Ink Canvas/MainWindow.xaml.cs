@@ -96,25 +96,6 @@ namespace Ink_Canvas
                 处于画板模式内：Topmost == false / currentMode != 0
                 处于 PPT 放映内：BtnPPTSlideShowEnd.Visibility
             */
-            try
-            {
-                var path = App.RootPath + settingsFileName;
-                if (File.Exists(path))
-                {
-                    var json = File.ReadAllText(path);
-                    var loadedSettings = JsonConvert.DeserializeObject<Settings>(json);
-                    var preferredLanguage = loadedSettings?.Appearance?.Language;
-                    if (!string.IsNullOrWhiteSpace(preferredLanguage))
-                    {
-                        LocalizationHelper.TrySetCulture(preferredLanguage);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"启动时预加载语言失败: {ex.Message}", LogHelper.LogType.Error);
-            }
-
             InitializeComponent();
 
             BlackboardLeftSide.Visibility = Visibility.Collapsed;
@@ -336,9 +317,6 @@ namespace Ink_Canvas
             // 添加窗口激活事件处理，确保置顶状态在窗口重新激活时得到保持
             Activated += Window_Activated;
             Deactivated += Window_Deactivated;
-
-            // 为滑块控件添加触摸事件支持
-            AddTouchSupportToSliders();
 
             // 初始化计时器控件事件
             Dispatcher.BeginInvoke(new Action(() =>
@@ -1191,6 +1169,7 @@ namespace Ink_Canvas
         private bool _suppressChickenSoupSourceSelectionChanged;
         private bool forcePointEraser;
         private bool _pendingStartupAutoUpdateCheck;
+        private bool _sliderTouchSupportInitialized;
 
         /// <summary>
         /// 在窗口加载完成后初始化应用的核心子系统、UI 状态和运行时监控组件。
@@ -1237,7 +1216,10 @@ namespace Ink_Canvas
             }
 
             //TextBlockVersion.Text = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            LogHelper.WriteLogToFile("Ink Canvas Loaded", LogHelper.LogType.Event);
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                LogHelper.WriteLogToFile("Ink Canvas Loaded", LogHelper.LogType.Event);
+            }), DispatcherPriority.ApplicationIdle);
 
             isLoaded = true;
             EnsureRealtimeStylusPipelineBinding();
@@ -1317,17 +1299,11 @@ namespace Ink_Canvas
 
             _ = RunDeferredStartupPhaseBAsync();
 
-            // 初始化剪贴板监控
-            InitializeClipboardMonitoring();
-
-            // 初始化悬浮窗拦截管理器
-            InitializeFloatingWindowInterceptor();
-
-            // 初始化全局快捷键管理器
-            InitializeGlobalHotkeyManager();
-
             // 初始化墨迹渐隐管理器
-            InitializeInkFadeManager();
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                InitializeInkFadeManager();
+            }), DispatcherPriority.ApplicationIdle);
 
             // 处理命令行参数中的文件路径
             HandleCommandLineFileOpen();
@@ -1426,7 +1402,12 @@ namespace Ink_Canvas
                     };
                 }
             }), DispatcherPriority.Loaded);
-            AddTouchSupportToSliders();
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (_sliderTouchSupportInitialized) return;
+                AddTouchSupportToSliders();
+                _sliderTouchSupportInitialized = true;
+            }), DispatcherPriority.ApplicationIdle);
         }
 
         private void ApplyLanguageFromSettings()
@@ -2412,6 +2393,10 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"[MainWindow] 初始化上传队列时出错: {ex.Message}", LogHelper.LogType.Error);
             }
 
+            InitializeClipboardMonitoring();
+            InitializeFloatingWindowInterceptor();
+            InitializeGlobalHotkeyManager();
+
             try
             {
                 string savePath = Settings.Automation.AutoSavedStrokesLocation;
@@ -2473,9 +2458,12 @@ namespace Ink_Canvas
             if (_pendingStartupAutoUpdateCheck && Settings.Startup?.IsAutoUpdate == true)
             {
                 _pendingStartupAutoUpdateCheck = false;
-                await Task.Delay(5000);
-                LogHelper.WriteLogToFile("AutoUpdate | Running deferred auto-update check after startup");
-                AutoUpdate();
+                await Task.Delay(3000);
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | Running deferred auto-update check at UI idle");
+                    AutoUpdate();
+                }), DispatcherPriority.ApplicationIdle);
             }
         }
 
