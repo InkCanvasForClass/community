@@ -460,7 +460,6 @@ namespace Ink_Canvas.Helpers
                 _memoryStreams = new MemoryStream[_maxSlides + 2];
             }
             CurrentStrokes?.Clear();
-            LogHelper.WriteLogToFile("已清除所有墨迹", LogHelper.LogType.Trace);
         }
 
         /// <summary>

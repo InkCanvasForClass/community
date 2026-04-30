@@ -2410,7 +2410,6 @@ namespace Ink_Canvas
             var slides = await Task.Run(BuildPptPreviewItems);
             if (slides == null || slides.Count == 0)
             {
-                LogHelper.WriteLogToFile("PPT增强预览未生成可用缩略图，改用默认导航", LogHelper.LogType.Warning);
                 _pptManager.TryShowSlideNavigation();
                 return;
             }

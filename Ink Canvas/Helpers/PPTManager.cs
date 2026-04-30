@@ -410,6 +410,15 @@ namespace Ink_Canvas.Helpers
                                     // COM对象类型转换失败，通常是因为对象已经被释放
                                     LogHelper.WriteLogToFile("PPT COM对象已被释放，跳过事件注册取消", LogHelper.LogType.Trace);
                                 }
+                                catch (System.Reflection.TargetInvocationException tie) when (tie.InnerException is InvalidComObjectException)
+                                {
+                                    // RCW 已分离：Office Interop 内部通过反射创建 EventProvider 时抛出，是正常情况
+                                    LogHelper.WriteLogToFile("PPT COM对象RCW已分离，跳过事件注册取消", LogHelper.LogType.Trace);
+                                }
+                                catch (InvalidComObjectException)
+                                {
+                                    LogHelper.WriteLogToFile("PPT COM对象RCW已分离，跳过事件注册取消", LogHelper.LogType.Trace);
+                                }
                                 catch (Exception ex)
                                 {
                                     LogHelper.WriteLogToFile($"取消PPT事件注册时发生异常: {ex}", LogHelper.LogType.Warning);
@@ -1255,7 +1264,6 @@ namespace Ink_Canvas.Helpers
             object slideNavigation = null;
             try
             {
-                LogHelper.WriteLogToFile($"尝试显示幻灯片导航 - 连接状态: {IsConnected}, 放映状态: {IsInSlideShow}", LogHelper.LogType.Trace);
 
                 if (!IsConnected || !IsInSlideShow || PPTApplication == null)
                 {
@@ -1288,7 +1296,6 @@ namespace Ink_Canvas.Helpers
                         {
                             dynamic sn = slideNavigation;
                             sn.Visible = true;
-                            LogHelper.WriteLogToFile("成功显示幻灯片导航（PowerPoint模式）", LogHelper.LogType.Event);
                             return true;
                         }
 
