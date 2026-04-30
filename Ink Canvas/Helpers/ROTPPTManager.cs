@@ -1214,6 +1214,7 @@ namespace Ink_Canvas.Helpers
                                     }
 
                                     _bindingEvents = true;
+                                    _forcePolling = false;
 
                                     LogHelper.WriteLogToFile("PPT事件注册成功", LogHelper.LogType.Trace);
                                 }
@@ -1243,9 +1244,6 @@ namespace Ink_Canvas.Helpers
                         _forcePolling = true;
                         LogHelper.WriteLogToFile($"无法注册事件: {ex.Message}", LogHelper.LogType.Warning);
                     }
-
-                    _bindingEvents = false;
-                    _forcePolling = true;
 
                     if (_pptActivePresentation != null)
                     {
