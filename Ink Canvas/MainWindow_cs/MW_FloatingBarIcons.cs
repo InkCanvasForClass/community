@@ -3059,6 +3059,7 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"停止PPT监控时出错: {ex.Message}", LogHelper.LogType.Error);
             }
 
+            _forceCloseFromExitOrRestartButton = true;
             App.IsAppExitByUser = true;
             // 不设置 CloseIsFromButton = true，让它也经过确认流程
             Close();
@@ -3072,6 +3073,7 @@ namespace Ink_Canvas
         public void BtnRestart_Click(object sender, RoutedEventArgs e)
         {
             Process.Start(System.Windows.Forms.Application.ExecutablePath, "-m");
+            _forceCloseFromExitOrRestartButton = true;
             App.IsAppExitByUser = true;
             // 不设置 CloseIsFromButton = true，让它也经过确认流程
             Close();

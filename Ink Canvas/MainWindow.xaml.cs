@@ -1519,6 +1519,7 @@ namespace Ink_Canvas
 
         private bool _allowCloseAfterExitVerification;
         private bool _isExitVerificationInProgress;
+        private bool _forceCloseFromExitOrRestartButton;
 
         /// <summary>
         /// 处理主窗口的关闭流程：记录关闭事件，按需进行退出密码验证或多次确认并据此取消或允许关闭。
@@ -1541,14 +1542,15 @@ namespace Ink_Canvas
                 return;
             }
 
-            if (BtnPPTSlideShowEnd != null && BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+            if (!_forceCloseFromExitOrRestartButton &&
+                BtnPPTSlideShowEnd != null && BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
             {
                 e.Cancel = true;
                 BtnPPTSlideShowEnd_Click(BtnPPTSlideShowEnd, null);
                 LogHelper.WriteLogToFile("Ink Canvas closing converted to exit PPT", LogHelper.LogType.Event);
                 return;
             }
-            if (currentMode != 0)
+            if (!_forceCloseFromExitOrRestartButton && currentMode != 0)
             {
                 e.Cancel = true;
                 CloseWhiteboardImmediately();
@@ -1580,6 +1582,7 @@ namespace Ink_Canvas
                             bool ok = await SecurityManager.PromptAndVerifyAsync(Settings, this, "退出验证", "请输入安全密码以退出软件。");
                             if (!ok)
                             {
+                                _forceCloseFromExitOrRestartButton = false;
                                 LogHelper.WriteLogToFile("Ink Canvas closing cancelled by security password", LogHelper.LogType.Event);
                                 return;
                             }
@@ -1610,6 +1613,7 @@ namespace Ink_Canvas
 
                 if (result1 == MessageBoxResult.Cancel)
                 {
+                    _forceCloseFromExitOrRestartButton = false;
                     e.Cancel = true;
                     LogHelper.WriteLogToFile("Ink Canvas closing cancelled at first confirmation", LogHelper.LogType.Event);
                     return;
@@ -1621,6 +1625,7 @@ namespace Ink_Canvas
 
                 if (result2 == MessageBoxResult.Cancel)
                 {
+                    _forceCloseFromExitOrRestartButton = false;
                     e.Cancel = true;
                     LogHelper.WriteLogToFile("Ink Canvas closing cancelled at second confirmation", LogHelper.LogType.Event);
                     return;
@@ -1632,6 +1637,7 @@ namespace Ink_Canvas
 
                 if (result3 == MessageBoxResult.Cancel)
                 {
+                    _forceCloseFromExitOrRestartButton = false;
                     e.Cancel = true;
                     LogHelper.WriteLogToFile("Ink Canvas closing cancelled at final confirmation", LogHelper.LogType.Event);
                     return;
