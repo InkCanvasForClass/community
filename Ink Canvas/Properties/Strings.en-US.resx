@@ -925,7 +925,16 @@
     <value>PPT page button clickable</value>
   </data>
   <data name="PPT_PageButtonClickableHint" xml:space="preserve">
-    <value># When enabled, clicking the page button opens PowerPoint grid thumbnails. Not supported in WPS.</value>
+    <value># Enable page-button navigation on click. By default it uses PowerPoint grid thumbnails (not supported in WPS); use the sub-setting below to manually enable enhanced preview for WPS support.</value>
+  </data>
+  <data name="PPT_PageButtonClickable_SubSettings" xml:space="preserve">
+    <value>Page button click sub-settings</value>
+  </data>
+  <data name="PPT_EnhancedPreview" xml:space="preserve">
+    <value>Enhanced preview for page button</value>
+  </data>
+  <data name="PPT_EnhancedPreviewHint" xml:space="preserve">
+    <value># Manually enable this option to show a thumbnail page list when clicking the page button (supports both WPS and PowerPoint), then click a thumbnail to jump.</value>
   </data>
   <data name="PPT_LongPressPageTurn" xml:space="preserve">
     <value>PPT long-press to turn page</value>

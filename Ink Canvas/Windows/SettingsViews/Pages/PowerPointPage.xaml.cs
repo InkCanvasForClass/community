@@ -72,6 +72,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CheckboxBPPTBlackBackground.IsChecked = bOpt.Length > 2 && bOpt[2] == '2';
 
             CardEnablePPTButtonPageClickable.IsOn = ppt.EnablePPTButtonPageClickable;
+            CardEnablePPTButtonEnhancedPreview.IsOn = ppt.EnablePPTButtonEnhancedPreview;
             CardEnablePPTButtonLongPressPageTurn.IsOn = ppt.EnablePPTButtonLongPressPageTurn;
 
             CardShowCanvasAtNewSlideShow.IsOn = ppt.IsShowCanvasAtNewSlideShow;
@@ -251,6 +252,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.PowerPointSettings.EnablePPTButtonPageClickable = CardEnablePPTButtonPageClickable.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchEnablePPTButtonEnhancedPreview_OnToggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.PowerPointSettings.EnablePPTButtonEnhancedPreview = CardEnablePPTButtonEnhancedPreview.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 

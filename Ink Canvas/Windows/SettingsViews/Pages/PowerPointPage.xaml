@@ -178,6 +178,13 @@
                             Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}"
                             Toggled="ToggleSwitchEnablePPTButtonPageClickable_OnToggled"/>
 
+                    <controls:LabeledSettingsCard x:Name="CardEnablePPTButtonEnhancedPreview"
+                            Header="{i18n:I18n Key=PPT_EnhancedPreview}"
+                            Description="{i18n:I18n Key=PPT_EnhancedPreviewHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
+                            Visibility="{Binding IsOn, ElementName=CardEnablePPTButtonPageClickable, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            Toggled="ToggleSwitchEnablePPTButtonEnhancedPreview_OnToggled"/>
+
                     <controls:LabeledSettingsCard x:Name="CardEnablePPTButtonLongPressPageTurn"
                             Header="{i18n:I18n Key=PPT_LongPressPageTurn}"
                             Description="{i18n:I18n Key=PPT_LongPressPageTurnHint}"
