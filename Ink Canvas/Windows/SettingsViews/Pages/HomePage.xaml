@@ -76,6 +76,13 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Shield}" />
                         </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
+
+                    <ui:SettingsCard Header="安全" Description="安全密码与进程保护"
+                        IsClickEnabled="True" Click="QuickNavCard_Click" Tag="SecurityPage">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Permissions}" />
+                        </ui:SettingsCard.HeaderIcon>
+                    </ui:SettingsCard>
                     
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="主界面" />

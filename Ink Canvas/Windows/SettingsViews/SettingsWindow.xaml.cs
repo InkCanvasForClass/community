@@ -40,6 +40,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 { "HomePage", typeof(HomePage) },
                 { "StartupPage", typeof(StartupPage) },
                 { "PrivacyPage", typeof(PrivacyPage) },
+                { "SecurityPage", typeof(SecurityPage) },
                 { "WindowPage", typeof(WindowPage) },
                 { "AppearancePage", typeof(AppearancePage) },
                 { "UpdatePage", typeof(UpdatePage) },

@@ -153,6 +153,15 @@
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Shield}"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="SecurityPageItem"
+                            Content="安全"
+                            Tag="SecurityPage"
+                            ToolTipService.ToolTip="安全密码与进程保护">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Permissions}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
 
