@@ -33,7 +33,7 @@
 
                 <controls:LabeledSettingsCard x:Name="ToggleSwitchDebugConsole"
                     Header="显示调试窗口"
-                    Description="显示一个独立的控制台窗口，用于实时输出日志（开启后立即生效；关闭设置中的"启用日志记录"将不会输出内容）。"
+                    Description="显示一个独立的控制台窗口，用于实时输出日志（开启后立即生效；关闭设置中的“启用日志记录”将不会输出内容）。"
                     Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}"
                     IsOn="False"
                     Toggled="ToggleSwitchDebugConsole_Toggled"/>
