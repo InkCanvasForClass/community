@@ -1215,10 +1215,7 @@ namespace Ink_Canvas
             }
 
             //TextBlockVersion.Text = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                LogHelper.WriteLogToFile("Ink Canvas Loaded", LogHelper.LogType.Event);
-            }), DispatcherPriority.ApplicationIdle);
+            LogHelper.WriteLogToFile("Ink Canvas Loaded", LogHelper.LogType.Event);
 
             isLoaded = true;
             BlackBoardLeftSidePageListView.ItemsSource = blackBoardSidePageListViewObservableCollection;
@@ -1296,6 +1293,12 @@ namespace Ink_Canvas
             }
 
             _ = RunDeferredStartupPhaseBAsync();
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                LoadInkFadeSettings();
+                LoadBrushAutoRestoreSettings();
+            }), DispatcherPriority.ApplicationIdle);
 
             // 初始化墨迹渐隐管理器
             Dispatcher.BeginInvoke(new Action(() =>

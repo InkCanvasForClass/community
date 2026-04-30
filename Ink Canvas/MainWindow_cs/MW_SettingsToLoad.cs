@@ -618,11 +618,6 @@ namespace Ink_Canvas
                 ViewboxFloatingBarMarginAnimation(100, true);
             }
 
-            // 加载墨迹渐隐设置
-            LoadInkFadeSettings();
-
-            // 加载画笔自动恢复设置
-            LoadBrushAutoRestoreSettings();
         }
 
         /// <summary>
@@ -635,13 +630,6 @@ namespace Ink_Canvas
         {
             try
             {
-
-
-
-
-
-
-
                 // 如果功能已启用，初始化并启动定时器
                 if (Settings.Canvas.EnableBrushAutoRestore)
                 {
