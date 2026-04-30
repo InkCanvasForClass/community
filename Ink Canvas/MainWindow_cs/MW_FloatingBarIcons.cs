@@ -2244,9 +2244,14 @@ namespace Ink_Canvas
 
             SetFloatingBarHighlightPosition("pen");
 
-            // 记录当前是否已经是批注模式且是否为高光显示模式
+            bool isRealtimePenState = inkCanvas.EditingMode == InkCanvasEditingMode.None
+                                      && ShouldUseRealtimeVelocityBrushTip()
+                                      && string.Equals(GetCurrentSelectedMode(), "pen", StringComparison.OrdinalIgnoreCase);
             bool wasInInkMode = inkCanvas.EditingMode == InkCanvasEditingMode.Ink
-                                || (Pen_Icon.Background != null && StackPanelCanvasControls.Visibility == Visibility.Visible);
+                                || isRealtimePenState
+                                || (Pen_Icon.Background != null
+                                    && StackPanelCanvasControls.Visibility == Visibility.Visible
+                                    && string.Equals(GetCurrentSelectedMode(), "pen", StringComparison.OrdinalIgnoreCase));
             bool wasHighlighter = drawingAttributes.IsHighlighter;
 
             if (drawingShapeMode != 0 && !isLongPressSelected)

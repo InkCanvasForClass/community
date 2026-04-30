@@ -52,6 +52,7 @@ namespace Ink_Canvas
         private readonly Guid RealtimeVelocityBrushTipAppliedGuid = new Guid("74E57D95-945F-4A8C-B52A-7D3EF2D4FD5B");
         internal const int MouseRealtimeStrokeId = -100001;
         private readonly HashSet<int> _activeRealtimeTouchStrokeIds = new HashSet<int>();
+        private readonly HashSet<int> _activeTouchStrokeIds = new HashSet<int>();
 
         private sealed class OneEuroFilter
         {
@@ -1202,6 +1203,28 @@ namespace Ink_Canvas
                 return;
             }
 
+            if ((isInMultiTouchMode || Settings.Gesture.IsEnableMultiTouchMode)
+                && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
+                && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
+                && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
+            {
+                try
+                {
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    var touchId = e.TouchDevice.Id;
+                    var p = e.GetTouchPoint(inkCanvas).Position;
+                    _activeTouchStrokeIds.Add(touchId);
+                    var sv = GetStrokeVisual(touchId);
+                    sv.Add(new StylusPoint(p.X, p.Y, 0.5f));
+                    sv.Redraw();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(ex);
+                }
+                return;
+            }
+
             if (Settings.Canvas.EnablePalmEraser && !isPalmEraserActive && drawingShapeMode == 0)
             {
                 var touchPoint = e.GetTouchPoint(inkCanvas);
@@ -1314,23 +1337,38 @@ namespace Ink_Canvas
                 EraserOverlay_PointerMove(sender, touchPoint.Position);
             }
 
-            if (!ShouldUseRealtimeVelocityBrushTipForTouch())
-                return;
-
             var touchId = e.TouchDevice.Id;
-            if (!_activeRealtimeTouchStrokeIds.Contains(touchId))
+            if (ShouldUseRealtimeVelocityBrushTipForTouch())
+            {
+                if (!_activeRealtimeTouchStrokeIds.Contains(touchId))
+                    return;
+                try
+                {
+                    var p = e.GetTouchPoint(inkCanvas).Position;
+                    var sv = GetStrokeVisual(touchId);
+                    if (TryAppendRealtimeVelocityBrushTipPoint(sv, touchId, p))
+                        sv.ForceRedraw();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(ex);
+                }
                 return;
-
-            try
-            {
-                var p = e.GetTouchPoint(inkCanvas).Position;
-                var sv = GetStrokeVisual(touchId);
-                if (TryAppendRealtimeVelocityBrushTipPoint(sv, touchId, p))
-                    sv.ForceRedraw();
             }
-            catch (Exception ex)
+
+            if (_activeTouchStrokeIds.Contains(touchId))
             {
-                System.Diagnostics.Debug.WriteLine(ex);
+                try
+                {
+                    var p = e.GetTouchPoint(inkCanvas).Position;
+                    var sv = GetStrokeVisual(touchId);
+                    sv.Add(new StylusPoint(p.X, p.Y, 0.5f));
+                    sv.Redraw();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(ex);
+                }
             }
         }
 
@@ -1387,6 +1425,34 @@ namespace Ink_Canvas
                     TouchDownPointsList.Remove(touchId);
                     CleanupRealtimeBrushTipState(touchId);
                     _activeRealtimeTouchStrokeIds.Remove(touchId);
+                }
+            }
+            else if (_activeTouchStrokeIds.Contains(touchId))
+            {
+                try
+                {
+                    var sv = GetStrokeVisual(touchId);
+                    sv?.Redraw();
+                    var stroke = sv?.Stroke;
+                    if (stroke != null)
+                    {
+                        inkCanvas.Strokes.Add(stroke);
+                        inkCanvas_StrokeCollected(inkCanvas, new InkCanvasStrokeCollectedEventArgs(stroke));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(ex);
+                }
+                finally
+                {
+                    if (VisualCanvasList.TryGetValue(touchId, out var visualCanvas) && inkCanvas.Children.Contains(visualCanvas))
+                        inkCanvas.Children.Remove(visualCanvas);
+                    StrokeVisualList.Remove(touchId);
+                    VisualCanvasList.Remove(touchId);
+                    TouchDownPointsList.Remove(touchId);
+                    CleanupRealtimeBrushTipState(touchId);
+                    _activeTouchStrokeIds.Remove(touchId);
                 }
             }
 

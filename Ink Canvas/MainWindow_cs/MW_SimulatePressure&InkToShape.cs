@@ -571,11 +571,7 @@ namespace Ink_Canvas
                             straightStroke.AddPropertyData(Helpers.ModernInkAnalyzer.ShapeStrokePropertyGuid, true);
 
                             // Replace the original stroke with the straightened one
-                            SetNewBackupOfStroke();
-                            _currentCommitType = CommitReason.ShapeRecognition;
-                            inkCanvas.Strokes.Remove(e.Stroke);
-                            inkCanvas.Strokes.Add(straightStroke);
-                            _currentCommitType = CommitReason.UserInput;
+                            ReplaceStrokesSafely(null, straightStroke, e.Stroke);
 
                             straightStrokeForHandwritingKey = straightStroke;
 
@@ -703,11 +699,7 @@ namespace Ink_Canvas
                                     };
                                     stroke.AddPropertyData(Helpers.ModernInkAnalyzer.ShapeStrokePropertyGuid, true);
                                     circles.Add(new Circle(result.Centroid, result.ShapeWidth / 2.0, stroke));
-                                    SetNewBackupOfStroke();
-                                    _currentCommitType = CommitReason.ShapeRecognition;
-                                    inkCanvas.Strokes.Remove(result.StrokesToRemove);
-                                    inkCanvas.Strokes.Add(stroke);
-                                    _currentCommitType = CommitReason.UserInput;
+                                    ReplaceStrokesSafely(result.StrokesToRemove, stroke, e.Stroke);
                                     newStrokes = new StrokeCollection();
                                 }
                             }
@@ -794,9 +786,6 @@ namespace Ink_Canvas
 
                                                 var topB = endP.Y - iniP.Y;
 
-                                                SetNewBackupOfStroke();
-                                                _currentCommitType = CommitReason.ShapeRecognition;
-                                                inkCanvas.Strokes.Remove(result.StrokesToRemove);
                                                 newStrokes = new StrokeCollection();
 
                                                 var _pointList = GenerateEllipseGeometry(iniP, endP, false);
@@ -812,8 +801,7 @@ namespace Ink_Canvas
                                                     _stroke,
                                                     _dashedLineStroke
                                                 };
-                                                inkCanvas.Strokes.Add(strokes);
-                                                _currentCommitType = CommitReason.UserInput;
+                                                ReplaceStrokesSafely(result.StrokesToRemove, strokes, e.Stroke);
                                                 return;
                                             }
                                         }
@@ -863,11 +851,7 @@ namespace Ink_Canvas
                                         stroke.Transform(m, false);
                                     }
 
-                                    SetNewBackupOfStroke();
-                                    _currentCommitType = CommitReason.ShapeRecognition;
-                                    inkCanvas.Strokes.Remove(result.StrokesToRemove);
-                                    inkCanvas.Strokes.Add(stroke);
-                                    _currentCommitType = CommitReason.UserInput;
+                                    ReplaceStrokesSafely(result.StrokesToRemove, stroke, e.Stroke);
                                     GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                                     newStrokes = new StrokeCollection();
                                 }
@@ -901,11 +885,7 @@ namespace Ink_Canvas
                                         DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
                                     };
                                     stroke.AddPropertyData(Helpers.ModernInkAnalyzer.ShapeStrokePropertyGuid, true);
-                                    SetNewBackupOfStroke();
-                                    _currentCommitType = CommitReason.ShapeRecognition;
-                                    inkCanvas.Strokes.Remove(result.StrokesToRemove);
-                                    inkCanvas.Strokes.Add(stroke);
-                                    _currentCommitType = CommitReason.UserInput;
+                                    ReplaceStrokesSafely(result.StrokesToRemove, stroke, e.Stroke);
                                     GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                                     newStrokes = new StrokeCollection();
                                 }
@@ -947,11 +927,7 @@ namespace Ink_Canvas
                                         DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
                                     };
                                     stroke.AddPropertyData(Helpers.ModernInkAnalyzer.ShapeStrokePropertyGuid, true);
-                                    SetNewBackupOfStroke();
-                                    _currentCommitType = CommitReason.ShapeRecognition;
-                                    inkCanvas.Strokes.Remove(result.StrokesToRemove);
-                                    inkCanvas.Strokes.Add(stroke);
-                                    _currentCommitType = CommitReason.UserInput;
+                                    ReplaceStrokesSafely(result.StrokesToRemove, stroke, e.Stroke);
                                     GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                                     newStrokes = new StrokeCollection();
                                 }
@@ -2222,6 +2198,49 @@ namespace Ink_Canvas
             }
 
             return true;
+        }
+
+        private void ReplaceStrokesSafely(StrokeCollection strokesToRemove, Stroke replacementStroke, Stroke fallbackOriginalStroke = null)
+        {
+            if (replacementStroke == null) return;
+            try
+            {
+                SetNewBackupOfStroke();
+                _currentCommitType = CommitReason.ShapeRecognition;
+
+                if (strokesToRemove != null && strokesToRemove.Count > 0)
+                    inkCanvas.Strokes.Remove(strokesToRemove);
+                if (fallbackOriginalStroke != null && inkCanvas.Strokes.Contains(fallbackOriginalStroke))
+                    inkCanvas.Strokes.Remove(fallbackOriginalStroke);
+
+                if (!inkCanvas.Strokes.Contains(replacementStroke))
+                    inkCanvas.Strokes.Add(replacementStroke);
+            }
+            finally
+            {
+                _currentCommitType = CommitReason.UserInput;
+            }
+        }
+
+        private void ReplaceStrokesSafely(StrokeCollection strokesToRemove, StrokeCollection replacementStrokes, Stroke fallbackOriginalStroke = null)
+        {
+            if (replacementStrokes == null || replacementStrokes.Count == 0) return;
+            try
+            {
+                SetNewBackupOfStroke();
+                _currentCommitType = CommitReason.ShapeRecognition;
+
+                if (strokesToRemove != null && strokesToRemove.Count > 0)
+                    inkCanvas.Strokes.Remove(strokesToRemove);
+                if (fallbackOriginalStroke != null && inkCanvas.Strokes.Contains(fallbackOriginalStroke))
+                    inkCanvas.Strokes.Remove(fallbackOriginalStroke);
+
+                inkCanvas.Strokes.Add(replacementStrokes);
+            }
+            finally
+            {
+                _currentCommitType = CommitReason.UserInput;
+            }
         }
 
         /// <summary>
