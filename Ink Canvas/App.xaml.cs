@@ -86,6 +86,8 @@ namespace Ink_Canvas
         private static SplashScreen _splashScreen;
         private static bool _isSplashScreenShown = false;
         private static System.Resources.ResourceSet _pendingLocalizedResourceSet;
+        private static readonly Stopwatch startupStopwatch = new Stopwatch();
+        private static readonly Stopwatch splashStopwatch = new Stopwatch();
 
         [DllImport("shell32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         private static extern int SetCurrentProcessExplicitAppUserModelID(string appId);
@@ -544,6 +546,7 @@ namespace Ink_Canvas
                 _splashScreen.Show();
                 _isSplashScreenShown = true;
                 splashScreenStartTime = DateTime.Now;
+                splashStopwatch.Restart();
                 LogHelper.WriteLogToFile("启动画面已显示");
             }
             catch (Exception ex)
@@ -763,6 +766,7 @@ namespace Ink_Canvas
         {
             appStartTime = DateTime.Now;
             appStartupStartTime = DateTime.Now;
+            startupStopwatch.Restart();
 
             TryApplyPreferredLanguageFromSettings();
 
@@ -1155,15 +1159,15 @@ namespace Ink_Canvas
             {
                 isStartupComplete = true;
                 startupCompleteHeartbeat = DateTime.Now;
-                if (_isSplashScreenShown && splashScreenStartTime != DateTime.MinValue)
+                if (_isSplashScreenShown && splashStopwatch.IsRunning)
                 {
-                    LogHelper.WriteLogToFile($"启动完成心跳已记录，启动画面显示时长: {(startupCompleteHeartbeat - splashScreenStartTime).TotalSeconds:F2}秒");
+                    LogHelper.WriteLogToFile($"启动完成心跳已记录，启动画面显示时长: {splashStopwatch.Elapsed.TotalSeconds:F2}秒");
                 }
                 else
                 {
                     LogHelper.WriteLogToFile($"启动完成心跳已记录");
                 }
-                LogHelper.WriteLogToFile($"启动时长: {(startupCompleteHeartbeat - appStartupStartTime).TotalSeconds:F2}秒");
+                LogHelper.WriteLogToFile($"启动时长: {startupStopwatch.Elapsed.TotalSeconds:F2}秒");
 
                 if (_isSplashScreenShown)
                 {
