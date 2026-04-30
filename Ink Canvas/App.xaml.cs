@@ -829,32 +829,11 @@ namespace Ink_Canvas
                 SetSplashProgress(50);
             }
 
-            // 记录应用启动（设备标识符）
             if (_isSplashScreenShown)
             {
                 SetSplashMessage("正在加载配置...");
                 SetSplashProgress(60);
-                await Task.Delay(100);
             }
-            DeviceIdentifier.RecordAppLaunch();
-            try
-            {
-                var systemVersion = DeviceIdentifier.GetSystemVersion();
-                if (!string.IsNullOrWhiteSpace(systemVersion))
-                {
-                    SentrySdk.ConfigureScope(scope =>
-                    {
-                        scope.SetTag("system_version", systemVersion);
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"App | 初始化系统版本遥测标签失败: {ex.Message}", LogHelper.LogType.Warning);
-            }
-            LogHelper.WriteLogToFile($"App | 设备ID: {DeviceIdentifier.GetDeviceId()}");
-            LogHelper.WriteLogToFile($"App | 使用频率: {DeviceIdentifier.GetUsageFrequency()}");
-            LogHelper.WriteLogToFile($"App | 更新优先级: {DeviceIdentifier.GetUpdatePriority()}");
 
             // 处理更新模式启动
             bool isUpdateMode = AutoUpdateHelper.HandleUpdateModeStartup(e.Args);
@@ -1287,6 +1266,28 @@ namespace Ink_Canvas
                 catch (Exception ex)
                 {
                     LogHelper.WriteLogToFile(string.Format("加载插件时出错: {0}", ex.Message), LogHelper.LogType.Error);
+                }
+
+                try
+                {
+                    await Task.Delay(1500);
+                    DeviceIdentifier.RecordAppLaunch();
+                    var systemVersion = DeviceIdentifier.GetSystemVersion();
+                    if (!string.IsNullOrWhiteSpace(systemVersion))
+                    {
+                        SentrySdk.ConfigureScope(scope =>
+                        {
+                            scope.SetTag("system_version", systemVersion);
+                        });
+                    }
+
+                    LogHelper.WriteLogToFile($"App | 设备ID: {DeviceIdentifier.GetDeviceId()}");
+                    LogHelper.WriteLogToFile($"App | 使用频率: {DeviceIdentifier.GetUsageFrequency()}");
+                    LogHelper.WriteLogToFile($"App | 更新优先级: {DeviceIdentifier.GetUpdatePriority()}");
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"App | 初始化设备统计与遥测标签失败: {ex.Message}", LogHelper.LogType.Warning);
                 }
             }
             catch (Exception ex)

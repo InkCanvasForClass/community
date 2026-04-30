@@ -311,7 +311,10 @@ namespace Ink_Canvas
             // 应用无焦点模式设置
             ApplyNoFocusMode();
             // 应用窗口置顶设置
-            ApplyAlwaysOnTop();
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                ApplyAlwaysOnTop();
+            }), DispatcherPriority.ApplicationIdle);
 
             // 添加窗口激活事件处理，确保置顶状态在窗口重新激活时得到保持
             Activated += Window_Activated;
@@ -1283,7 +1286,10 @@ namespace Ink_Canvas
             // 应用无焦点模式设置
             ApplyNoFocusMode();
             // 应用窗口置顶设置
-            ApplyAlwaysOnTop();
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                ApplyAlwaysOnTop();
+            }), DispatcherPriority.ApplicationIdle);
 
             // 设置UIA置顶状态
             App.IsUIAccessTopMostEnabled = Settings.Advanced.EnableUIAccessTopMost;
