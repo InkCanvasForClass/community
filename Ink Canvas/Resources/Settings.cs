@@ -272,8 +272,8 @@ namespace Ink_Canvas
         public bool EnableTrayIcon { get; set; } = true;
         [JsonProperty("viewboxFloatingBarOpacityInPPTValue")]
         public double ViewboxFloatingBarOpacityInPPTValue { get; set; } = 0.5;
-        [JsonProperty("enableViewboxBlackBoardScaleTransform")]
-        public bool EnableViewboxBlackBoardScaleTransform { get; set; }
+        [JsonProperty("viewboxBlackBoardScaleTransformValue")]
+        public double ViewboxBlackBoardScaleTransformValue { get; set; } = 1;
         [JsonProperty("isTransparentButtonBackground")]
         public bool IsTransparentButtonBackground { get; set; } = true;
         [JsonProperty("isShowExitButton")]

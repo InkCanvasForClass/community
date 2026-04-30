@@ -69,11 +69,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (settings.Appearance.ViewboxFloatingBarScaleTransformValue != 0)
                 ViewboxFloatingBarScaleTransformValueSlider.Value = settings.Appearance.ViewboxFloatingBarScaleTransformValue;
 
+            ViewboxBlackBoardScaleTransformValueSlider.Value = settings.Appearance.ViewboxBlackBoardScaleTransformValue;
+
             ViewboxFloatingBarOpacityValueSlider.Value = settings.Appearance.ViewboxFloatingBarOpacityValue;
             ViewboxFloatingBarOpacityInPPTValueSlider.Value = settings.Appearance.ViewboxFloatingBarOpacityInPPTValue;
 
             CardEnableDisPlayNibModeToggle.IsOn = settings.Appearance.IsEnableDisPlayNibModeToggler;
-            CardEnableViewboxBlackBoardScaleTransform.IsOn = settings.Appearance.EnableViewboxBlackBoardScaleTransform;
             CardEnableTimeDisplayInWhiteboardMode.IsOn = settings.Appearance.EnableTimeDisplayInWhiteboardMode;
             CardEnableChickenSoupInWhiteboardMode.IsOn = settings.Appearance.EnableChickenSoupInWhiteboardMode;
 
@@ -227,7 +228,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ViewboxFloatingBarScaleTransformValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var val = ViewboxFloatingBarScaleTransformValueSlider.Value;
+            var val = Math.Round(ViewboxFloatingBarScaleTransformValueSlider.Value, 2);
+            ViewboxFloatingBarScaleTransformValueSlider.Value = val;
             SettingsManager.Settings.Appearance.ViewboxFloatingBarScaleTransformValue = val;
             SettingsManager.SaveSettingsToFile();
             var mw = GetMainWindow();
@@ -245,21 +247,25 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ViewboxFloatingBarOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.ViewboxFloatingBarOpacityValue = ViewboxFloatingBarOpacityValueSlider.Value;
+            var val = Math.Round(ViewboxFloatingBarOpacityValueSlider.Value, 2);
+            ViewboxFloatingBarOpacityValueSlider.Value = val;
+            SettingsManager.Settings.Appearance.ViewboxFloatingBarOpacityValue = val;
             SettingsManager.SaveSettingsToFile();
             var mw = GetMainWindow();
-            if (mw != null) mw.ViewboxFloatingBar.Opacity = ViewboxFloatingBarOpacityValueSlider.Value;
+            if (mw != null) mw.ViewboxFloatingBar.Opacity = val;
         }
 
         private void ViewboxFloatingBarOpacityInPPTValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.ViewboxFloatingBarOpacityInPPTValue = ViewboxFloatingBarOpacityInPPTValueSlider.Value;
+            var val = Math.Round(ViewboxFloatingBarOpacityInPPTValueSlider.Value, 2);
+            ViewboxFloatingBarOpacityInPPTValueSlider.Value = val;
+            SettingsManager.Settings.Appearance.ViewboxFloatingBarOpacityInPPTValue = val;
             SettingsManager.SaveSettingsToFile();
             var mw = GetMainWindow();
             if (mw != null && mw.currentMode == 2)
             {
-                mw.ViewboxFloatingBar.Opacity = ViewboxFloatingBarOpacityInPPTValueSlider.Value;
+                mw.ViewboxFloatingBar.Opacity = val;
             }
         }
 
@@ -281,17 +287,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
         }
 
-        private void ToggleSwitchEnableViewboxBlackBoardScaleTransform_Toggled(object sender, RoutedEventArgs e)
+        private void ViewboxBlackBoardScaleTransformValueSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.EnableViewboxBlackBoardScaleTransform = CardEnableViewboxBlackBoardScaleTransform.IsOn;
+            var val = Math.Round(ViewboxBlackBoardScaleTransformValueSlider.Value, 2);
+            ViewboxBlackBoardScaleTransformValueSlider.Value = val;
+            SettingsManager.Settings.Appearance.ViewboxBlackBoardScaleTransformValue = val;
             SettingsManager.SaveSettingsToFile();
             var mw = GetMainWindow();
             if (mw != null)
             {
-                var scale = CardEnableViewboxBlackBoardScaleTransform.IsOn ? 0.8 : 1.0;
-                mw.ViewboxBlackboardCenterSideScaleTransform.ScaleX = scale;
-                mw.ViewboxBlackboardCenterSideScaleTransform.ScaleY = scale;
+                mw.ViewboxBlackboardCenterSideScaleTransform.ScaleX = val;
+                mw.ViewboxBlackboardCenterSideScaleTransform.ScaleY = val;
             }
         }
 

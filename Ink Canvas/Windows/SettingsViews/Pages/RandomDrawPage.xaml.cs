@@ -1,4 +1,5 @@
 using Ink_Canvas.Windows.SettingsViews.Helpers;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -77,10 +78,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.SaveSettingsToFile();
         }
 
-        private void RandWindowOnceCloseLatencySlider_ValueChanged(object sender, RoutedEventArgs e)
+        private void RandWindowOnceCloseLatencySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.RandSettings.RandWindowOnceCloseLatency = RandWindowOnceCloseLatencySlider.Value;
+            var val = Math.Round(RandWindowOnceCloseLatencySlider.Value, 2);
+            RandWindowOnceCloseLatencySlider.Value = val;
+            SettingsManager.Settings.RandSettings.RandWindowOnceCloseLatency = val;
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -213,7 +216,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void MLAvoidanceWeightSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.RandSettings.MLAvoidanceWeight = MLAvoidanceWeightSlider.Value;
+            var val = Math.Round(MLAvoidanceWeightSlider.Value, 2);
+            MLAvoidanceWeightSlider.Value = val;
+            SettingsManager.Settings.RandSettings.MLAvoidanceWeight = val;
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -273,10 +278,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.SaveSettingsToFile();
         }
 
-        private void TimerVolumeSlider_ValueChanged(object sender, RoutedEventArgs e)
+        private void TimerVolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.RandSettings.TimerVolume = TimerVolumeSlider.Value;
+            var val = Math.Round(TimerVolumeSlider.Value, 2);
+            TimerVolumeSlider.Value = val;
+            SettingsManager.Settings.RandSettings.TimerVolume = val;
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -311,10 +318,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.SaveSettingsToFile();
         }
 
-        private void ProgressiveReminderVolumeSlider_ValueChanged(object sender, RoutedEventArgs e)
+        private void ProgressiveReminderVolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.RandSettings.ProgressiveReminderVolume = ProgressiveReminderVolumeSlider.Value;
+            var val = Math.Round(ProgressiveReminderVolumeSlider.Value, 2);
+            ProgressiveReminderVolumeSlider.Value = val;
+            SettingsManager.Settings.RandSettings.ProgressiveReminderVolume = val;
             SettingsManager.SaveSettingsToFile();
         }
 

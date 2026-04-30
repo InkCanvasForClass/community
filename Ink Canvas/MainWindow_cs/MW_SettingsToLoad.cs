@@ -295,16 +295,8 @@ namespace Ink_Canvas
 
                 ViewboxFloatingBar.Opacity = Settings.Appearance.ViewboxFloatingBarOpacityValue;
 
-                if (Settings.Appearance.EnableViewboxBlackBoardScaleTransform)
-                {
-                    ViewboxBlackboardCenterSideScaleTransform.ScaleX = 0.8;
-                    ViewboxBlackboardCenterSideScaleTransform.ScaleY = 0.8;
-                }
-                else
-                {
-                    ViewboxBlackboardCenterSideScaleTransform.ScaleX = 1;
-                    ViewboxBlackboardCenterSideScaleTransform.ScaleY = 1;
-                }
+                ViewboxBlackboardCenterSideScaleTransform.ScaleX = Settings.Appearance.ViewboxBlackBoardScaleTransformValue;
+                ViewboxBlackboardCenterSideScaleTransform.ScaleY = Settings.Appearance.ViewboxBlackBoardScaleTransformValue;
 
                 if (Settings.Appearance.IsTransparentButtonBackground)
                 {

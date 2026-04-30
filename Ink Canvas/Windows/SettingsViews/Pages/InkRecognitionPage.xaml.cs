@@ -150,7 +150,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void LineStraightenSensitivitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.InkToShape.LineStraightenSensitivity = e.NewValue;
+            var val = Math.Round(LineStraightenSensitivitySlider.Value, 2);
+            LineStraightenSensitivitySlider.Value = val;
+            SettingsManager.Settings.InkToShape.LineStraightenSensitivity = val;
             SettingsManager.SaveSettingsToFile();
         }
 
