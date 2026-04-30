@@ -36,12 +36,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         [DllImport("user32.dll")]
         private static extern bool IsIconic(IntPtr hWnd);
 
-        [DllImport("UIAccessDLL_x86.dll", EntryPoint = "PrepareUIAccess", CallingConvention = CallingConvention.Cdecl)]
-        private static extern Int32 PrepareUIAccessX86();
-
-        [DllImport("UIAccessDLL_x64.dll", EntryPoint = "PrepareUIAccess", CallingConvention = CallingConvention.Cdecl)]
-        private static extern Int32 PrepareUIAccessX64();
-
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
 
@@ -300,6 +294,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                     {
                         try
                         {
+                            // 已具有 UIAccess 时无需重启
+                            if (UIAccessHelper.HasUIAccess())
+                            {
+                                LogHelper.WriteLogToFile("UIAccess | 当前进程已具有 UIAccess 权限");
+                                App.IsUIAccessTopMostEnabled = true;
+                                return;
+                            }
+
                             OnStopKillProcessTimer?.Invoke();
 
                             if (App.watchdogProcess != null && !App.watchdogProcess.HasExited)
@@ -308,18 +310,24 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                                 App.watchdogProcess = null;
                             }
 
-                            App.StartWatchdogIfNeeded();
+                            // 使用 Inkeys 方式：通过 winlogon 模拟令牌为自身令牌设置 UIAccess 标志后重启
+                            App.IsUIAccessTopMostEnabled = true;
+                            App.IsAppExitByUser = true;
+                            (Application.Current as App)?.ReleaseMutexForRestart();
 
-                            if (Environment.Is64BitProcess)
+                            bool started = UIAccessHelper.RestartWithUIAccess();
+                            if (started)
                             {
-                                PrepareUIAccessX64();
+                                Application.Current.Shutdown();
                             }
                             else
                             {
-                                PrepareUIAccessX86();
+                                LogHelper.WriteLogToFile("UIAccess | 启动失败，回退到普通管理员模式", LogHelper.LogType.Warning);
+                                App.IsUIAccessTopMostEnabled = false;
+                                App.IsAppExitByUser = false;
+                                App.StartWatchdogIfNeeded();
+                                OnStartKillProcessTimer?.Invoke();
                             }
-
-                            OnStartKillProcessTimer?.Invoke();
                         }
                         catch (Exception ex)
                         {
