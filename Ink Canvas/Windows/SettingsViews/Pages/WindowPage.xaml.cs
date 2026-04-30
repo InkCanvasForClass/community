@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -226,7 +227,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 App.IsUIAccessTopMostEnabled = false;
 
                 var msg = Properties.Strings.GetString("Startup_TopMostMode_Normal_RestartRequired");
-                var result = System.Windows.MessageBox.Show(msg, "Ink Canvas", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                var result = MessageBox.Show(msg, "Ink Canvas", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
                 if (result == MessageBoxResult.Yes)
                 {
@@ -256,7 +257,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 SettingsManager.SaveSettingsToFile();
 
                 var msg = Properties.Strings.GetString("Startup_TopMostMode_UIA_RestartRequired");
-                var result = System.Windows.MessageBox.Show(msg, "Ink Canvas", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                var result = MessageBox.Show(msg, "Ink Canvas", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
                 if (result == MessageBoxResult.Yes)
                 {

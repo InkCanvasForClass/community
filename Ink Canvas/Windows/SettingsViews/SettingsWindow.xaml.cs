@@ -6,7 +6,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Navigation;
-using MessageBox = System.Windows.MessageBox;
+using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using Screen = System.Windows.Forms.Screen;
 
 namespace Ink_Canvas.Windows.SettingsViews
