@@ -33,10 +33,33 @@
 
                 <controls:LabeledSettingsCard x:Name="ToggleSwitchDebugConsole"
                     Header="显示调试窗口"
-                    Description="显示一个独立的控制台窗口，用于实时输出日志（开启后立即生效；关闭设置中的“启用日志记录”将不会输出内容）。"
+                    Description="显示一个独立的控制台窗口，用于实时输出日志（开启后立即生效；关闭设置中的"启用日志记录"将不会输出内容）。"
                     Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}"
                     IsOn="False"
                     Toggled="ToggleSwitchDebugConsole_Toggled"/>
+
+                <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                    Text="图标设置" />
+
+                <ui:SettingsExpander Header="SettingsExpander 示例" IsEnabled="True"
+                    IsExpanded="True"
+                    d:Visibility="Visible" d:IsExpanded="True">
+
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Glyph="&#xE91B;"/>
+                    </ui:SettingsExpander.HeaderIcon>
+
+                    <controls:CopyButton Text="You can override the Left indention of a SettingsCard by overriding the SettingsCardLeftIndention"/>
+
+                    <ui:SettingsExpander.Items>
+                        <ui:SettingsCard Description="You can override the Left indention of a SettingsCard by overriding the SettingsCardLeftIndention"
+                            Header="Customization">
+                            <ui:SettingsCard.Resources>
+                                <sys:Double x:Key="SettingsCardLeftIndention">0</sys:Double>
+                            </ui:SettingsCard.Resources>
+                        </ui:SettingsCard>
+                    </ui:SettingsExpander.Items>
+                </ui:SettingsExpander>
             </ikw:SimpleStackPanel>
         </Grid>
     </ScrollViewer>
