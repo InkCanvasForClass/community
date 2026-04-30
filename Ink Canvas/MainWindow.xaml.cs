@@ -1673,6 +1673,8 @@ namespace Ink_Canvas
 
             try
             {
+                PPTTimeCapsule?.Dispose();
+
                 // 清理视频展台资源
                 if (_cameraService != null)
                 {

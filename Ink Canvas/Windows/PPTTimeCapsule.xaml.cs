@@ -54,6 +54,13 @@ namespace Ink_Canvas.Windows
 
         private void PPTTimeCapsule_Loaded(object sender, RoutedEventArgs e)
         {
+            if (isDisposed) return;
+
+            if (timeUpdateTimer == null || countdownUpdateTimer == null)
+            {
+                InitializeTimers();
+            }
+
             // 记录初始宽度
             if (MainCapsule != null && originalCapsuleWidth == 0)
             {
@@ -65,7 +72,10 @@ namespace Ink_Canvas.Windows
 
         private void PPTTimeCapsule_Unloaded(object sender, RoutedEventArgs e)
         {
-            Dispose();
+            if (isDisposed) return;
+
+            // Unloaded 可能是暂时从视觉树移除（如主题切换/模板刷新），这里只暂停刷新即可。
+            StopTimeUpdate();
         }
 
         /// <summary>
