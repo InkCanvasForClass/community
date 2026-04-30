@@ -3,130 +3,164 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Ink_Canvas"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        FontFamily="Microsoft YaHei UI"
+        Title="隐私说明 - InkCanvasForClass"
+        Height="640" Width="720"
+        MinHeight="420" MinWidth="520"
         WindowStartupLocation="CenterScreen"
         Topmost="True"
-        Title="隐私说明 - Ink Canvas" Height="600" Width="600"
         ui:ThemeManager.IsThemeAware="True"
         ui:TitleBar.ExtendViewIntoTitleBar="True"
         ui:WindowHelper.SystemBackdropType="Mica"
         ui:WindowHelper.UseModernWindowStyle="True"
         ui:TitleBar.Height="48"
         Loaded="Window_Loaded" Closing="Window_Closing">
+
     <Window.Resources>
-        <SolidColorBrush x:Key="PrivacyAgreementWindowBackground" Color="White"/>
-        <SolidColorBrush x:Key="PrivacyAgreementWindowForeground" Color="Black"/>
-        <SolidColorBrush x:Key="PrivacyAgreementWindowButtonBackground" Color="#F4F4F5"/>
-        <SolidColorBrush x:Key="PrivacyAgreementWindowButtonForeground" Color="Black"/>
-        <SolidColorBrush x:Key="PrivacyAgreementWindowBorderBrush" Color="#E4E4E7"/>
-        <SolidColorBrush x:Key="PrivacyAgreementWindowButtonAcceptBackground" Color="#3584e4"/>
-        <SolidColorBrush x:Key="PrivacyAgreementWindowButtonAcceptForeground" Color="White"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ui:ThemeResources CanBeAccessedAcrossThreads="True">
+                    <ui:ThemeResources.ThemeDictionaries />
+                </ui:ThemeResources>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Window.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        
-        <!-- 自定义标题栏 -->
-        <Border x:Name="Border_TitleBarRoot"
-                Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.Height)}">
+
+        <!-- 标题栏 -->
+        <Border Grid.Row="0"
+                Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.Height)}"
+                Background="Transparent">
+            <ikw:SimpleStackPanel Orientation="Horizontal"
+                                  Spacing="12"
+                                  VerticalAlignment="Center"
+                                  Margin="16,0,0,0">
+                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Shield}" FontSize="14" />
+                <TextBlock VerticalAlignment="Center"
+                           Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=Title}"
+                           TextWrapping="NoWrap" />
+            </ikw:SimpleStackPanel>
+        </Border>
+
+        <!-- Banner Header -->
+        <Border Grid.Row="1"
+                Padding="40,18,40,18"
+                BorderThickness="0,0,0,1"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#1F3B82F6" Offset="0" />
+                    <GradientStop Color="#0A8B5CF6" Offset="1" />
+                </LinearGradientBrush>
+            </Border.Background>
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-                <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=Title}" 
-                           VerticalAlignment="Center" Margin="12,0,0,0" FontSize="12" FontWeight="SemiBold"/>
+                <Border Grid.Column="0" Grid.RowSpan="2"
+                        Width="48" Height="48"
+                        Margin="0,0,16,0"
+                        VerticalAlignment="Top"
+                        CornerRadius="10"
+                        Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Shield}"
+                                 FontSize="24"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center" />
+                </Border>
 
-                <!--Right Inset-->
-                <Rectangle Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.SystemOverlayRightInset)}"
-                    Grid.Column="2"/>
-
-                <!--Right Buttons-->
-                <ikw:SimpleStackPanel x:Name="StackPanel_RightButtons"
-                    Orientation="Horizontal" Grid.Column="1" Spacing="5">
-                </ikw:SimpleStackPanel>
+                <TextBlock Grid.Column="1" Grid.Row="0"
+                           Style="{DynamicResource TitleTextBlockStyle}"
+                           Text="隐私说明" />
+                <TextBlock Grid.Column="1" Grid.Row="1"
+                           Style="{DynamicResource BodyTextBlockStyle}"
+                           Margin="0,4,0,0"
+                           Opacity="0.85"
+                           TextWrapping="Wrap"
+                           Text="请仔细阅读以下条款。点击&quot;同意&quot;即表示您理解并接受本软件的隐私实践。" />
             </Grid>
         </Border>
-        
-        <!-- 主内容区 -->
-        <Grid Grid.Row="1" Background="{DynamicResource PrivacyAgreementWindowBackground}">
-            <ScrollViewer Margin="10,10,10,70"
-                          VerticalScrollBarVisibility="Auto"
-                          HorizontalScrollBarVisibility="Disabled">
-                <TextBox Name="TextBoxPrivacyContent" 
-                         
-                         VerticalScrollBarVisibility="Auto" 
-                         AcceptsReturn="True" 
-                         IsReadOnly="True"
-                         TextWrapping="Wrap"
-                         Background="{DynamicResource PrivacyAgreementWindowBackground}"
-                         Foreground="{DynamicResource PrivacyAgreementWindowForeground}"
-                         BorderBrush="{DynamicResource PrivacyAgreementWindowBorderBrush}"
-                         Padding="10"/>
-            </ScrollViewer>
-            <StackPanel Orientation="Horizontal" 
-                        HorizontalAlignment="Right" 
-                        VerticalAlignment="Bottom"
-                        Margin="10">
-                <Button Name="ButtonCancel"
-                        Margin="0,0,10,0" 
-                        Content="取消" 
-                       
-                        Width="100" 
-                        Height="35"
-                        Click="ButtonCancel_Click"
-                        Background="{DynamicResource PrivacyAgreementWindowButtonBackground}"
-                        Foreground="{DynamicResource PrivacyAgreementWindowButtonForeground}"
-                        BorderBrush="{DynamicResource PrivacyAgreementWindowBorderBrush}"
-                        OverridesDefaultStyle="True">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border Background="{TemplateBinding Background}"
-                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                    CornerRadius="4">
-                                <ContentPresenter HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center"
-                                                  Margin="{TemplateBinding Padding}"
-                                                  RecognizesAccessKey="True"/>
-                            </Border>
-                        </ControlTemplate>
-                    </Button.Template>
+
+        <!-- 内容区 -->
+        <ScrollViewer Grid.Row="2"
+                      x:Name="ContentScroll"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      PanningMode="VerticalFirst"
+                      Padding="40,16,40,16">
+            <Border Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+                    CornerRadius="8"
+                    Padding="20,16"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
+                <TextBlock Name="TextBoxPrivacyContent"
+                           TextWrapping="Wrap"
+                           LineHeight="22"
+                           FontSize="13"
+                           Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+            </Border>
+        </ScrollViewer>
+
+        <!-- Footer -->
+        <Border Grid.Row="3"
+                Padding="40,12,40,16"
+                BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           VerticalAlignment="Center"
+                           Style="{DynamicResource CaptionTextBlockStyle}"
+                           Opacity="0.7"
+                           TextWrapping="Wrap"
+                           Text="本软件不会收集课堂内容或可识别的个人信息。" />
+
+                <Button Grid.Column="1"
+                        Name="ButtonCancel"
+                        MinWidth="96"
+                        Height="32"
+                        Margin="0,0,8,0"
+                        Click="ButtonCancel_Click">
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cancel}" FontSize="12" />
+                        <TextBlock Text="取消" />
+                    </ikw:SimpleStackPanel>
                 </Button>
-                <Button Name="ButtonAccept"
-                        Content="同意" 
-                       
-                        Width="100" 
-                        Height="35"
-                        Click="ButtonAccept_Click"
-                        Background="{DynamicResource PrivacyAgreementWindowButtonAcceptBackground}"
-                        Foreground="{DynamicResource PrivacyAgreementWindowButtonAcceptForeground}"
-                        BorderBrush="{DynamicResource PrivacyAgreementWindowBorderBrush}"
-                        OverridesDefaultStyle="True">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border Background="{TemplateBinding Background}"
-                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                    CornerRadius="4">
-                                <ContentPresenter HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center"
-                                                  Margin="{TemplateBinding Padding}"
-                                                  RecognizesAccessKey="True"/>
-                            </Border>
-                        </ControlTemplate>
-                    </Button.Template>
+
+                <Button Grid.Column="2"
+                        Name="ButtonAccept"
+                        MinWidth="120"
+                        Height="32"
+                        IsDefault="True"
+                        Style="{DynamicResource AccentButtonStyle}"
+                        Click="ButtonAccept_Click">
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Accept}" FontSize="12" />
+                        <TextBlock Text="同意" />
+                    </ikw:SimpleStackPanel>
                 </Button>
-            </StackPanel>
-        </Grid>
+            </Grid>
+        </Border>
     </Grid>
 </Window>
-
