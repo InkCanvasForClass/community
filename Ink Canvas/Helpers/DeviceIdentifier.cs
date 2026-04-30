@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -119,114 +120,26 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         private static string GenerateHardwareFingerprint()
         {
-            // 收集硬件信息
             var hardwareInfo = new StringBuilder();
+            AppendFingerprintPart(hardwareInfo, "CPU",
+                GetWmiProperty("SELECT ProcessorId FROM Win32_Processor", "ProcessorId"),
+                GetRegistryValue(@"HARDWARE\DESCRIPTION\System\CentralProcessor\0", "ProcessorNameString"),
+                GetRegistryValue(@"HARDWARE\DESCRIPTION\System\CentralProcessor\0", "Identifier"));
 
-            try
-            {
-                var assembly = Assembly.Load("System.Management");
-                if (assembly != null)
-                {
-                    // CPU信息
-                    try
-                    {
-                        var searcherType = assembly.GetType("System.Management.ManagementObjectSearcher");
-                        var searcher = Activator.CreateInstance(searcherType, "SELECT ProcessorId FROM Win32_Processor");
-                        var getMethod = searcherType.GetMethod("Get");
-                        var enumerator = getMethod.Invoke(searcher, null);
+            AppendFingerprintPart(hardwareInfo, "BOARD",
+                GetWmiProperty("SELECT SerialNumber FROM Win32_BaseBoard", "SerialNumber"),
+                GetRegistryValue(@"HARDWARE\DESCRIPTION\System\BIOS", "BaseBoardSerialNumber"),
+                GetRegistryValue(@"HARDWARE\DESCRIPTION\System\BIOS", "BaseBoardProduct"));
 
-                        var moveNextMethod = enumerator.GetType().GetMethod("MoveNext");
-                        var currentProperty = enumerator.GetType().GetProperty("Current");
+            AppendFingerprintPart(hardwareInfo, "BIOS",
+                GetWmiProperty("SELECT SerialNumber FROM Win32_BIOS", "SerialNumber"),
+                GetRegistryValue(@"HARDWARE\DESCRIPTION\System\BIOS", "BIOSVersion"),
+                GetRegistryValue(@"HARDWARE\DESCRIPTION\System\BIOS", "BIOSVendor"));
 
-                        if ((bool)moveNextMethod.Invoke(enumerator, null))
-                        {
-                            var obj = currentProperty.GetValue(enumerator);
-                            var indexer = obj.GetType().GetProperty("Item", new[] { typeof(string) });
-                            var processorId = indexer.GetValue(obj, new object[] { "ProcessorId" });
-                            hardwareInfo.Append(processorId?.ToString() ?? "");
-                        }
-
-                        var disposeMethod = searcher.GetType().GetMethod("Dispose");
-                        disposeMethod?.Invoke(searcher, null);
-                    }
-                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
-
-                    // 主板序列号
-                    try
-                    {
-                        var searcherType = assembly.GetType("System.Management.ManagementObjectSearcher");
-                        var searcher = Activator.CreateInstance(searcherType, "SELECT SerialNumber FROM Win32_BaseBoard");
-                        var getMethod = searcherType.GetMethod("Get");
-                        var enumerator = getMethod.Invoke(searcher, null);
-
-                        var moveNextMethod = enumerator.GetType().GetMethod("MoveNext");
-                        var currentProperty = enumerator.GetType().GetProperty("Current");
-
-                        if ((bool)moveNextMethod.Invoke(enumerator, null))
-                        {
-                            var obj = currentProperty.GetValue(enumerator);
-                            var indexer = obj.GetType().GetProperty("Item", new[] { typeof(string) });
-                            var serialNumber = indexer.GetValue(obj, new object[] { "SerialNumber" });
-                            hardwareInfo.Append(serialNumber?.ToString() ?? "");
-                        }
-
-                        var disposeMethod = searcher.GetType().GetMethod("Dispose");
-                        disposeMethod?.Invoke(searcher, null);
-                    }
-                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
-
-                    // BIOS序列号
-                    try
-                    {
-                        var searcherType = assembly.GetType("System.Management.ManagementObjectSearcher");
-                        var searcher = Activator.CreateInstance(searcherType, "SELECT SerialNumber FROM Win32_BIOS");
-                        var getMethod = searcherType.GetMethod("Get");
-                        var enumerator = getMethod.Invoke(searcher, null);
-
-                        var moveNextMethod = enumerator.GetType().GetMethod("MoveNext");
-                        var currentProperty = enumerator.GetType().GetProperty("Current");
-
-                        if ((bool)moveNextMethod.Invoke(enumerator, null))
-                        {
-                            var obj = currentProperty.GetValue(enumerator);
-                            var indexer = obj.GetType().GetProperty("Item", new[] { typeof(string) });
-                            var serialNumber = indexer.GetValue(obj, new object[] { "SerialNumber" });
-                            hardwareInfo.Append(serialNumber?.ToString() ?? "");
-                        }
-
-                        var disposeMethod = searcher.GetType().GetMethod("Dispose");
-                        disposeMethod?.Invoke(searcher, null);
-                    }
-                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
-
-                    // 主硬盘序列号
-                    try
-                    {
-                        var searcherType = assembly.GetType("System.Management.ManagementObjectSearcher");
-                        var searcher = Activator.CreateInstance(searcherType, "SELECT SerialNumber FROM Win32_DiskDrive WHERE MediaType='Fixed hard disk media'");
-                        var getMethod = searcherType.GetMethod("Get");
-                        var enumerator = getMethod.Invoke(searcher, null);
-
-                        var moveNextMethod = enumerator.GetType().GetMethod("MoveNext");
-                        var currentProperty = enumerator.GetType().GetProperty("Current");
-
-                        if ((bool)moveNextMethod.Invoke(enumerator, null))
-                        {
-                            var obj = currentProperty.GetValue(enumerator);
-                            var indexer = obj.GetType().GetProperty("Item", new[] { typeof(string) });
-                            var serialNumber = indexer.GetValue(obj, new object[] { "SerialNumber" });
-                            hardwareInfo.Append(serialNumber?.ToString() ?? "");
-                        }
-
-                        var disposeMethod = searcher.GetType().GetMethod("Dispose");
-                        disposeMethod?.Invoke(searcher, null);
-                    }
-                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
-                }
-            }
-            catch
-            {
-            }
+            AppendFingerprintPart(hardwareInfo, "DISK",
+                GetWmiProperty("SELECT SerialNumber FROM Win32_DiskDrive WHERE MediaType='Fixed hard disk media'", "SerialNumber"),
+                GetSystemDriveVolumeSerial(),
+                GetRegistryValue(@"SOFTWARE\Microsoft\Cryptography", "MachineGuid"));
 
             if (hardwareInfo.Length < 10)
             {
@@ -237,6 +150,108 @@ namespace Ink_Canvas.Helpers
 
             return hardwareInfo.ToString();
         }
+
+        private static void AppendFingerprintPart(StringBuilder hardwareInfo, string key, params string[] candidates)
+        {
+            foreach (var candidate in candidates)
+            {
+                if (!string.IsNullOrWhiteSpace(candidate))
+                {
+                    hardwareInfo.Append(key).Append(':').Append(candidate.Trim()).Append(';');
+                    return;
+                }
+            }
+        }
+
+        private static string GetWmiProperty(string query, string propertyName)
+        {
+            try
+            {
+                var assembly = Assembly.Load("System.Management");
+                var searcherType = assembly?.GetType("System.Management.ManagementObjectSearcher");
+                if (searcherType == null)
+                {
+                    return null;
+                }
+
+                var searcher = Activator.CreateInstance(searcherType, query);
+                var getMethod = searcherType.GetMethod("Get");
+                var resultCollection = getMethod?.Invoke(searcher, null);
+                if (resultCollection == null)
+                {
+                    return null;
+                }
+
+                var enumerator = resultCollection.GetType().GetMethod("GetEnumerator")?.Invoke(resultCollection, null);
+                var moveNextMethod = enumerator?.GetType().GetMethod("MoveNext");
+                var currentProperty = enumerator?.GetType().GetProperty("Current");
+                if (enumerator == null || moveNextMethod == null || currentProperty == null)
+                {
+                    return null;
+                }
+
+                if (!(bool)moveNextMethod.Invoke(enumerator, null))
+                {
+                    return null;
+                }
+
+                var currentObject = currentProperty.GetValue(enumerator);
+                var indexer = currentObject?.GetType().GetProperty("Item", new[] { typeof(string) });
+                var result = indexer?.GetValue(currentObject, new object[] { propertyName })?.ToString();
+
+                searcher?.GetType().GetMethod("Dispose")?.Invoke(searcher, null);
+                return result;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static string GetRegistryValue(string subKey, string valueName)
+        {
+            try
+            {
+                return Microsoft.Win32.Registry.GetValue($@"HKEY_LOCAL_MACHINE\{subKey}", valueName, null)?.ToString();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static string GetSystemDriveVolumeSerial()
+        {
+            try
+            {
+                var rootPath = Path.GetPathRoot(Environment.SystemDirectory);
+                if (string.IsNullOrWhiteSpace(rootPath))
+                {
+                    return null;
+                }
+
+                if (GetVolumeInformation(rootPath, null, 0, out uint serialNumber, out _, out _, null, 0))
+                {
+                    return serialNumber.ToString("X8");
+                }
+            }
+            catch
+            {
+            }
+
+            return null;
+        }
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern bool GetVolumeInformation(
+            string rootPathName,
+            StringBuilder volumeNameBuffer,
+            uint volumeNameSize,
+            out uint volumeSerialNumber,
+            out uint maximumComponentLength,
+            out uint fileSystemFlags,
+            StringBuilder fileSystemNameBuffer,
+            uint nFileSystemNameSize);
 
         /// <summary>
         /// 基于硬件指纹生成25字符的设备ID
