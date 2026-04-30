@@ -568,6 +568,36 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
+        /// 刷新多屏相关设置（开关和跟随鼠标策略）。
+        /// </summary>
+        public void RefreshMultiScreenSettings()
+        {
+            try
+            {
+                var advanced = MainWindow.Settings.Advanced;
+                _isMultiScreenMode = advanced.EnableMultiScreenSupport && ScreenDetectionHelper.HasMultipleScreens();
+                _enableScreenSpecificHotkeys = _isMultiScreenMode;
+
+                if (_isMultiScreenMode)
+                {
+                    _currentScreen = advanced.FollowMouseForScreenSelection
+                        ? Screen.FromPoint(Control.MousePosition)
+                        : ScreenDetectionHelper.GetWindowScreen(_mainWindow);
+                }
+                else
+                {
+                    _currentScreen = ScreenDetectionHelper.GetPrimaryScreen();
+                }
+
+                RefreshHotkeysForCurrentScreen();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"刷新多屏设置时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
         /// 获取当前屏幕信息
         /// </summary>
         /// <returns>当前屏幕信息</returns>
@@ -624,13 +654,15 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                // 检测是否有多个屏幕
-                _isMultiScreenMode = ScreenDetectionHelper.HasMultipleScreens();
+                var advanced = MainWindow.Settings.Advanced;
+                _isMultiScreenMode = advanced.EnableMultiScreenSupport && ScreenDetectionHelper.HasMultipleScreens();
+                _enableScreenSpecificHotkeys = _isMultiScreenMode;
 
                 if (_isMultiScreenMode)
                 {
-                    // 获取当前窗口所在的屏幕
-                    _currentScreen = ScreenDetectionHelper.GetWindowScreen(_mainWindow);
+                    _currentScreen = advanced.FollowMouseForScreenSelection
+                        ? Screen.FromPoint(Control.MousePosition)
+                        : ScreenDetectionHelper.GetWindowScreen(_mainWindow);
 
                     // 监听窗口位置变化事件
                     _mainWindow.LocationChanged += OnWindowLocationChanged;
@@ -686,6 +718,9 @@ namespace Ink_Canvas.Helpers
             try
             {
                 if (!_isMultiScreenMode || !_enableScreenSpecificHotkeys)
+                    return;
+
+                if (MainWindow.Settings.Advanced.FollowMouseForScreenSelection)
                     return;
 
                 var newScreen = ScreenDetectionHelper.GetWindowScreen(_mainWindow);
@@ -800,9 +835,16 @@ namespace Ink_Canvas.Helpers
                 if (!_isMultiScreenMode || !_enableScreenSpecificHotkeys)
                     return;
 
-                // 检查鼠标是否在当前窗口所在的屏幕上
                 var mousePosition = Control.MousePosition;
-                var currentScreen = Screen.FromPoint(mousePosition);
+                var mouseScreen = Screen.FromPoint(mousePosition);
+
+                if (MainWindow.Settings.Advanced.FollowMouseForScreenSelection &&
+                    mouseScreen != null &&
+                    mouseScreen != _currentScreen)
+                {
+                    _currentScreen = mouseScreen;
+                    RefreshHotkeysForCurrentScreen();
+                }
 
                 // 无论屏幕是否变化，都检查热键状态
                 // 这样可以确保热键状态始终与当前上下文保持一致

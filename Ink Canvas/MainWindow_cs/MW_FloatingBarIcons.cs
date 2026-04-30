@@ -204,6 +204,10 @@ namespace Ink_Canvas
         /// 用于记录上次在PPT中的坐标
         /// </summary>
         private Point pointPPT = new Point(-1, -1);
+        private DispatcherTimer _floatingBarScreenFollowTimer;
+        private string _lastFloatingBarScreenDeviceName;
+        private string _lastCanvasScreenDeviceName;
+        private bool _isRebuildingCanvasForScreen;
 
         /// <summary>
         /// 浮动工具栏移动事件处理
@@ -1733,8 +1737,7 @@ namespace Ink_Canvas
                     dpiScaleY = source.CompositionTarget.TransformToDevice.M22;
                 }
 
-                var windowHandle = new WindowInteropHelper(this).Handle;
-                var screen = Screen.FromHandle(windowHandle);
+                var screen = GetFloatingBarTargetScreen();
                 double screenWidth, screenHeight;
                 double toolbarHeight;
                 if (Settings.Advanced.IsEnableAvoidFullScreenHelper && PosXCaculatedWithTaskbarHeight)
@@ -1889,8 +1892,7 @@ namespace Ink_Canvas
                     dpiScaleY = source.CompositionTarget.TransformToDevice.M22;
                 }
 
-                var windowHandle = new WindowInteropHelper(this).Handle;
-                var screen = Screen.FromHandle(windowHandle);
+                var screen = GetFloatingBarTargetScreen();
                 double screenWidth, screenHeight;
                 double toolbarHeight;
                 if (Settings.Advanced.IsEnableAvoidFullScreenHelper)
@@ -2008,8 +2010,7 @@ namespace Ink_Canvas
                     dpiScaleY = source.CompositionTarget.TransformToDevice.M22;
                 }
 
-                var windowHandle = new WindowInteropHelper(this).Handle;
-                var screen = Screen.FromHandle(windowHandle);
+                var screen = GetFloatingBarTargetScreen();
                 double screenWidth = screen.Bounds.Width / dpiScaleX, screenHeight = screen.Bounds.Height / dpiScaleY;
                 // 仅计算Windows任务栏高度，不考虑其他程序对工作区的影响
                 var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
@@ -2101,6 +2102,203 @@ namespace Ink_Canvas
                 {
                     PureViewboxFloatingBarMarginAnimationInPPTMode(true);
                 }
+            }
+        }
+
+        private Screen GetFloatingBarTargetScreen()
+        {
+            try
+            {
+                if (Settings.Advanced.EnableMultiScreenSupport &&
+                    Settings.Advanced.FollowMouseForScreenSelection &&
+                    ScreenDetectionHelper.HasMultipleScreens())
+                {
+                    var mouseScreen = Screen.FromPoint(System.Windows.Forms.Control.MousePosition);
+                    if (mouseScreen != null)
+                    {
+                        return mouseScreen;
+                    }
+                }
+
+                var windowHandle = new WindowInteropHelper(this).Handle;
+                return Screen.FromHandle(windowHandle);
+            }
+            catch
+            {
+                return Screen.PrimaryScreen;
+            }
+        }
+
+        private Screen GetCurrentFloatingBarScreen()
+        {
+            try
+            {
+                if (ViewboxFloatingBar == null || !IsLoaded)
+                {
+                    return null;
+                }
+
+                var center = ViewboxFloatingBar.PointToScreen(new Point(
+                    Math.Max(0, ViewboxFloatingBar.ActualWidth / 2),
+                    Math.Max(0, ViewboxFloatingBar.ActualHeight / 2)));
+                return Screen.FromPoint(new System.Drawing.Point((int)center.X, (int)center.Y));
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        internal void RefreshFloatingBarScreenFollowState()
+        {
+            try
+            {
+                var enableFollow = Settings.Advanced.EnableMultiScreenSupport &&
+                                   Settings.Advanced.FollowMouseForScreenSelection &&
+                                   ScreenDetectionHelper.HasMultipleScreens();
+
+                if (!enableFollow)
+                {
+                    _floatingBarScreenFollowTimer?.Stop();
+                    _lastFloatingBarScreenDeviceName = null;
+                    return;
+                }
+
+                if (_floatingBarScreenFollowTimer == null)
+                {
+                    _floatingBarScreenFollowTimer = new DispatcherTimer
+                    {
+                        Interval = TimeSpan.FromMilliseconds(350)
+                    };
+                    _floatingBarScreenFollowTimer.Tick += FloatingBarScreenFollowTimer_Tick;
+                }
+
+                _lastFloatingBarScreenDeviceName = GetCurrentFloatingBarScreen()?.DeviceName;
+                _lastCanvasScreenDeviceName = _lastFloatingBarScreenDeviceName;
+
+                if (!_floatingBarScreenFollowTimer.IsEnabled)
+                {
+                    _floatingBarScreenFollowTimer.Start();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"刷新浮动栏多屏跟随状态失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        private void FloatingBarScreenFollowTimer_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!Settings.Advanced.EnableMultiScreenSupport ||
+                    !Settings.Advanced.FollowMouseForScreenSelection ||
+                    !ScreenDetectionHelper.HasMultipleScreens())
+                {
+                    _floatingBarScreenFollowTimer?.Stop();
+                    _lastFloatingBarScreenDeviceName = null;
+                    return;
+                }
+
+                if (currentMode == 1 || isDragDropInEffect || ViewboxFloatingBar.Visibility != Visibility.Visible)
+                {
+                    return;
+                }
+
+                var mouseScreen = Screen.FromPoint(System.Windows.Forms.Control.MousePosition);
+                var currentFloatingBarScreen = GetCurrentFloatingBarScreen();
+
+                if (mouseScreen == null || currentFloatingBarScreen == null)
+                {
+                    return;
+                }
+
+                if (mouseScreen.DeviceName == currentFloatingBarScreen.DeviceName)
+                {
+                    _lastFloatingBarScreenDeviceName = currentFloatingBarScreen.DeviceName;
+                    return;
+                }
+
+                if (mouseScreen.DeviceName == _lastFloatingBarScreenDeviceName)
+                {
+                    return;
+                }
+
+                _lastFloatingBarScreenDeviceName = mouseScreen.DeviceName;
+                RebuildCanvasOnTargetScreen(mouseScreen);
+
+                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                {
+                    PureViewboxFloatingBarMarginAnimationInPPTMode();
+                }
+                else
+                {
+                    PureViewboxFloatingBarMarginAnimationInDesktopMode();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"浮动栏跨屏跟随失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        private void RebuildCanvasOnTargetScreen(Screen targetScreen)
+        {
+            try
+            {
+                if (targetScreen == null || _isRebuildingCanvasForScreen)
+                {
+                    return;
+                }
+
+                if (_lastCanvasScreenDeviceName == targetScreen.DeviceName)
+                {
+                    return;
+                }
+
+                _isRebuildingCanvasForScreen = true;
+
+                double dpiScaleX = 1, dpiScaleY = 1;
+                var source = PresentationSource.FromVisual(this);
+                if (source?.CompositionTarget != null)
+                {
+                    dpiScaleX = source.CompositionTarget.TransformToDevice.M11;
+                    dpiScaleY = source.CompositionTarget.TransformToDevice.M22;
+                }
+
+                // 先移动主窗口到目标屏，确保画布承载区域切换到新屏幕。
+                MainWindow.MoveWindow(
+                    new WindowInteropHelper(this).Handle,
+                    targetScreen.Bounds.X,
+                    targetScreen.Bounds.Y,
+                    targetScreen.Bounds.Width,
+                    targetScreen.Bounds.Height,
+                    true);
+
+                // 重新铺设画布尺寸，强制触发布局刷新。
+                inkCanvas.Width = targetScreen.Bounds.Width / dpiScaleX;
+                inkCanvas.Height = targetScreen.Bounds.Height / dpiScaleY;
+                inkCanvas.InvalidateMeasure();
+                inkCanvas.InvalidateArrange();
+                inkCanvas.UpdateLayout();
+
+                if (GridInkCanvasSelectionCover != null)
+                {
+                    GridInkCanvasSelectionCover.Width = inkCanvas.Width;
+                    GridInkCanvasSelectionCover.Height = inkCanvas.Height;
+                    GridInkCanvasSelectionCover.InvalidateMeasure();
+                    GridInkCanvasSelectionCover.InvalidateArrange();
+                }
+
+                _lastCanvasScreenDeviceName = targetScreen.DeviceName;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"在新屏重建画布失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+            finally
+            {
+                _isRebuildingCanvasForScreen = false;
             }
         }
 

@@ -618,6 +618,8 @@ namespace Ink_Canvas
                 ViewboxFloatingBarMarginAnimation(100, true);
             }
 
+            RefreshFloatingBarScreenFollowState();
+
         }
 
         /// <summary>

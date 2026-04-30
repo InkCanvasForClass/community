@@ -731,6 +731,12 @@ namespace Ink_Canvas
 
         [JsonProperty("windowMode")]
         public bool WindowMode { get; set; } = true;
+
+        [JsonProperty("enableMultiScreenSupport")]
+        public bool EnableMultiScreenSupport { get; set; } = true;
+
+        [JsonProperty("followMouseForScreenSelection")]
+        public bool FollowMouseForScreenSelection { get; set; } = true;
     }
 
     public class InkToShape

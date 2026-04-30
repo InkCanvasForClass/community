@@ -57,6 +57,21 @@
                             SwitchName="ToggleSwitchAvoidFullScreen"
                             Toggled="ToggleSwitchAvoidFullScreen_Toggled" />
 
+                    <controls:LabeledSettingsCard x:Name="CardMultiScreenSupport"
+                            Header="多屏支持"
+                            Description="启用后将根据当前显示器环境启用多屏逻辑"
+                            Icon="{x:Static ui:SegoeFluentIcons.BackToWindow}"
+                            SwitchName="ToggleSwitchMultiScreenSupport"
+                            Toggled="ToggleSwitchMultiScreenSupport_Toggled" />
+
+                    <controls:LabeledSettingsCard x:Name="CardFollowMouseScreen"
+                            Header="自动跟随鼠标选择显示屏"
+                            Description="默认开启：自动以鼠标所在显示屏作为当前目标显示屏"
+                            Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
+                            Visibility="{Binding IsOn, ElementName=CardMultiScreenSupport, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            SwitchName="ToggleSwitchFollowMouseScreen"
+                            Toggled="ToggleSwitchFollowMouseScreen_Toggled" />
+
                     <ui:SettingsExpander x:Name="ExpanderAlwaysOnTop"
                             Header="{i18n:I18n Key=Startup_TopMost}"
                             Description="{i18n:I18n Key=Startup_TopMostHint}"

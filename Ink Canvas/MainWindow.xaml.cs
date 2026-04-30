@@ -2548,6 +2548,22 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 应用多屏设置到全局热键管理器。
+        /// </summary>
+        public void ApplyMultiScreenSettings()
+        {
+            try
+            {
+                _globalHotkeyManager?.RefreshMultiScreenSettings();
+                RefreshFloatingBarScreenFollowState();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"应用多屏设置时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
         /// 打开快捷键设置窗口
         /// </summary>
         private void OpenHotkeySettingsWindow()

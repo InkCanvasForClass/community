@@ -823,6 +823,8 @@ namespace Ink_Canvas
             Settings.Advanced.IsEnableForceFullScreen = false;
             Settings.Advanced.IsEnableDPIChangeDetection = false;
             Settings.Advanced.IsEnableResolutionChangeDetection = false;
+            Settings.Advanced.EnableMultiScreenSupport = true;
+            Settings.Advanced.FollowMouseForScreenSelection = true;
 
             Settings.Appearance.IsEnableDisPlayNibModeToggler = false;
             Settings.Appearance.IsColorfulViewboxFloatingBar = false;

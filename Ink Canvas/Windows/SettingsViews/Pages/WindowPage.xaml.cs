@@ -42,6 +42,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     CardNoFocusMode.IsOn = settings.Advanced.IsNoFocusMode;
                     CardWindowMode.IsOn = settings.Advanced.WindowMode;
                     CardAvoidFullScreen.IsOn = settings.Advanced.IsEnableAvoidFullScreenHelper;
+                    CardMultiScreenSupport.IsOn = settings.Advanced.EnableMultiScreenSupport;
+                    CardFollowMouseScreen.IsOn = settings.Advanced.FollowMouseForScreenSelection;
                     ToggleSwitchAlwaysOnTop.IsOn = settings.Advanced.IsAlwaysOnTop;
 
                     _topMostModeItems.Clear();
@@ -212,6 +214,48 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 Debug.WriteLine($"设置窗口置顶时出错: {ex.Message}");
+            }
+        }
+
+        private void ToggleSwitchMultiScreenSupport_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+
+            try
+            {
+                bool newState = CardMultiScreenSupport.IsOn;
+                SettingsManager.Settings.Advanced.EnableMultiScreenSupport = newState;
+                SettingsManager.SaveSettingsToFile();
+
+                if (Application.Current.MainWindow is MainWindow mainWindow)
+                {
+                    mainWindow.ApplyMultiScreenSettings();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"设置多屏支持时出错: {ex.Message}");
+            }
+        }
+
+        private void ToggleSwitchFollowMouseScreen_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+
+            try
+            {
+                bool newState = CardFollowMouseScreen.IsOn;
+                SettingsManager.Settings.Advanced.FollowMouseForScreenSelection = newState;
+                SettingsManager.SaveSettingsToFile();
+
+                if (Application.Current.MainWindow is MainWindow mainWindow)
+                {
+                    mainWindow.ApplyMultiScreenSettings();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"设置自动跟随鼠标选择显示屏时出错: {ex.Message}");
             }
         }
 
