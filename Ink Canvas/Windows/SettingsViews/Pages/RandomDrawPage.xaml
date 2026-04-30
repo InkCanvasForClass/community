@@ -64,19 +64,27 @@
                     </ui:SettingsCard>
 
                     <ui:SettingsCard Header="{i18n:I18n Key=Random_OnceCloseDelay}">
-                        <Slider x:Name="RandWindowOnceCloseLatencySlider"
-                                Minimum="0.5" Maximum="8" Width="200"
-                                IsSnapToTickEnabled="True" Value="2.5"
-                                TickFrequency="0.1" TickPlacement="None"
-                                ValueChanged="RandWindowOnceCloseLatencySlider_ValueChanged" />
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding ElementName=RandWindowOnceCloseLatencySlider, Path=Value, StringFormat={}{0:F1}}"
+                                       VerticalAlignment="Center" FontFamily="Consolas"/>
+                            <Slider x:Name="RandWindowOnceCloseLatencySlider"
+                                    Minimum="0.5" Maximum="8" Width="200"
+                                    IsSnapToTickEnabled="True" Value="2.5"
+                                    TickFrequency="0.1" TickPlacement="None"
+                                    ValueChanged="RandWindowOnceCloseLatencySlider_ValueChanged" />
+                        </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
                     <ui:SettingsCard Header="{i18n:I18n Key=Random_OnceMaxStudents}">
-                        <Slider x:Name="RandWindowOnceMaxStudentsSlider"
-                                Minimum="0" Maximum="20" Width="200"
-                                IsSnapToTickEnabled="True" Value="10" TickFrequency="1"
-                                TickPlacement="None"
-                                ValueChanged="RandWindowOnceMaxStudentsSlider_ValueChanged" />
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding ElementName=RandWindowOnceMaxStudentsSlider, Path=Value}"
+                                       VerticalAlignment="Center" FontFamily="Consolas"/>
+                            <Slider x:Name="RandWindowOnceMaxStudentsSlider"
+                                    Minimum="0" Maximum="20" Width="200"
+                                    IsSnapToTickEnabled="True" Value="10" TickFrequency="1"
+                                    TickPlacement="None"
+                                    ValueChanged="RandWindowOnceMaxStudentsSlider_ValueChanged" />
+                        </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
@@ -109,19 +117,27 @@
                         Toggled="ToggleSwitchEnableMLAvoidance_Toggled"/>
 
                     <ui:SettingsCard Header="{i18n:I18n Key=Random_ML_HistoryCount}">
-                        <Slider x:Name="MLAvoidanceHistorySlider"
-                                Minimum="5" Maximum="50" Width="200"
-                                IsSnapToTickEnabled="True" Value="50" TickFrequency="5"
-                                TickPlacement="None"
-                                ValueChanged="MLAvoidanceHistorySlider_ValueChanged" />
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding ElementName=MLAvoidanceHistorySlider, Path=Value}"
+                                       VerticalAlignment="Center" FontFamily="Consolas"/>
+                            <Slider x:Name="MLAvoidanceHistorySlider"
+                                    Minimum="5" Maximum="50" Width="200"
+                                    IsSnapToTickEnabled="True" Value="50" TickFrequency="5"
+                                    TickPlacement="None"
+                                    ValueChanged="MLAvoidanceHistorySlider_ValueChanged" />
+                        </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
                     <ui:SettingsCard Header="{i18n:I18n Key=Random_ML_Weight}">
-                        <Slider x:Name="MLAvoidanceWeightSlider"
-                                Minimum="0.1" Maximum="1.0" Width="200"
-                                IsSnapToTickEnabled="True" Value="1.0" TickFrequency="0.1"
-                                TickPlacement="None"
-                                ValueChanged="MLAvoidanceWeightSlider_ValueChanged" />
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding ElementName=MLAvoidanceWeightSlider, Path=Value, StringFormat={}{0:F1}}"
+                                       VerticalAlignment="Center" FontFamily="Consolas"/>
+                            <Slider x:Name="MLAvoidanceWeightSlider"
+                                    Minimum="0.1" Maximum="1.0" Width="200"
+                                    IsSnapToTickEnabled="True" Value="1.0" TickFrequency="0.1"
+                                    TickPlacement="None"
+                                    ValueChanged="MLAvoidanceWeightSlider_ValueChanged" />
+                        </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
                     <TextBlock Text="{i18n:I18n Key=Random_ML_Hint}"
@@ -152,11 +168,15 @@
                         Toggled="ToggleSwitchEnableOvertimeRedText_Toggled"/>
 
                     <ui:SettingsCard Header="{i18n:I18n Key=Timer_Volume}">
-                        <Slider x:Name="TimerVolumeSlider"
-                                Minimum="0" Maximum="1" Width="200"
-                                IsSnapToTickEnabled="True" Value="1" TickFrequency="0.1"
-                                TickPlacement="None"
-                                ValueChanged="TimerVolumeSlider_ValueChanged" />
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding ElementName=TimerVolumeSlider, Path=Value, StringFormat={}{0:F1}}"
+                                       VerticalAlignment="Center" FontFamily="Consolas"/>
+                            <Slider x:Name="TimerVolumeSlider"
+                                    Minimum="0" Maximum="1" Width="200"
+                                    IsSnapToTickEnabled="True" Value="1" TickFrequency="0.1"
+                                    TickPlacement="None"
+                                    ValueChanged="TimerVolumeSlider_ValueChanged" />
+                        </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
                     <ui:SettingsCard Header="{i18n:I18n Key=Timer_CustomSoundLabel}">
@@ -172,11 +192,15 @@
                         Toggled="ToggleSwitchEnableProgressiveReminder_Toggled"/>
 
                     <ui:SettingsCard Header="{i18n:I18n Key=Timer_ProgressiveVolume}">
-                        <Slider x:Name="ProgressiveReminderVolumeSlider"
-                                Minimum="0" Maximum="1" Width="200"
-                                IsSnapToTickEnabled="True" Value="1" TickFrequency="0.1"
-                                TickPlacement="None"
-                                ValueChanged="ProgressiveReminderVolumeSlider_ValueChanged" />
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding ElementName=ProgressiveReminderVolumeSlider, Path=Value, StringFormat={}{0:F1}}"
+                                       VerticalAlignment="Center" FontFamily="Consolas"/>
+                            <Slider x:Name="ProgressiveReminderVolumeSlider"
+                                    Minimum="0" Maximum="1" Width="200"
+                                    IsSnapToTickEnabled="True" Value="1" TickFrequency="0.1"
+                                    TickPlacement="None"
+                                    ValueChanged="ProgressiveReminderVolumeSlider_ValueChanged" />
+                        </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
                     <ui:SettingsCard Header="{i18n:I18n Key=Timer_ProgressiveCustomLabel}">
