@@ -145,43 +145,43 @@
                 </ui:SettingsExpander>
 
                 <!-- 日志 -->
-                <ui:SettingsExpander x:Name="LogsExpander"
-                                     Header="{i18n:I18n Key=Storage_Logs_Header}"
-                                     Description="{i18n:I18n Key=Storage_Logs_Desc}">
-                    <ui:SettingsExpander.HeaderIcon>
+                <ui:SettingsCard x:Name="LogsExpander"
+                                 Header="{i18n:I18n Key=Storage_Logs_Header}"
+                                 Description="{i18n:I18n Key=Storage_Logs_Desc}">
+                    <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.OpenFile}"/>
-                    </ui:SettingsExpander.HeaderIcon>
+                    </ui:SettingsCard.HeaderIcon>
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                         <TextBlock x:Name="LogsSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
                         <Button x:Name="BtnCleanLogs" Content="{i18n:I18n Key=Storage_Clean}" Click="BtnCleanLogs_Click"/>
                     </ikw:SimpleStackPanel>
-                </ui:SettingsExpander>
+                </ui:SettingsCard>
 
                 <!-- 墨迹 -->
-                <ui:SettingsExpander x:Name="InkExpander"
-                                     Header="{i18n:I18n Key=Storage_Ink_Header}"
-                                     Description="{i18n:I18n Key=Storage_Ink_Desc}">
-                    <ui:SettingsExpander.HeaderIcon>
+                <ui:SettingsCard x:Name="InkExpander"
+                                 Header="{i18n:I18n Key=Storage_Ink_Header}"
+                                 Description="{i18n:I18n Key=Storage_Ink_Desc}">
+                    <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
-                    </ui:SettingsExpander.HeaderIcon>
+                    </ui:SettingsCard.HeaderIcon>
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                         <TextBlock x:Name="InkSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
                         <Button x:Name="BtnCleanInk" Content="{i18n:I18n Key=Storage_Clean}" Click="BtnCleanInk_Click"/>
                     </ikw:SimpleStackPanel>
-                </ui:SettingsExpander>
+                </ui:SettingsCard>
 
                 <!-- 备份 -->
-                <ui:SettingsExpander x:Name="BackupsExpander"
-                                     Header="{i18n:I18n Key=Storage_Backups_Header}"
-                                     Description="{i18n:I18n Key=Storage_Backups_Desc}">
-                    <ui:SettingsExpander.HeaderIcon>
+                <ui:SettingsCard x:Name="BackupsExpander"
+                                 Header="{i18n:I18n Key=Storage_Backups_Header}"
+                                 Description="{i18n:I18n Key=Storage_Backups_Desc}">
+                    <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}"/>
-                    </ui:SettingsExpander.HeaderIcon>
+                    </ui:SettingsCard.HeaderIcon>
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                         <TextBlock x:Name="BackupsSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
                         <Button x:Name="BtnCleanBackups" Content="{i18n:I18n Key=Storage_Clean}" Click="BtnCleanBackups_Click"/>
                     </ikw:SimpleStackPanel>
-                </ui:SettingsExpander>
+                </ui:SettingsCard>
 
                 <!-- 自定义文件 -->
                 <ui:SettingsExpander x:Name="CustomExpander"
@@ -210,17 +210,17 @@
                 </ui:SettingsExpander>
 
                 <!-- 自动更新 -->
-                <ui:SettingsExpander x:Name="UpdateExpander"
-                                     Header="{i18n:I18n Key=Storage_Update_Header}"
-                                     Description="{i18n:I18n Key=Storage_Update_Desc}">
-                    <ui:SettingsExpander.HeaderIcon>
+                <ui:SettingsCard x:Name="UpdateExpander"
+                                 Header="{i18n:I18n Key=Storage_Update_Header}"
+                                 Description="{i18n:I18n Key=Storage_Update_Desc}">
+                    <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}"/>
-                    </ui:SettingsExpander.HeaderIcon>
+                    </ui:SettingsCard.HeaderIcon>
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                         <TextBlock x:Name="UpdateSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
                         <Button x:Name="BtnCleanUpdate" Content="{i18n:I18n Key=Storage_Clean}" Click="BtnCleanUpdate_Click"/>
                     </ikw:SimpleStackPanel>
-                </ui:SettingsExpander>
+                </ui:SettingsCard>
 
                 <!-- 其他 -->
                 <ui:SettingsExpander x:Name="OtherExpander"
