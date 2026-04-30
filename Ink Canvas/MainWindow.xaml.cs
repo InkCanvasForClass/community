@@ -4,7 +4,6 @@ using Ink_Canvas.Windows.SettingsViews.Helpers;
 using iNKORE.UI.WPF.Modern;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Win32;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -1222,7 +1221,6 @@ namespace Ink_Canvas
             }), DispatcherPriority.ApplicationIdle);
 
             isLoaded = true;
-            EnsureRealtimeStylusPipelineBinding();
             BlackBoardLeftSidePageListView.ItemsSource = blackBoardSidePageListViewObservableCollection;
             BlackBoardRightSidePageListView.ItemsSource = blackBoardSidePageListViewObservableCollection;
 

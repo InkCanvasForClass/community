@@ -50,7 +50,7 @@ namespace Ink_Canvas
         private InkCanvasEditingMode palmEraserPreviousEditingMode = InkCanvasEditingMode.Ink;
         private readonly Dictionary<int, RealtimeBrushTipState> _realtimeBrushTipStates = new Dictionary<int, RealtimeBrushTipState>();
         private readonly Guid RealtimeVelocityBrushTipAppliedGuid = new Guid("74E57D95-945F-4A8C-B52A-7D3EF2D4FD5B");
-        internal const int MouseRealtimeStrokeId = -100001;
+
         private sealed class OneEuroFilter
         {
             private readonly float _minCutoff;
@@ -102,7 +102,6 @@ namespace Ink_Canvas
             public float LastRawY { get; set; }
             public long LastTimestampMs { get; set; }
             public float SmoothedSampleRateHz { get; set; } = 120f;
-            public bool SawPressureVariation { get; set; }
             public bool HasSeed { get; set; }
             public float LastSmoothX { get; set; }
             public float LastSmoothY { get; set; }
@@ -121,44 +120,12 @@ namespace Ink_Canvas
             return x;
         }
 
-        private static float WidthToPressure(float width, float baseWidth)
-        {
-            if (baseWidth <= 1e-4f) return 0.5f;
-            var scale = width / baseWidth;
-            return RealtimeClamp((scale - 0.42f) / 1.16f, 0.08f, 1f);
-        }
-
         private bool ShouldUseRealtimeVelocityBrushTip()
         {
             return Settings.Canvas.InkStyle == 3
                 && Settings.Canvas.VelocityBrushTipMix > 0
-                && !Settings.Canvas.DisablePressure;
-        }
-
-        internal void EnsureRealtimeStylusPipelineBinding()
-        {
-            if (inkCanvas == null) return;
-
-            inkCanvas.StylusDown -= MainWindow_StylusDown;
-            inkCanvas.StylusMove -= MainWindow_StylusMove;
-            inkCanvas.StylusUp -= MainWindow_StylusUp;
-
-            inkCanvas.StylusDown += MainWindow_StylusDown;
-            inkCanvas.StylusMove += MainWindow_StylusMove;
-            inkCanvas.StylusUp += MainWindow_StylusUp;
-
-            if (ShouldUseRealtimeVelocityBrushTip()
-                && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
-                && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
-                && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
-            {
-                inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            }
-            else if (!ShouldUseRealtimeVelocityBrushTip()
-                     && inkCanvas.EditingMode == InkCanvasEditingMode.None)
-            {
-                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-            }
+                && !Settings.Canvas.DisablePressure
+                && penType == 0;
         }
 
         private void InitializeRealtimeBrushTipState(int stylusId, StylusDownEventArgs e)
@@ -171,22 +138,6 @@ namespace Ink_Canvas
 
             var startPoint = e.GetPosition(this);
             _realtimeBrushTipStates[stylusId] = new RealtimeBrushTipState
-            {
-                LastRawX = (float)startPoint.X,
-                LastRawY = (float)startPoint.Y,
-                LastTimestampMs = RealtimeNowMs()
-            };
-        }
-
-        private void InitializeRealtimeBrushTipStateFromPoint(int strokeId, Point startPoint)
-        {
-            if (!ShouldUseRealtimeVelocityBrushTip())
-            {
-                _realtimeBrushTipStates.Remove(strokeId);
-                return;
-            }
-
-            _realtimeBrushTipStates[strokeId] = new RealtimeBrushTipState
             {
                 LastRawX = (float)startPoint.X,
                 LastRawY = (float)startPoint.Y,
@@ -213,8 +164,6 @@ namespace Ink_Canvas
 
             var mix = RealtimeClamp((float)Settings.Canvas.VelocityBrushTipMix, 0f, 1f);
             var appended = false;
-            var baseWidth = (float)Math.Max(0.35,
-                strokeVisual.Stroke?.DrawingAttributes?.Width ?? inkCanvas.DefaultDrawingAttributes.Width);
 
             foreach (StylusPoint rawPoint in stylusPointCollection)
             {
@@ -234,24 +183,15 @@ namespace Ink_Canvas
                 var filteredX = state.FilterX.Filter(rawX, dt, speed);
                 var filteredY = state.FilterY.Filter(rawY, dt, speed);
 
-                var hwPressure = RealtimeClamp((float)rawPoint.PressureFactor, 0f, 1f);
-                if (Math.Abs(hwPressure - 0.5f) > 0.02f)
-                    state.SawPressureVariation = true;
-                var usePressure = state.SawPressureVariation && hwPressure > 0f;
-
-                var width = baseWidth;
-                if (usePressure)
-                    width *= 0.25f + 0.75f * hwPressure;
-                var speedNormalization = 1800f + state.SmoothedSampleRateHz * 3.5f;
-                width *= RealtimeClamp(1.15f - (speed / speedNormalization), 0.45f, 1.25f);
-                var speedPressure = WidthToPressure(width, baseWidth);
-
-                var pressure = usePressure
-                    ? ((1f - mix) * hwPressure + mix * speedPressure)
-                    : speedPressure;
+                var speedPressure = RealtimeBrushTipMixRatePressureFromSpeed(GetPointSpeed(
+                    new Point(state.LastRawX, state.LastRawY),
+                    new Point(rawX, rawY),
+                    new Point(filteredX, filteredY)));
+                var pressure = (1f - mix) * (float)rawPoint.PressureFactor + mix * speedPressure;
                 pressure = RealtimeClamp(pressure, 0.08f, 1f);
                 pressure = state.FilterPressure.Filter(pressure, dt, speed);
 
+                // 高频采样时做最小距离门限，避免点爆炸导致实时重绘卡顿
                 var minDist = state.SmoothedSampleRateHz > 160f ? 0.55f
                     : state.SmoothedSampleRateHz > 90f ? 0.4f
                     : 0.25f;
@@ -273,6 +213,7 @@ namespace Ink_Canvas
                 }
                 else
                 {
+                    // 采用中点链减抖：保持实时笔锋同时降低折线锯齿
                     var midX = (state.LastSmoothX + filteredX) * 0.5f;
                     var midY = (state.LastSmoothY + filteredY) * 0.5f;
                     var midPressure = (state.LastSmoothPressure + pressure) * 0.5f;
@@ -297,86 +238,6 @@ namespace Ink_Canvas
                     committedStroke.AddPropertyData(RealtimeVelocityBrushTipAppliedGuid, true);
             }
 
-            return true;
-        }
-
-        private bool TryAppendRealtimeVelocityBrushTipPoint(StrokeVisual strokeVisual, int strokeId, Point point, float rawPressure = 0.5f)
-        {
-            if (!ShouldUseRealtimeVelocityBrushTip() || strokeVisual == null)
-                return false;
-            if (!_realtimeBrushTipStates.TryGetValue(strokeId, out var state))
-                return false;
-
-            var mix = RealtimeClamp((float)Settings.Canvas.VelocityBrushTipMix, 0f, 1f);
-            var nowMs = RealtimeNowMs();
-            var dtMs = Math.Max(1L, nowMs - state.LastTimestampMs);
-            var dt = dtMs / 1000f;
-            var sampleRate = 1f / Math.Max(1e-4f, dt);
-            state.SmoothedSampleRateHz = state.SmoothedSampleRateHz * 0.85f + sampleRate * 0.15f;
-            var baseWidth = (float)Math.Max(0.35,
-                strokeVisual.Stroke?.DrawingAttributes?.Width ?? inkCanvas.DefaultDrawingAttributes.Width);
-
-            var rawX = (float)point.X;
-            var rawY = (float)point.Y;
-            var dx = rawX - state.LastRawX;
-            var dy = rawY - state.LastRawY;
-            var dist = (float)Math.Sqrt(dx * dx + dy * dy);
-            var speed = dist / dt;
-
-            var filteredX = state.FilterX.Filter(rawX, dt, speed);
-            var filteredY = state.FilterY.Filter(rawY, dt, speed);
-
-            rawPressure = RealtimeClamp(rawPressure, 0f, 1f);
-            if (Math.Abs(rawPressure - 0.5f) > 0.02f)
-                state.SawPressureVariation = true;
-            var usePressure = state.SawPressureVariation && rawPressure > 0f;
-
-            var width = baseWidth;
-            if (usePressure)
-                width *= 0.25f + 0.75f * rawPressure;
-            var speedNormalization = 1800f + state.SmoothedSampleRateHz * 3.5f;
-            width *= RealtimeClamp(1.15f - (speed / speedNormalization), 0.45f, 1.25f);
-            var speedPressure = WidthToPressure(width, baseWidth);
-
-            var pressure = usePressure
-                ? ((1f - mix) * rawPressure + mix * speedPressure)
-                : speedPressure;
-            pressure = RealtimeClamp(pressure, 0.08f, 1f);
-            pressure = state.FilterPressure.Filter(pressure, dt, speed);
-
-            var minDist = state.SmoothedSampleRateHz > 160f ? 0.55f
-                : state.SmoothedSampleRateHz > 90f ? 0.4f
-                : 0.25f;
-            if (dist < minDist && state.HasSeed)
-            {
-                state.LastRawX = rawX;
-                state.LastRawY = rawY;
-                state.LastTimestampMs = nowMs;
-                return true;
-            }
-
-            if (!state.HasSeed)
-            {
-                state.HasSeed = true;
-                state.LastSmoothX = filteredX;
-                state.LastSmoothY = filteredY;
-                state.LastSmoothPressure = pressure;
-                strokeVisual.Add(new StylusPoint(filteredX, filteredY, pressure));
-            }
-            else
-            {
-                var midX = (state.LastSmoothX + filteredX) * 0.5f;
-                var midY = (state.LastSmoothY + filteredY) * 0.5f;
-                var midPressure = (state.LastSmoothPressure + pressure) * 0.5f;
-                strokeVisual.Add(new StylusPoint(midX, midY, midPressure));
-                state.LastSmoothX = filteredX;
-                state.LastSmoothY = filteredY;
-                state.LastSmoothPressure = pressure;
-            }
-
-            state.LastRawX = rawX;
-            state.LastRawY = rawY;
-            state.LastTimestampMs = nowMs;
             return true;
         }
 
@@ -705,9 +566,7 @@ namespace Ink_Canvas
                 }
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
                 {
-                    inkCanvas.EditingMode = ShouldUseRealtimeVelocityBrushTip()
-                        ? InkCanvasEditingMode.None
-                        : InkCanvasEditingMode.Ink;
+                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                 }
                 else
                 {
@@ -895,11 +754,7 @@ namespace Ink_Canvas
                         strokeVisual.Add(new StylusPoint(stylusPoint.X, stylusPoint.Y, stylusPoint.PressureFactor));
                 }
 
-                if (isHandledByRealtime)
-                    strokeVisual.ForceRedraw();
-                else
-                    strokeVisual.Redraw();
-
+                strokeVisual.Redraw();
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }

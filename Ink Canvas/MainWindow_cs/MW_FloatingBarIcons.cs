@@ -2245,8 +2245,7 @@ namespace Ink_Canvas
             SetFloatingBarHighlightPosition("pen");
 
             // 记录当前是否已经是批注模式且是否为高光显示模式
-            bool wasInInkMode = inkCanvas.EditingMode == InkCanvasEditingMode.Ink
-                                || (Pen_Icon.Background != null && StackPanelCanvasControls.Visibility == Visibility.Visible);
+            bool wasInInkMode = inkCanvas.EditingMode == InkCanvasEditingMode.Ink;
             bool wasHighlighter = drawingAttributes.IsHighlighter;
 
             if (drawingShapeMode != 0 && !isLongPressSelected)
@@ -2451,8 +2450,6 @@ namespace Ink_Canvas
             forceEraser = false;
             forcePointEraser = false;
             drawingShapeMode = 0;
-
-            EnsureRealtimeStylusPipelineBinding();
         }
 
         /// <summary>

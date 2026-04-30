@@ -2488,7 +2488,6 @@ namespace Ink_Canvas
         /// 用于标识鼠标是否处于按下状态，在绘制过程中使用
         /// </remarks>
         private bool isMouseDown;
-        private bool _isMouseRealtimeInking;
 
         /// <summary>
         /// 触摸按下状态标志
@@ -2512,17 +2511,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left && ShouldUseRealtimeVelocityBrushTip() && drawingShapeMode == 0)
-            {
-                _isMouseRealtimeInking = true;
-                inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                var p = e.GetPosition(inkCanvas);
-                InitializeRealtimeBrushTipStateFromPoint(MouseRealtimeStrokeId, p);
-                var sv = GetStrokeVisual(MouseRealtimeStrokeId);
-                TryAppendRealtimeVelocityBrushTipPoint(sv, MouseRealtimeStrokeId, p);
-                sv.ForceRedraw();
-            }
-
             inkCanvas.CaptureMouse();
             ViewboxFloatingBar.IsHitTestVisible = false;
             BlackboardUIGridForInkReplay.IsHitTestVisible = false;
@@ -2543,24 +2531,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_MouseMove(object sender, MouseEventArgs e)
         {
-            if (_isMouseRealtimeInking && isMouseDown)
-            {
-                var sv = GetStrokeVisual(MouseRealtimeStrokeId);
-                var handled = TryAppendRealtimeVelocityBrushTipPoint(sv, MouseRealtimeStrokeId, e.GetPosition(inkCanvas));
-                if (handled)
-                {
-                    sv.ForceRedraw();
-                }
-                else
-                {
-                    _isMouseRealtimeInking = false;
-                    MouseTouchMove(e.GetPosition(inkCanvas));
-                }
-            }
-            else if (isMouseDown)
-            {
-                MouseTouchMove(e.GetPosition(inkCanvas));
-            }
+            if (isMouseDown) MouseTouchMove(e.GetPosition(inkCanvas));
 
             if (Settings.Canvas.IsShowCursor)
             {
@@ -2588,39 +2559,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (_isMouseRealtimeInking)
-            {
-                try
-                {
-                    var sv = GetStrokeVisual(MouseRealtimeStrokeId);
-                    sv?.ForceRedraw();
-                    var stroke = sv?.Stroke;
-                    if (stroke != null)
-                    {
-                        if (stroke.DrawingAttributes != null) stroke.DrawingAttributes.IgnorePressure = false;
-                        if (!stroke.ContainsPropertyData(RealtimeVelocityBrushTipAppliedGuid))
-                            stroke.AddPropertyData(RealtimeVelocityBrushTipAppliedGuid, true);
-                        inkCanvas.Strokes.Add(stroke);
-                        inkCanvas_StrokeCollected(inkCanvas, new InkCanvasStrokeCollectedEventArgs(stroke));
-                    }
-
-                    if (VisualCanvasList.TryGetValue(MouseRealtimeStrokeId, out var visualCanvas) && inkCanvas.Children.Contains(visualCanvas))
-                        inkCanvas.Children.Remove(visualCanvas);
-                    StrokeVisualList.Remove(MouseRealtimeStrokeId);
-                    VisualCanvasList.Remove(MouseRealtimeStrokeId);
-                    TouchDownPointsList.Remove(MouseRealtimeStrokeId);
-                    CleanupRealtimeBrushTipState(MouseRealtimeStrokeId);
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine(ex);
-                }
-                finally
-                {
-                    _isMouseRealtimeInking = false;
-                }
-            }
-
             HandleEraserOperationEnded();
             inkCanvas.ReleaseMouseCapture();
             ViewboxFloatingBar.IsHitTestVisible = true;
