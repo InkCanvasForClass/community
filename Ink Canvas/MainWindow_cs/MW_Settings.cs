@@ -829,7 +829,7 @@ namespace Ink_Canvas
             Settings.Appearance.IsEnableDisPlayNibModeToggler = false;
             Settings.Appearance.IsColorfulViewboxFloatingBar = false;
             Settings.Appearance.ViewboxFloatingBarScaleTransformValue = 1;
-            Settings.Appearance.EnableViewboxBlackBoardScaleTransform = false;
+            Settings.Appearance.ViewboxBlackBoardScaleTransformValue = 0.8;
             Settings.Appearance.IsTransparentButtonBackground = true;
             Settings.Appearance.IsShowExitButton = true;
             Settings.Appearance.IsShowEraserButton = true;
