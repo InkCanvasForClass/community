@@ -70,7 +70,7 @@
     
     <BitmapImage x:Key="QuickPanelBlackboardIcon" UriSource="/Resources/new-icons/blackboard.png"/>
     <BitmapImage x:Key="QuickPanelEndSlideshowIcon" UriSource="/Resources/new-icons/end-slides-show.png"/>
-    <BitmapImage x:Key="QuickPanelEyeIcon" UriSource="/Resources/new-icons/eye.png"/>
+    <BitmapImage x:Key="QuickPanelEyeIcon" UriSource="/Resources/new-icons/pen-lined.png"/>
     <BitmapImage x:Key="QuickPanelChevronLeftIcon" UriSource="/Resources/new-icons/chevron-left.png"/>
     
     <!-- 几何面板图标资源 -->
