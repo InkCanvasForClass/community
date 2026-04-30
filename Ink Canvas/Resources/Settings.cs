@@ -684,6 +684,9 @@ namespace Ink_Canvas
         [JsonProperty("isSaveLogByDate")]
         public bool IsSaveLogByDate { get; set; } = true;
 
+        [JsonProperty("isDebugConsoleEnabled")]
+        public bool IsDebugConsoleEnabled { get; set; } = false;
+
         [JsonProperty("isEnableFullScreenHelper")]
         public bool IsEnableFullScreenHelper { get; set; }
 
