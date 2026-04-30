@@ -1176,52 +1176,62 @@ namespace Ink_Canvas
                 });
             }
 
-            // 注册.icstk文件关联
+            _ = RunDeferredStartupTasksAsync();
+
+        }
+
+        private async Task RunDeferredStartupTasksAsync()
+        {
             try
             {
-                LogHelper.WriteLogToFile("开始注册.icstk文件关联");
-                FileAssociationManager.RegisterFileAssociation();
-                FileAssociationManager.ShowFileAssociationStatus();
+                await Task.Delay(1200);
+
+                try
+                {
+                    LogHelper.WriteLogToFile("开始注册.icstk文件关联");
+                    FileAssociationManager.RegisterFileAssociation();
+                    FileAssociationManager.ShowFileAssociationStatus();
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"注册文件关联时出错: {ex.Message}", LogHelper.LogType.Error);
+                }
+
+                try
+                {
+                    LogHelper.WriteLogToFile("启动IPC监听器");
+                    FileAssociationManager.StartIpcListener();
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"启动IPC监听器时出错: {ex.Message}", LogHelper.LogType.Error);
+                }
+
+                try
+                {
+                    LogHelper.WriteLogToFile("初始化上传帮助类");
+                    Helpers.UploadHelper.Initialize();
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"初始化上传帮助类时出错: {ex.Message}", LogHelper.LogType.Error);
+                }
+
+                try
+                {
+                    LogHelper.WriteLogToFile("开始加载插件");
+                    await PluginManager.Instance.LoadAllAsync();
+                    LogHelper.WriteLogToFile(string.Format("插件加载完成，共加载 {0} 个插件", PluginManager.Instance.Plugins.Count));
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile(string.Format("加载插件时出错: {0}", ex.Message), LogHelper.LogType.Error);
+                }
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"注册文件关联时出错: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"启动阶段任务执行失败: {ex.Message}", LogHelper.LogType.Error);
             }
-
-            // 启动IPC监听器
-            try
-            {
-                LogHelper.WriteLogToFile("启动IPC监听器");
-                FileAssociationManager.StartIpcListener();
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"启动IPC监听器时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-
-            // 初始化上传帮助类
-            try
-            {
-                LogHelper.WriteLogToFile("初始化上传帮助类");
-                Helpers.UploadHelper.Initialize();
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"初始化上传帮助类时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-
-            // 加载插件
-            try
-            {
-                LogHelper.WriteLogToFile("开始加载插件");
-                await PluginManager.Instance.LoadAllAsync();
-                LogHelper.WriteLogToFile(string.Format("插件加载完成，共加载 {0} 个插件", PluginManager.Instance.Plugins.Count));
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile(string.Format("加载插件时出错: {0}", ex.Message), LogHelper.LogType.Error);
-            }
-
         }
 
         private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
