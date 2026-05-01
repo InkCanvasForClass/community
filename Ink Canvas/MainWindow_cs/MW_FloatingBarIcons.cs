@@ -62,7 +62,7 @@ namespace Ink_Canvas
         {
             // 根据主题选择手势图标和颜色
             bool isDarkTheme = Settings.Appearance.Theme == 1 ||
-                               (Settings.Appearance.Theme == 2 && !IsSystemThemeLight());
+                               (Settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
             bool isLightTheme = !isDarkTheme;
             string gestureIconPath = isLightTheme ? "/Resources/new-icons/gesture.png" : "/Resources/new-icons/gesture_white.png";
 
@@ -422,7 +422,7 @@ namespace Ink_Canvas
                     SymbolIconSelect.Icon.Geometry = Geometry.Parse(GetCorrectIcon("lassoSelect", false));
 
                     bool isDarkThemeForButtons = Settings.Appearance.Theme == 1 ||
-                                                 (Settings.Appearance.Theme == 2 && !IsSystemThemeLight());
+                                                 (Settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
                     if (isDarkThemeForButtons)
                     {
                         BoardPen.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
@@ -460,7 +460,7 @@ namespace Ink_Canvas
                 // 根据主题选择高光颜色
                 Color highlightColor;
                 bool isDarkTheme = Settings.Appearance.Theme == 1 ||
-                                   (Settings.Appearance.Theme == 2 && !IsSystemThemeLight());
+                                   (Settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
 
                 if (isDarkTheme)
                 {
@@ -531,7 +531,7 @@ namespace Ink_Canvas
                             Cursor_Icon.Icon.Geometry =
                                 Geometry.Parse(GetCorrectIcon("cursor", true));
                             bool isDarkThemeForCursor = Settings.Appearance.Theme == 1 ||
-                                                        (Settings.Appearance.Theme == 2 && !IsSystemThemeLight());
+                                                        (Settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
                             if (isDarkThemeForCursor)
                             {
                                 BoardPen.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
@@ -4268,7 +4268,7 @@ namespace Ink_Canvas
                 Color highlightBackgroundColor;
                 Color highlightBarColor;
                 bool isDarkTheme = Settings.Appearance.Theme == 1 ||
-                                   (Settings.Appearance.Theme == 2 && !IsSystemThemeLight());
+                                   (Settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
 
                 if (isDarkTheme)
                 {

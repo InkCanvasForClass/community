@@ -1,5 +1,5 @@
-using iNKORE.UI.WPF.Modern;
 using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -153,7 +153,7 @@ namespace Ink_Canvas
         private bool IsCurrentThemeDark()
         {
             return Settings.Appearance.Theme == 1 ||
-                   (Settings.Appearance.Theme == 2 && !IsSystemThemeLight());
+                   (Settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
         }
 
         private void RefreshFloatingBarButtonColors()

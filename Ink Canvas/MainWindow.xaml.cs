@@ -1212,7 +1212,7 @@ namespace Ink_Canvas
                     SetTheme("Dark");
                     break;
                 case 2: // 跟随系统
-                    if (IsSystemThemeLight())
+                    if (ThemeHelper.IsSystemThemeLight())
                     {
                         ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
                         SetTheme("Light");
@@ -3265,7 +3265,7 @@ namespace Ink_Canvas
                         ViewboxFloatingBar.Opacity = 1.0;
                         break;
                     case 2: // 跟随系统
-                        if (IsSystemThemeLight())
+                        if (ThemeHelper.IsSystemThemeLight())
                         {
                             SetTheme("Light", true);
                             ViewboxFloatingBar.Opacity = 1.0;

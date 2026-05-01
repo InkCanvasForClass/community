@@ -1,4 +1,4 @@
-using iNKORE.UI.WPF.Modern;
+using Ink_Canvas.Helpers;
 using Microsoft.Win32;
 using System;
 using System.Timers;
