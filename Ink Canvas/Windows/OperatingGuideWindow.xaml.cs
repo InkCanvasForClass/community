@@ -1,5 +1,4 @@
 using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern;
 using System;
 using System.Windows;
 using System.Windows.Input;
@@ -23,52 +22,16 @@ namespace Ink_Canvas
             e.Handled = true;
         }
 
-        /// <summary>
-        /// 刷新主题
-        /// </summary>
         public void RefreshTheme()
         {
             try
             {
-                // 根据当前主题设置窗口主题
-                bool isDarkTheme = MainWindow.Settings.Appearance.Theme == 1 ||
-                                   (MainWindow.Settings.Appearance.Theme == 2 && !IsSystemThemeLight());
-
-                if (isDarkTheme)
-                {
-                    ThemeManager.SetRequestedTheme(this, ElementTheme.Dark);
-                }
-                else
-                {
-                    ThemeManager.SetRequestedTheme(this, ElementTheme.Light);
-                }
-
-                // 强制刷新UI
+                ThemeHelper.ApplyTheme(this, MainWindow.Settings);
                 InvalidateVisual();
             }
             catch (Exception)
             {
             }
-        }
-
-        /// <summary>
-        /// 检查系统主题是否为浅色
-        /// </summary>
-        private bool IsSystemThemeLight()
-        {
-            var light = false;
-            try
-            {
-                var registryKey = Microsoft.Win32.Registry.CurrentUser;
-                var themeKey =
-                    registryKey.OpenSubKey("software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize");
-                var keyValue = 0;
-                if (themeKey != null) keyValue = (int)themeKey.GetValue("SystemUsesLightTheme");
-                if (keyValue == 1) light = true;
-            }
-            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
-
-            return light;
         }
     }
 }
