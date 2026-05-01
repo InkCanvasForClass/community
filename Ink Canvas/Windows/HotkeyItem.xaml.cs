@@ -77,12 +77,21 @@ namespace Ink_Canvas.Windows
             }
         }
 
+        private static HotkeyItem _activeCaptureItem;
+
         private void StartHotkeyCapture()
         {
+            if (_activeCaptureItem != null && _activeCaptureItem != this)
+            {
+                _activeCaptureItem.StopHotkeyCapture();
+            }
+            _activeCaptureItem = this;
+
             CurrentHotkeyTextBlock.Text = "请按键...";
             Focus();
             KeyDown += HotkeyItem_KeyDown;
             KeyUp += HotkeyItem_KeyUp;
+            LostFocus += HotkeyItem_LostFocus;
         }
 
         private void StopHotkeyCapture()
@@ -90,6 +99,16 @@ namespace Ink_Canvas.Windows
             UpdateHotkeyDisplay();
             KeyDown -= HotkeyItem_KeyDown;
             KeyUp -= HotkeyItem_KeyUp;
+            LostFocus -= HotkeyItem_LostFocus;
+            if (_activeCaptureItem == this)
+            {
+                _activeCaptureItem = null;
+            }
+        }
+
+        private void HotkeyItem_LostFocus(object sender, RoutedEventArgs e)
+        {
+            StopHotkeyCapture();
         }
 
         private void HotkeyItem_KeyDown(object sender, KeyEventArgs e)

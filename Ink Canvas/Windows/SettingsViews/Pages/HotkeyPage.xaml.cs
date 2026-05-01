@@ -90,6 +90,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             try
             {
+                foreach (var hotkeyItem in _hotkeyItems.Values)
+                {
+                    hotkeyItem.SetCurrentHotkey(Key.None, ModifierKeys.None);
+                }
+
                 if (_hotkeyManager != null)
                 {
                     var configHotkeys = _hotkeyManager.GetHotkeysFromConfigFile();
