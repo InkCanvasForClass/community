@@ -563,13 +563,6 @@ namespace Ink_Canvas
                     PenPalette.Margin = new Thickness(currentMargin.Left, -200, currentMargin.Right, 32);
                     UpdatePenPalettePosition();
                 });
-
-                await Dispatcher.InvokeAsync(() =>
-                {
-                    BoardPenPaletteGrid.BeginAnimation(MarginProperty, null);
-                    var currentMargin = BoardPenPaletteGrid.Margin;
-                    BoardPenPaletteGrid.Margin = new Thickness(currentMargin.Left, -200, currentMargin.Right, 50);
-                });
             }
             else if (penType == 1)
             {
@@ -615,13 +608,6 @@ namespace Ink_Canvas
                     // 荧光笔模式面板稍小，使用不同的Top/Bottom
                     PenPalette.Margin = new Thickness(currentMargin.Left, -157, currentMargin.Right, 32);
                     UpdatePenPalettePosition();
-                });
-
-                await Dispatcher.InvokeAsync(() =>
-                {
-                    BoardPenPaletteGrid.BeginAnimation(MarginProperty, null);
-                    var currentMargin = BoardPenPaletteGrid.Margin;
-                    BoardPenPaletteGrid.Margin = new Thickness(currentMargin.Left, -154, currentMargin.Right, 50);
                 });
             }
         }

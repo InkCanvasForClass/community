@@ -442,53 +442,9 @@ namespace Ink_Canvas
         /// </summary>
         private void UpdateRGBSliders(Color color)
         {
-            if (BackgroundPalette != null && BackgroundPalette.Child is StackPanel stackPanel)
-            {
-                if (stackPanel.Children.Count > 1 && stackPanel.Children[1] is StackPanel contentPanel)
-                {
-                    // 查找RGB滑块
-                    Slider rSlider = null;
-                    Slider gSlider = null;
-                    Slider bSlider = null;
-
-                    // 遍历面板查找RGB滑块
-                    foreach (var child in contentPanel.Children)
-                    {
-                        if (child is StackPanel panel && panel.Orientation == Orientation.Horizontal)
-                        {
-                            foreach (var panelChild in panel.Children)
-                            {
-                                if (panelChild is Slider slider)
-                                {
-                                    if (panel.Children.Count > 0 && panel.Children[0] is TextBlock label)
-                                    {
-                                        if (label.Text == "R:")
-                                        {
-                                            rSlider = slider;
-                                        }
-                                        else if (label.Text == "G:")
-                                        {
-                                            gSlider = slider;
-                                        }
-                                        else if (label.Text == "B:")
-                                        {
-                                            bSlider = slider;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // 更新滑块值
-                    if (rSlider != null && gSlider != null && bSlider != null)
-                    {
-                        rSlider.Value = color.R;
-                        gSlider.Value = color.G;
-                        bSlider.Value = color.B;
-                    }
-                }
-            }
+            if (BackgroundRSlider != null) BackgroundRSlider.Value = color.R;
+            if (BackgroundGSlider != null) BackgroundGSlider.Value = color.G;
+            if (BackgroundBSlider != null) BackgroundBSlider.Value = color.B;
         }
     }
 }
