@@ -1,9 +1,15 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using iNKORE.UI.WPF.Modern.Controls;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 
@@ -11,9 +17,35 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
     public partial class UpdatePage : iNKORE.UI.WPF.Modern.Controls.Page
     {
-        private bool _isLoaded = false;
-        private bool _isChangingUpdateChannelInternally = false;
-        private bool _isChangingUpdatePackageArchInternally = false;
+        private enum UpdateUiState
+        {
+            Idle,
+            Checking,
+            UpdateAvailable,
+            Downloading,
+            Downloaded,
+            NetworkError
+        }
+
+        private class VersionItem
+        {
+            public string Version { get; set; }
+            public string DownloadUrl { get; set; }
+            public string ReleaseNotes { get; set; }
+        }
+
+        private bool _isLoaded;
+        private bool _isChangingUpdateChannelInternally;
+        private bool _isChangingUpdatePackageArchInternally;
+
+        private UpdateUiState _state = UpdateUiState.Idle;
+        private string _remoteVersion;
+        private AutoUpdateHelper.UpdateLineGroup _remoteLineGroup;
+        private string _remoteReleaseNotes;
+
+        private List<VersionItem> _versionList = new List<VersionItem>();
+        private VersionItem _selectedHistoricalItem;
+        private bool _isHistoryLoaded;
 
         public UpdatePage()
         {
@@ -21,11 +53,51 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             Loaded += UpdatePage_Loaded;
         }
 
-        private void UpdatePage_Loaded(object sender, RoutedEventArgs e)
+        private async void UpdatePage_Loaded(object sender, RoutedEventArgs e)
         {
             LoadSettings();
             _isLoaded = true;
+
+            // 复用启动时自动检查的结果，避免二次检查
+            var mainWindow = Application.Current.MainWindow as MainWindow;
+            if (mainWindow != null && !string.IsNullOrEmpty(mainWindow.AvailableLatestVersion))
+            {
+                _remoteVersion = mainWindow.AvailableLatestVersion;
+                _remoteLineGroup = mainWindow.AvailableLatestLineGroup;
+                _remoteReleaseNotes = mainWindow.AvailableLatestReleaseNotes;
+
+                try
+                {
+                    var statusFile = AutoUpdateHelper.GetUpdateDownloadStatusFilePath(_remoteVersion);
+                    if (System.IO.File.Exists(statusFile) &&
+                        System.IO.File.ReadAllText(statusFile).Trim().ToLower() == "true")
+                    {
+                        ApplyState(UpdateUiState.Downloaded);
+                    }
+                    else
+                    {
+                        ApplyState(UpdateUiState.UpdateAvailable);
+                    }
+                }
+                catch
+                {
+                    ApplyState(UpdateUiState.UpdateAvailable);
+                }
+
+                if (!string.IsNullOrEmpty(_remoteReleaseNotes))
+                    ChangelogViewer.Markdown = _remoteReleaseNotes;
+                else
+                    ChangelogViewer.Markdown = "切换到 *历史版本* 或点击 *检查更新* 查看具体更新日志。";
+                return;
+            }
+
+            // 没有缓存的检查结果时，仅展示空白；不主动联网，避免打开页面就触发请求
+            ApplyState(UpdateUiState.Idle);
+            ChangelogViewer.Markdown = "点击 *检查更新* 来获取最新版本及更新日志。";
+            await System.Threading.Tasks.Task.CompletedTask;
         }
+
+        #region 更新设置加载
 
         private void LoadSettings()
         {
@@ -82,6 +154,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _isLoaded = true;
         }
 
+        #endregion
+
         #region 自动更新事件处理
 
         private void ToggleSwitchIsAutoUpdate_Toggled(object sender, RoutedEventArgs e)
@@ -113,8 +187,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                bool newState = CardSilentUpdate.IsOn;
-                SettingsManager.Settings.Startup.IsAutoUpdateWithSilence = newState;
+                SettingsManager.Settings.Startup.IsAutoUpdateWithSilence = CardSilentUpdate.IsOn;
                 SettingsManager.SaveSettingsToFile();
             }
             catch (Exception ex)
@@ -197,7 +270,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (isTestChannel && !SettingsManager.Settings.Startup.HasAcceptedTelemetryPrivacy)
             {
                 MessageBox.Show(
-                    "加入预览 / 测试通道前，请先在关于页面勾选\u201C我已阅读并同意 privacy 中的隐私说明\u201D。",
+                    "加入预览 / 测试通道前，请先在关于页面勾选“我已阅读并同意 privacy 中的隐私说明”。",
                     "需要同意隐私说明",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
@@ -238,6 +311,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             LogHelper.WriteLogToFile($"Settings | Update channel changed to {SettingsManager.Settings.Startup.UpdateChannel}");
             SettingsManager.SaveSettingsToFile();
 
+            // 通道切换后强制刷新更新日志和历史版本缓存
+            _isHistoryLoaded = false;
+            _versionList.Clear();
+            VersionComboBox.ItemsSource = null;
+            ReleaseNotesViewer.Markdown = "";
+            await LoadChangelogAsync();
+
             if (SettingsManager.Settings.Startup.IsAutoUpdate)
             {
                 LogHelper.WriteLogToFile($"AutoUpdate | Channel changed to {newChannel}, performing immediate update check");
@@ -261,10 +341,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                         }
                     });
                 }
-            }
-            else
-            {
-                LogHelper.WriteLogToFile($"AutoUpdate | Channel changed to {newChannel}, but auto-update is disabled");
             }
         }
 
@@ -295,123 +371,519 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         #endregion
 
-        #region 手动操作事件处理
+        #region 更新状态机
 
-        private async void ManualUpdateButton_Click(object sender, RoutedEventArgs e)
+        private void ApplyState(UpdateUiState state, string customSubtitle = null)
         {
-            ManualUpdateButton.IsEnabled = false;
-            ManualUpdateButton.Content = "正在检查更新...";
+            _state = state;
 
+            CheckUpdateButton.Visibility = Visibility.Collapsed;
+            UpdateNowButton.Visibility = Visibility.Collapsed;
+            UpdateLaterButton.Visibility = Visibility.Collapsed;
+            SkipVersionButton.Visibility = Visibility.Collapsed;
+            CancelDownloadButton.Visibility = Visibility.Collapsed;
+            ProgressPanel.Visibility = Visibility.Collapsed;
+
+            CheckUpdateButton.IsEnabled = true;
+
+            switch (state)
+            {
+                case UpdateUiState.Idle:
+                    StatusIcon.Icon = SegoeFluentIcons.Completed;
+                    StatusTitle.Text = "已是最新版本";
+                    StatusSubtitle.Text = customSubtitle ?? BuildLastCheckSubtitle();
+                    CheckUpdateButton.Visibility = Visibility.Visible;
+                    break;
+
+                case UpdateUiState.Checking:
+                    StatusIcon.Icon = SegoeFluentIcons.Sync;
+                    StatusTitle.Text = "正在检查更新...";
+                    StatusSubtitle.Text = "";
+                    CheckUpdateButton.Visibility = Visibility.Visible;
+                    CheckUpdateButton.IsEnabled = false;
+                    ProgressPanel.Visibility = Visibility.Visible;
+                    ProgressText.Text = "正在连接更新服务器...";
+                    ProgressBar.IsIndeterminate = true;
+                    break;
+
+                case UpdateUiState.UpdateAvailable:
+                    StatusIcon.Icon = SegoeFluentIcons.Upload;
+                    StatusTitle.Text = $"检测到新版本 {_remoteVersion}";
+                    StatusSubtitle.Text = customSubtitle ?? $"当前版本 {GetCurrentVersion()} → {_remoteVersion}";
+                    UpdateNowButton.Visibility = Visibility.Visible;
+                    UpdateLaterButton.Visibility = Visibility.Visible;
+                    SkipVersionButton.Visibility = Visibility.Visible;
+                    break;
+
+                case UpdateUiState.Downloading:
+                    StatusIcon.Icon = SegoeFluentIcons.Download;
+                    StatusTitle.Text = "正在下载更新...";
+                    StatusSubtitle.Text = customSubtitle ?? $"目标版本 {_remoteVersion}";
+                    ProgressPanel.Visibility = Visibility.Visible;
+                    ProgressBar.IsIndeterminate = false;
+                    break;
+
+                case UpdateUiState.Downloaded:
+                    StatusIcon.Icon = SegoeFluentIcons.Download;
+                    StatusTitle.Text = "更新已下载完成";
+                    StatusSubtitle.Text = customSubtitle ?? $"将在软件关闭时自动安装 {_remoteVersion}";
+                    CheckUpdateButton.Visibility = Visibility.Visible;
+                    break;
+
+                case UpdateUiState.NetworkError:
+                    StatusIcon.Icon = SegoeFluentIcons.Error;
+                    StatusTitle.Text = "网络错误";
+                    StatusSubtitle.Text = customSubtitle ?? "请检查网络连接后重试。";
+                    CheckUpdateButton.Visibility = Visibility.Visible;
+                    break;
+            }
+        }
+
+        private string BuildLastCheckSubtitle()
+        {
+            string current = GetCurrentVersion();
+            return $"当前版本 {current}";
+        }
+
+        private static string GetCurrentVersion()
+        {
+            try
+            {
+                return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            }
+            catch
+            {
+                return "未知";
+            }
+        }
+
+        #endregion
+
+        #region 更新日志
+
+        private async System.Threading.Tasks.Task LoadChangelogAsync()
+        {
+            try
+            {
+                ChangelogViewer.Markdown = "正在加载更新日志...";
+
+                // 优先尝试从 GitHub API 获取最新 Release 的 body
+                try
+                {
+                    var releases = await AutoUpdateHelper.GetAllGithubReleases(SettingsManager.Settings.Startup.UpdateChannel);
+                    var latest = releases?
+                        .OrderByDescending(r => ParseVersionForSort(r.version))
+                        .Select(r => (Tuple<string, string, string>)Tuple.Create(r.version, r.downloadUrl, r.releaseNotes))
+                        .FirstOrDefault();
+                    if (latest != null && !string.IsNullOrWhiteSpace(latest.Item3))
+                    {
+                        ChangelogViewer.Markdown = latest.Item3;
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"UpdatePage | GitHub API 获取更新日志失败，回退到镜像源: {ex.Message}", LogHelper.LogType.Warning);
+                }
+
+                // 回退到镜像源
+                string md = await AutoUpdateHelper.GetUpdateLog(SettingsManager.Settings.Startup.UpdateChannel);
+                ChangelogViewer.Markdown = string.IsNullOrEmpty(md) ? "暂无更新日志。" : md;
+            }
+            catch (Exception ex)
+            {
+                ChangelogViewer.Markdown = $"加载更新日志失败：{ex.Message}";
+            }
+        }
+
+        #endregion
+
+        #region 检查 / 下载 / 安装
+
+        private async void CheckUpdateButton_Click(object sender, RoutedEventArgs e)
+        {
+            ApplyState(UpdateUiState.Checking);
             try
             {
                 LogHelper.WriteLogToFile("ManualUpdate | Manual update button clicked");
 
-                var (remoteVersion, lineGroup, apiReleaseNotes) = await AutoUpdateHelper.CheckForUpdates(SettingsManager.Settings.Startup.UpdateChannel, true, false);
+                string remoteVersion = null;
+                string apiReleaseNotes = null;
+                AutoUpdateHelper.UpdateLineGroup lineGroup = null;
 
-                if (remoteVersion != null)
+                // 优先通过 GitHub Releases API 获取最新版本
+                try
                 {
-                    LogHelper.WriteLogToFile($"ManualUpdate | Found new version: {remoteVersion}");
-
-                    string currentVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-
-                    HasNewUpdateWindow updateWindow = new HasNewUpdateWindow(currentVersion, remoteVersion, "", apiReleaseNotes);
-                    updateWindow.Owner = Application.Current.MainWindow;
-                    bool? dialogResult = updateWindow.ShowDialog();
-
-                    if (dialogResult != true)
+                    var releases = await AutoUpdateHelper.GetAllGithubReleases(SettingsManager.Settings.Startup.UpdateChannel);
+                    var latest = releases?
+                        .OrderByDescending(r => ParseVersionForSort(r.version))
+                        .Select(r => Tuple.Create(r.version, r.downloadUrl, r.releaseNotes))
+                        .FirstOrDefault();
+                    if (latest != null && !string.IsNullOrEmpty(latest.Item1))
                     {
-                        LogHelper.WriteLogToFile("ManualUpdate | Update dialog closed without selection");
-                        return;
+                        var localVersion = new Version(GetCurrentVersion());
+                        var remote = ParseVersionForSort(latest.Item1);
+                        if (remote > localVersion)
+                        {
+                            remoteVersion = latest.Item1.TrimStart('v', 'V');
+                            apiReleaseNotes = latest.Item3;
+                        }
                     }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"UpdatePage | GitHub API 检查更新失败，回退到 CheckForUpdates: {ex.Message}", LogHelper.LogType.Warning);
+                }
 
-                    var mainWindow = Application.Current.MainWindow as MainWindow;
+                // 回退：调用统一的 CheckForUpdates（包含镜像源 txt 方案）
+                if (string.IsNullOrEmpty(remoteVersion))
+                {
+                    var (rv, lg, notes) = await AutoUpdateHelper.CheckForUpdates(
+                        SettingsManager.Settings.Startup.UpdateChannel, true, false);
+                    remoteVersion = rv;
+                    lineGroup = lg;
+                    if (string.IsNullOrEmpty(apiReleaseNotes)) apiReleaseNotes = notes;
+                }
 
-                    switch (updateWindow.Result)
-                    {
-                        case HasNewUpdateWindow.UpdateResult.UpdateNow:
-                            LogHelper.WriteLogToFile("ManualUpdate | User chose to update now");
-                            MessageBox.Show("开始下载更新，请稍候...", "正在更新", MessageBoxButton.OK, MessageBoxImage.Information);
+                if (!string.IsNullOrEmpty(remoteVersion))
+                {
+                    _remoteVersion = remoteVersion;
+                    _remoteLineGroup = lineGroup;
+                    _remoteReleaseNotes = apiReleaseNotes;
 
-                            bool isDownloadSuccessful = mainWindow != null
-                                && await mainWindow.DownloadUpdateWithFallback(remoteVersion, lineGroup, SettingsManager.Settings.Startup.UpdateChannel);
+                    if (!string.IsNullOrEmpty(apiReleaseNotes))
+                        ChangelogViewer.Markdown = apiReleaseNotes;
 
-                            if (isDownloadSuccessful)
-                            {
-                                MessageBoxResult result = MessageBox.Show("更新已下载完成，点击确定后将关闭软件并安装新版本！", "安装更新", MessageBoxButton.OKCancel, MessageBoxImage.Information);
-
-                                if (result == MessageBoxResult.OK)
-                                {
-                                    App.IsAppExitByUser = true;
-                                    AutoUpdateHelper.InstallNewVersionApp(remoteVersion, true);
-                                    Application.Current.Shutdown();
-                                }
-                                else
-                                {
-                                    LogHelper.WriteLogToFile("ManualUpdate | User cancelled update installation");
-                                }
-                            }
-                            else
-                            {
-                                MessageBox.Show("更新下载失败，请检查网络连接后重试。", "下载失败", MessageBoxButton.OK, MessageBoxImage.Error);
-                            }
-                            break;
-
-                        case HasNewUpdateWindow.UpdateResult.UpdateLater:
-                            LogHelper.WriteLogToFile("ManualUpdate | User chose to update later");
-
-                            isDownloadSuccessful = mainWindow != null
-                                && await mainWindow.DownloadUpdateWithFallback(remoteVersion, lineGroup, SettingsManager.Settings.Startup.UpdateChannel);
-
-                            if (isDownloadSuccessful)
-                            {
-                                LogHelper.WriteLogToFile("ManualUpdate | Update downloaded successfully, will install when application closes");
-                                SettingsManager.Settings.Startup.IsAutoUpdate = true;
-                                SettingsManager.Settings.Startup.IsAutoUpdateWithSilence = true;
-
-                                if (mainWindow != null)
-                                    mainWindow.StartSilentUpdateTimer();
-
-                                MessageBox.Show("更新已下载完成，将在软件关闭时自动安装。", "更新已准备就绪", MessageBoxButton.OK, MessageBoxImage.Information);
-                            }
-                            else
-                            {
-                                LogHelper.WriteLogToFile("ManualUpdate | Update download failed", LogHelper.LogType.Error);
-                                MessageBox.Show("更新下载失败，请检查网络连接后重试。", "下载失败", MessageBoxButton.OK, MessageBoxImage.Error);
-                            }
-                            break;
-
-                        case HasNewUpdateWindow.UpdateResult.SkipVersion:
-                            LogHelper.WriteLogToFile($"ManualUpdate | User chose to skip version {remoteVersion}");
-                            SettingsManager.Settings.Startup.SkippedVersion = remoteVersion;
-                            SettingsManager.SaveSettingsToFile();
-                            MessageBox.Show($"已设置跳过版本 {remoteVersion}，在下次发布新版本之前不会再提示更新。",
-                                           "已跳过此版本",
-                                           MessageBoxButton.OK,
-                                           MessageBoxImage.Information);
-                            break;
-                    }
+                    ApplyState(UpdateUiState.UpdateAvailable);
                 }
                 else
                 {
-                    LogHelper.WriteLogToFile("ManualUpdate | No updates available");
-                    MessageBox.Show("当前已是最新版本！", "无可用更新", MessageBoxButton.OK, MessageBoxImage.Information);
+                    ApplyState(UpdateUiState.Idle);
                 }
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"Error in ManualUpdateButton_Click: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show(
-                    $"手动更新过程中发生错误: {ex.Message}",
-                    "更新错误",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-            }
-            finally
-            {
-                ManualUpdateButton.IsEnabled = true;
-                ManualUpdateButton.Content = "手动更新";
+                LogHelper.WriteLogToFile($"Error in CheckUpdateButton_Click: {ex.Message}", LogHelper.LogType.Error);
+                ApplyState(UpdateUiState.NetworkError, ex.Message);
             }
         }
+
+        private bool _downloadCancelled;
+        private static List<AutoUpdateHelper.UpdateLineGroup> _cachedOrderedGroups;
+        private static UpdateChannel _cachedGroupsChannel;
+
+        private static async System.Threading.Tasks.Task<List<AutoUpdateHelper.UpdateLineGroup>> GetOrderedGroupsCachedAsync(UpdateChannel channel)
+        {
+            if (_cachedOrderedGroups != null && _cachedOrderedGroups.Count > 0 && _cachedGroupsChannel == channel)
+                return _cachedOrderedGroups;
+            var groups = await AutoUpdateHelper.GetAvailableLineGroupsOrdered(channel);
+            _cachedOrderedGroups = groups;
+            _cachedGroupsChannel = channel;
+            return groups;
+        }
+
+        private async System.Threading.Tasks.Task<bool> DownloadWithProgressAsync()
+        {
+            _downloadCancelled = false;
+            var groups = await GetOrderedGroupsCachedAsync(SettingsManager.Settings.Startup.UpdateChannel);
+            if (groups == null || groups.Count == 0)
+            {
+                LogHelper.WriteLogToFile("UpdatePage | 没有可用的下载线路组", LogHelper.LogType.Error);
+                return false;
+            }
+            return await AutoUpdateHelper.DownloadSetupFileWithFallback(_remoteVersion, groups, (percent, text) =>
+            {
+                if (_downloadCancelled) return;
+                Dispatcher.Invoke(() =>
+                {
+                    if (_state != UpdateUiState.Downloading) return;
+                    ProgressBar.IsIndeterminate = false;
+                    ProgressBar.Value = percent;
+                    ProgressText.Text = text;
+                });
+            });
+        }
+
+        private async void UpdateNowButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(_remoteVersion)) return;
+
+            ApplyState(UpdateUiState.Downloading);
+            CancelDownloadButton.Visibility = Visibility.Visible;
+            ProgressBar.Value = 0;
+            ProgressText.Text = "正在准备下载...";
+
+            try
+            {
+                bool ok = await DownloadWithProgressAsync();
+
+                if (!ok)
+                {
+                    ApplyState(UpdateUiState.NetworkError, "更新下载失败，请检查网络连接后重试。");
+                    return;
+                }
+
+                MessageBoxResult result = MessageBox.Show(
+                    "更新已下载完成，点击确定后将关闭软件并安装新版本！",
+                    "安装更新",
+                    MessageBoxButton.OKCancel,
+                    MessageBoxImage.Information);
+
+                if (result == MessageBoxResult.OK)
+                {
+                    App.IsAppExitByUser = true;
+                    AutoUpdateHelper.InstallNewVersionApp(_remoteVersion, true);
+                    Application.Current.Shutdown();
+                }
+                else
+                {
+                    ApplyState(UpdateUiState.Downloaded);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"Error in UpdateNowButton_Click: {ex.Message}", LogHelper.LogType.Error);
+                ApplyState(UpdateUiState.NetworkError, ex.Message);
+            }
+        }
+
+        private async void UpdateLaterButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(_remoteVersion)) return;
+
+            var mainWindow = Application.Current.MainWindow as MainWindow;
+            if (mainWindow == null) return;
+
+            ApplyState(UpdateUiState.Downloading);
+            CancelDownloadButton.Visibility = Visibility.Visible;
+            ProgressBar.Value = 0;
+            ProgressText.Text = "正在后台下载...";
+
+            try
+            {
+                bool ok = await DownloadWithProgressAsync();
+
+                if (!ok)
+                {
+                    ApplyState(UpdateUiState.NetworkError, "更新下载失败，请检查网络连接后重试。");
+                    return;
+                }
+
+                SettingsManager.Settings.Startup.IsAutoUpdate = true;
+                SettingsManager.Settings.Startup.IsAutoUpdateWithSilence = true;
+                SettingsManager.SaveSettingsToFile();
+                CardAutoUpdate.IsOn = true;
+                CardSilentUpdate.IsOn = true;
+
+                mainWindow.StartSilentUpdateTimer();
+                ApplyState(UpdateUiState.Downloaded);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"Error in UpdateLaterButton_Click: {ex.Message}", LogHelper.LogType.Error);
+                ApplyState(UpdateUiState.NetworkError, ex.Message);
+            }
+        }
+
+        private void SkipVersionButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(_remoteVersion)) return;
+
+            SettingsManager.Settings.Startup.SkippedVersion = _remoteVersion;
+            SettingsManager.SaveSettingsToFile();
+            LogHelper.WriteLogToFile($"ManualUpdate | User chose to skip version {_remoteVersion}");
+
+            ApplyState(UpdateUiState.Idle, $"已跳过版本 {_remoteVersion}");
+        }
+
+        private void CancelDownloadButton_Click(object sender, RoutedEventArgs e)
+        {
+            _downloadCancelled = true;
+            AutoUpdateHelper.RequestCancelDownload();
+            ApplyState(UpdateUiState.UpdateAvailable);
+        }
+
+        #endregion
+
+        #region 历史版本回滚
+
+        private async void UpdateTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.OriginalSource != UpdateTabControl) return;
+            if (UpdateTabControl.SelectedItem == HistoryTabItem && !_isHistoryLoaded)
+            {
+                await LoadHistoryAsync();
+            }
+        }
+
+        private async void HistoryTabItem_GotFocus(object sender, RoutedEventArgs e)
+        {
+            // 兼容用户首次切到历史版本 Tab 时再加载
+            if (_isHistoryLoaded) return;
+            await LoadHistoryAsync();
+        }
+
+        private async System.Threading.Tasks.Task LoadHistoryAsync()
+        {
+            try
+            {
+                _isHistoryLoaded = true;
+                ReleaseNotesViewer.Markdown = "正在获取历史版本...";
+                RollbackButton.IsEnabled = false;
+
+                var releases = await AutoUpdateHelper.GetAllGithubReleases(SettingsManager.Settings.Startup.UpdateChannel);
+                _versionList = releases
+                    .Select(r => new VersionItem { Version = r.version, DownloadUrl = r.downloadUrl, ReleaseNotes = r.releaseNotes })
+                    .OrderByDescending(v => ParseVersionForSort(v.Version))
+                    .ToList();
+                VersionComboBox.ItemsSource = _versionList;
+
+                if (_versionList.Count > 0)
+                {
+                    VersionComboBox.SelectedIndex = 0;
+                    RollbackButton.IsEnabled = true;
+                }
+                else
+                {
+                    ReleaseNotesViewer.Markdown = "未获取到历史版本信息。";
+                }
+            }
+            catch (Exception ex)
+            {
+                ReleaseNotesViewer.Markdown = $"加载历史版本失败：{ex.Message}";
+            }
+        }
+
+        private static Version ParseVersionForSort(string version)
+        {
+            var v = (version ?? "").TrimStart('v', 'V');
+            return Version.TryParse(v, out var result) ? result : new Version(0, 0, 0, 0);
+        }
+
+        private void VersionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            _selectedHistoricalItem = VersionComboBox.SelectedItem as VersionItem;
+            if (_selectedHistoricalItem != null)
+            {
+                ReleaseNotesViewer.Markdown = _selectedHistoricalItem.ReleaseNotes ?? "无更新日志";
+                LogHelper.WriteLogToFile($"HistoryRollback | 用户选择版本: {_selectedHistoricalItem.Version}");
+            }
+            Keyboard.ClearFocus();
+        }
+
+        private async void RollbackButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_selectedHistoricalItem == null) return;
+
+            int days = await AskPauseDaysAsync();
+            if (days < 0)
+            {
+                LogHelper.WriteLogToFile("HistoryRollback | 用户取消了回滚操作");
+                return;
+            }
+
+            if (days == 0)
+            {
+                MainWindow.Settings.Startup.AutoUpdatePauseUntilDate = "";
+            }
+            else
+            {
+                DateTime pauseUntilDate = DateTime.Now.AddDays(days);
+                MainWindow.Settings.Startup.AutoUpdatePauseUntilDate = pauseUntilDate.ToString("yyyy-MM-dd");
+                LogHelper.WriteLogToFile($"HistoryRollback | 用户选择暂停自动更新 {days} 天，截止日期: {pauseUntilDate:yyyy-MM-dd}");
+            }
+            MainWindow.SaveSettingsToFile();
+
+            LogHelper.WriteLogToFile($"HistoryRollback | 用户确认回滚，目标版本: {_selectedHistoricalItem.Version}");
+            RollbackButton.IsEnabled = false;
+            VersionComboBox.IsEnabled = false;
+            RollbackProgressPanel.Visibility = Visibility.Visible;
+            RollbackProgressBar.Value = 0;
+            RollbackProgressText.Text = "正在准备下载...";
+
+            bool downloadSuccess = false;
+            try
+            {
+                downloadSuccess = await AutoUpdateHelper.StartManualDownloadAndInstall(
+                    _selectedHistoricalItem.Version,
+                    SettingsManager.Settings.Startup.UpdateChannel,
+                    (percent, text) =>
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            RollbackProgressBar.Value = percent;
+                            RollbackProgressText.Text = text;
+                        });
+                    });
+            }
+            catch (Exception ex)
+            {
+                RollbackProgressText.Text = $"下载失败: {ex.Message}";
+                LogHelper.WriteLogToFile($"HistoryRollback | 下载异常: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            if (downloadSuccess)
+            {
+                RollbackProgressBar.Value = 100;
+                RollbackProgressText.Text = "下载完成，准备安装...";
+            }
+            else
+            {
+                RollbackProgressText.Text = "下载失败，请检查网络后重试。";
+                RollbackButton.IsEnabled = true;
+                VersionComboBox.IsEnabled = true;
+            }
+        }
+
+        private async System.Threading.Tasks.Task<int> AskPauseDaysAsync()
+        {
+            var dialog = new ContentDialog
+            {
+                Title = "暂停自动更新",
+                PrimaryButtonText = "确定",
+                SecondaryButtonText = "取消"
+            };
+
+            var panel = new iNKORE.UI.WPF.Controls.SimpleStackPanel
+            {
+                Spacing = 16,
+                Margin = new Thickness(0, 10, 0, 0)
+            };
+
+            var textBlock = new TextBlock
+            {
+                Text = "请选择在回滚后多久不再接收自动更新：",
+                FontSize = 14
+            };
+
+            var daysComboBox = new ComboBox
+            {
+                Width = 200,
+                Height = 36,
+                HorizontalAlignment = HorizontalAlignment.Left
+            };
+            for (int i = 0; i <= 7; i++)
+            {
+                daysComboBox.Items.Add(new ComboBoxItem { Content = $"{i} 天", Tag = i });
+            }
+            daysComboBox.SelectedIndex = 0;
+
+            panel.Children.Add(textBlock);
+            panel.Children.Add(daysComboBox);
+            dialog.Content = panel;
+
+            var result = await dialog.ShowAsync();
+            if (result != ContentDialogResult.Primary) return -1;
+
+            if (daysComboBox.SelectedItem is ComboBoxItem cbi && cbi.Tag is int days)
+                return days;
+
+            return 1;
+        }
+
+        #endregion
+
+        #region 维护
 
         private async void FixVersionButton_Click(object sender, RoutedEventArgs e)
         {
@@ -421,47 +893,37 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
 
-            if (confirm == MessageBoxResult.Yes)
+            if (confirm != MessageBoxResult.Yes) return;
+
+            FixVersionButton.IsEnabled = false;
+            FixVersionButton.Content = "正在修复...";
+
+            try
             {
-                FixVersionButton.IsEnabled = false;
-                FixVersionButton.Content = "正在修复...";
-
-                try
+                bool result = await AutoUpdateHelper.FixVersion(SettingsManager.Settings.Startup.UpdateChannel);
+                if (!result)
                 {
-                    bool result = await AutoUpdateHelper.FixVersion(SettingsManager.Settings.Startup.UpdateChannel);
-
-                    if (!result)
-                    {
-                        MessageBox.Show(
-                            "版本修复失败，可能是网络问题或当前已是最新版本。",
-                            "修复失败",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Error);
-
-                        FixVersionButton.IsEnabled = true;
-                        FixVersionButton.Content = "版本修复";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"Error in FixVersionButton_Click: {ex.Message}", LogHelper.LogType.Error);
                     MessageBox.Show(
-                        $"版本修复过程中发生错误: {ex.Message}",
-                        "修复错误",
+                        "版本修复失败，可能是网络问题或当前已是最新版本。",
+                        "修复失败",
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
-
-                    FixVersionButton.IsEnabled = true;
-                    FixVersionButton.Content = "版本修复";
                 }
             }
-        }
-
-        private void HistoryRollbackButton_Click(object sender, RoutedEventArgs e)
-        {
-            var win = new HistoryRollbackWindow(SettingsManager.Settings.Startup.UpdateChannel);
-            win.Owner = Application.Current.MainWindow;
-            win.ShowDialog();
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"Error in FixVersionButton_Click: {ex.Message}", LogHelper.LogType.Error);
+                MessageBox.Show(
+                    $"版本修复过程中发生错误: {ex.Message}",
+                    "修复错误",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+            finally
+            {
+                FixVersionButton.IsEnabled = true;
+                FixVersionButton.Content = "版本修复";
+            }
         }
 
         #endregion

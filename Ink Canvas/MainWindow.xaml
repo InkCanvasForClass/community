@@ -2268,11 +2268,15 @@
         <!-- 通知弹窗 -->
         <Grid Name="GridNotifications" Margin="0,110" Visibility="Collapsed" HorizontalAlignment="Center"
               VerticalAlignment="Bottom">
-            <Border CornerRadius="6" MaxHeight="200" Padding="20 10" Background="{DynamicResource SettingsPageBackground}" Opacity="0.95"
-                    BorderBrush="#b91c1c" BorderThickness="1.5">
-                <TextBlock Name="TextBlockNotice" Text="{i18n:I18n Key=Notification_TestText}" VerticalAlignment="Center" HorizontalAlignment="Center"
-                           FontSize="16" Foreground="{DynamicResource SettingsPageForeground}" />
-            </Border>
+            <ui:InfoBar x:Name="NotificationInfoBar"
+                        IsOpen="True"
+                        IsClosable="False"
+                        Severity="Warning"
+                        Title="提醒"
+                        MaxWidth="900"
+                        Message="{Binding Text, ElementName=TextBlockNotice}" />
+            <TextBlock x:Name="TextBlockNotice" Visibility="Collapsed"
+                       Text="{i18n:I18n Key=Notification_TestText}" />
         </Grid>
         <!--// Old UI //-->
         <Viewbox Name="ViewBoxStackPanelMain" Visibility="Collapsed" Margin="10,10,10,55" HorizontalAlignment="Right"

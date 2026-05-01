@@ -95,7 +95,11 @@ namespace Ink_Canvas
         /// <summary>
         /// 可用的最新版本号
         /// </summary>
-        private string AvailableLatestVersion;
+        internal string AvailableLatestVersion;
+        /// <summary>
+        /// 最近一次自动检查得到的更新说明（Markdown）
+        /// </summary>
+        internal string AvailableLatestReleaseNotes;
         /// <summary>
         /// 静默更新检查定时器
         /// </summary>

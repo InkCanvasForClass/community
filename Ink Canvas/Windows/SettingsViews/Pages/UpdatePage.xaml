@@ -10,140 +10,308 @@
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       xmlns:c="clr-namespace:Ink_Canvas.Converter"
+      xmlns:mdxam="clr-namespace:MdXaml;assembly=MdXaml"
       mc:Ignorable="d"
-
       Title="更新">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
             <FrameworkElement.Resources>
-            <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
-            <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-            <Style x:Key="SettingsSectionHeaderTextBlockStyle"
-                BasedOn="{StaticResource BodyStrongTextBlockStyle}"
-                TargetType="TextBlock">
-                <Style.Setters>
+                <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
+                <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+                <Style x:Key="SettingsSectionHeaderTextBlockStyle"
+                       BasedOn="{StaticResource BodyStrongTextBlockStyle}"
+                       TargetType="TextBlock">
                     <Setter Property="Margin" Value="1,30,0,6" />
-                </Style.Setters>
-            </Style>
-        </FrameworkElement.Resources>
-            <Grid>
-                <ikw:SimpleStackPanel MaxWidth="1000"
-                    HorizontalAlignment="Stretch"
-                    Spacing="{StaticResource SettingsCardSpacing}">
+                </Style>
+            </FrameworkElement.Resources>
 
-                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="自动更新" />
+            <ikw:SimpleStackPanel MaxWidth="1000"
+                                  HorizontalAlignment="Stretch"
+                                  Spacing="{StaticResource SettingsCardSpacing}">
 
-                    <controls:LabeledSettingsCard x:Name="CardAutoUpdate"
-                            Header="{i18n:I18n Key=Header_AutoUpdate}"
-                            Description="{i18n:I18n Key=Startup_AutoUpdateHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Sync}"
-                            SwitchName="ToggleSwitchIsAutoUpdate"
-                            Toggled="ToggleSwitchIsAutoUpdate_Toggled" />
+                <!-- 状态横幅 -->
+                <Border Margin="0,16,0,0"
+                        Padding="20"
+                        CornerRadius="8"
+                        Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-                    <controls:LabeledSettingsCard x:Name="CardSilentUpdate"
-                            Header="{i18n:I18n Key=Header_SilentUpdate}"
-                            Description="{i18n:I18n Key=Startup_SilentUpdateHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.QuietHours}"
-                            SwitchName="ToggleSwitchIsAutoUpdateWithSilence"
-                            ShowWhen="{Binding IsOn, ElementName=CardAutoUpdate}"
-                            d:Visibility="Visible"
-                            Toggled="ToggleSwitchIsAutoUpdateWithSilence_Toggled" />
+                        <Border Grid.Column="0"
+                                Width="48" Height="48"
+                                CornerRadius="24"
+                                VerticalAlignment="Top"
+                                Margin="0,0,16,0"
+                                Background="{DynamicResource SystemControlHighlightAccentBrush}">
+                            <ui:FontIcon x:Name="StatusIcon"
+                                         FontSize="22"
+                                         Foreground="White"
+                                         Icon="{x:Static ui:SegoeFluentIcons.Completed}"
+                                         HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
 
-                    <ui:SettingsExpander x:Name="ExpanderSilentUpdateTime"
-                            Header="{i18n:I18n Key=Startup_SilentUpdateTimePeriod}"
-                            Visibility="{Binding IsOn, ElementName=CardSilentUpdate, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            IsExpanded="{Binding IsOn, ElementName=CardSilentUpdate, Mode=OneWay}"
-                            d:Visibility="Visible" d:IsExpanded="True">
-                        <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
-                        </ui:SettingsExpander.HeaderIcon>
-                        <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{i18n:I18n Key=Startup_SilentUpdateFullHint}">
-                                <ui:SettingsCard.Content>
-                                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
-                                        <ikw:SimpleStackPanel Orientation="Horizontal">
-                                            <TextBlock Margin="0,0,10,0" VerticalAlignment="Center"
-                                                Text="{i18n:I18n Key=Startup_StartTime}" FontSize="14" />
-                                            <ComboBox x:Name="AutoUpdateWithSilenceStartTimeComboBox"
-                                                SelectionChanged="AutoUpdateWithSilenceStartTimeComboBox_SelectionChanged" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal">
-                                            <TextBlock Margin="0,0,10,0" VerticalAlignment="Center"
-                                                Text="{i18n:I18n Key=Startup_EndTime}" FontSize="14" />
-                                            <ComboBox x:Name="AutoUpdateWithSilenceEndTimeComboBox"
-                                                SelectionChanged="AutoUpdateWithSilenceEndTimeComboBox_SelectionChanged" />
-                                        </ikw:SimpleStackPanel>
+                        <ikw:SimpleStackPanel Grid.Column="1" Spacing="4">
+                            <TextBlock x:Name="StatusTitle"
+                                       FontSize="22" FontWeight="SemiBold"
+                                       Text="正在加载更新状态..." />
+                            <TextBlock x:Name="StatusSubtitle"
+                                       Opacity="0.75"
+                                       TextWrapping="Wrap"
+                                       Text="" />
+
+                            <!-- 进度区 -->
+                            <ikw:SimpleStackPanel x:Name="ProgressPanel"
+                                                  Visibility="Collapsed"
+                                                  Margin="0,8,0,0"
+                                                  Spacing="4">
+                                <TextBlock x:Name="ProgressText" FontSize="13" Opacity="0.8" />
+                                <ProgressBar x:Name="ProgressBar"
+                                             Style="{DynamicResource DefaultProgressBarStyle}"
+                                             Height="6"
+                                             Minimum="0" Maximum="100"
+                                             Value="0" />
+                            </ikw:SimpleStackPanel>
+
+                            <!-- 操作按钮 -->
+                            <ikw:SimpleStackPanel Orientation="Horizontal"
+                                                  Margin="0,12,0,0"
+                                                  Spacing="8">
+                                <Button x:Name="CheckUpdateButton"
+                                        Style="{DynamicResource AccentButtonStyle}"
+                                        Click="CheckUpdateButton_Click">
+                                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" FontSize="14" />
+                                        <TextBlock Text="检查更新" />
                                     </ikw:SimpleStackPanel>
-                                </ui:SettingsCard.Content>
+                                </Button>
+                                <Button x:Name="UpdateNowButton"
+                                        Visibility="Collapsed"
+                                        Style="{DynamicResource AccentButtonStyle}"
+                                        Click="UpdateNowButton_Click">
+                                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Download}" FontSize="14" />
+                                        <TextBlock Text="立即下载并安装" />
+                                    </ikw:SimpleStackPanel>
+                                </Button>
+                                <Button x:Name="UpdateLaterButton"
+                                        Visibility="Collapsed"
+                                        Click="UpdateLaterButton_Click">
+                                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.QuietHours}" FontSize="14" />
+                                        <TextBlock Text="退出时安装" />
+                                    </ikw:SimpleStackPanel>
+                                </Button>
+                                <Button x:Name="SkipVersionButton"
+                                        Visibility="Collapsed"
+                                        Click="SkipVersionButton_Click">
+                                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cancel}" FontSize="14" />
+                                        <TextBlock Text="跳过此版本" />
+                                    </ikw:SimpleStackPanel>
+                                </Button>
+                                <Button x:Name="CancelDownloadButton"
+                                        Visibility="Collapsed"
+                                        Click="CancelDownloadButton_Click">
+                                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cancel}" FontSize="14" />
+                                        <TextBlock Text="取消" />
+                                    </ikw:SimpleStackPanel>
+                                </Button>
+                            </ikw:SimpleStackPanel>
+                        </ikw:SimpleStackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Tab 切换 -->
+                <TabControl x:Name="UpdateTabControl"
+                            Margin="0,16,0,0"
+                            HorizontalContentAlignment="Left"
+                            Style="{StaticResource TabControlPivotStyle}"
+                            BorderThickness="0"
+                            Background="Transparent"
+                            SelectionChanged="UpdateTabControl_SelectionChanged">
+                    <TabControl.Resources>
+                        <sys:Double x:Key="PivotHeaderItemFontSize">16</sys:Double>
+                    </TabControl.Resources>
+                    <!-- 更新日志 -->
+                    <TabItem Header="更新日志">
+                        <Border Margin="0,8,0,0"
+                                Padding="16"
+                                CornerRadius="8"
+                                MinHeight="200"
+                                Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                          HorizontalScrollBarVisibility="Disabled"
+                                          PanningMode="VerticalOnly"
+                                          MaxHeight="500">
+                                <mdxam:MarkdownScrollViewer x:Name="ChangelogViewer"
+                                                            MarkdownStyleName="GithubLike" />
+                            </ScrollViewer>
+                        </Border>
+                    </TabItem>
+
+                    <!-- 更新设置 -->
+                    <TabItem Header="更新设置">
+                        <ikw:SimpleStackPanel Margin="0,8,0,0"
+                                              Spacing="{StaticResource SettingsCardSpacing}">
+                            <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                                       Text="自动更新" />
+
+                            <controls:LabeledSettingsCard x:Name="CardAutoUpdate"
+                                                          Header="{i18n:I18n Key=Header_AutoUpdate}"
+                                                          Description="{i18n:I18n Key=Startup_AutoUpdateHint}"
+                                                          Icon="{x:Static ui:SegoeFluentIcons.Sync}"
+                                                          SwitchName="ToggleSwitchIsAutoUpdate"
+                                                          Toggled="ToggleSwitchIsAutoUpdate_Toggled" />
+
+                            <controls:LabeledSettingsCard x:Name="CardSilentUpdate"
+                                                          Header="{i18n:I18n Key=Header_SilentUpdate}"
+                                                          Description="{i18n:I18n Key=Startup_SilentUpdateHint}"
+                                                          Icon="{x:Static ui:SegoeFluentIcons.QuietHours}"
+                                                          SwitchName="ToggleSwitchIsAutoUpdateWithSilence"
+                                                          ShowWhen="{Binding IsOn, ElementName=CardAutoUpdate}"
+                                                          d:Visibility="Visible"
+                                                          Toggled="ToggleSwitchIsAutoUpdateWithSilence_Toggled" />
+
+                            <ui:SettingsExpander x:Name="ExpanderSilentUpdateTime"
+                                                 Header="{i18n:I18n Key=Startup_SilentUpdateTimePeriod}"
+                                                 Visibility="{Binding IsOn, ElementName=CardSilentUpdate, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                 IsExpanded="{Binding IsOn, ElementName=CardSilentUpdate, Mode=OneWay}"
+                                                 d:Visibility="Visible" d:IsExpanded="True">
+                                <ui:SettingsExpander.HeaderIcon>
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
+                                </ui:SettingsExpander.HeaderIcon>
+                                <ui:SettingsExpander.Items>
+                                    <ui:SettingsCard Header="{i18n:I18n Key=Startup_SilentUpdateFullHint}">
+                                        <ui:SettingsCard.Content>
+                                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
+                                                <ikw:SimpleStackPanel Orientation="Horizontal">
+                                                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center"
+                                                               Text="{i18n:I18n Key=Startup_StartTime}" FontSize="14" />
+                                                    <ComboBox x:Name="AutoUpdateWithSilenceStartTimeComboBox"
+                                                              SelectionChanged="AutoUpdateWithSilenceStartTimeComboBox_SelectionChanged" />
+                                                </ikw:SimpleStackPanel>
+                                                <ikw:SimpleStackPanel Orientation="Horizontal">
+                                                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center"
+                                                               Text="{i18n:I18n Key=Startup_EndTime}" FontSize="14" />
+                                                    <ComboBox x:Name="AutoUpdateWithSilenceEndTimeComboBox"
+                                                              SelectionChanged="AutoUpdateWithSilenceEndTimeComboBox_SelectionChanged" />
+                                                </ikw:SimpleStackPanel>
+                                            </ikw:SimpleStackPanel>
+                                        </ui:SettingsCard.Content>
+                                    </ui:SettingsCard>
+                                    <ui:SettingsCard Header="{i18n:I18n Key=Startup_TimePeriodHint}" />
+                                </ui:SettingsExpander.Items>
+                            </ui:SettingsExpander>
+
+                            <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                                       Text="更新通道" />
+
+                            <ui:SettingsCard Header="{i18n:I18n Key=Startup_UpdateChannel}"
+                                             Description="{i18n:I18n Key=Startup_UpdateChannelHint}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.SyncFolder}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <ComboBox x:Name="UpdateChannelSelector"
+                                          SelectionChanged="UpdateChannelSelector_SelectionChanged">
+                                    <ComboBoxItem Content="{i18n:I18n Key=Update_Release}" Tag="Release" />
+                                    <ComboBoxItem Content="{i18n:I18n Key=Update_Preview}" Tag="Preview" />
+                                    <ComboBoxItem Content="{i18n:I18n Key=Update_Beta}" Tag="Beta" />
+                                </ComboBox>
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="{i18n:I18n Key=Startup_TimePeriodHint}" />
-                        </ui:SettingsExpander.Items>
-                    </ui:SettingsExpander>
 
-                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="更新通道" />
+                            <ui:SettingsCard Header="{i18n:I18n Key=Startup_UpdatePackageArchitecture}"
+                                             Description="{i18n:I18n Key=Startup_UpdatePackageArchitectureHint}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <ComboBox x:Name="UpdatePackageArchitectureSelector"
+                                          SelectionChanged="UpdatePackageArchitectureSelector_SelectionChanged">
+                                    <ComboBoxItem Content="{i18n:I18n Key=Update_PackageArch_X86}" Tag="X86" />
+                                    <ComboBoxItem Content="{i18n:I18n Key=Update_PackageArch_X64}" Tag="X64" />
+                                </ComboBox>
+                            </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Startup_UpdateChannel}"
-                            Description="{i18n:I18n Key=Startup_UpdateChannelHint}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.SyncFolder}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ComboBox x:Name="UpdateChannelSelector"
-                                  SelectionChanged="UpdateChannelSelector_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=Update_Release}" Tag="Release" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Update_Preview}" Tag="Preview" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Update_Beta}" Tag="Beta" />
-                        </ComboBox>
-                    </ui:SettingsCard>
+                            <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                                       Text="维护" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Startup_UpdatePackageArchitecture}"
-                            Description="{i18n:I18n Key=Startup_UpdatePackageArchitectureHint}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ComboBox x:Name="UpdatePackageArchitectureSelector"
-                                  SelectionChanged="UpdatePackageArchitectureSelector_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=Update_PackageArch_X86}" Tag="X86" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Update_PackageArch_X64}" Tag="X64" />
-                        </ComboBox>
-                    </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=Btn_FixVersion}"
+                                             Description="{i18n:I18n Key=Startup_FixVersionHint}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Repair}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <Button x:Name="FixVersionButton" Content="{i18n:I18n Key=Btn_FixVersion}"
+                                        Click="FixVersionButton_Click" />
+                            </ui:SettingsCard>
+                        </ikw:SimpleStackPanel>
+                    </TabItem>
 
-                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="手动操作" />
+                    <!-- 历史版本 -->
+                    <TabItem x:Name="HistoryTabItem" Header="历史版本">
+                        <ikw:SimpleStackPanel Margin="0,8,0,0" Spacing="12">
+                            <ui:SettingsCard Header="选择历史版本"
+                                             Description="选择一个旧版本进行回滚（将下载并安装该版本）。">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.History}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <ComboBox x:Name="VersionComboBox"
+                                          MinWidth="220"
+                                          DisplayMemberPath="Version"
+                                          SelectionChanged="VersionComboBox_SelectionChanged" />
+                            </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Btn_ManualUpdate}"
-                            Description="{i18n:I18n Key=Startup_ManualUpdateHint}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Search}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <Button x:Name="ManualUpdateButton" Content="{i18n:I18n Key=Btn_ManualUpdate}"
-                                Click="ManualUpdateButton_Click" />
-                    </ui:SettingsCard>
+                            <Border Padding="16"
+                                    CornerRadius="8"
+                                    MinHeight="200"
+                                    Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+                                <ScrollViewer x:Name="ReleaseNotesScrollViewer"
+                                              VerticalScrollBarVisibility="Auto"
+                                              HorizontalScrollBarVisibility="Disabled"
+                                              PanningMode="VerticalOnly"
+                                              MaxHeight="350">
+                                    <mdxam:MarkdownScrollViewer x:Name="ReleaseNotesViewer"
+                                                                MarkdownStyleName="GithubLike"
+                                                                IsHitTestVisible="False" />
+                                </ScrollViewer>
+                            </Border>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Btn_FixVersion}"
-                            Description="{i18n:I18n Key=Startup_FixVersionHint}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Repair}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <Button x:Name="FixVersionButton" Content="{i18n:I18n Key=Btn_FixVersion}"
-                                Click="FixVersionButton_Click" />
-                    </ui:SettingsCard>
+                            <Button x:Name="RollbackButton"
+                                    HorizontalAlignment="Left"
+                                    IsEnabled="False"
+                                    Style="{DynamicResource AccentButtonStyle}"
+                                    Click="RollbackButton_Click">
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Undo}" FontSize="14" />
+                                    <TextBlock Text="回滚到此版本" />
+                                </ikw:SimpleStackPanel>
+                            </Button>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Btn_HistoryRollback}"
-                            Description="{i18n:I18n Key=Startup_HistoryRollbackHint}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.History}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <Button Content="{i18n:I18n Key=Btn_HistoryRollback}"
-                                Click="HistoryRollbackButton_Click" />
-                    </ui:SettingsCard>
+                            <Border x:Name="RollbackProgressPanel"
+                                    Visibility="Collapsed"
+                                    Padding="12"
+                                    CornerRadius="8"
+                                    Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+                                    BorderBrush="{DynamicResource SettingsPageBorderBrush}"
+                                    BorderThickness="1">
+                                <ikw:SimpleStackPanel Spacing="6">
+                                    <TextBlock x:Name="RollbackProgressText" Text="正在准备下载..." FontSize="13" />
+                                    <ProgressBar x:Name="RollbackProgressBar"
+                                                 Style="{DynamicResource DefaultProgressBarStyle}"
+                                                 Height="6"
+                                                 Minimum="0" Maximum="100" Value="0" />
+                                </ikw:SimpleStackPanel>
+                            </Border>
+                        </ikw:SimpleStackPanel>
+                    </TabItem>
+                </TabControl>
 
-                    <Rectangle Height="48" />
+                <Rectangle Height="48" />
 
-                </ikw:SimpleStackPanel>
-            </Grid>
+            </ikw:SimpleStackPanel>
         </Grid>
     </ScrollViewer>
 </ui:Page>

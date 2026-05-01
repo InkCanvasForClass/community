@@ -27,6 +27,37 @@ namespace Ink_Canvas.Helpers
         private static readonly string updatesFolderPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "AutoUpdate");
         private static string statusFilePath;
 
+        // 全局下载取消令牌；UI 通过 RequestCancelDownload 取消当前下载
+        private static CancellationTokenSource _activeDownloadCts;
+        private static readonly object _activeDownloadLock = new object();
+
+        public static void RequestCancelDownload()
+        {
+            lock (_activeDownloadLock)
+            {
+                try { _activeDownloadCts?.Cancel(); } catch { }
+            }
+        }
+
+        private static CancellationTokenSource BeginDownloadSession()
+        {
+            lock (_activeDownloadLock)
+            {
+                try { _activeDownloadCts?.Cancel(); } catch { }
+                _activeDownloadCts = new CancellationTokenSource();
+                return _activeDownloadCts;
+            }
+        }
+
+        private static void EndDownloadSession(CancellationTokenSource cts)
+        {
+            lock (_activeDownloadLock)
+            {
+                if (ReferenceEquals(_activeDownloadCts, cts)) _activeDownloadCts = null;
+            }
+            try { cts?.Dispose(); } catch { }
+        }
+
         public static bool IsX64UpdatePackageSelected()
         {
             try
@@ -383,6 +414,8 @@ namespace Ink_Canvas.Helpers
         // 获取所有可用线路组，按延迟排序
         public static async Task<List<UpdateLineGroup>> GetAvailableLineGroupsOrdered(UpdateChannel channel)
         {
+            var cached = TryGetCachedOrderedGroups(channel);
+            if (cached != null) return cached;
             var groups = ChannelLineGroups[channel];
             var availableGroups = new List<(UpdateLineGroup group, long delay)>();
 
@@ -468,7 +501,44 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile("AutoUpdate | 所有线路组均不可用", LogHelper.LogType.Error);
             }
 
+            CacheOrderedGroups(channel, orderedGroups);
             return orderedGroups;
+        }
+
+        // 缓存按延迟排序后的线路组，避免短时间内重复测速
+        private static readonly Dictionary<UpdateChannel, (List<UpdateLineGroup> groups, DateTime cachedAt)> _orderedGroupsCache
+            = new Dictionary<UpdateChannel, (List<UpdateLineGroup>, DateTime)>();
+        private static readonly TimeSpan _orderedGroupsCacheTtl = TimeSpan.FromMinutes(15);
+
+        private static List<UpdateLineGroup> TryGetCachedOrderedGroups(UpdateChannel channel)
+        {
+            lock (_orderedGroupsCache)
+            {
+                if (_orderedGroupsCache.TryGetValue(channel, out var entry) &&
+                    entry.groups != null && entry.groups.Count > 0 &&
+                    DateTime.UtcNow - entry.cachedAt < _orderedGroupsCacheTtl)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 复用线路组延迟检测缓存（{entry.groups.Count} 个）");
+                    return new List<UpdateLineGroup>(entry.groups);
+                }
+                return null;
+            }
+        }
+
+        private static void CacheOrderedGroups(UpdateChannel channel, List<UpdateLineGroup> groups)
+        {
+            lock (_orderedGroupsCache)
+            {
+                _orderedGroupsCache[channel] = (new List<UpdateLineGroup>(groups), DateTime.UtcNow);
+            }
+        }
+
+        public static void InvalidateOrderedGroupsCache()
+        {
+            lock (_orderedGroupsCache)
+            {
+                _orderedGroupsCache.Clear();
+            }
         }
 
         private static async Task<long> GetDownloadUrlDelay(string url)
@@ -945,6 +1015,7 @@ namespace Ink_Canvas.Helpers
         // 使用多线路组下载新版（支持自动切换）
         public static async Task<bool> DownloadSetupFileWithFallback(string version, List<UpdateLineGroup> groups, Action<double, string> progressCallback = null)
         {
+            var session = BeginDownloadSession();
             try
             {
                 version = NormalizeVersionForUpdate(version);
@@ -1021,6 +1092,13 @@ namespace Ink_Canvas.Helpers
                 progressCallback?.Invoke(0, "所有线路组下载均失败");
                 return false;
             }
+            catch (OperationCanceledException)
+            {
+                LogHelper.WriteLogToFile("AutoUpdate | 下载已被用户取消", LogHelper.LogType.Warning);
+                SaveDownloadStatus(false);
+                progressCallback?.Invoke(0, "下载已取消");
+                return false;
+            }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"AutoUpdate | 下载更新时出错: {ex.Message}", LogHelper.LogType.Error);
@@ -1033,6 +1111,10 @@ namespace Ink_Canvas.Helpers
                 progressCallback?.Invoke(0, $"下载异常: {ex.Message}");
                 return false;
             }
+            finally
+            {
+                EndDownloadSession(session);
+            }
         }
 
         // 下载文件的具体实现
@@ -1042,6 +1124,12 @@ namespace Ink_Canvas.Helpers
             int maxRetry = 3;
             // 降低并发数，减少网络压力
             int[] threadOptions = { 32, 16, 8, 4, 1 };
+
+            CancellationToken externalToken;
+            lock (_activeDownloadLock)
+            {
+                externalToken = _activeDownloadCts?.Token ?? CancellationToken.None;
+            }
 
             // 检查服务器是否支持Range分块下载
             bool supportRange = false;
@@ -1146,7 +1234,7 @@ namespace Ink_Canvas.Helpers
                                         // 增加连接超时设置
                                         client.Timeout = TimeSpan.FromSeconds(30);
 
-                                        var downloadCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token);
+                                        var downloadCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, externalToken);
                                         var lastReadTime = DateTime.UtcNow;
                                         bool dataReceived = false;
 
@@ -1339,12 +1427,18 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"AutoUpdate | 开始单线程下载: {fileUrl}");
                 progressCallback?.Invoke(0, "开始单线程下载");
 
+                CancellationToken token;
+                lock (_activeDownloadLock)
+                {
+                    token = _activeDownloadCts?.Token ?? CancellationToken.None;
+                }
+
                 using (var client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
                     client.Timeout = TimeSpan.FromMinutes(10); // 单线程下载设置更长的超时时间
 
-                    using (var resp = await client.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead))
+                    using (var resp = await client.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead, token))
                     {
                         resp.EnsureSuccessStatusCode();
                         using (var fs = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None))
@@ -1355,9 +1449,9 @@ namespace Ink_Canvas.Helpers
                             long downloaded = 0;
                             var lastProgressUpdate = DateTime.UtcNow;
 
-                            while ((read = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                            while ((read = await stream.ReadAsync(buffer, 0, buffer.Length, token)) > 0)
                             {
-                                await fs.WriteAsync(buffer, 0, read);
+                                await fs.WriteAsync(buffer, 0, read, token);
                                 downloaded += read;
 
                                 // 限制进度更新频率，避免UI卡顿
@@ -1378,6 +1472,13 @@ namespace Ink_Canvas.Helpers
                 progressCallback?.Invoke(100, "单线程下载完成");
                 LogHelper.WriteLogToFile("AutoUpdate | 单线程下载完成");
                 return true;
+            }
+            catch (OperationCanceledException)
+            {
+                LogHelper.WriteLogToFile("AutoUpdate | 单线程下载已被取消", LogHelper.LogType.Warning);
+                progressCallback?.Invoke(0, "下载已取消");
+                try { if (File.Exists(destinationPath)) File.Delete(destinationPath); } catch { }
+                return false;
             }
             catch (Exception ex)
             {
