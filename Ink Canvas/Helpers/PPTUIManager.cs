@@ -86,18 +86,8 @@ namespace Ink_Canvas.Helpers
                         _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Collapsed;
                         _mainWindow.BtnPPTSlideShowEnd.Visibility = Visibility.Visible;
 
-                        // 只有在页数有效时才更新页码显示
-                        if (currentSlide > 0 && totalSlides > 0)
-                        {
-                            _mainWindow.PPTBtnPageNow.Text = currentSlide.ToString();
-                            _mainWindow.PPTBtnPageTotal.Text = $"/ {totalSlides}";
-                        }
-                        else
-                        {
-                            // 页数无效时清空页码显示
-                            _mainWindow.PPTBtnPageNow.Text = "?";
-                            _mainWindow.PPTBtnPageTotal.Text = "/ ?";
-                        }
+                        // 同步页码到所有翻页条 + 兼容旧绑定的隐藏 placeholder
+                        SetPageNumberOnAllBars(currentSlide, totalSlides);
 
                         UpdateNavigationPanelsVisibility();
                         UpdateNavigationButtonStyles();
@@ -163,24 +153,41 @@ namespace Ink_Canvas.Helpers
             {
                 try
                 {
-                    // 只有在页数有效时才更新页码显示
-                    if (currentSlide > 0 && totalSlides > 0)
-                    {
-                        _mainWindow.PPTBtnPageNow.Text = currentSlide.ToString();
-                        _mainWindow.PPTBtnPageTotal.Text = $"/ {totalSlides}";
-                    }
-                    else
-                    {
-                        // 页数无效时清空页码显示
-                        _mainWindow.PPTBtnPageNow.Text = "?";
-                        _mainWindow.PPTBtnPageTotal.Text = "/ ?";
-                    }
+                    SetPageNumberOnAllBars(currentSlide, totalSlides);
                 }
                 catch (Exception ex)
                 {
                     LogHelper.WriteLogToFile($"更新页码显示失败: {ex}", LogHelper.LogType.Error);
                 }
             });
+        }
+
+        private void SetPageNumberOnAllBars(int currentSlide, int totalSlides)
+        {
+            var bars = new[]
+            {
+                _mainWindow.LeftBottomPanelForPPTNavigation,
+                _mainWindow.RightBottomPanelForPPTNavigation,
+                _mainWindow.LeftSidePanelForPPTNavigation,
+                _mainWindow.RightSidePanelForPPTNavigation,
+            };
+            foreach (var bar in bars)
+            {
+                if (bar == null) continue;
+                bar.CurrentSlide = currentSlide;
+                bar.TotalSlides = totalSlides;
+            }
+            // 兼容旧绑定（其它界面通过 ElementName 引用 PPTBtnPageNow / PPTBtnPageTotal）
+            if (currentSlide > 0 && totalSlides > 0)
+            {
+                _mainWindow.PPTBtnPageNow.Text = currentSlide.ToString();
+                _mainWindow.PPTBtnPageTotal.Text = $"/ {totalSlides}";
+            }
+            else
+            {
+                _mainWindow.PPTBtnPageNow.Text = "?";
+                _mainWindow.PPTBtnPageTotal.Text = "/ ?";
+            }
         }
 
         /// <summary>
@@ -391,16 +398,17 @@ namespace Ink_Canvas.Helpers
 
                 // 页码按钮显示
                 var pageButtonVisibility = options[0] == '2' ? Visibility.Visible : Visibility.Collapsed;
-                _mainWindow.PPTLSPageButton.Visibility = pageButtonVisibility;
-                _mainWindow.PPTRSPageButton.Visibility = pageButtonVisibility;
+                _mainWindow.LeftSidePanelForPPTNavigation.SetPageButtonVisibility(pageButtonVisibility);
+                _mainWindow.RightSidePanelForPPTNavigation.SetPageButtonVisibility(pageButtonVisibility);
 
-                // 透明度设置 - 直接使用用户设置的透明度值
-                _mainWindow.PPTBtnLSBorder.Opacity = PPTLSButtonOpacity;
-                _mainWindow.PPTBtnRSBorder.Opacity = PPTRSButtonOpacity;
+                // 透明度
+                _mainWindow.LeftSidePanelForPPTNavigation.SetBarOpacity(PPTLSButtonOpacity);
+                _mainWindow.RightSidePanelForPPTNavigation.SetBarOpacity(PPTRSButtonOpacity);
 
                 // 颜色主题
                 bool isDarkTheme = options[2] == '2';
-                ApplyButtonTheme(_mainWindow.PPTBtnLSBorder, _mainWindow.PPTBtnRSBorder, isDarkTheme, true);
+                _mainWindow.LeftSidePanelForPPTNavigation.ApplyTheme(isDarkTheme);
+                _mainWindow.RightSidePanelForPPTNavigation.ApplyTheme(isDarkTheme);
             }
             catch (Exception ex)
             {
@@ -419,112 +427,22 @@ namespace Ink_Canvas.Helpers
 
                 // 页码按钮显示
                 var pageButtonVisibility = options[0] == '2' ? Visibility.Visible : Visibility.Collapsed;
-                _mainWindow.PPTLBPageButton.Visibility = pageButtonVisibility;
-                _mainWindow.PPTRBPageButton.Visibility = pageButtonVisibility;
+                _mainWindow.LeftBottomPanelForPPTNavigation.SetPageButtonVisibility(pageButtonVisibility);
+                _mainWindow.RightBottomPanelForPPTNavigation.SetPageButtonVisibility(pageButtonVisibility);
 
-                // 透明度设置 - 直接使用用户设置的透明度值
-                _mainWindow.PPTBtnLBBorder.Opacity = PPTLBButtonOpacity;
-                _mainWindow.PPTBtnRBBorder.Opacity = PPTRBButtonOpacity;
+                // 透明度
+                _mainWindow.LeftBottomPanelForPPTNavigation.SetBarOpacity(PPTLBButtonOpacity);
+                _mainWindow.RightBottomPanelForPPTNavigation.SetBarOpacity(PPTRBButtonOpacity);
 
                 // 颜色主题
                 bool isDarkTheme = options[2] == '2';
-                ApplyButtonTheme(_mainWindow.PPTBtnLBBorder, _mainWindow.PPTBtnRBBorder, isDarkTheme, false);
+                _mainWindow.LeftBottomPanelForPPTNavigation.ApplyTheme(isDarkTheme);
+                _mainWindow.RightBottomPanelForPPTNavigation.ApplyTheme(isDarkTheme);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"更新底部按钮样式失败: {ex}", LogHelper.LogType.Error);
             }
-        }
-
-        private void ApplyButtonTheme(Border leftBorder, Border rightBorder, bool isDarkTheme, bool isSideButton)
-        {
-            try
-            {
-                Color backgroundColor, borderColor, foregroundColor, feedbackColor;
-
-                if (isDarkTheme)
-                {
-                    backgroundColor = Color.FromRgb(39, 39, 42);
-                    borderColor = Color.FromRgb(82, 82, 91);
-                    foregroundColor = Colors.White;
-                    feedbackColor = Colors.White;
-                }
-                else
-                {
-                    backgroundColor = Color.FromRgb(244, 244, 245);
-                    borderColor = Color.FromRgb(161, 161, 170);
-                    foregroundColor = Color.FromRgb(39, 39, 42);
-                    feedbackColor = Color.FromRgb(24, 24, 27);
-                }
-
-                // 应用背景和边框颜色
-                var backgroundBrush = new SolidColorBrush(backgroundColor);
-                var borderBrush = new SolidColorBrush(borderColor);
-
-                leftBorder.Background = backgroundBrush;
-                leftBorder.BorderBrush = borderBrush;
-                rightBorder.Background = backgroundBrush;
-                rightBorder.BorderBrush = borderBrush;
-
-                // 应用图标和文字颜色
-                var foregroundBrush = new SolidColorBrush(foregroundColor);
-                var feedbackBrush = new SolidColorBrush(feedbackColor);
-
-                if (isSideButton)
-                {
-                    ApplySideButtonColors(foregroundBrush, feedbackBrush);
-                }
-                else
-                {
-                    ApplyBottomButtonColors(foregroundBrush, feedbackBrush);
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"应用按钮主题失败: {ex}", LogHelper.LogType.Error);
-            }
-        }
-
-        private void ApplySideButtonColors(SolidColorBrush foregroundBrush, SolidColorBrush feedbackBrush)
-        {
-            // 图标颜色
-            _mainWindow.PPTLSPreviousButtonGeometry.Brush = foregroundBrush;
-            _mainWindow.PPTRSPreviousButtonGeometry.Brush = foregroundBrush;
-            _mainWindow.PPTLSNextButtonGeometry.Brush = foregroundBrush;
-            _mainWindow.PPTRSNextButtonGeometry.Brush = foregroundBrush;
-
-            // 反馈背景颜色
-            _mainWindow.PPTLSPreviousButtonFeedbackBorder.Background = feedbackBrush;
-            _mainWindow.PPTRSPreviousButtonFeedbackBorder.Background = feedbackBrush;
-            _mainWindow.PPTLSPageButtonFeedbackBorder.Background = feedbackBrush;
-            _mainWindow.PPTRSPageButtonFeedbackBorder.Background = feedbackBrush;
-            _mainWindow.PPTLSNextButtonFeedbackBorder.Background = feedbackBrush;
-            _mainWindow.PPTRSNextButtonFeedbackBorder.Background = feedbackBrush;
-
-            // 文字颜色
-            TextBlock.SetForeground(_mainWindow.PPTLSPageButton, foregroundBrush);
-            TextBlock.SetForeground(_mainWindow.PPTRSPageButton, foregroundBrush);
-        }
-
-        private void ApplyBottomButtonColors(SolidColorBrush foregroundBrush, SolidColorBrush feedbackBrush)
-        {
-            // 图标颜色
-            _mainWindow.PPTLBPreviousButtonGeometry.Brush = foregroundBrush;
-            _mainWindow.PPTRBPreviousButtonGeometry.Brush = foregroundBrush;
-            _mainWindow.PPTLBNextButtonGeometry.Brush = foregroundBrush;
-            _mainWindow.PPTRBNextButtonGeometry.Brush = foregroundBrush;
-
-            // 反馈背景颜色
-            _mainWindow.PPTLBPreviousButtonFeedbackBorder.Background = feedbackBrush;
-            _mainWindow.PPTRBPreviousButtonFeedbackBorder.Background = feedbackBrush;
-            _mainWindow.PPTLBPageButtonFeedbackBorder.Background = feedbackBrush;
-            _mainWindow.PPTRBPageButtonFeedbackBorder.Background = feedbackBrush;
-            _mainWindow.PPTLBNextButtonFeedbackBorder.Background = feedbackBrush;
-            _mainWindow.PPTRBNextButtonFeedbackBorder.Background = feedbackBrush;
-
-            // 文字颜色
-            TextBlock.SetForeground(_mainWindow.PPTLBPageButton, foregroundBrush);
-            TextBlock.SetForeground(_mainWindow.PPTRBPageButton, foregroundBrush);
         }
         #endregion
     }

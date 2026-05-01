@@ -83,9 +83,9 @@
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{i18n:I18n Key=PPT_LeftOffset}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="{Binding ElementName=PPTButtonLeftPositionValueSlider, Path=Value}"
+                                    <TextBlock Text="{Binding ElementName=PPTButtonLeftPositionValueSlider, Path=Value, StringFormat={}{0:F0}}"
                                                VerticalAlignment="Center" FontFamily="Consolas"/>
-                                    <Slider x:Name="PPTButtonLeftPositionValueSlider" Minimum="-500" Maximum="500" Width="200" ValueChanged="PPTButtonLeftPositionValueSlider_ValueChanged"/>
+                                    <Slider x:Name="PPTButtonLeftPositionValueSlider" Minimum="-500" Maximum="500" Width="200" IsSnapToTickEnabled="True" TickFrequency="1" ValueChanged="PPTButtonLeftPositionValueSlider_ValueChanged"/>
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{i18n:I18n Key=PPT_LeftOpacity}" Visibility="{Binding IsChecked, ElementName=CheckboxSPPTHalfOpacity, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -110,9 +110,9 @@
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{i18n:I18n Key=PPT_RightOffset}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="{Binding ElementName=PPTButtonRightPositionValueSlider, Path=Value}"
+                                    <TextBlock Text="{Binding ElementName=PPTButtonRightPositionValueSlider, Path=Value, StringFormat={}{0:F0}}"
                                                VerticalAlignment="Center" FontFamily="Consolas"/>
-                                    <Slider x:Name="PPTButtonRightPositionValueSlider" Minimum="-500" Maximum="500" Width="200" ValueChanged="PPTButtonRightPositionValueSlider_ValueChanged"/>
+                                    <Slider x:Name="PPTButtonRightPositionValueSlider" Minimum="-500" Maximum="500" Width="200" IsSnapToTickEnabled="True" TickFrequency="1" ValueChanged="PPTButtonRightPositionValueSlider_ValueChanged"/>
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{i18n:I18n Key=PPT_RightOpacity}" Visibility="{Binding IsChecked, ElementName=CheckboxSPPTHalfOpacity, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -137,9 +137,9 @@
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{i18n:I18n Key=PPT_LeftBottomOffset}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="{Binding ElementName=PPTButtonLBPositionValueSlider, Path=Value}"
+                                    <TextBlock Text="{Binding ElementName=PPTButtonLBPositionValueSlider, Path=Value, StringFormat={}{0:F0}}"
                                                VerticalAlignment="Center" FontFamily="Consolas"/>
-                                    <Slider x:Name="PPTButtonLBPositionValueSlider" Minimum="-500" Maximum="500" Width="200" ValueChanged="PPTButtonLBPositionValueSlider_ValueChanged"/>
+                                    <Slider x:Name="PPTButtonLBPositionValueSlider" Minimum="-500" Maximum="500" Width="200" IsSnapToTickEnabled="True" TickFrequency="1" ValueChanged="PPTButtonLBPositionValueSlider_ValueChanged"/>
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{i18n:I18n Key=PPT_LeftBottomOpacity}" Visibility="{Binding IsChecked, ElementName=CheckboxBPPTHalfOpacity, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -164,9 +164,9 @@
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{i18n:I18n Key=PPT_RightBottomOffset}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="{Binding ElementName=PPTButtonRBPositionValueSlider, Path=Value}"
+                                    <TextBlock Text="{Binding ElementName=PPTButtonRBPositionValueSlider, Path=Value, StringFormat={}{0:F0}}"
                                                VerticalAlignment="Center" FontFamily="Consolas"/>
-                                    <Slider x:Name="PPTButtonRBPositionValueSlider" Minimum="-500" Maximum="500" Width="200" ValueChanged="PPTButtonRBPositionValueSlider_ValueChanged"/>
+                                    <Slider x:Name="PPTButtonRBPositionValueSlider" Minimum="-500" Maximum="500" Width="200" IsSnapToTickEnabled="True" TickFrequency="1" ValueChanged="PPTButtonRBPositionValueSlider_ValueChanged"/>
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{i18n:I18n Key=PPT_RightBottomOpacity}" Visibility="{Binding IsChecked, ElementName=CheckboxBPPTHalfOpacity, Converter={StaticResource BooleanToVisibilityConverter}}">

@@ -2451,285 +2451,35 @@
         <!--// PPT 工具栏 //-->
         <Grid>
             <Grid Visibility="Visible">
-                <Viewbox x:Name="LeftBottomPanelForPPTNavigation" Visibility="Collapsed" Margin="6,0,0,6" Height="50"
-                         HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                    <Border BorderThickness="1" BorderBrush="#a1a1aa" Name="PPTBtnLBBorder"
-                            Background="#f4f4f5" Opacity="1" CornerRadius="6">
-                        <ikw:SimpleStackPanel Orientation="Horizontal">
-                            <Border Width="50" Height="50" MouseUp="GridPPTControlPrevious_MouseUp"
-                                    Name="PPTLBPreviousButtonBorder"
-                                    MouseDown="GridPPTControlPrevious_MouseDown"
-                                    MouseLeave="GridPPTControlPrevious_MouseLeave"
-                                    CornerRadius="5 5 0 0" Background="Transparent">
-                                <Grid>
-                                    <Border Margin="3" CornerRadius="5" Name="PPTLBPreviousButtonFeedbackBorder"
-                                            Background="#18181b" Opacity="0" />
-                                    <Image Height="28" Width="28">
-                                        <Image.Source>
-                                            <DrawingImage>
-                                                <DrawingImage.Drawing>
-                                                    <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                        <GeometryDrawing Brush="#27272a"
-                                                                         x:Name="PPTLBPreviousButtonGeometry"
-                                                                         Geometry="F0 M24,24z M0,0z M3.3994,12.9642C2.86687,12.4317,2.86687,11.5683,3.3994,11.0358L9.94485,4.49031C10.4774,3.95777 11.3408,3.95777 11.8733,4.49031 12.4059,5.02284 12.4059,5.88625 11.8733,6.41878L7.65575,10.6364 19.6364,10.6364C20.3895,10.6364 21,11.2469 21,12 21,12.7531 20.3895,13.3636 19.6364,13.3636L7.65575,13.3636 11.8733,17.5812C12.4059,18.1137 12.4059,18.9772 11.8733,19.5097 11.3408,20.0422 10.4774,20.0422 9.94485,19.5097L3.3994,12.9642z" />
-                                                    </DrawingGroup>
-                                                </DrawingImage.Drawing>
-                                            </DrawingImage>
-                                        </Image.Source>
-                                    </Image>
-                                </Grid>
-                            </Border>
-                            <Border Visibility="Visible" Name="PPTLBPageButton" TextBlock.Foreground="#171717"
-                                    MouseUp="PPTNavigationBtn_MouseUp" MouseDown="PPTNavigationBtn_MouseDown"
-                                    MouseLeave="PPTNavigationBtn_MouseLeave" Width="auto" MinWidth="50" Height="50"
-                                    Background="Transparent">
-                                <Grid>
-                                    <Border Margin="0,3" CornerRadius="5" Name="PPTLBPageButtonFeedbackBorder"
-                                            Background="#18181b" Opacity="0" />
-                                    <ikw:SimpleStackPanel VerticalAlignment="Center" Orientation="Vertical"
-                                                         Spacing="0.5" Margin="12,0">
-                                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                   FontSize="17" FontWeight="Bold"
-                                                   Text="{Binding ElementName=PPTBtnPageNow, Path=Text}" />
-                                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                   FontSize="10"
-                                                   Text="{Binding ElementName=PPTBtnPageTotal, Path=Text}" />
-                                    </ikw:SimpleStackPanel>
-
-                                </Grid>
-                            </Border>
-                            <Border Width="50" Height="50" MouseUp="GridPPTControlNext_MouseUp"
-                                    MouseDown="GridPPTControlNext_MouseDown" MouseLeave="GridPPTControlNext_MouseLeave"
-                                    CornerRadius="0 0 5 5" Background="Transparent" Name="PPTLBNextButtonBorder">
-                                <Grid>
-                                    <Border Margin="3" CornerRadius="5" Name="PPTLBNextButtonFeedbackBorder"
-                                            Background="#18181b" Opacity="0" />
-                                    <Image VerticalAlignment="Center" HorizontalAlignment="Center" Height="28"
-                                           Width="28">
-                                        <Image.Source>
-                                            <DrawingImage>
-                                                <DrawingImage.Drawing>
-                                                    <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                        <GeometryDrawing Brush="#27272a"
-                                                                         x:Name="PPTLBNextButtonGeometry"
-                                                                         Geometry="F0 M24,24z M0,0z M20.6006,12.9642C21.1331,12.4317,21.1331,11.5683,20.6006,11.0358L14.0551,4.49031C13.5226,3.95777 12.6592,3.95777 12.1267,4.49031 11.5941,5.02284 11.5941,5.88625 12.1267,6.41878L16.3443,10.6364 4.36364,10.6364C3.61052,10.6364 3,11.2469 3,12 3,12.7531 3.61052,13.3636 4.36364,13.3636L16.3443,13.3636 12.1267,17.5812C11.5941,18.1137 11.5941,18.9772 12.1267,19.5097 12.6592,20.0422 13.5226,20.0422 14.0551,19.5097L20.6006,12.9642z" />
-                                                    </DrawingGroup>
-                                                </DrawingImage.Drawing>
-                                            </DrawingImage>
-                                        </Image.Source>
-                                    </Image>
-                                </Grid>
-                            </Border>
-                        </ikw:SimpleStackPanel>
-                    </Border>
-                </Viewbox>
-                <Viewbox x:Name="RightBottomPanelForPPTNavigation" Visibility="Collapsed" Margin="0,0,6,6" Height="50"
-                         HorizontalAlignment="Right" VerticalAlignment="Bottom">
-                    <Border BorderThickness="1" BorderBrush="#a1a1aa" Name="PPTBtnRBBorder"
-                            Background="#f4f4f5" Opacity="1" CornerRadius="6">
-                        <ikw:SimpleStackPanel Orientation="Horizontal">
-                            <Border Width="50" Height="50" MouseUp="GridPPTControlPrevious_MouseUp"
-                                    Name="PPTRBPreviousButtonBorder"
-                                    MouseDown="GridPPTControlPrevious_MouseDown"
-                                    MouseLeave="GridPPTControlPrevious_MouseLeave"
-                                    CornerRadius="5 5 0 0" Background="Transparent">
-                                <Grid>
-                                    <Border Margin="3" CornerRadius="5" Name="PPTRBPreviousButtonFeedbackBorder"
-                                            Background="#18181b" Opacity="0" />
-                                    <Image Height="28" Width="28">
-                                        <Image.Source>
-                                            <DrawingImage>
-                                                <DrawingImage.Drawing>
-                                                    <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                        <GeometryDrawing Brush="#27272a"
-                                                                         x:Name="PPTRBPreviousButtonGeometry"
-                                                                         Geometry="F0 M24,24z M0,0z M3.3994,12.9642C2.86687,12.4317,2.86687,11.5683,3.3994,11.0358L9.94485,4.49031C10.4774,3.95777 11.3408,3.95777 11.8733,4.49031 12.4059,5.02284 12.4059,5.88625 11.8733,6.41878L7.65575,10.6364 19.6364,10.6364C20.3895,10.6364 21,11.2469 21,12 21,12.7531 20.3895,13.3636 19.6364,13.3636L7.65575,13.3636 11.8733,17.5812C12.4059,18.1137 12.4059,18.9772 11.8733,19.5097 11.3408,20.0422 10.4774,20.0422 9.94485,19.5097L3.3994,12.9642z" />
-                                                    </DrawingGroup>
-                                                </DrawingImage.Drawing>
-                                            </DrawingImage>
-                                        </Image.Source>
-                                    </Image>
-                                </Grid>
-                            </Border>
-                            <Border Visibility="Visible" Name="PPTRBPageButton" TextBlock.Foreground="#171717"
-                                    MouseUp="PPTNavigationBtn_MouseUp" MouseDown="PPTNavigationBtn_MouseDown"
-                                    MouseLeave="PPTNavigationBtn_MouseLeave" Width="auto" MinWidth="50" Height="50"
-                                    Background="Transparent">
-                                <Grid>
-                                    <Border Margin="0,3" CornerRadius="5" Name="PPTRBPageButtonFeedbackBorder"
-                                            Background="#18181b" Opacity="0" />
-                                    <ikw:SimpleStackPanel VerticalAlignment="Center" Orientation="Vertical"
-                                                         Spacing="0.5" Margin="12,0">
-                                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                   FontSize="17" FontWeight="Bold"
-                                                   Text="{Binding ElementName=PPTBtnPageNow, Path=Text}" />
-                                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                   FontSize="10"
-                                                   Text="{Binding ElementName=PPTBtnPageTotal, Path=Text}" />
-                                    </ikw:SimpleStackPanel>
-
-                                </Grid>
-                            </Border>
-                            <Border Width="50" Height="50" MouseUp="GridPPTControlNext_MouseUp"
-                                    MouseDown="GridPPTControlNext_MouseDown" MouseLeave="GridPPTControlNext_MouseLeave"
-                                    CornerRadius="0 0 5 5" Background="Transparent" Name="PPTRBNextButtonBorder">
-                                <Grid>
-                                    <Border Margin="3" CornerRadius="5" Name="PPTRBNextButtonFeedbackBorder"
-                                            Background="#18181b" Opacity="0" />
-                                    <Image VerticalAlignment="Center" HorizontalAlignment="Center" Height="28"
-                                           Width="28">
-                                        <Image.Source>
-                                            <DrawingImage>
-                                                <DrawingImage.Drawing>
-                                                    <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                        <GeometryDrawing Brush="#27272a"
-                                                                         x:Name="PPTRBNextButtonGeometry"
-                                                                         Geometry="F0 M24,24z M0,0z M20.6006,12.9642C21.1331,12.4317,21.1331,11.5683,20.6006,11.0358L14.0551,4.49031C13.5226,3.95777 12.6592,3.95777 12.1267,4.49031 11.5941,5.02284 11.5941,5.88625 12.1267,6.41878L16.3443,10.6364 4.36364,10.6364C3.61052,10.6364 3,11.2469 3,12 3,12.7531 3.61052,13.3636 4.36364,13.3636L16.3443,13.3636 12.1267,17.5812C11.5941,18.1137 11.5941,18.9772 12.1267,19.5097 12.6592,20.0422 13.5226,20.0422 14.0551,19.5097L20.6006,12.9642z" />
-                                                    </DrawingGroup>
-                                                </DrawingImage.Drawing>
-                                            </DrawingImage>
-                                        </Image.Source>
-                                    </Image>
-                                </Grid>
-                            </Border>
-                        </ikw:SimpleStackPanel>
-                    </Border>
-                </Viewbox>
+                <localControls:PptNavBar x:Name="LeftBottomPanelForPPTNavigation"
+                                         Visibility="Collapsed"
+                                         Direction="LeftBottom"
+                                         Margin="6,0,0,6"
+                                         HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                <localControls:PptNavBar x:Name="RightBottomPanelForPPTNavigation"
+                                         Visibility="Collapsed"
+                                         Direction="RightBottom"
+                                         Margin="0,0,6,6"
+                                         HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
             </Grid>
         </Grid>
 
         <!--// PPT 侧边翻页按钮 //-->
-        <Viewbox x:Name="LeftSidePanelForPPTNavigation" Visibility="Visible"  Width="56"
-                 HorizontalAlignment="Left" VerticalAlignment="Center">
-            <Border BorderThickness="1" BorderBrush="#a1a1aa" Name="PPTBtnLSBorder"
-                    Background="#f4f4f5" Opacity="1" CornerRadius="6" Margin="6,0,0,0">
-                <ikw:SimpleStackPanel Orientation="Vertical">
-                    <Border Width="50" Height="50" MouseUp="GridPPTControlPrevious_MouseUp"
-                            Name="PPTLSPreviousButtonBorder"
-                            MouseDown="GridPPTControlPrevious_MouseDown" MouseLeave="GridPPTControlPrevious_MouseLeave"
-                            CornerRadius="5 5 0 0" Background="Transparent">
-                        <Grid>
-                            <Border Margin="3" CornerRadius="5" Name="PPTLSPreviousButtonFeedbackBorder"
-                                    Background="#18181b" Opacity="0" />
-                            <Image Height="28" Width="28">
-                                <Image.Source>
-                                    <DrawingImage>
-                                        <DrawingImage.Drawing>
-                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                <GeometryDrawing Brush="#27272a" x:Name="PPTLSPreviousButtonGeometry"
-                                                                 Geometry="F0 M24,24z M0,0z M11.0357,3.3994C11.5682,2.86687,12.4316,2.86687,12.9641,3.3994L19.5096,9.94485C20.0421,10.4774 20.0421,11.3408 19.5096,11.8733 18.9771,12.4059 18.1137,12.4059 17.5811,11.8733L13.3635,7.65575 13.3635,19.6364C13.3635,20.3895 12.753,21 11.9999,21 11.2468,21 10.6363,20.3895 10.6363,19.6364L10.6363,7.65575 6.41869,11.8733C5.88616,12.4059 5.02275,12.4059 4.49022,11.8733 3.95769,11.3408 3.95769,10.4774 4.49022,9.94485L11.0357,3.3994z" />
-                                            </DrawingGroup>
-                                        </DrawingImage.Drawing>
-                                    </DrawingImage>
-                                </Image.Source>
-                            </Image>
-                        </Grid>
-                    </Border>
-                    <Border Visibility="Visible" Name="PPTLSPageButton" TextBlock.Foreground="#171717"
-                            MouseUp="PPTNavigationBtn_MouseUp" MouseDown="PPTNavigationBtn_MouseDown"
-                            MouseLeave="PPTNavigationBtn_MouseLeave" Width="50" Height="50"
-                            Background="Transparent">
-                        <Grid>
-                            <Border Margin="3,0" CornerRadius="5" Name="PPTLSPageButtonFeedbackBorder"
-                                    Background="#18181b" Opacity="0" />
-                            <ikw:SimpleStackPanel VerticalAlignment="Center" Orientation="Vertical" Spacing="0.5">
-                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
-                                           FontSize="17" FontWeight="Bold"
-                                           Text="999" Name="PPTBtnPageNow" />
-                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
-                                           FontSize="10" Text="/ 999" Name="PPTBtnPageTotal" />
-                            </ikw:SimpleStackPanel>
-                        </Grid>
-                    </Border>
-                    <Border Width="50" Height="50" MouseUp="GridPPTControlNext_MouseUp"
-                            MouseDown="GridPPTControlNext_MouseDown" MouseLeave="GridPPTControlNext_MouseLeave"
-                            CornerRadius="0 0 5 5" Background="Transparent" Name="PPTLSNextButtonBorder">
-                        <Grid>
-                            <Border Margin="3" CornerRadius="5" Name="PPTLSNextButtonFeedbackBorder"
-                                    Background="#18181b" Opacity="0" />
-                            <Image VerticalAlignment="Center" HorizontalAlignment="Center" Height="28" Width="28">
-                                <Image.Source>
-                                    <DrawingImage>
-                                        <DrawingImage.Drawing>
-                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                <GeometryDrawing Brush="#27272a" x:Name="PPTLSNextButtonGeometry"
-                                                                 Geometry="F0 M24,24z M0,0z M11.0357,20.6006C11.5682,21.1331,12.4316,21.1331,12.9641,20.6006L19.5096,14.0551C20.0421,13.5226 20.0421,12.6592 19.5096,12.1267 18.9771,11.5941 18.1137,11.5941 17.5811,12.1267L13.3635,16.3443 13.3635,4.36364C13.3635,3.61052 12.753,3 11.9999,3 11.2468,3 10.6363,3.61052 10.6363,4.36364L10.6363,16.3443 6.41869,12.1267C5.88616,11.5941 5.02275,11.5941 4.49022,12.1267 3.95769,12.6592 3.95769,13.5226 4.49022,14.0551L11.0357,20.6006z" />
-                                            </DrawingGroup>
-                                        </DrawingImage.Drawing>
-                                    </DrawingImage>
-                                </Image.Source>
-                            </Image>
-                        </Grid>
-                    </Border>
-                </ikw:SimpleStackPanel>
-            </Border>
-        </Viewbox>
-        <Viewbox x:Name="RightSidePanelForPPTNavigation" Visibility="Visible" Width="56"
-                 HorizontalAlignment="Right" VerticalAlignment="Center">
-            <Border BorderThickness="1" BorderBrush="#a1a1aa" Name="PPTBtnRSBorder"
-                    Background="#f4f4f5" Opacity="1" CornerRadius="6"  Margin="0,0,6,0">
-                <ikw:SimpleStackPanel Orientation="Vertical">
-                    <Border Width="50" Height="50" MouseUp="GridPPTControlPrevious_MouseUp"
-                            Name="PPTRSPreviousButtonBorder"
-                            MouseDown="GridPPTControlPrevious_MouseDown" MouseLeave="GridPPTControlPrevious_MouseLeave"
-                            CornerRadius="5 5 0 0" Background="Transparent">
-                        <Grid>
-                            <Border Margin="3" CornerRadius="5" Name="PPTRSPreviousButtonFeedbackBorder"
-                                    Background="#18181b" Opacity="0" />
-                            <Image Height="28" Width="28">
-                                <Image.Source>
-                                    <DrawingImage>
-                                        <DrawingImage.Drawing>
-                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                <GeometryDrawing Brush="#27272a" x:Name="PPTRSPreviousButtonGeometry"
-                                                                 Geometry="F0 M24,24z M0,0z M11.0357,3.3994C11.5682,2.86687,12.4316,2.86687,12.9641,3.3994L19.5096,9.94485C20.0421,10.4774 20.0421,11.3408 19.5096,11.8733 18.9771,12.4059 18.1137,12.4059 17.5811,11.8733L13.3635,7.65575 13.3635,19.6364C13.3635,20.3895 12.753,21 11.9999,21 11.2468,21 10.6363,20.3895 10.6363,19.6364L10.6363,7.65575 6.41869,11.8733C5.88616,12.4059 5.02275,12.4059 4.49022,11.8733 3.95769,11.3408 3.95769,10.4774 4.49022,9.94485L11.0357,3.3994z" />
-                                            </DrawingGroup>
-                                        </DrawingImage.Drawing>
-                                    </DrawingImage>
-                                </Image.Source>
-                            </Image>
-                        </Grid>
-                    </Border>
-                    <Border Visibility="Visible" Name="PPTRSPageButton"
-                            MouseUp="PPTNavigationBtn_MouseUp" MouseDown="PPTNavigationBtn_MouseDown"
-                            MouseLeave="PPTNavigationBtn_MouseLeave" Width="50" Height="50"
-                            Background="Transparent" TextBlock.Foreground="#171717">
-                        <Grid>
-                            <Border Margin="3,0" CornerRadius="5" Name="PPTRSPageButtonFeedbackBorder"
-                                    Background="#18181b" Opacity="0" />
-                            <ikw:SimpleStackPanel VerticalAlignment="Center" Orientation="Vertical" Spacing="0.5">
-                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
-                                           FontSize="17" FontWeight="Bold"
-                                           Text="{Binding ElementName=PPTBtnPageNow, Path=Text}" />
-                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
-                                           FontSize="10"
-                                           Text="{Binding ElementName=PPTBtnPageTotal, Path=Text}" />
-                            </ikw:SimpleStackPanel>
-                        </Grid>
-                    </Border>
-                    <Border Width="50" Height="50" MouseUp="GridPPTControlNext_MouseUp"
-                            MouseDown="GridPPTControlNext_MouseDown" MouseLeave="GridPPTControlNext_MouseLeave"
-                            CornerRadius="0 0 5 5" Background="Transparent" Name="PPTRSNextButtonBorder">
-                        <Grid>
-                            <Border Margin="3" CornerRadius="5" Name="PPTRSNextButtonFeedbackBorder"
-                                    Background="#18181b" Opacity="0" />
-                            <Image VerticalAlignment="Center" HorizontalAlignment="Center" Height="28" Width="28">
-                                <Image.Source>
-                                    <DrawingImage>
-                                        <DrawingImage.Drawing>
-                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                <GeometryDrawing Brush="#27272a" x:Name="PPTRSNextButtonGeometry"
-                                                                 Geometry="F0 M24,24z M0,0z M11.0357,20.6006C11.5682,21.1331,12.4316,21.1331,12.9641,20.6006L19.5096,14.0551C20.0421,13.5226 20.0421,12.6592 19.5096,12.1267 18.9771,11.5941 18.1137,11.5941 17.5811,12.1267L13.3635,16.3443 13.3635,4.36364C13.3635,3.61052 12.753,3 11.9999,3 11.2468,3 10.6363,3.61052 10.6363,4.36364L10.6363,16.3443 6.41869,12.1267C5.88616,11.5941 5.02275,11.5941 4.49022,12.1267 3.95769,12.6592 3.95769,13.5226 4.49022,14.0551L11.0357,20.6006z" />
-                                            </DrawingGroup>
-                                        </DrawingImage.Drawing>
-                                    </DrawingImage>
-                                </Image.Source>
-                            </Image>
-                        </Grid>
-                    </Border>
-                </ikw:SimpleStackPanel>
-            </Border>
-        </Viewbox>
+        <!-- 隐藏的全局页码源:旧代码与 PPTUIManager 通过 PPTBtnPageNow/Total 设置文字 -->
+        <ikw:SimpleStackPanel Visibility="Collapsed">
+            <TextBlock Name="PPTBtnPageNow" Text="?"/>
+            <TextBlock Name="PPTBtnPageTotal" Text="/ ?"/>
+        </ikw:SimpleStackPanel>
+        <localControls:PptNavBar x:Name="LeftSidePanelForPPTNavigation"
+                                 Visibility="Visible"
+                                 Direction="LeftSide"
+                                 Margin="6,0,0,0"
+                                 HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <localControls:PptNavBar x:Name="RightSidePanelForPPTNavigation"
+                                 Visibility="Visible"
+                                 Direction="RightSide"
+                                 Margin="0,0,6,0"
+                                 HorizontalAlignment="Right" VerticalAlignment="Center"/>
 
         <Grid Name="FloatingbarUIForInkReplay">
             <Viewbox Name="ViewboxFloatingBar" Margin="100,5,0,0" Cursor="Arrow"
