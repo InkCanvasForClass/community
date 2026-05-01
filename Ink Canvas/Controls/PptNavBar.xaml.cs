@@ -124,11 +124,56 @@ namespace Ink_Canvas.Controls
         {
             if (d is PptNavBar bar)
             {
-                bar.PreviewList.Visibility = (bool)e.NewValue ? Visibility.Visible : Visibility.Collapsed;
+                bool expanded = (bool)e.NewValue;
+                bar.PreviewList.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
                 bar.ApplyLayout();
-                if ((bool)e.NewValue) bar.SyncPreviewSelection();
-                bar.PreviewExpandedChanged?.Invoke(bar, (bool)e.NewValue);
+                if (expanded)
+                {
+                    bar.SyncPreviewSelection();
+                    bar.HookOutsideClick();
+                }
+                else
+                {
+                    bar.UnhookOutsideClick();
+                }
+                bar.PreviewExpandedChanged?.Invoke(bar, expanded);
             }
+        }
+
+        private Window _hookedWindow;
+        private void HookOutsideClick()
+        {
+            if (_hookedWindow != null) return;
+            _hookedWindow = Window.GetWindow(this);
+            if (_hookedWindow != null)
+            {
+                _hookedWindow.PreviewMouseDown += OnWindowPreviewMouseDown;
+            }
+        }
+        private void UnhookOutsideClick()
+        {
+            if (_hookedWindow != null)
+            {
+                _hookedWindow.PreviewMouseDown -= OnWindowPreviewMouseDown;
+                _hookedWindow = null;
+            }
+        }
+        private void OnWindowPreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.OriginalSource is DependencyObject d && !IsDescendantOf(d, this))
+            {
+                IsPreviewExpanded = false;
+            }
+        }
+        private static bool IsDescendantOf(DependencyObject child, DependencyObject ancestor)
+        {
+            while (child != null)
+            {
+                if (ReferenceEquals(child, ancestor)) return true;
+                child = System.Windows.Media.VisualTreeHelper.GetParent(child)
+                        ?? System.Windows.LogicalTreeHelper.GetParent(child);
+            }
+            return false;
         }
 
         private void ApplyDirection(NavDirection dir) => ApplyLayout();
