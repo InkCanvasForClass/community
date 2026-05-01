@@ -16,6 +16,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         public override string DefaultAnchorName => "StackPanelCanvasControls";
 
         protected override string IconBrushResourceKey => "RedBrush";
+        protected override string LabelBrushResourceKey => "RedBrush";
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.SymbolIconDelete_MouseUp(sender, e);

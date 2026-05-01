@@ -22,6 +22,9 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         /// <summary>DynamicResource 名称，用于 IconBrush。默认为 null（使用控件自带前景色）。</summary>
         protected virtual string IconBrushResourceKey => null;
 
+        /// <summary>DynamicResource 名称，用于 LabelBrush（文字颜色）。默认为 null（使用控件自带前景色）。</summary>
+        protected virtual string LabelBrushResourceKey => null;
+
         protected abstract void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e);
 
         /// <summary>构建后调用，用于回填 MainWindow 的原命名属性（partial 扩展里的 Attach*）。可选。</summary>
@@ -37,6 +40,11 @@ namespace Ink_Canvas.Controls.Toolbar.Items
             {
                 if (btn.TryFindResource(IconBrushResourceKey) is Brush brush) btn.IconBrush = brush;
                 else btn.SetResourceReference(ToolbarImageButton.IconBrushProperty, IconBrushResourceKey);
+            }
+            if (!string.IsNullOrEmpty(LabelBrushResourceKey))
+            {
+                if (btn.TryFindResource(LabelBrushResourceKey) is Brush brush) btn.LabelBrush = brush;
+                else btn.SetResourceReference(ToolbarImageButton.LabelBrushProperty, LabelBrushResourceKey);
             }
             btn.ButtonMouseUp += (s, e) => OnClick(host, s, e);
             AfterBuild(host, btn);

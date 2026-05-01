@@ -280,7 +280,7 @@
     <value>UIA置顶</value>
   </data>
   <data name="Startup_UIATopMostHint" xml:space="preserve">
-    <value># 开启UIA置顶后，软件需要管理员启动才能置顶…</value>
+    <value>开启UIA置顶后，软件需要管理员启动才能置顶…</value>
   </data>
   <data name="Startup_TopMostMode" xml:space="preserve">
     <value>置顶模式</value>
@@ -310,7 +310,7 @@
     <value>静默更新</value>
   </data>
   <data name="SilentUpdate_Hint" xml:space="preserve">
-    <value># 静默更新将在软件不使用时自动安装，无需手动操作</value>
+    <value>静默更新将在软件不使用时自动安装，无需手动操作</value>
   </data>
   <data name="Update_Channel" xml:space="preserve">
     <value>更新通道</value>
@@ -325,28 +325,28 @@
     <value>测试版 (Beta)</value>
   </data>
   <data name="Channel_Hint" xml:space="preserve">
-    <value># 稳定版提供可靠更新，预览版提供新功能体验…</value>
+    <value>稳定版提供可靠更新，预览版提供新功能体验…</value>
   </data>
   <data name="Btn_ManualUpdate" xml:space="preserve">
     <value>手动更新</value>
   </data>
   <data name="ManualUpdate_Hint" xml:space="preserve">
-    <value># 点击后立即检查并下载最新版本</value>
+    <value>点击后立即检查并下载最新版本</value>
   </data>
   <data name="Btn_VersionFix" xml:space="preserve">
     <value>版本修复</value>
   </data>
   <data name="VersionFix_Hint" xml:space="preserve">
-    <value># 版本修复会根据当前选择的通道下载最新版本并执行安装…</value>
+    <value>版本修复会根据当前选择的通道下载最新版本并执行安装…</value>
   </data>
   <data name="Btn_Rollback" xml:space="preserve">
     <value>历史版本回滚</value>
   </data>
   <data name="Rollback_Hint" xml:space="preserve">
-    <value># 历史版本回滚，点击后会弹出相应页面…</value>
+    <value>历史版本回滚，点击后会弹出相应页面…</value>
   </data>
   <data name="SilentUpdate_AfterDownloadHint" xml:space="preserve">
-    <value># 关闭静默更新后，已完成安装包的下载后将会弹窗询问…</value>
+    <value>关闭静默更新后，已完成安装包的下载后将会弹窗询问…</value>
   </data>
   <data name="SilentUpdate_TimeRange" xml:space="preserve">
     <value>静默更新时间段</value>
@@ -358,7 +358,7 @@
     <value>终止时间</value>
   </data>
   <data name="TimeRange_Hint" xml:space="preserve">
-    <value># 若终止时间小于起始时间…</value>
+    <value>若终止时间小于起始时间…</value>
   </data>
   <data name="Startup_RunAtLogin" xml:space="preserve">
     <value>开机时运行</value>
@@ -376,13 +376,13 @@
     <value>启用压感触屏模式</value>
   </data>
   <data name="Canvas_PressureTouchHint" xml:space="preserve">
-    <value># 开启后，触屏设备也将支持压感效果…</value>
+    <value>开启后，触屏设备也将支持压感效果…</value>
   </data>
   <data name="Canvas_IgnorePressure" xml:space="preserve">
     <value>屏蔽压感</value>
   </data>
   <data name="Canvas_IgnorePressureHint" xml:space="preserve">
-    <value># 开启后，将忽略所有设备的压感信息…</value>
+    <value>开启后，将忽略所有设备的压感信息…</value>
   </data>
   <data name="Canvas_EraserSize" xml:space="preserve">
     <value>橡皮大小</value>
@@ -403,13 +403,13 @@
     <value>很大</value>
   </data>
   <data name="EraserSize_SwitchHint" xml:space="preserve">
-    <value># 非实时切换，下一次使用面积擦时生效。</value>
+    <value>非实时切换，下一次使用面积擦时生效。</value>
   </data>
   <data name="Canvas_HideInkOnExit" xml:space="preserve">
     <value>退出画板模式后隐藏墨迹</value>
   </data>
   <data name="Canvas_HideInkOnExitHint" xml:space="preserve">
-    <value># 开启 退出画板模式后隐藏墨迹 选项后…</value>
+    <value>开启 退出画板模式后隐藏墨迹 选项后…</value>
   </data>
   <data name="Canvas_ClearInkHistory" xml:space="preserve">
     <value>清空墨迹时删除墨迹历史记录</value>
@@ -433,7 +433,7 @@
     <value>每次询问</value>
   </data>
   <data name="Canvas_AsymptoteHint" xml:space="preserve">
-    <value># 请注意，若不保留双曲线渐近线可能会有遇到撤回相关的 BUG…</value>
+    <value>请注意，若不保留双曲线渐近线可能会有遇到撤回相关的 BUG…</value>
   </data>
   <data name="Canvas_ShowCircleCenter" xml:space="preserve">
     <value>绘制圆时显示圆心位置</value>
@@ -448,7 +448,7 @@
     <value>启用墨迹渐隐功能</value>
   </data>
   <data name="Canvas_InkFadeHint" xml:space="preserve">
-    <value># 开启后墨迹不会绘制到画布上…</value>
+    <value>开启后墨迹不会绘制到画布上…</value>
   </data>
   <data name="Canvas_InkFadeTime" xml:space="preserve">
     <value>墨迹渐隐时间</value>
@@ -457,7 +457,7 @@
     <value>在笔工具菜单中隐藏墨迹渐隐控制</value>
   </data>
   <data name="Canvas_HideFadeInPenMenuHint" xml:space="preserve">
-    <value># 开启后，主工具栏上点击笔工具后弹出的上下文菜单中将不显示…</value>
+    <value>开启后，主工具栏上点击笔工具后弹出的上下文菜单中将不显示…</value>
   </data>
   <data name="Color" xml:space="preserve">
     <value>颜色</value>
@@ -532,7 +532,7 @@
     <value>无操作</value>
   </data>
   <data name="Crash_Hint" xml:space="preserve">
-    <value># 静默重启：崩溃后自动重启软件，无提示。无操作：崩溃后仅记录日志，不自动重启。</value>
+    <value>静默重启：崩溃后自动重启软件，无提示。无操作：崩溃后仅记录日志，不自动重启。</value>
   </data>
   <data name="Gesture_Title" xml:space="preserve">
     <value>手势</value>
@@ -541,13 +541,13 @@
     <value>进退白板模式自动开关双指移动功能</value>
   </data>
   <data name="Gesture_AutoToggleHint" xml:space="preserve">
-    <value># 开启后退出画板模式时自动关闭双指移动手势，进入白板模式时自动开启双指移动手势</value>
+    <value>开启后退出画板模式时自动关闭双指移动手势，进入白板模式时自动开启双指移动手势</value>
   </data>
   <data name="Gesture_AllowRotateScale" xml:space="preserve">
     <value>允许双指旋转与缩放选中的墨迹</value>
   </data>
   <data name="Gesture_AllowRotateScaleHint" xml:space="preserve">
-    <value># 允许选中墨迹后对墨迹进行双指或多指缩放操作（此设置不受“允许双指旋转”设置的影响）</value>
+    <value>允许选中墨迹后对墨迹进行双指或多指缩放操作（此设置不受“允许双指旋转”设置的影响）</value>
   </data>
   <data name="Gesture_EnablePalmEraser" xml:space="preserve">
     <value>启用手掌擦</value>
@@ -565,7 +565,7 @@
     <value>高敏感度</value>
   </data>
   <data name="Gesture_PalmHint" xml:space="preserve">
-    <value># 低敏感度：需要更大的触摸面积和更多触摸点，减少误判；高敏感度：更容易触发手掌擦，但可能误判手指。</value>
+    <value>低敏感度：需要更大的触摸面积和更多触摸点，减少误判；高敏感度：更容易触发手掌擦，但可能误判手指。</value>
   </data>
   <data name="InkRecog_Title" xml:space="preserve">
     <value>墨迹纠正</value>
@@ -577,7 +577,13 @@
     <value>WinRT识别转手写体字形</value>
   </data>
   <data name="InkRecog_HandwritingBeautifyHint" xml:space="preserve">
-    <value>#开启后，调用墨迹纠正API时：先WinRT识别手写词，再将识别成功的文字用手写风格字体(默认Ink Free/楷体等，可在设置JSON的handwritingCorrectionFontFamily调整）转成字形轮廓墨迹替换原笔画。需WinRT。</value>
+    <value>#开启后，调用墨迹纠正API时：先WinRT识别手写词，再将识别成功的文字用手写风格字体转成字形轮廓墨迹替换原笔画。需WinRT。</value>
+  </data>
+  <data name="InkRecog_HandwritingFont" xml:space="preserve">
+    <value>手写体字形字体</value>
+  </data>
+  <data name="InkRecog_HandwritingFontHint" xml:space="preserve">
+    <value>选择用于替换原笔画的手写风格字体。若所选字体不存在，将按列表回退。</value>
   </data>
   <data name="InkRecog_ShapeEngine" xml:space="preserve">
     <value>识别引擎</value>
@@ -622,7 +628,7 @@
     <value>高精度直线拉直</value>
   </data>
   <data name="InkRecog_HighPrecisionHint" xml:space="preserve">
-    <value># 开启后，当绘制的直线超过设定长度阈值时，将自动调整为完美直线。灵敏度范围0.05-2.0，越小要求越严格，越弯曲的线条越不容易被拉直；值越大越容易识别为直线。高精度模式下，每隔10像素取一个计数点，获取更准确的平均值用于判断。</value>
+    <value>开启后，当绘制的直线超过设定长度阈值时，将自动调整为完美直线。灵敏度范围0.05-2.0，越小要求越严格，越弯曲的线条越不容易被拉直；值越大越容易识别为直线。高精度模式下，每隔10像素取一个计数点，获取更准确的平均值用于判断。</value>
   </data>
   <data name="InkRecog_LineEndpointSnapping" xml:space="preserve">
     <value>直线端点吸附</value>
@@ -730,7 +736,7 @@
     <value>浮栏在PPT下透明度</value>
   </data>
   <data name="Theme_FloatingBarOpacityInPPTHint" xml:space="preserve">
-    <value># 重新进入PPT放映后生效</value>
+    <value>重新进入PPT放映后生效</value>
   </data>
   <data name="Theme_ShowNibButton" xml:space="preserve">
     <value>在调色盘窗口中显示 笔尖模式 按钮</value>
@@ -862,22 +868,22 @@
     <value>WPP进程查杀（防止WPP残留进程）</value>
   </data>
   <data name="PPT_KillWppHint" xml:space="preserve">
-    <value># 关闭后将不会自动查杀WPP残留进程，可能导致WPP关闭卡顿或无法彻底退出。</value>
+    <value>关闭后将不会自动查杀WPP残留进程，可能导致WPP关闭卡顿或无法彻底退出。</value>
   </data>
   <data name="PPT_WpsHint1" xml:space="preserve">
-    <value># 如果您只使用PowerPoint请不要打开WPS联动开关，如果使用WPS建议不要使用PowerPoint！</value>
+    <value>如果您只使用PowerPoint请不要打开WPS联动开关，如果使用WPS建议不要使用PowerPoint！</value>
   </data>
   <data name="PPT_WpsLagWarning" xml:space="preserve">
     <value>开启WPS支持后会导致WPS关闭时卡顿！</value>
   </data>
   <data name="PPT_WpsSupportHint" xml:space="preserve">
-    <value># 可支持 WPS，但目前无法同时支持 MSOffice 和 WPS。若要启用WPS支持，请确保 WPS 是否在 “配置工具” 中开启了 “WPS Office 兼容第三方系统和软件” 选项，否则将无法识别到WPS！</value>
+    <value>可支持 WPS，但目前无法同时支持 MSOffice 和 WPS。若要启用WPS支持，请确保 WPS 是否在 “配置工具” 中开启了 “WPS Office 兼容第三方系统和软件” 选项，否则将无法识别到WPS！</value>
   </data>
   <data name="Canvas_HideStrokeWhenSelecting" xml:space="preserve">
     <value>退出画板模式后隐藏墨迹</value>
   </data>
   <data name="Canvas_HideStrokeWhenSelectingHint" xml:space="preserve">
-    <value># 开启 退出画板模式后隐藏墨迹 选项后，进入 PPT 模式时未处于批注模式时不会显示墨迹。</value>
+    <value>开启 退出画板模式后隐藏墨迹 选项后，进入 PPT 模式时未处于批注模式时不会显示墨迹。</value>
   </data>
   <data name="Canvas_ClearInkAlsoClearHistory" xml:space="preserve">
     <value>清空墨迹时删除墨迹历史记录</value>
@@ -919,7 +925,7 @@
     <value>右侧透明度</value>
   </data>
   <data name="PPT_OffsetHint" xml:space="preserve">
-    <value># 调大往上偏移，调小往下偏移，修改为0为不偏移，居中放置</value>
+    <value>调大往上偏移，调小往下偏移，修改为0为不偏移，居中放置</value>
   </data>
   <data name="PPT_LeftBottomOffset" xml:space="preserve">
     <value>左下偏移</value>
@@ -934,7 +940,7 @@
     <value>右下透明度</value>
   </data>
   <data name="PPT_OffsetHintHorizontal" xml:space="preserve">
-    <value># 调大往右偏移，调小往左偏移，修改为0为不偏移，居中放置</value>
+    <value>调大往右偏移，调小往左偏移，修改为0为不偏移，居中放置</value>
   </data>
   <data name="PPT_SideGroupTitle" xml:space="preserve">
     <value>两侧</value>
@@ -955,7 +961,7 @@
     <value>PPT 页码按钮可点击</value>
   </data>
   <data name="PPT_PageButtonClickableHint" xml:space="preserve">
-    <value># 开启该选项后，点击页码按钮可唤起页码导航。默认调用 PowerPoint 网格缩略图（WPS 不支持）；可在下方子设置手动开启增强型预览以支持 WPS。</value>
+    <value>开启该选项后，点击页码按钮可唤起页码导航。默认调用 PowerPoint 网格缩略图（WPS 不支持）；可在下方子设置手动开启增强型预览以支持 WPS。</value>
   </data>
   <data name="PPT_PageButtonClickable_SubSettings" xml:space="preserve">
     <value>页码按钮点击子设置</value>
@@ -964,19 +970,19 @@
     <value>PPT 页码按钮增强型预览</value>
   </data>
   <data name="PPT_EnhancedPreviewHint" xml:space="preserve">
-    <value># 手动开启后，点击页码按钮将显示缩略图页列表（支持 WPS 与 PowerPoint），并可点击跳转到目标页。</value>
+    <value>手动开启后，点击页码按钮将显示缩略图页列表（支持 WPS 与 PowerPoint），并可点击跳转到目标页。</value>
   </data>
   <data name="PPT_LongPressPageTurn" xml:space="preserve">
     <value>PPT 翻页按钮长按翻页</value>
   </data>
   <data name="PPT_LongPressPageTurnHint" xml:space="preserve">
-    <value># 开启该选项后，长按PPT翻页按钮可以连续翻页，提高翻页效率。</value>
+    <value>开启该选项后，长按PPT翻页按钮可以连续翻页，提高翻页效率。</value>
   </data>
   <data name="Startup_UIAccessTopMostHint" xml:space="preserve">
-    <value># 开启UIA置顶后，软件需要管理员启动才能置顶，关闭此功能需要完全关闭软件后再手动启动，无法使用重启来关闭此功能</value>
+    <value>开启UIA置顶后，软件需要管理员启动才能置顶，关闭此功能需要完全关闭软件后再手动启动，无法使用重启来关闭此功能</value>
   </data>
   <data name="Startup_SilentUpdateHint" xml:space="preserve">
-    <value># 静默更新将在软件不使用时自动安装，无需手动操作</value>
+    <value>静默更新将在软件不使用时自动安装，无需手动操作</value>
   </data>
   <data name="Startup_UpdateChannel" xml:space="preserve">
     <value>更新通道</value>
@@ -1000,28 +1006,28 @@
     <value>64 位 (x64)</value>
   </data>
   <data name="Startup_UpdatePackageArchitectureHint" xml:space="preserve">
-    <value># 选择要下载架构</value>
+    <value>选择要下载架构</value>
   </data>
   <data name="Startup_UpdateChannelHint" xml:space="preserve">
-    <value># 稳定版提供可靠更新，预览版提供新功能体验同时拥有相较Beta版更强的稳定性，测试版提供新功能抢先体验</value>
+    <value>稳定版提供可靠更新，预览版提供新功能体验同时拥有相较Beta版更强的稳定性，测试版提供新功能抢先体验</value>
   </data>
   <data name="Startup_ManualUpdateHint" xml:space="preserve">
-    <value># 点击后立即检查并下载最新版本</value>
+    <value>点击后立即检查并下载最新版本</value>
   </data>
   <data name="Btn_FixVersion" xml:space="preserve">
     <value>版本修复</value>
   </data>
   <data name="Startup_FixVersionHint" xml:space="preserve">
-    <value># 版本修复会根据当前选择的通道下载最新版本并执行安装，可用于修复损坏的安装</value>
+    <value>版本修复会根据当前选择的通道下载最新版本并执行安装，可用于修复损坏的安装</value>
   </data>
   <data name="Btn_HistoryRollback" xml:space="preserve">
     <value>历史版本回滚</value>
   </data>
   <data name="Startup_HistoryRollbackHint" xml:space="preserve">
-    <value># 历史版本回滚，点击后会弹出相应页面供用户手动回滚到之前的版本</value>
+    <value>历史版本回滚，点击后会弹出相应页面供用户手动回滚到之前的版本</value>
   </data>
   <data name="Startup_SilentUpdateFullHint" xml:space="preserve">
-    <value># 关闭静默更新后，已完成安装包的下载后将会弹窗询问是否进行更新，开启静默更新后将会在安装包下载完成后每隔十分钟进行如下检测：①处于静默更新时间段内 ②未处于书写模式 ③未处于画板内。若以上检测通过即会关闭软件进行自动更新。</value>
+    <value>关闭静默更新后，已完成安装包的下载后将会弹窗询问是否进行更新，开启静默更新后将会在安装包下载完成后每隔十分钟进行如下检测：①处于静默更新时间段内 ②未处于书写模式 ③未处于画板内。若以上检测通过即会关闭软件进行自动更新。</value>
   </data>
   <data name="Startup_SilentUpdateTimePeriod" xml:space="preserve">
     <value>静默更新时间段</value>
@@ -1033,7 +1039,7 @@
     <value>终止时间</value>
   </data>
   <data name="Startup_TimePeriodHint" xml:space="preserve">
-    <value># 若终止时间小于起始时间，即将终止时间视为第二天的时间。# 若起始时间与终止时间相同，即视为全天候时间。</value>
+    <value>若终止时间小于起始时间，即将终止时间视为第二天的时间。若起始时间与终止时间相同，即视为全天候时间。</value>
   </data>
   <data name="Startup_RunAtStartup" xml:space="preserve">
     <value>开机时运行</value>
@@ -1060,7 +1066,7 @@
     <value>关闭硬件加速</value>
   </data>
   <data name="Canvas_DisableHardwareAccelerationHint" xml:space="preserve">
-    <value># 关闭后可提升兼容性，但可能降低性能；部分效果可能需要重启程序后完全生效。</value>
+    <value>关闭后可提升兼容性，但可能降低性能；部分效果可能需要重启程序后完全生效。</value>
   </data>
   <data name="Canvas_ShowCursor" xml:space="preserve">
     <value>显示画笔光标</value>
@@ -1069,13 +1075,13 @@
     <value>启用压感触屏模式</value>
   </data>
   <data name="Canvas_EnablePressureTouchHint" xml:space="preserve">
-    <value># 开启后，触屏设备也将支持压感效果，适用于部分支持压感但无法被系统识别的触屏设备。</value>
+    <value>开启后，触屏设备也将支持压感效果，适用于部分支持压感但无法被系统识别的触屏设备。</value>
   </data>
   <data name="Canvas_DisablePressure" xml:space="preserve">
     <value>屏蔽压感</value>
   </data>
   <data name="Canvas_DisablePressureHint" xml:space="preserve">
-    <value># 开启后，将忽略所有设备的压感信息，使所有笔画具有统一的粗细。与压感触屏模式互斥。</value>
+    <value>开启后，将忽略所有设备的压感信息，使所有笔画具有统一的粗细。与压感触屏模式互斥。</value>
   </data>
   <data name="Canvas_EraserSize_VerySmall" xml:space="preserve">
     <value>很小</value>
@@ -1093,7 +1099,7 @@
     <value>很大</value>
   </data>
   <data name="Canvas_EraserSizeHint" xml:space="preserve">
-    <value># 非实时切换，下一次使用面积擦时生效。</value>
+    <value>非实时切换，下一次使用面积擦时生效。</value>
   </data>
   <data name="Canvas_KeepHyperbolaAsymptote" xml:space="preserve">
     <value>保留双曲线渐近线</value>
@@ -1108,7 +1114,7 @@
     <value>每次询问</value>
   </data>
   <data name="Canvas_HyperbolaAsymptoteHint" xml:space="preserve">
-    <value># 请注意，若不保留双曲线渐近线可能会有遇到撤回相关的 BUG 影响用。</value>
+    <value>请注意，若不保留双曲线渐近线可能会有遇到撤回相关的 BUG 影响用。</value>
   </data>
   <data name="Canvas_WPFBezierSmoothing" xml:space="preserve">
     <value>使用WPF默认贝塞尔曲线平滑</value>
@@ -1126,19 +1132,19 @@
     <value>启用墨迹渐隐功能</value>
   </data>
   <data name="Canvas_EnableInkFadeHint" xml:space="preserve">
-    <value># 开启后墨迹不会绘制到画布上，而是保持湿墨迹状态，根据设置的渐隐时间自动消失</value>
+    <value>开启后墨迹不会绘制到画布上，而是保持湿墨迹状态，根据设置的渐隐时间自动消失</value>
   </data>
   <data name="Canvas_HideInkFadeInPenMenu" xml:space="preserve">
     <value>在笔工具菜单中隐藏墨迹渐隐控制</value>
   </data>
   <data name="Canvas_HideInkFadeInPenMenuHint" xml:space="preserve">
-    <value># 开启后，主工具栏上点击笔工具后弹出的上下文菜单中将不显示墨迹渐隐控制开关</value>
+    <value>开启后，主工具栏上点击笔工具后弹出的上下文菜单中将不显示墨迹渐隐控制开关</value>
   </data>
   <data name="Canvas_BrushAutoRestore" xml:space="preserve">
     <value>启用画笔自动恢复</value>
   </data>
   <data name="Canvas_BrushAutoRestoreHint" xml:space="preserve">
-    <value># 启用后，临时修改画笔设置后将在指定时间点自动恢复到你在此处配置的颜色 / 透明度 / 粗细</value>
+    <value>启用后，临时修改画笔设置后将在指定时间点自动恢复到你在此处配置的颜色 / 透明度 / 粗细</value>
   </data>
   <data name="Canvas_AutoRestoreTimePoints" xml:space="preserve">
     <value>自动恢复时间点 (HH:mm，可多个，用 ; 分隔)</value>
@@ -1183,16 +1189,16 @@
     <value>使用橡皮擦后自动切换回批注模式</value>
   </data>
   <data name="Canvas_SwitchBackAfterEraserHint" xml:space="preserve">
-    <value># 开启后，使用橡皮擦进行擦除操作后静置一段时间将自动切换回批注模式</value>
+    <value>开启后，使用橡皮擦进行擦除操作后静置一段时间将自动切换回批注模式</value>
   </data>
   <data name="Canvas_SwitchBackDelay" xml:space="preserve">
     <value>自动切换延迟时间</value>
   </data>
   <data name="Canvas_SwitchBackDelayHint" xml:space="preserve">
-    <value># 若在计时时间内再次进行擦除操作，计时器将重新开始计时</value>
+    <value>若在计时时间内再次进行擦除操作，计时器将重新开始计时</value>
   </data>
   <data name="InkRecog_LineEndpointSnappingHint" xml:space="preserve">
-    <value># 开启后，当绘制的直线端点靠近其他直线端点时，将自动吸附连接。</value>
+    <value>开启后，当绘制的直线端点靠近其他直线端点时，将自动吸附连接。</value>
   </data>
   <data name="PPT_EnterAnnotationOnShow" xml:space="preserve">
     <value>进入 PPT 放映时自动进入批注模式</value>
@@ -1207,19 +1213,19 @@
     <value>允许使用手指手势进行幻灯片翻页</value>
   </data>
   <data name="PPT_FingerGestureSlideHint" xml:space="preserve">
-    <value># 允许开启画板时使用手指手势进行幻灯片翻页（启用后，在幻灯片放映模式下，当画板无墨迹时，使用手指（笔尖或手掌无法识别）左右滑动即可控制幻灯片翻页。）</value>
+    <value>允许开启画板时使用手指手势进行幻灯片翻页（启用后，在幻灯片放映模式下，当画板无墨迹时，使用手指（笔尖或手掌无法识别）左右滑动即可控制幻灯片翻页。）</value>
   </data>
   <data name="PPT_ShowGestureButtonInShow" xml:space="preserve">
     <value>PPT 放映模式显示手势按钮</value>
   </data>
   <data name="PPT_ShowGestureButtonInShowHint" xml:space="preserve">
-    <value># 开启后在 PPT 放映模式下也显示手势按钮</value>
+    <value>开启后在 PPT 放映模式下也显示手势按钮</value>
   </data>
   <data name="PPT_TimeCapsule" xml:space="preserve">
     <value>PPT时间显示胶囊</value>
   </data>
   <data name="PPT_TimeCapsuleHint" xml:space="preserve">
-    <value># 开启后在 PPT 放映模式下显示时间胶囊，可替代最小化计时器窗口</value>
+    <value>开启后在 PPT 放映模式下显示时间胶囊，可替代最小化计时器窗口</value>
   </data>
   <data name="PPT_TimeCapsulePosition" xml:space="preserve">
     <value>时间胶囊位置：</value>
@@ -1237,19 +1243,19 @@
     <value>PPT 放映时显示快速面板</value>
   </data>
   <data name="PPT_ShowQuickPanelInShowHint" xml:space="preserve">
-    <value># 关闭后在 PPT 放映时不显示快速面板</value>
+    <value>关闭后在 PPT 放映时不显示快速面板</value>
   </data>
   <data name="PPT_AutoScreenshot" xml:space="preserve">
     <value>自动幻灯片截屏</value>
   </data>
   <data name="PPT_AutoScreenshotHint" xml:space="preserve">
-    <value># 开启 自动幻灯片截屏 后将会在幻灯片有墨迹时翻页自动截屏</value>
+    <value>开启 自动幻灯片截屏 后将会在幻灯片有墨迹时翻页自动截屏</value>
   </data>
   <data name="PPT_AutoSaveStrokes" xml:space="preserve">
     <value>自动保存幻灯片墨迹</value>
   </data>
   <data name="PPT_AutoSaveStrokesHint" xml:space="preserve">
-    <value># 开启 自动保存幻灯片墨迹 后将在结束幻灯片放映时自动将保存已有墨迹，并在下次打开时自动加载（文件名和幻灯片页数都要相同）</value>
+    <value>开启 自动保存幻灯片墨迹 后将在结束幻灯片放映时自动将保存已有墨迹，并在下次打开时自动加载（文件名和幻灯片页数都要相同）</value>
   </data>
   <data name="PPT_RememberLastPage" xml:space="preserve">
     <value>记忆并提示上次播放位置</value>
@@ -1283,13 +1289,13 @@
     <value>在下方区域内用笔尖点击以估计触摸大小倍数</value>
   </data>
   <data name="Advanced_TouchMultiplierValueHint" xml:space="preserve">
-    <value># 数值仅供参考</value>
+    <value>数值仅供参考</value>
   </data>
   <data name="Advanced_EraserBindTouchMultiplier" xml:space="preserve">
     <value>橡皮擦绑定触摸大小倍数</value>
   </data>
   <data name="Advanced_EraserBindTouchHint" xml:space="preserve">
-    <value># BoundsWidth 参数作为接触面积区分界限</value>
+    <value>BoundsWidth 参数作为接触面积区分界限</value>
   </data>
   <data name="Advanced_QuadIRMode" xml:space="preserve">
     <value>四边红外模式</value>
@@ -1301,7 +1307,7 @@
     <value>日志以日期保存</value>
   </data>
   <data name="Advanced_LogRotateHint" xml:space="preserve">
-    <value># 日志文件超过 512 KB 时会自动删除。开启日期保存后，日志将保存在Logs文件夹中，当文件夹大小超过5MB时自动清空。</value>
+    <value>日志文件超过 512 KB 时会自动删除。开启日期保存后，日志将保存在Logs文件夹中，当文件夹大小超过5MB时自动清空。</value>
   </data>
   <data name="Advanced_ConfirmExit" xml:space="preserve">
     <value>关闭软件时二次弹窗确认</value>
@@ -1313,13 +1319,13 @@
     <value>实验性选项</value>
   </data>
   <data name="Advanced_FullScreenHelperHint" xml:space="preserve">
-    <value># 感谢lindexi大佬提供的FullScreenHelper，可以减少任务栏弹出的问题，且支持多显示器自动全屏（虽然对icc来说没什么用就是了），如果遇到一些玄学问题，可以关闭该功能，重启icc后生效。</value>
+    <value>感谢lindexi大佬提供的FullScreenHelper，可以减少任务栏弹出的问题，且支持多显示器自动全屏（虽然对icc来说没什么用就是了），如果遇到一些玄学问题，可以关闭该功能，重启icc后生效。</value>
   </data>
   <data name="Advanced_AvoidFullScreenHelper" xml:space="preserve">
     <value>启用AvoidFullScreenHelper</value>
   </data>
   <data name="Advanced_AvoidFullScreenHelperHint" xml:space="preserve">
-    <value># 避免画布全屏，应该可解决任务栏非置顶和Win11任务栏无法点击的问题，会导致左侧或顶部有AppBar（Dock栏软件）时导致浮动工具栏偏移，重启icc后生效。</value>
+    <value>避免画布全屏，应该可解决任务栏非置顶和Win11任务栏无法点击的问题，会导致左侧或顶部有AppBar（Dock栏软件）时导致浮动工具栏偏移，重启icc后生效。</value>
   </data>
   <data name="Advanced_EdgeGestureUtil" xml:space="preserve">
     <value>启用EdgeGestureUtil</value>
@@ -1379,7 +1385,7 @@
     <value>设置备份与还原</value>
   </data>
   <data name="Backup_Desc" xml:space="preserve">
-    <value># 可手动备份当前设置或还原之前的备份，自动更新前也会自动备份</value>
+    <value>可手动备份当前设置或还原之前的备份，自动更新前也会自动备份</value>
   </data>
   <data name="Backup_AutoBeforeUpdate" xml:space="preserve">
     <value>自动更新前备份</value>
@@ -1418,7 +1424,7 @@
     <value>配置文件切换与热重载</value>
   </data>
   <data name="ConfigProfiles_Desc" xml:space="preserve">
-    <value># 选择配置文件即切换并热重载；另存为可将当前配置保存为新配置文件</value>
+    <value>选择配置文件即切换并热重载；另存为可将当前配置保存为新配置文件</value>
   </data>
   <data name="ConfigProfiles_Label" xml:space="preserve">
     <value>配置文件：</value>
@@ -1496,7 +1502,7 @@
     <value>软件退出后保持收纳模式</value>
   </data>
   <data name="Automation_KeepFoldAfterExitHint" xml:space="preserve">
-    <value># 开启后，执行自动收纳的软件在软件退出后不退出收纳模式，保持收纳状态</value>
+    <value>开启后，执行自动收纳的软件在软件退出后不退出收纳模式，保持收纳状态</value>
   </data>
   <data name="AutoKill_Title" xml:space="preserve">
     <value>自动查杀</value>
@@ -1511,7 +1517,7 @@
     <value>自动查杀希沃“PPT 小工具”</value>
   </data>
   <data name="AutoKill_PptToolsHint" xml:space="preserve">
-    <value># 请注意，查杀 PPT 小工具会导致希沃课堂授课助手无法使用，直接进入希沃课堂授课助手安装目录删除 Office.dll 文件即可进入 PPT 放映时不会启动希沃的 PPT 工具栏。</value>
+    <value>请注意，查杀 PPT 小工具会导致希沃课堂授课助手无法使用，直接进入希沃课堂授课助手安装目录删除 Office.dll 文件即可进入 PPT 放映时不会启动希沃的 PPT 工具栏。</value>
   </data>
   <data name="AutoKill_EasiNote5" xml:space="preserve">
     <value>自动查杀 希沃白板5</value>
@@ -1529,7 +1535,7 @@
     <value>自动查杀 希沃桌面2.0 桌面批注</value>
   </data>
   <data name="AutoKill_SeewoDesktop2AnnoHint" xml:space="preserve">
-    <value># 由于希沃桌面2.0提供的桌面批注是64位应用程序，icc是32位程序无法访问，所以目前暂不做精准匹配，只匹配进程名称DesktopAnnotation，后面会考虑封装一套基于P/Invoke和WMI的综合进程识别方案。如果遇到同进程名的软件直接不开启该选项就行了，见谅！</value>
+    <value>由于希沃桌面2.0提供的桌面批注是64位应用程序，icc是32位程序无法访问，所以目前暂不做精准匹配，只匹配进程名称DesktopAnnotation，后面会考虑封装一套基于P/Invoke和WMI的综合进程识别方案。如果遇到同进程名的软件直接不开启该选项就行了，见谅！</value>
   </data>
   <data name="AutoKill_SameAppTitle" xml:space="preserve">
     <value>同类软件查杀</value>
@@ -1607,19 +1613,19 @@
     <value>60分钟</value>
   </data>
   <data name="Storage_AutoSaveHint" xml:space="preserve">
-    <value># 开启后将在设定时间间隔自动保存墨迹，仅在画布可见且有墨迹时才会保存</value>
+    <value>开启后将在设定时间间隔自动保存墨迹，仅在画布可见且有墨迹时才会保存</value>
   </data>
   <data name="Storage_SaveFullPageStrokes" xml:space="preserve">
     <value>墨迹全页面保存</value>
   </data>
   <data name="Storage_SaveFullPageHint" xml:space="preserve">
-    <value># 开启后自动保存和手动保存墨迹时将以全屏模式保存。如果存在多个画布和墨迹，将把所有页面的墨迹按照每页为单位保存进一个压缩包中（注意，白板的墨迹只能在白板模式下打开，PPT的墨迹只能在PPT放映模式下打开）</value>
+    <value>开启后自动保存和手动保存墨迹时将以全屏模式保存。如果存在多个画布和墨迹，将把所有页面的墨迹按照每页为单位保存进一个压缩包中（注意，白板的墨迹只能在白板模式下打开，PPT的墨迹只能在PPT放映模式下打开）</value>
   </data>
   <data name="Storage_SaveAsXml" xml:space="preserve">
     <value>保存为XML格式</value>
   </data>
   <data name="Storage_SaveAsXmlHint" xml:space="preserve">
-    <value># 开启后保存墨迹时将使用XML格式（ISF格式），便于查看和编辑墨迹数据</value>
+    <value>开启后保存墨迹时将使用XML格式（ISF格式），便于查看和编辑墨迹数据</value>
   </data>
   <data name="Storage_AutoScreenshotMinInk" xml:space="preserve">
     <value>自动截图最小墨迹量</value>
@@ -1637,13 +1643,13 @@
     <value>设置保存到 文档</value>
   </data>
   <data name="Storage_PathPermissionHint" xml:space="preserve">
-    <value># 请注意检查保存文件夹是否有写入权限</value>
+    <value>请注意检查保存文件夹是否有写入权限</value>
   </data>
   <data name="Storage_AutoDeleteTitle" xml:space="preserve">
     <value>定期自动删除超过保存时间的墨迹、截图文件</value>
   </data>
   <data name="Storage_AutoDeleteHint" xml:space="preserve">
-    <value># 请注意如果开启自动删除功能，将会删除自动保存目录下所有后缀名为 .icstk 和 .png 的文件！</value>
+    <value>请注意如果开启自动删除功能，将会删除自动保存目录下所有后缀名为 .icstk 和 .png 的文件！</value>
   </data>
   <data name="Storage_RetentionTitle" xml:space="preserve">
     <value>保存时长</value>
@@ -1661,19 +1667,19 @@
     <value>退出收纳模式时自动切换至批注模式</value>
   </data>
   <data name="FoldMode_ExitToAnnotationHint" xml:space="preserve">
-    <value># 开启后，退出收纳模式时将自动切换至批注模式，便于快速批注</value>
+    <value>开启后，退出收纳模式时将自动切换至批注模式，便于快速批注</value>
   </data>
   <data name="FoldMode_AutoFoldAfterPPT" xml:space="preserve">
     <value>退出PPT放映后自动收纳浮动栏</value>
   </data>
   <data name="FoldMode_AutoFoldAfterPPTHint" xml:space="preserve">
-    <value># 开启后，退出PPT放映后会自动收纳浮动栏</value>
+    <value>开启后，退出PPT放映后会自动收纳浮动栏</value>
   </data>
   <data name="FoldMode_AutoFoldAfterWhiteboard" xml:space="preserve">
     <value>退出白板时自动收纳</value>
   </data>
   <data name="FoldMode_AutoFoldAfterWhiteboardHint" xml:space="preserve">
-    <value># 开启后，退出白板模式时会自动收纳到侧边栏</value>
+    <value>开启后，退出白板模式时会自动收纳到侧边栏</value>
   </data>
   <data name="Random_Title" xml:space="preserve">
     <value>随机点名</value>
@@ -1742,7 +1748,7 @@
     <value>避免重复权重</value>
   </data>
   <data name="Random_ML_Hint" xml:space="preserve">
-    <value># 机器学习算法会分析最近的点名历史，智能避免重复选择相同人员</value>
+    <value>机器学习算法会分析最近的点名历史，智能避免重复选择相同人员</value>
   </data>
   <data name="Timer_Title" xml:space="preserve">
     <value>计时器设置</value>
@@ -1838,7 +1844,7 @@
     <value>上传基础 + 可选数据</value>
   </data>
   <data name="About_LicenseHint" xml:space="preserve">
-    <value># 使用和分发本软件前，请您应当且务必知晓相关开源协议，且您应当知晓本软件基于 https://github.com/WXRIW/Ink-Canvas 修改而成。</value>
+    <value>使用和分发本软件前，请您应当且务必知晓相关开源协议，且您应当知晓本软件基于 https://github.com/WXRIW/Ink-Canvas 修改而成。</value>
   </data>
   <data name="About_LicenseTitle" xml:space="preserve">
     <value>本软件和ICA，Ink Canvas均基于许可证开源</value>
@@ -1901,7 +1907,7 @@
     <value>手指模式 BoundsWidth</value>
   </data>
   <data name="Advanced_EdgeGestureUtilHint_Part1" xml:space="preserve">
-    <value># EdgeGestureUtil是icc最新引入的可以暂时阻止在使用触摸时触发边缘手势（如Windows10环境下，屏幕左边缘滑动进入任务视图，右边缘滑动弹出通知中心；Windows11环境下，底部向上滑动打开开始菜单），其原理是使用了</value>
+    <value>EdgeGestureUtil是icc最新引入的可以暂时阻止在使用触摸时触发边缘手势（如Windows10环境下，屏幕左边缘滑动进入任务视图，右边缘滑动弹出通知中心；Windows11环境下，底部向上滑动打开开始菜单），其原理是使用了</value>
   </data>
   <data name="Advanced_EdgeGestureUtilHint_Part2" xml:space="preserve">
     <value>（当应用程序窗口处于活动状态且处于全屏模式 (或拥有的窗口) 处于活动状态时，防止边缘手势行为。）来实现的。如果有异常，请关闭该选项，该选项应该能够实时生效。（Win7和Win8用户该选项无法使用）</value>
@@ -1910,19 +1916,19 @@
     <value>启用ForceFullScreen</value>
   </data>
   <data name="Advanced_ForceFullScreenHint" xml:space="preserve">
-    <value># 当检测到窗口大小变化时，自动使用Win32API将本窗口的大小设置为主显示器大小（设备像素大小），不需要可以关闭，实时生效。</value>
+    <value>当检测到窗口大小变化时，自动使用Win32API将本窗口的大小设置为主显示器大小（设备像素大小），不需要可以关闭，实时生效。</value>
   </data>
   <data name="Advanced_DPIChangeDetection" xml:space="preserve">
     <value>启用DPIChangeDetection</value>
   </data>
   <data name="Advanced_DPIChangeDetectionHint" xml:space="preserve">
-    <value># 当检测到系统DPI变化时，会尝试检测FloatingBar是否在屏幕内显示，如果不在屏幕内显示将会尝试移动到屏幕内可见区域（DPI调大会触发，如果DPI调小是不会触发工具栏位置移动的，请您手动调整）。</value>
+    <value>当检测到系统DPI变化时，会尝试检测FloatingBar是否在屏幕内显示，如果不在屏幕内显示将会尝试移动到屏幕内可见区域（DPI调大会触发，如果DPI调小是不会触发工具栏位置移动的，请您手动调整）。</value>
   </data>
   <data name="Advanced_ResolutionChangeDetection" xml:space="preserve">
     <value>启用ResolutionChangeDetection</value>
   </data>
   <data name="Advanced_ResolutionChangeDetectionHint" xml:space="preserve">
-    <value># 当检测到系统分辨率变化时，会尝试检测FloatingBar是否在屏幕内显示，如果不在屏幕内显示将会尝试移动到屏幕内可见区域（分辨率调小可能会触发，如果在屏幕内不会自动调整位置，请手动挡）。</value>
+    <value>当检测到系统分辨率变化时，会尝试检测FloatingBar是否在屏幕内显示，如果不在屏幕内显示将会尝试移动到屏幕内可见区域（分辨率调小可能会触发，如果在屏幕内不会自动调整位置，请手动挡）。</value>
   </data>
   <data name="FloatingInterceptor_App_SeewoBoard3" xml:space="preserve">
     <value>希沃白板3</value>

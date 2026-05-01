@@ -265,7 +265,7 @@
     <value>UIA topmost</value>
   </data>
   <data name="Startup_UIATopMostHint" xml:space="preserve">
-    <value># UIA topmost requires admin to take effect.</value>
+    <value>UIA topmost requires admin to take effect.</value>
   </data>
   <data name="Startup_TopMostMode" xml:space="preserve">
     <value>Topmost Mode</value>
@@ -295,7 +295,7 @@
     <value>Silent update</value>
   </data>
   <data name="SilentUpdate_Hint" xml:space="preserve">
-    <value># Silent update installs when app is idle.</value>
+    <value>Silent update installs when app is idle.</value>
   </data>
   <data name="Update_Channel" xml:space="preserve">
     <value>Update channel</value>
@@ -310,28 +310,28 @@
     <value>Beta</value>
   </data>
   <data name="Channel_Hint" xml:space="preserve">
-    <value># Stable for reliability; Preview for new features.</value>
+    <value>Stable for reliability; Preview for new features.</value>
   </data>
   <data name="Btn_ManualUpdate" xml:space="preserve">
     <value>Check for updates</value>
   </data>
   <data name="ManualUpdate_Hint" xml:space="preserve">
-    <value># Check and download now.</value>
+    <value>Check and download now.</value>
   </data>
   <data name="Btn_VersionFix" xml:space="preserve">
     <value>Version fix</value>
   </data>
   <data name="VersionFix_Hint" xml:space="preserve">
-    <value># Download and install latest for current channel.</value>
+    <value>Download and install latest for current channel.</value>
   </data>
   <data name="Btn_Rollback" xml:space="preserve">
     <value>Rollback</value>
   </data>
   <data name="Rollback_Hint" xml:space="preserve">
-    <value># Open rollback page.</value>
+    <value>Open rollback page.</value>
   </data>
   <data name="SilentUpdate_AfterDownloadHint" xml:space="preserve">
-    <value># When silent update is off, you will be prompted after download.</value>
+    <value>When silent update is off, you will be prompted after download.</value>
   </data>
   <data name="SilentUpdate_TimeRange" xml:space="preserve">
     <value>Silent update time range</value>
@@ -343,7 +343,7 @@
     <value>End time</value>
   </data>
   <data name="TimeRange_Hint" xml:space="preserve">
-    <value># If end &lt; start…</value>
+    <value>If end &lt; start…</value>
   </data>
   <data name="Startup_RunAtLogin" xml:space="preserve">
     <value>Run at login</value>
@@ -361,13 +361,13 @@
     <value>Pressure-sensitive touch</value>
   </data>
   <data name="Canvas_PressureTouchHint" xml:space="preserve">
-    <value># Touch devices will support pressure.</value>
+    <value>Touch devices will support pressure.</value>
   </data>
   <data name="Canvas_IgnorePressure" xml:space="preserve">
     <value>Ignore pressure</value>
   </data>
   <data name="Canvas_IgnorePressureHint" xml:space="preserve">
-    <value># Ignore all device pressure.</value>
+    <value>Ignore all device pressure.</value>
   </data>
   <data name="Canvas_EraserSize" xml:space="preserve">
     <value>Eraser size</value>
@@ -388,13 +388,13 @@
     <value>Very large</value>
   </data>
   <data name="EraserSize_SwitchHint" xml:space="preserve">
-    <value># Takes effect on next area eraser use.</value>
+    <value>Takes effect on next area eraser use.</value>
   </data>
   <data name="Canvas_HideInkOnExit" xml:space="preserve">
     <value>Hide ink when leaving canvas</value>
   </data>
   <data name="Canvas_HideInkOnExitHint" xml:space="preserve">
-    <value># When enabled…</value>
+    <value>When enabled…</value>
   </data>
   <data name="Canvas_ClearInkHistory" xml:space="preserve">
     <value>Clear ink history when clearing</value>
@@ -418,7 +418,7 @@
     <value>Ask each time</value>
   </data>
   <data name="Canvas_AsymptoteHint" xml:space="preserve">
-    <value># Disabling may cause undo bugs.</value>
+    <value>Disabling may cause undo bugs.</value>
   </data>
   <data name="Canvas_ShowCircleCenter" xml:space="preserve">
     <value>Show circle center when drawing</value>
@@ -433,7 +433,7 @@
     <value>Ink fade</value>
   </data>
   <data name="Canvas_InkFadeHint" xml:space="preserve">
-    <value># Ink will not be drawn on canvas when enabled.</value>
+    <value>Ink will not be drawn on canvas when enabled.</value>
   </data>
   <data name="Canvas_InkFadeTime" xml:space="preserve">
     <value>Ink fade time</value>
@@ -442,7 +442,7 @@
     <value>Hide fade in pen menu</value>
   </data>
   <data name="Canvas_HideFadeInPenMenuHint" xml:space="preserve">
-    <value># Fade control will be hidden in pen context menu.</value>
+    <value>Fade control will be hidden in pen context menu.</value>
   </data>
   <data name="Color" xml:space="preserve">
     <value>Color</value>
@@ -517,7 +517,7 @@
     <value>No action</value>
   </data>
   <data name="Crash_Hint" xml:space="preserve">
-    <value># Silent restart: automatically restart without prompt. No action: only log, do not restart.</value>
+    <value>Silent restart: automatically restart without prompt. No action: only log, do not restart.</value>
   </data>
   <data name="Gesture_Title" xml:space="preserve">
     <value>Gestures</value>
@@ -526,13 +526,13 @@
     <value>Auto-toggle two-finger move in/out of whiteboard</value>
   </data>
   <data name="Gesture_AutoToggleHint" xml:space="preserve">
-    <value># When enabled: leaving canvas disables two-finger move; entering whiteboard enables it.</value>
+    <value>When enabled: leaving canvas disables two-finger move; entering whiteboard enables it.</value>
   </data>
   <data name="Gesture_AllowRotateScale" xml:space="preserve">
     <value>Allow rotate &amp; scale selected ink</value>
   </data>
   <data name="Gesture_AllowRotateScaleHint" xml:space="preserve">
-    <value># Allows scaling selected ink with two or more fingers (independent of rotate setting).</value>
+    <value>Allows scaling selected ink with two or more fingers (independent of rotate setting).</value>
   </data>
   <data name="Gesture_EnablePalmEraser" xml:space="preserve">
     <value>Enable palm eraser</value>
@@ -550,7 +550,7 @@
     <value>High sensitivity</value>
   </data>
   <data name="Gesture_PalmHint" xml:space="preserve">
-    <value># Low: larger area/more touches required (less false positive); High: easier to trigger but may mis-detect fingers.</value>
+    <value>Low: larger area/more touches required (less false positive); High: easier to trigger but may mis-detect fingers.</value>
   </data>
   <data name="InkRecog_Title" xml:space="preserve">
     <value>Ink correction</value>
@@ -562,7 +562,13 @@
     <value>WinRT recognition to handwriting glyphs</value>
   </data>
   <data name="InkRecog_HandwritingBeautifyHint" xml:space="preserve">
-    <value># When enabled, ink correction API: first recognizes handwritten words via WinRT, then replaces original strokes with glyph outlines rendered in a handwriting-style font (default Ink Free/KaiTi etc., configurable via handwritingCorrectionFontFamily in settings JSON). Requires 64-bit and WinRT.</value>
+    <value>When enabled, ink correction API: first recognizes handwritten words via WinRT, then replaces original strokes with glyph outlines rendered in a handwriting-style font. Requires 64-bit and WinRT.</value>
+  </data>
+  <data name="InkRecog_HandwritingFont" xml:space="preserve">
+    <value>Handwriting glyph font</value>
+  </data>
+  <data name="InkRecog_HandwritingFontHint" xml:space="preserve">
+    <value>Font used to replace original strokes with glyph outlines. Falls back through the list if the chosen font is missing.</value>
   </data>
   <data name="InkRecog_BlockRectFakePressure" xml:space="preserve">
     <value>Block fake pressure on corrected rectangles</value>
@@ -592,7 +598,7 @@
     <value>High-precision straightening</value>
   </data>
   <data name="InkRecog_HighPrecisionHint" xml:space="preserve">
-    <value># When enabled, lines longer than the threshold will be straightened. Sensitivity 0.05–2.0: smaller = stricter; larger = easier to treat as straight. High-precision samples every 10px for better judgement.</value>
+    <value>When enabled, lines longer than the threshold will be straightened. Sensitivity 0.05–2.0: smaller = stricter; larger = easier to treat as straight. High-precision samples every 10px for better judgement.</value>
   </data>
   <data name="InkRecog_LineEndpointSnapping" xml:space="preserve">
     <value>Line endpoint snapping</value>
@@ -700,7 +706,7 @@
     <value>Floating bar opacity in PPT</value>
   </data>
   <data name="Theme_FloatingBarOpacityInPPTHint" xml:space="preserve">
-    <value># Takes effect after re-entering slide show</value>
+    <value>Takes effect after re-entering slide show</value>
   </data>
   <data name="Theme_ShowNibButton" xml:space="preserve">
     <value>Show nib-mode button in palette</value>
@@ -832,22 +838,22 @@
     <value>Kill WPP process (avoid leftovers)</value>
   </data>
   <data name="PPT_KillWppHint" xml:space="preserve">
-    <value># When disabled, leftover WPP processes may cause slow close or cannot exit completely.</value>
+    <value>When disabled, leftover WPP processes may cause slow close or cannot exit completely.</value>
   </data>
   <data name="PPT_WpsHint1" xml:space="preserve">
-    <value># If you only use PowerPoint, do not enable WPS integration. If you use WPS, it is recommended not to use PowerPoint together.</value>
+    <value>If you only use PowerPoint, do not enable WPS integration. If you use WPS, it is recommended not to use PowerPoint together.</value>
   </data>
   <data name="PPT_WpsLagWarning" xml:space="preserve">
     <value>Enabling WPS support may cause lag when closing WPS!</value>
   </data>
   <data name="PPT_WpsSupportHint" xml:space="preserve">
-    <value># WPS is supported, but MS Office and WPS cannot be supported at the same time. To enable WPS support, make sure “WPS Office compatibility with third-party systems and software” is enabled in the WPS config tool, otherwise WPS cannot be detected.</value>
+    <value>WPS is supported, but MS Office and WPS cannot be supported at the same time. To enable WPS support, make sure “WPS Office compatibility with third-party systems and software” is enabled in the WPS config tool, otherwise WPS cannot be detected.</value>
   </data>
   <data name="Canvas_HideStrokeWhenSelecting" xml:space="preserve">
     <value>Hide ink when exiting board mode</value>
   </data>
   <data name="Canvas_HideStrokeWhenSelectingHint" xml:space="preserve">
-    <value># When this option is on, ink will not be shown in PPT mode if not in annotation mode.</value>
+    <value>When this option is on, ink will not be shown in PPT mode if not in annotation mode.</value>
   </data>
   <data name="Canvas_ClearInkAlsoClearHistory" xml:space="preserve">
     <value>Clear ink history when clearing ink</value>
@@ -889,7 +895,7 @@
     <value>Right opacity</value>
   </data>
   <data name="PPT_OffsetHint" xml:space="preserve">
-    <value># Increase for up, decrease for down; 0 = no offset, centered.</value>
+    <value>Increase for up, decrease for down; 0 = no offset, centered.</value>
   </data>
   <data name="PPT_LeftBottomOffset" xml:space="preserve">
     <value>Bottom left offset</value>
@@ -904,7 +910,7 @@
     <value>Bottom right opacity</value>
   </data>
   <data name="PPT_OffsetHintHorizontal" xml:space="preserve">
-    <value># Increase for right, decrease for left; 0 = no offset, centered.</value>
+    <value>Increase for right, decrease for left; 0 = no offset, centered.</value>
   </data>
   <data name="PPT_SideGroupTitle" xml:space="preserve">
     <value>Sides</value>
@@ -925,7 +931,7 @@
     <value>PPT page button clickable</value>
   </data>
   <data name="PPT_PageButtonClickableHint" xml:space="preserve">
-    <value># Enable page-button navigation on click. By default it uses PowerPoint grid thumbnails (not supported in WPS); use the sub-setting below to manually enable enhanced preview for WPS support.</value>
+    <value>Enable page-button navigation on click. By default it uses PowerPoint grid thumbnails (not supported in WPS); use the sub-setting below to manually enable enhanced preview for WPS support.</value>
   </data>
   <data name="PPT_PageButtonClickable_SubSettings" xml:space="preserve">
     <value>Page button click sub-settings</value>
@@ -934,19 +940,19 @@
     <value>Enhanced preview for page button</value>
   </data>
   <data name="PPT_EnhancedPreviewHint" xml:space="preserve">
-    <value># Manually enable this option to show a thumbnail page list when clicking the page button (supports both WPS and PowerPoint), then click a thumbnail to jump.</value>
+    <value>Manually enable this option to show a thumbnail page list when clicking the page button (supports both WPS and PowerPoint), then click a thumbnail to jump.</value>
   </data>
   <data name="PPT_LongPressPageTurn" xml:space="preserve">
     <value>PPT long-press to turn page</value>
   </data>
   <data name="PPT_LongPressPageTurnHint" xml:space="preserve">
-    <value># When enabled, long-press on PPT page button to turn pages continuously.</value>
+    <value>When enabled, long-press on PPT page button to turn pages continuously.</value>
   </data>
   <data name="Startup_UIAccessTopMostHint" xml:space="preserve">
-    <value># With UIA topmost on, app needs admin to stay on top. To turn off, fully quit then start again; restart will not disable it.</value>
+    <value>With UIA topmost on, app needs admin to stay on top. To turn off, fully quit then start again; restart will not disable it.</value>
   </data>
   <data name="Startup_SilentUpdateHint" xml:space="preserve">
-    <value># Silent update installs when the app is idle; no manual action needed.</value>
+    <value>Silent update installs when the app is idle; no manual action needed.</value>
   </data>
   <data name="Startup_UpdateChannel" xml:space="preserve">
     <value>Update channel</value>
@@ -961,25 +967,25 @@
     <value>Beta</value>
   </data>
   <data name="Startup_UpdateChannelHint" xml:space="preserve">
-    <value># Stable: reliable updates. Preview: new features with better stability than Beta. Beta: earliest new features.</value>
+    <value>Stable: reliable updates. Preview: new features with better stability than Beta. Beta: earliest new features.</value>
   </data>
   <data name="Startup_ManualUpdateHint" xml:space="preserve">
-    <value># Check and download the latest version now.</value>
+    <value>Check and download the latest version now.</value>
   </data>
   <data name="Btn_FixVersion" xml:space="preserve">
     <value>Repair installation</value>
   </data>
   <data name="Startup_FixVersionHint" xml:space="preserve">
-    <value># Repair downloads the latest build for the selected channel and reinstalls; use to fix broken installs.</value>
+    <value>Repair downloads the latest build for the selected channel and reinstalls; use to fix broken installs.</value>
   </data>
   <data name="Btn_HistoryRollback" xml:space="preserve">
     <value>Rollback to previous version</value>
   </data>
   <data name="Startup_HistoryRollbackHint" xml:space="preserve">
-    <value># Opens a page to manually roll back to an earlier version.</value>
+    <value>Opens a page to manually roll back to an earlier version.</value>
   </data>
   <data name="Startup_SilentUpdateFullHint" xml:space="preserve">
-    <value># When silent update is off, you will be prompted after download. When on, every 10 minutes the app checks: 1) within silent-update time window 2) not in writing mode 3) not in canvas. If all pass, it will close and update.</value>
+    <value>When silent update is off, you will be prompted after download. When on, every 10 minutes the app checks: 1) within silent-update time window 2) not in writing mode 3) not in canvas. If all pass, it will close and update.</value>
   </data>
   <data name="Startup_SilentUpdateTimePeriod" xml:space="preserve">
     <value>Silent update time window</value>
@@ -991,7 +997,7 @@
     <value>End time</value>
   </data>
   <data name="Startup_TimePeriodHint" xml:space="preserve">
-    <value># If end &lt; start, end is next day. If start = end, window is 24h.</value>
+    <value>If end &lt; start, end is next day. If start = end, window is 24h.</value>
   </data>
   <data name="Startup_RunAtStartup" xml:space="preserve">
     <value>Run at startup</value>
@@ -1018,7 +1024,7 @@
     <value>Disable hardware acceleration</value>
   </data>
   <data name="Canvas_DisableHardwareAccelerationHint" xml:space="preserve">
-    <value># Improves compatibility but may reduce performance; some effects may require an app restart to fully apply.</value>
+    <value>Improves compatibility but may reduce performance; some effects may require an app restart to fully apply.</value>
   </data>
   <data name="Canvas_ShowCursor" xml:space="preserve">
     <value>Show pen cursor</value>
@@ -1027,13 +1033,13 @@
     <value>Enable pressure-sensitive touch</value>
   </data>
   <data name="Canvas_EnablePressureTouchHint" xml:space="preserve">
-    <value># When on, touch screens that support pressure will show pressure; for devices not recognized by the system.</value>
+    <value>When on, touch screens that support pressure will show pressure; for devices not recognized by the system.</value>
   </data>
   <data name="Canvas_DisablePressure" xml:space="preserve">
     <value>Ignore pressure</value>
   </data>
   <data name="Canvas_DisablePressureHint" xml:space="preserve">
-    <value># When on, all strokes use uniform thickness; mutually exclusive with pressure-sensitive touch.</value>
+    <value>When on, all strokes use uniform thickness; mutually exclusive with pressure-sensitive touch.</value>
   </data>
   <data name="Canvas_EraserSize_VerySmall" xml:space="preserve">
     <value>Very small</value>
@@ -1051,7 +1057,7 @@
     <value>Very large</value>
   </data>
   <data name="Canvas_EraserSizeHint" xml:space="preserve">
-    <value># Change takes effect next time you use area eraser.</value>
+    <value>Change takes effect next time you use area eraser.</value>
   </data>
   <data name="Canvas_KeepHyperbolaAsymptote" xml:space="preserve">
     <value>Keep hyperbola asymptotes</value>
@@ -1066,7 +1072,7 @@
     <value>Ask each time</value>
   </data>
   <data name="Canvas_HyperbolaAsymptoteHint" xml:space="preserve">
-    <value># If not kept, undo-related bugs may occur.</value>
+    <value>If not kept, undo-related bugs may occur.</value>
   </data>
   <data name="Canvas_WPFBezierSmoothing" xml:space="preserve">
     <value>Use WPF default Bezier smoothing</value>
@@ -1084,19 +1090,19 @@
     <value>Enable ink fade</value>
   </data>
   <data name="Canvas_EnableInkFadeHint" xml:space="preserve">
-    <value># When on, ink is not committed to canvas; it fades after the set time.</value>
+    <value>When on, ink is not committed to canvas; it fades after the set time.</value>
   </data>
   <data name="Canvas_HideInkFadeInPenMenu" xml:space="preserve">
     <value>Hide ink fade control in pen menu</value>
   </data>
   <data name="Canvas_HideInkFadeInPenMenuHint" xml:space="preserve">
-    <value># When on, the pen context menu will not show the ink fade control.</value>
+    <value>When on, the pen context menu will not show the ink fade control.</value>
   </data>
   <data name="Canvas_BrushAutoRestore" xml:space="preserve">
     <value>Enable brush auto-restore</value>
   </data>
   <data name="Canvas_BrushAutoRestoreHint" xml:space="preserve">
-    <value># When on, temporary brush changes will restore at the configured time(s) to the color/opacity/width set here.</value>
+    <value>When on, temporary brush changes will restore at the configured time(s) to the color/opacity/width set here.</value>
   </data>
   <data name="Canvas_AutoRestoreTimePoints" xml:space="preserve">
     <value>Auto-restore time points (HH:mm, multiple with ;)</value>
@@ -1141,16 +1147,16 @@
     <value>Switch back to annotation after eraser</value>
   </data>
   <data name="Canvas_SwitchBackAfterEraserHint" xml:space="preserve">
-    <value># When on, after erasing, staying idle for a while will switch back to annotation mode.</value>
+    <value>When on, after erasing, staying idle for a while will switch back to annotation mode.</value>
   </data>
   <data name="Canvas_SwitchBackDelay" xml:space="preserve">
     <value>Auto switch delay</value>
   </data>
   <data name="Canvas_SwitchBackDelayHint" xml:space="preserve">
-    <value># If you erase again within the delay, the timer resets.</value>
+    <value>If you erase again within the delay, the timer resets.</value>
   </data>
   <data name="InkRecog_LineEndpointSnappingHint" xml:space="preserve">
-    <value># When on, line endpoints near other endpoints will snap and connect.</value>
+    <value>When on, line endpoints near other endpoints will snap and connect.</value>
   </data>
   <data name="PPT_EnterAnnotationOnShow" xml:space="preserve">
     <value>Enter annotation mode when starting PPT slide show</value>
@@ -1165,19 +1171,19 @@
     <value>Allow finger gesture to turn slides</value>
   </data>
   <data name="PPT_FingerGestureSlideHint" xml:space="preserve">
-    <value># When canvas is on, finger swipe (not pen) can turn slides in show mode when canvas has no ink.</value>
+    <value>When canvas is on, finger swipe (not pen) can turn slides in show mode when canvas has no ink.</value>
   </data>
   <data name="PPT_ShowGestureButtonInShow" xml:space="preserve">
     <value>Show gesture buttons in PPT slide show</value>
   </data>
   <data name="PPT_ShowGestureButtonInShowHint" xml:space="preserve">
-    <value># When on, gesture buttons are shown in PPT slide show.</value>
+    <value>When on, gesture buttons are shown in PPT slide show.</value>
   </data>
   <data name="PPT_TimeCapsule" xml:space="preserve">
     <value>PPT time capsule</value>
   </data>
   <data name="PPT_TimeCapsuleHint" xml:space="preserve">
-    <value># When on, show time capsule in PPT show; can replace minimized timer window.</value>
+    <value>When on, show time capsule in PPT show; can replace minimized timer window.</value>
   </data>
   <data name="PPT_TimeCapsulePosition" xml:space="preserve">
     <value>Time capsule position:</value>
@@ -1195,25 +1201,25 @@
     <value>Show quick panel in PPT slide show</value>
   </data>
   <data name="PPT_ShowQuickPanelInShowHint" xml:space="preserve">
-    <value># When off, quick panel is hidden in PPT slide show.</value>
+    <value>When off, quick panel is hidden in PPT slide show.</value>
   </data>
   <data name="PPT_AutoScreenshot" xml:space="preserve">
     <value>Auto screenshot on slide change</value>
   </data>
   <data name="PPT_AutoScreenshotHint" xml:space="preserve">
-    <value># When on, auto-screenshot when turning page with ink on slide.</value>
+    <value>When on, auto-screenshot when turning page with ink on slide.</value>
   </data>
   <data name="PPT_AutoSaveStrokes" xml:space="preserve">
     <value>Auto-save slide ink</value>
   </data>
   <data name="PPT_AutoSaveStrokesHint" xml:space="preserve">
-    <value># When on, ink is saved when ending slide show and loaded next time (same file and page).</value>
+    <value>When on, ink is saved when ending slide show and loaded next time (same file and page).</value>
   </data>
   <data name="PPT_RememberLastPage" xml:space="preserve">
     <value>Remember and prompt last slide position</value>
   </data>
   <data name="PPT_RememberLastPageHint" xml:space="preserve">
-    <value># When on, last page is recorded; choose Yes to jump to it.</value>
+    <value>When on, last page is recorded; choose Yes to jump to it.</value>
   </data>
   <data name="PPT_GoToFirstPageOnReenter" xml:space="preserve">
     <value>Go to first slide when entering show</value>
@@ -1240,13 +1246,13 @@
     <value>Tap with pen in the area below to estimate touch size multiplier</value>
   </data>
   <data name="Advanced_TouchMultiplierValueHint" xml:space="preserve">
-    <value># Value is for reference only</value>
+    <value>Value is for reference only</value>
   </data>
   <data name="Advanced_EraserBindTouchMultiplier" xml:space="preserve">
     <value>Bind eraser to touch size multiplier</value>
   </data>
   <data name="Advanced_EraserBindTouchHint" xml:space="preserve">
-    <value># BoundsWidth is used as contact area threshold</value>
+    <value>BoundsWidth is used as contact area threshold</value>
   </data>
   <data name="Advanced_QuadIRMode" xml:space="preserve">
     <value>Quad IR mode</value>
@@ -1258,7 +1264,7 @@
     <value>Save logs by date</value>
   </data>
   <data name="Advanced_LogRotateHint" xml:space="preserve">
-    <value># Log files over 512 KB are auto-deleted. With date save, logs go to Logs folder; folder is cleared when over 5 MB.</value>
+    <value>Log files over 512 KB are auto-deleted. With date save, logs go to Logs folder; folder is cleared when over 5 MB.</value>
   </data>
   <data name="Advanced_ConfirmExit" xml:space="preserve">
     <value>Confirm exit with dialog</value>
@@ -1270,13 +1276,13 @@
     <value>Experimental</value>
   </data>
   <data name="Advanced_FullScreenHelperHint" xml:space="preserve">
-    <value># Thanks to lindexi for FullScreenHelper; reduces taskbar pop-up and supports multi-monitor fullscreen. Disable if you see odd issues; restart ICC to apply.</value>
+    <value>Thanks to lindexi for FullScreenHelper; reduces taskbar pop-up and supports multi-monitor fullscreen. Disable if you see odd issues; restart ICC to apply.</value>
   </data>
   <data name="Advanced_AvoidFullScreenHelper" xml:space="preserve">
     <value>Enable AvoidFullScreenHelper</value>
   </data>
   <data name="Advanced_AvoidFullScreenHelperHint" xml:space="preserve">
-    <value># Avoid canvas fullscreen; may fix taskbar not on top and Win11 taskbar unclickable. Can cause floating bar offset with AppBar on left/top. Restart ICC to apply.</value>
+    <value>Avoid canvas fullscreen; may fix taskbar not on top and Win11 taskbar unclickable. Can cause floating bar offset with AppBar on left/top. Restart ICC to apply.</value>
   </data>
   <data name="Advanced_EdgeGestureUtil" xml:space="preserve">
     <value>Enable EdgeGestureUtil</value>
@@ -1336,7 +1342,7 @@
     <value>Settings backup &amp; restore</value>
   </data>
   <data name="Backup_Desc" xml:space="preserve">
-    <value># You can manually back up current settings or restore previous backups; backups are also created automatically before updates.</value>
+    <value>You can manually back up current settings or restore previous backups; backups are also created automatically before updates.</value>
   </data>
   <data name="Backup_AutoBeforeUpdate" xml:space="preserve">
     <value>Backup before update</value>
@@ -1375,7 +1381,7 @@
     <value>Config profiles &amp; hot reload</value>
   </data>
   <data name="ConfigProfiles_Desc" xml:space="preserve">
-    <value># Selecting a profile switches and hot-reloads it; \"Save as\" saves current settings as a new profile.</value>
+    <value>Selecting a profile switches and hot-reloads it; \"Save as\" saves current settings as a new profile.</value>
   </data>
   <data name="ConfigProfiles_Label" xml:space="preserve">
     <value>Profile:</value>
@@ -1453,7 +1459,7 @@
     <value>Keep folded after app exit</value>
   </data>
   <data name="Automation_KeepFoldAfterExitHint" xml:space="preserve">
-    <value># When on, apps that trigger auto fold will stay folded even after they exit.</value>
+    <value>When on, apps that trigger auto fold will stay folded even after they exit.</value>
   </data>
   <data name="AutoKill_Title" xml:space="preserve">
     <value>Auto kill</value>
@@ -1468,7 +1474,7 @@
     <value>Auto kill Seewo PPT tools</value>
   </data>
   <data name="AutoKill_PptToolsHint" xml:space="preserve">
-    <value># Killing PPT tools disables Seewo classroom helper. Delete Office.dll in its install folder to stop the PPT toolbar without auto kill.</value>
+    <value>Killing PPT tools disables Seewo classroom helper. Delete Office.dll in its install folder to stop the PPT toolbar without auto kill.</value>
   </data>
   <data name="AutoKill_EasiNote5" xml:space="preserve">
     <value>Auto kill Seewo Whiteboard 5</value>
@@ -1486,7 +1492,7 @@
     <value>Auto kill Seewo Desktop 2.0 annotation</value>
   </data>
   <data name="AutoKill_SeewoDesktop2AnnoHint" xml:space="preserve">
-    <value># Seewo Desktop 2.0 annotation is 64-bit so ICC (32-bit) cannot inspect it deeply; only process name DesktopAnnotation is matched. If you have another app with the same name, keep this off.</value>
+    <value>Seewo Desktop 2.0 annotation is 64-bit so ICC (32-bit) cannot inspect it deeply; only process name DesktopAnnotation is matched. If you have another app with the same name, keep this off.</value>
   </data>
   <data name="AutoKill_SameAppTitle" xml:space="preserve">
     <value>Kill similar apps</value>
@@ -1564,19 +1570,19 @@
     <value>60 minutes</value>
   </data>
   <data name="Storage_AutoSaveHint" xml:space="preserve">
-    <value># When on, strokes are auto-saved at the set interval, only when canvas is visible and has ink.</value>
+    <value>When on, strokes are auto-saved at the set interval, only when canvas is visible and has ink.</value>
   </data>
   <data name="Storage_SaveFullPageStrokes" xml:space="preserve">
     <value>Save full-page strokes</value>
   </data>
   <data name="Storage_SaveFullPageHint" xml:space="preserve">
-    <value># When on, auto/manual saves store all pages in fullscreen; multiple pages are packed in one archive (whiteboard strokes open only in whiteboard mode; PPT strokes only in slide show mode).</value>
+    <value>When on, auto/manual saves store all pages in fullscreen; multiple pages are packed in one archive (whiteboard strokes open only in whiteboard mode; PPT strokes only in slide show mode).</value>
   </data>
   <data name="Storage_SaveAsXml" xml:space="preserve">
     <value>Save as XML format</value>
   </data>
   <data name="Storage_SaveAsXmlHint" xml:space="preserve">
-    <value># When on, strokes are saved as XML (ISF) for easier inspection and editing.</value>
+    <value>When on, strokes are saved as XML (ISF) for easier inspection and editing.</value>
   </data>
   <data name="Storage_AutoScreenshotMinInk" xml:space="preserve">
     <value>Minimum ink for auto screenshot</value>
@@ -1594,13 +1600,13 @@
     <value>Set save path to Documents</value>
   </data>
   <data name="Storage_PathPermissionHint" xml:space="preserve">
-    <value># Please ensure the save folder is writable.</value>
+    <value>Please ensure the save folder is writable.</value>
   </data>
   <data name="Storage_AutoDeleteTitle" xml:space="preserve">
     <value>Auto delete old strokes and screenshots</value>
   </data>
   <data name="Storage_AutoDeleteHint" xml:space="preserve">
-    <value># When on, all .icstk and .png files in the auto-save folder may be deleted!</value>
+    <value>When on, all .icstk and .png files in the auto-save folder may be deleted!</value>
   </data>
   <data name="Storage_RetentionTitle" xml:space="preserve">
     <value>Retention duration</value>
@@ -1618,19 +1624,19 @@
     <value>Switch to annotation when exiting fold mode</value>
   </data>
   <data name="FoldMode_ExitToAnnotationHint" xml:space="preserve">
-    <value># When on, exiting fold mode switches back to annotation for convenience.</value>
+    <value>When on, exiting fold mode switches back to annotation for convenience.</value>
   </data>
   <data name="FoldMode_AutoFoldAfterPPT" xml:space="preserve">
     <value>Auto fold floating bar after PPT show</value>
   </data>
   <data name="FoldMode_AutoFoldAfterPPTHint" xml:space="preserve">
-    <value># When on, floating bar is auto-folded after exiting PPT slide show.</value>
+    <value>When on, floating bar is auto-folded after exiting PPT slide show.</value>
   </data>
   <data name="FoldMode_AutoFoldAfterWhiteboard" xml:space="preserve">
     <value>Auto fold when exiting whiteboard</value>
   </data>
   <data name="FoldMode_AutoFoldAfterWhiteboardHint" xml:space="preserve">
-    <value># When on, exiting whiteboard folds back to sidebar.</value>
+    <value>When on, exiting whiteboard folds back to sidebar.</value>
   </data>
   <data name="Random_Title" xml:space="preserve">
     <value>Random roll call</value>
@@ -1699,7 +1705,7 @@
     <value>Avoidance weight</value>
   </data>
   <data name="Random_ML_Hint" xml:space="preserve">
-    <value># ML analyzes recent roll-call history to avoid repeating the same students.</value>
+    <value>ML analyzes recent roll-call history to avoid repeating the same students.</value>
   </data>
   <data name="Timer_Title" xml:space="preserve">
     <value>Timer settings</value>
@@ -1795,7 +1801,7 @@
     <value>Upload basic + optional data</value>
   </data>
   <data name="About_LicenseHint" xml:space="preserve">
-    <value># Before using or distributing this software, you must be aware of the related open-source licenses. This software is based on https://github.com/WXRIW/Ink-Canvas.</value>
+    <value>Before using or distributing this software, you must be aware of the related open-source licenses. This software is based on https://github.com/WXRIW/Ink-Canvas.</value>
   </data>
   <data name="About_LicenseTitle" xml:space="preserve">
     <value>This software, ICA and Ink Canvas are all open sourced under a license</value>
@@ -1858,7 +1864,7 @@
     <value>Finger mode BoundsWidth</value>
   </data>
   <data name="Advanced_EdgeGestureUtilHint_Part1" xml:space="preserve">
-    <value># EdgeGestureUtil is newly introduced in ICC to temporarily block edge gestures when using touch (e.g., on Windows 10: swipe from the left edge to Task View, from the right edge to Action Center; on Windows 11: swipe up from the bottom to open Start). It works by using</value>
+    <value>EdgeGestureUtil is newly introduced in ICC to temporarily block edge gestures when using touch (e.g., on Windows 10: swipe from the left edge to Task View, from the right edge to Action Center; on Windows 11: swipe up from the bottom to open Start). It works by using</value>
   </data>
   <data name="Advanced_EdgeGestureUtilHint_Part2" xml:space="preserve">
     <value>(When the app window is active and in full-screen mode (or an owned window is active), prevents edge gesture behavior.) If anything is abnormal, turn this option off; it should take effect immediately. (Not available on Windows 7/8.)</value>
@@ -1867,19 +1873,19 @@
     <value>Enable ForceFullScreen</value>
   </data>
   <data name="Advanced_ForceFullScreenHint" xml:space="preserve">
-    <value># When a window size change is detected, automatically uses Win32 API to set this window size to the primary monitor size (in device pixels). Turn it off if you don't need it; takes effect immediately.</value>
+    <value>When a window size change is detected, automatically uses Win32 API to set this window size to the primary monitor size (in device pixels). Turn it off if you don't need it; takes effect immediately.</value>
   </data>
   <data name="Advanced_DPIChangeDetection" xml:space="preserve">
     <value>Enable DPIChangeDetection</value>
   </data>
   <data name="Advanced_DPIChangeDetectionHint" xml:space="preserve">
-    <value># When a system DPI change is detected, it tries to keep FloatingBar visible. If it goes off-screen, it will attempt to move it into the visible area. (Increasing DPI may trigger this; decreasing DPI won't auto-move—adjust manually.)</value>
+    <value>When a system DPI change is detected, it tries to keep FloatingBar visible. If it goes off-screen, it will attempt to move it into the visible area. (Increasing DPI may trigger this; decreasing DPI won't auto-move—adjust manually.)</value>
   </data>
   <data name="Advanced_ResolutionChangeDetection" xml:space="preserve">
     <value>Enable ResolutionChangeDetection</value>
   </data>
   <data name="Advanced_ResolutionChangeDetectionHint" xml:space="preserve">
-    <value># When a screen resolution change is detected, it tries to keep FloatingBar visible. If it goes off-screen, it will attempt to move it into the visible area. (Reducing resolution may trigger this; if it's still on-screen it won't auto-adjust—adjust manually.)</value>
+    <value>When a screen resolution change is detected, it tries to keep FloatingBar visible. If it goes off-screen, it will attempt to move it into the visible area. (Reducing resolution may trigger this; if it's still on-screen it won't auto-adjust—adjust manually.)</value>
   </data>
   <data name="FloatingInterceptor_App_SeewoBoard3" xml:space="preserve">
     <value>Seewo Whiteboard 3</value>

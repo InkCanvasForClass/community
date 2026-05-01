@@ -3283,10 +3283,20 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         public void BtnRestart_Click(object sender, RoutedEventArgs e)
         {
+            if (Settings.Advanced.IsSecondConfirmWhenShutdownApp)
+            {
+                if (MessageBox.Show("是否继续关闭 InkCanvasForClass，这将丢失当前未保存的墨迹。", "InkCanvasForClass",
+                        MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.Cancel) return;
+                if (MessageBox.Show("真的狠心关闭 InkCanvasForClass吗？", "InkCanvasForClass",
+                        MessageBoxButton.OKCancel, MessageBoxImage.Error) == MessageBoxResult.Cancel) return;
+                if (MessageBox.Show("最后确认：确定要关闭 InkCanvasForClass 吗？", "InkCanvasForClass",
+                        MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.Cancel) return;
+            }
+
             Process.Start(System.Windows.Forms.Application.ExecutablePath, "-m");
             _forceCloseFromExitOrRestartButton = true;
             App.IsAppExitByUser = true;
-            // 不设置 CloseIsFromButton = true，让它也经过确认流程
+            CloseIsFromButton = true;
             Close();
         }
 

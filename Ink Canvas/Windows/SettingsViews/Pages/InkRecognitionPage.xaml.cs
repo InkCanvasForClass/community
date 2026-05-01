@@ -38,6 +38,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     if (eng > 2) eng = 2;
                     ComboBoxShapeRecognitionEngine.SelectedIndex = eng;
                     CardEnableWinRtHandwritingStrokeBeautify.IsOn = settings.InkToShape.EnableWinRtHandwritingStrokeBeautify;
+                    SelectHandwritingFontByValue(settings.InkToShape.HandwritingCorrectionFontFamily);
                     CardEnableInkToShapeNoFakePressureRectangle.IsOn = settings.InkToShape.IsInkToShapeNoFakePressureRectangle;
                     CardEnableInkToShapeNoFakePressureTriangle.IsOn = settings.InkToShape.IsInkToShapeNoFakePressureTriangle;
                     ToggleCheckboxEnableInkToShapeTriangle.IsChecked = settings.InkToShape.IsInkToShapeTriangle;
@@ -94,6 +95,34 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.InkToShape.EnableWinRtHandwritingStrokeBeautify = CardEnableWinRtHandwritingStrokeBeautify.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void SelectHandwritingFontByValue(string value)
+        {
+            if (ComboBoxHandwritingCorrectionFont == null) return;
+            value = (value ?? string.Empty).Trim();
+            int matchIndex = -1;
+            for (int i = 0; i < ComboBoxHandwritingCorrectionFont.Items.Count; i++)
+            {
+                var item = ComboBoxHandwritingCorrectionFont.Items[i] as ComboBoxItem;
+                var tag = item?.Tag as string;
+                if (!string.IsNullOrEmpty(tag) && string.Equals(tag, value, StringComparison.OrdinalIgnoreCase))
+                {
+                    matchIndex = i;
+                    break;
+                }
+            }
+            ComboBoxHandwritingCorrectionFont.SelectedIndex = matchIndex >= 0 ? matchIndex : 0;
+        }
+
+        private void ComboBoxHandwritingCorrectionFont_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded || ComboBoxHandwritingCorrectionFont == null) return;
+            var item = ComboBoxHandwritingCorrectionFont.SelectedItem as ComboBoxItem;
+            var tag = item?.Tag as string;
+            if (string.IsNullOrWhiteSpace(tag)) return;
+            SettingsManager.Settings.InkToShape.HandwritingCorrectionFontFamily = tag;
             SettingsManager.SaveSettingsToFile();
         }
 

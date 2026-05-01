@@ -53,6 +53,20 @@ namespace Ink_Canvas.Controls
             set => SetValue(IconBrushProperty, value);
         }
 
+        public static readonly DependencyProperty LabelBrushProperty = DependencyProperty.Register(
+            nameof(LabelBrush), typeof(Brush), typeof(ToolbarImageButton),
+            new PropertyMetadata(null, (d, e) =>
+            {
+                var b = (ToolbarImageButton)d;
+                if (e.NewValue is Brush brush) b.LabelTextBlock.Foreground = brush;
+            }));
+
+        public Brush LabelBrush
+        {
+            get => (Brush)GetValue(LabelBrushProperty);
+            set => SetValue(LabelBrushProperty, value);
+        }
+
         public new Brush Background
         {
             get => ButtonPanel.Background;

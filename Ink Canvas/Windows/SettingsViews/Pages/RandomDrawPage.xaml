@@ -91,15 +91,12 @@
                         Text="{i18n:I18n Key=Random_BackgroundSettingsTitle}" />
 
                     <ui:SettingsCard Header="{i18n:I18n Key=Random_BackgroundSelectLabel}">
-                        <ComboBox x:Name="ComboBoxPickNameBackground"
-                                  SelectedIndex="0"
-                                  SelectionChanged="ComboBoxPickNameBackground_SelectionChanged" />
-                    </ui:SettingsCard>
-
-                    <ui:SettingsCard ContentAlignment="Left">
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                             <Button x:Name="ButtonAddCustomBackground" Content="{i18n:I18n Key=Random_CustomBackground_Upload}" Click="ButtonAddCustomBackground_Click" />
                             <Button x:Name="ButtonManageBackgrounds" Content="{i18n:I18n Key=Random_CustomBackground_Manage}" Click="ButtonManageBackgrounds_Click" />
+                            <ComboBox x:Name="ComboBoxPickNameBackground"
+                                      SelectedIndex="0"
+                                      SelectionChanged="ComboBoxPickNameBackground_SelectionChanged" />
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
