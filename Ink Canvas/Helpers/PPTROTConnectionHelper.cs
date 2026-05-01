@@ -17,6 +17,9 @@ namespace Ink_Canvas.Helpers
         [DllImport("ole32.dll")]
         private static extern int CreateBindCtx(int reserved, out IBindCtx ppbc);
 
+        [DllImport("ole32.dll", CharSet = CharSet.Unicode)]
+        private static extern int CLSIDFromProgID(string lpszProgID, out Guid pclsid);
+
         [DllImport("user32.dll")]
         private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
@@ -189,6 +192,7 @@ namespace Ink_Canvas.Helpers
 
                 IMoniker[] moniker = new IMoniker[1];
                 IntPtr fetched = IntPtr.Zero;
+                string[] applicationMonikersFromProgIds = GetApplicationMonikersFromProgIds();
 
                 while (enumMoniker.Next(1, moniker, fetched) == 0)
                 {
@@ -205,17 +209,32 @@ namespace Ink_Canvas.Helpers
                         CreateBindCtx(0, out bindCtx);
                         moniker[0].GetDisplayName(bindCtx, null, out displayName);
 
-                        if (LooksLikePresentationFile(displayName) || displayName == "!{91493441-5A91-11CF-8700-00AA0060263B}")
+                        bool looksLikePresentationFile = LooksLikePresentationFile(displayName);
+                        bool isApplicationMoniker = ContainsMoniker(applicationMonikersFromProgIds, displayName);
+                        if (!isApplicationMoniker)
+                        {
+                            isApplicationMoniker = IsFallbackApplicationMoniker(displayName);
+                        }
+
+                        if (looksLikePresentationFile || isApplicationMoniker)
                         {
                             rot.GetObject(moniker[0], out comObject);
                             if (comObject != null)
                             {
-                                try
+                                if (isApplicationMoniker)
                                 {
-                                    object appObj = comObject.GetType().InvokeMember("Application", BindingFlags.GetProperty, null, comObject, null);
-                                    candidateApp = appObj;
+                                    candidateApp = comObject;
+                                    comObject = null;
                                 }
-                                catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+                                else
+                                {
+                                    try
+                                    {
+                                        object appObj = comObject.GetType().InvokeMember("Application", BindingFlags.GetProperty, null, comObject, null);
+                                        candidateApp = appObj;
+                                    }
+                                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+                                }
                             }
                         }
                         bool isDuplicate = false;
@@ -396,6 +415,59 @@ namespace Ink_Canvas.Helpers
                     return true;
             }
             return false;
+        }
+
+        private static string[] GetApplicationMonikersFromProgIds()
+        {
+            string[] ApplicationProgIds = new[]
+            {
+                "PowerPoint.Application",
+                "KWPP.Application",
+                "Wpp.Application",
+                "WPP.Application",
+            };
+
+            List<string> monikers = new List<string>();
+
+            foreach (string progId in ApplicationProgIds)
+            {
+                Guid clsid;
+                if (CLSIDFromProgID(progId, out clsid) == 0 && clsid != Guid.Empty)
+                {
+                    string moniker = "!" + clsid.ToString("B").ToUpperInvariant();
+                    if (!ContainsMoniker(monikers, moniker))
+                    {
+                        monikers.Add(moniker);
+                    }
+                }
+            }
+
+            return monikers.ToArray();
+        }
+
+        private static bool ContainsMoniker(IEnumerable<string> monikers, string displayName)
+        {
+            if (monikers == null || string.IsNullOrEmpty(displayName))
+                return false;
+
+            foreach (string moniker in monikers)
+            {
+                if (string.Equals(displayName, moniker, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static bool IsFallbackApplicationMoniker(string displayName)
+        {
+            string[] FallbackApplicationMonikers = new[]
+            {
+                "!{91493441-5A91-11CF-8700-00AA0060263B}",
+                "!{44720441-94BF-4940-926D-4F38FECF2A48}",
+            };
+
+            return ContainsMoniker(FallbackApplicationMonikers, displayName);
         }
 
         public static bool IsSlideShowWindowActive(object sswObj)
