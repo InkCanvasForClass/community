@@ -1089,137 +1089,137 @@
                                                                  Label="{i18n:I18n Key=Board_Background}"
                                                                  IconGeometry="F0 M24,24z M0,0z M4.71815,3.98345C6.64142,2.23541 9.19629,1.17001 12,1.17001 17.9812,1.17001 22.83,6.01877 22.83,12 22.83,17.9813 17.9812,22.83 12,22.83 11.6262,22.83 11.2568,22.8111 10.8927,22.7741 5.8167,22.2586 1.77699,18.2377 1.2325,13.1703 1.22536,13.1039 1.21882,13.0373 1.21289,12.9705 1.20871,12.9234 1.20483,12.8762 1.20125,12.8289 1.18054,12.5553 1.17,12.2789 1.17,12 1.17,9.41057 2.07878,7.03339 3.59479,5.17001 3.9391,4.74681 4.31473,4.35011 4.71815,3.98345z M12,20.83C16.8767,20.83 20.83,16.8767 20.83,12 20.83,7.12334 16.8767,3.17001 12,3.17001L12,20.83z"
                                                                  ButtonMouseUp="BoardChangeBackgroundColorBtn_MouseUp" />
-                                                <Border>
-                                                    <Grid Width="0" Margin="0,0,0,5" RenderTransformOrigin="0,1">
-                                                        <Border ClipToBounds="True" x:Name="BackgroundPalette"
-                                                                Visibility="Collapsed"
-                                                                Margin="-115,-360,-55,50"
-                                                                CornerRadius="8"
-                                                                Background="{DynamicResource SettingsPageBackground}" Opacity="1" BorderBrush="#2563eb"
-                                                                BorderThickness="1">
-                                                            <ikw:SimpleStackPanel Margin="0">
-                                                                <Border BorderBrush="#1e3a8a" BorderThickness="0,0,0,1"
-                                                                        CornerRadius="8,8,0,0"
-                                                                        Background="#2563eb" Margin="-1,-1,-1,1">
-                                                                    <Grid Height="24">
-                                                                        <TextBlock Text="背景设置" Margin="8,0,0,0" Foreground="White"
-                                                                                   VerticalAlignment="Center" HorizontalAlignment="Left"
-                                                                                   FontSize="11" FontWeight="Bold" />
-                                                                        <Image Margin="0,0,8,0"
-                                                                               Source="/Resources/new-icons/close-white.png"
-                                                                               RenderOptions.BitmapScalingMode="HighQuality"
-                                                                               Height="16" Width="16"
-                                                                               HorizontalAlignment="Right" VerticalAlignment="Center"
-                                                                               MouseDown="Border_MouseDown"
-                                                                               MouseUp="CloseBordertools_MouseUp" />
-                                                                    </Grid>
-                                                                </Border>
+                                    <Border>
+                                        <Grid Width="0" Margin="0,0,0,5" RenderTransformOrigin="0,1">
+                                            <Border ClipToBounds="True" x:Name="BackgroundPalette"
+                                                            Visibility="Collapsed" d:Visibility="Visible"
+                                                            Margin="-189,-360,-55,50"
+                                                            CornerRadius="8"
+                                                            Background="{DynamicResource SettingsPageBackground}" Opacity="1" BorderBrush="#2563eb"
+                                                            BorderThickness="1">
+                                                <ikw:SimpleStackPanel Margin="0">
+                                                    <Border BorderBrush="#1e3a8a" BorderThickness="0,0,0,1"
+                                                                    CornerRadius="8,8,0,0"
+                                                                    Background="#2563eb" Margin="-1,-1,-1,1">
+                                                        <Grid Height="24">
+                                                            <TextBlock Text="背景设置" Margin="8,0,0,0" Foreground="White"
+                                                                                VerticalAlignment="Center" HorizontalAlignment="Left"
+                                                                                FontSize="11" FontWeight="Bold" />
+                                                            <Image Margin="0,0,8,0"
+                                                                            Source="/Resources/new-icons/close-white.png"
+                                                                            RenderOptions.BitmapScalingMode="HighQuality"
+                                                                            Height="16" Width="16"
+                                                                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                                            MouseDown="Border_MouseDown"
+                                                                            MouseUp="CloseBordertools_MouseUp" />
+                                                        </Grid>
+                                                    </Border>
                                                     <StackPanel>
                                                         <StackPanel Margin="8">
                                                             <TextBlock Text="白板模式"
-                                                                       Foreground="{DynamicResource TextForeground}"
-                                                                       FontSize="10" FontWeight="Bold"
-                                                                       HorizontalAlignment="Center"
-                                                                       Margin="0,4,0,8" />
+                                                                    Foreground="{DynamicResource TextForeground}"
+                                                                    FontSize="10" FontWeight="Bold"
+                                                                    HorizontalAlignment="Center"
+                                                                    Margin="0,4,0,8" />
                                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                                                 <Border x:Name="WhiteboardModeBtn"
-                                                                        Width="60" Height="30"
-                                                                        Background="#2563eb"
-                                                                        CornerRadius="4"
-                                                                        Margin="0,0,8,0"
-                                                                        MouseUp="WhiteboardModeBtn_MouseUp">
+                                                                    Width="60" Height="30"
+                                                                    Background="#2563eb"
+                                                                    CornerRadius="4"
+                                                                    Margin="0,0,8,0"
+                                                                    MouseUp="WhiteboardModeBtn_MouseUp">
                                                                     <TextBlock Text="白板"
-                                                                               Foreground="White"
-                                                                               HorizontalAlignment="Center"
-                                                                               VerticalAlignment="Center" />
+                                                                            Foreground="White"
+                                                                            HorizontalAlignment="Center"
+                                                                            VerticalAlignment="Center" />
                                                                 </Border>
                                                                 <Border x:Name="BlackboardModeBtn"
-                                                                        Width="60" Height="30"
-                                                                        Background="LightGray"
-                                                                        CornerRadius="4"
-                                                                        MouseUp="BlackboardModeBtn_MouseUp">
+                                                                    Width="60" Height="30"
+                                                                    Background="LightGray"
+                                                                    CornerRadius="4"
+                                                                    MouseUp="BlackboardModeBtn_MouseUp">
                                                                     <TextBlock Text="黑板"
-                                                                               Foreground="Black"
-                                                                               HorizontalAlignment="Center"
-                                                                               VerticalAlignment="Center" />
+                                                                            Foreground="Black"
+                                                                            HorizontalAlignment="Center"
+                                                                            VerticalAlignment="Center" />
                                                                 </Border>
                                                             </StackPanel>
                                                             <Border Height="1"
-                                                                    Background="{DynamicResource SettingsPageBorderBrush}"
-                                                                    Margin="0,12,0,12" />
+                                                                Background="{DynamicResource SettingsPageBorderBrush}"
+                                                                Margin="0,12,0,12" />
                                                             <TextBlock Text="背景颜色"
-                                                                       Foreground="{DynamicResource TextForeground}"
-                                                                       FontSize="10" FontWeight="Bold"
-                                                                       HorizontalAlignment="Center"
-                                                                       Margin="0,4,0,8" />
+                                                                    Foreground="{DynamicResource TextForeground}"
+                                                                    FontSize="10" FontWeight="Bold"
+                                                                    HorizontalAlignment="Center"
+                                                                    Margin="0,4,0,8" />
                                                             <Border x:Name="BackgroundColorPreview"
-                                                                    Width="100" Height="40"
-                                                                    BorderThickness="1"
-                                                                    BorderBrush="{DynamicResource SettingsPageBorderBrush}"
-                                                                    Background="White"
-                                                                    CornerRadius="4"
-                                                                    Margin="0,0,0,10"
-                                                                    HorizontalAlignment="Center" />
+                                                                Width="100" Height="40"
+                                                                BorderThickness="1"
+                                                                BorderBrush="{DynamicResource SettingsPageBorderBrush}"
+                                                                Background="White"
+                                                                CornerRadius="4"
+                                                                Margin="0,0,0,10"
+                                                                HorizontalAlignment="Center" />
                                                             <StackPanel Orientation="Horizontal" Margin="10,0,10,5">
                                                                 <TextBlock Text="R:" Width="20"
-                                                                           VerticalAlignment="Center"
-                                                                           Foreground="{DynamicResource TextForeground}" />
-                                                                <Slider x:Name="BackgroundRSlider"
-                                                                        Minimum="0" Maximum="255" Value="255"
-                                                                        Width="150" Margin="5,0,5,0"
                                                                         VerticalAlignment="Center"
-                                                                        ValueChanged="BackgroundRSlider_ValueChanged" />
+                                                                        Foreground="{DynamicResource TextForeground}" />
+                                                                <Slider x:Name="BackgroundRSlider"
+                                                                    Minimum="0" Maximum="255" Value="255"
+                                                                    Width="150" Margin="5,0,5,0"
+                                                                    VerticalAlignment="Center"
+                                                                    ValueChanged="BackgroundRSlider_ValueChanged" />
                                                                 <TextBlock x:Name="BackgroundRValue"
-                                                                           Text="255" Width="30"
-                                                                           VerticalAlignment="Center"
-                                                                           TextAlignment="Right"
-                                                                           Foreground="{DynamicResource TextForeground}" />
+                                                                        Text="255" Width="30"
+                                                                        VerticalAlignment="Center"
+                                                                        TextAlignment="Right"
+                                                                        Foreground="{DynamicResource TextForeground}" />
                                                             </StackPanel>
                                                             <StackPanel Orientation="Horizontal" Margin="10,0,10,5">
                                                                 <TextBlock Text="G:" Width="20"
-                                                                           VerticalAlignment="Center"
-                                                                           Foreground="{DynamicResource TextForeground}" />
-                                                                <Slider x:Name="BackgroundGSlider"
-                                                                        Minimum="0" Maximum="255" Value="255"
-                                                                        Width="150" Margin="5,0,5,0"
                                                                         VerticalAlignment="Center"
-                                                                        ValueChanged="BackgroundGSlider_ValueChanged" />
+                                                                        Foreground="{DynamicResource TextForeground}" />
+                                                                <Slider x:Name="BackgroundGSlider"
+                                                                    Minimum="0" Maximum="255" Value="255"
+                                                                    Width="150" Margin="5,0,5,0"
+                                                                    VerticalAlignment="Center"
+                                                                    ValueChanged="BackgroundGSlider_ValueChanged" />
                                                                 <TextBlock x:Name="BackgroundGValue"
-                                                                           Text="255" Width="30"
-                                                                           VerticalAlignment="Center"
-                                                                           TextAlignment="Right"
-                                                                           Foreground="{DynamicResource TextForeground}" />
+                                                                        Text="255" Width="30"
+                                                                        VerticalAlignment="Center"
+                                                                        TextAlignment="Right"
+                                                                        Foreground="{DynamicResource TextForeground}" />
                                                             </StackPanel>
                                                             <StackPanel Orientation="Horizontal" Margin="10,0,10,5">
                                                                 <TextBlock Text="B:" Width="20"
-                                                                           VerticalAlignment="Center"
-                                                                           Foreground="{DynamicResource TextForeground}" />
-                                                                <Slider x:Name="BackgroundBSlider"
-                                                                        Minimum="0" Maximum="255" Value="255"
-                                                                        Width="150" Margin="5,0,5,0"
                                                                         VerticalAlignment="Center"
-                                                                        ValueChanged="BackgroundBSlider_ValueChanged" />
+                                                                        Foreground="{DynamicResource TextForeground}" />
+                                                                <Slider x:Name="BackgroundBSlider"
+                                                                    Minimum="0" Maximum="255" Value="255"
+                                                                    Width="150" Margin="5,0,5,0"
+                                                                    VerticalAlignment="Center"
+                                                                    ValueChanged="BackgroundBSlider_ValueChanged" />
                                                                 <TextBlock x:Name="BackgroundBValue"
-                                                                           Text="255" Width="30"
-                                                                           VerticalAlignment="Center"
-                                                                           TextAlignment="Right"
-                                                                           Foreground="{DynamicResource TextForeground}" />
+                                                                        Text="255" Width="30"
+                                                                        VerticalAlignment="Center"
+                                                                        TextAlignment="Right"
+                                                                        Foreground="{DynamicResource TextForeground}" />
                                                             </StackPanel>
                                                             <Button x:Name="ApplyBackgroundColorBtn"
-                                                                    Content="应用颜色"
-                                                                    Margin="0,10,0,0"
-                                                                    Padding="10,5,10,5"
-                                                                    Background="#2563eb"
-                                                                    Foreground="White"
-                                                                    BorderThickness="0"
-                                                                    HorizontalAlignment="Center"
-                                                                    Click="ApplyBackgroundColorBtn_Click" />
+                                                                Content="应用颜色"
+                                                                Margin="0,10,0,0"
+                                                                Padding="10,5,10,5"
+                                                                Background="#2563eb"
+                                                                Foreground="White"
+                                                                BorderThickness="0"
+                                                                HorizontalAlignment="Center"
+                                                                Click="ApplyBackgroundColorBtn_Click" />
                                                         </StackPanel>
                                                     </StackPanel>
-                                                            </ikw:SimpleStackPanel>
-                                                        </Border>
-                                                    </Grid>
-                                                </Border>
+                                                </ikw:SimpleStackPanel>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
                                 </ikw:SimpleStackPanel>
                             </Border>
 
@@ -1234,18 +1234,11 @@
                                                                  Label="{i18n:I18n Key=Board_Pen}"
                                                                  IconGeometry="F1 M24,24z M0,0z M20.4786,1.42438C19.9985,1.23743 19.4847,1.15194 18.9698,1.17319 18.4549,1.19444 17.9499,1.32197 17.4869,1.54789 17.0368,1.76752 16.6358,2.07554 16.3083,2.45361L3.85516,14.9067 9.08243,20.134 21.5311,7.68529C21.9113,7.36382 22.223,6.96912 22.447,6.52438 22.6786,6.06462 22.8113,5.56167 22.8365,5.04763 22.8616,4.5336 22.7787,4.02012 22.593,3.54002 22.4073,3.05994 22.1232,2.62403 21.759,2.25988 21.3949,1.89574 20.9587,1.61132 20.4786,1.42438z M7.28056,21.1605L2.8286,16.7086 1.15912,22.83 7.28056,21.1605z"
                                                                  ButtonMouseUp="PenIcon_Click" />
+                                    <!--笔菜单-->
                                     <Border>
                                         <Grid Margin="0,5,0,5" Width="0">
                                             <Grid Name="BoardPenPaletteGrid" Margin="-160,-240,-53,50" RenderTransformOrigin="0,1">
-                                                <Grid.RenderTransform>
-                                                    <TransformGroup>
-                                                        <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
-                                                        <SkewTransform />
-                                                        <RotateTransform />
-                                                        <TranslateTransform />
-                                                    </TransformGroup>
-                                                </Grid.RenderTransform>
-                                                <Border x:Name="BoardPenPalette" Visibility="Collapsed"
+                                                <Border x:Name="BoardPenPalette" Visibility="Collapsed" d:Visibility="Visible"
                                                         Background="{DynamicResource FloatBarBackground}"
                                                         Opacity="1" BorderBrush="#2563eb"
                                                         BorderThickness="1" CornerRadius="8">
@@ -1560,17 +1553,10 @@
                                                                  Label="{i18n:I18n Key=Board_Eraser}"
                                                                  IconGeometry="F1 M24,24z M0,0z M15.6314,20.7262L22.7921,13.5655C24.3494,12.141,24.2819,9.81776,22.8105,8.34633L16.7793,2.31508C15.3547,0.757753,13.0315,0.825236,11.5601,2.29666L4.38099,9.47574 15.6314,20.7262z M14.2172,22.1404L2.96677,10.89 1.20761,12.6491C-0.34971,14.0737,-0.281711,16.3974,1.18971,17.8688L6.15089,22.83 13.5276,22.83 14.2172,22.1404z"
                                                                  ButtonMouseUp="BoardEraserIcon_Click" />
+                                    <!--橡皮菜单-->
                                     <Border>
                                         <Grid RenderTransformOrigin="0,1" Margin="-133,-172,13,55">
-                                            <Grid.RenderTransform>
-                                                <TransformGroup>
-                                                    <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
-                                                    <SkewTransform />
-                                                    <RotateTransform />
-                                                    <TranslateTransform />
-                                                </TransformGroup>
-                                            </Grid.RenderTransform>
-                                            <Border Visibility="Collapsed" ClipToBounds="True"
+                                            <Border Visibility="Collapsed" ClipToBounds="True"  d:Visibility="Visible"
                                                     x:Name="BoardEraserSizePanel"
                                                     CornerRadius="5" Background="{DynamicResource FloatBarBackground}"
                                                     Opacity="1"
@@ -1593,7 +1579,7 @@
                                                         </Canvas>
                                                     </Border>
                                                     <ikw:SimpleStackPanel Orientation="Horizontal" Margin="0,6,0,0"
-                                                                         Spacing="-2"
+                                                                         Spacing="2"
                                                                          VerticalAlignment="Center"
                                                                          HorizontalAlignment="Center">
                                                         <Label Margin="0,0,0,0" Content="{i18n:I18n Key=Board_Size}" FontWeight="Bold"
@@ -1759,13 +1745,14 @@
                                                                  Label="{i18n:I18n Key=Board_Shape}"
                                                                  IconGeometry="F1 M24,24z M0,0z M17.8604,10.7597L12.0068,1.17001 6.13961,10.7597 17.8604,10.7597z M10.9345,13.2403L1.34476,13.2403 1.34476,22.83 10.9345,22.83 10.9345,13.2403z M17.8604,13.2403C15.2122,13.2403 13.0655,15.387 13.0655,18.0352 13.0655,20.6833 15.2122,22.83 17.8604,22.83 20.5085,22.83 22.6552,20.6833 22.6552,18.0352 22.6552,15.387 20.5085,13.2403 17.8604,13.2403z"
                                                                  ButtonMouseUp="ImageDrawShape_MouseUp" />
+                                    <!--图形菜单-->
                                     <Border Width="0">
                                         <Border x:Name="BoardBorderDrawShape" Visibility="Visible"
                                                 Background="{DynamicResource FloatBarBackground}"
                                                 Opacity="1" BorderBrush="{DynamicResource FloatBarBorderBrush}" BorderThickness="1" CornerRadius="5"
                                                 Margin="-147,-286,-89,55">
                                             <Viewbox>
-                                                <ikw:SimpleStackPanel Spacing="-8" Orientation="Vertical">
+                                                <ikw:SimpleStackPanel Spacing="8" Orientation="Vertical">
                                                     <TextBlock FontSize="16"
                                                                Foreground="{DynamicResource FloatBarForeground}"
                                                                HorizontalAlignment="Left" Margin="10,8">
@@ -1911,6 +1898,7 @@
                                                                  Label="{i18n:I18n Key=Board_InsertImage}"
                                                                  IconGeometry="F1 M24,24z M0,0z M19,3H5C3.9,3 3,3.9 3,5v14c0,1.1 0.9,2 2,2h14c1.1,0 2-0.9 2-2V5C21,3.9 20.1,3 19,3zM19,19H5V5h14V19z M17,7c-1.1,0-2,0.9-2,2s0.9,2 2,2 2-0.9 2-2S18.1,7 17,7zM7,17l2.5-3.01 1.96,2.36 2.54-3.21L17,17H7z"
                                                                  ButtonMouseUp="InsertImageOptions_MouseUp" />
+                                    <!--插入图片菜单-->
                                     <localControls:BoardMenuFrame x:Name="BoardImageOptionsPanel" Visibility="Visible" ClipToBounds="True"
                                             PlacementTarget="{Binding ElementName=BoardInsertImage}"
                                             PanelCornerRadius="5" HeaderCornerRadius="6,6,0,0" TitleFontSize="11"
@@ -2002,66 +1990,67 @@
                                                                  Label="{i18n:I18n Key=Board_Tools}"
                                                                  IconGeometry="F1 M24,24z M0,0z M3.336,1.17001C2.13975,1.17001,1.17,2.13976,1.17,3.33601L1.17,8.75101C1.17,9.94726,2.13975,10.917,3.336,10.917L8.751,10.917C9.94725,10.917,10.917,9.94726,10.917,8.75101L10.917,3.33601C10.917,2.13976,9.94725,1.17001,8.751,1.17001L3.336,1.17001z M15.249,1.17001C14.0527,1.17001,13.083,2.13976,13.083,3.33601L13.083,8.75101C13.083,9.94726,14.0527,10.917,15.249,10.917L20.664,10.917C21.8602,10.917,22.83,9.94726,22.83,8.75101L22.83,3.33601C22.83,2.13976,21.8602,1.17001,20.664,1.17001L15.249,1.17001z M3.336,13.083C2.13975,13.083,1.17,14.0528,1.17,15.249L1.17,20.664C1.17,21.8603,2.13975,22.83,3.336,22.83L8.751,22.83C9.94725,22.83,10.917,21.8603,10.917,20.664L10.917,15.249C10.917,14.0528,9.94725,13.083,8.751,13.083L3.336,13.083z M15.249,13.083C14.0527,13.083,13.083,14.0528,13.083,15.249L13.083,20.664C13.083,21.8603,14.0527,22.83,15.249,22.83L20.664,22.83C21.8602,22.83,22.83,21.8603,22.83,20.664L22.83,15.249C22.83,14.0528,21.8602,13.083,20.664,13.083L15.249,13.083z"
                                                                  ButtonMouseUp="SymbolIconTools_MouseUp" />
-                                            <Border>
-                                                <Grid Width="0" Margin="0,0,0,5" RenderTransformOrigin="0,1">
-                                                    <Grid.RenderTransform>
-                                                        <TransformGroup>
-                                                            <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
-                                                            <SkewTransform />
-                                                            <RotateTransform />
-                                                            <TranslateTransform />
-                                                        </TransformGroup>
-                                                    </Grid.RenderTransform>
-                                                    <Border ClipToBounds="True" x:Name="BoardBorderTools"
-                                                            Visibility="Collapsed"
-                                                            Margin="-80,-160,-39,50"
-                                                            CornerRadius="5" Background="{DynamicResource SettingsPageBackground}" Opacity="1"
-                                                            BorderThickness="1"
-                                                            BorderBrush="#2563eb">
-                                                        <ikw:SimpleStackPanel Margin="-1,0,0,0">
-                                                            <Border BorderBrush="#1e3a8a" BorderThickness="0,0,0,1"
-                                                                    CornerRadius="6,6,0,0"
-                                                                    Background="#2563eb" Margin="-1,-1,-1,1">
-                                                                <Grid Height="24">
-                                                                    <TextBlock Text="{i18n:I18n Key=Tools_MoreFeaturesTitle}" Margin="8,0,0,0" Foreground="White"
-                                                                               VerticalAlignment="Center" HorizontalAlignment="Left"
-                                                                               FontSize="11" FontWeight="Bold" />
-                                                                    <Image Margin="0,0,8,0"
-                                                                           Source="/Resources/new-icons/close-white.png"
-                                                                           RenderOptions.BitmapScalingMode="HighQuality"
-                                                                           Height="16" Width="16"
-                                                                           HorizontalAlignment="Right" VerticalAlignment="Center"
-                                                                           MouseDown="Border_MouseDown"
-                                                                           MouseUp="CloseBordertools_MouseUp" />
-                                                                </Grid>
-                                                            </Border>
-                                                <ikw:SimpleStackPanel Margin="10,3,10,2" Spacing="-2">
-                                                        <ikw:SimpleStackPanel.Resources>
-                                                            <Style TargetType="Label" BasedOn="{StaticResource AutoFitToolPopupLabel8}" />
-                                                        </ikw:SimpleStackPanel.Resources>
-                                                        <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
-                                                                             Orientation="Horizontal">
-                                                            <controls:ToolMenuButton x:Name="BoardTimerToolBtn" ButtonMouseUp="ImageCountdownTimer_MouseUp" Label="{i18n:I18n Key=Tools_Timer}" />
-                                                            <controls:ToolMenuButton x:Name="BoardRandomDrawToolBtn" Visibility="Collapsed" ButtonMouseUp="SymbolIconRand_MouseUp" Label="{i18n:I18n Key=Tools_RandomDraw}" />
-                                                            <controls:ToolMenuButton x:Name="BoardSingleDrawToolBtn" Visibility="Collapsed" ButtonMouseUp="SymbolIconRandOne_MouseUp" Label="{i18n:I18n Key=Tools_SingleDraw}" />
-                                                        </ikw:SimpleStackPanel>
-                                                        <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
-                                                                             Orientation="Horizontal">
-                                                            <controls:ToolMenuButton x:Name="BoardSaveToolBtn" ButtonMouseDown="Border_MouseDown" ButtonMouseUp="SymbolIconSaveStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Save}" />
-                                                            <controls:ToolMenuButton x:Name="BoardOpenToolBtn" ButtonMouseDown="Border_MouseDown" ButtonMouseUp="SymbolIconOpenStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Open}" />
-                                                            <controls:ToolMenuButton x:Name="BoardReplayToolBtn" ButtonMouseUp="GridInkReplayButton_MouseUp" Label="{i18n:I18n Key=Tools_Replay}" />
-                                                        </ikw:SimpleStackPanel>
-                                                        <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
-                                                                             Orientation="Horizontal">
-                                                            <controls:ToolMenuButton x:Name="BoardScreenshotToolBtn" ButtonMouseUp="SymbolIconScreenshot_MouseUp" Label="{i18n:I18n Key=Tools_Screenshot}" />
-                                                            <controls:ToolMenuButton x:Name="BoardManualToolBtn" ButtonMouseUp="OperatingGuideWindowIcon_MouseUp" Label="{i18n:I18n Key=Tools_Manual}" />
-                                                            <controls:ToolMenuButton x:Name="BoardSettingsToolBtn" ButtonMouseUp="SymbolIconSettings_Click" Label="{i18n:I18n Key=Tools_Settings}" />
-                                                        </ikw:SimpleStackPanel>
-                                                    </ikw:SimpleStackPanel>
-                                                        </ikw:SimpleStackPanel>
+                                    <!--工具菜单-->
+                                    <Border>
+                                        <Grid Width="0" Margin="0,0,0,5" RenderTransformOrigin="0,1">
+                                            <Grid.RenderTransform>
+                                                <TransformGroup>
+                                                    <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
+                                                    <SkewTransform />
+                                                    <RotateTransform />
+                                                    <TranslateTransform />
+                                                </TransformGroup>
+                                            </Grid.RenderTransform>
+                                            <Border ClipToBounds="True" x:Name="BoardBorderTools"
+                                                    Visibility="Collapsed"
+                                                    Margin="-80,-160,-39,50"
+                                                    CornerRadius="5" Background="{DynamicResource SettingsPageBackground}" Opacity="1"
+                                                    BorderThickness="1"
+                                                    BorderBrush="#2563eb">
+                                                <ikw:SimpleStackPanel Margin="-1,0,0,0">
+                                                    <Border BorderBrush="#1e3a8a" BorderThickness="0,0,0,1"
+                                                            CornerRadius="6,6,0,0"
+                                                            Background="#2563eb" Margin="-1,-1,-1,1">
+                                                        <Grid Height="24">
+                                                            <TextBlock Text="{i18n:I18n Key=Tools_MoreFeaturesTitle}" Margin="8,0,0,0" Foreground="White"
+                                                                        VerticalAlignment="Center" HorizontalAlignment="Left"
+                                                                        FontSize="11" FontWeight="Bold" />
+                                                            <Image Margin="0,0,8,0"
+                                                                    Source="/Resources/new-icons/close-white.png"
+                                                                    RenderOptions.BitmapScalingMode="HighQuality"
+                                                                    Height="16" Width="16"
+                                                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                                    MouseDown="Border_MouseDown"
+                                                                    MouseUp="CloseBordertools_MouseUp" />
+                                                        </Grid>
                                                     </Border>
-                                                </Grid>
+                                        <ikw:SimpleStackPanel Margin="10,3,10,2" Spacing="2">
+                                                <ikw:SimpleStackPanel.Resources>
+                                                    <Style TargetType="Label" BasedOn="{StaticResource AutoFitToolPopupLabel8}" />
+                                                </ikw:SimpleStackPanel.Resources>
+                                                <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
+                                                                        Orientation="Horizontal">
+                                                    <controls:ToolMenuButton x:Name="BoardTimerToolBtn" ButtonMouseUp="ImageCountdownTimer_MouseUp" Label="{i18n:I18n Key=Tools_Timer}" />
+                                                    <controls:ToolMenuButton x:Name="BoardRandomDrawToolBtn" Visibility="Collapsed" ButtonMouseUp="SymbolIconRand_MouseUp" Label="{i18n:I18n Key=Tools_RandomDraw}" />
+                                                    <controls:ToolMenuButton x:Name="BoardSingleDrawToolBtn" Visibility="Collapsed" ButtonMouseUp="SymbolIconRandOne_MouseUp" Label="{i18n:I18n Key=Tools_SingleDraw}" />
+                                                </ikw:SimpleStackPanel>
+                                                <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
+                                                                        Orientation="Horizontal">
+                                                    <controls:ToolMenuButton x:Name="BoardSaveToolBtn" ButtonMouseDown="Border_MouseDown" ButtonMouseUp="SymbolIconSaveStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Save}" />
+                                                    <controls:ToolMenuButton x:Name="BoardOpenToolBtn" ButtonMouseDown="Border_MouseDown" ButtonMouseUp="SymbolIconOpenStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Open}" />
+                                                    <controls:ToolMenuButton x:Name="BoardReplayToolBtn" ButtonMouseUp="GridInkReplayButton_MouseUp" Label="{i18n:I18n Key=Tools_Replay}" />
+                                                </ikw:SimpleStackPanel>
+                                                <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
+                                                                        Orientation="Horizontal">
+                                                    <controls:ToolMenuButton x:Name="BoardScreenshotToolBtn" ButtonMouseUp="SymbolIconScreenshot_MouseUp" Label="{i18n:I18n Key=Tools_Screenshot}" />
+                                                    <controls:ToolMenuButton x:Name="BoardManualToolBtn" ButtonMouseUp="OperatingGuideWindowIcon_MouseUp" Label="{i18n:I18n Key=Tools_Manual}" />
+                                                    <controls:ToolMenuButton x:Name="BoardSettingsToolBtn" ButtonMouseUp="SymbolIconSettings_Click" Label="{i18n:I18n Key=Tools_Settings}" />
+                                                </ikw:SimpleStackPanel>
+                                            </ikw:SimpleStackPanel>
+                                                </ikw:SimpleStackPanel>
                                             </Border>
+                                        </Grid>
+                                    </Border>
                                     <controls:BoardToolbarButton x:Name="BoardExit"
                                                                  Position="Last"
                                                                  Label="{i18n:I18n Key=Board_Exit}"
@@ -2935,7 +2924,7 @@
                                                            MouseUp="CloseBordertools_MouseUp" />
                                                 </Canvas>
                                             </Border>
-                                            <ikw:SimpleStackPanel Orientation="Horizontal" Margin="0,8,0,0" Spacing="-2"
+                                            <ikw:SimpleStackPanel Orientation="Horizontal" Margin="0,8,0,0" Spacing="2"
                                                                  VerticalAlignment="Center"
                                                                  HorizontalAlignment="Center">
                                                 <Label Margin="0,0,0,0" Content="{i18n:I18n Key=Board_Size}" FontWeight="Bold"
@@ -3074,7 +3063,7 @@
                                                     </ikw:SimpleStackPanel>
                                                 </Border>
                                                 <!---->
-                                                <ikw:SimpleStackPanel Margin="10,3,10,2" Spacing="-2">
+                                                <ikw:SimpleStackPanel Margin="10,3,10,2" Spacing="2">
                                                     <ikw:SimpleStackPanel.Resources>
                                                         <Style TargetType="Label" BasedOn="{StaticResource AutoFitToolPopupLabel8}" />
                                                     </ikw:SimpleStackPanel.Resources>
