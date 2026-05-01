@@ -112,6 +112,11 @@ namespace Ink_Canvas.Helpers
                                 MainWindow.MoveWindow(new WindowInteropHelper(_mainWindow).Handle, 0, 0,
                                     System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width,
                                     System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height, true);
+
+                                // MoveWindow 触发的 WM_WINDOWPOSCHANGING + 重绘会打断面板的 ShowWithFadeIn 动画，
+                                // 在窗口尺寸最终确定后重新评估一次翻页面板的可见性。
+                                UpdateNavigationPanelsVisibility();
+                                UpdateNavigationButtonStyles();
                             }), DispatcherPriority.ApplicationIdle);
 
                             _mainWindow.isFullScreenApplied = true; // 标记已应用全屏处理
