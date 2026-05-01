@@ -79,7 +79,7 @@ namespace Ink_Canvas.Windows
 
         private void StartHotkeyCapture()
         {
-            BtnSetHotkey.Content = "请按键...";
+            CurrentHotkeyTextBlock.Text = "请按键...";
             Focus();
             KeyDown += HotkeyItem_KeyDown;
             KeyUp += HotkeyItem_KeyUp;
@@ -87,7 +87,7 @@ namespace Ink_Canvas.Windows
 
         private void StopHotkeyCapture()
         {
-            BtnSetHotkey.Content = "设置";
+            UpdateHotkeyDisplay();
             KeyDown -= HotkeyItem_KeyDown;
             KeyUp -= HotkeyItem_KeyUp;
         }

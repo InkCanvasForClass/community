@@ -15,25 +15,12 @@
         <ui:SettingsCard.HeaderIcon>
             <ui:FontIcon x:Name="HeaderFontIcon" Icon="{x:Static ui:SegoeFluentIcons.KeyboardStandard}" />
         </ui:SettingsCard.HeaderIcon>
-        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-            <Border Background="{DynamicResource SubtleFillColorSecondaryBrush}"
-                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                    BorderThickness="1"
-                    CornerRadius="4"
-                    Padding="10,4"
-                    VerticalAlignment="Center">
-                <TextBlock x:Name="CurrentHotkeyTextBlock"
-                           Text="未设置"
-                           FontFamily="Consolas"
-                           FontWeight="SemiBold"
-                           MinWidth="88"
-                           TextAlignment="Center"
-                           VerticalAlignment="Center" />
-            </Border>
-            <Button x:Name="BtnSetHotkey"
-                    Content="设置"
-                    MinWidth="64"
-                    Click="BtnSetHotkey_Click" />
-        </ikw:SimpleStackPanel>
+        <Button x:Name="BtnSetHotkey"
+                MinWidth="120"
+                FontFamily="Consolas"
+                FontWeight="SemiBold"
+                Click="BtnSetHotkey_Click">
+            <TextBlock x:Name="CurrentHotkeyTextBlock" Text="未设置" />
+        </Button>
     </ui:SettingsCard>
 </UserControl>
