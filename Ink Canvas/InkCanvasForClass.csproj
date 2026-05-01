@@ -102,20 +102,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="IACore">
-      <HintPath>.\IACore.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="IALoader">
-      <HintPath>.\IALoader.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="IAWinFX">
-      <HintPath>.\IAWinFX.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
@@ -153,6 +139,10 @@
   <ItemGroup>
     <ProjectReference Include="..\InkCanvas.PluginSdk\InkCanvas.PluginSdk.csproj" />
     <ProjectReference Include="..\InkCanvas.Controls\InkCanvas.Controls.csproj" />
+    <ProjectReference Include="..\InkCanvasForClass.IACoreHelper\InkCanvasForClass.IACoreHelper.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup Condition="'$(MSBuildRuntimeType)' == 'Full'">
     <COMReference Include="IWshRuntimeLibrary">
@@ -667,5 +657,12 @@
 
   <Target Name="CleanTelemetryDsn" AfterTargets="Build;Clean" Condition="Exists('$(MSBuildProjectDirectory)\telemetry_dsn.generated.txt')">
     <Delete Files="$(MSBuildProjectDirectory)\telemetry_dsn.generated.txt" />
+  </Target>
+
+  <Target Name="CopyIACoreHelper" AfterTargets="Build">
+    <ItemGroup>
+      <IACoreHelperFiles Include="$(MSBuildProjectDirectory)\..\InkCanvasForClass.IACoreHelper\bin\$(Configuration)\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(IACoreHelperFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" Condition="'@(IACoreHelperFiles)' != ''" />
   </Target>
 </Project>

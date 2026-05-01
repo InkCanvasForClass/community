@@ -96,8 +96,10 @@ namespace Ink_Canvas.Helpers
                     return RecognizeShapeWinRtOnDispatcherContext(strokes);
                 }
 
-                var legacy = InkRecognizeHelper.RecognizeShapeIACore(strokes);
-                return Task.FromResult(InkRecognizeHelper.FromIACoreOrEmpty(legacy));
+                // IACore 必须走 IPC 辅助进程（x86/.NET 4.7.2）。
+                // 在 .NET 6 x64 主进程中本地加载 IAWinFX 会失败，故不再本地回退。
+                var ipcResult = IpcIACoreClient.Instance.Recognize(strokes);
+                return Task.FromResult(ipcResult);
             }
             catch (Exception ex)
             {
@@ -214,9 +216,11 @@ namespace Ink_Canvas.Helpers
 
         public string GetSystemInfo()
         {
-            return _isModernSystemAvailable
-                ? $"现代化墨迹识别系统 (Windows Runtime API) - 进程架构: {Environment.Is64BitProcess}"
-                : $"传统墨迹识别系统 (IACore) - 进程架构: {Environment.Is64BitProcess}";
+            if (_isModernSystemAvailable)
+                return $"现代化墨迹识别系统 (Windows Runtime API) - 进程架构: {Environment.Is64BitProcess}";
+            if (IpcIACoreClient.Instance.IsAvailable)
+                return $"传统墨迹识别系统 (IACore via IPC) - 进程架构: {Environment.Is64BitProcess}";
+            return $"传统墨迹识别系统 (IACore 本地) - 进程架构: {Environment.Is64BitProcess}";
         }
 
         public void Dispose()
