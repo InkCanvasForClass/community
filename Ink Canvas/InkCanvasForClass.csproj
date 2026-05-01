@@ -139,7 +139,7 @@
   <ItemGroup>
     <ProjectReference Include="..\InkCanvas.PluginSdk\InkCanvas.PluginSdk.csproj" />
     <ProjectReference Include="..\InkCanvas.Controls\InkCanvas.Controls.csproj" />
-    <ProjectReference Include="..\InkCanvasForClass.IACoreHelper\InkCanvasForClass.IACoreHelper.csproj">
+    <ProjectReference Include="..\InkCanvas.IACoreHelper\InkCanvas.IACoreHelper.csproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <Private>false</Private>
     </ProjectReference>
@@ -661,7 +661,7 @@
 
   <Target Name="CopyIACoreHelper" AfterTargets="Build">
     <ItemGroup>
-      <IACoreHelperFiles Include="$(MSBuildProjectDirectory)\..\InkCanvasForClass.IACoreHelper\bin\$(Configuration)\*.*" />
+      <IACoreHelperFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.IACoreHelper\bin\$(Configuration)\*.*" />
     </ItemGroup>
     <Copy SourceFiles="@(IACoreHelperFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" Condition="'@(IACoreHelperFiles)' != ''" />
   </Target>

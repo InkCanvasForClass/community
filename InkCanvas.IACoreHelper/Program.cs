@@ -5,7 +5,7 @@ using System.Linq;
 using System.Windows.Ink;
 using System.Windows.Input;
 
-namespace InkCanvasForClass.IACoreHelper
+namespace InkCanvas.IACoreHelper
 {
     internal static class Program
     {

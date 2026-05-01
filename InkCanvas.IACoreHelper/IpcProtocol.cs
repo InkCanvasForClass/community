@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace InkCanvasForClass.IACoreHelper
+namespace InkCanvas.IACoreHelper
 {
     // Named Pipe 名称，主进程和辅助进程共用
     internal static class IpcConstants

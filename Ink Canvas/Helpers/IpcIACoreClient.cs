@@ -32,7 +32,7 @@ namespace Ink_Canvas.Helpers
         private bool _available;
 
         private static string HelperExePath =>
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "InkCanvasForClass.IACoreHelper.exe");
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "InkCanvas.IACoreHelper.exe");
 
         private string PipeName =>
             string.Format("ICC_IACoreHelper_{0}", Process.GetCurrentProcess().Id);
