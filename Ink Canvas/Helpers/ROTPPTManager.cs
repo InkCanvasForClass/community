@@ -1254,6 +1254,42 @@ namespace Ink_Canvas.Helpers
                 _pptSlideShowWindow = wn;
                 _lastPolledSlideNumber = -1; // 重置页码跟踪
 
+                // 兜底：ROT 路径下事件触发时 _pptActivePresentation 可能尚未绑定，
+                // 先从 SlideShowWindow.Presentation 取，再退回 PPTApplication.ActivePresentation，
+                // 保证后续 SlidesCount 在 UI 读取前一定有效。
+                if (_pptActivePresentation == null)
+                {
+                    try
+                    {
+                        if (wn != null)
+                        {
+                            dynamic ssw = wn;
+                            dynamic presFromWindow = ssw.Presentation;
+                            if (presFromWindow != null)
+                            {
+                                _pptActivePresentation = presFromWindow;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"OnSlideShowBegin 从 SlideShowWindow 兜底获取演示文稿失败: {ex.Message}", LogHelper.LogType.Warning);
+                    }
+
+                    if (_pptActivePresentation == null && PPTApplication != null)
+                    {
+                        try
+                        {
+                            dynamic app = PPTApplication;
+                            _pptActivePresentation = app.ActivePresentation;
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"OnSlideShowBegin 从 PPTApplication 兜底获取演示文稿失败: {ex.Message}", LogHelper.LogType.Warning);
+                        }
+                    }
+                }
+
                 try
                 {
                     if (_pptActivePresentation != null)
