@@ -1280,15 +1280,20 @@ namespace Ink_Canvas.Helpers
                     int versionDiff = CalculateVersionGenerationDifference(localVersion, updateVersion);
                     LogHelper.WriteLogToFile($"DeviceIdentifier | 无法获取版本发布时间，使用版本号差异判断 - 本地版本: {localVersion}, 远程版本: {updateVersion}, 代数差异: {versionDiff}");
 
-                    if (versionDiff >= 1)
+                    if (versionDiff <= 0)
                     {
-                        LogHelper.WriteLogToFile($"DeviceIdentifier | 版本号代数差异({versionDiff})>=1，允许更新");
-                    }
-                    else
-                    {
-                        LogHelper.WriteLogToFile($"DeviceIdentifier | 版本号代数差异({versionDiff})<1，可能是相同版本或降级，暂不更新");
+                        LogHelper.WriteLogToFile($"DeviceIdentifier | 版本号代数差异({versionDiff})<=0，可能是相同版本或降级，暂不更新");
                         return false;
                     }
+
+                    // 当代数差异较大（>=3）时直接放行，避免被分级策略卡住
+                    if (versionDiff >= 3)
+                    {
+                        LogHelper.WriteLogToFile($"DeviceIdentifier | 版本号代数差异({versionDiff})>=3，跳过分级策略直接推送");
+                        return true;
+                    }
+
+                    LogHelper.WriteLogToFile($"DeviceIdentifier | 版本号代数差异({versionDiff})>=1，进入分级策略判断");
                 }
 
                 // 计算最近活跃度（最后一次使用距今的天数）
