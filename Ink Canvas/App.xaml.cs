@@ -1204,6 +1204,17 @@ namespace Ink_Canvas
 
                 try
                 {
+                    LogHelper.WriteLogToFile("启动 IACore IPC 辅助进程");
+                    bool ipcStarted = IpcIACoreClient.Instance.Start();
+                    LogHelper.WriteLogToFile($"IACore IPC 辅助进程{(ipcStarted ? "启动成功" : "启动失败（将使用本地 IACore 回退）")}");
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"启动 IACore IPC 辅助进程时出错: {ex.Message}", LogHelper.LogType.Error);
+                }
+
+                try
+                {
                     LogHelper.WriteLogToFile("开始注册.icstk文件关联");
                     FileAssociationManager.RegisterFileAssociation();
                     FileAssociationManager.ShowFileAssociationStatus();
@@ -1577,6 +1588,13 @@ namespace Ink_Canvas
         private void App_Exit(object sender, ExitEventArgs e)
         {
             CleanupTerminationMonitoring();
+
+            try
+            {
+                IpcIACoreClient.Instance.Dispose();
+            }
+            catch { }
+
             // 卸载所有插件
             try
             {
