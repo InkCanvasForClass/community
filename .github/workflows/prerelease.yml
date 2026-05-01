@@ -305,6 +305,7 @@ jobs:
           $issContent = $issContent -replace '#define MyAppVersion ".*"', "#define MyAppVersion `"$version`""
           
           # 替换源文件路径为相对路径（考虑到ISS文件在build目录下，需要返回上级目录）
+          $issContent = $issContent -replace 'Source: "release\\\*";', 'Source: "../release/*";'
           $issContent = $issContent -replace 'Source: ".*\\{#MyAppExeName}";', 'Source: "../release/{#MyAppExeName}";'
           $issContent = $issContent -replace 'Source: ".*\\InkCanvasForClass.exe.config";', 'Source: "../release/InkCanvasForClass.exe.config";'
           
