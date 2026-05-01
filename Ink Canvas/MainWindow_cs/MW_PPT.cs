@@ -332,10 +332,9 @@ namespace Ink_Canvas
         #region PowerPoint Application Management
         /// <summary>
         /// 启动PowerPoint应用程序守护
-        /// <summary>
-        /// 启动对本地 PowerPoint 应用实例的守护监控并在需要时创建应用程序实例。
         /// </summary>
         /// <remarks>
+        /// 启动对本地 PowerPoint 应用实例的守护监控并在需要时创建应用程序实例。
         /// 仅在 PowerPoint 增强功能已启用且未使用 ROT 链接时生效；方法将创建 PowerPoint 应用（若不存在）并启动用于定期检查应用状态的定时器。
         /// </remarks>
         public void StartPowerPointProcessMonitoring()
