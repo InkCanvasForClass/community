@@ -3,69 +3,127 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
              mc:Ignorable="d"
-             d:DesignHeight="400" d:DesignWidth="300">
+             d:DesignHeight="420" d:DesignWidth="260">
     <UserControl.Resources>
         <ResourceDictionary>
-            <!-- 展开动画 -->
+            <!-- 展开 / 折叠动画 -->
             <Storyboard x:Key="ExpandAnimation">
                 <DoubleAnimation Storyboard.TargetName="PanelTransform"
-                               Storyboard.TargetProperty="X"
-                               Duration="0:0:0.3">
+                                 Storyboard.TargetProperty="X"
+                                 Duration="0:0:0.28">
                     <DoubleAnimation.EasingFunction>
                         <CubicEase EasingMode="EaseOut"/>
                     </DoubleAnimation.EasingFunction>
                 </DoubleAnimation>
             </Storyboard>
-            
-            <!-- 折叠动画 -->
             <Storyboard x:Key="CollapseAnimation">
                 <DoubleAnimation Storyboard.TargetName="PanelTransform"
-                               Storyboard.TargetProperty="X"
-                               Duration="0:0:0.3">
+                                 Storyboard.TargetProperty="X"
+                                 Duration="0:0:0.28">
                     <DoubleAnimation.EasingFunction>
-                        <CubicEase EasingMode="EaseOut"/>
+                        <CubicEase EasingMode="EaseIn"/>
                     </DoubleAnimation.EasingFunction>
                 </DoubleAnimation>
             </Storyboard>
+
+            <!-- Game Bar 风格扁平按钮 -->
+            <Style x:Key="GameBarFlatButton" TargetType="Button">
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="10,0"/>
+                <Setter Property="Height" Value="34"/>
+                <Setter Property="Background" Value="#28FFFFFF"/>
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bd"
+                                    Background="{TemplateBinding Background}"
+                                    CornerRadius="6"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="#40FFFFFF"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="#55FFFFFF"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- 区段标题 -->
+            <Style x:Key="GameBarSectionTitle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="10"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Opacity" Value="0.7"/>
+                <Setter Property="Margin" Value="2,0,0,4"/>
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
-    
+
     <Grid>
         <Canvas x:Name="MainCanvas" HorizontalAlignment="Right" VerticalAlignment="Top">
-            <!-- 主面板容器 -->
             <Grid x:Name="MainPanel" Canvas.Right="0" Canvas.Top="50">
                 <Grid.RenderTransform>
                     <TranslateTransform x:Name="PanelTransform" X="0"/>
                 </Grid.RenderTransform>
-                
+
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="24"/>
+                    <ColumnDefinition Width="20"/>
+                    <!-- 内容区域：宽度必须为 200 (与 _collapsedOffset 对应) -->
                     <ColumnDefinition Width="200"/>
                 </Grid.ColumnDefinitions>
-                
-                <!-- 左侧圆角矩形 - 箭头按钮区域 -->
-                <Border x:Name="ArrowButtonBorder" 
+
+                <!-- 内容区域外壳：圆角 + 背景 + 阴影 (只覆盖内容列，折叠后完全滑出视区) -->
+                <Border Grid.Column="1"
+                        CornerRadius="12">
+                    <Border.Background>
+                        <SolidColorBrush x:Name="ContentBackgroundBrush" Color="#CC1F1F1F"/>
+                    </Border.Background>
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="18" ShadowDepth="0" Opacity="0.35" Color="Black"/>
+                    </Border.Effect>
+                </Border>
+
+                <!-- 左侧箭头交互区（独立小胶囊，折叠后仍可见） -->
+                <Border x:Name="ArrowButtonBorder"
                         Grid.Column="0"
-                        CornerRadius="6,0,0,6"
+                        Width="14"
+                        Height="44"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        CornerRadius="7"
                         Cursor="Hand"
                         MouseLeftButtonDown="ArrowButton_MouseLeftButtonDown"
                         MouseEnter="ArrowButton_MouseEnter"
                         MouseLeave="ArrowButton_MouseLeave">
                     <Border.Background>
-                        <SolidColorBrush x:Name="ArrowButtonBackgroundBrush" Color="#CCFFFFFF"/>
+                        <SolidColorBrush x:Name="ArrowButtonBackgroundBrush" Color="#CC1F1F1F"/>
                     </Border.Background>
                     <Border.Effect>
-                        <DropShadowEffect BlurRadius="6" ShadowDepth="0" Opacity="0.2" Color="Black"/>
+                        <DropShadowEffect BlurRadius="8" ShadowDepth="0" Opacity="0.3" Color="Black"/>
                     </Border.Effect>
-                    
-                    <Viewbox Width="12" Height="12" VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <Path x:Name="ArrowPath" 
-                              Data="M 0,0 L 12,6 L 0,12 Z" 
+
+                    <Viewbox Width="7" Height="7"
+                             VerticalAlignment="Center"
+                             HorizontalAlignment="Center">
+                        <Path x:Name="ArrowPath"
+                              Data="M 0,0 L 12,6 L 0,12 Z"
                               Stretch="Uniform"
                               RenderTransformOrigin="0.5,0.5">
                             <Path.Fill>
-                                <SolidColorBrush x:Name="ArrowPathFillBrush" Color="#FF000000"/>
+                                <SolidColorBrush x:Name="ArrowPathFillBrush" Color="White"/>
                             </Path.Fill>
                             <Path.RenderTransform>
                                 <RotateTransform x:Name="ArrowRotateTransform" Angle="180"/>
@@ -73,72 +131,93 @@
                         </Path>
                     </Viewbox>
                 </Border>
-                
-                <!-- 右侧矩形 - 面板内容区域 -->
-                        <Border x:Name="ContentBorder"
+
+                <!-- 内容区域（透明，仅承担事件与裁剪） -->
+                <Border x:Name="ContentBorder"
                         Grid.Column="1"
-                        CornerRadius="0"
+                        Background="Transparent"
+                        CornerRadius="0,12,12,0"
                         MouseLeftButtonDown="ContentBorder_MouseLeftButtonDown"
                         MouseMove="ContentBorder_MouseMove"
                         MouseLeftButtonUp="ContentBorder_MouseLeftButtonUp"
                         TouchDown="ContentBorder_TouchDown"
                         TouchMove="ContentBorder_TouchMove"
                         TouchUp="ContentBorder_TouchUp">
-                    <Border.Background>
-                        <SolidColorBrush x:Name="ContentBackgroundBrush" Color="#CCFFFFFF"/>
-                    </Border.Background>
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="8" ShadowDepth="0" Opacity="0.2" Color="Black"/>
-                    </Border.Effect>
-                    
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                        <StackPanel x:Name="ContentPanel" Margin="10,8" Orientation="Vertical">
-                            
-                            <!-- 系统音量控制区域 -->
-                            <Grid Margin="0,0,0,8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                
-                                <!-- 左侧音量按钮 -->
-                                <Button x:Name="VolumeMuteButton"
-                                        Grid.Column="0"
-                                        Width="32" Height="32"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        Cursor="Hand"
-                                        Click="VolumeMuteButton_Click"
-                                        Margin="0,0,8,0"
-                                        Padding="0"
-                                        VerticalAlignment="Center"
-                                        HorizontalAlignment="Center">
-                                            <Viewbox Width="20" Height="20" Stretch="Uniform">
-                                                <Grid>
-                                                    <Path x:Name="VolumeIconPath" 
-                                                          Data="M 3,9 v 6 h 4 l 5,5 v -16 l -5,5 h -4 z" 
-                                                          Stretch="Uniform">
-                                                        <Path.Fill>
-                                                            <SolidColorBrush x:Name="VolumeIconFillBrush" Color="#FF000000"/>
-                                                        </Path.Fill>
-                                                    </Path>
-                                                    <Path x:Name="VolumeIconPath2" 
-                                                          Data="" 
-                                                          Stretch="Uniform"
-                                                          Opacity="0.5"
-                                                          Visibility="Collapsed">
-                                                        <Path.Fill>
-                                                            <SolidColorBrush x:Name="VolumeIconFillBrush2" Color="#FF000000"/>
-                                                        </Path.Fill>
-                                                    </Path>
-                                                </Grid>
-                                            </Viewbox>
-                                </Button>
-                                
-                                <!-- 中间音量滑块 -->
-                                <Grid Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0">
+
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  Padding="0">
+                        <StackPanel x:Name="ContentPanel" Margin="12,12,12,12" Orientation="Vertical">
+
+                            <!-- 区段：声音 -->
+                            <TextBlock Text="声音" Style="{StaticResource GameBarSectionTitle}">
+                                <TextBlock.Foreground>
+                                    <SolidColorBrush x:Name="MagnifierTitleForegroundBrush" Color="White"/>
+                                </TextBlock.Foreground>
+                            </TextBlock>
+
+                            <Border CornerRadius="8" Background="#1AFFFFFF" Padding="6" Margin="0,0,0,12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- 静音按钮 -->
+                                    <Button x:Name="VolumeMuteButton"
+                                            Grid.Column="0"
+                                            Width="28" Height="28"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Cursor="Hand"
+                                            Padding="0"
+                                            Click="VolumeMuteButton_Click"
+                                            VerticalAlignment="Center"
+                                            HorizontalAlignment="Center">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="Bd"
+                                                        Background="{TemplateBinding Background}"
+                                                        CornerRadius="6">
+                                                    <ContentPresenter HorizontalAlignment="Center"
+                                                                      VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="Bd" Property="Background" Value="#33FFFFFF"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                        <Viewbox Width="16" Height="16" Stretch="Uniform">
+                                            <Grid>
+                                                <Path x:Name="VolumeIconPath"
+                                                      Data="M 3,9 v 6 h 4 l 5,5 v -16 l -5,5 h -4 z"
+                                                      Stretch="Uniform">
+                                                    <Path.Fill>
+                                                        <SolidColorBrush x:Name="VolumeIconFillBrush" Color="White"/>
+                                                    </Path.Fill>
+                                                </Path>
+                                                <Path x:Name="VolumeIconPath2"
+                                                      Data=""
+                                                      Stretch="Uniform"
+                                                      Opacity="0.5"
+                                                      Visibility="Collapsed">
+                                                    <Path.Fill>
+                                                        <SolidColorBrush x:Name="VolumeIconFillBrush2" Color="White"/>
+                                                    </Path.Fill>
+                                                </Path>
+                                            </Grid>
+                                        </Viewbox>
+                                    </Button>
+
+                                    <!-- 音量滑块 -->
                                     <Slider x:Name="VolumeSlider"
+                                            Grid.Column="1"
+                                            Margin="8,0,8,0"
+                                            VerticalAlignment="Center"
+                                            Stylus.IsPressAndHoldEnabled="False"
                                             Minimum="0"
                                             Maximum="100"
                                             Value="50"
@@ -147,92 +226,58 @@
                                             ValueChanged="VolumeSlider_ValueChanged"
                                             PreviewMouseLeftButtonUp="VolumeSlider_PreviewMouseLeftButtonUp"
                                             ManipulationCompleted="VolumeSlider_ManipulationCompleted"/>
-                                </Grid>
-                                
-                                <!-- 右侧音量值 -->
-                                <TextBlock x:Name="VolumeValueText"
-                                           Grid.Column="2"
-                                           Text="50%"
-                                           FontSize="10"
-                                           VerticalAlignment="Center"
-                                           MinWidth="32"
-                                           TextAlignment="Center">
-                                    <TextBlock.Foreground>
-                                        <SolidColorBrush x:Name="VolumeValueForegroundBrush" Color="#80000000"/>
-                                    </TextBlock.Foreground>
-                                </TextBlock>
-                            </Grid>
-                            
-                            <!-- 分隔线 -->
-                            <Separator x:Name="Separator1" Margin="0,0,0,8" Height="1">
-                                <Separator.Background>
-                                    <SolidColorBrush x:Name="Separator1BackgroundBrush" Color="#E0E0E0"/>
-                                </Separator.Background>
-                            </Separator>
-                            
-                            <!-- 图片插入按钮区域 -->
-                            <StackPanel Orientation="Vertical" Margin="0,0,0,8">
-                                <!-- 选择文件按钮 -->
-                                <Button x:Name="InsertImageSelectFileButton"
-                                        Content="选择文件"
-                                        FontSize="11"
-                                        Height="30"
-                                        Background="#3b82f6"
-                                        Foreground="White"
-                                        BorderThickness="0"
-                                        Cursor="Hand"
-                                        Click="InsertImageSelectFileButton_Click"
-                                        Margin="0,0,0,4">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}" 
-                                                    CornerRadius="4"
-                                                    Padding="{TemplateBinding Padding}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                </Button>
-                                
-                                <!-- 截图插入按钮 -->
-                                <Button x:Name="InsertImageScreenshotButton"
-                                        Content="截图插入"
-                                        FontSize="11"
-                                        Height="30"
-                                        Background="#3b82f6"
-                                        Foreground="White"
-                                        BorderThickness="0"
-                                        Cursor="Hand"
-                                        Click="InsertImageScreenshotButton_Click"
-                                        Margin="0,0,0,0">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}" 
-                                                    CornerRadius="4"
-                                                    Padding="{TemplateBinding Padding}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                </Button>
-                            </StackPanel>
-                            
-                            <!-- 聚焦放大镜（暂未设计）- 暂时隐藏 -->
-                            <Border x:Name="MagnifierSection" Margin="0,0,0,8" Visibility="Collapsed">
-                                <StackPanel Orientation="Vertical">
-                                    <TextBlock x:Name="MagnifierTitleText" Text="聚焦放大镜" FontSize="11" FontWeight="Bold" Margin="0,0,0,6">
+
+                                    <!-- 数值 -->
+                                    <TextBlock x:Name="VolumeValueText"
+                                               Grid.Column="2"
+                                               Text="50%"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center"
+                                               MinWidth="32"
+                                               TextAlignment="Right">
                                         <TextBlock.Foreground>
-                                            <SolidColorBrush x:Name="MagnifierTitleForegroundBrush" Color="#FF000000"/>
+                                            <SolidColorBrush x:Name="VolumeValueForegroundBrush" Color="#E6FFFFFF"/>
                                         </TextBlock.Foreground>
                                     </TextBlock>
-                                    <TextBlock x:Name="MagnifierDescText" Text="功能暂未设计" FontSize="9" FontStyle="Italic">
+                                </Grid>
+                            </Border>
+
+                            <!-- 隐藏的占位分隔线（保留命名元素以满足 .cs 引用） -->
+                            <Separator x:Name="Separator1" Visibility="Collapsed" Height="0">
+                                <Separator.Background>
+                                    <SolidColorBrush x:Name="Separator1BackgroundBrush" Color="Transparent"/>
+                                </Separator.Background>
+                            </Separator>
+
+                            <!-- 区段：插入图片 -->
+                            <TextBlock Text="插入" Style="{StaticResource GameBarSectionTitle}"/>
+
+                            <StackPanel Orientation="Vertical" Margin="0,0,0,4">
+                                <Button x:Name="InsertImageSelectFileButton"
+                                        Content="选择文件"
+                                        Style="{StaticResource GameBarFlatButton}"
+                                        Margin="0,0,0,6"
+                                        Click="InsertImageSelectFileButton_Click"/>
+
+                                <Button x:Name="InsertImageScreenshotButton"
+                                        Content="截图插入"
+                                        Style="{StaticResource GameBarFlatButton}"
+                                        Click="InsertImageScreenshotButton_Click"/>
+                            </StackPanel>
+
+                            <!-- 隐藏占位（保留 .cs 引用的命名元素） -->
+                            <Border x:Name="MagnifierSection" Visibility="Collapsed">
+                                <StackPanel>
+                                    <TextBlock x:Name="MagnifierTitleText" Text="聚焦放大镜"/>
+                                    <TextBlock x:Name="MagnifierDescText" Text="功能暂未设计">
                                         <TextBlock.Foreground>
-                                            <SolidColorBrush x:Name="MagnifierDescForegroundBrush" Color="#80000000"/>
+                                            <SolidColorBrush x:Name="MagnifierDescForegroundBrush" Color="#80FFFFFF"/>
                                         </TextBlock.Foreground>
                                     </TextBlock>
                                 </StackPanel>
                             </Border>
-                            
+
                         </StackPanel>
                     </ScrollViewer>
                 </Border>
@@ -240,5 +285,3 @@
         </Canvas>
     </Grid>
 </UserControl>
-
-

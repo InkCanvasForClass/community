@@ -747,31 +747,34 @@ namespace Ink_Canvas.Windows
 
         private void ArrowButton_MouseEnter(object sender, MouseEventArgs e)
         {
-            // 根据当前主题设置悬停颜色
-            bool isDark = ArrowButtonBackgroundBrush.Color.R < 128;
-            if (isDark)
-            {
-                ArrowButtonBackgroundBrush.Color = Color.FromArgb(230, 32, 32, 32);
-            }
-            else
-            {
-                ArrowButtonBackgroundBrush.Color = Color.FromArgb(230, 255, 255, 255);
-            }
+            ArrowButtonBackgroundBrush.Color = Color.FromArgb(220, 55, 55, 55);
         }
 
         private void ArrowButton_MouseLeave(object sender, MouseEventArgs e)
         {
-            // 恢复主题颜色
-            ApplyTheme();
+            ArrowButtonBackgroundBrush.Color = Color.FromArgb(204, 31, 31, 31);
         }
 
         #endregion
 
         #region 拖动手势
 
+        private static bool IsWithinSlider(object source)
+        {
+            var d = source as DependencyObject;
+            while (d != null)
+            {
+                if (d is Slider) return true;
+                d = (d is System.Windows.Media.Visual || d is System.Windows.Media.Media3D.Visual3D)
+                    ? System.Windows.Media.VisualTreeHelper.GetParent(d)
+                    : LogicalTreeHelper.GetParent(d);
+            }
+            return false;
+        }
+
         private void ContentBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.OriginalSource is Slider) return; // 如果点击的是滑块，不处理拖动
+            if (IsWithinSlider(e.OriginalSource)) return;
 
             _isDragging = true;
             _dragStartPoint = e.GetPosition(MainCanvas);
@@ -816,7 +819,7 @@ namespace Ink_Canvas.Windows
 
         private void ContentBorder_TouchDown(object sender, TouchEventArgs e)
         {
-            if (e.OriginalSource is Slider) return;
+            if (IsWithinSlider(e.OriginalSource)) return;
 
             _isDragging = true;
             _dragStartPoint = e.GetTouchPoint(MainCanvas).Position;
@@ -1835,35 +1838,16 @@ namespace Ink_Canvas.Windows
         {
             try
             {
-                bool isDarkTheme = settings.Appearance.Theme == 1 ||
-                                   (settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
-
-                if (isDarkTheme)
-                {
-                    // 深色主题：使用80%不透明度的深色背景
-                    ArrowButtonBackgroundBrush.Color = Color.FromArgb(204, 32, 32, 32); // #CC202020
-                    ContentBackgroundBrush.Color = Color.FromArgb(204, 32, 32, 32); // #CC202020
-                    ArrowPathFillBrush.Color = Colors.White;
-                    VolumeIconFillBrush.Color = Colors.White;
-                    VolumeIconFillBrush2.Color = Colors.White;
-                    VolumeValueForegroundBrush.Color = Color.FromArgb(200, 255, 255, 255);
-                    MagnifierTitleForegroundBrush.Color = Colors.White;
-                    MagnifierDescForegroundBrush.Color = Color.FromArgb(200, 255, 255, 255);
-                    Separator1BackgroundBrush.Color = Color.FromArgb(128, 255, 255, 255);
-                }
-                else
-                {
-                    // 浅色主题：使用80%不透明度的白色背景
-                    ArrowButtonBackgroundBrush.Color = Color.FromArgb(204, 255, 255, 255); // #CCFFFFFF
-                    ContentBackgroundBrush.Color = Color.FromArgb(204, 255, 255, 255); // #CCFFFFFF
-                    ArrowPathFillBrush.Color = Colors.Black;
-                    VolumeIconFillBrush.Color = Colors.Black;
-                    VolumeIconFillBrush2.Color = Colors.Black;
-                    VolumeValueForegroundBrush.Color = Color.FromArgb(128, 0, 0, 0);
-                    MagnifierTitleForegroundBrush.Color = Colors.Black;
-                    MagnifierDescForegroundBrush.Color = Color.FromArgb(128, 0, 0, 0);
-                    Separator1BackgroundBrush.Color = Color.FromArgb(255, 224, 224, 224);
-                }
+                // Game Bar 风格：始终使用深色半透明外壳，不随系统主题翻转
+                ArrowButtonBackgroundBrush.Color = Color.FromArgb(204, 31, 31, 31);
+                ContentBackgroundBrush.Color = Color.FromArgb(204, 31, 31, 31); // #CC1F1F1F
+                ArrowPathFillBrush.Color = Colors.White;
+                VolumeIconFillBrush.Color = Colors.White;
+                VolumeIconFillBrush2.Color = Colors.White;
+                VolumeValueForegroundBrush.Color = Color.FromArgb(230, 255, 255, 255);
+                MagnifierTitleForegroundBrush.Color = Colors.White;
+                MagnifierDescForegroundBrush.Color = Color.FromArgb(200, 255, 255, 255);
+                Separator1BackgroundBrush.Color = Color.FromArgb(60, 255, 255, 255);
             }
             catch (Exception ex)
             {
