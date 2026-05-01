@@ -6,7 +6,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Threading;
 
 namespace Ink_Canvas.Windows
 {
@@ -15,16 +14,7 @@ namespace Ink_Canvas.Windows
     /// </summary>
     public partial class SplashScreen : Window
     {
-        private DispatcherTimer _timer;
-        private int _loadingStep = 0;
         private int _actualSplashStyle = 1;
-        private readonly string[] _loadingMessages = {
-            "正在启动 Ink Canvas...",
-            "正在初始化组件...",
-            "正在加载配置...",
-            "正在准备界面...",
-            "启动完成！"
-        };
 
         public SplashScreen()
         {
@@ -42,33 +32,6 @@ namespace Ink_Canvas.Windows
 
             // 加载启动图片并获取实际样式
             _actualSplashStyle = LoadSplashImageWithStyle();
-
-            // 启动加载动画
-            StartLoadingAnimation();
-        }
-
-        private void StartLoadingAnimation()
-        {
-            _timer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(1200)
-            };
-            _timer.Tick += Timer_Tick;
-            _timer.Start();
-        }
-
-        private void Timer_Tick(object sender, EventArgs e)
-        {
-            if (_loadingStep < _loadingMessages.Length)
-            {
-                LoadingText.Text = _loadingMessages[_loadingStep];
-                _loadingStep++;
-            }
-            else
-            {
-                _timer.Stop();
-                // 不要自动关闭启动画面，等待外部调用CloseSplashScreen
-            }
         }
 
         public void CloseSplashScreen()

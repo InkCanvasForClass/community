@@ -8,7 +8,7 @@
         xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="欢迎使用 InkCanvasForClass"
+        Title="欢迎使用 InkCanvasForClass CE"
         Height="700"
         Width="1080"
         MinHeight="520"
@@ -68,7 +68,7 @@
                     <Image Source="\Resources\icc.ico" Width="18"
                            RenderOptions.BitmapScalingMode="HighQuality" />
                     <TextBlock VerticalAlignment="Center"
-                               Text="欢迎使用 InkCanvasForClass"
+                               Text="欢迎使用 InkCanvasForClass CE"
                                TextWrapping="NoWrap" />
                 </ikw:SimpleStackPanel>
 
@@ -167,7 +167,7 @@
                                        RenderOptions.BitmapScalingMode="HighQuality" />
                             </Border>
 
-                            <TextBlock Text="欢迎使用 InkCanvasForClass"
+                            <TextBlock Text="欢迎使用 InkCanvasForClass CE"
                                        Style="{DynamicResource TitleLargeTextBlockStyle}"
                                        HorizontalAlignment="Center"
                                        TextAlignment="Center"
