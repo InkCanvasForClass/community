@@ -39,17 +39,32 @@
 
         <!-- 标题栏 -->
         <Border Grid.Row="0"
+                x:Name="AppTitleBar"
                 Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.Height)}"
-                Background="Transparent">
-            <ikw:SimpleStackPanel Orientation="Horizontal"
-                                  Spacing="12"
-                                  VerticalAlignment="Center"
-                                  Margin="16,0,0,0">
-                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Shield}" FontSize="14" />
-                <TextBlock VerticalAlignment="Center"
-                           Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=Title}"
-                           TextWrapping="NoWrap" />
-            </ikw:SimpleStackPanel>
+                Background="Transparent"
+                IsHitTestVisible="True"
+                Canvas.ZIndex="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="137" />
+                </Grid.ColumnDefinitions>
+                <ikw:SimpleStackPanel Grid.Column="0"
+                                      Orientation="Horizontal"
+                                      Spacing="12"
+                                      VerticalAlignment="Center"
+                                      Margin="16,0,0,0">
+                    <Image Source="\Resources\icc.ico" Width="20"
+                           RenderOptions.BitmapScalingMode="HighQuality" />
+                    <TextBlock VerticalAlignment="Center"
+                               Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=Title}"
+                               TextWrapping="NoWrap" />
+                </ikw:SimpleStackPanel>
+
+                <Rectangle Grid.Column="2"
+                           Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.SystemOverlayRightInset)}" />
+            </Grid>
         </Border>
 
         <!-- Banner Header -->

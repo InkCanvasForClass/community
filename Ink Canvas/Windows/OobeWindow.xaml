@@ -38,15 +38,6 @@
                    TargetType="TextBlock">
                 <Setter Property="Margin" Value="1,2,0,6" />
             </Style>
-
-            <Style x:Key="OobeStepChipStyle" TargetType="Border">
-                <Setter Property="Background" Value="Transparent" />
-                <Setter Property="CornerRadius" Value="9" />
-                <Setter Property="Padding" Value="10,3" />
-                <Setter Property="Margin" Value="0,0,4,0" />
-                <Setter Property="VerticalAlignment" Value="Center" />
-                <Setter Property="Opacity" Value="0.55" />
-            </Style>
         </ResourceDictionary>
     </Window.Resources>
 
@@ -62,7 +53,9 @@
         <Border x:Name="AppTitleBar"
                 Grid.Row="0"
                 Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.Height)}"
-                Background="Transparent">
+                Background="Transparent"
+                IsHitTestVisible="True"
+                Canvas.ZIndex="10">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -80,10 +73,13 @@
                                Text="欢迎使用 InkCanvasForClass"
                                TextWrapping="NoWrap" />
                 </ikw:SimpleStackPanel>
+
+                <Rectangle Grid.Column="2"
+                           Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.SystemOverlayRightInset)}" />
             </Grid>
         </Border>
 
-        <!-- 顶部 Banner: 标题 + 步骤芯片 -->
+        <!-- 顶部 Banner -->
         <Border Grid.Row="1"
                 x:Name="HeaderBanner"
                 Padding="56,16,56,18"
@@ -123,23 +119,23 @@
                            x:Name="StepIndicatorText"
                            Style="{DynamicResource CaptionTextBlockStyle}"
                            Opacity="0.75"
-                           Text="步骤 1 / 12" />
+                           Text="步骤 1 / 8" />
                 <TextBlock Grid.Column="1" Grid.Row="1"
                            x:Name="StepTitleText"
                            Style="{DynamicResource TitleTextBlockStyle}"
                            Margin="0,2,0,0"
-                           Text="启动时行为" />
+                           Text="启动与隐私" />
                 <TextBlock Grid.Column="1" Grid.Row="2"
                            x:Name="StepSubtitleText"
                            Style="{DynamicResource BodyTextBlockStyle}"
                            Margin="0,4,0,0"
                            Opacity="0.85"
                            TextWrapping="Wrap"
-                           Text="遥测、自动更新与启动行为,对应 设置 → 启动、隐私。" />
+                           Text="遥测、隐私协议、自动更新与崩溃处理。" />
             </Grid>
         </Border>
 
-        <!-- 步骤内容(带切换动画) -->
+        <!-- 步骤内容 -->
         <Grid Grid.Row="2" ClipToBounds="True">
             <ScrollViewer x:Name="StepScrollViewer"
                           PanningMode="VerticalFirst"
@@ -155,14 +151,14 @@
                             <TranslateTransform x:Name="StepHostTransform" X="0" Y="0" />
                         </ikw:SimpleStackPanel.RenderTransform>
 
-                        <!-- 步骤 1:启动 / 隐私 -->
+                        <!-- 步骤 1: 启动与隐私 -->
                         <ikw:SimpleStackPanel x:Name="StepTelemetryPanel"
                                               Spacing="{StaticResource SettingsCardSpacing}">
                             <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                                        Text="匿名使用数据与隐私" />
 
                             <ui:SettingsExpander Header="匿名使用数据与隐私"
-                                                 Description="完全匿名的使用统计,仅用于改进软件稳定性与性能。无论选择哪一项,课堂核心功能均可正常使用。"
+                                                 Description="完全匿名的使用统计,仅用于改进软件稳定性与性能。"
                                                  IsExpanded="True">
                                 <ui:SettingsExpander.HeaderIcon>
                                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Shield}" />
@@ -194,7 +190,7 @@
 
                             <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                                        Margin="1,18,0,6"
-                                       Text="启动行为" />
+                                       Text="启动与崩溃处理" />
 
                             <controls:LabeledSettingsCard x:Name="CardFoldAtStartup"
                                                           Header="启动时收纳到屏幕边缘"
@@ -207,9 +203,20 @@
                                                           Description="允许后台检查更新并下载新版本。"
                                                           Icon="{x:Static ui:SegoeFluentIcons.Sync}"
                                                           SwitchName="ToggleSwitchAutoUpdate" />
+
+                            <ui:SettingsCard Header="发生未处理异常时"
+                                             Description="可在 设置 → 启动 中修改。">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Warning}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <ComboBox x:Name="ComboBoxCrashAction" MinWidth="200">
+                                    <ComboBoxItem Content="静默重启软件(推荐)" />
+                                    <ComboBoxItem Content="无操作(仅记录日志)" />
+                                </ComboBox>
+                            </ui:SettingsCard>
                         </ikw:SimpleStackPanel>
 
-                        <!-- 步骤 2:画板和墨迹 -->
+                        <!-- 步骤 2: 画板与墨迹(含纠正) -->
                         <ikw:SimpleStackPanel x:Name="StepCanvasPanel"
                                               Spacing="{StaticResource SettingsCardSpacing}"
                                               Visibility="Collapsed">
@@ -233,9 +240,19 @@
                                                           Description="进入 PPT 非批注模式时不显示墨迹。"
                                                           Icon="{x:Static ui:SegoeFluentIcons.Hide}"
                                                           SwitchName="ToggleSwitchHideStrokeWhenSelecting" />
+
+                            <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                                       Margin="1,18,0,6"
+                                       Text="墨迹纠正" />
+
+                            <controls:LabeledSettingsCard x:Name="CardInkToShapeEnabled"
+                                                          Header="启用墨迹识别"
+                                                          Description="手绘图形自动转为标准形状。"
+                                                          Icon="{x:Static ui:SegoeFluentIcons.Draw}"
+                                                          SwitchName="ToggleSwitchInkToShapeEnabled" />
                         </ikw:SimpleStackPanel>
 
-                        <!-- 步骤 3:手势操作 -->
+                        <!-- 步骤 3: 手势 -->
                         <ikw:SimpleStackPanel x:Name="StepGesturesPanel"
                                               Spacing="{StaticResource SettingsCardSpacing}"
                                               Visibility="Collapsed">
@@ -264,21 +281,7 @@
                                                           SwitchName="ToggleSwitchEnablePalmEraser" />
                         </ikw:SimpleStackPanel>
 
-                        <!-- 步骤 4:墨迹纠正 -->
-                        <ikw:SimpleStackPanel x:Name="StepInkRecognitionPanel"
-                                              Spacing="{StaticResource SettingsCardSpacing}"
-                                              Visibility="Collapsed">
-                            <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                                       Text="墨迹纠正" />
-
-                            <controls:LabeledSettingsCard x:Name="CardInkToShapeEnabled"
-                                                          Header="启用墨迹识别"
-                                                          Description="手绘图形自动转为标准形状。"
-                                                          Icon="{x:Static ui:SegoeFluentIcons.Draw}"
-                                                          SwitchName="ToggleSwitchInkToShapeEnabled" />
-                        </ikw:SimpleStackPanel>
-
-                        <!-- 步骤 5:个性化 -->
+                        <!-- 步骤 4: 个性化(主题 + 启动动画 + 托盘 + 快速面板 + 快捷键) -->
                         <ikw:SimpleStackPanel x:Name="StepAppearancePanel"
                                               Spacing="{StaticResource SettingsCardSpacing}"
                                               Visibility="Collapsed">
@@ -318,13 +321,9 @@
                                                           Description="计时器、点名等常用工具的快速入口。"
                                                           Icon="{x:Static ui:SegoeFluentIcons.ViewAll}"
                                                           SwitchName="ToggleSwitchShowQuickPanel" />
-                        </ikw:SimpleStackPanel>
 
-                        <!-- 步骤 6:快捷键 -->
-                        <ikw:SimpleStackPanel x:Name="StepShortcutsPanel"
-                                              Spacing="{StaticResource SettingsCardSpacing}"
-                                              Visibility="Collapsed">
                             <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                                       Margin="1,18,0,6"
                                        Text="快捷键" />
 
                             <controls:LabeledSettingsCard x:Name="CardEnableHotkeysInMouseMode"
@@ -334,26 +333,7 @@
                                                           SwitchName="ToggleSwitchEnableHotkeysInMouseMode" />
                         </ikw:SimpleStackPanel>
 
-                        <!-- 步骤 7:崩溃处理 -->
-                        <ikw:SimpleStackPanel x:Name="StepCrashActionPanel"
-                                              Spacing="{StaticResource SettingsCardSpacing}"
-                                              Visibility="Collapsed">
-                            <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                                       Text="崩溃处理" />
-
-                            <ui:SettingsCard Header="发生未处理异常时"
-                                             Description="可在 设置 → 启动 中修改。">
-                                <ui:SettingsCard.HeaderIcon>
-                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Warning}" />
-                                </ui:SettingsCard.HeaderIcon>
-                                <ComboBox x:Name="ComboBoxCrashAction" MinWidth="200">
-                                    <ComboBoxItem Content="静默重启软件(推荐)" />
-                                    <ComboBoxItem Content="无操作(仅记录日志)" />
-                                </ComboBox>
-                            </ui:SettingsCard>
-                        </ikw:SimpleStackPanel>
-
-                        <!-- 步骤 8:PowerPoint -->
+                        <!-- 步骤 5: PowerPoint -->
                         <ikw:SimpleStackPanel x:Name="StepPptPanel"
                                               Spacing="{StaticResource SettingsCardSpacing}"
                                               Visibility="Collapsed">
@@ -385,7 +365,7 @@
                                                           SwitchName="ToggleSwitchPptTimeCapsule" />
                         </ikw:SimpleStackPanel>
 
-                        <!-- 步骤 9:自动化 -->
+                        <!-- 步骤 6: 自动化 + 截图 -->
                         <ikw:SimpleStackPanel x:Name="StepAutomationPanel"
                                               Spacing="{StaticResource SettingsCardSpacing}"
                                               Visibility="Collapsed">
@@ -408,9 +388,23 @@
                                                           Description="拦截希沃、鸿合等课堂软件的悬浮窗,避免遮挡画板。"
                                                           Icon="{x:Static ui:SegoeFluentIcons.Cancel}"
                                                           SwitchName="ToggleSwitchFloatingWindowInterceptor" />
+
+                            <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                                       Margin="1,18,0,6"
+                                       Text="截图与屏幕捕捉" />
+
+                            <controls:LabeledSettingsCard x:Name="CardAutoSaveStrokesAtClear"
+                                                          Header="清屏时自动保存截图"
+                                                          Icon="{x:Static ui:SegoeFluentIcons.Camera}"
+                                                          SwitchName="ToggleSwitchAutoSaveStrokesAtClear" />
+
+                            <controls:LabeledSettingsCard x:Name="CardSaveScreenshotsInDateFolders"
+                                                          Header="按日期分文件夹保存截图"
+                                                          Icon="{x:Static ui:SegoeFluentIcons.Folder}"
+                                                          SwitchName="ToggleSwitchSaveScreenshotsInDateFolders" />
                         </ikw:SimpleStackPanel>
 
-                        <!-- 步骤 10:随机点名 -->
+                        <!-- 步骤 7: 随机点名 -->
                         <ikw:SimpleStackPanel x:Name="StepLuckyRandomPanel"
                                               Spacing="{StaticResource SettingsCardSpacing}"
                                               Visibility="Collapsed">
@@ -423,7 +417,7 @@
                                                           SwitchName="ToggleSwitchShowRandomAndSingleDraw" />
                         </ikw:SimpleStackPanel>
 
-                        <!-- 步骤 11:高级 -->
+                        <!-- 步骤 8: 高级 -->
                         <ikw:SimpleStackPanel x:Name="StepAdvancedPanel"
                                               Spacing="{StaticResource SettingsCardSpacing}"
                                               Visibility="Collapsed">
@@ -435,24 +429,6 @@
                                                           Description="便于问题排查与反馈。"
                                                           Icon="{x:Static ui:SegoeFluentIcons.Document}"
                                                           SwitchName="ToggleSwitchIsLogEnabled" />
-                        </ikw:SimpleStackPanel>
-
-                        <!-- 步骤 12:截图与屏幕捕捉 -->
-                        <ikw:SimpleStackPanel x:Name="StepSnapshotPanel"
-                                              Spacing="{StaticResource SettingsCardSpacing}"
-                                              Visibility="Collapsed">
-                            <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                                       Text="截图和屏幕捕捉" />
-
-                            <controls:LabeledSettingsCard x:Name="CardAutoSaveStrokesAtClear"
-                                                          Header="清屏时自动保存截图"
-                                                          Icon="{x:Static ui:SegoeFluentIcons.Camera}"
-                                                          SwitchName="ToggleSwitchAutoSaveStrokesAtClear" />
-
-                            <controls:LabeledSettingsCard x:Name="CardSaveScreenshotsInDateFolders"
-                                                          Header="按日期分文件夹保存截图"
-                                                          Icon="{x:Static ui:SegoeFluentIcons.Folder}"
-                                                          SwitchName="ToggleSwitchSaveScreenshotsInDateFolders" />
                         </ikw:SimpleStackPanel>
 
                         <Rectangle Height="32" />
@@ -474,7 +450,6 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!-- 进度条 -->
                 <Grid Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0" MaxWidth="420" HorizontalAlignment="Left">
                     <Border Height="4" CornerRadius="2"
                             Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" />
@@ -491,7 +466,7 @@
                            Margin="0,0,16,0"
                            Style="{DynamicResource CaptionTextBlockStyle}"
                            Opacity="0.7"
-                           Text="1 / 12" />
+                           Text="1 / 8" />
 
                 <Button x:Name="BtnPreviousStep"
                         Grid.Column="2"

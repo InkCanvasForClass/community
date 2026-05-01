@@ -15,8 +15,8 @@ namespace Ink_Canvas.Windows
     {
         private readonly Settings _settings;
         private int _currentStep = 0;
-        private const int MaxStepIndex = 11;
-        private const int StepCount = 12;
+        private const int MaxStepIndex = 7;
+        private const int StepCount = 8;
 
         private FrameworkElement[] _stepPanels;
         private static readonly TimeSpan SlideDuration = TimeSpan.FromMilliseconds(280);
@@ -36,15 +36,11 @@ namespace Ink_Canvas.Windows
                 StepTelemetryPanel,
                 StepCanvasPanel,
                 StepGesturesPanel,
-                StepInkRecognitionPanel,
                 StepAppearancePanel,
-                StepShortcutsPanel,
-                StepCrashActionPanel,
                 StepPptPanel,
                 StepAutomationPanel,
                 StepLuckyRandomPanel,
                 StepAdvancedPanel,
-                StepSnapshotPanel,
             };
 
             InitializeFromSettings();
@@ -409,64 +405,44 @@ namespace Ink_Canvas.Windows
             switch (step)
             {
                 case 0:
-                    title = "启动时行为";
-                    subtitle = "遥测、自动更新与启动行为,对应 设置 → 启动、隐私。";
+                    title = "启动与隐私";
+                    subtitle = "遥测、隐私协议、自动更新与崩溃处理。";
                     icon = SegoeFluentIcons.Shield;
                     break;
                 case 1:
                     title = "画板与墨迹";
-                    subtitle = "画笔光标、压感、墨迹显示,对应 设置 → 画板。";
+                    subtitle = "光标、压感、墨迹显示与墨迹纠正。";
                     icon = SegoeFluentIcons.Edit;
                     break;
                 case 2:
                     title = "手势操作";
-                    subtitle = "双指缩放/平移、手掌擦等,对应 设置 → 画板。";
+                    subtitle = "双指缩放/平移、手掌擦等。";
                     icon = SegoeFluentIcons.TouchPointer;
                     break;
                 case 3:
-                    title = "墨迹纠正";
-                    subtitle = "手绘图形识别为标准形状,对应 设置 → 墨迹纠正。";
-                    icon = SegoeFluentIcons.Draw;
-                    break;
-                case 4:
-                    title = "个性化设置";
-                    subtitle = "主题、启动动画、托盘与快速面板,对应 设置 → 个性化。";
+                    title = "个性化";
+                    subtitle = "主题、启动动画、托盘、快速面板与快捷键。";
                     icon = SegoeFluentIcons.Personalize;
                     break;
-                case 5:
-                    title = "快捷键";
-                    subtitle = "鼠标模式下的全局快捷键,对应 设置 → 个性化。";
-                    icon = SegoeFluentIcons.PenWorkspace;
-                    break;
-                case 6:
-                    title = "崩溃处理";
-                    subtitle = "未处理异常时的行为,对应 设置 → 启动。";
-                    icon = SegoeFluentIcons.Warning;
-                    break;
-                case 7:
+                case 4:
                     title = "PowerPoint 联动";
-                    subtitle = "放映联动与墨迹保存,对应 设置 → PowerPoint。";
+                    subtitle = "放映联动、墨迹与截屏自动保存、时间胶囊。";
                     icon = SegoeFluentIcons.Slideshow;
                     break;
-                case 8:
-                    title = "自动化行为";
-                    subtitle = "自动收纳、墨迹自动保存等,对应 设置 → 自动化。";
+                case 5:
+                    title = "自动化与截图";
+                    subtitle = "自动收纳、墨迹自动保存、悬浮窗拦截与截图保存。";
                     icon = SegoeFluentIcons.Sync;
                     break;
-                case 9:
+                case 6:
                     title = "随机点名";
-                    subtitle = "点名窗口选项,对应 设置 → 随机点名。";
+                    subtitle = "点名窗口选项。";
                     icon = SegoeFluentIcons.People;
                     break;
-                case 10:
+                case 7:
                     title = "高级选项";
-                    subtitle = "日志等,对应 设置 → 高级。";
+                    subtitle = "日志等高级配置。";
                     icon = SegoeFluentIcons.Settings;
-                    break;
-                case 11:
-                    title = "截图和屏幕捕捉";
-                    subtitle = "清屏截图、按日期保存等,对应 设置 → 自动化。";
-                    icon = SegoeFluentIcons.Camera;
                     break;
                 default:
                     title = string.Empty; subtitle = string.Empty; icon = SegoeFluentIcons.Home;

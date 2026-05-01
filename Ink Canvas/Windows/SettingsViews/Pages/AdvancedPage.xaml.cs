@@ -391,7 +391,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 Content = content,
                 PrimaryButtonText = "保存",
                 SecondaryButtonText = "取消",
-                Owner = GetMainWindow()
+                Owner = Window.GetWindow(this) ?? GetMainWindow()
             };
             var result = await dialog.ShowAsync();
             if (result != ContentDialogResult.Primary) return;
