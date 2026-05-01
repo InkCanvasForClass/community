@@ -87,6 +87,7 @@ namespace Ink_Canvas.Controls
         public event EventHandler PreviousPressedDown;
         public event EventHandler NextPressedDown;
         public event EventHandler PressEnded;
+        public event EventHandler<bool> PreviewExpandedChanged;
 
         // 静态几何（左下/右下：水平箭头；左侧/右侧：垂直箭头）
         private static readonly Geometry HArrowLeft = Geometry.Parse("F0 M24,24z M0,0z M3.3994,12.9642C2.86687,12.4317,2.86687,11.5683,3.3994,11.0358L9.94485,4.49031C10.4774,3.95777 11.3408,3.95777 11.8733,4.49031 12.4059,5.02284 12.4059,5.88625 11.8733,6.41878L7.65575,10.6364 19.6364,10.6364C20.3895,10.6364 21,11.2469 21,12 21,12.7531 20.3895,13.3636 19.6364,13.3636L7.65575,13.3636 11.8733,17.5812C12.4059,18.1137 12.4059,18.9772 11.8733,19.5097 11.3408,20.0422 10.4774,20.0422 9.94485,19.5097L3.3994,12.9642z");
@@ -124,21 +125,32 @@ namespace Ink_Canvas.Controls
             if (d is PptNavBar bar)
             {
                 bar.PreviewList.Visibility = (bool)e.NewValue ? Visibility.Visible : Visibility.Collapsed;
+                bar.ApplyLayout();
                 if ((bool)e.NewValue) bar.SyncPreviewSelection();
+                bar.PreviewExpandedChanged?.Invoke(bar, (bool)e.NewValue);
             }
         }
 
-        private void ApplyDirection(NavDirection dir)
+        private void ApplyDirection(NavDirection dir) => ApplyLayout();
+
+        private void ApplyLayout()
         {
-            // 默认值
-            DockPanel.SetDock(PreviewList, Dock.Top);
-            ButtonRow.Orientation = Orientation.Horizontal;
+            var dir = Direction;
+            bool expanded = IsPreviewExpanded;
+
+            // 重置可能在不同状态下被设置的属性
             ButtonRow.ClearValue(WidthProperty);
             ButtonRow.ClearValue(HeightProperty);
+            ButtonRow.ClearValue(HorizontalAlignmentProperty);
             PreviewList.ClearValue(WidthProperty);
             PreviewList.ClearValue(HeightProperty);
             PreviewList.ClearValue(MaxHeightProperty);
             PreviewList.ClearValue(MaxWidthProperty);
+            PreviewList.ClearValue(HorizontalAlignmentProperty);
+            ClearValue(HeightProperty);
+            ClearValue(MaxHeightProperty);
+
+            double availableHeight = ComputeAvailableHeight();
 
             switch (dir)
             {
@@ -148,12 +160,28 @@ namespace Ink_Canvas.Controls
                     DockPanel.SetDock(ButtonRow, Dock.Bottom);
                     ButtonRow.Orientation = Orientation.Horizontal;
                     ButtonRow.Height = 50;
-                    // ListBox 宽度跟随 ButtonRow 实际宽度
-                    PreviewList.SetBinding(WidthProperty, new System.Windows.Data.Binding(nameof(ButtonRow.ActualWidth)) { Source = ButtonRow });
-                    PreviewList.MaxHeight = 380;
+                    if (expanded)
+                    {
+                        // 预览面板拉宽到 280,贴向同侧角落
+                        PreviewList.Width = 280;
+                        PreviewList.MaxHeight = Math.Max(200, availableHeight - 50);
+                        PreviewList.HorizontalAlignment = dir == NavDirection.LeftBottom
+                            ? HorizontalAlignment.Left
+                            : HorizontalAlignment.Right;
+                        // 按钮组宽度限制为原始内容宽度,并贴向同侧,保持按钮位置不变
+                        ButtonRow.HorizontalAlignment = dir == NavDirection.LeftBottom
+                            ? HorizontalAlignment.Left
+                            : HorizontalAlignment.Right;
+                    }
+                    else
+                    {
+                        PreviewList.SetBinding(WidthProperty, new System.Windows.Data.Binding(nameof(ButtonRow.ActualWidth)) { Source = ButtonRow });
+                        PreviewList.MaxHeight = 380;
+                    }
                     PreviousButtonGeometry.Geometry = HArrowLeft;
                     NextButtonGeometry.Geometry = HArrowRight;
                     break;
+
                 case NavDirection.LeftSide:
                     DockPanel.SetDock(PreviewList, Dock.Right);
                     DockPanel.SetDock(ButtonRow, Dock.Left);
@@ -175,6 +203,13 @@ namespace Ink_Canvas.Controls
                     NextButtonGeometry.Geometry = VArrowDown;
                     break;
             }
+        }
+
+        private double ComputeAvailableHeight()
+        {
+            var window = Window.GetWindow(this);
+            double h = window != null ? window.ActualHeight : SystemParameters.PrimaryScreenHeight;
+            return Math.Max(240, h - 12);
         }
 
         private void RefreshPageText()

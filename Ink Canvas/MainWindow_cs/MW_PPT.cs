@@ -2391,6 +2391,75 @@ namespace Ink_Canvas
                 var captured = bar;
                 bar.PageClick += async (s, e) => await OnPptNavBarPageClickAsync(captured);
                 bar.SlideSelected += (s, slideNumber) => OnPptNavBarSlideSelected(captured, slideNumber);
+                bar.PreviewExpandedChanged += (s, expanded) => OnPptNavBarPreviewExpandedChanged(captured, expanded);
+            }
+        }
+
+        private bool _suppressPreviewExpandedSync;
+
+        private void OnPptNavBarPreviewExpandedChanged(Controls.PptNavBar bar, bool expanded)
+        {
+            if (_suppressPreviewExpandedSync) return;
+            try
+            {
+                _suppressPreviewExpandedSync = true;
+
+                if (expanded)
+                {
+                    // 仅允许同时一侧展开
+                    foreach (var other in new[]
+                    {
+                        LeftBottomPanelForPPTNavigation,
+                        RightBottomPanelForPPTNavigation,
+                        LeftSidePanelForPPTNavigation,
+                        RightSidePanelForPPTNavigation,
+                    })
+                    {
+                        if (other == null || ReferenceEquals(other, bar)) continue;
+                        if (other.IsPreviewExpanded) other.IsPreviewExpanded = false;
+                    }
+                }
+
+                // 底部条展开时,隐藏同侧的中部侧边条避免遮挡;收起后还原可见性
+                ApplyBottomBarSideOcclusion();
+            }
+            finally
+            {
+                _suppressPreviewExpandedSync = false;
+            }
+        }
+
+        private void ApplyBottomBarSideOcclusion()
+        {
+            var leftBottomExpanded = LeftBottomPanelForPPTNavigation != null && LeftBottomPanelForPPTNavigation.IsPreviewExpanded;
+            var rightBottomExpanded = RightBottomPanelForPPTNavigation != null && RightBottomPanelForPPTNavigation.IsPreviewExpanded;
+
+            // 同侧的侧边条在底部条展开时隐藏
+            if (LeftSidePanelForPPTNavigation != null)
+            {
+                if (leftBottomExpanded)
+                {
+                    LeftSidePanelForPPTNavigation.Tag = LeftSidePanelForPPTNavigation.Visibility;
+                    LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                }
+                else if (LeftSidePanelForPPTNavigation.Tag is Visibility cached)
+                {
+                    LeftSidePanelForPPTNavigation.Visibility = cached;
+                    LeftSidePanelForPPTNavigation.ClearValue(TagProperty);
+                }
+            }
+            if (RightSidePanelForPPTNavigation != null)
+            {
+                if (rightBottomExpanded)
+                {
+                    RightSidePanelForPPTNavigation.Tag = RightSidePanelForPPTNavigation.Visibility;
+                    RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                }
+                else if (RightSidePanelForPPTNavigation.Tag is Visibility cached)
+                {
+                    RightSidePanelForPPTNavigation.Visibility = cached;
+                    RightSidePanelForPPTNavigation.ClearValue(TagProperty);
+                }
             }
         }
 
