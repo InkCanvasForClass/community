@@ -496,7 +496,7 @@ namespace Ink_Canvas
         /// 10. 提交历史记录
         /// 11. 插入图片后切换到选择模式并刷新浮动栏高光显示
         /// </remarks>
-        private async Task InsertScreenshotToCanvas(Bitmap bitmap)
+        private Task InsertScreenshotToCanvas(Bitmap bitmap)
         {
             try
             {
@@ -504,7 +504,7 @@ namespace Ink_Canvas
                 if (bitmap == null || bitmap.Width <= 0 || bitmap.Height <= 0)
                 {
                     ShowNotification("无效的截图");
-                    return;
+                    return Task.CompletedTask;
                 }
 
                 // 将Bitmap转换为WPF BitmapSource
@@ -513,7 +513,7 @@ namespace Ink_Canvas
                 if (bitmapSource == null)
                 {
                     ShowNotification("转换截图失败");
-                    return;
+                    return Task.CompletedTask;
                 }
 
                 // 创建WPF Image控件
@@ -572,6 +572,7 @@ namespace Ink_Canvas
             {
                 bitmap?.Dispose();
             }
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -591,7 +592,7 @@ namespace Ink_Canvas
         /// 8. 提交历史记录
         /// 9. 插入图片后切换到选择模式并刷新浮动栏高光显示
         /// </remarks>
-        private async Task InsertBitmapSourceToCanvas(BitmapSource bitmapSource, string successMessage = "截图已插入到画布", string failureMessagePrefix = "插入截图失败")
+        private Task InsertBitmapSourceToCanvas(BitmapSource bitmapSource, string successMessage = "截图已插入到画布", string failureMessagePrefix = "插入截图失败")
         {
             try
             {
@@ -647,6 +648,7 @@ namespace Ink_Canvas
                 ShowNotification($"{failureMessagePrefix}: {ex.Message}");
                 LogHelper.WriteLogToFile($"插入摄像头截图失败: {ex.Message}", LogHelper.LogType.Error);
             }
+            return Task.CompletedTask;
         }
 
         /// <summary>

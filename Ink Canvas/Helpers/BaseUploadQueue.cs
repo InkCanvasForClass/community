@@ -519,7 +519,7 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 异步上传文件
         /// </summary>
-        public async Task<bool> UploadFileAsync(string filePath, CancellationToken cancellationToken = default)
+        public Task<bool> UploadFileAsync(string filePath, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -528,19 +528,19 @@ namespace Ink_Canvas.Helpers
                 // 检查是否启用
                 if (!IsUploadEnabled())
                 {
-                    return false;
+                    return Task.FromResult(false);
                 }
 
                 // 基本验证
                 if (!File.Exists(filePath))
                 {
                     LogHelper.WriteLogToFile($"[{GetType().Name}] 上传失败：文件不存在 - {filePath}", LogHelper.LogType.Error);
-                    return false;
+                    return Task.FromResult(false);
                 }
 
                 if (!IsValidFile(filePath))
                 {
-                    return false;
+                    return Task.FromResult(false);
                 }
 
                 // 确保队列已初始化
@@ -552,7 +552,7 @@ namespace Ink_Canvas.Helpers
                 // 加入队列
                 EnqueueFile(filePath, 0, cancellationToken);
 
-                return true;
+                return Task.FromResult(true);
             }
             catch (OperationCanceledException)
             {
@@ -562,7 +562,7 @@ namespace Ink_Canvas.Helpers
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"[{GetType().Name}] 加入上传队列时出错: {ex.Message}", LogHelper.LogType.Error);
-                return false;
+                return Task.FromResult(false);
             }
         }
 

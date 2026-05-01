@@ -592,7 +592,7 @@ namespace Ink_Canvas
                                 {
                                     // 先展开浮动栏，然后进入批注状态
                                     // UnFoldFloatingBar 方法内部会根据设置自动进入批注模式
-                                    UnFoldFloatingBar(null);
+                                    _ = UnFoldFloatingBar(null);
                                 }
                                 else
                                 {

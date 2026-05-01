@@ -657,7 +657,7 @@ namespace Ink_Canvas.Windows
         /// <summary>
         /// 保存按钮点击事件
         /// </summary>
-        private async void BtnSave_Click(object sender, RoutedEventArgs e)
+        private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
             try
             {

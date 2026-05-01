@@ -272,21 +272,21 @@ namespace Ink_Canvas
         /// - 显示通知
         /// - 包含异常处理
         /// </remarks>
-        private async Task PasteImageFromClipboard(Point? position = null)
+        private Task PasteImageFromClipboard(Point? position = null)
         {
             try
             {
                 if (!Clipboard.ContainsImage())
                 {
                     ShowNotification("剪贴板中没有图片");
-                    return;
+                    return Task.CompletedTask;
                 }
 
                 var clipboardImage = Clipboard.GetImage();
                 if (clipboardImage == null)
                 {
                     ShowNotification("无法获取剪贴板图片");
-                    return;
+                    return Task.CompletedTask;
                 }
 
                 // 创建Image控件
@@ -383,6 +383,7 @@ namespace Ink_Canvas
                 ShowNotification($"粘贴图片失败: {ex.Message}");
                 LogHelper.WriteLogToFile($"粘贴图片失败: {ex.Message}", LogHelper.LogType.Error);
             }
+            return Task.CompletedTask;
         }
 
 

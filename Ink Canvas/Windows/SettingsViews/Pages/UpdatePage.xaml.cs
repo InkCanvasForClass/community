@@ -326,7 +326,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (mainWindow != null)
                 {
                     mainWindow.ResetUpdateCheckRetry();
-                    await System.Threading.Tasks.Task.Run(async () =>
+                    await System.Threading.Tasks.Task.Run(() =>
                     {
                         try
                         {

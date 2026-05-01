@@ -2374,7 +2374,7 @@ namespace Ink_Canvas
             {
                 _pendingStartupAutoUpdateCheck = false;
                 await Task.Delay(3000);
-                Dispatcher.BeginInvoke(new Action(() =>
+                _ = Dispatcher.BeginInvoke(new Action(() =>
                 {
                     LogHelper.WriteLogToFile("AutoUpdate | Running deferred auto-update check at UI idle");
                     AutoUpdate();

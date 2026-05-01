@@ -868,7 +868,7 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile($"App | 清理更新标记文件失败: {ex.Message}", LogHelper.LogType.Warning);
                 }
 
-                Task.Run(async () =>
+                _ = Task.Run(async () =>
                 {
                     try
                     {
@@ -1174,7 +1174,7 @@ namespace Ink_Canvas
                 await Task.Delay(600);
                 Dispatcher.Invoke(() => _taskbar?.ForceCreate());
             });
-            Dispatcher.BeginInvoke(new Action(() =>
+            _ = Dispatcher.BeginInvoke(new Action(() =>
             {
                 if (_pendingLocalizedResourceSet != null)
                 {
@@ -1189,7 +1189,7 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"App | 处理启动URI参数: {startupUriArg}", LogHelper.LogType.Event);
                 // 延迟一点执行，确保窗口初始化完成
-                Task.Delay(1000).ContinueWith(_ =>
+                _ = Task.Delay(1000).ContinueWith(_ =>
                 {
                     mainWindow.Dispatcher.Invoke(() =>
                     {
