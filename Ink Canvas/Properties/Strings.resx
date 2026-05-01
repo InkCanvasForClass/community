@@ -589,7 +589,7 @@
     <value>识别引擎</value>
   </data>
   <data name="InkRecog_ShapeEngineHint" xml:space="preserve">
-    <value> 自动：64 位进程使用 WinRT（Windows 10+），32 位使用 IACore。可强制指定 IACore 或 WinRT。</value>
+    <value> 自动：在 Windows 10+ 使用 WinRT，否则使用 IACore。可强制指定 IACore 或 WinRT。IACore 通过 IPC 辅助进程运行，在 32/64 位主进程下均可用。</value>
   </data>
   <data name="InkRecog_ShapeEngineAuto" xml:space="preserve">
     <value>自动</value>

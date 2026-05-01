@@ -1204,9 +1204,14 @@ namespace Ink_Canvas
 
                 try
                 {
-                    LogHelper.WriteLogToFile("启动 IACore IPC 辅助进程");
-                    bool ipcStarted = IpcIACoreClient.Instance.Start();
-                    LogHelper.WriteLogToFile($"IACore IPC 辅助进程{(ipcStarted ? "启动成功" : "启动失败（将使用本地 IACore 回退）")}");
+                    var shapeMode = ShapeRecognitionRouter.FromSettingsInt(
+                        Ink_Canvas.Windows.SettingsViews.Helpers.SettingsManager.Settings?.InkToShape?.ShapeRecognitionEngine ?? 0);
+                    if (!ShapeRecognitionRouter.ResolveUseWinRt(shapeMode))
+                    {
+                        LogHelper.WriteLogToFile("启动 IACore IPC 辅助进程");
+                        bool ipcStarted = IpcIACoreClient.Instance.Start();
+                        LogHelper.WriteLogToFile($"IACore IPC 辅助进程{(ipcStarted ? "启动成功" : "启动失败")}");
+                    }
                 }
                 catch (Exception ex)
                 {

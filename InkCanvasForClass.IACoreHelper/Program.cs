@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
-using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Input;
 
@@ -10,29 +9,16 @@ namespace InkCanvasForClass.IACoreHelper
 {
     internal static class Program
     {
-        private static readonly string LogPath = Path.Combine(
-            AppDomain.CurrentDomain.BaseDirectory, "IACoreHelper.log");
-
-        private static void Log(string msg)
-        {
-            try { File.AppendAllText(LogPath, $"{DateTime.Now:HH:mm:ss.fff} {msg}{Environment.NewLine}"); }
-            catch { }
-        }
-
         [STAThread]
         static void Main(string[] args)
         {
-            Log($"=== Helper started, args=[{string.Join(",", args)}], cwd={Environment.CurrentDirectory}, baseDir={AppDomain.CurrentDomain.BaseDirectory} ===");
-
             if (args.Length < 1 || !int.TryParse(args[0], out int parentPid))
             {
                 Console.Error.WriteLine("Usage: IACoreHelper.exe <parentPid>");
-                Log("Missing parentPid argument, exiting");
                 return;
             }
 
             string pipeName = string.Format(IpcConstants.PipeName, parentPid);
-            Log($"Pipe name: {pipeName}");
 
             try
             {
@@ -40,7 +26,6 @@ namespace InkCanvasForClass.IACoreHelper
             }
             catch (Exception ex)
             {
-                Log($"FATAL: {ex}");
                 Console.Error.WriteLine("IACoreHelper fatal: " + ex.Message);
             }
         }
@@ -82,7 +67,6 @@ namespace InkCanvasForClass.IACoreHelper
                         Console.Error.WriteLine("IACoreHelper pipe error: " + ex.Message);
                     }
                 }
-                // 每次连接后重新监听，支持多次调用
             }
         }
 
@@ -90,19 +74,14 @@ namespace InkCanvasForClass.IACoreHelper
         {
             try
             {
-                Log($"HandleRecognize: strokes={request.Strokes?.Length ?? 0}");
                 var strokes = BuildStrokeCollection(request);
-                Log($"Built StrokeCollection: count={strokes.Count}");
                 if (strokes.Count == 0)
                     return new RecognizeResponse { Success = false, ShapeName = string.Empty };
 
-                var result = RecognizeCore(strokes);
-                Log($"RecognizeCore result: success={result.Success}, shape={result.ShapeName}");
-                return result;
+                return RecognizeCore(strokes);
             }
             catch (Exception ex)
             {
-                Log($"HandleRecognize EXCEPTION: {ex}");
                 Console.Error.WriteLine("IACoreHelper recognize error: " + ex.Message);
                 return new RecognizeResponse { Success = false, ShapeName = string.Empty };
             }
@@ -189,7 +168,6 @@ namespace InkCanvasForClass.IACoreHelper
             if (hot != null)
                 for (int i = 0; i < hot.Count; i++) { hotX[i] = (float)hot[i].X; hotY[i] = (float)hot[i].Y; }
 
-            // 计算参与识别的笔画在原始集合中的下标
             var participatingStrokes = analysisAlternate.Strokes;
             int[] strokeIndices = new int[participatingStrokes?.Count ?? 0];
             if (participatingStrokes != null)
