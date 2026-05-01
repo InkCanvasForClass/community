@@ -442,37 +442,179 @@ namespace Ink_Canvas.Windows.SettingsViews
         #endregion
 
         #region 搜索框逻辑优化
+
+        private sealed class SearchEntry
+        {
+            public string Text;
+            public string PageTag;
+            public WeakReference<FrameworkElement> Target;
+        }
+
+        private List<SearchEntry> _searchIndex;
+        private bool _indexBuilt;
+
+        private void EnsureSearchIndexBuilt()
+        {
+            if (_indexBuilt && _searchIndex != null) return;
+            _searchIndex = new List<SearchEntry>(256);
+
+            foreach (var item in GetAllNavigationItems())
+            {
+                var text = item.Content?.ToString();
+                var tag = item.Tag as string;
+                if (!string.IsNullOrWhiteSpace(text) && !string.IsNullOrEmpty(tag))
+                {
+                    _searchIndex.Add(new SearchEntry { Text = text.Trim(), PageTag = tag });
+                }
+            }
+
+            foreach (var kv in _pageTypes.ToList())
+            {
+                var tag = kv.Key;
+                if (tag == "Settings") continue;
+                if (kv.Value == typeof(PluginSettingsPage)) continue;
+
+                try
+                {
+                    if (!_pages.TryGetValue(tag, out var page))
+                    {
+                        page = Activator.CreateInstance(kv.Value);
+                        _pages[tag] = page;
+                    }
+                    if (page is FrameworkElement feRoot)
+                    {
+                        if (!feRoot.IsLoaded)
+                        {
+                            try { feRoot.ApplyTemplate(); } catch { }
+                        }
+                        CollectEntriesFromPage(feRoot, tag);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"为页面 {tag} 建索引失败: {ex.Message}");
+                }
+            }
+
+            foreach (var kv in _pluginPages)
+            {
+                var pageTag = kv.Key;
+                var info = kv.Value;
+                var name = info?.Name;
+                if (!string.IsNullOrWhiteSpace(name))
+                {
+                    _searchIndex.Add(new SearchEntry { Text = $"{name} 设置", PageTag = pageTag });
+                }
+            }
+
+            _indexBuilt = true;
+        }
+
+        private void CollectEntriesFromPage(DependencyObject root, string pageTag)
+        {
+            foreach (var node in EnumerateLogicalDescendants(root))
+            {
+                string header = null;
+                FrameworkElement target = node as FrameworkElement;
+
+                if (node is Ink_Canvas.Controls.LabeledSettingsCard lsc)
+                {
+                    header = lsc.Header;
+                }
+                else if (node is iNKORE.UI.WPF.Modern.Controls.SettingsCard sc)
+                {
+                    header = sc.Header?.ToString();
+                }
+                else if (node is iNKORE.UI.WPF.Modern.Controls.SettingsExpander se)
+                {
+                    header = se.Header?.ToString();
+                }
+
+                if (!string.IsNullOrWhiteSpace(header) && target != null)
+                {
+                    _searchIndex.Add(new SearchEntry
+                    {
+                        Text = header.Trim(),
+                        PageTag = pageTag,
+                        Target = new WeakReference<FrameworkElement>(target)
+                    });
+                }
+            }
+        }
+
+        private static IEnumerable<DependencyObject> EnumerateLogicalDescendants(DependencyObject root)
+        {
+            if (root == null) yield break;
+            var stack = new Stack<DependencyObject>();
+            stack.Push(root);
+            while (stack.Count > 0)
+            {
+                var node = stack.Pop();
+                yield return node;
+                foreach (var child in LogicalTreeHelper.GetChildren(node))
+                {
+                    if (child is DependencyObject d) stack.Push(d);
+                }
+            }
+        }
+
+        private void NavigateToSearchEntry(SearchEntry entry)
+        {
+            if (entry == null) return;
+
+            NavigateToPage(entry.PageTag);
+            var navItem = FindNavigationViewItemByTag(entry.PageTag);
+            if (navItem != null && NavigationViewControl.SelectedItem != navItem)
+            {
+                NavigationViewControl.SelectedItem = navItem;
+                NavigationViewControl.Header = navItem.Content;
+            }
+
+            if (entry.Target != null && entry.Target.TryGetTarget(out var fe))
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try { fe.BringIntoView(); } catch { }
+                }), System.Windows.Threading.DispatcherPriority.Background);
+            }
+        }
+
         private void OnControlsSearchBoxQuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
-            if (string.IsNullOrWhiteSpace(args.QueryText)) return;
+            EnsureSearchIndexBuilt();
 
-            string query = args.QueryText.Trim().ToLower();
-            var allNavItems = GetAllNavigationItems();
+            string raw = (args.ChosenSuggestion as string) ?? args.QueryText;
+            if (string.IsNullOrWhiteSpace(raw)) return;
 
-            var targetItem = allNavItems.FirstOrDefault(item =>
-                item.Content?.ToString().ToLower().Contains(query) == true);
+            string query = raw.Trim();
+            string queryLower = query.ToLower();
 
-            if (targetItem != null)
-            {
-                NavigationViewControl.SelectedItem = targetItem;
-            }
+            var entry = _searchIndex.FirstOrDefault(e => e.Text.Equals(query, StringComparison.OrdinalIgnoreCase))
+                        ?? _searchIndex.FirstOrDefault(e => e.Text.ToLower().Contains(queryLower));
+
+            NavigateToSearchEntry(entry);
         }
 
         private void OnControlsSearchBoxTextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
             if (args.Reason != AutoSuggestionBoxTextChangeReason.UserInput) return;
 
-            string query = sender.Text.Trim().ToLower();
-            var suggestions = new List<string>();
+            EnsureSearchIndexBuilt();
 
-            if (!string.IsNullOrEmpty(query))
+            string query = sender.Text?.Trim() ?? string.Empty;
+            if (string.IsNullOrEmpty(query))
             {
-                var allNavItems = GetAllNavigationItems();
-                suggestions = allNavItems
-                    .Where(item => item.Content?.ToString().ToLower().Contains(query) == true)
-                    .Select(item => item.Content.ToString())
-                    .ToList();
+                sender.ItemsSource = null;
+                return;
             }
+
+            string queryLower = query.ToLower();
+            var suggestions = _searchIndex
+                .Where(e => e.Text.ToLower().Contains(queryLower))
+                .Select(e => e.Text)
+                .Distinct()
+                .Take(50)
+                .ToList();
 
             sender.ItemsSource = suggestions;
         }

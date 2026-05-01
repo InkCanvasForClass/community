@@ -223,14 +223,14 @@
                 </ui:SettingsCard>
 
                 <!-- 其他 -->
-                <ui:SettingsExpander x:Name="OtherExpander"
-                                     Header="{i18n:I18n Key=Storage_Other_Header}"
-                                     Description="{i18n:I18n Key=Storage_Other_Desc}">
-                    <ui:SettingsExpander.HeaderIcon>
+                <ui:SettingsCard x:Name="OtherExpander"
+                                 Header="{i18n:I18n Key=Storage_Other_Header}"
+                                 Description="{i18n:I18n Key=Storage_Other_Desc}">
+                    <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.More}"/>
-                    </ui:SettingsExpander.HeaderIcon>
+                    </ui:SettingsCard.HeaderIcon>
                     <TextBlock x:Name="OtherSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                </ui:SettingsExpander>
+                </ui:SettingsCard>
 
                 <Rectangle Height="48" />
 
