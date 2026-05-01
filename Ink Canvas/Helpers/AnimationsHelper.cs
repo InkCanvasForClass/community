@@ -2,11 +2,22 @@ using System;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using Ink_Canvas.Controls;
 
 namespace Ink_Canvas.Helpers
 {
     internal class AnimationsHelper
     {
+        private static UIElement ResolveAnimationTarget(UIElement element)
+        {
+            if (element is BoardMenuFrame frame)
+            {
+                frame.ApplyTemplate();
+                return frame.AnimationTarget ?? element;
+            }
+            return element;
+        }
+
         public static void ShowWithFadeIn(UIElement element, double duration = 0.15)
         {
             if (element.Visibility == Visibility.Visible) return;
@@ -36,14 +47,17 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                if (element.Visibility == Visibility.Visible) return;
-
                 if (element == null)
                     throw new ArgumentNullException(nameof(element));
 
+                if (element.Visibility == Visibility.Visible) return;
+
+                element.Visibility = Visibility.Visible;
+
+                var target = ResolveAnimationTarget(element);
+
                 var sb = new Storyboard();
 
-                // 渐变动画
                 var fadeInAnimation = new DoubleAnimation
                 {
                     From = 0.5,
@@ -54,10 +68,9 @@ namespace Ink_Canvas.Helpers
 
                 Storyboard.SetTargetProperty(fadeInAnimation, new PropertyPath(UIElement.OpacityProperty));
 
-                // 滑动动画
                 var slideAnimation = new DoubleAnimation
                 {
-                    From = element.RenderTransform.Value.OffsetY + 10, // 滑动距离
+                    From = 10,
                     To = 0,
                     Duration = TimeSpan.FromSeconds(duration)
                 };
@@ -68,10 +81,9 @@ namespace Ink_Canvas.Helpers
                 sb.Children.Add(fadeInAnimation);
                 sb.Children.Add(slideAnimation);
 
-                element.Visibility = Visibility.Visible;
-                element.RenderTransform = new TranslateTransform();
+                target.RenderTransform = new TranslateTransform();
 
-                sb.Begin((FrameworkElement)element);
+                sb.Begin((FrameworkElement)target);
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
@@ -207,14 +219,15 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                if (element.Visibility == Visibility.Collapsed) return;
-
                 if (element == null)
                     throw new ArgumentNullException(nameof(element));
 
+                if (element.Visibility == Visibility.Collapsed) return;
+
+                var target = ResolveAnimationTarget(element);
+
                 var sb = new Storyboard();
 
-                // 渐变动画
                 var fadeOutAnimation = new DoubleAnimation
                 {
                     From = 1,
@@ -224,11 +237,10 @@ namespace Ink_Canvas.Helpers
                 fadeOutAnimation.EasingFunction = new CubicEase();
                 Storyboard.SetTargetProperty(fadeOutAnimation, new PropertyPath(UIElement.OpacityProperty));
 
-                // 滑动动画
                 var slideAnimation = new DoubleAnimation
                 {
                     From = 0,
-                    To = element.RenderTransform.Value.OffsetY + 10, // 滑动距离
+                    To = 10,
                     Duration = TimeSpan.FromSeconds(duration)
                 };
                 slideAnimation.EasingFunction = new CubicEase();
@@ -243,8 +255,8 @@ namespace Ink_Canvas.Helpers
                     element.Visibility = Visibility.Collapsed;
                 };
 
-                element.RenderTransform = new TranslateTransform();
-                sb.Begin((FrameworkElement)element);
+                target.RenderTransform = new TranslateTransform();
+                sb.Begin((FrameworkElement)target);
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }

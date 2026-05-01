@@ -309,7 +309,7 @@ namespace Ink_Canvas
             BorderDrawShape.Visibility = Visibility.Collapsed;
             BoardBorderDrawShape.Visibility = Visibility.Collapsed;
 
-            if (LogicalTreeHelper.FindLogicalNode(this, "BackgroundPalette") is Border bgPalette)
+            if (LogicalTreeHelper.FindLogicalNode(this, "BackgroundPalette") is UIElement bgPalette)
             {
                 bgPalette.Visibility = Visibility.Collapsed;
             }
@@ -390,7 +390,7 @@ namespace Ink_Canvas
             AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
 
             // 隐藏背景设置面板
-            if (LogicalTreeHelper.FindLogicalNode(this, "BackgroundPalette") is Border bgPalette)
+            if (LogicalTreeHelper.FindLogicalNode(this, "BackgroundPalette") is UIElement bgPalette)
             {
                 AnimationsHelper.HideWithSlideAndFade(bgPalette);
             }
@@ -1687,7 +1687,7 @@ namespace Ink_Canvas
         /// <param name="e">鼠标按钮事件参数</param>
         private void SymbolIconTools_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (BorderTools.Visibility == Visibility.Visible)
+            if (BorderTools.Visibility == Visibility.Visible || BoardBorderTools.Visibility == Visibility.Visible)
             {
                 AnimationsHelper.HideWithSlideAndFade(BorderTools);
                 AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
@@ -1695,9 +1695,15 @@ namespace Ink_Canvas
             else
             {
                 HideSubPanels();
-                UpdateBorderToolsPosition();
-                AnimationsHelper.ShowWithSlideFromBottomAndFade(BorderTools);
-                AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderTools);
+                if (currentMode == 0)
+                {
+                    UpdateBorderToolsPosition();
+                    AnimationsHelper.ShowWithSlideFromBottomAndFade(BorderTools);
+                }
+                else
+                {
+                    AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderTools);
+                }
             }
         }
 
