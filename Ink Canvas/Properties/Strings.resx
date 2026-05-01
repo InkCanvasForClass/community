@@ -585,12 +585,6 @@
   <data name="InkRecog_ShapeEngineHint" xml:space="preserve">
     <value> 自动：64 位进程使用 WinRT（Windows 10+），32 位使用 IACore。可强制指定 IACore 或 WinRT。</value>
   </data>
-  <data name="InkRecog_HandwritingBeautify" xml:space="preserve">
-    <value>手写体纠正</value>
-  </data>
-  <data name="InkRecog_HandwritingBeautifyHint" xml:space="preserve">
-    <value># 开启后，将对手写笔画进行更平滑、更工整的纠正处理（基于 WinRT）。</value>
-  </data>
   <data name="InkRecog_ShapeEngineAuto" xml:space="preserve">
     <value>自动</value>
   </data>

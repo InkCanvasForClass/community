@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
@@ -189,9 +188,7 @@ namespace Ink_Canvas.Helpers
 
         /// <summary>
         /// 确保窗口全屏的Hook
-        /// 使用HandleProcessCorruptedStateExceptions，防止访问内存过程中因为一些致命异常导致程序崩溃
         /// </summary>
-        [HandleProcessCorruptedStateExceptions]
         private static IntPtr KeepFullScreenHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
             //处理WM_WINDOWPOSCHANGING消息

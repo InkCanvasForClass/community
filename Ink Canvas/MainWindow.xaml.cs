@@ -1162,7 +1162,6 @@ namespace Ink_Canvas
 
         public string _lastAppliedProfileName;
         private bool isLoaded;
-        private bool _suppressChickenSoupSourceSelectionChanged;
         private bool forcePointEraser;
         private bool _pendingStartupAutoUpdateCheck;
         private bool _sliderTouchSupportInitialized;
