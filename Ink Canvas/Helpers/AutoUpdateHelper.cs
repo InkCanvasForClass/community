@@ -1050,8 +1050,19 @@ namespace Ink_Canvas.Helpers
                 }
 
                 // 依次尝试每个线路组
+                CancellationToken groupLoopToken;
+                lock (_activeDownloadLock)
+                {
+                    groupLoopToken = _activeDownloadCts?.Token ?? CancellationToken.None;
+                }
                 foreach (var group in groups)
                 {
+                    if (groupLoopToken.IsCancellationRequested)
+                    {
+                        LogHelper.WriteLogToFile("AutoUpdate | 用户已取消，停止尝试后续线路组");
+                        break;
+                    }
+
                     string url = string.Format(group.DownloadUrlFormat, version);
                     url = AppendX64SuffixBeforeZipExtension(url);
                     // 智教联盟需要先获取真实下载地址
@@ -1076,6 +1087,12 @@ namespace Ink_Canvas.Helpers
                     LogHelper.WriteLogToFile($"AutoUpdate | 尝试从线路组 {group.GroupName} 下载: {url}");
 
                     bool downloadSuccess = await DownloadFile(url, zipFilePath, progressCallback);
+
+                    if (groupLoopToken.IsCancellationRequested)
+                    {
+                        LogHelper.WriteLogToFile("AutoUpdate | 用户已取消，停止尝试后续线路组");
+                        break;
+                    }
 
                     if (downloadSuccess)
                     {
@@ -1294,8 +1311,20 @@ namespace Ink_Canvas.Helpers
                                     success = true;
                                     LogHelper.WriteLogToFile($"AutoUpdate | 分块{block.Index}下载成功");
                                 }
-                                catch (Exception ex) when (ex is HttpRequestException || ex is IOException || ex is TaskCanceledException)
+                                catch (Exception ex) when (ex is HttpRequestException || ex is IOException || ex is TaskCanceledException || ex is OperationCanceledException)
                                 {
+                                    // 用户主动取消：不再重试
+                                    if (externalToken.IsCancellationRequested)
+                                    {
+                                        LogHelper.WriteLogToFile($"AutoUpdate | 分块{block.Index}下载已被用户取消", LogHelper.LogType.Warning);
+                                        if (File.Exists(tempPath))
+                                        {
+                                            try { File.Delete(tempPath); } catch { }
+                                        }
+                                        cts.Cancel();
+                                        return;
+                                    }
+
                                     LogHelper.WriteLogToFile($"AutoUpdate | 分块{block.Index}下载失败，第{retry + 1}次: {ex.Message}", LogHelper.LogType.Warning);
                                     progressCallback?.Invoke(0, $"分块{block.Index}下载失败，第{retry + 1}次: {ex.Message}");
 
@@ -1306,7 +1335,8 @@ namespace Ink_Canvas.Helpers
                                     }
 
                                     // 增加重试间隔，避免频繁重试
-                                    await Task.Delay(2000 * (retry + 1));
+                                    try { await Task.Delay(2000 * (retry + 1), externalToken); }
+                                    catch (OperationCanceledException) { cts.Cancel(); return; }
                                 }
                             }
                             if (success)

@@ -467,26 +467,36 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 ChangelogViewer.Markdown = "正在加载更新日志...";
 
-                // 优先尝试从 GitHub API 获取最新 Release 的 body
+                // 优先尝试从 GitHub API 获取最新 Release 的 body（带超时，失败则回退到镜像）
                 try
                 {
-                    var releases = await AutoUpdateHelper.GetAllGithubReleases(SettingsManager.Settings.Startup.UpdateChannel);
-                    var latest = releases?
-                        .OrderByDescending(r => ParseVersionForSort(r.version))
-                        .Select(r => (Tuple<string, string, string>)Tuple.Create(r.version, r.downloadUrl, r.releaseNotes))
-                        .FirstOrDefault();
-                    if (latest != null && !string.IsNullOrWhiteSpace(latest.Item3))
+                    var apiTask = AutoUpdateHelper.GetAllGithubReleases(SettingsManager.Settings.Startup.UpdateChannel);
+                    var completed = await System.Threading.Tasks.Task.WhenAny(apiTask, System.Threading.Tasks.Task.Delay(TimeSpan.FromSeconds(8)));
+                    if (completed == apiTask)
                     {
-                        ChangelogViewer.Markdown = latest.Item3;
-                        return;
+                        var releases = await apiTask;
+                        var latest = releases?
+                            .OrderByDescending(r => ParseVersionForSort(r.version))
+                            .Select(r => (Tuple<string, string, string>)Tuple.Create(r.version, r.downloadUrl, r.releaseNotes))
+                            .FirstOrDefault();
+                        if (latest != null && !string.IsNullOrWhiteSpace(latest.Item3))
+                        {
+                            ChangelogViewer.Markdown = latest.Item3;
+                            return;
+                        }
+                        LogHelper.WriteLogToFile("UpdatePage | GitHub API 未返回可用的更新日志，回退到镜像", LogHelper.LogType.Warning);
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile("UpdatePage | GitHub API 获取更新日志超时，回退到镜像", LogHelper.LogType.Warning);
                     }
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.WriteLogToFile($"UpdatePage | GitHub API 获取更新日志失败，回退到镜像源: {ex.Message}", LogHelper.LogType.Warning);
+                    LogHelper.WriteLogToFile($"UpdatePage | GitHub API 获取更新日志失败，回退到镜像: {ex.Message}", LogHelper.LogType.Warning);
                 }
 
-                // 回退到镜像源
+                // 回退到镜像源 UpdateLog.md
                 string md = await AutoUpdateHelper.GetUpdateLog(SettingsManager.Settings.Startup.UpdateChannel);
                 ChangelogViewer.Markdown = string.IsNullOrEmpty(md) ? "暂无更新日志。" : md;
             }
