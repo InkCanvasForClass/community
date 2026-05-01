@@ -775,10 +775,9 @@ namespace Ink_Canvas
             // 根据设置决定是否显示启动画面
             if (ShouldShowSplashScreen() && !IsLaunchByFileOrUri(e.Args))
             {
-                await Task.Delay(100);
                 ShowSplashScreen();
                 SetSplashMessage(Strings.GetString("Splash_Starting"));
-                SetSplashProgress(20);
+                SetSplashProgress(25);
 
                 // 强制刷新UI，确保启动画面显示
                 Application.Current.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
@@ -815,24 +814,12 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile("App | 检测到最终应用启动（更新后的应用）");
             }
 
-            // 释放IACore相关DLL
-            if (_isSplashScreenShown)
-            {
-                SetSplashMessage("正在初始化组件...");
-                SetSplashProgress(40);
-            }
-
-            // 释放UIAccess DLL
-            if (_isSplashScreenShown)
-            {
-                SetSplashMessage("正在初始化组件...");
-                SetSplashProgress(50);
-            }
 
             if (_isSplashScreenShown)
             {
                 SetSplashMessage("正在加载配置...");
-                SetSplashProgress(60);
+                SetSplashProgress(50);
+                await Task.Delay(100);
             }
 
             // 处理更新模式启动
@@ -1105,7 +1092,7 @@ namespace Ink_Canvas
             if (_isSplashScreenShown)
             {
                 SetSplashMessage("正在初始化主界面...");
-                SetSplashProgress(80);
+                SetSplashProgress(75);
             }
             var mainWindow = new MainWindow();
             MainWindow = mainWindow;
@@ -1150,16 +1137,14 @@ namespace Ink_Canvas
 
                 if (_isSplashScreenShown)
                 {
-                    SetSplashMessage("完成初始化...");
-                    SetSplashProgress(80);
-                    Task.Delay(300).ContinueWith(_ =>
+                    SetSplashMessage("启动完成！");
+                    SetSplashProgress(100);
+                    Task.Delay(100).ContinueWith(_ =>
                     {
                         Dispatcher.Invoke(() =>
                         {
-                            SetSplashMessage("启动完成！");
-                            SetSplashProgress(100);
                             // 延迟关闭启动画面，让用户看到完成消息
-                            Task.Delay(500).ContinueWith(__ =>
+                            Task.Delay(100).ContinueWith(__ =>
                             {
                                 Dispatcher.Invoke(() => CloseSplashScreen());
                             });
