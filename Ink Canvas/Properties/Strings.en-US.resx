@@ -1458,6 +1458,12 @@
   <data name="AutoKill_Title" xml:space="preserve">
     <value>Auto kill</value>
   </data>
+  <data name="AutoFold_Mode" xml:space="preserve">
+    <value>Fold mode</value>
+  </data>
+  <data name="AutoSave_Title" xml:space="preserve">
+    <value>Auto save</value>
+  </data>
   <data name="AutoKill_PptTools" xml:space="preserve">
     <value>Auto kill Seewo PPT tools</value>
   </data>

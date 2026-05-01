@@ -44,7 +44,7 @@
                                 <Setter TargetName="Bd" Property="Background" Value="#1affffff"/>
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="#22c55e"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#66CCFF"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>

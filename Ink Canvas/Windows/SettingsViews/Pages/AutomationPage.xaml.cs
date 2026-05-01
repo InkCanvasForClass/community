@@ -100,6 +100,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SideControlMinimumAutomationSlider.Value = auto.MinimumAutomationStrokeNumber;
             CardSaveFullPageStrokes.IsOn = auto.IsSaveFullPageStrokes;
 
+            CardUseCustomSaveFileName.IsOn = auto.IsUseCustomSaveFileName;
+            TextBoxCustomSaveFileNameTemplate.Text = auto.CustomSaveFileNameTemplate;
+            SyncSaveFileNamePresetSelection(auto.CustomSaveFileNameTemplate);
+
             if (auto.FloatingWindowInterceptor.InterceptRules != null)
             {
                 ToggleSwitchSeewoWhiteboard3Floating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoWhiteboard3Floating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoWhiteboard3Floating"];
@@ -473,6 +477,65 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             SettingsManager.Settings.Automation.IsSaveFullPageStrokes = CardSaveFullPageStrokes.IsOn;
             SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchUseCustomSaveFileName_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Automation.IsUseCustomSaveFileName = CardUseCustomSaveFileName.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void TextBoxCustomSaveFileNameTemplate_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Automation.CustomSaveFileNameTemplate = TextBoxCustomSaveFileNameTemplate.Text;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ComboBoxSaveFileNamePreset_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded || ComboBoxSaveFileNamePreset.SelectedItem == null) return;
+            var item = ComboBoxSaveFileNamePreset.SelectedItem as ComboBoxItem;
+            var tag = item?.Tag?.ToString();
+            if (string.IsNullOrEmpty(tag)) return;
+
+            if (tag == "__custom__")
+            {
+                CardCustomSaveFileNameTemplate.Visibility = Visibility.Visible;
+                return;
+            }
+
+            CardCustomSaveFileNameTemplate.Visibility = Visibility.Collapsed;
+            SettingsManager.Settings.Automation.CustomSaveFileNameTemplate = tag;
+            TextBoxCustomSaveFileNameTemplate.Text = tag;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void SyncSaveFileNamePresetSelection(string template)
+        {
+            int matchedIndex = -1;
+            for (int i = 0; i < ComboBoxSaveFileNamePreset.Items.Count; i++)
+            {
+                var item = ComboBoxSaveFileNamePreset.Items[i] as ComboBoxItem;
+                var tag = item?.Tag?.ToString();
+                if (tag == template)
+                {
+                    matchedIndex = i;
+                    break;
+                }
+            }
+
+            if (matchedIndex >= 0)
+            {
+                ComboBoxSaveFileNamePreset.SelectedIndex = matchedIndex;
+                CardCustomSaveFileNameTemplate.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                ComboBoxSaveFileNamePreset.SelectedIndex = ComboBoxSaveFileNamePreset.Items.Count - 1;
+                CardCustomSaveFileNameTemplate.Visibility = Visibility.Visible;
+            }
         }
 
         #endregion

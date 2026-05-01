@@ -43,8 +43,23 @@ namespace Ink_Canvas
                     var basePath = Settings.Automation.AutoSavedStrokesLocation
                         + @"\Auto Saved - BlackBoard Strokes";
                     if (!Directory.Exists(basePath)) Directory.CreateDirectory(basePath);
-                    strokeSavePath = Path.Combine(basePath,
-                        $"{DateTime.Now:yyyy-MM-dd HH-mm-ss-fff} Page-{pageIndexForStrokes} StrokesCount-{strokesToSave.Count}.icstk");
+                    string stem;
+                    if (Settings.Automation.IsUseCustomSaveFileName)
+                    {
+                        stem = SaveFileNameHelper.Render(Settings.Automation.CustomSaveFileNameTemplate,
+                            new SaveFileNameContext
+                            {
+                                Mode = "BlackBoard",
+                                Type = "Auto",
+                                Page = pageIndexForStrokes,
+                                Count = strokesToSave.Count
+                            });
+                    }
+                    else
+                    {
+                        stem = $"{DateTime.Now:yyyy-MM-dd HH-mm-ss-fff} Page-{pageIndexForStrokes} StrokesCount-{strokesToSave.Count}";
+                    }
+                    strokeSavePath = Path.Combine(basePath, stem + ".icstk");
                 }
             }
             catch (Exception ex)
@@ -149,7 +164,7 @@ namespace Ink_Canvas
         {
             var desktopPath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
-                $"{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.png");
+                $"{GetScreenshotFileNameStem()}.png");
 
             CaptureAndSaveScreenshot(desktopPath, false);
 
@@ -188,7 +203,7 @@ namespace Ink_Canvas
 
                 var desktopPath = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
-                    $"{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.png");
+                    $"{GetScreenshotFileNameStem()}.png");
 
                 using (var originalBitmap = CaptureScreenArea(screenshotResult.Value.Area))
                 {
@@ -437,7 +452,10 @@ namespace Ink_Canvas
         {
             if (string.IsNullOrWhiteSpace(fileName))
             {
-                fileName = DateTime.Now.ToString("HH-mm-ss");
+                fileName = Settings.Automation.IsUseCustomSaveFileName
+                    ? SaveFileNameHelper.Render(Settings.Automation.CustomSaveFileNameTemplate,
+                        new SaveFileNameContext { Mode = "Screenshot", Type = "Auto", Count = inkCanvas?.Strokes?.Count })
+                    : DateTime.Now.ToString("HH-mm-ss");
             }
 
             var basePath = Settings.Automation.AutoSavedStrokesLocation;
@@ -473,7 +491,17 @@ namespace Ink_Canvas
 
             return Path.Combine(
                 screenshotsFolder,
-                $"{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.png");
+                $"{GetScreenshotFileNameStem()}.png");
+        }
+
+        private string GetScreenshotFileNameStem()
+        {
+            if (Settings.Automation.IsUseCustomSaveFileName)
+            {
+                return SaveFileNameHelper.Render(Settings.Automation.CustomSaveFileNameTemplate,
+                    new SaveFileNameContext { Mode = "Screenshot", Type = "Auto", Count = inkCanvas?.Strokes?.Count });
+            }
+            return DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
         }
     }
 }

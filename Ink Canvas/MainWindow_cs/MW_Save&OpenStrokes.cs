@@ -132,7 +132,19 @@ namespace Ink_Canvas
                                + (currentMode == 0 ? "Annotation Strokes" : "BlackBoard Strokes");
                 if (!Directory.Exists(savePath)) Directory.CreateDirectory(savePath);
                 string savePathWithName;
-                if (currentMode != 0) // 黑板模式下
+                if (Settings.Automation.IsUseCustomSaveFileName)
+                {
+                    var ctx = new SaveFileNameContext
+                    {
+                        Mode = currentMode == 0 ? "Annotation" : "BlackBoard",
+                        Type = saveByUser ? "User" : "Auto",
+                        Page = currentMode != 0 ? CurrentWhiteboardIndex : (int?)null,
+                        Count = inkCanvas.Strokes.Count
+                    };
+                    var fname = SaveFileNameHelper.Render(Settings.Automation.CustomSaveFileNameTemplate, ctx);
+                    savePathWithName = savePath + @"\" + fname + ".icstk";
+                }
+                else if (currentMode != 0) // 黑板模式下
                     savePathWithName = savePath + @"\" + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss-fff") + " Page-" +
                                        CurrentWhiteboardIndex + " StrokesCount-" + inkCanvas.Strokes.Count + ".icstk";
                 else

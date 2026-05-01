@@ -581,6 +581,12 @@ namespace Ink_Canvas
         [JsonProperty("isSaveFullPageStrokes")]
         public bool IsSaveFullPageStrokes;
 
+        [JsonProperty("isUseCustomSaveFileName")]
+        public bool IsUseCustomSaveFileName { get; set; } = false;
+
+        [JsonProperty("customSaveFileNameTemplate")]
+        public string CustomSaveFileNameTemplate { get; set; } = "{datetime}";
+
         [JsonProperty("isSaveStrokesAsXML")]
         public bool IsSaveStrokesAsXML { get; set; } = false;
 
