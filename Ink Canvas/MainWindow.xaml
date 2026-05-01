@@ -1899,76 +1899,96 @@
                                                                  IconGeometry="F1 M24,24z M0,0z M19,3H5C3.9,3 3,3.9 3,5v14c0,1.1 0.9,2 2,2h14c1.1,0 2-0.9 2-2V5C21,3.9 20.1,3 19,3zM19,19H5V5h14V19z M17,7c-1.1,0-2,0.9-2,2s0.9,2 2,2 2-0.9 2-2S18.1,7 17,7zM7,17l2.5-3.01 1.96,2.36 2.54-3.21L17,17H7z"
                                                                  ButtonMouseUp="InsertImageOptions_MouseUp" />
                                     <!--插入图片菜单-->
-                                    <localControls:BoardMenuFrame x:Name="BoardImageOptionsPanel" Visibility="Visible" ClipToBounds="True"
-                                            PlacementTarget="{Binding ElementName=BoardInsertImage}"
-                                            PanelCornerRadius="5" HeaderCornerRadius="6,6,0,0" TitleFontSize="11"
-                                            PanelBackground="{DynamicResource FloatBarBackground}" Opacity="1"
-                                            Title="{i18n:I18n Key=Board_SelectImage}"
-                                            CloseMouseDown="Border_MouseDown"
-                                            CloseMouseUp="CloseImageOptionsPanel_MouseUp">
-                                        <ikw:SimpleStackPanel Margin="6,4,6,4" Spacing="2">
-                                                <!-- Screenshot Option -->
-                                            <Border MouseDown="Border_MouseDown" MouseUp="ImageOptionScreenshot_MouseUp"
-                                                            Background="Transparent" CornerRadius="3" Padding="6,4">
-                                                <Border.Style>
-                                                    <Style TargetType="Border">
-                                                        <Setter Property="Background" Value="Transparent"/>
-                                                        <Style.Triggers>
-                                                            <Trigger Property="IsMouseOver" Value="True">
-                                                                <Setter Property="Background" Value="#f0f9ff"/>
-                                                            </Trigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Border.Style>
-                                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
-                                                    <Image Height="16" Width="16">
-                                                        <Image.Source>
-                                                            <DrawingImage>
-                                                                <DrawingImage.Drawing>
-                                                                    <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                        <GeometryDrawing Brush="#2563eb"
-                                                                                    Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.ScreenshotIconGeometry}, Converter={StaticResource StringToGeometryConverter}}"/>
-                                                                    </DrawingGroup>
-                                                                </DrawingImage.Drawing>
-                                                            </DrawingImage>
-                                                        </Image.Source>
-                                                    </Image>
-                                                    <TextBlock Text="{i18n:I18n Key=Board_Screenshot}" FontSize="10"
-                                                                        Foreground="{DynamicResource TextForeground}" VerticalAlignment="Center"/>
+                                    <Border>
+                                        <Grid RenderTransformOrigin="0,1" Margin="-133,-172,13,55">
+                                            <Border Visibility="Collapsed" ClipToBounds="True"  d:Visibility="Visible"
+                                                    x:Name="BoardImageOptionsPanel"
+                                                    CornerRadius="5" Background="{DynamicResource FloatBarBackground}"
+                                                    Opacity="1"
+                                                    BorderBrush="#2563eb" BorderThickness="1">
+                                                <ikw:SimpleStackPanel Margin="0">
+                                                    <Border BorderBrush="#1e3a8a" BorderThickness="0,0,0,1"
+                                                            CornerRadius="6,6,0,0"
+                                                            Background="#2563eb" Margin="-1,-1,-1,1">
+                                                        <Canvas Height="24" ClipToBounds="True">
+                                                            <TextBlock Text="{i18n:I18n Key=Board_SelectImage}" Canvas.Left="8" Foreground="White"
+                                                                       Padding="0,5"
+                                                                       FontSize="11" FontWeight="Bold"
+                                                                       TextAlignment="Center" />
+                                                            <Image Margin="100,4,0,0"
+                                                                   Source="/Resources/new-icons/close-white.png"
+                                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                                   Height="16" Width="16"
+                                                                   MouseDown="Border_MouseDown"
+                                                                   MouseUp="CloseImageOptionsPanel_MouseUp" />
+                                                        </Canvas>
+                                                    </Border>
+                                                    <ikw:SimpleStackPanel Margin="6,4,6,4" Spacing="2">
+                                                        <!-- Screenshot Option -->
+                                                        <Border MouseDown="Border_MouseDown" MouseUp="ImageOptionScreenshot_MouseUp"
+                                                                Background="Transparent" CornerRadius="3" Padding="6,4">
+                                                            <Border.Style>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="Background" Value="Transparent"/>
+                                                                    <Style.Triggers>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                            <Setter Property="Background" Value="#f0f9ff"/>
+                                                                        </Trigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Border.Style>
+                                                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                                                                <Image Height="16" Width="16">
+                                                                    <Image.Source>
+                                                                        <DrawingImage>
+                                                                            <DrawingImage.Drawing>
+                                                                                <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                                                                    <GeometryDrawing Brush="#2563eb"
+                                                                                                Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.ScreenshotIconGeometry}, Converter={StaticResource StringToGeometryConverter}}"/>
+                                                                                </DrawingGroup>
+                                                                            </DrawingImage.Drawing>
+                                                                        </DrawingImage>
+                                                                    </Image.Source>
+                                                                </Image>
+                                                                <TextBlock Text="{i18n:I18n Key=Board_Screenshot}" FontSize="10"
+                                                                            Foreground="{DynamicResource TextForeground}" VerticalAlignment="Center"/>
+                                                            </ikw:SimpleStackPanel>
+                                                        </Border>
+                                                        <!-- Select Image Option -->
+                                                        <Border MouseDown="Border_MouseDown" MouseUp="ImageOptionSelectFile_MouseUp"
+                                                                Background="Transparent" CornerRadius="3" Padding="6,4">
+                                                            <Border.Style>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="Background" Value="Transparent"/>
+                                                                    <Style.Triggers>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                            <Setter Property="Background" Value="#f0f9ff"/>
+                                                                        </Trigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Border.Style>
+                                                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                                                                <Image Height="16" Width="16">
+                                                                    <Image.Source>
+                                                                        <DrawingImage>
+                                                                            <DrawingImage.Drawing>
+                                                                                <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                                                                    <GeometryDrawing Brush="#2563eb"
+                                                                                                Geometry="F1 M24,24z M0,0z M19,3H5C3.9,3 3,3.9 3,5v14c0,1.1 0.9,2 2,2h14c1.1,0 2-0.9 2-2V5C21,3.9 20.1,3 19,3zM19,19H5V5h14V19z M17,7c-1.1,0-2,0.9-2,2s0.9,2 2,2 2-0.9 2-2S18.1,7 17,7zM7,17l2.5-3.01 1.96,2.36 2.54-3.21L17,17H7z"/>
+                                                                                </DrawingGroup>
+                                                                            </DrawingImage.Drawing>
+                                                                        </DrawingImage>
+                                                                    </Image.Source>
+                                                                </Image>
+                                                                <TextBlock Text="{i18n:I18n Key=Board_SelectImage}" FontSize="10"
+                                                                            Foreground="{DynamicResource TextForeground}" VerticalAlignment="Center"/>
+                                                            </ikw:SimpleStackPanel>
+                                                        </Border>
+                                                    </ikw:SimpleStackPanel>
                                                 </ikw:SimpleStackPanel>
                                             </Border>
-                                            <!-- Select Image Option -->
-                                            <Border MouseDown="Border_MouseDown" MouseUp="ImageOptionSelectFile_MouseUp"
-                                                            Background="Transparent" CornerRadius="3" Padding="6,4">
-                                                <Border.Style>
-                                                    <Style TargetType="Border">
-                                                        <Setter Property="Background" Value="Transparent"/>
-                                                        <Style.Triggers>
-                                                            <Trigger Property="IsMouseOver" Value="True">
-                                                                <Setter Property="Background" Value="#f0f9ff"/>
-                                                            </Trigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Border.Style>
-                                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
-                                                    <Image Height="16" Width="16">
-                                                        <Image.Source>
-                                                            <DrawingImage>
-                                                                <DrawingImage.Drawing>
-                                                                    <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                        <GeometryDrawing Brush="#2563eb"
-                                                                                    Geometry="F1 M24,24z M0,0z M19,3H5C3.9,3 3,3.9 3,5v14c0,1.1 0.9,2 2,2h14c1.1,0 2-0.9 2-2V5C21,3.9 20.1,3 19,3zM19,19H5V5h14V19z M17,7c-1.1,0-2,0.9-2,2s0.9,2 2,2 2-0.9 2-2S18.1,7 17,7zM7,17l2.5-3.01 1.96,2.36 2.54-3.21L17,17H7z"/>
-                                                                    </DrawingGroup>
-                                                                </DrawingImage.Drawing>
-                                                            </DrawingImage>
-                                                        </Image.Source>
-                                                    </Image>
-                                                    <TextBlock Text="{i18n:I18n Key=Board_SelectImage}" FontSize="10"
-                                                                        Foreground="{DynamicResource TextForeground}" VerticalAlignment="Center"/>
-                                                </ikw:SimpleStackPanel>
-                                            </Border>
-                                        </ikw:SimpleStackPanel>
-                                    </localControls:BoardMenuFrame>
+                                        </Grid>
+                                    </Border>
                                     <controls:BoardToolbarButton x:Name="BoardUndo"
                                                                  Label="{i18n:I18n Key=Board_Undo}"
                                                                  IconGeometry="F1 M24,24z M0,0z M8.71408,16.8493L0.874451,9.00964 8.71408,1.17001 8.71408,7.42358 15.7239,7.42358C16.7074,7.42358 17.6791,7.62744 18.583,8.02124 19.4866,8.41493 20.3023,8.98966 20.9857,9.70849 21.6689,10.4271 22.2069,11.276 22.5726,12.2047 22.9383,13.1333 23.1256,14.126 23.1256,15.1268 23.1256,16.1276 22.9383,17.1203 22.5726,18.0489 22.2069,18.9776 21.6689,19.8264 20.9857,20.5451 20.3023,21.2639 19.4866,21.8387 18.583,22.2324 17.6791,22.6262 16.7074,22.83 15.7239,22.83L10.437,22.83 10.437,19.6579 15.7239,19.6579C16.2679,19.6579 16.8086,19.5453 17.3159,19.3243 17.8235,19.1031 18.29,18.7767 18.6867,18.3594 19.0835,17.942 19.4023,17.4422 19.6211,16.8866 19.8399,16.3308 19.9534,15.7326 19.9534,15.1268 19.9534,14.5209 19.8399,13.9227 19.6211,13.367 19.4023,12.8114 19.0835,12.3115 18.6867,11.8941 18.29,11.4769 17.8235,11.1505 17.3159,10.9293 16.8086,10.7083 16.2679,10.5957 15.7239,10.5957L8.71408,10.5957 8.71408,16.8493z"
