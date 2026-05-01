@@ -1197,16 +1197,30 @@
                                                                  Label="{i18n:I18n Key=Board_Pen}"
                                                                  IconGeometry="F1 M24,24z M0,0z M20.4786,1.42438C19.9985,1.23743 19.4847,1.15194 18.9698,1.17319 18.4549,1.19444 17.9499,1.32197 17.4869,1.54789 17.0368,1.76752 16.6358,2.07554 16.3083,2.45361L3.85516,14.9067 9.08243,20.134 21.5311,7.68529C21.9113,7.36382 22.223,6.96912 22.447,6.52438 22.6786,6.06462 22.8113,5.56167 22.8365,5.04763 22.8616,4.5336 22.7787,4.02012 22.593,3.54002 22.4073,3.05994 22.1232,2.62403 21.759,2.25988 21.3949,1.89574 20.9587,1.61132 20.4786,1.42438z M7.28056,21.1605L2.8286,16.7086 1.15912,22.83 7.28056,21.1605z"
                                                                  ButtonMouseUp="PenIcon_Click" />
-                                    <localControls:BoardMenuFrame x:Name="BoardPenPalette" Visibility="Collapsed"
-                                                                  PlacementTarget="{Binding ElementName=BoardPen}"
-                                                                  PanelCornerRadius="8"
-                                                                  HeaderCornerRadius="8,8,0,0"
-                                                                  PanelBackground="{DynamicResource FloatBarBackground}"
-                                                                  CloseMouseDown="Border_MouseDown"
-                                                                  CloseMouseUp="CloseBordertools_MouseUp">
-                                        <localControls:BoardMenuFrame.Title>
-                                            <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Stretch"
-                                                                  Spacing="2" VerticalAlignment="Center">
+                                    <Border>
+                                        <Grid Margin="0,5,0,5" Width="0">
+                                            <Grid Name="BoardPenPaletteGrid" Margin="-160,-240,-53,50" RenderTransformOrigin="0,1">
+                                                <Grid.RenderTransform>
+                                                    <TransformGroup>
+                                                        <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
+                                                        <SkewTransform />
+                                                        <RotateTransform />
+                                                        <TranslateTransform />
+                                                    </TransformGroup>
+                                                </Grid.RenderTransform>
+                                                <Border x:Name="BoardPenPalette" Visibility="Collapsed"
+                                                        Background="{DynamicResource FloatBarBackground}"
+                                                        Opacity="1" BorderBrush="#2563eb"
+                                                        BorderThickness="1" CornerRadius="8">
+                                                    <ikw:SimpleStackPanel>
+                                                        <Border BorderBrush="#1e3a8a" Height="32"
+                                                                BorderThickness="0,0,0,1"
+                                                                CornerRadius="7,7,0,0" Background="#2563eb"
+                                                                Margin="0" Padding="1,1,1,0">
+                                                            <ikw:SimpleStackPanel Orientation="Vertical" VerticalAlignment="Center">
+                                                                <ikw:SimpleStackPanel Orientation="Horizontal"
+                                                                    HorizontalAlignment="Stretch"
+                                                                    Margin="8,0,0,0" Spacing="2">
                                                 <Border x:Name="BoardDefaultPenTabButton"
                                                         MouseDown="SwitchToDefaultPen"
                                                         Background="#48dbeafe" Height="20" Width="36" CornerRadius="3">
@@ -1262,8 +1276,15 @@
                                                         </ikw:SimpleStackPanel>
                                                     </Canvas>
                                                 </Border>
-                                            </ikw:SimpleStackPanel>
-                                        </localControls:BoardMenuFrame.Title>
+                                                                    <Image Margin="66,0,0,0"
+                                                                           Source="/Resources/new-icons/close-white.png"
+                                                                           RenderOptions.BitmapScalingMode="HighQuality"
+                                                                           Height="16" Width="16"
+                                                                           MouseDown="Border_MouseDown"
+                                                                           MouseUp="CloseBordertools_MouseUp" />
+                                                                </ikw:SimpleStackPanel>
+                                                            </ikw:SimpleStackPanel>
+                                                        </Border>
                                         <ikw:SimpleStackPanel>
                                                         <Viewbox Name="BoardDefaultPenPropsPanel"
                                                                  Visibility="Collapsed"
@@ -1385,7 +1406,7 @@
                                                                     <Slider x:Name="BoardHighlighterWidthSlider"
                                                                             Minimum="15"
                                                                             Maximum="45" Width="208"
-                                                                           
+
                                                                             FontSize="20"
                                                                             IsSnapToTickEnabled="True" Value="20"
                                                                             TickFrequency="1" TickPlacement="None"
@@ -1493,23 +1514,47 @@
                                                             </ikw:SimpleStackPanel>
                                                         </Viewbox>
                                                     </ikw:SimpleStackPanel>
-                                                </localControls:BoardMenuFrame>
+                                                    </ikw:SimpleStackPanel>
+                                                </Border>
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
                                     <controls:BoardToolbarButton x:Name="BoardEraser"
                                                                  Label="{i18n:I18n Key=Board_Eraser}"
                                                                  IconGeometry="F1 M24,24z M0,0z M15.6314,20.7262L22.7921,13.5655C24.3494,12.141,24.2819,9.81776,22.8105,8.34633L16.7793,2.31508C15.3547,0.757753,13.0315,0.825236,11.5601,2.29666L4.38099,9.47574 15.6314,20.7262z M14.2172,22.1404L2.96677,10.89 1.20761,12.6491C-0.34971,14.0737,-0.281711,16.3974,1.18971,17.8688L6.15089,22.83 13.5276,22.83 14.2172,22.1404z"
                                                                  ButtonMouseUp="BoardEraserIcon_Click" />
-                                    <localControls:BoardMenuFrame ClipToBounds="True"
+                                    <Border>
+                                        <Grid RenderTransformOrigin="0,1" Margin="-133,-172,13,55">
+                                            <Grid.RenderTransform>
+                                                <TransformGroup>
+                                                    <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
+                                                    <SkewTransform />
+                                                    <RotateTransform />
+                                                    <TranslateTransform />
+                                                </TransformGroup>
+                                            </Grid.RenderTransform>
+                                            <Border Visibility="Collapsed" ClipToBounds="True"
                                                     x:Name="BoardEraserSizePanel"
-                                                    PlacementTarget="{Binding ElementName=BoardEraser}"
-                                                    Title="{i18n:I18n Key=FloatingBar_GesturePanelTitle}"
-                                                    PanelCornerRadius="5"
-                                                    HeaderCornerRadius="6,6,0,0"
-                                                    TitleFontSize="11"
-                                                    PanelBackground="{DynamicResource FloatBarBackground}"
+                                                    CornerRadius="5" Background="{DynamicResource FloatBarBackground}"
                                                     Opacity="1"
-                                                    CloseMouseDown="Border_MouseDown"
-                                                    CloseMouseUp="CloseBordertools_MouseUp">
+                                                    BorderBrush="#2563eb" BorderThickness="1">
                                                 <ikw:SimpleStackPanel Margin="0">
+                                                    <Border BorderBrush="#1e3a8a" BorderThickness="0,0,0,1"
+                                                            CornerRadius="6,6,0,0"
+                                                            Background="#2563eb" Margin="-1,-1,-1,1">
+                                                        <Canvas Height="24" ClipToBounds="True">
+                                                            <TextBlock Text="{i18n:I18n Key=Board_EraserOptions}" Canvas.Left="8" Foreground="White"
+                                                                       Padding="0,5"
+                                                                       FontSize="11" FontWeight="Bold"
+                                                                       TextAlignment="Center" />
+                                                            <Image Margin="100,4,0,0"
+                                                                   Source="/Resources/new-icons/close-white.png"
+                                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                                   Height="16" Width="16"
+                                                                   MouseDown="Border_MouseDown"
+                                                                   MouseUp="CloseBordertools_MouseUp" />
+                                                        </Canvas>
+                                                    </Border>
                                                     <ikw:SimpleStackPanel Orientation="Horizontal" Margin="0,6,0,0"
                                                                          Spacing="-2"
                                                                          VerticalAlignment="Center"
@@ -1670,7 +1715,9 @@
                                                         </Button.Content>
                                                     </Button>
                                                 </ikw:SimpleStackPanel>
-                                            </localControls:BoardMenuFrame>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
                                     <controls:BoardToolbarButton x:Name="BoardGeometry"
                                                                  Label="{i18n:I18n Key=Board_Shape}"
                                                                  IconGeometry="F1 M24,24z M0,0z M17.8604,10.7597L12.0068,1.17001 6.13961,10.7597 17.8604,10.7597z M10.9345,13.2403L1.34476,13.2403 1.34476,22.83 10.9345,22.83 10.9345,13.2403z M17.8604,13.2403C15.2122,13.2403 13.0655,15.387 13.0655,18.0352 13.0655,20.6833 15.2122,22.83 17.8604,22.83 20.5085,22.83 22.6552,20.6833 22.6552,18.0352 22.6552,15.387 20.5085,13.2403 17.8604,13.2403z"
@@ -1937,8 +1984,8 @@
                                                         </ikw:SimpleStackPanel>
                                                         <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
                                                                              Orientation="Horizontal">
-                                                            <controls:ToolMenuButton x:Name="BoardSaveToolBtn" ButtonMouseUp="SymbolIconSaveStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Save}" />
-                                                            <controls:ToolMenuButton x:Name="BoardOpenToolBtn" ButtonMouseUp="SymbolIconOpenStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Open}" />
+                                                            <controls:ToolMenuButton x:Name="BoardSaveToolBtn" ButtonMouseDown="Border_MouseDown" ButtonMouseUp="SymbolIconSaveStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Save}" />
+                                                            <controls:ToolMenuButton x:Name="BoardOpenToolBtn" ButtonMouseDown="Border_MouseDown" ButtonMouseUp="SymbolIconOpenStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Open}" />
                                                             <controls:ToolMenuButton x:Name="BoardReplayToolBtn" ButtonMouseUp="GridInkReplayButton_MouseUp" Label="{i18n:I18n Key=Tools_Replay}" />
                                                         </ikw:SimpleStackPanel>
                                                         <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
@@ -2763,7 +2810,7 @@
                                                     <ikw:SimpleStackPanel Orientation="Horizontal"
                                                                          HorizontalAlignment="Stretch">
                                                         <Canvas Height="24" Width="315" ClipToBounds="True">
-                                                            <TextBlock Text="{i18n:I18n Key=FloatingBar_GesturePanelTitle}" Canvas.Left="8" Foreground="White"
+                                                            <TextBlock Text="{i18n:I18n Key=Board_Shape}" Canvas.Left="8" Foreground="White"
                                                                        Padding="0,5" FontSize="11" FontWeight="Bold"
                                                                        TextAlignment="Center" />
                                                             <Image Margin="295,3.5,0,0"
@@ -2814,7 +2861,7 @@
                                                     CornerRadius="6,6,0,0"
                                                     Background="#2563eb" Margin="-1,-1,-1,1">
                                                 <Canvas Height="24" ClipToBounds="True">
-                                                    <TextBlock Text="{i18n:I18n Key=FloatingBar_GesturePanelTitle}" Canvas.Left="8" Foreground="White"
+                                                    <TextBlock Text="{i18n:I18n Key=Board_EraserOptions}" Canvas.Left="8" Foreground="White"
                                                                Padding="0,5"
                                                                FontSize="11" FontWeight="Bold" TextAlignment="Center" />
                                                     <Image Margin="100,4,0,0"
@@ -2978,8 +3025,8 @@
                                                     </ikw:SimpleStackPanel>
                                                     <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
                                                                          Orientation="Horizontal">
-                                                        <controls:ToolMenuButton x:Name="SaveToolBtn" ButtonMouseUp="SymbolIconSaveStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Save}" />
-                                                        <controls:ToolMenuButton x:Name="OpenToolBtn" ButtonMouseUp="SymbolIconOpenStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Open}" />
+                                                        <controls:ToolMenuButton x:Name="SaveToolBtn" ButtonMouseDown="Border_MouseDown" ButtonMouseUp="SymbolIconSaveStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Save}" />
+                                                        <controls:ToolMenuButton x:Name="OpenToolBtn" ButtonMouseDown="Border_MouseDown" ButtonMouseUp="SymbolIconOpenStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Open}" />
                                                         <controls:ToolMenuButton x:Name="ReplayToolBtn" ButtonMouseUp="GridInkReplayButton_MouseUp" Label="{i18n:I18n Key=Tools_Replay}" />
                                                     </ikw:SimpleStackPanel>
                                                     <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
