@@ -306,17 +306,6 @@ namespace Ink_Canvas.Windows
 
         private void BtnConfirm_Click(object sender, RoutedEventArgs e)
         {
-            // 离开"启动与隐私"页前必须勾选隐私协议
-            if (_currentStep == 0 && CheckBoxPrivacyAccepted.IsChecked != true)
-            {
-                MessageBox.Show(this,
-                    "请先勾选\"我已阅读并同意《隐私协议》\"后再继续。",
-                    "需要同意隐私协议",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
-                return;
-            }
-
             if (_currentStep == FinishIndex)
             {
                 ApplySelection();
@@ -340,18 +329,6 @@ namespace Ink_Canvas.Windows
 
             int target = ResolveTargetFromNavItem(args.SelectedItem as NavigationViewItem);
             if (target == _currentStep) return;
-
-            // 强制隐私门禁: 如果当前在步骤 0 且未勾选, 仅允许返回欢迎页, 不允许跳到后续步骤
-            if (_currentStep == 0 && CheckBoxPrivacyAccepted.IsChecked != true && target > 0)
-            {
-                MessageBox.Show(this,
-                    "请先勾选\"我已阅读并同意《隐私协议》\"后再继续。",
-                    "需要同意隐私协议",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
-                SyncNavSelection();
-                return;
-            }
 
             int direction = target > _currentStep ? 1 : -1;
             NavigateTo(target, direction);
@@ -405,6 +382,7 @@ namespace Ink_Canvas.Windows
 
         private void HyperlinkPrivacy_Click(object sender, RoutedEventArgs e)
         {
+            e.Handled = true;
             if (_privacyDialogShown) return;
             _privacyDialogShown = true;
             try
@@ -422,15 +400,15 @@ namespace Ink_Canvas.Windows
             }
             finally
             {
-                _privacyDialogShown = false;
+                Dispatcher.BeginInvoke(new Action(() => _privacyDialogShown = false),
+                    System.Windows.Threading.DispatcherPriority.Background);
             }
         }
 
         private void UpdateConfirmEnabled()
         {
-            if (BtnConfirm == null || CheckBoxPrivacyAccepted == null) return;
-            // 在步骤 0 时, 必须先勾选隐私协议才能继续
-            BtnConfirm.IsEnabled = _currentStep != 0 || CheckBoxPrivacyAccepted.IsChecked == true;
+            if (BtnConfirm == null) return;
+            BtnConfirm.IsEnabled = true;
         }
 
         #endregion

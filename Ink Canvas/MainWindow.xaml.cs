@@ -1197,8 +1197,6 @@ namespace Ink_Canvas
                 Helpers.DebugConsoleManager.Show();
             }
 
-            _ = TelemetryUploader.UploadTelemetryIfNeededAsync();
-
             LoadCustomBackgroundColor();
             SetWindowMode();
 
@@ -1296,11 +1294,6 @@ namespace Ink_Canvas
 
             // 应用无焦点模式设置
             ApplyNoFocusMode();
-            // 应用窗口置顶设置
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                ApplyAlwaysOnTop();
-            }), DispatcherPriority.ApplicationIdle);
 
             // 设置UIA置顶状态
             App.IsUIAccessTopMostEnabled = Settings.Advanced.EnableUIAccessTopMost;
@@ -1310,18 +1303,6 @@ namespace Ink_Canvas
             }
 
             _ = RunDeferredStartupPhaseBAsync();
-
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                LoadInkFadeSettings();
-                LoadBrushAutoRestoreSettings();
-            }), DispatcherPriority.ApplicationIdle);
-
-            // 初始化墨迹渐隐管理器
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                InitializeInkFadeManager();
-            }), DispatcherPriority.ApplicationIdle);
 
             // 处理命令行参数中的文件路径
             HandleCommandLineFileOpen();
@@ -1420,12 +1401,6 @@ namespace Ink_Canvas
                     };
                 }
             }), DispatcherPriority.Loaded);
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                if (_sliderTouchSupportInitialized) return;
-                AddTouchSupportToSliders();
-                _sliderTouchSupportInitialized = true;
-            }), DispatcherPriority.ApplicationIdle);
         }
 
         private void ApplyLanguageFromSettings()
@@ -2310,6 +2285,27 @@ namespace Ink_Canvas
             InitializeClipboardMonitoring();
             InitializeFloatingWindowInterceptor();
             InitializeGlobalHotkeyManager();
+
+            _ = TelemetryUploader.UploadTelemetryIfNeededAsync();
+
+            _ = Dispatcher.BeginInvoke(new Action(() =>
+            {
+                ApplyAlwaysOnTop();
+            }), DispatcherPriority.ApplicationIdle);
+
+            _ = Dispatcher.BeginInvoke(new Action(() =>
+            {
+                LoadInkFadeSettings();
+                LoadBrushAutoRestoreSettings();
+                InitializeInkFadeManager();
+            }), DispatcherPriority.ApplicationIdle);
+
+            _ = Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (_sliderTouchSupportInitialized) return;
+                AddTouchSupportToSliders();
+                _sliderTouchSupportInitialized = true;
+            }), DispatcherPriority.ApplicationIdle);
 
             try
             {
