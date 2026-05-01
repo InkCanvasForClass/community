@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using FontIcon = iNKORE.UI.WPF.Modern.Controls.FontIcon;
+using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using NavigationView = iNKORE.UI.WPF.Modern.Controls.NavigationView;
 using NavigationViewItem = iNKORE.UI.WPF.Modern.Controls.NavigationViewItem;
 using NavigationViewSelectionChangedEventArgs = iNKORE.UI.WPF.Modern.Controls.NavigationViewSelectionChangedEventArgs;
