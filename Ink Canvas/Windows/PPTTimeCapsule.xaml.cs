@@ -819,21 +819,8 @@ namespace Ink_Canvas.Windows
         {
             try
             {
-                bool isDarkTheme = false;
-
-                if (settings.Appearance.Theme == 0) // 浅色主题
-                {
-                    isDarkTheme = false;
-                }
-                else if (settings.Appearance.Theme == 1) // 深色主题
-                {
-                    isDarkTheme = true;
-                }
-                else // 跟随系统主题
-                {
-                    bool isSystemLight = IsSystemThemeLight();
-                    isDarkTheme = !isSystemLight;
-                }
+                bool isDarkTheme = settings.Appearance.Theme == 1 ||
+                                   (settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
 
                 if (isDarkTheme)
                 {
@@ -862,31 +849,6 @@ namespace Ink_Canvas.Windows
             {
                 LogHelper.WriteLogToFile($"应用PPT时间胶囊主题失败: {ex.Message}", LogHelper.LogType.Error);
             }
-        }
-
-        private bool IsSystemThemeLight()
-        {
-            var light = false;
-            try
-            {
-                var registryKey = Microsoft.Win32.Registry.CurrentUser;
-                var themeKey = registryKey.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
-                if (themeKey != null)
-                {
-                    var value = themeKey.GetValue("AppsUseLightTheme");
-                    if (value != null)
-                    {
-                        light = (int)value == 1;
-                    }
-                    themeKey.Close();
-                }
-            }
-            catch
-            {
-                // 如果读取注册表失败，默认为浅色主题
-                light = true;
-            }
-            return light;
         }
 
         /// <summary>

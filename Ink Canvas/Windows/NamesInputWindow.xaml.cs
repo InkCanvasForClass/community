@@ -69,37 +69,7 @@ namespace Ink_Canvas
 
         private void ApplyTheme(Settings settings)
         {
-            try
-            {
-                if (settings.Appearance.Theme == 0) // 浅色主题
-                {
-                    iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, iNKORE.UI.WPF.Modern.ElementTheme.Light);
-                    ApplyThemeResources("Light");
-                }
-                else if (settings.Appearance.Theme == 1) // 深色主题
-                {
-                    iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, iNKORE.UI.WPF.Modern.ElementTheme.Dark);
-                    ApplyThemeResources("Dark");
-                }
-                else // 跟随系统主题
-                {
-                    bool isSystemLight = IsSystemThemeLight();
-                    if (isSystemLight)
-                    {
-                        iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, iNKORE.UI.WPF.Modern.ElementTheme.Light);
-                        ApplyThemeResources("Light");
-                    }
-                    else
-                    {
-                        iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, iNKORE.UI.WPF.Modern.ElementTheme.Dark);
-                        ApplyThemeResources("Dark");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"应用名单导入窗口主题出错: {ex.Message}", LogHelper.LogType.Error);
-            }
+            ThemeHelper.ApplyTheme(this, settings, ApplyThemeResources);
         }
 
         private void ApplyThemeResources(string theme)
@@ -133,29 +103,5 @@ namespace Ink_Canvas
             }
         }
 
-        private bool IsSystemThemeLight()
-        {
-            var light = false;
-            try
-            {
-                var registryKey = Microsoft.Win32.Registry.CurrentUser;
-                var themeKey = registryKey.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
-                if (themeKey != null)
-                {
-                    var value = themeKey.GetValue("AppsUseLightTheme");
-                    if (value != null)
-                    {
-                        light = (int)value == 1;
-                    }
-                    themeKey.Close();
-                }
-            }
-            catch
-            {
-                // 如果无法读取注册表，默认使用浅色主题
-                light = true;
-            }
-            return light;
-        }
     }
 }

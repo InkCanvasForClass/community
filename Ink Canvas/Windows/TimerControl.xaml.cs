@@ -346,63 +346,11 @@ namespace Ink_Canvas.Windows
 
         private void ApplyTheme(Settings settings)
         {
-            try
+            ThemeHelper.ApplyTheme(this, settings, theme =>
             {
-                if (settings.Appearance.Theme == 0) // 浅色主题
-                {
-                    iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, iNKORE.UI.WPF.Modern.ElementTheme.Light);
-                }
-                else if (settings.Appearance.Theme == 1) // 深色主题
-                {
-                    iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, iNKORE.UI.WPF.Modern.ElementTheme.Dark);
-                    SetDarkThemeBorder();
-                }
-                else // 跟随系统主题
-                {
-                    bool isSystemLight = IsSystemThemeLight();
-                    if (isSystemLight)
-                    {
-                        iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, iNKORE.UI.WPF.Modern.ElementTheme.Light);
-                    }
-                    else
-                    {
-                        iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, iNKORE.UI.WPF.Modern.ElementTheme.Dark);
-                        SetDarkThemeBorder();
-                    }
-                }
-
-                // 刷新数字和冒号显示的颜色
+                if (theme == "Dark") SetDarkThemeBorder();
                 UpdateDigitDisplays();
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"应用新计时器UI倒计时窗口主题出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        private bool IsSystemThemeLight()
-        {
-            var light = false;
-            try
-            {
-                var registryKey = Microsoft.Win32.Registry.CurrentUser;
-                var themeKey = registryKey.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
-                if (themeKey != null)
-                {
-                    var value = themeKey.GetValue("AppsUseLightTheme");
-                    if (value != null)
-                    {
-                        light = (int)value == 1;
-                    }
-                    themeKey.Close();
-                }
-            }
-            catch
-            {
-                // 如果读取注册表失败，默认为浅色主题
-                light = true;
-            }
-            return light;
+            });
         }
 
         private void UpdateDigitDisplays()
