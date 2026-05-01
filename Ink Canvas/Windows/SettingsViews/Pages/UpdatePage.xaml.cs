@@ -9,7 +9,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Threading;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 

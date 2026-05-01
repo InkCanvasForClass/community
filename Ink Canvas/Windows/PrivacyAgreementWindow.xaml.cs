@@ -103,7 +103,8 @@ namespace Ink_Canvas
                 {
                     case 0: target = iNKORE.UI.WPF.Modern.ElementTheme.Light; break;
                     case 1: target = iNKORE.UI.WPF.Modern.ElementTheme.Dark; break;
-                    default: target = IsSystemThemeLight()
+                    default:
+                        target = IsSystemThemeLight()
                             ? iNKORE.UI.WPF.Modern.ElementTheme.Light
                             : iNKORE.UI.WPF.Modern.ElementTheme.Dark; break;
                 }

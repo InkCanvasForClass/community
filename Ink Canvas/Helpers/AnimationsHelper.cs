@@ -1,8 +1,8 @@
+using Ink_Canvas.Controls;
 using System;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using Ink_Canvas.Controls;
 
 namespace Ink_Canvas.Helpers
 {

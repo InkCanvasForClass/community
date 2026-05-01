@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using Page = iNKORE.UI.WPF.Modern.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
