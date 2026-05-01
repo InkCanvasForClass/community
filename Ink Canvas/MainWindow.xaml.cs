@@ -2575,29 +2575,6 @@ namespace Ink_Canvas
             }
         }
 
-        /// <summary>
-        /// 打开快捷键设置窗口
-        /// </summary>
-        private void OpenHotkeySettingsWindow()
-        {
-            try
-            {
-                if (_globalHotkeyManager == null)
-                {
-                    MessageBox.Show("快捷键管理器尚未初始化，请稍后重试。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
-                var hotkeySettingsWindow = new HotkeySettingsWindow(this, _globalHotkeyManager);
-                hotkeySettingsWindow.Owner = this;
-                hotkeySettingsWindow.ShowDialog();
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"打开快捷键设置窗口时出错: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show($"打开快捷键设置窗口时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
         #endregion
 
         #region 展台/白板分辨率切换

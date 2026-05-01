@@ -99,6 +99,13 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Personalize}" />
                         </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
+
+                    <ui:SettingsCard Header="快捷键" Description="快捷键设置"
+                        IsClickEnabled="True" Click="QuickNavCard_Click" Tag="HotkeyPage">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.KeyboardStandard}" />
+                        </ui:SettingsCard.HeaderIcon>
+                    </ui:SettingsCard>
                     
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="画板" />

@@ -3,68 +3,37 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
              xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
              mc:Ignorable="d"
-             d:DesignHeight="60"
+             d:DesignHeight="68"
              d:DesignWidth="600">
 
-    <Border Background="#2d2d30"
-            BorderBrush="#3f3f46"
-            BorderThickness="1"
-            CornerRadius="6"
-            Margin="0,2"
-            SnapsToDevicePixels="True">
-        <Grid Margin="14,10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-
-            <ikw:SimpleStackPanel Grid.Column="0" VerticalAlignment="Center">
-                <TextBlock x:Name="TitleTextBlock"
-                           Text="快捷键标题"
-                           FontSize="14"
-                           FontWeight="SemiBold"
-                           Foreground="#fafafa" />
-                <TextBlock x:Name="DescriptionTextBlock"
-                           Text="快捷键描述"
-                           FontSize="12"
-                           Foreground="#a1a1aa"
-                           Margin="0,2,0,0"
-                           TextWrapping="Wrap" />
-            </ikw:SimpleStackPanel>
-
-            <Border Grid.Column="1"
-                    Background="#3f3f46"
-                    BorderBrush="#71717a"
+    <ui:SettingsCard x:Name="RootCard"
+                     Header="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                     Description="{Binding Description, RelativeSource={RelativeSource AncestorType=UserControl}}">
+        <ui:SettingsCard.HeaderIcon>
+            <ui:FontIcon x:Name="HeaderFontIcon" Icon="{x:Static ui:SegoeFluentIcons.KeyboardStandard}" />
+        </ui:SettingsCard.HeaderIcon>
+        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <Border Background="{DynamicResource SubtleFillColorSecondaryBrush}"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
                     BorderThickness="1"
                     CornerRadius="4"
-                    Margin="10,0,0,0"
-                    Padding="10,6"
+                    Padding="10,4"
                     VerticalAlignment="Center">
                 <TextBlock x:Name="CurrentHotkeyTextBlock"
                            Text="未设置"
-                           FontSize="12"
                            FontFamily="Consolas"
                            FontWeight="SemiBold"
-                           Foreground="#fafafa"
                            MinWidth="88"
                            TextAlignment="Center"
                            VerticalAlignment="Center" />
             </Border>
-
             <Button x:Name="BtnSetHotkey"
-                    Grid.Column="2"
                     Content="设置"
-                    Width="72"
-                    Height="30"
-                    FontSize="12"
-                    Margin="10,0,0,0"
-                    VerticalAlignment="Center"
-                    Style="{DynamicResource PrimaryButtonStyle}"
-                    Padding="12,4"
+                    MinWidth="64"
                     Click="BtnSetHotkey_Click" />
-        </Grid>
-    </Border>
+        </ikw:SimpleStackPanel>
+    </ui:SettingsCard>
 </UserControl>

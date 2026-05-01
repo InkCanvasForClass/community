@@ -2,7 +2,6 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace Ink_Canvas.Windows
 {
@@ -11,34 +10,24 @@ namespace Ink_Canvas.Windows
     /// </summary>
     public partial class HotkeyItem : UserControl
     {
-        private static readonly SolidColorBrush HotkeyValueForeground = CreateFrozenBrush(0xFA, 0xFA, 0xFA);
-        private static readonly SolidColorBrush HotkeyPlaceholderForeground = CreateFrozenBrush(0xA1, 0xA1, 0xAA);
+        public static readonly DependencyProperty TitleProperty =
+            DependencyProperty.Register(nameof(Title), typeof(string), typeof(HotkeyItem),
+                new PropertyMetadata(string.Empty));
 
-        private static SolidColorBrush CreateFrozenBrush(byte r, byte g, byte b)
-        {
-            var brush = new SolidColorBrush(Color.FromRgb(r, g, b));
-            brush.Freeze();
-            return brush;
-        }
+        public static readonly DependencyProperty DescriptionProperty =
+            DependencyProperty.Register(nameof(Description), typeof(string), typeof(HotkeyItem),
+                new PropertyMetadata(string.Empty));
 
-        #region Events
-        /// <summary>
-        /// 快捷键变更事件
-        /// </summary>
-        public event EventHandler<HotkeyChangedEventArgs> HotkeyChanged;
-        #endregion
-
-        #region Properties
         public string Title
         {
-            get => TitleTextBlock.Text;
-            set => TitleTextBlock.Text = value;
+            get => (string)GetValue(TitleProperty);
+            set => SetValue(TitleProperty, value);
         }
 
         public string Description
         {
-            get => DescriptionTextBlock.Text;
-            set => DescriptionTextBlock.Text = value;
+            get => (string)GetValue(DescriptionProperty);
+            set => SetValue(DescriptionProperty, value);
         }
 
         public string DefaultKey { get; set; }
@@ -49,24 +38,20 @@ namespace Ink_Canvas.Windows
         /// </summary>
         public string HotkeyName { get; set; }
 
+        /// <summary>
+        /// 快捷键变更事件
+        /// </summary>
+        public event EventHandler<HotkeyChangedEventArgs> HotkeyChanged;
+
         private Key _currentKey = Key.None;
         private ModifierKeys _currentModifiers = ModifierKeys.None;
-        #endregion
 
-        #region Constructor
         public HotkeyItem()
         {
             InitializeComponent();
             UpdateHotkeyDisplay();
         }
-        #endregion
 
-        #region Public Methods
-        /// <summary>
-        /// 设置当前快捷键
-        /// </summary>
-        /// <param name="key">按键</param>
-        /// <param name="modifiers">修饰键</param>
         public void SetCurrentHotkey(Key key, ModifierKeys modifiers)
         {
             _currentKey = key;
@@ -74,41 +59,28 @@ namespace Ink_Canvas.Windows
             UpdateHotkeyDisplay();
         }
 
-        /// <summary>
-        /// 获取当前快捷键
-        /// </summary>
-        /// <returns>快捷键信息</returns>
         public (Key key, ModifierKeys modifiers) GetCurrentHotkey()
         {
             return (_currentKey, _currentModifiers);
         }
-        #endregion
 
-        #region Private Methods
         private void UpdateHotkeyDisplay()
         {
             if (_currentKey == Key.None)
             {
                 CurrentHotkeyTextBlock.Text = "未设置";
-                CurrentHotkeyTextBlock.Foreground = HotkeyPlaceholderForeground;
             }
             else
             {
                 var modifiersText = _currentModifiers == ModifierKeys.None ? "" : $"{_currentModifiers}+";
                 CurrentHotkeyTextBlock.Text = $"{modifiersText}{_currentKey}";
-                CurrentHotkeyTextBlock.Foreground = HotkeyValueForeground;
             }
         }
 
         private void StartHotkeyCapture()
         {
             BtnSetHotkey.Content = "请按键...";
-            BtnSetHotkey.Background = Brushes.Orange;
-
-            // 设置焦点以捕获键盘事件
             Focus();
-
-            // 添加键盘事件处理器
             KeyDown += HotkeyItem_KeyDown;
             KeyUp += HotkeyItem_KeyUp;
         }
@@ -116,9 +88,6 @@ namespace Ink_Canvas.Windows
         private void StopHotkeyCapture()
         {
             BtnSetHotkey.Content = "设置";
-            BtnSetHotkey.ClearValue(Button.BackgroundProperty);
-
-            // 移除键盘事件处理器
             KeyDown -= HotkeyItem_KeyDown;
             KeyUp -= HotkeyItem_KeyUp;
         }
@@ -127,7 +96,6 @@ namespace Ink_Canvas.Windows
         {
             e.Handled = true;
 
-            // 忽略某些特殊键
             if (e.Key == Key.LeftShift || e.Key == Key.RightShift ||
                 e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl ||
                 e.Key == Key.LeftAlt || e.Key == Key.RightAlt ||
@@ -136,7 +104,6 @@ namespace Ink_Canvas.Windows
                 return;
             }
 
-            // 获取修饰键
             var modifiers = ModifierKeys.None;
             if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
                 modifiers |= ModifierKeys.Control;
@@ -147,20 +114,15 @@ namespace Ink_Canvas.Windows
             if (Keyboard.IsKeyDown(Key.LWin) || Keyboard.IsKeyDown(Key.RWin))
                 modifiers |= ModifierKeys.Windows;
 
-            // 设置新的快捷键
-            var oldKey = _currentKey;
-            var oldModifiers = _currentModifiers;
-
             _currentKey = e.Key;
             _currentModifiers = modifiers;
 
             UpdateHotkeyDisplay();
             StopHotkeyCapture();
 
-            // 触发快捷键变更事件
             HotkeyChanged?.Invoke(this, new HotkeyChangedEventArgs
             {
-                HotkeyName = HotkeyName ?? Title, // 优先使用HotkeyName，如果没有则使用Title
+                HotkeyName = HotkeyName ?? Title,
                 Key = _currentKey,
                 Modifiers = _currentModifiers
             });
@@ -170,13 +132,20 @@ namespace Ink_Canvas.Windows
         {
             e.Handled = true;
         }
-        #endregion
 
-        #region Event Handlers
         private void BtnSetHotkey_Click(object sender, RoutedEventArgs e)
         {
             StartHotkeyCapture();
         }
-        #endregion
+    }
+
+    /// <summary>
+    /// 快捷键变更事件参数
+    /// </summary>
+    public class HotkeyChangedEventArgs : EventArgs
+    {
+        public string HotkeyName { get; set; }
+        public Key Key { get; set; }
+        public ModifierKeys Modifiers { get; set; }
     }
 }

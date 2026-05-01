@@ -43,6 +43,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 { "SecurityPage", typeof(SecurityPage) },
                 { "WindowPage", typeof(WindowPage) },
                 { "AppearancePage", typeof(AppearancePage) },
+                { "HotkeyPage", typeof(HotkeyPage) },
                 { "UpdatePage", typeof(UpdatePage) },
                 { "ExperimentalPage", typeof(ExperimentalPage) },
                 { "AdvancedPage", typeof(AdvancedPage) },
