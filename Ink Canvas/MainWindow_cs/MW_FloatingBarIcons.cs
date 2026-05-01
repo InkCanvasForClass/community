@@ -1685,7 +1685,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">鼠标按钮事件参数</param>
-        private void SymbolIconTools_MouseUp(object sender, MouseButtonEventArgs e)
+        internal void SymbolIconTools_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (BorderTools.Visibility == Visibility.Visible || BoardBorderTools.Visibility == Visibility.Visible)
             {
@@ -2793,7 +2793,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
-        private void EraserIconByStrokes_Click(object sender, MouseButtonEventArgs e)
+        internal void EraserIconByStrokes_Click(object sender, MouseButtonEventArgs e)
         {
             // 禁用高级橡皮擦系统
             DisableEraserOverlay();
@@ -2825,7 +2825,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
-        private void CursorWithDelIcon_Click(object sender, MouseButtonEventArgs e)
+        internal void CursorWithDelIcon_Click(object sender, MouseButtonEventArgs e)
         {
             SymbolIconDelete_MouseUp(sender, null);
             CursorIcon_Click(null, null);

@@ -1,3 +1,4 @@
+using Ink_Canvas.Controls.Toolbar;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -37,6 +38,9 @@ namespace Ink_Canvas
 
         [JsonProperty("security")]
         public Security Security { get; set; } = new Security();
+
+        [JsonProperty("toolbar")]
+        public ToolbarLayoutSettings Toolbar { get; set; } = new ToolbarLayoutSettings();
     }
 
     public class Security

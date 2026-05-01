@@ -1,3 +1,5 @@
+using Ink_Canvas.Controls;
+using Ink_Canvas.Controls.Toolbar;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
@@ -73,6 +75,14 @@ namespace Ink_Canvas
         private static readonly object _cursorLock = new object();
 
         internal static DateTime? TrayTemporaryShowUntilUtc;
+
+        // Phase 1: Cursor_Icon / Pen_Icon 原为 XAML 自动生成字段，迁移到 ToolbarRegistry 动态注入后
+        // 由 ToolbarHost 在 Window_Loaded 中回填。外部代码 (MW_AutoTheme / MW_FloatingBarIcons 等)
+        // 以原字段名继续访问，无需修改。
+        internal ToolbarImageButton Cursor_Icon { get; private set; }
+        internal ToolbarImageButton Pen_Icon { get; private set; }
+
+        internal ToolbarHost ToolbarHost { get; private set; }
 
         #region Window Initialization
 
@@ -1175,6 +1185,9 @@ namespace Ink_Canvas
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             loadPenCanvas();
+            // 工具栏插件化按钮先注入到容器，确保 LoadSettings 内部对 Cursor_Icon / Pen_Icon 等的访问非空。
+            // Settings.Toolbar 此时尚为默认值（全部可见），与旧 XAML 行为一致。
+            InitializeToolbarPlugins();
             //加载设置
             LoadSettings(true);
             ApplyLanguageFromSettings();

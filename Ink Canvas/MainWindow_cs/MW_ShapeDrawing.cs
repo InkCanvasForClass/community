@@ -32,7 +32,7 @@ namespace Ink_Canvas
         /// 3. 如果形状绘制面板可见，则隐藏它
         /// 4. 如果形状绘制面板不可见，则显示它
         /// </remarks>
-        private void ImageDrawShape_MouseUp(object sender, MouseButtonEventArgs e)
+        internal void ImageDrawShape_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (BorderDrawShape.Visibility == Visibility.Visible)
             {
