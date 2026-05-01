@@ -7,7 +7,10 @@ namespace Ink_Canvas.Helpers
 {
     internal class AnimationsHelper
     {
-        private static UIElement ResolveAnimationTarget(UIElement element) => element;
+        private static UIElement ResolveAnimationTarget(UIElement element)
+        {
+            return element;
+        }
 
         public static void ShowWithFadeIn(UIElement element, double duration = 0.15)
         {

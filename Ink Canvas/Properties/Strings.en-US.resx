@@ -2175,6 +2175,9 @@ Hide</value>
   <data name="FloatingBar_GestureButton" xml:space="preserve">
     <value>Gesture</value>
   </data>
+  <data name="FloatingBar_ExitButton" xml:space="preserve">
+    <value>Exit</value>
+  </data>
   <data name="FloatingBar_GesturePanelTitle" xml:space="preserve">
     <value>Gesture options</value>
   </data>
