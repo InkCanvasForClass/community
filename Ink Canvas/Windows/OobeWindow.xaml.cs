@@ -4,21 +4,33 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using FontIcon = iNKORE.UI.WPF.Modern.Controls.FontIcon;
+using NavigationView = iNKORE.UI.WPF.Modern.Controls.NavigationView;
+using NavigationViewItem = iNKORE.UI.WPF.Modern.Controls.NavigationViewItem;
+using NavigationViewSelectionChangedEventArgs = iNKORE.UI.WPF.Modern.Controls.NavigationViewSelectionChangedEventArgs;
 
 namespace Ink_Canvas.Windows
 {
     /// <summary>
-    /// 首次启动体验(OOBE)窗口,使用与设置窗口一致的卡片化 UI 引导用户完成初始配置。
-    /// 切换步骤时使用横向滑动 + 淡入,模仿 ClassIsland 的设置向导动画风格。
+    /// 首次启动体验(OOBE)窗口。使用 iNKORE.UI.WPF.Modern 的 NavigationView 作为左侧导航,
+    /// 引导用户依次完成欢迎页、8 个配置步骤与完成摘要页。
     /// </summary>
     public partial class OobeWindow : Window
     {
         private readonly Settings _settings;
-        private int _currentStep = 0;
-        private const int MaxStepIndex = 7;
+
+        // 视图状态: -1 = 欢迎; 0..7 = 步骤; 8 = 完成
+        private const int WelcomeIndex = -1;
+        private const int FinishIndex = 8;
         private const int StepCount = 8;
+        private const int MaxStepIndex = StepCount - 1;
+
+        private int _currentStep = WelcomeIndex;
+        private bool _suppressNavSelection;
 
         private FrameworkElement[] _stepPanels;
+        private NavigationViewItem[] _navItems;
+
         private static readonly TimeSpan SlideDuration = TimeSpan.FromMilliseconds(280);
         private static readonly IEasingFunction SlideEase = new CubicEase { EasingMode = EasingMode.EaseOut };
 
@@ -43,8 +55,21 @@ namespace Ink_Canvas.Windows
                 StepAdvancedPanel,
             };
 
+            _navItems = new[]
+            {
+                NavItemTelemetry,
+                NavItemCanvas,
+                NavItemGestures,
+                NavItemAppearance,
+                NavItemPpt,
+                NavItemAutomation,
+                NavItemLuckyRandom,
+                NavItemAdvanced,
+            };
+
             InitializeFromSettings();
-            UpdateStepUI(animateDirection: 0, instant: true);
+            UpdateView(animateDirection: 0, instant: true);
+            SyncNavSelection();
         }
 
         #region Settings IO
@@ -273,8 +298,14 @@ namespace Ink_Canvas.Windows
 
         #region Navigation
 
+        private void BtnStartWelcome_Click(object sender, RoutedEventArgs e)
+        {
+            NavigateTo(0, direction: 1);
+        }
+
         private void BtnConfirm_Click(object sender, RoutedEventArgs e)
         {
+            // 离开"启动与隐私"页前必须勾选隐私协议
             if (_currentStep == 0 && CheckBoxPrivacyAccepted.IsChecked != true)
             {
                 MessageBox.Show(this,
@@ -285,23 +316,83 @@ namespace Ink_Canvas.Windows
                 return;
             }
 
-            if (_currentStep < MaxStepIndex)
+            if (_currentStep == FinishIndex)
             {
-                _currentStep++;
-                UpdateStepUI(animateDirection: 1);
+                ApplySelection();
+                DialogResult = true;
+                Close();
                 return;
             }
 
-            ApplySelection();
-            DialogResult = true;
-            Close();
+            NavigateTo(_currentStep + 1, direction: 1);
         }
 
         private void BtnPreviousStep_Click(object sender, RoutedEventArgs e)
         {
-            if (_currentStep <= 0) return;
-            _currentStep--;
-            UpdateStepUI(animateDirection: -1);
+            if (_currentStep <= WelcomeIndex) return;
+            NavigateTo(_currentStep - 1, direction: -1);
+        }
+
+        private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+        {
+            if (_suppressNavSelection) return;
+
+            int target = ResolveTargetFromNavItem(args.SelectedItem as NavigationViewItem);
+            if (target == _currentStep) return;
+
+            // 强制隐私门禁: 如果当前在步骤 0 且未勾选, 仅允许返回欢迎页, 不允许跳到后续步骤
+            if (_currentStep == 0 && CheckBoxPrivacyAccepted.IsChecked != true && target > 0)
+            {
+                MessageBox.Show(this,
+                    "请先勾选\"我已阅读并同意《隐私协议》\"后再继续。",
+                    "需要同意隐私协议",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                SyncNavSelection();
+                return;
+            }
+
+            int direction = target > _currentStep ? 1 : -1;
+            NavigateTo(target, direction);
+        }
+
+        private int ResolveTargetFromNavItem(NavigationViewItem item)
+        {
+            if (item == null) return _currentStep;
+            if (item == NavItemWelcome) return WelcomeIndex;
+            if (item == NavItemFinish) return FinishIndex;
+            for (int i = 0; i < _navItems.Length; i++)
+            {
+                if (_navItems[i] == item) return i;
+            }
+            return _currentStep;
+        }
+
+        private void NavigateTo(int target, int direction)
+        {
+            if (target < WelcomeIndex) target = WelcomeIndex;
+            if (target > FinishIndex) target = FinishIndex;
+            _currentStep = target;
+            UpdateView(direction);
+            SyncNavSelection();
+        }
+
+        private void SyncNavSelection()
+        {
+            _suppressNavSelection = true;
+            try
+            {
+                if (_currentStep == WelcomeIndex)
+                    NavView.SelectedItem = NavItemWelcome;
+                else if (_currentStep == FinishIndex)
+                    NavView.SelectedItem = NavItemFinish;
+                else
+                    NavView.SelectedItem = _navItems[_currentStep];
+            }
+            finally
+            {
+                _suppressNavSelection = false;
+            }
         }
 
         private void CheckBoxPrivacyAccepted_Changed(object sender, RoutedEventArgs e)
@@ -328,11 +419,16 @@ namespace Ink_Canvas.Windows
             {
                 System.Diagnostics.Debug.WriteLine(ex);
             }
+            finally
+            {
+                _privacyDialogShown = false;
+            }
         }
 
         private void UpdateConfirmEnabled()
         {
             if (BtnConfirm == null || CheckBoxPrivacyAccepted == null) return;
+            // 在步骤 0 时, 必须先勾选隐私协议才能继续
             BtnConfirm.IsEnabled = _currentStep != 0 || CheckBoxPrivacyAccepted.IsChecked == true;
         }
 
@@ -357,35 +453,70 @@ namespace Ink_Canvas.Windows
             }
         }
 
-        private void UpdateStepUI(int animateDirection, bool instant = false)
+        private void UpdateView(int animateDirection, bool instant = false)
         {
             try
             {
-                for (int i = 0; i < _stepPanels.Length; i++)
+                bool isWelcome = _currentStep == WelcomeIndex;
+                bool isFinish = _currentStep == FinishIndex;
+                bool isStep = !isWelcome && !isFinish;
+
+                WelcomePanel.Visibility = isWelcome ? Visibility.Visible : Visibility.Collapsed;
+                StepScrollViewer.Visibility = isStep ? Visibility.Visible : Visibility.Collapsed;
+                FinishPanel.Visibility = isFinish ? Visibility.Visible : Visibility.Collapsed;
+
+                if (isStep)
                 {
-                    _stepPanels[i].Visibility = i == _currentStep ? Visibility.Visible : Visibility.Collapsed;
+                    for (int i = 0; i < _stepPanels.Length; i++)
+                    {
+                        _stepPanels[i].Visibility = i == _currentStep ? Visibility.Visible : Visibility.Collapsed;
+                    }
+
+                    StepIndicatorText.Text = $"步骤 {_currentStep + 1} / {StepCount}";
+                    ApplyStepMeta(_currentStep);
+
+                    if (StepScrollViewer != null) StepScrollViewer.ScrollToTop();
                 }
 
-                StepIndicatorText.Text = $"步骤 {_currentStep + 1} / {StepCount}";
-                FooterStepText.Text = $"{_currentStep + 1} / {StepCount}";
-                BtnPreviousStep.Visibility = _currentStep > 0 ? Visibility.Visible : Visibility.Collapsed;
+                if (isFinish)
+                {
+                    BuildFinishSummary();
+                }
 
-                ApplyStepMeta(_currentStep);
+                // 底部进度: 欢迎=0, 各步骤按比例, 完成=100
+                double progress;
+                if (isWelcome) progress = 0;
+                else if (isFinish) progress = 100;
+                else progress = (_currentStep + 1) / (double)(StepCount + 1) * 100.0;
 
-                BtnConfirmText.Text = _currentStep == MaxStepIndex ? "保存并开始使用" : "下一步";
-                BtnConfirmIcon.Icon = _currentStep == MaxStepIndex
-                    ? SegoeFluentIcons.Accept
-                    : SegoeFluentIcons.ChevronRight;
+                AnimateProgress(progress, instant);
+
+                // Footer 步骤计数
+                if (isWelcome) FooterStepText.Text = string.Empty;
+                else if (isFinish) FooterStepText.Text = $"{StepCount} / {StepCount} · 完成";
+                else FooterStepText.Text = $"{_currentStep + 1} / {StepCount}";
+
+                // 上一步按钮: 欢迎页隐藏
+                BtnPreviousStep.Visibility = isWelcome ? Visibility.Collapsed : Visibility.Visible;
+
+                // 主按钮: 欢迎页隐藏(由欢迎页自身的"开始"按钮负责)
+                BtnConfirm.Visibility = isWelcome ? Visibility.Collapsed : Visibility.Visible;
+                if (isFinish)
+                {
+                    BtnConfirmText.Text = "保存并开始使用";
+                    BtnConfirmIcon.Icon = SegoeFluentIcons.Accept;
+                }
+                else
+                {
+                    BtnConfirmText.Text = "下一步";
+                    BtnConfirmIcon.Icon = SegoeFluentIcons.ChevronRight;
+                }
 
                 UpdateConfirmEnabled();
 
-                if (StepScrollViewer != null) StepScrollViewer.ScrollToTop();
-
-                AnimateProgress(instant);
-
                 if (!instant && animateDirection != 0)
                 {
-                    AnimateStepSlide(animateDirection);
+                    AnimateContentSlide(animateDirection);
                 }
                 else
                 {
@@ -401,81 +532,135 @@ namespace Ink_Canvas.Windows
 
         private void ApplyStepMeta(int step)
         {
-            string title; string subtitle; FontIconData icon;
+            string title; string subtitle;
             switch (step)
             {
                 case 0:
                     title = "启动与隐私";
                     subtitle = "遥测、隐私协议、自动更新与崩溃处理。";
-                    icon = SegoeFluentIcons.Shield;
                     break;
                 case 1:
                     title = "画板与墨迹";
                     subtitle = "光标、压感、墨迹显示与墨迹纠正。";
-                    icon = SegoeFluentIcons.Edit;
                     break;
                 case 2:
                     title = "手势操作";
                     subtitle = "双指缩放/平移、手掌擦等。";
-                    icon = SegoeFluentIcons.TouchPointer;
                     break;
                 case 3:
                     title = "个性化";
                     subtitle = "主题、启动动画、托盘、快速面板与快捷键。";
-                    icon = SegoeFluentIcons.Personalize;
                     break;
                 case 4:
                     title = "PowerPoint 联动";
                     subtitle = "放映联动、墨迹与截屏自动保存、时间胶囊。";
-                    icon = SegoeFluentIcons.Slideshow;
                     break;
                 case 5:
                     title = "自动化与截图";
                     subtitle = "自动收纳、墨迹自动保存、悬浮窗拦截与截图保存。";
-                    icon = SegoeFluentIcons.Sync;
                     break;
                 case 6:
                     title = "随机点名";
                     subtitle = "点名窗口选项。";
-                    icon = SegoeFluentIcons.People;
                     break;
                 case 7:
                     title = "高级选项";
                     subtitle = "日志等高级配置。";
-                    icon = SegoeFluentIcons.Settings;
                     break;
                 default:
-                    title = string.Empty; subtitle = string.Empty; icon = SegoeFluentIcons.Home;
+                    title = string.Empty; subtitle = string.Empty;
                     break;
             }
 
             StepTitleText.Text = title;
             StepSubtitleText.Text = subtitle;
-            StepIcon.Icon = icon;
         }
 
-        private void AnimateProgress(bool instant)
+        private void BuildFinishSummary()
+        {
+            FinishSummaryHost.Children.Clear();
+
+            string telemetryText;
+            switch (ComboBoxTelemetryUploadLevel.SelectedIndex)
+            {
+                case 0: telemetryText = "不上传任何匿名使用数据"; break;
+                case 1: telemetryText = "基础(崩溃信息、版本与系统信息)"; break;
+                default: telemetryText = "可选(功能使用频率等)"; break;
+            }
+
+            string themeText;
+            switch (ComboBoxTheme.SelectedIndex)
+            {
+                case 0: themeText = "浅色"; break;
+                case 1: themeText = "深色"; break;
+                default: themeText = "跟随系统"; break;
+            }
+
+            AddSummaryRow(SegoeFluentIcons.Shield, "遥测级别", telemetryText);
+            AddSummaryRow(SegoeFluentIcons.Sync, "自动检查更新", BoolText(CardAutoUpdate.IsOn));
+            AddSummaryRow(SegoeFluentIcons.Personalize, "应用主题", themeText);
+            AddSummaryRow(SegoeFluentIcons.Slideshow, "PowerPoint / WPS 联动", BoolText(CardPptSupport.IsOn));
+            AddSummaryRow(SegoeFluentIcons.TouchPointer, "双指缩放 / 平移",
+                $"{BoolText(CardTwoFingerZoom.IsOn)} / {BoolText(CardTwoFingerTranslate.IsOn)}");
+            AddSummaryRow(SegoeFluentIcons.Pin, "系统托盘图标", BoolText(CardEnableTrayIcon.IsOn));
+            AddSummaryRow(SegoeFluentIcons.Document, "启用日志", BoolText(CardIsLogEnabled.IsOn));
+        }
+
+        private static string BoolText(bool value) => value ? "已启用" : "已关闭";
+
+        private void AddSummaryRow(FontIconData icon, string label, string value)
+        {
+            var grid = new Grid { Margin = new Thickness(0, 2, 0, 2) };
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(28) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(180) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+            var fontIcon = new FontIcon { Icon = icon, FontSize = 16, Opacity = 0.85 };
+            Grid.SetColumn(fontIcon, 0);
+            grid.Children.Add(fontIcon);
+
+            var labelBlock = new TextBlock
+            {
+                Text = label,
+                Opacity = 0.85,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            Grid.SetColumn(labelBlock, 1);
+            grid.Children.Add(labelBlock);
+
+            var valueBlock = new TextBlock
+            {
+                Text = value,
+                FontWeight = FontWeights.SemiBold,
+                TextWrapping = TextWrapping.Wrap,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            Grid.SetColumn(valueBlock, 2);
+            grid.Children.Add(valueBlock);
+
+            FinishSummaryHost.Children.Add(grid);
+        }
+
+        private void AnimateProgress(double targetPercent, bool instant)
         {
             try
             {
-                double total = ActualWidth > 0 ? ActualWidth : Width;
-                double trackWidth = Math.Max(0, Math.Min(420, total - 56 * 2 - 320));
-                double progress = (_currentStep + 1) / (double)StepCount;
-                double targetWidth = trackWidth * progress;
+                if (StepProgressBar == null) return;
 
                 if (instant)
                 {
-                    ProgressFill.Width = targetWidth;
+                    StepProgressBar.BeginAnimation(System.Windows.Controls.Primitives.RangeBase.ValueProperty, null);
+                    StepProgressBar.Value = targetPercent;
                     return;
                 }
 
                 var anim = new DoubleAnimation
                 {
-                    To = targetWidth,
+                    To = targetPercent,
                     Duration = TimeSpan.FromMilliseconds(320),
                     EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
                 };
-                ProgressFill.BeginAnimation(WidthProperty, anim);
+                StepProgressBar.BeginAnimation(System.Windows.Controls.Primitives.RangeBase.ValueProperty, anim);
             }
             catch (Exception ex)
             {
@@ -483,7 +668,7 @@ namespace Ink_Canvas.Windows
             }
         }
 
-        private void AnimateStepSlide(int direction)
+        private void AnimateContentSlide(int direction)
         {
             // direction: 1 = 前进 (新内容从右滑入), -1 = 后退 (从左滑入)
             double from = direction > 0 ? 36 : -36;
@@ -508,12 +693,6 @@ namespace Ink_Canvas.Windows
 
             StepHostTransform.BeginAnimation(TranslateTransform.XProperty, slide);
             StepHost.BeginAnimation(OpacityProperty, fade);
-        }
-
-        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
-        {
-            base.OnRenderSizeChanged(sizeInfo);
-            AnimateProgress(instant: true);
         }
     }
 }
