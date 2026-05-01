@@ -21,7 +21,7 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={autopf}\{#MyAppName}
+DefaultDirName={localappdata}\{#MyAppName}
 UninstallDisplayIcon={app}\{#MyAppExeName}
 ChangesAssociations=yes
 DefaultGroupName={#MyAppName}
@@ -41,10 +41,10 @@ Name: "english"; MessagesFile: "compiler:Languages\EnglishBritish.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "dotnet6"; Description: "下载并安装 .NET Runtime 6 (运行本程序所需)"; GroupDescription: "运行时组件:"; Flags: unchecked
 
 [Files]
-Source: "release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "release\InkCanvasForClass.exe.config"; DestDir: "{app}"; Flags: ignoreversion
+Source: "release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; 注意：不要在任何共享系统文件上使用 "Flags: ignoreversion" 
 
 [Registry]
@@ -61,3 +61,90 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+
+[Code]
+var
+  DownloadPage: TDownloadWizardPage;
+
+function GetDotNet6DownloadUrl: String;
+begin
+  if IsWin64 then
+    Result := 'https://builds.dotnet.microsoft.com/dotnet/Runtime/6.0.36/dotnet-runtime-6.0.36-win-x64.exe'
+  else
+    Result := 'https://builds.dotnet.microsoft.com/dotnet/Runtime/6.0.36/dotnet-runtime-6.0.36-win-x86.exe';
+end;
+
+function GetDotNet6InstallerName: String;
+begin
+  if IsWin64 then
+    Result := 'dotnet-runtime-6.0.36-win-x64.exe'
+  else
+    Result := 'dotnet-runtime-6.0.36-win-x86.exe';
+end;
+
+procedure InitializeWizard;
+begin
+  DownloadPage := CreateDownloadPage(SetupMessage(msgWizardPreparing), SetupMessage(msgPreparingDesc), nil);
+end;
+
+function NextButtonClick(CurPageID: Integer): Boolean;
+var
+  Error: String;
+begin
+  if CurPageID = wpReady then
+  begin
+    if IsTaskSelected('dotnet6') then
+    begin
+      WizardForm.StatusLabel.Caption := '正在下载 .NET Runtime 6...';
+      WizardForm.StatusLabel.Visible := True;
+      DownloadPage.Clear;
+      DownloadPage.Add(
+        GetDotNet6DownloadUrl,
+        GetDotNet6InstallerName, '');
+      DownloadPage.Show;
+      try
+        try
+          DownloadPage.Download;
+        except
+          if DownloadPage.AbortedByUser then
+            Log('Aborted by user.')
+          else
+          begin
+            Error := Format('%s: %s', [DownloadPage.LastBaseNameOrUrl, GetExceptionMessage]);
+            SuppressibleMsgBox(AddPeriod(Error), mbCriticalError, MB_OK, IDOK);
+          end;
+          Result := False;
+          Exit;
+        end;
+      finally
+        DownloadPage.Hide;
+        WizardForm.StatusLabel.Visible := False;
+      end;
+    end;
+  end;
+  Result := True;
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+var
+  ResultCode: Integer;
+  DotNetInstallerPath: String;
+begin
+  if CurStep = ssPostInstall then
+  begin
+    if IsTaskSelected('dotnet6') then
+    begin
+      DotNetInstallerPath := ExpandConstant(Format('{tmp}\%s', [GetDotNet6InstallerName]));
+      if FileExists(DotNetInstallerPath) then
+      begin
+        WizardForm.StatusLabel.Caption := '正在安装 .NET Runtime 6...';
+        WizardForm.StatusLabel.Visible := True;
+        Log('Installing .NET Runtime 6...');
+        Exec(DotNetInstallerPath, '/install /quiet /norestart', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+        Log(Format('Installation completed with code: %d', [ResultCode]));
+        WizardForm.StatusLabel.Visible := False;
+        DeleteFile(DotNetInstallerPath);
+      end;
+    end;
+  end
+end;
