@@ -1,4 +1,3 @@
-using Ink_Canvas.Controls;
 using System;
 using System.Windows;
 using System.Windows.Media;
@@ -10,11 +9,6 @@ namespace Ink_Canvas.Helpers
     {
         private static UIElement ResolveAnimationTarget(UIElement element)
         {
-            if (element is BoardMenuFrame frame)
-            {
-                frame.ApplyTemplate();
-                return frame.AnimationTarget ?? element;
-            }
             return element;
         }
 

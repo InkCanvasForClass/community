@@ -2218,6 +2218,9 @@
   <data name="FloatingBar_GestureButton" xml:space="preserve">
     <value>手势</value>
   </data>
+  <data name="FloatingBar_ExitButton" xml:space="preserve">
+    <value>退出</value>
+  </data>
   <data name="FloatingBar_GesturePanelTitle" xml:space="preserve">
     <value>手势选项</value>
   </data>
