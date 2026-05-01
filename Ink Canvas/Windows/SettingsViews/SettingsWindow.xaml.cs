@@ -141,11 +141,25 @@ namespace Ink_Canvas.Windows.SettingsViews
                 {
                     0 => iNKORE.UI.WPF.Modern.ElementTheme.Light,
                     1 => iNKORE.UI.WPF.Modern.ElementTheme.Dark,
-                    _ => iNKORE.UI.WPF.Modern.ElementTheme.Default,
+                    _ => IsSystemThemeLight() ? iNKORE.UI.WPF.Modern.ElementTheme.Light : iNKORE.UI.WPF.Modern.ElementTheme.Dark,
                 };
                 iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, elementTheme);
             }
             catch { }
+        }
+
+        private static bool IsSystemThemeLight()
+        {
+            try
+            {
+                using (var themeKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(
+                    @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"))
+                {
+                    if (themeKey?.GetValue("SystemUsesLightTheme") is int v) return v == 1;
+                }
+            }
+            catch { }
+            return false;
         }
 
         #region 修复触摸屏鼠标指针消失问题
