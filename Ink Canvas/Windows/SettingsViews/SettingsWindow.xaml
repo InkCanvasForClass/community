@@ -256,6 +256,11 @@
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}"/>
                     </ui:NavigationViewItem.Icon>
+                    <ui:NavigationViewItem.InfoBadge>
+                        <ui:InfoBadge Style="{DynamicResource AttentionDotInfoBadgeStyle}"
+                                      MinWidth="8" MinHeight="8"
+                                      Visibility="Collapsed"/>
+                    </ui:NavigationViewItem.InfoBadge>
                 </ui:NavigationViewItem>
 
                 <!-- 实验性选项 -->

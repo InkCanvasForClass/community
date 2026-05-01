@@ -27,6 +27,7 @@ namespace Ink_Canvas.Windows.SettingsViews
         private bool _wasMaximized = false;
 
         private bool _isNavigating = false;
+        private bool _updateBadgeDismissed = false;
 
         public SettingsWindow()
         {
@@ -76,6 +77,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 SetMaxSizeAndCenter();
                 RegisterDpiChangedListener();
                 LoadPluginSettingsPages();
+                UpdateUpdateBadgeVisibility();
             };
 
             this.Closed += (sender, e) =>
@@ -290,6 +292,12 @@ namespace Ink_Canvas.Windows.SettingsViews
                         pluginSettingsPage.CurrentPlugin = pluginInfo;
                     }
                     NavigationViewControl.Header = selectedItem.Content;
+
+                    if (tag == "UpdatePage")
+                    {
+                        _updateBadgeDismissed = true;
+                        UpdateUpdateBadgeVisibility();
+                    }
                 }
             }
         }
@@ -540,6 +548,22 @@ namespace Ink_Canvas.Windows.SettingsViews
         public NavigationView GetNavigationView()
         {
             return NavigationViewControl;
+        }
+
+        public void UpdateUpdateBadgeVisibility()
+        {
+            try
+            {
+                var mainWindow = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
+                bool hasUpdate = mainWindow != null && !string.IsNullOrEmpty(mainWindow.AvailableLatestVersion);
+                var item = FindNavigationViewItemByTag("UpdatePage");
+                var badge = item?.InfoBadge;
+                if (badge != null)
+                {
+                    badge.Visibility = (hasUpdate && !_updateBadgeDismissed) ? Visibility.Visible : Visibility.Collapsed;
+                }
+            }
+            catch { }
         }
     }
 }
