@@ -927,16 +927,31 @@
                                                                  Label="{i18n:I18n Key=Board_Gesture}"
                                                                  IconGeometry="F0 M24,24z M0,0z M7.82154,10.0753L7.82154,3.74613C7.82154,3.06603 8.08946,2.40655 8.57377,1.92224 9.05808,1.43793 9.70726,1.17001 10.3977,1.17001 11.0881,1.17001 11.7372,1.43793 12.2216,1.92224 12.7059,2.40655 12.9738,3.05573 12.9738,3.74613L12.9738,6.37308C13.1415,6.33947 13.3139,6.32225 13.489,6.32225 14.1794,6.32225 14.8286,6.59016 15.3129,7.07447 15.4484,7.21001 15.567,7.35845 15.6675,7.5171 15.9551,7.40916 16.2634,7.35269 16.5803,7.35269 17.2707,7.35269 17.9199,7.62061 18.4042,8.10492 18.5461,8.24683 18.6695,8.4029 18.7729,8.57001 19.6856,8.26338 20.7674,8.45871 21.4647,9.15599 21.949,9.6403 22.2169,10.2998 22.2169,10.9799L22.2169,15.6169C22.2169,17.5438 21.4647,19.3574 20.1045,20.7176 18.7443,22.0778 16.9307,22.83 15.0038,22.83L13.149,22.83 13.1799,22.8094 12.8398,22.8094C11.7682,22.7579 10.7068,22.4694 9.75878,21.9541 8.70773,21.3874 7.81124,20.563 7.15175,19.5738L6.94566,19.2647C6.60562,18.7494 5.49273,16.8019 3.52458,13.3087 3.19484,12.7213 3.1021,12.0412 3.27727,11.3818 3.45245,10.7326 3.86463,10.1761 4.44168,9.83608 5.00842,9.49604 5.66791,9.35177 6.31709,9.43421 6.86548,9.50385 7.39181,9.7279 7.82154,10.0753z M10.037,3.38547C10.1297,3.28243 10.2637,3.23091 10.3977,3.23091 10.5316,3.23091 10.6656,3.29273 10.7583,3.38547 10.8614,3.47821 10.9129,3.61217 10.9129,3.74613L10.9129,11.4745C10.9129,12.0412 11.3766,12.5049 11.9433,12.5049 12.5101,12.5049 12.9738,12.0412 12.9738,11.4745L12.9738,8.89836C12.9738,8.7644 13.0356,8.63045 13.1283,8.53771 13.2211,8.43466 13.355,8.38314 13.489,8.38314 13.623,8.38314 13.7569,8.44497 13.8497,8.53771 13.9527,8.63045 14.0042,8.7644 14.0042,8.89836L14.0042,11.4745C14.0042,12.0412 14.4679,12.5049 15.0347,12.5049 15.6014,12.5049 16.0651,12.0412 16.0651,11.4745L16.0651,9.92881C16.0651,9.79485 16.1269,9.66089 16.2197,9.56815 16.3124,9.46511 16.4464,9.41359 16.5803,9.41359 16.7143,9.41359 16.8483,9.47541 16.941,9.56815 17.044,9.66089 17.0956,9.79485 17.0956,9.92881L17.0956,10.5869C17.0752,10.7163 17.0646,10.8477 17.0646,10.9799 17.0646,11.0661 17.0754,11.1499 17.0956,11.2301L17.0956,11.4745C17.0956,12.0412 17.5593,12.5049 18.126,12.5049 18.6928,12.5049 19.1565,12.0412 19.1565,11.4745L19.1565,10.8128C19.1834,10.7399 19.2266,10.6727 19.2801,10.6192 19.4759,10.4234 19.8159,10.4234 20.0117,10.6192 20.1148,10.712 20.1663,10.8459 20.1663,10.9799L20.1663,15.6169C20.1663,16.9977 19.6408,18.296 18.6618,19.2647 17.6829,20.2333 16.3949,20.7691 15.0141,20.7691L13.1593,20.7691C12.3143,20.7691 11.4796,20.5527 10.7274,20.1509 9.98548,19.749 9.3363,19.1616 8.8726,18.4506L8.66651,18.1415C8.35737,17.6675 7.23419,15.7096 5.31756,12.2988 5.24543,12.1752 5.23512,12.0412 5.26604,11.9073 5.30725,11.7733 5.38969,11.6703 5.50304,11.5981 5.66791,11.4951 5.874,11.4539 6.06978,11.4745 6.26557,11.5054 6.45105,11.5878 6.59531,11.7321L8.11007,13.2469C8.49419,13.631 9.10425,13.648 9.50833,13.2978 9.73651,13.1084 9.88244,12.8229 9.88244,12.5049L9.88244,3.74613C9.88244,3.61217,9.94426,3.47821,10.037,3.38547z M2.99905,6.31195L1.78313,4.65293 2.61779,4.04497C3.46275,3.4267,4.37985,2.89087,5.33817,2.46838L6.27587,2.0459 7.12084,3.93162 6.18313,4.3541C5.35878,4.72506,4.56533,5.17846,3.83372,5.71429L2.99905,6.32225 2.99905,6.31195z M18.2806,5.20935L19.1565,5.75549 20.259,4.01404 19.3831,3.4679C18.1157,2.67446,16.7452,2.0768,15.3026,1.68523L14.303,1.41731 13.7672,3.40607 14.7667,3.67399C16.0033,4.00373,17.1883,4.51895,18.2806,5.20935z"
                                                                  ButtonMouseUp="TwoFingerGestureBorder_MouseUp" />
-                                            <localControls:BoardMenuFrame x:Name="BoardTwoFingerGestureBorder"
-                                                ClipToBounds="True"
-                                                PlacementTarget="{Binding ElementName=BoardGesture}"
-                                                Title="{i18n:I18n Key=Board_GestureOptions}"
-                                                PanelCornerRadius="8"
-                                                HeaderCornerRadius="8,8,0,0"
-                                                PanelBackground="{DynamicResource FloatBarBackground}"
-                                                Opacity="1"
-                                                CloseMouseDown="Border_MouseDown"
-                                                CloseMouseUp="CloseBordertools_MouseUp">
+                                            <Border>
+                                                <Grid Width="0" Margin="0,0,0,5" RenderTransformOrigin="0,1">
+                                                    <Border ClipToBounds="True" x:Name="BoardTwoFingerGestureBorder"
+                                                        Visibility="Collapsed"
+                                                        Margin="-115,-161,-55,50"
+                                                        CornerRadius="8"
+                                                        Background="{DynamicResource FloatBarBackground}" Opacity="1" BorderBrush="#2563eb"
+                                                        BorderThickness="1">
+                                                        <ikw:SimpleStackPanel Margin="0">
+                                                            <Border BorderBrush="#1e3a8a" BorderThickness="0,0,0,1"
+                                                                CornerRadius="8,8,0,0"
+                                                                Background="#2563eb" Margin="-1,-1,-1,1">
+                                                                <Grid Height="24">
+                                                                    <TextBlock Text="{i18n:I18n Key=Board_GestureOptions}" Margin="8,0,0,0" Foreground="White"
+                                                                        VerticalAlignment="Center" HorizontalAlignment="Left"
+                                                                        FontSize="11" FontWeight="Bold" />
+                                                                    <Image Margin="0,0,8,0"
+                                                                        Source="/Resources/new-icons/close-white.png"
+                                                                        RenderOptions.BitmapScalingMode="HighQuality"
+                                                                        Height="16" Width="16"
+                                                                        HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                                        MouseDown="Border_MouseDown"
+                                                                        MouseUp="CloseBordertools_MouseUp" />
+                                                                </Grid>
+                                                            </Border>
                                                 <Viewbox Margin="8,0,8,0">
                                                         <ikw:SimpleStackPanel Margin="0">
                                                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="2"
@@ -1065,21 +1080,40 @@
                                                             </ikw:SimpleStackPanel>
                                                         </ikw:SimpleStackPanel>
                                                     </Viewbox>
-                                            </localControls:BoardMenuFrame>
+                                                        </ikw:SimpleStackPanel>
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
                                     <controls:BoardToolbarButton x:Name="BoardChangeBackgroundColorBtn"
                                                                  Position="Last"
                                                                  Label="{i18n:I18n Key=Board_Background}"
                                                                  IconGeometry="F0 M24,24z M0,0z M4.71815,3.98345C6.64142,2.23541 9.19629,1.17001 12,1.17001 17.9812,1.17001 22.83,6.01877 22.83,12 22.83,17.9813 17.9812,22.83 12,22.83 11.6262,22.83 11.2568,22.8111 10.8927,22.7741 5.8167,22.2586 1.77699,18.2377 1.2325,13.1703 1.22536,13.1039 1.21882,13.0373 1.21289,12.9705 1.20871,12.9234 1.20483,12.8762 1.20125,12.8289 1.18054,12.5553 1.17,12.2789 1.17,12 1.17,9.41057 2.07878,7.03339 3.59479,5.17001 3.9391,4.74681 4.31473,4.35011 4.71815,3.98345z M12,20.83C16.8767,20.83 20.83,16.8767 20.83,12 20.83,7.12334 16.8767,3.17001 12,3.17001L12,20.83z"
                                                                  ButtonMouseUp="BoardChangeBackgroundColorBtn_MouseUp" />
-                                                <localControls:BoardMenuFrame x:Name="BackgroundPalette" Visibility="Collapsed"
-                                                        PlacementTarget="{Binding ElementName=BoardChangeBackgroundColorBtn}"
-                                                        PanelBackground="{DynamicResource SettingsPageBackground}"
-                                                        Opacity="1"
-                                                        PanelCornerRadius="8"
-                                                        HeaderCornerRadius="8,8,0,0"
-                                                        TitleFontSize="11"
-                                                        Title="背景设置"
-                                                        CloseMouseUp="CloseBordertools_MouseUp">
+                                                <Border>
+                                                    <Grid Width="0" Margin="0,0,0,5" RenderTransformOrigin="0,1">
+                                                        <Border ClipToBounds="True" x:Name="BackgroundPalette"
+                                                                Visibility="Collapsed"
+                                                                Margin="-115,-360,-55,50"
+                                                                CornerRadius="8"
+                                                                Background="{DynamicResource SettingsPageBackground}" Opacity="1" BorderBrush="#2563eb"
+                                                                BorderThickness="1">
+                                                            <ikw:SimpleStackPanel Margin="0">
+                                                                <Border BorderBrush="#1e3a8a" BorderThickness="0,0,0,1"
+                                                                        CornerRadius="8,8,0,0"
+                                                                        Background="#2563eb" Margin="-1,-1,-1,1">
+                                                                    <Grid Height="24">
+                                                                        <TextBlock Text="背景设置" Margin="8,0,0,0" Foreground="White"
+                                                                                   VerticalAlignment="Center" HorizontalAlignment="Left"
+                                                                                   FontSize="11" FontWeight="Bold" />
+                                                                        <Image Margin="0,0,8,0"
+                                                                               Source="/Resources/new-icons/close-white.png"
+                                                                               RenderOptions.BitmapScalingMode="HighQuality"
+                                                                               Height="16" Width="16"
+                                                                               HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                                               MouseDown="Border_MouseDown"
+                                                                               MouseUp="CloseBordertools_MouseUp" />
+                                                                    </Grid>
+                                                                </Border>
                                                     <StackPanel>
                                                         <StackPanel Margin="8">
                                                             <TextBlock Text="白板模式"
@@ -1182,7 +1216,10 @@
                                                                     Click="ApplyBackgroundColorBtn_Click" />
                                                         </StackPanel>
                                                     </StackPanel>
-                                                </localControls:BoardMenuFrame>
+                                                            </ikw:SimpleStackPanel>
+                                                        </Border>
+                                                    </Grid>
+                                                </Border>
                                 </ikw:SimpleStackPanel>
                             </Border>
 
@@ -1965,13 +2002,39 @@
                                                                  Label="{i18n:I18n Key=Board_Tools}"
                                                                  IconGeometry="F1 M24,24z M0,0z M3.336,1.17001C2.13975,1.17001,1.17,2.13976,1.17,3.33601L1.17,8.75101C1.17,9.94726,2.13975,10.917,3.336,10.917L8.751,10.917C9.94725,10.917,10.917,9.94726,10.917,8.75101L10.917,3.33601C10.917,2.13976,9.94725,1.17001,8.751,1.17001L3.336,1.17001z M15.249,1.17001C14.0527,1.17001,13.083,2.13976,13.083,3.33601L13.083,8.75101C13.083,9.94726,14.0527,10.917,15.249,10.917L20.664,10.917C21.8602,10.917,22.83,9.94726,22.83,8.75101L22.83,3.33601C22.83,2.13976,21.8602,1.17001,20.664,1.17001L15.249,1.17001z M3.336,13.083C2.13975,13.083,1.17,14.0528,1.17,15.249L1.17,20.664C1.17,21.8603,2.13975,22.83,3.336,22.83L8.751,22.83C9.94725,22.83,10.917,21.8603,10.917,20.664L10.917,15.249C10.917,14.0528,9.94725,13.083,8.751,13.083L3.336,13.083z M15.249,13.083C14.0527,13.083,13.083,14.0528,13.083,15.249L13.083,20.664C13.083,21.8603,14.0527,22.83,15.249,22.83L20.664,22.83C21.8602,22.83,22.83,21.8603,22.83,20.664L22.83,15.249C22.83,14.0528,21.8602,13.083,20.664,13.083L15.249,13.083z"
                                                                  ButtonMouseUp="SymbolIconTools_MouseUp" />
-                                            <localControls:BoardMenuFrame ClipToBounds="True" x:Name="BoardBorderTools"
-                                                    PlacementTarget="{Binding ElementName=BoardTools}"
-                                                    PanelCornerRadius="5" HeaderCornerRadius="6,6,0,0" TitleFontSize="11"
-                                                    PanelBackground="{DynamicResource SettingsPageBackground}" Opacity="1"
-                                                    Title="{i18n:I18n Key=Tools_MoreFeaturesTitle}"
-                                                    CloseMouseDown="Border_MouseDown"
-                                                    CloseMouseUp="CloseBordertools_MouseUp">
+                                            <Border>
+                                                <Grid Width="0" Margin="0,0,0,5" RenderTransformOrigin="0,1">
+                                                    <Grid.RenderTransform>
+                                                        <TransformGroup>
+                                                            <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
+                                                            <SkewTransform />
+                                                            <RotateTransform />
+                                                            <TranslateTransform />
+                                                        </TransformGroup>
+                                                    </Grid.RenderTransform>
+                                                    <Border ClipToBounds="True" x:Name="BoardBorderTools"
+                                                            Visibility="Collapsed"
+                                                            Margin="-80,-160,-39,50"
+                                                            CornerRadius="5" Background="{DynamicResource SettingsPageBackground}" Opacity="1"
+                                                            BorderThickness="1"
+                                                            BorderBrush="#2563eb">
+                                                        <ikw:SimpleStackPanel Margin="-1,0,0,0">
+                                                            <Border BorderBrush="#1e3a8a" BorderThickness="0,0,0,1"
+                                                                    CornerRadius="6,6,0,0"
+                                                                    Background="#2563eb" Margin="-1,-1,-1,1">
+                                                                <Grid Height="24">
+                                                                    <TextBlock Text="{i18n:I18n Key=Tools_MoreFeaturesTitle}" Margin="8,0,0,0" Foreground="White"
+                                                                               VerticalAlignment="Center" HorizontalAlignment="Left"
+                                                                               FontSize="11" FontWeight="Bold" />
+                                                                    <Image Margin="0,0,8,0"
+                                                                           Source="/Resources/new-icons/close-white.png"
+                                                                           RenderOptions.BitmapScalingMode="HighQuality"
+                                                                           Height="16" Width="16"
+                                                                           HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                                           MouseDown="Border_MouseDown"
+                                                                           MouseUp="CloseBordertools_MouseUp" />
+                                                                </Grid>
+                                                            </Border>
                                                 <ikw:SimpleStackPanel Margin="10,3,10,2" Spacing="-2">
                                                         <ikw:SimpleStackPanel.Resources>
                                                             <Style TargetType="Label" BasedOn="{StaticResource AutoFitToolPopupLabel8}" />
@@ -1995,7 +2058,10 @@
                                                             <controls:ToolMenuButton x:Name="BoardSettingsToolBtn" ButtonMouseUp="SymbolIconSettings_Click" Label="{i18n:I18n Key=Tools_Settings}" />
                                                         </ikw:SimpleStackPanel>
                                                     </ikw:SimpleStackPanel>
-                                            </localControls:BoardMenuFrame>
+                                                        </ikw:SimpleStackPanel>
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
                                     <controls:BoardToolbarButton x:Name="BoardExit"
                                                                  Position="Last"
                                                                  Label="{i18n:I18n Key=Board_Exit}"
