@@ -78,6 +78,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 RegisterDpiChangedListener();
                 LoadPluginSettingsPages();
                 UpdateUpdateBadgeVisibility();
+                _ = PreloadAllPagesAsync();
             };
 
             this.Closed += (sender, e) =>
@@ -688,6 +689,42 @@ namespace Ink_Canvas.Windows.SettingsViews
         public NavigationView GetNavigationView()
         {
             return NavigationViewControl;
+        }
+
+        private async System.Threading.Tasks.Task PreloadAllPagesAsync()
+        {
+            try
+            {
+                var tags = _pageTypes.Keys.ToList();
+                foreach (var tag in tags)
+                {
+                    if (_pages.ContainsKey(tag))
+                        continue;
+                    if (!_pageTypes.TryGetValue(tag, out var type))
+                        continue;
+                    if (type == typeof(PluginSettingsPage))
+                        continue;
+
+                    await Dispatcher.InvokeAsync(() =>
+                    {
+                        try
+                        {
+                            if (_pages.ContainsKey(tag))
+                                return;
+                            var page = Activator.CreateInstance(type);
+                            _pages[tag] = page;
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"预加载设置页面 {tag} 失败: {ex.Message}");
+                        }
+                    }, System.Windows.Threading.DispatcherPriority.Background);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"异步预加载设置页面时出错: {ex.Message}");
+            }
         }
 
         public void UpdateUpdateBadgeVisibility()
