@@ -108,6 +108,8 @@ namespace Ink_Canvas
         public int AutoStraightenLineThreshold { get; set; } = 80; // 直线自动拉直的长度阈值（像素）
         [JsonProperty("highPrecisionLineStraighten")]
         public bool HighPrecisionLineStraighten { get; set; } = true; // 是否启用高精度直线拉直
+        [JsonProperty("pauseStraightenLine")]
+        public bool PauseStraightenLine { get; set; } = false; // 是否启用停顿拉直（书写中停顿时自动拉直笔画）
         [JsonProperty("lineEndpointSnapping")]
         public bool LineEndpointSnapping { get; set; } = true; // 是否启用直线端点吸附
         [JsonProperty("lineEndpointSnappingThreshold")]

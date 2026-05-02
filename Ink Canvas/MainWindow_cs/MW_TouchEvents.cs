@@ -1,6 +1,7 @@
 using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -8,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Point = System.Windows.Point;
 
 namespace Ink_Canvas
@@ -53,6 +55,9 @@ namespace Ink_Canvas
         internal const int MouseRealtimeStrokeId = -100001;
         private readonly HashSet<int> _activeRealtimeTouchStrokeIds = new HashSet<int>();
         private readonly HashSet<int> _activeTouchStrokeIds = new HashSet<int>();
+
+        private readonly Dictionary<int, DispatcherTimer> _pauseStraightenTimers = new Dictionary<int, DispatcherTimer>();
+        private const int PauseStraightenDelayMs = 300;
 
         private sealed class OneEuroFilter
         {
@@ -762,6 +767,9 @@ namespace Ink_Canvas
                 || inkCanvas.EditingMode == InkCanvasEditingMode.Select) return;
 
             InitializeRealtimeBrushTipState(e.StylusDevice.Id, e);
+            CancelPauseStraightenTimer(e.StylusDevice.Id);
+            _pauseStraightenInkModeStartPos = e.GetPosition(inkCanvas);
+            _pauseStraightenInkModeTracking = true;
             TouchDownPointsList[e.StylusDevice.Id] = InkCanvasEditingMode.None;
         }
 
@@ -865,6 +873,9 @@ namespace Ink_Canvas
                 VisualCanvasList.Remove(e.StylusDevice.Id);
                 TouchDownPointsList.Remove(e.StylusDevice.Id);
                 CleanupRealtimeBrushTipState(e.StylusDevice.Id);
+                CancelPauseStraightenTimer(e.StylusDevice.Id);
+                CancelPauseStraightenTimer(-200001);
+                _pauseStraightenInkModeTracking = false;
                 if (StrokeVisualList.Count == 0 || VisualCanvasList.Count == 0 || TouchDownPointsList.Count == 0)
                 {
                     // 只清除手写笔预览相关的Canvas，不清除所有子元素
@@ -921,7 +932,14 @@ namespace Ink_Canvas
                     return;
                 }
 
-                if (GetTouchDownPointsList(e.StylusDevice.Id) != InkCanvasEditingMode.None) return;
+                if (GetTouchDownPointsList(e.StylusDevice.Id) != InkCanvasEditingMode.None)
+                {
+                    // Regular Ink mode — InkCanvas builds the stroke internally.
+                    // Track position for pause-straighten.
+                    if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink && drawingShapeMode == 0)
+                        ResetPauseStraightenTimerInkMode(e.GetPosition(inkCanvas));
+                    return;
+                }
                 try
                 {
                     if (e.StylusDevice.StylusButtons[1].StylusButtonState == StylusButtonState.Down) return;
@@ -937,6 +955,8 @@ namespace Ink_Canvas
                     foreach (var stylusPoint in stylusPointCollection)
                         strokeVisual.Add(new StylusPoint(stylusPoint.X, stylusPoint.Y, stylusPoint.PressureFactor));
                 }
+
+                ResetPauseStraightenTimer(e.StylusDevice.Id);
 
                 if (isHandledByRealtime)
                     strokeVisual.ForceRedraw();
@@ -985,6 +1005,124 @@ namespace Ink_Canvas
         private VisualCanvas GetVisualCanvas(int id)
         {
             return VisualCanvasList.TryGetValue(id, out var visualCanvas) ? visualCanvas : null;
+        }
+
+        private void ResetPauseStraightenTimer(int stylusId)
+        {
+            if (!Settings.Canvas.PauseStraightenLine) return;
+            Debug.WriteLine($"ResetPauseStraightenTimer: id={stylusId}");
+            if (_pauseStraightenTimers.TryGetValue(stylusId, out var existing))
+            {
+                existing.Stop();
+                existing.Start();
+                return;
+            }
+            var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(PauseStraightenDelayMs) };
+            var capturedId = stylusId;
+            timer.Tick += (s, e) =>
+            {
+                timer.Stop();
+                _pauseStraightenTimers.Remove(capturedId);
+                Debug.WriteLine($"PauseStraightenTimer fired: id={capturedId}");
+                TryPauseStraighten(capturedId);
+            };
+            _pauseStraightenTimers[stylusId] = timer;
+            timer.Start();
+        }
+
+        private void ResetPauseStraightenTimerInkMode(Point currentPos)
+        {
+            if (!Settings.Canvas.PauseStraightenLine) return;
+            const int inkModeId = -200001;
+            _pauseStraightenInkModeLastPos = currentPos;
+            if (_pauseStraightenTimers.TryGetValue(inkModeId, out var existing))
+            {
+                existing.Stop();
+                existing.Start();
+                return;
+            }
+            var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(PauseStraightenDelayMs) };
+            timer.Tick += (s, e) =>
+            {
+                timer.Stop();
+                _pauseStraightenTimers.Remove(inkModeId);
+                TryPauseStraightenInkMode();
+            };
+            _pauseStraightenTimers[inkModeId] = timer;
+            timer.Start();
+        }
+
+        private Point _pauseStraightenInkModeLastPos;
+        private Point _pauseStraightenInkModeStartPos;
+        private bool _pauseStraightenInkModeTracking;
+
+        private void TryPauseStraightenInkMode()
+        {
+            if (!Settings.Canvas.PauseStraightenLine) return;
+            if (!_pauseStraightenInkModeTracking) return;
+            if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink) return;
+            if (drawingShapeMode != 0) return;
+
+            var start = _pauseStraightenInkModeStartPos;
+            var end = _pauseStraightenInkModeLastPos;
+            double lineLength = GetDistance(start, end);
+            if (lineLength < 2) return;
+
+            // Commit current stroke by briefly switching mode
+            inkCanvas.EditingMode = InkCanvasEditingMode.None;
+            inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+
+            // The just-committed stroke should now be last in inkCanvas.Strokes
+            if (inkCanvas.Strokes.Count == 0) return;
+            var stroke = inkCanvas.Strokes[inkCanvas.Strokes.Count - 1];
+            if (stroke.StylusPoints.Count < 2) return;
+
+            var newPoints = new StylusPointCollection();
+            newPoints.Add(new StylusPoint(start.X, start.Y, 0.5f));
+            if (lineLength > 100)
+            {
+                newPoints.Add(new StylusPoint(start.X + (end.X - start.X) / 3.0, start.Y + (end.Y - start.Y) / 3.0, 0.5f));
+                newPoints.Add(new StylusPoint(start.X + (end.X - start.X) * 2.0 / 3.0, start.Y + (end.Y - start.Y) * 2.0 / 3.0, 0.5f));
+            }
+            newPoints.Add(new StylusPoint(end.X, end.Y, 0.5f));
+            stroke.StylusPoints = newPoints;
+
+            _pauseStraightenInkModeTracking = false;
+        }
+
+        private void CancelPauseStraightenTimer(int stylusId)
+        {
+            if (_pauseStraightenTimers.TryGetValue(stylusId, out var timer))
+            {
+                timer.Stop();
+                _pauseStraightenTimers.Remove(stylusId);
+            }
+        }
+
+        private void TryPauseStraighten(int stylusId)
+        {
+            if (!Settings.Canvas.PauseStraightenLine) { Debug.WriteLine("PauseStraighten: disabled"); return; }
+            var strokeVisual = StrokeVisualList.TryGetValue(stylusId, out var sv) ? sv : null;
+            if (strokeVisual?.Stroke == null) { Debug.WriteLine($"PauseStraighten: no stroke for id={stylusId}"); return; }
+            var stroke = strokeVisual.Stroke;
+            Debug.WriteLine($"PauseStraighten: points={stroke.StylusPoints.Count}");
+            if (stroke.StylusPoints.Count < 2) return;
+
+            var start = stroke.StylusPoints[0].ToPoint();
+            var end = stroke.StylusPoints[stroke.StylusPoints.Count - 1].ToPoint();
+            double lineLength = GetDistance(start, end);
+            Debug.WriteLine($"PauseStraighten: length={lineLength:F1}, STRAIGHTENING!");
+
+            var newPoints = new StylusPointCollection();
+            newPoints.Add(new StylusPoint(start.X, start.Y, 0.5f));
+            if (lineLength > 100)
+            {
+                newPoints.Add(new StylusPoint(start.X + (end.X - start.X) / 3.0, start.Y + (end.Y - start.Y) / 3.0, 0.5f));
+                newPoints.Add(new StylusPoint(start.X + (end.X - start.X) * 2.0 / 3.0, start.Y + (end.Y - start.Y) * 2.0 / 3.0, 0.5f));
+            }
+            newPoints.Add(new StylusPoint(end.X, end.Y, 0.5f));
+            stroke.StylusPoints = newPoints;
+            strokeVisual.ForceRedraw();
         }
 
         /// <summary>
@@ -1191,6 +1329,7 @@ namespace Ink_Canvas
                     var touchId = e.TouchDevice.Id;
                     var p = e.GetTouchPoint(inkCanvas).Position;
                     _activeRealtimeTouchStrokeIds.Add(touchId);
+                    CancelPauseStraightenTimer(touchId);
                     InitializeRealtimeBrushTipStateFromPoint(touchId, p);
                     var sv = GetStrokeVisual(touchId);
                     TryAppendRealtimeVelocityBrushTipPoint(sv, touchId, p);
@@ -1214,6 +1353,7 @@ namespace Ink_Canvas
                     var touchId = e.TouchDevice.Id;
                     var p = e.GetTouchPoint(inkCanvas).Position;
                     _activeTouchStrokeIds.Add(touchId);
+                    CancelPauseStraightenTimer(touchId);
                     var sv = GetStrokeVisual(touchId);
                     sv.Add(new StylusPoint(p.X, p.Y, 0.5f));
                     sv.Redraw();
@@ -1348,6 +1488,7 @@ namespace Ink_Canvas
                     var sv = GetStrokeVisual(touchId);
                     if (TryAppendRealtimeVelocityBrushTipPoint(sv, touchId, p))
                         sv.ForceRedraw();
+                    ResetPauseStraightenTimer(touchId);
                 }
                 catch (Exception ex)
                 {
@@ -1364,6 +1505,7 @@ namespace Ink_Canvas
                     var sv = GetStrokeVisual(touchId);
                     sv.Add(new StylusPoint(p.X, p.Y, 0.5f));
                     sv.Redraw();
+                    ResetPauseStraightenTimer(touchId);
                 }
                 catch (Exception ex)
                 {
@@ -1424,6 +1566,7 @@ namespace Ink_Canvas
                     VisualCanvasList.Remove(touchId);
                     TouchDownPointsList.Remove(touchId);
                     CleanupRealtimeBrushTipState(touchId);
+                    CancelPauseStraightenTimer(touchId);
                     _activeRealtimeTouchStrokeIds.Remove(touchId);
                 }
             }
@@ -1452,6 +1595,7 @@ namespace Ink_Canvas
                     VisualCanvasList.Remove(touchId);
                     TouchDownPointsList.Remove(touchId);
                     CleanupRealtimeBrushTipState(touchId);
+                    CancelPauseStraightenTimer(touchId);
                     _activeTouchStrokeIds.Remove(touchId);
                 }
             }

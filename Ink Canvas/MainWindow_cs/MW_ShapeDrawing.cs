@@ -2517,6 +2517,7 @@ namespace Ink_Canvas
                 _isMouseRealtimeInking = true;
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
                 var p = e.GetPosition(inkCanvas);
+                CancelPauseStraightenTimer(MouseRealtimeStrokeId);
                 InitializeRealtimeBrushTipStateFromPoint(MouseRealtimeStrokeId, p);
                 var sv = GetStrokeVisual(MouseRealtimeStrokeId);
                 TryAppendRealtimeVelocityBrushTipPoint(sv, MouseRealtimeStrokeId, p);
@@ -2547,7 +2548,10 @@ namespace Ink_Canvas
             {
                 var sv = GetStrokeVisual(MouseRealtimeStrokeId);
                 if (TryAppendRealtimeVelocityBrushTipPoint(sv, MouseRealtimeStrokeId, e.GetPosition(inkCanvas)))
+                {
                     sv.ForceRedraw();
+                    ResetPauseStraightenTimer(MouseRealtimeStrokeId);
+                }
                 else
                 {
                     _isMouseRealtimeInking = false;
@@ -2612,6 +2616,7 @@ namespace Ink_Canvas
                     VisualCanvasList.Remove(MouseRealtimeStrokeId);
                     TouchDownPointsList.Remove(MouseRealtimeStrokeId);
                     CleanupRealtimeBrushTipState(MouseRealtimeStrokeId);
+                    CancelPauseStraightenTimer(MouseRealtimeStrokeId);
                     _isMouseRealtimeInking = false;
                 }
             }

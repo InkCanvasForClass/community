@@ -157,6 +157,13 @@
                                         OffContent="{DynamicResource Common_Off}"
                                         Toggled="ToggleSwitchHighPrecisionLineStraighten_Toggled" />
                             </ui:SettingsCard>
+                            <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_PauseStraightenLine}"
+                                    Description="{i18n:I18n Key=InkRecog_PauseStraightenHint}">
+                                <ui:ToggleSwitch x:Name="ToggleSwitchPauseStraightenLine"
+                                        OnContent="{DynamicResource Common_On}"
+                                        OffContent="{DynamicResource Common_Off}"
+                                        Toggled="ToggleSwitchPauseStraightenLine_Toggled" />
+                            </ui:SettingsCard>
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
