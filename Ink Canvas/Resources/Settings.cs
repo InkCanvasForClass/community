@@ -437,6 +437,14 @@ namespace Ink_Canvas
         public bool EnablePPTTimeCapsule { get; set; } = true;
         [JsonProperty("pptTimeCapsulePosition")]
         public int PPTTimeCapsulePosition { get; set; } = 1;
+        [JsonProperty("pptTimeCapsuleOpacity")]
+        public double PPTTimeCapsuleOpacity { get; set; } = 1.0;
+        [JsonProperty("pptTimeCapsuleScale")]
+        public double PPTTimeCapsuleScale { get; set; } = 1.0;
+        [JsonProperty("pptTimeCapsuleOffsetX")]
+        public double PPTTimeCapsuleOffsetX { get; set; } = 0;
+        [JsonProperty("pptTimeCapsuleOffsetY")]
+        public double PPTTimeCapsuleOffsetY { get; set; } = 0;
         [JsonProperty("useRotPptLink")]
         public bool UseRotPptLink { get; set; } = false;
         [JsonProperty("showPPTSidebarByDefault")]

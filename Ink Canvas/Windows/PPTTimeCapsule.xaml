@@ -111,7 +111,12 @@
                 Padding="16,8"
                 Width="120"
                 Cursor="Hand"
-                MouseLeftButtonDown="MainCapsule_MouseLeftButtonDown">
+                MouseLeftButtonDown="MainCapsule_MouseLeftButtonDown"
+                MouseMove="MainCapsule_MouseMove"
+                MouseLeftButtonUp="MainCapsule_MouseLeftButtonUp">
+            <Border.RenderTransform>
+                <TranslateTransform x:Name="CapsuleDragTransform"/>
+            </Border.RenderTransform>
             <Border.Background>
                 <SolidColorBrush x:Name="CapsuleBackgroundBrush" Color="#CCFFFFFF"/>
             </Border.Background>

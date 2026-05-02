@@ -1197,6 +1197,12 @@
   <data name="PPT_TimeCapsulePos_Center" xml:space="preserve">
     <value>Top center</value>
   </data>
+  <data name="PPT_TimeCapsuleOpacity" xml:space="preserve">
+    <value>Time capsule opacity:</value>
+  </data>
+  <data name="PPT_TimeCapsuleScale" xml:space="preserve">
+    <value>Time capsule scale:</value>
+  </data>
   <data name="PPT_ShowQuickPanelInShow" xml:space="preserve">
     <value>Show quick panel in PPT slide show</value>
   </data>

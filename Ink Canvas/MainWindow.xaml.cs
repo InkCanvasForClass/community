@@ -2747,6 +2747,8 @@ namespace Ink_Canvas
                 {
                     PPTTimeCapsuleContainer.Visibility = Visibility.Visible;
                     UpdatePPTTimeCapsulePosition();
+                    UpdatePPTTimeCapsuleOpacity();
+                    UpdatePPTTimeCapsuleScale();
                 }
                 else
                 {
@@ -2805,22 +2807,84 @@ namespace Ink_Canvas
                         PPTTimeCapsuleContainer.HorizontalAlignment = HorizontalAlignment.Left;
                         PPTTimeCapsuleContainer.VerticalAlignment = VerticalAlignment.Top;
                         PPTTimeCapsuleContainer.Margin = new Thickness(20, 20, 0, 0);
+                        PPTTimeCapsuleContainer.RenderTransformOrigin = new Point(0, 0);
                         break;
                     case 1: // 右上角
                         PPTTimeCapsuleContainer.HorizontalAlignment = HorizontalAlignment.Right;
                         PPTTimeCapsuleContainer.VerticalAlignment = VerticalAlignment.Top;
                         PPTTimeCapsuleContainer.Margin = new Thickness(0, 20, 20, 0);
+                        PPTTimeCapsuleContainer.RenderTransformOrigin = new Point(1, 0);
                         break;
                     case 2: // 顶部居中
                         PPTTimeCapsuleContainer.HorizontalAlignment = HorizontalAlignment.Center;
                         PPTTimeCapsuleContainer.VerticalAlignment = VerticalAlignment.Top;
                         PPTTimeCapsuleContainer.Margin = new Thickness(0, 20, 0, 0);
+                        PPTTimeCapsuleContainer.RenderTransformOrigin = new Point(0.5, 0);
                         break;
+                }
+
+                // 应用拖拽偏移
+                if (PPTTimeCapsule != null)
+                {
+                    PPTTimeCapsule.ApplyDragOffset(
+                        Settings.PowerPointSettings.PPTTimeCapsuleOffsetX,
+                        Settings.PowerPointSettings.PPTTimeCapsuleOffsetY);
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"更新PPT时间胶囊位置时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 更新PPT时间胶囊的透明度
+        /// </summary>
+        public void UpdatePPTTimeCapsuleOpacity()
+        {
+            try
+            {
+                if (PPTTimeCapsuleContainer == null) return;
+                PPTTimeCapsuleContainer.Opacity = Settings.PowerPointSettings.PPTTimeCapsuleOpacity;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新PPT时间胶囊透明度时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 更新PPT时间胶囊的大小
+        /// </summary>
+        public void UpdatePPTTimeCapsuleScale()
+        {
+            try
+            {
+                if (PPTTimeCapsuleScaleTransform == null) return;
+                double scale = Settings.PowerPointSettings.PPTTimeCapsuleScale;
+                PPTTimeCapsuleScaleTransform.ScaleX = scale;
+                PPTTimeCapsuleScaleTransform.ScaleY = scale;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新PPT时间胶囊大小时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 保存PPT时间胶囊拖拽偏移量
+        /// </summary>
+        public void SavePPTTimeCapsuleOffset(double offsetX, double offsetY)
+        {
+            try
+            {
+                Settings.PowerPointSettings.PPTTimeCapsuleOffsetX = offsetX;
+                Settings.PowerPointSettings.PPTTimeCapsuleOffsetY = offsetY;
+                SaveSettingsToFile();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"保存PPT时间胶囊位置偏移时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
