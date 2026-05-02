@@ -718,7 +718,7 @@ namespace Ink_Canvas.Helpers
 
             try
             {
-                if (!IsConnected || !IsInSlideShow || PPTApplication == null)
+                if (!IsConnected || PPTApplication == null)
                     return;
 
                 if (!Marshal.IsComObject(PPTApplication))
@@ -733,7 +733,7 @@ namespace Ink_Canvas.Helpers
                 if (slideShowWindow == null)
                     return;
 
-                SlideShowBegin?.Invoke(slideShowWindow);
+                OnSlideShowBegin(slideShowWindow);
             }
             catch (COMException comEx)
             {
@@ -818,17 +818,10 @@ namespace Ink_Canvas.Helpers
             {
                 UnbindEvents();
 
-                if (activePresentation != null)
-                {
-                    try
-                    {
-                        PresentationClose?.Invoke(activePresentation);
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"触发PresentationClose事件失败: {ex.Message}", LogHelper.LogType.Warning);
-                    }
-                }
+                // 注意：PresentationClose 只应在真正的关闭（OnPresentationBeforeClose）中抛出。
+                // DisconnectFromPPT 会被重绑、热重载、瞬时 COM 失效恢复等内部路径调用，
+                // 此时演示文稿仍处于打开状态，抛 PresentationClose 会让上层错误地清空缓存，
+                // 而后续重连到同一个演示文稿也不会补发 PresentationOpen。
 
                 SafeReleaseComObject(slideShowWindow, "_pptSlideShowWindow");
                 SafeReleaseComObject(activePresentation, "_pptActivePresentation");
@@ -1217,6 +1210,15 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
+                try
+                {
+                    PresentationClose?.Invoke(pres ?? _pptActivePresentation);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"触发PresentationClose事件失败: {ex.Message}", LogHelper.LogType.Warning);
+                }
+
                 if (_bindingEvents && PPTApplication != null)
                 {
                     try
