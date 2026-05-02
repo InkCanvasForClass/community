@@ -1946,59 +1946,24 @@
                         </ikw:SimpleStackPanel>
                     </Grid>
                 </Viewbox>
-                <Popup x:Name="BoardBorderToolsPopup"
-                       PlacementTarget="{Binding ElementName=BoardTools}"
-                       Placement="Custom"
-                       AllowsTransparency="True"
-                       StaysOpen="True"
-                       IsOpen="False">
-                    <Border x:Name="BoardBorderTools"
-                            CornerRadius="6" Background="{DynamicResource SettingsPageBackground}" Opacity="1"
-                            BorderThickness="1"
-                            BorderBrush="#2563eb">
-                        <ikw:SimpleStackPanel Margin="0,0,0,0">
-                            <Border BorderBrush="#1e3a8a" BorderThickness="0,0,0,1"
-                                    CornerRadius="4,4,0,0" ClipToBounds="True"
-                                    Background="#2563eb">
-                                <Grid Margin="5">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="{i18n:I18n Key=Tools_MoreFeaturesTitle}" Foreground="White"
-                                                VerticalAlignment="Center" Grid.Column="0"
-                                                FontSize="11" FontWeight="Bold" />
-                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChromeCloseContrast}"
-                                                Foreground="White" FontSize="12"
-                                                VerticalAlignment="Center"
-                                                Grid.Column="1"
-                                                MouseDown="Border_MouseDown"
-                                                MouseUp="CloseBordertools_MouseUp" />
-                                </Grid>
-                            </Border>
-                            <ikw:SimpleStackPanel Margin="10,3,10,2" Spacing="2">
-                                <ikw:SimpleStackPanel.Resources>
-                                    <Style TargetType="Label" BasedOn="{StaticResource AutoFitToolPopupLabel8}" />
-                                </ikw:SimpleStackPanel.Resources>
-                                <ikw:SimpleStackPanel Height="40" Orientation="Horizontal">
-                                    <controls:ToolMenuButton x:Name="BoardTimerToolBtn" ButtonMouseUp="ImageCountdownTimer_MouseUp" Label="{i18n:I18n Key=Tools_Timer}" />
-                                    <controls:ToolMenuButton x:Name="BoardRandomDrawToolBtn" Visibility="Collapsed" ButtonMouseUp="SymbolIconRand_MouseUp" Label="{i18n:I18n Key=Tools_RandomDraw}" />
-                                    <controls:ToolMenuButton x:Name="BoardSingleDrawToolBtn" Visibility="Collapsed" ButtonMouseUp="SymbolIconRandOne_MouseUp" Label="{i18n:I18n Key=Tools_SingleDraw}" />
-                                </ikw:SimpleStackPanel>
-                                <ikw:SimpleStackPanel Height="40" Orientation="Horizontal">
-                                    <controls:ToolMenuButton x:Name="BoardSaveToolBtn" ButtonMouseDown="Border_MouseDown" ButtonMouseUp="SymbolIconSaveStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Save}" />
-                                    <controls:ToolMenuButton x:Name="BoardOpenToolBtn" ButtonMouseDown="Border_MouseDown" ButtonMouseUp="SymbolIconOpenStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Open}" />
-                                    <controls:ToolMenuButton x:Name="BoardReplayToolBtn" ButtonMouseUp="GridInkReplayButton_MouseUp" Label="{i18n:I18n Key=Tools_Replay}" />
-                                </ikw:SimpleStackPanel>
-                                <ikw:SimpleStackPanel Height="40" Orientation="Horizontal">
-                                    <controls:ToolMenuButton x:Name="BoardScreenshotToolBtn" ButtonMouseUp="SymbolIconScreenshot_MouseUp" Label="{i18n:I18n Key=Tools_Screenshot}" />
-                                    <controls:ToolMenuButton x:Name="BoardManualToolBtn" ButtonMouseUp="OperatingGuideWindowIcon_MouseUp" Label="{i18n:I18n Key=Tools_Manual}" />
-                                    <controls:ToolMenuButton x:Name="BoardSettingsToolBtn" ButtonMouseUp="SymbolIconSettings_Click" Label="{i18n:I18n Key=Tools_Settings}" />
-                                </ikw:SimpleStackPanel>
-                            </ikw:SimpleStackPanel>
-                        </ikw:SimpleStackPanel>
-                    </Border>
-                </Popup>
+                <Grid>
+                    <Grid.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
+                            <SkewTransform />
+                            <RotateTransform />
+                            <TranslateTransform />
+                        </TransformGroup>
+                    </Grid.RenderTransform>
+                    <Popup x:Name="BoardBorderToolsPopup"
+                           PlacementTarget="{Binding ElementName=BoardTools}"
+                           Placement="Custom"
+                           AllowsTransparency="True"
+                           StaysOpen="True"
+                           IsOpen="False">
+                        <localControls:ToolsPopupContent x:Name="BoardToolsPopupContent" IsBoardMode="True" />
+                    </Popup>
+                </Grid>
                 <!-- 右下角 -->
                 <Viewbox x:Name="ViewboxBlackboardRightSide" Margin="3,0,0,0" Height="55"
                          HorizontalAlignment="Right" VerticalAlignment="Bottom"
@@ -2986,47 +2951,7 @@
                                        AllowsTransparency="True"
                                        StaysOpen="True"
                                        IsOpen="False">
-                                    <Border CornerRadius="8" Background="{DynamicResource ToolsPopupBackground}"
-                                            BorderBrush="#3b82f6" BorderThickness="2">
-                                        <ikw:SimpleStackPanel Margin="-1">
-                                            <Grid Margin="8,7,10,5">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="10"
-                                                                           Text="{i18n:I18n Key=Tools_MoreFeaturesTitle}"
-                                                                           Foreground="{DynamicResource ToolsPopupTitleForeground}" FontWeight="Bold"/>
-                                                <ui:FontIcon Grid.Column="1" Icon="{x:Static ui:SegoeFluentIcons.ChromeCloseContrast}"
-                                                                             Foreground="#DC2626" FontSize="8" VerticalAlignment="Center"
-                                                                             MouseDown="Border_MouseDown"
-                                                                             MouseUp="CloseBordertools_MouseUp" />
-                                            </Grid>
-                                            <Border Margin="6,0,6,6" BorderBrush="{DynamicResource ToolsPopupInnerBorderBrush}" Background="{DynamicResource ToolsPopupInnerBackground}" BorderThickness="1"
-                                                    CornerRadius="4">
-                                                <ikw:SimpleStackPanel Margin="2" Spacing="1">
-                                                    <ikw:SimpleStackPanel.Resources>
-                                                        <Style TargetType="Label" BasedOn="{StaticResource AutoFitToolPopupLabel8}" />
-                                                    </ikw:SimpleStackPanel.Resources>
-                                                    <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40" Orientation="Horizontal">
-                                                        <controls:ToolMenuButton x:Name="TimerToolBtn" ButtonMouseUp="ImageCountdownTimer_MouseUp" Label="{i18n:I18n Key=Tools_Timer}" />
-                                                        <controls:ToolMenuButton x:Name="RandomDrawToolBtn" ButtonMouseUp="SymbolIconRand_MouseUp" Label="{i18n:I18n Key=Tools_RandomDraw}" />
-                                                        <controls:ToolMenuButton x:Name="SingleDrawToolBtn" ButtonMouseUp="SymbolIconRandOne_MouseUp" Label="{i18n:I18n Key=Tools_SingleDraw}" />
-                                                    </ikw:SimpleStackPanel>
-                                                    <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40" Orientation="Horizontal">
-                                                        <controls:ToolMenuButton x:Name="SaveToolBtn" ButtonMouseDown="Border_MouseDown" ButtonMouseUp="SymbolIconSaveStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Save}" />
-                                                        <controls:ToolMenuButton x:Name="OpenToolBtn" ButtonMouseDown="Border_MouseDown" ButtonMouseUp="SymbolIconOpenStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Open}" />
-                                                        <controls:ToolMenuButton x:Name="ReplayToolBtn" ButtonMouseUp="GridInkReplayButton_MouseUp" Label="{i18n:I18n Key=Tools_Replay}" />
-                                                    </ikw:SimpleStackPanel>
-                                                    <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40" Orientation="Horizontal">
-                                                        <controls:ToolMenuButton x:Name="ScreenshotToolBtn" ButtonMouseUp="SymbolIconScreenshot_MouseUp" Label="{i18n:I18n Key=Tools_Screenshot}" />
-                                                        <controls:ToolMenuButton x:Name="ManualToolBtn" ButtonMouseUp="OperatingGuideWindowIcon_MouseUp" Label="{i18n:I18n Key=Tools_Manual}" />
-                                                        <controls:ToolMenuButton x:Name="SettingsToolBtn" ButtonMouseUp="SymbolIconSettings_Click" Label="{i18n:I18n Key=Tools_Settings}" />
-                                                    </ikw:SimpleStackPanel>
-                                                </ikw:SimpleStackPanel>
-                                            </Border>
-                                        </ikw:SimpleStackPanel>
-                                    </Border>
+                                    <localControls:ToolsPopupContent x:Name="MainToolsPopupContent" />
                                 </Popup>
                             </ikw:SimpleStackPanel>
                         </Grid>

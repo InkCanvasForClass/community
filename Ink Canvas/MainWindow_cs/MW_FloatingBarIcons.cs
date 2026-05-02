@@ -249,14 +249,13 @@ namespace Ink_Canvas
         {
             try
             {
-                // 创建管理器实例
                 _popupManager = new PopupManagerHelper();
 
-                // 注册需要管理的 Popup 控件
+                _popupManager.ShouldBeTopmost = () => Settings.Advanced.IsAlwaysOnTop;
+
                 _popupManager.RegisterPopup(BorderTools);
                 _popupManager.RegisterPopup(BoardBorderToolsPopup);
 
-                // 初始化（订阅渲染事件）
                 _popupManager.Initialize();
 
                 System.Diagnostics.Debug.WriteLine("[PopupManager] Initialized successfully");

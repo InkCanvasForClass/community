@@ -83,7 +83,66 @@ namespace Ink_Canvas
 
         internal ToolbarHost ToolbarHost { get; private set; }
 
+        // Board-prefixed buttons: originally XAML auto-generated fields, now delegated to BoardToolsPopupContent
+        internal ToolMenuButton BoardTimerToolBtn => BoardToolsPopupContent?.TimerBtn;
+        internal ToolMenuButton BoardRandomDrawToolBtn => BoardToolsPopupContent?.RandomDrawBtn;
+        internal ToolMenuButton BoardSingleDrawToolBtn => BoardToolsPopupContent?.SingleDrawBtn;
+        internal ToolMenuButton BoardSaveToolBtn => BoardToolsPopupContent?.SaveBtn;
+        internal ToolMenuButton BoardOpenToolBtn => BoardToolsPopupContent?.OpenBtn;
+        internal ToolMenuButton BoardReplayToolBtn => BoardToolsPopupContent?.ReplayBtn;
+        internal ToolMenuButton BoardScreenshotToolBtn => BoardToolsPopupContent?.ScreenshotBtn;
+        internal ToolMenuButton BoardManualToolBtn => BoardToolsPopupContent?.ManualBtn;
+        internal ToolMenuButton BoardSettingsToolBtn => BoardToolsPopupContent?.SettingsBtn;
+
+        // Non-Board buttons: originally XAML auto-generated fields, now delegated to MainToolsPopupContent
+        internal ToolMenuButton TimerToolBtn => MainToolsPopupContent?.TimerBtn;
+        internal ToolMenuButton RandomDrawToolBtn => MainToolsPopupContent?.RandomDrawBtn;
+        internal ToolMenuButton SingleDrawToolBtn => MainToolsPopupContent?.SingleDrawBtn;
+        internal ToolMenuButton SaveToolBtn => MainToolsPopupContent?.SaveBtn;
+        internal ToolMenuButton OpenToolBtn => MainToolsPopupContent?.OpenBtn;
+        internal ToolMenuButton ReplayToolBtn => MainToolsPopupContent?.ReplayBtn;
+        internal ToolMenuButton ScreenshotToolBtn => MainToolsPopupContent?.ScreenshotBtn;
+        internal ToolMenuButton ManualToolBtn => MainToolsPopupContent?.ManualBtn;
+        internal ToolMenuButton SettingsToolBtn => MainToolsPopupContent?.SettingsBtn;
+
         #region Window Initialization
+
+        private void WireUpToolsPopupContentEvents()
+        {
+            if (BoardToolsPopupContent != null)
+            {
+                BoardToolsPopupContent.TimerBtn.ButtonMouseUp += ImageCountdownTimer_MouseUp;
+                BoardToolsPopupContent.RandomDrawBtn.ButtonMouseUp += SymbolIconRand_MouseUp;
+                BoardToolsPopupContent.SingleDrawBtn.ButtonMouseUp += SymbolIconRandOne_MouseUp;
+                BoardToolsPopupContent.SaveBtn.ButtonMouseDown += Border_MouseDown;
+                BoardToolsPopupContent.SaveBtn.ButtonMouseUp += SymbolIconSaveStrokes_MouseUp;
+                BoardToolsPopupContent.OpenBtn.ButtonMouseDown += Border_MouseDown;
+                BoardToolsPopupContent.OpenBtn.ButtonMouseUp += SymbolIconOpenStrokes_MouseUp;
+                BoardToolsPopupContent.ReplayBtn.ButtonMouseUp += GridInkReplayButton_MouseUp;
+                BoardToolsPopupContent.ScreenshotBtn.ButtonMouseUp += SymbolIconScreenshot_MouseUp;
+                BoardToolsPopupContent.ManualBtn.ButtonMouseUp += OperatingGuideWindowIcon_MouseUp;
+                BoardToolsPopupContent.SettingsBtn.ButtonMouseUp += SymbolIconSettings_Click;
+                BoardToolsPopupContent.CloseFontIcon.MouseDown += Border_MouseDown;
+                BoardToolsPopupContent.CloseFontIcon.MouseUp += CloseBordertools_MouseUp;
+            }
+
+            if (MainToolsPopupContent != null)
+            {
+                MainToolsPopupContent.TimerBtn.ButtonMouseUp += ImageCountdownTimer_MouseUp;
+                MainToolsPopupContent.RandomDrawBtn.ButtonMouseUp += SymbolIconRand_MouseUp;
+                MainToolsPopupContent.SingleDrawBtn.ButtonMouseUp += SymbolIconRandOne_MouseUp;
+                MainToolsPopupContent.SaveBtn.ButtonMouseDown += Border_MouseDown;
+                MainToolsPopupContent.SaveBtn.ButtonMouseUp += SymbolIconSaveStrokes_MouseUp;
+                MainToolsPopupContent.OpenBtn.ButtonMouseDown += Border_MouseDown;
+                MainToolsPopupContent.OpenBtn.ButtonMouseUp += SymbolIconOpenStrokes_MouseUp;
+                MainToolsPopupContent.ReplayBtn.ButtonMouseUp += GridInkReplayButton_MouseUp;
+                MainToolsPopupContent.ScreenshotBtn.ButtonMouseUp += SymbolIconScreenshot_MouseUp;
+                MainToolsPopupContent.ManualBtn.ButtonMouseUp += OperatingGuideWindowIcon_MouseUp;
+                MainToolsPopupContent.SettingsBtn.ButtonMouseUp += SymbolIconSettings_Click;
+                MainToolsPopupContent.CloseFontIcon.MouseDown += Border_MouseDown;
+                MainToolsPopupContent.CloseFontIcon.MouseUp += CloseBordertools_MouseUp;
+            }
+        }
 
         /// <summary>
         /// 初始化主窗口实例，构建并配置界面元素、初始页面和应用程序运行时状态。
@@ -99,6 +158,8 @@ namespace Ink_Canvas
                 处于 PPT 放映内：BtnPPTSlideShowEnd.Visibility
             */
             InitializeComponent();
+
+            WireUpToolsPopupContentEvents();
 
             BoardBorderToolsPopup.CustomPopupPlacementCallback =
                 (popupSize, targetSize, offset) => new[]

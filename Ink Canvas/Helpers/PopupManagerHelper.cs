@@ -9,18 +9,6 @@ using System.Runtime.InteropServices;
 
 namespace Ink_Canvas.Helpers
 {
-    /// <summary>
-    /// WPF Popup 管理器 - 提供置顶和拖动跟随功能
-    /// 
-    /// 功能：
-    /// 1. Topmost 管理：确保 Popup 始终在其他控件之上
-    /// 2. 拖动跟随：让 Popup 在父容器拖动时平滑跟随移动
-    /// 
-    /// 使用方式：
-    /// var manager = new PopupManagerHelper();
-    /// manager.Initialize();
-    /// manager.RegisterPopup(myPopup);
-    /// </summary>
     public class PopupManagerHelper
     {
         #region Win32 API
@@ -41,6 +29,7 @@ namespace Ink_Canvas.Helpers
         }
 
         private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
+        private static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
         private const uint SWP_NOMOVE = 0x0002;
         private const uint SWP_NOSIZE = 0x0001;
         private const uint SWP_NOACTIVATE = 0x0010;
@@ -50,14 +39,11 @@ namespace Ink_Canvas.Helpers
 
         #region 配置
 
-        /// <summary>
-        /// PopupManagerHelper 配置选项
-        /// </summary>
         public class Config
         {
-            public int TopmostCheckInterval { get; set; } = 10; // 每 N 帧检查一次置顶（默认10帧≈160ms）
-            public bool UseRenderingSync { get; set; } = true; // 是否使用渲染同步
-            public int InitialTopmostAttempts { get; set; } = 3; // 初始显示时的置顶次数
+            public int TopmostCheckInterval { get; set; } = 10;
+            public bool UseRenderingSync { get; set; } = true;
+            public int InitialTopmostAttempts { get; set; } = 3;
         }
 
         #endregion
@@ -75,15 +61,7 @@ namespace Ink_Canvas.Helpers
 
         #region 构造函数
 
-        /// <summary>
-        /// 创建 PopupManagerHelper 实例（使用默认配置）
-        /// </summary>
         public PopupManagerHelper() : this(new Config()) { }
-
-        /// <summary>
-        /// 创建 PopupManagerHelper 实例（自定义配置）
-        /// </summary>
-        /// <param name="config">配置选项</param>
         public PopupManagerHelper(Config config)
         {
             _config = config ?? new Config();
@@ -91,11 +69,23 @@ namespace Ink_Canvas.Helpers
 
         #endregion
 
-        #region 初始化与注册
+        #region 条件置顶回调
 
         /// <summary>
-        /// 初始化管理器（订阅渲染事件，通常在 Window_Loaded 中调用一次）
+        /// 条件置顶回调。返回 true 时才对 Popup 执行 HWND_TOPMOST，返回 false 时取消置顶。
+        /// 未设置时默认始终置顶（向后兼容）。
         /// </summary>
+        public Func<bool> ShouldBeTopmost { get; set; }
+
+        private bool CheckShouldBeTopmost()
+        {
+            return ShouldBeTopmost == null || ShouldBeTopmost();
+        }
+
+        #endregion
+
+        #region 初始化与注册
+
         public void Initialize()
         {
             if (_isInitialized) return;
@@ -114,17 +104,12 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        /// <summary>
-        /// 注册需要管理的 Popup 控件
-        /// </summary>
-        /// <param name="popup">要管理的 Popup</param>
         public void RegisterPopup(Popup popup)
         {
             if (popup == null || _registeredPopups.Contains(popup)) return;
 
             _registeredPopups.Add(popup);
 
-            // 如果 Popup 已经打开，立即执行强力置顶
             if (popup.IsOpen)
             {
                 BringToFront(popup);
@@ -133,10 +118,6 @@ namespace Ink_Canvas.Helpers
             System.Diagnostics.Debug.WriteLine($"[PopupManager] Registered popup: {popup.Name ?? "unnamed"}");
         }
 
-        /// <summary>
-        /// 注销不再管理的 Popup 控件
-        /// </summary>
-        /// <param name="popup">要注销的 Popup</param>
         public void UnregisterPopup(Popup popup)
         {
             if (popup == null) return;
@@ -147,39 +128,25 @@ namespace Ink_Canvas.Helpers
 
         #endregion
 
-        #region 公共 API - 供外部调用
+        #region 公共 API
 
-        /// <summary>
-        /// 标记需要更新位置（在拖动事件中调用）
-        /// </summary>
         public void MarkNeedsUpdate()
         {
             _needsUpdate = true;
         }
 
-        /// <summary>
-        /// 强制将 Popup 提升到最顶层（多次调用确保生效）
-        /// 用于初始显示或动画完成后
-        /// </summary>
-        /// <param name="popup">要置顶的 Popup</param>
         public void BringToFront(Popup popup)
         {
+            if (!CheckShouldBeTopmost()) return;
             BringToFrontInternal(popup, _config.InitialTopmostAttempts);
         }
 
-        /// <summary>
-        /// 轻量级置顶（单次调用，用于拖动时或定期保顶）
-        /// </summary>
-        /// <param name="popup">要置顶的 Popup</param>
         public void BringToFrontLight(Popup popup)
         {
+            if (!CheckShouldBeTopmost()) return;
             BringToFrontAsync(popup);
         }
 
-        /// <summary>
-        /// 更新 Popup 位置（通过 Offset 微调，不重建窗口）
-        /// </summary>
-        /// <param name="popup">要更新位置的 Popup</param>
         public void UpdatePosition(Popup popup)
         {
             if (popup == null || !popup.IsOpen || popup.PlacementTarget == null) return;
@@ -212,24 +179,18 @@ namespace Ink_Canvas.Helpers
 
         #region 内部实现 - 渲染回调
 
-        /// <summary>
-        /// 渲染周期回调（每帧自动触发）
-        /// 处理位置更新和置顶维护
-        /// </summary>
         private void OnRendering(object sender, EventArgs e)
         {
             try
             {
                 if (_needsUpdate)
                 {
-                    // 拖动中：更新位置 + 同步置顶
                     UpdateAllPositions();
                     BringAllToFrontSync();
                     _needsUpdate = false;
                     return;
                 }
 
-                // 静止时：低频保顶（使用计数器节流）
                 MaintainTopmostForAll();
             }
             catch (Exception ex)
@@ -238,9 +199,6 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        /// <summary>
-        /// 更新所有已注册 Popup 的位置
-        /// </summary>
         private void UpdateAllPositions()
         {
             foreach (var popup in _registeredPopups)
@@ -249,25 +207,17 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        /// <summary>
-        /// 为所有打开的 Popup 执行轻量级置顶（拖动时每帧调用）
-        /// 使用同步调用确保时序正确
-        /// </summary>
         private void BringAllToFrontSync()
         {
             foreach (var popup in _registeredPopups)
             {
                 if (popup.IsOpen && popup.PlacementTarget != null)
                 {
-                    BringToFrontSync(popup);
+                    ApplyTopmostState(popup);
                 }
             }
         }
 
-        /// <summary>
-        /// 为所有已注册的打开的 Popup 维持置顶状态
-        /// 使用计数器降低调用频率，使用同步调用避免闪烁
-        /// </summary>
         private void MaintainTopmostForAll()
         {
             _topmostCounter++;
@@ -278,7 +228,7 @@ namespace Ink_Canvas.Helpers
             {
                 if (popup.IsOpen && popup.PlacementTarget != null)
                 {
-                    BringToFrontSync(popup);  // 改用同步版本
+                    ApplyTopmostState(popup);
                 }
             }
         }
@@ -287,13 +237,11 @@ namespace Ink_Canvas.Helpers
 
         #region 内部实现 - Win32 操作
 
-        /// <summary>
-        /// 同步置顶（直接调用，无异步延迟）
-        /// 用于拖动时和定期保顶，确保时序正确
-        /// </summary>
-        private void BringToFrontSync(Popup popup)
+        private void ApplyTopmostState(Popup popup)
         {
             if (popup?.Child == null) return;
+
+            var shouldBeTopmost = CheckShouldBeTopmost();
 
             try
             {
@@ -302,19 +250,16 @@ namespace Ink_Canvas.Helpers
 
                 SetWindowPos(
                     source.Handle,
-                    HWND_TOPMOST,
+                    shouldBeTopmost ? HWND_TOPMOST : HWND_NOTOPMOST,
                     0, 0, 0, 0,
                     SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[PopupManager] BringToFrontSync failed: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[PopupManager] ApplyTopmostState failed: {ex.Message}");
             }
         }
 
-        /// <summary>
-        /// 多次尝试将 Popup 置顶（异步版本，仅用于初始显示）
-        /// </summary>
         private void BringToFrontInternal(Popup popup, int attempts)
         {
             if (popup?.Child == null) return;
@@ -360,9 +305,6 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        /// <summary>
-        /// 异步轻量级置顶（单次调用）
-        /// </summary>
         private void BringToFrontAsync(Popup popup)
         {
             if (popup?.Child == null) return;
@@ -391,9 +333,6 @@ namespace Ink_Canvas.Helpers
 
         #region 清理
 
-        /// <summary>
-        /// 清理资源（在窗口关闭时调用）
-        /// </summary>
         public void Cleanup()
         {
             if (!_isInitialized) return;
