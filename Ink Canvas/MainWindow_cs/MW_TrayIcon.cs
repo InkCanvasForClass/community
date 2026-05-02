@@ -24,6 +24,109 @@ namespace Ink_Canvas
 
         private bool _trayTemporaryShowRestoreHideChecked;
 
+        private void TaskbarTrayIcon_TrayLeftMouseDown(object sender, RoutedEventArgs e)
+        {
+            var action = Ink_Canvas.MainWindow.Settings.Appearance.TrayLeftClickAction;
+            ExecuteTrayClickAction(action);
+        }
+
+        private void TaskbarTrayIcon_TrayRightMouseDown(object sender, RoutedEventArgs e)
+        {
+            var action = Ink_Canvas.MainWindow.Settings.Appearance.TrayRightClickAction;
+            ExecuteTrayClickAction(action);
+        }
+
+        private void ExecuteTrayClickAction(TrayClickAction action)
+        {
+            switch (action)
+            {
+                case TrayClickAction.ShowMenu:
+                    ShowTrayContextMenu();
+                    break;
+                case TrayClickAction.HideShowMainWindow:
+                    ToggleMainWindowVisibility();
+                    break;
+                case TrayClickAction.TempShowMainWindow:
+                    TempShowMainWindowTrayIconMenuItem_Clicked(null, null);
+                    break;
+                case TrayClickAction.OpenSettings:
+                    OpenSettingsTrayIconMenuItem_Clicked(null, null);
+                    break;
+                case TrayClickAction.DisableAllHotkeys:
+                    DisableAllHotkeysMenuItem_Clicked(FindTrayMenuItem("DisableAllHotkeysMenuItem"), null);
+                    break;
+                case TrayClickAction.ForceFullScreen:
+                    ForceFullScreenTrayIconMenuItem_Clicked(null, null);
+                    break;
+                case TrayClickAction.ToggleFoldFloatingBar:
+                    FoldFloatingBarTrayIconMenuItem_Clicked(null, null);
+                    break;
+                case TrayClickAction.ResetFloatingBarPosition:
+                    ResetFloatingBarPositionTrayIconMenuItem_Clicked(null, null);
+                    break;
+                case TrayClickAction.RestartApp:
+                    RestartAppTrayIconMenuItem_Clicked(null, null);
+                    break;
+                case TrayClickAction.CloseApp:
+                    CloseAppTrayIconMenuItem_Clicked(null, null);
+                    break;
+            }
+        }
+
+        private MenuItem FindTrayMenuItem(string name)
+        {
+            try
+            {
+                var trayMenu = ((TaskbarIcon)Current.Resources["TaskbarTrayIcon"]).ContextMenu;
+                return trayMenu?.Items.OfType<MenuItem>().FirstOrDefault(mi => mi.Name == name);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private void ShowTrayContextMenu()
+        {
+            try
+            {
+                var taskbarIcon = (TaskbarIcon)Current.Resources["TaskbarTrayIcon"];
+                if (taskbarIcon?.ContextMenu != null)
+                {
+                    taskbarIcon.ContextMenu.IsOpen = true;
+                }
+            }
+            catch { }
+        }
+
+        private void ToggleMainWindowVisibility()
+        {
+            var mainWin = Current.MainWindow as MainWindow;
+            if (mainWin?.IsLoaded != true) return;
+
+            var hideItem = FindTrayMenuItem("HideICCMainWindowTrayIconMenuItem");
+            if (hideItem != null)
+            {
+                if (hideItem.IsChecked)
+                {
+                    hideItem.IsChecked = false;
+                    HideICCMainWindowTrayIconMenuItem_UnChecked(hideItem, null);
+                }
+                else
+                {
+                    hideItem.IsChecked = true;
+                    HideICCMainWindowTrayIconMenuItem_Checked(hideItem, null);
+                }
+            }
+            else
+            {
+                if (mainWin.IsVisible)
+                    mainWin.Hide();
+                else
+                    mainWin.Show();
+            }
+        }
+
         /// <summary>
         /// 系统托盘菜单打开时的事件处理方法
         /// </summary>

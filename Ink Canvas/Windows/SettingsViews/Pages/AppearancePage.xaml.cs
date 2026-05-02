@@ -108,6 +108,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             CardEnableTrayIcon.IsOn = settings.Appearance.EnableTrayIcon;
 
+            ComboBoxTrayLeftClickAction.SelectedIndex = (int)settings.Appearance.TrayLeftClickAction;
+            ComboBoxTrayRightClickAction.SelectedIndex = (int)settings.Appearance.TrayRightClickAction;
+
             if (BtnHitokotoCustomize != null)
                 BtnHitokotoCustomize.Visibility = settings.Appearance.ChickenSoupSource == 3 ? Visibility.Visible : Visibility.Collapsed;
         }
@@ -548,6 +551,20 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     fe.Visibility = CardEnableTrayIcon.IsOn ? Visibility.Visible : Visibility.Collapsed;
             }
             catch { }
+        }
+
+        private void ComboBoxTrayLeftClickAction_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.TrayLeftClickAction = (TrayClickAction)ComboBoxTrayLeftClickAction.SelectedIndex;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ComboBoxTrayRightClickAction_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.TrayRightClickAction = (TrayClickAction)ComboBoxTrayRightClickAction.SelectedIndex;
+            SettingsManager.SaveSettingsToFile();
         }
 
         #endregion
