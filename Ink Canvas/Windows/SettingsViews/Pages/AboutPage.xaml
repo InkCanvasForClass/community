@@ -154,7 +154,7 @@
                                   ItemTemplate="{StaticResource ContributorAvatarTemplate}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <WrapPanel Orientation="Horizontal" ItemWidth="96" Margin="0,0,0,8" />
+                                <WrapPanel Orientation="Horizontal" ItemWidth="110" Margin="0,0,0,8" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                     </ItemsControl>
