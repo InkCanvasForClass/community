@@ -28,6 +28,12 @@
     <!-- 白板模式浮动栏颜色 -->
     <SolidColorBrush x:Key="BoardFloatBarBackground" Color="#2a2a2a" />
     <SolidColorBrush x:Key="BoardFloatBarBorderBrush" Color="#555555" />
+
+    <!-- 更多功能弹窗颜色 -->
+    <SolidColorBrush x:Key="ToolsPopupBackground" Color="#1f1f1f" />
+    <SolidColorBrush x:Key="ToolsPopupInnerBackground" Color="#2a2a2a" />
+    <SolidColorBrush x:Key="ToolsPopupInnerBorderBrush" Color="#404040" />
+    <SolidColorBrush x:Key="ToolsPopupTitleForeground" Color="#60a5fa" />
     
     <!-- 白板模式按钮选中状态颜色 -->
     <SolidColorBrush x:Key="BoardFloatBarSelectedBackground" Color="#2563eb" />

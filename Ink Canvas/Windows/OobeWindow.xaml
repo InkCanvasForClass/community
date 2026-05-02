@@ -194,8 +194,19 @@
                                     Style="{DynamicResource AccentButtonStyle}"
                                     Click="BtnStartWelcome_Click">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="开始" />
+                                    <TextBlock Text="开始逐步配置" />
                                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronRight}" FontSize="12" />
+                                </ikw:SimpleStackPanel>
+                            </Button>
+
+                            <Button x:Name="BtnUsePreset"
+                                    HorizontalAlignment="Center"
+                                    MinWidth="180"
+                                    Height="36"
+                                    Click="BtnUsePreset_Click">
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Repair}" FontSize="12" />
+                                    <TextBlock Text="使用预设配置" />
                                 </ikw:SimpleStackPanel>
                             </Button>
                         </ikw:SimpleStackPanel>
