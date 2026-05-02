@@ -122,8 +122,13 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="{Binding ElementName=ViewboxFloatingBarScaleTransformValueSlider, Path=Value, StringFormat={}{0:F2}}"
-                                       VerticalAlignment="Center" FontFamily="Consolas"/>
+                            <TextBlock x:Name="ViewboxFloatingBarActualScaleText"
+                                       Text="1.50x"
+                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                            <TextBlock Text=" (" VerticalAlignment="Center" FontSize="11" Foreground="Gray"/>
+                            <TextBlock Text="{Binding ElementName=ViewboxFloatingBarScaleTransformValueSlider, Path=Value, StringFormat={}{0:F2}x)}"
+                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                            <TextBlock Text=")" VerticalAlignment="Center" FontSize="11" Foreground="Gray"/>
                             <Slider x:Name="ViewboxFloatingBarScaleTransformValueSlider" Minimum="0.5"
                                     Maximum="1.25" Width="200"
                                     IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
@@ -138,7 +143,7 @@
                         </ui:SettingsCard.HeaderIcon>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock Text="{Binding ElementName=ViewboxFloatingBarOpacityValueSlider, Path=Value, StringFormat={}{0:F2}}"
-                                       VerticalAlignment="Center" FontFamily="Consolas"/>
+                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                             <Slider x:Name="ViewboxFloatingBarOpacityValueSlider" Minimum="0.3"
                                     Maximum="1" Width="200"
                                     IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
@@ -154,7 +159,7 @@
                         </ui:SettingsCard.HeaderIcon>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock Text="{Binding ElementName=ViewboxFloatingBarOpacityInPPTValueSlider, Path=Value, StringFormat={}{0:F2}}"
-                                       VerticalAlignment="Center" FontFamily="Consolas"/>
+                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                             <Slider x:Name="ViewboxFloatingBarOpacityInPPTValueSlider" Minimum="0.3"
                                     Maximum="1" Width="200"
                                     IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
@@ -175,7 +180,7 @@
                         </ui:SettingsCard.HeaderIcon>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock Text="{Binding ElementName=ViewboxBlackBoardScaleTransformValueSlider, Path=Value, StringFormat={}{0:F2}}"
-                                       VerticalAlignment="Center" FontFamily="Consolas"/>
+                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                             <Slider x:Name="ViewboxBlackBoardScaleTransformValueSlider" Minimum="0.5"
                                     Maximum="1.5" Width="200"
                                     IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"

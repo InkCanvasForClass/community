@@ -258,11 +258,18 @@ namespace Ink_Canvas
 
                 if (Settings.Appearance.ViewboxFloatingBarScaleTransformValue != 0)
                 {
-                    double val = Settings.Appearance.ViewboxFloatingBarScaleTransformValue;
-                    ViewboxFloatingBarScaleTransform.ScaleX =
-                        (val > 0.5 && val < 1.25) ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1;
-                    ViewboxFloatingBarScaleTransform.ScaleY =
-                        (val > 0.5 && val < 1.25) ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1;
+                    double userVal = Settings.Appearance.ViewboxFloatingBarScaleTransformValue;
+                    // 限制用户设置值在有效范围内
+                    double clampedUserVal = (userVal > 0.5 && userVal < 1.25) ? userVal : 
+                                               userVal <= 0.5 ? 0.5 : 
+                                               userVal >= 1.25 ? 1.25 : 1.0;
+                    
+                    // 实际缩放 = 基础倍率(1.5) × 用户设置倍率
+                    double actualScale = 1.5 * clampedUserVal;
+                    
+                    // 最终范围限制：0.75x ~ 1.875x
+                    ViewboxFloatingBarScaleTransform.ScaleX = actualScale;
+                    ViewboxFloatingBarScaleTransform.ScaleY = actualScale;
                 }
 
                 switch (Settings.Appearance.UnFoldButtonImageType)

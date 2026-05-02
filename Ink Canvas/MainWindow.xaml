@@ -708,7 +708,8 @@
             <Grid Visibility="{Binding ElementName=GridBackgroundCoverHolder, Path=Visibility}">
                 <!-- 左下角 -->
                 <Viewbox x:Name="ViewboxBlackboardLeftSide" Margin="3,0,0,0" Height="55" HorizontalAlignment="Left"
-                         VerticalAlignment="Bottom">
+                         VerticalAlignment="Bottom"
+                         Stretch="None">
                     <Grid Name="BlackboardLeftSide" Visibility="Visible" Margin="0,0,0,3" Height="50"
                           HorizontalAlignment="Center" VerticalAlignment="Bottom">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="5">
@@ -833,7 +834,8 @@
                 </Viewbox>
                 <!-- 中间 -->
                 <Viewbox Margin="3,0,0,0" Height="56" HorizontalAlignment="Center"
-                         VerticalAlignment="Bottom">
+                         VerticalAlignment="Bottom"
+                         Stretch="None">
                     <Viewbox.LayoutTransform>
                         <ScaleTransform x:Name="ViewboxBlackboardCenterSideScaleTransform" ScaleX="1" ScaleY="1" />
                     </Viewbox.LayoutTransform>
@@ -1999,7 +2001,8 @@
                 </Popup>
                 <!-- 右下角 -->
                 <Viewbox x:Name="ViewboxBlackboardRightSide" Margin="3,0,0,0" Height="55"
-                         HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                         HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                         Stretch="None">
                     <Grid Name="BlackboardRightSide" Visibility="Visible" Margin="0,0,0,3" Height="50"
                           HorizontalAlignment="Center" VerticalAlignment="Bottom">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="5">
@@ -2357,10 +2360,11 @@
         <Grid Name="FloatingbarUIForInkReplay">
             <Viewbox Name="ViewboxFloatingBar" Margin="150,250,0,0" Cursor="Arrow"
                      HorizontalAlignment="Left" Height="58" VerticalAlignment="Top"
+                     Stretch="None"
                      UseLayoutRounding="True" SnapsToDevicePixels="True"
                      RenderTransformOrigin="0.5,0.5">
                 <Viewbox.LayoutTransform>
-                    <ScaleTransform x:Name="ViewboxFloatingBarScaleTransform" ScaleX="1" ScaleY="1" />
+                    <ScaleTransform x:Name="ViewboxFloatingBarScaleTransform" ScaleX="1.5" ScaleY="1.5" />
                 </Viewbox.LayoutTransform>
                 <ikw:SimpleStackPanel Orientation="Horizontal">
                     <Border x:Name="BorderFloatingBarMoveControls" Width="36" Height="36" CornerRadius="5"

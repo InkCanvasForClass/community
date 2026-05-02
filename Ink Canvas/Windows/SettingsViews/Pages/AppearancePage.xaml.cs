@@ -238,11 +238,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
             SettingsManager.Settings.Appearance.ViewboxFloatingBarScaleTransformValue = val;
             SettingsManager.SaveSettingsToFile();
+
+            // 计算并显示实际缩放倍率（基础 1.5 × 用户设置）
+            double clampedVal = (val > 0.5 && val < 1.25) ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1.0;
+            double actualScale = 1.5 * clampedVal;
+            ViewboxFloatingBarActualScaleText.Text = $"{actualScale:F2}x";
+
             var mw = GetMainWindow();
             if (mw != null)
             {
-                mw.ViewboxFloatingBarScaleTransform.ScaleX = val > 0.5 && val < 1.25 ? val : val <= 0.5 ? 0.5 : 1.25;
-                mw.ViewboxFloatingBarScaleTransform.ScaleY = val > 0.5 && val < 1.25 ? val : val <= 0.5 ? 0.5 : 1.25;
+                // 应用实际缩放值（基础 1.5 × 用户设置）
+                mw.ViewboxFloatingBarScaleTransform.ScaleX = actualScale;
+                mw.ViewboxFloatingBarScaleTransform.ScaleY = actualScale;
                 if (mw.BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
                     mw.ViewboxFloatingBarMarginAnimation(60);
                 else
