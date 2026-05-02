@@ -34,6 +34,8 @@ namespace Ink_Canvas
         /// </summary>
         private string _currentToolMode = "cursor";
 
+        private static Windows.SettingsViews.SettingsWindow _settingsWindow = null;
+
         #region "手勢"按鈕
 
         /// <summary>
@@ -3307,6 +3309,15 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         internal async void BtnSettings_Click(object sender, RoutedEventArgs e)
         {
+            if (_settingsWindow != null)
+            {
+                if (_settingsWindow.WindowState == System.Windows.WindowState.Minimized)
+                    _settingsWindow.WindowState = System.Windows.WindowState.Normal;
+                _settingsWindow.Activate();
+                _settingsWindow.Focus();
+                return;
+            }
+
             try
             {
                 if (Ink_Canvas.Helpers.SecurityManager.IsPasswordRequiredForEnterSettings(Settings))
@@ -3322,10 +3333,11 @@ namespace Ink_Canvas
             }
 
             HideSubPanels();
-            var settingsWindow = new Windows.SettingsViews.SettingsWindow();
-            settingsWindow.Owner = this;
-            settingsWindow.Topmost = this.Topmost;
-            settingsWindow.ShowDialog();
+            _settingsWindow = new Windows.SettingsViews.SettingsWindow();
+            _settingsWindow.Owner = this;
+            _settingsWindow.Topmost = this.Topmost;
+            _settingsWindow.Closed += (s, args) => _settingsWindow = null;
+            _settingsWindow.ShowDialog();
         }
 
         private void BtnThickness_Click(object sender, RoutedEventArgs e) { }

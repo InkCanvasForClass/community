@@ -256,6 +256,20 @@ namespace Ink_Canvas
         public bool HasShownOobe { get; set; } = false;
     }
 
+    public enum TrayClickAction
+    {
+        ShowMenu = 0,
+        HideShowMainWindow = 1,
+        TempShowMainWindow = 2,
+        OpenSettings = 3,
+        DisableAllHotkeys = 4,
+        ForceFullScreen = 5,
+        ToggleFoldFloatingBar = 6,
+        ResetFloatingBarPosition = 7,
+        RestartApp = 8,
+        CloseApp = 9
+    }
+
     public class Appearance
     {
         [JsonProperty("isEnableDisPlayNibModeToggler")]
@@ -274,6 +288,10 @@ namespace Ink_Canvas
         public double ViewboxFloatingBarOpacityValue { get; set; } = 1.0;
         [JsonProperty("enableTrayIcon")]
         public bool EnableTrayIcon { get; set; } = true;
+        [JsonProperty("trayLeftClickAction")]
+        public TrayClickAction TrayLeftClickAction { get; set; } = TrayClickAction.ShowMenu;
+        [JsonProperty("trayRightClickAction")]
+        public TrayClickAction TrayRightClickAction { get; set; } = TrayClickAction.ShowMenu;
         [JsonProperty("viewboxFloatingBarOpacityInPPTValue")]
         public double ViewboxFloatingBarOpacityInPPTValue { get; set; } = 0.5;
         [JsonProperty("viewboxBlackBoardScaleTransformValue")]
