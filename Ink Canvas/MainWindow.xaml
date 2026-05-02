@@ -2985,11 +2985,11 @@
                                     <Grid Width="0" d:Visibility="Visible">
                                     </Grid>
                                 </ikw:SimpleStackPanel>
-                                <Border Name="BorderTools" 
+                                <Border Name="BorderTools"
                                         Visibility="Collapsed" d:Visibility="Visible"
                                         Margin="-103,-156,-16,37" CornerRadius="6"
                                         Background="{DynamicResource FloatBarBackground}"
-                                        BorderBrush="#2563eb" >
+                                        BorderBrush="#2563eb" BorderThickness="1">
                                     <ikw:SimpleStackPanel Margin="-1">
                                         <Border BorderBrush="#1e3a8a" BorderThickness="0,0,0,1" CornerRadius="8,8,0,0" Background="#2563eb">
                                             <Grid Margin="5">
