@@ -1014,10 +1014,11 @@ namespace Ink_Canvas
             if (_pauseStraightenTimers.TryGetValue(stylusId, out var existing))
             {
                 existing.Stop();
+                existing.Interval = TimeSpan.FromMilliseconds(Settings.Canvas.PauseStraightenDelay);
                 existing.Start();
                 return;
             }
-            var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(PauseStraightenDelayMs) };
+            var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(Settings.Canvas.PauseStraightenDelay) };
             var capturedId = stylusId;
             timer.Tick += (s, e) =>
             {
@@ -1038,10 +1039,11 @@ namespace Ink_Canvas
             if (_pauseStraightenTimers.TryGetValue(inkModeId, out var existing))
             {
                 existing.Stop();
+                existing.Interval = TimeSpan.FromMilliseconds(Settings.Canvas.PauseStraightenDelay);
                 existing.Start();
                 return;
             }
-            var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(PauseStraightenDelayMs) };
+            var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(Settings.Canvas.PauseStraightenDelay) };
             timer.Tick += (s, e) =>
             {
                 timer.Stop();

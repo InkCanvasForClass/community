@@ -53,6 +53,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     AutoStraightenLineThresholdSlider.Value = settings.Canvas.AutoStraightenLineThreshold;
                     ToggleSwitchHighPrecisionLineStraighten.IsOn = settings.Canvas.HighPrecisionLineStraighten;
                     ToggleSwitchPauseStraightenLine.IsOn = settings.Canvas.PauseStraightenLine;
+                    PauseStraightenDelaySlider.Value = settings.Canvas.PauseStraightenDelay;
                     ToggleSwitchLineEndpointSnapping.IsOn = settings.Canvas.LineEndpointSnapping;
                 }
             }
@@ -197,6 +198,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.Canvas.PauseStraightenLine = ToggleSwitchPauseStraightenLine.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void PauseStraightenDelaySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.PauseStraightenDelay = (int)PauseStraightenDelaySlider.Value;
             SettingsManager.SaveSettingsToFile();
         }
 

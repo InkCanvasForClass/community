@@ -110,6 +110,8 @@ namespace Ink_Canvas
         public bool HighPrecisionLineStraighten { get; set; } = true; // 是否启用高精度直线拉直
         [JsonProperty("pauseStraightenLine")]
         public bool PauseStraightenLine { get; set; } = false; // 是否启用停顿拉直（书写中停顿时自动拉直笔画）
+        [JsonProperty("pauseStraightenDelay")]
+        public int PauseStraightenDelay { get; set; } = 300; // 停顿拉直触发延迟（毫秒）
         [JsonProperty("lineEndpointSnapping")]
         public bool LineEndpointSnapping { get; set; } = true; // 是否启用直线端点吸附
         [JsonProperty("lineEndpointSnappingThreshold")]

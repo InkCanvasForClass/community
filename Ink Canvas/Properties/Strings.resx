@@ -636,6 +636,9 @@
   <data name="InkRecog_PauseStraightenHint" xml:space="preserve">
     <value>书写中停顿时，自动将当前笔画拉直为直线（需同时开启直线自动拉直）。</value>
   </data>
+  <data name="InkRecog_PauseStraightenDelay" xml:space="preserve">
+    <value>停顿触发延迟</value>
+  </data>
   <data name="InkRecog_LineEndpointSnapping" xml:space="preserve">
     <value>直线端点吸附</value>
   </data>
