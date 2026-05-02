@@ -349,8 +349,66 @@ namespace Ink_Canvas.Windows
             ThemeHelper.ApplyTheme(this, settings, theme =>
             {
                 if (theme == "Dark") SetDarkThemeBorder();
-                UpdateDigitDisplays();
+                // 复用当前状态下的显示逻辑，避免把暂停/超时/运行中的读数重置为初始设定时间。
+                RefreshDigitDisplayForCurrentState();
             });
+        }
+
+        /// <summary>
+        /// 依据当前计时器状态刷新数字显示：
+        /// 运行中按 DateTime.Now、暂停中按 pauseTime 推算；处于超时模式时按超时值渲染；未启动时回退到初始设定值。
+        /// 供主题切换等场景直接复用 Timer_Elapsed 的渲染分支。
+        /// </summary>
+        private void RefreshDigitDisplayForCurrentState()
+        {
+            if (!isTimerRunning)
+            {
+                UpdateDigitDisplays();
+                return;
+            }
+
+            DateTime referenceTime = isPaused ? pauseTime : DateTime.Now;
+            TimeSpan timeSpan = referenceTime - startTime;
+            TimeSpan totalTimeSpan = new TimeSpan(hour, minute, second);
+
+            if (!isOvertimeMode)
+            {
+                TimeSpan leftTimeSpan = totalTimeSpan - timeSpan;
+                if (leftTimeSpan.Milliseconds > 0) leftTimeSpan += new TimeSpan(0, 0, 1);
+                if (leftTimeSpan < TimeSpan.Zero) leftTimeSpan = TimeSpan.Zero;
+
+                int displayHours = Math.Min(99, (int)leftTimeSpan.TotalHours);
+                SetDigitDisplay("Digit1Display", displayHours / 10);
+                SetDigitDisplay("Digit2Display", displayHours % 10);
+                SetDigitDisplay("Digit3Display", leftTimeSpan.Minutes / 10);
+                SetDigitDisplay("Digit4Display", leftTimeSpan.Minutes % 10);
+                SetDigitDisplay("Digit5Display", leftTimeSpan.Seconds / 10);
+                SetDigitDisplay("Digit6Display", leftTimeSpan.Seconds % 10);
+                SetColonDisplay(false);
+            }
+            else
+            {
+                TimeSpan overtimeSpan = timeSpan - totalTimeSpan;
+                if (overtimeSpan < TimeSpan.Zero) overtimeSpan = TimeSpan.Zero;
+
+                int displayHours = Math.Max(0, Math.Min(99, (int)overtimeSpan.TotalHours));
+                bool shouldShowRed = MainWindow.Settings?.RandSettings?.EnableOvertimeRedText == true;
+
+                int hoursTens = Math.Max(0, Math.Min(9, Math.Abs(displayHours / 10) % 10));
+                int hoursOnes = Math.Max(0, Math.Min(9, (displayHours % 10 + 10) % 10));
+                int minutesTens = Math.Max(0, Math.Min(9, Math.Abs(overtimeSpan.Minutes) / 10));
+                int minutesOnes = Math.Max(0, Math.Min(9, Math.Abs(overtimeSpan.Minutes) % 10));
+                int secondsTens = Math.Max(0, Math.Min(9, Math.Abs(overtimeSpan.Seconds) / 10));
+                int secondsOnes = Math.Max(0, Math.Min(9, Math.Abs(overtimeSpan.Seconds) % 10));
+
+                SetDigitDisplay("Digit1Display", hoursTens, shouldShowRed);
+                SetDigitDisplay("Digit2Display", hoursOnes, shouldShowRed);
+                SetDigitDisplay("Digit3Display", minutesTens, shouldShowRed);
+                SetDigitDisplay("Digit4Display", minutesOnes, shouldShowRed);
+                SetDigitDisplay("Digit5Display", secondsTens, shouldShowRed);
+                SetDigitDisplay("Digit6Display", secondsOnes, shouldShowRed);
+                SetColonDisplay(shouldShowRed);
+            }
         }
 
         private void UpdateDigitDisplays()
