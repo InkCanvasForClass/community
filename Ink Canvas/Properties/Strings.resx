@@ -577,7 +577,7 @@
     <value>WinRT识别转手写体字形</value>
   </data>
   <data name="InkRecog_HandwritingBeautifyHint" xml:space="preserve">
-    <value>#开启后，调用墨迹纠正API时：先WinRT识别手写词，再将识别成功的文字用手写风格字体转成字形轮廓墨迹替换原笔画。需WinRT。</value>
+    <value>开启后，调用墨迹纠正API时：先WinRT识别手写词，再将识别成功的文字用手写风格字体转成字形轮廓墨迹替换原笔画。需WinRT。</value>
   </data>
   <data name="InkRecog_HandwritingFont" xml:space="preserve">
     <value>手写体字形字体</value>
@@ -1261,7 +1261,7 @@
     <value>记忆并提示上次播放位置</value>
   </data>
   <data name="PPT_RememberLastPageHint" xml:space="preserve">
-    <value>#开启后会记录上次播放的页数，点击"是"后会自动跳转</value>
+    <value>开启后会记录上次播放的页数，点击"是"后会自动跳转</value>
   </data>
   <data name="PPT_GoToFirstPageOnReenter" xml:space="preserve">
     <value>进入放映时回到首页</value>
