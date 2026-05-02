@@ -2985,53 +2985,53 @@
                                     <Grid Width="0" d:Visibility="Visible">
                                     </Grid>
                                 </ikw:SimpleStackPanel>
-                                <Border Name="BorderTools"
-                                        Visibility="Collapsed" d:Visibility="Visible"
-                                        Margin="-103,-156,-16,37" CornerRadius="6"
-                                        Background="{DynamicResource FloatBarBackground}"
-                                        BorderBrush="#2563eb" BorderThickness="1">
-                                    <ikw:SimpleStackPanel Margin="-1">
-                                        <Border BorderBrush="#1e3a8a" BorderThickness="0,0,0,1" CornerRadius="8,8,0,0" Background="#2563eb">
-                                            <Grid Margin="5">
+                                <Popup x:Name="BorderTools"
+                                       Placement="Custom"
+                                       AllowsTransparency="True"
+                                       StaysOpen="True"
+                                       IsOpen="False">
+                                    <Border CornerRadius="6" Background="#F4F4F5"
+                                            BorderBrush="#3b82f6" BorderThickness="1">
+                                        <ikw:SimpleStackPanel Margin="-1">
+                                            <Grid Margin="8,8,8,5">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*" />
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" VerticalAlignment="Center"
-                                                                       Text="{i18n:I18n Key=Tools_MoreFeaturesTitle}"
-                                                                       Foreground="White" FontWeight="Bold"/>
+                                                <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="12"
+                                                                           Text="{i18n:I18n Key=Tools_MoreFeaturesTitle}"
+                                                                           Foreground="#2563eb" FontWeight="Bold"/>
                                                 <ui:FontIcon Grid.Column="1" Icon="{x:Static ui:SegoeFluentIcons.ChromeCloseContrast}"
-                                                                         Foreground="White" FontSize="12"
-                                                                         MouseDown="Border_MouseDown"
-                                                                         MouseUp="CloseBordertools_MouseUp" />
+                                                                             Foreground="#DC2626" FontSize="12" VerticalAlignment="Center"
+                                                                             MouseDown="Border_MouseDown"
+                                                                             MouseUp="CloseBordertools_MouseUp" />
                                             </Grid>
-                                        </Border>
-                                        <!---->
-                                        <ikw:SimpleStackPanel Margin="10,3,10,2" Spacing="2">
-                                            <ikw:SimpleStackPanel.Resources>
-                                                <Style TargetType="Label" BasedOn="{StaticResource AutoFitToolPopupLabel8}" />
-                                            </ikw:SimpleStackPanel.Resources>
-                                            <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
-                                                                             Orientation="Horizontal">
-                                                <controls:ToolMenuButton x:Name="TimerToolBtn" ButtonMouseUp="ImageCountdownTimer_MouseUp" Label="{i18n:I18n Key=Tools_Timer}" />
-                                                <controls:ToolMenuButton x:Name="RandomDrawToolBtn" ButtonMouseUp="SymbolIconRand_MouseUp" Label="{i18n:I18n Key=Tools_RandomDraw}" />
-                                                <controls:ToolMenuButton x:Name="SingleDrawToolBtn" ButtonMouseUp="SymbolIconRandOne_MouseUp" Label="{i18n:I18n Key=Tools_SingleDraw}" />
-                                            </ikw:SimpleStackPanel>
-                                            <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
-                                                                             Orientation="Horizontal">
-                                                <controls:ToolMenuButton x:Name="SaveToolBtn" ButtonMouseDown="Border_MouseDown" ButtonMouseUp="SymbolIconSaveStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Save}" />
-                                                <controls:ToolMenuButton x:Name="OpenToolBtn" ButtonMouseDown="Border_MouseDown" ButtonMouseUp="SymbolIconOpenStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Open}" />
-                                                <controls:ToolMenuButton x:Name="ReplayToolBtn" ButtonMouseUp="GridInkReplayButton_MouseUp" Label="{i18n:I18n Key=Tools_Replay}" />
-                                            </ikw:SimpleStackPanel>
-                                            <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
-                                                                             Orientation="Horizontal">
-                                                <controls:ToolMenuButton x:Name="ScreenshotToolBtn" ButtonMouseUp="SymbolIconScreenshot_MouseUp" Label="{i18n:I18n Key=Tools_Screenshot}" />
-                                                <controls:ToolMenuButton x:Name="ManualToolBtn" ButtonMouseUp="OperatingGuideWindowIcon_MouseUp" Label="{i18n:I18n Key=Tools_Manual}" />
-                                                <controls:ToolMenuButton x:Name="SettingsToolBtn" ButtonMouseUp="SymbolIconSettings_Click" Label="{i18n:I18n Key=Tools_Settings}" />
-                                            </ikw:SimpleStackPanel>
+                                            <Border Margin="8,0,8,8" BorderBrush="#D4D4D8" Background="#fafafa" BorderThickness="1"
+                                                    CornerRadius="6">
+                                                <ikw:SimpleStackPanel Margin="2" Spacing="1">
+                                                    <ikw:SimpleStackPanel.Resources>
+                                                        <Style TargetType="Label" BasedOn="{StaticResource AutoFitToolPopupLabel8}" />
+                                                    </ikw:SimpleStackPanel.Resources>
+                                                    <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40" Orientation="Horizontal">
+                                                        <controls:ToolMenuButton x:Name="TimerToolBtn" ButtonMouseUp="ImageCountdownTimer_MouseUp" Label="{i18n:I18n Key=Tools_Timer}" />
+                                                        <controls:ToolMenuButton x:Name="RandomDrawToolBtn" ButtonMouseUp="SymbolIconRand_MouseUp" Label="{i18n:I18n Key=Tools_RandomDraw}" />
+                                                        <controls:ToolMenuButton x:Name="SingleDrawToolBtn" ButtonMouseUp="SymbolIconRandOne_MouseUp" Label="{i18n:I18n Key=Tools_SingleDraw}" />
+                                                    </ikw:SimpleStackPanel>
+                                                    <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40" Orientation="Horizontal">
+                                                        <controls:ToolMenuButton x:Name="SaveToolBtn" ButtonMouseDown="Border_MouseDown" ButtonMouseUp="SymbolIconSaveStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Save}" />
+                                                        <controls:ToolMenuButton x:Name="OpenToolBtn" ButtonMouseDown="Border_MouseDown" ButtonMouseUp="SymbolIconOpenStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Open}" />
+                                                        <controls:ToolMenuButton x:Name="ReplayToolBtn" ButtonMouseUp="GridInkReplayButton_MouseUp" Label="{i18n:I18n Key=Tools_Replay}" />
+                                                    </ikw:SimpleStackPanel>
+                                                    <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40" Orientation="Horizontal">
+                                                        <controls:ToolMenuButton x:Name="ScreenshotToolBtn" ButtonMouseUp="SymbolIconScreenshot_MouseUp" Label="{i18n:I18n Key=Tools_Screenshot}" />
+                                                        <controls:ToolMenuButton x:Name="ManualToolBtn" ButtonMouseUp="OperatingGuideWindowIcon_MouseUp" Label="{i18n:I18n Key=Tools_Manual}" />
+                                                        <controls:ToolMenuButton x:Name="SettingsToolBtn" ButtonMouseUp="SymbolIconSettings_Click" Label="{i18n:I18n Key=Tools_Settings}" />
+                                                    </ikw:SimpleStackPanel>
+                                                </ikw:SimpleStackPanel>
+                                            </Border>
                                         </ikw:SimpleStackPanel>
-                                    </ikw:SimpleStackPanel>
-                                </Border>
+                                    </Border>
+                                </Popup>
                             </ikw:SimpleStackPanel>
                         </Grid>
 

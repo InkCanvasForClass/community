@@ -34,7 +34,7 @@ namespace Ink_Canvas
             else
             {
                 AnimationsHelper.HideWithSlideAndFade(EraserSizePanel);
-                AnimationsHelper.HideWithSlideAndFade(BorderTools);
+                AnimationsHelper.HidePopupWithSlideAndFade(BorderTools);
                 AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
                 AnimationsHelper.HideWithSlideAndFade(PenPalette);
                 AnimationsHelper.HideWithSlideAndFade(BoardPenPalette);

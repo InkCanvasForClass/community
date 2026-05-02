@@ -32,7 +32,11 @@ namespace Ink_Canvas
         internal void AttachSymbolIconRedo(ToolbarImageButton btn) => SymbolIconRedo = btn;
         internal void AttachCursorWithDelBtn(ToolbarImageButton btn) => CursorWithDelFloatingBarBtn = btn;
         internal void AttachWhiteboardBtn(ToolbarImageButton btn) => WhiteboardFloatingBarBtn = btn;
-        internal void AttachToolsBtn(ToolbarImageButton btn) => ToolsFloatingBarBtn = btn;
+        internal void AttachToolsBtn(ToolbarImageButton btn)
+        {
+            ToolsFloatingBarBtn = btn;
+            BorderTools.PlacementTarget = btn;
+        }
         internal void AttachFoldIcon(ToolbarImageButton btn) => Fold_Icon = btn;
 
         internal void InitializeToolbarPlugins()

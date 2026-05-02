@@ -99,10 +99,15 @@ namespace Ink_Canvas.Controls.Toolbar
                     visible = cfg.Visible;
                 try
                 {
-                    var menuElement = host.Window.FindName(item.MenuPanelName) as FrameworkElement;
-                    if (menuElement != null)
+                    var menuElement = host.Window.FindName(item.MenuPanelName);
+                    if (menuElement is System.Windows.Controls.Primitives.Popup popup)
                     {
-                        menuElement.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+                        popup.IsOpen = visible;
+                        LogHelper.WriteLogToFile($"ToolbarRegistry: 菜单 Popup [{item.MenuPanelName}] -> {(visible ? "Open" : "Closed")}", LogHelper.LogType.Info);
+                    }
+                    else if (menuElement is FrameworkElement fe)
+                    {
+                        fe.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
                         LogHelper.WriteLogToFile($"ToolbarRegistry: 菜单 [{item.MenuPanelName}] -> {(visible ? "Visible" : "Collapsed")}", LogHelper.LogType.Info);
                     }
                     else

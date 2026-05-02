@@ -294,7 +294,7 @@ namespace Ink_Canvas
         /// </summary>
         private void HideSubPanelsImmediately()
         {
-            BorderTools.Visibility = Visibility.Collapsed;
+            BorderTools.IsOpen = false;
             BoardBorderToolsPopup.IsOpen = false;
             PenPalette.Visibility = Visibility.Collapsed;
             BoardPenPalette.Visibility = Visibility.Collapsed;
@@ -376,7 +376,7 @@ namespace Ink_Canvas
         /// </param>
         internal async void HideSubPanels(string mode = null, bool autoAlignCenter = false)
         {
-            AnimationsHelper.HideWithSlideAndFade(BorderTools);
+            AnimationsHelper.HidePopupWithSlideAndFade(BorderTools);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
             AnimationsHelper.HideWithSlideAndFade(PenPalette);
             AnimationsHelper.HideWithSlideAndFade(BoardPenPalette);
@@ -1099,7 +1099,7 @@ namespace Ink_Canvas
         {
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
-            AnimationsHelper.HideWithSlideAndFade(BorderTools);
+            AnimationsHelper.HidePopupWithSlideAndFade(BorderTools);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
@@ -1151,7 +1151,7 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void OperatingGuideWindowIcon_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            AnimationsHelper.HideWithSlideAndFade(BorderTools);
+            AnimationsHelper.HidePopupWithSlideAndFade(BorderTools);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
@@ -1171,7 +1171,7 @@ namespace Ink_Canvas
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
 
-            AnimationsHelper.HideWithSlideAndFade(BorderTools);
+            AnimationsHelper.HidePopupWithSlideAndFade(BorderTools);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
@@ -1306,7 +1306,7 @@ namespace Ink_Canvas
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
 
-            AnimationsHelper.HideWithSlideAndFade(BorderTools);
+            AnimationsHelper.HidePopupWithSlideAndFade(BorderTools);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
@@ -1385,7 +1385,7 @@ namespace Ink_Canvas
         {
             //if (lastBorderMouseDownObject != sender) return;
 
-            AnimationsHelper.HideWithSlideAndFade(BorderTools);
+            AnimationsHelper.HidePopupWithSlideAndFade(BorderTools);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
@@ -1687,9 +1687,9 @@ namespace Ink_Canvas
         /// <param name="e">鼠标按钮事件参数</param>
         internal void SymbolIconTools_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (BorderTools.Visibility == Visibility.Visible || BoardBorderToolsPopup.IsOpen)
+            if (BorderTools.IsOpen || BoardBorderToolsPopup.IsOpen)
             {
-                AnimationsHelper.HideWithSlideAndFade(BorderTools);
+                AnimationsHelper.HidePopupWithSlideAndFade(BorderTools);
                 AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
             }
             else
@@ -1697,8 +1697,7 @@ namespace Ink_Canvas
                 HideSubPanels();
                 if (currentMode == 0)
                 {
-                    UpdateBorderToolsPosition();
-                    AnimationsHelper.ShowWithSlideFromBottomAndFade(BorderTools);
+                    AnimationsHelper.ShowPopupWithSlideAndFade(BorderTools);
                 }
                 else
                 {
