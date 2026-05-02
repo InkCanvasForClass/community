@@ -134,8 +134,8 @@
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_LengthThreshold}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="{Binding Value, ElementName=AutoStraightenLineThresholdSlider, StringFormat={}{0:0}}"
-                                               VerticalAlignment="Center" FontFamily="Consolas"/>
+                                    <TextBlock x:Name="AutoStraightenLineThresholdText"
+                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                                     <Slider x:Name="AutoStraightenLineThresholdSlider" Width="200" Minimum="30" Maximum="300"
                                             Value="80" TickFrequency="30" IsSnapToTickEnabled="True"
                                             ValueChanged="AutoStraightenLineThresholdSlider_ValueChanged" />
@@ -143,8 +143,8 @@
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_Sensitivity}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="{Binding Value, ElementName=LineStraightenSensitivitySlider, StringFormat={}{0:F2}}"
-                                               VerticalAlignment="Center" FontFamily="Consolas"/>
+                                    <TextBlock x:Name="LineStraightenSensitivityText"
+                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                                     <Slider x:Name="LineStraightenSensitivitySlider" Width="200" Minimum="0.05" Maximum="2.0"
                                             Value="0.20" TickFrequency="0.05" IsSnapToTickEnabled="True"
                                             ValueChanged="LineStraightenSensitivitySlider_ValueChanged" />
@@ -166,8 +166,8 @@
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_PauseStraightenDelay}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="{Binding Value, ElementName=PauseStraightenDelaySlider, StringFormat={}{0:0} ms}"
-                                               VerticalAlignment="Center" FontFamily="Consolas"/>
+                                    <TextBlock x:Name="PauseStraightenDelayText"
+                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                                     <Slider x:Name="PauseStraightenDelaySlider" Width="200" Minimum="100" Maximum="1000"
                                             Value="300" TickFrequency="50" IsSnapToTickEnabled="True"
                                             ValueChanged="PauseStraightenDelaySlider_ValueChanged" />
@@ -190,8 +190,8 @@
                             <ui:SettingsCard Header="{i18n:I18n Key=InkRecog_SnappingDistance}"
                                     Description="{i18n:I18n Key=InkRecog_LineEndpointSnappingHint}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="{Binding Value, ElementName=LineEndpointSnappingThresholdSlider, StringFormat={}{0:0}}"
-                                               VerticalAlignment="Center" FontFamily="Consolas"/>
+                                    <TextBlock x:Name="LineEndpointSnappingThresholdText"
+                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                                     <Slider x:Name="LineEndpointSnappingThresholdSlider" Width="200" Minimum="5" Maximum="50"
                                             Value="15" TickFrequency="5" IsSnapToTickEnabled="True"
                                             ValueChanged="LineEndpointSnappingThresholdSlider_ValueChanged" />

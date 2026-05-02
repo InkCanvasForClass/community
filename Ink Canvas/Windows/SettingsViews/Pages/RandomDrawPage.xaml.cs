@@ -23,6 +23,23 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             LoadSettings();
             _isLoaded = true;
+            UpdateAllSliderTexts();
+        }
+
+        private void UpdateAllSliderTexts()
+        {
+            UpdateSliderText(RandWindowOnceCloseLatencySlider, RandWindowOnceCloseLatencyText, "{0:F1}");
+            UpdateSliderText(RandWindowOnceMaxStudentsSlider, RandWindowOnceMaxStudentsText, "{0:0}");
+            UpdateSliderText(MLAvoidanceHistorySlider, MLAvoidanceHistoryText, "{0:0}");
+            UpdateSliderText(MLAvoidanceWeightSlider, MLAvoidanceWeightText, "{0:F1}");
+            UpdateSliderText(TimerVolumeSlider, TimerVolumeText, "{0:F1}");
+            UpdateSliderText(ProgressiveReminderVolumeSlider, ProgressiveReminderVolumeText, "{0:F1}");
+        }
+
+        private void UpdateSliderText(Slider slider, TextBlock textBlock, string format)
+        {
+            if (slider == null || textBlock == null) return;
+            textBlock.Text = string.Format(format, slider.Value);
         }
 
         private void Page_Unloaded(object sender, RoutedEventArgs e)
@@ -80,6 +97,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void RandWindowOnceCloseLatencySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            UpdateSliderText(RandWindowOnceCloseLatencySlider, RandWindowOnceCloseLatencyText, "{0:F1}");
             if (!_isLoaded) return;
             var val = Math.Round(RandWindowOnceCloseLatencySlider.Value, 2);
             RandWindowOnceCloseLatencySlider.Value = val;
@@ -89,6 +107,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void RandWindowOnceMaxStudentsSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
+            UpdateSliderText(RandWindowOnceMaxStudentsSlider, RandWindowOnceMaxStudentsText, "{0:0}");
             if (!_isLoaded) return;
             SettingsManager.Settings.RandSettings.RandWindowOnceMaxStudents = (int)RandWindowOnceMaxStudentsSlider.Value;
             SettingsManager.SaveSettingsToFile();
@@ -208,6 +227,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void MLAvoidanceHistorySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            UpdateSliderText(MLAvoidanceHistorySlider, MLAvoidanceHistoryText, "{0:0}");
             if (!_isLoaded) return;
             SettingsManager.Settings.RandSettings.MLAvoidanceHistoryCount = (int)MLAvoidanceHistorySlider.Value;
             SettingsManager.SaveSettingsToFile();
@@ -215,6 +235,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void MLAvoidanceWeightSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            UpdateSliderText(MLAvoidanceWeightSlider, MLAvoidanceWeightText, "{0:F1}");
             if (!_isLoaded) return;
             var slider = MLAvoidanceWeightSlider;
             var val = Math.Round(slider.Value, 2);
@@ -286,6 +307,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void TimerVolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            UpdateSliderText(TimerVolumeSlider, TimerVolumeText, "{0:F1}");
             if (!_isLoaded) return;
             var slider = TimerVolumeSlider;
             var val = Math.Round(slider.Value, 2);
@@ -331,6 +353,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void ProgressiveReminderVolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            UpdateSliderText(ProgressiveReminderVolumeSlider, ProgressiveReminderVolumeText, "{0:F1}");
             if (!_isLoaded) return;
             var slider = ProgressiveReminderVolumeSlider;
             var val = Math.Round(slider.Value, 2);
