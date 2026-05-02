@@ -294,8 +294,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void BrushAutoRestoreWidthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!_isLoaded) return;
-            var val = Math.Round(BrushAutoRestoreWidthSlider.Value, 2);
-            BrushAutoRestoreWidthSlider.Value = val;
+            var slider = BrushAutoRestoreWidthSlider;
+            var val = Math.Round(slider.Value, 2);
+            // 仅在四舍五入纠正了显示值时回写；那次 set 会重入 ValueChanged 完成保存。
+            if (slider.Value != val)
+            {
+                slider.Value = val;
+                return;
+            }
             SettingsManager.Settings.Canvas.BrushAutoRestoreWidth = val;
             SettingsManager.SaveSettingsToFile();
         }

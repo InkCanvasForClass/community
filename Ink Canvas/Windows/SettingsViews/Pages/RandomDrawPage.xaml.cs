@@ -216,8 +216,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void MLAvoidanceWeightSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!_isLoaded) return;
-            var val = Math.Round(MLAvoidanceWeightSlider.Value, 2);
-            MLAvoidanceWeightSlider.Value = val;
+            var slider = MLAvoidanceWeightSlider;
+            var val = Math.Round(slider.Value, 2);
+            // 仅当四舍五入纠正了显示值时才回写；那次 set 会重入 ValueChanged 完成保存。
+            if (slider.Value != val)
+            {
+                slider.Value = val;
+                return;
+            }
             SettingsManager.Settings.RandSettings.MLAvoidanceWeight = val;
             SettingsManager.SaveSettingsToFile();
         }
@@ -281,8 +287,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void TimerVolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!_isLoaded) return;
-            var val = Math.Round(TimerVolumeSlider.Value, 2);
-            TimerVolumeSlider.Value = val;
+            var slider = TimerVolumeSlider;
+            var val = Math.Round(slider.Value, 2);
+            if (slider.Value != val)
+            {
+                slider.Value = val;
+                return;
+            }
             SettingsManager.Settings.RandSettings.TimerVolume = val;
             SettingsManager.SaveSettingsToFile();
         }
@@ -321,8 +332,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ProgressiveReminderVolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!_isLoaded) return;
-            var val = Math.Round(ProgressiveReminderVolumeSlider.Value, 2);
-            ProgressiveReminderVolumeSlider.Value = val;
+            var slider = ProgressiveReminderVolumeSlider;
+            var val = Math.Round(slider.Value, 2);
+            if (slider.Value != val)
+            {
+                slider.Value = val;
+                return;
+            }
             SettingsManager.Settings.RandSettings.ProgressiveReminderVolume = val;
             SettingsManager.SaveSettingsToFile();
         }

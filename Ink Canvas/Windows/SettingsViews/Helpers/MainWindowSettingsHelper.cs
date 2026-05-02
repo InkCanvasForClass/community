@@ -339,14 +339,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 };
 
                 bool isThemeRelated = false;
-                string controlNameLower = controlName.ToLower();
 
                 foreach (var themeControl in themeRelatedControls)
                 {
-                    string themeControlLower = themeControl.ToLower();
-                    if (controlNameLower.Contains(themeControlLower) ||
-                        themeControlLower.Contains(controlNameLower) ||
-                        controlNameLower == themeControlLower)
+                    // OrdinalIgnoreCase 避免在循环里反复 ToLower() 生成中间字符串。
+                    if (controlName.IndexOf(themeControl, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        themeControl.IndexOf(controlName, StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         isThemeRelated = true;
                         break;

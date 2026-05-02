@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
              xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+             xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
              mc:Ignorable="d"
              d:DesignHeight="68"
              d:DesignWidth="600">
@@ -20,7 +21,7 @@
                 FontFamily="Consolas"
                 FontWeight="SemiBold"
                 Click="BtnSetHotkey_Click">
-            <TextBlock x:Name="CurrentHotkeyTextBlock" Text="未设置" />
+            <TextBlock x:Name="CurrentHotkeyTextBlock" Text="{i18n:I18n Key=Hotkey_NotSet}" />
         </Button>
     </ui:SettingsCard>
 </UserControl>

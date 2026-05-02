@@ -373,30 +373,30 @@
                             Toggled="ToggleSwitchSaveFullPageStrokes_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardUseCustomSaveFileName"
-                            Header="使用自定义保存文件名"
-                            Description="开启后可选择保存文件的命名方式"
+                            Header="{i18n:I18n Key=Automation_UseCustomSaveFileName_Header}"
+                            Description="{i18n:I18n Key=Automation_UseCustomSaveFileName_Desc}"
                             Icon="{x:Static ui:SegoeFluentIcons.Edit}"
                             Toggled="ToggleSwitchUseCustomSaveFileName_Toggled"/>
 
-                    <ui:SettingsExpander x:Name="CardSaveFileNamePreset" Header="文件名格式">
+                    <ui:SettingsExpander x:Name="CardSaveFileNamePreset" Header="{i18n:I18n Key=Automation_SaveFileNameFormat}">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
                         </ui:SettingsExpander.HeaderIcon>
                         <ComboBox x:Name="ComboBoxSaveFileNamePreset"
                                   MinWidth="260"
                                   SelectionChanged="ComboBoxSaveFileNamePreset_SelectionChanged">
-                            <ComboBoxItem Content="时间戳（默认）" Tag="{}{datetime}"/>
-                            <ComboBoxItem Content="日期" Tag="{}{date}"/>
-                            <ComboBoxItem Content="日期 + 时间" Tag="{}{date}_{time}"/>
-                            <ComboBoxItem Content="日期 + 模式" Tag="{}{date}_{mode}"/>
-                            <ComboBoxItem Content="日期 + 模式 + 页码" Tag="{}{date}_{mode}_Page-{page}"/>
-                            <ComboBoxItem Content="日期 + 模式 + 页码 + 笔画数" Tag="{}{date}_{mode}_Page-{page}_Strokes-{count}"/>
-                            <ComboBoxItem Content="自定义..." Tag="__custom__"/>
+                            <ComboBoxItem Content="{i18n:I18n Key=Automation_SaveFileName_Timestamp}" Tag="{}{datetime}"/>
+                            <ComboBoxItem Content="{i18n:I18n Key=Automation_SaveFileName_Date}" Tag="{}{date}"/>
+                            <ComboBoxItem Content="{i18n:I18n Key=Automation_SaveFileName_DateTime}" Tag="{}{date}_{time}"/>
+                            <ComboBoxItem Content="{i18n:I18n Key=Automation_SaveFileName_DateMode}" Tag="{}{date}_{mode}"/>
+                            <ComboBoxItem Content="{i18n:I18n Key=Automation_SaveFileName_DateModePage}" Tag="{}{date}_{mode}_Page-{page}"/>
+                            <ComboBoxItem Content="{i18n:I18n Key=Automation_SaveFileName_DateModePageCount}" Tag="{}{date}_{mode}_Page-{page}_Strokes-{count}"/>
+                            <ComboBoxItem Content="{i18n:I18n Key=Automation_SaveFileName_Custom}" Tag="__custom__"/>
                         </ComboBox>
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard x:Name="CardCustomSaveFileNameTemplate"
-                                             Header="自定义模板"
-                                             Description="可用占位符：{date} {time} {datetime} {mode} {page} {count} {type}"
+                                             Header="{i18n:I18n Key=Automation_SaveFileName_CustomTemplate_Header}"
+                                             Description="{i18n:I18n Key=Automation_SaveFileName_CustomTemplate_Desc}"
                                              Visibility="Collapsed">
                                 <TextBox x:Name="TextBoxCustomSaveFileNameTemplate"
                                          MinWidth="260"

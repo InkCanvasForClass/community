@@ -2737,7 +2737,22 @@ Hide</value>
     <value>Logs</value>
   </data>
   <data name="Storage_Logs_Desc" xml:space="preserve">
-    <value>.txt logs and crash reports under Logs / Crashs. Cleanable.</value>
+    <value>.txt logs and crash reports under Logs / Crashes. Cleanable.</value>
+  </data>
+  <data name="Hotkey_NotSet" xml:space="preserve">
+    <value>Not set</value>
+  </data>
+  <data name="Settings_Nav_Security" xml:space="preserve">
+    <value>Security</value>
+  </data>
+  <data name="Settings_Nav_Security_Tooltip" xml:space="preserve">
+    <value>Security password and process protection</value>
+  </data>
+  <data name="Settings_Nav_Hotkey" xml:space="preserve">
+    <value>Hotkeys</value>
+  </data>
+  <data name="Settings_Nav_Hotkey_Tooltip" xml:space="preserve">
+    <value>Hotkey settings</value>
   </data>
   <data name="Storage_Ink_Header" xml:space="preserve">
     <value>Ink</value>
@@ -2798,5 +2813,47 @@ Hide</value>
   </data>
   <data name="Storage_NavTooltip" xml:space="preserve">
     <value>View and clean storage used by ICC CE</value>
+  </data>
+  <data name="Debug_ShowConsole_Header" xml:space="preserve">
+    <value>Show debug console</value>
+  </data>
+  <data name="Debug_ShowConsole_Desc" xml:space="preserve">
+    <value>Show a separate console window for live log output (takes effect immediately; if "Enable logging" is off in settings, no content will be emitted).</value>
+  </data>
+  <data name="Automation_UseCustomSaveFileName_Header" xml:space="preserve">
+    <value>Use custom save file name</value>
+  </data>
+  <data name="Automation_UseCustomSaveFileName_Desc" xml:space="preserve">
+    <value>When enabled, choose how saved files are named</value>
+  </data>
+  <data name="Automation_SaveFileNameFormat" xml:space="preserve">
+    <value>File name format</value>
+  </data>
+  <data name="Automation_SaveFileName_Timestamp" xml:space="preserve">
+    <value>Timestamp (default)</value>
+  </data>
+  <data name="Automation_SaveFileName_Date" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="Automation_SaveFileName_DateTime" xml:space="preserve">
+    <value>Date + Time</value>
+  </data>
+  <data name="Automation_SaveFileName_DateMode" xml:space="preserve">
+    <value>Date + Mode</value>
+  </data>
+  <data name="Automation_SaveFileName_DateModePage" xml:space="preserve">
+    <value>Date + Mode + Page</value>
+  </data>
+  <data name="Automation_SaveFileName_DateModePageCount" xml:space="preserve">
+    <value>Date + Mode + Page + Stroke count</value>
+  </data>
+  <data name="Automation_SaveFileName_Custom" xml:space="preserve">
+    <value>Custom...</value>
+  </data>
+  <data name="Automation_SaveFileName_CustomTemplate_Header" xml:space="preserve">
+    <value>Custom template</value>
+  </data>
+  <data name="Automation_SaveFileName_CustomTemplate_Desc" xml:space="preserve">
+    <value>Available placeholders: {date} {time} {datetime} {mode} {page} {count} {type}</value>
   </data>
 </root>

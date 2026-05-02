@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -68,7 +69,7 @@ namespace Ink_Canvas.Windows
         {
             if (_currentKey == Key.None)
             {
-                CurrentHotkeyTextBlock.Text = "未设置";
+                CurrentHotkeyTextBlock.Text = LocalizationHelper.GetString("Hotkey_NotSet");
             }
             else
             {

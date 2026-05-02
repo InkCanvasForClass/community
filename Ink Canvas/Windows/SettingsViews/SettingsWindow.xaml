@@ -155,9 +155,9 @@
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
                             x:Name="SecurityPageItem"
-                            Content="安全"
+                            Content="{i18n:I18n Key=Settings_Nav_Security}"
                             Tag="SecurityPage"
-                            ToolTipService.ToolTip="安全密码与进程保护">
+                            ToolTipService.ToolTip="{i18n:I18n Key=Settings_Nav_Security_Tooltip}">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Permissions}"/>
                             </ui:NavigationViewItem.Icon>
@@ -195,9 +195,9 @@
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
                             x:Name="HotkeyPageItem"
-                            Content="快捷键"
+                            Content="{i18n:I18n Key=Settings_Nav_Hotkey}"
                             Tag="HotkeyPage"
-                            ToolTipService.ToolTip="快捷键设置">
+                            ToolTipService.ToolTip="{i18n:I18n Key=Settings_Nav_Hotkey_Tooltip}">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.KeyboardStandard}"/>
                             </ui:NavigationViewItem.Icon>

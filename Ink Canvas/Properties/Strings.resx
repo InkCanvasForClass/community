@@ -2782,6 +2782,21 @@
   <data name="Storage_Logs_Desc" xml:space="preserve">
     <value>位于 Logs / Crashs 目录下的 .txt 日志与崩溃报告，可清理</value>
   </data>
+  <data name="Hotkey_NotSet" xml:space="preserve">
+    <value>未设置</value>
+  </data>
+  <data name="Settings_Nav_Security" xml:space="preserve">
+    <value>安全</value>
+  </data>
+  <data name="Settings_Nav_Security_Tooltip" xml:space="preserve">
+    <value>安全密码与进程保护</value>
+  </data>
+  <data name="Settings_Nav_Hotkey" xml:space="preserve">
+    <value>快捷键</value>
+  </data>
+  <data name="Settings_Nav_Hotkey_Tooltip" xml:space="preserve">
+    <value>快捷键设置</value>
+  </data>
   <data name="Storage_Ink_Header" xml:space="preserve">
     <value>墨迹</value>
   </data>
@@ -2841,5 +2856,47 @@
   </data>
   <data name="Storage_NavTooltip" xml:space="preserve">
     <value>查看与清理 ICC CE 占用的存储空间</value>
+  </data>
+  <data name="Debug_ShowConsole_Header" xml:space="preserve">
+    <value>显示调试窗口</value>
+  </data>
+  <data name="Debug_ShowConsole_Desc" xml:space="preserve">
+    <value>显示一个独立的控制台窗口，用于实时输出日志（开启后立即生效；关闭设置中的“启用日志记录”将不会输出内容）。</value>
+  </data>
+  <data name="Automation_UseCustomSaveFileName_Header" xml:space="preserve">
+    <value>使用自定义保存文件名</value>
+  </data>
+  <data name="Automation_UseCustomSaveFileName_Desc" xml:space="preserve">
+    <value>开启后可选择保存文件的命名方式</value>
+  </data>
+  <data name="Automation_SaveFileNameFormat" xml:space="preserve">
+    <value>文件名格式</value>
+  </data>
+  <data name="Automation_SaveFileName_Timestamp" xml:space="preserve">
+    <value>时间戳（默认）</value>
+  </data>
+  <data name="Automation_SaveFileName_Date" xml:space="preserve">
+    <value>日期</value>
+  </data>
+  <data name="Automation_SaveFileName_DateTime" xml:space="preserve">
+    <value>日期 + 时间</value>
+  </data>
+  <data name="Automation_SaveFileName_DateMode" xml:space="preserve">
+    <value>日期 + 模式</value>
+  </data>
+  <data name="Automation_SaveFileName_DateModePage" xml:space="preserve">
+    <value>日期 + 模式 + 页码</value>
+  </data>
+  <data name="Automation_SaveFileName_DateModePageCount" xml:space="preserve">
+    <value>日期 + 模式 + 页码 + 笔画数</value>
+  </data>
+  <data name="Automation_SaveFileName_Custom" xml:space="preserve">
+    <value>自定义...</value>
+  </data>
+  <data name="Automation_SaveFileName_CustomTemplate_Header" xml:space="preserve">
+    <value>自定义模板</value>
+  </data>
+  <data name="Automation_SaveFileName_CustomTemplate_Desc" xml:space="preserve">
+    <value>可用占位符：{date} {time} {datetime} {mode} {page} {count} {type}</value>
   </data>
 </root>

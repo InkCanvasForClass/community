@@ -8,6 +8,7 @@
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       mc:Ignorable="d"
       Title="Debug">
 
@@ -32,8 +33,8 @@
                     Text="Debug" />
 
                 <controls:LabeledSettingsCard x:Name="ToggleSwitchDebugConsole"
-                    Header="显示调试窗口"
-                    Description="显示一个独立的控制台窗口，用于实时输出日志（开启后立即生效；关闭设置中的“启用日志记录”将不会输出内容）。"
+                    Header="{i18n:I18n Key=Debug_ShowConsole_Header}"
+                    Description="{i18n:I18n Key=Debug_ShowConsole_Desc}"
                     Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}"
                     IsOn="False"
                     Toggled="ToggleSwitchDebugConsole_Toggled"/>

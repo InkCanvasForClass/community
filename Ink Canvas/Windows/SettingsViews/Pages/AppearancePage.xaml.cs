@@ -228,8 +228,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ViewboxFloatingBarScaleTransformValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var val = Math.Round(ViewboxFloatingBarScaleTransformValueSlider.Value, 2);
-            ViewboxFloatingBarScaleTransformValueSlider.Value = val;
+            var slider = ViewboxFloatingBarScaleTransformValueSlider;
+            var val = Math.Round(slider.Value, 2);
+            // 仅当四舍五入纠正了显示值时才回写；那次 set 会重入 ValueChanged 完成保存。
+            if (slider.Value != val)
+            {
+                slider.Value = val;
+                return;
+            }
             SettingsManager.Settings.Appearance.ViewboxFloatingBarScaleTransformValue = val;
             SettingsManager.SaveSettingsToFile();
             var mw = GetMainWindow();
@@ -247,8 +253,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ViewboxFloatingBarOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var val = Math.Round(ViewboxFloatingBarOpacityValueSlider.Value, 2);
-            ViewboxFloatingBarOpacityValueSlider.Value = val;
+            var slider = ViewboxFloatingBarOpacityValueSlider;
+            var val = Math.Round(slider.Value, 2);
+            if (slider.Value != val)
+            {
+                slider.Value = val;
+                return;
+            }
             SettingsManager.Settings.Appearance.ViewboxFloatingBarOpacityValue = val;
             SettingsManager.SaveSettingsToFile();
             var mw = GetMainWindow();
@@ -258,8 +269,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ViewboxFloatingBarOpacityInPPTValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var val = Math.Round(ViewboxFloatingBarOpacityInPPTValueSlider.Value, 2);
-            ViewboxFloatingBarOpacityInPPTValueSlider.Value = val;
+            var slider = ViewboxFloatingBarOpacityInPPTValueSlider;
+            var val = Math.Round(slider.Value, 2);
+            if (slider.Value != val)
+            {
+                slider.Value = val;
+                return;
+            }
             SettingsManager.Settings.Appearance.ViewboxFloatingBarOpacityInPPTValue = val;
             SettingsManager.SaveSettingsToFile();
             var mw = GetMainWindow();
@@ -290,8 +306,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ViewboxBlackBoardScaleTransformValueSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!_isLoaded) return;
-            var val = Math.Round(ViewboxBlackBoardScaleTransformValueSlider.Value, 2);
-            ViewboxBlackBoardScaleTransformValueSlider.Value = val;
+            var slider = ViewboxBlackBoardScaleTransformValueSlider;
+            var val = Math.Round(slider.Value, 2);
+            if (slider.Value != val)
+            {
+                slider.Value = val;
+                return;
+            }
             SettingsManager.Settings.Appearance.ViewboxBlackBoardScaleTransformValue = val;
             SettingsManager.SaveSettingsToFile();
             var mw = GetMainWindow();

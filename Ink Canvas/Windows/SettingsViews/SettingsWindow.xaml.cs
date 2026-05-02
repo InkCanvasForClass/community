@@ -587,10 +587,9 @@ namespace Ink_Canvas.Windows.SettingsViews
             if (string.IsNullOrWhiteSpace(raw)) return;
 
             string query = raw.Trim();
-            string queryLower = query.ToLower();
 
             var entry = _searchIndex.FirstOrDefault(e => e.Text.Equals(query, StringComparison.OrdinalIgnoreCase))
-                        ?? _searchIndex.FirstOrDefault(e => e.Text.ToLower().Contains(queryLower));
+                        ?? _searchIndex.FirstOrDefault(e => e.Text.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0);
 
             NavigateToSearchEntry(entry);
         }
@@ -608,9 +607,8 @@ namespace Ink_Canvas.Windows.SettingsViews
                 return;
             }
 
-            string queryLower = query.ToLower();
             var suggestions = _searchIndex
-                .Where(e => e.Text.ToLower().Contains(queryLower))
+                .Where(e => e.Text.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0)
                 .Select(e => e.Text)
                 .Distinct()
                 .Take(50)
