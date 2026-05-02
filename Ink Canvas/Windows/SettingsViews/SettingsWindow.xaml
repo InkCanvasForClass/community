@@ -352,6 +352,14 @@
 
             <ui:NavigationView.FooterMenuItems>
                 <ui:NavigationViewItem
+                    x:Name="FriendlyLinksItem"
+                    Content="友链"
+                    Tag="FriendlyLinksPage">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+                <ui:NavigationViewItem
                     x:Name="AboutItem"
                     Content="关于 InkCanvasForClass"
                     Tag="AboutPage">

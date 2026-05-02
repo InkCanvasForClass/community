@@ -56,6 +56,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 { "CanvasPage", typeof(CanvasPage) },
                 { "InkRecognitionPage", typeof(InkRecognitionPage) },
                 { "DebugPage", typeof(DebugPage) },
+                { "FriendlyLinksPage", typeof(FriendlyLinksPage) },
                 { "AboutPage", typeof(AboutPage) },
                 { "Settings", typeof(SettingsPage) },
                 { "PluginPage", typeof(PluginPage) },
