@@ -247,7 +247,9 @@ namespace Ink_Canvas
                     SetTheme(ThemeDark);
                     break;
                 case 2:
-                    SetTheme(ThemeHelper.IsSystemThemeLightLegacy() ? ThemeLight : ThemeDark);
+                    // 与 IsCurrentThemeDark / GetEffectiveTheme / 浮动栏一致，统一读 AppsUseLightTheme，
+                    // 否则 SystemUsesLightTheme 与 AppsUseLightTheme 可独立取值时主题会混搭
+                    SetTheme(ThemeHelper.IsSystemThemeLight() ? ThemeLight : ThemeDark);
                     break;
             }
         }
