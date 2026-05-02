@@ -2275,7 +2275,7 @@ namespace Ink_Canvas
                     }
                     else
                     {
-                        var slides = await Task.Run(BuildPptPreviewItems);
+                        var slides = await RunOnStaAsync(BuildPptPreviewItems);
                         if (slides == null || slides.Count == 0)
                         {
                             LogHelper.WriteLogToFile("PPT增强预览未生成可用缩略图，改用默认导航", LogHelper.LogType.Warning);
@@ -2360,8 +2360,14 @@ namespace Ink_Canvas
         }
 
         /// <summary>在 MainWindow 加载完成后调用,把 4 个 PptNavBar 的事件接到本类。</summary>
+        private bool _pptNavBarsWired;
+
         private void WirePptNavBars()
         {
+            // InitializePPTManagers 可能被多次调用（切换 COM/ROT、设置变更等）。
+            // PptNavBar 事件若在同一控件上重复订阅，会导致翻页、长按、预览展开等逻辑成倍触发。
+            if (_pptNavBarsWired) return;
+
             var bars = new[]
             {
                 LeftBottomPanelForPPTNavigation,
@@ -2390,6 +2396,8 @@ namespace Ink_Canvas
                 bar.SlideSelected += (s, slideNumber) => OnPptNavBarSlideSelected(captured, slideNumber);
                 bar.PreviewExpandedChanged += (s, expanded) => OnPptNavBarPreviewExpandedChanged(captured, expanded);
             }
+
+            _pptNavBarsWired = true;
         }
 
         private bool _suppressPreviewExpandedSync;
@@ -2458,6 +2466,22 @@ namespace Ink_Canvas
                     RightSidePanelForPPTNavigation.ClearValue(TagProperty);
                 }
             }
+        }
+
+        private static Task<T> RunOnStaAsync<T>(Func<T> func)
+        {
+            // Office interop 要求 STA + COM 单元；Task.Run 跑到 MTA 线程池里会触发 RPC_E_WRONG_THREAD
+            // 等随机 COM 失败，表现为增强预览空白或崩溃。显式创建 STA worker 在其中执行导出。
+            var tcs = new TaskCompletionSource<T>();
+            var thread = new Thread(() =>
+            {
+                try { tcs.SetResult(func()); }
+                catch (Exception ex) { tcs.SetException(ex); }
+            });
+            thread.IsBackground = true;
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            return tcs.Task;
         }
 
         private List<PptEnhancedPreviewItem> BuildPptPreviewItems()
