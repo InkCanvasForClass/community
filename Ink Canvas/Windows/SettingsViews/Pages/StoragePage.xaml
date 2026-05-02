@@ -59,9 +59,18 @@
                         </Grid>
 
                         <!-- 横向占比柱状图 -->
-                        <Border Height="14" CornerRadius="7"
+                        <Border x:Name="UsageBarBorder" Height="14" CornerRadius="2"
                                 Background="{DynamicResource ControlStrokeColorDefaultBrush}"
                                 ClipToBounds="True">
+                            <Border.OpacityMask>
+                                <VisualBrush>
+                                    <VisualBrush.Visual>
+                                        <Border Background="Black" CornerRadius="2"
+                                                Width="{Binding ActualWidth, ElementName=UsageBarBorder}"
+                                                Height="{Binding ActualHeight, ElementName=UsageBarBorder}"/>
+                                    </VisualBrush.Visual>
+                                </VisualBrush>
+                            </Border.OpacityMask>
                             <Grid x:Name="UsageStackedBar">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition x:Name="BarCoreCol" Width="0*"/>
