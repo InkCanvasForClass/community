@@ -107,41 +107,34 @@ namespace Ink_Canvas
 
         #region Window Initialization
 
+        private bool _toolsPopupEventsWired;
+
         private void WireUpToolsPopupContentEvents()
         {
-            if (BoardToolsPopupContent != null)
-            {
-                BoardToolsPopupContent.TimerBtn.ButtonMouseUp += ImageCountdownTimer_MouseUp;
-                BoardToolsPopupContent.RandomDrawBtn.ButtonMouseUp += SymbolIconRand_MouseUp;
-                BoardToolsPopupContent.SingleDrawBtn.ButtonMouseUp += SymbolIconRandOne_MouseUp;
-                BoardToolsPopupContent.SaveBtn.ButtonMouseDown += Border_MouseDown;
-                BoardToolsPopupContent.SaveBtn.ButtonMouseUp += SymbolIconSaveStrokes_MouseUp;
-                BoardToolsPopupContent.OpenBtn.ButtonMouseDown += Border_MouseDown;
-                BoardToolsPopupContent.OpenBtn.ButtonMouseUp += SymbolIconOpenStrokes_MouseUp;
-                BoardToolsPopupContent.ReplayBtn.ButtonMouseUp += GridInkReplayButton_MouseUp;
-                BoardToolsPopupContent.ScreenshotBtn.ButtonMouseUp += SymbolIconScreenshot_MouseUp;
-                BoardToolsPopupContent.ManualBtn.ButtonMouseUp += OperatingGuideWindowIcon_MouseUp;
-                BoardToolsPopupContent.SettingsBtn.ButtonMouseUp += SymbolIconSettings_Click;
-                BoardToolsPopupContent.CloseFontIcon.MouseDown += Border_MouseDown;
-                BoardToolsPopupContent.CloseFontIcon.MouseUp += CloseBordertools_MouseUp;
-            }
+            if (_toolsPopupEventsWired) return;
+            _toolsPopupEventsWired = true;
 
-            if (MainToolsPopupContent != null)
-            {
-                MainToolsPopupContent.TimerBtn.ButtonMouseUp += ImageCountdownTimer_MouseUp;
-                MainToolsPopupContent.RandomDrawBtn.ButtonMouseUp += SymbolIconRand_MouseUp;
-                MainToolsPopupContent.SingleDrawBtn.ButtonMouseUp += SymbolIconRandOne_MouseUp;
-                MainToolsPopupContent.SaveBtn.ButtonMouseDown += Border_MouseDown;
-                MainToolsPopupContent.SaveBtn.ButtonMouseUp += SymbolIconSaveStrokes_MouseUp;
-                MainToolsPopupContent.OpenBtn.ButtonMouseDown += Border_MouseDown;
-                MainToolsPopupContent.OpenBtn.ButtonMouseUp += SymbolIconOpenStrokes_MouseUp;
-                MainToolsPopupContent.ReplayBtn.ButtonMouseUp += GridInkReplayButton_MouseUp;
-                MainToolsPopupContent.ScreenshotBtn.ButtonMouseUp += SymbolIconScreenshot_MouseUp;
-                MainToolsPopupContent.ManualBtn.ButtonMouseUp += OperatingGuideWindowIcon_MouseUp;
-                MainToolsPopupContent.SettingsBtn.ButtonMouseUp += SymbolIconSettings_Click;
-                MainToolsPopupContent.CloseFontIcon.MouseDown += Border_MouseDown;
-                MainToolsPopupContent.CloseFontIcon.MouseUp += CloseBordertools_MouseUp;
-            }
+            WireUpSingleToolsPopupContent(BoardToolsPopupContent);
+            WireUpSingleToolsPopupContent(MainToolsPopupContent);
+        }
+
+        private void WireUpSingleToolsPopupContent(ToolsPopupContent content)
+        {
+            if (content == null) return;
+
+            content.TimerBtn.ButtonMouseUp += ImageCountdownTimer_MouseUp;
+            content.RandomDrawBtn.ButtonMouseUp += SymbolIconRand_MouseUp;
+            content.SingleDrawBtn.ButtonMouseUp += SymbolIconRandOne_MouseUp;
+            content.SaveBtn.ButtonMouseDown += Border_MouseDown;
+            content.SaveBtn.ButtonMouseUp += SymbolIconSaveStrokes_MouseUp;
+            content.OpenBtn.ButtonMouseDown += Border_MouseDown;
+            content.OpenBtn.ButtonMouseUp += SymbolIconOpenStrokes_MouseUp;
+            content.ReplayBtn.ButtonMouseUp += GridInkReplayButton_MouseUp;
+            content.ScreenshotBtn.ButtonMouseUp += SymbolIconScreenshot_MouseUp;
+            content.ManualBtn.ButtonMouseUp += OperatingGuideWindowIcon_MouseUp;
+            content.SettingsBtn.ButtonMouseUp += SymbolIconSettings_Click;
+            content.CloseFontIcon.MouseDown += Border_MouseDown;
+            content.CloseFontIcon.MouseUp += CloseBordertools_MouseUp;
         }
 
         /// <summary>
