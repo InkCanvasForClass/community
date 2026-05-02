@@ -219,7 +219,7 @@
         </ResourceDictionary>
     </Window.Resources>
     <Grid x:Name="Main_Grid">
-        <!--// 黑/白 板幕布 //-->
+        <!--黑/白 板幕布-->
         <Grid Name="GridBackgroundCoverHolder">
             <Grid Name="GridBackgroundCover" Visibility="Collapsed" Background="#1F1F1F">
                 <Image Name="ICCWaterMarkWhite" Source="Resources/Icons-png/icc-transparent.png" Width="648"
@@ -703,7 +703,7 @@
                 </Viewbox>
             </Grid>
         </Grid>
-        <!--// BlackBoard 界面 //-->
+        <!--白板-->
         <Grid Name="BlackboardUIGridForInkReplay">
             <Grid Visibility="{Binding ElementName=GridBackgroundCoverHolder, Path=Visibility}">
                 <!-- 左下角 -->
@@ -2187,7 +2187,7 @@
                 </ikw:SimpleStackPanel>
             </Grid>
         </Grid>
-        <!-- 通知弹窗 -->
+        <!--通知弹窗-->
         <Grid Name="GridNotifications" Margin="0,110" Visibility="Collapsed" HorizontalAlignment="Center"
               VerticalAlignment="Bottom">
             <ui:InfoBar x:Name="NotificationInfoBar"
@@ -2200,7 +2200,7 @@
             <TextBlock x:Name="TextBlockNotice" Visibility="Collapsed"
                        Text="{i18n:I18n Key=Notification_TestText}" />
         </Grid>
-        <!--// Old UI //-->
+        <!--Old UI-->
         <Viewbox Name="ViewBoxStackPanelMain" Visibility="Collapsed" Margin="10,10,10,55" HorizontalAlignment="Right"
                  VerticalAlignment="Bottom" Width="46">
             <StackPanel Name="StackPanelMain" Width="46">
@@ -2353,6 +2353,7 @@
                                  Direction="RightSide"
                                  Margin="0,0,6,0"
                                  HorizontalAlignment="Right" VerticalAlignment="Center"/>
+        <!--浮动工具栏-->
         <Grid Name="FloatingbarUIForInkReplay">
             <Viewbox Name="ViewboxFloatingBar" Margin="150,250,0,0" Cursor="Arrow"
                      HorizontalAlignment="Left" Height="58" VerticalAlignment="Top"
@@ -3194,6 +3195,7 @@
         </Grid>
         <Grid Name="GridForFloatingBarDraging" Background="#01000000" Visibility="Collapsed"
               MouseMove="SymbolIconEmoji_MouseMove" MouseUp="SymbolIconEmoji_MouseUp" />
+        <!--墨迹重播-->
         <Grid>
             <InkCanvas Name="InkCanvasForInkReplay" MouseDown="InkCanvasForInkReplay_MouseDown" Visibility="Collapsed"
                        EditingMode="None" Background="Transparent" />
@@ -3351,7 +3353,7 @@
                 </ikw:SimpleStackPanel>
             </Border>
         </Grid>
-        <!--// 侧边栏 //-->
+        <!--侧边栏-->
         <Viewbox x:Name="LeftSidePanel" MouseUp="LeftUnFoldButtonDisplayQuickPanel_MouseUp" Visibility="Visible"
                  Height="50" Width="32" Margin="-60,0,0,-150" HorizontalAlignment="Left" VerticalAlignment="Center">
             <ikw:SimpleStackPanel>
@@ -3362,6 +3364,7 @@
                 </Border>
             </ikw:SimpleStackPanel>
         </Viewbox>
+        <!--收纳下的快捷面板-->
         <Viewbox Width="50" Visibility="Collapsed" Name="LeftUnFoldButtonQuickPanel" Margin="-1,0,0,-150"
                  HorizontalAlignment="Left" VerticalAlignment="Center">
             <Border ClipToBounds="True" Visibility="Visible" CornerRadius="0,6,6,0" Background="{DynamicResource FloatBarBackground}" Opacity="1"
@@ -3414,7 +3417,7 @@
                 </ikw:SimpleStackPanel>
             </Border>
         </Viewbox>
-        <!-- 视频展台侧栏 -->
+        <!--视频展台侧栏-->
         <Border
             x:Name="VideoPresenterSidebar"
             Width="350"
