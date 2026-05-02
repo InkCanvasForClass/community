@@ -1814,6 +1814,7 @@ namespace Ink_Canvas
             // 清除之前的更新状态，确保使用新通道重新检查
             AvailableLatestVersion = null;
             AvailableLatestLineGroup = null;
+            AvailableLatestReleaseNotes = null;
 
             // 使用当前选择的更新通道检查更新
             var (remoteVersion, lineGroup, apiReleaseNotes) = await AutoUpdateHelper.CheckForUpdates(Settings.Startup.UpdateChannel);
