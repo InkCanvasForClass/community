@@ -294,7 +294,13 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                if (!GetUserPrimaryToken(out IntPtr userToken))
+                if (!GetCurrentProcessSessionId(out uint sessionId))
+                {
+                    LogHelper.WriteLogToFile($"UIAccess | 获取当前会话 ID 失败 (LastError={Marshal.GetLastWin32Error()})", LogHelper.LogType.Error);
+                    return false;
+                }
+
+                if (!GetUserPrimaryToken(sessionId, out IntPtr userToken))
                 {
                     LogHelper.WriteLogToFile($"UIAccess | 获取用户令牌失败 (LastError={Marshal.GetLastWin32Error()})", LogHelper.LogType.Error);
                     return false;
@@ -506,11 +512,31 @@ namespace Ink_Canvas.Helpers
             finally { CloseHandle(hProc); }
         }
 
+        private static bool GetCurrentProcessSessionId(out uint sessionId)
+        {
+            sessionId = 0;
+            if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, out IntPtr hSelfQuery))
+                return false;
+            try
+            {
+                IntPtr sesBuf = Marshal.AllocHGlobal(sizeof(uint));
+                try
+                {
+                    if (!GetTokenInformation(hSelfQuery, TokenSessionId, sesBuf, sizeof(uint), out _))
+                        return false;
+                    sessionId = (uint)Marshal.ReadInt32(sesBuf);
+                    return true;
+                }
+                finally { Marshal.FreeHGlobal(sesBuf); }
+            }
+            finally { CloseHandle(hSelfQuery); }
+        }
+
         /// <summary>
         /// 从 explorer.exe / ctfmon.exe 取得普通用户（非提升）令牌的主令牌副本，用于降权启动。
         /// 仅当当前进程为管理员时才能成功。
         /// </summary>
-        private static bool GetUserPrimaryToken(out IntPtr userToken)
+        private static bool GetUserPrimaryToken(uint sessionId, out IntPtr userToken)
         {
             userToken = IntPtr.Zero;
 
@@ -528,9 +554,9 @@ namespace Ink_Canvas.Helpers
                     {
                         if (string.Equals(pe.szExeFile, name, StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryDuplicateUserPrimaryToken(pe.th32ProcessID, out userToken))
+                            if (TryDuplicateUserPrimaryToken(pe.th32ProcessID, sessionId, out userToken))
                             {
-                                LogHelper.WriteLogToFile($"UIAccess | 已从 {name} (PID={pe.th32ProcessID}) 取得用户令牌");
+                                LogHelper.WriteLogToFile($"UIAccess | 已从 {name} (PID={pe.th32ProcessID}, Session={sessionId}) 取得用户令牌");
                                 return true;
                             }
                         }
@@ -543,7 +569,7 @@ namespace Ink_Canvas.Helpers
             return false;
         }
 
-        private static bool TryDuplicateUserPrimaryToken(uint pid, out IntPtr dupToken)
+        private static bool TryDuplicateUserPrimaryToken(uint pid, uint sessionId, out IntPtr dupToken)
         {
             dupToken = IntPtr.Zero;
 
@@ -557,6 +583,18 @@ namespace Ink_Canvas.Helpers
 
                 try
                 {
+                    // 会话隔离：拒绝来自其他登录会话（RDP / 终端服务 / 快速用户切换）的令牌，
+                    // 否则降权后进程会落到错误用户的桌面上下文中。
+                    IntPtr sesBuf = Marshal.AllocHGlobal(sizeof(uint));
+                    try
+                    {
+                        if (!GetTokenInformation(hToken, TokenSessionId, sesBuf, sizeof(uint), out _))
+                            return false;
+                        if ((uint)Marshal.ReadInt32(sesBuf) != sessionId)
+                            return false;
+                    }
+                    finally { Marshal.FreeHGlobal(sesBuf); }
+
                     // 仅接受非提升令牌（否则降权失败）
                     IntPtr elevBuf = Marshal.AllocHGlobal(sizeof(int));
                     try
