@@ -6,33 +6,37 @@
              xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
              mc:Ignorable="d"
              d:DesignHeight="38" d:DesignWidth="32">
-    <ikw:SimpleStackPanel x:Name="ButtonPanel"
-                          MouseDown="ButtonPanel_MouseDown"
-                          MouseLeave="ButtonPanel_MouseLeave"
-                          MouseUp="ButtonPanel_MouseUp"
-                          Background="Transparent"
-                          Orientation="Vertical"
-                          HorizontalAlignment="Center"
-                          Height="38" Width="32"
-                          Margin="0">
-        <Image x:Name="ButtonImage"
-               Margin="0,4,0,2"
-               Height="19" Width="19"
-               RenderOptions.BitmapScalingMode="HighQuality">
-            <Image.Source>
-                <DrawingImage>
-                    <DrawingImage.Drawing>
-                        <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                            <GeometryDrawing x:Name="IconGeometryInternal"
-                                             Brush="{DynamicResource IconForeground}" />
-                        </DrawingGroup>
-                    </DrawingImage.Drawing>
-                </DrawingImage>
-            </Image.Source>
-        </Image>
-        <Label x:Name="LabelControl"
-               FontSize="8"
-               HorizontalAlignment="Center"
-               Foreground="{DynamicResource FloatBarForeground}" />
-    </ikw:SimpleStackPanel>
+    <Border x:Name="ButtonBorder"
+            CornerRadius="5"
+            Background="Transparent">
+        <ikw:SimpleStackPanel x:Name="ButtonPanel"
+                              MouseDown="ButtonPanel_MouseDown"
+                              MouseLeave="ButtonPanel_MouseLeave"
+                              MouseUp="ButtonPanel_MouseUp"
+                              Background="Transparent"
+                              Orientation="Vertical"
+                              HorizontalAlignment="Center"
+                              Height="38" Width="32"
+                              Margin="0">
+            <Image x:Name="ButtonImage"
+                   Margin="0,4,0,2"
+                   Height="19" Width="19"
+                   RenderOptions.BitmapScalingMode="HighQuality">
+                <Image.Source>
+                    <DrawingImage>
+                        <DrawingImage.Drawing>
+                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                <GeometryDrawing x:Name="IconGeometryInternal"
+                                                 Brush="{DynamicResource IconForeground}" />
+                            </DrawingGroup>
+                        </DrawingImage.Drawing>
+                    </DrawingImage>
+                </Image.Source>
+            </Image>
+            <Label x:Name="LabelControl"
+                   FontSize="8"
+                   HorizontalAlignment="Center"
+                   Foreground="{DynamicResource FloatBarForeground}" />
+        </ikw:SimpleStackPanel>
+    </Border>
 </UserControl>

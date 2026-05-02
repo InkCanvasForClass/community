@@ -9,6 +9,7 @@ namespace Ink_Canvas.Controls
     {
         private Geometry _pendingGeometry;
         private Brush _pendingBrush;
+        private static ToolMenuButton _lastPressedButton;
 
         public static readonly DependencyProperty LabelProperty = DependencyProperty.Register(
             nameof(Label), typeof(string), typeof(ToolMenuButton),
@@ -68,8 +69,8 @@ namespace Ink_Canvas.Controls
 
         public new Brush Background
         {
-            get => ButtonPanel.Background;
-            set => ButtonPanel.Background = value;
+            get => ButtonBorder.Background;
+            set => ButtonBorder.Background = value;
         }
 
         public GeometryDrawing Icon
@@ -90,6 +91,7 @@ namespace Ink_Canvas.Controls
         {
             InitializeComponent();
             Loaded += ToolMenuButton_Loaded;
+            ButtonBorder.Background = Brushes.Transparent;
         }
 
         private void ToolMenuButton_Loaded(object sender, RoutedEventArgs e)
@@ -105,16 +107,35 @@ namespace Ink_Canvas.Controls
 
         private void ButtonPanel_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (!IsEnabled) return;
+            if (_lastPressedButton != null && _lastPressedButton != this)
+            {
+                _lastPressedButton.ButtonBorder.Background = Brushes.Transparent;
+            }
+            _lastPressedButton = this;
+            ButtonBorder.Background = new SolidColorBrush(Color.FromArgb(80, 24, 24, 27));
             ButtonMouseDown?.Invoke(this, e);
         }
 
         private void ButtonPanel_MouseLeave(object sender, MouseEventArgs e)
         {
+            if (!IsEnabled) return;
+            if (_lastPressedButton == this)
+            {
+                ButtonBorder.Background = Brushes.Transparent;
+                _lastPressedButton = null;
+            }
             ButtonMouseLeave?.Invoke(this, e);
         }
 
         private void ButtonPanel_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (!IsEnabled) return;
+            if (_lastPressedButton == this)
+            {
+                ButtonBorder.Background = Brushes.Transparent;
+                _lastPressedButton = null;
+            }
             ButtonMouseUp?.Invoke(this, e);
         }
     }
