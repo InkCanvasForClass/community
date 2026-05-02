@@ -1114,7 +1114,7 @@
     <value>每次询问</value>
   </data>
   <data name="Canvas_HyperbolaAsymptoteHint" xml:space="preserve">
-    <value>请注意，若不保留双曲线渐近线可能会有遇到撤回相关的 BUG 影响用。</value>
+    <value>请注意，若不保留双曲线渐近线可能会有遇到撤回相关的 BUG 影响使用。</value>
   </data>
   <data name="Canvas_WPFBezierSmoothing" xml:space="preserve">
     <value>使用WPF默认贝塞尔曲线平滑</value>
