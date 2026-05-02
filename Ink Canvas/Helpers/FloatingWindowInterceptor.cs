@@ -872,8 +872,6 @@ namespace Ink_Canvas.Helpers
                 }
             }
         }
-<<<END_W2P:old_string:h4e39a0fd>>>
-END_CALL
 
         private bool MatchesRule(IntPtr hWnd, InterceptRule rule)
         {
