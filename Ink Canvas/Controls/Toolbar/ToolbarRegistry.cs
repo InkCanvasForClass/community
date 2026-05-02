@@ -8,12 +8,10 @@ using System.Windows.Controls;
 
 namespace Ink_Canvas.Controls.Toolbar
 {
-    /// <summary>
-    /// 扫描当前程序集里的 IToolbarItem 实现，按用户配置（Settings.Toolbar）排序/过滤后注入到目标容器。
-    /// </summary>
     public static class ToolbarRegistry
     {
         private static List<IToolbarItem> _items;
+        internal const string InjectedTag = "ToolbarRegistryInjected";
 
         public static IReadOnlyList<IToolbarItem> Discover()
         {
@@ -34,13 +32,25 @@ namespace Ink_Canvas.Controls.Toolbar
                 })
                 .Where(i => i != null)
                 .ToList();
+            LogHelper.WriteLogToFile($"ToolbarRegistry: Discover 完成, 发现 {_items.Count} 个条目", LogHelper.LogType.Info);
             return _items;
         }
 
-        /// <summary>按 slot 分配工具栏条目到对应容器。调用者负责清空目标容器里要被接管的旧内容。</summary>
+        public static void ClearInjected(Panel container)
+        {
+            if (container == null) return;
+            var toRemove = container.Children.OfType<FrameworkElement>()
+                .Where(e => e.Tag as string == InjectedTag)
+                .ToList();
+            foreach (var element in toRemove)
+                container.Children.Remove(element);
+            LogHelper.WriteLogToFile($"ToolbarRegistry: ClearInjected 清除 {toRemove.Count} 个元素 [{container.Name}]", LogHelper.LogType.Info);
+        }
+
         public static void Populate(IToolbarHost host, IDictionary<ToolbarSlot, Panel> slots, ToolbarLayoutSettings layout)
         {
-            if (host == null || slots == null) return;
+            LogHelper.WriteLogToFile($"ToolbarRegistry: Populate 开始", LogHelper.LogType.Info);
+            if (host == null || slots == null) { LogHelper.WriteLogToFile("ToolbarRegistry: Populate host 或 slots 为空", LogHelper.LogType.Warning); return; }
             layout = layout ?? new ToolbarLayoutSettings();
 
             var grouped = new Dictionary<ToolbarSlot, List<(IToolbarItem item, ToolbarItemConfig cfg)>>();
@@ -65,18 +75,51 @@ namespace Ink_Canvas.Controls.Toolbar
                 }
                 list.Add((item, cfg));
             }
+            LogHelper.WriteLogToFile($"ToolbarRegistry: 分组完成, {grouped.Count} 个 slot 有可见条目", LogHelper.LogType.Info);
 
             foreach (var kv in grouped)
             {
                 if (!slots.TryGetValue(kv.Key, out var container) || container == null) continue;
+                LogHelper.WriteLogToFile($"ToolbarRegistry: 注入到 {kv.Key}, 条目数={kv.Value.Count}", LogHelper.LogType.Info);
                 InjectIntoContainer(host, container, kv.Value);
+            }
+
+            ApplyMenuVisibility(host, layout);
+            LogHelper.WriteLogToFile($"ToolbarRegistry: Populate 完成", LogHelper.LogType.Info);
+        }
+
+        public static void ApplyMenuVisibility(IToolbarHost host, ToolbarLayoutSettings layout)
+        {
+            if (host == null || layout == null) return;
+            foreach (var item in Discover())
+            {
+                if (string.IsNullOrEmpty(item.MenuPanelName)) continue;
+                bool visible = true;
+                if (layout.Items.TryGetValue(item.Id, out var cfg))
+                    visible = cfg.Visible;
+                try
+                {
+                    var menuElement = host.Window.FindName(item.MenuPanelName) as FrameworkElement;
+                    if (menuElement != null)
+                    {
+                        menuElement.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+                        LogHelper.WriteLogToFile($"ToolbarRegistry: 菜单 [{item.MenuPanelName}] -> {(visible ? "Visible" : "Collapsed")}", LogHelper.LogType.Info);
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile($"ToolbarRegistry: 找不到菜单面板 [{item.MenuPanelName}]", LogHelper.LogType.Warning);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"ToolbarRegistry: 设置菜单可见性异常 [{item.MenuPanelName}]: {ex.Message}", LogHelper.LogType.Warning);
+                }
             }
         }
 
         private static void InjectIntoContainer(IToolbarHost host, Panel container,
             List<(IToolbarItem item, ToolbarItemConfig cfg)> entries)
         {
-            // 按 Position 分桶，每桶内按 Order 升序。
             var prepend = entries.Where(e => e.cfg.Position == ToolbarInsertPosition.Prepend).OrderBy(e => e.cfg.Order).ToList();
             var append = entries.Where(e => e.cfg.Position == ToolbarInsertPosition.Append).OrderBy(e => e.cfg.Order).ToList();
             var before = entries.Where(e => e.cfg.Position == ToolbarInsertPosition.BeforeAnchor).ToList();
@@ -153,7 +196,7 @@ namespace Ink_Canvas.Controls.Toolbar
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"ToolbarRegistry: 构建 {item.Id} 失败: {ex.Message}", LogHelper.LogType.Warning);
+                LogHelper.WriteLogToFile($"ToolbarRegistry: 构建 {item.Id} 失败: {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}", LogHelper.LogType.Error);
                 return null;
             }
         }

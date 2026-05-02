@@ -8,6 +8,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         public override string LocalizationKey => "FloatingBar_AreaEraser";
         public override ToolbarSlot DefaultSlot => ToolbarSlot.FloatingBarCanvasControls;
         public override int DefaultOrder => 100;
+        public override string MenuPanelName => "EraserSizePanel";
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.EraserIcon_Click(sender, e);

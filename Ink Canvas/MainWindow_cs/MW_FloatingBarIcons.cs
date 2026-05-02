@@ -295,7 +295,7 @@ namespace Ink_Canvas
         private void HideSubPanelsImmediately()
         {
             BorderTools.Visibility = Visibility.Collapsed;
-            BoardBorderTools.Visibility = Visibility.Collapsed;
+            BoardBorderToolsPopup.IsOpen = false;
             PenPalette.Visibility = Visibility.Collapsed;
             BoardPenPalette.Visibility = Visibility.Collapsed;
             BoardEraserSizePanel.Visibility = Visibility.Collapsed;
@@ -377,7 +377,7 @@ namespace Ink_Canvas
         internal async void HideSubPanels(string mode = null, bool autoAlignCenter = false)
         {
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
+            AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
             AnimationsHelper.HideWithSlideAndFade(PenPalette);
             AnimationsHelper.HideWithSlideAndFade(BoardPenPalette);
             AnimationsHelper.HideWithSlideAndFade(BoardEraserSizePanel);
@@ -1100,7 +1100,7 @@ namespace Ink_Canvas
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
+            AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
             if (Settings.RandSettings?.UseNewStyleUI == true)
@@ -1152,7 +1152,7 @@ namespace Ink_Canvas
         private void OperatingGuideWindowIcon_MouseUp(object sender, MouseButtonEventArgs e)
         {
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
+            AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
             new OperatingGuideWindow().Show();
@@ -1172,7 +1172,7 @@ namespace Ink_Canvas
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
 
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
+            AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
             // 根据设置决定使用哪个点名窗口
@@ -1307,7 +1307,7 @@ namespace Ink_Canvas
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
 
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
+            AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
             // 检查是否启用了外部点名功能
@@ -1386,7 +1386,7 @@ namespace Ink_Canvas
             //if (lastBorderMouseDownObject != sender) return;
 
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
+            AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
             CollapseBorderDrawShape();
@@ -1687,10 +1687,10 @@ namespace Ink_Canvas
         /// <param name="e">鼠标按钮事件参数</param>
         internal void SymbolIconTools_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (BorderTools.Visibility == Visibility.Visible || BoardBorderTools.Visibility == Visibility.Visible)
+            if (BorderTools.Visibility == Visibility.Visible || BoardBorderToolsPopup.IsOpen)
             {
                 AnimationsHelper.HideWithSlideAndFade(BorderTools);
-                AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
+                AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
             }
             else
             {
@@ -1702,7 +1702,7 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderTools);
+                    AnimationsHelper.ShowPopupWithSlideAndFade(BoardBorderToolsPopup);
                 }
             }
         }

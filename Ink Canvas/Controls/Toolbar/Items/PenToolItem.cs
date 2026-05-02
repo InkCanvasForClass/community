@@ -8,6 +8,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         public override string LocalizationKey => "FloatingBar_Annotate";
         public override ToolbarSlot DefaultSlot => ToolbarSlot.FloatingBarMain;
         public override int DefaultOrder => 110;
+        public override string MenuPanelName => "PenPalette";
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.PenIcon_Click(sender, e);

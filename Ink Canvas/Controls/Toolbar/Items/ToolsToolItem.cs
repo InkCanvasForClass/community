@@ -10,6 +10,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         public override int DefaultOrder => 110;
         public override ToolbarInsertPosition DefaultPosition => ToolbarInsertPosition.AfterAnchor;
         public override string DefaultAnchorName => "FloatingBarEndSeparator";
+        public override string MenuPanelName => "BorderTools";
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.SymbolIconTools_MouseUp(sender, e);

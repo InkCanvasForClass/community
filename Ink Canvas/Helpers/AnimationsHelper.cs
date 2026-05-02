@@ -1,5 +1,6 @@
 using System;
 using System.Windows;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 
@@ -264,7 +265,6 @@ namespace Ink_Canvas.Helpers
 
             var sb = new Storyboard();
 
-            // 渐变动画
             var fadeOutAnimation = new DoubleAnimation
             {
                 From = 1,
@@ -281,6 +281,107 @@ namespace Ink_Canvas.Helpers
             };
 
             sb.Begin((FrameworkElement)element);
+        }
+
+        public static void ShowPopupWithSlideAndFade(Popup popup, double duration = 0.15)
+        {
+            try
+            {
+                if (popup == null)
+                    throw new ArgumentNullException(nameof(popup));
+
+                if (popup.IsOpen) return;
+
+                var child = popup.Child as FrameworkElement;
+                if (child == null)
+                {
+                    popup.IsOpen = true;
+                    return;
+                }
+
+                child.Opacity = 0.5;
+                child.RenderTransform = new TranslateTransform(0, 10);
+
+                popup.IsOpen = true;
+
+                var sb = new Storyboard();
+
+                var fadeInAnimation = new DoubleAnimation
+                {
+                    From = 0.5,
+                    To = 1,
+                    Duration = TimeSpan.FromSeconds(duration)
+                };
+                fadeInAnimation.EasingFunction = new CubicEase();
+                Storyboard.SetTargetProperty(fadeInAnimation, new PropertyPath(UIElement.OpacityProperty));
+
+                var slideAnimation = new DoubleAnimation
+                {
+                    From = 10,
+                    To = 0,
+                    Duration = TimeSpan.FromSeconds(duration)
+                };
+                slideAnimation.EasingFunction = new CubicEase();
+                Storyboard.SetTargetProperty(slideAnimation, new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.Y)"));
+
+                sb.Children.Add(fadeInAnimation);
+                sb.Children.Add(slideAnimation);
+
+                sb.Begin(child);
+            }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+        }
+
+        public static void HidePopupWithSlideAndFade(Popup popup, double duration = 0.15)
+        {
+            try
+            {
+                if (popup == null)
+                    throw new ArgumentNullException(nameof(popup));
+
+                if (!popup.IsOpen) return;
+
+                var child = popup.Child as FrameworkElement;
+                if (child == null)
+                {
+                    popup.IsOpen = false;
+                    return;
+                }
+
+                var sb = new Storyboard();
+
+                var fadeOutAnimation = new DoubleAnimation
+                {
+                    From = 1,
+                    To = 0,
+                    Duration = TimeSpan.FromSeconds(duration)
+                };
+                fadeOutAnimation.EasingFunction = new CubicEase();
+                Storyboard.SetTargetProperty(fadeOutAnimation, new PropertyPath(UIElement.OpacityProperty));
+
+                var slideAnimation = new DoubleAnimation
+                {
+                    From = 0,
+                    To = 10,
+                    Duration = TimeSpan.FromSeconds(duration)
+                };
+                slideAnimation.EasingFunction = new CubicEase();
+                Storyboard.SetTargetProperty(slideAnimation, new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.Y)"));
+
+                sb.Children.Add(fadeOutAnimation);
+                sb.Children.Add(slideAnimation);
+
+                sb.Completed += (s, e) =>
+                {
+                    popup.IsOpen = false;
+                    child.Opacity = 1;
+                    child.RenderTransform = new TranslateTransform();
+                };
+
+                child.RenderTransform = new TranslateTransform();
+                sb.Begin(child);
+            }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
     }

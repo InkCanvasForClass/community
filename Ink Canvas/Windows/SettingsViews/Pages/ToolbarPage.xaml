@@ -1,0 +1,92 @@
+<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.ToolbarPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
+      xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+      xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+      xmlns:dd="urn:gong-wpf-dragdrop"
+      mc:Ignorable="d"
+      Title="工具栏">
+
+    <Page.Resources>
+        <Style x:Key="ToolbarItemStyle" TargetType="ListBox">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="dd:DragDrop.IsDragSource" Value="True"/>
+            <Setter Property="dd:DragDrop.IsDropTarget" Value="True"/>
+            <Setter Property="dd:DragDrop.UseDefaultEffectDataTemplate" Value="False"/>
+            <Setter Property="dd:DragDrop.SelectDroppedItems" Value="True"/>
+            <Setter Property="dd:DragDrop.DropTargetAdornerBrush" Value="#2563eb"/>
+            <Setter Property="dd:DragDrop.DropHandler" Value="{Binding}"/>
+            <Setter Property="ScrollViewer.PanningMode" Value="VerticalOnly"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="dd:DragDrop.EffectMoveAdornerTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <Border Background="#2563eb" CornerRadius="12" Padding="16,8"
+                                Opacity="0.9">
+                            <TextBlock Text="移动" Foreground="White"
+                                       FontSize="13" FontWeight="Medium"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="ToolbarItemTemplate">
+            <Grid Height="44" Margin="0,1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="&#xE76F;"
+                           FontFamily="Segoe MDL2 Assets" FontSize="14"
+                           VerticalAlignment="Center" Margin="0,0,10,0" Opacity="0.45"/>
+
+                <TextBlock Grid.Column="1" Text="{Binding DisplayName}"
+                           FontSize="14" VerticalAlignment="Center"/>
+
+                <CheckBox Grid.Column="2" IsChecked="{Binding IsVisible, Mode=TwoWay}"
+                          VerticalAlignment="Center" Margin="12,0,0,0"
+                          ToolTip="显示或隐藏此按钮"/>
+            </Grid>
+        </DataTemplate>
+    </Page.Resources>
+
+    <ScrollViewer PanningMode="VerticalFirst">
+        <StackPanel Margin="59,0,59,0" MaxWidth="1000">
+
+            <!-- 主工具栏 -->
+            <TextBlock Text="主工具栏" FontSize="16" FontWeight="Bold" Margin="0,20,0,4"/>
+            <TextBlock Text="拖动调整顺序，开关控制显示。隐藏的按钮不会出现在浮动工具栏中。"
+                       Opacity="0.65" FontSize="12" Margin="0,0,0,8"/>
+            <ListBox Name="MainItemsList" Style="{StaticResource ToolbarItemStyle}"
+                     ItemTemplate="{StaticResource ToolbarItemTemplate}"
+                     ItemsSource="{Binding MainItems}" />
+
+            <!-- 画布控制 -->
+            <TextBlock Text="画布控制" FontSize="16" FontWeight="Bold" Margin="0,24,0,4"/>
+            <TextBlock Text="批注模式下可见的工具按钮排序。"
+                       Opacity="0.65" FontSize="12" Margin="0,0,0,8"/>
+            <ListBox Name="CanvasItemsList" Style="{StaticResource ToolbarItemStyle}"
+                     ItemTemplate="{StaticResource ToolbarItemTemplate}"
+                     ItemsSource="{Binding CanvasItems}" />
+
+            <!-- 尾部按钮 -->
+            <TextBlock Text="尾部按钮" FontSize="16" FontWeight="Bold" Margin="0,24,0,4"/>
+            <TextBlock Text="白板、工具、折叠按钮排序。"
+                       Opacity="0.65" FontSize="12" Margin="0,0,0,8"/>
+            <ListBox Name="EndItemsList" Style="{StaticResource ToolbarItemStyle}"
+                     ItemTemplate="{StaticResource ToolbarItemTemplate}"
+                     ItemsSource="{Binding EndItems}" />
+
+            <Button Content="恢复默认布局" Click="ButtonReset_Click"
+                    Padding="20,10" HorizontalAlignment="Left" Margin="0,16,0,0"/>
+
+        </StackPanel>
+    </ScrollViewer>
+</ui:Page>

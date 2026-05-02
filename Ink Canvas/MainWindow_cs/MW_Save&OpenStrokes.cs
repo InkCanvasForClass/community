@@ -99,7 +99,7 @@ namespace Ink_Canvas
             if (lastBorderMouseDownObject != sender || inkCanvas.Visibility != Visibility.Visible) return;
 
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
+            AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
 
             GridNotifications.Visibility = Visibility.Collapsed;
 
@@ -917,7 +917,7 @@ namespace Ink_Canvas
         {
             if (lastBorderMouseDownObject != sender) return;
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
+            AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
 
             var openFileDialog = new OpenFileDialog();
             openFileDialog.InitialDirectory = Settings.Automation.AutoSavedStrokesLocation;

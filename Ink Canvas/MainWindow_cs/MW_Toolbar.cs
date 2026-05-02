@@ -1,5 +1,7 @@
+using System;
 using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar;
+using Ink_Canvas.Helpers;
 using System.Collections.Generic;
 using System.Windows.Controls;
 
@@ -7,8 +9,6 @@ namespace Ink_Canvas
 {
     public partial class MainWindow
     {
-        // 这批属性替代了 XAML 中原有的 x:Name 自动生成字段；外部代码继续按原名访问。
-        // 由对应 Toolbar Item 的 AfterBuild 回填，Populate 发生在 Window_Loaded 早期。
         internal ToolbarImageButton SymbolIconDelete { get; private set; }
         internal ToolbarImageButton Eraser_Icon { get; private set; }
         internal ToolbarImageButton EraserByStrokes_Icon { get; private set; }
@@ -35,22 +35,46 @@ namespace Ink_Canvas
         internal void AttachToolsBtn(ToolbarImageButton btn) => ToolsFloatingBarBtn = btn;
         internal void AttachFoldIcon(ToolbarImageButton btn) => Fold_Icon = btn;
 
-        /// <summary>
-        /// 在 Window_Loaded 早期调用：按 Settings.Toolbar 配置把插件化按钮填充到对应容器。
-        /// 必须在 LoadSettings 之前，因为 LoadSettings 会访问 Cursor_Icon/Pen_Icon/Eraser_Icon 等。
-        /// </summary>
         internal void InitializeToolbarPlugins()
         {
-            ToolbarHost = new ToolbarHost(this);
-            var slots = new Dictionary<ToolbarSlot, Panel>
+            LogHelper.WriteLogToFile("MW_Toolbar: InitializeToolbarPlugins 开始", LogHelper.LogType.Info);
+            try
             {
-                { ToolbarSlot.FloatingBarMain, StackPanelFloatingBar },
-                { ToolbarSlot.FloatingBarCanvasControls, StackPanelCanvasControls },
-                { ToolbarSlot.FloatingBarEnd, StackPanelFloatingBarEnd },
-                { ToolbarSlot.BlackboardLeft, BlackboardLeftSide },
-                { ToolbarSlot.BlackboardRight, BlackboardRightSide }
-            };
-            ToolbarRegistry.Populate(ToolbarHost, slots, Settings?.Toolbar);
+                ToolbarHost = new ToolbarHost(this);
+                var slots = new Dictionary<ToolbarSlot, Panel>
+                {
+                    { ToolbarSlot.FloatingBarMain, StackPanelFloatingBar },
+                    { ToolbarSlot.FloatingBarCanvasControls, StackPanelCanvasControls },
+                    { ToolbarSlot.FloatingBarEnd, StackPanelFloatingBarEnd },
+                    { ToolbarSlot.BlackboardLeft, BlackboardLeftSide },
+                    { ToolbarSlot.BlackboardRight, BlackboardRightSide }
+                };
+                ToolbarRegistry.Populate(ToolbarHost, slots, Settings?.Toolbar);
+                LogHelper.WriteLogToFile("MW_Toolbar: InitializeToolbarPlugins 完成", LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"MW_Toolbar: InitializeToolbarPlugins 异常: {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}", LogHelper.LogType.Error);
+            }
+        }
+
+        internal void RebuildToolbar()
+        {
+            LogHelper.WriteLogToFile("MW_Toolbar: RebuildToolbar 开始", LogHelper.LogType.Info);
+            try
+            {
+                ToolbarRegistry.ClearInjected(StackPanelFloatingBar);
+                ToolbarRegistry.ClearInjected(StackPanelCanvasControls);
+                ToolbarRegistry.ClearInjected(StackPanelFloatingBarEnd);
+                ToolbarRegistry.ClearInjected(BlackboardLeftSide);
+                ToolbarRegistry.ClearInjected(BlackboardRightSide);
+                InitializeToolbarPlugins();
+                LogHelper.WriteLogToFile("MW_Toolbar: RebuildToolbar 完成", LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"MW_Toolbar: RebuildToolbar 异常: {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}", LogHelper.LogType.Error);
+            }
         }
     }
 }
