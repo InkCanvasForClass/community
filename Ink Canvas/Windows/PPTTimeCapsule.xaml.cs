@@ -30,6 +30,13 @@ namespace Ink_Canvas.Windows
         private Storyboard currentWidthAnimation; // 当前正在运行的宽度动画
         private volatile bool isDisposed = false;
 
+        // 拖拽状态
+        private bool isDragging = false;
+        private Point dragStartPoint;
+        private double dragStartOffsetX = 0;
+        private double dragStartOffsetY = 0;
+        private const double DragThreshold = 5.0;
+
         public PPTTimeCapsule()
         {
             InitializeComponent();
@@ -732,7 +739,57 @@ namespace Ink_Canvas.Windows
 
         private void MainCapsule_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            // 点击恢复主计时器窗口（不重置计时器）
+            // 记录拖拽起始点
+            isDragging = false;
+            dragStartPoint = e.GetPosition(Application.Current.MainWindow);
+            dragStartOffsetX = CapsuleDragTransform.X;
+            dragStartOffsetY = CapsuleDragTransform.Y;
+            MainCapsule.CaptureMouse();
+            MainCapsule.Cursor = Cursors.SizeAll;
+        }
+
+        private void MainCapsule_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!MainCapsule.IsMouseCaptured) return;
+
+            var currentPoint = e.GetPosition(Application.Current.MainWindow);
+            double deltaX = currentPoint.X - dragStartPoint.X;
+            double deltaY = currentPoint.Y - dragStartPoint.Y;
+
+            // 超过阈值才开始拖拽
+            if (!isDragging && (Math.Abs(deltaX) > DragThreshold || Math.Abs(deltaY) > DragThreshold))
+            {
+                isDragging = true;
+            }
+
+            if (isDragging)
+            {
+                CapsuleDragTransform.X = dragStartOffsetX + deltaX;
+                CapsuleDragTransform.Y = dragStartOffsetY + deltaY;
+            }
+        }
+
+        private void MainCapsule_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            MainCapsule.ReleaseMouseCapture();
+            MainCapsule.Cursor = Cursors.Hand;
+
+            if (isDragging)
+            {
+                // 拖拽结束，保存位置到设置
+                isDragging = false;
+                var mainWindow = Application.Current.MainWindow as MainWindow;
+                mainWindow?.SavePPTTimeCapsuleOffset(CapsuleDragTransform.X, CapsuleDragTransform.Y);
+            }
+            else
+            {
+                // 未发生拖拽，视为点击：恢复主计时器窗口（不重置计时器）
+                RestoreTimerWindow();
+            }
+        }
+
+        private void RestoreTimerWindow()
+        {
             var mainWindow = Application.Current.MainWindow as MainWindow;
             if (mainWindow != null)
             {
@@ -849,6 +906,26 @@ namespace Ink_Canvas.Windows
             {
                 LogHelper.WriteLogToFile($"应用PPT时间胶囊主题失败: {ex.Message}", LogHelper.LogType.Error);
             }
+        }
+
+        /// <summary>
+        /// 应用拖拽偏移量
+        /// </summary>
+        public void ApplyDragOffset(double offsetX, double offsetY)
+        {
+            if (CapsuleDragTransform != null)
+            {
+                CapsuleDragTransform.X = offsetX;
+                CapsuleDragTransform.Y = offsetY;
+            }
+        }
+
+        /// <summary>
+        /// 重置拖拽偏移量到默认位置
+        /// </summary>
+        public void ResetDragOffset()
+        {
+            ApplyDragOffset(0, 0);
         }
 
         /// <summary>

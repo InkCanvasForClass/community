@@ -684,6 +684,45 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 mw.UpdatePPTTimeCapsulePosition();
         }
 
+        private void SliderPPTTimeCapsuleOpacity_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!_isLoaded || SliderPPTTimeCapsuleOpacity == null) return;
+            var val = Math.Round(SliderPPTTimeCapsuleOpacity.Value, 2);
+            if (SliderPPTTimeCapsuleOpacity.Value != val)
+            {
+                SliderPPTTimeCapsuleOpacity.Value = val;
+                return;
+            }
+            SettingsManager.Settings.PowerPointSettings.PPTTimeCapsuleOpacity = val;
+            SettingsManager.SaveSettingsToFile();
+            var mw = GetMainWindow();
+            if (mw != null && mw.BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                mw.UpdatePPTTimeCapsuleOpacity();
+        }
+
+        private void SliderPPTTimeCapsuleScale_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!_isLoaded || SliderPPTTimeCapsuleScale == null) return;
+            var val = Math.Round(SliderPPTTimeCapsuleScale.Value, 1);
+            if (SliderPPTTimeCapsuleScale.Value != val)
+            {
+                SliderPPTTimeCapsuleScale.Value = val;
+                return;
+            }
+            SettingsManager.Settings.PowerPointSettings.PPTTimeCapsuleScale = val;
+            SettingsManager.SaveSettingsToFile();
+            var mw = GetMainWindow();
+            if (mw != null && mw.BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                mw.UpdatePPTTimeCapsuleScale();
+        }
+
+        private void ButtonResetPPTTimeCapsulePosition_Click(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            var mw = GetMainWindow();
+            mw?.ResetPPTTimeCapsuleOffset();
+        }
+
         #endregion
 
         #region PPT Auto Save & Notifications

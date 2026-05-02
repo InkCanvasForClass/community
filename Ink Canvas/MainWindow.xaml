@@ -3632,12 +3632,16 @@
                 Height="200">
             <Windows:MinimizedTimerControl x:Name="MinimizedTimerControl"/>
         </Border>
-        <Border x:Name="PPTTimeCapsuleContainer" 
+        <Border x:Name="PPTTimeCapsuleContainer"
                 Visibility="Collapsed"
                 Panel.ZIndex="999"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Top"
-                Margin="0,20,20,0">
+                Margin="0,20,20,0"
+                RenderTransformOrigin="1,0">
+            <Border.RenderTransform>
+                <ScaleTransform x:Name="PPTTimeCapsuleScaleTransform" ScaleX="1" ScaleY="1"/>
+            </Border.RenderTransform>
             <Windows:PPTTimeCapsule x:Name="PPTTimeCapsule"/>
         </Border>
         <Border x:Name="PPTQuickPanelContainer" 

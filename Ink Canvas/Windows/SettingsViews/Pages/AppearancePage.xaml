@@ -330,6 +330,46 @@
                             SwitchName="ToggleSwitchEnableTrayIcon"
                             Toggled="ToggleSwitchEnableTrayIcon_Toggled" />
 
+                    <ui:SettingsCard Header="托盘左键点击">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronLeft}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ComboBox x:Name="ComboBoxTrayLeftClickAction"
+                                  SelectedIndex="0"
+                                  SelectionChanged="ComboBoxTrayLeftClickAction_SelectionChanged">
+                            <ComboBoxItem Content="打开菜单" />
+                            <ComboBoxItem Content="隐藏/显示主窗口" />
+                            <ComboBoxItem Content="临时显示主窗口" />
+                            <ComboBoxItem Content="打开设置" />
+                            <ComboBoxItem Content="禁用/启用所有快捷键" />
+                            <ComboBoxItem Content="强制全屏化" />
+                            <ComboBoxItem Content="切换浮动栏收纳模式" />
+                            <ComboBoxItem Content="重置工具栏位置" />
+                            <ComboBoxItem Content="重启软件" />
+                            <ComboBoxItem Content="退出软件" />
+                        </ComboBox>
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard Header="托盘右键点击">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronRight}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ComboBox x:Name="ComboBoxTrayRightClickAction"
+                                  SelectedIndex="0"
+                                  SelectionChanged="ComboBoxTrayRightClickAction_SelectionChanged">
+                            <ComboBoxItem Content="打开菜单" />
+                            <ComboBoxItem Content="隐藏/显示主窗口" />
+                            <ComboBoxItem Content="临时显示主窗口" />
+                            <ComboBoxItem Content="打开设置" />
+                            <ComboBoxItem Content="禁用/启用所有快捷键" />
+                            <ComboBoxItem Content="强制全屏化" />
+                            <ComboBoxItem Content="切换浮动栏收纳模式" />
+                            <ComboBoxItem Content="重置工具栏位置" />
+                            <ComboBoxItem Content="重启软件" />
+                            <ComboBoxItem Content="退出软件" />
+                        </ComboBox>
+                    </ui:SettingsCard>
+
                     <Rectangle Height="48" />
                 </ikw:SimpleStackPanel>
             </Grid>

@@ -268,6 +268,45 @@
                         </ComboBox>
                     </ui:SettingsCard>
 
+                    <ui:SettingsCard Header="{i18n:I18n Key=PPT_TimeCapsuleOpacity}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EaseOfAccess}"/>
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding ElementName=SliderPPTTimeCapsuleOpacity, Path=Value, StringFormat={}{0:F2}}"
+                                       VerticalAlignment="Center" FontFamily="Consolas"/>
+                            <Slider x:Name="SliderPPTTimeCapsuleOpacity" Minimum="0.2"
+                                    Maximum="1" Width="200"
+                                    IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
+                                    TickPlacement="None" AutoToolTipPlacement="None"
+                                    ValueChanged="SliderPPTTimeCapsuleOpacity_ValueChanged" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard Header="{i18n:I18n Key=PPT_TimeCapsuleScale}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Zoom}"/>
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding ElementName=SliderPPTTimeCapsuleScale, Path=Value, StringFormat={}{0:F1}}"
+                                       VerticalAlignment="Center" FontFamily="Consolas"/>
+                            <Slider x:Name="SliderPPTTimeCapsuleScale" Minimum="0.5"
+                                    Maximum="2.0" Width="200"
+                                    IsSnapToTickEnabled="True" Value="1" TickFrequency="0.1"
+                                    TickPlacement="None" AutoToolTipPlacement="None"
+                                    ValueChanged="SliderPPTTimeCapsuleScale_ValueChanged" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard Header="{i18n:I18n Key=PPT_TimeCapsuleResetPosition}"
+                                     Description="{i18n:I18n Key=PPT_TimeCapsuleResetPositionHint}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Redo}"/>
+                        </ui:SettingsCard.HeaderIcon>
+                        <Button Content="{i18n:I18n Key=PPT_TimeCapsuleResetPosition}"
+                                Click="ButtonResetPPTTimeCapsulePosition_Click"/>
+                    </ui:SettingsCard>
+
                     <controls:LabeledSettingsCard x:Name="CardShowPPTSidebarByDefault"
                             Header="{i18n:I18n Key=PPT_ShowQuickPanelInShow}"
                             Description="{i18n:I18n Key=PPT_ShowQuickPanelInShowHint}"
