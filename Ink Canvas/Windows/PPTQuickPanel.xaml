@@ -266,11 +266,63 @@
                                         Click="InsertImageScreenshotButton_Click"/>
                             </StackPanel>
 
-                            <!-- 隐藏占位（保留 .cs 引用的命名元素） -->
-                            <Border x:Name="MagnifierSection" Visibility="Collapsed">
+                            <!-- 区段：聚焦放大镜 -->
+                            <Border x:Name="MagnifierSection">
                                 <StackPanel>
-                                    <TextBlock x:Name="MagnifierTitleText" Text="聚焦放大镜"/>
-                                    <TextBlock x:Name="MagnifierDescText" Text="功能暂未设计">
+                                    <TextBlock x:Name="MagnifierTitleText"
+                                               Text="聚焦放大镜"
+                                               Style="{StaticResource GameBarSectionTitle}">
+                                        <TextBlock.Foreground>
+                                            <SolidColorBrush x:Name="MagnifierTitleForeground2Brush" Color="White"/>
+                                        </TextBlock.Foreground>
+                                    </TextBlock>
+
+                                    <Button x:Name="MagnifierToggleButton"
+                                            Content="开启放大镜"
+                                            Style="{StaticResource GameBarFlatButton}"
+                                            Margin="0,0,0,6"
+                                            Click="MagnifierToggleButton_Click"/>
+
+                                    <Border CornerRadius="8" Background="#1AFFFFFF" Padding="6" Margin="0,0,0,4">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0"
+                                                       Text="缩放"
+                                                       FontSize="11"
+                                                       VerticalAlignment="Center"
+                                                       Margin="4,0,8,0"
+                                                       Foreground="White"/>
+                                            <Slider x:Name="MagnifierZoomSlider"
+                                                    Grid.Column="1"
+                                                    VerticalAlignment="Center"
+                                                    Stylus.IsPressAndHoldEnabled="False"
+                                                    Minimum="1.5"
+                                                    Maximum="6"
+                                                    Value="2"
+                                                    TickFrequency="0.5"
+                                                    IsSnapToTickEnabled="True"
+                                                    ValueChanged="MagnifierZoomSlider_ValueChanged"/>
+                                            <TextBlock x:Name="MagnifierZoomValueText"
+                                                       Grid.Column="2"
+                                                       Text="2.0x"
+                                                       FontSize="11"
+                                                       FontWeight="SemiBold"
+                                                       VerticalAlignment="Center"
+                                                       MinWidth="36"
+                                                       TextAlignment="Right"
+                                                       Foreground="#E6FFFFFF"/>
+                                        </Grid>
+                                    </Border>
+
+                                    <TextBlock x:Name="MagnifierDescText"
+                                               Text="放大镜跟随鼠标，再次点击按钮关闭"
+                                               FontSize="11"
+                                               Margin="2,0,0,0"
+                                               TextWrapping="Wrap">
                                         <TextBlock.Foreground>
                                             <SolidColorBrush x:Name="MagnifierDescForegroundBrush" Color="#80FFFFFF"/>
                                         </TextBlock.Foreground>

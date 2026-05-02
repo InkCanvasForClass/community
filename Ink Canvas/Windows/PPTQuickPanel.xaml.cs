@@ -1857,6 +1857,46 @@ namespace Ink_Canvas.Windows
 
         #endregion
 
+        #region 聚焦放大镜
+
+        private void MagnifierToggleButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (MagnifierWindow.HasInstance)
+                {
+                    MagnifierWindow.HideInstance();
+                    MagnifierToggleButton.Content = "开启放大镜";
+                }
+                else
+                {
+                    MagnifierWindow.Show((float)MagnifierZoomSlider.Value);
+                    if (MagnifierWindow.HasInstance)
+                    {
+                        MagnifierToggleButton.Content = "关闭放大镜";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"切换聚焦放大镜失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void MagnifierZoomSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (MagnifierZoomValueText != null)
+            {
+                MagnifierZoomValueText.Text = $"{e.NewValue:0.0}x";
+            }
+            if (MagnifierWindow.HasInstance)
+            {
+                MagnifierWindow.SetZoom((float)e.NewValue);
+            }
+        }
+
+        #endregion
+
         #region 公开方法
 
         /// <summary>
@@ -1865,6 +1905,12 @@ namespace Ink_Canvas.Windows
         public void UpdateVisibility(bool isInPPTMode)
         {
             Visibility = isInPPTMode ? Visibility.Visible : Visibility.Collapsed;
+            if (!isInPPTMode && MagnifierWindow.HasInstance)
+            {
+                MagnifierWindow.HideInstance();
+                if (MagnifierToggleButton != null)
+                    MagnifierToggleButton.Content = "开启放大镜";
+            }
         }
 
         #endregion
