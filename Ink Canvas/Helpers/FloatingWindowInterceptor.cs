@@ -822,6 +822,10 @@ namespace Ink_Canvas.Helpers
 
                 var foundWindows = new List<(IntPtr hwnd, InterceptRule rule)>();
 
+                // Reset per-scan state
+                foreach (var rule in _interceptRules.Values)
+                    rule.foundHwnd = false;
+
                 EnumWindows((hWnd, lParam) =>
                 {
                     EnumChildWindows(hWnd, (childHwnd, _) =>
@@ -836,11 +840,13 @@ namespace Ink_Canvas.Helpers
                 var interceptedCount = 0;
                 foreach (var (hWnd, rule) in foundWindows)
                 {
-                    // 已被隐藏且仍不可见：已拦截，无需重复操作
-                    if (_interceptedWindows.ContainsKey(hWnd) && !IsWindowVisible(hWnd))
-                        continue;
-                    ApplyIntercept(hWnd, rule);
-                    interceptedCount++;
+                    bool shouldAct = !_interceptedWindows.ContainsKey(hWnd) ||
+                                    (_interceptedWindows.ContainsKey(hWnd) && IsWindowVisible(hWnd));
+                    if (shouldAct)
+                    {
+                        ApplyIntercept(hWnd, rule);
+                        interceptedCount++;
+                    }
                 }
 
                 if (interceptedCount == 0) _consecutiveEmptyScans++;
@@ -859,21 +865,19 @@ namespace Ink_Canvas.Helpers
 
         private void CheckWindow(IntPtr hWnd, List<(IntPtr, InterceptRule)> found)
         {
-            // 必须是合法窗口句柄，但不要求可见（被我们隐藏的窗口也需要被发现以维持拦截状态）
-            if (!IsWindow(hWnd)) return;
+            if (!IsWindow(hWnd) || !IsWindowVisible(hWnd)) return;
 
             foreach (var rule in _interceptRules.Values)
             {
-                if (!rule.IsEnabled) continue;
+                if (!rule.IsEnabled || rule.foundHwnd) continue;
                 if (MatchesRule(hWnd, rule))
                 {
+                    rule.outHwnd = hWnd;
+                    rule.foundHwnd = true;
                     found.Add((hWnd, rule));
-                    break; // 一个窗口只匹配第一条命中的规则
                 }
             }
         }
-<<<END_W2P:old_string:h4e39a0fd>>>
-END_CALL
 
         private bool MatchesRule(IntPtr hWnd, InterceptRule rule)
         {
@@ -950,36 +954,34 @@ END_CALL
                     int h = rect.Bottom - rect.Top;
                     if (w == 0 && h == 0) return false;
 
-                    // DWM 返回物理像素，GetSystemMetrics 返回逻辑像素，需换算
-                    var hdc = GetDC(IntPtr.Zero);
-                    float scaleX = GetDeviceCaps(hdc, LOGPIXELSX) / 96.0f;
-                    float scaleY = GetDeviceCaps(hdc, LOGPIXELSY) / 96.0f;
-                    ReleaseDC(IntPtr.Zero, hdc);
-                    int screenW = (int)(GetSystemMetrics(SM_CXSCREEN) * scaleX);
-                    int screenH = (int)(GetSystemMetrics(SM_CYSCREEN) * scaleY);
-
                     const int tolerance = 2;
 
                     switch (rule.SizeMatchType)
                     {
                         case SizeMatchType.FullScreen:
-                            if (Math.Abs(w - screenW) > tolerance || Math.Abs(h - screenH) > tolerance)
+                            if (w != GetSystemMetrics(SM_CXSCREEN) || h != GetSystemMetrics(SM_CYSCREEN))
                                 return false;
                             break;
                         case SizeMatchType.FullHeight:
-                            if (Math.Abs(h - screenH) > tolerance) return false;
+                            if (h != GetSystemMetrics(SM_CYSCREEN)) return false;
                             break;
                         case SizeMatchType.FullWidth:
-                            if (Math.Abs(w - screenW) > tolerance) return false;
+                            if (w != GetSystemMetrics(SM_CXSCREEN)) return false;
                             break;
                         case SizeMatchType.Exact:
                             if (w != rule.WindowWidth || h != rule.WindowHeight) return false;
                             break;
                         case SizeMatchType.DPIScale:
+                        {
+                            var hdc = GetDC(IntPtr.Zero);
+                            float scaleX = GetDeviceCaps(hdc, LOGPIXELSX) / 96.0f;
+                            float scaleY = GetDeviceCaps(hdc, LOGPIXELSY) / 96.0f;
+                            ReleaseDC(IntPtr.Zero, hdc);
                             if (Math.Abs(rule.WindowWidth * scaleX - w) > tolerance ||
                                 Math.Abs(rule.WindowHeight * scaleY - h) > tolerance)
                                 return false;
                             break;
+                        }
                         case SizeMatchType.Scale:
                         {
                             if (rule.WindowWidth == 0 || rule.WindowHeight == 0) return false;
