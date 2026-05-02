@@ -169,55 +169,6 @@ namespace Ink_Canvas
             if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoDesktopSideBarFloating, toggle.IsOn);
         }
 
-        private void ToggleSwitchSeewoIwbAssistantFloating_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!isLoaded) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoIwbAssistantFloating, toggle.IsOn);
-        }
-
-        private void ToggleSwitchSeewoDesktopDrawingFloating_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!isLoaded) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoDesktopDrawingFloating, toggle.IsOn);
-        }
-
-        private void ToggleSwitchYiouBoardFloating_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!isLoaded) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.YiouBoardFloating, toggle.IsOn);
-        }
-
-        private void ToggleSwitchClassInXFloating_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!isLoaded) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.ClassInXFloating, toggle.IsOn);
-        }
-
-        private void ToggleSwitchChangYan5Floating_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!isLoaded) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.ChangYan5Floating, toggle.IsOn);
-        }
-
-        private void ToggleSwitchIclass30SidebarFloating_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!isLoaded) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.Iclass30SidebarFloating, toggle.IsOn);
-        }
-
-        private void ToggleSwitchIclass30Floating_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!isLoaded) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.Iclass30Floating, toggle.IsOn);
-        }
-
         public void SetInterceptRule(FloatingWindowInterceptor.InterceptType type, bool enabled)
         {
             try
