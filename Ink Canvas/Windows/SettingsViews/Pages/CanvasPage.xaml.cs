@@ -20,6 +20,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             LoadSettings();
             _isLoaded = true;
+            UpdateAllSliderTexts();
+        }
+
+        private void UpdateAllSliderTexts()
+        {
+            UpdateSliderText(InkFadeTimeSlider, InkFadeTimeText, "{0:0}ms");
+            UpdateSliderText(BrushAutoRestoreWidthSlider, BrushAutoRestoreWidthText, "{0:F2}");
+            UpdateSliderText(BrushAutoRestoreAlphaSlider, BrushAutoRestoreAlphaText, "{0:0}");
+            UpdateSliderText(EraserAutoSwitchBackDelaySlider, EraserAutoSwitchBackDelayText, "{0:0}秒");
+        }
+
+        private void UpdateSliderText(Slider slider, TextBlock textBlock, string format)
+        {
+            if (slider == null || textBlock == null) return;
+            textBlock.Text = string.Format(format, slider.Value);
         }
 
         private void LoadSettings()
@@ -248,6 +263,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void InkFadeTimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            UpdateSliderText(InkFadeTimeSlider, InkFadeTimeText, "{0:0}ms");
             if (!_isLoaded) return;
             SettingsManager.Settings.Canvas.InkFadeTime = (int)e.NewValue;
             SettingsManager.SaveSettingsToFile();
@@ -293,10 +309,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void BrushAutoRestoreWidthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            UpdateSliderText(BrushAutoRestoreWidthSlider, BrushAutoRestoreWidthText, "{0:F2}");
             if (!_isLoaded) return;
             var slider = BrushAutoRestoreWidthSlider;
             var val = Math.Round(slider.Value, 2);
-            // 仅在四舍五入纠正了显示值时回写；那次 set 会重入 ValueChanged 完成保存。
             if (slider.Value != val)
             {
                 slider.Value = val;
@@ -308,6 +324,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void BrushAutoRestoreAlphaSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            UpdateSliderText(BrushAutoRestoreAlphaSlider, BrushAutoRestoreAlphaText, "{0:0}");
             if (!_isLoaded) return;
             SettingsManager.Settings.Canvas.BrushAutoRestoreAlpha = (int)e.NewValue;
             SettingsManager.SaveSettingsToFile();
@@ -323,6 +340,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void EraserAutoSwitchBackDelaySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            UpdateSliderText(EraserAutoSwitchBackDelaySlider, EraserAutoSwitchBackDelayText, "{0:0}秒");
             if (!_isLoaded) return;
             SettingsManager.Settings.Canvas.EraserAutoSwitchBackDelaySeconds = (int)e.NewValue;
             SettingsManager.SaveSettingsToFile();

@@ -31,6 +31,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             LoadSettings();
             _isLoaded = true;
+            UpdateAllSliderTexts();
+        }
+
+        private void UpdateAllSliderTexts()
+        {
+            UpdateSliderText(ViewboxFloatingBarScaleTransformValueSlider, ViewboxFloatingBarScaleSliderText, "{0:F2}x)");
+            UpdateSliderText(ViewboxFloatingBarOpacityValueSlider, ViewboxFloatingBarOpacityText, "{0:F2}");
+            UpdateSliderText(ViewboxFloatingBarOpacityInPPTValueSlider, ViewboxFloatingBarOpacityInPPTText, "{0:F2}");
+            UpdateSliderText(ViewboxBlackBoardScaleTransformValueSlider, ViewboxBlackBoardScaleText, "{0:F2}");
+        }
+
+        private void UpdateSliderText(Slider slider, TextBlock textBlock, string format)
+        {
+            if (slider == null || textBlock == null) return;
+            textBlock.Text = string.Format(format, slider.Value);
         }
 
         private void Page_Unloaded(object sender, RoutedEventArgs e)
@@ -227,6 +242,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void ViewboxFloatingBarScaleTransformValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
+            UpdateSliderText(ViewboxFloatingBarScaleTransformValueSlider, ViewboxFloatingBarScaleSliderText, "{0:F2}x)");
             if (!_isLoaded) return;
             var slider = ViewboxFloatingBarScaleTransformValueSlider;
             var val = Math.Round(slider.Value, 2);
@@ -259,6 +275,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void ViewboxFloatingBarOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
+            UpdateSliderText(ViewboxFloatingBarOpacityValueSlider, ViewboxFloatingBarOpacityText, "{0:F2}");
             if (!_isLoaded) return;
             var slider = ViewboxFloatingBarOpacityValueSlider;
             var val = Math.Round(slider.Value, 2);
@@ -275,6 +292,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void ViewboxFloatingBarOpacityInPPTValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
+            UpdateSliderText(ViewboxFloatingBarOpacityInPPTValueSlider, ViewboxFloatingBarOpacityInPPTText, "{0:F2}");
             if (!_isLoaded) return;
             var slider = ViewboxFloatingBarOpacityInPPTValueSlider;
             var val = Math.Round(slider.Value, 2);
@@ -312,6 +330,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void ViewboxBlackBoardScaleTransformValueSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            UpdateSliderText(ViewboxBlackBoardScaleTransformValueSlider, ViewboxBlackBoardScaleText, "{0:F2}");
             if (!_isLoaded) return;
             var slider = ViewboxBlackBoardScaleTransformValueSlider;
             var val = Math.Round(slider.Value, 2);

@@ -31,6 +31,20 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             LoadSettings();
             _isLoaded = true;
             RefreshConfigProfileList();
+            UpdateAllSliderTexts();
+        }
+
+        private void UpdateAllSliderTexts()
+        {
+            UpdateSliderText(TouchMultiplierSlider, TouchMultiplierText, "{0:F2}");
+            UpdateSliderText(NibModeBoundsWidthSlider, NibModeBoundsWidthText, "{0:0}");
+            UpdateSliderText(FingerModeBoundsWidthSlider, FingerModeBoundsWidthText, "{0:0}");
+        }
+
+        private void UpdateSliderText(Slider slider, TextBlock textBlock, string format)
+        {
+            if (slider == null || textBlock == null) return;
+            textBlock.Text = string.Format(format, slider.Value);
         }
 
         private void Page_Unloaded(object sender, RoutedEventArgs e)
@@ -91,6 +105,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void TouchMultiplierSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            UpdateSliderText(TouchMultiplierSlider, TouchMultiplierText, "{0:F2}");
             if (!_isLoaded) return;
             var val = Math.Round(TouchMultiplierSlider.Value, 2);
             TouchMultiplierSlider.Value = val;
@@ -121,6 +136,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void NibModeBoundsWidthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            UpdateSliderText(NibModeBoundsWidthSlider, NibModeBoundsWidthText, "{0:0}");
             if (!_isLoaded) return;
             SettingsManager.Settings.Advanced.NibModeBoundsWidth = (int)e.NewValue;
             var mw = GetMainWindow();
@@ -136,6 +152,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void FingerModeBoundsWidthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            UpdateSliderText(FingerModeBoundsWidthSlider, FingerModeBoundsWidthText, "{0:0}");
             if (!_isLoaded) return;
             SettingsManager.Settings.Advanced.FingerModeBoundsWidth = (int)e.NewValue;
             var mw = GetMainWindow();

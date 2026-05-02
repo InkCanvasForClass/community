@@ -52,8 +52,8 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Touch}" />
                         </ui:SettingsExpander.HeaderIcon>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="{Binding Value, ElementName=TouchMultiplierSlider, StringFormat={}{0:F2}}"
-                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                            <TextBlock x:Name="TouchMultiplierText"
+                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="45"/>
                             <Slider x:Name="TouchMultiplierSlider"
                                     Minimum="0" Maximum="2"
                                     Width="200"
@@ -86,8 +86,8 @@
 
                     <ui:SettingsCard Header="{i18n:I18n Key=Advanced_NibModeBoundsWidthHeader}">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="{Binding Value, ElementName=NibModeBoundsWidthSlider}"
-                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                            <TextBlock x:Name="NibModeBoundsWidthText"
+                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="35"/>
                             <Slider x:Name="NibModeBoundsWidthSlider"
                                     Minimum="1" Maximum="50" Width="200"
                                     IsSnapToTickEnabled="True" TickFrequency="1" Value="5"
@@ -98,8 +98,8 @@
 
                     <ui:SettingsCard Header="{i18n:I18n Key=Advanced_FingerModeBoundsWidthHeader}">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="{Binding Value, ElementName=FingerModeBoundsWidthSlider}"
-                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                            <TextBlock x:Name="FingerModeBoundsWidthText"
+                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="35"/>
                             <Slider x:Name="FingerModeBoundsWidthSlider"
                                     Minimum="1" Maximum="50" Width="200"
                                     IsSnapToTickEnabled="True" TickFrequency="1" Value="20"

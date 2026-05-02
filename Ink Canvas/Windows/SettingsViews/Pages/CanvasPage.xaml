@@ -147,8 +147,8 @@
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{i18n:I18n Key=Canvas_InkFadeTime}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="{Binding Value, ElementName=InkFadeTimeSlider, StringFormat={}{0:0}ms}"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                    <TextBlock x:Name="InkFadeTimeText"
+                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="55"/>
                                     <Slider x:Name="InkFadeTimeSlider" Width="200" Minimum="1000" Maximum="10000"
                                             Value="3000" TickFrequency="1000" IsSnapToTickEnabled="True"
                                             ValueChanged="InkFadeTimeSlider_ValueChanged" />
@@ -196,8 +196,8 @@
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{i18n:I18n Key=Canvas_RestoreWidth}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="{Binding Value, ElementName=BrushAutoRestoreWidthSlider, StringFormat={}{0:F2}px}"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                    <TextBlock x:Name="BrushAutoRestoreWidthText"
+                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="45"/>
                                     <Slider x:Name="BrushAutoRestoreWidthSlider" Width="200" Minimum="1" Maximum="20"
                                             TickFrequency="1" IsSnapToTickEnabled="True" Value="5"
                                             ValueChanged="BrushAutoRestoreWidthSlider_ValueChanged" />
@@ -205,8 +205,8 @@
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{i18n:I18n Key=Canvas_RestoreOpacity}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="{Binding Value, ElementName=BrushAutoRestoreAlphaSlider, StringFormat={}{0:0}}"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                    <TextBlock x:Name="BrushAutoRestoreAlphaText"
+                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="35"/>
                                     <Slider x:Name="BrushAutoRestoreAlphaSlider" Width="200" Minimum="0" Maximum="255"
                                             TickFrequency="5" IsSnapToTickEnabled="True"
                                             ValueChanged="BrushAutoRestoreAlphaSlider_ValueChanged" />
@@ -230,8 +230,8 @@
                             <ui:SettingsCard Header="{i18n:I18n Key=Canvas_SwitchBackDelay}"
                                     Description="{i18n:I18n Key=Canvas_SwitchBackDelayHint}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Text="{Binding Value, ElementName=EraserAutoSwitchBackDelaySlider, StringFormat={}{0:0}秒}"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                    <TextBlock x:Name="EraserAutoSwitchBackDelayText"
+                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="40"/>
                                     <Slider x:Name="EraserAutoSwitchBackDelaySlider" Width="200" Minimum="1" Maximum="60"
                                             Value="10" TickFrequency="1" IsSnapToTickEnabled="True"
                                             ValueChanged="EraserAutoSwitchBackDelaySlider_ValueChanged" />
