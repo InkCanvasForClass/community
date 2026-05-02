@@ -513,6 +513,14 @@ namespace Ink_Canvas
                 var rotateTransform = transformGroup.Children.OfType<RotateTransform>().FirstOrDefault();
                 if (rotateTransform != null)
                 {
+                    // 绕元素视觉中心旋转，避免旋转后位置乱飘
+                    double w = element.ActualWidth > 0 ? element.ActualWidth : element.Width;
+                    double h = element.ActualHeight > 0 ? element.ActualHeight : element.Height;
+                    if (!double.IsNaN(w) && !double.IsNaN(h))
+                    {
+                        rotateTransform.CenterX = w / 2;
+                        rotateTransform.CenterY = h / 2;
+                    }
                     rotateTransform.Angle += angle;
                 }
             }
@@ -2399,8 +2407,7 @@ namespace Ink_Canvas
             {
                 if (ImageSelectionOverlay == null || element == null) return;
                 EnsureImageOverlayHooks();
-                Rect bounds = GetElementActualBounds(element);
-                ImageSelectionOverlay.UpdateFrame(bounds, GetElementRotationAngle(element));
+                UpdateImageResizeHandlesPosition(default);
                 ImageSelectionOverlay.Visibility = Visibility.Visible;
             }
             catch (Exception ex)
@@ -2422,13 +2429,42 @@ namespace Ink_Canvas
             }
         }
 
+        // elementBounds parameter is ignored — overlay needs the UNROTATED bounds of the element,
+        // computed directly from the element's own state so rotation never distorts the frame.
         private void UpdateImageResizeHandlesPosition(Rect elementBounds)
         {
             try
             {
-                if (ImageSelectionOverlay == null) return;
-                double angle = currentSelectedElement != null ? GetElementRotationAngle(currentSelectedElement) : 0;
-                ImageSelectionOverlay.UpdateFrame(elementBounds, angle);
+                if (ImageSelectionOverlay == null || currentSelectedElement == null) return;
+
+                var element = currentSelectedElement;
+                double w = element.ActualWidth > 0 ? element.ActualWidth : element.Width;
+                double h = element.ActualHeight > 0 ? element.ActualHeight : element.Height;
+                if (double.IsNaN(w) || double.IsNaN(h) || w <= 0 || h <= 0) return;
+
+                double left = InkCanvas.GetLeft(element);
+                double top = InkCanvas.GetTop(element);
+                if (double.IsNaN(left)) left = 0;
+                if (double.IsNaN(top)) top = 0;
+
+                double scaleX = 1, scaleY = 1, translateX = 0, translateY = 0, angle = 0;
+                if (element.RenderTransform is TransformGroup tg)
+                {
+                    var st = tg.Children.OfType<ScaleTransform>().FirstOrDefault();
+                    var tt = tg.Children.OfType<TranslateTransform>().FirstOrDefault();
+                    var rt = tg.Children.OfType<RotateTransform>().FirstOrDefault();
+                    if (st != null) { scaleX = st.ScaleX; scaleY = st.ScaleY; }
+                    if (tt != null) { translateX = tt.X; translateY = tt.Y; }
+                    if (rt != null) angle = rt.Angle;
+                }
+
+                double scaledW = w * scaleX;
+                double scaledH = h * scaleY;
+                // Local (pre-rotation) center in canvas coordinates
+                double localCenterX = left + translateX + scaledW / 2;
+                double localCenterY = top + translateY + scaledH / 2;
+
+                ImageSelectionOverlay.UpdateFrame(new Point(localCenterX, localCenterY), scaledW, scaledH, angle);
             }
             catch (Exception ex)
             {
@@ -2446,12 +2482,22 @@ namespace Ink_Canvas
             return 0;
         }
 
+        // Rotate a canvas-space vector back into the element's local (unrotated) space.
+        private Vector CanvasVectorToLocal(Vector canvasDelta, double angleDegrees)
+        {
+            double rad = -angleDegrees * Math.PI / 180.0;
+            double cos = Math.Cos(rad);
+            double sin = Math.Sin(rad);
+            return new Vector(canvasDelta.X * cos - canvasDelta.Y * sin,
+                              canvasDelta.X * sin + canvasDelta.Y * cos);
+        }
+
         private void ImageSelectionOverlay_ResizeDelta(object sender, ImageResizeDeltaEventArgs e)
         {
             try
             {
                 if (!IsBitmapLikeCanvasElement(currentSelectedElement)) return;
-                ResizeImageByCorner(currentSelectedElement, e.StartCanvasPoint, e.CurrentCanvasPoint, e.Corner, e.LockAspectRatio);
+                ResizeImageByCorner(currentSelectedElement, e.CanvasDelta, e.Corner, e.LockAspectRatio);
             }
             catch (Exception ex)
             {
@@ -2469,11 +2515,14 @@ namespace Ink_Canvas
                     var tt = tg.Children.OfType<TranslateTransform>().FirstOrDefault();
                     if (tt != null)
                     {
-                        tt.X += e.Delta.X;
-                        tt.Y += e.Delta.Y;
+                        // Translate is applied before Rotate, so convert canvas delta to local space.
+                        double angle = GetElementRotationAngle(currentSelectedElement);
+                        var local = CanvasVectorToLocal(e.CanvasDelta, angle);
+                        tt.X += local.X;
+                        tt.Y += local.Y;
                     }
                 }
-                UpdateImageResizeHandlesPosition(GetElementActualBounds(currentSelectedElement));
+                UpdateImageResizeHandlesPosition(default);
                 if (BorderImageSelectionControl?.Visibility == Visibility.Visible)
                     UpdateImageSelectionToolbarPosition(currentSelectedElement);
             }
@@ -2489,7 +2538,7 @@ namespace Ink_Canvas
             {
                 if (currentSelectedElement == null) return;
                 ApplyRotateTransform(currentSelectedElement, e.AngleDelta);
-                UpdateImageResizeHandlesPosition(GetElementActualBounds(currentSelectedElement));
+                UpdateImageResizeHandlesPosition(default);
                 if (BorderImageSelectionControl?.Visibility == Visibility.Visible)
                     UpdateImageSelectionToolbarPosition(currentSelectedElement);
             }
@@ -2499,82 +2548,109 @@ namespace Ink_Canvas
             }
         }
 
-        private void ResizeImageByCorner(FrameworkElement element, Point startPoint, Point currentPoint,
+        private void ResizeImageByCorner(FrameworkElement element, Vector canvasDelta,
                                          ImageResizeCorner corner, bool lockAspect)
         {
             if (!(element.RenderTransform is TransformGroup transformGroup)) return;
             var scaleTransform = transformGroup.Children.OfType<ScaleTransform>().FirstOrDefault();
             var translateTransform = transformGroup.Children.OfType<TranslateTransform>().FirstOrDefault();
+            var rotateTransform = transformGroup.Children.OfType<RotateTransform>().FirstOrDefault();
             if (scaleTransform == null || translateTransform == null) return;
 
-            Rect currentBounds = GetElementActualBounds(element);
-            if (currentBounds.Width <= 0 || currentBounds.Height <= 0) return;
+            double angle = rotateTransform?.Angle ?? 0;
+            double baseW = element.ActualWidth > 0 ? element.ActualWidth : element.Width;
+            double baseH = element.ActualHeight > 0 ? element.ActualHeight : element.Height;
+            if (double.IsNaN(baseW) || double.IsNaN(baseH) || baseW <= 0 || baseH <= 0) return;
 
-            double deltaX = currentPoint.X - startPoint.X;
-            double deltaY = currentPoint.Y - startPoint.Y;
+            double left = InkCanvas.GetLeft(element); if (double.IsNaN(left)) left = 0;
+            double top = InkCanvas.GetTop(element); if (double.IsNaN(top)) top = 0;
 
-            double scaleX = 1.0, scaleY = 1.0, translateX = 0, translateY = 0;
+            double curW = baseW * scaleTransform.ScaleX;
+            double curH = baseH * scaleTransform.ScaleY;
 
+            // Drag delta → local (unrotated) space so corner tracks cursor under any rotation.
+            Vector local = CanvasVectorToLocal(canvasDelta, angle);
+
+            double newW = curW, newH = curH;
+            double pivotFracX = 0, pivotFracY = 0; // opposite corner as fraction of scaled box
             switch (corner)
             {
                 case ImageResizeCorner.TopLeft:
-                    scaleX = (currentBounds.Width - deltaX) / currentBounds.Width;
-                    scaleY = (currentBounds.Height - deltaY) / currentBounds.Height;
-                    translateX = deltaX;
-                    translateY = deltaY;
+                    newW = curW - local.X; newH = curH - local.Y;
+                    pivotFracX = 1; pivotFracY = 1;
                     break;
                 case ImageResizeCorner.TopRight:
-                    scaleX = (currentBounds.Width + deltaX) / currentBounds.Width;
-                    scaleY = (currentBounds.Height - deltaY) / currentBounds.Height;
-                    translateY = deltaY;
+                    newW = curW + local.X; newH = curH - local.Y;
+                    pivotFracX = 0; pivotFracY = 1;
                     break;
                 case ImageResizeCorner.BottomLeft:
-                    scaleX = (currentBounds.Width - deltaX) / currentBounds.Width;
-                    scaleY = (currentBounds.Height + deltaY) / currentBounds.Height;
-                    translateX = deltaX;
+                    newW = curW - local.X; newH = curH + local.Y;
+                    pivotFracX = 1; pivotFracY = 0;
                     break;
                 case ImageResizeCorner.BottomRight:
-                    scaleX = (currentBounds.Width + deltaX) / currentBounds.Width;
-                    scaleY = (currentBounds.Height + deltaY) / currentBounds.Height;
+                    newW = curW + local.X; newH = curH + local.Y;
+                    pivotFracX = 0; pivotFracY = 0;
                     break;
             }
 
-            if (lockAspect)
+            if (lockAspect && curW > 0 && curH > 0)
             {
-                double uniform = Math.Min(scaleX, scaleY);
-                scaleX = uniform;
-                scaleY = uniform;
-                // recompute translate so opposite corner stays put
-                double wNew = currentBounds.Width * uniform;
-                double hNew = currentBounds.Height * uniform;
-                switch (corner)
-                {
-                    case ImageResizeCorner.TopLeft:
-                        translateX = currentBounds.Width - wNew;
-                        translateY = currentBounds.Height - hNew;
-                        break;
-                    case ImageResizeCorner.TopRight:
-                        translateX = 0;
-                        translateY = currentBounds.Height - hNew;
-                        break;
-                    case ImageResizeCorner.BottomLeft:
-                        translateX = currentBounds.Width - wNew;
-                        translateY = 0;
-                        break;
-                }
+                double uniform = Math.Min(newW / curW, newH / curH);
+                newW = curW * uniform;
+                newH = curH * uniform;
             }
 
-            scaleX = Math.Max(0.1, Math.Min(scaleX, 5.0));
-            scaleY = Math.Max(0.1, Math.Min(scaleY, 5.0));
+            // Clamp final scale
+            double newScaleX = newW / baseW;
+            double newScaleY = newH / baseH;
+            newScaleX = Math.Max(0.1, Math.Min(newScaleX, 10.0));
+            newScaleY = Math.Max(0.1, Math.Min(newScaleY, 10.0));
+            newW = baseW * newScaleX;
+            newH = baseH * newScaleY;
 
-            scaleTransform.ScaleX *= scaleX;
-            scaleTransform.ScaleY *= scaleY;
-            translateTransform.X += translateX;
-            translateTransform.Y += translateY;
+            double tx = translateTransform.X;
+            double ty = translateTransform.Y;
 
-            UpdateImageResizeHandlesPosition(GetElementActualBounds(element));
+            // Pivot canvas position BEFORE the change
+            Point pivotBefore = ComputeCornerCanvas(pivotFracX * curW, pivotFracY * curH,
+                                                    curW, curH, left, top, tx, ty, angle);
+            // Pivot canvas position AFTER the scale change, assuming translate unchanged
+            Point pivotAfter = ComputeCornerCanvas(pivotFracX * newW, pivotFracY * newH,
+                                                   newW, newH, left, top, tx, ty, angle);
+
+            // Shift translate in local space to bring pivotAfter back to pivotBefore
+            Vector canvasDrift = pivotBefore - pivotAfter;
+            Vector localShift = CanvasVectorToLocal(canvasDrift, angle);
+            translateTransform.X += localShift.X;
+            translateTransform.Y += localShift.Y;
+
+            scaleTransform.ScaleX = newScaleX;
+            scaleTransform.ScaleY = newScaleY;
+
+            UpdateImageResizeHandlesPosition(default);
             if (BorderImageSelectionControl?.Visibility == Visibility.Visible)
                 UpdateImageSelectionToolbarPosition(element);
+        }
+
+        // Canvas position of local point (lx, ly) inside the scaled box of size (sW, sH),
+        // given element placement (left, top), translate (tx, ty) and rotation angle (deg).
+        // Rotation pivot is the visual center: pre-rotate (tx + sW/2, ty + sH/2).
+        private static Point ComputeCornerCanvas(double lx, double ly, double sW, double sH,
+                                                 double left, double top, double tx, double ty,
+                                                 double angleDeg)
+        {
+            double preX = tx + lx;
+            double preY = ty + ly;
+            double cx = tx + sW / 2;
+            double cy = ty + sH / 2;
+            double rad = angleDeg * Math.PI / 180.0;
+            double cos = Math.Cos(rad);
+            double sin = Math.Sin(rad);
+            double relX = preX - cx;
+            double relY = preY - cy;
+            double rotX = relX * cos - relY * sin + cx;
+            double rotY = relX * sin + relY * cos + cy;
+            return new Point(left + rotX, top + rotY);
         }
 
         #endregion

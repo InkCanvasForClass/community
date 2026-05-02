@@ -2,6 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Shapes;
 
 namespace Ink_Canvas.Controls
@@ -17,23 +18,21 @@ namespace Ink_Canvas.Controls
     public class ImageResizeDeltaEventArgs : EventArgs
     {
         public ImageResizeCorner Corner { get; }
-        public Point CurrentCanvasPoint { get; }
-        public Point StartCanvasPoint { get; }
+        public Vector CanvasDelta { get; }
         public bool LockAspectRatio { get; }
 
-        public ImageResizeDeltaEventArgs(ImageResizeCorner corner, Point start, Point current, bool lockAspect)
+        public ImageResizeDeltaEventArgs(ImageResizeCorner corner, Vector canvasDelta, bool lockAspect)
         {
             Corner = corner;
-            StartCanvasPoint = start;
-            CurrentCanvasPoint = current;
+            CanvasDelta = canvasDelta;
             LockAspectRatio = lockAspect;
         }
     }
 
     public class ImageMoveDeltaEventArgs : EventArgs
     {
-        public Vector Delta { get; }
-        public ImageMoveDeltaEventArgs(Vector delta) { Delta = delta; }
+        public Vector CanvasDelta { get; }
+        public ImageMoveDeltaEventArgs(Vector delta) { CanvasDelta = delta; }
     }
 
     public class ImageRotateDeltaEventArgs : EventArgs
@@ -56,7 +55,8 @@ namespace Ink_Canvas.Controls
 
         public IInputElement CoordinateSource { get; set; }
 
-        private Point _rotationCenter;
+        private Point _rotationCenterCanvas;
+        private readonly RotateTransform _overlayRotation = new RotateTransform(0);
 
         private bool _isResizing;
         private bool _isRotating;
@@ -68,6 +68,7 @@ namespace Ink_Canvas.Controls
         public ImageSelectionOverlay()
         {
             InitializeComponent();
+            RenderTransform = _overlayRotation;
 
             TopLeftHandle.MouseLeftButtonDown += (s, e) => BeginResize(ImageResizeCorner.TopLeft, e, TopLeftHandle);
             TopRightHandle.MouseLeftButtonDown += (s, e) => BeginResize(ImageResizeCorner.TopRight, e, TopRightHandle);
@@ -93,39 +94,49 @@ namespace Ink_Canvas.Controls
             MoveSurface.MouseLeftButtonUp += EndMove;
         }
 
-        public void UpdateFrame(Rect canvasBounds, double rotationAngleDegrees)
+        /// <summary>
+        /// Position overlay so its logical rect (width × height) is centered at centerCanvas,
+        /// then rotated by rotationAngleDegrees around that center to match the target element.
+        /// </summary>
+        public void UpdateFrame(Point centerCanvas, double width, double height, double rotationAngleDegrees)
         {
-            if (canvasBounds.Width <= 0 || canvasBounds.Height <= 0) return;
+            if (width <= 0 || height <= 0) return;
 
-            _rotationCenter = new Point(canvasBounds.Left + canvasBounds.Width / 2,
-                                        canvasBounds.Top + canvasBounds.Height / 2);
+            _rotationCenterCanvas = centerCanvas;
 
-            Margin = new Thickness(canvasBounds.Left, canvasBounds.Top, 0, 0);
-            Width = canvasBounds.Width;
-            Height = canvasBounds.Height;
+            double left = centerCanvas.X - width / 2;
+            double top = centerCanvas.Y - height / 2;
+            Margin = new Thickness(left, top, 0, 0);
+            Width = width;
+            Height = height;
 
-            FrameBorder.Width = canvasBounds.Width;
-            FrameBorder.Height = canvasBounds.Height;
+            RenderTransformOrigin = new Point(0, 0);
+            _overlayRotation.Angle = rotationAngleDegrees;
+            _overlayRotation.CenterX = width / 2;
+            _overlayRotation.CenterY = height / 2;
+
+            FrameBorder.Width = width;
+            FrameBorder.Height = height;
             System.Windows.Controls.Canvas.SetLeft(FrameBorder, 0);
             System.Windows.Controls.Canvas.SetTop(FrameBorder, 0);
 
-            MoveSurface.Width = canvasBounds.Width;
-            MoveSurface.Height = canvasBounds.Height;
+            MoveSurface.Width = width;
+            MoveSurface.Height = height;
             System.Windows.Controls.Canvas.SetLeft(MoveSurface, 0);
             System.Windows.Controls.Canvas.SetTop(MoveSurface, 0);
 
             double h = HandleSize / 2;
             System.Windows.Controls.Canvas.SetLeft(TopLeftHandle, -h);
             System.Windows.Controls.Canvas.SetTop(TopLeftHandle, -h);
-            System.Windows.Controls.Canvas.SetLeft(TopRightHandle, canvasBounds.Width - h);
+            System.Windows.Controls.Canvas.SetLeft(TopRightHandle, width - h);
             System.Windows.Controls.Canvas.SetTop(TopRightHandle, -h);
             System.Windows.Controls.Canvas.SetLeft(BottomLeftHandle, -h);
-            System.Windows.Controls.Canvas.SetTop(BottomLeftHandle, canvasBounds.Height - h);
-            System.Windows.Controls.Canvas.SetLeft(BottomRightHandle, canvasBounds.Width - h);
-            System.Windows.Controls.Canvas.SetTop(BottomRightHandle, canvasBounds.Height - h);
+            System.Windows.Controls.Canvas.SetTop(BottomLeftHandle, height - h);
+            System.Windows.Controls.Canvas.SetLeft(BottomRightHandle, width - h);
+            System.Windows.Controls.Canvas.SetTop(BottomRightHandle, height - h);
 
             double rh = RotationHandleSize / 2;
-            double midX = canvasBounds.Width / 2;
+            double midX = width / 2;
             System.Windows.Controls.Canvas.SetLeft(RotationHandle, midX - rh);
             System.Windows.Controls.Canvas.SetTop(RotationHandle, -RotationHandleOffset - rh);
 
@@ -155,8 +166,9 @@ namespace Ink_Canvas.Controls
             var source = GetSource();
             if (source == null) return;
             var current = e.GetPosition(source);
+            var delta = current - _lastPoint;
             bool lockAspect = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift;
-            ResizeDelta?.Invoke(this, new ImageResizeDeltaEventArgs(_activeCorner, _lastPoint, current, lockAspect));
+            ResizeDelta?.Invoke(this, new ImageResizeDeltaEventArgs(_activeCorner, delta, lockAspect));
             _lastPoint = current;
             e.Handled = true;
         }
@@ -240,8 +252,8 @@ namespace Ink_Canvas.Controls
 
         private double AngleFromCenter(Point p)
         {
-            double dx = p.X - _rotationCenter.X;
-            double dy = p.Y - _rotationCenter.Y;
+            double dx = p.X - _rotationCenterCanvas.X;
+            double dy = p.Y - _rotationCenterCanvas.Y;
             return Math.Atan2(dy, dx) * 180.0 / Math.PI;
         }
     }
