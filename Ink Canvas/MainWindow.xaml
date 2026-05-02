@@ -2363,8 +2363,8 @@
                                  HorizontalAlignment="Right" VerticalAlignment="Center"/>
 
         <Grid Name="FloatingbarUIForInkReplay">
-            <Viewbox Name="ViewboxFloatingBar" Margin="100,5,0,0" Cursor="Arrow"
-                     HorizontalAlignment="Left" Height="58" VerticalAlignment="Top" Width="1200"
+            <Viewbox Name="ViewboxFloatingBar" Margin="150,250,0,0" Cursor="Arrow"
+                     HorizontalAlignment="Left" Height="58" VerticalAlignment="Top"
                      UseLayoutRounding="True" SnapsToDevicePixels="True"
                      RenderTransformOrigin="0.5,0.5">
                 <Viewbox.LayoutTransform>
@@ -2990,24 +2990,24 @@
                                        AllowsTransparency="True"
                                        StaysOpen="True"
                                        IsOpen="False">
-                                    <Border CornerRadius="6" Background="#F4F4F5"
-                                            BorderBrush="#3b82f6" BorderThickness="1">
+                                    <Border CornerRadius="8" Background="#F4F4F5"
+                                            BorderBrush="#3b82f6" BorderThickness="2">
                                         <ikw:SimpleStackPanel Margin="-1">
-                                            <Grid Margin="8,8,8,5">
+                                            <Grid Margin="8,7,10,5">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*" />
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="12"
+                                                <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="10"
                                                                            Text="{i18n:I18n Key=Tools_MoreFeaturesTitle}"
                                                                            Foreground="#2563eb" FontWeight="Bold"/>
                                                 <ui:FontIcon Grid.Column="1" Icon="{x:Static ui:SegoeFluentIcons.ChromeCloseContrast}"
-                                                                             Foreground="#DC2626" FontSize="12" VerticalAlignment="Center"
+                                                                             Foreground="#DC2626" FontSize="8" VerticalAlignment="Center"
                                                                              MouseDown="Border_MouseDown"
                                                                              MouseUp="CloseBordertools_MouseUp" />
                                             </Grid>
-                                            <Border Margin="8,0,8,8" BorderBrush="#D4D4D8" Background="#fafafa" BorderThickness="1"
-                                                    CornerRadius="6">
+                                            <Border Margin="6,0,6,6" BorderBrush="#D4D4D8" Background="#fafafa" BorderThickness="1"
+                                                    CornerRadius="4">
                                                 <ikw:SimpleStackPanel Margin="2" Spacing="1">
                                                     <ikw:SimpleStackPanel.Resources>
                                                         <Style TargetType="Label" BasedOn="{StaticResource AutoFitToolPopupLabel8}" />

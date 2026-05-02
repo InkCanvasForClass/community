@@ -112,9 +112,10 @@ namespace Ink_Canvas
                 (popupSize, targetSize, offset) => new[]
                 {
                     new CustomPopupPlacement(
-                        new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height),
+                        new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height - 8),
                         PopupPrimaryAxis.Vertical)
                 };
+
             BlackboardLeftSide.Visibility = Visibility.Collapsed;
             BlackboardCenterSide.Visibility = Visibility.Collapsed;
             BlackboardRightSide.Visibility = Visibility.Collapsed;
