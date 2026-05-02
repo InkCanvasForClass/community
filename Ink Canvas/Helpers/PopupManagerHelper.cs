@@ -17,30 +17,19 @@ namespace Ink_Canvas.Helpers
         private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
         [DllImport("user32.dll")]
-        private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
-
-        [DllImport("user32.dll")]
         private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
 
         [DllImport("user32.dll")]
         private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
 
-        [StructLayout(LayoutKind.Sequential)]
-        private struct RECT
-        {
-            public int Left;
-            public int Top;
-            public int Right;
-            public int Bottom;
-        }
-
         private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
         private static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
+        private static readonly IntPtr HWND_TOP = IntPtr.Zero;
         private const uint SWP_NOMOVE = 0x0002;
         private const uint SWP_NOSIZE = 0x0001;
         private const uint SWP_NOACTIVATE = 0x0010;
         private const uint SWP_SHOWWINDOW = 0x0040;
-        private const uint SWP_FRAMECHANGED = 0x0020;
+        private const uint SWP_NOOWNERZORDER = 0x0200;
         private const int GWL_EXSTYLE = -20;
         private const int WS_EX_TOPMOST = 0x00000008;
 
@@ -138,13 +127,10 @@ namespace Ink_Canvas.Helpers
             var popup = sender as Popup;
             if (popup == null) return;
 
-            if (!CheckShouldBeTopmost())
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
-                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    RemoveTopmostFromPopup(popup);
-                }), DispatcherPriority.Loaded);
-            }
+                ApplyTopmostState(popup);
+            }), DispatcherPriority.Loaded);
         }
 
         #endregion
@@ -158,14 +144,61 @@ namespace Ink_Canvas.Helpers
 
         public void BringToFront(Popup popup)
         {
-            if (!CheckShouldBeTopmost()) return;
-            BringToFrontInternal(popup, _config.InitialTopmostAttempts);
+            if (popup?.Child == null) return;
+
+            Action bringToTopAction = () =>
+            {
+                try
+                {
+                    var source = PresentationSource.FromVisual(popup.Child) as HwndSource;
+                    if (source?.Handle == null) return;
+
+                    ApplyTopmostStateToHwnd(source.Handle);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[PopupManager] BringToFront failed: {ex.Message}");
+                }
+            };
+
+            for (int i = 0; i < _config.InitialTopmostAttempts; i++)
+            {
+                DispatcherPriority priority;
+                switch (i)
+                {
+                    case 0:
+                        priority = DispatcherPriority.Render;
+                        break;
+                    case 1:
+                        priority = DispatcherPriority.Normal;
+                        break;
+                    default:
+                        priority = DispatcherPriority.Background;
+                        break;
+                }
+
+                Application.Current.Dispatcher.BeginInvoke(bringToTopAction, priority);
+            }
         }
 
         public void BringToFrontLight(Popup popup)
         {
-            if (!CheckShouldBeTopmost()) return;
-            BringToFrontAsync(popup);
+            if (popup?.Child == null) return;
+
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    var source = PresentationSource.FromVisual(popup.Child) as HwndSource;
+                    if (source?.Handle == null) return;
+
+                    ApplyTopmostStateToHwnd(source.Handle);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[PopupManager] BringToFrontLight failed: {ex.Message}");
+                }
+            }), DispatcherPriority.Render);
         }
 
         public void UpdatePosition(Popup popup)
@@ -262,25 +295,12 @@ namespace Ink_Canvas.Helpers
         {
             if (popup?.Child == null) return;
 
-            var shouldBeTopmost = CheckShouldBeTopmost();
-
             try
             {
                 var source = PresentationSource.FromVisual(popup.Child) as HwndSource;
                 if (source?.Handle == null) return;
 
-                if (shouldBeTopmost)
-                {
-                    SetWindowPos(
-                        source.Handle,
-                        HWND_TOPMOST,
-                        0, 0, 0, 0,
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
-                }
-                else
-                {
-                    RemoveTopmostFromHwnd(source.Handle);
-                }
+                ApplyTopmostStateToHwnd(source.Handle);
             }
             catch (Exception ex)
             {
@@ -288,104 +308,37 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        private void RemoveTopmostFromPopup(Popup popup)
+        private void ApplyTopmostStateToHwnd(IntPtr hwnd)
         {
-            if (popup?.Child == null) return;
+            var shouldBeTopmost = CheckShouldBeTopmost();
 
             try
             {
-                var source = PresentationSource.FromVisual(popup.Child) as HwndSource;
-                if (source?.Handle == null) return;
+                int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
 
-                RemoveTopmostFromHwnd(source.Handle);
+                if (shouldBeTopmost)
+                {
+                    if ((exStyle & WS_EX_TOPMOST) == 0)
+                    {
+                        SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0,
+                            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
+                    }
+                }
+                else
+                {
+                    if ((exStyle & WS_EX_TOPMOST) != 0)
+                    {
+                        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_TOPMOST);
+                    }
+
+                    SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0,
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+                }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[PopupManager] RemoveTopmostFromPopup failed: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[PopupManager] ApplyTopmostStateToHwnd failed: {ex.Message}");
             }
-        }
-
-        private void RemoveTopmostFromHwnd(IntPtr hwnd)
-        {
-            SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0,
-                SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
-
-            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-            if ((exStyle & WS_EX_TOPMOST) != 0)
-            {
-                SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_TOPMOST);
-            }
-
-            System.Diagnostics.Debug.WriteLine($"[PopupManager] Removed TOPMOST from hwnd={hwnd}");
-        }
-
-        private void BringToFrontInternal(Popup popup, int attempts)
-        {
-            if (popup?.Child == null) return;
-
-            Action bringToTopAction = () =>
-            {
-                try
-                {
-                    var source = PresentationSource.FromVisual(popup.Child) as HwndSource;
-                    if (source?.Handle == null) return;
-
-                    SetWindowPos(
-                        source.Handle,
-                        HWND_TOPMOST,
-                        0, 0, 0, 0,
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
-
-                    System.Diagnostics.Debug.WriteLine($"[PopupManager] Set TOPMOST for {popup.Name ?? "unnamed"}");
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"[PopupManager] BringToFront failed: {ex.Message}");
-                }
-            };
-
-            for (int i = 0; i < attempts; i++)
-            {
-                DispatcherPriority priority;
-                switch (i)
-                {
-                    case 0:
-                        priority = DispatcherPriority.Render;
-                        break;
-                    case 1:
-                        priority = DispatcherPriority.Normal;
-                        break;
-                    default:
-                        priority = DispatcherPriority.Background;
-                        break;
-                }
-
-                Application.Current.Dispatcher.BeginInvoke(bringToTopAction, priority);
-            }
-        }
-
-        private void BringToFrontAsync(Popup popup)
-        {
-            if (popup?.Child == null) return;
-
-            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                try
-                {
-                    var source = PresentationSource.FromVisual(popup.Child) as HwndSource;
-                    if (source?.Handle == null) return;
-
-                    SetWindowPos(
-                        source.Handle,
-                        HWND_TOPMOST,
-                        0, 0, 0, 0,
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"[PopupManager] BringToFrontLight failed: {ex.Message}");
-                }
-            }), DispatcherPriority.Render);
         }
 
         #endregion
