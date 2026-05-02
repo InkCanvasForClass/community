@@ -118,6 +118,19 @@ namespace Ink_Canvas.Windows
             Loaded += PPTQuickPanel_Loaded;
             Unloaded += PPTQuickPanel_Unloaded;
             IsVisibleChanged += PPTQuickPanel_IsVisibleChanged;
+
+            MagnifierWindow.Closed2 += OnMagnifierClosed;
+        }
+
+        private void OnMagnifierClosed(object sender, EventArgs e)
+        {
+            Dispatcher.BeginInvoke(new Action(SyncMagnifierButtonState));
+        }
+
+        private void SyncMagnifierButtonState()
+        {
+            if (MagnifierToggleButton == null) return;
+            MagnifierToggleButton.Content = MagnifierWindow.HasInstance ? "关闭放大镜" : "开启放大镜";
         }
 
         private void PPTQuickPanel_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -125,6 +138,7 @@ namespace Ink_Canvas.Windows
             if (Visibility == Visibility.Visible)
             {
                 ApplyTheme();
+                SyncMagnifierButtonState();
             }
         }
 
