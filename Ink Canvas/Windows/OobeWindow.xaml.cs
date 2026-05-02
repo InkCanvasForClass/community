@@ -303,6 +303,28 @@ namespace Ink_Canvas.Windows
             NavigateTo(0, direction: 1);
         }
 
+        private void BtnUsePreset_Click(object sender, RoutedEventArgs e)
+        {
+            var presetWindow = new OobePresetWindow { Owner = this };
+            bool? result = presetWindow.ShowDialog();
+            if (result != true) return;
+
+            switch (presetWindow.SelectedPreset)
+            {
+                case OobePresetWindow.PresetKind.Standard:
+                    OobePresetWindow.ApplyStandard(_settings);
+                    break;
+                case OobePresetWindow.PresetKind.Lite:
+                    OobePresetWindow.ApplyLite(_settings);
+                    break;
+                default:
+                    return;
+            }
+
+            DialogResult = true;
+            Close();
+        }
+
         private void BtnConfirm_Click(object sender, RoutedEventArgs e)
         {
             if (_currentStep == FinishIndex)

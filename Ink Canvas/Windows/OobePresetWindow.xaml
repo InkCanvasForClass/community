@@ -1,0 +1,293 @@
+<Window x:Class="Ink_Canvas.Windows.OobePresetWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+        mc:Ignorable="d"
+        Title="选择预设配置 - InkCanvasForClass CE"
+        Height="560" Width="680"
+        MinHeight="420" MinWidth="520"
+        WindowStartupLocation="CenterOwner"
+        Topmost="True"
+        ui:ThemeManager.IsThemeAware="True"
+        ui:TitleBar.ExtendViewIntoTitleBar="True"
+        ui:WindowHelper.SystemBackdropType="Mica"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        ui:TitleBar.Height="40">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ui:ThemeResources CanBeAccessedAcrossThreads="True">
+                    <ui:ThemeResources.ThemeDictionaries />
+                </ui:ThemeResources>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- 标题栏 -->
+        <Border Grid.Row="0"
+                x:Name="AppTitleBar"
+                Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.Height)}"
+                Background="Transparent"
+                IsHitTestVisible="True"
+                Canvas.ZIndex="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="137" />
+                </Grid.ColumnDefinitions>
+                <ikw:SimpleStackPanel Grid.Column="0"
+                                      Orientation="Horizontal"
+                                      Spacing="12"
+                                      VerticalAlignment="Center"
+                                      Margin="16,0,0,0">
+                    <Image Source="\Resources\icc.ico" Width="18"
+                           RenderOptions.BitmapScalingMode="HighQuality" />
+                    <TextBlock VerticalAlignment="Center"
+                               Text="选择预设配置"
+                               TextWrapping="NoWrap" />
+                </ikw:SimpleStackPanel>
+                <Rectangle Grid.Column="2"
+                           Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.SystemOverlayRightInset)}" />
+            </Grid>
+        </Border>
+
+        <!-- Banner Header -->
+        <Border Grid.Row="1"
+                Padding="36,16,36,16"
+                BorderThickness="0,0,0,1"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#1F3B82F6" Offset="0" />
+                    <GradientStop Color="#0A10B981" Offset="1" />
+                </LinearGradientBrush>
+            </Border.Background>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0"
+                        Width="44" Height="44"
+                        Margin="0,0,14,0"
+                        CornerRadius="10"
+                        Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Repair}"
+                                 FontSize="22"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center" />
+                </Border>
+                <ikw:SimpleStackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                    <TextBlock Style="{DynamicResource TitleTextBlockStyle}"
+                               Text="选择预设配置" />
+                    <TextBlock Style="{DynamicResource BodyTextBlockStyle}"
+                               Opacity="0.85"
+                               TextWrapping="Wrap"
+                               Text="选择一套由开发者调校的推荐配置，一键完成设置。所有选项可在「设置」中随时修改。" />
+                </ikw:SimpleStackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 预设列表 -->
+        <ScrollViewer Grid.Row="2"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      PanningMode="VerticalFirst"
+                      Padding="36,16,36,8">
+            <ikw:SimpleStackPanel Spacing="10">
+
+                <!-- 预设卡片: 课堂标准配置 -->
+                <Border x:Name="CardStandard"
+                        CornerRadius="8"
+                        Padding="20,16"
+                        BorderThickness="2"
+                        Cursor="Hand"
+                        MouseLeftButtonDown="CardStandard_Click">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseLowBrush}" />
+                            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" />
+                        </Style>
+                    </Border.Style>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0"
+                                Width="40" Height="40"
+                                CornerRadius="8"
+                                Margin="0,0,14,0"
+                                Background="{DynamicResource SystemControlBackgroundAccentBrush}">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
+                                         FontSize="20"
+                                         Foreground="White"
+                                         HorizontalAlignment="Center"
+                                         VerticalAlignment="Center" />
+                        </Border>
+                        <ikw:SimpleStackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
+                            <TextBlock Style="{DynamicResource BodyStrongTextBlockStyle}"
+                                       Text="课堂标准配置" />
+                            <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
+                                       Opacity="0.75"
+                                       TextWrapping="Wrap"
+                                       Text="启用 PPT 联动、自动保存墨迹、托盘图标、双指手势，适合大多数课堂场景。" />
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6" Margin="0,4,0,0">
+                                <Border CornerRadius="4" Padding="6,2"
+                                        Background="{DynamicResource SystemControlBackgroundAccentBrush}">
+                                    <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
+                                               Foreground="White" Text="PPT 联动" />
+                                </Border>
+                                <Border CornerRadius="4" Padding="6,2"
+                                        Background="{DynamicResource SystemControlBackgroundAccentBrush}">
+                                    <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
+                                               Foreground="White" Text="自动保存" />
+                                </Border>
+                                <Border CornerRadius="4" Padding="6,2"
+                                        Background="{DynamicResource SystemControlBackgroundAccentBrush}">
+                                    <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
+                                               Foreground="White" Text="双指手势" />
+                                </Border>
+                            </ikw:SimpleStackPanel>
+                        </ikw:SimpleStackPanel>
+                        <ui:FontIcon x:Name="IconStandard"
+                                     Grid.Column="2"
+                                     Icon="{x:Static ui:SegoeFluentIcons.RadioBullet}"
+                                     FontSize="20"
+                                     Margin="12,0,0,0"
+                                     Opacity="0"
+                                     Foreground="{DynamicResource SystemControlForegroundAccentBrush}"
+                                     VerticalAlignment="Center" />
+                    </Grid>
+                </Border>
+
+                <!-- 预设卡片: 简洁轻量配置 -->
+                <Border x:Name="CardLite"
+                        CornerRadius="8"
+                        Padding="20,16"
+                        BorderThickness="2"
+                        Cursor="Hand"
+                        MouseLeftButtonDown="CardLite_Click">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseLowBrush}" />
+                            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" />
+                        </Style>
+                    </Border.Style>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0"
+                                Width="40" Height="40"
+                                CornerRadius="8"
+                                Margin="0,0,14,0"
+                                Background="#FF6366F1">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"
+                                         FontSize="20"
+                                         Foreground="White"
+                                         HorizontalAlignment="Center"
+                                         VerticalAlignment="Center" />
+                        </Border>
+                        <ikw:SimpleStackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
+                            <TextBlock Style="{DynamicResource BodyStrongTextBlockStyle}"
+                                       Text="简洁轻量配置" />
+                            <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
+                                       Opacity="0.75"
+                                       TextWrapping="Wrap"
+                                       Text="关闭大部分自动化与联动功能，保持最小后台行为，适合简单批注场景。" />
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6" Margin="0,4,0,0">
+                                <Border CornerRadius="4" Padding="6,2"
+                                        Background="#FF6366F1">
+                                    <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
+                                               Foreground="White" Text="PPT 联动" />
+                                </Border>
+                                <Border CornerRadius="4" Padding="6,2"
+                                        Background="#FF6366F1">
+                                    <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
+                                               Foreground="White" Text="托盘图标" />
+                                </Border>
+                                <Border CornerRadius="4" Padding="6,2"
+                                        Background="#FF6366F1">
+                                    <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
+                                               Foreground="White" Text="自动保存" />
+                                </Border>
+                            </ikw:SimpleStackPanel>
+                        </ikw:SimpleStackPanel>
+                        <ui:FontIcon x:Name="IconLite"
+                                     Grid.Column="2"
+                                     Icon="{x:Static ui:SegoeFluentIcons.RadioBullet}"
+                                     FontSize="20"
+                                     Margin="12,0,0,0"
+                                     Opacity="0"
+                                     Foreground="{DynamicResource SystemControlForegroundAccentBrush}"
+                                     VerticalAlignment="Center" />
+                    </Grid>
+                </Border>
+
+            </ikw:SimpleStackPanel>
+        </ScrollViewer>
+
+        <!-- Footer -->
+        <Border Grid.Row="3"
+                Padding="36,12,36,16"
+                BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           VerticalAlignment="Center"
+                           Style="{DynamicResource CaptionTextBlockStyle}"
+                           Opacity="0.7"
+                           TextWrapping="Wrap"
+                           Text="选择预设后将直接完成初始设置，无需逐步配置。" />
+
+                <Button Grid.Column="1"
+                        x:Name="BtnCancel"
+                        MinWidth="96"
+                        Height="32"
+                        Margin="0,0,8,0"
+                        Click="BtnCancel_Click">
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Back}" FontSize="12" />
+                        <TextBlock Text="返回" />
+                    </ikw:SimpleStackPanel>
+                </Button>
+
+                <Button Grid.Column="2"
+                        x:Name="BtnApply"
+                        MinWidth="140"
+                        Height="32"
+                        IsEnabled="False"
+                        Style="{DynamicResource AccentButtonStyle}"
+                        Click="BtnApply_Click">
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Accept}" FontSize="12" />
+                        <TextBlock Text="应用并开始使用" />
+                    </ikw:SimpleStackPanel>
+                </Button>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
