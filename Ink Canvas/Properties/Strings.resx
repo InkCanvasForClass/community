@@ -1254,6 +1254,12 @@
   <data name="PPT_TimeCapsuleScale" xml:space="preserve">
     <value>时间胶囊大小：</value>
   </data>
+  <data name="PPT_TimeCapsuleResetPosition" xml:space="preserve">
+    <value>重置位置</value>
+  </data>
+  <data name="PPT_TimeCapsuleResetPositionHint" xml:space="preserve">
+    <value>将时间胶囊重置到默认位置</value>
+  </data>
   <data name="PPT_ShowQuickPanelInShow" xml:space="preserve">
     <value>PPT 放映时显示快速面板</value>
   </data>

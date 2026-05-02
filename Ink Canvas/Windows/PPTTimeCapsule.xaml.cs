@@ -921,6 +921,14 @@ namespace Ink_Canvas.Windows
         }
 
         /// <summary>
+        /// 重置拖拽偏移量到默认位置
+        /// </summary>
+        public void ResetDragOffset()
+        {
+            ApplyDragOffset(0, 0);
+        }
+
+        /// <summary>
         /// 获取当前倒计时状态
         /// </summary>
         public bool IsCountdownRunning => parentControl != null && parentControl.IsTimerRunning;

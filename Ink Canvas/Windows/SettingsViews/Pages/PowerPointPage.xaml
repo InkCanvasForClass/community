@@ -298,6 +298,15 @@
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
+                    <ui:SettingsCard Header="{i18n:I18n Key=PPT_TimeCapsuleResetPosition}"
+                                     Description="{i18n:I18n Key=PPT_TimeCapsuleResetPositionHint}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Redo}"/>
+                        </ui:SettingsCard.HeaderIcon>
+                        <Button Content="{i18n:I18n Key=PPT_TimeCapsuleResetPosition}"
+                                Click="ButtonResetPPTTimeCapsulePosition_Click"/>
+                    </ui:SettingsCard>
+
                     <controls:LabeledSettingsCard x:Name="CardShowPPTSidebarByDefault"
                             Header="{i18n:I18n Key=PPT_ShowQuickPanelInShow}"
                             Description="{i18n:I18n Key=PPT_ShowQuickPanelInShowHint}"

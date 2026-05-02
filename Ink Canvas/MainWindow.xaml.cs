@@ -2888,6 +2888,24 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 重置PPT时间胶囊拖拽偏移量
+        /// </summary>
+        public void ResetPPTTimeCapsuleOffset()
+        {
+            try
+            {
+                Settings.PowerPointSettings.PPTTimeCapsuleOffsetX = 0;
+                Settings.PowerPointSettings.PPTTimeCapsuleOffsetY = 0;
+                PPTTimeCapsule?.ResetDragOffset();
+                SaveSettingsToFile();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"重置PPT时间胶囊位置时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
 
         /// <summary>
         /// 初始化文件关联状态显示

@@ -689,6 +689,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 mw.UpdatePPTTimeCapsuleScale();
         }
 
+        private void ButtonResetPPTTimeCapsulePosition_Click(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            var mw = GetMainWindow();
+            mw?.ResetPPTTimeCapsuleOffset();
+        }
+
         #endregion
 
         #region PPT Auto Save & Notifications
