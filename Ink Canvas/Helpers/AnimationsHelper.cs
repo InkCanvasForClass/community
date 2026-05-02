@@ -135,6 +135,41 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        /// <summary>
+        /// 轻量级置顶方法（用于拖动时的实时跟随）
+        /// 仅执行一次置顶，避免性能问题
+        /// </summary>
+        public static void BringPopupToFrontLight(Popup popup)
+        {
+            try
+            {
+                if (popup?.Child == null) return;
+
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        var source = PresentationSource.FromVisual(popup.Child) as HwndSource;
+                        if (source?.Handle == null) return;
+
+                        var hwnd = source.Handle;
+
+                        SetWindowPos(hwnd, HWND_TOPMOST,
+                            0, 0, 0, 0,
+                            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[PopupZOrder] BringPopupToFrontLight failed: {ex.Message}");
+                    }
+                }), System.Windows.Threading.DispatcherPriority.Render);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[PopupZOrder] BringPopupToFrontLight error: {ex.Message}");
+            }
+        }
+
         #endregion
 
         private static UIElement ResolveAnimationTarget(UIElement element)
@@ -425,7 +460,6 @@ namespace Ink_Canvas.Helpers
                 if (child == null)
                 {
                     popup.IsOpen = true;
-                    BringPopupToFront(popup);
                     return;
                 }
 
@@ -434,8 +468,8 @@ namespace Ink_Canvas.Helpers
 
                 popup.IsOpen = true;
 
-                // 提升 Popup 到最顶层
-                BringPopupToFront(popup);
+                // 注意：置顶由 PopupManagerHelper 统一管理，
+                // 此处不再调用 BringPopupToFront，避免重复置顶导致闪烁
 
                 var sb = new Storyboard();
 

@@ -206,10 +206,14 @@ namespace Ink_Canvas
         /// </summary>
         private Point pointPPT = new Point(-1, -1);
         private DispatcherTimer _floatingBarScreenFollowTimer;
-        private DispatcherTimer _popupRefreshTimer; // Popup 位置刷新节流定时器
         private string _lastFloatingBarScreenDeviceName;
         private string _lastCanvasScreenDeviceName;
         private bool _isRebuildingCanvasForScreen;
+
+        /// <summary>
+        /// Popup 管理器（负责置顶和拖动跟随）
+        /// </summary>
+        private PopupManagerHelper _popupManager;
 
         /// <summary>
         /// 浮动工具栏移动事件处理
@@ -230,94 +234,34 @@ namespace Ink_Canvas
                 else
                     pointDesktop = new Point(xPos, yPos);
 
-                // 刷新 Popup 菜单位置（带节流）
-                RefreshPopupPositionThrottled();
+                // 标记需要更新 Popup 位置（使用 PopupManagerHelper）
+                _popupManager?.MarkNeedsUpdate();
             }
         }
 
         /// <summary>
-        /// 刷新 Popup 菜单位置（带节流，避免频繁调用）
+        /// 初始化 Popup 管理器（创建实例、注册 Popup、启动跟随系统）
+        /// 在 Window_Loaded 中调用一次
         /// </summary>
-        private void RefreshPopupPositionThrottled()
+        internal void InitializePopupManager()
         {
             try
             {
-                // 如果没有打开的 Popup，直接返回
-                if (!BorderTools.IsOpen && !BoardBorderToolsPopup.IsOpen) return;
+                // 创建管理器实例
+                _popupManager = new PopupManagerHelper();
 
-                // 如果定时器不存在，创建一个（16ms ≈ 60fps）
-                if (_popupRefreshTimer == null)
-                {
-                    _popupRefreshTimer = new DispatcherTimer();
-                    _popupRefreshTimer.Interval = TimeSpan.FromMilliseconds(16);
-                    _popupRefreshTimer.Tick += (s, e) =>
-                    {
-                        _popupRefreshTimer?.Stop();
-                        RefreshPopupPositionInternal();
-                    };
-                }
+                // 注册需要管理的 Popup 控件
+                _popupManager.RegisterPopup(BorderTools);
+                _popupManager.RegisterPopup(BoardBorderToolsPopup);
 
-                // 重启定时器（如果已经在运行，会重新计时）
-                _popupRefreshTimer.Stop();
-                _popupRefreshTimer.Start();
+                // 初始化（订阅渲染事件）
+                _popupManager.Initialize();
+
+                System.Diagnostics.Debug.WriteLine("[PopupManager] Initialized successfully");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"RefreshPopupPositionThrottled error: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// 实际执行 Popup 位置刷新（强力版本）
-        /// </summary>
-        private void RefreshPopupPositionInternal()
-        {
-            try
-            {
-                RefreshPopupForcefully(BorderTools);
-                RefreshPopupForcefully(BoardBorderToolsPopup);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"RefreshPopupPositionInternal error: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// 强制刷新单个 Popup 的位置
-        /// 使用多种策略确保位置更新生效
-        /// </summary>
-        private void RefreshPopupForcefully(Popup popup)
-        {
-            if (popup == null || !popup.IsOpen || popup.PlacementTarget == null) return;
-
-            try
-            {
-                // 策略1：强制失效测量和布局
-                popup.InvalidateMeasure();
-                popup.InvalidateArrange();
-
-                // 策略2：修改 Offset 触发重新定位
-                var originalHorizontalOffset = popup.HorizontalOffset;
-                var originalVerticalOffset = popup.VerticalOffset;
-
-                popup.HorizontalOffset = originalHorizontalOffset + 0.001;
-                popup.VerticalOffset = originalVerticalOffset + 0.001;
-
-                popup.HorizontalOffset = originalHorizontalOffset;
-                popup.VerticalOffset = originalVerticalOffset;
-
-                // 策略3：强制更新布局
-                popup.UpdateLayout();
-
-                // 策略4：使用 Win32 API 强制刷新窗口位置（终极方案）
-                AnimationsHelper.ForceRefreshPopupPosition(popup);
-
-                System.Diagnostics.Debug.WriteLine($"[PopupRefresh] Forcefully refreshed popup position");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"[PopupRefresh] Error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[PopupManager] Initialize error: {ex.Message}");
             }
         }
 
@@ -1789,10 +1733,12 @@ namespace Ink_Canvas
                 if (currentMode == 0)
                 {
                     AnimationsHelper.ShowPopupWithSlideAndFade(BorderTools);
+                    _popupManager?.BringToFront(BorderTools);
                 }
                 else
                 {
                     AnimationsHelper.ShowPopupWithSlideAndFade(BoardBorderToolsPopup);
+                    _popupManager?.BringToFront(BoardBorderToolsPopup);
                 }
             }
         }
