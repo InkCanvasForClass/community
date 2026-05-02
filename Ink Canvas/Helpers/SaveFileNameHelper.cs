@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 
@@ -11,6 +12,14 @@ namespace Ink_Canvas.Helpers
     public static class SaveFileNameHelper
     {
         private const string DefaultDateTime = "yyyy-MM-dd HH-mm-ss-fff";
+
+        // Windows 保留设备名（不区分大小写）。这些名称无论是否带扩展名，CreateFile 都会失败。
+        private static readonly HashSet<string> ReservedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "CON", "PRN", "AUX", "NUL",
+            "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+            "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
+        };
 
         public static string Render(string template, SaveFileNameContext ctx)
         {
@@ -51,7 +60,20 @@ namespace Ink_Canvas.Helpers
             {
                 name = name.Replace(c, '_');
             }
-            return name.Trim();
+
+            // Windows 禁止文件名以点号或空格结尾（会被静默截断甚至创建失败）。
+            name = name.Trim().TrimEnd('.', ' ');
+
+            if (string.IsNullOrEmpty(name)) return name;
+
+            // 保留设备名：比较时忽略扩展名，命中则加下划线前缀以规避。
+            var stem = Path.GetFileNameWithoutExtension(name);
+            if (!string.IsNullOrEmpty(stem) && ReservedNames.Contains(stem))
+            {
+                name = "_" + name;
+            }
+
+            return name;
         }
     }
 
