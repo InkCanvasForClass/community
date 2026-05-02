@@ -19,6 +19,12 @@ namespace Ink_Canvas.Helpers
         [DllImport("user32.dll")]
         private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 
+        [DllImport("user32.dll")]
+        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+
+        [DllImport("user32.dll")]
+        private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+
         [StructLayout(LayoutKind.Sequential)]
         private struct RECT
         {
@@ -34,6 +40,9 @@ namespace Ink_Canvas.Helpers
         private const uint SWP_NOSIZE = 0x0001;
         private const uint SWP_NOACTIVATE = 0x0010;
         private const uint SWP_SHOWWINDOW = 0x0040;
+        private const uint SWP_FRAMECHANGED = 0x0020;
+        private const int GWL_EXSTYLE = -20;
+        private const int WS_EX_TOPMOST = 0x00000008;
 
         #endregion
 
@@ -71,10 +80,6 @@ namespace Ink_Canvas.Helpers
 
         #region 条件置顶回调
 
-        /// <summary>
-        /// 条件置顶回调。返回 true 时才对 Popup 执行 HWND_TOPMOST，返回 false 时取消置顶。
-        /// 未设置时默认始终置顶（向后兼容）。
-        /// </summary>
         public Func<bool> ShouldBeTopmost { get; set; }
 
         private bool CheckShouldBeTopmost()
@@ -109,6 +114,7 @@ namespace Ink_Canvas.Helpers
             if (popup == null || _registeredPopups.Contains(popup)) return;
 
             _registeredPopups.Add(popup);
+            popup.Opened += OnPopupOpened;
 
             if (popup.IsOpen)
             {
@@ -122,8 +128,23 @@ namespace Ink_Canvas.Helpers
         {
             if (popup == null) return;
 
+            popup.Opened -= OnPopupOpened;
             _registeredPopups.Remove(popup);
             System.Diagnostics.Debug.WriteLine($"[PopupManager] Unregistered popup: {popup.Name ?? "unnamed"}");
+        }
+
+        private void OnPopupOpened(object sender, EventArgs e)
+        {
+            var popup = sender as Popup;
+            if (popup == null) return;
+
+            if (!CheckShouldBeTopmost())
+            {
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    RemoveTopmostFromPopup(popup);
+                }), DispatcherPriority.Loaded);
+            }
         }
 
         #endregion
@@ -248,16 +269,54 @@ namespace Ink_Canvas.Helpers
                 var source = PresentationSource.FromVisual(popup.Child) as HwndSource;
                 if (source?.Handle == null) return;
 
-                SetWindowPos(
-                    source.Handle,
-                    shouldBeTopmost ? HWND_TOPMOST : HWND_NOTOPMOST,
-                    0, 0, 0, 0,
-                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+                if (shouldBeTopmost)
+                {
+                    SetWindowPos(
+                        source.Handle,
+                        HWND_TOPMOST,
+                        0, 0, 0, 0,
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+                }
+                else
+                {
+                    RemoveTopmostFromHwnd(source.Handle);
+                }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[PopupManager] ApplyTopmostState failed: {ex.Message}");
             }
+        }
+
+        private void RemoveTopmostFromPopup(Popup popup)
+        {
+            if (popup?.Child == null) return;
+
+            try
+            {
+                var source = PresentationSource.FromVisual(popup.Child) as HwndSource;
+                if (source?.Handle == null) return;
+
+                RemoveTopmostFromHwnd(source.Handle);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[PopupManager] RemoveTopmostFromPopup failed: {ex.Message}");
+            }
+        }
+
+        private void RemoveTopmostFromHwnd(IntPtr hwnd)
+        {
+            SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0,
+                SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+
+            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+            if ((exStyle & WS_EX_TOPMOST) != 0)
+            {
+                SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_TOPMOST);
+            }
+
+            System.Diagnostics.Debug.WriteLine($"[PopupManager] Removed TOPMOST from hwnd={hwnd}");
         }
 
         private void BringToFrontInternal(Popup popup, int attempts)
@@ -340,6 +399,10 @@ namespace Ink_Canvas.Helpers
             try
             {
                 CompositionTarget.Rendering -= OnRendering;
+                foreach (var popup in _registeredPopups)
+                {
+                    popup.Opened -= OnPopupOpened;
+                }
                 _registeredPopups.Clear();
                 _isInitialized = false;
             }
