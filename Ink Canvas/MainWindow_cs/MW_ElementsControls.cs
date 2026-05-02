@@ -289,7 +289,7 @@ namespace Ink_Canvas
                 }
 
                 // 如果是图片元素，更新选择点位置
-                if (IsBitmapLikeCanvasElement(element) && ImageResizeHandlesCanvas?.Visibility == Visibility.Visible)
+                if (IsBitmapLikeCanvasElement(element) && ImageSelectionOverlay?.Visibility == Visibility.Visible)
                 {
                     UpdateImageResizeHandlesPosition(GetElementActualBounds(element));
                 }
@@ -325,7 +325,7 @@ namespace Ink_Canvas
                 }
 
                 // 如果是图片元素，更新选择点位置
-                if (IsBitmapLikeCanvasElement(element) && ImageResizeHandlesCanvas?.Visibility == Visibility.Visible)
+                if (IsBitmapLikeCanvasElement(element) && ImageSelectionOverlay?.Visibility == Visibility.Visible)
                 {
                     UpdateImageResizeHandlesPosition(GetElementActualBounds(element));
                 }
@@ -415,7 +415,7 @@ namespace Ink_Canvas
                 }
 
                 // 如果是图片元素，更新选择点位置
-                if (IsBitmapLikeCanvasElement(element) && ImageResizeHandlesCanvas?.Visibility == Visibility.Visible)
+                if (IsBitmapLikeCanvasElement(element) && ImageSelectionOverlay?.Visibility == Visibility.Visible)
                 {
                     UpdateImageResizeHandlesPosition(GetElementActualBounds(element));
                 }
@@ -2176,7 +2176,7 @@ namespace Ink_Canvas
                 if (currentSelectedElement != null && IsBitmapLikeCanvasElement(currentSelectedElement))
                 {
                     UpdateImageSelectionToolbarPosition(currentSelectedElement);
-                    if (ImageResizeHandlesCanvas?.Visibility == Visibility.Visible)
+                    if (ImageSelectionOverlay?.Visibility == Visibility.Visible)
                         UpdateImageResizeHandlesPosition(GetElementActualBounds(currentSelectedElement));
                 }
             }), DispatcherPriority.Loaded);
@@ -2379,238 +2379,202 @@ namespace Ink_Canvas
 
         #endregion
 
-        #region Image Resize Handles
+        #region Image Selection Overlay
 
-        // 图片缩放选择点相关变量
-        private bool isResizingImage = false;
-        private Point imageResizeStartPoint;
-        private string activeResizeHandle = "";
+        private bool _imageOverlayHooked;
 
-        // 显示图片缩放选择点
+        private void EnsureImageOverlayHooks()
+        {
+            if (_imageOverlayHooked || ImageSelectionOverlay == null) return;
+            ImageSelectionOverlay.CoordinateSource = inkCanvas;
+            ImageSelectionOverlay.ResizeDelta += ImageSelectionOverlay_ResizeDelta;
+            ImageSelectionOverlay.MoveDelta += ImageSelectionOverlay_MoveDelta;
+            ImageSelectionOverlay.RotateDelta += ImageSelectionOverlay_RotateDelta;
+            _imageOverlayHooked = true;
+        }
+
         private void ShowImageResizeHandles(FrameworkElement element)
         {
             try
             {
-                if (ImageResizeHandlesCanvas == null || element == null) return;
-
-                // 获取元素的实际边界
-                Rect elementBounds = GetElementActualBounds(element);
-
-                // 设置选择点位置
-                UpdateImageResizeHandlesPosition(elementBounds);
-
-                // 显示选择点
-                ImageResizeHandlesCanvas.Visibility = Visibility.Visible;
+                if (ImageSelectionOverlay == null || element == null) return;
+                EnsureImageOverlayHooks();
+                Rect bounds = GetElementActualBounds(element);
+                ImageSelectionOverlay.UpdateFrame(bounds, GetElementRotationAngle(element));
+                ImageSelectionOverlay.Visibility = Visibility.Visible;
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"显示图片缩放选择点失败: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"显示图片选中框失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
-        // 隐藏图片缩放选择点
         private void HideImageResizeHandles()
         {
             try
             {
-                if (ImageResizeHandlesCanvas != null)
-                {
-                    ImageResizeHandlesCanvas.Visibility = Visibility.Collapsed;
-                }
+                if (ImageSelectionOverlay != null)
+                    ImageSelectionOverlay.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"隐藏图片缩放选择点失败: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"隐藏图片选中框失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
-        // 更新图片缩放选择点位置
         private void UpdateImageResizeHandlesPosition(Rect elementBounds)
         {
             try
             {
-                if (ImageResizeHandlesCanvas == null) return;
-
-                ImageResizeHandlesCanvas.Margin = new Thickness(elementBounds.Left, elementBounds.Top, 0, 0);
-
-                // 四个角控制点
-                System.Windows.Controls.Canvas.SetLeft(ImageTopLeftHandle, -4);
-                System.Windows.Controls.Canvas.SetTop(ImageTopLeftHandle, -4);
-
-                System.Windows.Controls.Canvas.SetLeft(ImageTopRightHandle, elementBounds.Width - 4);
-                System.Windows.Controls.Canvas.SetTop(ImageTopRightHandle, -4);
-
-                System.Windows.Controls.Canvas.SetLeft(ImageBottomLeftHandle, -4);
-                System.Windows.Controls.Canvas.SetTop(ImageBottomLeftHandle, elementBounds.Height - 4);
-
-                System.Windows.Controls.Canvas.SetLeft(ImageBottomRightHandle, elementBounds.Width - 4);
-                System.Windows.Controls.Canvas.SetTop(ImageBottomRightHandle, elementBounds.Height - 4);
-
-                // 四个边控制点
-                System.Windows.Controls.Canvas.SetLeft(ImageTopHandle, elementBounds.Width / 2 - 4);
-                System.Windows.Controls.Canvas.SetTop(ImageTopHandle, -4);
-
-                System.Windows.Controls.Canvas.SetLeft(ImageBottomHandle, elementBounds.Width / 2 - 4);
-                System.Windows.Controls.Canvas.SetTop(ImageBottomHandle, elementBounds.Height - 4);
-
-                System.Windows.Controls.Canvas.SetLeft(ImageLeftHandle, -4);
-                System.Windows.Controls.Canvas.SetTop(ImageLeftHandle, elementBounds.Height / 2 - 4);
-
-                System.Windows.Controls.Canvas.SetLeft(ImageRightHandle, elementBounds.Width - 4);
-                System.Windows.Controls.Canvas.SetTop(ImageRightHandle, elementBounds.Height / 2 - 4);
+                if (ImageSelectionOverlay == null) return;
+                double angle = currentSelectedElement != null ? GetElementRotationAngle(currentSelectedElement) : 0;
+                ImageSelectionOverlay.UpdateFrame(elementBounds, angle);
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"更新图片缩放选择点位置失败: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"更新图片选中框位置失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
-        // 图片缩放选择点鼠标按下事件
-        private void ImageResizeHandle_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private double GetElementRotationAngle(FrameworkElement element)
+        {
+            if (element?.RenderTransform is TransformGroup tg)
+            {
+                var rt = tg.Children.OfType<RotateTransform>().FirstOrDefault();
+                if (rt != null) return rt.Angle;
+            }
+            return 0;
+        }
+
+        private void ImageSelectionOverlay_ResizeDelta(object sender, ImageResizeDeltaEventArgs e)
         {
             try
             {
-                if (IsBitmapLikeCanvasElement(currentSelectedElement) && sender is Ellipse ellipse)
-                {
-                    isResizingImage = true;
-                    imageResizeStartPoint = e.GetPosition(inkCanvas);
-
-                    // 确定是哪个控制点
-                    activeResizeHandle = ellipse.Name;
-
-                    // 捕获鼠标
-                    ellipse.CaptureMouse();
-                    e.Handled = true;
-                }
+                if (!IsBitmapLikeCanvasElement(currentSelectedElement)) return;
+                ResizeImageByCorner(currentSelectedElement, e.StartCanvasPoint, e.CurrentCanvasPoint, e.Corner, e.LockAspectRatio);
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"图片缩放选择点鼠标按下事件失败: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"图片缩放失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
-        // 图片缩放选择点鼠标释放事件
-        private void ImageResizeHandle_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void ImageSelectionOverlay_MoveDelta(object sender, ImageMoveDeltaEventArgs e)
         {
             try
             {
-                if (isResizingImage && sender is Ellipse ellipse)
+                if (currentSelectedElement == null) return;
+                if (currentSelectedElement.RenderTransform is TransformGroup tg)
                 {
-                    isResizingImage = false;
-                    ellipse.ReleaseMouseCapture();
-                    activeResizeHandle = "";
-                    e.Handled = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"图片缩放选择点鼠标释放事件失败: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        // 图片缩放选择点鼠标移动事件
-        private void ImageResizeHandle_MouseMove(object sender, MouseEventArgs e)
-        {
-            try
-            {
-                if (isResizingImage && IsBitmapLikeCanvasElement(currentSelectedElement) && sender is Ellipse ellipse)
-                {
-                    var currentPoint = e.GetPosition(inkCanvas);
-                    ResizeImageByHandle(currentSelectedElement, imageResizeStartPoint, currentPoint, activeResizeHandle);
-                    imageResizeStartPoint = currentPoint;
-                    e.Handled = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"图片缩放选择点鼠标移动事件失败: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        // 根据控制点缩放图片
-        private void ResizeImageByHandle(FrameworkElement element, Point startPoint, Point currentPoint, string handleName)
-        {
-            try
-            {
-                if (element.RenderTransform is TransformGroup transformGroup)
-                {
-                    var scaleTransform = transformGroup.Children.OfType<ScaleTransform>().FirstOrDefault();
-                    var translateTransform = transformGroup.Children.OfType<TranslateTransform>().FirstOrDefault();
-
-                    if (scaleTransform == null || translateTransform == null) return;
-
-                    // 获取图片的当前边界
-                    Rect currentBounds = GetElementActualBounds(element);
-                    double deltaX = currentPoint.X - startPoint.X;
-                    double deltaY = currentPoint.Y - startPoint.Y;
-
-                    // 计算缩放比例
-                    double scaleX = 1.0;
-                    double scaleY = 1.0;
-                    double translateX = 0;
-                    double translateY = 0;
-
-                    switch (handleName)
+                    var tt = tg.Children.OfType<TranslateTransform>().FirstOrDefault();
+                    if (tt != null)
                     {
-                        case "ImageTopLeftHandle":
-                            scaleX = (currentBounds.Width - deltaX) / currentBounds.Width;
-                            scaleY = (currentBounds.Height - deltaY) / currentBounds.Height;
-                            translateX = deltaX;
-                            translateY = deltaY;
-                            break;
-                        case "ImageTopRightHandle":
-                            scaleX = (currentBounds.Width + deltaX) / currentBounds.Width;
-                            scaleY = (currentBounds.Height - deltaY) / currentBounds.Height;
-                            translateY = deltaY;
-                            break;
-                        case "ImageBottomLeftHandle":
-                            scaleX = (currentBounds.Width - deltaX) / currentBounds.Width;
-                            scaleY = (currentBounds.Height + deltaY) / currentBounds.Height;
-                            translateX = deltaX;
-                            break;
-                        case "ImageBottomRightHandle":
-                            scaleX = (currentBounds.Width + deltaX) / currentBounds.Width;
-                            scaleY = (currentBounds.Height + deltaY) / currentBounds.Height;
-                            break;
-                        case "ImageTopHandle":
-                            scaleY = (currentBounds.Height - deltaY) / currentBounds.Height;
-                            translateY = deltaY;
-                            break;
-                        case "ImageBottomHandle":
-                            scaleY = (currentBounds.Height + deltaY) / currentBounds.Height;
-                            break;
-                        case "ImageLeftHandle":
-                            scaleX = (currentBounds.Width - deltaX) / currentBounds.Width;
-                            translateX = deltaX;
-                            break;
-                        case "ImageRightHandle":
-                            scaleX = (currentBounds.Width + deltaX) / currentBounds.Width;
-                            break;
+                        tt.X += e.Delta.X;
+                        tt.Y += e.Delta.Y;
                     }
-
-                    // 限制缩放范围
-                    scaleX = Math.Max(0.1, Math.Min(scaleX, 5.0));
-                    scaleY = Math.Max(0.1, Math.Min(scaleY, 5.0));
-
-                    // 应用缩放
-                    scaleTransform.ScaleX *= scaleX;
-                    scaleTransform.ScaleY *= scaleY;
-
-                    // 应用平移
-                    translateTransform.X += translateX;
-                    translateTransform.Y += translateY;
-
-                    // 更新选择点位置
-                    UpdateImageResizeHandlesPosition(GetElementActualBounds(element));
-
-                    if (BorderImageSelectionControl?.Visibility == Visibility.Visible)
-                        UpdateImageSelectionToolbarPosition(element);
                 }
+                UpdateImageResizeHandlesPosition(GetElementActualBounds(currentSelectedElement));
+                if (BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                    UpdateImageSelectionToolbarPosition(currentSelectedElement);
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"根据控制点缩放图片失败: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"图片拖动失败: {ex.Message}", LogHelper.LogType.Error);
             }
+        }
+
+        private void ImageSelectionOverlay_RotateDelta(object sender, ImageRotateDeltaEventArgs e)
+        {
+            try
+            {
+                if (currentSelectedElement == null) return;
+                ApplyRotateTransform(currentSelectedElement, e.AngleDelta);
+                UpdateImageResizeHandlesPosition(GetElementActualBounds(currentSelectedElement));
+                if (BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                    UpdateImageSelectionToolbarPosition(currentSelectedElement);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"图片旋转失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void ResizeImageByCorner(FrameworkElement element, Point startPoint, Point currentPoint,
+                                         ImageResizeCorner corner, bool lockAspect)
+        {
+            if (!(element.RenderTransform is TransformGroup transformGroup)) return;
+            var scaleTransform = transformGroup.Children.OfType<ScaleTransform>().FirstOrDefault();
+            var translateTransform = transformGroup.Children.OfType<TranslateTransform>().FirstOrDefault();
+            if (scaleTransform == null || translateTransform == null) return;
+
+            Rect currentBounds = GetElementActualBounds(element);
+            if (currentBounds.Width <= 0 || currentBounds.Height <= 0) return;
+
+            double deltaX = currentPoint.X - startPoint.X;
+            double deltaY = currentPoint.Y - startPoint.Y;
+
+            double scaleX = 1.0, scaleY = 1.0, translateX = 0, translateY = 0;
+
+            switch (corner)
+            {
+                case ImageResizeCorner.TopLeft:
+                    scaleX = (currentBounds.Width - deltaX) / currentBounds.Width;
+                    scaleY = (currentBounds.Height - deltaY) / currentBounds.Height;
+                    translateX = deltaX;
+                    translateY = deltaY;
+                    break;
+                case ImageResizeCorner.TopRight:
+                    scaleX = (currentBounds.Width + deltaX) / currentBounds.Width;
+                    scaleY = (currentBounds.Height - deltaY) / currentBounds.Height;
+                    translateY = deltaY;
+                    break;
+                case ImageResizeCorner.BottomLeft:
+                    scaleX = (currentBounds.Width - deltaX) / currentBounds.Width;
+                    scaleY = (currentBounds.Height + deltaY) / currentBounds.Height;
+                    translateX = deltaX;
+                    break;
+                case ImageResizeCorner.BottomRight:
+                    scaleX = (currentBounds.Width + deltaX) / currentBounds.Width;
+                    scaleY = (currentBounds.Height + deltaY) / currentBounds.Height;
+                    break;
+            }
+
+            if (lockAspect)
+            {
+                double uniform = Math.Min(scaleX, scaleY);
+                scaleX = uniform;
+                scaleY = uniform;
+                // recompute translate so opposite corner stays put
+                double wNew = currentBounds.Width * uniform;
+                double hNew = currentBounds.Height * uniform;
+                switch (corner)
+                {
+                    case ImageResizeCorner.TopLeft:
+                        translateX = currentBounds.Width - wNew;
+                        translateY = currentBounds.Height - hNew;
+                        break;
+                    case ImageResizeCorner.TopRight:
+                        translateX = 0;
+                        translateY = currentBounds.Height - hNew;
+                        break;
+                    case ImageResizeCorner.BottomLeft:
+                        translateX = currentBounds.Width - wNew;
+                        translateY = 0;
+                        break;
+                }
+            }
+
+            scaleX = Math.Max(0.1, Math.Min(scaleX, 5.0));
+            scaleY = Math.Max(0.1, Math.Min(scaleY, 5.0));
+
+            scaleTransform.ScaleX *= scaleX;
+            scaleTransform.ScaleY *= scaleY;
+            translateTransform.X += translateX;
+            translateTransform.Y += translateY;
+
+            UpdateImageResizeHandlesPosition(GetElementActualBounds(element));
+            if (BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                UpdateImageSelectionToolbarPosition(element);
         }
 
         #endregion

@@ -1,0 +1,60 @@
+<UserControl x:Class="Ink_Canvas.Controls.ImageSelectionOverlay"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             HorizontalAlignment="Left" VerticalAlignment="Top"
+             Background="{x:Null}"
+             IsHitTestVisible="True">
+    <Canvas x:Name="OverlayRoot" Background="Transparent" IsHitTestVisible="True" ClipToBounds="False">
+        <Rectangle x:Name="MoveSurface"
+                   Fill="Transparent"
+                   Cursor="SizeAll"
+                   IsHitTestVisible="True" />
+        <Rectangle x:Name="FrameBorder"
+                   Stroke="#22D3A9"
+                   StrokeThickness="1.5"
+                   Fill="Transparent"
+                   IsHitTestVisible="False"
+                   SnapsToDevicePixels="True" />
+
+        <Line x:Name="RotationLine"
+              Stroke="#22D3A9"
+              StrokeThickness="1.5"
+              IsHitTestVisible="False"
+              SnapsToDevicePixels="True" />
+
+        <Ellipse x:Name="RotationHandle"
+                 Width="14" Height="14"
+                 Fill="#22D3A9"
+                 Stroke="White"
+                 StrokeThickness="2"
+                 Cursor="Hand" />
+
+        <Ellipse x:Name="TopLeftHandle"
+                 Width="12" Height="12"
+                 Fill="White"
+                 Stroke="#22D3A9"
+                 StrokeThickness="1.5"
+                 Cursor="SizeNWSE" />
+        <Ellipse x:Name="TopRightHandle"
+                 Width="12" Height="12"
+                 Fill="White"
+                 Stroke="#22D3A9"
+                 StrokeThickness="1.5"
+                 Cursor="SizeNESW" />
+        <Ellipse x:Name="BottomLeftHandle"
+                 Width="12" Height="12"
+                 Fill="White"
+                 Stroke="#22D3A9"
+                 StrokeThickness="1.5"
+                 Cursor="SizeNESW" />
+        <Ellipse x:Name="BottomRightHandle"
+                 Width="12" Height="12"
+                 Fill="White"
+                 Stroke="#22D3A9"
+                 StrokeThickness="1.5"
+                 Cursor="SizeNWSE" />
+    </Canvas>
+</UserControl>
