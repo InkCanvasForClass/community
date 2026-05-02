@@ -302,7 +302,7 @@
                     <TextBlock Text="{i18n:I18n Key=AutoSave_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
                     <controls:LabeledSettingsCard x:Name="CardSaveScreenshotsInDateFolders"
-                            Header="{i18n:I18n Key=Storage_AutoSaveInkOnScreenshot}"
+                            Header="{i18n:I18n Key=Storage_ScreenshotsByDateFolder}"
                             Icon="{x:Static ui:SegoeFluentIcons.Folder}"
                             Toggled="ToggleSwitchSaveScreenshotsInDateFolders_Toggled"/>
 

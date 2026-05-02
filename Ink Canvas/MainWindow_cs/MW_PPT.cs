@@ -2269,9 +2269,15 @@ namespace Ink_Canvas
 
                 if (Settings.PowerPointSettings.EnablePPTButtonEnhancedPreview && bar != null)
                 {
-                    if (bar.IsPreviewExpanded)
+                    // 侧边条点击时,把增强预览重定向到同侧的底部条上展开
+                    var targetBar = ResolvePreviewTargetBar(bar);
+                    if (targetBar == null)
                     {
-                        bar.IsPreviewExpanded = false;
+                        _pptManager.TryShowSlideNavigation();
+                    }
+                    else if (targetBar.IsPreviewExpanded)
+                    {
+                        targetBar.IsPreviewExpanded = false;
                     }
                     else
                     {
@@ -2292,9 +2298,9 @@ namespace Ink_Canvas
                                     Thumbnail = s.Thumbnail
                                 });
                             }
-                            bar.PreviewItems = items;
-                            bar.CurrentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
-                            bar.IsPreviewExpanded = true;
+                            targetBar.PreviewItems = items;
+                            targetBar.CurrentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
+                            targetBar.IsPreviewExpanded = true;
                         }
                     }
                 }
@@ -2330,6 +2336,35 @@ namespace Ink_Canvas
             try { _pptManager?.TryNavigateToSlide(slideNumber); }
             catch (Exception ex) { LogHelper.WriteLogToFile($"PPT增强预览跳转异常: {ex}", LogHelper.LogType.Error); }
             finally { if (bar != null) bar.IsPreviewExpanded = false; }
+        }
+
+        /// <summary>
+        /// 选择承载增强预览的底部条:
+        /// - 来自侧边条的点击重定向到同侧底部条;
+        /// - 若同侧底部条不可用,退化到任意可用的底部条;
+        /// - 来自底部条的点击保持原行为。
+        /// </summary>
+        private Controls.PptNavBar ResolvePreviewTargetBar(Controls.PptNavBar source)
+        {
+            if (source == null) return null;
+            switch (source.Direction)
+            {
+                case Controls.PptNavBar.NavDirection.LeftSide:
+                    return PickVisibleBar(LeftBottomPanelForPPTNavigation, RightBottomPanelForPPTNavigation) ?? source;
+                case Controls.PptNavBar.NavDirection.RightSide:
+                    return PickVisibleBar(RightBottomPanelForPPTNavigation, LeftBottomPanelForPPTNavigation) ?? source;
+                default:
+                    return source;
+            }
+        }
+
+        private static Controls.PptNavBar PickVisibleBar(params Controls.PptNavBar[] candidates)
+        {
+            foreach (var c in candidates)
+            {
+                if (c != null && c.Visibility == Visibility.Visible) return c;
+            }
+            return null;
         }
 
         private sealed class PptEnhancedPreviewItem

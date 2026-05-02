@@ -722,64 +722,60 @@ namespace Ink_Canvas.Helpers
 
             var m = new Matrix(scale, 0, 0, scale, tx, ty);
             geom.Transform = new MatrixTransform(m);
-            return StrokesFromOutlinedGeometry(geom, templateDa, 0.35);
+
+            var filled = FilledGlyphStroke.TryCreate(geom, templateDa);
+            if (filled == null)
+                return list;
+
+            list.Add(filled);
+            return list;
+        }
+    }
+
+    /// <summary>
+    /// 把字形几何作为「实心填充」绘制的笔画。仍是 WPF <see cref="Stroke"/>，可被 InkCanvas 选择/移动/删除，
+    /// 但渲染时直接 DrawGeometry(brush, null, geom)，不再走 StylusPoints 描边路径。
+    /// </summary>
+    internal sealed class FilledGlyphStroke : Stroke
+    {
+        private readonly Geometry _geometry;
+
+        private FilledGlyphStroke(StylusPointCollection pts, Geometry geometry, DrawingAttributes da)
+            : base(pts)
+        {
+            _geometry = geometry;
+            if (da != null)
+                DrawingAttributes = da.Clone();
         }
 
-        private static List<Stroke> StrokesFromOutlinedGeometry(Geometry geometry, DrawingAttributes da, double tolerance)
+        public static FilledGlyphStroke TryCreate(Geometry geometry, DrawingAttributes templateDa)
         {
-            var list = new List<Stroke>();
-            if (geometry == null || geometry.IsEmpty() || da == null)
-                return list;
+            if (geometry == null || geometry.IsEmpty())
+                return null;
 
-            Geometry outlined;
-            try
+            var b = geometry.Bounds;
+            if (b.IsEmpty || b.Width < 0.5 || b.Height < 0.5)
+                return null;
+
+            // StylusPoints 用 bounds 四角，保证命中测试 / 选区 / 包围盒计算正常。
+            var pts = new StylusPointCollection
             {
-                outlined = geometry.GetOutlinedPathGeometry(tolerance, ToleranceType.Absolute);
-            }
-            catch
-            {
-                return list;
-            }
+                new StylusPoint(b.Left,  b.Top,    0.5f),
+                new StylusPoint(b.Right, b.Top,    0.5f),
+                new StylusPoint(b.Right, b.Bottom, 0.5f),
+                new StylusPoint(b.Left,  b.Bottom, 0.5f),
+            };
 
-            if (outlined == null || outlined.IsEmpty())
-                return list;
+            return new FilledGlyphStroke(pts, geometry, templateDa);
+        }
 
-            Geometry flat;
-            try
-            {
-                flat = outlined.GetFlattenedPathGeometry(tolerance, ToleranceType.Absolute);
-            }
-            catch
-            {
-                return list;
-            }
+        protected override void DrawCore(DrawingContext drawingContext, DrawingAttributes drawingAttributes)
+        {
+            if (drawingContext == null || _geometry == null)
+                return;
 
-            if (!(flat is PathGeometry pg))
-                return list;
-
-            foreach (var fig in pg.Figures)
-            {
-                var pts = new StylusPointCollection();
-                pts.Add(new StylusPoint(fig.StartPoint.X, fig.StartPoint.Y, 0.5f));
-                foreach (var seg in fig.Segments)
-                {
-                    switch (seg)
-                    {
-                        case LineSegment ls:
-                            pts.Add(new StylusPoint(ls.Point.X, ls.Point.Y, 0.5f));
-                            break;
-                        case PolyLineSegment pls:
-                            foreach (var p in pls.Points)
-                                pts.Add(new StylusPoint(p.X, p.Y, 0.5f));
-                            break;
-                    }
-                }
-
-                if (pts.Count >= 2)
-                    list.Add(new Stroke(pts) { DrawingAttributes = da.Clone() });
-            }
-
-            return list;
+            var color = drawingAttributes != null ? drawingAttributes.Color : Colors.Black;
+            drawingContext.DrawGeometry(new SolidColorBrush(color), null, _geometry);
         }
     }
 

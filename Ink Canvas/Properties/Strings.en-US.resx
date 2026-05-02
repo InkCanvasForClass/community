@@ -1864,7 +1864,7 @@
     <value>Finger mode BoundsWidth</value>
   </data>
   <data name="Advanced_EdgeGestureUtilHint_Part1" xml:space="preserve">
-    <value>EdgeGestureUtil is newly introduced in ICC to temporarily block edge gestures when using touch (e.g., on Windows 10: swipe from the left edge to Task View, from the right edge to Action Center; on Windows 11: swipe up from the bottom to open Start). It works by using</value>
+    <value>EdgeGestureUtil is newly introduced in ICC to temporarily block edge gestures when using touch (e.g., on Windows 10: swipe from the left edge to Task View, from the right edge to Action Center; on Windows 11: swipe up from the bottom to open Start). It works by using System.EdgeGesture.DisableTouchWhenFullscreen (When the app window is active and in full-screen mode (or an owned window is active), prevents edge gesture behavior.) If anything is abnormal, turn this option off; it should take effect immediately. (Not available on Windows 7/8.)</value>
   </data>
   <data name="Advanced_EdgeGestureUtilHint_Part2" xml:space="preserve">
     <value>(When the app window is active and in full-screen mode (or an owned window is active), prevents edge gesture behavior.) If anything is abnormal, turn this option off; it should take effect immediately. (Not available on Windows 7/8.)</value>
