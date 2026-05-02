@@ -9,6 +9,22 @@
 >
     <Application.Resources>
         <ResourceDictionary>
+            <FontFamily x:Key="HarmonyOSFont">./Resources/Fonts/#HarmonyOS Sans SC</FontFamily>
+            <Style TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource HarmonyOSFont}"/>
+            </Style>
+            <Style TargetType="Button">
+                <Setter Property="FontFamily" Value="{StaticResource HarmonyOSFont}"/>
+            </Style>
+            <Style TargetType="TextBox">
+                <Setter Property="FontFamily" Value="{StaticResource HarmonyOSFont}"/>
+            </Style>
+            <Style TargetType="Label">
+                <Setter Property="FontFamily" Value="{StaticResource HarmonyOSFont}"/>
+            </Style>
+            <Style TargetType="MenuItem">
+                <Setter Property="FontFamily" Value="{StaticResource HarmonyOSFont}"/>
+            </Style>
             <Style TargetType="ui:ScrollViewerEx">
                 <EventSetter Event="PreviewMouseWheel" Handler="ScrollViewer_PreviewMouseWheel"/>
             </Style>

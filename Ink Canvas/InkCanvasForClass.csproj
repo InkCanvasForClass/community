@@ -614,6 +614,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Fonts\LXGWWenKaiTC-Regular.ttf" />
+    <Resource Include="Resources\Fonts\HarmonyOS_SansSC_Black.ttf" />
+    <Resource Include="Resources\Fonts\HarmonyOS_SansSC_Bold.ttf" />
+    <Resource Include="Resources\Fonts\HarmonyOS_SansSC_Light.ttf" />
+    <Resource Include="Resources\Fonts\HarmonyOS_SansSC_Medium.ttf" />
+    <Resource Include="Resources\Fonts\HarmonyOS_SansSC_Regular.ttf" />
+    <Resource Include="Resources\Fonts\HarmonyOS_SansSC_Thin.ttf" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons-png\HiteAnnotation.png" />
