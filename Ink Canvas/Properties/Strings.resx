@@ -2831,7 +2831,7 @@
     <value>自动更新</value>
   </data>
   <data name="Storage_Update_Desc" xml:space="preserve">
-    <value>AutoUpdate 目录中的安装包与下载缓存，每次新版本发布或更新时会被刷新</value>
+    <value>AutoUpdate 目录中的安装包与下载缓存，每次更新完成后会被清理</value>
   </data>
   <data name="Storage_Other_Header" xml:space="preserve">
     <value>其他</value>
