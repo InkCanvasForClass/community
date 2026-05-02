@@ -71,11 +71,6 @@ namespace Ink_Canvas.Helpers
         private int _topmostCounter = 0;
         private bool _offsetToggle = true;
 
-        // 性能监控（调试用，发布时可移除）
-        private int _frameCount = 0;
-        private DateTime _lastReportTime = DateTime.Now;
-        private const int REPORT_INTERVAL_SECONDS = 5; // 每5秒报告一次
-
         #endregion
 
         #region 构造函数
@@ -225,21 +220,6 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                _frameCount++;
-
-                // 性能监控：每5秒输出一次统计（调试用）
-                if ((DateTime.Now - _lastReportTime).TotalSeconds >= REPORT_INTERVAL_SECONDS)
-                {
-                    var elapsed = (DateTime.Now - _lastReportTime).TotalSeconds;
-                    var fps = _frameCount / elapsed;
-                    System.Diagnostics.Debug.WriteLine(
-                        $"[PopupManager Perf] FPS: {fps:F1}, " +
-                        $"Frames: {_frameCount}, " +
-                        $"Topmost calls: {_frameCount / _config.TopmostCheckInterval:F0}");
-                    _frameCount = 0;
-                    _lastReportTime = DateTime.Now;
-                }
-
                 if (_needsUpdate)
                 {
                     // 拖动中：更新位置 + 同步置顶
