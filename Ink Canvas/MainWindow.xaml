@@ -3419,7 +3419,11 @@
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelBlackboardIcon}" Label="{i18n:I18n Key=QuickPanel_Whiteboard}" ButtonMouseUp="ImageBlackboard_MouseUp" />
                     <controls:QuickPanelButton x:Name="BtnExitPptFromSidebarRight" IconSource="{DynamicResource QuickPanelEndSlideshowIcon}" Label="{i18n:I18n Key=QuickPanel_ExitShow}" LabelFontSize="7" Visibility="Collapsed" ButtonMouseUp="ExitPPTSlideShow_MouseUp" />
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelEyeIcon}" Label="{i18n:I18n Key=QuickPanel_Show}" ButtonMouseUp="UnFoldFloatingBar_MouseUp" />
-                    <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelChevronLeftIcon}" ButtonMouseUp="HideQuickPanel_MouseUp" />
+                    <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelChevronLeftIcon}" ButtonMouseUp="HideQuickPanel_MouseUp" RenderTransformOrigin="0.5,0.5">
+                        <controls:QuickPanelButton.RenderTransform>
+                            <RotateTransform Angle="180" />
+                        </controls:QuickPanelButton.RenderTransform>
+                    </controls:QuickPanelButton>
                 </ikw:SimpleStackPanel>
             </Border>
         </Viewbox>
