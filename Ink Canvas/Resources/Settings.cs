@@ -627,6 +627,7 @@ namespace Ink_Canvas
         [JsonProperty("interceptRules")]
         public Dictionary<string, bool> InterceptRules { get; set; } = new Dictionary<string, bool>
         {
+            // 希沃系列
             { "SeewoWhiteboard3Floating", false },
             { "SeewoWhiteboard5Floating", false },
             { "SeewoWhiteboard5CFloating", false },
@@ -634,8 +635,19 @@ namespace Ink_Canvas
             { "SeewoPincoDrawingFloating", false },
             { "SeewoPincoBoardService", false },
             { "SeewoPPTFloating", false },
+            { "SeewoIwbAssistantFloating", false },
+            { "SeewoDesktopSideBarFloating", false },
+            { "SeewoDesktopDrawingFloating", false },
+            { "SeewoDesktopAnnotationFloating", false },
+            // 欧帝
+            { "YiouBoardFloating", false },
+            // AiClass
             { "AiClassFloating", false },
+            // ClassIn X
+            { "ClassInXFloating", false },
+            // 鸿合
             { "HiteAnnotationFloating", false },
+            // 畅言4.0
             { "ChangYanFloating", false },
             { "ChangYanBrushSettings", false },
             { "ChangYanSwipeClear", false },
@@ -649,10 +661,14 @@ namespace Ink_Canvas
             { "ChangYanPptPageControl", false },
             { "ChangYanPptGoBack", false },
             { "ChangYanPptPreview", false },
+            // 畅言5.0
+            { "ChangYan5Floating", false },
+            // 天喻
             { "IntelligentClassFloating", false },
             { "IntelligentClassPptFloating", false },
-            { "SeewoDesktopAnnotationFloating", false },
-            { "SeewoDesktopSideBarFloating", false }
+            // C30智能教学
+            { "Iclass30SidebarFloating", false },
+            { "Iclass30Floating", false },
         };
     }
 
