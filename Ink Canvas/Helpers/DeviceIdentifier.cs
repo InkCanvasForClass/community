@@ -1509,32 +1509,22 @@ namespace Ink_Canvas.Helpers
                     int.TryParse(remoteParts[2], out int remoteBuild) &&
                     int.TryParse(remoteParts[3], out int remoteRevision))
                 {
-                    // 计算代数差异：主版本号差异 * 1000 + 次版本号差异 * 100 + 构建号差异 * 10 + 修订号差异
-                    int majorDiff = remoteMajor - localMajor;
-                    int minorDiff = remoteMinor - localMinor;
-                    int buildDiff = remoteBuild - localBuild;
-                    int revisionDiff = remoteRevision - localRevision;
+                    var localSemver = new Version(localMajor, localMinor, localBuild, localRevision);
+                    var remoteSemver = new Version(remoteMajor, remoteMinor, remoteBuild, remoteRevision);
+                    int direction = remoteSemver.CompareTo(localSemver);
+                    if (direction == 0) return 0;
+                    int sign = direction > 0 ? 1 : -1;
 
-                    // 如果主版本号不同，则代数差异很大
-                    if (majorDiff != 0)
-                    {
-                        return majorDiff * 1000 + minorDiff * 100 + buildDiff * 10 + revisionDiff;
-                    }
+                    int majorDiff = Math.Abs(remoteMajor - localMajor);
+                    if (majorDiff != 0) return sign * (majorDiff * 1000);
 
-                    // 如果次版本号不同，则代数差异中等
-                    if (minorDiff != 0)
-                    {
-                        return minorDiff * 100 + buildDiff * 10 + revisionDiff;
-                    }
+                    int minorDiff = Math.Abs(remoteMinor - localMinor);
+                    if (minorDiff != 0) return sign * (minorDiff * 100);
 
-                    // 如果构建号不同，则代数差异较小
-                    if (buildDiff != 0)
-                    {
-                        return buildDiff * 10 + revisionDiff;
-                    }
+                    int buildDiff = Math.Abs(remoteBuild - localBuild);
+                    if (buildDiff != 0) return sign * (buildDiff * 10);
 
-                    // 只有修订号不同，代数差异最小
-                    return revisionDiff;
+                    return sign * Math.Abs(remoteRevision - localRevision);
                 }
 
                 return 0;
