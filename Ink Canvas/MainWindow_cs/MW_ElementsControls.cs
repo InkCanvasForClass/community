@@ -510,19 +510,22 @@ namespace Ink_Canvas
         {
             if (element.RenderTransform is TransformGroup transformGroup)
             {
+                var scaleTransform = transformGroup.Children.OfType<ScaleTransform>().FirstOrDefault();
+                var translateTransform = transformGroup.Children.OfType<TranslateTransform>().FirstOrDefault();
                 var rotateTransform = transformGroup.Children.OfType<RotateTransform>().FirstOrDefault();
-                if (rotateTransform != null)
-                {
-                    // 绕元素视觉中心旋转，避免旋转后位置乱飘
-                    double w = element.ActualWidth > 0 ? element.ActualWidth : element.Width;
-                    double h = element.ActualHeight > 0 ? element.ActualHeight : element.Height;
-                    if (!double.IsNaN(w) && !double.IsNaN(h))
-                    {
-                        rotateTransform.CenterX = w / 2;
-                        rotateTransform.CenterY = h / 2;
-                    }
-                    rotateTransform.Angle += angle;
-                }
+                if (rotateTransform == null) return;
+
+                var (ox, oy, visW, visH) = GetElementVisualBox(element);
+                double sX = scaleTransform?.ScaleX ?? 1;
+                double sY = scaleTransform?.ScaleY ?? 1;
+                double tx = translateTransform?.X ?? 0;
+                double ty = translateTransform?.Y ?? 0;
+
+                // Rotate runs last in the group, so its Center is in post-scale/translate space —
+                // i.e. the current visual center of the element.
+                rotateTransform.CenterX = tx + (ox + visW / 2) * sX;
+                rotateTransform.CenterY = ty + (oy + visH / 2) * sY;
+                rotateTransform.Angle += angle;
             }
         }
 
@@ -2390,6 +2393,7 @@ namespace Ink_Canvas
         #region Image Selection Overlay
 
         private bool _imageOverlayHooked;
+        private FrameworkElement _overlayTrackedElement;
 
         private void EnsureImageOverlayHooks()
         {
@@ -2401,12 +2405,38 @@ namespace Ink_Canvas
             _imageOverlayHooked = true;
         }
 
+        private void AttachOverlayTracking(FrameworkElement element)
+        {
+            if (_overlayTrackedElement == element) return;
+            DetachOverlayTracking();
+            _overlayTrackedElement = element;
+            if (element != null) element.LayoutUpdated += OverlayTrackedElement_LayoutUpdated;
+        }
+
+        private void DetachOverlayTracking()
+        {
+            if (_overlayTrackedElement != null)
+            {
+                _overlayTrackedElement.LayoutUpdated -= OverlayTrackedElement_LayoutUpdated;
+                _overlayTrackedElement = null;
+            }
+        }
+
+        private void OverlayTrackedElement_LayoutUpdated(object sender, EventArgs e)
+        {
+            if (ImageSelectionOverlay?.Visibility != Visibility.Visible) return;
+            if (currentSelectedElement == null || _overlayTrackedElement == null) return;
+            if (!ReferenceEquals(currentSelectedElement, _overlayTrackedElement)) return;
+            UpdateImageResizeHandlesPosition(default);
+        }
+
         private void ShowImageResizeHandles(FrameworkElement element)
         {
             try
             {
                 if (ImageSelectionOverlay == null || element == null) return;
                 EnsureImageOverlayHooks();
+                AttachOverlayTracking(element);
                 UpdateImageResizeHandlesPosition(default);
                 ImageSelectionOverlay.Visibility = Visibility.Visible;
             }
@@ -2420,6 +2450,7 @@ namespace Ink_Canvas
         {
             try
             {
+                DetachOverlayTracking();
                 if (ImageSelectionOverlay != null)
                     ImageSelectionOverlay.Visibility = Visibility.Collapsed;
             }
@@ -2438,33 +2469,49 @@ namespace Ink_Canvas
                 if (ImageSelectionOverlay == null || currentSelectedElement == null) return;
 
                 var element = currentSelectedElement;
-                double w = element.ActualWidth > 0 ? element.ActualWidth : element.Width;
-                double h = element.ActualHeight > 0 ? element.ActualHeight : element.Height;
-                if (double.IsNaN(w) || double.IsNaN(h) || w <= 0 || h <= 0) return;
+                var (ox, oy, visW, visH) = GetElementVisualBox(element);
+                if (visW <= 0 || visH <= 0) return;
 
-                double left = InkCanvas.GetLeft(element);
-                double top = InkCanvas.GetTop(element);
-                if (double.IsNaN(left)) left = 0;
-                if (double.IsNaN(top)) top = 0;
-
-                double scaleX = 1, scaleY = 1, translateX = 0, translateY = 0, angle = 0;
+                double scaleX = 1, scaleY = 1, angle = 0;
                 if (element.RenderTransform is TransformGroup tg)
                 {
                     var st = tg.Children.OfType<ScaleTransform>().FirstOrDefault();
-                    var tt = tg.Children.OfType<TranslateTransform>().FirstOrDefault();
                     var rt = tg.Children.OfType<RotateTransform>().FirstOrDefault();
                     if (st != null) { scaleX = st.ScaleX; scaleY = st.ScaleY; }
-                    if (tt != null) { translateX = tt.X; translateY = tt.Y; }
                     if (rt != null) angle = rt.Angle;
                 }
 
-                double scaledW = w * scaleX;
-                double scaledH = h * scaleY;
-                // Local (pre-rotation) center in canvas coordinates
-                double localCenterX = left + translateX + scaledW / 2;
-                double localCenterY = top + translateY + scaledH / 2;
+                // Compute the visual center directly from the element's actual transform,
+                // so we don't have to model the transform chain ourselves.
+                Point visualCenterLocal = new Point(ox + visW / 2, oy + visH / 2);
+                Point centerCanvas;
+                try
+                {
+                    var t = element.TransformToAncestor(inkCanvas);
+                    centerCanvas = t.Transform(visualCenterLocal);
+                    // Cancel out rotation: TransformToAncestor includes Rotate; we need pre-rotation
+                    // center in canvas coords for the overlay (overlay applies rotation itself).
+                    // The visual center is invariant under rotation around itself, so this is the
+                    // same point in canvas coords either way.
+                }
+                catch
+                {
+                    double left = InkCanvas.GetLeft(element); if (double.IsNaN(left)) left = 0;
+                    double top = InkCanvas.GetTop(element); if (double.IsNaN(top)) top = 0;
+                    double tx = 0, ty = 0;
+                    if (element.RenderTransform is TransformGroup tg2)
+                    {
+                        var tt = tg2.Children.OfType<TranslateTransform>().FirstOrDefault();
+                        if (tt != null) { tx = tt.X; ty = tt.Y; }
+                    }
+                    centerCanvas = new Point(left + tx + (ox + visW / 2) * scaleX,
+                                             top + ty + (oy + visH / 2) * scaleY);
+                }
 
-                ImageSelectionOverlay.UpdateFrame(new Point(localCenterX, localCenterY), scaledW, scaledH, angle);
+                double scaledW = visW * scaleX;
+                double scaledH = visH * scaleY;
+
+                ImageSelectionOverlay.UpdateFrame(centerCanvas, scaledW, scaledH, angle);
             }
             catch (Exception ex)
             {
@@ -2480,6 +2527,30 @@ namespace Ink_Canvas
                 if (rt != null) return rt.Angle;
             }
             return 0;
+        }
+
+        // Visual box of the rendered content inside element.ActualWidth/Height,
+        // accounting for Stretch=Uniform letterboxing on Image elements.
+        // Returns (offsetX, offsetY, visibleW, visibleH) in base (unscaled) coords.
+        private static (double ox, double oy, double w, double h) GetElementVisualBox(FrameworkElement element)
+        {
+            double boxW = element.ActualWidth > 0 ? element.ActualWidth : element.Width;
+            double boxH = element.ActualHeight > 0 ? element.ActualHeight : element.Height;
+            if (double.IsNaN(boxW) || double.IsNaN(boxH) || boxW <= 0 || boxH <= 0)
+                return (0, 0, 0, 0);
+
+            if (element is Image img && img.Stretch == Stretch.Uniform && img.Source is BitmapSource bs
+                && bs.PixelWidth > 0 && bs.PixelHeight > 0)
+            {
+                double srcAspect = (double)bs.PixelWidth / bs.PixelHeight;
+                double boxAspect = boxW / boxH;
+                double vW, vH;
+                if (srcAspect > boxAspect) { vW = boxW; vH = boxW / srcAspect; }
+                else { vH = boxH; vW = boxH * srcAspect; }
+                return ((boxW - vW) / 2, (boxH - vH) / 2, vW, vH);
+            }
+
+            return (0, 0, boxW, boxH);
         }
 
         // Rotate a canvas-space vector back into the element's local (unrotated) space.
@@ -2513,13 +2584,18 @@ namespace Ink_Canvas
                 if (currentSelectedElement.RenderTransform is TransformGroup tg)
                 {
                     var tt = tg.Children.OfType<TranslateTransform>().FirstOrDefault();
+                    var rt = tg.Children.OfType<RotateTransform>().FirstOrDefault();
                     if (tt != null)
                     {
-                        // Translate is applied before Rotate, so convert canvas delta to local space.
-                        double angle = GetElementRotationAngle(currentSelectedElement);
-                        var local = CanvasVectorToLocal(e.CanvasDelta, angle);
-                        tt.X += local.X;
-                        tt.Y += local.Y;
+                        tt.X += e.CanvasDelta.X;
+                        tt.Y += e.CanvasDelta.Y;
+                        // Keep rotation center locked to the visual center so the element
+                        // translates rigidly instead of swinging around an old pivot.
+                        if (rt != null)
+                        {
+                            rt.CenterX += e.CanvasDelta.X;
+                            rt.CenterY += e.CanvasDelta.Y;
+                        }
                     }
                 }
                 UpdateImageResizeHandlesPosition(default);
@@ -2558,21 +2634,21 @@ namespace Ink_Canvas
             if (scaleTransform == null || translateTransform == null) return;
 
             double angle = rotateTransform?.Angle ?? 0;
-            double baseW = element.ActualWidth > 0 ? element.ActualWidth : element.Width;
-            double baseH = element.ActualHeight > 0 ? element.ActualHeight : element.Height;
-            if (double.IsNaN(baseW) || double.IsNaN(baseH) || baseW <= 0 || baseH <= 0) return;
+
+            var (ox, oy, visW, visH) = GetElementVisualBox(element);
+            if (visW <= 0 || visH <= 0) return;
 
             double left = InkCanvas.GetLeft(element); if (double.IsNaN(left)) left = 0;
             double top = InkCanvas.GetTop(element); if (double.IsNaN(top)) top = 0;
 
-            double curW = baseW * scaleTransform.ScaleX;
-            double curH = baseH * scaleTransform.ScaleY;
+            double curW = visW * scaleTransform.ScaleX;
+            double curH = visH * scaleTransform.ScaleY;
 
             // Drag delta → local (unrotated) space so corner tracks cursor under any rotation.
             Vector local = CanvasVectorToLocal(canvasDelta, angle);
 
             double newW = curW, newH = curH;
-            double pivotFracX = 0, pivotFracY = 0; // opposite corner as fraction of scaled box
+            double pivotFracX = 0, pivotFracY = 0; // opposite visual corner
             switch (corner)
             {
                 case ImageResizeCorner.TopLeft:
@@ -2600,56 +2676,72 @@ namespace Ink_Canvas
                 newH = curH * uniform;
             }
 
-            // Clamp final scale
-            double newScaleX = newW / baseW;
-            double newScaleY = newH / baseH;
+            double newScaleX = newW / visW;
+            double newScaleY = newH / visH;
             newScaleX = Math.Max(0.1, Math.Min(newScaleX, 10.0));
             newScaleY = Math.Max(0.1, Math.Min(newScaleY, 10.0));
-            newW = baseW * newScaleX;
-            newH = baseH * newScaleY;
+            newW = visW * newScaleX;
+            newH = visH * newScaleY;
 
             double tx = translateTransform.X;
             double ty = translateTransform.Y;
 
-            // Pivot canvas position BEFORE the change
-            Point pivotBefore = ComputeCornerCanvas(pivotFracX * curW, pivotFracY * curH,
-                                                    curW, curH, left, top, tx, ty, angle);
-            // Pivot canvas position AFTER the scale change, assuming translate unchanged
-            Point pivotAfter = ComputeCornerCanvas(pivotFracX * newW, pivotFracY * newH,
-                                                   newW, newH, left, top, tx, ty, angle);
+            // Visual pivot canvas position BEFORE the change.
+            // Visual box origin (pre-scale) is (ox, oy); after scale its top-left in post-scale
+            // space (before rotation/translate) is (ox*sx, oy*sy), size (visW*sx, visH*sy).
+            // Pivot pre-rotation = (tx + (ox + pivotFrac*visW) * sx,  ty + (oy + pivotFrac*visH) * sy).
+            // Rotation center is the element visual center, which is the SAME pre-rotation anchor
+            // we derive below — so pre-rotation coord == canvas coord relative to (left, top) up
+            // to a rotation around that center. Because we rotate around the center and both
+            // before/after share the same center (we'll update it to newCenter below after shift),
+            // we must match canvas positions WITH rotation applied.
+            Point pivotBefore = ApplyCanvasTransform(ox + pivotFracX * visW, oy + pivotFracY * visH,
+                                                     ox + visW / 2, oy + visH / 2,
+                                                     scaleTransform.ScaleX, scaleTransform.ScaleY,
+                                                     tx, ty, angle, left, top);
 
-            // Shift translate in local space to bring pivotAfter back to pivotBefore
+            Point pivotAfter = ApplyCanvasTransform(ox + pivotFracX * visW, oy + pivotFracY * visH,
+                                                    ox + visW / 2, oy + visH / 2,
+                                                    newScaleX, newScaleY,
+                                                    tx, ty, angle, left, top);
+
             Vector canvasDrift = pivotBefore - pivotAfter;
-            Vector localShift = CanvasVectorToLocal(canvasDrift, angle);
-            translateTransform.X += localShift.X;
-            translateTransform.Y += localShift.Y;
+            translateTransform.X += canvasDrift.X;
+            translateTransform.Y += canvasDrift.Y;
 
             scaleTransform.ScaleX = newScaleX;
             scaleTransform.ScaleY = newScaleY;
+
+            // Update rotation center to the new visual center so future rotations behave.
+            if (rotateTransform != null)
+            {
+                rotateTransform.CenterX = translateTransform.X + (ox + visW / 2) * newScaleX;
+                rotateTransform.CenterY = translateTransform.Y + (oy + visH / 2) * newScaleY;
+            }
 
             UpdateImageResizeHandlesPosition(default);
             if (BorderImageSelectionControl?.Visibility == Visibility.Visible)
                 UpdateImageSelectionToolbarPosition(element);
         }
 
-        // Canvas position of local point (lx, ly) inside the scaled box of size (sW, sH),
-        // given element placement (left, top), translate (tx, ty) and rotation angle (deg).
-        // Rotation pivot is the visual center: pre-rotate (tx + sW/2, ty + sH/2).
-        private static Point ComputeCornerCanvas(double lx, double ly, double sW, double sH,
-                                                 double left, double top, double tx, double ty,
-                                                 double angleDeg)
+        // Canvas position of element-local point (lx, ly) under the given transform.
+        // Model: P_canvas = (left, top) + Rotate_center(S * (lx,ly) + T)
+        // where center = S * (cx, cy) + T, and rotation angle is angleDeg.
+        private static Point ApplyCanvasTransform(double lx, double ly, double cx, double cy,
+                                                  double sx, double sy, double tx, double ty,
+                                                  double angleDeg, double left, double top)
         {
-            double preX = tx + lx;
-            double preY = ty + ly;
-            double cx = tx + sW / 2;
-            double cy = ty + sH / 2;
+            double preX = sx * lx + tx;
+            double preY = sy * ly + ty;
+            double centerX = sx * cx + tx;
+            double centerY = sy * cy + ty;
             double rad = angleDeg * Math.PI / 180.0;
             double cos = Math.Cos(rad);
             double sin = Math.Sin(rad);
-            double relX = preX - cx;
-            double relY = preY - cy;
-            double rotX = relX * cos - relY * sin + cx;
-            double rotY = relX * sin + relY * cos + cy;
+            double relX = preX - centerX;
+            double relY = preY - centerY;
+            double rotX = relX * cos - relY * sin + centerX;
+            double rotY = relX * sin + relY * cos + centerY;
             return new Point(left + rotX, top + rotY);
         }
 
