@@ -94,10 +94,27 @@ namespace Ink_Canvas.Helpers
             var popup = sender as Popup;
             if (popup == null) return;
 
+            FixPopupZOrder(popup);
+
             Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 FixPopupZOrder(popup);
             }), DispatcherPriority.Loaded);
+
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                FixPopupZOrder(popup);
+            }), DispatcherPriority.Render);
+
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                FixPopupZOrder(popup);
+            }), DispatcherPriority.Background);
+
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                FixPopupZOrder(popup);
+            }), DispatcherPriority.ApplicationIdle);
         }
 
         #endregion
