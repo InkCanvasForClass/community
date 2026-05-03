@@ -239,7 +239,7 @@
     <value>模式设置</value>
   </data>
   <data name="Settings_ModeDesc" xml:space="preserve">
-    <value>选择软件运行模式。仅PPT模式下，软件将完全隐藏，仅在PPT放映时出现。（实验性功能，可能不稳定。）</value>
+    <value>选择软件运行模式。仅 PPT 模式下，软件将完全隐藏，仅在 PPT 放映时出现。（实验性功能，可能不稳定。）</value>
   </data>
   <data name="Settings_ModeDesc_1" xml:space="preserve">
     <value>运行模式</value>
@@ -248,7 +248,7 @@
     <value>正常模式</value>
   </data>
   <data name="Mode_PPTOnly" xml:space="preserve">
-    <value>仅PPT模式</value>
+    <value>仅 PPT 模式</value>
   </data>
   <data name="Settings_NewWindow" xml:space="preserve">
     <value>新设置窗口</value>
@@ -281,10 +281,10 @@
     <value>窗口置顶</value>
   </data>
   <data name="Startup_UIATopMost" xml:space="preserve">
-    <value>UIA置顶</value>
+    <value>UIA 置顶</value>
   </data>
   <data name="Startup_UIATopMostHint" xml:space="preserve">
-    <value>开启UIA置顶后，软件需要管理员启动才能置顶…</value>
+    <value>开启 UIA 置顶后，软件需要管理员权限启动才能置顶…</value>
   </data>
   <data name="Startup_TopMostMode" xml:space="preserve">
     <value>置顶模式</value>
@@ -293,10 +293,10 @@
     <value>普通置顶</value>
   </data>
   <data name="Startup_TopMostMode_UIA" xml:space="preserve">
-    <value>UIA置顶（需要管理员权限）</value>
+    <value>UIA 置顶（需要管理员权限）</value>
   </data>
   <data name="Startup_TopMostMode_UIA_RestartRequired" xml:space="preserve">
-    <value>切换到UIA置顶模式需要重启软件才能生效，是否立即重启？</value>
+    <value>切换到 UIA 置顶模式需要重启软件才能生效，是否立即重启？</value>
   </data>
   <data name="Startup_TopMostMode_Normal_RestartRequired" xml:space="preserve">
     <value>切换到普通置顶模式需要重启软件才能生效，是否立即重启？</value>
@@ -431,7 +431,7 @@
     <value>清空画布时同时清空图片</value>
   </data>
   <data name="Canvas_CompressImage" xml:space="preserve">
-    <value>插入图片时自动压缩（大于1920x1080）</value>
+    <value>插入图片时自动压缩（大于 1920×1080）</value>
   </data>
   <data name="Canvas_KeepAsymptote" xml:space="preserve">
     <value>保留双曲线渐近线</value>
@@ -452,7 +452,7 @@
     <value>绘制圆时显示圆心位置</value>
   </data>
   <data name="Canvas_WPFBezier" xml:space="preserve">
-    <value>使用WPF默认贝塞尔曲线平滑</value>
+    <value>使用 WPF 默认贝塞尔曲线平滑</value>
   </data>
   <data name="Canvas_AdvancedSmoothing" xml:space="preserve">
     <value>使用高级曲线平滑（推荐）</value>
@@ -527,7 +527,7 @@
     <value>重启次数过多</value>
   </data>
   <data name="Msg_RestartLimit" xml:space="preserve">
-    <value>检测到程序已连续重启5次，已停止自动重启。请联系开发者或检查系统环境。</value>
+    <value>检测到程序已连续重启 5 次，已停止自动重启。请联系开发者或检查系统环境。</value>
   </data>
   <data name="Splash_Starting" xml:space="preserve">
     <value>正在启动 Ink Canvas...</value>
@@ -560,7 +560,7 @@
     <value>允许双指旋转与缩放选中的墨迹</value>
   </data>
   <data name="Gesture_AllowRotateScaleHint" xml:space="preserve">
-    <value>允许选中墨迹后对墨迹进行双指或多指缩放操作（此设置不受“允许双指旋转”设置的影响）</value>
+    <value>允许选中墨迹后对墨迹进行双指或多指缩放操作（此设置不受「允许双指旋转」设置的影响）</value>
   </data>
   <data name="Gesture_EnablePalmEraser" xml:space="preserve">
     <value>启用手掌擦</value>
@@ -590,7 +590,7 @@
     <value>WinRT识别转手写体字形</value>
   </data>
   <data name="InkRecog_HandwritingBeautifyHint" xml:space="preserve">
-    <value>开启后，调用墨迹纠正API时：先WinRT识别手写词，再将识别成功的文字用手写风格字体转成字形轮廓墨迹替换原笔画。需WinRT。</value>
+    <value>开启后，调用墨迹纠正 API 时：先使用 WinRT 识别手写文字，再将识别成功的文字用手写风格字体转成字形轮廓墨迹替换原笔画。需 WinRT。</value>
   </data>
   <data name="InkRecog_HandwritingFont" xml:space="preserve">
     <value>手写体字形字体</value>
@@ -641,7 +641,7 @@
     <value>高精度直线拉直</value>
   </data>
   <data name="InkRecog_HighPrecisionHint" xml:space="preserve">
-    <value>开启后，当绘制的直线超过设定长度阈值时，将自动调整为完美直线。灵敏度范围0.05-2.0，越小要求越严格，越弯曲的线条越不容易被拉直；值越大越容易识别为直线。高精度模式下，每隔10像素取一个计数点，获取更准确的平均值用于判断。</value>
+    <value>开启后，当绘制的直线超过设定长度阈值时，将自动调整为完美直线。灵敏度范围 0.05-2.0，越小要求越严格，越弯曲的线条越不容易被拉直；值越大越容易识别为直线。高精度模式下，每隔 10 像素取一个计数点，获取更准确的平均值用于判断。</value>
   </data>
   <data name="InkRecog_PauseStraightenLine" xml:space="preserve">
     <value>停顿拉直</value>
@@ -695,10 +695,10 @@
     <value>Transient</value>
   </data>
   <data name="Theme_WindowBackdrop_Acrylic10" xml:space="preserve">
-    <value>亚克力10</value>
+    <value>亚克力 10</value>
   </data>
   <data name="Theme_WindowBackdrop_Acrylic11" xml:space="preserve">
-    <value>亚克力11</value>
+    <value>亚克力 11</value>
   </data>
   <data name="Theme_EnableSplash" xml:space="preserve">
     <value>启用启动动画</value>
@@ -731,22 +731,22 @@
     <value>浮动工具栏图标</value>
   </data>
   <data name="Theme_FloatingIcon_IccDefault" xml:space="preserve">
-    <value>“ICC-CE”默认</value>
+    <value>「ICC-CE」默认</value>
   </data>
   <data name="Theme_FloatingIcon_IccNoShadow" xml:space="preserve">
-    <value>“ICC-CE”无阴影</value>
+    <value>「ICC-CE」无阴影</value>
   </data>
   <data name="Theme_FloatingIcon_IccDark" xml:space="preserve">
-    <value>“ICC-CE”深色</value>
+    <value>「ICC-CE」深色</value>
   </data>
   <data name="Theme_FloatingIcon_IccDarkBreath" xml:space="preserve">
-    <value>“ICC-CE”深色呼吸版</value>
+    <value>「ICC-CE」深色呼吸版</value>
   </data>
   <data name="Theme_FloatingIcon_IccWhiteTransparent" xml:space="preserve">
-    <value>“ICC-CE”白色透明版</value>
+    <value>「ICC-CE」白色透明版</value>
   </data>
   <data name="Theme_FloatingIcon_IccBlackTransparent" xml:space="preserve">
-    <value>“ICC-CE”黑色透明版</value>
+    <value>「ICC-CE」黑色透明版</value>
   </data>
   <data name="Theme_FloatingIcon_CoolapkCrossEye" xml:space="preserve">
     <value>酷安斗鸡眼滑稽</value>
@@ -776,31 +776,31 @@
     <value>管理</value>
   </data>
   <data name="Theme_FloatingBarScale" xml:space="preserve">
-    <value>浮动工具栏缩放</value>
+    <value>浮动工具栏缩放倍数</value>
   </data>
   <data name="Theme_FloatingBarOpacity" xml:space="preserve">
     <value>浮动工具栏透明度</value>
   </data>
   <data name="Theme_FloatingBarOpacityInPPT" xml:space="preserve">
-    <value>浮栏在PPT下透明度</value>
+    <value>浮栏在 PPT 下透明度</value>
   </data>
   <data name="Theme_FloatingBarOpacityInPPTHint" xml:space="preserve">
-    <value>重新进入PPT放映后生效</value>
+    <value>重新进入 PPT 放映后生效</value>
   </data>
   <data name="Theme_ShowNibButton" xml:space="preserve">
     <value>在调色盘窗口中显示 笔尖模式 按钮</value>
   </data>
   <data name="Theme_BlackboardScale80" xml:space="preserve">
-    <value>白板 UI 80% 缩放</value>
+    <value>白板 UI 缩放倍数</value>
   </data>
   <data name="Theme_ShowTimeInWhiteboard" xml:space="preserve">
     <value>在白板中显示当前时间和日期</value>
   </data>
   <data name="Theme_ShowQuoteInWhiteboard" xml:space="preserve">
-    <value>在白板中显示信仰の源1（好喝的/毒的鸡汤）</value>
+    <value>在白板中显示信仰の源 1（好喝的/毒的鸡汤）</value>
   </data>
   <data name="Theme_QuoteSource" xml:space="preserve">
-    <value>信仰の源出自Where？</value>
+    <value>信仰の源出自 Where？</value>
   </data>
   <data name="Theme_QuoteSource_OsuQuotes" xml:space="preserve">
     <value>osu!玩家语录</value>
@@ -833,7 +833,7 @@
     <value>浮动栏按钮显示</value>
   </data>
   <data name="Theme_UseLegacyFloatingBarUI" xml:space="preserve">
-    <value>使用老版浮动栏按钮UI</value>
+    <value>使用老版浮动栏按钮 UI</value>
   </data>
   <data name="Theme_ShowShapeButton" xml:space="preserve">
     <value>显示形状按钮</value>
@@ -866,10 +866,10 @@
     <value>快捷调色盘显示模式</value>
   </data>
   <data name="Theme_QuickPalette_SingleRow" xml:space="preserve">
-    <value>单行显示(6色)</value>
+    <value>单行显示（6 种颜色）</value>
   </data>
   <data name="Theme_QuickPalette_DoubleRow" xml:space="preserve">
-    <value>双行显示(8色)</value>
+    <value>双行显示（8 种颜色）</value>
   </data>
   <data name="Theme_EraserButtonDisplay" xml:space="preserve">
     <value>橡皮按钮显示</value>
@@ -941,7 +941,7 @@
     <value>PowerPoint 联动增强</value>
   </data>
   <data name="PPT_SkipAnimations" xml:space="preserve">
-    <value>抢占焦点放映（用于跳过PPT动画）</value>
+    <value>抢占焦点放映（用于跳过 PPT 动画）</value>
   </data>
   <data name="PPT_UseRot" xml:space="preserve">
     <value>使用 ROT 联动</value>
@@ -950,19 +950,19 @@
     <value>WPS 支持</value>
   </data>
   <data name="PPT_KillWppProcess" xml:space="preserve">
-    <value>WPP进程查杀（防止WPP残留进程）</value>
+    <value>WPP 进程查杀（防止 WPP 残留进程）</value>
   </data>
   <data name="PPT_KillWppHint" xml:space="preserve">
-    <value>关闭后将不会自动查杀WPP残留进程，可能导致WPP关闭卡顿或无法彻底退出。</value>
+    <value>关闭后将不会自动查杀 WPP 残留进程，可能导致 WPP 关闭 时卡顿或无法彻底退出。</value>
   </data>
   <data name="PPT_WpsHint1" xml:space="preserve">
-    <value>如果您只使用PowerPoint请不要打开WPS联动开关，如果使用WPS建议不要使用PowerPoint！</value>
+    <value>如果您只使用 PowerPoint，请不要打开 WPS 联动开关，如果使用 WPS 建议不要使用 PowerPoint！</value>
   </data>
   <data name="PPT_WpsLagWarning" xml:space="preserve">
-    <value>开启WPS支持后会导致WPS关闭时卡顿！</value>
+    <value>开启 WPS 支持后会导致 WPS 关闭 时卡顿！</value>
   </data>
   <data name="PPT_WpsSupportHint" xml:space="preserve">
-    <value>可支持 WPS，但目前无法同时支持 MSOffice 和 WPS。若要启用WPS支持，请确保 WPS 是否在 “配置工具” 中开启了 “WPS Office 兼容第三方系统和软件” 选项，否则将无法识别到WPS！</value>
+    <value>可支持 WPS 支持，但目前无法同时支持 MSOffice 和 WPS。若要启用 WPS 支持，请确保 WPS 是否在 「配置工具」 中开启了 「WPS Office 兼容第三方系统和软件」 选项，否则将无法识别到 WPS ！</value>
   </data>
   <data name="Canvas_HideStrokeWhenSelecting" xml:space="preserve">
     <value>退出画板模式后隐藏墨迹</value>
@@ -977,7 +977,7 @@
     <value>清空画布时同时清空图片</value>
   </data>
   <data name="Canvas_CompressPicturesUploaded" xml:space="preserve">
-    <value>插入图片时自动压缩（大于1920x1080）</value>
+    <value>插入图片时自动压缩（大于1920×1080）</value>
   </data>
   <data name="PPT_FlipButtonsTitle" xml:space="preserve">
     <value>PPT翻页按钮</value>
@@ -1010,7 +1010,7 @@
     <value>右侧透明度</value>
   </data>
   <data name="PPT_OffsetHint" xml:space="preserve">
-    <value>调大往上偏移，调小往下偏移，修改为0为不偏移，居中放置</value>
+    <value>调大往上偏移，调小往下偏移，修改为 0 为不偏移，居中放置</value>
   </data>
   <data name="PPT_LeftBottomOffset" xml:space="preserve">
     <value>左下偏移</value>
@@ -1097,7 +1097,7 @@
     <value>选择要下载架构</value>
   </data>
   <data name="Startup_UpdateChannelHint" xml:space="preserve">
-    <value>稳定版提供可靠更新，预览版提供新功能体验同时拥有相较Beta版更强的稳定性，测试版提供新功能抢先体验</value>
+    <value>稳定版提供可靠更新，预览版提供新功能体验同时拥有较 Beta 版版更强的稳定性，测试版提供新功能抢先体验</value>
   </data>
   <data name="Startup_ManualUpdateHint" xml:space="preserve">
     <value>点击后立即检查并下载最新版本</value>
@@ -1205,7 +1205,7 @@
     <value>请注意，若不保留双曲线渐近线可能会有遇到撤回相关的 BUG 影响使用。</value>
   </data>
   <data name="Canvas_WPFBezierSmoothing" xml:space="preserve">
-    <value>使用WPF默认贝塞尔曲线平滑</value>
+    <value>使用 WPF 默认贝塞尔曲线平滑</value>
   </data>
   <data name="Canvas_AdvancedBezierSmoothing" xml:space="preserve">
     <value>使用高级曲线平滑（推荐）</value>
@@ -1292,7 +1292,7 @@
     <value>进入 PPT 放映时自动进入批注模式</value>
   </data>
   <data name="PPT_ConflictWithAutoFold" xml:space="preserve">
-    <value>该项与"自动化"中的"播放PPT时自动收纳"选项冲突！</value>
+    <value>该项与「自动化」中的「播放 PPT 时自动收纳」选项冲突！</value>
   </data>
   <data name="PPT_TwoFingerGesture" xml:space="preserve">
     <value>允许幻灯片模式下的双指手势</value>
@@ -1310,7 +1310,7 @@
     <value>开启后在 PPT 放映模式下也显示手势按钮</value>
   </data>
   <data name="PPT_TimeCapsule" xml:space="preserve">
-    <value>PPT时间显示胶囊</value>
+    <value>PPT 时间显示胶囊</value>
   </data>
   <data name="PPT_TimeCapsuleHint" xml:space="preserve">
     <value>开启后在 PPT 放映模式下显示时间胶囊，可替代最小化计时器窗口</value>
@@ -1407,28 +1407,28 @@
     <value>日志以日期保存</value>
   </data>
   <data name="Advanced_LogRotateHint" xml:space="preserve">
-    <value>日志文件超过 512 KB 时会自动删除。开启日期保存后，日志将保存在Logs文件夹中，当文件夹大小超过5MB时自动清空。</value>
+    <value>日志文件超过 512 KB 时会自动删除。开启日期保存后，日志将保存在 Logs 文件夹中，当文件夹大小超过 5MB 时自动清空。</value>
   </data>
   <data name="Advanced_ConfirmExit" xml:space="preserve">
     <value>关闭软件时二次弹窗确认</value>
   </data>
   <data name="Advanced_FullScreenHelper" xml:space="preserve">
-    <value>启用FullScreenHelper</value>
+    <value>启用 FullScreenHelper</value>
   </data>
   <data name="Advanced_Experimental" xml:space="preserve">
     <value>实验性选项</value>
   </data>
   <data name="Advanced_FullScreenHelperHint" xml:space="preserve">
-    <value>感谢lindexi大佬提供的FullScreenHelper，可以减少任务栏弹出的问题，且支持多显示器自动全屏（虽然对icc来说没什么用就是了），如果遇到一些玄学问题，可以关闭该功能，重启icc后生效。</value>
+    <value>感谢 lindexi 大佬提供的 FullScreenHelper，可以减少任务栏弹出的问题，且支持多显示器自动全屏（虽然对icc来说没什么用就是了），如果遇到一些玄学问题，可以关闭该功能，重启icc后生效。</value>
   </data>
   <data name="Advanced_AvoidFullScreenHelper" xml:space="preserve">
-    <value>启用AvoidFullScreenHelper</value>
+    <value>启用 AvoidFullScreenHelper</value>
   </data>
   <data name="Advanced_AvoidFullScreenHelperHint" xml:space="preserve">
-    <value>避免画布全屏，应该可解决任务栏非置顶和Win11任务栏无法点击的问题，会导致左侧或顶部有AppBar（Dock栏软件）时导致浮动工具栏偏移，重启icc后生效。</value>
+    <value>避免画布全屏，应该可以解决任务栏非置顶和 Win11 任务栏无法点击的问题，会导致左侧或顶部有 AppBar（Dock栏软件）时导致浮动工具栏偏移，重启icc后生效。</value>
   </data>
   <data name="Advanced_EdgeGestureUtil" xml:space="preserve">
-    <value>启用EdgeGestureUtil</value>
+    <value>启用 EdgeGestureUtil</value>
   </data>
   <data name="Tools_MoreFeaturesTitle" xml:space="preserve">
     <value>更多功能</value>
@@ -1497,22 +1497,22 @@
     <value>备份间隔</value>
   </data>
   <data name="Backup_Interval_1Day" xml:space="preserve">
-    <value>1天</value>
+    <value>1 天</value>
   </data>
   <data name="Backup_Interval_3Days" xml:space="preserve">
-    <value>3天</value>
+    <value>3 天</value>
   </data>
   <data name="Backup_Interval_7Days" xml:space="preserve">
-    <value>7天</value>
+    <value>7 天</value>
   </data>
   <data name="Backup_Interval_14Days" xml:space="preserve">
-    <value>14天</value>
+    <value>14 天</value>
   </data>
   <data name="Backup_Interval_30Days" xml:space="preserve">
-    <value>30天</value>
+    <value>30 天</value>
   </data>
   <data name="Backup_Interval_DefaultHint" xml:space="preserve">
-    <value>（默认7天）</value>
+    <value>（默认 7 天）</value>
   </data>
   <data name="Backup_Manual" xml:space="preserve">
     <value>手动备份</value>
@@ -1542,19 +1542,19 @@
     <value>自动收纳</value>
   </data>
   <data name="AutoFold_App_SeewoBoard5" xml:space="preserve">
-    <value>希沃白板5</value>
+    <value>希沃白板 5</value>
   </data>
   <data name="AutoFold_App_SeewoCamera" xml:space="preserve">
     <value>希沃展台</value>
   </data>
   <data name="AutoFold_App_SeewoBoard3" xml:space="preserve">
-    <value>希沃白板3</value>
+    <value>希沃白板 3</value>
   </data>
   <data name="AutoFold_App_SeewoLightBoard" xml:space="preserve">
     <value>希沃轻白板</value>
   </data>
   <data name="AutoFold_App_SeewoLightBoard5C" xml:space="preserve">
-    <value>希沃轻白板5C</value>
+    <value>希沃轻白板 5C</value>
   </data>
   <data name="AutoFold_App_SeewoPinco" xml:space="preserve">
     <value>希沃品课</value>
@@ -1596,7 +1596,7 @@
     <value>中原旧白板</value>
   </data>
   <data name="Automation_AutoFoldInPPT" xml:space="preserve">
-    <value>播放PPT时自动收纳</value>
+    <value>播放 PPT 时自动收纳</value>
   </data>
   <data name="Automation_KeepFoldAfterExit" xml:space="preserve">
     <value>软件退出后保持收纳模式</value>
@@ -1614,13 +1614,13 @@
     <value>自动保存</value>
   </data>
   <data name="AutoKill_PptTools" xml:space="preserve">
-    <value>自动查杀希沃“PPT 小工具”</value>
+    <value>自动查杀 希沃 PPT 小工具</value>
   </data>
   <data name="AutoKill_PptToolsHint" xml:space="preserve">
     <value>请注意，查杀 PPT 小工具会导致希沃课堂授课助手无法使用，直接进入希沃课堂授课助手安装目录删除 Office.dll 文件即可进入 PPT 放映时不会启动希沃的 PPT 工具栏。</value>
   </data>
   <data name="AutoKill_EasiNote5" xml:space="preserve">
-    <value>自动查杀 希沃白板5</value>
+    <value>自动查杀 希沃白板 5</value>
   </data>
   <data name="AutoKill_HiteAnnotation" xml:space="preserve">
     <value>自动查杀 鸿合屏幕书写</value>
@@ -1632,10 +1632,10 @@
     <value>自动查杀 优教授课端</value>
   </data>
   <data name="AutoKill_SeewoDesktop2Anno" xml:space="preserve">
-    <value>自动查杀 希沃桌面2.0 桌面批注</value>
+    <value>自动查杀 希沃桌面 2.0 桌面批注</value>
   </data>
   <data name="AutoKill_SeewoDesktop2AnnoHint" xml:space="preserve">
-    <value>由于希沃桌面2.0提供的桌面批注是64位应用程序，icc是32位程序无法访问，所以目前暂不做精准匹配，只匹配进程名称DesktopAnnotation，后面会考虑封装一套基于P/Invoke和WMI的综合进程识别方案。如果遇到同进程名的软件直接不开启该选项就行了，见谅！</value>
+    <value>由于希沃桌面 2.0 提供的桌面批注是 64 位应用程序，icc是 32 位程序无法访问，所以目前暂不做精准匹配，只匹配进程名称 DesktopAnnotation，后面会考虑封装一套基于 P/Invoke 和 WMI 的综合进程识别方案。如果遇到同进程名的软件直接不开启该选项就行了，见谅！</value>
   </data>
   <data name="AutoKill_SameAppTitle" xml:space="preserve">
     <value>同类软件查杀</value>
@@ -1644,16 +1644,16 @@
     <value>自动查杀 Ink Canvas 和 IC+</value>
   </data>
   <data name="AutoKill_ICA" xml:space="preserve">
-    <value>自动查杀ICA（新版旧版通杀）</value>
+    <value>自动查杀 ICA （新版旧版通杀）</value>
   </data>
   <data name="AutoKill_Inkeys" xml:space="preserve">
-    <value>自动查杀 智绘教Inkeys（仅限新版）</value>
+    <value>自动查杀 智绘教 Inkeys（仅限新版）</value>
   </data>
   <data name="FileAssoc_Title" xml:space="preserve">
     <value>文件关联管理</value>
   </data>
   <data name="FileAssoc_Desc" xml:space="preserve">
-    <value>管理.icstk文件的关联设置，双击.icstk文件可直接在Ink Canvas中打开</value>
+    <value>管理 .icstk 文件的关联设置，双击 .icstk 文件可直接在 Ink Canvas 中打开</value>
   </data>
   <data name="FileAssoc_Unregister" xml:space="preserve">
     <value>取消文件关联</value>
@@ -1692,25 +1692,25 @@
     <value>保存间隔</value>
   </data>
   <data name="Storage_AutoSaveInterval_1Min" xml:space="preserve">
-    <value>1分钟</value>
+    <value>1 分钟</value>
   </data>
   <data name="Storage_AutoSaveInterval_3Min" xml:space="preserve">
-    <value>3分钟</value>
+    <value>3 分钟</value>
   </data>
   <data name="Storage_AutoSaveInterval_5Min" xml:space="preserve">
-    <value>5分钟</value>
+    <value>5 分钟</value>
   </data>
   <data name="Storage_AutoSaveInterval_10Min" xml:space="preserve">
-    <value>10分钟</value>
+    <value>10 分钟</value>
   </data>
   <data name="Storage_AutoSaveInterval_15Min" xml:space="preserve">
-    <value>15分钟</value>
+    <value>15 分钟</value>
   </data>
   <data name="Storage_AutoSaveInterval_30Min" xml:space="preserve">
-    <value>30分钟</value>
+    <value>30 分钟</value>
   </data>
   <data name="Storage_AutoSaveInterval_60Min" xml:space="preserve">
-    <value>60分钟</value>
+    <value>60 分钟</value>
   </data>
   <data name="Storage_AutoSaveHint" xml:space="preserve">
     <value>开启后将在设定时间间隔自动保存墨迹，仅在画布可见且有墨迹时才会保存</value>
@@ -1719,13 +1719,13 @@
     <value>墨迹全页面保存</value>
   </data>
   <data name="Storage_SaveFullPageHint" xml:space="preserve">
-    <value>开启后自动保存和手动保存墨迹时将以全屏模式保存。如果存在多个画布和墨迹，将把所有页面的墨迹按照每页为单位保存进一个压缩包中（注意，白板的墨迹只能在白板模式下打开，PPT的墨迹只能在PPT放映模式下打开）</value>
+    <value>开启后自动保存和手动保存墨迹时将以全屏模式保存。如果存在多个画布和墨迹，将把所有页面的墨迹按照每页为单位保存进一个压缩包中（注意，白板的墨迹只能在白板模式下打开，PPT 的墨迹只能在 PPT 放映模式下打开）</value>
   </data>
   <data name="Storage_SaveAsXml" xml:space="preserve">
-    <value>保存为XML格式</value>
+    <value>保存为 XML 格式</value>
   </data>
   <data name="Storage_SaveAsXmlHint" xml:space="preserve">
-    <value>开启后保存墨迹时将使用XML格式（ISF格式），便于查看和编辑墨迹数据</value>
+    <value>开启后保存墨迹时将使用 XML 格式（ISF 格式），便于查看和编辑墨迹数据</value>
   </data>
   <data name="Storage_AutoScreenshotMinInk" xml:space="preserve">
     <value>自动截图最小墨迹量</value>
@@ -1770,10 +1770,10 @@
     <value>开启后，退出收纳模式时将自动切换至批注模式，便于快速批注</value>
   </data>
   <data name="FoldMode_AutoFoldAfterPPT" xml:space="preserve">
-    <value>退出PPT放映后自动收纳浮动栏</value>
+    <value>退出 PPT 放映模式后自动收纳浮动栏</value>
   </data>
   <data name="FoldMode_AutoFoldAfterPPTHint" xml:space="preserve">
-    <value>开启后，退出PPT放映后会自动收纳浮动栏</value>
+    <value>开启后，退出 PPT 放映模式后会自动收纳浮动栏</value>
   </data>
   <data name="FoldMode_AutoFoldAfterWhiteboard" xml:space="preserve">
     <value>退出白板时自动收纳</value>
@@ -1833,10 +1833,10 @@
     <value>单次随机点名人数上限</value>
   </data>
   <data name="Random_NewUI_Title" xml:space="preserve">
-    <value>新点名UI设置</value>
+    <value>新点名 UI 设置</value>
   </data>
   <data name="Random_NewUI_Enable" xml:space="preserve">
-    <value>启用新点名UI</value>
+    <value>启用新点名 UI</value>
   </data>
   <data name="Random_ML_AvoidRepeat" xml:space="preserve">
     <value>启用机器学习避免重复</value>
@@ -1854,10 +1854,10 @@
     <value>计时器设置</value>
   </data>
   <data name="Timer_UseLegacyButtons" xml:space="preserve">
-    <value>使用老版计时器按钮UI</value>
+    <value>使用老版计时器按钮 UI</value>
   </data>
   <data name="Timer_NewUI" xml:space="preserve">
-    <value>新计时器UI</value>
+    <value>新计时器 UI</value>
   </data>
   <data name="Timer_EnableCountUp" xml:space="preserve">
     <value>启用正计时</value>
@@ -1899,7 +1899,7 @@
     <value>设备信息</value>
   </data>
   <data name="About_DeviceIdLabel" xml:space="preserve">
-    <value>设备ID：</value>
+    <value>设备 ID：</value>
   </data>
   <data name="About_UsageFrequencyLabel" xml:space="preserve">
     <value>使用频率：</value>
@@ -1947,7 +1947,7 @@
     <value>使用和分发本软件前，请您应当且务必知晓相关开源协议，且您应当知晓本软件基于 https://github.com/WXRIW/Ink-Canvas 修改而成。</value>
   </data>
   <data name="About_LicenseTitle" xml:space="preserve">
-    <value>本软件和ICA，Ink Canvas均基于许可证开源</value>
+    <value>本软件和 ICA，Ink Canvas 均基于许可证开源</value>
   </data>
   <data name="About_LicenseBody" xml:space="preserve">
     <value>本强许可协议的许可条件是，在相同许可协议下，提供许可作品的完整源代码和修改，包括使用许可作品的大型作品。版权和许可声明必须保留。贡献者明确授予专利权。</value>
@@ -2016,37 +2016,37 @@
     <value>手指模式 BoundsWidth</value>
   </data>
   <data name="Advanced_EdgeGestureUtilHint_Part1" xml:space="preserve">
-    <value>EdgeGestureUtil是icc最新引入的可以暂时阻止在使用触摸时触发边缘手势（如Windows10环境下，屏幕左边缘滑动进入任务视图，右边缘滑动弹出通知中心；Windows11环境下，底部向上滑动打开开始菜单），其原理是使用了 System.EdgeGesture.DisableTouchWhenFullscreen （当应用程序窗口处于活动状态且处于全屏模式 (或拥有的窗口) 处于活动状态时，防止边缘手势行为。）来实现的。如果有异常，请关闭该选项，该选项应该能够实时生效。（Win7和Win8用户该选项无法使用）</value>
+    <value>EdgeGestureUtil 是 icc 最新引入的可以暂时阻止在使用触摸时触发边缘手势（如 Windows10 环境下，屏幕左边缘滑动进入任务视图，右边缘滑动弹出通知中心；Windows11 环境下，底部向上滑动打开开始菜单），其原理是使用了 System.EdgeGesture.DisableTouchWhenFullscreen （当应用程序窗口处于活动状态且处于全屏模式 (或拥有的窗口) 处于活动状态时，防止边缘手势行为。）来实现的。如果有异常，请关闭该选项，该选项应该能够实时生效。（Win7 和 Win8 用户该选项无法使用）</value>
   </data>
   <data name="Advanced_EdgeGestureUtilHint_Part2" xml:space="preserve">
     <value>（当应用程序窗口处于活动状态且处于全屏模式 (或拥有的窗口) 处于活动状态时，防止边缘手势行为。）来实现的。如果有异常，请关闭该选项，该选项应该能够实时生效。（Win7和Win8用户该选项无法使用）</value>
   </data>
   <data name="Advanced_ForceFullScreen" xml:space="preserve">
-    <value>启用ForceFullScreen</value>
+    <value>启用 ForceFullScreen</value>
   </data>
   <data name="Advanced_ForceFullScreenHint" xml:space="preserve">
-    <value>当检测到窗口大小变化时，自动使用Win32API将本窗口的大小设置为主显示器大小（设备像素大小），不需要可以关闭，实时生效。</value>
+    <value>当检测到窗口大小变化时，自动使用 Win32 API 将本窗口的大小设置为主显示器大小（设备像素大小），不需要可以关闭，实时生效。</value>
   </data>
   <data name="Advanced_DPIChangeDetection" xml:space="preserve">
-    <value>启用DPIChangeDetection</value>
+    <value>启用 DPIChangeDetection</value>
   </data>
   <data name="Advanced_DPIChangeDetectionHint" xml:space="preserve">
-    <value>当检测到系统DPI变化时，会尝试检测FloatingBar是否在屏幕内显示，如果不在屏幕内显示将会尝试移动到屏幕内可见区域（DPI调大会触发，如果DPI调小是不会触发工具栏位置移动的，请您手动调整）。</value>
+    <value>当检测到系统 DPI 变化时，会尝试检测 FloatingBar 是否在屏幕内显示，如果不在屏幕内显示将会尝试移动到屏幕内可见区域（DPI调大会触发，如果 DPI 调小是不会触发工具栏位置移动的，请您手动调整）。</value>
   </data>
   <data name="Advanced_ResolutionChangeDetection" xml:space="preserve">
-    <value>启用ResolutionChangeDetection</value>
+    <value>启用 ResolutionChangeDetection</value>
   </data>
   <data name="Advanced_ResolutionChangeDetectionHint" xml:space="preserve">
-    <value>当检测到系统分辨率变化时，会尝试检测FloatingBar是否在屏幕内显示，如果不在屏幕内显示将会尝试移动到屏幕内可见区域（分辨率调小可能会触发，如果在屏幕内不会自动调整位置，请手动挡）。</value>
+    <value>当检测到系统分辨率变化时，会尝试检测 FloatingBar 是否在屏幕内显示，如果不在屏幕内显示将会尝试移动到屏幕内可见区域（分辨率调小可能会触发，如果在屏幕内不会自动调整位置，请手动挡）。</value>
   </data>
   <data name="FloatingInterceptor_App_SeewoBoard3" xml:space="preserve">
-    <value>希沃白板3</value>
+    <value>希沃白板 3</value>
   </data>
   <data name="FloatingInterceptor_App_SeewoBoard5" xml:space="preserve">
-    <value>希沃白板5</value>
+    <value>希沃白板 5</value>
   </data>
   <data name="FloatingInterceptor_App_SeewoBoard5C" xml:space="preserve">
-    <value>希沃白板5C</value>
+    <value>希沃白板 5C</value>
   </data>
   <data name="FloatingInterceptor_App_SeewoPinco" xml:space="preserve">
     <value>希沃品课</value>
@@ -2055,7 +2055,7 @@
     <value>希沃品课画笔</value>
   </data>
   <data name="FloatingInterceptor_App_SeewoPPTTools" xml:space="preserve">
-    <value>希沃PPT小工具</value>
+    <value>希沃 PPT 小工具</value>
   </data>
   <data name="FloatingInterceptor_App_AiClass" xml:space="preserve">
     <value>AiClass</value>
@@ -2067,7 +2067,7 @@
     <value>畅言智慧课堂</value>
   </data>
   <data name="FloatingInterceptor_App_ChangYanPPT" xml:space="preserve">
-    <value>畅言PPT</value>
+    <value>畅言 PPT</value>
   </data>
   <data name="FloatingInterceptor_App_IntelligentClass" xml:space="preserve">
     <value>天喻教育云</value>
@@ -2373,7 +2373,7 @@
     <value>开机启动后自动收纳到侧边栏</value>
   </data>
   <data name="Startup_PPTOnlyModeHint" xml:space="preserve">
-    <value>启用后，软件将完全隐藏，仅在PPT放映时出现</value>
+    <value>启用后，软件将完全隐藏，仅在 PPT 放映时出现</value>
   </data>
   <data name="AdvancedPanel_Hint" xml:space="preserve">
     <value>启用特殊屏幕模式以优化触摸体验</value>
@@ -2433,7 +2433,7 @@
     <value>调整浮动工具栏的透明度</value>
   </data>
   <data name="AppearancePanel_PPTPPTHint" xml:space="preserve">
-    <value>在PPT模式下浮动工具栏的透明度（重新进入PPT放映后生效）</value>
+    <value>在 PPT 模式下，浮动工具栏的透明度（重新进入 PPT 放映后生效）</value>
   </data>
   <data name="AppearancePanel_Hint_6" xml:space="preserve">
     <value>在调色盘窗口中显示笔尖模式切换按钮</value>
@@ -2493,7 +2493,7 @@
     <value>开启后，退出收纳模式时将自动切换至批注模式，便于快速批注</value>
   </data>
   <data name="AppearancePanel_PPTHint" xml:space="preserve">
-    <value>开启后，退出PPT放映后会自动收纳浮动栏</value>
+    <value>开启后，退出 PPT 放映后会自动收纳浮动栏</value>
   </data>
   <data name="AppearancePanel_Hint_24" xml:space="preserve">
     <value>开启后，退出白板模式时会自动收纳到侧边栏</value>
@@ -2522,14 +2522,14 @@
   <data name="CanvasAndInkPanel_Hint_3" xml:space="preserve">
     <value>清空画布时同时删除所有插入的图片</value>
   </data>
-  <data name="CanvasAndInkPanel_1920x1080Hint" xml:space="preserve">
-    <value>插入的图片大于1920x1080时自动压缩以节省内存</value>
+  <data name="CanvasAndInkPanel_1920×1080Hint" xml:space="preserve">
+    <value>插入的图片大于 1920×1080 时自动压缩以节省内存</value>
   </data>
   <data name="CanvasAndInkPanel_Hint_4" xml:space="preserve">
     <value>绘制圆形时显示圆心标记</value>
   </data>
   <data name="CanvasAndInkPanel_WPFHint" xml:space="preserve">
-    <value>使用WPF内置的曲线平滑算法</value>
+    <value>使用 WPF 内置的曲线平滑算法</value>
   </data>
   <data name="CanvasAndInkPanel_Hint_5" xml:space="preserve">
     <value>使用改进的贝塞尔曲线平滑算法，提供更好的绘制效果</value>
@@ -2547,7 +2547,7 @@
     <value>开启后将在设定时间间隔自动保存墨迹，仅在画布可见且有墨迹时才会保存</value>
   </data>
   <data name="CanvasAndInkPanel_XMLISFHint" xml:space="preserve">
-    <value>开启后保存墨迹时将使用XML格式（ISF格式），便于查看和编辑墨迹数据</value>
+    <value>开启后保存墨迹时将使用 XML 格式（ ISF 格式），便于查看和编辑墨迹数据</value>
   </data>
   <data name="GesturesPanel_Hint" xml:space="preserve">
     <value>开启后退出画板模式时自动关闭双指移动手势，进入白板模式时自动开启双指移动手势</value>
@@ -2571,7 +2571,7 @@
     <value>当绘制的直线超过设定长度阈值时，将自动调整为完美直线</value>
   </data>
   <data name="InkRecognitionPanel_10Hint" xml:space="preserve">
-    <value>高精度模式下，每隔10像素取一个计数点，获取更准确的平均值用于判断</value>
+    <value>高精度模式下，每隔 10 像素取一个计数点，获取更准确的平均值用于判断</value>
   </data>
   <data name="InkRecognitionPanel_Hint_4" xml:space="preserve">
     <value>当绘制的直线端点靠近其他直线端点时，将自动吸附连接</value>
@@ -2610,13 +2610,13 @@
     <value>选择点名窗口的背景</value>
   </data>
   <data name="PowerPointPanel_PPTHint" xml:space="preserve">
-    <value>在PPT放映模式下显示翻页控制按钮</value>
+    <value>在 PPT 放映模式下显示翻页控制按钮</value>
   </data>
   <data name="PowerPointPanel_0Hint" xml:space="preserve">
-    <value>调大往上偏移，调小往下偏移，修改为0为不偏移，居中放置</value>
+    <value>调大往上偏移，调小往下偏移，修改为 0 为不偏移，居中放置</value>
   </data>
   <data name="PowerPointPanel_0Hint_1" xml:space="preserve">
-    <value>调大往右偏移，调小往左偏移，修改为0为不偏移，居中放置</value>
+    <value>调大往右偏移，调小往左偏移，修改为 0 为不偏移，居中放置</value>
   </data>
   <data name="PowerPointPanel_Hint" xml:space="preserve">
     <value>调整左下按钮的位置</value>
@@ -2637,7 +2637,7 @@
     <value>调整右下翻页按钮的透明度</value>
   </data>
   <data name="PowerPointPanel_PPTHint_1" xml:space="preserve">
-    <value>进入PPT放映时自动切换到批注模式</value>
+    <value>进入 PPT 放映时自动切换到批注模式</value>
   </data>
   <data name="PowerPointPanel_Hint_6" xml:space="preserve">
     <value>在幻灯片模式下允许使用双指手势</value>
@@ -2652,13 +2652,13 @@
     <value>开启后会记录上次播放的页数，点击"是"后会自动跳转</value>
   </data>
   <data name="PowerPointPanel_PPTHint_2" xml:space="preserve">
-    <value>进入PPT放映时自动跳转到第一页</value>
+    <value>进入 PPT 放映时自动跳转到第一页</value>
   </data>
   <data name="PowerPointPanel_Hint_8" xml:space="preserve">
     <value>在播放隐藏幻灯片时显示提示</value>
   </data>
   <data name="PowerPointPanel_PPTHint_3" xml:space="preserve">
-    <value>在PPT自动播放时显示提示</value>
+    <value>在 PPT 自动播放 时显示提示</value>
   </data>
   <data name="SecurityPanel_Hint" xml:space="preserve">
     <value>开启后需要设置密码</value>
@@ -2721,7 +2721,7 @@
     <value>调整浮动工具栏的透明度</value>
   </data>
   <data name="ThemePanel_PPTPPTHint" xml:space="preserve">
-    <value>在PPT模式下浮动工具栏的透明度（重新进入PPT放映后生效）</value>
+    <value>在 PPT 模式下，浮动工具栏的透明度（重新进入 PPT 放映后生效）</value>
   </data>
   <data name="ThemePanel_Hint_6" xml:space="preserve">
     <value>在调色盘窗口中显示笔尖模式切换按钮</value>
@@ -2781,7 +2781,7 @@
     <value>开启后，退出收纳模式时将自动切换至批注模式，便于快速批注</value>
   </data>
   <data name="ThemePanel_PPTHint" xml:space="preserve">
-    <value>开启后，退出PPT放映后会自动收纳浮动栏</value>
+    <value>开启后，退出 PPT 放映后会自动收纳浮动栏</value>
   </data>
   <data name="ThemePanel_Hint_24" xml:space="preserve">
     <value>开启后，退出白板模式时会自动收纳到侧边栏</value>
@@ -2823,7 +2823,7 @@
     <value>在软件不使用时自动安装更新，无需手动操作</value>
   </data>
   <data name="Startup_UIAccessTopMostHint_1" xml:space="preserve">
-    <value>使用UIA方式实现置顶，需要管理员权限</value>
+    <value>使用 UIA 方式实现置顶，需要管理员权限</value>
   </data>
   <data name="Canvas_LaunchSeewoVideoShowcaseForWhiteboardBooth" xml:space="preserve">
     <value>白板展台按钮启动希沃视频展台</value>
@@ -2976,7 +2976,7 @@
     <value>显示调试窗口</value>
   </data>
   <data name="Debug_ShowConsole_Desc" xml:space="preserve">
-    <value>显示一个独立的控制台窗口，用于实时输出日志（开启后立即生效；关闭设置中的“启用日志记录”将不会输出内容）。</value>
+    <value>显示一个独立的控制台窗口，用于实时输出日志（开启后立即生效；关闭设置中的「启用日志记录」将不会输出内容）。</value>
   </data>
   <data name="Automation_UseCustomSaveFileName_Header" xml:space="preserve">
     <value>使用自定义保存文件名</value>
