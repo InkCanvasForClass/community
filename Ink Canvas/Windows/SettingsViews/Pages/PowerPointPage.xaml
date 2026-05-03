@@ -71,109 +71,280 @@
                             Icon="{x:Static ui:SegoeFluentIcons.ShowResults}"
                             Toggled="ToggleSwitchShowPPTButton_OnToggled"/>
 
-                    <ui:SettingsExpander Header="{i18n:I18n Key=PPT_Position_Left}" d:Visibility="Visible" d:IsExpanded="True"
-                            Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    <!-- PPT Flip Buttons Preview -->
+                    <Border x:Name="PreviewContainer"
+                            Width="320"
+                            Height="180"
+                            Margin="0,8,0,0"
+                            HorizontalAlignment="Center"
+                            Background="White"
+                            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid>
+                            <Viewbox x:Name="PreviewLeftSide" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="2,0,0,0"
+                                     Stretch="Uniform" Width="22" Height="66">
+                                <Border Width="50" Background="#f4f4f5" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="6">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#000000" BlurRadius="14" ShadowDepth="2" Opacity="0.16"/>
+                                    </Border.Effect>
+                                    <StackPanel Orientation="Vertical">
+                                        <Border Width="50" Height="50" Background="Transparent">
+                                            <Path Fill="#27272a" Width="28" Height="28" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  Data="F0 M24,24z M0,0z M11.0357,3.3994C11.5682,2.86687,12.4316,2.86687,12.9641,3.3994L19.5096,9.94485C20.0421,10.4774 20.0421,11.3408 19.5096,11.8733 18.9771,12.4059 18.1137,12.4059 17.5811,11.8733L13.3635,7.65575 13.3635,19.6364C13.3635,20.3895 12.753,21 11.9999,21 11.2468,21 10.6363,20.3895 10.6363,19.6364L10.6363,7.65575 6.41869,11.8733C5.88616,12.4059 5.02275,12.4059 4.49022,11.8733 3.95769,11.3408 3.95769,10.4774 4.49022,9.94485L11.0357,3.3994z"/>
+                                        </Border>
+                                        <Border x:Name="PreviewLeftSidePage" MinWidth="50" MinHeight="50" Background="Transparent">
+                                            <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                <TextBlock Text="1" FontSize="12" FontWeight="Bold" Foreground="#171717"/>
+                                                <TextBlock Text="/ 12" FontSize="8" Foreground="#171717"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <Border Width="50" Height="50" Background="Transparent">
+                                            <Path Fill="#27272a" Width="28" Height="28" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  Data="F0 M24,24z M0,0z M11.0357,20.6006C11.5682,21.1331,12.4316,21.1331,12.9641,20.6006L19.5096,14.0551C20.0421,13.5226 20.0421,12.6592 19.5096,12.1267 18.9771,11.5941 18.1137,11.5941 17.5811,12.1267L13.3635,16.3443 13.3635,4.36364C13.3635,3.61052 12.753,3 11.9999,3 11.2468,3 10.6363,3.61052 10.6363,4.36364L10.6363,16.3443 6.41869,12.1267C5.88616,11.5941 5.02275,11.5941 4.49022,12.1267 3.95769,12.6592 3.95769,13.5226 4.49022,14.0551L11.0357,20.6006z"/>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
+                            </Viewbox>
+                            <Viewbox x:Name="PreviewRightSide" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,2,0"
+                                     Stretch="Uniform" Width="22" Height="66">
+                                <Border Width="50" Background="#f4f4f5" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="6">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#000000" BlurRadius="14" ShadowDepth="2" Opacity="0.16"/>
+                                    </Border.Effect>
+                                    <StackPanel Orientation="Vertical">
+                                        <Border Width="50" Height="50" Background="Transparent">
+                                            <Path Fill="#27272a" Width="28" Height="28" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  Data="F0 M24,24z M0,0z M11.0357,3.3994C11.5682,2.86687,12.4316,2.86687,12.9641,3.3994L19.5096,9.94485C20.0421,10.4774 20.0421,11.3408 19.5096,11.8733 18.9771,12.4059 18.1137,12.4059 17.5811,11.8733L13.3635,7.65575 13.3635,19.6364C13.3635,20.3895 12.753,21 11.9999,21 11.2468,21 10.6363,20.3895 10.6363,19.6364L10.6363,7.65575 6.41869,11.8733C5.88616,12.4059 5.02275,12.4059 4.49022,11.8733 3.95769,11.3408 3.95769,10.4774 4.49022,9.94485L11.0357,3.3994z"/>
+                                        </Border>
+                                        <Border x:Name="PreviewRightSidePage" MinWidth="50" MinHeight="50" Background="Transparent">
+                                            <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                <TextBlock Text="1" FontSize="12" FontWeight="Bold" Foreground="#171717"/>
+                                                <TextBlock Text="/ 12" FontSize="8" Foreground="#171717"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <Border Width="50" Height="50" Background="Transparent">
+                                            <Path Fill="#27272a" Width="28" Height="28" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  Data="F0 M24,24z M0,0z M11.0357,20.6006C11.5682,21.1331,12.4316,21.1331,12.9641,20.6006L19.5096,14.0551C20.0421,13.5226 20.0421,12.6592 19.5096,12.1267 18.9771,11.5941 18.1137,11.5941 17.5811,12.1267L13.3635,16.3443 13.3635,4.36364C13.3635,3.61052 12.753,3 11.9999,3 11.2468,3 10.6363,3.61052 10.6363,4.36364L10.6363,16.3443 6.41869,12.1267C5.88616,11.5941 5.02275,11.5941 4.49022,12.1267 3.95769,12.6592 3.95769,13.5226 4.49022,14.0551L11.0357,20.6006z"/>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
+                            </Viewbox>
+                            <Viewbox x:Name="PreviewLeftBottom" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="2,0,0,2"
+                                     Stretch="Uniform" Width="66" Height="22">
+                                <Border Height="50" Background="#f4f4f5" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="6">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#000000" BlurRadius="14" ShadowDepth="2" Opacity="0.16"/>
+                                    </Border.Effect>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="50" Height="50" Background="Transparent" CornerRadius="5 5 0 0">
+                                            <Path Fill="#27272a" Width="28" Height="28" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  Data="F0 M24,24z M0,0z M3.3994,12.9642C2.86687,12.4317,2.86687,11.5683,3.3994,11.0358L9.94485,4.49031C10.4774,3.95777 11.3408,3.95777 11.8733,4.49031 12.4059,5.02284 12.4059,5.88625 11.8733,6.41878L7.65575,10.6364 19.6364,10.6364C20.3895,10.6364 21,11.2469 21,12 21,12.7531 20.3895,13.3636 19.6364,13.3636L7.65575,13.3636 11.8733,17.5812C12.4059,18.1137 12.4059,18.9772 11.8733,19.5097 11.3408,20.0422 10.4774,20.0422 9.94485,19.5097L3.3994,12.9642z"/>
+                                        </Border>
+                                        <Border x:Name="PreviewLeftBottomPage" MinWidth="50" MinHeight="50" Background="Transparent">
+                                            <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                <TextBlock Text="1" FontSize="12" FontWeight="Bold" Foreground="#171717"/>
+                                                <TextBlock Text="/ 12" FontSize="8" Foreground="#171717"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <Border Width="50" Height="50" Background="Transparent" CornerRadius="0 0 5 5">
+                                            <Path Fill="#27272a" Width="28" Height="28" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  Data="F0 M24,24z M0,0z M20.6006,12.9642C21.1331,12.4317,21.1331,11.5683,20.6006,11.0358L14.0551,4.49031C13.5226,3.95777 12.6592,3.95777 12.1267,4.49031 11.5941,5.02284 11.5941,5.88625 12.1267,6.41878L16.3443,10.6364 4.36364,10.6364C3.61052,10.6364 3,11.2469 3,12 3,12.7531 3.61052,13.3636 4.36364,13.3636L16.3443,13.3636 12.1267,17.5812C11.5941,18.1137 11.5941,18.9772 12.1267,19.5097 12.6592,20.0422 13.5226,20.0422 14.0551,19.5097L20.6006,12.9642z"/>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
+                            </Viewbox>
+                            <Viewbox x:Name="PreviewRightBottom" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,2"
+                                     Stretch="Uniform" Width="66" Height="22">
+                                <Border Height="50" Background="#f4f4f5" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="6">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#000000" BlurRadius="14" ShadowDepth="2" Opacity="0.16"/>
+                                    </Border.Effect>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="50" Height="50" Background="Transparent" CornerRadius="5 5 0 0">
+                                            <Path Fill="#27272a" Width="28" Height="28" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  Data="F0 M24,24z M0,0z M3.3994,12.9642C2.86687,12.4317,2.86687,11.5683,3.3994,11.0358L9.94485,4.49031C10.4774,3.95777 11.3408,3.95777 11.8733,4.49031 12.4059,5.02284 12.4059,5.88625 11.8733,6.41878L7.65575,10.6364 19.6364,10.6364C20.3895,10.6364 21,11.2469 21,12 21,12.7531 20.3895,13.3636 19.6364,13.3636L7.65575,13.3636 11.8733,17.5812C12.4059,18.1137 12.4059,18.9772 11.8733,19.5097 11.3408,20.0422 10.4774,20.0422 9.94485,19.5097L3.3994,12.9642z"/>
+                                        </Border>
+                                        <Border x:Name="PreviewRightBottomPage" MinWidth="50" MinHeight="50" Background="Transparent">
+                                            <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                <TextBlock Text="1" FontSize="12" FontWeight="Bold" Foreground="#171717"/>
+                                                <TextBlock Text="/ 12" FontSize="8" Foreground="#171717"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <Border Width="50" Height="50" Background="Transparent" CornerRadius="0 0 5 5">
+                                            <Path Fill="#27272a" Width="28" Height="28" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  Data="F0 M24,24z M0,0z M20.6006,12.9642C21.1331,12.4317,21.1331,11.5683,20.6006,11.0358L14.0551,4.49031C13.5226,3.95777 12.6592,3.95777 12.1267,4.49031 11.5941,5.02284 11.5941,5.88625 12.1267,6.41878L16.3443,10.6364 4.36364,10.6364C3.61052,10.6364 3,11.2469 3,12 3,12.7531 3.61052,13.3636 4.36364,13.3636L16.3443,13.3636 12.1267,17.5812C11.5941,18.1137 11.5941,18.9772 12.1267,19.5097 12.6592,20.0422 13.5226,20.0422 14.0551,19.5097L20.6006,12.9642z"/>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
+                            </Viewbox>
+                        </Grid>
+                    </Border>
+
+                    <ui:SettingsExpander Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}"
                             IsExpanded="{Binding IsOn, ElementName=CardShowPPTButton, Mode=OneWay}">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.CaretSolidLeft}"/>
                         </ui:SettingsExpander.HeaderIcon>
+                        <ui:SettingsExpander.Header>
+                            <Grid HorizontalAlignment="Stretch" Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ui:SettingsExpander}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{i18n:I18n Key=PPT_Position_Left}" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}"/>
+                                <ui:ToggleSwitch Grid.Column="1" x:Name="CheckboxEnableLSPPTButton" Toggled="CheckboxEnableLSPPTButton_IsCheckChanged" Margin="8,0,0,0" IsOn="True" OnContent="" OffContent=""/>
+                            </Grid>
+                        </ui:SettingsExpander.Header>
                         <ui:SettingsExpander.Content>
-                            <CheckBox x:Name="CheckboxEnableLSPPTButton" Checked="CheckboxEnableLSPPTButton_IsCheckChanged" Unchecked="CheckboxEnableLSPPTButton_IsCheckChanged"/>
+                            <CheckBox Visibility="Collapsed"/>
                         </ui:SettingsExpander.Content>
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{i18n:I18n Key=PPT_LeftOffset}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="PPTButtonLeftPositionText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                                    <Slider x:Name="PPTButtonLeftPositionValueSlider" Minimum="-500" Maximum="500" Width="200" IsSnapToTickEnabled="True" TickFrequency="5" ValueChanged="PPTButtonLeftPositionValueSlider_ValueChanged"/>
+                                    <Slider x:Name="PPTButtonLeftPositionValueSlider" Minimum="-500" Maximum="500" Width="160" IsSnapToTickEnabled="True" TickFrequency="5" ValueChanged="PPTButtonLeftPositionValueSlider_ValueChanged"/>
+                                    <Button Padding="4,2" Click="ResetLeftOffset_Click">
+                                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" FontSize="12"/>
+                                    </Button>
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{i18n:I18n Key=PPT_LeftOpacity}" Visibility="{Binding IsChecked, ElementName=CheckboxSPPTHalfOpacity, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="PPTLSButtonOpacityText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                                    <Slider x:Name="PPTLSButtonOpacityValueSlider" Minimum="0.1" Maximum="1.0" Width="200" ValueChanged="PPTLSButtonOpacityValueSlider_ValueChanged"/>
+                                    <Slider x:Name="PPTLSButtonOpacityValueSlider" Minimum="0.1" Maximum="1.0" Width="160" ValueChanged="PPTLSButtonOpacityValueSlider_ValueChanged"/>
+                                    <Button Padding="4,2" Click="ResetLeftOpacity_Click">
+                                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" FontSize="12"/>
+                                    </Button>
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
-                    <ui:SettingsExpander Header="{i18n:I18n Key=PPT_Position_Right}"
-                            Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    <ui:SettingsExpander Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}"
                             IsExpanded="{Binding IsOn, ElementName=CardShowPPTButton, Mode=OneWay}">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.CaretSolidRight}"/>
                         </ui:SettingsExpander.HeaderIcon>
+                        <ui:SettingsExpander.Header>
+                            <Grid HorizontalAlignment="Stretch" Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ui:SettingsExpander}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{i18n:I18n Key=PPT_Position_Right}" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}"/>
+                                <ui:ToggleSwitch Grid.Column="1" x:Name="CheckboxEnableRSPPTButton" Toggled="CheckboxEnableRSPPTButton_IsCheckChanged" Margin="8,0,0,0" IsOn="True" OnContent="" OffContent=""/>
+                            </Grid>
+                        </ui:SettingsExpander.Header>
                         <ui:SettingsExpander.Content>
-                            <CheckBox x:Name="CheckboxEnableRSPPTButton" Checked="CheckboxEnableRSPPTButton_IsCheckChanged" Unchecked="CheckboxEnableRSPPTButton_IsCheckChanged"/>
+                            <CheckBox Visibility="Collapsed"/>
                         </ui:SettingsExpander.Content>
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{i18n:I18n Key=PPT_RightOffset}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="PPTButtonRightPositionText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                                    <Slider x:Name="PPTButtonRightPositionValueSlider" Minimum="-500" Maximum="500" Width="200" IsSnapToTickEnabled="True" TickFrequency="5" ValueChanged="PPTButtonRightPositionValueSlider_ValueChanged"/>
+                                    <Slider x:Name="PPTButtonRightPositionValueSlider" Minimum="-500" Maximum="500" Width="160" IsSnapToTickEnabled="True" TickFrequency="5" ValueChanged="PPTButtonRightPositionValueSlider_ValueChanged"/>
+                                    <Button Padding="4,2" Click="ResetRightOffset_Click">
+                                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" FontSize="12"/>
+                                    </Button>
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{i18n:I18n Key=PPT_RightOpacity}" Visibility="{Binding IsChecked, ElementName=CheckboxSPPTHalfOpacity, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="PPTRSButtonOpacityText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                                    <Slider x:Name="PPTRSButtonOpacityValueSlider" Minimum="0.1" Maximum="1.0" Width="200" ValueChanged="PPTRSButtonOpacityValueSlider_ValueChanged"/>
+                                    <Slider x:Name="PPTRSButtonOpacityValueSlider" Minimum="0.1" Maximum="1.0" Width="160" ValueChanged="PPTRSButtonOpacityValueSlider_ValueChanged"/>
+                                    <Button Padding="4,2" Click="ResetRightOpacity_Click">
+                                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" FontSize="12"/>
+                                    </Button>
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
-                    <ui:SettingsExpander Header="{i18n:I18n Key=PPT_Position_LeftBottom}"
-                            Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    <ui:SettingsExpander Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}"
                             IsExpanded="{Binding IsOn, ElementName=CardShowPPTButton, Mode=OneWay}">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.CaretSolidDown}"/>
                         </ui:SettingsExpander.HeaderIcon>
+                        <ui:SettingsExpander.Header>
+                            <Grid HorizontalAlignment="Stretch" Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ui:SettingsExpander}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{i18n:I18n Key=PPT_Position_LeftBottom}" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}"/>
+                                <ui:ToggleSwitch Grid.Column="1" x:Name="CheckboxEnableLBPPTButton" Toggled="CheckboxEnableLBPPTButton_IsCheckChanged" Margin="8,0,0,0" IsOn="True" OnContent="" OffContent=""/>
+                            </Grid>
+                        </ui:SettingsExpander.Header>
                         <ui:SettingsExpander.Content>
-                            <CheckBox x:Name="CheckboxEnableLBPPTButton" Checked="CheckboxEnableLBPPTButton_IsCheckChanged" Unchecked="CheckboxEnableLBPPTButton_IsCheckChanged"/>
+                            <CheckBox Visibility="Collapsed"/>
                         </ui:SettingsExpander.Content>
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{i18n:I18n Key=PPT_LeftBottomOffset}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="PPTButtonLBPositionText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                                    <Slider x:Name="PPTButtonLBPositionValueSlider" Minimum="-100" Maximum="500" Width="200" IsSnapToTickEnabled="True" TickFrequency="5" ValueChanged="PPTButtonLBPositionValueSlider_ValueChanged"/>
+                                    <Slider x:Name="PPTButtonLBPositionValueSlider" Minimum="-100" Maximum="500" Width="160" IsSnapToTickEnabled="True" TickFrequency="5" ValueChanged="PPTButtonLBPositionValueSlider_ValueChanged"/>
+                                    <Button Padding="4,2" Click="ResetLeftBottomOffset_Click">
+                                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" FontSize="12"/>
+                                    </Button>
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{i18n:I18n Key=PPT_LeftBottomOpacity}" Visibility="{Binding IsChecked, ElementName=CheckboxBPPTHalfOpacity, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="PPTLBButtonOpacityText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                                    <Slider x:Name="PPTLBButtonOpacityValueSlider" Minimum="0.1" Maximum="1.0" Width="200" ValueChanged="PPTLBButtonOpacityValueSlider_ValueChanged"/>
+                                    <Slider x:Name="PPTLBButtonOpacityValueSlider" Minimum="0.1" Maximum="1.0" Width="160" ValueChanged="PPTLBButtonOpacityValueSlider_ValueChanged"/>
+                                    <Button Padding="4,2" Click="ResetLeftBottomOpacity_Click">
+                                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" FontSize="12"/>
+                                    </Button>
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
-                    <ui:SettingsExpander Header="{i18n:I18n Key=PPT_Position_RightBottom}"
-                            Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    <ui:SettingsExpander Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}"
                             IsExpanded="{Binding IsOn, ElementName=CardShowPPTButton, Mode=OneWay}">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.CaretSolidDown}"/>
                         </ui:SettingsExpander.HeaderIcon>
+                        <ui:SettingsExpander.Header>
+                            <Grid HorizontalAlignment="Stretch" Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ui:SettingsExpander}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{i18n:I18n Key=PPT_Position_RightBottom}" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}"/>
+                                <ui:ToggleSwitch Grid.Column="1" x:Name="CheckboxEnableRBPPTButton" Toggled="CheckboxEnableRBPPTButton_IsCheckChanged" Margin="8,0,0,0" IsOn="True" OnContent="" OffContent=""/>
+                            </Grid>
+                        </ui:SettingsExpander.Header>
                         <ui:SettingsExpander.Content>
-                            <CheckBox x:Name="CheckboxEnableRBPPTButton" Checked="CheckboxEnableRBPPTButton_IsCheckChanged" Unchecked="CheckboxEnableRBPPTButton_IsCheckChanged"/>
+                            <CheckBox Visibility="Collapsed"/>
                         </ui:SettingsExpander.Content>
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{i18n:I18n Key=PPT_RightBottomOffset}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="PPTButtonRBPositionText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                                    <Slider x:Name="PPTButtonRBPositionValueSlider" Minimum="-100" Maximum="500" Width="200" IsSnapToTickEnabled="True" TickFrequency="5" ValueChanged="PPTButtonRBPositionValueSlider_ValueChanged"/>
+                                    <Slider x:Name="PPTButtonRBPositionValueSlider" Minimum="-100" Maximum="500" Width="160" IsSnapToTickEnabled="True" TickFrequency="5" ValueChanged="PPTButtonRBPositionValueSlider_ValueChanged"/>
+                                    <Button Padding="4,2" Click="ResetRightBottomOffset_Click">
+                                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" FontSize="12"/>
+                                    </Button>
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{i18n:I18n Key=PPT_RightBottomOpacity}" Visibility="{Binding IsChecked, ElementName=CheckboxBPPTHalfOpacity, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="PPTRBButtonOpacityText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                                    <Slider x:Name="PPTRBButtonOpacityValueSlider" Minimum="0.1" Maximum="1.0" Width="200" ValueChanged="PPTRBButtonOpacityValueSlider_ValueChanged"/>
+                                    <Slider x:Name="PPTRBButtonOpacityValueSlider" Minimum="0.1" Maximum="1.0" Width="160" ValueChanged="PPTRBButtonOpacityValueSlider_ValueChanged"/>
+                                    <Button Padding="4,2" Click="ResetRightBottomOpacity_Click">
+                                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" FontSize="12"/>
+                                    </Button>
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>

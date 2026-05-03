@@ -51,6 +51,33 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private MainWindow GetMainWindow() => Application.Current.MainWindow as MainWindow;
 
+        private void UpdatePreview()
+        {
+            if (PreviewLeftSide == null) return;
+
+            bool showPPTButton = CardShowPPTButton.IsOn;
+
+            PreviewLeftSide.Visibility = showPPTButton && CheckboxEnableLSPPTButton.IsOn ? Visibility.Visible : Visibility.Collapsed;
+            PreviewLeftSide.Opacity = PPTLSButtonOpacityValueSlider.Value;
+            PreviewLeftSidePage.Visibility = CheckboxSPPTDisplayPage.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+            PreviewLeftSide.Margin = new Thickness(2, (int)PPTButtonLeftPositionValueSlider.Value / 15, 0, 0);
+
+            PreviewRightSide.Visibility = showPPTButton && CheckboxEnableRSPPTButton.IsOn ? Visibility.Visible : Visibility.Collapsed;
+            PreviewRightSide.Opacity = PPTRSButtonOpacityValueSlider.Value;
+            PreviewRightSidePage.Visibility = CheckboxSPPTDisplayPage.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+            PreviewRightSide.Margin = new Thickness(0, (int)PPTButtonRightPositionValueSlider.Value / 15, 2, 0);
+
+            PreviewLeftBottom.Visibility = showPPTButton && CheckboxEnableLBPPTButton.IsOn ? Visibility.Visible : Visibility.Collapsed;
+            PreviewLeftBottom.Opacity = PPTLBButtonOpacityValueSlider.Value;
+            PreviewLeftBottomPage.Visibility = CheckboxBPPTDisplayPage.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+            PreviewLeftBottom.Margin = new Thickness(2 + (int)PPTButtonLBPositionValueSlider.Value / 15, 0, 0, 2);
+
+            PreviewRightBottom.Visibility = showPPTButton && CheckboxEnableRBPPTButton.IsOn ? Visibility.Visible : Visibility.Collapsed;
+            PreviewRightBottom.Opacity = PPTRBButtonOpacityValueSlider.Value;
+            PreviewRightBottomPage.Visibility = CheckboxBPPTDisplayPage.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+            PreviewRightBottom.Margin = new Thickness(0, 0, 2 + (int)PPTButtonRBPositionValueSlider.Value / 15, 2);
+        }
+
         private void LoadSettings()
         {
             _isLoaded = false;
@@ -65,10 +92,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             CardShowPPTButton.IsOn = ppt.ShowPPTButton;
             var displayOpt = ppt.PPTButtonsDisplayOption.ToString();
-            CheckboxEnableLBPPTButton.IsChecked = displayOpt.Length > 0 && displayOpt[0] == '2';
-            CheckboxEnableRBPPTButton.IsChecked = displayOpt.Length > 1 && displayOpt[1] == '2';
-            CheckboxEnableLSPPTButton.IsChecked = displayOpt.Length > 2 && displayOpt[2] == '2';
-            CheckboxEnableRSPPTButton.IsChecked = displayOpt.Length > 3 && displayOpt[3] == '2';
+            CheckboxEnableLBPPTButton.IsOn = displayOpt.Length > 0 && displayOpt[0] == '2';
+            CheckboxEnableRBPPTButton.IsOn = displayOpt.Length > 1 && displayOpt[1] == '2';
+            CheckboxEnableLSPPTButton.IsOn = displayOpt.Length > 2 && displayOpt[2] == '2';
+            CheckboxEnableRSPPTButton.IsOn = displayOpt.Length > 3 && displayOpt[3] == '2';
 
             PPTButtonLeftPositionValueSlider.Value = ppt.PPTLSButtonPosition;
             PPTButtonRightPositionValueSlider.Value = ppt.PPTRSButtonPosition;
@@ -111,6 +138,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardNotifyHiddenPage.IsOn = ppt.IsNotifyHiddenPage;
             CardNotifyAutoPlayPresentation.IsOn = ppt.IsNotifyAutoPlayPresentation;
 
+            UpdatePreview();
             _isLoaded = true;
         }
 
@@ -255,6 +283,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 mw.PPTUIManager.UpdateNavigationPanelsVisibility();
             }
             mw?.UpdatePPTBtnPreview();
+            UpdatePreview();
         }
 
         private void ToggleSwitchShowPPTSidebarByDefault_Toggled(object sender, RoutedEventArgs e)
@@ -302,6 +331,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             mw?.UpdatePPTUIManagerSettings();
             _sliderDelayAction.DebounceAction(2000, null, () => SettingsManager.SaveSettingsToFile());
             mw?.UpdatePPTBtnPreview();
+            UpdatePreview();
         }
 
         private void PPTButtonRightPositionValueSlider_ValueChanged(object sender, RoutedEventArgs e)
@@ -314,6 +344,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             mw?.UpdatePPTUIManagerSettings();
             _sliderDelayAction.DebounceAction(2000, null, () => SettingsManager.SaveSettingsToFile());
             mw?.UpdatePPTBtnPreview();
+            UpdatePreview();
         }
 
         private void PPTButtonLBPositionValueSlider_ValueChanged(object sender, RoutedEventArgs e)
@@ -326,6 +357,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             mw?.UpdatePPTUIManagerSettings();
             _sliderDelayAction.DebounceAction(2000, null, () => SettingsManager.SaveSettingsToFile());
             mw?.UpdatePPTBtnPreview();
+            UpdatePreview();
         }
 
         private void PPTButtonRBPositionValueSlider_ValueChanged(object sender, RoutedEventArgs e)
@@ -338,6 +370,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             mw?.UpdatePPTUIManagerSettings();
             _sliderDelayAction.DebounceAction(2000, null, () => SettingsManager.SaveSettingsToFile());
             mw?.UpdatePPTBtnPreview();
+            UpdatePreview();
         }
 
         private void PPTLSButtonOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
@@ -357,6 +390,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 mw.PPTUIManager.UpdateNavigationButtonStyles();
             }
             mw?.UpdatePPTBtnPreview();
+            UpdatePreview();
         }
 
         private void PPTRSButtonOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
@@ -376,6 +410,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 mw.PPTUIManager.UpdateNavigationButtonStyles();
             }
             mw?.UpdatePPTBtnPreview();
+            UpdatePreview();
         }
 
         private void PPTLBButtonOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
@@ -395,6 +430,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 mw.PPTUIManager.UpdateNavigationButtonStyles();
             }
             mw?.UpdatePPTBtnPreview();
+            UpdatePreview();
         }
 
         private void PPTRBButtonOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
@@ -414,6 +450,47 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 mw.PPTUIManager.UpdateNavigationButtonStyles();
             }
             mw?.UpdatePPTBtnPreview();
+            UpdatePreview();
+        }
+
+        private void ResetLeftOffset_Click(object sender, RoutedEventArgs e)
+        {
+            PPTButtonLeftPositionValueSlider.Value = 0;
+        }
+
+        private void ResetLeftOpacity_Click(object sender, RoutedEventArgs e)
+        {
+            PPTLSButtonOpacityValueSlider.Value = 0.5;
+        }
+
+        private void ResetRightOffset_Click(object sender, RoutedEventArgs e)
+        {
+            PPTButtonRightPositionValueSlider.Value = 0;
+        }
+
+        private void ResetRightOpacity_Click(object sender, RoutedEventArgs e)
+        {
+            PPTRSButtonOpacityValueSlider.Value = 0.5;
+        }
+
+        private void ResetLeftBottomOffset_Click(object sender, RoutedEventArgs e)
+        {
+            PPTButtonLBPositionValueSlider.Value = 0;
+        }
+
+        private void ResetLeftBottomOpacity_Click(object sender, RoutedEventArgs e)
+        {
+            PPTLBButtonOpacityValueSlider.Value = 0.5;
+        }
+
+        private void ResetRightBottomOffset_Click(object sender, RoutedEventArgs e)
+        {
+            PPTButtonRBPositionValueSlider.Value = 0;
+        }
+
+        private void ResetRightBottomOpacity_Click(object sender, RoutedEventArgs e)
+        {
+            PPTRBButtonOpacityValueSlider.Value = 0.5;
         }
 
         #endregion
@@ -426,7 +503,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var mw = GetMainWindow();
             var str = SettingsManager.Settings.PowerPointSettings.PPTButtonsDisplayOption.ToString();
             char[] c = str.ToCharArray();
-            c[0] = CheckboxEnableLBPPTButton.IsChecked == true ? '2' : '1';
+            c[0] = CheckboxEnableLBPPTButton.IsOn ? '2' : '1';
             SettingsManager.Settings.PowerPointSettings.PPTButtonsDisplayOption = int.Parse(new string(c));
             SettingsManager.SaveSettingsToFile();
             if (mw?.PPTUIManager != null && mw.BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
@@ -435,6 +512,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 mw.PPTUIManager.UpdateNavigationPanelsVisibility();
             }
             mw?.UpdatePPTBtnPreview();
+            UpdatePreview();
         }
 
         private void CheckboxEnableRBPPTButton_IsCheckChanged(object sender, RoutedEventArgs e)
@@ -443,7 +521,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var mw = GetMainWindow();
             var str = SettingsManager.Settings.PowerPointSettings.PPTButtonsDisplayOption.ToString();
             char[] c = str.ToCharArray();
-            c[1] = CheckboxEnableRBPPTButton.IsChecked == true ? '2' : '1';
+            c[1] = CheckboxEnableRBPPTButton.IsOn ? '2' : '1';
             SettingsManager.Settings.PowerPointSettings.PPTButtonsDisplayOption = int.Parse(new string(c));
             SettingsManager.SaveSettingsToFile();
             if (mw?.PPTUIManager != null && mw.BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
@@ -452,6 +530,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 mw.PPTUIManager.UpdateNavigationPanelsVisibility();
             }
             mw?.UpdatePPTBtnPreview();
+            UpdatePreview();
         }
 
         private void CheckboxEnableLSPPTButton_IsCheckChanged(object sender, RoutedEventArgs e)
@@ -460,7 +539,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var mw = GetMainWindow();
             var str = SettingsManager.Settings.PowerPointSettings.PPTButtonsDisplayOption.ToString();
             char[] c = str.ToCharArray();
-            c[2] = CheckboxEnableLSPPTButton.IsChecked == true ? '2' : '1';
+            c[2] = CheckboxEnableLSPPTButton.IsOn ? '2' : '1';
             SettingsManager.Settings.PowerPointSettings.PPTButtonsDisplayOption = int.Parse(new string(c));
             SettingsManager.SaveSettingsToFile();
             if (mw?.PPTUIManager != null && mw.BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
@@ -469,6 +548,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 mw.PPTUIManager.UpdateNavigationPanelsVisibility();
             }
             mw?.UpdatePPTBtnPreview();
+            UpdatePreview();
         }
 
         private void CheckboxEnableRSPPTButton_IsCheckChanged(object sender, RoutedEventArgs e)
@@ -477,7 +557,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var mw = GetMainWindow();
             var str = SettingsManager.Settings.PowerPointSettings.PPTButtonsDisplayOption.ToString();
             char[] c = str.ToCharArray();
-            c[3] = CheckboxEnableRSPPTButton.IsChecked == true ? '2' : '1';
+            c[3] = CheckboxEnableRSPPTButton.IsOn ? '2' : '1';
             SettingsManager.Settings.PowerPointSettings.PPTButtonsDisplayOption = int.Parse(new string(c));
             SettingsManager.SaveSettingsToFile();
             if (mw?.PPTUIManager != null && mw.BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
@@ -486,6 +566,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 mw.PPTUIManager.UpdateNavigationPanelsVisibility();
             }
             mw?.UpdatePPTBtnPreview();
+            UpdatePreview();
         }
 
         private void CheckboxSPPTDisplayPage_IsCheckChange(object sender, RoutedEventArgs e)
@@ -503,6 +584,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 mw.PPTUIManager.UpdateNavigationButtonStyles();
             }
             mw?.UpdatePPTBtnPreview();
+            UpdatePreview();
         }
 
         private void CheckboxSPPTHalfOpacity_IsCheckChange(object sender, RoutedEventArgs e)
@@ -538,6 +620,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 mw.PPTUIManager.UpdateNavigationButtonStyles();
             }
             mw?.UpdatePPTBtnPreview();
+            UpdatePreview();
         }
 
         private void CheckboxSPPTBlackBackground_IsCheckChange(object sender, RoutedEventArgs e)
@@ -572,6 +655,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 mw.PPTUIManager.UpdateNavigationButtonStyles();
             }
             mw?.UpdatePPTBtnPreview();
+            UpdatePreview();
         }
 
         private void CheckboxBPPTHalfOpacity_IsCheckChange(object sender, RoutedEventArgs e)
@@ -607,6 +691,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 mw.PPTUIManager.UpdateNavigationButtonStyles();
             }
             mw?.UpdatePPTBtnPreview();
+            UpdatePreview();
         }
 
         private void CheckboxBPPTBlackBackground_IsCheckChange(object sender, RoutedEventArgs e)
