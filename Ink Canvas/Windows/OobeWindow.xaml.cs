@@ -4,6 +4,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Linq;
+using Ink_Canvas.Helpers;
 using FontIcon = iNKORE.UI.WPF.Modern.Controls.FontIcon;
 using NavigationView = iNKORE.UI.WPF.Modern.Controls.NavigationView;
 using NavigationViewItem = iNKORE.UI.WPF.Modern.Controls.NavigationViewItem;
@@ -40,6 +42,7 @@ namespace Ink_Canvas.Windows
 
             _settings = settings;
             InitializeComponent();
+            WindowBackdropHelper.Apply(this, _settings);
 
             Opacity = 0;
 
@@ -128,6 +131,7 @@ namespace Ink_Canvas.Windows
                     int themeIndex = _settings.Appearance.Theme;
                     if (themeIndex < 0 || themeIndex > 2) themeIndex = 2;
                     ComboBoxTheme.SelectedIndex = themeIndex;
+                    SelectComboBoxItemByTag(ComboBoxWindowBackdrop, _settings.Appearance.WindowBackdrop);
                     CardEnableSplashScreen.IsOn = _settings.Appearance.EnableSplashScreen;
                     CardEnableTrayIcon.IsOn = _settings.Appearance.EnableTrayIcon;
                     CardShowQuickPanel.IsOn = _settings.Appearance.IsShowQuickPanel;
@@ -239,6 +243,7 @@ namespace Ink_Canvas.Windows
                     int themeIndex = ComboBoxTheme.SelectedIndex;
                     if (themeIndex < 0) themeIndex = 2;
                     _settings.Appearance.Theme = themeIndex;
+                    _settings.Appearance.WindowBackdrop = GetSelectedComboBoxTag(ComboBoxWindowBackdrop, "None");
                     _settings.Appearance.EnableSplashScreen = CardEnableSplashScreen.IsOn;
                     _settings.Appearance.EnableTrayIcon = CardEnableTrayIcon.IsOn;
                     _settings.Appearance.IsShowQuickPanel = CardShowQuickPanel.IsOn;
@@ -292,6 +297,29 @@ namespace Ink_Canvas.Windows
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+        }
+
+        private static void SelectComboBoxItemByTag(ComboBox comboBox, string tag)
+        {
+            if (comboBox == null) return;
+
+            var selectedItem = comboBox.Items
+                .OfType<ComboBoxItem>()
+                .FirstOrDefault(item => string.Equals(item.Tag?.ToString(), tag, StringComparison.OrdinalIgnoreCase))
+                ?? comboBox.Items.OfType<ComboBoxItem>().FirstOrDefault();
+
+            comboBox.SelectedItem = selectedItem;
+        }
+
+        private static string GetSelectedComboBoxTag(ComboBox comboBox, string fallback)
+        {
+            return (comboBox?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? fallback;
+        }
+
+        private void ComboBoxWindowBackdrop_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ComboBoxWindowBackdrop == null) return;
+            WindowBackdropHelper.Apply(this, GetSelectedComboBoxTag(ComboBoxWindowBackdrop, "None"));
         }
 
         #endregion
@@ -589,6 +617,7 @@ namespace Ink_Canvas.Windows
             }
 
             string themeText;
+            string backdropText = GetSelectedComboBoxTag(ComboBoxWindowBackdrop, "None");
             switch (ComboBoxTheme.SelectedIndex)
             {
                 case 0: themeText = "浅色"; break;

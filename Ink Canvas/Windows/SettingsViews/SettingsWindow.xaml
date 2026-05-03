@@ -13,8 +13,9 @@
     WindowStartupLocation="CenterScreen"
     ui:ThemeManager.IsThemeAware="True"
     ui:TitleBar.ExtendViewIntoTitleBar="True"
-    ui:WindowHelper.SystemBackdropType="Mica"
+    ui:WindowHelper.SystemBackdropType="None"
     ui:WindowHelper.UseModernWindowStyle="True"
+    ui:WindowHelper.CornerStyle="Round"
     ui:TitleBar.Height="48"
     mc:Ignorable="d">
 
@@ -351,6 +352,14 @@
             </ui:NavigationView.MenuItems>
 
             <ui:NavigationView.FooterMenuItems>
+                <ui:NavigationViewItem
+                    x:Name="FriendlyLinksItem"
+                    Content="友链"
+                    Tag="FriendlyLinksPage">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
                 <ui:NavigationViewItem
                     x:Name="AboutItem"
                     Content="关于 InkCanvasForClass"

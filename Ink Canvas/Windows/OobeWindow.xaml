@@ -19,8 +19,9 @@
         Loaded="OobeWindow_OnLoaded"
         ui:ThemeManager.IsThemeAware="True"
         ui:TitleBar.ExtendViewIntoTitleBar="True"
-        ui:WindowHelper.SystemBackdropType="Mica"
+        ui:WindowHelper.SystemBackdropType="None"
         ui:WindowHelper.UseModernWindowStyle="True"
+        ui:WindowHelper.CornerStyle="Round"
         ui:TitleBar.Height="40">
 
     <Window.Resources>
@@ -390,6 +391,24 @@
                                             <ComboBoxItem Content="浅色" />
                                             <ComboBoxItem Content="深色" />
                                             <ComboBoxItem Content="跟随系统" />
+                                        </ComboBox>
+                                    </ui:SettingsCard>
+
+                                    <ui:SettingsCard Header="窗口背景样式"
+                                                     Description="控制设置、OOBE 等现代窗口的 Mica / Acrylic 背景效果。">
+                                        <ui:SettingsCard.HeaderIcon>
+                                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FullScreen}" />
+                                        </ui:SettingsCard.HeaderIcon>
+                                        <ComboBox x:Name="ComboBoxWindowBackdrop"
+                                                  MinWidth="180"
+                                                  SelectionChanged="ComboBoxWindowBackdrop_SelectionChanged">
+                                            <ComboBoxItem Content="None" Tag="None" />
+                                            <ComboBoxItem Content="Mica" Tag="Mica" />
+                                            <ComboBoxItem Content="Acrylic" Tag="Acrylic" />
+                                            <ComboBoxItem Content="Tabbed" Tag="Tabbed" />
+                                            <ComboBoxItem Content="Transient" Tag="Transient" />
+                                            <ComboBoxItem Content="Acrylic10" Tag="Acrylic10" />
+                                            <ComboBoxItem Content="Acrylic11" Tag="Acrylic11" />
                                         </ComboBox>
                                     </ui:SettingsCard>
 

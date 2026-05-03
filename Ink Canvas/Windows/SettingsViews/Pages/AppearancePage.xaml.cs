@@ -1,5 +1,6 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
+using Ink_Canvas.Windows.SettingsViews;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Diagnostics;
@@ -59,6 +60,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (settings?.Appearance == null) return;
 
             ComboBoxTheme.SelectedIndex = settings.Appearance.Theme;
+            SelectComboBoxItemByTag(ComboBoxWindowBackdrop, settings.Appearance.WindowBackdrop);
 
             _isApplyingLanguageFromSettings = true;
             try
@@ -132,6 +134,23 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private MainWindow GetMainWindow() => Application.Current.MainWindow as MainWindow;
 
+        private static void SelectComboBoxItemByTag(ComboBox comboBox, string tag)
+        {
+            if (comboBox == null) return;
+
+            var selectedItem = comboBox.Items
+                .OfType<ComboBoxItem>()
+                .FirstOrDefault(item => string.Equals(item.Tag?.ToString(), tag, StringComparison.OrdinalIgnoreCase))
+                ?? comboBox.Items.OfType<ComboBoxItem>().FirstOrDefault();
+
+            comboBox.SelectedItem = selectedItem;
+        }
+
+        private static string GetSelectedComboBoxTag(ComboBox comboBox, string fallback)
+        {
+            return (comboBox?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? fallback;
+        }
+
         #region Theme & Language
 
         private void ComboBoxTheme_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -188,6 +207,23 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 }
             }
             catch (Exception ex) { Debug.WriteLine($"切换界面语言时出错: {ex.Message}"); }
+        }
+
+        private void ComboBoxWindowBackdrop_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            try
+            {
+                var backdrop = GetSelectedComboBoxTag(ComboBoxWindowBackdrop, "None");
+                SettingsManager.Settings.Appearance.WindowBackdrop = backdrop;
+                SettingsManager.SaveSettingsToFile();
+
+                if (Window.GetWindow(this) is SettingsWindow settingsWindow)
+                {
+                    settingsWindow.ApplyWindowBackdrop(backdrop);
+                }
+            }
+            catch (Exception ex) { Debug.WriteLine($"切换窗口背景样式时出错: {ex.Message}"); }
         }
 
         #endregion

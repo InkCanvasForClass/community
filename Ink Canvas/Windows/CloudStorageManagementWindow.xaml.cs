@@ -35,6 +35,7 @@ namespace Ink_Canvas.Windows
         public CloudStorageManagementWindow(MainWindow mainWindow = null)
         {
             InitializeComponent();
+            WindowBackdropHelper.Apply(this);
 
             // 初始化班级下拉框
             CmbClassSelection.Items.Clear();

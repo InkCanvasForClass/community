@@ -16,6 +16,7 @@ namespace Ink_Canvas
         public NamesInputWindow()
         {
             InitializeComponent();
+            WindowBackdropHelper.Apply(this);
             AnimationsHelper.ShowWithSlideFromBottomAndFade(this, 0.25);
             ApplyTheme();
         }

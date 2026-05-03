@@ -330,6 +330,8 @@ namespace Ink_Canvas
         public bool IsShowModeFingerToggleSwitch { get; set; } = true;
         [JsonProperty("theme")]
         public int Theme { get; set; } = 2;
+        [JsonProperty("windowBackdrop")]
+        public string WindowBackdrop { get; set; } = "Mica";
 
         // 浮动栏按钮显示控制
         [JsonProperty("useLegacyFloatingBarUI")]

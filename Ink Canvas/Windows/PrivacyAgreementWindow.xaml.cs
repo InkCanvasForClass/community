@@ -17,6 +17,7 @@ namespace Ink_Canvas
         public PrivacyAgreementWindow()
         {
             InitializeComponent();
+            WindowBackdropHelper.Apply(this);
             Topmost = true;
             AnimationsHelper.ShowWithSlideFromBottomAndFade(this, 0.25);
             ApplyTheme();

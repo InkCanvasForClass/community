@@ -45,6 +45,23 @@
                         </ComboBox>
                     </ui:SettingsCard>
 
+                    <ui:SettingsCard Header="窗口背景样式">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FullScreen}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ComboBox x:Name="ComboBoxWindowBackdrop"
+                                  MinWidth="180"
+                                  SelectionChanged="ComboBoxWindowBackdrop_SelectionChanged">
+                            <ComboBoxItem Content="None" Tag="None" />
+                            <ComboBoxItem Content="Mica" Tag="Mica" />
+                            <ComboBoxItem Content="Acrylic" Tag="Acrylic" />
+                            <ComboBoxItem Content="Tabbed" Tag="Tabbed" />
+                            <ComboBoxItem Content="Transient" Tag="Transient" />
+                            <ComboBoxItem Content="Acrylic10" Tag="Acrylic10" />
+                            <ComboBoxItem Content="Acrylic11" Tag="Acrylic11" />
+                        </ComboBox>
+                    </ui:SettingsCard>
+
                     <ui:SettingsCard Header="{i18n:I18n Key=Theme_LanguageLabel}"
                             Description="{i18n:I18n Key=Theme_Language_RestartHint}">
                         <ui:SettingsCard.HeaderIcon>

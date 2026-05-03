@@ -11,7 +11,7 @@
         Title="演示文档设置 - Ink Canvas For Class CE" Height="160" Width="450" FontFamily="Microsoft YaHei UI"
         ui:ThemeManager.IsThemeAware="True"
         ui:TitleBar.ExtendViewIntoTitleBar="True"
-        ui:WindowHelper.SystemBackdropType="Mica"
+        ui:WindowHelper.SystemBackdropType="None"
         ui:WindowHelper.UseModernWindowStyle="True"
         ui:TitleBar.Height="48">
     <Grid>
