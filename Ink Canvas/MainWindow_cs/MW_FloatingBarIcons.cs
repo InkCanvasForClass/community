@@ -4337,41 +4337,33 @@ namespace Ink_Canvas
                 }
 
                 // 根据主题设置高光颜色
-                if (hasTargetHighlightPlacement)
+                switch (mode)
                 {
-                    position = targetHighlightPosition;
-                    actualHighlightWidth = targetHighlightWidth;
-                }
-                else
-                {
-                    switch (mode)
-                    {
-                        case "cursor":
-                            actualHighlightWidth = cursorWidth;
-                            position = marginOffset;
-                            break;
-                        case "pen":
-                        case "color":
-                            actualHighlightWidth = penWidth;
-                            position = marginOffset + cursorWidth;
-                            break;
-                        case "eraser":
-                            actualHighlightWidth = eraserWidth;
-                            position = marginOffset + cursorWidth + penWidth + quickColorPaletteTotalWidth + deleteWidth;
-                            break;
-                        case "eraserByStrokes":
-                            actualHighlightWidth = eraserByStrokesWidth;
-                            position = marginOffset + cursorWidth + penWidth + quickColorPaletteTotalWidth + deleteWidth + eraserWidth;
-                            break;
-                        case "select":
-                            actualHighlightWidth = selectWidth;
-                            position = marginOffset + cursorWidth + penWidth + quickColorPaletteTotalWidth + deleteWidth + eraserWidth + eraserByStrokesWidth;
-                            break;
-                        case "shape":
-                            actualHighlightWidth = buttonWidth;
-                            position = marginOffset + cursorWidth + penWidth + quickColorPaletteTotalWidth + deleteWidth + eraserWidth + eraserByStrokesWidth + selectWidth;
-                            break;
-                    }
+                    case "cursor":
+                        actualHighlightWidth = cursorWidth;
+                        position = marginOffset;
+                        break;
+                    case "pen":
+                    case "color":
+                        actualHighlightWidth = penWidth;
+                        position = marginOffset + cursorWidth;
+                        break;
+                    case "eraser":
+                        actualHighlightWidth = eraserWidth;
+                        position = marginOffset + cursorWidth + penWidth + quickColorPaletteTotalWidth + deleteWidth;
+                        break;
+                    case "eraserByStrokes":
+                        actualHighlightWidth = eraserByStrokesWidth;
+                        position = marginOffset + cursorWidth + penWidth + quickColorPaletteTotalWidth + deleteWidth + eraserWidth;
+                        break;
+                    case "select":
+                        actualHighlightWidth = selectWidth;
+                        position = marginOffset + cursorWidth + penWidth + quickColorPaletteTotalWidth + deleteWidth + eraserWidth + eraserByStrokesWidth;
+                        break;
+                    case "shape":
+                        actualHighlightWidth = buttonWidth;
+                        position = marginOffset + cursorWidth + penWidth + quickColorPaletteTotalWidth + deleteWidth + eraserWidth + eraserByStrokesWidth + selectWidth;
+                        break;
                 }
 
                 if (actualHighlightWidth <= 0)
@@ -4397,6 +4389,58 @@ namespace Ink_Canvas
                 }
 
                 // 设置高光背景颜色
+                void ResetFloatingBarToolIconHighlights()
+                {
+                    var foregroundBrush = new SolidColorBrush(FloatBarForegroundColor);
+
+                    void ResetIcon(ToolbarImageButton button, string iconType)
+                    {
+                        if (button == null) return;
+
+                        button.Icon.Brush = foregroundBrush;
+                        button.Icon.Geometry = Geometry.Parse(GetCorrectIcon(iconType, false));
+                    }
+
+                    ResetIcon(Cursor_Icon, "cursor");
+                    ResetIcon(Pen_Icon, "pen");
+                    ResetIcon(Eraser_Icon, "eraserCircle");
+                    ResetIcon(EraserByStrokes_Icon, "eraserStroke");
+                    ResetIcon(SymbolIconSelect, "lassoSelect");
+                }
+
+                void ApplyFloatingBarToolIconHighlight(string toolMode, Color highlightColor)
+                {
+                    var highlightBrush = new SolidColorBrush(highlightColor);
+
+                    void HighlightIcon(ToolbarImageButton button, string iconType)
+                    {
+                        if (button == null) return;
+
+                        button.Icon.Brush = highlightBrush;
+                        button.Icon.Geometry = Geometry.Parse(GetCorrectIcon(iconType, true));
+                    }
+
+                    switch (toolMode)
+                    {
+                        case "cursor":
+                            HighlightIcon(Cursor_Icon, "cursor");
+                            break;
+                        case "pen":
+                        case "color":
+                            HighlightIcon(Pen_Icon, "pen");
+                            break;
+                        case "eraser":
+                            HighlightIcon(Eraser_Icon, "eraserCircle");
+                            break;
+                        case "eraserByStrokes":
+                            HighlightIcon(EraserByStrokes_Icon, "eraserStroke");
+                            break;
+                        case "select":
+                            HighlightIcon(SymbolIconSelect, "lassoSelect");
+                            break;
+                    }
+                }
+
                 FloatingbarSelectionBG.Width = actualHighlightWidth;
                 FloatingbarSelectionBG.Background = new SolidColorBrush(highlightBackgroundColor);
                 if (FloatingbarSelectionBG.Child is System.Windows.Controls.Canvas canvas && canvas.Children.Count > 0)
