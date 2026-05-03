@@ -13,6 +13,7 @@
         Topmost="True"
         ui:ThemeManager.IsThemeAware="True"
         ui:TitleBar.ExtendViewIntoTitleBar="True"
+        ui:WindowHelper.SystemBackdropType="None"
         ui:WindowHelper.UseModernWindowStyle="True"
         ui:WindowHelper.CornerStyle="Round"
         ui:TitleBar.Height="40">
