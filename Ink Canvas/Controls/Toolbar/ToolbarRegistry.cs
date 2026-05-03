@@ -52,6 +52,7 @@ namespace Ink_Canvas.Controls.Toolbar
             LogHelper.WriteLogToFile($"ToolbarRegistry: Populate 开始", LogHelper.LogType.Info);
             if (host == null || slots == null) { LogHelper.WriteLogToFile("ToolbarRegistry: Populate host 或 slots 为空", LogHelper.LogType.Warning); return; }
             layout = layout ?? new ToolbarLayoutSettings();
+            MigrateLegacyDefaultLayout(layout);
 
             var grouped = new Dictionary<ToolbarSlot, List<(IToolbarItem item, ToolbarItemConfig cfg)>>();
             foreach (var item in Discover())
@@ -86,6 +87,22 @@ namespace Ink_Canvas.Controls.Toolbar
 
             ApplyMenuVisibility(host, layout);
             LogHelper.WriteLogToFile($"ToolbarRegistry: Populate 完成", LogHelper.LogType.Info);
+        }
+
+        private static void MigrateLegacyDefaultLayout(ToolbarLayoutSettings layout)
+        {
+            if (layout?.Items == null) return;
+            if (!layout.Items.TryGetValue("builtin.inkFreeze", out var cfg) || cfg == null) return;
+
+            if (cfg.Slot == ToolbarSlot.FloatingBarEnd
+                && cfg.Position == ToolbarInsertPosition.AfterAnchor
+                && cfg.AnchorName == "FloatingBarEndSeparator"
+                && cfg.Order == 130)
+            {
+                cfg.Slot = ToolbarSlot.FloatingBarMain;
+                cfg.Order = 120;
+                cfg.AnchorName = "QuickColorPaletteSingleRowPanel";
+            }
         }
 
         public static void ApplyMenuVisibility(IToolbarHost host, ToolbarLayoutSettings layout)

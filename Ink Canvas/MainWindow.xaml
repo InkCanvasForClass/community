@@ -2740,6 +2740,7 @@
                                                                 ButtonMouseDown="FloatingBarToolBtnMouseDownFeedback_Panel" ButtonMouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel" ButtonMouseUp="QuickColorGreen_Click" ToolTip="{i18n:I18n Key=Canvas_Color_Green}"/>
                                 </ikw:SimpleStackPanel>
 
+                                <!-- Freeze_Icon 由 ToolbarRegistry 注入（AfterAnchor=QuickColorPaletteSingleRowPanel） -->
                                 <!-- SymbolIconDelete 由 ClearToolItem 动态注入（BeforeAnchor=StackPanelCanvasControls） -->
                                 <ikw:SimpleStackPanel Name="StackPanelCanvasControls" Visibility="Visible"
                                                      Orientation="{Binding ElementName=StackPanelFloatingBar, Path=Orientation}">

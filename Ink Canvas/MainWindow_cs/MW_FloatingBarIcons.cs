@@ -294,19 +294,31 @@ namespace Ink_Canvas
         {
             isDragDropInEffect = false;
 
-            if (e is null || (Math.Abs(downPos.X - e.GetPosition(null).X) <= 10 &&
-                              Math.Abs(downPos.Y - e.GetPosition(null).Y) <= 10))
+            var isClick = e is null || (Math.Abs(downPos.X - e.GetPosition(null).X) <= 10 &&
+                                        Math.Abs(downPos.Y - e.GetPosition(null).Y) <= 10);
+
+            if (isClick)
             {
+                var headLeft = GetCurrentFloatingBarHeadLeft();
                 if (BorderFloatingBarMainControls.Visibility == Visibility.Visible)
                 {
                     BorderFloatingBarMainControls.Visibility = Visibility.Collapsed;
                     CheckEnableTwoFingerGestureBtnVisibility(false);
+                    PlaceFloatingBarAfterHeadToggle(headLeft, false);
                 }
                 else
                 {
                     BorderFloatingBarMainControls.Visibility = Visibility.Visible;
                     CheckEnableTwoFingerGestureBtnVisibility(true);
+                    PlaceFloatingBarAfterHeadToggle(headLeft, true);
                 }
+            }
+            else
+            {
+                PlaceFloatingBarAfterHeadToggle(
+                    GetCurrentFloatingBarHeadLeft(),
+                    BorderFloatingBarMainControls.Visibility == Visibility.Visible);
+                _popupManager?.MarkNeedsUpdate();
             }
 
             GridForFloatingBarDraging.Visibility = Visibility.Collapsed;
@@ -1754,6 +1766,158 @@ namespace Ink_Canvas
         /// 浮动工具栏边距动画是否正在运行
         /// </summary>
         private bool isViewboxFloatingBarMarginAnimationRunning;
+        private bool isFloatingBarHeadOnRight;
+
+        private double GetFloatingBarScaleX()
+        {
+            var scale = ViewboxFloatingBarScaleTransform?.ScaleX ?? 1;
+            return scale > 0 && !double.IsNaN(scale) && !double.IsInfinity(scale) ? scale : 1;
+        }
+
+        private double GetElementWidthForFloatingBar(FrameworkElement element, double fallbackWidth)
+        {
+            if (element == null) return fallbackWidth;
+
+            var width = element.ActualWidth;
+            if (width <= 0 || double.IsNaN(width)) width = element.DesiredSize.Width;
+            if (width <= 0 || double.IsNaN(width)) width = element.RenderSize.Width;
+            if (width <= 0 || double.IsNaN(width)) width = element.Width;
+
+            return width > 0 && !double.IsNaN(width) && !double.IsInfinity(width) ? width : fallbackWidth;
+        }
+
+        private double GetFloatingBarScaledWidth()
+        {
+            var baseWidth = GetElementWidthForFloatingBar(ViewboxFloatingBar, 200);
+            return baseWidth * GetFloatingBarScaleX();
+        }
+
+        private double GetFloatingBarHeadScaledWidth()
+        {
+            return GetElementWidthForFloatingBar(BorderFloatingBarMoveControls, 36) * GetFloatingBarScaleX();
+        }
+
+        private double GetFloatingBarScreenWidth(bool useWorkingArea)
+        {
+            double dpiScaleX = 1;
+            var source = PresentationSource.FromVisual(this);
+            if (source?.CompositionTarget != null)
+            {
+                dpiScaleX = source.CompositionTarget.TransformToDevice.M11;
+            }
+
+            var screen = GetFloatingBarTargetScreen();
+            return (useWorkingArea ? screen.WorkingArea.Width : screen.Bounds.Width) / dpiScaleX;
+        }
+
+        private void SetFloatingBarHeadPlacement(bool headOnRight)
+        {
+            if (FloatingBarRootPanel == null || BorderFloatingBarMoveControls == null) return;
+
+            var children = FloatingBarRootPanel.Children;
+            if (children.Contains(BorderFloatingBarMoveControls))
+            {
+                children.Remove(BorderFloatingBarMoveControls);
+            }
+
+            if (headOnRight)
+            {
+                children.Add(BorderFloatingBarMoveControls);
+                BorderFloatingBarMoveControls.Margin = new Thickness(2, 0, 0, 0);
+                if (BorderFloatingBarMainControls != null)
+                    BorderFloatingBarMainControls.Margin = new Thickness(0);
+            }
+            else
+            {
+                children.Insert(0, BorderFloatingBarMoveControls);
+                BorderFloatingBarMoveControls.Margin = new Thickness(0);
+                if (BorderFloatingBarMainControls != null)
+                    BorderFloatingBarMainControls.Margin = new Thickness(2, 0, 0, 0);
+            }
+
+            isFloatingBarHeadOnRight = headOnRight;
+        }
+
+        private double ClampFloatingBarLeft(double left, double floatingBarWidth, double screenWidth)
+        {
+            var maxLeft = Math.Max(0, screenWidth - floatingBarWidth);
+            return Math.Max(0, Math.Min(left, maxLeft));
+        }
+
+        private void PlaceFloatingBarAfterHeadToggle(double headLeft, bool isExpanding)
+        {
+            ViewboxFloatingBar.UpdateLayout();
+            var screenWidth = GetFloatingBarScreenWidth(false);
+
+            if (!isExpanding)
+            {
+                SetFloatingBarHeadPlacement(false);
+                var collapsedWidth = GetFloatingBarHeadScaledWidth();
+                pos.X = ClampFloatingBarLeft(headLeft, collapsedWidth, screenWidth);
+                ViewboxFloatingBar.Margin = new Thickness(pos.X, ViewboxFloatingBar.Margin.Top, -2000, -200);
+                SaveFloatingBarPositionPoint();
+                return;
+            }
+
+            var floatingBarWidth = GetFloatingBarScaledWidth();
+            var headWidth = GetFloatingBarHeadScaledWidth();
+            var shouldPlaceToolsOnLeft = headLeft + floatingBarWidth > screenWidth;
+
+            SetFloatingBarHeadPlacement(shouldPlaceToolsOnLeft);
+            ViewboxFloatingBar.UpdateLayout();
+
+            floatingBarWidth = GetFloatingBarScaledWidth();
+            headWidth = GetFloatingBarHeadScaledWidth();
+
+            var nextLeft = shouldPlaceToolsOnLeft
+                ? headLeft - Math.Max(0, floatingBarWidth - headWidth)
+                : headLeft;
+
+            pos.X = ClampFloatingBarLeft(nextLeft, floatingBarWidth, screenWidth);
+            ViewboxFloatingBar.Margin = new Thickness(pos.X, ViewboxFloatingBar.Margin.Top, -2000, -200);
+            SaveFloatingBarPositionPoint();
+        }
+
+        private double NormalizeFloatingBarLeftForScreen(double requestedLeft, double floatingBarWidth,
+            double screenWidth)
+        {
+            var headWidth = GetFloatingBarHeadScaledWidth();
+            var nextLeft = requestedLeft;
+            var shouldPlaceToolsOnLeft = isFloatingBarHeadOnRight;
+
+            if (!isFloatingBarHeadOnRight && requestedLeft + floatingBarWidth > screenWidth)
+            {
+                shouldPlaceToolsOnLeft = true;
+                nextLeft = requestedLeft - Math.Max(0, floatingBarWidth - headWidth);
+            }
+            else if (isFloatingBarHeadOnRight && requestedLeft + floatingBarWidth <= screenWidth)
+            {
+                shouldPlaceToolsOnLeft = requestedLeft > screenWidth / 2;
+            }
+
+            SetFloatingBarHeadPlacement(shouldPlaceToolsOnLeft);
+            return ClampFloatingBarLeft(nextLeft, floatingBarWidth, screenWidth);
+        }
+
+        private double GetCurrentFloatingBarHeadLeft()
+        {
+            ViewboxFloatingBar.UpdateLayout();
+            var floatingBarWidth = GetFloatingBarScaledWidth();
+            var headWidth = GetFloatingBarHeadScaledWidth();
+            var headOffset = isFloatingBarHeadOnRight
+                ? Math.Max(0, floatingBarWidth - headWidth)
+                : 0;
+            return ViewboxFloatingBar.Margin.Left + headOffset;
+        }
+
+        private void SaveFloatingBarPositionPoint()
+        {
+            var currentPoint = new Point(ViewboxFloatingBar.Margin.Left, ViewboxFloatingBar.Margin.Top);
+            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                pointPPT = currentPoint;
+            else
+                pointDesktop = currentPoint;
+        }
 
         /// <summary>
         /// 浮动工具栏边距动画处理
@@ -1896,6 +2060,12 @@ namespace Ink_Canvas
                                 pointDesktop = pos;
                         }
                     }
+
+                    pos.X = NormalizeFloatingBarLeftForScreen(pos.X, floatingBarWidth, screenWidth);
+                    if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                        pointPPT = pos;
+                    else
+                        pointDesktop = pos;
                 }
 
                 var marginAnimation = new ThicknessAnimation
