@@ -134,6 +134,11 @@ namespace Ink_Canvas.Helpers
             return VerifyPassword(settings, passwordBox.Password);
         }
 
+        public static Task<bool> PromptAndVerifyPasswordOrTotpAsync(Settings settings, Window owner, string title, string message)
+        {
+            return PromptAndVerifyAsync(settings, owner, title, message);
+        }
+
         /// <summary>
         /// 显示一个对话框让用户输入并确认新密码，成功时返回该密码。
         /// </summary>

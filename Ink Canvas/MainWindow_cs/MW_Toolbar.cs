@@ -20,6 +20,7 @@ namespace Ink_Canvas
         internal ToolbarImageButton WhiteboardFloatingBarBtn { get; private set; }
         internal ToolbarImageButton ToolsFloatingBarBtn { get; private set; }
         internal ToolbarImageButton Fold_Icon { get; private set; }
+        internal ToolbarImageButton Freeze_Icon { get; private set; }
 
         internal GeometryButton BoardImageDrawLine => ShapeDrawPopupContent?.DrawLineBtn;
         internal GeometryButton BoardImageDrawDashedLine => ShapeDrawPopupContent?.DrawDashedLineBtn;
