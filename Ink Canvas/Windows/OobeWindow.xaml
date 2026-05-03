@@ -19,8 +19,9 @@
         Loaded="OobeWindow_OnLoaded"
         ui:ThemeManager.IsThemeAware="True"
         ui:TitleBar.ExtendViewIntoTitleBar="True"
-        ui:WindowHelper.SystemBackdropType="Mica"
+        ui:WindowHelper.SystemBackdropType="Acrylic10"
         ui:WindowHelper.UseModernWindowStyle="True"
+        ui:WindowHelper.CornerStyle="Round"
         ui:TitleBar.Height="40">
 
     <Window.Resources>
