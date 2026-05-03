@@ -13,7 +13,7 @@ using ui = iNKORE.UI.WPF.Controls;
 
 namespace Ink_Canvas
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
         private const string ThemeLight = "Light";
         private const string ThemeDark = "Dark";
@@ -61,7 +61,7 @@ namespace Ink_Canvas
                 });
             });
 
-            ThemeManager.SetRequestedTheme(window, elementTheme);
+            ThemeManager.SetRequestedTheme(this, elementTheme);
 
             InitializeFloatBarForegroundColor();
             RefreshQuickPanelIcons();
@@ -75,7 +75,7 @@ namespace Ink_Canvas
                 AutoSwitchFloatingBarIconForTheme(theme);
             }
 
-            window.InvalidateVisual();
+            InvalidateVisual();
             RefreshOtherWindowsTheme();
         }
 

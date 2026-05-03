@@ -16,7 +16,7 @@ using RadioButton = System.Windows.Controls.RadioButton;
 
 namespace Ink_Canvas
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
         #region Behavior
 

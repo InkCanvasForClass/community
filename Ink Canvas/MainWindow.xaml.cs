@@ -38,7 +38,7 @@ using VerticalAlignment = System.Windows.VerticalAlignment;
 
 namespace Ink_Canvas
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
         // 每一页一个Canvas对象
         private List<System.Windows.Controls.Canvas> whiteboardPages = new List<System.Windows.Controls.Canvas>();

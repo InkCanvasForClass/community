@@ -10,7 +10,7 @@ using System.Windows.Media;
 
 namespace Ink_Canvas
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
         /// <summary>
         /// 提交原因枚举，用于标识不同类型的操作

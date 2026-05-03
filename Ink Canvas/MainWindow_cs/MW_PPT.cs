@@ -24,7 +24,7 @@ using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 
 namespace Ink_Canvas
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
         #region Win32 API Declarations
         [DllImport("user32.dll")]
@@ -2265,6 +2265,7 @@ namespace Ink_Canvas
             {
                 GridTransparencyFakeBackground.Opacity = 1;
                 GridTransparencyFakeBackground.Background = new SolidColorBrush(StringToColor("#01FFFFFF"));
+                SetTransparentNotHitThrough();
                 CursorIcon_Click(null, null);
 
                 if (Settings.PowerPointSettings.EnablePPTButtonEnhancedPreview && bar != null)

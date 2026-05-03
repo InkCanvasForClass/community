@@ -53,6 +53,13 @@
                             SwitchName="ToggleSwitchWindowMode"
                             Toggled="ToggleSwitchWindowMode_Toggled" />
 
+                    <controls:LabeledSettingsCard x:Name="CardWindowChromeRendering"
+                            Header="{i18n:I18n Key=Window_WindowChromeRendering}"
+                            Description="{i18n:I18n Key=Window_WindowChromeRenderingHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.SpeedHigh}"
+                            SwitchName="ToggleSwitchWindowChromeRendering"
+                            Toggled="ToggleSwitchWindowChromeRendering_Toggled" />
+
                     <controls:LabeledSettingsCard x:Name="CardAvoidFullScreen"
                             Header="{i18n:I18n Key=Advanced_AvoidFullScreenHelper}"
                             Description="{i18n:I18n Key=Advanced_AvoidFullScreenHelperHint}"

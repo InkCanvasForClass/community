@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace Ink_Canvas
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
         /// <summary>
         /// 鼠标滚轮事件处理，用于PPT翻页

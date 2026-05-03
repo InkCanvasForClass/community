@@ -9,7 +9,7 @@ using System.Windows.Media;
 
 namespace Ink_Canvas
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
         // 橡皮擦系统核心变量
         public bool isUsingGeometryEraser = false;

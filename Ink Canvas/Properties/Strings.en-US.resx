@@ -291,6 +291,15 @@
   <data name="Startup_TopMostMode_RestartAsNormal" xml:space="preserve">
     <value>Switch to Non-Admin Mode</value>
   </data>
+  <data name="Window_WindowChromeRendering" xml:space="preserve">
+    <value>Render with WindowChrome</value>
+  </data>
+  <data name="Window_WindowChromeRenderingHint" xml:space="preserve">
+    <value>Use DWM/WindowChrome for the transparent main window. This is usually smoother than AllowsTransparency and takes effect after restart.</value>
+  </data>
+  <data name="Window_WindowChromeRendering_RestartRequired" xml:space="preserve">
+    <value>Changing WindowChrome rendering requires a restart to take effect. Restart now?</value>
+  </data>
   <data name="Header_AutoUpdate" xml:space="preserve">
     <value>Auto-update</value>
   </data>

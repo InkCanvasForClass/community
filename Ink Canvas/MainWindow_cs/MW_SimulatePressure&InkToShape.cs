@@ -28,7 +28,7 @@ namespace Ink_Canvas
     /// 6. 高级贝塞尔曲线平滑：对墨迹进行平滑处理
     /// 7. 异步墨水处理：提高性能的异步墨水处理机制
     /// </remarks>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
         private Helpers.ModernInkAnalyzer _modernInkAnalyzer;
         private Helpers.ModernInkAnalyzer ModernInkAnalyzer =>

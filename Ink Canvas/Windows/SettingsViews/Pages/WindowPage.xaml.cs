@@ -41,6 +41,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 {
                     CardNoFocusMode.IsOn = settings.Advanced.IsNoFocusMode;
                     CardWindowMode.IsOn = settings.Advanced.WindowMode;
+                    CardWindowChromeRendering.IsOn = settings.Startup?.EnableWindowChromeRendering ?? false;
                     CardAvoidFullScreen.IsOn = settings.Advanced.IsEnableAvoidFullScreenHelper;
                     CardMultiScreenSupport.IsOn = settings.Advanced.EnableMultiScreenSupport;
                     CardFollowMouseScreen.IsOn = settings.Advanced.FollowMouseForScreenSelection;
@@ -182,6 +183,33 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 Debug.WriteLine($"设置避免全屏时出错: {ex.Message}");
+            }
+        }
+
+        private void ToggleSwitchWindowChromeRendering_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+
+            try
+            {
+                bool newState = CardWindowChromeRendering.IsOn;
+                if (SettingsManager.Settings.Startup == null)
+                    SettingsManager.Settings.Startup = new Startup();
+
+                SettingsManager.Settings.Startup.EnableWindowChromeRendering = newState;
+                SettingsManager.SaveSettingsToFile();
+
+                var msg = Properties.Strings.GetString("Window_WindowChromeRendering_RestartRequired");
+                var result = MessageBox.Show(msg, "Ink Canvas", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    AppRestartHelper.RestartWithCurrentPrivileges();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"设置 WindowChrome 渲染时出错: {ex.Message}");
             }
         }
 

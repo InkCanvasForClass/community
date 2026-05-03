@@ -307,6 +307,15 @@
   <data name="Startup_TopMostMode_RestartAsNormal" xml:space="preserve">
     <value>切换到非管理员模式</value>
   </data>
+  <data name="Window_WindowChromeRendering" xml:space="preserve">
+    <value>以 WindowChrome 模式渲染</value>
+  </data>
+  <data name="Window_WindowChromeRenderingHint" xml:space="preserve">
+    <value>使用 DWM/WindowChrome 绘制透明主窗口，通常比 AllowsTransparency 更流畅；需要重启后生效。</value>
+  </data>
+  <data name="Window_WindowChromeRendering_RestartRequired" xml:space="preserve">
+    <value>切换 WindowChrome 渲染模式需要重启软件才能生效，是否立即重启？</value>
+  </data>
   <data name="Header_AutoUpdate" xml:space="preserve">
     <value>自动检查更新</value>
   </data>

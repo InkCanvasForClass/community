@@ -17,7 +17,7 @@ using System.Windows.Media.Imaging;
 
 namespace Ink_Canvas
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
         private static readonly SolidColorBrush BoothButtonHighlightBrush = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FF66CCFF"));
         private bool _boothButtonPressHandlersAttached;

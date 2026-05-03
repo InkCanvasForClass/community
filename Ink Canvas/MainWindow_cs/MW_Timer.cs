@@ -76,7 +76,7 @@ namespace Ink_Canvas
         }
     }
 
-    public partial class MainWindow : Window
+    public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
         /// <summary>
         /// 进程终止定时器

@@ -4,7 +4,7 @@ using System.Windows;
 
 namespace Ink_Canvas
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
         #region 悬浮窗拦截功能
 
