@@ -57,7 +57,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void BorderStrokeSelectionClone_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("克隆墨迹")) return;
             if (lastBorderMouseDownObject != sender) return;
 
             try
@@ -87,7 +86,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void BorderStrokeSelectionCloneToNewBoard_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("克隆墨迹到新页面")) return;
             if (lastBorderMouseDownObject != sender) return;
 
             var strokes = inkCanvas.GetSelectedStrokes();
@@ -121,7 +119,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void GridPenWidthDecrease_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("修改墨迹粗细")) return;
             if (lastBorderMouseDownObject != sender) return;
             ChangeStrokeThickness(0.8);
         }
@@ -137,7 +134,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void GridPenWidthIncrease_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("修改墨迹粗细")) return;
             if (lastBorderMouseDownObject != sender) return;
             ChangeStrokeThickness(1.25);
         }
@@ -153,7 +149,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void ChangeStrokeThickness(double multipler)
         {
-            if (TryBlockFrozenPageMutation("修改墨迹粗细")) return;
             foreach (var stroke in inkCanvas.GetSelectedStrokes())
             {
                 var newWidth = stroke.DrawingAttributes.Width * multipler;
@@ -188,7 +183,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void GridPenWidthRestore_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("修改墨迹粗细")) return;
             if (lastBorderMouseDownObject != sender) return;
 
             foreach (var stroke in inkCanvas.GetSelectedStrokes())
@@ -210,7 +204,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void ImageFlipHorizontal_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("翻转墨迹")) return;
             if (lastBorderMouseDownObject != sender) return;
 
             var m = new Matrix();
@@ -258,7 +251,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void ImageFlipVertical_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("翻转墨迹")) return;
             if (lastBorderMouseDownObject != sender) return;
 
             var m = new Matrix();
@@ -300,7 +292,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void ImageRotate45_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("旋转墨迹")) return;
             if (lastBorderMouseDownObject != sender) return;
 
             var m = new Matrix();
@@ -341,7 +332,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void ImageRotate90_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("旋转墨迹")) return;
             if (lastBorderMouseDownObject != sender) return;
 
             var m = new Matrix();
@@ -425,11 +415,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void GridInkCanvasSelectionCover_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("移动墨迹"))
-            {
-                e.Handled = true;
-                return;
-            }
             isGridInkCanvasSelectionCoverMouseDown = true;
 
             // 检查是否有选中的墨迹
@@ -740,11 +725,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void GridInkCanvasSelectionCover_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("移动或缩放墨迹"))
-            {
-                e.Handled = true;
-                return;
-            }
             try
             {
                 if (dec.Count >= 1)
@@ -803,11 +783,6 @@ namespace Ink_Canvas
         /// <param name="e">触摸事件参数，包含触点位置与设备 ID。</param>
         private void GridInkCanvasSelectionCover_TouchDown(object sender, TouchEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("移动墨迹"))
-            {
-                e.Handled = true;
-                return;
-            }
             dec.Add(e.TouchDevice.Id);
             //设备1个的时候，记录中心点
             if (dec.Count == 1)
@@ -871,11 +846,6 @@ namespace Ink_Canvas
         /// <remarks>仅在存在选中墨迹且当前仅有一个触摸点时生效；若起始触摸点未记录（lastDragPointInCanvas 为 (0,0)）则不移动。只有当触摸位移在任一方向超过 1 像素时，才对每条选中墨迹应用平移变换，并更新选择控件位置与最后触摸点。</remarks>
         private void GridInkCanvasSelectionCover_TouchMove(object sender, TouchEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("移动墨迹"))
-            {
-                e.Handled = true;
-                return;
-            }
             // 处理触摸移动事件 - 用于拖动选中的墨迹
             if (inkCanvas.GetSelectedStrokes().Count > 0 && dec.Count == 1)
             {
@@ -1076,11 +1046,6 @@ namespace Ink_Canvas
         /// <param name="e">包含鼠标按下事件的位置信息和处理标志的 <see cref="MouseButtonEventArgs"/> 实例。</param>
         private void SelectionHandle_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("调整墨迹大小"))
-            {
-                e.Handled = true;
-                return;
-            }
             if (sender is Rectangle handle)
             {
                 isResizing = true;
@@ -1141,11 +1106,6 @@ namespace Ink_Canvas
         /// <param name="e">触摸事件数据；方法会标记事件为已处理并使用其触点相对于 inkCanvas 的位置。</param>
         private void SelectionHandle_TouchDown(object sender, TouchEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("调整墨迹大小"))
-            {
-                e.Handled = true;
-                return;
-            }
             if (sender is Rectangle handle)
             {
                 isResizing = true;

@@ -1,5 +1,6 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
+using Ink_Canvas.Windows.SettingsViews;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Diagnostics;
@@ -36,7 +37,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void UpdateAllSliderTexts()
         {
-            UpdateSliderText(ViewboxFloatingBarScaleTransformValueSlider, ViewboxFloatingBarScaleSliderText, "{0:F2}x");
+            UpdateSliderText(ViewboxFloatingBarScaleTransformValueSlider, ViewboxFloatingBarScaleSliderText, "{0:F2}x)");
             UpdateSliderText(ViewboxFloatingBarOpacityValueSlider, ViewboxFloatingBarOpacityText, "{0:F2}");
             UpdateSliderText(ViewboxFloatingBarOpacityInPPTValueSlider, ViewboxFloatingBarOpacityInPPTText, "{0:F2}");
             UpdateSliderText(ViewboxBlackBoardScaleTransformValueSlider, ViewboxBlackBoardScaleText, "{0:F2}");
@@ -280,7 +281,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void ViewboxFloatingBarScaleTransformValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
-            UpdateSliderText(ViewboxFloatingBarScaleTransformValueSlider, ViewboxFloatingBarScaleSliderText, "{0:F2}x");
+            UpdateSliderText(ViewboxFloatingBarScaleTransformValueSlider, ViewboxFloatingBarScaleSliderText, "{0:F2}x)");
             if (!_isLoaded) return;
             var slider = ViewboxFloatingBarScaleTransformValueSlider;
             var val = Math.Round(slider.Value, 2);

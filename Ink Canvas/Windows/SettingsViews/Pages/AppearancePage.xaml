@@ -45,20 +45,20 @@
                         </ComboBox>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Theme_WindowBackdrop}">
+                    <ui:SettingsCard Header="窗口背景样式">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FullScreen}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxWindowBackdrop"
                                   MinWidth="180"
                                   SelectionChanged="ComboBoxWindowBackdrop_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_None}" Tag="None" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_Mica}" Tag="Mica" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_Acrylic}" Tag="Acrylic" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_Tabbed}" Tag="Tabbed" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_Transient}" Tag="Transient" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_Acrylic10}" Tag="Acrylic10" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_Acrylic11}" Tag="Acrylic11" />
+                            <ComboBoxItem Content="None" Tag="None" />
+                            <ComboBoxItem Content="Mica" Tag="Mica" />
+                            <ComboBoxItem Content="Acrylic" Tag="Acrylic" />
+                            <ComboBoxItem Content="Tabbed" Tag="Tabbed" />
+                            <ComboBoxItem Content="Transient" Tag="Transient" />
+                            <ComboBoxItem Content="Acrylic10" Tag="Acrylic10" />
+                            <ComboBoxItem Content="Acrylic11" Tag="Acrylic11" />
                         </ComboBox>
                     </ui:SettingsCard>
 
@@ -347,43 +347,43 @@
                             SwitchName="ToggleSwitchEnableTrayIcon"
                             Toggled="ToggleSwitchEnableTrayIcon_Toggled" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Tray_LeftClickAction}">
+                    <ui:SettingsCard Header="托盘左键点击">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronLeft}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxTrayLeftClickAction"
                                   SelectedIndex="0"
                                   SelectionChanged="ComboBoxTrayLeftClickAction_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_ShowMenu}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_HideShowMainWindow}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_TempShowMainWindow}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_OpenSettings}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_DisableAllHotkeys}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_ForceFullScreen}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_ToggleFoldFloatingBar}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_ResetFloatingBarPosition}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_RestartApp}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_CloseApp}" />
+                            <ComboBoxItem Content="打开菜单" />
+                            <ComboBoxItem Content="隐藏/显示主窗口" />
+                            <ComboBoxItem Content="临时显示主窗口" />
+                            <ComboBoxItem Content="打开设置" />
+                            <ComboBoxItem Content="禁用/启用所有快捷键" />
+                            <ComboBoxItem Content="强制全屏化" />
+                            <ComboBoxItem Content="切换浮动栏收纳模式" />
+                            <ComboBoxItem Content="重置工具栏位置" />
+                            <ComboBoxItem Content="重启软件" />
+                            <ComboBoxItem Content="退出软件" />
                         </ComboBox>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Tray_RightClickAction}">
+                    <ui:SettingsCard Header="托盘右键点击">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronRight}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxTrayRightClickAction"
                                   SelectedIndex="0"
                                   SelectionChanged="ComboBoxTrayRightClickAction_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_ShowMenu}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_HideShowMainWindow}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_TempShowMainWindow}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_OpenSettings}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_DisableAllHotkeys}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_ForceFullScreen}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_ToggleFoldFloatingBar}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_ResetFloatingBarPosition}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_RestartApp}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_CloseApp}" />
+                            <ComboBoxItem Content="打开菜单" />
+                            <ComboBoxItem Content="隐藏/显示主窗口" />
+                            <ComboBoxItem Content="临时显示主窗口" />
+                            <ComboBoxItem Content="打开设置" />
+                            <ComboBoxItem Content="禁用/启用所有快捷键" />
+                            <ComboBoxItem Content="强制全屏化" />
+                            <ComboBoxItem Content="切换浮动栏收纳模式" />
+                            <ComboBoxItem Content="重置工具栏位置" />
+                            <ComboBoxItem Content="重启软件" />
+                            <ComboBoxItem Content="退出软件" />
                         </ComboBox>
                     </ui:SettingsCard>
 

@@ -12,6 +12,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 using System.Windows.Threading;
 using Path = System.IO.Path;
 
@@ -184,11 +185,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void Element_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("移动图片"))
-            {
-                e.Handled = true;
-                return;
-            }
             if (sender is FrameworkElement element)
             {
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.Select)
@@ -315,11 +311,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void Element_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("缩放图片"))
-            {
-                e.Handled = true;
-                return;
-            }
             if (sender is FrameworkElement element)
             {
 
@@ -358,11 +349,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void Element_TouchDown(object sender, TouchEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("移动图片"))
-            {
-                e.Handled = true;
-                return;
-            }
             if (sender is FrameworkElement element)
             {
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.Select)
@@ -408,11 +394,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void Element_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("移动或缩放图片"))
-            {
-                e.Handled = true;
-                return;
-            }
             if (sender is FrameworkElement element)
             {
                 // 检查是否是双指手势
@@ -1917,7 +1898,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void BorderImageClone_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("克隆图片")) return;
             try
             {
                 if (currentSelectedElement is Image originalImage)
@@ -1964,7 +1944,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void BorderImageCloneToNewBoard_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("克隆图片到新页面")) return;
             try
             {
                 if (currentSelectedElement is Image originalImage)
@@ -2016,7 +1995,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void BorderImageRotateLeft_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("旋转图片")) return;
             try
             {
                 if (currentSelectedElement != null)
@@ -2051,7 +2029,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void BorderImageRotateRight_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("旋转图片")) return;
             try
             {
                 if (currentSelectedElement != null)
@@ -2087,7 +2064,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void GridImageScaleDecrease_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("缩放图片")) return;
             try
             {
                 if (currentSelectedElement != null)
@@ -2124,7 +2100,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void GridImageScaleIncrease_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("缩放图片")) return;
             try
             {
                 if (currentSelectedElement != null)
@@ -2220,7 +2195,6 @@ namespace Ink_Canvas
 
         private async void BorderPdfSidebarPagePrev_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("切换 PDF 页")) return;
             try
             {
                 var pdf = GetPdfSidebarTargetElement();
@@ -2236,7 +2210,6 @@ namespace Ink_Canvas
 
         private async void BorderPdfSidebarPageNext_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("切换 PDF 页")) return;
             try
             {
                 var pdf = GetPdfSidebarTargetElement();
@@ -2255,7 +2228,6 @@ namespace Ink_Canvas
         /// </summary>
         private void BorderImageDelete_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("删除图片")) return;
             try
             {
                 if (currentSelectedElement != null)
@@ -2593,7 +2565,6 @@ namespace Ink_Canvas
 
         private void ImageSelectionOverlay_ResizeDelta(object sender, ImageResizeDeltaEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("缩放图片")) return;
             try
             {
                 if (!IsBitmapLikeCanvasElement(currentSelectedElement)) return;
@@ -2607,7 +2578,6 @@ namespace Ink_Canvas
 
         private void ImageSelectionOverlay_MoveDelta(object sender, ImageMoveDeltaEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("移动图片")) return;
             try
             {
                 if (currentSelectedElement == null) return;
@@ -2640,7 +2610,6 @@ namespace Ink_Canvas
 
         private void ImageSelectionOverlay_RotateDelta(object sender, ImageRotateDeltaEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("旋转图片")) return;
             try
             {
                 if (currentSelectedElement == null) return;

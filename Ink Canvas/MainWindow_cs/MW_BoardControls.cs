@@ -61,8 +61,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void SaveStrokes(bool isBackupMain = false)
         {
-            ApplyFreezeStateToCurrentStrokes();
-
             // 确保画布上的所有UI元素都被保存到时间机器历史记录中
             var currentHistory = timeMachine.ExportTimeMachineHistory();
             var elementsInHistory = new HashSet<UIElement>();
@@ -230,8 +228,6 @@ namespace Ink_Canvas
                 {
                     timeMachine.ClearStrokeHistory();
                     SyncPdfPageSidebarWithCanvas();
-                    ApplyFreezeStateToCurrentStrokes();
-                    UpdateInkFreezeButtonState();
                     return;
                 }
 
@@ -279,11 +275,6 @@ namespace Ink_Canvas
             catch
             {
                 // ignored
-            }
-            finally
-            {
-                ApplyFreezeStateToCurrentStrokes();
-                UpdateInkFreezeButtonState();
             }
         }
 
@@ -526,7 +517,6 @@ namespace Ink_Canvas
 
         private void BtnWhiteBoardAdd_Click(object sender, RoutedEventArgs e)
         {
-            MarkCurrentPageInkChanged();
             if (WhiteboardTotalCount >= 99) return;
             if (Settings.Automation.IsAutoSaveStrokesAtClear &&
                 inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
@@ -556,15 +546,11 @@ namespace Ink_Canvas
                 {
                     TimeMachineHistories[i] = TimeMachineHistories[i - 1];
                     savedMultiTouchModeStates[i] = savedMultiTouchModeStates[i - 1];
-                    frozenPages[i] = frozenPages[i - 1];
-                    pageLastUserInkMutationUtc[i] = pageLastUserInkMutationUtc[i - 1];
                 }
             }
 
             // 确保新页面的历史记录为空
             TimeMachineHistories[CurrentWhiteboardIndex] = null;
-            frozenPages[CurrentWhiteboardIndex] = false;
-            pageLastUserInkMutationUtc[CurrentWhiteboardIndex] = DateTime.MinValue;
 
             // 恢复新页面（这会清空画布，因为历史记录为null）
             RestoreStrokes();
@@ -597,12 +583,6 @@ namespace Ink_Canvas
             if (WhiteboardTotalCount <= 1 || pageIndex < 1 || pageIndex > WhiteboardTotalCount)
                 return;
 
-            if (IsPageFrozen(pageIndex))
-            {
-                ShowNotification("该页面已冻结，不能删除");
-                return;
-            }
-
             if (currentSelectedElement != null)
             {
                 var previousEditingMode = inkCanvas.EditingMode;
@@ -622,8 +602,6 @@ namespace Ink_Canvas
                     {
                         TimeMachineHistories[i] = FlattenPageHistory(TimeMachineHistories[i + 1]);
                         savedMultiTouchModeStates[i] = savedMultiTouchModeStates[i + 1];
-                        frozenPages[i] = frozenPages[i + 1];
-                        pageLastUserInkMutationUtc[i] = pageLastUserInkMutationUtc[i + 1];
                     }
                 }
                 else
@@ -641,8 +619,6 @@ namespace Ink_Canvas
                 {
                     TimeMachineHistories[i] = FlattenPageHistory(TimeMachineHistories[i + 1]);
                     savedMultiTouchModeStates[i] = savedMultiTouchModeStates[i + 1];
-                    frozenPages[i] = frozenPages[i + 1];
-                    pageLastUserInkMutationUtc[i] = pageLastUserInkMutationUtc[i + 1];
                 }
                 TimeMachineHistories[WhiteboardTotalCount] = null;
                 WhiteboardTotalCount--;
@@ -654,15 +630,10 @@ namespace Ink_Canvas
                 {
                     TimeMachineHistories[i] = FlattenPageHistory(TimeMachineHistories[i + 1]);
                     savedMultiTouchModeStates[i] = savedMultiTouchModeStates[i + 1];
-                    frozenPages[i] = frozenPages[i + 1];
-                    pageLastUserInkMutationUtc[i] = pageLastUserInkMutationUtc[i + 1];
                 }
                 TimeMachineHistories[WhiteboardTotalCount] = null;
                 WhiteboardTotalCount--;
             }
-
-            frozenPages[WhiteboardTotalCount + 1] = false;
-            pageLastUserInkMutationUtc[WhiteboardTotalCount + 1] = DateTime.MinValue;
 
             UpdateIndexInfoDisplay();
             if (WhiteboardTotalCount < 99) BtnWhiteBoardAdd.IsEnabled = true;
@@ -741,7 +712,6 @@ namespace Ink_Canvas
             }
 
             BtnWhiteBoardDelete.IsEnabled = WhiteboardTotalCount != 1;
-            UpdateInkFreezeButtonState();
         }
     }
 }

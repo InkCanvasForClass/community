@@ -156,9 +156,6 @@
   <data name="Nav_About" xml:space="preserve">
     <value>About</value>
   </data>
-  <data name="Nav_FriendlyLinks" xml:space="preserve">
-    <value>Friendly links</value>
-  </data>
   <data name="App_Title" xml:space="preserve">
     <value>InkCanvasforClass</value>
   </data>
@@ -633,33 +630,6 @@
   <data name="Theme_System" xml:space="preserve">
     <value>Follow system</value>
   </data>
-  <data name="Theme_WindowBackdrop" xml:space="preserve">
-    <value>Window background style</value>
-  </data>
-  <data name="Theme_WindowBackdrop_Description" xml:space="preserve">
-    <value>Controls Mica, Acrylic, and other background effects for modern windows such as Settings and OOBE.</value>
-  </data>
-  <data name="Theme_WindowBackdrop_None" xml:space="preserve">
-    <value>No background effect</value>
-  </data>
-  <data name="Theme_WindowBackdrop_Mica" xml:space="preserve">
-    <value>Mica</value>
-  </data>
-  <data name="Theme_WindowBackdrop_Acrylic" xml:space="preserve">
-    <value>Acrylic</value>
-  </data>
-  <data name="Theme_WindowBackdrop_Tabbed" xml:space="preserve">
-    <value>Tabbed background</value>
-  </data>
-  <data name="Theme_WindowBackdrop_Transient" xml:space="preserve">
-    <value>Transient background</value>
-  </data>
-  <data name="Theme_WindowBackdrop_Acrylic10" xml:space="preserve">
-    <value>Acrylic (Windows 10 compatible)</value>
-  </data>
-  <data name="Theme_WindowBackdrop_Acrylic11" xml:space="preserve">
-    <value>Acrylic (Windows 11 compatible)</value>
-  </data>
   <data name="Theme_EnableSplash" xml:space="preserve">
     <value>Enable startup animation</value>
   </data>
@@ -852,42 +822,6 @@
   <data name="Tray_EnableTrayIcon" xml:space="preserve">
     <value>Enable tray icon</value>
   </data>
-  <data name="Tray_LeftClickAction" xml:space="preserve">
-    <value>Tray left-click</value>
-  </data>
-  <data name="Tray_RightClickAction" xml:space="preserve">
-    <value>Tray right-click</value>
-  </data>
-  <data name="Tray_ClickAction_ShowMenu" xml:space="preserve">
-    <value>Open menu</value>
-  </data>
-  <data name="Tray_ClickAction_HideShowMainWindow" xml:space="preserve">
-    <value>Hide/show main window</value>
-  </data>
-  <data name="Tray_ClickAction_TempShowMainWindow" xml:space="preserve">
-    <value>Temporarily show main window</value>
-  </data>
-  <data name="Tray_ClickAction_OpenSettings" xml:space="preserve">
-    <value>Open settings</value>
-  </data>
-  <data name="Tray_ClickAction_DisableAllHotkeys" xml:space="preserve">
-    <value>Disable/enable all hotkeys</value>
-  </data>
-  <data name="Tray_ClickAction_ForceFullScreen" xml:space="preserve">
-    <value>Force fullscreen</value>
-  </data>
-  <data name="Tray_ClickAction_ToggleFoldFloatingBar" xml:space="preserve">
-    <value>Toggle floating bar dock mode</value>
-  </data>
-  <data name="Tray_ClickAction_ResetFloatingBarPosition" xml:space="preserve">
-    <value>Reset toolbar position</value>
-  </data>
-  <data name="Tray_ClickAction_RestartApp" xml:space="preserve">
-    <value>Restart app</value>
-  </data>
-  <data name="Tray_ClickAction_CloseApp" xml:space="preserve">
-    <value>Exit app</value>
-  </data>
   <data name="PPT_GroupTitle" xml:space="preserve">
     <value>PPT integration</value>
   </data>
@@ -1025,9 +959,6 @@
   </data>
   <data name="Startup_UIAccessTopMostHint" xml:space="preserve">
     <value>With UIA topmost on, app needs admin to stay on top. To turn off, fully quit then start again; restart will not disable it.</value>
-  </data>
-  <data name="Startup_AutoUpdateHint" xml:space="preserve">
-    <value>Automatically check for updates when the app starts.</value>
   </data>
   <data name="Startup_SilentUpdateHint" xml:space="preserve">
     <value>Silent update installs when the app is idle; no manual action needed.</value>
@@ -1935,15 +1866,6 @@
   <data name="About_VersionLabel" xml:space="preserve">
     <value>Version:</value>
   </data>
-  <data name="FriendlyLinks_Title" xml:space="preserve">
-    <value>Friendly links</value>
-  </data>
-  <data name="FriendlyLinks_NamePickerDescription" xml:space="preserve">
-    <value>Random name picker and drawing tool</value>
-  </data>
-  <data name="FriendlyLinks_Visit" xml:space="preserve">
-    <value>Visit</value>
-  </data>
   <data name="Common_Close" xml:space="preserve">
     <value>Close</value>
   </data>
@@ -2226,12 +2148,6 @@ Hide</value>
   <data name="FloatingBar_Whiteboard" xml:space="preserve">
     <value>Board</value>
   </data>
-  <data name="FloatingBar_Freeze" xml:space="preserve">
-    <value>Freeze</value>
-  </data>
-  <data name="FloatingBar_Unfreeze" xml:space="preserve">
-    <value>Unfreeze</value>
-  </data>
   <data name="FloatingBar_Hide" xml:space="preserve">
     <value>Hide</value>
   </data>
@@ -2276,6 +2192,36 @@ Hide</value>
   </data>
   <data name="Geometry_DrawCone" xml:space="preserve">
     <value>Cone</value>
+  </data>
+  <data name="Geometry_DrawCoordinate1" xml:space="preserve">
+    <value>Coordinate 1</value>
+  </data>
+  <data name="Geometry_DrawCoordinate2" xml:space="preserve">
+    <value>Coordinate 2</value>
+  </data>
+  <data name="Geometry_DrawCoordinate3" xml:space="preserve">
+    <value>Coordinate 3</value>
+  </data>
+  <data name="Geometry_DrawCoordinate4" xml:space="preserve">
+    <value>Coordinate 4</value>
+  </data>
+  <data name="Geometry_DrawCoordinate5" xml:space="preserve">
+    <value>Coordinate 5</value>
+  </data>
+  <data name="Geometry_DrawHyperbola" xml:space="preserve">
+    <value>Hyperbola</value>
+  </data>
+  <data name="Geometry_DrawHyperbolaWithFocal" xml:space="preserve">
+    <value>Hyperbola (Focal)</value>
+  </data>
+  <data name="Geometry_DrawParabola" xml:space="preserve">
+    <value>Parabola</value>
+  </data>
+  <data name="Geometry_DrawParabolaWithFocal" xml:space="preserve">
+    <value>Parabola (Focal)</value>
+  </data>
+  <data name="Geometry_DrawParabola2" xml:space="preserve">
+    <value>Parabola 2</value>
   </data>
   <data name="FloatingBar_GestureButton" xml:space="preserve">
     <value>Gesture</value>

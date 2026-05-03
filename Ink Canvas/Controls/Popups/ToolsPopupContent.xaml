@@ -8,8 +8,7 @@
              xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
              xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
              xmlns:helpers="clr-namespace:Ink_Canvas.Helpers"
-             mc:Ignorable="d"
-             d:DesignHeight="200" d:DesignWidth="200">
+             mc:Ignorable="d">
     <UserControl.Resources>
         <Style x:Key="AutoFitToolPopupLabel8" TargetType="Label">
             <Setter Property="Padding" Value="0" />

@@ -137,6 +137,48 @@ namespace Ink_Canvas
             content.CloseFontIcon.MouseUp += CloseBordertools_MouseUp;
         }
 
+        private bool _boardShapeDrawPopupEventsWired;
+
+        private void WireUpBoardShapeDrawPopupContentEvents()
+        {
+            if (_boardShapeDrawPopupEventsWired) return;
+            _boardShapeDrawPopupEventsWired = true;
+
+            var content = BoardShapeDrawPopupContent;
+            if (content == null) return;
+
+            content.DrawLineBtn.ButtonMouseDown += Image_MouseDown;
+            content.DrawLineBtn.ButtonMouseUp += BtnDrawLine_Click;
+            content.DrawDashedLineBtn.ButtonMouseDown += Image_MouseDown;
+            content.DrawDashedLineBtn.ButtonMouseUp += BtnDrawDashedLine_Click;
+            content.DrawDotLineBtn.ButtonMouseDown += Image_MouseDown;
+            content.DrawDotLineBtn.ButtonMouseUp += BtnDrawDotLine_Click;
+            content.DrawArrowBtn.ButtonMouseDown += Image_MouseDown;
+            content.DrawArrowBtn.ButtonMouseUp += BtnDrawArrow_Click;
+            content.DrawParallelLineBtn.ButtonMouseDown += Image_MouseDown;
+            content.DrawParallelLineBtn.ButtonMouseUp += BtnDrawParallelLine_Click;
+            content.DrawRectangleCenterBtn.ButtonMouseUp += BtnDrawRectangleCenter_Click;
+            content.DrawCircleBtn.ButtonMouseUp += BtnDrawCircle_Click;
+            content.DrawDashedCircleBtn.ButtonMouseUp += BtnDrawDashedCircle_Click;
+            content.DrawEllipseCenterBtn.ButtonMouseUp += BtnDrawCenterEllipse_Click;
+            content.DrawCuboidBtn.ButtonMouseUp += BtnDrawCuboid_Click;
+            content.DrawRectangleBtn.ButtonMouseUp += BtnDrawRectangle_Click;
+            content.DrawCylinderBtn.ButtonMouseUp += BtnDrawCylinder_Click;
+            content.DrawConeBtn.ButtonMouseUp += BtnDrawCone_Click;
+            content.DrawCoordinate1Btn.ButtonMouseUp += BtnDrawCoordinate1_Click;
+            content.DrawCoordinate2Btn.ButtonMouseUp += BtnDrawCoordinate2_Click;
+            content.DrawCoordinate3Btn.ButtonMouseUp += BtnDrawCoordinate3_Click;
+            content.DrawCoordinate4Btn.ButtonMouseUp += BtnDrawCoordinate4_Click;
+            content.DrawCoordinate5Btn.ButtonMouseUp += BtnDrawCoordinate5_Click;
+            content.DrawHyperbolaBtn.ButtonMouseUp += BtnDrawHyperbola_Click;
+            content.DrawHyperbolaWithFocalPointBtn.ButtonMouseUp += BtnDrawHyperbolaWithFocalPoint_Click;
+            content.DrawParabola1Btn.ButtonMouseUp += BtnDrawParabola1_Click;
+            content.DrawParabolaWithFocalPointBtn.ButtonMouseUp += BtnDrawParabolaWithFocalPoint_Click;
+            content.DrawParabola2Btn.ButtonMouseUp += BtnDrawParabola2_Click;
+            content.CloseFontIcon.MouseDown += Border_MouseDown;
+            content.CloseFontIcon.MouseUp += CloseBordertools_MouseUp;
+        }
+
         private bool _shapeDrawPopupEventsWired;
 
         private void WireUpShapeDrawPopupContentEvents()
@@ -191,6 +233,7 @@ namespace Ink_Canvas
 
             WireUpToolsPopupContentEvents();
             WireUpShapeDrawPopupContentEvents();
+            WireUpBoardShapeDrawPopupContentEvents();
 
             BoardBorderToolsPopup.CustomPopupPlacementCallback =
                 (popupSize, targetSize, offset) => new[]
@@ -216,6 +259,14 @@ namespace Ink_Canvas
                         PopupPrimaryAxis.Vertical)
                 };
 
+            BoardBorderDrawShape.CustomPopupPlacementCallback =
+                (popupSize, targetSize, offset) => new[]
+                {
+                    new CustomPopupPlacement(
+                        new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height - 8),
+                        PopupPrimaryAxis.Vertical)
+                };
+
             BlackboardLeftSide.Visibility = Visibility.Collapsed;
             BlackboardCenterSide.Visibility = Visibility.Collapsed;
             BlackboardRightSide.Visibility = Visibility.Collapsed;
@@ -225,7 +276,7 @@ namespace Ink_Canvas
             TwoFingerGestureBorder.Visibility = Visibility.Collapsed;
             BoardTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
             BorderDrawShape.IsOpen = false;
-            BoardBorderDrawShape.Visibility = Visibility.Collapsed;
+            BoardBorderDrawShape.IsOpen = false;
             GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
 
             //if (!App.StartArgs.Contains("-o"))
@@ -1209,12 +1260,6 @@ namespace Ink_Canvas
         {
             var inkCanvas1 = sender as InkCanvas;
             if (inkCanvas1 == null) return;
-            if (IsCurrentPageFrozen && IsFreezeMutatingMode(inkCanvas1.EditingMode))
-            {
-                TryBlockFrozenPageMutation("修改冻结页面");
-                inkCanvas1.EditingMode = InkCanvasEditingMode.None;
-                return;
-            }
 
             // 使用辅助方法设置光标
             SetCursorBasedOnEditingMode(inkCanvas1);
@@ -2114,13 +2159,6 @@ namespace Ink_Canvas
         // 鼠标输入
         private void inkCanvas_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (IsCurrentPageFrozen && IsFreezeMutatingMode(inkCanvas.EditingMode))
-            {
-                TryBlockFrozenPageMutation("修改冻结页面");
-                e.Handled = true;
-                return;
-            }
-
             // 使用辅助方法设置光标
             SetCursorBasedOnEditingMode(sender as InkCanvas);
 
@@ -2149,13 +2187,6 @@ namespace Ink_Canvas
         // 手写笔输入
         private void inkCanvas_StylusDown(object sender, StylusDownEventArgs e)
         {
-            if (IsCurrentPageFrozen && IsFreezeMutatingMode(inkCanvas.EditingMode))
-            {
-                TryBlockFrozenPageMutation("修改冻结页面");
-                e.Handled = true;
-                return;
-            }
-
             // 使用辅助方法设置光标
             SetCursorBasedOnEditingMode(sender as InkCanvas);
         }
@@ -3077,16 +3108,10 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="newMode">新的编辑模式</param>
         /// <param name="additionalActions">可选的额外操作委托</param>
-        internal bool SetCurrentToolMode(InkCanvasEditingMode newMode, Action additionalActions = null)
+        internal void SetCurrentToolMode(InkCanvasEditingMode newMode, Action additionalActions = null)
         {
             try
             {
-                if (IsCurrentPageFrozen && IsFreezeMutatingMode(newMode))
-                {
-                    TryBlockFrozenPageMutation("切换到编辑工具");
-                    return false;
-                }
-
                 // 如果切换到非橡皮擦模式，禁用橡皮擦覆盖层并重置橡皮擦状态
                 if (newMode != InkCanvasEditingMode.EraseByPoint && newMode != InkCanvasEditingMode.EraseByStroke)
                 {
@@ -3113,13 +3138,11 @@ namespace Ink_Canvas
 
                 // 执行额外的操作（如果有）
                 additionalActions?.Invoke();
-                return true;
 
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"设置工具模式时出错: {ex.Message}", LogHelper.LogType.Error);
-                return false;
             }
         }
 

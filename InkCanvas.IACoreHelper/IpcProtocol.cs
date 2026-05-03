@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace InkCanvas.IACoreHelper
 {
@@ -8,7 +11,7 @@ namespace InkCanvas.IACoreHelper
         public const string PipeName = "ICC_IACoreHelper_{0}";  // {0} = 主进程 PID
         public const int RequestTimeout = 5000;                  // ms
         public const byte CmdRecognize = 0x01;
-        public const byte CmdShutdown = 0xFF;
+        public const byte CmdShutdown  = 0xFF;
     }
 
     // 单个 StylusPoint 的轻量传输结构
@@ -73,7 +76,7 @@ namespace InkCanvas.IACoreHelper
         public float ShapeHeight;
         public float[] HotPointsX;
         public float[] HotPointsY;
-        public int[] StrokeIndices;   // 参与识别的笔画在原始数组中的下标
+        public int[]   StrokeIndices;   // 参与识别的笔画在原始数组中的下标
 
         public void WriteTo(BinaryWriter w)
         {
@@ -102,10 +105,10 @@ namespace InkCanvas.IACoreHelper
         {
             var resp = new RecognizeResponse
             {
-                Success = r.ReadBoolean(),
-                ShapeName = r.ReadString(),
-                CentroidX = r.ReadSingle(),
-                CentroidY = r.ReadSingle(),
+                Success    = r.ReadBoolean(),
+                ShapeName  = r.ReadString(),
+                CentroidX  = r.ReadSingle(),
+                CentroidY  = r.ReadSingle(),
                 ShapeWidth = r.ReadSingle(),
                 ShapeHeight = r.ReadSingle()
             };

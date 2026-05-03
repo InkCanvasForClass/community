@@ -168,7 +168,6 @@ namespace Ink_Canvas
                 WhiteboardFloatingBarBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.WhiteboardFloatingBarBtnIcon);
                 ToolsFloatingBarBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.ToolsFloatingBarBtnIcon);
                 Fold_Icon.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.FoldIcon);
-                UpdateInkFreezeButtonState();
 
                 TimerToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.TimerIconGeometry);
                 RandomDrawToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.RandomDrawIconGeometry);
@@ -235,7 +234,6 @@ namespace Ink_Canvas
             WhiteboardFloatingBarBtn.Icon.Brush = brush;
             ToolsFloatingBarBtn.Icon.Brush = brush;
             Fold_Icon.Icon.Brush = brush;
-            if (Freeze_Icon != null) Freeze_Icon.Icon.Brush = brush;
         }
 
         private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
