@@ -4337,6 +4337,49 @@ namespace Ink_Canvas
                 }
 
                 // 根据主题设置高光颜色
+                if (hasTargetHighlightPlacement)
+                {
+                    position = targetHighlightPosition;
+                    actualHighlightWidth = targetHighlightWidth;
+                }
+                else
+                {
+                    switch (mode)
+                    {
+                        case "cursor":
+                            actualHighlightWidth = cursorWidth;
+                            position = marginOffset;
+                            break;
+                        case "pen":
+                        case "color":
+                            actualHighlightWidth = penWidth;
+                            position = marginOffset + cursorWidth;
+                            break;
+                        case "eraser":
+                            actualHighlightWidth = eraserWidth;
+                            position = marginOffset + cursorWidth + penWidth + quickColorPaletteTotalWidth + deleteWidth;
+                            break;
+                        case "eraserByStrokes":
+                            actualHighlightWidth = eraserByStrokesWidth;
+                            position = marginOffset + cursorWidth + penWidth + quickColorPaletteTotalWidth + deleteWidth + eraserWidth;
+                            break;
+                        case "select":
+                            actualHighlightWidth = selectWidth;
+                            position = marginOffset + cursorWidth + penWidth + quickColorPaletteTotalWidth + deleteWidth + eraserWidth + eraserByStrokesWidth;
+                            break;
+                        case "shape":
+                            actualHighlightWidth = buttonWidth;
+                            position = marginOffset + cursorWidth + penWidth + quickColorPaletteTotalWidth + deleteWidth + eraserWidth + eraserByStrokesWidth + selectWidth;
+                            break;
+                    }
+                }
+
+                if (actualHighlightWidth <= 0)
+                {
+                    FloatingbarSelectionBG.Visibility = Visibility.Hidden;
+                    return;
+                }
+
                 Color highlightBackgroundColor;
                 Color highlightBarColor;
                 bool isDarkTheme = Settings.Appearance.Theme == 1 ||
@@ -4354,17 +4397,22 @@ namespace Ink_Canvas
                 }
 
                 // 设置高光背景颜色
+                FloatingbarSelectionBG.Width = actualHighlightWidth;
                 FloatingbarSelectionBG.Background = new SolidColorBrush(highlightBackgroundColor);
                 if (FloatingbarSelectionBG.Child is System.Windows.Controls.Canvas canvas && canvas.Children.Count > 0)
                 {
                     var firstChild = canvas.Children[0];
                     if (firstChild is Border innerBorder)
                     {
+                        System.Windows.Controls.Canvas.SetLeft(innerBorder, Math.Max(0, (actualHighlightWidth - innerBorder.Width) / 2));
                         innerBorder.Background = new SolidColorBrush(highlightBarColor);
                     }
                 }
 
                 // 设置高光位置
+                ResetFloatingBarToolIconHighlights();
+                ApplyFloatingBarToolIconHighlight(mode, highlightBarColor);
+
                 FloatingbarSelectionBG.Visibility = Visibility.Visible;
                 System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, position);
             }
