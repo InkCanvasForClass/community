@@ -951,6 +951,9 @@
   <data name="Startup_UIAccessTopMostHint" xml:space="preserve">
     <value>With UIA topmost on, app needs admin to stay on top. To turn off, fully quit then start again; restart will not disable it.</value>
   </data>
+  <data name="Startup_AutoUpdateHint" xml:space="preserve">
+    <value>Automatically check for updates when the app starts.</value>
+  </data>
   <data name="Startup_SilentUpdateHint" xml:space="preserve">
     <value>Silent update installs when the app is idle; no manual action needed.</value>
   </data>
@@ -2138,6 +2141,12 @@ Hide</value>
   </data>
   <data name="FloatingBar_Whiteboard" xml:space="preserve">
     <value>Board</value>
+  </data>
+  <data name="FloatingBar_Freeze" xml:space="preserve">
+    <value>Freeze</value>
+  </data>
+  <data name="FloatingBar_Unfreeze" xml:space="preserve">
+    <value>Unfreeze</value>
   </data>
   <data name="FloatingBar_Hide" xml:space="preserve">
     <value>Hide</value>

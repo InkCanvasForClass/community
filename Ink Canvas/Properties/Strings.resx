@@ -990,6 +990,9 @@
   <data name="Startup_UIAccessTopMostHint" xml:space="preserve">
     <value>开启UIA置顶后，软件需要管理员启动才能置顶，关闭此功能需要完全关闭软件后再手动启动，无法使用重启来关闭此功能</value>
   </data>
+  <data name="Startup_AutoUpdateHint" xml:space="preserve">
+    <value>开启后将在软件启动时自动检查更新。</value>
+  </data>
   <data name="Startup_SilentUpdateHint" xml:space="preserve">
     <value>静默更新将在软件不使用时自动安装，无需手动操作</value>
   </data>
@@ -2190,6 +2193,12 @@
   </data>
   <data name="FloatingBar_Whiteboard" xml:space="preserve">
     <value>白板</value>
+  </data>
+  <data name="FloatingBar_Freeze" xml:space="preserve">
+    <value>冻结</value>
+  </data>
+  <data name="FloatingBar_Unfreeze" xml:space="preserve">
+    <value>解冻</value>
   </data>
   <data name="FloatingBar_Hide" xml:space="preserve">
     <value>隐藏</value>
