@@ -137,6 +137,38 @@ namespace Ink_Canvas
             content.CloseFontIcon.MouseUp += CloseBordertools_MouseUp;
         }
 
+        private bool _shapeDrawPopupEventsWired;
+
+        private void WireUpShapeDrawPopupContentEvents()
+        {
+            if (_shapeDrawPopupEventsWired) return;
+            _shapeDrawPopupEventsWired = true;
+
+            var content = ShapeDrawPopupContent;
+            if (content == null) return;
+
+            content.DrawLineBtn.ButtonMouseDown += Image_MouseDown;
+            content.DrawLineBtn.ButtonMouseUp += BtnDrawLine_Click;
+            content.DrawDashedLineBtn.ButtonMouseDown += Image_MouseDown;
+            content.DrawDashedLineBtn.ButtonMouseUp += BtnDrawDashedLine_Click;
+            content.DrawDotLineBtn.ButtonMouseDown += Image_MouseDown;
+            content.DrawDotLineBtn.ButtonMouseUp += BtnDrawDotLine_Click;
+            content.DrawArrowBtn.ButtonMouseDown += Image_MouseDown;
+            content.DrawArrowBtn.ButtonMouseUp += BtnDrawArrow_Click;
+            content.DrawParallelLineBtn.ButtonMouseDown += Image_MouseDown;
+            content.DrawParallelLineBtn.ButtonMouseUp += BtnDrawParallelLine_Click;
+            content.DrawRectangleCenterBtn.ButtonMouseUp += BtnDrawRectangleCenter_Click;
+            content.DrawCircleBtn.ButtonMouseUp += BtnDrawCircle_Click;
+            content.DrawDashedCircleBtn.ButtonMouseUp += BtnDrawDashedCircle_Click;
+            content.DrawEllipseCenterBtn.ButtonMouseUp += BtnDrawCenterEllipse_Click;
+            content.DrawCuboidBtn.ButtonMouseUp += BtnDrawCuboid_Click;
+            content.DrawRectangleBtn.ButtonMouseUp += BtnDrawRectangle_Click;
+            content.DrawCylinderBtn.ButtonMouseUp += BtnDrawCylinder_Click;
+            content.DrawConeBtn.ButtonMouseUp += BtnDrawCone_Click;
+            content.CloseFontIcon.MouseDown += Border_MouseDown;
+            content.CloseFontIcon.MouseUp += CloseBordertools_MouseUp;
+        }
+
         /// <summary>
         /// 初始化主窗口实例，构建并配置界面元素、初始页面和应用程序运行时状态。
         /// </summary>
@@ -153,6 +185,7 @@ namespace Ink_Canvas
             InitializeComponent();
 
             WireUpToolsPopupContentEvents();
+            WireUpShapeDrawPopupContentEvents();
 
             BoardBorderToolsPopup.CustomPopupPlacementCallback =
                 (popupSize, targetSize, offset) => new[]
@@ -170,6 +203,14 @@ namespace Ink_Canvas
                         PopupPrimaryAxis.Vertical)
                 };
 
+            BorderDrawShape.CustomPopupPlacementCallback =
+                (popupSize, targetSize, offset) => new[]
+                {
+                    new CustomPopupPlacement(
+                        new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height - 8),
+                        PopupPrimaryAxis.Vertical)
+                };
+
             BlackboardLeftSide.Visibility = Visibility.Collapsed;
             BlackboardCenterSide.Visibility = Visibility.Collapsed;
             BlackboardRightSide.Visibility = Visibility.Collapsed;
@@ -178,7 +219,7 @@ namespace Ink_Canvas
             RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
             TwoFingerGestureBorder.Visibility = Visibility.Collapsed;
             BoardTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
-            BorderDrawShape.Visibility = Visibility.Collapsed;
+            BorderDrawShape.IsOpen = false;
             BoardBorderDrawShape.Visibility = Visibility.Collapsed;
             GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
 

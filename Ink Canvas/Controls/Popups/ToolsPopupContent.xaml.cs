@@ -36,7 +36,7 @@ namespace Ink_Canvas.Controls
         public ToolMenuButton ManualBtn => ManualToolBtn;
         public ToolMenuButton SettingsBtn => SettingsToolBtn;
 
-        public FontIcon CloseFontIcon => CloseIcon;
+        public FontIcon CloseFontIcon => TitleBar?.CloseFontIcon;
 
         public ToolsPopupContent()
         {

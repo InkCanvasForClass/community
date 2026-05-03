@@ -2747,57 +2747,6 @@
 
                                     <!-- Eraser_Icon / EraserByStrokes_Icon / SymbolIconSelect / ShapeDrawFloatingBarBtn 由 ToolbarRegistry 注入（Prepend） -->
 
-                                    <Grid Width="0">
-                                        <Border x:Name="BorderDrawShape" Background="{DynamicResource FloatBarBackground}" Opacity="1"
-                                                Visibility="Visible" BorderBrush="#2563eb"
-                                                BorderThickness="1"
-                                                CornerRadius="5" Margin="-170,-140,-147,37">
-                                            <ikw:SimpleStackPanel Orientation="Vertical">
-                                                <!--<TextBlock FontSize="16" Foreground="{DynamicResource FloatBarForeground}" HorizontalAlignment="Left" Margin="10,8">
-                                                <Run Text="图形"/>
-                                                <Run Text="(第一行支持长按保持选中)" FontSize="10"/>
-                                            </TextBlock>
-                                            <ui:SymbolIcon Margin="0,-20,8,15" Symbol="Pin" MouseDown="Border_MouseDown" MouseUp="SymbolIconPinBorderDrawShape_MouseUp" Foreground="{DynamicResource FloatBarForeground}" HorizontalAlignment="Right"/>-->
-                                                <Border BorderBrush="#1e3a8a" BorderThickness="0,0,0,1"
-                                                        CornerRadius="6,6,0,0" Background="#2563eb" Margin="-1,-1,-1,0">
-                                                    <Grid Margin="5">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*" />
-                                                            <ColumnDefinition Width="Auto" />
-                                                        </Grid.ColumnDefinitions>
-                                                        <TextBlock Text="{i18n:I18n Key=Board_Shape}" Foreground="White"
-                                                                   VerticalAlignment="Center" Grid.Column="0"
-                                                                   FontSize="11" FontWeight="Bold" />
-                                                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChromeCloseContrast}"
-                                                                    Foreground="White" FontSize="12"
-                                                                    VerticalAlignment="Center" Grid.Column="1"
-                                                                    MouseDown="Border_MouseDown"
-                                                                    MouseUp="CloseBordertools_MouseUp" />
-                                                    </Grid>
-                                                </Border>
-
-                                                <ikw:SimpleStackPanel Orientation="Horizontal" Height="38" Spacing="2"
-                                                                     Margin="4,6,4,0">
-                                                    <controls:GeometryButton x:Name="BoardImageDrawLine" IconSource="{DynamicResource GeoIconLine}" Label="{i18n:I18n Key=Geometry_DrawLine}" ButtonMouseDown="Image_MouseDown" ButtonMouseUp="BtnDrawLine_Click" />
-                                                    <controls:GeometryButton x:Name="BoardImageDrawDashedLine" IconSource="{DynamicResource GeoIconDashedLine}" Label="{i18n:I18n Key=Geometry_DrawDashedLine}" ButtonMouseDown="Image_MouseDown" ButtonMouseUp="BtnDrawDashedLine_Click" />
-                                                    <controls:GeometryButton x:Name="BoardImageDrawDotLine" IconSource="{DynamicResource GeoIconDotLine}" Label="{i18n:I18n Key=Geometry_DrawDottedLine}" ButtonMouseDown="Image_MouseDown" ButtonMouseUp="BtnDrawDotLine_Click" />
-                                                    <controls:GeometryButton x:Name="BoardImageDrawArrow" IconSource="{DynamicResource GeoIconArrow}" Label="{i18n:I18n Key=Geometry_DrawArrow}" ButtonMouseDown="Image_MouseDown" ButtonMouseUp="BtnDrawArrow_Click" />
-                                                    <controls:GeometryButton x:Name="BoardImageDrawParallelLine" IconSource="{DynamicResource GeoIconParallelLine}" Label="{i18n:I18n Key=Geometry_DrawParallelLines}" ButtonMouseDown="Image_MouseDown" ButtonMouseUp="BtnDrawParallelLine_Click" />
-                                                    <controls:GeometryButton IconSource="{DynamicResource GeoIconRectangleCenter}" Label="{i18n:I18n Key=Geometry_DrawCenteredSquare}" ButtonMouseUp="BtnDrawRectangleCenter_Click" />
-                                                    <controls:GeometryButton IconSource="{DynamicResource GeoIconCircle}" Label="{i18n:I18n Key=Geometry_DrawCenteredCircle}" ButtonMouseUp="BtnDrawCircle_Click" />
-                                                    <controls:GeometryButton IconSource="{DynamicResource GeoIconDashedCircle}" Label="{i18n:I18n Key=Geometry_DrawCenteredDashedCircle}" ButtonMouseUp="BtnDrawDashedCircle_Click" />
-                                                    <controls:GeometryButton IconSource="{DynamicResource GeoIconEllipseCenter}" Label="{i18n:I18n Key=Geometry_DrawCenteredEllipse}" ButtonMouseUp="BtnDrawCenterEllipse_Click" />
-                                                </ikw:SimpleStackPanel>
-                                                <ikw:SimpleStackPanel Orientation="Horizontal" Height="38" Spacing="2"
-                                                                     Margin="4,0,4,6">
-                                                    <controls:GeometryButton IconSource="{DynamicResource GeoIconCuboid}" Label="{i18n:I18n Key=Geometry_DrawCuboid}" ButtonMouseUp="BtnDrawCuboid_Click" />
-                                                    <controls:GeometryButton IconSource="{DynamicResource GeoIconRectangle}" Label="{i18n:I18n Key=Geometry_DrawSquare}" ButtonMouseUp="BtnDrawRectangle_Click" />
-                                                    <controls:GeometryButton IconSource="{DynamicResource GeoIconCylinder}" Label="{i18n:I18n Key=Geometry_DrawCylinder}" ButtonMouseUp="BtnDrawCylinder_Click" />
-                                                    <controls:GeometryButton IconSource="{DynamicResource GeoIconCone}" Label="{i18n:I18n Key=Geometry_DrawCone}" ButtonMouseUp="BtnDrawCone_Click" />
-                                                </ikw:SimpleStackPanel>
-                                            </ikw:SimpleStackPanel>
-                                        </Border>
-                                    </Grid>
                                     <!-- SymbolIconUndo / SymbolIconRedo / CursorWithDelFloatingBarBtn 由 ToolbarRegistry 注入（Append） -->
                                 </ikw:SimpleStackPanel>
                                 <Grid Width="0">
@@ -2952,6 +2901,13 @@
                                        StaysOpen="True"
                                        IsOpen="False">
                                     <localControls:ToolsPopupContent x:Name="MainToolsPopupContent" />
+                                </Popup>
+                                <Popup x:Name="BorderDrawShape"
+                                       Placement="Custom"
+                                       AllowsTransparency="True"
+                                       StaysOpen="True"
+                                       IsOpen="False">
+                                    <localControls:ShapeDrawPopupContent x:Name="ShapeDrawPopupContent" />
                                 </Popup>
                             </ikw:SimpleStackPanel>
                         </Grid>

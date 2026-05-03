@@ -4,7 +4,6 @@ using Ink_Canvas.Controls.Toolbar;
 using Ink_Canvas.Helpers;
 using System.Collections.Generic;
 using System.Windows.Controls;
-
 namespace Ink_Canvas
 {
     public partial class MainWindow
@@ -21,13 +20,23 @@ namespace Ink_Canvas
         internal ToolbarImageButton ToolsFloatingBarBtn { get; private set; }
         internal ToolbarImageButton Fold_Icon { get; private set; }
 
+        internal GeometryButton BoardImageDrawLine => ShapeDrawPopupContent?.DrawLineBtn;
+        internal GeometryButton BoardImageDrawDashedLine => ShapeDrawPopupContent?.DrawDashedLineBtn;
+        internal GeometryButton BoardImageDrawDotLine => ShapeDrawPopupContent?.DrawDotLineBtn;
+        internal GeometryButton BoardImageDrawArrow => ShapeDrawPopupContent?.DrawArrowBtn;
+        internal GeometryButton BoardImageDrawParallelLine => ShapeDrawPopupContent?.DrawParallelLineBtn;
+
         internal void AttachCursorIconView(ToolbarImageButton btn) => Cursor_Icon = btn;
         internal void AttachPenIconView(ToolbarImageButton btn) => Pen_Icon = btn;
         internal void AttachSymbolIconDelete(ToolbarImageButton btn) => SymbolIconDelete = btn;
         internal void AttachEraserIcon(ToolbarImageButton btn) => Eraser_Icon = btn;
         internal void AttachEraserByStrokesIcon(ToolbarImageButton btn) => EraserByStrokes_Icon = btn;
         internal void AttachSymbolIconSelect(ToolbarImageButton btn) => SymbolIconSelect = btn;
-        internal void AttachShapeDrawBtn(ToolbarImageButton btn) => ShapeDrawFloatingBarBtn = btn;
+        internal void AttachShapeDrawBtn(ToolbarImageButton btn)
+        {
+            ShapeDrawFloatingBarBtn = btn;
+            BorderDrawShape.PlacementTarget = btn;
+        }
         internal void AttachSymbolIconUndo(ToolbarImageButton btn) => SymbolIconUndo = btn;
         internal void AttachSymbolIconRedo(ToolbarImageButton btn) => SymbolIconRedo = btn;
         internal void AttachCursorWithDelBtn(ToolbarImageButton btn) => CursorWithDelFloatingBarBtn = btn;
