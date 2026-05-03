@@ -17,6 +17,7 @@ namespace Ink_Canvas.Helpers
         private readonly bool _useWindowChromeRendering;
         private readonly bool _dwmEnabled;
         private IntPtr _hwnd;
+        private bool _transparentHitThrough;
 
         public bool IsUsingWindowChromeRendering => _useWindowChromeRendering && _dwmEnabled;
 
@@ -71,6 +72,7 @@ namespace Ink_Canvas.Helpers
             if (!IsUsingWindowChromeRendering) return;
 
             _hwnd = new WindowInteropHelper(this).Handle;
+            EnsureLayeredWindowStyle();
             if (HwndSource.FromHwnd(_hwnd) is HwndSource source)
             {
                 source.AddHook(WindowChromeStyleHook);
@@ -86,33 +88,63 @@ namespace Ink_Canvas.Helpers
                 Marshal.StructureToPtr(styleStruct, lParam, false);
                 handled = true;
             }
+            else if (msg == (int)WindowMessage.NcHitTest && _transparentHitThrough)
+            {
+                var point = PointFromScreen(GetPointFromLParam(lParam));
+                if (!ShouldHandleWindowChromeHitTest(point))
+                {
+                    handled = true;
+                    return new IntPtr(HtTransparent);
+                }
+            }
 
             return IntPtr.Zero;
         }
 
         public void SetTransparentHitThrough()
         {
-            if (!IsUsingWindowChromeRendering || _hwnd == IntPtr.Zero) return;
-
-            var exStyle = GetWindowLongPtr(_hwnd, GwlExStyle).ToInt64();
-            SetWindowLongPtr(_hwnd, GwlExStyle, new IntPtr(exStyle | WsExTransparent | WsExLayered));
+            if (!IsUsingWindowChromeRendering) return;
+            _transparentHitThrough = true;
+            EnsureLayeredWindowStyle();
         }
 
         public void SetTransparentNotHitThrough()
         {
-            if (!IsUsingWindowChromeRendering || _hwnd == IntPtr.Zero) return;
+            if (!IsUsingWindowChromeRendering) return;
+            _transparentHitThrough = false;
+            EnsureLayeredWindowStyle();
+        }
 
-            var exStyle = GetWindowLongPtr(_hwnd, GwlExStyle).ToInt64();
-            SetWindowLongPtr(_hwnd, GwlExStyle, new IntPtr((exStyle & ~WsExTransparent) | WsExLayered));
+        protected virtual bool ShouldHandleWindowChromeHitTest(Point windowPoint)
+        {
+            return InputHitTest(windowPoint) != null;
         }
 
         private const int GwlExStyle = -20;
         private const long WsExLayered = 0x00080000L;
-        private const long WsExTransparent = 0x00000020L;
+        private const int HtTransparent = -1;
 
         private enum WindowMessage
         {
+            NcHitTest = 0x0084,
             StyleChanging = 0x007C
+        }
+
+        private static Point GetPointFromLParam(IntPtr lParam)
+        {
+            var value = lParam.ToInt64();
+            var x = unchecked((short)(value & 0xffff));
+            var y = unchecked((short)((value >> 16) & 0xffff));
+            return new Point(x, y);
+        }
+
+        private void EnsureLayeredWindowStyle()
+        {
+            if (!IsUsingWindowChromeRendering || _hwnd == IntPtr.Zero) return;
+
+            var exStyle = GetWindowLongPtr(_hwnd, GwlExStyle).ToInt64();
+            if ((exStyle & WsExLayered) == 0)
+                SetWindowLongPtr(_hwnd, GwlExStyle, new IntPtr(exStyle | WsExLayered));
         }
 
         [StructLayout(LayoutKind.Sequential)]
