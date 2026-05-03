@@ -26,6 +26,9 @@ namespace Ink_Canvas
         private Image eraserFeedback;
         private TranslateTransform eraserFeedbackTranslateTransform;
 
+        // 锁定笔画的GUID
+        private static readonly Guid IsLockGuid = new Guid("12345678-1234-1234-1234-123456789ABC");
+
         /// <summary>
         /// 橡皮擦覆盖层加载事件处理
         /// </summary>
@@ -100,7 +103,6 @@ namespace Ink_Canvas
         /// </summary>
         private void EraserOverlay_PointerDown(object sender)
         {
-            if (TryBlockFrozenPageMutation("擦除冻结页面")) return;
             if (isUsingGeometryEraser) return;
 
             // 锁定
@@ -182,13 +184,12 @@ namespace Ink_Canvas
         /// </summary>
         private void EraserOverlay_PointerMove(object sender, Point pt)
         {
-            if (TryBlockFrozenPageMutation("擦除冻结页面")) return;
             if (!isUsingGeometryEraser) return;
 
             if (isUsingStrokesEraser)
             {
                 // 笔画橡皮擦模式
-                var _filtered = inkCanvas.Strokes.HitTest(pt).Where(stroke => !stroke.ContainsPropertyData(FrozenStrokePropertyGuid));
+                var _filtered = inkCanvas.Strokes.HitTest(pt).Where(stroke => !stroke.ContainsPropertyData(IsLockGuid));
                 var filtered = _filtered as Stroke[] ?? _filtered.ToArray();
                 if (!filtered.Any()) return;
                 inkCanvas.Strokes.Remove(new StrokeCollection(filtered));
@@ -226,11 +227,11 @@ namespace Ink_Canvas
             StrokeCollection strokesToReplace = new StrokeCollection { args.HitStroke };
 
             // 过滤锁定的笔画
-            var filtered_2replace = strokesToReplace.Where(stroke => !stroke.ContainsPropertyData(FrozenStrokePropertyGuid));
+            var filtered_2replace = strokesToReplace.Where(stroke => !stroke.ContainsPropertyData(IsLockGuid));
             var filtered2Replace = filtered_2replace as Stroke[] ?? filtered_2replace.ToArray();
             if (!filtered2Replace.Any()) return;
 
-            var filtered_result = eraseResult.Where(stroke => !stroke.ContainsPropertyData(FrozenStrokePropertyGuid));
+            var filtered_result = eraseResult.Where(stroke => !stroke.ContainsPropertyData(IsLockGuid));
             var filteredResult = filtered_result as Stroke[] ?? filtered_result.ToArray();
 
             // 替换或删除笔画

@@ -34,19 +34,24 @@ namespace Ink_Canvas
         /// </remarks>
         internal void ImageDrawShape_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("打开几何工具")) return;
-
-            if (BorderDrawShape.IsOpen)
+            if (BorderDrawShape.IsOpen || BoardBorderDrawShape.IsOpen)
             {
                 AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
-                AnimationsHelper.HideWithSlideAndFade(BoardBorderDrawShape);
+                AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderDrawShape);
             }
             else
             {
                 HideSubPanels();
-                AnimationsHelper.ShowPopupWithSlideAndFade(BorderDrawShape);
-                _popupManager?.BringToFront(BorderDrawShape);
-                AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderDrawShape);
+                if (currentMode == 0)
+                {
+                    AnimationsHelper.ShowPopupWithSlideAndFade(BorderDrawShape);
+                    _popupManager?.BringToFront(BorderDrawShape);
+                }
+                else
+                {
+                    AnimationsHelper.ShowPopupWithSlideAndFade(BoardBorderDrawShape);
+                    _popupManager?.BringToFront(BoardBorderDrawShape);
+                }
             }
         }
 
@@ -144,11 +149,6 @@ namespace Ink_Canvas
         /// </remarks>
         private async void Image_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("绘制几何图形"))
-            {
-                e.Handled = true;
-                return;
-            }
             lastMouseDownSender = sender;
             lastMouseDownTime = DateTime.Now;
 
@@ -200,7 +200,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void BtnPen_Click(object sender, RoutedEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("切换到画笔")) return;
             forceEraser = false;
             drawingShapeMode = 0;
             inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
@@ -222,9 +221,6 @@ namespace Ink_Canvas
         /// </remarks>
         private Task<bool> CheckIsDrawingShapesInMultiTouchMode()
         {
-            if (TryBlockFrozenPageMutation("绘制几何图形"))
-                return Task.FromResult(false);
-
             if (isInMultiTouchMode)
             {
                 ToggleSwitchEnableMultiTouchMode.IsOn = false;
@@ -249,7 +245,7 @@ namespace Ink_Canvas
         /// </remarks>
         public async void BtnDrawLine_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             if (lastMouseDownSender == sender)
             {
                 forcePointEraser = false;
@@ -291,7 +287,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawDashedLine_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             if (lastMouseDownSender == sender)
             {
                 forcePointEraser = false;
@@ -333,7 +329,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawDotLine_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             if (lastMouseDownSender == sender)
             {
                 forcePointEraser = false;
@@ -375,7 +371,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawArrow_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             if (lastMouseDownSender == sender)
             {
                 forcePointEraser = false;
@@ -417,7 +413,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawParallelLine_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             if (lastMouseDownSender == sender)
             {
                 forcePointEraser = false;
@@ -463,7 +459,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawCoordinate1_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             forcePointEraser = false;
             DisableEraserOverlay();
 
@@ -494,7 +490,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawCoordinate2_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             forcePointEraser = false;
             DisableEraserOverlay();
 
@@ -525,7 +521,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawCoordinate3_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             forcePointEraser = false;
             DisableEraserOverlay();
 
@@ -556,7 +552,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawCoordinate4_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             forcePointEraser = false;
             DisableEraserOverlay();
 
@@ -587,7 +583,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawCoordinate5_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             forcePointEraser = false;
             DisableEraserOverlay();
 
@@ -618,7 +614,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawRectangle_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             forcePointEraser = false;
             DisableEraserOverlay();
 
@@ -649,7 +645,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawRectangleCenter_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             forcePointEraser = false;
             DisableEraserOverlay();
 
@@ -680,7 +676,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawEllipse_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             forcePointEraser = false;
             DisableEraserOverlay();
 
@@ -711,7 +707,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawCircle_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             forcePointEraser = false;
             DisableEraserOverlay();
 
@@ -742,7 +738,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawCenterEllipse_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             forcePointEraser = false;
             DisableEraserOverlay();
 
@@ -773,7 +769,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawCenterEllipseWithFocalPoint_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             forcePointEraser = false;
             DisableEraserOverlay();
 
@@ -804,7 +800,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawDashedCircle_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             forcePointEraser = false;
             DisableEraserOverlay();
 
@@ -836,7 +832,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawHyperbola_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             forcePointEraser = false;
             DisableEraserOverlay();
 
@@ -869,7 +865,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawHyperbolaWithFocalPoint_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             forcePointEraser = false;
             DisableEraserOverlay();
 
@@ -901,7 +897,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawParabola1_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             forcePointEraser = false;
             DisableEraserOverlay();
 
@@ -932,7 +928,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawParabolaWithFocalPoint_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             forcePointEraser = false;
             DisableEraserOverlay();
 
@@ -963,7 +959,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawParabola2_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             forcePointEraser = false;
             DisableEraserOverlay();
 
@@ -994,7 +990,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawCylinder_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             forcePointEraser = false;
             DisableEraserOverlay();
 
@@ -1025,7 +1021,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawCone_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             forcePointEraser = false;
             DisableEraserOverlay();
 
@@ -1058,7 +1054,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawCuboid_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+            await CheckIsDrawingShapesInMultiTouchMode();
             forcePointEraser = false;
             DisableEraserOverlay();
 

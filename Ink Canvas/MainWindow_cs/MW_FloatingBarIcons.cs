@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Forms;
 using System.Windows.Ink;
 using System.Windows.Input;
@@ -260,6 +261,7 @@ namespace Ink_Canvas
                 _popupManager.RegisterPopup(BorderTools);
                 _popupManager.RegisterPopup(BoardBorderToolsPopup);
                 _popupManager.RegisterPopup(BorderDrawShape);
+                _popupManager.RegisterPopup(BoardBorderDrawShape);
 
                 _popupManager.Initialize();
 
@@ -299,31 +301,19 @@ namespace Ink_Canvas
         {
             isDragDropInEffect = false;
 
-            var isClick = e is null || (Math.Abs(downPos.X - e.GetPosition(null).X) <= 10 &&
-                                        Math.Abs(downPos.Y - e.GetPosition(null).Y) <= 10);
-
-            if (isClick)
+            if (e is null || (Math.Abs(downPos.X - e.GetPosition(null).X) <= 10 &&
+                              Math.Abs(downPos.Y - e.GetPosition(null).Y) <= 10))
             {
-                var headLeft = GetCurrentFloatingBarHeadLeft();
                 if (BorderFloatingBarMainControls.Visibility == Visibility.Visible)
                 {
                     BorderFloatingBarMainControls.Visibility = Visibility.Collapsed;
                     CheckEnableTwoFingerGestureBtnVisibility(false);
-                    PlaceFloatingBarAfterHeadToggle(headLeft, false);
                 }
                 else
                 {
                     BorderFloatingBarMainControls.Visibility = Visibility.Visible;
                     CheckEnableTwoFingerGestureBtnVisibility(true);
-                    PlaceFloatingBarAfterHeadToggle(headLeft, true);
                 }
-            }
-            else
-            {
-                PlaceFloatingBarAfterHeadToggle(
-                    GetCurrentFloatingBarHeadLeft(),
-                    BorderFloatingBarMainControls.Visibility == Visibility.Visible);
-                _popupManager?.MarkNeedsUpdate();
             }
 
             GridForFloatingBarDraging.Visibility = Visibility.Collapsed;
@@ -339,7 +329,7 @@ namespace Ink_Canvas
         private void CollapseBorderDrawShape()
         {
             AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderDrawShape);
+            AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderDrawShape);
         }
 
         /// <summary>
@@ -360,7 +350,7 @@ namespace Ink_Canvas
             BoardTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
             // 添加隐藏图形工具的二级菜单面板
             BorderDrawShape.IsOpen = false;
-            BoardBorderDrawShape.Visibility = Visibility.Collapsed;
+            BoardBorderDrawShape.IsOpen = false;
 
             if (LogicalTreeHelper.FindLogicalNode(this, "BackgroundPalette") is UIElement bgPalette)
             {
@@ -429,8 +419,6 @@ namespace Ink_Canvas
         /// </param>
         internal async void HideSubPanels(string mode = null, bool autoAlignCenter = false)
         {
-            mode = NormalizeToolModeForFreeze(mode);
-
             AnimationsHelper.HidePopupWithSlideAndFade(BorderTools);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
             AnimationsHelper.HideWithSlideAndFade(PenPalette);
@@ -456,7 +444,7 @@ namespace Ink_Canvas
             if (ToggleSwitchDrawShapeBorderAutoHide.IsOn)
             {
                 AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
-                AnimationsHelper.HideWithSlideAndFade(BoardBorderDrawShape);
+                AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderDrawShape);
             }
 
             if (mode != null)
@@ -649,7 +637,6 @@ namespace Ink_Canvas
         /// <param name="e">鼠标按钮事件参数</param>
         internal void SymbolIconUndo_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("撤销冻结页面内容")) return;
             if (!BtnUndo.IsEnabled) return;
             BtnUndo_Click(BtnUndo, null);
             HideSubPanels();
@@ -662,7 +649,6 @@ namespace Ink_Canvas
         /// <param name="e">鼠标按钮事件参数</param>
         internal void SymbolIconRedo_MouseUp(object sender, RoutedEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("重做冻结页面内容")) return;
             if (!BtnRedo.IsEnabled) return;
             BtnRedo_Click(BtnRedo, null);
             HideSubPanels();
@@ -958,7 +944,6 @@ namespace Ink_Canvas
         /// <param name="e">鼠标按钮事件参数</param>
         internal void SymbolIconDelete_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("清除冻结页面内容")) return;
             if (inkCanvas.GetSelectedStrokes().Count > 0)
             {
                 inkCanvas.Strokes.Remove(inkCanvas.GetSelectedStrokes());
@@ -1441,7 +1426,6 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void GridInkReplayButton_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("重播冻结页面内容")) return;
             //if (lastBorderMouseDownObject != sender) return;
 
             AnimationsHelper.HidePopupWithSlideAndFade(BorderTools);
@@ -1771,158 +1755,6 @@ namespace Ink_Canvas
         /// 浮动工具栏边距动画是否正在运行
         /// </summary>
         private bool isViewboxFloatingBarMarginAnimationRunning;
-        private bool isFloatingBarHeadOnRight;
-
-        private double GetFloatingBarScaleX()
-        {
-            var scale = ViewboxFloatingBarScaleTransform?.ScaleX ?? 1;
-            return scale > 0 && !double.IsNaN(scale) && !double.IsInfinity(scale) ? scale : 1;
-        }
-
-        private double GetElementWidthForFloatingBar(FrameworkElement element, double fallbackWidth)
-        {
-            if (element == null) return fallbackWidth;
-
-            var width = element.ActualWidth;
-            if (width <= 0 || double.IsNaN(width)) width = element.DesiredSize.Width;
-            if (width <= 0 || double.IsNaN(width)) width = element.RenderSize.Width;
-            if (width <= 0 || double.IsNaN(width)) width = element.Width;
-
-            return width > 0 && !double.IsNaN(width) && !double.IsInfinity(width) ? width : fallbackWidth;
-        }
-
-        private double GetFloatingBarScaledWidth()
-        {
-            var baseWidth = GetElementWidthForFloatingBar(ViewboxFloatingBar, 200);
-            return baseWidth * GetFloatingBarScaleX();
-        }
-
-        private double GetFloatingBarHeadScaledWidth()
-        {
-            return GetElementWidthForFloatingBar(BorderFloatingBarMoveControls, 36) * GetFloatingBarScaleX();
-        }
-
-        private double GetFloatingBarScreenWidth(bool useWorkingArea)
-        {
-            double dpiScaleX = 1;
-            var source = PresentationSource.FromVisual(this);
-            if (source?.CompositionTarget != null)
-            {
-                dpiScaleX = source.CompositionTarget.TransformToDevice.M11;
-            }
-
-            var screen = GetFloatingBarTargetScreen();
-            return (useWorkingArea ? screen.WorkingArea.Width : screen.Bounds.Width) / dpiScaleX;
-        }
-
-        private void SetFloatingBarHeadPlacement(bool headOnRight)
-        {
-            if (FloatingBarRootPanel == null || BorderFloatingBarMoveControls == null) return;
-
-            var children = FloatingBarRootPanel.Children;
-            if (children.Contains(BorderFloatingBarMoveControls))
-            {
-                children.Remove(BorderFloatingBarMoveControls);
-            }
-
-            if (headOnRight)
-            {
-                children.Add(BorderFloatingBarMoveControls);
-                BorderFloatingBarMoveControls.Margin = new Thickness(2, 0, 0, 0);
-                if (BorderFloatingBarMainControls != null)
-                    BorderFloatingBarMainControls.Margin = new Thickness(0);
-            }
-            else
-            {
-                children.Insert(0, BorderFloatingBarMoveControls);
-                BorderFloatingBarMoveControls.Margin = new Thickness(0);
-                if (BorderFloatingBarMainControls != null)
-                    BorderFloatingBarMainControls.Margin = new Thickness(2, 0, 0, 0);
-            }
-
-            isFloatingBarHeadOnRight = headOnRight;
-        }
-
-        private double ClampFloatingBarLeft(double left, double floatingBarWidth, double screenWidth)
-        {
-            var maxLeft = Math.Max(0, screenWidth - floatingBarWidth);
-            return Math.Max(0, Math.Min(left, maxLeft));
-        }
-
-        private void PlaceFloatingBarAfterHeadToggle(double headLeft, bool isExpanding)
-        {
-            ViewboxFloatingBar.UpdateLayout();
-            var screenWidth = GetFloatingBarScreenWidth(false);
-
-            if (!isExpanding)
-            {
-                SetFloatingBarHeadPlacement(false);
-                var collapsedWidth = GetFloatingBarHeadScaledWidth();
-                pos.X = ClampFloatingBarLeft(headLeft, collapsedWidth, screenWidth);
-                ViewboxFloatingBar.Margin = new Thickness(pos.X, ViewboxFloatingBar.Margin.Top, -2000, -200);
-                SaveFloatingBarPositionPoint();
-                return;
-            }
-
-            var floatingBarWidth = GetFloatingBarScaledWidth();
-            var headWidth = GetFloatingBarHeadScaledWidth();
-            var shouldPlaceToolsOnLeft = headLeft + floatingBarWidth > screenWidth;
-
-            SetFloatingBarHeadPlacement(shouldPlaceToolsOnLeft);
-            ViewboxFloatingBar.UpdateLayout();
-
-            floatingBarWidth = GetFloatingBarScaledWidth();
-            headWidth = GetFloatingBarHeadScaledWidth();
-
-            var nextLeft = shouldPlaceToolsOnLeft
-                ? headLeft - Math.Max(0, floatingBarWidth - headWidth)
-                : headLeft;
-
-            pos.X = ClampFloatingBarLeft(nextLeft, floatingBarWidth, screenWidth);
-            ViewboxFloatingBar.Margin = new Thickness(pos.X, ViewboxFloatingBar.Margin.Top, -2000, -200);
-            SaveFloatingBarPositionPoint();
-        }
-
-        private double NormalizeFloatingBarLeftForScreen(double requestedLeft, double floatingBarWidth,
-            double screenWidth)
-        {
-            var headWidth = GetFloatingBarHeadScaledWidth();
-            var nextLeft = requestedLeft;
-            var shouldPlaceToolsOnLeft = isFloatingBarHeadOnRight;
-
-            if (!isFloatingBarHeadOnRight && requestedLeft + floatingBarWidth > screenWidth)
-            {
-                shouldPlaceToolsOnLeft = true;
-                nextLeft = requestedLeft - Math.Max(0, floatingBarWidth - headWidth);
-            }
-            else if (isFloatingBarHeadOnRight && requestedLeft + floatingBarWidth <= screenWidth)
-            {
-                shouldPlaceToolsOnLeft = requestedLeft > screenWidth / 2;
-            }
-
-            SetFloatingBarHeadPlacement(shouldPlaceToolsOnLeft);
-            return ClampFloatingBarLeft(nextLeft, floatingBarWidth, screenWidth);
-        }
-
-        private double GetCurrentFloatingBarHeadLeft()
-        {
-            ViewboxFloatingBar.UpdateLayout();
-            var floatingBarWidth = GetFloatingBarScaledWidth();
-            var headWidth = GetFloatingBarHeadScaledWidth();
-            var headOffset = isFloatingBarHeadOnRight
-                ? Math.Max(0, floatingBarWidth - headWidth)
-                : 0;
-            return ViewboxFloatingBar.Margin.Left + headOffset;
-        }
-
-        private void SaveFloatingBarPositionPoint()
-        {
-            var currentPoint = new Point(ViewboxFloatingBar.Margin.Left, ViewboxFloatingBar.Margin.Top);
-            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
-                pointPPT = currentPoint;
-            else
-                pointDesktop = currentPoint;
-        }
 
         /// <summary>
         /// 浮动工具栏边距动画处理
@@ -2065,12 +1897,6 @@ namespace Ink_Canvas
                                 pointDesktop = pos;
                         }
                     }
-
-                    pos.X = NormalizeFloatingBarLeftForScreen(pos.X, floatingBarWidth, screenWidth);
-                    if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
-                        pointPPT = pos;
-                    else
-                        pointDesktop = pos;
                 }
 
                 var marginAnimation = new ThicknessAnimation
@@ -2648,8 +2474,6 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         internal void PenIcon_Click(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("切换到画笔")) return;
-
             if (lastBorderMouseDownObject is Panel panel)
                 panel.Background = new SolidColorBrush(Colors.Transparent);
 
@@ -2902,8 +2726,6 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         internal void EraserIcon_Click(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("切换到橡皮擦")) return;
-
             bool isAlreadyEraser = inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint;
             forceEraser = false;
             forcePointEraser = true;
@@ -2967,8 +2789,6 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void BoardEraserIcon_Click(object sender, RoutedEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("切换到橡皮擦")) return;
-
             bool isAlreadyEraser = inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint;
             forceEraser = false;
             forcePointEraser = true;
@@ -3019,8 +2839,6 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         internal void EraserIconByStrokes_Click(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("切换到线擦")) return;
-
             // 禁用高级橡皮擦系统
             DisableEraserOverlay();
 
@@ -3349,8 +3167,6 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void SelectIcon_MouseUp(object sender, RoutedEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("切换到选择工具")) return;
-
             // 禁用高级橡皮擦系统
             DisableEraserOverlay();
 
@@ -3573,7 +3389,6 @@ namespace Ink_Canvas
 
         private void BtnClear_Click(object sender, RoutedEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("清空冻结页面内容")) return;
             forceEraser = false;
             //BorderClearInDelete.Visibility = Visibility.Collapsed;
 
@@ -4069,7 +3884,6 @@ namespace Ink_Canvas
 
         private void InsertImageOptions_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("插入图片")) return;
             // Check if the image options panel is currently visible
             bool isImagePanelVisible = BoardImageOptionsPanel.Visibility == Visibility.Visible;
 
@@ -4094,7 +3908,6 @@ namespace Ink_Canvas
 
         private async void ImageOptionScreenshot_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("插入截图")) return;
             // Hide the options panel
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
@@ -4107,7 +3920,6 @@ namespace Ink_Canvas
 
         private async void ImageOptionSelectFile_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("插入图片")) return;
             // Hide the options panel
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
@@ -4181,7 +3993,6 @@ namespace Ink_Canvas
         // 插入图片方法
         private async void InsertImage_MouseUp_New(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("插入图片")) return;
             var dialog = new OpenFileDialog
             {
                 Filter = "图片与 PDF|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf|图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf"
@@ -4251,7 +4062,6 @@ namespace Ink_Canvas
         // Keep the old method for backward compatibility
         private async void InsertImage_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("插入图片")) return;
             var dialog = new OpenFileDialog
             {
                 Filter = "图片与 PDF|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf|图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf"
@@ -4399,8 +4209,6 @@ namespace Ink_Canvas
         {
             try
             {
-                mode = NormalizeToolModeForFreeze(mode);
-
                 if (FloatingbarSelectionBG == null) return;
 
                 // 检查浮动栏是否处于收起状态
@@ -4511,41 +4319,6 @@ namespace Ink_Canvas
                 }
 
                 // 根据主题设置高光颜色
-                switch (mode)
-                {
-                    case "cursor":
-                        actualHighlightWidth = cursorWidth;
-                        position = marginOffset;
-                        break;
-                    case "pen":
-                    case "color":
-                        actualHighlightWidth = penWidth;
-                        position = marginOffset + cursorWidth;
-                        break;
-                    case "eraser":
-                        actualHighlightWidth = eraserWidth;
-                        position = marginOffset + cursorWidth + penWidth + quickColorPaletteTotalWidth + deleteWidth;
-                        break;
-                    case "eraserByStrokes":
-                        actualHighlightWidth = eraserByStrokesWidth;
-                        position = marginOffset + cursorWidth + penWidth + quickColorPaletteTotalWidth + deleteWidth + eraserWidth;
-                        break;
-                    case "select":
-                        actualHighlightWidth = selectWidth;
-                        position = marginOffset + cursorWidth + penWidth + quickColorPaletteTotalWidth + deleteWidth + eraserWidth + eraserByStrokesWidth;
-                        break;
-                    case "shape":
-                        actualHighlightWidth = buttonWidth;
-                        position = marginOffset + cursorWidth + penWidth + quickColorPaletteTotalWidth + deleteWidth + eraserWidth + eraserByStrokesWidth + selectWidth;
-                        break;
-                }
-
-                if (actualHighlightWidth <= 0)
-                {
-                    FloatingbarSelectionBG.Visibility = Visibility.Hidden;
-                    return;
-                }
-
                 Color highlightBackgroundColor;
                 Color highlightBarColor;
                 bool isDarkTheme = Settings.Appearance.Theme == 1 ||
@@ -4563,74 +4336,17 @@ namespace Ink_Canvas
                 }
 
                 // 设置高光背景颜色
-                void ResetFloatingBarToolIconHighlights()
-                {
-                    var foregroundBrush = new SolidColorBrush(FloatBarForegroundColor);
-
-                    void ResetIcon(ToolbarImageButton button, string iconType)
-                    {
-                        if (button == null) return;
-
-                        button.Icon.Brush = foregroundBrush;
-                        button.Icon.Geometry = Geometry.Parse(GetCorrectIcon(iconType, false));
-                    }
-
-                    ResetIcon(Cursor_Icon, "cursor");
-                    ResetIcon(Pen_Icon, "pen");
-                    ResetIcon(Eraser_Icon, "eraserCircle");
-                    ResetIcon(EraserByStrokes_Icon, "eraserStroke");
-                    ResetIcon(SymbolIconSelect, "lassoSelect");
-                }
-
-                void ApplyFloatingBarToolIconHighlight(string toolMode, Color highlightColor)
-                {
-                    var highlightBrush = new SolidColorBrush(highlightColor);
-
-                    void HighlightIcon(ToolbarImageButton button, string iconType)
-                    {
-                        if (button == null) return;
-
-                        button.Icon.Brush = highlightBrush;
-                        button.Icon.Geometry = Geometry.Parse(GetCorrectIcon(iconType, true));
-                    }
-
-                    switch (toolMode)
-                    {
-                        case "cursor":
-                            HighlightIcon(Cursor_Icon, "cursor");
-                            break;
-                        case "pen":
-                        case "color":
-                            HighlightIcon(Pen_Icon, "pen");
-                            break;
-                        case "eraser":
-                            HighlightIcon(Eraser_Icon, "eraserCircle");
-                            break;
-                        case "eraserByStrokes":
-                            HighlightIcon(EraserByStrokes_Icon, "eraserStroke");
-                            break;
-                        case "select":
-                            HighlightIcon(SymbolIconSelect, "lassoSelect");
-                            break;
-                    }
-                }
-
-                FloatingbarSelectionBG.Width = actualHighlightWidth;
                 FloatingbarSelectionBG.Background = new SolidColorBrush(highlightBackgroundColor);
                 if (FloatingbarSelectionBG.Child is System.Windows.Controls.Canvas canvas && canvas.Children.Count > 0)
                 {
                     var firstChild = canvas.Children[0];
                     if (firstChild is Border innerBorder)
                     {
-                        System.Windows.Controls.Canvas.SetLeft(innerBorder, Math.Max(0, (actualHighlightWidth - innerBorder.Width) / 2));
                         innerBorder.Background = new SolidColorBrush(highlightBarColor);
                     }
                 }
 
                 // 设置高光位置
-                ResetFloatingBarToolIconHighlights();
-                ApplyFloatingBarToolIconHighlight(mode, highlightBarColor);
-
                 FloatingbarSelectionBG.Visibility = Visibility.Visible;
                 System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, position);
             }
@@ -4813,7 +4529,7 @@ namespace Ink_Canvas
         /// <param name="mode">模式名称</param>
         private void UpdateCurrentToolMode(string mode)
         {
-            _currentToolMode = NormalizeToolModeForFreeze(mode);
+            _currentToolMode = mode;
         }
 
         #endregion

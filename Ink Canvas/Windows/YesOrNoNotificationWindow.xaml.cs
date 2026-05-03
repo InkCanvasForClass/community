@@ -1,9 +1,9 @@
-using Ink_Canvas.Helpers;
 using System;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas
 {
