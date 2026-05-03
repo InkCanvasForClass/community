@@ -668,7 +668,7 @@
     <value>窗口背景样式</value>
   </data>
   <data name="Theme_WindowBackdrop_Description" xml:space="preserve">
-    <value>控制设置、OOBE 等现代窗口的云母、亚克力等背景效果。</value>
+    <value>C控制设置、OOBE 等现代窗口的云母、亚克力等背景效果。</value>
   </data>
   <data name="Theme_WindowBackdrop_None" xml:space="preserve">
     <value>无背景效果</value>
@@ -680,16 +680,16 @@
     <value>亚克力</value>
   </data>
   <data name="Theme_WindowBackdrop_Tabbed" xml:space="preserve">
-    <value>标签页背景</value>
+    <value>Tabbed</value>
   </data>
   <data name="Theme_WindowBackdrop_Transient" xml:space="preserve">
-    <value>临时背景</value>
+    <value>Transient</value>
   </data>
   <data name="Theme_WindowBackdrop_Acrylic10" xml:space="preserve">
-    <value>亚克力（10 兼容）</value>
+    <value>亚克力10</value>
   </data>
   <data name="Theme_WindowBackdrop_Acrylic11" xml:space="preserve">
-    <value>亚克力（11 兼容）</value>
+    <value>亚克力11</value>
   </data>
   <data name="Theme_EnableSplash" xml:space="preserve">
     <value>启用启动动画</value>
