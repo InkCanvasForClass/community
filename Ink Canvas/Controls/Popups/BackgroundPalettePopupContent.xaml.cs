@@ -16,11 +16,12 @@ namespace Ink_Canvas.Controls
         public Button ApplyBtn => ApplyBackgroundColorBtn;
         public Border WhiteboardBtn => WhiteboardModeBtn;
         public Border BlackboardBtn => BlackboardModeBtn;
-        public FontIcon CloseFontIcon => TitleBar?.CloseFontIcon;
+        public FontIcon CloseFontIcon => Shell?.CloseFontIcon;
 
         public BackgroundPalettePopupContent()
         {
             InitializeComponent();
+            Shell.InnerContent = InnerContentHost.Content;
         }
     }
 }

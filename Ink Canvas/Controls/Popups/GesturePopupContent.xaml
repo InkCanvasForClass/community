@@ -8,14 +8,12 @@
              xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
              xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
              mc:Ignorable="d">
-    <Border CornerRadius="8" Background="{DynamicResource FloatBarBackground}"
-            BorderBrush="#2563eb" BorderThickness="1">
-        <ikw:SimpleStackPanel Margin="0">
-            <Border BorderBrush="#1e3a8a" BorderThickness="0,0,0,1"
-                    CornerRadius="8,8,0,0" Background="#2563eb"
-                    Margin="-1,-1,-1,0">
-                <controls:PopupTitleBar x:Name="TitleBar" />
-            </Border>
+    <Grid>
+        <controls:PopupShellContent x:Name="Shell"
+                                    Background="{DynamicResource FloatBarBackground}"
+                                    BorderBrush="#2563eb" BorderThickness="1"
+                                    d:Visibility="Collapsed" />
+        <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
             <Viewbox Margin="8,4,8,6">
                 <ikw:SimpleStackPanel x:Name="_OpacityPanel" Margin="0">
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="2"
@@ -120,6 +118,6 @@
                     </ikw:SimpleStackPanel>
                 </ikw:SimpleStackPanel>
             </Viewbox>
-        </ikw:SimpleStackPanel>
-    </Border>
+        </ContentControl>
+    </Grid>
 </UserControl>

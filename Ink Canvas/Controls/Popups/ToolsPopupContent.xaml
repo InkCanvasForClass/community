@@ -22,7 +22,7 @@
         </Style>
     </UserControl.Resources>
     <Grid>
-        <controls:PopupShellContent x:Name="Shell" Title="{i18n:I18n Key=Tools_MoreFeaturesTitle}" />
+        <controls:PopupShellContent x:Name="Shell" Title="{i18n:I18n Key=Tools_MoreFeaturesTitle}" d:Visibility="Collapsed" />
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
             <ikw:SimpleStackPanel Margin="2" Spacing="1">
                 <ikw:SimpleStackPanel.Resources>
