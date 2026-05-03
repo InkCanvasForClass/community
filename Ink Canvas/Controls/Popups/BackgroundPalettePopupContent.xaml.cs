@@ -1,0 +1,26 @@
+using System.Windows.Controls;
+using System.Windows.Media;
+using iNKORE.UI.WPF.Modern.Controls;
+
+namespace Ink_Canvas.Controls
+{
+    public partial class BackgroundPalettePopupContent : UserControl
+    {
+        public Slider RSlider => BackgroundRSlider;
+        public Slider GSlider => BackgroundGSlider;
+        public Slider BSlider => BackgroundBSlider;
+        public TextBlock RValue => BackgroundRValue;
+        public TextBlock GValue => BackgroundGValue;
+        public TextBlock BValue => BackgroundBValue;
+        public Border ColorPreview => BackgroundColorPreview;
+        public Button ApplyBtn => ApplyBackgroundColorBtn;
+        public Border WhiteboardBtn => WhiteboardModeBtn;
+        public Border BlackboardBtn => BlackboardModeBtn;
+        public FontIcon CloseFontIcon => TitleBar?.CloseFontIcon;
+
+        public BackgroundPalettePopupContent()
+        {
+            InitializeComponent();
+        }
+    }
+}

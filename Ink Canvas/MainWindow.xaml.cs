@@ -224,14 +224,78 @@ namespace Ink_Canvas
                         PopupPrimaryAxis.Vertical)
                 };
 
+            PenPalette.CustomPopupPlacementCallback =
+                (popupSize, targetSize, offset) => new[]
+                {
+                    new CustomPopupPlacement(
+                        new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height - 8),
+                        PopupPrimaryAxis.Vertical)
+                };
+
+            BoardPenPalette.CustomPopupPlacementCallback =
+                (popupSize, targetSize, offset) => new[]
+                {
+                    new CustomPopupPlacement(
+                        new Point((targetSize.Width - popupSize.Width) / 2, -popupSize.Height - 5),
+                        PopupPrimaryAxis.Vertical)
+                };
+
+            EraserSizePanel.CustomPopupPlacementCallback =
+                (popupSize, targetSize, offset) => new[]
+                {
+                    new CustomPopupPlacement(
+                        new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height - 8),
+                        PopupPrimaryAxis.Vertical)
+                };
+
+            BoardEraserSizePanel.CustomPopupPlacementCallback =
+                (popupSize, targetSize, offset) => new[]
+                {
+                    new CustomPopupPlacement(
+                        new Point((targetSize.Width - popupSize.Width) / 2, -popupSize.Height - 5),
+                        PopupPrimaryAxis.Vertical)
+                };
+
+            BoardImageOptionsPanel.CustomPopupPlacementCallback =
+                (popupSize, targetSize, offset) => new[]
+                {
+                    new CustomPopupPlacement(
+                        new Point((targetSize.Width - popupSize.Width) / 2, -popupSize.Height - 5),
+                        PopupPrimaryAxis.Vertical)
+                };
+
+            TwoFingerGestureBorder.CustomPopupPlacementCallback =
+                (popupSize, targetSize, offset) => new[]
+                {
+                    new CustomPopupPlacement(
+                        new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height - 8),
+                        PopupPrimaryAxis.Vertical)
+                };
+
+            BoardTwoFingerGestureBorder.CustomPopupPlacementCallback =
+                (popupSize, targetSize, offset) => new[]
+                {
+                    new CustomPopupPlacement(
+                        new Point((targetSize.Width - popupSize.Width) / 2, -popupSize.Height - 5),
+                        PopupPrimaryAxis.Vertical)
+                };
+
+            BackgroundPalette.CustomPopupPlacementCallback =
+                (popupSize, targetSize, offset) => new[]
+                {
+                    new CustomPopupPlacement(
+                        new Point((targetSize.Width - popupSize.Width) / 2, -popupSize.Height - 5),
+                        PopupPrimaryAxis.Vertical)
+                };
+
             BlackboardLeftSide.Visibility = Visibility.Collapsed;
             BlackboardCenterSide.Visibility = Visibility.Collapsed;
             BlackboardRightSide.Visibility = Visibility.Collapsed;
             BorderTools.IsOpen = false;
             LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
             RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
-            TwoFingerGestureBorder.Visibility = Visibility.Collapsed;
-            BoardTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+            TwoFingerGestureBorder.IsOpen = false;
+            BoardTwoFingerGestureBorder.IsOpen = false;
             BorderDrawShape.IsOpen = false;
             BoardBorderDrawShape.IsOpen = false;
             GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
