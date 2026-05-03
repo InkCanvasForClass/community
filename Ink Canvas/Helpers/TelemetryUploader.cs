@@ -60,6 +60,12 @@ namespace Ink_Canvas.Helpers
                         return;
                     }
 
+                    if (!settings.Startup.HasAcceptedTelemetryPrivacy)
+                    {
+                        LogHelper.WriteLogToFile("TelemetryUploader | 未同意隐私说明，取消遥测上传", LogHelper.LogType.Warning);
+                        return;
+                    }
+
                     string deviceId = DeviceIdentifier.GetDeviceId();
                     if (string.IsNullOrWhiteSpace(deviceId) || deviceId.Length < 5)
                     {
