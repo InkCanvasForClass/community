@@ -1,0 +1,42 @@
+<UserControl x:Class="Ink_Canvas.Controls.ShapeDrawPopupContent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+             xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+             xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+             xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
+             mc:Ignorable="d"
+             d:DesignHeight="200" d:DesignWidth="400">
+    <Border CornerRadius="8" Background="{DynamicResource ToolsPopupBackground}"
+            BorderBrush="#3b82f6" BorderThickness="2">
+        <ikw:SimpleStackPanel Margin="-1">
+            <controls:PopupTitleBar x:Name="TitleBar" Title="{i18n:I18n Key=Board_Shape}" />
+            <Border Margin="6,0,6,6" BorderBrush="{DynamicResource ToolsPopupInnerBorderBrush}" Background="{DynamicResource ToolsPopupInnerBackground}" BorderThickness="1"
+                    CornerRadius="4">
+                <ikw:SimpleStackPanel Margin="2" Spacing="1">
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Height="38" Spacing="2"
+                                         Margin="4,4,4,0">
+                        <controls:GeometryButton x:Name="BoardImageDrawLine" IconSource="{DynamicResource GeoIconLine}" Label="{i18n:I18n Key=Geometry_DrawLine}" />
+                        <controls:GeometryButton x:Name="BoardImageDrawDashedLine" IconSource="{DynamicResource GeoIconDashedLine}" Label="{i18n:I18n Key=Geometry_DrawDashedLine}" />
+                        <controls:GeometryButton x:Name="BoardImageDrawDotLine" IconSource="{DynamicResource GeoIconDotLine}" Label="{i18n:I18n Key=Geometry_DrawDottedLine}" />
+                        <controls:GeometryButton x:Name="BoardImageDrawArrow" IconSource="{DynamicResource GeoIconArrow}" Label="{i18n:I18n Key=Geometry_DrawArrow}" />
+                        <controls:GeometryButton x:Name="BoardImageDrawParallelLine" IconSource="{DynamicResource GeoIconParallelLine}" Label="{i18n:I18n Key=Geometry_DrawParallelLines}" />
+                        <controls:GeometryButton x:Name="BoardImageDrawRectangleCenter" IconSource="{DynamicResource GeoIconRectangleCenter}" Label="{i18n:I18n Key=Geometry_DrawCenteredSquare}" />
+                        <controls:GeometryButton x:Name="BoardImageDrawCircle" IconSource="{DynamicResource GeoIconCircle}" Label="{i18n:I18n Key=Geometry_DrawCenteredCircle}" />
+                        <controls:GeometryButton x:Name="BoardImageDrawDashedCircle" IconSource="{DynamicResource GeoIconDashedCircle}" Label="{i18n:I18n Key=Geometry_DrawCenteredDashedCircle}" />
+                        <controls:GeometryButton x:Name="BoardImageDrawEllipseCenter" IconSource="{DynamicResource GeoIconEllipseCenter}" Label="{i18n:I18n Key=Geometry_DrawCenteredEllipse}" />
+                    </ikw:SimpleStackPanel>
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Height="38" Spacing="2"
+                                         Margin="4,0,4,4">
+                        <controls:GeometryButton x:Name="BoardImageDrawCuboid" IconSource="{DynamicResource GeoIconCuboid}" Label="{i18n:I18n Key=Geometry_DrawCuboid}" />
+                        <controls:GeometryButton x:Name="BoardImageDrawRectangle" IconSource="{DynamicResource GeoIconRectangle}" Label="{i18n:I18n Key=Geometry_DrawSquare}" />
+                        <controls:GeometryButton x:Name="BoardImageDrawCylinder" IconSource="{DynamicResource GeoIconCylinder}" Label="{i18n:I18n Key=Geometry_DrawCylinder}" />
+                        <controls:GeometryButton x:Name="BoardImageDrawCone" IconSource="{DynamicResource GeoIconCone}" Label="{i18n:I18n Key=Geometry_DrawCone}" />
+                    </ikw:SimpleStackPanel>
+                </ikw:SimpleStackPanel>
+            </Border>
+        </ikw:SimpleStackPanel>
+    </Border>
+</UserControl>

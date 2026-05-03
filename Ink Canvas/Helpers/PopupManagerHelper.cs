@@ -318,11 +318,13 @@ namespace Ink_Canvas.Helpers
 
                 if (shouldBeTopmost)
                 {
-                    if ((exStyle & WS_EX_TOPMOST) == 0)
+                    if ((exStyle & WS_EX_TOPMOST) != 0)
                     {
-                        SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0,
-                            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
+                        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_TOPMOST);
                     }
+
+                    SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0,
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
                 }
                 else
                 {

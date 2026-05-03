@@ -25,17 +25,7 @@
     <Border CornerRadius="8" Background="{DynamicResource ToolsPopupBackground}"
             BorderBrush="#3b82f6" BorderThickness="2">
         <ikw:SimpleStackPanel Margin="-1">
-            <Grid Margin="8,7,10,5">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="10"
-                           Text="{i18n:I18n Key=Tools_MoreFeaturesTitle}"
-                           Foreground="{DynamicResource ToolsPopupTitleForeground}" FontWeight="Bold"/>
-                <ui:FontIcon x:Name="CloseIcon" Grid.Column="1" Icon="{x:Static ui:SegoeFluentIcons.ChromeCloseContrast}"
-                             Foreground="#DC2626" FontSize="8" VerticalAlignment="Center" />
-            </Grid>
+            <controls:PopupTitleBar x:Name="TitleBar" Title="{i18n:I18n Key=Tools_MoreFeaturesTitle}" />
             <Border Margin="6,0,6,6" BorderBrush="{DynamicResource ToolsPopupInnerBorderBrush}" Background="{DynamicResource ToolsPopupInnerBackground}" BorderThickness="1"
                     CornerRadius="4">
                 <ikw:SimpleStackPanel Margin="2" Spacing="1">

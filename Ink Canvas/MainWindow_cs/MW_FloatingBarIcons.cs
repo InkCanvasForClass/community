@@ -255,6 +255,7 @@ namespace Ink_Canvas
 
                 _popupManager.RegisterPopup(BorderTools);
                 _popupManager.RegisterPopup(BoardBorderToolsPopup);
+                _popupManager.RegisterPopup(BorderDrawShape);
 
                 _popupManager.Initialize();
 
@@ -321,7 +322,7 @@ namespace Ink_Canvas
         /// </summary>
         private void CollapseBorderDrawShape()
         {
-            AnimationsHelper.HideWithSlideAndFade(BorderDrawShape);
+            AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderDrawShape);
         }
 
@@ -342,7 +343,7 @@ namespace Ink_Canvas
             TwoFingerGestureBorder.Visibility = Visibility.Collapsed;
             BoardTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
             // 添加隐藏图形工具的二级菜单面板
-            BorderDrawShape.Visibility = Visibility.Collapsed;
+            BorderDrawShape.IsOpen = false;
             BoardBorderDrawShape.Visibility = Visibility.Collapsed;
 
             if (LogicalTreeHelper.FindLogicalNode(this, "BackgroundPalette") is UIElement bgPalette)
@@ -418,7 +419,7 @@ namespace Ink_Canvas
             AnimationsHelper.HideWithSlideAndFade(BoardPenPalette);
             AnimationsHelper.HideWithSlideAndFade(BoardEraserSizePanel);
             AnimationsHelper.HideWithSlideAndFade(EraserSizePanel);
-            AnimationsHelper.HideWithSlideAndFade(BorderDrawShape);
+            AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
@@ -436,7 +437,7 @@ namespace Ink_Canvas
             AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
             if (ToggleSwitchDrawShapeBorderAutoHide.IsOn)
             {
-                AnimationsHelper.HideWithSlideAndFade(BorderDrawShape);
+                AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
                 AnimationsHelper.HideWithSlideAndFade(BoardBorderDrawShape);
             }
 
@@ -4443,7 +4444,6 @@ namespace Ink_Canvas
         /// </summary>
         private void UpdateBorderDrawShapePosition()
         {
-            UpdateSubPanelPosition(ShapeDrawFloatingBarBtn, BorderDrawShape, 317);
         }
 
         /// <summary>
