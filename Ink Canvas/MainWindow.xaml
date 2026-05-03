@@ -1782,7 +1782,6 @@
                                                                  Label="{i18n:I18n Key=Board_Tools}"
                                                                  IconGeometry="F1 M24,24z M0,0z M3.336,1.17001C2.13975,1.17001,1.17,2.13976,1.17,3.33601L1.17,8.75101C1.17,9.94726,2.13975,10.917,3.336,10.917L8.751,10.917C9.94725,10.917,10.917,9.94726,10.917,8.75101L10.917,3.33601C10.917,2.13976,9.94725,1.17001,8.751,1.17001L3.336,1.17001z M15.249,1.17001C14.0527,1.17001,13.083,2.13976,13.083,3.33601L13.083,8.75101C13.083,9.94726,14.0527,10.917,15.249,10.917L20.664,10.917C21.8602,10.917,22.83,9.94726,22.83,8.75101L22.83,3.33601C22.83,2.13976,21.8602,1.17001,20.664,1.17001L15.249,1.17001z M3.336,13.083C2.13975,13.083,1.17,14.0528,1.17,15.249L1.17,20.664C1.17,21.8603,2.13975,22.83,3.336,22.83L8.751,22.83C9.94725,22.83,10.917,21.8603,10.917,20.664L10.917,15.249C10.917,14.0528,9.94725,13.083,8.751,13.083L3.336,13.083z M15.249,13.083C14.0527,13.083,13.083,14.0528,13.083,15.249L13.083,20.664C13.083,21.8603,14.0527,22.83,15.249,22.83L20.664,22.83C21.8602,22.83,22.83,21.8603,22.83,20.664L22.83,15.249C22.83,14.0528,21.8602,13.083,20.664,13.083L15.249,13.083z"
                                                                  ButtonMouseUp="SymbolIconTools_MouseUp" />
-
                                     <controls:BoardToolbarButton x:Name="BoardExit"
                                                                  Position="Last"
                                                                  Label="{i18n:I18n Key=Board_Exit}"
@@ -2182,7 +2181,7 @@
         <!--浮动工具栏-->
         <Grid Name="FloatingbarUIForInkReplay">
             <Viewbox Name="ViewboxFloatingBar" Margin="150,250,0,0" Cursor="Arrow"
-                     Visibility="Collapsed"
+                     Visibility="Collapsed" d:Visibility="Visible"
                      HorizontalAlignment="Left" Height="58" VerticalAlignment="Top"
                      Stretch="None"
                      UseLayoutRounding="True" SnapsToDevicePixels="True"
@@ -2191,6 +2190,7 @@
                     <ScaleTransform x:Name="ViewboxFloatingBarScaleTransform" ScaleX="1.5" ScaleY="1.5" />
                 </Viewbox.LayoutTransform>
                 <ikw:SimpleStackPanel Orientation="Horizontal">
+                    <!--拖动图标-->
                     <Border x:Name="BorderFloatingBarMoveControls" Width="36" Height="36" CornerRadius="5"
                             Background="{DynamicResource FloatBarBackground}" BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}"
                             MouseDown="SymbolIconEmoji_MouseDown" MouseUp="SymbolIconEmoji_MouseUp">
@@ -2203,6 +2203,7 @@
                                    Source="/Resources/Icons-png/icc.png" />
                         </ikw:SimpleStackPanel>
                     </Border>
+                    <!--内容区域-->
                     <Border Margin="2,0,0,0" Padding="2" Visibility="Visible" Height="36"
                             Name="BorderFloatingBarMainControls" Background="{DynamicResource FloatBarBackground}" CornerRadius="5"
                             BorderThickness="1"
@@ -2220,8 +2221,7 @@
                             </Canvas>
                             <ikw:SimpleStackPanel Margin="2,0" Name="StackPanelFloatingBar" Orientation="Horizontal" Cursor="Arrow" HorizontalAlignment="Left">
                                 <!-- Cursor_Icon / Pen_Icon 由 ToolbarRegistry 动态注入（见 Controls/Toolbar/Items/*） -->
-                                <ikw:SimpleStackPanel Width="0"
-                                                         Orientation="{Binding ElementName=StackPanelFloatingBar, Path=Orientation}">
+                                <ikw:SimpleStackPanel Width="0" Orientation="{Binding ElementName=StackPanelFloatingBar, Path=Orientation}">
                                     <Grid Margin="-14,5,14,5" Width="0" RenderTransformOrigin=" 1,0">
                                         <Border x:Name="PenPalette" Visibility="Collapsed" d:Visibility="Visible" Background="{DynamicResource FloatBarBackground}"
                                                     Opacity="1" BorderBrush="#2563eb"
@@ -2769,6 +2769,7 @@
                             </ikw:SimpleStackPanel>
                         </Grid>
                     </Border>
+                    <!--手势图标-->
                     <ikw:SimpleStackPanel Orientation="{Binding ElementName=StackPanelFloatingBar, Path=Orientation}">
                         <Border Margin="2,0,0,0" x:Name="EnableTwoFingerGestureBorder" Visibility="Visible" Width="36"
                             Height="36" CornerRadius="5" Background="{DynamicResource FloatBarBackground}" BorderBrush="{DynamicResource FloatBarBorderBrush}"
@@ -2914,7 +2915,7 @@
                             </Border>
                         </Canvas>
                     </ikw:SimpleStackPanel>
-                    <!--Visibility="{Binding ElementName=BtnPPTSlideShowEnd, Path=Visibility}">-->
+                    <!--退出图标-->
                     <Border x:Name="BorderFloatingBarExitPPTBtn" Margin="2,0,0,0" Width="36" Height="36"
                             MouseDown="Border_MouseDown" MouseUp="ImagePPTControlEnd_MouseUp"
                             Background="{DynamicResource FloatBarBackground}" CornerRadius="5" BorderThickness="1"
@@ -3390,4 +3391,3 @@
         </Border>
     </Grid>
 </helpers:PerformanceTransparentWin>
-
