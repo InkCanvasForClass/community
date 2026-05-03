@@ -6,6 +6,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Linq;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using FontIcon = iNKORE.UI.WPF.Modern.Controls.FontIcon;
 using NavigationView = iNKORE.UI.WPF.Modern.Controls.NavigationView;
 using NavigationViewItem = iNKORE.UI.WPF.Modern.Controls.NavigationViewItem;
@@ -617,7 +618,7 @@ namespace Ink_Canvas.Windows
             }
 
             string themeText;
-            string backdropText = GetSelectedComboBoxTag(ComboBoxWindowBackdrop, "None");
+            string backdropText = GetSelectedComboBoxContent(ComboBoxWindowBackdrop, Strings.GetString("Theme_WindowBackdrop_None") ?? "None");
             switch (ComboBoxTheme.SelectedIndex)
             {
                 case 0: themeText = "浅色"; break;
@@ -628,6 +629,7 @@ namespace Ink_Canvas.Windows
             AddSummaryRow(SegoeFluentIcons.Shield, "遥测级别", telemetryText);
             AddSummaryRow(SegoeFluentIcons.Sync, "自动检查更新", BoolText(CardAutoUpdate.IsOn));
             AddSummaryRow(SegoeFluentIcons.Personalize, "应用主题", themeText);
+            AddSummaryRow(SegoeFluentIcons.FullScreen, Strings.GetString("Theme_WindowBackdrop") ?? "Theme_WindowBackdrop", backdropText);
             AddSummaryRow(SegoeFluentIcons.Slideshow, "PowerPoint / WPS 联动", BoolText(CardPptSupport.IsOn));
             AddSummaryRow(SegoeFluentIcons.TouchPointer, "双指缩放 / 平移",
                 $"{BoolText(CardTwoFingerZoom.IsOn)} / {BoolText(CardTwoFingerTranslate.IsOn)}");
@@ -636,6 +638,11 @@ namespace Ink_Canvas.Windows
         }
 
         private static string BoolText(bool value) => value ? "已启用" : "已关闭";
+
+        private static string GetSelectedComboBoxContent(ComboBox comboBox, string fallback)
+        {
+            return (comboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? fallback;
+        }
 
         private void AddSummaryRow(FontIconData icon, string label, string value)
         {

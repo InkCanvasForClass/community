@@ -354,7 +354,7 @@
             <ui:NavigationView.FooterMenuItems>
                 <ui:NavigationViewItem
                     x:Name="FriendlyLinksItem"
-                    Content="友链"
+                    Content="{i18n:I18n Key=Nav_FriendlyLinks}"
                     Tag="FriendlyLinksPage">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />

@@ -5,9 +5,10 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d"
-      Title="友链">
+      Title="{i18n:I18n Key=FriendlyLinks_Title}">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -27,14 +28,14 @@
                 Spacing="{StaticResource SettingsCardSpacing}">
 
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                    Text="友链" />
+                    Text="{i18n:I18n Key=FriendlyLinks_Title}" />
 
                 <ui:SettingsCard Header="NamePicker"
-                    Description="随机点名与抽取工具">
+                    Description="{i18n:I18n Key=FriendlyLinks_NamePickerDescription}">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />
                     </ui:SettingsCard.HeaderIcon>
-                    <ui:HyperlinkButton Content="访问"
+                    <ui:HyperlinkButton Content="{i18n:I18n Key=FriendlyLinks_Visit}"
                         NavigateUri="https://github.com/NamePickerOrg/NamePicker" />
                 </ui:SettingsCard>
 

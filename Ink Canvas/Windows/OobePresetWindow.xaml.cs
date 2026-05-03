@@ -74,8 +74,9 @@ namespace Ink_Canvas.Windows
             settings.Startup.IsFoldAtStartup = true;
             settings.Startup.IsAutoUpdate = true;
             settings.Startup.CrashAction = 0; // 静默重启
-            settings.Startup.TelemetryUploadLevel = TelemetryUploadLevel.Basic;
-            settings.Startup.HasAcceptedTelemetryPrivacy = true;
+            settings.Startup.TelemetryUploadLevel = settings.Startup.HasAcceptedTelemetryPrivacy
+                ? TelemetryUploadLevel.Basic
+                : TelemetryUploadLevel.None;
 
             // 画板与墨迹
             settings.Canvas.IsShowCursor = false;
@@ -132,7 +133,6 @@ namespace Ink_Canvas.Windows
             settings.Startup.IsAutoUpdate = true;
             settings.Startup.CrashAction = 0;
             settings.Startup.TelemetryUploadLevel = TelemetryUploadLevel.None;
-            settings.Startup.HasAcceptedTelemetryPrivacy = true;
 
             // 画板与墨迹
             settings.Canvas.IsShowCursor = false;
