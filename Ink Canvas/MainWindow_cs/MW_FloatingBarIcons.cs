@@ -260,8 +260,9 @@ namespace Ink_Canvas
                 _popupManager.RegisterPopup(BorderTools);
                 _popupManager.RegisterPopup(BoardBorderToolsPopup);
                 _popupManager.RegisterPopup(BorderDrawShape);
+                _popupManager.RegisterPopup(BoardBorderDrawShape);
 
-                _popupManager.Initialize();
+                _popupManager.Initialize(this);
 
                 System.Diagnostics.Debug.WriteLine("[PopupManager] Initialized successfully");
             }
@@ -339,7 +340,7 @@ namespace Ink_Canvas
         private void CollapseBorderDrawShape()
         {
             AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderDrawShape);
+            AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderDrawShape);
         }
 
         /// <summary>
@@ -360,7 +361,7 @@ namespace Ink_Canvas
             BoardTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
             // 添加隐藏图形工具的二级菜单面板
             BorderDrawShape.IsOpen = false;
-            BoardBorderDrawShape.Visibility = Visibility.Collapsed;
+            BoardBorderDrawShape.IsOpen = false;
 
             if (LogicalTreeHelper.FindLogicalNode(this, "BackgroundPalette") is UIElement bgPalette)
             {
@@ -438,6 +439,7 @@ namespace Ink_Canvas
             AnimationsHelper.HideWithSlideAndFade(BoardEraserSizePanel);
             AnimationsHelper.HideWithSlideAndFade(EraserSizePanel);
             AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
+            AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderDrawShape);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
@@ -456,7 +458,7 @@ namespace Ink_Canvas
             if (ToggleSwitchDrawShapeBorderAutoHide.IsOn)
             {
                 AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
-                AnimationsHelper.HideWithSlideAndFade(BoardBorderDrawShape);
+                AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderDrawShape);
             }
 
             if (mode != null)
@@ -1996,6 +1998,21 @@ namespace Ink_Canvas
 
                 double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
 
+                double baseHeight = ViewboxFloatingBar.ActualHeight;
+                if (baseHeight <= 0)
+                {
+                    baseHeight = ViewboxFloatingBar.DesiredSize.Height;
+                }
+                if (baseHeight <= 0)
+                {
+                    baseHeight = ViewboxFloatingBar.RenderSize.Height;
+                }
+                if (baseHeight <= 0)
+                {
+                    baseHeight = 58;
+                }
+                double floatingBarHeight = baseHeight * ViewboxFloatingBarScaleTransform.ScaleY;
+
 
                 // 如果快捷调色盘显示，确保有足够空间
                 if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
@@ -2018,27 +2035,25 @@ namespace Ink_Canvas
 
                 if (!PosXCaculatedWithTaskbarHeight)
                 {
-                    // 如果任务栏高度为0(隐藏状态),则使用固定边距
                     if (toolbarHeight == 0)
                     {
                         pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY;
                     }
                     else
                     {
-                        pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY;
+                        pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY - toolbarHeight;
                     }
                 }
                 else if (PosXCaculatedWithTaskbarHeight)
                 {
-                    // 如果任务栏高度为0(隐藏状态),则使用固定高度
                     if (toolbarHeight == 0)
                     {
-                        pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY -
+                        pos.Y = screenHeight - floatingBarHeight -
                                3 * ViewboxFloatingBarScaleTransform.ScaleY;
                     }
                     else
                     {
-                        pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY -
+                        pos.Y = screenHeight - floatingBarHeight -
                                toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
                     }
                 }
@@ -2156,6 +2171,21 @@ namespace Ink_Canvas
 
                 double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
 
+                double baseHeight = ViewboxFloatingBar.ActualHeight;
+                if (baseHeight <= 0)
+                {
+                    baseHeight = ViewboxFloatingBar.DesiredSize.Height;
+                }
+                if (baseHeight <= 0)
+                {
+                    baseHeight = ViewboxFloatingBar.RenderSize.Height;
+                }
+                if (baseHeight <= 0)
+                {
+                    baseHeight = 58;
+                }
+                double floatingBarHeight = baseHeight * ViewboxFloatingBarScaleTransform.ScaleY;
+
 
                 // 如果快捷调色盘显示，确保有足够空间
                 if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
@@ -2164,28 +2194,24 @@ namespace Ink_Canvas
                     // 根据显示模式调整宽度
                     if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
                     {
-                        // 单行显示模式，自适应宽度，但需要足够空间显示6个颜色
                         floatingBarWidth = Math.Max(floatingBarWidth, 120 * ViewboxFloatingBarScaleTransform.ScaleX);
                     }
                     else
                     {
-                        // 双行显示模式，宽度较大
                         floatingBarWidth = Math.Max(floatingBarWidth, 68 * ViewboxFloatingBarScaleTransform.ScaleX);
                     }
                 }
 
                 pos.X = (screenWidth - floatingBarWidth) / 2;
 
-                // 如果任务栏高度为0,则使用固定边距
                 if (toolbarHeight == 0)
                 {
-                    pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY -
+                    pos.Y = screenHeight - floatingBarHeight -
                            3 * ViewboxFloatingBarScaleTransform.ScaleY;
-                    LogHelper.WriteLogToFile($"任务栏隐藏,使用固定高度: {ViewboxFloatingBar.ActualHeight}");
                 }
                 else
                 {
-                    pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY -
+                    pos.Y = screenHeight - floatingBarHeight -
                            toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
                 }
 

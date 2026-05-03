@@ -1814,10 +1814,11 @@
                     </Popup>
                     <!--图形菜单-->
                     <Popup x:Name="BoardBorderDrawShape"
-                            Placement="Custom"
-                            AllowsTransparency="True"
-                            StaysOpen="True"
-                            IsOpen="False">
+                           PlacementTarget="{Binding ElementName=BoardGeometry}"
+                           Placement="Custom"
+                           AllowsTransparency="True"
+                           StaysOpen="True"
+                           IsOpen="False">
                         <localControls:ShapeDrawPopupContent x:Name="BoardShapeDrawPopupContent" />
                     </Popup>
                 </Grid>

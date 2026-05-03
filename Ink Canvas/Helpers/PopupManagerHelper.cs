@@ -36,12 +36,15 @@ namespace Ink_Canvas.Helpers
 
         #region 状态管理
 
+        private static readonly List<PopupManagerHelper> _activeInstances = new List<PopupManagerHelper>();
+
         private readonly List<Popup> _registeredPopups = new List<Popup>();
+        private Window _ownerWindow;
+        private IntPtr _ownerHwnd = IntPtr.Zero;
         private bool _isInitialized = false;
-        private bool _offsetToggle = true;
         private bool _needsUpdate = false;
         private int _topmostCheckCounter = 0;
-        private const int TopmostCheckInterval = 30;
+        private const int TopmostCheckInterval = 15;
 
         #endregion
 
@@ -58,13 +61,20 @@ namespace Ink_Canvas.Helpers
 
         #region 初始化与注册
 
-        public void Initialize()
+        public void Initialize(Window ownerWindow)
         {
             if (_isInitialized) return;
+
+            _ownerWindow = ownerWindow;
+            if (_ownerWindow != null)
+            {
+                _ownerHwnd = new WindowInteropHelper(_ownerWindow).Handle;
+            }
 
             try
             {
                 CompositionTarget.Rendering += OnRendering;
+                _activeInstances.Add(this);
                 _isInitialized = true;
             }
             catch (Exception ex)
@@ -172,18 +182,8 @@ namespace Ink_Canvas.Helpers
                 var hOffset = popup.HorizontalOffset;
                 var vOffset = popup.VerticalOffset;
 
-                if (_offsetToggle)
-                {
-                    popup.HorizontalOffset = hOffset + 0.001;
-                    popup.VerticalOffset = vOffset + 0.001;
-                }
-                else
-                {
-                    popup.HorizontalOffset = hOffset - 0.001;
-                    popup.VerticalOffset = vOffset - 0.001;
-                }
-
-                _offsetToggle = !_offsetToggle;
+                popup.HorizontalOffset = hOffset + 0.001;
+                popup.VerticalOffset = vOffset + 0.001;
             }
             catch (Exception ex)
             {
@@ -199,6 +199,14 @@ namespace Ink_Canvas.Helpers
                 {
                     FixPopupZOrder(popup);
                 }
+            }
+        }
+
+        public static void NotifyTopmostMaintained()
+        {
+            for (int i = 0; i < _activeInstances.Count; i++)
+            {
+                _activeInstances[i].OnOwnerActivated();
             }
         }
 
@@ -251,28 +259,29 @@ namespace Ink_Canvas.Helpers
                 var source = PresentationSource.FromVisual(popup.Child) as HwndSource;
                 if (source?.Handle == null) return;
 
-                var hwnd = source.Handle;
-                int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+                var popupHwnd = source.Handle;
                 var shouldBeTopmost = CheckShouldBeTopmost();
 
                 if (shouldBeTopmost)
                 {
-                    if ((exStyle & WS_EX_TOPMOST) != 0)
-                    {
-                        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_TOPMOST);
-                    }
-
-                    SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0,
+                    SetWindowPos(popupHwnd, HWND_TOPMOST, 0, 0, 0, 0,
                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
+
+                    if (_ownerHwnd != IntPtr.Zero)
+                    {
+                        SetWindowPos(_ownerHwnd, popupHwnd, 0, 0, 0, 0,
+                            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+                    }
                 }
                 else
                 {
+                    int exStyle = GetWindowLong(popupHwnd, GWL_EXSTYLE);
                     if ((exStyle & WS_EX_TOPMOST) != 0)
                     {
-                        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_TOPMOST);
+                        SetWindowLong(popupHwnd, GWL_EXSTYLE, exStyle & ~WS_EX_TOPMOST);
                     }
 
-                    SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0,
+                    SetWindowPos(popupHwnd, HWND_NOTOPMOST, 0, 0, 0, 0,
                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
                 }
             }
@@ -299,6 +308,7 @@ namespace Ink_Canvas.Helpers
                     popup.Closed -= OnPopupClosed;
                 }
                 _registeredPopups.Clear();
+                _activeInstances.Remove(this);
                 _isInitialized = false;
             }
             catch (Exception ex)

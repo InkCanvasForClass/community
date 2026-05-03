@@ -216,6 +216,14 @@ namespace Ink_Canvas
                         PopupPrimaryAxis.Vertical)
                 };
 
+            BoardBorderDrawShape.CustomPopupPlacementCallback =
+                (popupSize, targetSize, offset) => new[]
+                {
+                    new CustomPopupPlacement(
+                        new Point((targetSize.Width - popupSize.Width) / 2, -popupSize.Height - 5),
+                        PopupPrimaryAxis.Vertical)
+                };
+
             BlackboardLeftSide.Visibility = Visibility.Collapsed;
             BlackboardCenterSide.Visibility = Visibility.Collapsed;
             BlackboardRightSide.Visibility = Visibility.Collapsed;
@@ -225,7 +233,7 @@ namespace Ink_Canvas
             TwoFingerGestureBorder.Visibility = Visibility.Collapsed;
             BoardTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
             BorderDrawShape.IsOpen = false;
-            BoardBorderDrawShape.Visibility = Visibility.Collapsed;
+            BoardBorderDrawShape.IsOpen = false;
             GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
 
             //if (!App.StartArgs.Contains("-o"))

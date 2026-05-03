@@ -458,6 +458,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                     {
                         SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
                     }
+
+                    PopupManagerHelper.NotifyTopmostMaintained();
                 }
             }
             catch (Exception ex)
