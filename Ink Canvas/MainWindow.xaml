@@ -2182,6 +2182,7 @@
         <!--浮动工具栏-->
         <Grid Name="FloatingbarUIForInkReplay">
             <Viewbox Name="ViewboxFloatingBar" Margin="150,250,0,0" Cursor="Arrow"
+                     Visibility="Collapsed"
                      HorizontalAlignment="Left" Height="58" VerticalAlignment="Top"
                      Stretch="None"
                      UseLayoutRounding="True" SnapsToDevicePixels="True"

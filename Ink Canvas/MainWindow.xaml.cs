@@ -226,6 +226,11 @@ namespace Ink_Canvas
             */
             InitializeComponent();
 
+            if (BorderTools.Child is FrameworkElement btChild) btChild.Visibility = Visibility.Collapsed;
+            if (BorderDrawShape.Child is FrameworkElement bdsChild) bdsChild.Visibility = Visibility.Collapsed;
+            if (BoardBorderToolsPopup.Child is FrameworkElement bbtpChild) bbtpChild.Visibility = Visibility.Collapsed;
+            if (BoardBorderDrawShape.Child is FrameworkElement bbdsChild) bbdsChild.Visibility = Visibility.Collapsed;
+
             WireUpToolsPopupContentEvents();
             WireUpShapeDrawPopupContentEvents();
             WireUpBoardShapeDrawPopupContentEvents();

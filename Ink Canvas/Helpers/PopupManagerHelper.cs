@@ -77,6 +77,12 @@ namespace Ink_Canvas.Helpers
 
             _registeredPopups.Add(popup);
             popup.Opened += OnPopupOpened;
+            popup.Closed += OnPopupClosed;
+
+            if (popup.Child is FrameworkElement child && !popup.IsOpen)
+            {
+                child.Visibility = Visibility.Collapsed;
+            }
 
             System.Diagnostics.Debug.WriteLine($"[PopupManager] Registered popup: {popup.Name ?? "unnamed"}");
         }
@@ -86,6 +92,7 @@ namespace Ink_Canvas.Helpers
             if (popup == null) return;
 
             popup.Opened -= OnPopupOpened;
+            popup.Closed -= OnPopupClosed;
             _registeredPopups.Remove(popup);
         }
 
@@ -94,27 +101,26 @@ namespace Ink_Canvas.Helpers
             var popup = sender as Popup;
             if (popup == null) return;
 
-            FixPopupZOrder(popup);
+            if (popup.Child is FrameworkElement child)
+            {
+                child.Visibility = Visibility.Visible;
+            }
 
             Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 FixPopupZOrder(popup);
             }), DispatcherPriority.Loaded);
+        }
 
-            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                FixPopupZOrder(popup);
-            }), DispatcherPriority.Render);
+        private void OnPopupClosed(object sender, EventArgs e)
+        {
+            var popup = sender as Popup;
+            if (popup == null) return;
 
-            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            if (popup.Child is FrameworkElement child)
             {
-                FixPopupZOrder(popup);
-            }), DispatcherPriority.Background);
-
-            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                FixPopupZOrder(popup);
-            }), DispatcherPriority.ApplicationIdle);
+                child.Visibility = Visibility.Collapsed;
+            }
         }
 
         #endregion
@@ -257,6 +263,7 @@ namespace Ink_Canvas.Helpers
                 foreach (var popup in _registeredPopups)
                 {
                     popup.Opened -= OnPopupOpened;
+                    popup.Closed -= OnPopupClosed;
                 }
                 _registeredPopups.Clear();
                 _isInitialized = false;

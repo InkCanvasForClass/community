@@ -463,6 +463,7 @@ namespace Ink_Canvas.Helpers
                     return;
                 }
 
+                child.Visibility = Visibility.Visible;
                 child.Opacity = 0.5;
                 child.RenderTransform = new TranslateTransform(0, 10);
 
