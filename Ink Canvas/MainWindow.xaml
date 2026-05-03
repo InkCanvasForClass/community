@@ -1143,7 +1143,6 @@
                                     </Border>
                                 </ikw:SimpleStackPanel>
                             </Border>
-
                             <Border CornerRadius="5,5,5,5" Background="{DynamicResource BoardFloatBarBackground}" Margin="0,0,5,0">
                                 <ikw:SimpleStackPanel Orientation="Horizontal">
                                     <controls:BoardToolbarButton x:Name="BoardSelect"
@@ -1668,162 +1667,13 @@
                                                                  Label="{i18n:I18n Key=Board_Shape}"
                                                                  IconGeometry="F1 M24,24z M0,0z M17.8604,10.7597L12.0068,1.17001 6.13961,10.7597 17.8604,10.7597z M10.9345,13.2403L1.34476,13.2403 1.34476,22.83 10.9345,22.83 10.9345,13.2403z M17.8604,13.2403C15.2122,13.2403 13.0655,15.387 13.0655,18.0352 13.0655,20.6833 15.2122,22.83 17.8604,22.83 20.5085,22.83 22.6552,20.6833 22.6552,18.0352 22.6552,15.387 20.5085,13.2403 17.8604,13.2403z"
                                                                  ButtonMouseUp="ImageDrawShape_MouseUp" />
-                                    <!--图形菜单-->
-                                    <Border Width="0">
-                                        <Border x:Name="BoardBorderDrawShape" Visibility="Visible"
-                                                Background="{DynamicResource FloatBarBackground}"
-                                                Opacity="1" BorderBrush="{DynamicResource FloatBarBorderBrush}" BorderThickness="1" CornerRadius="5"
-                                                Margin="-147,-286,-89,55">
-                                            <Viewbox>
-                                                <ikw:SimpleStackPanel Spacing="8" Orientation="Vertical">
-                                                    <TextBlock FontSize="16"
-                                                               Foreground="{DynamicResource FloatBarForeground}"
-                                                               HorizontalAlignment="Left" Margin="10,8">
-                                                        <Run Text="{i18n:I18n Key=Board_Shape}" />
-                                                        <Run Text="{i18n:I18n Key=Board_ShapeHintLongPress}" FontSize="10" />
-                                                    </TextBlock>
-                                                    <ui:FontIcon Margin="0,-20,8,15" Icon="{x:Static ui:SegoeFluentIcons.Pin}"
-                                                                   MouseDown="Border_MouseDown"
-                                                                   MouseUp="SymbolIconPinBorderDrawShape_MouseUp"
-                                                                   Foreground="{DynamicResource FloatBarForeground}"
-                                                                   HorizontalAlignment="Right" />
-                                                    <ikw:SimpleStackPanel Margin="20,0,0,0" Orientation="Horizontal">
-                                                        <ikw:SimpleStackPanel Visibility="Collapsed" Margin="58,6,5,6"
-                                                                             Width="54">
-                                                            <Label Margin="0,0,0,-2" Content="{i18n:I18n Key=Board_AutoHide}"
-                                                                   Foreground="{DynamicResource FloatBarForeground}"
-                                                                   FontSize="13"
-                                                                   VerticalAlignment="Center" />
-                                                            <Viewbox Height="25">
-                                                                <ui:ToggleSwitch
-                                                                    Name="ToggleSwitchDrawShapeBorderAutoHide"
-                                                                    Foreground="{DynamicResource FloatBarForeground}"
-                                                                    Width="70"
-                                                                    IsOn="True" />
-                                                            </Viewbox>
-                                                        </ikw:SimpleStackPanel>
-                                                    </ikw:SimpleStackPanel>
-                                                    <ikw:SimpleStackPanel Height="50" Spacing="14"
-                                                                         Orientation="Horizontal">
-                                                        <Image Name="ImageDrawLine" Margin="16,12,0,12"
-                                                               MouseDown="Image_MouseDown"
-                                                               MouseUp="BtnDrawLine_Click"
-                                                               Source="{DynamicResource DrawShapeImageSource.Line}" />
-                                                        <Image Name="ImageDrawDashedLine" Margin="0,12,0,12"
-                                                               MouseDown="Image_MouseDown"
-                                                               MouseUp="BtnDrawDashedLine_Click"
-                                                               Source="{DynamicResource DrawShapeImageSource.DashedLine}" />
-                                                        <Image Name="ImageDrawDotLine" Margin="0,12,0,12"
-                                                               MouseDown="Image_MouseDown"
-                                                               MouseUp="BtnDrawDotLine_Click"
-                                                               Source="{DynamicResource DrawShapeImageSource.DotLine}" />
-                                                        <Image Name="ImageDrawArrow" Margin="0,12,0,12"
-                                                               MouseDown="Image_MouseDown"
-                                                               MouseUp="BtnDrawArrow_Click"
-                                                               Source="{DynamicResource DrawShapeImageSource.ArrowLine}" />
-                                                        <Image Name="ImageDrawParallelLine" Margin="0,11.5,16,11.5"
-                                                               MouseDown="Image_MouseDown"
-                                                               MouseUp="BtnDrawParallelLine_Click"
-                                                               Source="{DynamicResource DrawShapeImageSource.ParallelLine}" />
-                                                    </ikw:SimpleStackPanel>
-                                                    <ikw:SimpleStackPanel Height="50" Spacing="15"
-                                                                         Orientation="Horizontal">
-                                                        <Image Margin="16,12,0,12" MouseUp="BtnDrawCoordinate1_Click"
-                                                               Source="{DynamicResource DrawShapeImageSource.Coordinate1}" />
-                                                        <Image Margin="0,12" MouseUp="BtnDrawCoordinate2_Click"
-                                                               Source="{DynamicResource DrawShapeImageSource.Coordinate2}" />
-                                                        <Image Margin="0,12" MouseUp="BtnDrawCoordinate3_Click"
-                                                               Source="{DynamicResource DrawShapeImageSource.Coordinate3}" />
-                                                        <Image Margin="0,12" MouseUp="BtnDrawCoordinate4_Click"
-                                                               Source="{DynamicResource DrawShapeImageSource.Coordinate4}" />
-                                                        <Image Margin="-1,11.5" MouseUp="BtnDrawCoordinate5_Click"
-                                                               Source="{DynamicResource DrawShapeImageSource.Coordinate5}" />
-                                                    </ikw:SimpleStackPanel>
-                                                    <ikw:SimpleStackPanel Height="50" Spacing="10"
-                                                                         Orientation="Horizontal">
-                                                        <Image Margin="16,11,2,11"
-                                                               MouseUp="BtnDrawRectangleCenter_Click"
-                                                               Source="{DynamicResource DrawShapeImageSource.RectangleCenter}" />
-                                                        <Image Visibility="Collapsed" Margin="0,10"
-                                                               MouseUp="BtnDrawEllipse_Click"
-                                                               Source="{DynamicResource DrawShapeImageSource.Ellipse}" />
-                                                        <Image Margin="0,10" MouseUp="BtnDrawCircle_Click"
-                                                               Source="{DynamicResource DrawShapeImageSource.Circle}" />
-                                                        <Image Margin="0,10" MouseUp="BtnDrawDashedCircle_Click"
-                                                               Source="{DynamicResource DrawShapeImageSource.DashedCircle}" />
-                                                        <Image Margin="0,10" MouseUp="BtnDrawCenterEllipse_Click"
-                                                               Source="{DynamicResource DrawShapeImageSource.EllipseCenter}"
-                                                               Width="30" />
-                                                        <Image Margin="0,10"
-                                                               MouseUp="BtnDrawCenterEllipseWithFocalPoint_Click"
-                                                               Source="{DynamicResource DrawShapeImageSource.EllipseCenterWithFocalPoint}"
-                                                               Width="30" />
-                                                    </ikw:SimpleStackPanel>
-                                                    <ikw:SimpleStackPanel Height="50" Spacing="10"
-                                                                         Orientation="Horizontal">
-                                                        <Image Margin="16,10,2,10" MouseUp="BtnDrawHyperbola_Click"
-                                                               Width="26"
-                                                               Source="{DynamicResource DrawShapeImageSource.Hyperbola}" />
-                                                        <Image Margin="4,10,2,10"
-                                                               MouseUp="BtnDrawHyperbolaWithFocalPoint_Click"
-                                                               Width="26"
-                                                               Source="{DynamicResource DrawShapeImageSource.HyperbolaWithFocalPoint}" />
-                                                        <Image Margin="2.5,10,2,10" MouseUp="BtnDrawParabola1_Click"
-                                                               Width="26"
-                                                               Source="{DynamicResource DrawShapeImageSource.Parabola}" />
-                                                        <Image Margin="1,10,2,10"
-                                                               MouseUp="BtnDrawParabolaWithFocalPoint_Click"
-                                                               Width="26"
-                                                               Source="{DynamicResource DrawShapeImageSource.ParabolaWithFocalPoint}"
-                                                               RenderTransformOrigin="0.5,0.5">
-                                                            <Image.RenderTransform>
-                                                                <TransformGroup>
-                                                                    <ScaleTransform />
-                                                                    <SkewTransform />
-                                                                    <RotateTransform Angle="90" />
-                                                                    <TranslateTransform />
-                                                                </TransformGroup>
-                                                            </Image.RenderTransform>
-                                                        </Image>
-                                                        <Image Margin="2,10,2,10" MouseUp="BtnDrawParabola2_Click"
-                                                               Width="26"
-                                                               Source="{DynamicResource DrawShapeImageSource.Parabola}"
-                                                               RenderTransformOrigin="0.5,0.5">
-                                                            <Image.RenderTransform>
-                                                                <TransformGroup>
-                                                                    <ScaleTransform />
-                                                                    <SkewTransform />
-                                                                    <RotateTransform Angle="90"/>
-                                                                    <TranslateTransform />
-                                                                </TransformGroup>
-                                                            </Image.RenderTransform>
-                                                        </Image>
-                                                    </ikw:SimpleStackPanel>
-                                                    <ikw:SimpleStackPanel Height="50" Spacing="10"
-                                                                         Orientation="Horizontal">
-                                                        <Image Margin="15,11,2,11" MouseUp="BtnDrawRectangle_Click"
-                                                               Source="{DynamicResource DrawShapeImageSource.Rectangle}" />
-                                                        <Image Margin="6,10,2,10" MouseUp="BtnDrawCylinder_Click"
-                                                               Source="{DynamicResource DrawShapeImageSource.Cylinder}" />
-                                                        <Image Margin="8,12.5,0,10" MouseUp="BtnDrawCone_Click"
-                                                               Source="{DynamicResource DrawShapeImageSource.Cone}" />
-                                                        <Image Margin="5.5,12.5,2.5,10" MouseUp="BtnDrawCuboid_Click"
-                                                               Source="{DynamicResource DrawShapeImageSource.Cuboid}" />
-                                                        <Image Visibility="Collapsed" Margin="0,11.5,2.5,9.5"
-                                                               MouseUp="BtnDrawCuboid_Click"
-                                                               Source="{DynamicResource DrawShapeImageSource.Tetrahedron}" />
-                                                    </ikw:SimpleStackPanel>
-                                                </ikw:SimpleStackPanel>
-                                            </Viewbox>
-                                        </Border>
-                                    </Border>
                                     <controls:BoardToolbarButton x:Name="BoardInsertImage"
                                                                  Label="{i18n:I18n Key=Board_InsertImage}"
                                                                  IconGeometry="F1 M24,24z M0,0z M19,3H5C3.9,3 3,3.9 3,5v14c0,1.1 0.9,2 2,2h14c1.1,0 2-0.9 2-2V5C21,3.9 20.1,3 19,3zM19,19H5V5h14V19z M17,7c-1.1,0-2,0.9-2,2s0.9,2 2,2 2-0.9 2-2S18.1,7 17,7zM7,17l2.5-3.01 1.96,2.36 2.54-3.21L17,17H7z"
                                                                  ButtonMouseUp="InsertImageOptions_MouseUp" />
                                     <!--插入图片菜单-->
                                     <Border>
-                                        <Grid RenderTransformOrigin="0,1" Margin="-133,-172,13,55">
+                                        <Grid RenderTransformOrigin="0,1" Margin="-133,-92,13,55">
                                             <Border Visibility="Collapsed" ClipToBounds="True"  d:Visibility="Visible"
                                                     x:Name="BoardImageOptionsPanel"
                                                     CornerRadius="5" Background="{DynamicResource FloatBarBackground}"
@@ -1925,7 +1775,6 @@
                                                                  ButtonMouseUp="SymbolIconRedo_MouseUp" />
                                 </ikw:SimpleStackPanel>
                             </Border>
-
                             <Border CornerRadius="5,5,5,5" Background="{DynamicResource BoardFloatBarBackground}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal">
                                     <controls:BoardToolbarButton x:Name="BoardTools"
@@ -1941,10 +1790,10 @@
                                                                  ButtonMouseUp="ImageBlackboard_MouseUp" />
                                 </ikw:SimpleStackPanel>
                             </Border>
-
                         </ikw:SimpleStackPanel>
                     </Grid>
                 </Viewbox>
+                <!--菜单-->
                 <Grid>
                     <Grid.RenderTransform>
                         <TransformGroup>
@@ -1954,6 +1803,7 @@
                             <TranslateTransform />
                         </TransformGroup>
                     </Grid.RenderTransform>
+                    <!--工具菜单-->
                     <Popup x:Name="BoardBorderToolsPopup"
                            PlacementTarget="{Binding ElementName=BoardTools}"
                            Placement="Custom"
@@ -1961,6 +1811,14 @@
                            StaysOpen="True"
                            IsOpen="False">
                         <localControls:ToolsPopupContent x:Name="BoardToolsPopupContent" IsBoardMode="True" />
+                    </Popup>
+                    <!--图形菜单-->
+                    <Popup x:Name="BoardBorderDrawShape"
+                            Placement="Custom"
+                            AllowsTransparency="True"
+                            StaysOpen="True"
+                            IsOpen="False">
+                        <localControls:ShapeDrawPopupContent x:Name="BoardShapeDrawPopupContent" />
                     </Popup>
                 </Grid>
                 <!-- 右下角 -->
@@ -2323,6 +2181,7 @@
         <!--浮动工具栏-->
         <Grid Name="FloatingbarUIForInkReplay">
             <Viewbox Name="ViewboxFloatingBar" Margin="150,250,0,0" Cursor="Arrow"
+                     Visibility="Collapsed"
                      HorizontalAlignment="Left" Height="58" VerticalAlignment="Top"
                      Stretch="None"
                      UseLayoutRounding="True" SnapsToDevicePixels="True"
@@ -2330,7 +2189,7 @@
                 <Viewbox.LayoutTransform>
                     <ScaleTransform x:Name="ViewboxFloatingBarScaleTransform" ScaleX="1.5" ScaleY="1.5" />
                 </Viewbox.LayoutTransform>
-                <ikw:SimpleStackPanel x:Name="FloatingBarRootPanel" Orientation="Horizontal">
+                <ikw:SimpleStackPanel Orientation="Horizontal">
                     <Border x:Name="BorderFloatingBarMoveControls" Width="36" Height="36" CornerRadius="5"
                             Background="{DynamicResource FloatBarBackground}" BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}"
                             MouseDown="SymbolIconEmoji_MouseDown" MouseUp="SymbolIconEmoji_MouseUp">
@@ -2714,7 +2573,6 @@
                                                                     ButtonMouseDown="FloatingBarToolBtnMouseDownFeedback_Panel" ButtonMouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel" ButtonMouseUp="QuickColorPurple_Click" ToolTip="{i18n:I18n Key=Canvas_Color_Purple}"/>
                                     </ikw:SimpleStackPanel>
                                 </ikw:SimpleStackPanel>
-
                                 <!-- 快捷调色盘 - 单行显示模式 -->
                                 <ikw:SimpleStackPanel Name="QuickColorPaletteSingleRowPanel" 
                                                      Visibility="Collapsed" d:Visibility="Visible"
@@ -2738,8 +2596,6 @@
                                     <controls:ColorPickerButton x:Name="QuickColorGreenSingle" Color="#16A34A" CheckIconFill="Black" ButtonSize="18" CheckIconSize="10"
                                                                 ButtonMouseDown="FloatingBarToolBtnMouseDownFeedback_Panel" ButtonMouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel" ButtonMouseUp="QuickColorGreen_Click" ToolTip="{i18n:I18n Key=Canvas_Color_Green}"/>
                                 </ikw:SimpleStackPanel>
-
-                                <!-- Freeze_Icon 由 ToolbarRegistry 注入（AfterAnchor=QuickColorPaletteSingleRowPanel） -->
                                 <!-- SymbolIconDelete 由 ClearToolItem 动态注入（BeforeAnchor=StackPanelCanvasControls） -->
                                 <ikw:SimpleStackPanel Name="StackPanelCanvasControls" Visibility="Visible"
                                                      Orientation="{Binding ElementName=StackPanelFloatingBar, Path=Orientation}">
@@ -2911,9 +2767,7 @@
                                 </Popup>
                             </ikw:SimpleStackPanel>
                         </Grid>
-
                     </Border>
-
                     <ikw:SimpleStackPanel Orientation="{Binding ElementName=StackPanelFloatingBar, Path=Orientation}">
                         <Border Margin="2,0,0,0" x:Name="EnableTwoFingerGestureBorder" Visibility="Visible" Width="36"
                             Height="36" CornerRadius="5" Background="{DynamicResource FloatBarBackground}" BorderBrush="{DynamicResource FloatBarBorderBrush}"

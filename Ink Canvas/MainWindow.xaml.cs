@@ -184,6 +184,11 @@ namespace Ink_Canvas
             */
             InitializeComponent();
 
+            if (BorderTools.Child is FrameworkElement btChild) btChild.Visibility = Visibility.Collapsed;
+            if (BorderDrawShape.Child is FrameworkElement bdsChild) bdsChild.Visibility = Visibility.Collapsed;
+            if (BoardBorderToolsPopup.Child is FrameworkElement bbtpChild) bbtpChild.Visibility = Visibility.Collapsed;
+            if (BoardBorderDrawShape.Child is FrameworkElement bbdsChild) bbdsChild.Visibility = Visibility.Collapsed;
+
             WireUpToolsPopupContentEvents();
             WireUpShapeDrawPopupContentEvents();
 
@@ -2383,15 +2388,15 @@ namespace Ink_Canvas
 
         private void Window_Activated(object sender, EventArgs e)
         {
-            // 窗口激活时，如果启用了置顶功能，重新应用置顶设置
             if (Settings.Advanced.IsAlwaysOnTop)
             {
-                // 使用Dispatcher.BeginInvoke确保在UI线程上执行
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     ApplyAlwaysOnTop();
                 }), DispatcherPriority.Loaded);
             }
+
+            _popupManager?.OnOwnerActivated();
         }
 
         private async Task RunDeferredStartupPhaseBAsync()

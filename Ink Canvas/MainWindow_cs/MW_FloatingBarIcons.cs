@@ -237,6 +237,11 @@ namespace Ink_Canvas
 
                 // 标记需要更新 Popup 位置（使用 PopupManagerHelper）
                 _popupManager?.MarkNeedsUpdate();
+
+                if (BorderTools.IsOpen) _popupManager?.BringToFront(BorderTools);
+                if (BoardBorderToolsPopup.IsOpen) _popupManager?.BringToFront(BoardBorderToolsPopup);
+                if (BorderDrawShape.IsOpen) _popupManager?.BringToFront(BorderDrawShape);
+                if (BoardBorderDrawShape.IsOpen) _popupManager?.BringToFront(BoardBorderDrawShape);
             }
         }
 
