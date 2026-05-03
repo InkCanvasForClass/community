@@ -300,7 +300,7 @@
                   TouchDown="GridInkCanvasSelectionCover_TouchDown"
                   TouchUp="GridInkCanvasSelectionCover_TouchUp"
                   TouchMove="GridInkCanvasSelectionCover_TouchMove"
-                  Background="#01FFFFFF" Opacity="0.01" Visibility="Visible" Margin="1,0,-1,0">
+                  Background="#01FFFFFF" Opacity="0.01" Visibility="Collapsed" d:Visibility="Visible" Margin="1,0,-1,0">
 
                 <!-- 选择框 -->
                 <Rectangle Name="SelectionRectangle"
@@ -710,7 +710,7 @@
                 <Viewbox x:Name="ViewboxBlackboardLeftSide" Margin="3,0,0,0" Height="55" HorizontalAlignment="Left"
                          VerticalAlignment="Bottom"
                          Stretch="None">
-                    <Grid Name="BlackboardLeftSide" Visibility="Visible" Margin="0,0,0,3" Height="50"
+                    <Grid Name="BlackboardLeftSide" Visibility="Collapsed" d:Visibility="Visible" Margin="0,0,0,3" Height="50"
                           HorizontalAlignment="Center" VerticalAlignment="Bottom">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="5">
                             <Border CornerRadius="5,5,5,5" Background="{DynamicResource BoardFloatBarBackground}" Margin="0,0,0,0">
@@ -839,7 +839,7 @@
                     <Viewbox.LayoutTransform>
                         <ScaleTransform x:Name="ViewboxBlackboardCenterSideScaleTransform" ScaleX="1" ScaleY="1" />
                     </Viewbox.LayoutTransform>
-                    <Grid x:Name="BlackboardCenterSide" Visibility="Visible" Margin="0,0,0,3" Height="50"
+                    <Grid x:Name="BlackboardCenterSide" Visibility="Collapsed" d:Visibility="Visible" Margin="0,0,0,3" Height="50"
                           HorizontalAlignment="Center" VerticalAlignment="Bottom">
                         <ikw:SimpleStackPanel Orientation="Horizontal">
                             <Border CornerRadius="5,5,5,5" Background="{DynamicResource BoardFloatBarBackground}" Margin="0,0,5,0">
@@ -1968,7 +1968,7 @@
                 <Viewbox x:Name="ViewboxBlackboardRightSide" Margin="3,0,0,0" Height="55"
                          HorizontalAlignment="Right" VerticalAlignment="Bottom"
                          Stretch="None">
-                    <Grid Name="BlackboardRightSide" Visibility="Visible" Margin="0,0,0,3" Height="50"
+                    <Grid Name="BlackboardRightSide" Visibility="Collapsed" d:Visibility="Visible" Margin="0,0,0,3" Height="50"
                           HorizontalAlignment="Center" VerticalAlignment="Bottom">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="5">
                             <controls:BoardToolbarButton x:Name="BtnWhiteBoardAddBoard"
@@ -2312,12 +2312,12 @@
             <TextBlock Name="PPTBtnPageTotal" Text="/ ?"/>
         </ikw:SimpleStackPanel>
         <localControls:PptNavBar x:Name="LeftSidePanelForPPTNavigation"
-                                 Visibility="Visible"
+                                 Visibility="Collapsed" d:Visibility="Visible"
                                  Direction="LeftSide"
                                  Margin="6,0,0,0"
                                  HorizontalAlignment="Left" VerticalAlignment="Center"/>
         <localControls:PptNavBar x:Name="RightSidePanelForPPTNavigation"
-                                 Visibility="Visible"
+                                 Visibility="Collapsed" d:Visibility="Visible"
                                  Direction="RightSide"
                                  Margin="0,0,6,0"
                                  HorizontalAlignment="Right" VerticalAlignment="Center"/>
@@ -2364,7 +2364,7 @@
                                 <ikw:SimpleStackPanel Width="0"
                                                          Orientation="{Binding ElementName=StackPanelFloatingBar, Path=Orientation}">
                                     <Grid Margin="-14,5,14,5" Width="0" RenderTransformOrigin=" 1,0">
-                                        <Border x:Name="PenPalette" Visibility="Visible" Background="{DynamicResource FloatBarBackground}"
+                                        <Border x:Name="PenPalette" Visibility="Collapsed" d:Visibility="Visible" Background="{DynamicResource FloatBarBackground}"
                                                     Opacity="1" BorderBrush="#2563eb"
                                                     BorderThickness="1" CornerRadius="8" Margin="-96.5,-84">
                                             <ikw:SimpleStackPanel Margin="0,-20,0,0">
@@ -2753,7 +2753,7 @@
                                     <Grid x:Name="BackgroundPaletteGrid" Margin="-203,-128,83,37">
                                         <!-- 背景面板将在代码中动态添加 -->
                                     </Grid>
-                                    <Border Visibility="Visible" ClipToBounds="True" Name="EraserSizePanel"
+                                    <Border Visibility="Collapsed" d:Visibility="Visible" ClipToBounds="True" Name="EraserSizePanel"
                                             Margin="-203,-148,83,40" CornerRadius="5" Background="{DynamicResource FloatBarBackground}" Opacity="1"
                                             BorderBrush="#2563eb" BorderThickness="1">
                                         <ikw:SimpleStackPanel Margin="0">
