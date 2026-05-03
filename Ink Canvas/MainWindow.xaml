@@ -2331,7 +2331,7 @@
                 <Viewbox.LayoutTransform>
                     <ScaleTransform x:Name="ViewboxFloatingBarScaleTransform" ScaleX="1.5" ScaleY="1.5" />
                 </Viewbox.LayoutTransform>
-                <ikw:SimpleStackPanel Orientation="Horizontal">
+                <ikw:SimpleStackPanel x:Name="FloatingBarRootPanel" Orientation="Horizontal">
                     <Border x:Name="BorderFloatingBarMoveControls" Width="36" Height="36" CornerRadius="5"
                             Background="{DynamicResource FloatBarBackground}" BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}"
                             MouseDown="SymbolIconEmoji_MouseDown" MouseUp="SymbolIconEmoji_MouseUp">

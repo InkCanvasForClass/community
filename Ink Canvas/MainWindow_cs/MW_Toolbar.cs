@@ -1,7 +1,7 @@
-using System;
 using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar;
 using Ink_Canvas.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Windows.Controls;
 namespace Ink_Canvas

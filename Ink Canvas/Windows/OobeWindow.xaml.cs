@@ -1,12 +1,12 @@
+using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Linq;
-using Ink_Canvas.Helpers;
-using Ink_Canvas.Properties;
 using FontIcon = iNKORE.UI.WPF.Modern.Controls.FontIcon;
 using NavigationView = iNKORE.UI.WPF.Modern.Controls.NavigationView;
 using NavigationViewItem = iNKORE.UI.WPF.Modern.Controls.NavigationViewItem;
