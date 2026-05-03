@@ -40,6 +40,8 @@ namespace Ink_Canvas.Helpers
         private bool _isInitialized = false;
         private bool _offsetToggle = true;
         private bool _needsUpdate = false;
+        private int _topmostCheckCounter = 0;
+        private const int TopmostCheckInterval = 30;
 
         #endregion
 
@@ -106,10 +108,17 @@ namespace Ink_Canvas.Helpers
                 child.Visibility = Visibility.Visible;
             }
 
+            FixPopupZOrder(popup);
+
             Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 FixPopupZOrder(popup);
             }), DispatcherPriority.Loaded);
+
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                FixPopupZOrder(popup);
+            }), DispatcherPriority.Background);
         }
 
         private void OnPopupClosed(object sender, EventArgs e)
@@ -182,9 +191,20 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        public void OnOwnerActivated()
+        {
+            foreach (var popup in _registeredPopups)
+            {
+                if (popup.IsOpen)
+                {
+                    FixPopupZOrder(popup);
+                }
+            }
+        }
+
         #endregion
 
-        #region 内部实现 - 渲染回调（仅用于位置跟随）
+        #region 内部实现 - 渲染回调
 
         private void OnRendering(object sender, EventArgs e)
         {
@@ -197,6 +217,19 @@ namespace Ink_Canvas.Helpers
                         UpdatePosition(popup);
                     }
                     _needsUpdate = false;
+                }
+
+                _topmostCheckCounter++;
+                if (_topmostCheckCounter >= TopmostCheckInterval)
+                {
+                    _topmostCheckCounter = 0;
+                    foreach (var popup in _registeredPopups)
+                    {
+                        if (popup.IsOpen)
+                        {
+                            FixPopupZOrder(popup);
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -224,12 +257,12 @@ namespace Ink_Canvas.Helpers
 
                 if (shouldBeTopmost)
                 {
-                    if ((exStyle & WS_EX_TOPMOST) == 0)
+                    if ((exStyle & WS_EX_TOPMOST) != 0)
                     {
-                        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
+                        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_TOPMOST);
                     }
 
-                    SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
+                    SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0,
                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
                 }
                 else

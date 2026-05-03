@@ -2419,15 +2419,15 @@ namespace Ink_Canvas
 
         private void Window_Activated(object sender, EventArgs e)
         {
-            // 窗口激活时，如果启用了置顶功能，重新应用置顶设置
             if (Settings.Advanced.IsAlwaysOnTop)
             {
-                // 使用Dispatcher.BeginInvoke确保在UI线程上执行
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     ApplyAlwaysOnTop();
                 }), DispatcherPriority.Loaded);
             }
+
+            _popupManager?.OnOwnerActivated();
         }
 
         private async Task RunDeferredStartupPhaseBAsync()
