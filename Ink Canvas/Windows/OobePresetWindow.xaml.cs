@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas.Windows
 {
@@ -13,6 +14,7 @@ namespace Ink_Canvas.Windows
         public OobePresetWindow()
         {
             InitializeComponent();
+            WindowBackdropHelper.Apply(this);
         }
 
         private void SelectPreset(PresetKind kind)
@@ -91,6 +93,7 @@ namespace Ink_Canvas.Windows
 
             // 个性化
             settings.Appearance.Theme = 2; // 跟随系统
+            settings.Appearance.WindowBackdrop = "None";
             settings.Appearance.EnableSplashScreen = false;
             settings.Appearance.EnableTrayIcon = true;
             settings.Appearance.IsShowQuickPanel = true;
@@ -147,6 +150,7 @@ namespace Ink_Canvas.Windows
 
             // 个性化
             settings.Appearance.Theme = 2; // 跟随系统
+            settings.Appearance.WindowBackdrop = "None";
             settings.Appearance.EnableSplashScreen = false;
             settings.Appearance.EnableTrayIcon = true;
             settings.Appearance.IsShowQuickPanel = false;

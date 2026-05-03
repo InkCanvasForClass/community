@@ -34,6 +34,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             InitializeComponent();
 
             ApplyCurrentTheme();
+            global::Ink_Canvas.Helpers.WindowBackdropHelper.Apply(this, Helpers.SettingsManager.Settings);
 
             // 初始化内置页面映射
             _pageTypes = new Dictionary<string, Type>
@@ -136,6 +137,12 @@ namespace Ink_Canvas.Windows.SettingsViews
         public void RefreshTheme()
         {
             ApplyCurrentTheme();
+            global::Ink_Canvas.Helpers.WindowBackdropHelper.Apply(this, Helpers.SettingsManager.Settings);
+        }
+
+        public void ApplyWindowBackdrop(string backdropName)
+        {
+            global::Ink_Canvas.Helpers.WindowBackdropHelper.Apply(this, backdropName);
         }
 
         private void ApplyCurrentTheme()

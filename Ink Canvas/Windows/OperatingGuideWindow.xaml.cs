@@ -13,6 +13,7 @@ namespace Ink_Canvas
         public OperatingGuideWindow()
         {
             InitializeComponent();
+            WindowBackdropHelper.Apply(this);
             RefreshTheme();
             AnimationsHelper.ShowWithSlideFromBottomAndFade(this, 0.25);
         }

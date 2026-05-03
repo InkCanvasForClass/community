@@ -13,7 +13,6 @@
     WindowStartupLocation="CenterScreen"
     ui:ThemeManager.IsThemeAware="True"
     ui:TitleBar.ExtendViewIntoTitleBar="True"
-    ui:WindowHelper.SystemBackdropType="Acrylic10"
     ui:WindowHelper.UseModernWindowStyle="True"
     ui:WindowHelper.CornerStyle="Round"
     ui:TitleBar.Height="48"

@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas
 {
@@ -38,6 +39,7 @@ namespace Ink_Canvas
             _noAction = noAction;
             _windowClose = windowClose;
             InitializeComponent();
+            WindowBackdropHelper.Apply(this);
             Label.Text = text;
 
             Loaded += YesOrNoNotificationWindow_Loaded;

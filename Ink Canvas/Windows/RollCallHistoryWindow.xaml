@@ -13,7 +13,6 @@
         Loaded="Window_Loaded"
         ui:ThemeManager.IsThemeAware="True"
         ui:TitleBar.ExtendViewIntoTitleBar="True"
-        ui:WindowHelper.SystemBackdropType="Mica"
         ui:WindowHelper.UseModernWindowStyle="True"
         ui:TitleBar.Height="48">
     <Window.Resources>
