@@ -3,6 +3,7 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using System;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Input;
@@ -45,6 +46,28 @@ namespace Ink_Canvas
                || mode == InkCanvasEditingMode.EraseByStroke
                || mode == InkCanvasEditingMode.Select
                || drawingShapeMode != 0;
+
+        private bool IsFreezeEditingToolModeName(string mode)
+        {
+            switch (mode)
+            {
+                case "pen":
+                case "color":
+                case "eraser":
+                case "eraserByStrokes":
+                case "select":
+                case "shape":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private string NormalizeToolModeForFreeze(string mode)
+        {
+            if (string.IsNullOrEmpty(mode)) return mode;
+            return IsCurrentPageFrozen && IsFreezeEditingToolModeName(mode) ? "cursor" : mode;
+        }
 
         private void MarkCurrentPageInkChanged()
             => MarkPageInkChanged(GetCurrentFreezePageIndex());
@@ -189,6 +212,7 @@ namespace Ink_Canvas
 
                 if (inkCanvas != null && inkCanvas.EditingMode != InkCanvasEditingMode.None)
                     inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                _globalHotkeyManager?.UpdateHotkeyStateForToolMode(true);
                 UpdateCurrentToolMode("cursor");
                 SetFloatingBarHighlightPosition("cursor");
             }

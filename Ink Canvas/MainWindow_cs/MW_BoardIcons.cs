@@ -312,6 +312,8 @@ namespace Ink_Canvas
         /// </remarks>
         private void BoardLassoIcon_Click(object sender, RoutedEventArgs e)
         {
+            if (TryBlockFrozenPageMutation("切换到选择工具")) return;
+
             forceEraser = false;
             forcePointEraser = false;
             drawingShapeMode = 0;

@@ -413,6 +413,8 @@ namespace Ink_Canvas
         /// </param>
         internal async void HideSubPanels(string mode = null, bool autoAlignCenter = false)
         {
+            mode = NormalizeToolModeForFreeze(mode);
+
             AnimationsHelper.HidePopupWithSlideAndFade(BorderTools);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
             AnimationsHelper.HideWithSlideAndFade(PenPalette);
@@ -2472,6 +2474,8 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         internal void PenIcon_Click(object sender, MouseButtonEventArgs e)
         {
+            if (TryBlockFrozenPageMutation("切换到画笔")) return;
+
             if (lastBorderMouseDownObject is Panel panel)
                 panel.Background = new SolidColorBrush(Colors.Transparent);
 
@@ -2724,6 +2728,8 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         internal void EraserIcon_Click(object sender, MouseButtonEventArgs e)
         {
+            if (TryBlockFrozenPageMutation("切换到橡皮擦")) return;
+
             bool isAlreadyEraser = inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint;
             forceEraser = false;
             forcePointEraser = true;
@@ -2787,6 +2793,8 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void BoardEraserIcon_Click(object sender, RoutedEventArgs e)
         {
+            if (TryBlockFrozenPageMutation("切换到橡皮擦")) return;
+
             bool isAlreadyEraser = inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint;
             forceEraser = false;
             forcePointEraser = true;
@@ -2837,6 +2845,8 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         internal void EraserIconByStrokes_Click(object sender, MouseButtonEventArgs e)
         {
+            if (TryBlockFrozenPageMutation("切换到线擦")) return;
+
             // 禁用高级橡皮擦系统
             DisableEraserOverlay();
 
@@ -3165,6 +3175,8 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void SelectIcon_MouseUp(object sender, RoutedEventArgs e)
         {
+            if (TryBlockFrozenPageMutation("切换到选择工具")) return;
+
             // 禁用高级橡皮擦系统
             DisableEraserOverlay();
 
@@ -4213,6 +4225,8 @@ namespace Ink_Canvas
         {
             try
             {
+                mode = NormalizeToolModeForFreeze(mode);
+
                 if (FloatingbarSelectionBG == null) return;
 
                 // 检查浮动栏是否处于收起状态
@@ -4533,7 +4547,7 @@ namespace Ink_Canvas
         /// <param name="mode">模式名称</param>
         private void UpdateCurrentToolMode(string mode)
         {
-            _currentToolMode = mode;
+            _currentToolMode = NormalizeToolModeForFreeze(mode);
         }
 
         #endregion
