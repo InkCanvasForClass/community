@@ -13,7 +13,7 @@ using Point = System.Windows.Point;
 
 namespace Ink_Canvas
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
         #region Floating Control
 

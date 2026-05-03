@@ -8,7 +8,7 @@ using System.Windows.Media;
 
 namespace Ink_Canvas
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
         /// <summary>
         /// 处理背景颜色按钮点击事件，显示或隐藏背景颜色选项面板
@@ -39,7 +39,6 @@ namespace Ink_Canvas
                 AnimationsHelper.HideWithSlideAndFade(PenPalette);
                 AnimationsHelper.HideWithSlideAndFade(BoardPenPalette);
                 AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
-                AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderDrawShape);
                 AnimationsHelper.HideWithSlideAndFade(BoardBorderDrawShape);
                 AnimationsHelper.HideWithSlideAndFade(BoardEraserSizePanel);
                 AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);

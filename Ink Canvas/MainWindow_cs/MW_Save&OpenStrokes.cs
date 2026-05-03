@@ -42,7 +42,7 @@ namespace Ink_Canvas
         /// <summary>保存时的 PDF 总页数，用于校验；仅 Type == Pdf 时有效。</summary>
         public int? PdfPageCount { get; set; }
     }
-    public partial class MainWindow : Window
+    public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
         /// <summary>收集画布上图片与 PDF 的元数据，写入 .elements.json（与墨迹文件同路径）。</summary>
         private void CollectCanvasElementsMetadata(List<CanvasElementInfo> elementInfos)
@@ -1472,3 +1472,4 @@ namespace Ink_Canvas
         }
     }
 }
+

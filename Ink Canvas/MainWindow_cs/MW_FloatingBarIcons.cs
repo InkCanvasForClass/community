@@ -27,7 +27,7 @@ using Point = System.Windows.Point;
 
 namespace Ink_Canvas
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
         /// <summary>
         /// 当前工具模式
@@ -260,8 +260,6 @@ namespace Ink_Canvas
                 _popupManager.RegisterPopup(BorderTools);
                 _popupManager.RegisterPopup(BoardBorderToolsPopup);
                 _popupManager.RegisterPopup(BorderDrawShape);
-                _popupManager.RegisterPopup(BoardBorderDrawShape);
-
 
                 _popupManager.Initialize();
 
@@ -2594,6 +2592,7 @@ namespace Ink_Canvas
 
             GridTransparencyFakeBackground.Opacity = 0;
             GridTransparencyFakeBackground.Background = Brushes.Transparent;
+            SetTransparentHitThrough();
 
             GridBackgroundCoverHolder.Visibility = Visibility.Collapsed;
 
@@ -2701,6 +2700,7 @@ namespace Ink_Canvas
 
                 GridTransparencyFakeBackground.Opacity = 1;
                 GridTransparencyFakeBackground.Background = new SolidColorBrush(StringToColor("#01FFFFFF"));
+                SetTransparentNotHitThrough();
 
                 inkCanvas.IsHitTestVisible = true;
                 inkCanvas.Visibility = Visibility.Visible;
@@ -3917,6 +3917,7 @@ namespace Ink_Canvas
                 // 进入批注模式
                 GridTransparencyFakeBackground.Opacity = 1;
                 GridTransparencyFakeBackground.Background = new SolidColorBrush(StringToColor("#01FFFFFF"));
+                SetTransparentNotHitThrough();
                 inkCanvas.IsHitTestVisible = true;
                 inkCanvas.Visibility = Visibility.Visible;
 
@@ -4001,6 +4002,7 @@ namespace Ink_Canvas
 
                 GridTransparencyFakeBackground.Opacity = 0;
                 GridTransparencyFakeBackground.Background = Brushes.Transparent;
+                SetTransparentHitThrough();
 
                 GridBackgroundCoverHolder.Visibility = Visibility.Collapsed;
 

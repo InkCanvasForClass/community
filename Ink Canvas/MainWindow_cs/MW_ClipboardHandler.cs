@@ -1,454 +1,542 @@
 using Ink_Canvas.Helpers;
 using System;
-using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Ink;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Threading;
+using Clipboard = System.Windows.Clipboard;
+using ContextMenu = System.Windows.Controls.ContextMenu;
+using Cursors = System.Windows.Input.Cursors;
+using MenuItem = System.Windows.Controls.MenuItem;
 
 namespace Ink_Canvas
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
         /// <summary>
-        /// 处理背景颜色按钮点击事件，显示或隐藏背景颜色选项面板
+        /// 剪贴板更新消息常量
         /// </summary>
-        /// <param name="sender">事件发送者</param>
-        /// <param name="e">事件参数</param>
+        private const int WM_CLIPBOARDUPDATE = 0x031D;
+
+        /// <summary>
+        /// 添加剪贴板格式监听器
+        /// </summary>
+        /// <param name="hwnd">窗口句柄</param>
+        /// <returns>操作是否成功</returns>
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool AddClipboardFormatListener(IntPtr hwnd);
+
+        /// <summary>
+        /// 移除剪贴板格式监听器
+        /// </summary>
+        /// <param name="hwnd">窗口句柄</param>
+        /// <returns>操作是否成功</returns>
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool RemoveClipboardFormatListener(IntPtr hwnd);
+
+        /// <summary>
+        /// 剪贴板监控启用状态
+        /// </summary>
+        private bool isClipboardMonitoringEnabled;
+
+        /// <summary>
+        /// 最后一次剪贴板图像
+        /// </summary>
+        private BitmapSource lastClipboardImage;
+
+        /// <summary>
+        /// 剪贴板窗口句柄源
+        /// </summary>
+        private HwndSource _clipboardHwndSource;
+
+        /// <summary>
+        /// 最后一次粘贴通知时间
+        /// </summary>
+        private DateTime _lastPasteNotificationTime = DateTime.MinValue;
+
+        /// <summary>
+        /// 粘贴通知防抖时间（秒）
+        /// </summary>
+        private const int PasteNotificationDebounceSeconds = 4;
+
+        /// <summary>
+        /// 启用并初始化对系统剪贴板变更的监控，确保窗口消息钩子在可用时安装并订阅剪贴板更新事件。
+        /// </summary>
         /// <remarks>
-        /// - 检查应用是否已加载
-        /// - 创建背景选项面板（如果不存在）
-        /// - 显示或隐藏背景选项面板
-        /// - 隐藏其他可能显示的面板
-        /// - 处理白板/黑板模式切换
-        /// - 更新背景颜色和墨迹颜色
+        /// 在首次调用时订阅内部的 ClipboardNotification.ClipboardUpdate 事件、将监控标志设为已启用，并在窗口句柄可用时安装窗口消息钩子；若句柄尚不可用则延迟到 SourceInitialized 事件完成后安装。此方法会异步调度 EnsureClipboardHookInstalled 以在加载优先级下最终确认钩子已安装。发生异常时记录错误但不会抛出。
         /// </remarks>
-        private void BoardChangeBackgroundColorBtn_MouseUp(object sender, RoutedEventArgs e)
+        private void InitializeClipboardMonitoring()
         {
-            if (!isLoaded) return;
-
-            if (BackgroundPalette.Visibility == Visibility.Visible)
+            try
             {
-                AnimationsHelper.HideWithSlideAndFade(BackgroundPalette);
+                if (isClipboardMonitoringEnabled)
+                    return;
+
+                ClipboardNotification.ClipboardUpdate += OnClipboardUpdate;
+                isClipboardMonitoringEnabled = true;
+
+                if (new WindowInteropHelper(this).Handle != IntPtr.Zero)
+                    OnSourceInitializedForClipboard(this, EventArgs.Empty);
+                else
+                    SourceInitialized += OnSourceInitializedForClipboard;
+                Dispatcher.BeginInvoke(new Action(EnsureClipboardHookInstalled), DispatcherPriority.Loaded);
             }
-            else
+            catch (Exception ex)
             {
-                AnimationsHelper.HideWithSlideAndFade(EraserSizePanel);
-                AnimationsHelper.HidePopupWithSlideAndFade(BorderTools);
-                AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
-                AnimationsHelper.HideWithSlideAndFade(PenPalette);
-                AnimationsHelper.HideWithSlideAndFade(BoardPenPalette);
-                AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
-                AnimationsHelper.HideWithSlideAndFade(BoardBorderDrawShape);
-                AnimationsHelper.HideWithSlideAndFade(BoardEraserSizePanel);
-                AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
-                AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
-                AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
-
-                LoadCustomBackgroundColor();
-                UpdateBackgroundButtonsState();
-                AnimationsHelper.ShowWithSlideFromBottomAndFade(BackgroundPalette);
-            }
-        }
-
-        private void WhiteboardModeBtn_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            Settings.Canvas.UsingWhiteboard = true;
-            SaveSettingsToFile();
-            ICCWaterMarkDark.Visibility = Visibility.Visible;
-            ICCWaterMarkWhite.Visibility = Visibility.Collapsed;
-
-            Color defaultWhiteboardColor = Color.FromRgb(255, 255, 255);
-
-            if (currentMode == 1)
-            {
-                GridBackgroundCover.Background = new SolidColorBrush(defaultWhiteboardColor);
-                UpdateRGBSliders(defaultWhiteboardColor);
-                CustomBackgroundColor = defaultWhiteboardColor;
-                string colorHex = $"#{defaultWhiteboardColor.R:X2}{defaultWhiteboardColor.G:X2}{defaultWhiteboardColor.B:X2}";
-                Settings.Canvas.CustomBackgroundColor = colorHex;
-                SaveSettingsToFile();
-            }
-
-            CheckLastColor(0);
-            forceEraser = false;
-            CheckColorTheme(true);
-            UpdateBackgroundButtonsState();
-        }
-
-        private void BlackboardModeBtn_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            Settings.Canvas.UsingWhiteboard = false;
-            SaveSettingsToFile();
-            ICCWaterMarkWhite.Visibility = Visibility.Visible;
-            ICCWaterMarkDark.Visibility = Visibility.Collapsed;
-
-            Color defaultBlackboardColor = Color.FromRgb(22, 41, 36);
-
-            if (currentMode == 1)
-            {
-                GridBackgroundCover.Background = new SolidColorBrush(defaultBlackboardColor);
-                UpdateRGBSliders(defaultBlackboardColor);
-                CustomBackgroundColor = defaultBlackboardColor;
-                string colorHex = $"#{defaultBlackboardColor.R:X2}{defaultBlackboardColor.G:X2}{defaultBlackboardColor.B:X2}";
-                Settings.Canvas.CustomBackgroundColor = colorHex;
-                SaveSettingsToFile();
-            }
-
-            CheckLastColor(5);
-            forceEraser = false;
-            CheckColorTheme(true);
-            UpdateBackgroundButtonsState();
-        }
-
-        private void BackgroundRSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (BackgroundRValue != null)
-            {
-                BackgroundRValue.Text = ((int)e.NewValue).ToString();
-                UpdateColorPreviewFromSliders();
-            }
-        }
-
-        private void BackgroundGSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (BackgroundGValue != null)
-            {
-                BackgroundGValue.Text = ((int)e.NewValue).ToString();
-                UpdateColorPreviewFromSliders();
-            }
-        }
-
-        private void BackgroundBSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (BackgroundBValue != null)
-            {
-                BackgroundBValue.Text = ((int)e.NewValue).ToString();
-                UpdateColorPreviewFromSliders();
-            }
-        }
-
-        private void ApplyBackgroundColorBtn_Click(object sender, RoutedEventArgs e)
-        {
-            Color selectedColor = Color.FromRgb(
-                (byte)BackgroundRSlider.Value,
-                (byte)BackgroundGSlider.Value,
-                (byte)BackgroundBSlider.Value
-            );
-            ApplyCustomBackgroundColor(selectedColor);
-        }
-
-        private void UpdateColorPreviewFromSliders()
-        {
-            if (BackgroundColorPreview != null)
-            {
-                Color previewColor = Color.FromRgb(
-                    (byte)BackgroundRSlider.Value,
-                    (byte)BackgroundGSlider.Value,
-                    (byte)BackgroundBSlider.Value
-                );
-                BackgroundColorPreview.Background = new SolidColorBrush(previewColor);
-            }
-        }
-
-        private void UpdateBackgroundButtonsState()
-        {
-            if (WhiteboardModeBtn != null)
-            {
-                WhiteboardModeBtn.Background = Settings.Canvas.UsingWhiteboard ?
-                    new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb)) :
-                    new SolidColorBrush(Colors.LightGray);
-                if (WhiteboardModeBtn.Child is TextBlock whiteboardText)
-                {
-                    whiteboardText.Foreground = Settings.Canvas.UsingWhiteboard ?
-                        new SolidColorBrush(Colors.White) :
-                        new SolidColorBrush(Colors.Black);
-                }
-            }
-
-            if (BlackboardModeBtn != null)
-            {
-                BlackboardModeBtn.Background = !Settings.Canvas.UsingWhiteboard ?
-                    new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb)) :
-                    new SolidColorBrush(Colors.LightGray);
-                if (BlackboardModeBtn.Child is TextBlock blackboardText)
-                {
-                    blackboardText.Foreground = !Settings.Canvas.UsingWhiteboard ?
-                        new SolidColorBrush(Colors.White) :
-                        new SolidColorBrush(Colors.Black);
-                }
+                LogHelper.WriteLogToFile($"初始化剪贴板监控失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
         /// <summary>
-        /// 当前自定义背景色
+        /// — 在窗口句柄可用且尚未安装钩子时，为接收剪贴板更新消息安装窗口消息钩子。
         /// </summary>
-        private Color? CustomBackgroundColor { get; set; }
-
-        /// <summary>
-        /// 更新颜色预览框的颜色
-        /// </summary>
-        private void UpdateColorPreview(Border colorPreview, Slider rSlider, Slider gSlider, Slider bSlider)
+        private void EnsureClipboardHookInstalled()
         {
-            Color previewColor = Color.FromRgb(
-                (byte)rSlider.Value,
-                (byte)gSlider.Value,
-                (byte)bSlider.Value
-            );
-            colorPreview.Background = new SolidColorBrush(previewColor);
+            if (_clipboardHwndSource != null) return;
+            var handle = new WindowInteropHelper(this).Handle;
+            if (handle == IntPtr.Zero) return;
+            OnSourceInitializedForClipboard(this, EventArgs.Empty);
         }
 
         /// <summary>
-        /// 应用自定义背景颜色
+        /// 在窗口初始化后安装用于接收系统剪贴板更改消息的窗口钩子并注册剪贴板格式监听器。
         /// </summary>
-        private void ApplyCustomBackgroundColor(Color color)
+        /// <remarks>
+        /// 将当前窗口的 HwndSource 与 ClipboardWndProc 消息钩子关联，并调用 AddClipboardFormatListener 注册剪贴板更新通知；若无法获取窗口句柄则不执行任何操作。
+        /// </remarks>
+        private void OnSourceInitializedForClipboard(object sender, EventArgs e)
         {
-            // 保存当前选择的颜色
-            CustomBackgroundColor = color;
-
-            // 将颜色转换为十六进制字符串并保存到设置中
-            string colorHex = $"#{color.R:X2}{color.G:X2}{color.B:X2}";
-            Settings.Canvas.CustomBackgroundColor = colorHex;
-
-            // 只在白板或黑板模式下应用自定义背景色
-            if (currentMode == 1) // 白板或黑板模式
+            SourceInitialized -= OnSourceInitializedForClipboard;
+            try
             {
-                // 设置白板/黑板模式下的背景
-                GridBackgroundCover.Background = new SolidColorBrush(color);
+                var handle = new WindowInteropHelper(this).Handle;
+                if (handle == IntPtr.Zero) return;
+
+                _clipboardHwndSource = HwndSource.FromHwnd(handle);
+                _clipboardHwndSource?.AddHook(ClipboardWndProc);
+
+                if (!AddClipboardFormatListener(handle))
+                    LogHelper.WriteLogToFile($"AddClipboardFormatListener 失败: {Marshal.GetLastWin32Error()}", LogHelper.LogType.Warning);
             }
-
-            // 保存设置
-            SaveSettingsToFile();
-
-            // 立即更新界面
-            if (BackgroundPalette != null)
+            catch (Exception ex)
             {
-                UpdateBackgroundButtonsState();
-                UpdateRGBSliders(color); // 更新RGB滑块的值
+                LogHelper.WriteLogToFile($"安装剪贴板监听失败: {ex.Message}", LogHelper.LogType.Error);
             }
-
-            // 显示提示信息
-            ShowNotification($"已应用自定义背景色: {colorHex}");
         }
 
         /// <summary>
-        /// 从设置中加载自定义背景色
+        /// 处理窗口消息，响应剪贴板更新事件
         /// </summary>
-        private void LoadCustomBackgroundColor()
+        /// <param name="hwnd">窗口句柄</param>
+        /// <param name="msg">消息类型</param>
+        /// <param name="wParam">消息参数W</param>
+        /// <param name="lParam">消息参数L</param>
+        /// <param name="handled">消息是否已处理</param>
+        /// <returns>处理结果</returns>
+        /// <remarks>
+        /// - 当收到剪贴板更新消息时，通知剪贴板变更
+        /// - 标记消息为已处理
+        /// </remarks>
+        private IntPtr ClipboardWndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
-            if (!string.IsNullOrEmpty(Settings.Canvas.CustomBackgroundColor))
+            if (msg == WM_CLIPBOARDUPDATE)
+            {
+                Dispatcher.BeginInvoke(new Action(() => ClipboardNotification.NotifyFromMessage()), DispatcherPriority.Background);
+                handled = true;
+            }
+            return IntPtr.Zero;
+        }
+
+        /// <summary>
+        /// 在剪贴板内容变化时检查剪贴板是否包含图像并缓存该图像。
+        /// </summary>
+        /// <remarks>
+        /// 如果剪贴板包含图像，则读取该图像并更新字段 <c>lastClipboardImage</c>；否则不做任何操作。方法内部会捕获异常并记录日志，不会向上抛出。 
+        /// </remarks>
+        private void OnClipboardUpdate()
+        {
+            try
+            {
+                if (!Clipboard.ContainsImage())
+                    return;
+
+                var clipboardImage = Clipboard.GetImage();
+                if (clipboardImage != null)
+                    lastClipboardImage = clipboardImage;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"处理剪贴板更新失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 在进入白板时检查系统剪贴板是否包含图片；如果存在图片且与上次提示间隔超过预设节流时间，则显示粘贴提示。
+        /// </summary>
+        public void CheckClipboardImageAndShowPasteNotificationWhenEnteringBoard()
+        {
+            try
+            {
+                if (!Clipboard.ContainsImage())
+                    return;
+
+                bool debounceElapsed = (DateTime.Now - _lastPasteNotificationTime).TotalSeconds >= PasteNotificationDebounceSeconds;
+                if (!debounceElapsed)
+                    return;
+
+                _lastPasteNotificationTime = DateTime.Now;
+                ShowPasteNotification();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"进入白板时检测剪贴板失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 在界面上显示提示，告知用户剪贴板中存在图片并可在白板上右键粘贴。
+        /// </summary>
+        private void ShowPasteNotification()
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
             {
                 try
                 {
-                    // 解析颜色字符串
-                    string colorHex = Settings.Canvas.CustomBackgroundColor;
-                    if (colorHex.StartsWith("#") && colorHex.Length == 7) // #RRGGBB 格式
-                    {
-                        byte r = Convert.ToByte(colorHex.Substring(1, 2), 16);
-                        byte g = Convert.ToByte(colorHex.Substring(3, 2), 16);
-                        byte b = Convert.ToByte(colorHex.Substring(5, 2), 16);
-
-                        // 保存到内存中
-                        CustomBackgroundColor = Color.FromRgb(r, g, b);
-                    }
+                    ShowNotification("检测到剪贴板中有图片，右键点击白板可粘贴");
                 }
                 catch (Exception ex)
                 {
-                    // 解析失败，根据当前模式设置默认颜色
-                    if (!Settings.Canvas.UsingWhiteboard)
+                    LogHelper.WriteLogToFile($"显示粘贴提示失败: {ex.Message}", LogHelper.LogType.Error);
+                }
+            }), DispatcherPriority.Normal);
+        }
+
+        /// <summary>
+        /// 在指定位置显示包含“粘贴图片”项的右键菜单（仅在剪贴板包含图片时显示）。
+        /// </summary>
+        /// <param name="position">右键菜单应定位的画布坐标；该位置会传递给粘贴操作以确定图片粘贴位置。</param>
+        private void ShowPasteContextMenu(Point position)
+        {
+            try
+            {
+                if (!Clipboard.ContainsImage()) return;
+
+                // 创建右键菜单
+                var contextMenu = new ContextMenu();
+
+                var pasteMenuItem = new MenuItem
+                {
+                    Header = "粘贴图片"
+                };
+
+                pasteMenuItem.Click += async (s, e) => await PasteImageFromClipboard(position);
+                contextMenu.Items.Add(pasteMenuItem);
+
+                // 显示菜单
+                contextMenu.IsOpen = true;
+                contextMenu.PlacementTarget = inkCanvas;
+                contextMenu.Placement = PlacementMode.MousePoint;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"显示粘贴菜单失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 从剪贴板粘贴图片到画布
+        /// </summary>
+        /// <param name="position">粘贴位置（可选）</param>
+        /// <returns>异步任务</returns>
+        /// <remarks>
+        /// - 检查剪贴板是否包含图片
+        /// - 创建Image控件并设置属性
+        /// - 生成唯一名称
+        /// - 初始化变换组
+        /// - 设置图片属性，避免被InkCanvas选择系统处理
+        /// - 添加到画布
+        /// - 等待图片加载完成后进行居中处理
+        /// - 如果有指定位置，调整到指定位置
+        /// - 绑定事件处理器
+        /// - 提交到历史记录
+        /// - 插入图片后切换到选择模式并刷新浮动栏高光显示
+        /// - 显示通知
+        /// - 包含异常处理
+        /// </remarks>
+        private Task PasteImageFromClipboard(Point? position = null)
+        {
+            if (TryBlockFrozenPageMutation("粘贴图片")) return Task.CompletedTask;
+            try
+            {
+                if (!Clipboard.ContainsImage())
+                {
+                    ShowNotification("剪贴板中没有图片");
+                    return Task.CompletedTask;
+                }
+
+                var clipboardImage = Clipboard.GetImage();
+                if (clipboardImage == null)
+                {
+                    ShowNotification("无法获取剪贴板图片");
+                    return Task.CompletedTask;
+                }
+
+                // 创建Image控件
+                var image = new Image
+                {
+                    Source = clipboardImage,
+                    Width = clipboardImage.PixelWidth,
+                    Height = clipboardImage.PixelHeight,
+                    Stretch = Stretch.Fill
+                };
+
+                // 生成唯一名称
+                string timestamp = "img_clipboard_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
+                image.Name = timestamp;
+
+                // 初始化TransformGroup
+                if (image is FrameworkElement element)
+                {
+                    var transformGroup = new TransformGroup();
+                    transformGroup.Children.Add(new ScaleTransform(1, 1));
+                    transformGroup.Children.Add(new TranslateTransform(0, 0));
+                    transformGroup.Children.Add(new RotateTransform(0));
+                    element.RenderTransform = transformGroup;
+                }
+
+                // 设置图片属性，避免被InkCanvas选择系统处理
+                image.IsHitTestVisible = true;
+                image.Focusable = false;
+
+                // 初始化InkCanvas选择设置
+                if (inkCanvas != null)
+                {
+                    // 清除当前选择，避免显示控制点
+                    inkCanvas.Select(new StrokeCollection());
+                    // 设置编辑模式为非选择模式，这样可以保持图片的交互功能
+                    // 同时通过图片的IsHitTestVisible和Focusable属性来避免InkCanvas选择系统的干扰
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                }
+
+                // 添加到画布
+                inkCanvas.Children.Add(image);
+
+                // 等待图片加载完成后再进行居中处理
+                image.Loaded += (sender, e) =>
+                {
+                    // 确保在UI线程中执行
+                    Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        // 黑板模式默认颜色
-                        CustomBackgroundColor = Color.FromRgb(22, 41, 36);
-                    }
-                    else
-                    {
-                        // 白板模式默认颜色
-                        CustomBackgroundColor = Color.FromRgb(234, 235, 237);
-                    }
+                        // 先进行缩放居中处理
+                        CenterAndScaleElement(image);
 
-                    // 可以在这里记录日志
-                    Console.WriteLine($"解析自定义背景色失败: {ex.Message}");
-                }
+                        // 如果有指定位置，调整到指定位置
+                        if (position.HasValue)
+                        {
+                            // 在指定位置居中显示
+                            InkCanvas.SetLeft(image, position.Value.X - image.Width / 2);
+                            InkCanvas.SetTop(image, position.Value.Y - image.Height / 2);
+                        }
+
+                        // 绑定事件处理器
+                        if (image is FrameworkElement elementForEvents)
+                        {
+                            // 鼠标事件
+                            elementForEvents.MouseLeftButtonDown += Element_MouseLeftButtonDown;
+                            elementForEvents.MouseLeftButtonUp += Element_MouseLeftButtonUp;
+                            elementForEvents.MouseMove += Element_MouseMove;
+                            elementForEvents.MouseWheel += Element_MouseWheel;
+
+                            // 触摸事件
+                            elementForEvents.TouchDown += Element_TouchDown;
+                            elementForEvents.TouchUp += Element_TouchUp;
+                            elementForEvents.IsManipulationEnabled = true;
+                            elementForEvents.ManipulationDelta += Element_ManipulationDelta;
+                            elementForEvents.ManipulationCompleted += Element_ManipulationCompleted;
+
+                            // 设置光标
+                            elementForEvents.Cursor = Cursors.Hand;
+                        }
+                    }), DispatcherPriority.Loaded);
+                };
+
+                // 提交到历史记录
+                timeMachine.CommitElementInsertHistory(image);
+
+                // 插入图片后切换到选择模式并刷新浮动栏高光显示
+                SetCurrentToolMode(InkCanvasEditingMode.Select);
+                UpdateCurrentToolMode("select");
+                HideSubPanels("select");
+
+                ShowNotification("图片已从剪贴板粘贴");
             }
-            else
+            catch (Exception ex)
             {
-                // 如果没有设置自定义背景色，根据当前模式设置默认颜色
-                if (!Settings.Canvas.UsingWhiteboard)
+                ShowNotification($"粘贴图片失败: {ex.Message}");
+                LogHelper.WriteLogToFile($"粘贴图片失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+            return Task.CompletedTask;
+        }
+
+
+
+        /// <summary>
+        /// 处理白板右键事件，显示粘贴图片菜单
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 只在白板模式下处理
+        /// - 检查是否有图片在剪贴板中
+        /// - 显示粘贴上下文菜单
+        /// - 包含异常处理
+        /// </remarks>
+        private void InkCanvas_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                // 只在白板模式下处理
+                if (currentMode != 1) return;
+
+                // 检查是否有图片在剪贴板中
+                if (Clipboard.ContainsImage())
                 {
-                    // 黑板模式默认颜色
-                    CustomBackgroundColor = Color.FromRgb(22, 41, 36);
+                    var position = e.GetPosition(inkCanvas);
+                    ShowPasteContextMenu(position);
                 }
-                else
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"处理右键事件失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 处理全局粘贴快捷键，粘贴剪贴板中的图片
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 只在白板模式下处理
+        /// - 检查剪贴板是否包含图片
+        /// - 从剪贴板粘贴图片
+        /// - 包含异常处理
+        /// </remarks>
+        internal async void HandleGlobalPaste(object sender, ExecutedRoutedEventArgs e)
+        {
+            try
+            {
+                // 只在白板模式下处理
+                if (currentMode != 1) return;
+
+                if (Clipboard.ContainsImage())
                 {
-                    // 白板模式默认颜色
-                    CustomBackgroundColor = Color.FromRgb(234, 235, 237);
+                    await PasteImageFromClipboard();
                 }
             }
-
-            // 只在白板或黑板模式下应用自定义背景色
-            if (currentMode == 1 && CustomBackgroundColor.HasValue) // 白板或黑板模式
+            catch (Exception ex)
             {
-                // 设置白板/黑板模式下的背景
-                GridBackgroundCover.Background = new SolidColorBrush(CustomBackgroundColor.Value);
+                LogHelper.WriteLogToFile($"处理全局粘贴失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
 
-                // 更新RGB滑块的值（如果调色板已经创建）
-                if (BackgroundPalette != null && BackgroundPalette.Visibility == Visibility.Visible)
+        /// <summary>
+        /// 清理剪贴板监控资源
+        /// </summary>
+        /// <remarks>
+        /// - 取消订阅剪贴板更新事件
+        /// - 移除剪贴板格式监听器
+        /// - 移除窗口消息钩子
+        /// - 重置相关变量
+        /// - 包含异常处理
+        /// </remarks>
+        private void CleanupClipboardMonitoring()
+        {
+            try
+            {
+                if (isClipboardMonitoringEnabled)
                 {
-                    UpdateRGBSliders(CustomBackgroundColor.Value);
+                    ClipboardNotification.ClipboardUpdate -= OnClipboardUpdate;
+                    isClipboardMonitoringEnabled = false;
+                }
+
+                var handle = new WindowInteropHelper(this).Handle;
+                if (handle != IntPtr.Zero)
+                    RemoveClipboardFormatListener(handle);
+
+                _clipboardHwndSource?.RemoveHook(ClipboardWndProc);
+                _clipboardHwndSource = null;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"清理剪贴板监控失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 剪贴板通知类，用于监控剪贴板变化
+    /// </summary>
+    public static class ClipboardNotification
+    {
+        /// <summary>
+        /// 剪贴板更新事件
+        /// </summary>
+        public static event Action ClipboardUpdate;
+
+        /// <summary>
+        /// 最后一次剪贴板文本
+        /// </summary>
+        private static string lastClipboardText = "";
+
+        /// <summary>
+        /// 最后一次是否有图片
+        /// </summary>
+        private static bool lastHadImage;
+
+        /// <summary>
+        /// 检查当前系统剪贴板的文本与图像状态，并在检测到相关变化或存在图像时触发 <see cref="ClipboardUpdate"/> 事件以通知订阅者。
+        /// </summary>
+        /// <remarks>
+        /// 会比较当前剪贴板的图像存在性与文本内容与内部缓存的上一状态；若图像存在性发生变化、文本内容发生变化，或当前存在图像，则更新缓存并调用 <see cref="ClipboardUpdate"/>。方法内部捕获异常并将错误记录到日志，而不是向调用方抛出异常。
+        /// </remarks>
+        public static void NotifyFromMessage()
+        {
+            try
+            {
+                bool currentHasImage = Clipboard.ContainsImage();
+                string currentText = Clipboard.ContainsText() ? Clipboard.GetText() : "";
+
+                if (currentHasImage != lastHadImage || currentText != lastClipboardText || currentHasImage)
+                {
+                    lastHadImage = currentHasImage;
+                    lastClipboardText = currentText;
+                    ClipboardUpdate?.Invoke();
                 }
             }
-        }
-
-        /// <summary>
-        /// 处理套索工具图标点击事件，切换到选择模式
-        /// </summary>
-        /// <param name="sender">事件发送者</param>
-        /// <param name="e">事件参数</param>
-        /// <remarks>
-        /// - 禁用橡皮擦模式
-        /// - 禁用形状绘制模式
-        /// - 设置当前工具模式为选择模式
-        /// - 根据编辑模式设置光标
-        /// </remarks>
-        private void BoardLassoIcon_Click(object sender, RoutedEventArgs e)
-        {
-            if (TryBlockFrozenPageMutation("切换到选择工具")) return;
-
-            forceEraser = false;
-            forcePointEraser = false;
-            drawingShapeMode = 0;
-            // 使用集中化的工具模式切换方法
-            SetCurrentToolMode(InkCanvasEditingMode.Select);
-            SetCursorBasedOnEditingMode(inkCanvas);
-        }
-
-        /// <summary>
-        /// 处理橡皮擦图标点击事件，切换到按笔画擦除模式
-        /// </summary>
-        /// <param name="sender">事件发送者</param>
-        /// <param name="e">事件参数</param>
-        /// <remarks>
-        /// - 禁用高级橡皮擦系统
-        /// - 启用橡皮擦模式
-        /// - 设置橡皮擦形状为圆形
-        /// - 设置当前工具模式为按笔画擦除
-
-        /// 处理删除图标点击事件，清空画布内容
-        /// </summary>
-        /// <param name="sender">事件发送者</param>
-        /// <param name="e">事件参数</param>
-        /// <remarks>
-        /// - 调用钢笔图标点击事件
-        /// - 调用符号删除鼠标抬起事件
-        /// - 根据设置决定是否清空图片
-        /// - 如果设置为清空图片，则清空所有子元素
-        /// - 否则，保存非笔画元素并在清空后恢复
-        /// </remarks>
-        private void BoardSymbolIconDelete_MouseUp(object sender, RoutedEventArgs e)
-        {
-            if (TryBlockFrozenPageMutation("清除冻结页面内容")) return;
-            PenIcon_Click(null, null);
-            SymbolIconDelete_MouseUp(null, null);
-
-            // 根据设置决定是否清空图片
-            if (Settings.Canvas.ClearCanvasAlsoClearImages)
+            catch (Exception ex)
             {
-                // 如果设置为清空图片，则直接清空所有子元素
-                Debug.WriteLine("BoardSymbolIconDelete: Clearing all children including images");
-                inkCanvas.Children.Clear();
-            }
-            else
-            {
-                // 保存非笔画元素（如图片）
-                Debug.WriteLine("BoardSymbolIconDelete: Preserving non-stroke elements (images)");
-                var preservedElements = PreserveNonStrokeElements();
-                Debug.WriteLine($"BoardSymbolIconDelete: Preserved elements count: {preservedElements.Count}");
-                inkCanvas.Children.Clear();
-                // 恢复非笔画元素
-                RestoreNonStrokeElements(preservedElements);
-                Debug.WriteLine($"BoardSymbolIconDelete: inkCanvas.Children.Count after restore: {inkCanvas.Children.Count}");
-            }
-        }
-        /// <summary>
-        /// 处理删除墨迹和历史记录图标点击事件，清空画布内容和时间机器历史
-        /// </summary>
-        /// <param name="sender">事件发送者</param>
-        /// <param name="e">事件参数</param>
-        /// <remarks>
-        /// - 调用钢笔图标点击事件
-        /// - 调用符号删除鼠标抬起事件
-        /// - 根据设置决定是否清空时间机器历史
-        /// - 根据设置决定是否清空图片
-        /// - 如果设置为清空图片，则清空所有子元素
-        /// - 否则，保存非笔画元素并在清空后恢复
-        /// </remarks>
-        private void BoardSymbolIconDeleteInkAndHistories_MouseUp(object sender, RoutedEventArgs e)
-        {
-            if (TryBlockFrozenPageMutation("清除冻结页面内容")) return;
-            PenIcon_Click(null, null);
-            SymbolIconDelete_MouseUp(null, null);
-            if (!Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
-
-            // 根据设置决定是否清空图片
-            if (Settings.Canvas.ClearCanvasAlsoClearImages)
-            {
-                // 如果设置为清空图片，则直接清空所有子元素
-                Debug.WriteLine("BoardSymbolIconDeleteInkAndHistories: Clearing all children including images");
-                inkCanvas.Children.Clear();
-            }
-            else
-            {
-                // 保存非笔画元素（如图片）
-                Debug.WriteLine("BoardSymbolIconDeleteInkAndHistories: Preserving non-stroke elements (images)");
-                var preservedElements = PreserveNonStrokeElements();
-                Debug.WriteLine($"BoardSymbolIconDeleteInkAndHistories: Preserved elements count: {preservedElements.Count}");
-                inkCanvas.Children.Clear();
-                // 恢复非笔画元素
-                RestoreNonStrokeElements(preservedElements);
-                Debug.WriteLine($"BoardSymbolIconDeleteInkAndHistories: inkCanvas.Children.Count after restore: {inkCanvas.Children.Count}");
+                LogHelper.WriteLogToFile($"剪贴板 NotifyFromMessage 异常: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
         /// <summary>
-        /// 处理启动希沃视频展台图标点击事件
+        /// 停止剪贴板监控
         /// </summary>
-        /// <param name="sender">事件发送者</param>
-        /// <param name="e">事件参数</param>
         /// <remarks>
-        /// - 调用图片黑板鼠标抬起事件
-        /// - 启动希沃视频展台软件
+        /// 当前实现为空方法，预留用于未来扩展
         /// </remarks>
-        private void BoardLaunchEasiCamera_MouseUp(object sender, MouseButtonEventArgs e)
+        public static void Stop()
         {
-            ImageBlackboard_MouseUp(null, null);
-            SoftwareLauncher.LaunchEasiCamera("希沃视频展台");
-        }
-
-        /// <summary>
-        /// 处理启动Desmos计算器图标点击事件
-        /// </summary>
-        /// <param name="sender">事件发送者</param>
-        /// <param name="e">事件参数</param>
-        /// <remarks>
-        /// - 立即隐藏所有子面板
-        /// - 调用图片黑板鼠标抬起事件
-        /// - 打开Desmos计算器网页
-        /// </remarks>
-        private void BoardLaunchDesmos_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            HideSubPanelsImmediately();
-            ImageBlackboard_MouseUp(null, null);
-            Process.Start("https://www.desmos.com/calculator?lang=zh-CN");
-        }
-
-        /// <summary>
-        /// 根据当前背景颜色更新RGB滑块的值
-        /// </summary>
-        private void UpdateRGBSliders(Color color)
-        {
-            if (BackgroundRSlider != null) BackgroundRSlider.Value = color.R;
-            if (BackgroundGSlider != null) BackgroundGSlider.Value = color.G;
-            if (BackgroundBSlider != null) BackgroundBSlider.Value = color.B;
         }
     }
 }

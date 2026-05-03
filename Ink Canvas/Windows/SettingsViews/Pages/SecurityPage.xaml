@@ -86,6 +86,30 @@
                             SwitchName="ToggleSwitchRequirePasswordOnModifyOrClearNameList"
                             Toggled="ToggleSwitchRequirePasswordOnModifyOrClearNameList_Toggled" />
 
+                    <controls:LabeledSettingsCard x:Name="CardTotpEnabled"
+                            Header="启用 TOTP 验证"
+                            Description="可用于冻结笔迹解冻等二次验证"
+                            Icon="{x:Static ui:SegoeFluentIcons.Permissions}"
+                            SwitchName="ToggleSwitchTotpEnabled"
+                            Toggled="ToggleSwitchTotpEnabled_Toggled" />
+
+                    <ui:SettingsCard x:Name="CardTotpManage"
+                                     Header="TOTP 密钥"
+                                     Description="在身份验证器中手动添加该密钥">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Lock}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBox x:Name="TextBoxTotpSecret"
+                                     Width="260"
+                                     IsReadOnly="True" />
+                            <Button x:Name="BtnGenerateTotpSecret"
+                                    Content="生成/重置密钥"
+                                    MinWidth="120"
+                                    Click="BtnGenerateTotpSecret_Click" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
                     <!-- 进程保护 -->
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="进程保护" />

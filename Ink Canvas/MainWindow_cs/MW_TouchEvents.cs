@@ -724,6 +724,13 @@ namespace Ink_Canvas
                 return;
             }
 
+            if (IsCurrentPageFrozen)
+            {
+                TryBlockFrozenPageMutation("书写或擦除");
+                e.Handled = true;
+                return;
+            }
+
 
             // 根据是否为笔尾自动切换橡皮擦/画笔模式
             if (e.StylusDevice.Inverted)
@@ -1196,6 +1203,13 @@ namespace Ink_Canvas
                 return;
             }
 
+            if (IsCurrentPageFrozen)
+            {
+                TryBlockFrozenPageMutation("修改冻结页面");
+                e.Handled = true;
+                return;
+            }
+
             SetCursorBasedOnEditingMode(inkCanvas);
             inkCanvas.CaptureTouch(e.TouchDevice);
 
@@ -1277,6 +1291,13 @@ namespace Ink_Canvas
                 new Rect(0, 0, ViewboxFloatingBar.ActualWidth, ViewboxFloatingBar.ActualHeight));
             if (floatingBarBounds.Contains(touchPointForBar.Position))
                 return;
+
+            if (IsCurrentPageFrozen)
+            {
+                TryBlockFrozenPageMutation("修改冻结页面");
+                e.Handled = true;
+                return;
+            }
 
             if ((inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
                  || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
@@ -1780,6 +1801,13 @@ namespace Ink_Canvas
         /// </remarks>
         private void Main_Grid_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
         {
+            if (IsCurrentPageFrozen)
+            {
+                TryBlockFrozenPageMutation("移动或缩放内容");
+                e.Handled = true;
+                return;
+            }
+
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
                 return;
 
@@ -1970,4 +1998,3 @@ namespace Ink_Canvas
         }
     }
 }
-

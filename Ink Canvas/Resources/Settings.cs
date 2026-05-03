@@ -51,6 +51,10 @@ namespace Ink_Canvas
         public string PasswordSalt { get; set; } = "";
         [JsonProperty("passwordHash")]
         public string PasswordHash { get; set; } = "";
+        [JsonProperty("totpEnabled")]
+        public bool TotpEnabled { get; set; } = false;
+        [JsonProperty("totpSecret")]
+        public string TotpSecret { get; set; } = "";
         [JsonProperty("requirePasswordOnExit")]
         public bool RequirePasswordOnExit { get; set; } = false;
         [JsonProperty("requirePasswordOnEnterSettings")]

@@ -381,13 +381,13 @@ namespace Ink_Canvas.Windows
             switch (_resizeTag)
             {
                 case "NW": nL = _rL + dx; nT = _rT + dy; nW = _rW - dx; nH = _rH - dy; break;
-                case "N":  nT = _rT + dy; nH = _rH - dy; break;
+                case "N": nT = _rT + dy; nH = _rH - dy; break;
                 case "NE": nT = _rT + dy; nW = _rW + dx; nH = _rH - dy; break;
-                case "E":  nW = _rW + dx; break;
+                case "E": nW = _rW + dx; break;
                 case "SE": nW = _rW + dx; nH = _rH + dy; break;
-                case "S":  nH = _rH + dy; break;
+                case "S": nH = _rH + dy; break;
                 case "SW": nL = _rL + dx; nW = _rW - dx; nH = _rH + dy; break;
-                case "W":  nL = _rL + dx; nW = _rW - dx; break;
+                case "W": nL = _rL + dx; nW = _rW - dx; break;
             }
             if (nW < MinBoxW) { if (_resizeTag.Contains("W")) nL -= MinBoxW - nW; nW = MinBoxW; }
             if (nH < MinBoxH) { if (_resizeTag.Contains("N")) nT -= MinBoxH - nH; nH = MinBoxH; }
@@ -470,9 +470,15 @@ namespace Ink_Canvas.Windows
             if (_magHwnd == IntPtr.Zero) return;
             var m = new MAGTRANSFORM
             {
-                m00 = _zoom, m01 = 0, m02 = 0,
-                m10 = 0, m11 = _zoom, m12 = 0,
-                m20 = 0, m21 = 0, m22 = 1.0f
+                m00 = _zoom,
+                m01 = 0,
+                m02 = 0,
+                m10 = 0,
+                m11 = _zoom,
+                m12 = 0,
+                m20 = 0,
+                m21 = 0,
+                m22 = 1.0f
             };
             MagSetWindowTransform(_magHwnd, ref m);
         }

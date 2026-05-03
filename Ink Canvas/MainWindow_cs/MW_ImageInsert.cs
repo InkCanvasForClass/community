@@ -46,7 +46,7 @@ namespace Ink_Canvas
         }
     }
 
-    public partial class MainWindow : Window
+    public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
         /// <summary>
         /// 截图并插入到画布

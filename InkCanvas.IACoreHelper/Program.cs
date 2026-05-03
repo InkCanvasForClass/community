@@ -159,9 +159,9 @@ namespace InkCanvas.IACoreHelper
             if (node == null)
                 return new RecognizeResponse { Success = false, ShapeName = string.Empty };
 
-            var shape  = node.GetShape();
+            var shape = node.GetShape();
             var center = node.Centroid;
-            var hot    = node.HotPoints;
+            var hot = node.HotPoints;
 
             float[] hotX = new float[hot?.Count ?? 0];
             float[] hotY = new float[hot?.Count ?? 0];
@@ -176,14 +176,14 @@ namespace InkCanvas.IACoreHelper
 
             return new RecognizeResponse
             {
-                Success       = true,
-                ShapeName     = node.GetShapeName() ?? string.Empty,
-                CentroidX     = (float)center.X,
-                CentroidY     = (float)center.Y,
-                ShapeWidth    = shape != null ? (float)shape.Width  : 0f,
-                ShapeHeight   = shape != null ? (float)shape.Height : 0f,
-                HotPointsX    = hotX,
-                HotPointsY    = hotY,
+                Success = true,
+                ShapeName = node.GetShapeName() ?? string.Empty,
+                CentroidX = (float)center.X,
+                CentroidY = (float)center.Y,
+                ShapeWidth = shape != null ? (float)shape.Width : 0f,
+                ShapeHeight = shape != null ? (float)shape.Height : 0f,
+                HotPointsX = hotX,
+                HotPointsY = hotY,
                 StrokeIndices = strokeIndices
             };
         }

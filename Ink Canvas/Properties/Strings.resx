@@ -169,6 +169,10 @@
     <value>关于</value>
     <comment>设置侧栏 - 关于</comment>
   </data>
+  <data name="Nav_FriendlyLinks" xml:space="preserve">
+    <value>友链</value>
+    <comment>设置侧栏 - 友链</comment>
+  </data>
   <data name="App_Title" xml:space="preserve">
     <value>InkCanvasforClass</value>
     <comment>主窗口标题</comment>
@@ -669,6 +673,33 @@
   <data name="Theme_System" xml:space="preserve">
     <value>跟随系统</value>
   </data>
+  <data name="Theme_WindowBackdrop" xml:space="preserve">
+    <value>窗口背景样式</value>
+  </data>
+  <data name="Theme_WindowBackdrop_Description" xml:space="preserve">
+    <value>C控制设置、OOBE 等现代窗口的云母、亚克力等背景效果。</value>
+  </data>
+  <data name="Theme_WindowBackdrop_None" xml:space="preserve">
+    <value>无背景效果</value>
+  </data>
+  <data name="Theme_WindowBackdrop_Mica" xml:space="preserve">
+    <value>云母</value>
+  </data>
+  <data name="Theme_WindowBackdrop_Acrylic" xml:space="preserve">
+    <value>亚克力</value>
+  </data>
+  <data name="Theme_WindowBackdrop_Tabbed" xml:space="preserve">
+    <value>Tabbed</value>
+  </data>
+  <data name="Theme_WindowBackdrop_Transient" xml:space="preserve">
+    <value>Transient</value>
+  </data>
+  <data name="Theme_WindowBackdrop_Acrylic10" xml:space="preserve">
+    <value>亚克力10</value>
+  </data>
+  <data name="Theme_WindowBackdrop_Acrylic11" xml:space="preserve">
+    <value>亚克力11</value>
+  </data>
   <data name="Theme_EnableSplash" xml:space="preserve">
     <value>启用启动动画</value>
   </data>
@@ -861,6 +892,42 @@
   <data name="Tray_EnableTrayIcon" xml:space="preserve">
     <value>启用托盘图标</value>
   </data>
+  <data name="Tray_LeftClickAction" xml:space="preserve">
+    <value>托盘左键点击</value>
+  </data>
+  <data name="Tray_RightClickAction" xml:space="preserve">
+    <value>托盘右键点击</value>
+  </data>
+  <data name="Tray_ClickAction_ShowMenu" xml:space="preserve">
+    <value>打开菜单</value>
+  </data>
+  <data name="Tray_ClickAction_HideShowMainWindow" xml:space="preserve">
+    <value>隐藏/显示主窗口</value>
+  </data>
+  <data name="Tray_ClickAction_TempShowMainWindow" xml:space="preserve">
+    <value>临时显示主窗口</value>
+  </data>
+  <data name="Tray_ClickAction_OpenSettings" xml:space="preserve">
+    <value>打开设置</value>
+  </data>
+  <data name="Tray_ClickAction_DisableAllHotkeys" xml:space="preserve">
+    <value>禁用/启用所有快捷键</value>
+  </data>
+  <data name="Tray_ClickAction_ForceFullScreen" xml:space="preserve">
+    <value>强制全屏化</value>
+  </data>
+  <data name="Tray_ClickAction_ToggleFoldFloatingBar" xml:space="preserve">
+    <value>切换浮动栏收纳模式</value>
+  </data>
+  <data name="Tray_ClickAction_ResetFloatingBarPosition" xml:space="preserve">
+    <value>重置工具栏位置</value>
+  </data>
+  <data name="Tray_ClickAction_RestartApp" xml:space="preserve">
+    <value>重启软件</value>
+  </data>
+  <data name="Tray_ClickAction_CloseApp" xml:space="preserve">
+    <value>退出软件</value>
+  </data>
   <data name="PPT_GroupTitle" xml:space="preserve">
     <value>PPT联动</value>
   </data>
@@ -998,6 +1065,9 @@
   </data>
   <data name="Startup_UIAccessTopMostHint" xml:space="preserve">
     <value>开启UIA置顶后，软件需要管理员启动才能置顶，关闭此功能需要完全关闭软件后再手动启动，无法使用重启来关闭此功能</value>
+  </data>
+  <data name="Startup_AutoUpdateHint" xml:space="preserve">
+    <value>开启后将在软件启动时自动检查更新。</value>
   </data>
   <data name="Startup_SilentUpdateHint" xml:space="preserve">
     <value>静默更新将在软件不使用时自动安装，无需手动操作</value>
@@ -1918,6 +1988,15 @@
   <data name="About_VersionLabel" xml:space="preserve">
     <value>版本：</value>
   </data>
+  <data name="FriendlyLinks_Title" xml:space="preserve">
+    <value>友链</value>
+  </data>
+  <data name="FriendlyLinks_NamePickerDescription" xml:space="preserve">
+    <value>随机点名与抽取工具</value>
+  </data>
+  <data name="FriendlyLinks_Visit" xml:space="preserve">
+    <value>访问</value>
+  </data>
   <data name="Common_Close" xml:space="preserve">
     <value>关闭</value>
   </data>
@@ -2200,6 +2279,12 @@
   <data name="FloatingBar_Whiteboard" xml:space="preserve">
     <value>白板</value>
   </data>
+  <data name="FloatingBar_Freeze" xml:space="preserve">
+    <value>冻结</value>
+  </data>
+  <data name="FloatingBar_Unfreeze" xml:space="preserve">
+    <value>解冻</value>
+  </data>
   <data name="FloatingBar_Hide" xml:space="preserve">
     <value>隐藏</value>
   </data>
@@ -2244,36 +2329,6 @@
   </data>
   <data name="Geometry_DrawCone" xml:space="preserve">
     <value>画圆锥</value>
-  </data>
-  <data name="Geometry_DrawCoordinate1" xml:space="preserve">
-    <value>坐标系1</value>
-  </data>
-  <data name="Geometry_DrawCoordinate2" xml:space="preserve">
-    <value>坐标系2</value>
-  </data>
-  <data name="Geometry_DrawCoordinate3" xml:space="preserve">
-    <value>坐标系3</value>
-  </data>
-  <data name="Geometry_DrawCoordinate4" xml:space="preserve">
-    <value>坐标系4</value>
-  </data>
-  <data name="Geometry_DrawCoordinate5" xml:space="preserve">
-    <value>坐标系5</value>
-  </data>
-  <data name="Geometry_DrawHyperbola" xml:space="preserve">
-    <value>双曲线</value>
-  </data>
-  <data name="Geometry_DrawHyperbolaWithFocal" xml:space="preserve">
-    <value>双曲线(焦点)</value>
-  </data>
-  <data name="Geometry_DrawParabola" xml:space="preserve">
-    <value>抛物线</value>
-  </data>
-  <data name="Geometry_DrawParabolaWithFocal" xml:space="preserve">
-    <value>抛物线(焦点)</value>
-  </data>
-  <data name="Geometry_DrawParabola2" xml:space="preserve">
-    <value>抛物线2</value>
   </data>
   <data name="FloatingBar_GestureButton" xml:space="preserve">
     <value>手势</value>

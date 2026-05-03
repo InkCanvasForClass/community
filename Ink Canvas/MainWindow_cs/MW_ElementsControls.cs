@@ -17,7 +17,7 @@ using Path = System.IO.Path;
 
 namespace Ink_Canvas
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
         /// <summary>
         /// 当前选中的可操作元素
