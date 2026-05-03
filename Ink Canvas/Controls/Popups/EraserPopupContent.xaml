@@ -21,10 +21,7 @@
         </Style>
     </UserControl.Resources>
     <Grid>
-        <controls:PopupShellContent x:Name="Shell" Title="{i18n:I18n Key=Board_EraserOptions}"
-                                    Background="{DynamicResource FloatBarBackground}"
-                                    BorderBrush="#2563eb" BorderThickness="1"
-                                    d:Visibility="Collapsed" />
+        <controls:PopupShellContent x:Name="Shell" Title="{i18n:I18n Key=Board_EraserOptions}" d:Visibility="Collapsed" />
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
             <ikw:SimpleStackPanel Margin="4">
                 <ikw:SimpleStackPanel Orientation="Horizontal" Margin="0,4,0,0" Spacing="2"

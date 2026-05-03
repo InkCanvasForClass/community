@@ -852,6 +852,7 @@
                                            Placement="Custom"
                                            AllowsTransparency="True"
                                            StaysOpen="True"
+                                           PlacementTarget="{Binding ElementName=BoardGesture}"
                                            IsOpen="False">
                                         <localControls:GesturePopupContent x:Name="BoardGesturePopupContent" />
                                     </Popup>
@@ -895,6 +896,7 @@
                                            Placement="Custom"
                                            AllowsTransparency="True"
                                            StaysOpen="True"
+                                           PlacementTarget="{Binding ElementName=BoardEraser}"
                                            IsOpen="False">
                                         <localControls:EraserPopupContent x:Name="BoardEraserPopupContent" IsBoardMode="True" />
                                     </Popup>
@@ -911,6 +913,7 @@
                                            Placement="Custom"
                                            AllowsTransparency="True"
                                            StaysOpen="True"
+                                           PlacementTarget="{Binding ElementName=BoardInsertImage}"
                                            IsOpen="False">
                                         <localControls:ImageOptionsPopupContent x:Name="BoardImageOptionsPopupContent" />
                                     </Popup>
@@ -1498,6 +1501,7 @@
                                Placement="Custom"
                                AllowsTransparency="True"
                                StaysOpen="True"
+                               PlacementTarget="{Binding ElementName=EnableTwoFingerGestureBorder}"
                                IsOpen="False">
                             <localControls:GesturePopupContent x:Name="FloatingBarGesturePopupContent" />
                         </Popup>

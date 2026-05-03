@@ -44,7 +44,7 @@ namespace Ink_Canvas
         internal void AttachCursorIconView(ToolbarImageButton btn) => Cursor_Icon = btn;
         internal void AttachPenIconView(ToolbarImageButton btn) => Pen_Icon = btn;
         internal void AttachSymbolIconDelete(ToolbarImageButton btn) => SymbolIconDelete = btn;
-        internal void AttachEraserIcon(ToolbarImageButton btn) => Eraser_Icon = btn;
+        internal void AttachEraserIcon(ToolbarImageButton btn) { Eraser_Icon = btn; EraserSizePanel.PlacementTarget = btn; }
         internal void AttachEraserByStrokesIcon(ToolbarImageButton btn) => EraserByStrokes_Icon = btn;
         internal void AttachSymbolIconSelect(ToolbarImageButton btn) => SymbolIconSelect = btn;
         internal void AttachShapeDrawBtn(ToolbarImageButton btn)

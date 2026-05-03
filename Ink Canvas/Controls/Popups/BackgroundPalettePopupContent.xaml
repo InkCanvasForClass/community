@@ -8,10 +8,7 @@
              xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
              mc:Ignorable="d">
     <Grid>
-        <controls:PopupShellContent x:Name="Shell" Title="背景设置"
-                                    Background="{DynamicResource SettingsPageBackground}"
-                                    BorderThickness="1"
-                                    d:Visibility="Collapsed" />
+        <controls:PopupShellContent x:Name="Shell" Title="背景设置" d:Visibility="Collapsed" />
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
             <ikw:SimpleStackPanel Margin="8">
                 <TextBlock Text="白板模式"

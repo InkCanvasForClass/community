@@ -9,10 +9,7 @@
              xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
              mc:Ignorable="d">
     <Grid>
-        <controls:PopupShellContent x:Name="Shell"
-                                    Background="{DynamicResource FloatBarBackground}"
-                                    BorderBrush="#2563eb" BorderThickness="1"
-                                    d:Visibility="Collapsed" />
+        <controls:PopupShellContent x:Name="Shell" d:Visibility="Collapsed" />
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
             <Viewbox Margin="8,4,8,6">
                 <ikw:SimpleStackPanel x:Name="_OpacityPanel" Margin="0">

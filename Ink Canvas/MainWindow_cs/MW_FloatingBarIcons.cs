@@ -43,7 +43,7 @@ namespace Ink_Canvas
         /// </summary>
         private void TwoFingerGestureBorder_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TwoFingerGestureBorder.IsOpen)
+            if (TwoFingerGestureBorder.IsOpen || BoardTwoFingerGestureBorder.IsOpen)
             {
                 AnimationsHelper.HidePopupWithSlideAndFade(TwoFingerGestureBorder);
                 AnimationsHelper.HidePopupWithSlideAndFade(BoardTwoFingerGestureBorder);
@@ -51,10 +51,16 @@ namespace Ink_Canvas
             else
             {
                 HideSubPanels();
-                AnimationsHelper.ShowPopupWithSlideAndFade(TwoFingerGestureBorder);
-                _popupManager?.BringToFront(TwoFingerGestureBorder);
-                AnimationsHelper.ShowPopupWithSlideAndFade(BoardTwoFingerGestureBorder);
-                _popupManager?.BringToFront(BoardTwoFingerGestureBorder);
+                if (currentMode == 0)
+                {
+                    AnimationsHelper.ShowPopupWithSlideAndFade(TwoFingerGestureBorder);
+                    _popupManager?.BringToFront(TwoFingerGestureBorder);
+                }
+                else
+                {
+                    AnimationsHelper.ShowPopupWithSlideAndFade(BoardTwoFingerGestureBorder);
+                    _popupManager?.BringToFront(BoardTwoFingerGestureBorder);
+                }
             }
         }
 
@@ -2974,12 +2980,14 @@ namespace Ink_Canvas
 
             if (isAlreadyEraser)
             {
-                // 已是橡皮状态，再次点击才弹出/收起面板
-                if (EraserSizePanel.IsOpen == false)
+                if (EraserSizePanel.IsOpen == false && BoardEraserSizePanel?.IsOpen != true)
                 {
-                    AnimationsHelper.ShowPopupWithSlideAndFade(EraserSizePanel);
-                    _popupManager?.BringToFront(EraserSizePanel);
-                    if (BoardEraserSizePanel != null)
+                    if (currentMode == 0)
+                    {
+                        AnimationsHelper.ShowPopupWithSlideAndFade(EraserSizePanel);
+                        _popupManager?.BringToFront(EraserSizePanel);
+                    }
+                    else
                     {
                         AnimationsHelper.ShowPopupWithSlideAndFade(BoardEraserSizePanel);
                         _popupManager?.BringToFront(BoardEraserSizePanel);
@@ -3030,13 +3038,18 @@ namespace Ink_Canvas
 
             if (isAlreadyEraser)
             {
-                // 已是橡皮状态，再次点击才弹出/收起面板
-                if (BoardEraserSizePanel != null && BoardEraserSizePanel.IsOpen == false)
+                if (BoardEraserSizePanel?.IsOpen != true && EraserSizePanel.IsOpen == false)
                 {
-                    AnimationsHelper.ShowPopupWithSlideAndFade(BoardEraserSizePanel);
-                    _popupManager?.BringToFront(BoardEraserSizePanel);
-                    AnimationsHelper.ShowPopupWithSlideAndFade(EraserSizePanel);
-                    _popupManager?.BringToFront(EraserSizePanel);
+                    if (currentMode == 0)
+                    {
+                        AnimationsHelper.ShowPopupWithSlideAndFade(EraserSizePanel);
+                        _popupManager?.BringToFront(EraserSizePanel);
+                    }
+                    else
+                    {
+                        AnimationsHelper.ShowPopupWithSlideAndFade(BoardEraserSizePanel);
+                        _popupManager?.BringToFront(BoardEraserSizePanel);
+                    }
                 }
                 else
                 {
