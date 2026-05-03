@@ -427,6 +427,33 @@ namespace Ink_Canvas
         /// </remarks>
         private void StrokesOnStrokesChanged(object sender, StrokeCollectionChangedEventArgs e)
         {
+            if (IsCurrentPageFrozen && _currentCommitType != CommitReason.CodeInput)
+            {
+                var previousCommitType = _currentCommitType;
+                _currentCommitType = CommitReason.CodeInput;
+                try
+                {
+                    if (e?.Added != null && e.Added.Count > 0)
+                        inkCanvas.Strokes.Remove(e.Added);
+                    if (e?.Removed != null)
+                    {
+                        foreach (Stroke stroke in e.Removed)
+                            if (!inkCanvas.Strokes.Contains(stroke))
+                                inkCanvas.Strokes.Add(stroke);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"冻结页面回滚笔迹变化失败: {ex.Message}", LogHelper.LogType.Warning);
+                }
+                finally
+                {
+                    _currentCommitType = previousCommitType;
+                }
+                TryBlockFrozenPageMutation("修改冻结页面");
+                return;
+            }
+
             if (!isHidingSubPanelsWhenInking)
             {
                 isHidingSubPanelsWhenInking = true;
@@ -450,6 +477,9 @@ namespace Ink_Canvas
             }
 
             if (_currentCommitType == CommitReason.CodeInput || _currentCommitType == CommitReason.ShapeDrawing) return;
+
+            if (e.Added.Count != 0 || e.Removed.Count != 0)
+                MarkCurrentPageInkChanged();
 
             if ((e.Added.Count != 0 || e.Removed.Count != 0) && IsEraseByPoint)
             {
@@ -496,6 +526,12 @@ namespace Ink_Canvas
         /// </remarks>
         private void Stroke_DrawingAttributesChanged(object sender, PropertyDataChangedEventArgs e)
         {
+            if (IsCurrentPageFrozen && _currentCommitType != CommitReason.CodeInput)
+            {
+                TryBlockFrozenPageMutation("修改冻结页面");
+                return;
+            }
+
             var key = sender as Stroke;
             var currentValue = key.DrawingAttributes.Clone();
             DrawingAttributesHistory.TryGetValue(key, out var previousTuple);
@@ -573,6 +609,12 @@ namespace Ink_Canvas
         /// </remarks>
         private void Stroke_StylusPointsChanged(object sender, EventArgs e)
         {
+            if (IsCurrentPageFrozen && _currentCommitType != CommitReason.CodeInput)
+            {
+                TryBlockFrozenPageMutation("修改冻结页面");
+                return;
+            }
+
             var selectedStrokes = inkCanvas.GetSelectedStrokes();
             var count = selectedStrokes.Count;
             if (count == 0) count = inkCanvas.Strokes.Count;

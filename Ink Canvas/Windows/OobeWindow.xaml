@@ -6,6 +6,7 @@
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
         xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+        xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="欢迎使用 InkCanvasForClass CE"
@@ -394,21 +395,21 @@
                                         </ComboBox>
                                     </ui:SettingsCard>
 
-                                    <ui:SettingsCard Header="窗口背景样式"
-                                                     Description="控制设置、OOBE 等现代窗口的 Mica / Acrylic 背景效果。">
+                                    <ui:SettingsCard Header="{i18n:I18n Key=Theme_WindowBackdrop}"
+                                                     Description="{i18n:I18n Key=Theme_WindowBackdrop_Description}">
                                         <ui:SettingsCard.HeaderIcon>
                                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FullScreen}" />
                                         </ui:SettingsCard.HeaderIcon>
                                         <ComboBox x:Name="ComboBoxWindowBackdrop"
                                                   MinWidth="180"
                                                   SelectionChanged="ComboBoxWindowBackdrop_SelectionChanged">
-                                            <ComboBoxItem Content="None" Tag="None" />
-                                            <ComboBoxItem Content="Mica" Tag="Mica" />
-                                            <ComboBoxItem Content="Acrylic" Tag="Acrylic" />
-                                            <ComboBoxItem Content="Tabbed" Tag="Tabbed" />
-                                            <ComboBoxItem Content="Transient" Tag="Transient" />
-                                            <ComboBoxItem Content="Acrylic10" Tag="Acrylic10" />
-                                            <ComboBoxItem Content="Acrylic11" Tag="Acrylic11" />
+                                            <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_None}" Tag="None" />
+                                            <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_Mica}" Tag="Mica" />
+                                            <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_Acrylic}" Tag="Acrylic" />
+                                            <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_Tabbed}" Tag="Tabbed" />
+                                            <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_Transient}" Tag="Transient" />
+                                            <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_Acrylic10}" Tag="Acrylic10" />
+                                            <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_Acrylic11}" Tag="Acrylic11" />
                                         </ComboBox>
                                     </ui:SettingsCard>
 

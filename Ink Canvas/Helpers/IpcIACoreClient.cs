@@ -86,10 +86,10 @@ namespace Ink_Canvas.Helpers
 
                 var psi = new ProcessStartInfo
                 {
-                    FileName         = HelperExePath,
-                    Arguments        = Process.GetCurrentProcess().Id.ToString(),
-                    UseShellExecute  = false,
-                    CreateNoWindow   = true,
+                    FileName = HelperExePath,
+                    Arguments = Process.GetCurrentProcess().Id.ToString(),
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
                     WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory
                 };
                 _helperProcess = Process.Start(psi);
@@ -161,20 +161,20 @@ namespace Ink_Canvas.Helpers
                     }
                     writer.Flush();
 
-                    bool success   = reader.ReadBoolean();
-                    string shape   = reader.ReadString();
-                    float cx       = reader.ReadSingle();
-                    float cy       = reader.ReadSingle();
-                    float width    = reader.ReadSingle();
-                    float height   = reader.ReadSingle();
+                    bool success = reader.ReadBoolean();
+                    string shape = reader.ReadString();
+                    float cx = reader.ReadSingle();
+                    float cy = reader.ReadSingle();
+                    float width = reader.ReadSingle();
+                    float height = reader.ReadSingle();
 
-                    int hotLen     = reader.ReadInt32();
-                    var hotPoints  = new PointCollection();
+                    int hotLen = reader.ReadInt32();
+                    var hotPoints = new PointCollection();
                     for (int i = 0; i < hotLen; i++)
                         hotPoints.Add(new Point(reader.ReadSingle(), reader.ReadSingle()));
 
-                    int idxLen     = reader.ReadInt32();
-                    var indices    = new int[idxLen];
+                    int idxLen = reader.ReadInt32();
+                    var indices = new int[idxLen];
                     for (int i = 0; i < idxLen; i++)
                         indices[i] = reader.ReadInt32();
 
@@ -237,7 +237,7 @@ namespace Ink_Canvas.Helpers
             {
                 _helperProcess?.Dispose();
                 _helperProcess = null;
-                _available     = false;
+                _available = false;
             }
         }
 
@@ -248,8 +248,8 @@ namespace Ink_Canvas.Helpers
             KillHelper();
         }
 
-        private const int  IpcTimeoutMs = 5000;
+        private const int IpcTimeoutMs = 5000;
         private const byte CmdRecognize = 0x01;
-        private const byte CmdShutdown  = 0xFF;
+        private const byte CmdShutdown = 0xFF;
     }
 }
