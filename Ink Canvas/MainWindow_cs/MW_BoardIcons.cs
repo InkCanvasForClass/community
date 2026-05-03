@@ -344,6 +344,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void BoardSymbolIconDelete_MouseUp(object sender, RoutedEventArgs e)
         {
+            if (TryBlockFrozenPageMutation("清除冻结页面内容")) return;
             PenIcon_Click(null, null);
             SymbolIconDelete_MouseUp(null, null);
 
@@ -381,6 +382,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void BoardSymbolIconDeleteInkAndHistories_MouseUp(object sender, RoutedEventArgs e)
         {
+            if (TryBlockFrozenPageMutation("清除冻结页面内容")) return;
             PenIcon_Click(null, null);
             SymbolIconDelete_MouseUp(null, null);
             if (!Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();

@@ -20,6 +20,7 @@ namespace Ink_Canvas
         internal ToolbarImageButton WhiteboardFloatingBarBtn { get; private set; }
         internal ToolbarImageButton ToolsFloatingBarBtn { get; private set; }
         internal ToolbarImageButton Fold_Icon { get; private set; }
+        internal ToolbarImageButton Freeze_Icon { get; private set; }
 
         internal void AttachCursorIconView(ToolbarImageButton btn) => Cursor_Icon = btn;
         internal void AttachPenIconView(ToolbarImageButton btn) => Pen_Icon = btn;

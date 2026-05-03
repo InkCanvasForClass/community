@@ -142,6 +142,11 @@ namespace Ink_Canvas
         /// </remarks>
         private async void Image_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (TryBlockFrozenPageMutation("绘制几何图形"))
+            {
+                e.Handled = true;
+                return;
+            }
             lastMouseDownSender = sender;
             lastMouseDownTime = DateTime.Now;
 
@@ -193,6 +198,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void BtnPen_Click(object sender, RoutedEventArgs e)
         {
+            if (TryBlockFrozenPageMutation("切换到画笔")) return;
             forceEraser = false;
             drawingShapeMode = 0;
             inkCanvas.EditingMode = InkCanvasEditingMode.Ink;

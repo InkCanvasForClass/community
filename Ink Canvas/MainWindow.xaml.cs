@@ -1163,6 +1163,12 @@ namespace Ink_Canvas
         {
             var inkCanvas1 = sender as InkCanvas;
             if (inkCanvas1 == null) return;
+            if (IsCurrentPageFrozen && IsFreezeMutatingMode(inkCanvas1.EditingMode))
+            {
+                TryBlockFrozenPageMutation("修改冻结页面");
+                inkCanvas1.EditingMode = InkCanvasEditingMode.None;
+                return;
+            }
 
             // 使用辅助方法设置光标
             SetCursorBasedOnEditingMode(inkCanvas1);
@@ -2062,6 +2068,13 @@ namespace Ink_Canvas
         // 鼠标输入
         private void inkCanvas_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (IsCurrentPageFrozen && IsFreezeMutatingMode(inkCanvas.EditingMode))
+            {
+                TryBlockFrozenPageMutation("修改冻结页面");
+                e.Handled = true;
+                return;
+            }
+
             // 使用辅助方法设置光标
             SetCursorBasedOnEditingMode(sender as InkCanvas);
 
@@ -2090,6 +2103,13 @@ namespace Ink_Canvas
         // 手写笔输入
         private void inkCanvas_StylusDown(object sender, StylusDownEventArgs e)
         {
+            if (IsCurrentPageFrozen && IsFreezeMutatingMode(inkCanvas.EditingMode))
+            {
+                TryBlockFrozenPageMutation("修改冻结页面");
+                e.Handled = true;
+                return;
+            }
+
             // 使用辅助方法设置光标
             SetCursorBasedOnEditingMode(sender as InkCanvas);
         }
@@ -3015,6 +3035,13 @@ namespace Ink_Canvas
         {
             try
             {
+                if (IsCurrentPageFrozen && IsFreezeMutatingMode(newMode))
+                {
+                    TryBlockFrozenPageMutation("切换到编辑工具");
+                    newMode = InkCanvasEditingMode.None;
+                    additionalActions = null;
+                }
+
                 // 如果切换到非橡皮擦模式，禁用橡皮擦覆盖层并重置橡皮擦状态
                 if (newMode != InkCanvasEditingMode.EraseByPoint && newMode != InkCanvasEditingMode.EraseByStroke)
                 {

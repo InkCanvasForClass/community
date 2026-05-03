@@ -915,6 +915,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void SymbolIconOpenStrokes_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (TryBlockFrozenPageMutation("打开墨迹文件")) return;
             if (lastBorderMouseDownObject != sender) return;
             AnimationsHelper.HidePopupWithSlideAndFade(BorderTools);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
@@ -1065,6 +1066,7 @@ namespace Ink_Canvas
         /// </summary>
         private void RestorePPTStrokesFromZip(string tempDir, Dictionary<string, string> metadata)
         {
+            if (TryBlockFrozenPageMutation("恢复墨迹文件")) return;
             try
             {
                 // 确保当前处于PPT放映模式
@@ -1160,6 +1162,7 @@ namespace Ink_Canvas
         /// </summary>
         private void RestoreWhiteboardStrokesFromZip(string tempDir, Dictionary<string, string> metadata)
         {
+            if (TryBlockFrozenPageMutation("恢复墨迹文件")) return;
             try
             {
                 // 确保当前处于白板模式
@@ -1182,6 +1185,7 @@ namespace Ink_Canvas
                 // 重置白板状态
                 WhiteboardTotalCount = totalPages;
                 CurrentWhiteboardIndex = 1;
+                ResetInkFreezePageStates();
 
                 // 清空历史记录
                 for (int i = 0; i < TimeMachineHistories.Length; i++)
@@ -1232,6 +1236,7 @@ namespace Ink_Canvas
         /// </summary>
         public void OpenXMLStrokeFile(string filePath)
         {
+            if (TryBlockFrozenPageMutation("打开墨迹文件")) return;
             try
             {
                 XDocument doc = XDocument.Load(filePath);
@@ -1412,6 +1417,7 @@ namespace Ink_Canvas
         /// </remarks>
         public void OpenSingleStrokeFile(string filePath)
         {
+            if (TryBlockFrozenPageMutation("打开墨迹文件")) return;
             var fileStreamHasNoStroke = false;
             using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
             {

@@ -630,6 +630,7 @@ namespace Ink_Canvas
         /// <param name="e">鼠标按钮事件参数</param>
         internal void SymbolIconUndo_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (TryBlockFrozenPageMutation("撤销冻结页面内容")) return;
             if (!BtnUndo.IsEnabled) return;
             BtnUndo_Click(BtnUndo, null);
             HideSubPanels();
@@ -642,6 +643,7 @@ namespace Ink_Canvas
         /// <param name="e">鼠标按钮事件参数</param>
         internal void SymbolIconRedo_MouseUp(object sender, RoutedEventArgs e)
         {
+            if (TryBlockFrozenPageMutation("重做冻结页面内容")) return;
             if (!BtnRedo.IsEnabled) return;
             BtnRedo_Click(BtnRedo, null);
             HideSubPanels();
@@ -937,6 +939,7 @@ namespace Ink_Canvas
         /// <param name="e">鼠标按钮事件参数</param>
         internal void SymbolIconDelete_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (TryBlockFrozenPageMutation("清除冻结页面内容")) return;
             if (inkCanvas.GetSelectedStrokes().Count > 0)
             {
                 inkCanvas.Strokes.Remove(inkCanvas.GetSelectedStrokes());
@@ -1419,6 +1422,7 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void GridInkReplayButton_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (TryBlockFrozenPageMutation("重播冻结页面内容")) return;
             //if (lastBorderMouseDownObject != sender) return;
 
             AnimationsHelper.HidePopupWithSlideAndFade(BorderTools);
@@ -3382,6 +3386,7 @@ namespace Ink_Canvas
 
         private void BtnClear_Click(object sender, RoutedEventArgs e)
         {
+            if (TryBlockFrozenPageMutation("清空冻结页面内容")) return;
             forceEraser = false;
             //BorderClearInDelete.Visibility = Visibility.Collapsed;
 
@@ -3877,6 +3882,7 @@ namespace Ink_Canvas
 
         private void InsertImageOptions_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (TryBlockFrozenPageMutation("插入图片")) return;
             // Check if the image options panel is currently visible
             bool isImagePanelVisible = BoardImageOptionsPanel.Visibility == Visibility.Visible;
 
@@ -3901,6 +3907,7 @@ namespace Ink_Canvas
 
         private async void ImageOptionScreenshot_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (TryBlockFrozenPageMutation("插入截图")) return;
             // Hide the options panel
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
@@ -3913,6 +3920,7 @@ namespace Ink_Canvas
 
         private async void ImageOptionSelectFile_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (TryBlockFrozenPageMutation("插入图片")) return;
             // Hide the options panel
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
@@ -3986,6 +3994,7 @@ namespace Ink_Canvas
         // 插入图片方法
         private async void InsertImage_MouseUp_New(object sender, MouseButtonEventArgs e)
         {
+            if (TryBlockFrozenPageMutation("插入图片")) return;
             var dialog = new OpenFileDialog
             {
                 Filter = "图片与 PDF|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf|图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf"
@@ -4055,6 +4064,7 @@ namespace Ink_Canvas
         // Keep the old method for backward compatibility
         private async void InsertImage_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (TryBlockFrozenPageMutation("插入图片")) return;
             var dialog = new OpenFileDialog
             {
                 Filter = "图片与 PDF|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf|图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf"

@@ -43,6 +43,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 CardRequirePasswordOnEnterSettings.IsOn = sec.RequirePasswordOnEnterSettings;
                 CardRequirePasswordOnResetConfig.IsOn = sec.RequirePasswordOnResetConfig;
                 CardRequirePasswordOnModifyOrClearNameList.IsOn = sec.RequirePasswordOnModifyOrClearNameList;
+                CardTotpEnabled.IsOn = sec.TotpEnabled;
+                TextBoxTotpSecret.Text = sec.TotpSecret ?? "";
                 CardEnableProcessProtection.IsOn = sec.EnableProcessProtection;
 
                 UpdatePasswordUiState();
@@ -60,6 +62,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var enabled = sec != null && sec.PasswordEnabled;
 
             if (BtnSetOrChangePassword != null) BtnSetOrChangePassword.IsEnabled = enabled;
+            if (BtnGenerateTotpSecret != null) BtnGenerateTotpSecret.IsEnabled = CardTotpEnabled?.IsOn == true;
+            if (TextBoxTotpSecret != null) TextBoxTotpSecret.IsEnabled = CardTotpEnabled?.IsOn == true;
 
             CardRequirePasswordOnExit.IsEnabled = enabled;
             CardRequirePasswordOnEnterSettings.IsEnabled = enabled;
@@ -178,6 +182,44 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.Settings.Security.EnableProcessProtection = newState;
             SettingsManager.SaveSettingsToFile();
             ProcessProtectionManager.SetEnabled(newState);
+        }
+
+        private void ToggleSwitchTotpEnabled_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            var settings = SettingsManager.Settings;
+            if (settings == null) return;
+            if (settings.Security == null) settings.Security = new Security();
+
+            var sec = settings.Security;
+            sec.TotpEnabled = CardTotpEnabled.IsOn;
+            if (sec.TotpEnabled && string.IsNullOrWhiteSpace(sec.TotpSecret))
+            {
+                sec.TotpSecret = SecurityManager.GenerateTotpSecret();
+                TextBoxTotpSecret.Text = sec.TotpSecret;
+            }
+
+            SettingsManager.SaveSettingsToFile();
+            UpdatePasswordUiState();
+        }
+
+        private async void BtnGenerateTotpSecret_Click(object sender, RoutedEventArgs e)
+        {
+            var settings = SettingsManager.Settings;
+            if (settings == null) return;
+            if (settings.Security == null) settings.Security = new Security();
+
+            var owner = Window.GetWindow(this);
+            bool ok = await SecurityManager.PromptAndVerifyPasswordOrTotpAsync(settings, owner,
+                "重置 TOTP 密钥", "请输入安全密码或当前 TOTP 动态验证码以重置密钥。");
+            if (!ok) return;
+
+            settings.Security.TotpSecret = SecurityManager.GenerateTotpSecret();
+            settings.Security.TotpEnabled = true;
+            TextBoxTotpSecret.Text = settings.Security.TotpSecret;
+            SetCardIsOnSilently(CardTotpEnabled, true);
+            SettingsManager.SaveSettingsToFile();
+            UpdatePasswordUiState();
         }
     }
 }

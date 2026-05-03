@@ -96,6 +96,36 @@ namespace Ink_Canvas
                     case "board":
                         ImageBlackboard_MouseUp(null, null);
                         return;
+                    case "freeze":
+                    case "lock":
+                    case "ink-freeze":
+                    case "ink/lock":
+                        FreezePage(GetUriFreezePageOrCurrent(uri), true);
+                        return;
+                    case "unfreeze":
+                    case "unlock":
+                    case "ink-unfreeze":
+                    case "ink/unlock":
+                        _ = UnfreezePageAsync(GetUriFreezePageOrCurrent(uri), skipVerification: true);
+                        return;
+                    case "freeze/start":
+                    case "lock/start":
+                    case "ink-freeze/start":
+                    case "ink/lock/start":
+                        HandleInkFreezeCourseStart(GetUriFreezePageOrCurrent(uri));
+                        return;
+                    case "freeze/end":
+                    case "lock/end":
+                    case "ink-freeze/end":
+                    case "ink/lock/end":
+                        HandleInkFreezeCourseEnd(GetUriFreezePageOrCurrent(uri, allowMissing: true));
+                        return;
+                    case "freeze/cancel":
+                    case "lock/cancel":
+                    case "ink-freeze/cancel":
+                    case "ink/lock/cancel":
+                        HandleInkFreezeCourseCancel();
+                        return;
                 }
 
                 if (pathLower == "tool/state")
@@ -191,6 +221,15 @@ namespace Ink_Canvas
             }
             catch (Exception ex) { LogHelper.WriteLogToFile($"解析 URI 参数失败: {ex.Message}", LogHelper.LogType.Warning); }
             return "";
+        }
+
+        private int GetUriFreezePageOrCurrent(string uri, bool allowMissing = false)
+        {
+            string pageText = GetUriQueryValue(uri, "page");
+            if (int.TryParse(pageText, out int page) && page >= 0 && page <= 100)
+                return page;
+
+            return allowMissing ? -1 : GetCurrentFreezePageIndex();
         }
 
         private const string ConfigProfileListTempFile = "InkCanvasConfigProfileList.json";

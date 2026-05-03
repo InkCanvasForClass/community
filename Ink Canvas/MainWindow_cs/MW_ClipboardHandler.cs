@@ -274,6 +274,7 @@ namespace Ink_Canvas
         /// </remarks>
         private Task PasteImageFromClipboard(Point? position = null)
         {
+            if (TryBlockFrozenPageMutation("粘贴图片")) return Task.CompletedTask;
             try
             {
                 if (!Clipboard.ContainsImage())

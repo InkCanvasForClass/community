@@ -1,7 +1,9 @@
 using iNKORE.UI.WPF.Controls;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
+using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -32,6 +34,11 @@ namespace Ink_Canvas.Helpers
             => settings?.Security != null
                 && !string.IsNullOrWhiteSpace(settings.Security.PasswordSalt)
                 && !string.IsNullOrWhiteSpace(settings.Security.PasswordHash);
+
+        public static bool HasTotpConfigured(Settings settings)
+            => settings?.Security != null
+               && settings.Security.TotpEnabled
+               && !string.IsNullOrWhiteSpace(settings.Security.TotpSecret);
 
         /// <summary>
         /// 确定在退出应用时是否需要输入密码。
@@ -132,6 +139,53 @@ namespace Ink_Canvas.Helpers
             if (result != ContentDialogResult.Primary) return false;
 
             return VerifyPassword(settings, passwordBox.Password);
+        }
+
+        public static async Task<bool> PromptAndVerifyPasswordOrTotpAsync(Settings settings, Window owner, string title, string message)
+        {
+            bool hasPassword = IsPasswordFeatureEnabled(settings) && HasPasswordConfigured(settings);
+            bool hasTotp = HasTotpConfigured(settings);
+            if (!hasPassword && !hasTotp) return true;
+
+            var dialog = new ContentDialog
+            {
+                Title = title,
+                PrimaryButtonText = "确定",
+                SecondaryButtonText = "取消"
+            };
+
+            var panel = new SimpleStackPanel
+            {
+                Spacing = 12,
+                Margin = new Thickness(0, 10, 0, 0)
+            };
+
+            panel.Children.Add(new TextBlock
+            {
+                Text = message,
+                TextWrapping = TextWrapping.Wrap
+            });
+
+            var inputBox = new PasswordBox
+            {
+                Height = 32
+            };
+            panel.Children.Add(inputBox);
+            panel.Children.Add(new TextBlock
+            {
+                Text = hasPassword && hasTotp ? "可输入安全密码或 6 位 TOTP 验证码。" : (hasTotp ? "请输入 6 位 TOTP 验证码。" : "请输入安全密码。"),
+                TextWrapping = TextWrapping.Wrap,
+                Opacity = 0.72
+            });
+
+            dialog.Content = panel;
+
+            var result = await dialog.ShowAsync();
+            if (result != ContentDialogResult.Primary) return false;
+
+            string input = inputBox.Password ?? "";
+            if (hasPassword && VerifyPassword(settings, input)) return true;
+            return hasTotp && VerifyTotp(settings, input);
         }
 
         /// <summary>
@@ -293,6 +347,42 @@ namespace Ink_Canvas.Helpers
             settings.Security.PasswordHash = "";
         }
 
+        public static string GenerateTotpSecret()
+        {
+            var bytes = new byte[20];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(bytes);
+            }
+            return Base32Encode(bytes);
+        }
+
+        public static bool VerifyTotp(Settings settings, string code)
+        {
+            if (!HasTotpConfigured(settings) || string.IsNullOrWhiteSpace(code)) return false;
+
+            string normalized = new string(code.Where(char.IsDigit).ToArray());
+            if (normalized.Length != 6) return false;
+
+            try
+            {
+                var secret = Base32Decode(settings.Security.TotpSecret);
+                long step = DateTimeOffset.UtcNow.ToUnixTimeSeconds() / 30;
+                for (long offset = -1; offset <= 1; offset++)
+                {
+                    string expected = GenerateTotpCode(secret, step + offset);
+                    if (FixedTimeEquals(Encoding.ASCII.GetBytes(normalized), Encoding.ASCII.GetBytes(expected)))
+                        return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// 使用 PBKDF2（Rfc2898）从给定的密码和盐派生指定长度的密钥字节。
         /// </summary>
@@ -325,6 +415,89 @@ namespace Ink_Canvas.Helpers
                 diff |= a[i] ^ b[i];
             }
             return diff == 0;
+        }
+
+        private static string GenerateTotpCode(byte[] secret, long timeStep)
+        {
+            var counter = BitConverter.GetBytes(timeStep);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(counter);
+
+            using (var hmac = new HMACSHA1(secret))
+            {
+                var hash = hmac.ComputeHash(counter);
+                int offset = hash[hash.Length - 1] & 0x0f;
+                int binary =
+                    ((hash[offset] & 0x7f) << 24)
+                    | ((hash[offset + 1] & 0xff) << 16)
+                    | ((hash[offset + 2] & 0xff) << 8)
+                    | (hash[offset + 3] & 0xff);
+                return (binary % 1_000_000).ToString("D6");
+            }
+        }
+
+        private static string Base32Encode(byte[] data)
+        {
+            const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+            if (data == null || data.Length == 0) return "";
+
+            var result = new StringBuilder();
+            int buffer = data[0];
+            int next = 1;
+            int bitsLeft = 8;
+            while (bitsLeft > 0 || next < data.Length)
+            {
+                if (bitsLeft < 5)
+                {
+                    if (next < data.Length)
+                    {
+                        buffer <<= 8;
+                        buffer |= data[next++] & 0xff;
+                        bitsLeft += 8;
+                    }
+                    else
+                    {
+                        int pad = 5 - bitsLeft;
+                        buffer <<= pad;
+                        bitsLeft += pad;
+                    }
+                }
+
+                int index = 0x1f & (buffer >> (bitsLeft - 5));
+                bitsLeft -= 5;
+                result.Append(alphabet[index]);
+            }
+
+            return result.ToString();
+        }
+
+        private static byte[] Base32Decode(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return Array.Empty<byte>();
+
+            string normalized = input.Trim().Replace(" ", "").Replace("-", "").TrimEnd('=').ToUpperInvariant();
+            var bytes = new System.Collections.Generic.List<byte>();
+            int buffer = 0;
+            int bitsLeft = 0;
+
+            foreach (char c in normalized)
+            {
+                int value;
+                if (c >= 'A' && c <= 'Z') value = c - 'A';
+                else if (c >= '2' && c <= '7') value = c - '2' + 26;
+                else continue;
+
+                buffer = (buffer << 5) | value;
+                bitsLeft += 5;
+
+                if (bitsLeft >= 8)
+                {
+                    bytes.Add((byte)((buffer >> (bitsLeft - 8)) & 0xff));
+                    bitsLeft -= 8;
+                }
+            }
+
+            return bytes.ToArray();
         }
     }
 }
