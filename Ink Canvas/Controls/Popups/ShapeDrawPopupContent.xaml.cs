@@ -20,6 +20,17 @@ namespace Ink_Canvas.Controls
         public GeometryButton DrawCylinderBtn => BoardImageDrawCylinder;
         public GeometryButton DrawConeBtn => BoardImageDrawCone;
 
+        public GeometryButton DrawCoordinate1Btn => ImageDrawCoordinate1;
+        public GeometryButton DrawCoordinate2Btn => ImageDrawCoordinate2;
+        public GeometryButton DrawCoordinate3Btn => ImageDrawCoordinate3;
+        public GeometryButton DrawCoordinate4Btn => ImageDrawCoordinate4;
+        public GeometryButton DrawCoordinate5Btn => ImageDrawCoordinate5;
+        public GeometryButton DrawHyperbolaBtn => ImageDrawHyperbola;
+        public GeometryButton DrawHyperbolaWithFocalPointBtn => ImageDrawHyperbolaWithFocalPoint;
+        public GeometryButton DrawParabola1Btn => ImageDrawParabola1;
+        public GeometryButton DrawParabolaWithFocalPointBtn => ImageDrawParabolaWithFocalPoint;
+        public GeometryButton DrawParabola2Btn => ImageDrawParabola2;
+
         public FontIcon CloseFontIcon => TitleBar?.CloseFontIcon;
 
         public ShapeDrawPopupContent()

@@ -2236,6 +2236,36 @@
   <data name="Geometry_DrawCone" xml:space="preserve">
     <value>画圆锥</value>
   </data>
+  <data name="Geometry_DrawCoordinate1" xml:space="preserve">
+    <value>坐标系1</value>
+  </data>
+  <data name="Geometry_DrawCoordinate2" xml:space="preserve">
+    <value>坐标系2</value>
+  </data>
+  <data name="Geometry_DrawCoordinate3" xml:space="preserve">
+    <value>坐标系3</value>
+  </data>
+  <data name="Geometry_DrawCoordinate4" xml:space="preserve">
+    <value>坐标系4</value>
+  </data>
+  <data name="Geometry_DrawCoordinate5" xml:space="preserve">
+    <value>坐标系5</value>
+  </data>
+  <data name="Geometry_DrawHyperbola" xml:space="preserve">
+    <value>双曲线</value>
+  </data>
+  <data name="Geometry_DrawHyperbolaWithFocal" xml:space="preserve">
+    <value>双曲线(焦点)</value>
+  </data>
+  <data name="Geometry_DrawParabola" xml:space="preserve">
+    <value>抛物线</value>
+  </data>
+  <data name="Geometry_DrawParabolaWithFocal" xml:space="preserve">
+    <value>抛物线(焦点)</value>
+  </data>
+  <data name="Geometry_DrawParabola2" xml:space="preserve">
+    <value>抛物线2</value>
+  </data>
   <data name="FloatingBar_GestureButton" xml:space="preserve">
     <value>手势</value>
   </data>

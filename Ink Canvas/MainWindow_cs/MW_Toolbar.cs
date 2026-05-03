@@ -4,6 +4,7 @@ using Ink_Canvas.Controls.Toolbar;
 using Ink_Canvas.Helpers;
 using System.Collections.Generic;
 using System.Windows.Controls;
+using iNKORE.UI.WPF.Modern.Controls;
 namespace Ink_Canvas
 {
     public partial class MainWindow
@@ -25,6 +26,14 @@ namespace Ink_Canvas
         internal GeometryButton BoardImageDrawDotLine => ShapeDrawPopupContent?.DrawDotLineBtn;
         internal GeometryButton BoardImageDrawArrow => ShapeDrawPopupContent?.DrawArrowBtn;
         internal GeometryButton BoardImageDrawParallelLine => ShapeDrawPopupContent?.DrawParallelLineBtn;
+
+        internal GeometryButton ImageDrawLine => BoardShapeDrawPopupContent?.DrawLineBtn;
+        internal GeometryButton ImageDrawDashedLine => BoardShapeDrawPopupContent?.DrawDashedLineBtn;
+        internal GeometryButton ImageDrawDotLine => BoardShapeDrawPopupContent?.DrawDotLineBtn;
+        internal GeometryButton ImageDrawArrow => BoardShapeDrawPopupContent?.DrawArrowBtn;
+        internal GeometryButton ImageDrawParallelLine => BoardShapeDrawPopupContent?.DrawParallelLineBtn;
+
+        internal ToggleSwitch ToggleSwitchDrawShapeBorderAutoHide { get; private set; } = new ToggleSwitch { IsOn = true };
 
         internal void AttachCursorIconView(ToolbarImageButton btn) => Cursor_Icon = btn;
         internal void AttachPenIconView(ToolbarImageButton btn) => Pen_Icon = btn;

@@ -7,8 +7,7 @@
              xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
              xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
              xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
-             mc:Ignorable="d"
-             d:DesignHeight="200" d:DesignWidth="400">
+             mc:Ignorable="d">
     <Border CornerRadius="8" Background="{DynamicResource ToolsPopupBackground}"
             BorderBrush="#3b82f6" BorderThickness="2">
         <ikw:SimpleStackPanel Margin="-1">
@@ -27,6 +26,22 @@
                         <controls:GeometryButton x:Name="BoardImageDrawCircle" IconSource="{DynamicResource GeoIconCircle}" Label="{i18n:I18n Key=Geometry_DrawCenteredCircle}" />
                         <controls:GeometryButton x:Name="BoardImageDrawDashedCircle" IconSource="{DynamicResource GeoIconDashedCircle}" Label="{i18n:I18n Key=Geometry_DrawCenteredDashedCircle}" />
                         <controls:GeometryButton x:Name="BoardImageDrawEllipseCenter" IconSource="{DynamicResource GeoIconEllipseCenter}" Label="{i18n:I18n Key=Geometry_DrawCenteredEllipse}" />
+                    </ikw:SimpleStackPanel>
+                    <ikw:SimpleStackPanel x:Name="BoardOnlyRow1" Orientation="Horizontal" Height="38" Spacing="2"
+                                         Margin="4,0,4,0">
+                        <controls:GeometryButton x:Name="ImageDrawCoordinate1" IconSource="{DynamicResource DrawShapeImageSource.Coordinate1}" Label="{i18n:I18n Key=Geometry_DrawCoordinate1}" />
+                        <controls:GeometryButton x:Name="ImageDrawCoordinate2" IconSource="{DynamicResource DrawShapeImageSource.Coordinate2}" Label="{i18n:I18n Key=Geometry_DrawCoordinate2}" />
+                        <controls:GeometryButton x:Name="ImageDrawCoordinate3" IconSource="{DynamicResource DrawShapeImageSource.Coordinate3}" Label="{i18n:I18n Key=Geometry_DrawCoordinate3}" />
+                        <controls:GeometryButton x:Name="ImageDrawCoordinate4" IconSource="{DynamicResource DrawShapeImageSource.Coordinate4}" Label="{i18n:I18n Key=Geometry_DrawCoordinate4}" />
+                        <controls:GeometryButton x:Name="ImageDrawCoordinate5" IconSource="{DynamicResource DrawShapeImageSource.Coordinate5}" Label="{i18n:I18n Key=Geometry_DrawCoordinate5}" />
+                    </ikw:SimpleStackPanel>
+                    <ikw:SimpleStackPanel x:Name="BoardOnlyRow2" Orientation="Horizontal" Height="38" Spacing="2"
+                                         Margin="4,0,4,0">
+                        <controls:GeometryButton x:Name="ImageDrawHyperbola" IconSource="{DynamicResource DrawShapeImageSource.Hyperbola}" Label="{i18n:I18n Key=Geometry_DrawHyperbola}" />
+                        <controls:GeometryButton x:Name="ImageDrawHyperbolaWithFocalPoint" IconSource="{DynamicResource DrawShapeImageSource.HyperbolaWithFocalPoint}" Label="{i18n:I18n Key=Geometry_DrawHyperbolaWithFocal}" />
+                        <controls:GeometryButton x:Name="ImageDrawParabola1" IconSource="{DynamicResource DrawShapeImageSource.Parabola}" Label="{i18n:I18n Key=Geometry_DrawParabola}" />
+                        <controls:GeometryButton x:Name="ImageDrawParabolaWithFocalPoint" IconSource="{DynamicResource DrawShapeImageSource.ParabolaWithFocalPoint}" Label="{i18n:I18n Key=Geometry_DrawParabolaWithFocal}" />
+                        <controls:GeometryButton x:Name="ImageDrawParabola2" IconSource="{DynamicResource DrawShapeImageSource.Parabola}" Label="{i18n:I18n Key=Geometry_DrawParabola2}" />
                     </ikw:SimpleStackPanel>
                     <ikw:SimpleStackPanel Orientation="Horizontal" Height="38" Spacing="2"
                                          Margin="4,0,4,4">

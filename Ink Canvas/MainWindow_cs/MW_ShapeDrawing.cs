@@ -34,17 +34,24 @@ namespace Ink_Canvas
         /// </remarks>
         internal void ImageDrawShape_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (BorderDrawShape.IsOpen)
+            if (BorderDrawShape.IsOpen || BoardBorderDrawShape.IsOpen)
             {
                 AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
-                AnimationsHelper.HideWithSlideAndFade(BoardBorderDrawShape);
+                AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderDrawShape);
             }
             else
             {
                 HideSubPanels();
-                AnimationsHelper.ShowPopupWithSlideAndFade(BorderDrawShape);
-                _popupManager?.BringToFront(BorderDrawShape);
-                AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderDrawShape);
+                if (currentMode == 0)
+                {
+                    AnimationsHelper.ShowPopupWithSlideAndFade(BorderDrawShape);
+                    _popupManager?.BringToFront(BorderDrawShape);
+                }
+                else
+                {
+                    AnimationsHelper.ShowPopupWithSlideAndFade(BoardBorderDrawShape);
+                    _popupManager?.BringToFront(BoardBorderDrawShape);
+                }
             }
         }
 

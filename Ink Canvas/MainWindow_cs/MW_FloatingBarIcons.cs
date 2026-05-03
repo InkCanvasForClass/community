@@ -256,6 +256,7 @@ namespace Ink_Canvas
                 _popupManager.RegisterPopup(BorderTools);
                 _popupManager.RegisterPopup(BoardBorderToolsPopup);
                 _popupManager.RegisterPopup(BorderDrawShape);
+                _popupManager.RegisterPopup(BoardBorderDrawShape);
 
                 _popupManager.Initialize();
 
@@ -323,7 +324,7 @@ namespace Ink_Canvas
         private void CollapseBorderDrawShape()
         {
             AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderDrawShape);
+            AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderDrawShape);
         }
 
         /// <summary>
@@ -344,7 +345,7 @@ namespace Ink_Canvas
             BoardTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
             // 添加隐藏图形工具的二级菜单面板
             BorderDrawShape.IsOpen = false;
-            BoardBorderDrawShape.Visibility = Visibility.Collapsed;
+            BoardBorderDrawShape.IsOpen = false;
 
             if (LogicalTreeHelper.FindLogicalNode(this, "BackgroundPalette") is UIElement bgPalette)
             {
@@ -438,7 +439,7 @@ namespace Ink_Canvas
             if (ToggleSwitchDrawShapeBorderAutoHide.IsOn)
             {
                 AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
-                AnimationsHelper.HideWithSlideAndFade(BoardBorderDrawShape);
+                AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderDrawShape);
             }
 
             if (mode != null)
