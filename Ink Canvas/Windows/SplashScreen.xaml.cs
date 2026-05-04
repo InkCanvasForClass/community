@@ -39,25 +39,31 @@ namespace Ink_Canvas.Windows
 
         private void ApplyCustomTextPosition()
         {
+            // 只有自定义样式且有自定义图片时才应用文字位置设置
+            if (_actualSplashStyle != 7)
+            {
+                return;
+            }
+
             int textPosition = GetCurrentSplashTextPosition();
 
             switch (textPosition)
             {
                 case 0: // 左下
-                    TextAndProgressBarContainer.HorizontalAlignment = HorizontalAlignment.Left;
-                    TextAndProgressBarContainer.Margin = new Thickness(100, 0, 0, 200);
+                    LoadingText.HorizontalAlignment = HorizontalAlignment.Center;
+                    LoadingText.Margin = new Thickness(-240, 200, 0, 0);
                     break;
                 case 1: // 中下
-                    TextAndProgressBarContainer.HorizontalAlignment = HorizontalAlignment.Center;
-                    TextAndProgressBarContainer.Margin = new Thickness(0, 0, 0, 200);
+                    LoadingText.HorizontalAlignment = HorizontalAlignment.Center;
+                    LoadingText.Margin = new Thickness(0, 200, 0, 0);
                     break;
                 case 2: // 右下
-                    TextAndProgressBarContainer.HorizontalAlignment = HorizontalAlignment.Right;
-                    TextAndProgressBarContainer.Margin = new Thickness(0, 0, 100, 200);
+                    LoadingText.HorizontalAlignment = HorizontalAlignment.Center;
+                    LoadingText.Margin = new Thickness(0, 200, -240, 0);
                     break;
                 default: // 默认中下
-                    TextAndProgressBarContainer.HorizontalAlignment = HorizontalAlignment.Center;
-                    TextAndProgressBarContainer.Margin = new Thickness(0, 0, 0, 200);
+                    LoadingText.HorizontalAlignment = HorizontalAlignment.Center;
+                    LoadingText.Margin = new Thickness(0, 200, 0, 0);
                     break;
             }
         }
@@ -185,14 +191,22 @@ namespace Ink_Canvas.Windows
                 LoadingText.Text = message;
 
                 // 根据实际启动动画样式调整加载文本样式
-                if (actualSplashStyle == 6 || actualSplashStyle == 7) // 马年限定或自定义
+                if (actualSplashStyle == 6) // 马年限定
                 {
-                    // 马年限定/自定义样式
+                    // 马年限定样式
                     LoadingText.FontSize = 12;
                     LoadingText.FontWeight = FontWeights.SemiBold;
                     LoadingText.Foreground = Brushes.White;
                     LoadingText.HorizontalAlignment = HorizontalAlignment.Center;
                     LoadingText.Margin = new Thickness(0, 200, 140, 4);
+                }
+                else if (actualSplashStyle == 7) // 自定义图片
+                {
+                    // 自定义图片样式 - 不改变 HorizontalAlignment，由 ApplyCustomTextPosition 决定
+                    LoadingText.FontSize = 12;
+                    LoadingText.FontWeight = FontWeights.SemiBold;
+                    LoadingText.Foreground = Brushes.White;
+                    // 不覆盖 HorizontalAlignment 和 Margin，保留 ApplyCustomTextPosition 的设置
                 }
                 else
                 {
@@ -364,6 +378,14 @@ namespace Ink_Canvas.Windows
                 {
                     actualStyle = 7;
                     return customImagePath;
+                }
+
+                // 如果选择自定义样式但没有选择图片，使用随机样式
+                if (splashStyle == 7)
+                {
+                    actualStyle = GetActualStyle(0); // 使用随机
+                    string imageName = GetImageNameByStyle(0);
+                    return $"pack://application:,,,/Resources/Startup-animation/{imageName}";
                 }
 
                 actualStyle = GetActualStyle(splashStyle);
