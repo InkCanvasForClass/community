@@ -307,13 +307,11 @@ namespace Ink_Canvas
 
                 if (Settings.Appearance.IsTransparentButtonBackground)
                 {
-                    BtnExit.Background = new SolidColorBrush(StringToColor("#7F909090"));
+                    { /* Old UI removed */ }
                 }
                 else
                 {
-                    BtnExit.Background = BtnSwitchTheme.Content.ToString() == "深色"
-                        ? new SolidColorBrush(StringToColor("#FFCCCCCC"))
-                        : new SolidColorBrush(StringToColor("#FF555555"));
+                    { /* Old UI removed */ }
                 }
 
                 if (Settings.Appearance.FloatingBarImg >= 12 + Settings.Appearance.CustomFloatingBarImgs.Count)
@@ -608,7 +606,7 @@ namespace Ink_Canvas
             }
 
             // auto align
-            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+            if (IsInPptPresentationMode)
             {
                 ViewboxFloatingBarMarginAnimation(60);
             }

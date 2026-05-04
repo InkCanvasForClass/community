@@ -158,7 +158,7 @@ namespace Ink_Canvas
                     List<StrokeCollection> allPageStrokes = new List<StrokeCollection>();
 
                     // 检查PPT放映模式下的多页面墨迹
-                    if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible && _pptManager?.IsConnected == true)
+                    if (IsInPptPresentationMode && _pptManager?.IsConnected == true)
                     {
                         hasMultiplePages = true;
                         var totalSlides = _pptManager.SlidesCount;
@@ -202,7 +202,7 @@ namespace Ink_Canvas
                     if (hasMultiplePages && allPageStrokes.Count > 0)
                     {
                         // 检查是否是PPT模式
-                        bool isPPTMode = BtnPPTSlideShowEnd.Visibility == Visibility.Visible && _pptManager?.IsConnected == true;
+                        bool isPPTMode = IsInPptPresentationMode && _pptManager?.IsConnected == true;
 
                         if (isPPTMode)
                         {
@@ -276,7 +276,7 @@ namespace Ink_Canvas
                     List<StrokeCollection> allPageStrokes = new List<StrokeCollection>();
 
                     // 检查PPT放映模式下的多页面墨迹
-                    if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible && _pptManager?.IsConnected == true)
+                    if (IsInPptPresentationMode && _pptManager?.IsConnected == true)
                     {
                         hasMultiplePages = true;
                         // 收集PPT放映模式下的所有页面墨迹
@@ -340,7 +340,7 @@ namespace Ink_Canvas
                     List<StrokeCollection> allPageStrokes = new List<StrokeCollection>();
 
                     // 检查PPT放映模式下的多页面墨迹
-                    if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible && _pptManager?.IsConnected == true)
+                    if (IsInPptPresentationMode && _pptManager?.IsConnected == true)
                     {
                         hasMultiplePages = true;
                         var totalSlides = _pptManager.SlidesCount;
@@ -987,7 +987,7 @@ namespace Ink_Canvas
                     bool isWhiteboardMode = metadata.ContainsKey("模式") && metadata["模式"].Contains("白板");
 
                     // 检查当前是否处于PPT模式
-                    bool isCurrentlyInPPTMode = BtnPPTSlideShowEnd.Visibility == Visibility.Visible && pptApplication != null;
+                    bool isCurrentlyInPPTMode = IsInPptPresentationMode && pptApplication != null;
 
                     // 检查当前是否处于白板模式
                     bool isCurrentlyInWhiteboardMode = currentMode != 0;
@@ -1070,7 +1070,7 @@ namespace Ink_Canvas
             try
             {
                 // 确保当前处于PPT放映模式
-                if (BtnPPTSlideShowEnd.Visibility != Visibility.Visible || pptApplication == null)
+                if (!IsInPptPresentationMode || pptApplication == null)
                 {
                     throw new InvalidOperationException("当前不在PPT放映模式，无法恢复PPT墨迹");
                 }

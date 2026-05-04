@@ -13,7 +13,7 @@ namespace Ink_Canvas
         /// <param name="e">鼠标滚轮事件参数</param>
         private void Window_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (BtnPPTSlideShowEnd.Visibility != Visibility.Visible || currentMode != 0) return;
+            if (!IsInPptPresentationMode || currentMode != 0) return;
             if (e.Delta >= 120)
             {
                 BtnPPTSlidesUp_Click(null, null);
@@ -31,7 +31,7 @@ namespace Ink_Canvas
         /// <param name="e">键盘事件参数</param>
         private void Main_Grid_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (BtnPPTSlideShowEnd.Visibility != Visibility.Visible || currentMode != 0) return;
+            if (!IsInPptPresentationMode || currentMode != 0) return;
 
             if (e.Key == Key.Down || e.Key == Key.PageDown || e.Key == Key.Right || e.Key == Key.N || e.Key == Key.Space)
             {
@@ -96,7 +96,7 @@ namespace Ink_Canvas
                 return;
             }
 
-            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) BtnPPTSlideShowEnd_Click(BtnPPTSlideShowEnd, null);
+            if (IsInPptPresentationMode) ExitPptPresentation();
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
@@ -52,14 +52,14 @@ namespace Ink_Canvas.Helpers
                 {
                     if (isConnected)
                     {
-                        _mainWindow.StackPanelPPTControls.Visibility = Visibility.Visible;
-                        _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Visible;
+                        _mainWindow.ArePptControlsVisible = true;
+                        // Old UI removed:                         _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Visible;
                     }
                     else
                     {
-                        _mainWindow.StackPanelPPTControls.Visibility = Visibility.Collapsed;
-                        _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Collapsed;
-                        _mainWindow.BtnPPTSlideShowEnd.Visibility = Visibility.Collapsed;
+                        _mainWindow.ArePptControlsVisible = false;
+                        // Old UI removed:                         _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Collapsed;
+                        _mainWindow.IsInPptPresentationMode = false;
                         HideAllNavigationPanels();
                     }
                 }
@@ -81,8 +81,8 @@ namespace Ink_Canvas.Helpers
                 {
                     if (isInSlideShow)
                     {
-                        _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Collapsed;
-                        _mainWindow.BtnPPTSlideShowEnd.Visibility = Visibility.Visible;
+                        // Old UI removed:                         _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Collapsed;
+                        _mainWindow.IsInPptPresentationMode = true;
 
                         // 同步页码到所有翻页条 + 兼容旧绑定的隐藏 placeholder
                         SetPageNumberOnAllBars(currentSlide, totalSlides);
@@ -112,8 +112,8 @@ namespace Ink_Canvas.Helpers
                     }
                     else
                     {
-                        _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Visible;
-                        _mainWindow.BtnPPTSlideShowEnd.Visibility = Visibility.Collapsed;
+                        // Old UI removed:                         _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Visible;
+                        _mainWindow.IsInPptPresentationMode = false;
                         HideAllNavigationPanels();
                         _mainWindow.UpdatePPTTimeCapsuleVisibility();
                         _mainWindow.UpdatePPTQuickPanelVisibility();
@@ -226,7 +226,7 @@ namespace Ink_Canvas.Helpers
                     bool hasValidPageCount = slidesCount > 0;
 
                     bool shouldShowButtons = ShowPPTButton &&
-                                          _mainWindow.BtnPPTSlideShowEnd.Visibility == Visibility.Visible &&
+                                          _mainWindow.IsInPptPresentationMode &&
                                           isInSlideShow &&
                                           hasValidPageCount &&
                                           !MainWindow.Settings.Automation.IsAutoFoldInPPTSlideShow;
@@ -374,7 +374,7 @@ namespace Ink_Canvas.Helpers
             {
                 try
                 {
-                    _mainWindow.ViewBoxStackPanelMain.Margin = margin;
+                    // Old UI removed:                     _mainWindow.ViewBoxStackPanelMain.Margin = margin;
                 }
                 catch (Exception ex)
                 {

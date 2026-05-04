@@ -148,7 +148,7 @@ namespace Ink_Canvas
         private void CheckEnableTwoFingerGestureBtnVisibility(bool isVisible)
         {
             // 在PPT放映模式下根据设置决定是否显示手势按钮
-            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+            if (IsInPptPresentationMode)
             {
                 // 如果启用了PPT放映模式显示手势按钮，且当前处于批注模式，则显示手势按钮
                 if (Settings.PowerPointSettings.ShowGestureButtonInSlideShow && isVisible && inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
@@ -237,7 +237,7 @@ namespace Ink_Canvas
                 ViewboxFloatingBar.Margin = new Thickness(xPos, yPos, -2000, -200);
 
                 pos = e.GetPosition(null);
-                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                if (IsInPptPresentationMode)
                     pointPPT = new Point(xPos, yPos);
                 else
                     pointDesktop = new Point(xPos, yPos);
@@ -626,7 +626,7 @@ namespace Ink_Canvas
 
                 if (autoAlignCenter) // 控制居中
                 {
-                    if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                    if (IsInPptPresentationMode)
                     {
                         await Task.Delay(50);
                         ViewboxFloatingBarMarginAnimation(60);
@@ -660,8 +660,8 @@ namespace Ink_Canvas
         internal void SymbolIconUndo_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (TryBlockFrozenPageMutation("撤销冻结页面内容")) return;
-            if (!BtnUndo.IsEnabled) return;
-            BtnUndo_Click(BtnUndo, null);
+            if (!IsUndoEnabled) return;
+            BtnUndo_Click(null, null);
             HideSubPanels();
         }
 
@@ -673,8 +673,8 @@ namespace Ink_Canvas
         internal void SymbolIconRedo_MouseUp(object sender, RoutedEventArgs e)
         {
             if (TryBlockFrozenPageMutation("重做冻结页面内容")) return;
-            if (!BtnRedo.IsEnabled) return;
-            BtnRedo_Click(BtnRedo, null);
+            if (!IsRedoEnabled) return;
+            BtnRedo_Click(null, null);
             HideSubPanels();
         }
 
@@ -740,7 +740,7 @@ namespace Ink_Canvas
                         AnimationsHelper.HideWithSlideAndFade(BlackboardRightSide);
                     }
 
-                    BtnHideInkCanvas_Click(BtnHideInkCanvas, null);
+                    BtnHideInkCanvas_Click(null, null);
                 }
 
                 if (Settings.Gesture.AutoSwitchTwoFingerGesture) // 自动关闭多指书写、开启双指移动
@@ -831,8 +831,8 @@ namespace Ink_Canvas
                 HideSubPanelsImmediately();
 
                 // 只有在PPT放映模式下且页数有效时才显示翻页按钮
-                if (StackPanelPPTControls.Visibility == Visibility.Visible &&
-                    BtnPPTSlideShowEnd.Visibility == Visibility.Visible &&
+                if (ArePptControlsVisible &&
+                    IsInPptPresentationMode &&
                     PPTManager?.IsInSlideShow == true &&
                     PPTManager?.SlidesCount > 0)
                 {
@@ -858,7 +858,7 @@ namespace Ink_Canvas
                 if (Settings.Automation.IsAutoSaveStrokesAtClear &&
                     inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber) CaptureAndEnqueueScreenshotSave(true);
 
-                if (BtnPPTSlideShowEnd.Visibility == Visibility.Collapsed)
+                if (!IsInPptPresentationMode)
                     new Thread(() =>
                     {
                         Thread.Sleep(300);
@@ -887,7 +887,7 @@ namespace Ink_Canvas
                 ViewboxFloatingBar.Visibility = Visibility.Visible;
             }
 
-            BtnSwitch_Click(BtnSwitch, null);
+            SwitchBackground(null, null);
 
             if (currentMode == 0)
             {
@@ -919,10 +919,10 @@ namespace Ink_Canvas
                 }
             }
 
-            if (currentMode == 0 && inkCanvas.Strokes.Count == 0 && BtnPPTSlideShowEnd.Visibility != Visibility.Visible)
+            if (currentMode == 0 && inkCanvas.Strokes.Count == 0 && !IsInPptPresentationMode)
                 CursorIcon_Click(null, null);
 
-            BtnExit.Foreground = Brushes.White;
+            { /* Old UI removed */ }
             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
 
             new Thread(() =>
@@ -949,9 +949,9 @@ namespace Ink_Canvas
             }
             else
             {
-                BtnHideInkCanvas_Click(BtnHideInkCanvas, null);
+                BtnHideInkCanvas_Click(null, null);
 
-                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                if (IsInPptPresentationMode)
                 {
                     await Task.Delay(100);
                     ViewboxFloatingBarMarginAnimation(60);
@@ -979,7 +979,7 @@ namespace Ink_Canvas
                 if (Settings.Automation.IsAutoSaveStrokesAtClear &&
                     inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
                 {
-                    if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                    if (IsInPptPresentationMode)
                     {
                         var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
                         var presentationName = _pptManager?.GetPresentationName() ?? "";
@@ -1928,7 +1928,7 @@ namespace Ink_Canvas
         private void SaveFloatingBarPositionPoint()
         {
             var currentPoint = new Point(ViewboxFloatingBar.Margin.Left, ViewboxFloatingBar.Margin.Top);
-            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+            if (IsInPptPresentationMode)
                 pointPPT = currentPoint;
             else
                 pointDesktop = currentPoint;
@@ -2068,7 +2068,7 @@ namespace Ink_Canvas
 
                 if (MarginFromEdge != -60)
                 {
-                    if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                    if (IsInPptPresentationMode)
                     {
                         if (pointPPT.X != -1 || pointPPT.Y != -1)
                         {
@@ -2090,7 +2090,7 @@ namespace Ink_Canvas
                     }
 
                     pos.X = NormalizeFloatingBarLeftForScreen(pos.X, floatingBarWidth, screenWidth);
-                    if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                    if (IsInPptPresentationMode)
                         pointPPT = pos;
                     else
                         pointDesktop = pos;
@@ -2485,7 +2485,7 @@ namespace Ink_Canvas
                 _lastFloatingBarScreenDeviceName = mouseScreen.DeviceName;
                 RebuildCanvasOnTargetScreen(mouseScreen);
 
-                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                if (IsInPptPresentationMode)
                 {
                     PureViewboxFloatingBarMarginAnimationInPPTMode();
                 }
@@ -2582,7 +2582,7 @@ namespace Ink_Canvas
             if (inkCanvas.Strokes.Count > 0 &&
                 inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
             {
-                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                if (IsInPptPresentationMode)
                 {
                     var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
                     var presentationName = _pptManager?.GetPresentationName() ?? "";
@@ -2591,7 +2591,7 @@ namespace Ink_Canvas
                 else CaptureAndEnqueueScreenshotSave(true);
             }
 
-            if (BtnPPTSlideShowEnd.Visibility != Visibility.Visible)
+            if (!IsInPptPresentationMode)
             {
                 if (Settings.Canvas.HideStrokeWhenSelecting)
                 {
@@ -2642,13 +2642,13 @@ namespace Ink_Canvas
                 RestoreStrokes(true);
             }
 
-            if (BtnSwitchTheme.Content.ToString() == "浅色")
-                BtnSwitch.Content = "黑板";
+            if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
+            { /* Old UI removed */ }
             else
-                BtnSwitch.Content = "白板";
+            { /* Old UI removed */ }
 
-            StackPanelPPTButtons.Visibility = Visibility.Visible;
-            BtnHideInkCanvas.Content = "显示\n画板";
+            { /* Old UI removed */ }
+            { /* Old UI removed */ }
             CheckEnableTwoFingerGestureBtnVisibility(false);
 
 
@@ -2669,7 +2669,7 @@ namespace Ink_Canvas
                 HideSubPanels("cursor", true);
                 await Task.Delay(50);
 
-                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                if (IsInPptPresentationMode)
                     ViewboxFloatingBarMarginAnimation(60);
                 else
                     ViewboxFloatingBarMarginAnimation(100, true);
@@ -2747,19 +2747,19 @@ namespace Ink_Canvas
 
                 if (GridBackgroundCover.Visibility == Visibility.Collapsed)
                 {
-                    if (BtnSwitchTheme.Content.ToString() == "浅色")
-                        BtnSwitch.Content = "黑板";
+                    if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
+            { /* Old UI removed */ }
                     else
-                        BtnSwitch.Content = "白板";
-                    StackPanelPPTButtons.Visibility = Visibility.Visible;
+            { /* Old UI removed */ }
+            { /* Old UI removed */ }
                 }
                 else
                 {
-                    BtnSwitch.Content = "屏幕";
-                    StackPanelPPTButtons.Visibility = Visibility.Collapsed;
+            { /* Old UI removed */ }
+            { /* Old UI removed */ }
                 }
 
-                BtnHideInkCanvas.Content = "隐藏\n画板";
+            { /* Old UI removed */ }
 
                 // 进入批注模式时的全屏处理（仅当未应用过全屏处理时）
                 if (Settings.Advanced.IsEnableAvoidFullScreenHelper && !isFullScreenApplied)
@@ -3456,17 +3456,17 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
-        private void BtnFingerDragMode_Click(object sender, RoutedEventArgs e)
+        public void ToggleFingerDragMode(object sender, RoutedEventArgs e)
         {
             if (isSingleFingerDragMode)
             {
                 isSingleFingerDragMode = false;
-                BtnFingerDragMode.Content = "单指\n拖动";
+            { /* Old UI removed */ }
             }
             else
             {
                 isSingleFingerDragMode = true;
-                BtnFingerDragMode.Content = "多指\n拖动";
+            { /* Old UI removed */ }
             }
         }
 
@@ -3533,7 +3533,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
-        public void BtnExit_Click(object sender, RoutedEventArgs e)
+        public void ExitApplication(object sender, RoutedEventArgs e)
         {
             // 立即停止PPT监控，避免关闭过程中定时器继续尝试连接
             try
@@ -3613,10 +3613,7 @@ namespace Ink_Canvas
             _settingsWindow.Closed += (s, args) => _settingsWindow = null;
             _settingsWindow.ShowDialog();
         }
-
-        private void BtnThickness_Click(object sender, RoutedEventArgs e) { }
-
-        private bool forceEraser;
+private bool forceEraser;
 
 
         private void BtnClear_Click(object sender, RoutedEventArgs e)
@@ -3664,7 +3661,7 @@ namespace Ink_Canvas
 
             GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
 
-            if (isSingleFingerDragMode) BtnFingerDragMode_Click(BtnFingerDragMode, null);
+            if (isSingleFingerDragMode) ToggleFingerDragMode(null, null);
             isLongPressSelected = false;
         }
 
@@ -3700,13 +3697,6 @@ namespace Ink_Canvas
             }
         }
 
-        private void BtnHideControl_Click(object sender, RoutedEventArgs e)
-        {
-            if (StackPanelControl.Visibility == Visibility.Visible)
-                StackPanelControl.Visibility = Visibility.Hidden;
-            else
-                StackPanelControl.Visibility = Visibility.Visible;
-        }
 
         internal int currentMode;
 
@@ -3716,7 +3706,7 @@ namespace Ink_Canvas
             if (Settings.Advanced.IsEnableAvoidFullScreenHelper &&
                 isFullScreenApplied &&
                 currentMode == 0 && // 不在白板模式
-                BtnPPTSlideShowEnd.Visibility != Visibility.Visible) // 不在PPT放映模式
+                !IsInPptPresentationMode) // 不在PPT放映模式
             {
                 // 恢复为非画板模式，重新启用全屏限制
                 AvoidFullScreenHelper.SetBoardMode(false);
@@ -3740,7 +3730,7 @@ namespace Ink_Canvas
         /// <remarks>
         /// 切换过程中会保存/清理/恢复画笔轨迹，显示或隐藏白板/黑板面板、手势面板与 PPT 控件，调整主题与悬浮工具栏可见性，处理全屏/工作区尺寸恢复或进入全屏，以及在进入白板时检查剪贴板并显示粘贴提示。该方法还会触发隐藏/显示墨迹画布的逻辑（通过调用 BtnHideInkCanvas_Click）。
         /// </remarks>
-        private void BtnSwitch_Click(object sender, RoutedEventArgs e)
+        private void SwitchBackground(object sender, RoutedEventArgs e)
         {
             if (GridTransparencyFakeBackground.Background == Brushes.Transparent)
             {
@@ -3762,33 +3752,33 @@ namespace Ink_Canvas
                     RestoreStrokes(true);
 
 
-                    if (BtnSwitchTheme.Content.ToString() == "浅色")
+                    if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
                     {
-                        BtnSwitch.Content = "黑板";
-                        BtnExit.Foreground = Brushes.White;
+            { /* Old UI removed */ }
+            { /* Old UI removed */ }
                     }
                     else
                     {
-                        BtnSwitch.Content = "白板";
+            { /* Old UI removed */ }
                         if (isPresentationHaveBlackSpace)
                         {
-                            BtnExit.Foreground = Brushes.White;
+            { /* Old UI removed */ }
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
                         }
                         else
                         {
-                            BtnExit.Foreground = Brushes.Black;
+            { /* Old UI removed */ }
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
                         }
                     }
 
-                    StackPanelPPTButtons.Visibility = Visibility.Visible;
+            { /* Old UI removed */ }
 
                     CheckClipboardImageAndShowPasteNotificationWhenEnteringBoard();
                 }
 
                 Topmost = true;
-                BtnHideInkCanvas_Click(BtnHideInkCanvas, e);
+                BtnHideInkCanvas_Click(null, e);
             }
             else
             {
@@ -3813,7 +3803,7 @@ namespace Ink_Canvas
 
                         // 退出白板模式时取消全屏（仅在非PPT模式下）
                         if (Settings.Advanced.IsEnableAvoidFullScreenHelper &&
-                            BtnPPTSlideShowEnd.Visibility != Visibility.Visible) // 不在PPT放映模式
+                            !IsInPptPresentationMode) // 不在PPT放映模式
                         {
                             // 恢复为非画板模式，重新启用全屏限制
                             AvoidFullScreenHelper.SetBoardMode(false);
@@ -3836,7 +3826,7 @@ namespace Ink_Canvas
                         // 退出白板时自动收纳功能 - 等待浮动栏完全展开后再收纳
                         // 当处于PPT放映模式时，不自动收纳
                         if (Settings.Automation.IsAutoFoldWhenExitWhiteboard && !isFloatingBarFolded &&
-                            BtnPPTSlideShowEnd.Visibility != Visibility.Visible)
+                            !IsInPptPresentationMode)
                         {
                             // 使用异步延迟，等待浮动栏展开动画完成后再收纳
                             Task.Run(async () =>
@@ -3849,28 +3839,28 @@ namespace Ink_Canvas
                             });
                         }
 
-                        if (BtnSwitchTheme.Content.ToString() == "浅色")
+                        if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
                         {
-                            BtnSwitch.Content = "黑板";
-                            BtnExit.Foreground = Brushes.White;
+            { /* Old UI removed */ }
+            { /* Old UI removed */ }
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
                         }
                         else
                         {
-                            BtnSwitch.Content = "白板";
+            { /* Old UI removed */ }
                             if (isPresentationHaveBlackSpace)
                             {
-                                BtnExit.Foreground = Brushes.White;
+            { /* Old UI removed */ }
                                 ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
                             }
                             else
                             {
-                                BtnExit.Foreground = Brushes.Black;
+            { /* Old UI removed */ }
                                 ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
                             }
                         }
 
-                        StackPanelPPTButtons.Visibility = Visibility.Visible;
+            { /* Old UI removed */ }
                         Topmost = true;
                         break;
                     case 1: //黑板或白板模式
@@ -3887,7 +3877,7 @@ namespace Ink_Canvas
 
                         // 进入白板模式时全屏（仅在非PPT模式下）
                         if (Settings.Advanced.IsEnableAvoidFullScreenHelper &&
-                            BtnPPTSlideShowEnd.Visibility != Visibility.Visible) // 不在PPT放映模式
+                            !IsInPptPresentationMode) // 不在PPT放映模式
                         {
                             // 设置为画板模式，允许全屏操作
                             AvoidFullScreenHelper.SetBoardMode(true);
@@ -3903,15 +3893,15 @@ namespace Ink_Canvas
 
                         ViewboxFloatingBar.Visibility = Visibility.Collapsed;
 
-                        BtnSwitch.Content = "屏幕";
-                        if (BtnSwitchTheme.Content.ToString() == "浅色")
+            { /* Old UI removed */ }
+                        if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
                         {
-                            BtnExit.Foreground = Brushes.White;
+            { /* Old UI removed */ }
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
                         }
                         else
                         {
-                            BtnExit.Foreground = Brushes.Black;
+            { /* Old UI removed */ }
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
                         }
 
@@ -3935,7 +3925,7 @@ namespace Ink_Canvas
                             ColorSwitchCheck();
                         }
 
-                        StackPanelPPTButtons.Visibility = Visibility.Collapsed;
+            { /* Old UI removed */ }
 
                         if (Settings.Advanced.EnableUIAccessTopMost)
                         {
@@ -3955,6 +3945,7 @@ namespace Ink_Canvas
         }
 
         public int BoundsWidth = 5;
+        private bool _isToolbarOnRightSide = true;
 
         private void BtnHideInkCanvas_Click(object sender, RoutedEventArgs e)
         {
@@ -3973,19 +3964,19 @@ namespace Ink_Canvas
 
                 if (GridBackgroundCover.Visibility == Visibility.Collapsed)
                 {
-                    if (BtnSwitchTheme.Content.ToString() == "浅色")
-                        BtnSwitch.Content = "黑板";
+                    if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
+            { /* Old UI removed */ }
                     else
-                        BtnSwitch.Content = "白板";
-                    StackPanelPPTButtons.Visibility = Visibility.Visible;
+            { /* Old UI removed */ }
+            { /* Old UI removed */ }
                 }
                 else
                 {
-                    BtnSwitch.Content = "屏幕";
-                    StackPanelPPTButtons.Visibility = Visibility.Collapsed;
+            { /* Old UI removed */ }
+            { /* Old UI removed */ }
                 }
 
-                BtnHideInkCanvas.Content = "隐藏\n画板";
+            { /* Old UI removed */ }
 
                 // 进入批注模式时的全屏处理（仅当未应用过全屏处理时）
                 if (Settings.Advanced.IsEnableAvoidFullScreenHelper && !isFullScreenApplied)
@@ -4005,7 +3996,7 @@ namespace Ink_Canvas
             else
             {
                 // Auto-clear Strokes 要等待截图完成再清理笔记
-                if (BtnPPTSlideShowEnd.Visibility != Visibility.Visible)
+                if (!IsInPptPresentationMode)
                 {
                     if (isLoaded && Settings.Automation.IsAutoClearWhenExitingWritingMode)
                         if (inkCanvas.Strokes.Count > 0)
@@ -4061,13 +4052,13 @@ namespace Ink_Canvas
                     RestoreStrokes(true);
                 }
 
-                if (BtnSwitchTheme.Content.ToString() == "浅色")
-                    BtnSwitch.Content = "黑板";
+                if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
+            { /* Old UI removed */ }
                 else
-                    BtnSwitch.Content = "白板";
+            { /* Old UI removed */ }
 
-                StackPanelPPTButtons.Visibility = Visibility.Visible;
-                BtnHideInkCanvas.Content = "显示\n画板";
+            { /* Old UI removed */ }
+            { /* Old UI removed */ }
             }
 
             if (GridTransparencyFakeBackground.Background == Brushes.Transparent)
@@ -4095,24 +4086,24 @@ namespace Ink_Canvas
 
         private void BtnSwitchSide_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewBoxStackPanelMain.HorizontalAlignment == HorizontalAlignment.Right)
+            if (_isToolbarOnRightSide)
             {
-                ViewBoxStackPanelMain.HorizontalAlignment = HorizontalAlignment.Left;
-                ViewBoxStackPanelShapes.HorizontalAlignment = HorizontalAlignment.Right;
+            { /* Old UI removed */ }
+            { /* Old UI removed */ }
             }
             else
             {
-                ViewBoxStackPanelMain.HorizontalAlignment = HorizontalAlignment.Right;
-                ViewBoxStackPanelShapes.HorizontalAlignment = HorizontalAlignment.Left;
+            { /* Old UI removed */ }
+            { /* Old UI removed */ }
             }
         }
 
         private void StackPanel_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (((StackPanel)sender).Visibility == Visibility.Visible)
-                GridForLeftSideReservedSpace.Visibility = Visibility.Collapsed;
+            { /* Old UI removed */ }
             else
-                GridForLeftSideReservedSpace.Visibility = Visibility.Visible;
+            { /* Old UI removed */ }
         }
 
         #endregion
