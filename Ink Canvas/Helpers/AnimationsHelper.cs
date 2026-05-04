@@ -202,7 +202,7 @@ namespace Ink_Canvas.Helpers
             sb.Begin((FrameworkElement)element);
         }
 
-        public static void ShowWithSlideFromBottomAndFade(UIElement element, double duration = 0.15)
+        public static void ShowWithSlideFromBottomAndFade(UIElement element, double duration = 0.25)
         {
             try
             {
@@ -211,36 +211,39 @@ namespace Ink_Canvas.Helpers
 
                 if (element.Visibility == Visibility.Visible) return;
 
-                element.Visibility = Visibility.Visible;
-
                 var target = ResolveAnimationTarget(element);
+
+                // 初始化变换：设置起始位置（从下方20像素开始）
+                var initialTransform = new TranslateTransform(0, 20);
+                target.RenderTransform = initialTransform;
+                target.Opacity = 0;
+
+                element.Visibility = Visibility.Visible;
 
                 var sb = new Storyboard();
 
                 var fadeInAnimation = new DoubleAnimation
                 {
-                    From = 0.5,
+                    From = 0,
                     To = 1,
                     Duration = TimeSpan.FromSeconds(duration)
                 };
                 fadeInAnimation.EasingFunction = new CubicEase();
-
+                Storyboard.SetTarget(fadeInAnimation, target);
                 Storyboard.SetTargetProperty(fadeInAnimation, new PropertyPath(UIElement.OpacityProperty));
 
                 var slideAnimation = new DoubleAnimation
                 {
-                    From = 10,
+                    From = 20,
                     To = 0,
                     Duration = TimeSpan.FromSeconds(duration)
                 };
-                Storyboard.SetTargetProperty(slideAnimation, new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.Y)"));
-
                 slideAnimation.EasingFunction = new CubicEase();
+                Storyboard.SetTarget(slideAnimation, target);
+                Storyboard.SetTargetProperty(slideAnimation, new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.Y)"));
 
                 sb.Children.Add(fadeInAnimation);
                 sb.Children.Add(slideAnimation);
-
-                target.RenderTransform = new TranslateTransform();
 
                 sb.Begin((FrameworkElement)target);
             }
