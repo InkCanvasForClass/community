@@ -132,6 +132,7 @@ namespace Ink_Canvas
         #region Window Initialization
 
         private bool _toolsPopupEventsWired;
+        private bool _backgroundPaletteEventsWired;
 
         private void WireUpToolsPopupContentEvents()
         {
@@ -159,6 +160,22 @@ namespace Ink_Canvas
             content.SettingsBtn.ButtonMouseUp += SymbolIconSettings_Click;
             content.CloseFontIcon.MouseDown += Border_MouseDown;
             content.CloseFontIcon.MouseUp += CloseBordertools_MouseUp;
+        }
+
+        private void WireUpBackgroundPaletteEvents()
+        {
+            if (_backgroundPaletteEventsWired) return;
+            _backgroundPaletteEventsWired = true;
+
+            if (BackgroundPalettePopupContent == null) return;
+
+            var content = BackgroundPalettePopupContent;
+            content.WhiteboardBtn.MouseUp += WhiteboardModeBtn_MouseUp;
+            content.BlackboardBtn.MouseUp += BlackboardModeBtn_MouseUp;
+            content.RSlider.ValueChanged += BackgroundRSlider_ValueChanged;
+            content.GSlider.ValueChanged += BackgroundGSlider_ValueChanged;
+            content.BSlider.ValueChanged += BackgroundBSlider_ValueChanged;
+            content.ApplyBtn.Click += ApplyBackgroundColorBtn_Click;
         }
 
         private void WireUpBoardShapeDrawPopupContentEvents()
@@ -267,6 +284,7 @@ namespace Ink_Canvas
             WireUpToolsPopupContentEvents();
             WireUpShapeDrawPopupContentEvents();
             WireUpBoardShapeDrawPopupContentEvents();
+            WireUpBackgroundPaletteEvents();
             BoardBorderToolsPopup.CustomPopupPlacementCallback =
                 (popupSize, targetSize, offset) => new[]
                 {
