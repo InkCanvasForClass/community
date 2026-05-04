@@ -1362,6 +1362,7 @@ namespace Ink_Canvas
         /// - 对连续重启次数有保护：若重启计数达到或超过5次，会弹出提示并停止自动重启（重置重启计数并退出进程）。  
         /// - 在 OOBE（首次引导）展示期间不执行守护检查。  
         /// - 该方法会产生外部可观察的副作用：可能启动新进程并调用 Environment.Exit 终止当前进程，或显示消息框。
+        /// - 重启前会等待1秒以确保旧进程资源已释放，避免多实例竞争条件。
         /// </remarks>
         private void StartHeartbeatMonitor()
         {
@@ -1440,6 +1441,7 @@ namespace Ink_Canvas
                             try
                             {
                                 string exePath = Process.GetCurrentProcess().MainModule.FileName;
+                                Thread.Sleep(1000);
                                 Process.Start(exePath);
                             }
                             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }

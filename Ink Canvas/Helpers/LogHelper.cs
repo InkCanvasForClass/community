@@ -11,6 +11,7 @@ namespace Ink_Canvas.Helpers
         private static string LogsFolder = "Logs";
         private static string AppStartTime = DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss");
         private static readonly long MaxLogsFolderSizeBytes = 5 * 1024 * 1024; // 5MB
+        private static int _isWritingLog = 0;
 
         public static void NewLog(string str)
         {
@@ -36,7 +37,24 @@ namespace Ink_Canvas.Helpers
         /// <param name="logType">日志的类型/等级，用于在日志条目中标识（例如 Info、Error、Warning 等）。</param>
         public static void WriteLogToFile(string str, LogType logType = LogType.Info)
         {
-            // 检查日志是否启用
+            if (Interlocked.CompareExchange(ref _isWritingLog, 1, 0) != 0)
+            {
+                System.Diagnostics.Debug.WriteLine($"[LogHelper] Recursive logging detected: {str}");
+                return;
+            }
+
+            try
+            {
+                WriteLogToFileCore(str, logType);
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _isWritingLog, 0);
+            }
+        }
+
+        private static void WriteLogToFileCore(string str, LogType logType)
+        {
             if (MainWindow.Settings != null && MainWindow.Settings.Advanced != null && !MainWindow.Settings.Advanced.IsLogEnabled) return;
 
             string strLogType = logType.ToString();
