@@ -1191,7 +1191,7 @@ namespace Ink_Canvas
         {
             try
             {
-                await Task.Delay(1200);
+                await Task.Delay(400);
 
                 try
                 {
@@ -1262,7 +1262,6 @@ namespace Ink_Canvas
 
                 try
                 {
-                    await Task.Delay(1500);
                     DeviceIdentifier.RecordAppLaunch();
                     var systemVersion = DeviceIdentifier.GetSystemVersion();
                     if (!string.IsNullOrWhiteSpace(systemVersion))

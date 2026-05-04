@@ -605,16 +605,6 @@ namespace Ink_Canvas
                 Settings.Automation = new Automation();
             }
 
-            // auto align
-            if (IsInPptPresentationMode)
-            {
-                ViewboxFloatingBarMarginAnimation(60);
-            }
-            else
-            {
-                ViewboxFloatingBarMarginAnimation(100, true);
-            }
-
             RefreshFloatingBarScreenFollowState();
 
         }

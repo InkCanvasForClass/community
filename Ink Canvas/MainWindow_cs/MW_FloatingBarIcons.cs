@@ -1975,163 +1975,26 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="MarginFromEdge">边缘边距</param>
         /// <param name="PosXCaculatedWithTaskbarHeight">是否考虑任务栏高度计算位置</param>
+        /// <param name="skipAnimation">是否跳过动画直接定位（用于启动时快速恢复位置）</param>
         public async void ViewboxFloatingBarMarginAnimation(int MarginFromEdge,
-            bool PosXCaculatedWithTaskbarHeight = false)
+            bool PosXCaculatedWithTaskbarHeight = false, bool skipAnimation = false)
         {
-            // 新增：在白板模式下不执行浮动栏动画
             if (currentMode == 1)
             {
                 return;
             }
 
             if (MarginFromEdge == 60) MarginFromEdge = 55;
+
+            if (skipAnimation)
+            {
+                ViewboxFloatingBarMarginAnimationCore(MarginFromEdge, PosXCaculatedWithTaskbarHeight);
+                return;
+            }
+
             await Dispatcher.InvokeAsync(() =>
             {
-                if (!Topmost)
-                    MarginFromEdge = -60;
-                else
-                    ViewboxFloatingBar.Visibility = Visibility.Visible;
-                isViewboxFloatingBarMarginAnimationRunning = true;
-
-                double dpiScaleX = 1, dpiScaleY = 1;
-                var source = PresentationSource.FromVisual(this);
-                if (source != null)
-                {
-                    dpiScaleX = source.CompositionTarget.TransformToDevice.M11;
-                    dpiScaleY = source.CompositionTarget.TransformToDevice.M22;
-                }
-
-                var screen = GetFloatingBarTargetScreen();
-                double screenWidth, screenHeight;
-                double toolbarHeight;
-                if (Settings.Advanced.IsEnableAvoidFullScreenHelper && PosXCaculatedWithTaskbarHeight)
-                {
-                    screenWidth = screen.WorkingArea.Width / dpiScaleX;
-                    screenHeight = screen.WorkingArea.Height / dpiScaleY;
-                    toolbarHeight = 0;
-                }
-                else
-                {
-                    screenWidth = screen.Bounds.Width / dpiScaleX;
-                    screenHeight = screen.Bounds.Height / dpiScaleY;
-                    toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
-                }
-
-                // 使用更可靠的方法获取浮动栏宽度
-                double baseWidth = ViewboxFloatingBar.ActualWidth;
-
-                // 如果ActualWidth为0，尝试使用DesiredSize
-                if (baseWidth <= 0)
-                {
-                    baseWidth = ViewboxFloatingBar.DesiredSize.Width;
-                }
-
-                // 如果仍然为0，使用RenderSize
-                if (baseWidth <= 0)
-                {
-                    baseWidth = ViewboxFloatingBar.RenderSize.Width;
-                }
-
-                // 如果所有方法都失败，使用一个基于内容的估算值
-                if (baseWidth <= 0)
-                {
-                    // 根据浮动栏内容估算宽度
-                    baseWidth = 200; // 最小宽度
-                    LogHelper.WriteLogToFile($"浮动栏宽度无法获取，使用估算值: {baseWidth}");
-                }
-
-                double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
-
-                double baseHeight = ViewboxFloatingBar.ActualHeight;
-                if (baseHeight <= 0)
-                {
-                    baseHeight = ViewboxFloatingBar.DesiredSize.Height;
-                }
-                if (baseHeight <= 0)
-                {
-                    baseHeight = ViewboxFloatingBar.RenderSize.Height;
-                }
-                if (baseHeight <= 0)
-                {
-                    baseHeight = 58;
-                }
-                double floatingBarHeight = baseHeight * ViewboxFloatingBarScaleTransform.ScaleY;
-
-
-                // 如果快捷调色盘显示，确保有足够空间
-                if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
-                    (QuickColorPaletteSingleRowPanel != null && QuickColorPaletteSingleRowPanel.Visibility == Visibility.Visible))
-                {
-                    // 根据显示模式调整宽度
-                    if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
-                    {
-                        // 单行显示模式，自适应宽度，但需要足够空间显示6个颜色
-                        floatingBarWidth = Math.Max(floatingBarWidth, 120 * ViewboxFloatingBarScaleTransform.ScaleX);
-                    }
-                    else
-                    {
-                        // 双行显示模式，宽度较大
-                        floatingBarWidth = Math.Max(floatingBarWidth, 68 * ViewboxFloatingBarScaleTransform.ScaleX);
-                    }
-                }
-
-                pos.X = (screenWidth - floatingBarWidth) / 2;
-
-                if (!PosXCaculatedWithTaskbarHeight)
-                {
-                    if (toolbarHeight == 0)
-                    {
-                        pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY;
-                    }
-                    else
-                    {
-                        pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY - toolbarHeight;
-                    }
-                }
-                else if (PosXCaculatedWithTaskbarHeight)
-                {
-                    if (toolbarHeight == 0)
-                    {
-                        pos.Y = screenHeight - floatingBarHeight -
-                               3 * ViewboxFloatingBarScaleTransform.ScaleY;
-                    }
-                    else
-                    {
-                        pos.Y = screenHeight - floatingBarHeight -
-                               toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
-                    }
-                }
-
-                if (MarginFromEdge != -60)
-                {
-                    if (IsInPptPresentationMode)
-                    {
-                        if (pointPPT.X != -1 || pointPPT.Y != -1)
-                        {
-                            if (Math.Abs(pointPPT.Y - pos.Y) > 50)
-                                pos = pointPPT;
-                            else
-                                pointPPT = pos;
-                        }
-                    }
-                    else
-                    {
-                        if (pointDesktop.X != -1 || pointDesktop.Y != -1)
-                        {
-                            if (Math.Abs(pointDesktop.Y - pos.Y) > 50)
-                                pos = pointDesktop;
-                            else
-                                pointDesktop = pos;
-                        }
-                    }
-
-                    pos.X = NormalizeFloatingBarLeftForScreen(pos.X, floatingBarWidth, screenWidth);
-                    if (IsInPptPresentationMode)
-                        pointPPT = pos;
-                    else
-                        pointDesktop = pos;
-                }
-
+                ViewboxFloatingBarMarginAnimationCore(MarginFromEdge, PosXCaculatedWithTaskbarHeight);
                 var marginAnimation = new ThicknessAnimation
                 {
                     Duration = TimeSpan.FromSeconds(0.35),
@@ -2149,6 +2012,150 @@ namespace Ink_Canvas
                 ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
                 if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
             });
+        }
+
+        private void ViewboxFloatingBarMarginAnimationCore(int MarginFromEdge,
+            bool PosXCaculatedWithTaskbarHeight = false)
+        {
+            if (!Topmost)
+                MarginFromEdge = -60;
+            else
+                ViewboxFloatingBar.Visibility = Visibility.Visible;
+            isViewboxFloatingBarMarginAnimationRunning = true;
+
+            double dpiScaleX = 1, dpiScaleY = 1;
+            var source = PresentationSource.FromVisual(this);
+            if (source != null)
+            {
+                dpiScaleX = source.CompositionTarget.TransformToDevice.M11;
+                dpiScaleY = source.CompositionTarget.TransformToDevice.M22;
+            }
+
+            var screen = GetFloatingBarTargetScreen();
+            double screenWidth, screenHeight;
+            double toolbarHeight;
+            if (Settings.Advanced.IsEnableAvoidFullScreenHelper && PosXCaculatedWithTaskbarHeight)
+            {
+                screenWidth = screen.WorkingArea.Width / dpiScaleX;
+                screenHeight = screen.WorkingArea.Height / dpiScaleY;
+                toolbarHeight = 0;
+            }
+            else
+            {
+                screenWidth = screen.Bounds.Width / dpiScaleX;
+                screenHeight = screen.Bounds.Height / dpiScaleY;
+                toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
+            }
+
+            double baseWidth = ViewboxFloatingBar.ActualWidth;
+
+            if (baseWidth <= 0)
+            {
+                baseWidth = ViewboxFloatingBar.DesiredSize.Width;
+            }
+
+            if (baseWidth <= 0)
+            {
+                baseWidth = ViewboxFloatingBar.RenderSize.Width;
+            }
+
+            if (baseWidth <= 0)
+            {
+                baseWidth = 200;
+                LogHelper.WriteLogToFile($"浮动栏宽度无法获取，使用估算值: {baseWidth}");
+            }
+
+            double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
+
+            double baseHeight = ViewboxFloatingBar.ActualHeight;
+            if (baseHeight <= 0)
+            {
+                baseHeight = ViewboxFloatingBar.DesiredSize.Height;
+            }
+            if (baseHeight <= 0)
+            {
+                baseHeight = ViewboxFloatingBar.RenderSize.Height;
+            }
+            if (baseHeight <= 0)
+            {
+                baseHeight = 58;
+            }
+            double floatingBarHeight = baseHeight * ViewboxFloatingBarScaleTransform.ScaleY;
+
+
+            if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
+                (QuickColorPaletteSingleRowPanel != null && QuickColorPaletteSingleRowPanel.Visibility == Visibility.Visible))
+            {
+                if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
+                {
+                    floatingBarWidth = Math.Max(floatingBarWidth, 120 * ViewboxFloatingBarScaleTransform.ScaleX);
+                }
+                else
+                {
+                    floatingBarWidth = Math.Max(floatingBarWidth, 68 * ViewboxFloatingBarScaleTransform.ScaleX);
+                }
+            }
+
+            pos.X = (screenWidth - floatingBarWidth) / 2;
+
+            if (!PosXCaculatedWithTaskbarHeight)
+            {
+                if (toolbarHeight == 0)
+                {
+                    pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY;
+                }
+                else
+                {
+                    pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY - toolbarHeight;
+                }
+            }
+            else if (PosXCaculatedWithTaskbarHeight)
+            {
+                if (toolbarHeight == 0)
+                {
+                    pos.Y = screenHeight - floatingBarHeight -
+                           3 * ViewboxFloatingBarScaleTransform.ScaleY;
+                }
+                else
+                {
+                    pos.Y = screenHeight - floatingBarHeight -
+                           toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
+                }
+            }
+
+            if (MarginFromEdge != -60)
+            {
+                if (IsInPptPresentationMode)
+                {
+                    if (pointPPT.X != -1 || pointPPT.Y != -1)
+                    {
+                        if (Math.Abs(pointPPT.Y - pos.Y) > 50)
+                            pos = pointPPT;
+                        else
+                            pointPPT = pos;
+                    }
+                }
+                else
+                {
+                    if (pointDesktop.X != -1 || pointDesktop.Y != -1)
+                    {
+                        if (Math.Abs(pointDesktop.Y - pos.Y) > 50)
+                            pos = pointDesktop;
+                        else
+                            pointDesktop = pos;
+                    }
+                }
+
+                pos.X = NormalizeFloatingBarLeftForScreen(pos.X, floatingBarWidth, screenWidth);
+                if (IsInPptPresentationMode)
+                    pointPPT = pos;
+                else
+                    pointDesktop = pos;
+            }
+
+            ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, 0, -20);
+            isViewboxFloatingBarMarginAnimationRunning = false;
+            if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
         }
 
         /// <summary>

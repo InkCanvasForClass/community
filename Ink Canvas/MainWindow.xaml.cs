@@ -400,11 +400,6 @@ namespace Ink_Canvas
                 (workingArea.Width - floatingBarWidth) / 2,
                 workingArea.Bottom - 60 - workingArea.Top,
                 -2000, -200);
-            // 新增：只在屏幕模式下初始化浮动栏动画
-            if (currentMode == 0)
-            {
-                ViewboxFloatingBarMarginAnimation(100, true);
-            }
 
             try
             {
@@ -1461,6 +1456,12 @@ namespace Ink_Canvas
             InitializePopupManager();
             //加载设置
             LoadSettings(true);
+            // 启动时直接设置浮动栏位置，跳过动画
+            if (currentMode == 0)
+            {
+                if (IsInPptPresentationMode) ViewboxFloatingBarMarginAnimation(60, skipAnimation: true);
+                else ViewboxFloatingBarMarginAnimation(100, true, skipAnimation: true);
+            }
             ApplyLanguageFromSettings();
 
             // 启动时根据设置恢复调试控制台显示状态
@@ -2570,7 +2571,7 @@ namespace Ink_Canvas
 
         private async Task RunDeferredStartupPhaseBAsync()
         {
-            await Task.Delay(1200);
+            await Task.Delay(600);
 
             try
             {
@@ -2676,7 +2677,7 @@ namespace Ink_Canvas
             if (_pendingStartupAutoUpdateCheck && Settings.Startup?.IsAutoUpdate == true)
             {
                 _pendingStartupAutoUpdateCheck = false;
-                await Task.Delay(3000);
+                await Task.Delay(8000);
                 _ = Dispatcher.BeginInvoke(new Action(() =>
                 {
                     LogHelper.WriteLogToFile("AutoUpdate | Running deferred auto-update check at UI idle");
