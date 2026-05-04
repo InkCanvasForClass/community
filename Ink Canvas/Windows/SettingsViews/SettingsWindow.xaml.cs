@@ -4,7 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Navigation;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using Screen = System.Windows.Forms.Screen;
@@ -13,6 +16,32 @@ namespace Ink_Canvas.Windows.SettingsViews
 {
     public partial class SettingsWindow : Window
     {
+        private static readonly Dictionary<string, Type> _staticPageTypes = new Dictionary<string, Type>
+        {
+            { "HomePage", typeof(HomePage) },
+            { "StartupPage", typeof(StartupPage) },
+            { "PrivacyPage", typeof(PrivacyPage) },
+            { "SecurityPage", typeof(SecurityPage) },
+            { "WindowPage", typeof(WindowPage) },
+            { "AppearancePage", typeof(AppearancePage) },
+            { "HotkeyPage", typeof(HotkeyPage) },
+            { "ToolbarPage", typeof(ToolbarPage) },
+            { "UpdatePage", typeof(UpdatePage) },
+            { "ExperimentalPage", typeof(ExperimentalPage) },
+            { "AdvancedPage", typeof(AdvancedPage) },
+            { "StoragePage", typeof(StoragePage) },
+            { "AutomationPage", typeof(AutomationPage) },
+            { "PowerPointPage", typeof(PowerPointPage) },
+            { "RandomDrawPage", typeof(RandomDrawPage) },
+            { "CanvasPage", typeof(CanvasPage) },
+            { "InkRecognitionPage", typeof(InkRecognitionPage) },
+            { "DebugPage", typeof(DebugPage) },
+            { "FriendlyLinksPage", typeof(FriendlyLinksPage) },
+            { "AboutPage", typeof(AboutPage) },
+            { "Settings", typeof(SettingsPage) },
+            { "PluginPage", typeof(PluginPage) },
+            { "PluginSettingsPage", typeof(PluginSettingsPage) }
+        };
         private Dictionary<string, Type> _pageTypes;
         private readonly Dictionary<string, object> _pages = new Dictionary<string, object>();
         private readonly Dictionary<string, Ink_Canvas.Plugins.PluginInfo> _pluginPages = new Dictionary<string, Ink_Canvas.Plugins.PluginInfo>();
@@ -36,32 +65,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             ApplyCurrentTheme();
             global::Ink_Canvas.Helpers.WindowBackdropHelper.Apply(this, Helpers.SettingsManager.Settings);
 
-            _pageTypes = new Dictionary<string, Type>
-            {
-                { "HomePage", typeof(HomePage) },
-                { "StartupPage", typeof(StartupPage) },
-                { "PrivacyPage", typeof(PrivacyPage) },
-                { "SecurityPage", typeof(SecurityPage) },
-                { "WindowPage", typeof(WindowPage) },
-                { "AppearancePage", typeof(AppearancePage) },
-                { "HotkeyPage", typeof(HotkeyPage) },
-                { "ToolbarPage", typeof(ToolbarPage) },
-                { "UpdatePage", typeof(UpdatePage) },
-                { "ExperimentalPage", typeof(ExperimentalPage) },
-                { "AdvancedPage", typeof(AdvancedPage) },
-                { "StoragePage", typeof(StoragePage) },
-                { "AutomationPage", typeof(AutomationPage) },
-                { "PowerPointPage", typeof(PowerPointPage) },
-                { "RandomDrawPage", typeof(RandomDrawPage) },
-                { "CanvasPage", typeof(CanvasPage) },
-                { "InkRecognitionPage", typeof(InkRecognitionPage) },
-                { "DebugPage", typeof(DebugPage) },
-                { "FriendlyLinksPage", typeof(FriendlyLinksPage) },
-                { "AboutPage", typeof(AboutPage) },
-                { "Settings", typeof(SettingsPage) },
-                { "PluginPage", typeof(PluginPage) },
-                { "PluginSettingsPage", typeof(PluginSettingsPage) }
-            };
+            _pageTypes = new Dictionary<string, Type>(_staticPageTypes);
 
             UpdateAppTitleBarMargin();
 
@@ -72,12 +76,16 @@ namespace Ink_Canvas.Windows.SettingsViews
 
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    LoadPluginSettingsPages();
-                    UpdateUpdateBadgeVisibility();
                     NavigateToPage("HomePage");
                     NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems[0];
                     NavigationViewControl.Header = "首页";
-                }), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        LoadPluginSettingsPages();
+                        UpdateUpdateBadgeVisibility();
+                    }), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                }), System.Windows.Threading.DispatcherPriority.Normal);
 
                 _ = PreloadAllPagesAsync();
             };
@@ -329,7 +337,10 @@ namespace Ink_Canvas.Windows.SettingsViews
                     pluginSettingsPage.CurrentPlugin = pluginInfo;
                 }
 
+                rootFrame.NavigationUIVisibility = NavigationUIVisibility.Hidden;
+                rootFrame.RemoveBackEntry();
                 rootFrame.Navigate(cachedPage);
+                rootFrame.RemoveBackEntry();
             }
             catch (Exception ex)
             {
@@ -376,6 +387,36 @@ namespace Ink_Canvas.Windows.SettingsViews
                         NavigationViewControl.Header = targetItem.Content;
                     }
                     break;
+                }
+            }
+
+            ApplySmoothScrollingToPage(e.Content as FrameworkElement);
+        }
+
+        private void ApplySmoothScrollingToPage(FrameworkElement root)
+        {
+            if (root == null) return;
+
+            var queue = new Queue<DependencyObject>();
+            if (root is DependencyObject rootDep) queue.Enqueue(rootDep);
+
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+
+                if (current is ScrollViewer sv)
+                {
+                    sv.PanningMode = PanningMode.VerticalOnly;
+                    sv.PanningDeceleration = 0.001;
+                    sv.PanningRatio = 1;
+                    sv.ManipulationBoundaryFeedback += (s, e) => e.Handled = true;
+                }
+
+                var children = LogicalTreeHelper.GetChildren(current);
+                foreach (var child in children)
+                {
+                    if (child is DependencyObject childDep)
+                        queue.Enqueue(childDep);
                 }
             }
         }
