@@ -144,7 +144,7 @@
     <Grid x:Name="Main_Grid">
         <!--黑/白 板幕布-->
         <Grid Name="GridBackgroundCoverHolder">
-            <Grid Name="GridBackgroundCover" Visibility="Collapsed" Background="#1F1F1F">
+            <Grid Name="GridBackgroundCover" Visibility="Collapsed"  d:Visibility="Visible" Background="#1F1F1F">
                 <Image Name="ICCWaterMarkWhite" Source="Resources/Icons-png/icc-transparent.png" Width="648"
                        Height="648" Opacity="0.035" />
                 <Image Name="ICCWaterMarkDark" Source="Resources/Icons-png/icc-transparent-dark.png" Width="648"
@@ -152,7 +152,7 @@
             </Grid>
         </Grid>
         <Grid Name="GridTransparencyFakeBackground" Opacity="0" />
-        <Label Name="Label" Visibility="Collapsed" Foreground="Gray" Content="0" />
+        <Label Name="Label" Visibility="Collapsed"  d:Visibility="Visible" Foreground="Gray" Content="0" />
         <Grid Name="InkCanvasGridForInkReplay">
             <InkCanvas x:Name="inkCanvas" ForceCursor="True" UseCustomCursor="True"
                        TouchDown="Main_Grid_TouchDown"
@@ -186,7 +186,7 @@
                        RenderTransformOrigin="0,0" 
                        Width="0" 
                        Height="0"
-                       Visibility="Collapsed">
+                       Visibility="Collapsed"  d:Visibility="Visible">
                     <Image.RenderTransform>
                         <TranslateTransform x:Name="EraserFeedbackTranslateTransform"/>
                     </Image.RenderTransform>
@@ -198,18 +198,18 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Bottom"
                     Margin="0,0,0,200"
-                    Visibility="Collapsed"
+                    Visibility="Collapsed"  d:Visibility="Visible"
                     Panel.ZIndex="1001"/>
         </Grid>
         <Canvas IsHitTestVisible="False">
             <ikw:SimpleStackPanel Canvas.Left="25" Canvas.Top="15" Orientation="Vertical">
-                <TextBlock Text="{Binding nowTime}" Name="WaterMarkTime" Visibility="Collapsed" FontSize="30"
+                <TextBlock Text="{Binding nowTime}" Name="WaterMarkTime" Visibility="Collapsed"  d:Visibility="Visible" FontSize="30"
                            FontWeight="Bold" Foreground="White" Opacity="0.6" />
-                <TextBlock Text="{Binding nowDate}" Name="WaterMarkDate" Visibility="Collapsed" Margin="2,0,0,0"
+                <TextBlock Text="{Binding nowDate}" Name="WaterMarkDate" Visibility="Collapsed"  d:Visibility="Visible" Margin="2,0,0,0"
                            FontSize="16" Foreground="White" Opacity="0.45" />
             </ikw:SimpleStackPanel>
             <TextBlock Canvas.Right="25" Canvas.Top="15" Text="多一份理解，少一份抱怨" Name="BlackBoardWaterMark"
-                       Visibility="Collapsed" FontSize="24" FontWeight="Bold" Foreground="White" Opacity="0.5" />
+                       Visibility="Collapsed"  d:Visibility="Visible" FontSize="24" FontWeight="Bold" Foreground="White" Opacity="0.5" />
         </Canvas>
         <!--墨迹/图片选择器-->
         <Grid Visibility="{Binding ElementName=inkCanvas, Path=Visibility}">
@@ -224,7 +224,7 @@
                   TouchDown="GridInkCanvasSelectionCover_TouchDown"
                   TouchUp="GridInkCanvasSelectionCover_TouchUp"
                   TouchMove="GridInkCanvasSelectionCover_TouchMove"
-                  Background="#01FFFFFF" Opacity="0.01" Visibility="Collapsed" d:Visibility="Visible" Margin="1,0,-1,0">
+                  Background="#01FFFFFF" Opacity="0.01" Visibility="Collapsed"  d:Visibility="Visible" Margin="1,0,-1,0">
 
                 <!-- 选择框 -->
                 <Rectangle Name="SelectionRectangle"
@@ -232,13 +232,13 @@
                            StrokeThickness="2"
                            StrokeDashArray="5,5"
                            Fill="Transparent"
-                           Visibility="Collapsed"
+                           Visibility="Collapsed"  d:Visibility="Visible"
                            IsHitTestVisible="False"
                            HorizontalAlignment="Left"
                            VerticalAlignment="Top" />
 
                 <!-- 选择点容器 -->
-                <Canvas Name="SelectionHandlesCanvas" Visibility="Collapsed">
+                <Canvas Name="SelectionHandlesCanvas" Visibility="Collapsed"  d:Visibility="Visible">
                     <!-- 四个角选择点 -->
                     <Rectangle Name="TopLeftHandle" Width="8" Height="8" Fill="LightBlue" Stroke="Blue" StrokeThickness="1" 
                                Cursor="SizeNWSE" MouseDown="SelectionHandle_MouseDown" MouseMove="SelectionHandle_MouseMove" MouseUp="SelectionHandle_MouseUp" 
@@ -384,7 +384,7 @@
                     HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,0"
                     CornerRadius="5" Height="80"
                     Background="{DynamicResource FloatBarBackground}"
-                    Visibility="Collapsed"
+                    Visibility="Collapsed"  d:Visibility="Visible"
                     BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}">
                 <Viewbox Margin="0,-2.5">
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10" Height="60">
@@ -496,7 +496,7 @@
                     BorderBrush="#33FFFFFF"
                     BorderThickness="1"
                     SnapsToDevicePixels="True"
-                    Visibility="Collapsed"
+                    Visibility="Collapsed"  d:Visibility="Visible"
                     Panel.ZIndex="1001"
                     ui:ThemeManager.RequestedTheme="Dark">
                 <Border.Effect>
@@ -589,7 +589,7 @@
 
             <!-- 图片选择覆盖层（缩放/移动/旋转） -->
             <localControls:ImageSelectionOverlay x:Name="ImageSelectionOverlay"
-                                            Visibility="Collapsed"
+                                            Visibility="Collapsed"  d:Visibility="Visible"
                                             Panel.ZIndex="1000" />
 
         </Grid>
@@ -763,7 +763,7 @@
                     <Viewbox.LayoutTransform>
                         <ScaleTransform x:Name="ViewboxBlackboardCenterSideScaleTransform" ScaleX="1" ScaleY="1" />
                     </Viewbox.LayoutTransform>
-                    <Grid x:Name="BlackboardCenterSide" Visibility="Collapsed" d:Visibility="Visible" Margin="0,0,0,3" Height="50"
+                    <Grid x:Name="BlackboardCenterSide" Visibility="Collapsed"  d:Visibility="Visible" Margin="0,0,0,3" Height="50"
                           HorizontalAlignment="Center" VerticalAlignment="Bottom">
                         <ikw:SimpleStackPanel Orientation="Horizontal">
                             <Border CornerRadius="5,5,5,5" Background="{DynamicResource BoardFloatBarBackground}" Margin="0,0,5,0">
@@ -877,7 +877,7 @@
                 <Viewbox x:Name="ViewboxBlackboardRightSide" Margin="3,0,0,0" Height="55"
                          HorizontalAlignment="Right" VerticalAlignment="Bottom"
                          Stretch="None">
-                    <Grid Name="BlackboardRightSide" Visibility="Collapsed" d:Visibility="Visible" Margin="0,0,0,3" Height="50"
+                    <Grid Name="BlackboardRightSide" Visibility="Collapsed"  d:Visibility="Visible" Margin="0,0,0,3" Height="50"
                           HorizontalAlignment="Center" VerticalAlignment="Bottom">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="5">
                             <controls:BoardToolbarButton x:Name="BtnWhiteBoardAddBoard"
@@ -981,7 +981,7 @@
                                      VerticalAlignment="Bottom"
                                      HorizontalAlignment="Right"
                                      Height="50" Margin="10" d:Margin="10,10,10,60"
-                                     Visibility="Collapsed" d:Visibility="Visible">
+                                     Visibility="Collapsed"  d:Visibility="Visible">
                     <Button Name="BtnWhiteBoardAdd"
                             Width="50" Height="48" FontSize="26" Click="BtnWhiteBoardAdd_Click"
                             Foreground="{DynamicResource FloatBarForeground}"
@@ -1065,7 +1065,7 @@
             </Grid>
         </Grid>
         <!--通知弹窗-->
-        <Grid Name="GridNotifications" Margin="0,110" Visibility="Collapsed" HorizontalAlignment="Center"
+        <Grid Name="GridNotifications" Margin="0,110" Visibility="Collapsed"  d:Visibility="Visible" HorizontalAlignment="Center"
               VerticalAlignment="Bottom">
             <ui:InfoBar x:Name="NotificationInfoBar"
                         IsOpen="True"
@@ -1074,19 +1074,19 @@
                         Title="提醒"
                         MaxWidth="900"
                         Message="{Binding Text, ElementName=TextBlockNotice}" />
-            <TextBlock x:Name="TextBlockNotice" Visibility="Collapsed"
+            <TextBlock x:Name="TextBlockNotice" Visibility="Collapsed"  d:Visibility="Visible"
                        Text="{i18n:I18n Key=Notification_TestText}" />
         </Grid>
         <!--// PPT 工具栏 //-->
         <Grid>
             <Grid Visibility="Visible">
                 <localControls:PptNavBar x:Name="LeftBottomPanelForPPTNavigation"
-                                         Visibility="Collapsed"
+                                         Visibility="Collapsed"  d:Visibility="Visible"
                                          Direction="LeftBottom"
                                          Margin="6,0,0,6"
                                          HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
                 <localControls:PptNavBar x:Name="RightBottomPanelForPPTNavigation"
-                                         Visibility="Collapsed"
+                                         Visibility="Collapsed"  d:Visibility="Visible"
                                          Direction="RightBottom"
                                          Margin="0,0,6,6"
                                          HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
@@ -1094,25 +1094,26 @@
         </Grid>
         <!--// PPT 侧边翻页按钮 //-->
         <!-- 隐藏的全局页码源:旧代码与 PPTUIManager 通过 PPTBtnPageNow/Total 设置文字 -->
-        <ikw:SimpleStackPanel Visibility="Collapsed">
+        <ikw:SimpleStackPanel Visibility="Collapsed"  d:Visibility="Visible">
             <TextBlock Name="PPTBtnPageNow" Text="?"/>
             <TextBlock Name="PPTBtnPageTotal" Text="/ ?"/>
         </ikw:SimpleStackPanel>
-        <!--左右侧边翻页按钮-->
+        <!--PPT侧边翻页按钮//左-->
         <localControls:PptNavBar x:Name="LeftSidePanelForPPTNavigation"
-                                 Visibility="Collapsed" d:Visibility="Visible"
+                                 Visibility="Collapsed"  d:Visibility="Visible"
                                  Direction="LeftSide"
                                  Margin="6,0,0,0"
                                  HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <!--PPT侧边翻页按钮//右-->
         <localControls:PptNavBar x:Name="RightSidePanelForPPTNavigation"
-                                 Visibility="Collapsed" d:Visibility="Visible"
+                                 Visibility="Collapsed"  d:Visibility="Visible"
                                  Direction="RightSide"
                                  Margin="0,0,6,0"
                                  HorizontalAlignment="Right" VerticalAlignment="Center"/>
         <!--浮动工具栏-->
         <Grid Name="FloatingbarUIForInkReplay">
             <Viewbox Name="ViewboxFloatingBar" Margin="150,250,0,0" Cursor="Arrow"
-                     Visibility="Collapsed" d:Visibility="Visible"
+                     Visibility="Collapsed"  d:Visibility="Visible"
                      HorizontalAlignment="Left" Height="58" VerticalAlignment="Top"
                      Stretch="None"
                      UseLayoutRounding="True" SnapsToDevicePixels="True"
@@ -1161,7 +1162,7 @@
                                 </Popup>
                                 <!-- 快捷调色盘 - 双行显示模式 -->
                                 <ikw:SimpleStackPanel Name="QuickColorPalettePanel" 
-                                                     Visibility="Collapsed" d:Visibility="Visible"
+                                                     Visibility="Collapsed"  d:Visibility="Visible"
                                                      Orientation="Vertical" 
                                                      HorizontalAlignment="Center" 
                                                      Margin="4,0,4,0"
@@ -1196,7 +1197,7 @@
                                 </ikw:SimpleStackPanel>
                                 <!-- 快捷调色盘 - 单行显示模式 -->
                                 <ikw:SimpleStackPanel Name="QuickColorPaletteSingleRowPanel" 
-                                                     Visibility="Collapsed" d:Visibility="Visible"
+                                                     Visibility="Collapsed"  d:Visibility="Visible"
                                                      Orientation="Horizontal" 
                                                      HorizontalAlignment="Center" 
                                                      Margin="4,0,4,0"
@@ -1287,7 +1288,7 @@
                             MouseDown="Border_MouseDown" MouseUp="ImagePPTControlEnd_MouseUp"
                             Background="{DynamicResource FloatBarBackground}" CornerRadius="5" BorderThickness="1"
                             BorderBrush="{DynamicResource FloatBarBorderBrush}"
-                            Visibility="Collapsed">
+                            Visibility="Collapsed"  d:Visibility="Visible">
                         <ikw:SimpleStackPanel Background="Transparent" Orientation="Vertical"
                                              HorizontalAlignment="Center"
                                              Width="28" Margin="0,0">
@@ -1301,14 +1302,14 @@
                 </ikw:SimpleStackPanel>
             </Viewbox>
         </Grid>
-        <Grid Name="GridForFloatingBarDraging" Background="#01000000" Visibility="Collapsed"
+        <Grid Name="GridForFloatingBarDraging" Background="#01000000" Visibility="Collapsed"  d:Visibility="Visible"
               MouseMove="SymbolIconEmoji_MouseMove" MouseUp="SymbolIconEmoji_MouseUp" />
         <!--墨迹重播-->
         <Grid>
-            <InkCanvas Name="InkCanvasForInkReplay" MouseDown="InkCanvasForInkReplay_MouseDown" Visibility="Collapsed"
+            <InkCanvas Name="InkCanvasForInkReplay" MouseDown="InkCanvasForInkReplay_MouseDown" Visibility="Collapsed"  d:Visibility="Visible"
                        EditingMode="None" Background="Transparent" />
             <Border Name="BorderInkReplayToolBox" Width="386" Height="48" HorizontalAlignment="Center"
-                    Visibility="Collapsed"
+                    Visibility="Collapsed"  d:Visibility="Visible"
                     VerticalAlignment="Bottom" Margin="0,0,0,16" Background="{DynamicResource FloatBarBackground}" CornerRadius="5"
                     BorderBrush="#a1a1aa" BorderThickness="1">
                 <ikw:SimpleStackPanel Orientation="Horizontal">
@@ -1337,7 +1338,7 @@
                         <Border Name="InkReplayPlayPauseBorder" MouseDown="InkReplayPlayPauseBorder_OnMouseDown"
                                 MouseUp="InkReplayPlayPauseBorder_OnMouseUp" CornerRadius="16" Height="32" Width="32">
                             <Grid>
-                                <Image Name="InkReplayPlayButtonImage" Visibility="Collapsed" Width="18" Height="18"
+                                <Image Name="InkReplayPlayButtonImage" Visibility="Collapsed"  d:Visibility="Visible" Width="18" Height="18"
                                        Margin="2,0,0,0">
                                     <Image.Source>
                                         <DrawingImage>
@@ -1461,12 +1462,12 @@
                 </ikw:SimpleStackPanel>
             </Border>
         </Grid>
-        <!--侧边栏-->
+        <!--侧边栏//左-->
         <localControls:SidePanelToggle x:Name="LeftSidePanel" MouseUp="LeftUnFoldButtonDisplayQuickPanel_MouseUp"
                                        Visibility="Visible" Margin="-60,0,0,-150"
                                        HorizontalAlignment="Left" VerticalAlignment="Center" />
-        <!--收纳下的快捷面板-->
-        <Viewbox Width="50" Visibility="Collapsed" Name="LeftUnFoldButtonQuickPanel" Margin="-1,0,0,-150" d:Visibility="Visible" d:Margin="-1,0,0,500"
+        <!--收纳下的快捷面板//左-->
+        <Viewbox Width="50" Visibility="Collapsed"  d:Visibility="Visible" Name="LeftUnFoldButtonQuickPanel" Margin="-1,0,0,-150" d:Margin="-1,0,0,500"
                  HorizontalAlignment="Left" VerticalAlignment="Center">
             <Border ClipToBounds="True" Visibility="Visible" CornerRadius="0,6,6,0" Background="{DynamicResource FloatBarBackground}" Opacity="1"
                     BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}" d:BorderBrush="Red" d:Background="Green" Width="32">
@@ -1475,18 +1476,19 @@
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelPeopleMoneyIcon}" Label="{i18n:I18n Key=QuickPanel_RandomDraw}" ButtonMouseUp="SymbolIconRand_MouseUp" />
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelTimerIcon}" Label="{i18n:I18n Key=QuickPanel_Timer}" ButtonMouseUp="ImageCountdownTimer_MouseUp" />
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelBlackboardIcon}" Label="{i18n:I18n Key=QuickPanel_Whiteboard}" ButtonMouseUp="ImageBlackboard_MouseUp" />
-                    <controls:QuickPanelButton x:Name="BtnExitPptFromSidebarLeft" IconSource="{DynamicResource QuickPanelEndSlideshowIcon}" Label="{i18n:I18n Key=QuickPanel_ExitShow}" LabelFontSize="7" Visibility="Collapsed" ButtonMouseUp="ExitPPTSlideShow_MouseUp" />
+                    <controls:QuickPanelButton x:Name="BtnExitPptFromSidebarLeft" IconSource="{DynamicResource QuickPanelEndSlideshowIcon}" Label="{i18n:I18n Key=QuickPanel_ExitShow}" LabelFontSize="7" Visibility="Collapsed"  d:Visibility="Visible" ButtonMouseUp="ExitPPTSlideShow_MouseUp" />
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelEyeIcon}" Label="{i18n:I18n Key=QuickPanel_Show}" ButtonMouseUp="UnFoldFloatingBar_MouseUp" />
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelChevronLeftIcon}" ButtonMouseUp="HideQuickPanel_MouseUp" />
                 </ikw:SimpleStackPanel>
             </Border>
         </Viewbox>
-        <!--侧边栏-->
+        <!--侧边栏//右-->
         <localControls:SidePanelToggle x:Name="RightSidePanel" MouseUp="RightUnFoldButtonDisplayQuickPanel_MouseUp"
                                        Visibility="{Binding ElementName=LeftSidePanel, Path=Visibility}"
                                        Margin="0,0,-60,-150" IsRightSide="True"
                                        HorizontalAlignment="Right" VerticalAlignment="Center" />
-        <Viewbox Width="50" Visibility="Collapsed" Name="RightUnFoldButtonQuickPanel" Margin="0,0,-1,-150" d:Visibility="Visible" d:Margin="0,0,-1,500"
+        <!--收纳下的快捷面板//右-->
+        <Viewbox Width="50" Visibility="Collapsed"  d:Visibility="Visible" Name="RightUnFoldButtonQuickPanel" Margin="0,0,-1,-150" d:Margin="0,0,-1,500"
                  HorizontalAlignment="Right" VerticalAlignment="Center">
             <Border ClipToBounds="True" Visibility="Visible" CornerRadius="6,0,0,6" Background="{DynamicResource FloatBarBackground}" Opacity="1"
                     BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}" d:BorderBrush="Red" d:Background="Green" Width="32">
@@ -1495,7 +1497,7 @@
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelPeopleMoneyIcon}" Label="{i18n:I18n Key=QuickPanel_RandomDraw}" ButtonMouseUp="SymbolIconRand_MouseUp" />
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelTimerIcon}" Label="{i18n:I18n Key=QuickPanel_Timer}" ButtonMouseUp="ImageCountdownTimer_MouseUp" />
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelBlackboardIcon}" Label="{i18n:I18n Key=QuickPanel_Whiteboard}" ButtonMouseUp="ImageBlackboard_MouseUp" />
-                    <controls:QuickPanelButton x:Name="BtnExitPptFromSidebarRight" IconSource="{DynamicResource QuickPanelEndSlideshowIcon}" Label="{i18n:I18n Key=QuickPanel_ExitShow}" LabelFontSize="7" Visibility="Collapsed" ButtonMouseUp="ExitPPTSlideShow_MouseUp" />
+                    <controls:QuickPanelButton x:Name="BtnExitPptFromSidebarRight" IconSource="{DynamicResource QuickPanelEndSlideshowIcon}" Label="{i18n:I18n Key=QuickPanel_ExitShow}" LabelFontSize="7" Visibility="Collapsed"  d:Visibility="Visible" ButtonMouseUp="ExitPPTSlideShow_MouseUp" />
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelEyeIcon}" Label="{i18n:I18n Key=QuickPanel_Show}" ButtonMouseUp="UnFoldFloatingBar_MouseUp" />
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelChevronLeftIcon}" ButtonMouseUp="HideQuickPanel_MouseUp" RenderTransformOrigin="0.5,0.5">
                         <controls:QuickPanelButton.RenderTransform>
@@ -1514,7 +1516,7 @@
             Background="{DynamicResource FloatBarBackground}"
             BorderBrush="{DynamicResource FloatBarBorderBrush}"
             BorderThickness="0,0,1,0"
-            Visibility="Collapsed"
+            Visibility="Collapsed"  d:Visibility="Visible"
             Panel.ZIndex="996">
             <Grid>
                 <Grid.RowDefinitions>
@@ -1699,7 +1701,7 @@
         </Border>
         <!-- 包装层：为 TimerControl 提供 Visibility/Margin 控制与鼠标拖拽手柄，代码中 7 文件 40+ 处引用，非死代码 -->
         <Border x:Name="TimerContainer" 
-                Visibility="Collapsed"
+                Visibility="Collapsed"  d:Visibility="Visible"
                 Panel.ZIndex="998"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
@@ -1709,7 +1711,7 @@
         </Border>
         <!-- 包装层：计时器最小化浮窗，同步主容器位置后显示/拖拽，非死代码 -->
         <Border x:Name="MinimizedTimerContainer" 
-                Visibility="Collapsed"
+                Visibility="Collapsed"  d:Visibility="Visible"
                 Panel.ZIndex="997"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
@@ -1720,7 +1722,7 @@
         </Border>
         <!-- 包装层：PPT 时间胶囊容器，承载 ScaleTransform 与屏幕四角定位，非死代码 -->
         <Border x:Name="PPTTimeCapsuleContainer"
-                Visibility="Collapsed"
+                Visibility="Collapsed"  d:Visibility="Visible"
                 Panel.ZIndex="999"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Top"
@@ -1733,7 +1735,7 @@
         </Border>
         <!-- 包装层：PPT 放映快捷面板，代码中 4 处控制 Visibility/位置，非死代码 -->
         <Border x:Name="PPTQuickPanelContainer" 
-                Visibility="Collapsed"
+                Visibility="Collapsed"  d:Visibility="Visible"
                 Panel.ZIndex="999"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Top"
