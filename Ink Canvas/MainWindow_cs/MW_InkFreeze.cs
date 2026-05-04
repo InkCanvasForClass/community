@@ -159,11 +159,25 @@ namespace Ink_Canvas
 
         internal async void ToggleInkFreeze_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            int pageIndex = GetCurrentFreezePageIndex();
-            if (IsPageFrozen(pageIndex))
-                await UnfreezePageAsync(pageIndex);
-            else
-                FreezePage(pageIndex);
+            try
+            {
+                int pageIndex = GetCurrentFreezePageIndex();
+                if (IsPageFrozen(pageIndex))
+                {
+                    await UnfreezePageAsync(pageIndex);
+                }
+                else
+                {
+                    FreezePage(pageIndex);
+
+                    // 直接调用 CursorIcon_Click 来确保完整切换到鼠标模式
+                    CursorIcon_Click(null, null);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"浮动栏冻结按钮点击失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
         }
 
         internal void AttachInkFreezeBtn(ToolbarImageButton btn)
