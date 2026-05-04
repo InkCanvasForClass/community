@@ -43,17 +43,24 @@ namespace Ink_Canvas
         /// </summary>
         private void TwoFingerGestureBorder_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TwoFingerGestureBorder.Visibility == Visibility.Visible)
+            if (TwoFingerGestureBorder.IsOpen || BoardTwoFingerGestureBorder.IsOpen)
             {
-                AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
-                AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
+                AnimationsHelper.HidePopupWithSlideAndFade(TwoFingerGestureBorder);
+                AnimationsHelper.HidePopupWithSlideAndFade(BoardTwoFingerGestureBorder);
             }
             else
             {
                 HideSubPanels();
-                UpdateTwoFingerGestureBorderPosition();
-                AnimationsHelper.ShowWithSlideFromBottomAndFade(TwoFingerGestureBorder);
-                AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardTwoFingerGestureBorder);
+                if (currentMode == 0)
+                {
+                    AnimationsHelper.ShowPopupWithSlideAndFade(TwoFingerGestureBorder);
+                    _popupManager?.BringToFront(TwoFingerGestureBorder);
+                }
+                else
+                {
+                    AnimationsHelper.ShowPopupWithSlideAndFade(BoardTwoFingerGestureBorder);
+                    _popupManager?.BringToFront(BoardTwoFingerGestureBorder);
+                }
             }
         }
 
@@ -261,6 +268,14 @@ namespace Ink_Canvas
                 _popupManager.RegisterPopup(BoardBorderToolsPopup);
                 _popupManager.RegisterPopup(BorderDrawShape);
                 _popupManager.RegisterPopup(BoardBorderDrawShape);
+                _popupManager.RegisterPopup(PenPalette);
+                _popupManager.RegisterPopup(BoardPenPalette);
+                _popupManager.RegisterPopup(EraserSizePanel);
+                _popupManager.RegisterPopup(BoardEraserSizePanel);
+                _popupManager.RegisterPopup(BoardImageOptionsPanel);
+                _popupManager.RegisterPopup(TwoFingerGestureBorder);
+                _popupManager.RegisterPopup(BoardTwoFingerGestureBorder);
+                _popupManager.RegisterPopup(BackgroundPalette);
 
                 _popupManager.Initialize(this);
 
@@ -350,23 +365,20 @@ namespace Ink_Canvas
         {
             BorderTools.IsOpen = false;
             BoardBorderToolsPopup.IsOpen = false;
-            PenPalette.Visibility = Visibility.Collapsed;
-            BoardPenPalette.Visibility = Visibility.Collapsed;
-            BoardEraserSizePanel.Visibility = Visibility.Collapsed;
-            EraserSizePanel.Visibility = Visibility.Collapsed;
+            PenPalette.IsOpen = false;
+            BoardPenPalette.IsOpen = false;
+            BoardEraserSizePanel.IsOpen = false;
+            EraserSizePanel.IsOpen = false;
             BoardBorderLeftPageListView.Visibility = Visibility.Collapsed;
             BoardBorderRightPageListView.Visibility = Visibility.Collapsed;
-            BoardImageOptionsPanel.Visibility = Visibility.Collapsed;
-            TwoFingerGestureBorder.Visibility = Visibility.Collapsed;
-            BoardTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+            BoardImageOptionsPanel.IsOpen = false;
+            TwoFingerGestureBorder.IsOpen = false;
+            BoardTwoFingerGestureBorder.IsOpen = false;
             // 添加隐藏图形工具的二级菜单面板
             BorderDrawShape.IsOpen = false;
             BoardBorderDrawShape.IsOpen = false;
 
-            if (LogicalTreeHelper.FindLogicalNode(this, "BackgroundPalette") is UIElement bgPalette)
-            {
-                bgPalette.Visibility = Visibility.Collapsed;
-            }
+            BackgroundPalette.IsOpen = false;
         }
 
         /// <summary>
@@ -434,27 +446,23 @@ namespace Ink_Canvas
 
             AnimationsHelper.HidePopupWithSlideAndFade(BorderTools);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
-            AnimationsHelper.HideWithSlideAndFade(PenPalette);
-            AnimationsHelper.HideWithSlideAndFade(BoardPenPalette);
-            AnimationsHelper.HideWithSlideAndFade(BoardEraserSizePanel);
-            AnimationsHelper.HideWithSlideAndFade(EraserSizePanel);
+            AnimationsHelper.HidePopupWithSlideAndFade(PenPalette);
+            AnimationsHelper.HidePopupWithSlideAndFade(BoardPenPalette);
+            AnimationsHelper.HidePopupWithSlideAndFade(BoardEraserSizePanel);
+            AnimationsHelper.HidePopupWithSlideAndFade(EraserSizePanel);
             AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderDrawShape);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
-            AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
-            AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
-            AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
+            AnimationsHelper.HidePopupWithSlideAndFade(BoardImageOptionsPanel);
+            AnimationsHelper.HidePopupWithSlideAndFade(TwoFingerGestureBorder);
+            AnimationsHelper.HidePopupWithSlideAndFade(BoardTwoFingerGestureBorder);
 
-            // 隐藏背景设置面板
-            if (LogicalTreeHelper.FindLogicalNode(this, "BackgroundPalette") is UIElement bgPalette)
-            {
-                AnimationsHelper.HideWithSlideAndFade(bgPalette);
-            }
+            AnimationsHelper.HidePopupWithSlideAndFade(BackgroundPalette);
 
-            AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
-            AnimationsHelper.HideWithSlideAndFade(EraserSizePanel);
-            AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
+            AnimationsHelper.HidePopupWithSlideAndFade(TwoFingerGestureBorder);
+            AnimationsHelper.HidePopupWithSlideAndFade(EraserSizePanel);
+            AnimationsHelper.HidePopupWithSlideAndFade(BoardTwoFingerGestureBorder);
             if (ToggleSwitchDrawShapeBorderAutoHide.IsOn)
             {
                 AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
@@ -2853,17 +2861,18 @@ namespace Ink_Canvas
                         }
                     }
 
-                    if (PenPalette.Visibility == Visibility.Visible)
+                    if (PenPalette.IsOpen)
                     {
-                        AnimationsHelper.HideWithSlideAndFade(PenPalette);
-                        AnimationsHelper.HideWithSlideAndFade(BoardPenPalette);
+                        AnimationsHelper.HidePopupWithSlideAndFade(PenPalette);
+                        AnimationsHelper.HidePopupWithSlideAndFade(BoardPenPalette);
                     }
                     else
                     {
                         HideSubPanels();
-                        UpdatePenPalettePosition();
-                        AnimationsHelper.ShowWithSlideFromBottomAndFade(PenPalette);
-                        AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardPenPalette);
+                        AnimationsHelper.ShowPopupWithSlideAndFade(PenPalette);
+                        _popupManager?.BringToFront(PenPalette);
+                        AnimationsHelper.ShowPopupWithSlideAndFade(BoardPenPalette);
+                        _popupManager?.BringToFront(BoardPenPalette);
                     }
                 }
                 else
@@ -2971,19 +2980,24 @@ namespace Ink_Canvas
 
             if (isAlreadyEraser)
             {
-                // 已是橡皮状态，再次点击才弹出/收起面板
-                if (EraserSizePanel.Visibility == Visibility.Collapsed)
+                if (EraserSizePanel.IsOpen == false && BoardEraserSizePanel?.IsOpen != true)
                 {
-                    UpdateEraserSizePanelPosition();
-                    AnimationsHelper.ShowWithSlideFromBottomAndFade(EraserSizePanel);
-                    if (BoardEraserSizePanel != null)
-                        AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardEraserSizePanel);
+                    if (currentMode == 0)
+                    {
+                        AnimationsHelper.ShowPopupWithSlideAndFade(EraserSizePanel);
+                        _popupManager?.BringToFront(EraserSizePanel);
+                    }
+                    else
+                    {
+                        AnimationsHelper.ShowPopupWithSlideAndFade(BoardEraserSizePanel);
+                        _popupManager?.BringToFront(BoardEraserSizePanel);
+                    }
                 }
                 else
                 {
-                    AnimationsHelper.HideWithSlideAndFade(EraserSizePanel);
+                    AnimationsHelper.HidePopupWithSlideAndFade(EraserSizePanel);
                     if (BoardEraserSizePanel != null)
-                        AnimationsHelper.HideWithSlideAndFade(BoardEraserSizePanel);
+                        AnimationsHelper.HidePopupWithSlideAndFade(BoardEraserSizePanel);
                 }
             }
         }
@@ -3024,18 +3038,24 @@ namespace Ink_Canvas
 
             if (isAlreadyEraser)
             {
-                // 已是橡皮状态，再次点击才弹出/收起面板
-                if (BoardEraserSizePanel != null && BoardEraserSizePanel.Visibility == Visibility.Collapsed)
+                if (BoardEraserSizePanel?.IsOpen != true && EraserSizePanel.IsOpen == false)
                 {
-                    UpdateEraserSizePanelPosition();
-                    AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardEraserSizePanel);
-                    AnimationsHelper.ShowWithSlideFromBottomAndFade(EraserSizePanel);
+                    if (currentMode == 0)
+                    {
+                        AnimationsHelper.ShowPopupWithSlideAndFade(EraserSizePanel);
+                        _popupManager?.BringToFront(EraserSizePanel);
+                    }
+                    else
+                    {
+                        AnimationsHelper.ShowPopupWithSlideAndFade(BoardEraserSizePanel);
+                        _popupManager?.BringToFront(BoardEraserSizePanel);
+                    }
                 }
                 else
                 {
                     if (BoardEraserSizePanel != null)
-                        AnimationsHelper.HideWithSlideAndFade(BoardEraserSizePanel);
-                    AnimationsHelper.HideWithSlideAndFade(EraserSizePanel);
+                        AnimationsHelper.HidePopupWithSlideAndFade(BoardEraserSizePanel);
+                    AnimationsHelper.HidePopupWithSlideAndFade(EraserSizePanel);
                 }
             }
         }
@@ -4101,32 +4121,33 @@ namespace Ink_Canvas
         {
             if (TryBlockFrozenPageMutation("插入图片")) return;
             // Check if the image options panel is currently visible
-            bool isImagePanelVisible = BoardImageOptionsPanel.Visibility == Visibility.Visible;
+            bool isImagePanelVisible = BoardImageOptionsPanel.IsOpen;
 
             // Toggle the image options panel
             if (isImagePanelVisible)
             {
                 // Panel was visible, so hide it with animation
-                AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
+                AnimationsHelper.HidePopupWithSlideAndFade(BoardImageOptionsPanel);
             }
             else
             {
                 // Panel was hidden, so hide other panels and show this one
                 HideSubPanels();
-                AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardImageOptionsPanel);
+                AnimationsHelper.ShowPopupWithSlideAndFade(BoardImageOptionsPanel);
+                _popupManager?.BringToFront(BoardImageOptionsPanel);
             }
         }
 
         private void CloseImageOptionsPanel_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
+            AnimationsHelper.HidePopupWithSlideAndFade(BoardImageOptionsPanel);
         }
 
         private async void ImageOptionScreenshot_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (TryBlockFrozenPageMutation("插入截图")) return;
             // Hide the options panel
-            AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
+            AnimationsHelper.HidePopupWithSlideAndFade(BoardImageOptionsPanel);
 
             // Wait a bit for the panel to hide
             await Task.Delay(100);

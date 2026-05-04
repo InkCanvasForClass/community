@@ -31,11 +31,12 @@ namespace Ink_Canvas.Controls
         public GeometryButton DrawParabolaWithFocalPointBtn => ImageDrawParabolaWithFocalPoint;
         public GeometryButton DrawParabola2Btn => ImageDrawParabola2;
 
-        public FontIcon CloseFontIcon => TitleBar?.CloseFontIcon;
+        public FontIcon CloseFontIcon => Shell?.CloseFontIcon;
 
         public ShapeDrawPopupContent()
         {
             InitializeComponent();
+            Shell.InnerContent = InnerContentHost.Content;
         }
     }
 }

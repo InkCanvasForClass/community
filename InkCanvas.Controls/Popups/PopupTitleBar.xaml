@@ -11,7 +11,7 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
-        <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="10"
+        <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="10" d:Text="test"
                    Text="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}"
                    Foreground="{DynamicResource ToolsPopupTitleForeground}" FontWeight="Bold"/>
         <ui:FontIcon x:Name="CloseIcon" Grid.Column="1"
