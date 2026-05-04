@@ -709,11 +709,11 @@ namespace Ink_Canvas
             // 执行翻页
             if (_isLongPressNext)
             {
-                BtnPPTSlidesDown_Click(BtnPPTSlidesDown, null);
+                BtnPPTSlidesDown_Click(null, null);
             }
             else
             {
-                BtnPPTSlidesUp_Click(BtnPPTSlidesUp, null);
+                BtnPPTSlidesUp_Click(null, null);
             }
         }
         #endregion
@@ -1160,13 +1160,13 @@ namespace Ink_Canvas
                         !Settings.Automation.IsAutoFoldInPPTSlideShow &&
                         GridTransparencyFakeBackground.Background == Brushes.Transparent && !isFloatingBarFolded)
                     {
-                        BtnHideInkCanvas_Click(BtnHideInkCanvas, null);
+                        BtnHideInkCanvas_Click(null, null);
                     }
 
                     if (currentMode != 0)
                     {
                         ImageBlackboard_MouseUp(null, null);
-                        BtnHideInkCanvas_Click(BtnHideInkCanvas, null);
+                        BtnHideInkCanvas_Click(null, null);
                     }
 
                     BorderFloatingBarMainControls.Visibility = Visibility.Visible;
@@ -1504,9 +1504,9 @@ namespace Ink_Canvas
                         isPresentationHaveBlackSpace = false;
 
                         // 恢复主题
-                        if (BtnSwitchTheme.Content.ToString() == "深色")
+                        if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Light)
                         {
-                            BtnExit.Foreground = Brushes.Black;
+                            { /* Old UI removed */ }
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
                         }
 
@@ -1555,7 +1555,7 @@ namespace Ink_Canvas
                         }
 
                         if (GridTransparencyFakeBackground.Background != Brushes.Transparent)
-                            BtnHideInkCanvas_Click(BtnHideInkCanvas, null);
+                            BtnHideInkCanvas_Click(null, null);
                         SetCurrentToolMode(InkCanvasEditingMode.None);
 
                         UpdateCurrentToolMode("cursor");
@@ -1792,7 +1792,7 @@ namespace Ink_Canvas
         {
             try
             {
-                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) return;
+                if (IsInPptPresentationMode) return;
 
                 bool hasSlideTimings = false;
                 if (pres?.Slides != null)
@@ -2414,8 +2414,8 @@ namespace Ink_Canvas
             foreach (var bar in bars)
             {
                 if (bar == null) continue;
-                bar.PreviousClick += (s, e) => BtnPPTSlidesUp_Click(BtnPPTSlidesUp, null);
-                bar.NextClick += (s, e) => BtnPPTSlidesDown_Click(BtnPPTSlidesDown, null);
+                bar.PreviousClick += (s, e) => BtnPPTSlidesUp_Click(null, null);
+                bar.NextClick += (s, e) => BtnPPTSlidesDown_Click(null, null);
                 bar.PreviousPressedDown += (s, e) =>
                 {
                     if (Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn)
@@ -2637,7 +2637,7 @@ namespace Ink_Canvas
             }).Start();
         }
 
-        private async void BtnPPTSlideShowEnd_Click(object sender, RoutedEventArgs e)
+        public async Task ExitPptPresentation()
         {
             try
             {
@@ -2771,7 +2771,7 @@ namespace Ink_Canvas
         private void GridPPTControlPrevious_MouseUp(object sender, MouseButtonEventArgs e)
         {
             StopLongPressDetection();
-            BtnPPTSlidesUp_Click(BtnPPTSlidesUp, null);
+            BtnPPTSlidesUp_Click(null, null);
         }
 
 
@@ -2786,7 +2786,7 @@ namespace Ink_Canvas
         private void GridPPTControlNext_MouseUp(object sender, MouseButtonEventArgs e)
         {
             StopLongPressDetection();
-            BtnPPTSlidesDown_Click(BtnPPTSlidesDown, null);
+            BtnPPTSlidesDown_Click(null, null);
         }
 
         /// <summary>
@@ -2799,7 +2799,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void ImagePPTControlEnd_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            BtnPPTSlideShowEnd_Click(BtnPPTSlideShowEnd, null);
+            ExitPptPresentation();
         }
     }
 }

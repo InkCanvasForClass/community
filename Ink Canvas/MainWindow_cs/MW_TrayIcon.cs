@@ -355,7 +355,7 @@ namespace Ink_Canvas
             if (mainWin != null && mainWin.IsLoaded)
             {
                 IsAppExitByUser = true;
-                mainWin.BtnExit_Click(null, null);
+                mainWin.ExitApplication(null, null);
             }
         }
 
@@ -466,7 +466,7 @@ namespace Ink_Canvas
                 var isInPPTPresentationMode = false;
                 Dispatcher.Invoke(() =>
                 {
-                    isInPPTPresentationMode = mainWin.BtnPPTSlideShowEnd.Visibility == Visibility.Visible;
+                    isInPPTPresentationMode = mainWin.IsInPptPresentationMode;
                 });
                 if (!mainWin.isFloatingBarFolded)
                 {

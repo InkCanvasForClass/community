@@ -17,7 +17,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         {
             host.Window.AttachSymbolIconRedo(view);
             view.SetBinding(System.Windows.UIElement.IsEnabledProperty,
-                new System.Windows.Data.Binding("IsEnabled") { ElementName = "BtnRedo" });
+                new System.Windows.Data.Binding("IsRedoEnabled") { Source = host.Window });
         }
     }
 }

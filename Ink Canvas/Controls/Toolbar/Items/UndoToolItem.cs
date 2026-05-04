@@ -17,7 +17,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         {
             host.Window.AttachSymbolIconUndo(view);
             view.SetBinding(System.Windows.UIElement.IsEnabledProperty,
-                new System.Windows.Data.Binding("IsEnabled") { ElementName = "BtnUndo" });
+                new System.Windows.Data.Binding("IsUndoEnabled") { Source = host.Window });
         }
     }
 }

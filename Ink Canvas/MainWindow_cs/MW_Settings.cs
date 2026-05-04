@@ -383,7 +383,7 @@ namespace Ink_Canvas
         //private void ToggleSwitchShowBottomPPTNavigationPanel_OnToggled(object sender, RoutedEventArgs e) {
         //    if (!isLoaded) return;
         //    Settings.PowerPointSettings.IsShowBottomPPTNavigationPanel = ToggleSwitchShowBottomPPTNavigationPanel.IsOn;
-        //    if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+        //    if (IsInPptPresentationMode)
         //        //BottomViewboxPPTSidesControl.Visibility = Settings.PowerPointSettings.IsShowBottomPPTNavigationPanel
         //        //    ? Visibility.Visible
         //        //    : Visibility.Collapsed;
@@ -394,7 +394,7 @@ namespace Ink_Canvas
         //private void ToggleSwitchShowSidePPTNavigationPanel_OnToggled(object sender, RoutedEventArgs e) {
         //    if (!isLoaded) return;
         //    Settings.PowerPointSettings.IsShowSidePPTNavigationPanel = ToggleSwitchShowSidePPTNavigationPanel.IsOn;
-        //    if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) {
+        //    if (IsInPptPresentationMode) {
         //        LeftSidePanelForPPTNavigation.Visibility = Settings.PowerPointSettings.IsShowSidePPTNavigationPanel
         //            ? Visibility.Visible
         //            : Visibility.Collapsed;
@@ -418,7 +418,7 @@ namespace Ink_Canvas
         /// </summary>
         public void UpdatePPTUIManagerSettings()
         {
-            if (_pptUIManager != null && BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+            if (_pptUIManager != null && IsInPptPresentationMode)
             {
                 _pptUIManager.PPTButtonsDisplayOption = Settings.PowerPointSettings.PPTButtonsDisplayOption;
                 _pptUIManager.PPTSButtonsOption = Settings.PowerPointSettings.PPTSButtonsOption;
@@ -1166,7 +1166,7 @@ namespace Ink_Canvas
                     // 如果快捷调色盘的可见性发生变化，重新计算浮动栏位置
                     if (wasVisible != shouldShow && !isFloatingBarFolded)
                     {
-                        if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                        if (IsInPptPresentationMode)
                             ViewboxFloatingBarMarginAnimation(60);
                         else
                         {
@@ -1236,7 +1236,7 @@ namespace Ink_Canvas
                         // 重新计算浮动栏位置，因为按钮可见性变化会影响浮动栏宽度
                         if (currentMode == 0) // 只在屏幕模式下重新计算浮动栏位置
                         {
-                            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                            if (IsInPptPresentationMode)
                             {
                                 ViewboxFloatingBarMarginAnimation(60);
                             }

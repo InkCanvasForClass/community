@@ -304,7 +304,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 // 应用实际缩放值（基础 1.5 × 用户设置）
                 mw.ViewboxFloatingBarScaleTransform.ScaleX = actualScale;
                 mw.ViewboxFloatingBarScaleTransform.ScaleY = actualScale;
-                if (mw.BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                if (mw.IsInPptPresentationMode)
                     mw.ViewboxFloatingBarMarginAnimation(60);
                 else
                     mw.ViewboxFloatingBarMarginAnimation(100, true);

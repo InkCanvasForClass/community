@@ -187,7 +187,7 @@ namespace Ink_Canvas
                 UpdateCurrentToolMode("shape");
 
                 isLongPressSelected = true;
-                if (isSingleFingerDragMode) BtnFingerDragMode_Click(BtnFingerDragMode, null);
+                if (isSingleFingerDragMode) ToggleFingerDragMode(null, null);
             }
         }
 

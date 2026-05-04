@@ -53,7 +53,7 @@ namespace Ink_Canvas
                     SyncPdfPageSidebarWithCanvas();
                 }
 
-                BtnHideInkCanvas_Click(BtnHideInkCanvas, null);
+                BtnHideInkCanvas_Click(null, null);
             }
 
             var strokes = inkCanvas.GetSelectedStrokes();

@@ -49,8 +49,8 @@ namespace Ink_Canvas
             BlackBoardWaterMark.Visibility = Visibility.Collapsed;
             ICCWaterMarkDark.Visibility = Visibility.Collapsed;
             ICCWaterMarkWhite.Visibility = Visibility.Collapsed;
-            BtnSwitch_Click(BtnSwitch, null);
-            BtnExit.Foreground = Brushes.White;
+            SwitchBackground(null, null);
+            { /* Old UI removed */ }
             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
             new Thread(() =>
             {
@@ -364,7 +364,7 @@ namespace Ink_Canvas
                 LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
                 RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             });
-            if (sender == null || StackPanelPPTControls.Visibility == Visibility.Visible)
+            if (sender == null || ArePptControlsVisible)
                 unfoldFloatingBarByUser = false;
             else
                 unfoldFloatingBarByUser = true;
@@ -394,8 +394,8 @@ namespace Ink_Canvas
                 }
 
                 // 只有在PPT放映模式下且页数有效时才显示翻页按钮
-                if (StackPanelPPTControls.Visibility == Visibility.Visible &&
-                    BtnPPTSlideShowEnd.Visibility == Visibility.Visible &&
+                if (ArePptControlsVisible &&
+                    IsInPptPresentationMode &&
                     PPTManager?.IsInSlideShow == true &&
                     PPTManager?.SlidesCount > 0)
                 {
@@ -431,7 +431,7 @@ namespace Ink_Canvas
                     ViewboxFloatingBar.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
                     ViewboxFloatingBar.Arrange(new Rect(ViewboxFloatingBar.DesiredSize));
 
-                    if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                    if (IsInPptPresentationMode)
                         ViewboxFloatingBarMarginAnimation(60);
                     else
                         ViewboxFloatingBarMarginAnimation(100, true);

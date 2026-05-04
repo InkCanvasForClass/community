@@ -33,7 +33,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void BtnExit_Click(object sender, RoutedEventArgs e)
         {
             var mainWindow = Application.Current.MainWindow as MainWindow;
-            mainWindow?.BtnExit_Click(sender, e);
+            mainWindow?.ExitApplication(sender, e);
         }
     }
 }
