@@ -58,34 +58,6 @@
                                 Click="BtnSetOrChangePassword_Click" />
                     </ui:SettingsCard>
 
-                    <controls:LabeledSettingsCard x:Name="CardRequirePasswordOnExit"
-                            Header="退出软件需要密码"
-                            Description="关闭 InkCanvasForClass 时进行密码验证"
-                            Icon="{x:Static ui:SegoeFluentIcons.SignOut}"
-                            SwitchName="ToggleSwitchRequirePasswordOnExit"
-                            Toggled="ToggleSwitchRequirePasswordOnExit_Toggled" />
-
-                    <controls:LabeledSettingsCard x:Name="CardRequirePasswordOnEnterSettings"
-                            Header="进入设置需要密码"
-                            Description="打开设置面板/新设置窗口时进行验证"
-                            Icon="{x:Static ui:SegoeFluentIcons.Settings}"
-                            SwitchName="ToggleSwitchRequirePasswordOnEnterSettings"
-                            Toggled="ToggleSwitchRequirePasswordOnEnterSettings_Toggled" />
-
-                    <controls:LabeledSettingsCard x:Name="CardRequirePasswordOnResetConfig"
-                            Header="重置配置需要密码"
-                            Description="重置 Settings.json 前进行二次验证"
-                            Icon="{x:Static ui:SegoeFluentIcons.Refresh}"
-                            SwitchName="ToggleSwitchRequirePasswordOnResetConfig"
-                            Toggled="ToggleSwitchRequirePasswordOnResetConfig_Toggled" />
-
-                    <controls:LabeledSettingsCard x:Name="CardRequirePasswordOnModifyOrClearNameList"
-                            Header="修改/清空点名名单需要密码"
-                            Description="对点名名单进行修改或清空前进行验证"
-                            Icon="{x:Static ui:SegoeFluentIcons.People}"
-                            SwitchName="ToggleSwitchRequirePasswordOnModifyOrClearNameList"
-                            Toggled="ToggleSwitchRequirePasswordOnModifyOrClearNameList_Toggled" />
-
                     <controls:LabeledSettingsCard x:Name="CardTotpEnabled"
                             Header="启用 TOTP 验证"
                             Description="可用于冻结笔迹解冻等二次验证"
@@ -109,6 +81,34 @@
                                     Click="BtnGenerateTotpSecret_Click" />
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
+
+                    <controls:LabeledSettingsCard x:Name="CardRequirePasswordOnExit"
+                            Header="退出软件需要验证"
+                            Description="关闭 InkCanvasForClass 时进行密码验证"
+                            Icon="{x:Static ui:SegoeFluentIcons.SignOut}"
+                            SwitchName="ToggleSwitchRequirePasswordOnExit"
+                            Toggled="ToggleSwitchRequirePasswordOnExit_Toggled" />
+
+                    <controls:LabeledSettingsCard x:Name="CardRequirePasswordOnEnterSettings"
+                            Header="进入设置需要验证"
+                            Description="打开设置面板/新设置窗口时进行验证"
+                            Icon="{x:Static ui:SegoeFluentIcons.Settings}"
+                            SwitchName="ToggleSwitchRequirePasswordOnEnterSettings"
+                            Toggled="ToggleSwitchRequirePasswordOnEnterSettings_Toggled" />
+
+                    <controls:LabeledSettingsCard x:Name="CardRequirePasswordOnResetConfig"
+                            Header="重置配置需要验证"
+                            Description="重置 Settings.json 前进行二次验证"
+                            Icon="{x:Static ui:SegoeFluentIcons.Refresh}"
+                            SwitchName="ToggleSwitchRequirePasswordOnResetConfig"
+                            Toggled="ToggleSwitchRequirePasswordOnResetConfig_Toggled" />
+
+                    <controls:LabeledSettingsCard x:Name="CardRequirePasswordOnModifyOrClearNameList"
+                            Header="修改/清空点名名单需要验证"
+                            Description="对点名名单进行修改或清空前进行验证"
+                            Icon="{x:Static ui:SegoeFluentIcons.People}"
+                            SwitchName="ToggleSwitchRequirePasswordOnModifyOrClearNameList"
+                            Toggled="ToggleSwitchRequirePasswordOnModifyOrClearNameList_Toggled" />
 
                     <!-- 进程保护 -->
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"

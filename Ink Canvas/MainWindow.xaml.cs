@@ -1837,7 +1837,7 @@ namespace Ink_Canvas
                     {
                         try
                         {
-                            bool ok = await SecurityManager.PromptAndVerifyAsync(Settings, this, "退出验证", "请输入安全密码以退出软件。");
+                            bool ok = await SecurityManager.PromptAndVerifyPasswordOrTotpAsync(Settings, this, "退出验证", "请输入安全密码或 TOTP 验证码以退出软件。");
                             if (!ok)
                             {
                                 _forceCloseFromExitOrRestartButton = false;

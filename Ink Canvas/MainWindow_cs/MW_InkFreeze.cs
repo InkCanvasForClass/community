@@ -248,7 +248,7 @@ namespace Ink_Canvas
                         HideSubPanels("cursor", true);
                         await Task.Delay(50);
 
-                        if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                        if (IsInPptPresentationMode)
                             ViewboxFloatingBarMarginAnimation(60);
                         else
                             ViewboxFloatingBarMarginAnimation(100, true);

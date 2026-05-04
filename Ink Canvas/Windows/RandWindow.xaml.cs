@@ -349,11 +349,11 @@ namespace Ink_Canvas
         {
             if (SecurityManager.IsPasswordRequiredForModifyOrClearNameList(MainWindow.Settings))
             {
-                bool ok = await SecurityManager.PromptAndVerifyAsync(
+                bool ok = await SecurityManager.PromptAndVerifyPasswordOrTotpAsync(
                     MainWindow.Settings,
                     this,
                     "名单修改验证",
-                    "请输入安全密码以修改点名名单。");
+                    "请输入安全密码或 TOTP 验证码以修改点名名单。");
                 if (!ok) return;
             }
 
