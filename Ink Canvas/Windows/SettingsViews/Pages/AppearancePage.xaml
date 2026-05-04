@@ -133,13 +133,70 @@
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AlignCenter}" />
                         </ui:SettingsCard.HeaderIcon>
-                        <ComboBox x:Name="ComboBoxCustomSplashTextPosition"
-                                  SelectedIndex="1"
-                                  SelectionChanged="ComboBoxCustomSplashTextPosition_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_TextPosition_BottomLeft}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_TextPosition_BottomCenter}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_TextPosition_BottomRight}" />
-                        </ComboBox>
+                        <Border CornerRadius="4"
+                                BorderThickness="1"
+                                BorderBrush="#30808080"
+                                Background="Transparent"
+                                Width="110"
+                                Height="32">
+                            <Grid ClipToBounds="True">
+                                <!-- 滑动选择指示器 -->
+                                <Border x:Name="SelectionIndicator"
+                                        CornerRadius="3"
+                                        Background="#200078D7"
+                                        BorderBrush="#800078D7"
+                                        BorderThickness="1"
+                                        Width="34"
+                                        Height="28"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
+                                        Margin="1,1,0,1"
+                                        Panel.ZIndex="1">
+                                    <Border.RenderTransform>
+                                        <TranslateTransform x:Name="IndicatorTranslateTransform" X="0"/>
+                                    </Border.RenderTransform>
+                                </Border>
+                                <!-- 按钮层 -->
+                                <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Border x:Name="BorderTextAlignLeft"
+                                            Width="36" Height="30"
+                                            PreviewMouseLeftButtonDown="BorderTextAlign_Click"
+                                            Tag="0"
+                                            Cursor="Hand"
+                                            Panel.ZIndex="2">
+                                        <Canvas>
+                                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AlignLeft}" FontSize="14"
+                                                         Canvas.Left="11" Canvas.Top="8"
+                                                         Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                                        </Canvas>
+                                    </Border>
+                                    <Border x:Name="BorderTextAlignCenter"
+                                            Width="36" Height="30"
+                                            PreviewMouseLeftButtonDown="BorderTextAlign_Click"
+                                            Tag="1"
+                                            Cursor="Hand"
+                                            Panel.ZIndex="2">
+                                        <Canvas>
+                                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AlignCenter}" FontSize="14"
+                                                         Canvas.Left="11" Canvas.Top="8"
+                                                         Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                                        </Canvas>
+                                    </Border>
+                                    <Border x:Name="BorderTextAlignRight"
+                                            Width="36" Height="30"
+                                            PreviewMouseLeftButtonDown="BorderTextAlign_Click"
+                                            Tag="2"
+                                            Cursor="Hand"
+                                            Panel.ZIndex="2">
+                                        <Canvas>
+                                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AlignRight}" FontSize="14"
+                                                         Canvas.Left="11" Canvas.Top="8"
+                                                         Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                                        </Canvas>
+                                    </Border>
+                                </ikw:SimpleStackPanel>
+                            </Grid>
+                        </Border>
                     </ui:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"

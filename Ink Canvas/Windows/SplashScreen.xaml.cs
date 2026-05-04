@@ -384,8 +384,8 @@ namespace Ink_Canvas.Windows
                 if (splashStyle == 7)
                 {
                     actualStyle = GetActualStyle(0); // 使用随机
-                    string imageName = GetImageNameByStyle(0);
-                    return $"pack://application:,,,/Resources/Startup-animation/{imageName}";
+                    string randomImageName = GetImageNameByStyle(0);
+                    return $"pack://application:,,,/Resources/Startup-animation/{randomImageName}";
                 }
 
                 actualStyle = GetActualStyle(splashStyle);

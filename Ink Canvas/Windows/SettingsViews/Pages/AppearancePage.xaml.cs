@@ -7,6 +7,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using ContentDialog = iNKORE.UI.WPF.Modern.Controls.ContentDialog;
@@ -91,7 +92,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 TextBlockCustomSplashPath.ToolTip = null;
             }
 
-            ComboBoxCustomSplashTextPosition.SelectedIndex = settings.Appearance.CustomSplashTextPosition;
+            UpdateTextAlignButtonAppearance(settings.Appearance.CustomSplashTextPosition);
 
             if (settings.Appearance.FloatingBarImg >= ComboBoxFloatingBarImg.Items.Count)
                 settings.Appearance.FloatingBarImg = 0;
@@ -266,11 +267,52 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardCustomSplashTextPosition.Visibility = isCustomSelected ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        private void ComboBoxCustomSplashTextPosition_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void BorderTextAlign_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.CustomSplashTextPosition = ComboBoxCustomSplashTextPosition.SelectedIndex;
-            SettingsManager.SaveSettingsToFile();
+
+            if (sender is Border border && border.Tag != null)
+            {
+                int selectedIndex = int.Parse(border.Tag.ToString());
+                SettingsManager.Settings.Appearance.CustomSplashTextPosition = selectedIndex;
+                SettingsManager.SaveSettingsToFile();
+                UpdateTextAlignButtonAppearance(selectedIndex);
+            }
+        }
+
+        private void UpdateTextAlignButtonAppearance(int selectedIndex)
+        {
+            AnimateIndicatorToPosition(selectedIndex);
+        }
+
+        private void AnimateIndicatorToPosition(int position)
+        {
+            // 外容器 110px，内边距 1px，每个按钮 36px
+            // 左: X=0, 中: X=36, 右: X=72
+            double targetX = position * 36;
+
+            var animation = new DoubleAnimation
+            {
+                To = targetX,
+                Duration = TimeSpan.FromMilliseconds(200),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+
+            IndicatorTranslateTransform.BeginAnimation(TranslateTransform.XProperty, animation);
+
+            // 跟随系统主题颜色
+            var isDarkTheme = SettingsManager.Settings.Appearance.Theme == 1;
+
+            if (isDarkTheme)
+            {
+                SelectionIndicator.Background = new SolidColorBrush(Color.FromArgb(40, 0, 120, 215));
+                SelectionIndicator.BorderBrush = new SolidColorBrush(Color.FromArgb(150, 0, 120, 215));
+            }
+            else
+            {
+                SelectionIndicator.Background = new SolidColorBrush(Color.FromArgb(25, 0, 120, 215));
+                SelectionIndicator.BorderBrush = new SolidColorBrush(Color.FromArgb(120, 0, 120, 215));
+            }
         }
 
         private void ButtonBrowseCustomSplash_Click(object sender, RoutedEventArgs e)
