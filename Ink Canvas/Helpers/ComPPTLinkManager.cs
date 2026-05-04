@@ -60,7 +60,7 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 停止对 PowerPoint 的监控，断开当前连接并停止触发相关事件。
         /// </summary>
-        public void StopMonitoring() => _inner.StopMonitoring();
+        public void StopMonitoring(bool isShutdown = false) => _inner.StopMonitoring(isShutdown);
 
         /// <summary>
         /// 强制断开当前 COM PPT 连接并停止对其监控，同时写入事件日志。

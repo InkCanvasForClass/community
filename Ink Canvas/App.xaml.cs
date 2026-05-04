@@ -1609,6 +1609,17 @@ namespace Ink_Canvas
             }
             catch { }
 
+            try
+            {
+                if (mutex != null)
+                {
+                    mutex.ReleaseMutex();
+                    mutex.Dispose();
+                    mutex = null;
+                }
+            }
+            catch { }
+
             // 卸载所有插件
             try
             {
