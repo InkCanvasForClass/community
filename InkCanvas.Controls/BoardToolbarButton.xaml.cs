@@ -86,6 +86,8 @@ namespace Ink_Canvas.Controls
             set => SetValue(IconBrushProperty, value);
         }
 
+
+
         public event MouseButtonEventHandler ButtonMouseDown;
         public event MouseButtonEventHandler ButtonMouseUp;
 

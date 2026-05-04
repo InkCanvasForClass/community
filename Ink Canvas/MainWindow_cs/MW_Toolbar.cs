@@ -20,6 +20,7 @@ namespace Ink_Canvas
         internal ToolbarImageButton ToolsFloatingBarBtn { get; private set; }
         internal ToolbarImageButton Fold_Icon { get; private set; }
         internal ToolbarImageButton Freeze_Icon { get; private set; }
+        internal BoardToolbarButton BoardInkFreezeBtn { get; private set; }
 
         internal Panel FloatingBarRootPanel => BorderFloatingBarMoveControls?.Parent as Panel;
         internal iNKORE.UI.WPF.Modern.Controls.ToggleSwitch ToggleSwitchDrawShapeBorderAutoHide { get; } =

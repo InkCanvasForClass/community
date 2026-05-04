@@ -1317,6 +1317,7 @@ namespace Ink_Canvas
             // 工具栏插件化按钮先注入到容器，确保 LoadSettings 内部对 Cursor_Icon / Pen_Icon 等的访问非空。
             // Settings.Toolbar 此时尚为默认值（全部可见），与旧 XAML 行为一致。
             InitializeToolbarPlugins();
+            AttachBoardInkFreezeBtn(BoardInkFreeze);
             // 初始化 Popup 管理器（置顶 + 拖动跟随）
             InitializePopupManager();
             //加载设置

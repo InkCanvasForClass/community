@@ -172,26 +172,80 @@ namespace Ink_Canvas
             UpdateInkFreezeButtonState();
         }
 
+        internal void AttachBoardInkFreezeBtn(BoardToolbarButton btn)
+        {
+            BoardInkFreezeBtn = btn;
+            UpdateInkFreezeButtonState();
+        }
+
         private void UpdateInkFreezeButtonState()
         {
             try
             {
-                if (Freeze_Icon == null) return;
+                if (Freeze_Icon != null)
+                {
+                    bool isFrozen = IsCurrentPageFrozen;
+                    Freeze_Icon.Label = Strings.GetString(isFrozen ? "FloatingBar_Unfreeze" : "FloatingBar_Freeze")
+                                        ?? (isFrozen ? "解冻" : "冻结");
+                    Freeze_Icon.Icon.Geometry = Geometry.Parse(isFrozen
+                        ? XamlGraphicsIconGeometries.UnfreezeIconGeometry
+                        : XamlGraphicsIconGeometries.FreezeIconGeometry);
 
-                bool isFrozen = IsCurrentPageFrozen;
-                Freeze_Icon.Label = Strings.GetString(isFrozen ? "FloatingBar_Unfreeze" : "FloatingBar_Freeze")
-                                    ?? (isFrozen ? "解冻" : "冻结");
-                Freeze_Icon.Icon.Geometry = Geometry.Parse(isFrozen
-                    ? XamlGraphicsIconGeometries.UnfreezeIconGeometry
-                    : XamlGraphicsIconGeometries.FreezeIconGeometry);
+                    var foreground = FloatBarForegroundColor;
+                    var frozenColor = IsCurrentThemeDark() ? Color.FromRgb(102, 204, 255) : Color.FromRgb(30, 58, 138);
+                    Freeze_Icon.Icon.Brush = new SolidColorBrush(isFrozen ? frozenColor : foreground);
+                }
 
-                var foreground = FloatBarForegroundColor;
-                var frozenColor = IsCurrentThemeDark() ? Color.FromRgb(102, 204, 255) : Color.FromRgb(30, 58, 138);
-                Freeze_Icon.Icon.Brush = new SolidColorBrush(isFrozen ? frozenColor : foreground);
+                if (BoardInkFreezeBtn != null)
+                {
+                    int pageIndex = GetCurrentFreezePageIndex();
+                    bool isFrozen = IsPageFrozen(pageIndex);
+                    BoardInkFreezeBtn.Label = Strings.GetString(isFrozen ? "FloatingBar_Unfreeze" : "FloatingBar_Freeze")
+                                              ?? (isFrozen ? "解冻" : "冻结");
+                    BoardInkFreezeBtn.IconGeometry = isFrozen
+                        ? XamlGraphicsIconGeometries.UnfreezeIconGeometry
+                        : XamlGraphicsIconGeometries.FreezeIconGeometry;
+
+                    var frozenColor = IsCurrentThemeDark() ? Color.FromRgb(102, 204, 255) : Color.FromRgb(30, 58, 138);
+                    BoardInkFreezeBtn.IconBrush = new SolidColorBrush(isFrozen ? frozenColor : FloatBarForegroundColor);
+                }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"更新冻结按钮状态失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        internal async void BoardInkFreeze_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                int pageIndex = GetCurrentFreezePageIndex();
+                if (IsPageFrozen(pageIndex))
+                {
+                    await UnfreezePageAsync(pageIndex);
+                }
+                else
+                {
+                    FreezePage(pageIndex);
+
+                    if (!isFloatingBarFolded)
+                    {
+                        HideSubPanels("cursor", true);
+                        await Task.Delay(50);
+
+                        if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                            ViewboxFloatingBarMarginAnimation(60);
+                        else
+                            ViewboxFloatingBarMarginAnimation(100, true);
+                    }
+
+                    UpdateInkFreezeButtonState();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"白板冻结按钮点击失败: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
 
@@ -215,6 +269,9 @@ namespace Ink_Canvas
                 _globalHotkeyManager?.UpdateHotkeyStateForToolMode(true);
                 UpdateCurrentToolMode("cursor");
                 SetFloatingBarHighlightPosition("cursor");
+
+                if (currentMode == 0 && StackPanelCanvasControls != null)
+                    StackPanelCanvasControls.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex)
             {

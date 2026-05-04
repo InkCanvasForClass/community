@@ -236,6 +236,7 @@ namespace Ink_Canvas
             ToolsFloatingBarBtn.Icon.Brush = brush;
             Fold_Icon.Icon.Brush = brush;
             if (Freeze_Icon != null) Freeze_Icon.Icon.Brush = brush;
+            if (BoardInkFreezeBtn != null) BoardInkFreezeBtn.IconBrush = brush;
         }
 
         private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
