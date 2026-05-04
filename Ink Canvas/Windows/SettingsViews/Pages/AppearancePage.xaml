@@ -99,6 +99,46 @@
                             <ComboBoxItem Content="{i18n:I18n Key=Theme_Splash_Autumn}" />
                             <ComboBoxItem Content="{i18n:I18n Key=Theme_Splash_Winter}" />
                             <ComboBoxItem Content="{i18n:I18n Key=Theme_Splash_Horse}" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Theme_Splash_Custom}" />
+                        </ComboBox>
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard x:Name="CardCustomSplashImage" Header="{i18n:I18n Key=Theme_CustomSplashImage}"
+                                     Description="{i18n:I18n Key=Theme_CustomSplashImage_Desc}"
+                                     Visibility="Collapsed">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Photo}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock x:Name="TextBlockCustomSplashPath"
+                                       Text="{i18n:I18n Key=Theme_CustomSplash_NotSelected}"
+                                       VerticalAlignment="Center"
+                                       MaxWidth="200"
+                                       TextTrimming="CharacterEllipsis"
+                                       Foreground="Gray"/>
+                            <Button x:Name="ButtonBrowseCustomSplash"
+                                    Content="{i18n:I18n Key=Theme_Browse}"
+                                    Padding="10,3"
+                                    Click="ButtonBrowseCustomSplash_Click"/>
+                            <Button x:Name="ButtonClearCustomSplash"
+                                    Content="{i18n:I18n Key=Theme_Clear}"
+                                    Padding="10,3"
+                                    Click="ButtonClearCustomSplash_Click"/>
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard x:Name="CardCustomSplashTextPosition" Header="{i18n:I18n Key=Theme_CustomSplashTextPosition}"
+                                     Description="{i18n:I18n Key=Theme_CustomSplashTextPosition_Desc}"
+                                     Visibility="Collapsed">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AlignCenter}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ComboBox x:Name="ComboBoxCustomSplashTextPosition"
+                                  SelectedIndex="1"
+                                  SelectionChanged="ComboBoxCustomSplashTextPosition_SelectionChanged">
+                            <ComboBoxItem Content="{i18n:I18n Key=Theme_TextPosition_BottomLeft}" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Theme_TextPosition_BottomCenter}" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Theme_TextPosition_BottomRight}" />
                         </ComboBox>
                     </ui:SettingsCard>
 

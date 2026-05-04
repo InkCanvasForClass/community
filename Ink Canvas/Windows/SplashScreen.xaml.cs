@@ -32,6 +32,56 @@ namespace Ink_Canvas.Windows
 
             // 加载启动图片并获取实际样式
             _actualSplashStyle = LoadSplashImageWithStyle();
+
+            // 加载自定义文字位置
+            ApplyCustomTextPosition();
+        }
+
+        private void ApplyCustomTextPosition()
+        {
+            int textPosition = GetCurrentSplashTextPosition();
+
+            switch (textPosition)
+            {
+                case 0: // 左下
+                    TextAndProgressBarContainer.HorizontalAlignment = HorizontalAlignment.Left;
+                    TextAndProgressBarContainer.Margin = new Thickness(100, 0, 0, 200);
+                    break;
+                case 1: // 中下
+                    TextAndProgressBarContainer.HorizontalAlignment = HorizontalAlignment.Center;
+                    TextAndProgressBarContainer.Margin = new Thickness(0, 0, 0, 200);
+                    break;
+                case 2: // 右下
+                    TextAndProgressBarContainer.HorizontalAlignment = HorizontalAlignment.Right;
+                    TextAndProgressBarContainer.Margin = new Thickness(0, 0, 100, 200);
+                    break;
+                default: // 默认中下
+                    TextAndProgressBarContainer.HorizontalAlignment = HorizontalAlignment.Center;
+                    TextAndProgressBarContainer.Margin = new Thickness(0, 0, 0, 200);
+                    break;
+            }
+        }
+
+        private int GetCurrentSplashTextPosition()
+        {
+            try
+            {
+                var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs", "Settings.json");
+                if (File.Exists(settingsPath))
+                {
+                    var json = File.ReadAllText(settingsPath);
+                    dynamic obj = JsonConvert.DeserializeObject(json);
+                    if (obj?["appearance"]?["customSplashTextPosition"] != null)
+                    {
+                        return (int)obj["appearance"]["customSplashTextPosition"];
+                    }
+                }
+                return 1; // 默认中下
+            }
+            catch
+            {
+                return 1; // 默认中下
+            }
         }
 
         public void CloseSplashScreen()
@@ -135,9 +185,9 @@ namespace Ink_Canvas.Windows
                 LoadingText.Text = message;
 
                 // 根据实际启动动画样式调整加载文本样式
-                if (actualSplashStyle == 6) // 马年限定
+                if (actualSplashStyle == 6 || actualSplashStyle == 7) // 马年限定或自定义
                 {
-                    // 马年限定样式
+                    // 马年限定/自定义样式
                     LoadingText.FontSize = 12;
                     LoadingText.FontWeight = FontWeights.SemiBold;
                     LoadingText.Foreground = Brushes.White;
@@ -237,7 +287,10 @@ namespace Ink_Canvas.Windows
                 string imagePath = GetSplashImagePath(out actualStyle);
                 if (!string.IsNullOrEmpty(imagePath))
                 {
-                    StartupImage.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(imagePath));
+                    if (File.Exists(imagePath) || imagePath.StartsWith("pack://"))
+                    {
+                        StartupImage.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(imagePath));
+                    }
                 }
                 return actualStyle;
             }
@@ -289,9 +342,9 @@ namespace Ink_Canvas.Windows
         {
             try
             {
-                // 读取设置
                 var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs", "Settings.json");
-                int splashStyle = 1; // 默认跟随四季
+                int splashStyle = 1;
+                string customImagePath = string.Empty;
 
                 if (File.Exists(settingsPath))
                 {
@@ -301,9 +354,18 @@ namespace Ink_Canvas.Windows
                     {
                         splashStyle = (int)obj["appearance"]["splashScreenStyle"];
                     }
+                    if (obj?["appearance"]?["customSplashImagePath"] != null)
+                    {
+                        customImagePath = (string)obj["appearance"]["customSplashImagePath"];
+                    }
                 }
 
-                // 根据样式选择图片，并获取实际样式
+                if (splashStyle == 7 && !string.IsNullOrEmpty(customImagePath) && File.Exists(customImagePath))
+                {
+                    actualStyle = 7;
+                    return customImagePath;
+                }
+
                 actualStyle = GetActualStyle(splashStyle);
                 string imageName = GetImageNameByStyle(splashStyle);
                 return $"pack://application:,,,/Resources/Startup-animation/{imageName}";
@@ -398,6 +460,9 @@ namespace Ink_Canvas.Windows
                     progressColor = HslToRgb(204, 15, 22);
                     break;
                 case 6: // 马年限定 - 白色
+                    progressColor = Colors.White;
+                    break;
+                case 7: // 自定义图片 - 白色
                     progressColor = Colors.White;
                     break;
                 default: // 默认使用

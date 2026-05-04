@@ -727,6 +727,39 @@
   <data name="Theme_Splash_Horse" xml:space="preserve">
     <value>马年限定</value>
   </data>
+  <data name="Theme_Splash_Custom" xml:space="preserve">
+    <value>自定义</value>
+  </data>
+  <data name="Theme_CustomSplashImage" xml:space="preserve">
+    <value>自定义启动图片</value>
+  </data>
+  <data name="Theme_CustomSplashImage_Desc" xml:space="preserve">
+    <value>选择自定义图片作为启动动画背景（支持JPG、PNG、BMP等格式）</value>
+  </data>
+  <data name="Theme_CustomSplashTextPosition" xml:space="preserve">
+    <value>文字显示位置</value>
+  </data>
+  <data name="Theme_CustomSplashTextPosition_Desc" xml:space="preserve">
+    <value>设置启动时加载文字和进度条的位置</value>
+  </data>
+  <data name="Theme_TextPosition_BottomLeft" xml:space="preserve">
+    <value>左下</value>
+  </data>
+  <data name="Theme_TextPosition_BottomCenter" xml:space="preserve">
+    <value>中下</value>
+  </data>
+  <data name="Theme_TextPosition_BottomRight" xml:space="preserve">
+    <value>右下</value>
+  </data>
+  <data name="Theme_CustomSplash_NotSelected" xml:space="preserve">
+    <value>未选择自定义图片</value>
+  </data>
+  <data name="Theme_Browse" xml:space="preserve">
+    <value>浏览</value>
+  </data>
+  <data name="Theme_Clear" xml:space="preserve">
+    <value>清除</value>
+  </data>
   <data name="Theme_FloatingBarIcon" xml:space="preserve">
     <value>浮动工具栏图标</value>
   </data>

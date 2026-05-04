@@ -77,6 +77,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             CardEnableSplashScreen.IsOn = settings.Appearance.EnableSplashScreen;
             ComboBoxSplashScreenStyle.SelectedIndex = settings.Appearance.SplashScreenStyle;
+            UpdateCustomSplashImageVisibility();
+
+            if (!string.IsNullOrEmpty(settings.Appearance.CustomSplashImagePath) && 
+                System.IO.File.Exists(settings.Appearance.CustomSplashImagePath))
+            {
+                TextBlockCustomSplashPath.Text = System.IO.Path.GetFileName(settings.Appearance.CustomSplashImagePath);
+                TextBlockCustomSplashPath.ToolTip = settings.Appearance.CustomSplashImagePath;
+            }
+            else
+            {
+                TextBlockCustomSplashPath.Text = "未选择自定义图片";
+                TextBlockCustomSplashPath.ToolTip = null;
+            }
+
+            ComboBoxCustomSplashTextPosition.SelectedIndex = settings.Appearance.CustomSplashTextPosition;
 
             if (settings.Appearance.FloatingBarImg >= ComboBoxFloatingBarImg.Items.Count)
                 settings.Appearance.FloatingBarImg = 0;
@@ -241,6 +256,57 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             SettingsManager.Settings.Appearance.SplashScreenStyle = ComboBoxSplashScreenStyle.SelectedIndex;
             SettingsManager.SaveSettingsToFile();
+            UpdateCustomSplashImageVisibility();
+        }
+
+        private void UpdateCustomSplashImageVisibility()
+        {
+            bool isCustomSelected = ComboBoxSplashScreenStyle.SelectedIndex == 7;
+            CardCustomSplashImage.Visibility = isCustomSelected ? Visibility.Visible : Visibility.Collapsed;
+            CardCustomSplashTextPosition.Visibility = isCustomSelected ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void ComboBoxCustomSplashTextPosition_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.CustomSplashTextPosition = ComboBoxCustomSplashTextPosition.SelectedIndex;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ButtonBrowseCustomSplash_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var openFileDialog = new Microsoft.Win32.OpenFileDialog
+                {
+                    Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.webp|All Files|*.*",
+                    Title = "选择自定义启动图片"
+                };
+
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    string selectedPath = openFileDialog.FileName;
+                    if (!string.IsNullOrEmpty(selectedPath))
+                    {
+                        SettingsManager.Settings.Appearance.CustomSplashImagePath = selectedPath;
+                        SettingsManager.SaveSettingsToFile();
+                        TextBlockCustomSplashPath.Text = System.IO.Path.GetFileName(selectedPath);
+                        TextBlockCustomSplashPath.ToolTip = selectedPath;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"选择自定义启动图片时出错: {ex.Message}");
+            }
+        }
+
+        private void ButtonClearCustomSplash_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsManager.Settings.Appearance.CustomSplashImagePath = string.Empty;
+            SettingsManager.SaveSettingsToFile();
+            TextBlockCustomSplashPath.Text = "未选择自定义图片";
+            TextBlockCustomSplashPath.ToolTip = null;
         }
 
         #endregion

@@ -13,11 +13,12 @@
     <Grid>
         <!-- 启动图片容器 -->
         <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-            <!-- 启动图片 -->
+            <!-- 启动图片（使用邻近缩放） -->
             <Image x:Name="StartupImage" 
                    Width="600" 
                    Height="450"
-                   Stretch="Uniform" />
+                   Stretch="Uniform"
+                   RenderOptions.BitmapScalingMode="NearestNeighbor" />
 
             <!-- 版本号显示 - 右上角 -->
             <TextBlock x:Name="VersionTextBlock" 
@@ -30,38 +31,56 @@
                     Panel.ZIndex="1000" />
         </Grid>
         
-        <!-- 加载文本 -->
-        <TextBlock x:Name="LoadingText" 
-                   Text="正在启动 Ink Canvas..." 
-                   FontSize="18" 
-                   FontFamily="pack://application:,,,/Resources/Fonts/#LXGW WenKai TC"
-                   FontWeight="SemiBold"
-                   Foreground="White"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   Margin="0,200,0,0" />
+        <!-- 文字和进度条容器（可动态调整位置） -->
+        <Grid x:Name="TextAndProgressBarContainer"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Bottom"
+              Margin="0,0,0,200">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto" MinHeight="10"/>
+                <RowDefinition Height="10"/>
+            </Grid.RowDefinitions>
+            
+            <!-- 加载文本（带阴影） -->
+            <TextBlock x:Name="LoadingText" 
+                       Grid.Row="0"
+                       Text="正在启动 Ink Canvas..." 
+                       FontSize="18" 
+                       FontFamily="pack://application:,,,/Resources/Fonts/#LXGW WenKai TC"
+                       FontWeight="SemiBold"
+                       Foreground="White"
+                       HorizontalAlignment="Center">
+                <TextBlock.Effect>
+                    <DropShadowEffect Color="Black" 
+                                      Direction="270" 
+                                      ShadowDepth="2" 
+                                      BlurRadius="5" 
+                                      Opacity="0.7"/>
+                </TextBlock.Effect>
+            </TextBlock>
 
-        <!-- 进度条 -->
-        <Grid HorizontalAlignment="Center"
-               VerticalAlignment="Center"
-               Margin="0,276.5,0,0"
-               Width="532"
-               Height="10">
-             <!-- 进度条填充 -->
-             <Border x:Name="ProgressBarFill"
-                      HorizontalAlignment="Left"
-                      Width="0">
-                 <Border.Style>
-                     <Style TargetType="Border">
-                         <Setter Property="CornerRadius" Value="0,0,7,7"/>
-                     </Style>
-                 </Border.Style>
-             </Border>
-            <!-- 进度条背景 -->
-            <Border x:Name="ProgressBarBackground"
-                     CornerRadius="7"
-                     BorderThickness="1"
-                     ClipToBounds="True"/>
+            <!-- 进度条 -->
+            <Grid Grid.Row="2"
+                  HorizontalAlignment="Center"
+                  Width="532"
+                  Height="10">
+                 <!-- 进度条填充 -->
+                 <Border x:Name="ProgressBarFill"
+                          HorizontalAlignment="Left"
+                          Width="0">
+                     <Border.Style>
+                         <Style TargetType="Border">
+                             <Setter Property="CornerRadius" Value="0,0,7,7"/>
+                         </Style>
+                     </Border.Style>
+                 </Border>
+                <!-- 进度条背景 -->
+                <Border x:Name="ProgressBarBackground"
+                         CornerRadius="7"
+                         BorderThickness="1"
+                         ClipToBounds="True"/>
+            </Grid>
         </Grid>
     </Grid>
 </Window>
