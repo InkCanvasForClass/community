@@ -36,7 +36,6 @@ namespace Ink_Canvas.Windows.SettingsViews
             ApplyCurrentTheme();
             global::Ink_Canvas.Helpers.WindowBackdropHelper.Apply(this, Helpers.SettingsManager.Settings);
 
-            // 初始化内置页面映射
             _pageTypes = new Dictionary<string, Type>
             {
                 { "HomePage", typeof(HomePage) },
@@ -64,23 +63,22 @@ namespace Ink_Canvas.Windows.SettingsViews
                 { "PluginSettingsPage", typeof(PluginSettingsPage) }
             };
 
-            // 默认选中首页
-            if (NavigationViewControl.MenuItems.Count > 0)
-            {
-                NavigateToPage("HomePage");
-                NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems[0];
-                NavigationViewControl.Header = "首页";
-            }
-
             UpdateAppTitleBarMargin();
 
-            // 窗口生命周期事件
             this.Loaded += (sender, e) =>
             {
                 SetMaxSizeAndCenter();
                 RegisterDpiChangedListener();
-                LoadPluginSettingsPages();
-                UpdateUpdateBadgeVisibility();
+
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    LoadPluginSettingsPages();
+                    UpdateUpdateBadgeVisibility();
+                    NavigateToPage("HomePage");
+                    NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems[0];
+                    NavigationViewControl.Header = "首页";
+                }), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+
                 _ = PreloadAllPagesAsync();
             };
 
@@ -91,12 +89,10 @@ namespace Ink_Canvas.Windows.SettingsViews
                 _pageTypes.Clear();
             };
 
-            // 修复触摸屏操作后鼠标指针消失的问题
             this.TouchUp += (s, e) => ShowCursor(true);
             this.MouseEnter += (s, e) => ShowCursor(true);
             this.Activated += (s, e) => ShowCursor(true);
 
-            // 窗口状态改变时调整大小限制
             this.StateChanged += (sender, e) =>
             {
                 if (this.WindowState == WindowState.Maximized)
@@ -705,6 +701,8 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         private async System.Threading.Tasks.Task PreloadAllPagesAsync()
         {
+            await System.Threading.Tasks.Task.Delay(1000);
+
             try
             {
                 var tags = _pageTypes.Keys.ToList();
@@ -730,7 +728,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                         {
                             System.Diagnostics.Debug.WriteLine($"预加载设置页面 {tag} 失败: {ex.Message}");
                         }
-                    }, System.Windows.Threading.DispatcherPriority.Background);
+                    }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
                 }
             }
             catch (Exception ex)
