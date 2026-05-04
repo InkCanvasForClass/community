@@ -421,6 +421,7 @@ namespace Ink_Canvas.Helpers
 
             LogHelper.WriteLogToFile($"AutoUpdate | 开始检测通道 {channel} 下所有线路组延迟...");
 
+            var testUrls = new List<(UpdateLineGroup group, string testUrl)>();
             foreach (var group in groups)
             {
                 string testUrl = null;
@@ -450,10 +451,15 @@ namespace Ink_Canvas.Helpers
                     continue;
                 }
 
+                testUrls.Add((group, testUrl));
+            }
+
+            var tasks = testUrls.Select(async entry =>
+            {
+                var (group, testUrl) = entry;
                 LogHelper.WriteLogToFile($"AutoUpdate | 检测线路组: {group.GroupName} ({testUrl})");
 
                 long delay;
-
                 if (group.GroupName == "智教联盟" || group.GroupName == "inkeys")
                 {
                     delay = await GetDownloadUrlDelay(testUrl);
@@ -466,11 +472,22 @@ namespace Ink_Canvas.Helpers
                 if (delay >= 0)
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | 线路组 {group.GroupName} 延迟: {delay}ms");
-                    availableGroups.Add((group, delay));
+                    return (group, delay, success: true);
                 }
                 else
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | 线路组 {group.GroupName} 不可用", LogHelper.LogType.Warning);
+                    return (group, delay, success: false);
+                }
+            }).ToArray();
+
+            var results = await Task.WhenAll(tasks);
+
+            foreach (var (group, delay, success) in results)
+            {
+                if (success)
+                {
+                    availableGroups.Add((group, delay));
                 }
             }
 

@@ -1351,6 +1351,7 @@ namespace Ink_Canvas
         private static DateTime startupCompleteHeartbeat = DateTime.MinValue;
         private static DateTime splashScreenStartTime = DateTime.MinValue;
         private static DateTime appStartupStartTime = DateTime.MinValue;
+        private static volatile bool isAppExiting = false;
 
         /// <summary>
         /// 启动并管理应用的心跳与守护检查定时器，监测启动阶段与主线程是否无响应，并在符合配置的情况下尝试静默重启应用。
@@ -1374,6 +1375,8 @@ namespace Ink_Canvas
 
             watchdogTimer = new Timer(_ =>
             {
+                if (isAppExiting)
+                    return;
                 if (IsOobeShowing)
                     return;
 
@@ -1592,6 +1595,11 @@ namespace Ink_Canvas
 
         private void App_Exit(object sender, ExitEventArgs e)
         {
+            isAppExiting = true;
+
+            try { heartbeatTimer?.Stop(); } catch { }
+            try { watchdogTimer?.Change(Timeout.Infinite, Timeout.Infinite); watchdogTimer?.Dispose(); } catch { }
+
             CleanupTerminationMonitoring();
 
             try
