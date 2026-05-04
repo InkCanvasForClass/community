@@ -780,6 +780,9 @@
   <data name="Theme_EnableQuickPanel" xml:space="preserve">
     <value>Enable quick panel in docked mode</value>
   </data>
+  <data name="Theme_QuickPanelBottomOffset" xml:space="preserve">
+    <value>Quick panel vertical offset</value>
+  </data>
   <data name="Theme_UnfoldButtonIcon" xml:space="preserve">
     <value>Un-dock button icon</value>
   </data>

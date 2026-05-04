@@ -40,6 +40,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdateSliderText(ViewboxFloatingBarOpacityValueSlider, ViewboxFloatingBarOpacityText, "{0:F2}");
             UpdateSliderText(ViewboxFloatingBarOpacityInPPTValueSlider, ViewboxFloatingBarOpacityInPPTText, "{0:F2}");
             UpdateSliderText(ViewboxBlackBoardScaleTransformValueSlider, ViewboxBlackBoardScaleText, "{0:F2}");
+            UpdateSliderText(QuickPanelBottomOffsetSlider, QuickPanelBottomOffsetText, "{0:F0}");
             UpdateFloatingBarActualScaleText();
         }
 
@@ -117,6 +118,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
 
             CardEnableQuickPanel.IsOn = settings.Appearance.IsShowQuickPanel;
+            QuickPanelBottomOffsetSlider.Value = settings.Appearance.QuickPanelBottomOffset;
             ComboBoxUnFoldBtnImg.SelectedIndex = settings.Appearance.UnFoldButtonImageType;
 
             CardUseLegacyFloatingBarUI.IsOn = settings.Appearance.UseLegacyFloatingBarUI;
@@ -510,6 +512,22 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             SettingsManager.Settings.Appearance.IsShowQuickPanel = CardEnableQuickPanel.IsOn;
             SettingsManager.SaveSettingsToFile();
+        }
+
+        private void QuickPanelBottomOffsetSlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            UpdateSliderText(QuickPanelBottomOffsetSlider, QuickPanelBottomOffsetText, "{0:F0}");
+            if (!_isLoaded) return;
+            var val = Math.Round(QuickPanelBottomOffsetSlider.Value);
+            if (QuickPanelBottomOffsetSlider.Value != val)
+            {
+                QuickPanelBottomOffsetSlider.Value = val;
+                return;
+            }
+            SettingsManager.Settings.Appearance.QuickPanelBottomOffset = val;
+            SettingsManager.SaveSettingsToFile();
+            var mw = GetMainWindow();
+            if (mw != null) mw.ApplyQuickPanelBottomOffset(val);
         }
 
         private void ComboBoxUnFoldBtnImg_SelectionChanged(object sender, SelectionChangedEventArgs e)

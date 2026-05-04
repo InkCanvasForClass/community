@@ -305,6 +305,8 @@ namespace Ink_Canvas
                 ViewboxBlackboardCenterSideScaleTransform.ScaleX = Settings.Appearance.ViewboxBlackBoardScaleTransformValue;
                 ViewboxBlackboardCenterSideScaleTransform.ScaleY = Settings.Appearance.ViewboxBlackBoardScaleTransformValue;
 
+                ApplyQuickPanelBottomOffset(Settings.Appearance.QuickPanelBottomOffset);
+
                 if (Settings.Appearance.IsTransparentButtonBackground)
                 {
                     { /* Old UI removed */ }
@@ -813,6 +815,21 @@ namespace Ink_Canvas
                 userObj.Remove(key);
                 hasChanges = true;
             }
+        }
+
+        internal void ApplyQuickPanelBottomOffset(double offset)
+        {
+            var leftPanelMargin = LeftSidePanel.Margin;
+            LeftSidePanel.Margin = new Thickness(leftPanelMargin.Left, leftPanelMargin.Top, leftPanelMargin.Right, offset);
+
+            var rightPanelMargin = RightSidePanel.Margin;
+            RightSidePanel.Margin = new Thickness(rightPanelMargin.Left, rightPanelMargin.Top, rightPanelMargin.Right, offset);
+
+            var leftQuickPanelMargin = LeftUnFoldButtonQuickPanel.Margin;
+            LeftUnFoldButtonQuickPanel.Margin = new Thickness(leftQuickPanelMargin.Left, leftQuickPanelMargin.Top, leftQuickPanelMargin.Right, offset);
+
+            var rightQuickPanelMargin = RightUnFoldButtonQuickPanel.Margin;
+            RightUnFoldButtonQuickPanel.Margin = new Thickness(rightQuickPanelMargin.Left, rightQuickPanelMargin.Top, rightQuickPanelMargin.Right, offset);
         }
     }
 }

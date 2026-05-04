@@ -244,6 +244,21 @@
                             SwitchName="ToggleSwitchEnableQuickPanel"
                             Toggled="ToggleSwitchEnableQuickPanel_Toggled" />
 
+                    <ui:SettingsCard Header="{i18n:I18n Key=Theme_QuickPanelBottomOffset}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronDown}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock x:Name="QuickPanelBottomOffsetText"
+                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                            <Slider x:Name="QuickPanelBottomOffsetSlider" Minimum="-500"
+                                    Maximum="0" Width="200"
+                                    IsSnapToTickEnabled="True" Value="-150" TickFrequency="10"
+                                    TickPlacement="None" AutoToolTipPlacement="None"
+                                    ValueChanged="QuickPanelBottomOffsetSlider_ValueChanged" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
                     <ui:SettingsCard Header="{i18n:I18n Key=Theme_UnfoldButtonIcon}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronRight}" />

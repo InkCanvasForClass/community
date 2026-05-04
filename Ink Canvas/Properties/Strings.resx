@@ -820,6 +820,9 @@
   <data name="Theme_EnableQuickPanel" xml:space="preserve">
     <value>在收纳模式下启用快速面板</value>
   </data>
+  <data name="Theme_QuickPanelBottomOffset" xml:space="preserve">
+    <value>快捷面板垂直偏移</value>
+  </data>
   <data name="Theme_UnfoldButtonIcon" xml:space="preserve">
     <value>取消收纳按钮图标</value>
   </data>

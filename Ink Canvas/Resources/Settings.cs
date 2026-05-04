@@ -369,6 +369,9 @@ namespace Ink_Canvas
         [JsonProperty("language")]
         public string Language { get; set; } = "";
 
+        [JsonProperty("quickPanelBottomOffset")]
+        public double QuickPanelBottomOffset { get; set; } = -150;
+
     }
 
     public class PowerPointSettings

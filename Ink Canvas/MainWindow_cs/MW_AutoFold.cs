@@ -176,8 +176,8 @@ namespace Ink_Canvas
                     var marginAnimation = new ThicknessAnimation
                     {
                         Duration = TimeSpan.FromSeconds(0.1),
-                        From = new Thickness(-50, 0, 0, -150),
-                        To = new Thickness(-1, 0, 0, -150)
+                        From = new Thickness(-50, 0, 0, Settings.Appearance.QuickPanelBottomOffset),
+                        To = new Thickness(-1, 0, 0, Settings.Appearance.QuickPanelBottomOffset)
                     };
                     marginAnimation.EasingFunction = new CubicEase();
                     LeftUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, marginAnimation);
@@ -186,7 +186,7 @@ namespace Ink_Canvas
 
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    LeftUnFoldButtonQuickPanel.Margin = new Thickness(-1, 0, 0, -150);
+                    LeftUnFoldButtonQuickPanel.Margin = new Thickness(-1, 0, 0, Settings.Appearance.QuickPanelBottomOffset);
                 });
             }
             else
@@ -217,8 +217,8 @@ namespace Ink_Canvas
                     var marginAnimation = new ThicknessAnimation
                     {
                         Duration = TimeSpan.FromSeconds(0.1),
-                        From = new Thickness(0, 0, -50, -150),
-                        To = new Thickness(0, 0, -1, -150)
+                        From = new Thickness(0, 0, -50, Settings.Appearance.QuickPanelBottomOffset),
+                        To = new Thickness(0, 0, -1, Settings.Appearance.QuickPanelBottomOffset)
                     };
                     marginAnimation.EasingFunction = new CubicEase();
                     RightUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, marginAnimation);
@@ -227,7 +227,7 @@ namespace Ink_Canvas
 
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    RightUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, -1, -150);
+                    RightUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, -1, Settings.Appearance.QuickPanelBottomOffset);
                 });
             }
             else
@@ -254,8 +254,8 @@ namespace Ink_Canvas
                     var marginAnimation = new ThicknessAnimation
                     {
                         Duration = TimeSpan.FromSeconds(0.1),
-                        From = new Thickness(-1, 0, 0, -150),
-                        To = new Thickness(-50, 0, 0, -150)
+                        From = new Thickness(-1, 0, 0, Settings.Appearance.QuickPanelBottomOffset),
+                        To = new Thickness(-50, 0, 0, Settings.Appearance.QuickPanelBottomOffset)
                     };
                     marginAnimation.EasingFunction = new CubicEase();
                     LeftUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, marginAnimation);
@@ -264,7 +264,7 @@ namespace Ink_Canvas
 
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    LeftUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, -50, -150);
+                    LeftUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, -50, Settings.Appearance.QuickPanelBottomOffset);
                     LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
                 });
             }
@@ -288,8 +288,8 @@ namespace Ink_Canvas
                     var marginAnimation = new ThicknessAnimation
                     {
                         Duration = TimeSpan.FromSeconds(0.1),
-                        From = new Thickness(0, 0, -1, -150),
-                        To = new Thickness(0, 0, -50, -150)
+                        From = new Thickness(0, 0, -1, Settings.Appearance.QuickPanelBottomOffset),
+                        To = new Thickness(0, 0, -50, Settings.Appearance.QuickPanelBottomOffset)
                     };
                     marginAnimation.EasingFunction = new CubicEase();
                     RightUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, marginAnimation);
@@ -298,7 +298,7 @@ namespace Ink_Canvas
 
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    RightUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, -50, -150);
+                    RightUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, -50, Settings.Appearance.QuickPanelBottomOffset);
                     RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
                 });
             }
@@ -486,14 +486,14 @@ namespace Ink_Canvas
                 {
                     Duration = isNoAnimation ? TimeSpan.FromSeconds(0) : TimeSpan.FromSeconds(0.175),
                     From = LeftSidePanel.Margin,
-                    To = new Thickness(MarginFromEdge, 0, 0, -150)
+                    To = new Thickness(MarginFromEdge, 0, 0, Settings.Appearance.QuickPanelBottomOffset)
                 };
                 LeftSidePanelmarginAnimation.EasingFunction = new CubicEase();
                 var RightSidePanelmarginAnimation = new ThicknessAnimation
                 {
                     Duration = isNoAnimation ? TimeSpan.FromSeconds(0) : TimeSpan.FromSeconds(0.175),
                     From = RightSidePanel.Margin,
-                    To = new Thickness(0, 0, MarginFromEdge, -150)
+                    To = new Thickness(0, 0, MarginFromEdge, Settings.Appearance.QuickPanelBottomOffset)
                 };
                 RightSidePanelmarginAnimation.EasingFunction = new CubicEase();
                 LeftSidePanel.BeginAnimation(MarginProperty, LeftSidePanelmarginAnimation);
@@ -504,8 +504,8 @@ namespace Ink_Canvas
 
             await Dispatcher.InvokeAsync(() =>
             {
-                LeftSidePanel.Margin = new Thickness(MarginFromEdge, 0, 0, -150);
-                RightSidePanel.Margin = new Thickness(0, 0, MarginFromEdge, -150);
+                LeftSidePanel.Margin = new Thickness(MarginFromEdge, 0, 0, Settings.Appearance.QuickPanelBottomOffset);
+                RightSidePanel.Margin = new Thickness(0, 0, MarginFromEdge, Settings.Appearance.QuickPanelBottomOffset);
 
                 if (MarginFromEdge == -50) LeftSidePanel.Visibility = Visibility.Collapsed;
             });
