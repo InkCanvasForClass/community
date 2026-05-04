@@ -10,18 +10,17 @@
     <Grid>
         <controls:PopupShellContent x:Name="Shell" Title="背景设置" d:Visibility="Collapsed" />
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
-            <ikw:SimpleStackPanel Margin="8">
+            <ikw:SimpleStackPanel Margin="8" Spacing="4">
                 <TextBlock Text="白板模式"
                            Foreground="{DynamicResource TextForeground}"
                            FontSize="10" FontWeight="Bold"
                            HorizontalAlignment="Center"/>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20">
                     <Border x:Name="WhiteboardModeBtn"
                             Width="60" Height="30"
                             Background="#2563eb"
-                            CornerRadius="4"
-                            Margin="0,0,8,0">
-                        <TextBlock Text="白板"
+                            CornerRadius="4">
+                        <TextBlock Text="白板" FontSize="10"
                                    Foreground="White"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center" />
@@ -35,30 +34,27 @@
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center" />
                     </Border>
-                </StackPanel>
-                <Border Height="1"
-                        Background="{DynamicResource SettingsPageBorderBrush}"
-                        Margin="0,12,0,12" />
+                </ikw:SimpleStackPanel>
+                <Border Height="1" d:Background="Green"
+                        Background="{DynamicResource SettingsPageBorderBrush}"/>
                 <TextBlock Text="背景颜色"
                            Foreground="{DynamicResource TextForeground}"
                            FontSize="10" FontWeight="Bold"
-                           HorizontalAlignment="Center"
-                           Margin="0,4,0,8" />
+                           HorizontalAlignment="Center"/>
                 <Border x:Name="BackgroundColorPreview"
                         Width="100" Height="40"
                         BorderThickness="1"
                         BorderBrush="{DynamicResource SettingsPageBorderBrush}"
                         Background="White"
                         CornerRadius="4"
-                        Margin="0,0,0,10"
                         HorizontalAlignment="Center" />
-                <StackPanel Orientation="Horizontal" Margin="10,0,10,5">
+                <StackPanel Orientation="Horizontal">
                     <TextBlock Text="R:" Width="20"
                                VerticalAlignment="Center"
                                Foreground="{DynamicResource TextForeground}" />
                     <Slider x:Name="BackgroundRSlider"
                             Minimum="0" Maximum="255" Value="255"
-                            Width="150" Margin="5,0,5,0"
+                            Width="100"
                             VerticalAlignment="Center" />
                     <TextBlock x:Name="BackgroundRValue"
                                Text="255" Width="30"
@@ -66,13 +62,13 @@
                                TextAlignment="Right"
                                Foreground="{DynamicResource TextForeground}" />
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="10,0,10,5">
+                <StackPanel Orientation="Horizontal">
                     <TextBlock Text="G:" Width="20"
                                VerticalAlignment="Center"
                                Foreground="{DynamicResource TextForeground}" />
                     <Slider x:Name="BackgroundGSlider"
                             Minimum="0" Maximum="255" Value="255"
-                            Width="150" Margin="5,0,5,0"
+                            Width="100"
                             VerticalAlignment="Center" />
                     <TextBlock x:Name="BackgroundGValue"
                                Text="255" Width="30"
@@ -80,13 +76,13 @@
                                TextAlignment="Right"
                                Foreground="{DynamicResource TextForeground}" />
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="10,0,10,5">
+                <StackPanel Orientation="Horizontal">
                     <TextBlock Text="B:" Width="20"
                                VerticalAlignment="Center"
                                Foreground="{DynamicResource TextForeground}" />
                     <Slider x:Name="BackgroundBSlider"
                             Minimum="0" Maximum="255" Value="255"
-                            Width="150" Margin="5,0,5,0"
+                            Width="100"
                             VerticalAlignment="Center" />
                     <TextBlock x:Name="BackgroundBValue"
                                Text="255" Width="30"
@@ -96,11 +92,8 @@
                 </StackPanel>
                 <Button x:Name="ApplyBackgroundColorBtn"
                         Content="应用颜色"
-                        Margin="0,10,0,0"
-                        Padding="10,5,10,5"
                         Background="#2563eb"
-                        Foreground="White"
-                        BorderThickness="0"
+                        Foreground="Black"
                         HorizontalAlignment="Center" />
             </ikw:SimpleStackPanel>
         </ContentControl>

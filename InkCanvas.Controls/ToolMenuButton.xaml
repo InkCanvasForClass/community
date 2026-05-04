@@ -4,11 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-             mc:Ignorable="d"
-             d:DesignHeight="38" d:DesignWidth="32">
+             mc:Ignorable="d">
     <Border x:Name="ButtonBorder"
-            CornerRadius="5"
-            Background="Transparent">
+            CornerRadius="4"
+            Background="Transparent" d:Background="Red">
         <ikw:SimpleStackPanel x:Name="ButtonPanel"
                               MouseDown="ButtonPanel_MouseDown"
                               MouseLeave="ButtonPanel_MouseLeave"
@@ -16,11 +15,10 @@
                               Background="Transparent"
                               Orientation="Vertical"
                               HorizontalAlignment="Center"
-                              Height="38" Width="32"
-                              Margin="0">
+                              Height="60" Width="48">
             <Image x:Name="ButtonImage"
-                   Margin="0,4,0,2"
-                   Height="19" Width="19"
+                   Margin="9,9,9,0"
+                   Height="30" Width="30"
                    RenderOptions.BitmapScalingMode="HighQuality">
                 <Image.Source>
                     <DrawingImage>
@@ -34,7 +32,7 @@
                 </Image.Source>
             </Image>
             <Label x:Name="LabelControl"
-                   FontSize="8"
+                   FontSize="14" d:Content="田田田"
                    HorizontalAlignment="Center"
                    Foreground="{DynamicResource FloatBarForeground}" />
         </ikw:SimpleStackPanel>

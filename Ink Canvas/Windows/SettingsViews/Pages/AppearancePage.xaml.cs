@@ -40,6 +40,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdateSliderText(ViewboxFloatingBarOpacityValueSlider, ViewboxFloatingBarOpacityText, "{0:F2}");
             UpdateSliderText(ViewboxFloatingBarOpacityInPPTValueSlider, ViewboxFloatingBarOpacityInPPTText, "{0:F2}");
             UpdateSliderText(ViewboxBlackBoardScaleTransformValueSlider, ViewboxBlackBoardScaleText, "{0:F2}");
+            UpdateFloatingBarActualScaleText();
+        }
+
+        private void UpdateFloatingBarActualScaleText()
+        {
+            if (ViewboxFloatingBarScaleTransformValueSlider == null || ViewboxFloatingBarActualScaleText == null) return;
+            double val = ViewboxFloatingBarScaleTransformValueSlider.Value;
+            double clampedVal = (val > 0.5 && val < 1.25) ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1.0;
+            double actualScale = 1.5 * clampedVal;
+            ViewboxFloatingBarActualScaleText.Text = $"{actualScale:F2}x";
         }
 
         private void UpdateSliderText(Slider slider, TextBlock textBlock, string format)
@@ -293,10 +303,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.Settings.Appearance.ViewboxFloatingBarScaleTransformValue = val;
             SettingsManager.SaveSettingsToFile();
 
-            // 计算并显示实际缩放倍率（基础 1.5 × 用户设置）
             double clampedVal = (val > 0.5 && val < 1.25) ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1.0;
             double actualScale = 1.5 * clampedVal;
-            ViewboxFloatingBarActualScaleText.Text = $"{actualScale:F2}x";
+            UpdateFloatingBarActualScaleText();
 
             var mw = GetMainWindow();
             if (mw != null)

@@ -4,18 +4,17 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-             mc:Ignorable="d"
-             d:DesignHeight="30" d:DesignWidth="200">
+             mc:Ignorable="d" d:Width="300">
     <Grid Margin="8,7,10,5">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
-        <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="10" d:Text="test"
+        <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="20" d:Text="test"
                    Text="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}"
                    Foreground="{DynamicResource ToolsPopupTitleForeground}" FontWeight="Bold"/>
         <ui:FontIcon x:Name="CloseIcon" Grid.Column="1"
                      Icon="{x:Static ui:SegoeFluentIcons.ChromeCloseContrast}"
-                     Foreground="#DC2626" FontSize="8" VerticalAlignment="Center" />
+                     Foreground="#DC2626" FontSize="20" VerticalAlignment="Center" />
     </Grid>
 </UserControl>
