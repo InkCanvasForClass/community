@@ -1851,13 +1851,13 @@
     <value>点名类型</value>
   </data>
   <data name="Random_ExternalType_ClassIsland" xml:space="preserve">
-    <value>ClassIsland点名</value>
+    <value>ClassIsland 点名</value>
   </data>
   <data name="Random_ExternalType_SecRandom" xml:space="preserve">
-    <value>SecRandom点名</value>
+    <value>SecRandom 点名</value>
   </data>
   <data name="Random_ExternalType_NamePicker" xml:space="preserve">
-    <value>NamePicker点名</value>
+    <value>NamePicker 点名</value>
   </data>
   <data name="Random_OnceCloseDelay" xml:space="preserve">
     <value>单次抽人窗口关闭延迟</value>
