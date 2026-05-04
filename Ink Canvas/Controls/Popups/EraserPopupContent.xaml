@@ -1,0 +1,162 @@
+<UserControl x:Class="Ink_Canvas.Controls.EraserPopupContent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+             xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+             xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+             xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
+             xmlns:icons="clr-namespace:Ink_Canvas"
+             xmlns:c="clr-namespace:Ink_Canvas.Converter"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <c:StringToGeometryConverter x:Key="StringToGeometryConverter" />
+        <Style x:Key="AutoFitFloatBarLabel9" TargetType="TextBlock">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            <Setter Property="Foreground" Value="{DynamicResource FloatBarForeground}" />
+            <Setter Property="FontWeight" Value="Medium" />
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <controls:PopupShellContent x:Name="Shell" Title="{i18n:I18n Key=Board_EraserOptions}" d:Visibility="Collapsed" />
+        <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
+            <ikw:SimpleStackPanel Margin="4">
+                <ikw:SimpleStackPanel Orientation="Horizontal" Margin="0,4,0,0" Spacing="2"
+                                     VerticalAlignment="Center"
+                                     HorizontalAlignment="Center">
+                    <Label Margin="0,0,0,0" Content="{i18n:I18n Key=Board_Size}" FontWeight="Bold"
+                           Foreground="{DynamicResource FloatBarForeground}" FontSize="10"
+                           VerticalAlignment="Center" />
+                    <Viewbox Margin="8,0,0,0" Height="20" Width="52">
+                        <ComboBox x:Name="ComboBoxEraserSize"
+                                  SelectedIndex="2">
+                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_VerySmall}" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_Small}" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_Medium}" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_Large}" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_VeryLarge}" />
+                        </ComboBox>
+                    </Viewbox>
+                </ikw:SimpleStackPanel>
+                <TextBlock HorizontalAlignment="Center" Margin="0,10,0,6"
+                           Text="{i18n:I18n Key=Board_EraserShape}"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource FloatBarForeground}"
+                           FontSize="10" VerticalAlignment="Center" />
+                <ikw:SimpleStackPanel Orientation="Horizontal"
+                                     HorizontalAlignment="Center"
+                                     Margin="0,0,0,0" Spacing="4">
+                    <Border x:Name="CircleEraserTabButton"
+                            Background="#48dbeafe" Height="20" Width="40"
+                            CornerRadius="3">
+                        <Canvas>
+                            <ikw:SimpleStackPanel x:Name="CircleEraserTabButtonIndicator"
+                                                 Visibility="Visible" Orientation="Horizontal"
+                                                 Canvas.Left="11" Canvas.Right="11"
+                                                 Canvas.Bottom="0">
+                                <Border Width="18" Height="2"
+                                        Background="{DynamicResource FloatBarBackground}"
+                                        CornerRadius="1" />
+                            </ikw:SimpleStackPanel>
+                            <ikw:SimpleStackPanel Orientation="Vertical" Height="20" Width="40">
+                                <ikw:SimpleStackPanel VerticalAlignment="Center"
+                                                     Orientation="Horizontal"
+                                                     HorizontalAlignment="Center" Margin="0,3">
+                                    <TextBlock x:Name="CircleEraserTabButtonText"
+                                               Foreground="{DynamicResource FloatBarForeground}" FontWeight="Medium"
+                                               FontSize="9" TextAlignment="Center"
+                                               Text="{i18n:I18n Key=Board_EraserShape_Circle}"
+                                               Style="{StaticResource AutoFitFloatBarLabel9}" />
+                                </ikw:SimpleStackPanel>
+                            </ikw:SimpleStackPanel>
+                        </Canvas>
+                    </Border>
+                    <Border x:Name="RectangleEraserTabButton"
+                            Background="Transparent"
+                            Height="20" Width="40" CornerRadius="3">
+                        <Canvas>
+                            <ikw:SimpleStackPanel Visibility="Collapsed"
+                                                 x:Name="RectangleEraserTabButtonIndicator"
+                                                 Orientation="Horizontal" Canvas.Left="11"
+                                                 Canvas.Right="11" Canvas.Bottom="0">
+                                <Border Width="18" Height="2"
+                                        Background="{DynamicResource FloatBarBackground}"
+                                        CornerRadius="1" />
+                            </ikw:SimpleStackPanel>
+                            <ikw:SimpleStackPanel Orientation="Vertical" Height="20" Width="40">
+                                <ikw:SimpleStackPanel VerticalAlignment="Center"
+                                                     Orientation="Horizontal"
+                                                     HorizontalAlignment="Center" Margin="0,3">
+                                    <TextBlock x:Name="RectangleEraserTabButtonText"
+                                               Foreground="{DynamicResource FloatBarForeground}" FontWeight="Medium"
+                                               FontSize="9" TextAlignment="Center"
+                                               Text="{i18n:I18n Key=Board_EraserShape_Blackboard}"
+                                               Style="{StaticResource AutoFitFloatBarLabel9}" />
+                                </ikw:SimpleStackPanel>
+                            </ikw:SimpleStackPanel>
+                        </Canvas>
+                    </Border>
+                </ikw:SimpleStackPanel>
+                <Button x:Name="ClearInkButton" Foreground="White"
+                        HorizontalAlignment="Center" Margin="0,6,0,0"
+                        MinHeight="28" Padding="12,4">
+                    <Button.Resources>
+                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundKey}" Color="#b91c1c" />
+                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPointerOverKey}" Color="#b91c1c" />
+                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPressedKey}" Color="#991b1b" />
+                    </Button.Resources>
+                    <Button.Content>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="3">
+                            <Image RenderOptions.BitmapScalingMode="HighQuality" Height="12">
+                                <Image.Source>
+                                    <DrawingImage>
+                                        <DrawingImage.Drawing>
+                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                                <GeometryDrawing Brush="White"
+                                                                 Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.ClearInkIconGeometry}, Converter={StaticResource StringToGeometryConverter}}"/>
+                                            </DrawingGroup>
+                                        </DrawingImage.Drawing>
+                                    </DrawingImage>
+                                </Image.Source>
+                            </Image>
+                            <TextBlock FontSize="10" VerticalAlignment="Center"
+                                       Foreground="White" FontWeight="Bold"
+                                       Text="{i18n:I18n Key=Board_ClearInk}" />
+                        </ikw:SimpleStackPanel>
+                    </Button.Content>
+                </Button>
+                <Button x:Name="ClearInkAndHistoryButton" Foreground="White"
+                        HorizontalAlignment="Center" Margin="0,4,0,4"
+                        MinHeight="28" Padding="12,4">
+                    <Button.Resources>
+                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundKey}" Color="#b91c1c" />
+                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPointerOverKey}" Color="#b91c1c" />
+                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPressedKey}" Color="#991b1b" />
+                    </Button.Resources>
+                    <Button.Content>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="4" Margin="-4,-1">
+                            <Image RenderOptions.BitmapScalingMode="HighQuality" Height="12">
+                                <Image.Source>
+                                    <DrawingImage>
+                                        <DrawingImage.Drawing>
+                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                                <GeometryDrawing Brush="White"
+                                                                 Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.ClearInkIconGeometry}, Converter={StaticResource StringToGeometryConverter}}"/>
+                                            </DrawingGroup>
+                                        </DrawingImage.Drawing>
+                                    </DrawingImage>
+                                </Image.Source>
+                            </Image>
+                            <TextBlock FontSize="9" VerticalAlignment="Center"
+                                       Foreground="White"
+                                       Text="{i18n:I18n Key=Board_ClearInkAndHistory}" />
+                        </ikw:SimpleStackPanel>
+                    </Button.Content>
+                </Button>
+            </ikw:SimpleStackPanel>
+        </ContentControl>
+    </Grid>
+</UserControl>

@@ -21,33 +21,29 @@
             <Setter Property="helpers:AutoFontSizeHelper.Step" Value="0.25" />
         </Style>
     </UserControl.Resources>
-    <Border CornerRadius="8" Background="{DynamicResource ToolsPopupBackground}"
-            BorderBrush="#3b82f6" BorderThickness="2">
-        <ikw:SimpleStackPanel Margin="-1">
-            <controls:PopupTitleBar x:Name="TitleBar" Title="{i18n:I18n Key=Tools_MoreFeaturesTitle}" />
-            <Border Margin="6,0,6,6" BorderBrush="{DynamicResource ToolsPopupInnerBorderBrush}" Background="{DynamicResource ToolsPopupInnerBackground}" BorderThickness="1"
-                    CornerRadius="4">
-                <ikw:SimpleStackPanel Margin="2" Spacing="1">
-                    <ikw:SimpleStackPanel.Resources>
-                        <Style TargetType="Label" BasedOn="{StaticResource AutoFitToolPopupLabel8}" />
-                    </ikw:SimpleStackPanel.Resources>
-                    <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40" Orientation="Horizontal">
-                        <controls:ToolMenuButton x:Name="TimerToolBtn" Label="{i18n:I18n Key=Tools_Timer}" />
-                        <controls:ToolMenuButton x:Name="RandomDrawToolBtn" Label="{i18n:I18n Key=Tools_RandomDraw}" />
-                        <controls:ToolMenuButton x:Name="SingleDrawToolBtn" Label="{i18n:I18n Key=Tools_SingleDraw}" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40" Orientation="Horizontal">
-                        <controls:ToolMenuButton x:Name="SaveToolBtn" Label="{i18n:I18n Key=Tools_Save}" />
-                        <controls:ToolMenuButton x:Name="OpenToolBtn" Label="{i18n:I18n Key=Tools_Open}" />
-                        <controls:ToolMenuButton x:Name="ReplayToolBtn" Label="{i18n:I18n Key=Tools_Replay}" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40" Orientation="Horizontal">
-                        <controls:ToolMenuButton x:Name="ScreenshotToolBtn" Label="{i18n:I18n Key=Tools_Screenshot}" />
-                        <controls:ToolMenuButton x:Name="ManualToolBtn" Label="{i18n:I18n Key=Tools_Manual}" />
-                        <controls:ToolMenuButton x:Name="SettingsToolBtn" Label="{i18n:I18n Key=Tools_Settings}" />
-                    </ikw:SimpleStackPanel>
+    <Grid>
+        <controls:PopupShellContent x:Name="Shell" Title="{i18n:I18n Key=Tools_MoreFeaturesTitle}" d:Visibility="Collapsed" />
+        <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
+            <ikw:SimpleStackPanel Margin="2" Spacing="1">
+                <ikw:SimpleStackPanel.Resources>
+                    <Style TargetType="Label" BasedOn="{StaticResource AutoFitToolPopupLabel8}" />
+                </ikw:SimpleStackPanel.Resources>
+                <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40" Orientation="Horizontal">
+                    <controls:ToolMenuButton x:Name="TimerToolBtn" Label="{i18n:I18n Key=Tools_Timer}" />
+                    <controls:ToolMenuButton x:Name="RandomDrawToolBtn" Label="{i18n:I18n Key=Tools_RandomDraw}" />
+                    <controls:ToolMenuButton x:Name="SingleDrawToolBtn" Label="{i18n:I18n Key=Tools_SingleDraw}" />
                 </ikw:SimpleStackPanel>
-            </Border>
-        </ikw:SimpleStackPanel>
-    </Border>
+                <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40" Orientation="Horizontal">
+                    <controls:ToolMenuButton x:Name="SaveToolBtn" Label="{i18n:I18n Key=Tools_Save}" />
+                    <controls:ToolMenuButton x:Name="OpenToolBtn" Label="{i18n:I18n Key=Tools_Open}" />
+                    <controls:ToolMenuButton x:Name="ReplayToolBtn" Label="{i18n:I18n Key=Tools_Replay}" />
+                </ikw:SimpleStackPanel>
+                <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40" Orientation="Horizontal">
+                    <controls:ToolMenuButton x:Name="ScreenshotToolBtn" Label="{i18n:I18n Key=Tools_Screenshot}" />
+                    <controls:ToolMenuButton x:Name="ManualToolBtn" Label="{i18n:I18n Key=Tools_Manual}" />
+                    <controls:ToolMenuButton x:Name="SettingsToolBtn" Label="{i18n:I18n Key=Tools_Settings}" />
+                </ikw:SimpleStackPanel>
+            </ikw:SimpleStackPanel>
+        </ContentControl>
+    </Grid>
 </UserControl>
