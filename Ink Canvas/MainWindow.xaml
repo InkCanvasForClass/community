@@ -44,8 +44,6 @@
                 <ResourceDictionary Source="MainWindow_cs/MW_Eraser.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <SolidColorBrush x:Key="NavButtonActiveBackground" Color="#3b82f6"/>
-
             <c:IsEnabledToOpacityConverter x:Key="IsEnabledToOpacityConverter" />
             <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <c:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
@@ -125,17 +123,6 @@
                 <Setter Property="helpers:AutoFontSizeHelper.Step" Value="0.25" />
             </Style>
 
-            <Style x:Key="AutoFitToolPopupLabel8" TargetType="Label">
-                <Setter Property="Padding" Value="0" />
-                <Setter Property="HorizontalContentAlignment" Value="Center" />
-                <Setter Property="VerticalContentAlignment" Value="Center" />
-                <Setter Property="Foreground" Value="{DynamicResource FloatBarForeground}" />
-                <Setter Property="helpers:AutoFontSizeHelper.IsEnabled" Value="True" />
-                <Setter Property="helpers:AutoFontSizeHelper.MinFontSize" Value="3.5" />
-                <Setter Property="helpers:AutoFontSizeHelper.MaxFontSize" Value="8" />
-                <Setter Property="helpers:AutoFontSizeHelper.Step" Value="0.25" />
-            </Style>
-
             <Style x:Key="AutoFitGestureOptionLabel10" TargetType="Label">
                 <Setter Property="Foreground" Value="{DynamicResource FloatBarForeground}" />
                 <Setter Property="FontWeight" Value="Normal" />
@@ -151,69 +138,6 @@
             <Style x:Key="AutoFitBoardGestureOptionLabel10" TargetType="Label" BasedOn="{StaticResource AutoFitGestureOptionLabel10}">
                 <Setter Property="helpers:AutoFontSizeHelper.MinFontSize" Value="5" />
                 <Setter Property="helpers:AutoFontSizeHelper.MaxFontSize" Value="10" />
-            </Style>
-
-            <!-- Navigation Button Style -->
-            <Style x:Key="NavButton" TargetType="Button">
-                <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="Button">
-                            <Border x:Name="border" Background="{TemplateBinding Background}" 
-                                      BorderBrush="{TemplateBinding BorderBrush}" 
-                                      BorderThickness="{TemplateBinding BorderThickness}"
-                                      CornerRadius="4">
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#27272a"/>
-                                </Trigger>
-                                <Trigger Property="IsPressed" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
-                                </Trigger>
-                                <!-- 使用多个DataTrigger替代动态绑定 -->
-                                <DataTrigger Binding="{Binding Tag}" Value="startup">
-                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="canvas">
-                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="gesture">
-                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="inkrecognition">
-                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="crashaction">
-                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="ppt">
-                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="advanced">
-                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="automation">
-                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="randomwindow">
-                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="theme">
-                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="shortcuts">
-                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="about">
-                                    <Setter Property="Background" Value="{StaticResource NavButtonActiveBackground}"/>
-                                </DataTrigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
             </Style>
         </ResourceDictionary>
     </helpers:PerformanceTransparentWin.Resources>
@@ -287,6 +211,7 @@
             <TextBlock Canvas.Right="25" Canvas.Top="15" Text="多一份理解，少一份抱怨" Name="BlackBoardWaterMark"
                        Visibility="Collapsed" FontSize="24" FontWeight="Bold" Foreground="White" Opacity="0.5" />
         </Canvas>
+        <!--墨迹/图片选择器-->
         <Grid Visibility="{Binding ElementName=inkCanvas, Path=Visibility}">
             <Grid Name="GridInkCanvasSelectionCover"
                   MouseDown="GridInkCanvasSelectionCover_MouseDown"
@@ -346,7 +271,7 @@
             <Border Name="BorderStrokeSelectionControl"
                     HorizontalAlignment="Left" VerticalAlignment="Top" Margin="800,400,0,0"
                     CornerRadius="5" Height="80"
-                    Background="{DynamicResource FloatBarBackground}"
+                    Background="{DynamicResource FloatBarBackground}" d:BorderBrush="Red" d:Background="Green"
                     Visibility="{Binding ElementName=GridInkCanvasSelectionCover, Path=Visibility}"
                     BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}">
                 <Viewbox Margin="0,-2.5">
@@ -668,12 +593,12 @@
                                             Panel.ZIndex="1000" />
 
         </Grid>
-        <Grid Visibility="Collapsed">
-            <Grid Visibility="{Binding ElementName=GridBackgroundCoverHolder, Path=Visibility}">
+        <Grid Visibility="Collapsed"  d:Visibility="Visible">
+            <Grid Visibility="{Binding ElementName=GridBackgroundCoverHolder, Path=Visibility}" d:Visibility="Visible">
                 <Viewbox Margin="10" Height="50" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="5">
                         <Border Width="36" Height="36" CornerRadius="5"
-                                Background="{DynamicResource FloatBarBackground}" BorderThickness="1"
+                                Background="{DynamicResource FloatBarBackground}" BorderThickness="1" d:BorderBrush="Red" d:Background="Green"
                                 BorderBrush="{DynamicResource FloatBarBorderBrush}">
                             <Grid Margin="6" MouseUp="GridPPTControlPrevious_MouseUp">
                                 <Image
@@ -681,7 +606,7 @@
                             </Grid>
                         </Border>
                         <Border Visibility="{Binding ElementName=PptNavigationBtn, Path=Visibility}" Width="36"
-                                Height="36" CornerRadius="5" Background="{DynamicResource FloatBarBackground}"
+                                Height="36" CornerRadius="5" Background="{DynamicResource FloatBarBackground}" d:BorderBrush="Red" d:Background="Green"
                                 BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}">
                             <Grid MouseUp="PPTNavigationBtn_MouseUp">
                                 <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -691,7 +616,7 @@
                             </Grid>
                         </Border>
                         <Border Width="36" Height="36" CornerRadius="5"
-                                Background="{DynamicResource FloatBarBackground}" BorderThickness="1"
+                                Background="{DynamicResource FloatBarBackground}" BorderThickness="1" d:BorderBrush="Red" d:Background="Green"
                                 BorderBrush="{DynamicResource FloatBarBorderBrush}">
                             <Grid Margin="6" MouseUp="GridPPTControlNext_MouseUp">
                                 <Image
@@ -1173,6 +1098,7 @@
             <TextBlock Name="PPTBtnPageNow" Text="?"/>
             <TextBlock Name="PPTBtnPageTotal" Text="/ ?"/>
         </ikw:SimpleStackPanel>
+        <!--左右侧边翻页按钮-->
         <localControls:PptNavBar x:Name="LeftSidePanelForPPTNavigation"
                                  Visibility="Collapsed" d:Visibility="Visible"
                                  Direction="LeftSide"
@@ -1536,21 +1462,14 @@
             </Border>
         </Grid>
         <!--侧边栏-->
-        <Viewbox x:Name="LeftSidePanel" MouseUp="LeftUnFoldButtonDisplayQuickPanel_MouseUp" Visibility="Visible"
-                 Height="50" Width="32" Margin="-60,0,0,-150" HorizontalAlignment="Left" VerticalAlignment="Center">
-            <ikw:SimpleStackPanel>
-                <Border Background="#9918181b" Opacity="1" CornerRadius="0,25,25,0" Height="50" Width="32">
-                    <Image x:Name="LeftUnFoldBtnImgChevron" Margin="10,0,0,0"
-                           Source="{DynamicResource QuickPanelUnfoldChevronIcon}"
-                           RenderOptions.BitmapScalingMode="HighQuality" Height="14" Width="14" />
-                </Border>
-            </ikw:SimpleStackPanel>
-        </Viewbox>
+        <localControls:SidePanelToggle x:Name="LeftSidePanel" MouseUp="LeftUnFoldButtonDisplayQuickPanel_MouseUp"
+                                       Visibility="Visible" Margin="-60,0,0,-150"
+                                       HorizontalAlignment="Left" VerticalAlignment="Center" />
         <!--收纳下的快捷面板-->
-        <Viewbox Width="50" Visibility="Collapsed" Name="LeftUnFoldButtonQuickPanel" Margin="-1,0,0,-150"
+        <Viewbox Width="50" Visibility="Collapsed" Name="LeftUnFoldButtonQuickPanel" Margin="-1,0,0,-150" d:Visibility="Visible" d:Margin="-1,0,0,500"
                  HorizontalAlignment="Left" VerticalAlignment="Center">
             <Border ClipToBounds="True" Visibility="Visible" CornerRadius="0,6,6,0" Background="{DynamicResource FloatBarBackground}" Opacity="1"
-                    BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}" Width="32">
+                    BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}" d:BorderBrush="Red" d:Background="Green" Width="32">
                 <ikw:SimpleStackPanel Orientation="Vertical" Margin="0,5">
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelPersonMoneyIcon}" Label="{i18n:I18n Key=QuickPanel_SingleDraw}" ButtonMouseUp="SymbolIconRandOne_MouseUp" />
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelPeopleMoneyIcon}" Label="{i18n:I18n Key=QuickPanel_RandomDraw}" ButtonMouseUp="SymbolIconRand_MouseUp" />
@@ -1562,28 +1481,15 @@
                 </ikw:SimpleStackPanel>
             </Border>
         </Viewbox>
-        <Viewbox x:Name="RightSidePanel" MouseUp="RightUnFoldButtonDisplayQuickPanel_MouseUp"
-                 Visibility="{Binding ElementName=LeftSidePanel, Path=Visibility}" Height="50" Width="32"
-                 Margin="0,0,-60,-150" HorizontalAlignment="Right" VerticalAlignment="Center">
-            <ikw:SimpleStackPanel>
-                <Border Background="#9918181b" Opacity="1" CornerRadius="25,0,0,25" Height="50" Width="32">
-                    <Image Margin="0,0,10,0" x:Name="RightUnFoldBtnImgChevron"
-                           Source="{DynamicResource QuickPanelUnfoldChevronIcon}"
-                           RenderOptions.BitmapScalingMode="HighQuality" Height="14" Width="14"
-                           RenderTransformOrigin="0.5,0.5">
-                        <Image.RenderTransform>
-                            <TransformGroup>
-                                <RotateTransform Angle="180" />
-                            </TransformGroup>
-                        </Image.RenderTransform>
-                    </Image>
-                </Border>
-            </ikw:SimpleStackPanel>
-        </Viewbox>
-        <Viewbox Width="50" Visibility="Collapsed" Name="RightUnFoldButtonQuickPanel" Margin="0,0,-1,-150"
+        <!--侧边栏-->
+        <localControls:SidePanelToggle x:Name="RightSidePanel" MouseUp="RightUnFoldButtonDisplayQuickPanel_MouseUp"
+                                       Visibility="{Binding ElementName=LeftSidePanel, Path=Visibility}"
+                                       Margin="0,0,-60,-150" IsRightSide="True"
+                                       HorizontalAlignment="Right" VerticalAlignment="Center" />
+        <Viewbox Width="50" Visibility="Collapsed" Name="RightUnFoldButtonQuickPanel" Margin="0,0,-1,-150" d:Visibility="Visible" d:Margin="0,0,-1,500"
                  HorizontalAlignment="Right" VerticalAlignment="Center">
             <Border ClipToBounds="True" Visibility="Visible" CornerRadius="6,0,0,6" Background="{DynamicResource FloatBarBackground}" Opacity="1"
-                    BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}" Width="32">
+                    BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}" d:BorderBrush="Red" d:Background="Green" Width="32">
                 <ikw:SimpleStackPanel Orientation="Vertical" Margin="0,5">
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelPersonMoneyIcon}" Label="{i18n:I18n Key=QuickPanel_SingleDraw}" ButtonMouseUp="SymbolIconRandOne_MouseUp" />
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelPeopleMoneyIcon}" Label="{i18n:I18n Key=QuickPanel_RandomDraw}" ButtonMouseUp="SymbolIconRand_MouseUp" />
@@ -1791,6 +1697,7 @@
                 </Grid>
             </Grid>
         </Border>
+        <!-- 包装层：为 TimerControl 提供 Visibility/Margin 控制与鼠标拖拽手柄，代码中 7 文件 40+ 处引用，非死代码 -->
         <Border x:Name="TimerContainer" 
                 Visibility="Collapsed"
                 Panel.ZIndex="998"
@@ -1800,6 +1707,7 @@
                 Height="500">
             <Windows:TimerControl x:Name="TimerControl"/>
         </Border>
+        <!-- 包装层：计时器最小化浮窗，同步主容器位置后显示/拖拽，非死代码 -->
         <Border x:Name="MinimizedTimerContainer" 
                 Visibility="Collapsed"
                 Panel.ZIndex="997"
@@ -1810,6 +1718,7 @@
                 Height="200">
             <Windows:MinimizedTimerControl x:Name="MinimizedTimerControl"/>
         </Border>
+        <!-- 包装层：PPT 时间胶囊容器，承载 ScaleTransform 与屏幕四角定位，非死代码 -->
         <Border x:Name="PPTTimeCapsuleContainer"
                 Visibility="Collapsed"
                 Panel.ZIndex="999"
@@ -1822,6 +1731,7 @@
             </Border.RenderTransform>
             <Windows:PPTTimeCapsule x:Name="PPTTimeCapsule"/>
         </Border>
+        <!-- 包装层：PPT 放映快捷面板，代码中 4 处控制 Visibility/位置，非死代码 -->
         <Border x:Name="PPTQuickPanelContainer" 
                 Visibility="Collapsed"
                 Panel.ZIndex="999"

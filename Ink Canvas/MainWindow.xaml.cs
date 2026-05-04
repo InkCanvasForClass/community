@@ -105,6 +105,9 @@ namespace Ink_Canvas
         internal ToolMenuButton ManualToolBtn => MainToolsPopupContent?.ManualBtn;
         internal ToolMenuButton SettingsToolBtn => MainToolsPopupContent?.SettingsBtn;
 
+        internal Image LeftUnFoldBtnImgChevron => LeftSidePanel?.ChevronIcon;
+        internal Image RightUnFoldBtnImgChevron => RightSidePanel?.ChevronIcon;
+
         internal bool IsInPptPresentationMode { get; set; }
         internal bool ArePptControlsVisible { get; set; }
 
