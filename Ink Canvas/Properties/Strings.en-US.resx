@@ -724,22 +724,22 @@
     <value>Floating toolbar icon</value>
   </data>
   <data name="Theme_FloatingIcon_IccDefault" xml:space="preserve">
-    <value>“ICC-CE” default</value>
+    <value>"ICC-CE" default</value>
   </data>
   <data name="Theme_FloatingIcon_IccNoShadow" xml:space="preserve">
-    <value>“ICC-CE” no shadow</value>
+    <value>"ICC-CE" no shadow</value>
   </data>
   <data name="Theme_FloatingIcon_IccDark" xml:space="preserve">
-    <value>“ICC-CE” dark</value>
+    <value>"ICC-CE" dark</value>
   </data>
   <data name="Theme_FloatingIcon_IccDarkBreath" xml:space="preserve">
-    <value>“ICC-CE” dark breathing</value>
+    <value>"ICC-CE" dark breathing</value>
   </data>
   <data name="Theme_FloatingIcon_IccWhiteTransparent" xml:space="preserve">
-    <value>“ICC-CE” white transparent</value>
+    <value>"ICC-CE" white transparent</value>
   </data>
   <data name="Theme_FloatingIcon_IccBlackTransparent" xml:space="preserve">
-    <value>“ICC-CE” black transparent</value>
+    <value>"ICC-CE" black transparent</value>
   </data>
   <data name="Theme_FloatingIcon_CoolapkCrossEye" xml:space="preserve">
     <value>Coolapk cross-eye emoji</value>
@@ -955,7 +955,7 @@
     <value>Enabling WPS support may cause lag when closing WPS!</value>
   </data>
   <data name="PPT_WpsSupportHint" xml:space="preserve">
-    <value>WPS is supported, but MS Office and WPS cannot be supported at the same time. To enable WPS support, make sure “WPS Office compatibility with third-party systems and software” is enabled in the WPS config tool, otherwise WPS cannot be detected.</value>
+    <value>WPS is supported, but MS Office and WPS cannot be supported at the same time. To enable WPS support, make sure "WPS Office compatibility with third-party systems and software" is enabled in the WPS config tool, otherwise WPS cannot be detected.</value>
   </data>
   <data name="Canvas_HideStrokeWhenSelecting" xml:space="preserve">
     <value>Hide ink when exiting board mode</value>
