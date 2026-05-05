@@ -850,7 +850,7 @@ namespace Ink_Canvas
                         _pptUIManager?.UpdateSidebarExitButtons(false);
 
                         // 隐藏浮动栏退出PPT按钮
-                        BorderFloatingBarExitPPTBtn.Visibility = Visibility.Collapsed;
+                        HideFloatingBarExitPPTBtn();
                         ResetPPTStateVariables();
                         _ = HandleManualSlideShowEnd();
                         if (Settings.PowerPointSettings.UseRotPptLink)
@@ -1164,7 +1164,7 @@ namespace Ink_Canvas
                     _pptUIManager?.UpdateSidebarExitButtons(true);
 
                     // 显示浮动栏退出PPT按钮
-                    BorderFloatingBarExitPPTBtn.Visibility = Visibility.Visible;
+                    ShowFloatingBarExitPPTBtn();
 
                     // 处理画板显示
                     if (Settings.PowerPointSettings.IsShowCanvasAtNewSlideShow &&
@@ -1526,7 +1526,7 @@ namespace Ink_Canvas
                         _pptUIManager?.UpdateSidebarExitButtons(false);
 
                         // 隐藏浮动栏退出PPT按钮
-                        BorderFloatingBarExitPPTBtn.Visibility = Visibility.Collapsed;
+                        HideFloatingBarExitPPTBtn();
 
                         _pptUIManager?.SetMainPanelMargin(new Thickness(10, 10, 10, 55));
                         _pptUIManager?.SetFloatingBarOpacity(Settings.Appearance.ViewboxFloatingBarOpacityValue);
@@ -2688,7 +2688,7 @@ namespace Ink_Canvas
                     {
                         _pptUIManager?.UpdateSlideShowStatus(false);
                         _pptUIManager?.UpdateSidebarExitButtons(false);
-                        BorderFloatingBarExitPPTBtn.Visibility = Visibility.Collapsed;
+                        HideFloatingBarExitPPTBtn();
                         LogHelper.WriteLogToFile("手动更新放映结束UI状态", LogHelper.LogType.Trace);
                         CheckMainWindowVisibility();
                     });
@@ -2723,7 +2723,7 @@ namespace Ink_Canvas
                 {
                     _pptUIManager?.UpdateSlideShowStatus(false);
                     _pptUIManager?.UpdateSidebarExitButtons(false);
-                    BorderFloatingBarExitPPTBtn.Visibility = Visibility.Collapsed;
+                    HideFloatingBarExitPPTBtn();
                     CheckMainWindowVisibility();
                 });
 
@@ -2817,6 +2817,16 @@ namespace Ink_Canvas
         private async void ImagePPTControlEnd_MouseUp(object sender, MouseButtonEventArgs e)
         {
             await ExitPptPresentation();
+        }
+
+        private void ShowFloatingBarExitPPTBtn()
+        {
+            BorderFloatingBarExitPPTBtn.Visibility = Visibility.Visible;
+        }
+
+        private void HideFloatingBarExitPPTBtn()
+        {
+            BorderFloatingBarExitPPTBtn.Visibility = Visibility.Collapsed;
         }
     }
 }
