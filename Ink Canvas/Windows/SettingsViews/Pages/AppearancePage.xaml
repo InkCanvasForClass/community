@@ -309,6 +309,14 @@
                             SwitchName="ToggleSwitchEnableTimeDisplayInWhiteboardMode"
                             Toggled="ToggleSwitchEnableTimeDisplayInWhiteboardMode_Toggled" />
 
+                    <controls:LabeledSettingsCard x:Name="CardUse24HourTimeFormat"
+                            Header="{i18n:I18n Key=AppearancePanel_24HourTimeFormat}"
+                            Toggled="ToggleSwitchUse24HourTimeFormat_Toggled">
+                        <controls:LabeledSettingsCard.HeaderIcon>
+                            <ui:FontIcon Glyph="&#xE917;" />
+                        </controls:LabeledSettingsCard.HeaderIcon>
+                    </controls:LabeledSettingsCard>
+
                     <controls:LabeledSettingsCard x:Name="CardEnableChickenSoupInWhiteboardMode"
                             Header="{i18n:I18n Key=Theme_ShowQuoteInWhiteboard}"
                             Icon="{x:Static ui:SegoeFluentIcons.Message}"

@@ -108,6 +108,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             CardEnableDisPlayNibModeToggle.IsOn = settings.Appearance.IsEnableDisPlayNibModeToggler;
             CardEnableTimeDisplayInWhiteboardMode.IsOn = settings.Appearance.EnableTimeDisplayInWhiteboardMode;
+            CardUse24HourTimeFormat.IsOn = settings.Appearance.Use24HourTimeFormat;
             CardEnableChickenSoupInWhiteboardMode.IsOn = settings.Appearance.EnableChickenSoupInWhiteboardMode;
 
             _suppressChickenSoupSourceSelectionChanged = true;
@@ -519,6 +520,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 mw.BlackBoardWaterMark.Visibility = CardEnableChickenSoupInWhiteboardMode.IsOn ? Visibility.Visible : Visibility.Collapsed;
             }
+        }
+
+        private void ToggleSwitchUse24HourTimeFormat_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.Use24HourTimeFormat = CardUse24HourTimeFormat.IsOn;
+            SettingsManager.SaveSettingsToFile();
         }
 
         private async void ComboBoxChickenSoupSource_SelectionChanged(object sender, SelectionChangedEventArgs e)

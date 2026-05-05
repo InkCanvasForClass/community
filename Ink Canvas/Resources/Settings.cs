@@ -374,6 +374,8 @@ namespace Ink_Canvas
         public bool EnableHotkeysInMouseMode { get; set; } = false;
         [JsonProperty("language")]
         public string Language { get; set; } = "";
+        [JsonProperty("use24HourTimeFormat")]
+        public bool Use24HourTimeFormat { get; set; } = false;
 
     }
 

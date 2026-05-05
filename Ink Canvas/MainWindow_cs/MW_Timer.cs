@@ -121,10 +121,6 @@ namespace Ink_Canvas
         /// </summary>
         private const int MAX_UPDATE_CHECK_RETRIES = 6;
         /// <summary>
-        /// 时间显示定时器
-        /// </summary>
-        private Timer timerDisplayTime = new Timer();
-        /// <summary>
         /// 日期显示定时器
         /// </summary>
         private Timer timerDisplayDate = new Timer();
@@ -231,9 +227,6 @@ namespace Ink_Canvas
             timerCheckAutoUpdateRetry.Interval = 1000 * 60 * 10;
             WaterMarkTime.DataContext = nowTimeVM;
             WaterMarkDate.DataContext = nowTimeVM;
-            timerDisplayTime.Elapsed += TimerDisplayTime_Elapsed;
-            timerDisplayTime.Interval = 1000;
-            timerDisplayTime.Start();
             timerDisplayDate.Elapsed += TimerDisplayDate_Elapsed;
             timerDisplayDate.Interval = 1000 * 60 * 60 * 1;
             timerDisplayDate.Start();
@@ -242,7 +235,11 @@ namespace Ink_Canvas
             timerNtpSync.Start();
             timerKillProcess.Start();
             nowTimeVM.nowDate = DateTime.Now.ToString("yyyy'年'MM'月'dd'日' dddd");
-            nowTimeVM.nowTime = DateTime.Now.ToString("tt hh'时'mm'分'ss'秒'");
+            nowTimeVM.nowTime = Settings.Appearance.Use24HourTimeFormat 
+                ? DateTime.Now.ToString("HH:mm:ss") 
+                : DateTime.Now.ToString("tt hh'时'mm'分'ss'秒'");
+
+            InitHighPrecisionTimeDisplay();
 
             // 程序启动时立即进行一次NTP同步
             Task.Run(async () =>
@@ -420,23 +417,20 @@ namespace Ink_Canvas
         /// 1. 获取当前本地时间
         /// 2. 检测系统时间是否发生重大跳跃（超过3分钟），如果是则触发NTP同步
         /// 3. 如果启用网络时间且偏移量已计算，则应用偏移量
-        /// 4. 格式化时间字符串
+        /// 4. 格式化时间字符串（支持12/24小时制）
         /// 5. 只有当时间字符串发生变化时才更新UI，避免不必要的UI刷新
         /// 6. 使用BeginInvoke异步更新UI，避免阻塞
         /// </remarks>
         private void TimerDisplayTime_Elapsed(object sender, ElapsedEventArgs e)
         {
             DateTime localTime = DateTime.Now;
-            DateTime displayTime = localTime; // 默认使用本地时间
+            DateTime displayTime = localTime;
 
-            // 检测系统时间是否发生重大跳跃（超过2分钟）
             TimeSpan timeJump = localTime - lastLocalTime;
             double timeJumpMinutes = Math.Abs(timeJump.TotalMinutes);
 
             if (timeJumpMinutes > 3 && !isNtpSyncing)
             {
-                // 系统时间发生重大变化（超过3分钟），立即触发NTP同步
-                // 使用异步方式触发NTP同步，避免阻塞主线程
                 Task.Run(async () =>
                 {
                     try
@@ -451,22 +445,25 @@ namespace Ink_Canvas
             }
             lastLocalTime = localTime;
 
-            // 如果启用网络时间且偏移量已计算，则应用偏移量
             if (useNetworkTime && networkTimeOffset != TimeSpan.Zero)
             {
                 displayTime = localTime + networkTimeOffset;
             }
 
-            // 格式化时间字符串
-            string timeString = displayTime.ToString("tt hh'时'mm'分'ss'秒'");
+            string timeString;
+            if (Settings.Appearance.Use24HourTimeFormat)
+            {
+                timeString = displayTime.ToString("HH:mm:ss");
+            }
+            else
+            {
+                timeString = displayTime.ToString("tt hh'时'mm'分'ss'秒'");
+            }
 
-
-            // 只有当时间字符串发生变化时才更新UI，避免不必要的UI刷新
             if (timeString != lastDisplayedTime)
             {
                 lastDisplayedTime = timeString;
 
-                // 使用BeginInvoke异步更新UI，避免阻塞
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     nowTimeVM.nowTime = timeString;
@@ -490,6 +487,47 @@ namespace Ink_Canvas
             {
                 nowTimeVM.nowDate = DateTime.Now.ToString("yyyy'年'MM'月'dd'日' dddd");
             }));
+        }
+
+        private DispatcherTimer _dispatcherTimerForTime;
+
+        /// <summary>
+        /// 初始化高精度时间显示定时器
+        /// </summary>
+        private void InitHighPrecisionTimeDisplay()
+        {
+            _dispatcherTimerForTime = new DispatcherTimer(DispatcherPriority.Normal)
+            {
+                Interval = TimeSpan.FromMilliseconds(200)
+            };
+            _dispatcherTimerForTime.Tick += DispatcherTimerForTime_Tick;
+            _dispatcherTimerForTime.Start();
+        }
+
+        private void DispatcherTimerForTime_Tick(object sender, EventArgs e)
+        {
+            DateTime displayTime = DateTime.Now;
+
+            if (useNetworkTime && networkTimeOffset != TimeSpan.Zero)
+            {
+                displayTime = DateTime.Now + networkTimeOffset;
+            }
+
+            string timeString;
+            if (Settings.Appearance.Use24HourTimeFormat)
+            {
+                timeString = displayTime.ToString("HH:mm:ss");
+            }
+            else
+            {
+                timeString = displayTime.ToString("tt hh'时'mm'分'ss'秒'");
+            }
+
+            if (timeString != lastDisplayedTime)
+            {
+                lastDisplayedTime = timeString;
+                nowTimeVM.nowTime = timeString;
+            }
         }
 
         /// <summary>
@@ -1414,14 +1452,6 @@ namespace Ink_Canvas
                     timerCheckAutoUpdateRetry = null;
                 }
 
-                if (timerDisplayTime != null)
-                {
-                    timerDisplayTime.Stop();
-                    timerDisplayTime.Elapsed -= TimerDisplayTime_Elapsed;
-                    timerDisplayTime.Dispose();
-                    timerDisplayTime = null;
-                }
-
                 if (timerDisplayDate != null)
                 {
                     timerDisplayDate.Stop();
@@ -1439,6 +1469,13 @@ namespace Ink_Canvas
                 }
 
                 // DispatcherTimers run on UI thread
+                if (_dispatcherTimerForTime != null)
+                {
+                    _dispatcherTimerForTime.Stop();
+                    _dispatcherTimerForTime.Tick -= DispatcherTimerForTime_Tick;
+                    _dispatcherTimerForTime = null;
+                }
+
                 if (autoSaveStrokesTimer != null)
                 {
                     autoSaveStrokesTimer.Stop();
