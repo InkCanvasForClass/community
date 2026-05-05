@@ -2112,20 +2112,6 @@ namespace Ink_Canvas
             else if (PosXCaculatedWithTaskbarHeight)
             {
                 if (toolbarHeight == 0)
-                double baseWidth = ViewboxFloatingBar.ActualWidth;
-                if (baseWidth <= 0) baseWidth = ViewboxFloatingBar.DesiredSize.Width;
-                if (baseWidth <= 0) baseWidth = ViewboxFloatingBar.RenderSize.Width;
-                if (baseWidth <= 0)
-                {
-                    baseWidth = 200;
-                    LogHelper.WriteLogToFile($"浮动栏宽度无法获取，使用估算值: {baseWidth}");
-                }
-                double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
-
-                double baseHeight = ViewboxFloatingBar.ActualHeight;
-                if (baseHeight <= 0) baseHeight = ViewboxFloatingBar.DesiredSize.Height;
-                if (baseHeight <= 0) baseHeight = ViewboxFloatingBar.RenderSize.Height;
-                if (baseHeight <= 0)
                 {
                     pos.Y = screenHeight - floatingBarHeight -
                            3 * ViewboxFloatingBarScaleTransform.ScaleY;
@@ -2148,6 +2134,7 @@ namespace Ink_Canvas
                         else
                             pointPPT = pos;
                     }
+                }
                 pos.X = (screenWidth - floatingBarWidth) / 2;
 
                 if (MarginFromEdge < 0)
@@ -2169,15 +2156,13 @@ namespace Ink_Canvas
                     pos.Y = screenHeight - floatingBarHeight -
                            toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
                 }
-                else
+
+                if (pointDesktop.X != -1 || pointDesktop.Y != -1)
                 {
-                    if (pointDesktop.X != -1 || pointDesktop.Y != -1)
-                    {
-                        if (Math.Abs(pointDesktop.Y - pos.Y) > 50)
-                            pos = pointDesktop;
-                        else
-                            pointDesktop = pos;
-                    }
+                    if (Math.Abs(pointDesktop.Y - pos.Y) > 50)
+                        pos = pointDesktop;
+                    else
+                        pointDesktop = pos;
                 }
 
                 pos.X = NormalizeFloatingBarLeftForScreen(pos.X, floatingBarWidth, screenWidth);
