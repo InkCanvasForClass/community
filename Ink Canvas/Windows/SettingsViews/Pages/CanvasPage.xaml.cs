@@ -57,10 +57,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     CardLaunchSeewoVideoShowcaseForWhiteboardBooth.IsOn = settings.Canvas.LaunchSeewoVideoShowcaseForWhiteboardBooth;
                     ComboBoxHyperbolaAsymptoteOption.SelectedIndex = (int)settings.Canvas.HyperbolaAsymptoteOption;
                     CardShowCircleCenter.IsOn = settings.Canvas.ShowCircleCenter;
-                    int curveMode;
-                    if (settings.Canvas.UseAdvancedBezierSmoothing) curveMode = 0;
+                    int curveMode = 0;
+                    if (settings.Canvas.UseAdvancedBezierSmoothing) curveMode = 2;
                     else if (settings.Canvas.FitToCurve) curveMode = 1;
-                    else curveMode = 2;
                     ComboBoxCurveSmoothingMode.SelectedIndex = curveMode;
                     ToggleSwitchEnableInkFade.IsOn = settings.Canvas.EnableInkFade;
                     InkFadeTimeSlider.Value = settings.Canvas.InkFadeTime;
