@@ -23,7 +23,7 @@
 
 ## 💫 软件说明
 
-使用该版本 InkCanvasForClass，意味着您同意自行承担任何可能存在的问题与风险。建议不要在公众场合（例如公开课，录播课，线上直播课，大型会议）使用未经广泛测试和优化的 Beta 版本，对使用 Beta 版本而带来的任何问题和风险（例如：被班主任批斗，被校长处罚，崩溃而导致的场面混乱，全球海平面上升等），**将由使用者自行承担**，[CJKmkp](https://github.com/CJKmkp) 及其项目的所有维护者不提供任何担保。
+使用该版本 InkCanvasForClass，意味着您同意自行承担任何可能存在的问题与风险。建议不要在公众场合（例如公开课、录播课、线上直播课、大型会议）使用未经广泛测试和优化的 Beta 版本，对使用 Beta 版本而带来的任何问题和风险（例如：被班主任批斗、被校长处罚、崩溃而导致的场面混乱、全球海平面上升等），**将由使用者自行承担**，[CJKmkp](https://github.com/CJKmkp) 及其项目的所有维护者不提供任何担保。
 
 ♥️ **本项目版权归 [CJKmkp](https://github.com/CJKmkp) 所有。[CJKmkp](https://github.com/CJKmkp) 拥有最终解释权。**
 
@@ -31,16 +31,16 @@
 
 ## ⚠️ 使用须知
 
-在使用和分发本软件前，请务必了解相关开源协议。本软件基于 <https://github.com/InkCanvasForClass/icc-20240610-stable> 修改而来，而 icc-20240610-stable 基于 <https://github.com/ChangSakura/Ink-Canvas> 修改，ica 则基于 <https://github.com/WXRIW/Ink-Canvas> 修改，增加了包括但不限于隐藏到侧边栏等功能，更改了相关UI和软件操作逻辑。对于墨迹书写功能以及 ica 独有功能的相关问题反馈，建议优先查阅 <https://github.com/WXRIW/Ink-Canvas/issues> 。**使用前建议戴上大脑使用。**
+在使用和分发本软件前，请务必了解相关开源协议。本软件基于 <https://github.com/InkCanvasForClass/icc-20240610-stable> 修改而来，而 icc-20240610-stable 基于 <https://github.com/ChangSakura/Ink-Canvas> 修改，ICA 则基于 <https://github.com/WXRIW/Ink-Canvas> 修改，增加了包括但不限于隐藏到侧边栏等功能，更改了相关UI和软件操作逻辑。对于墨迹书写功能以及 ICA 独有功能的相关问题反馈，建议优先查阅 <https://github.com/WXRIW/Ink-Canvas/issues> 。**使用前建议戴上大脑使用。**
 
 # 💬 提示
-- 对于新功能的有效意见和合理建议，开发者会适时回复并进行开发。本软件并非商业性质软件或由营利性机构驱动，请不要催促开发者，耐心等待能让功能少些Bug，更加稳定。
-- 此软件仅用于个人使用，请勿商用。更新速度不会很快，如果有能力请通过PR贡献代码，而不是在 Issue 里无能狂怒。
+- 对于新功能的有效意见和合理建议，开发者会适时回复并进行开发。本软件并非商业性质软件或由营利性机构驱动，请不要催促开发者，耐心等待能让功能少些 Bug，更加稳定。
+- 此软件仅用于个人使用，请勿商用。更新速度不会很快，如果有能力请通过 PR 贡献代码，而不是在 Issue 里无能狂怒。
 - 欢迎尝试 InkCanvas 家族的其他成员，包括 [Ink Canvas Plus](https://khyan.top/ic+) 和 [Ink Canvas Artistry](https://github.com/InkCanvas/Ink-Canvas-Artistry) 。您的大力宣传能让更多用户发现我们的软件。
 - **强烈建议使用 Microsoft Office 365 的 PowerPoint 搭配 InkCanvasForClass 使用，效果更好！！！**
 
 ## 📗 FAQ
-### 在 Windows 10 以下版本系统中，部分图标显示为 “□” 怎么办？
+### 在 Windows 10 以下版本系统中，部分图标显示为 「□」 怎么办？
 [点击下载](https://aka.ms/SegoeFonts "SegoeFonts") SegoeFonts 文件，安装压缩包中 `SegMDL2.ttf` 字体后重启即可解决。
 
 ### 点击放映后一翻页就闪退
@@ -48,8 +48,8 @@
 
 ### 放映后画板程序不会切换到 PPT 模式
 1. PowerPoint 处在保护模式下（只读），请退出保护模式，方法如下：
-   1. 打开 PowerPoint，点击左上角的“文件”选项；
-   2. 在“信息”标签内，点击右侧的“启用编辑”按钮。
+   1. 打开 PowerPoint，点击左上角的「文件」选项；
+   2. 在「信息」标签内，点击右侧的「启用编辑」按钮。
 2. 曾经安装过 WPS Office 办公软件，导致 COM 组件被破坏，解决方法为完全卸载 WPS Office 后重新安装 Microsoft Office Mondo 2016 即可解决。
 3. 请确保 PowerPoint 和本应用运行在同一权限下，如果 PowerPoint 以管理员身份运行而本应用以普通用户身份运行，也会出现无法切换到 PPT 模式的现象，您可以通过检查 PowerPoint 的兼容性设置或提权本应用运行来解决该问题。
 4. 如果上述方法不能解决你的问题，请参考这个链接[【点击此处以跳转】](https://www.inkeys.top/tutorial/ppt-com.html)
@@ -64,8 +64,8 @@
 **请注意，在贡献代码时，_务必_ 将所有代码提交到 _net6_ 分支，以保证net6版本总是新于main版本。**
 
 ## TODO LIST
-1. 预备2.0版本开发
-2. Ci联动插件
+1. 预备 2.0 版本开发
+2. Ci 联动插件
 
 ## 贡献者
 > [!NOTE]
