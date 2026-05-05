@@ -840,14 +840,6 @@
                 </Viewbox>
                 <!--菜单-->
                 <Grid>
-                    <Grid.RenderTransform>
-                        <TransformGroup>
-                            <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
-                            <SkewTransform />
-                            <RotateTransform />
-                            <TranslateTransform />
-                        </TransformGroup>
-                    </Grid.RenderTransform>
                     <!--手势菜单-->
                     <Popup x:Name="BoardTwoFingerGestureBorder" Placement="Custom" AllowsTransparency="True" StaysOpen="True" PlacementTarget="{Binding ElementName=BoardGesture}" IsOpen="False">
                         <localControls:GesturePopupContent x:Name="BoardGesturePopupContent" />

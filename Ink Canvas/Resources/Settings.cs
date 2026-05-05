@@ -377,6 +377,9 @@ namespace Ink_Canvas
         [JsonProperty("use24HourTimeFormat")]
         public bool Use24HourTimeFormat { get; set; } = false;
 
+        [JsonProperty("quickPanelBottomOffset")]
+        public double QuickPanelBottomOffset { get; set; } = -150;
+
     }
 
     public class PowerPointSettings

@@ -610,7 +610,7 @@ jobs:
           echo "Pre-release: ${{ needs.prepare.outputs.is_prerelease }}"
           
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.prepare.outputs.tag_name }}
           name: ICC CE ${{ needs.prepare.outputs.version }}
@@ -720,7 +720,7 @@ jobs:
             ${SHA:+-f sha="$SHA"}
       
       - name: Create GitHub Release on beta repo
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.prepare.outputs.tag_name }}
           name: ICC CE ${{ needs.prepare.outputs.version }}

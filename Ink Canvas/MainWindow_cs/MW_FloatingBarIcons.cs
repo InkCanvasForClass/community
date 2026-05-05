@@ -2112,6 +2112,20 @@ namespace Ink_Canvas
             else if (PosXCaculatedWithTaskbarHeight)
             {
                 if (toolbarHeight == 0)
+                double baseWidth = ViewboxFloatingBar.ActualWidth;
+                if (baseWidth <= 0) baseWidth = ViewboxFloatingBar.DesiredSize.Width;
+                if (baseWidth <= 0) baseWidth = ViewboxFloatingBar.RenderSize.Width;
+                if (baseWidth <= 0)
+                {
+                    baseWidth = 200;
+                    LogHelper.WriteLogToFile($"浮动栏宽度无法获取，使用估算值: {baseWidth}");
+                }
+                double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
+
+                double baseHeight = ViewboxFloatingBar.ActualHeight;
+                if (baseHeight <= 0) baseHeight = ViewboxFloatingBar.DesiredSize.Height;
+                if (baseHeight <= 0) baseHeight = ViewboxFloatingBar.RenderSize.Height;
+                if (baseHeight <= 0)
                 {
                     pos.Y = screenHeight - floatingBarHeight -
                            3 * ViewboxFloatingBarScaleTransform.ScaleY;
@@ -2134,6 +2148,26 @@ namespace Ink_Canvas
                         else
                             pointPPT = pos;
                     }
+                pos.X = (screenWidth - floatingBarWidth) / 2;
+
+                if (MarginFromEdge < 0)
+                {
+                    pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY;
+                }
+                else if (IsInPptPresentationMode)
+                {
+                    pos.Y = screenHeight - floatingBarHeight +
+                           2 * ViewboxFloatingBarScaleTransform.ScaleY;
+                }
+                else if (toolbarHeight == 0)
+                {
+                    pos.Y = screenHeight - floatingBarHeight -
+                           3 * ViewboxFloatingBarScaleTransform.ScaleY;
+                }
+                else
+                {
+                    pos.Y = screenHeight - floatingBarHeight -
+                           toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
                 }
                 else
                 {
@@ -2199,27 +2233,19 @@ namespace Ink_Canvas
                 }
 
                 double baseWidth = ViewboxFloatingBar.ActualWidth;
-
-                // 如果ActualWidth为0，尝试使用DesiredSize
                 if (baseWidth <= 0)
                 {
                     baseWidth = ViewboxFloatingBar.DesiredSize.Width;
                 }
-
-                // 如果仍然为0，使用RenderSize
                 if (baseWidth <= 0)
                 {
                     baseWidth = ViewboxFloatingBar.RenderSize.Width;
                 }
-
-                // 如果所有方法都失败，使用一个基于内容的估算值
                 if (baseWidth <= 0)
                 {
-                    // 根据浮动栏内容估算宽度
-                    baseWidth = 200; // 最小宽度
+                    baseWidth = 200;
                     LogHelper.WriteLogToFile($"浮动栏宽度无法获取，使用估算值: {baseWidth}");
                 }
-
                 double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
 
                 double baseHeight = ViewboxFloatingBar.ActualHeight;
@@ -2242,7 +2268,6 @@ namespace Ink_Canvas
                 if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
                     (QuickColorPaletteSingleRowPanel != null && QuickColorPaletteSingleRowPanel.Visibility == Visibility.Visible))
                 {
-                    // 根据显示模式调整宽度
                     if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
                     {
                         floatingBarWidth = Math.Max(floatingBarWidth, 120 * ViewboxFloatingBarScaleTransform.ScaleX);
@@ -2320,49 +2345,46 @@ namespace Ink_Canvas
                 // 使用更可靠的方法获取浮动栏宽度
                 double baseWidth = ViewboxFloatingBar.ActualWidth;
 
-                // 如果ActualWidth为0，尝试使用DesiredSize
                 if (baseWidth <= 0)
                 {
                     baseWidth = ViewboxFloatingBar.DesiredSize.Width;
                 }
-
-                // 如果仍然为0，使用RenderSize
                 if (baseWidth <= 0)
                 {
                     baseWidth = ViewboxFloatingBar.RenderSize.Width;
                 }
-
-                // 如果所有方法都失败，使用一个基于内容的估算值
                 if (baseWidth <= 0)
                 {
-                    // 根据浮动栏内容估算宽度
-                    baseWidth = 200; // 最小宽度
+                    baseWidth = 200;
                     LogHelper.WriteLogToFile($"浮动栏宽度无法获取，使用估算值: {baseWidth}");
                 }
-
                 double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
+
+                double baseHeight = ViewboxFloatingBar.ActualHeight;
+                if (baseHeight <= 0) baseHeight = ViewboxFloatingBar.DesiredSize.Height;
+                if (baseHeight <= 0) baseHeight = ViewboxFloatingBar.RenderSize.Height;
+                if (baseHeight <= 0) baseHeight = 58;
+                double floatingBarHeight = baseHeight * ViewboxFloatingBarScaleTransform.ScaleY;
 
 
                 // 如果快捷调色盘显示，确保有足够空间
                 if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
                     (QuickColorPaletteSingleRowPanel != null && QuickColorPaletteSingleRowPanel.Visibility == Visibility.Visible))
                 {
-                    // 根据显示模式调整宽度
                     if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
                     {
-                        // 单行显示模式，自适应宽度，但需要足够空间显示6个颜色
                         floatingBarWidth = Math.Max(floatingBarWidth, 120 * ViewboxFloatingBarScaleTransform.ScaleX);
                     }
                     else
                     {
-                        // 双行显示模式，宽度较大
                         floatingBarWidth = Math.Max(floatingBarWidth, 68 * ViewboxFloatingBarScaleTransform.ScaleX);
                     }
                 }
 
                 pos.X = (screenWidth - floatingBarWidth) / 2;
 
-                pos.Y = screenHeight - 55 * ViewboxFloatingBarScaleTransform.ScaleY;
+                pos.Y = screenHeight - floatingBarHeight +
+                       2 * ViewboxFloatingBarScaleTransform.ScaleY;
 
                 if (pointPPT.X != -1 || pointPPT.Y != -1)
                 {
