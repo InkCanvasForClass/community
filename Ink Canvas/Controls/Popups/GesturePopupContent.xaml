@@ -9,7 +9,7 @@
              xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
              mc:Ignorable="d">
     <Grid>
-        <controls:PopupShellContent x:Name="Shell" d:Visibility="Collapsed" />
+        <controls:PopupShellContent x:Name="Shell" Title="{i18n:I18n Key=Gesture_Title}" d:Visibility="Collapsed" />
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
             <Viewbox Margin="8,4,8,6">
                 <ikw:SimpleStackPanel x:Name="_OpacityPanel" Margin="0">
@@ -21,6 +21,8 @@
                                RenderOptions.BitmapScalingMode="HighQuality"
                                Height="16" Width="16" />
                         <Label x:Name="MultiTouchLabel" FontSize="10"
+                               Content="{i18n:I18n Key=FloatingBar_Gesture_MultiTouchWriting}"
+                               Foreground="{DynamicResource FloatBarForeground}"
                                VerticalAlignment="Center" Width="62" />
                         <Viewbox Width="36" Height="20" Margin="2,0,0,0">
                             <ui:ToggleSwitch MinWidth="0" Margin="0,-6,0,-6"
@@ -46,6 +48,8 @@
                                RenderOptions.BitmapScalingMode="HighQuality"
                                Height="16" Width="16" />
                         <Label x:Name="TwoFingerMoveLabel" FontSize="10"
+                               Content="{i18n:I18n Key=FloatingBar_Gesture_TwoFingerMove}"
+                               Foreground="{DynamicResource FloatBarForeground}"
                                VerticalAlignment="Center" Width="62" />
                         <Viewbox Width="36" Height="20" Margin="2,0,0,0">
                             <ui:ToggleSwitch MinWidth="0" Margin="0,-6,0,-6"
@@ -71,6 +75,8 @@
                                RenderOptions.BitmapScalingMode="HighQuality"
                                Height="16" Width="16" />
                         <Label x:Name="TwoFingerZoomLabel" FontSize="10"
+                               Content="{i18n:I18n Key=FloatingBar_Gesture_TwoFingerZoom}"
+                               Foreground="{DynamicResource FloatBarForeground}"
                                VerticalAlignment="Center" Width="62" />
                         <Viewbox Width="36" Height="20" Margin="2,0,0,0">
                             <ui:ToggleSwitch MinWidth="0" Margin="0,-6,0,-6"
@@ -96,6 +102,8 @@
                                RenderOptions.BitmapScalingMode="HighQuality"
                                Height="16" Width="16" />
                         <Label x:Name="TwoFingerRotateLabel" FontSize="10"
+                               Content="{i18n:I18n Key=FloatingBar_Gesture_TwoFingerRotate}"
+                               Foreground="{DynamicResource FloatBarForeground}"
                                VerticalAlignment="Center" Width="62" />
                         <Viewbox Width="36" Height="20" Margin="2,0,0,0">
                             <ui:ToggleSwitch MinWidth="0" Margin="0,-6,0,-6"

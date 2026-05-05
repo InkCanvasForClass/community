@@ -2823,7 +2823,7 @@ namespace Ink_Canvas
                         }
                     }
 
-                    if (PenPalette.IsOpen)
+                    if (currentMode == 1 ? BoardPenPalette.IsOpen : PenPalette.IsOpen)
                     {
                         AnimationsHelper.HidePopupWithSlideAndFade(PenPalette);
                         AnimationsHelper.HidePopupWithSlideAndFade(BoardPenPalette);
@@ -2831,10 +2831,16 @@ namespace Ink_Canvas
                     else
                     {
                         HideSubPanels();
-                        AnimationsHelper.ShowPopupWithSlideAndFade(PenPalette);
-                        _popupManager?.BringToFront(PenPalette);
-                        AnimationsHelper.ShowPopupWithSlideAndFade(BoardPenPalette);
-                        _popupManager?.BringToFront(BoardPenPalette);
+                        if (currentMode == 1)
+                        {
+                            AnimationsHelper.ShowPopupWithSlideAndFade(BoardPenPalette);
+                            _popupManager?.BringToFront(BoardPenPalette);
+                        }
+                        else
+                        {
+                            AnimationsHelper.ShowPopupWithSlideAndFade(PenPalette);
+                            _popupManager?.BringToFront(PenPalette);
+                        }
                     }
                 }
                 else
