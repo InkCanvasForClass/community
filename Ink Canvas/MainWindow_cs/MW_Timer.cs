@@ -230,7 +230,7 @@ namespace Ink_Canvas
             timerDisplayDate.Elapsed += TimerDisplayDate_Elapsed;
             timerDisplayDate.Interval = 1000 * 60 * 60 * 1;
             timerDisplayDate.Start();
-            timerNtpSync.Elapsed += async (s, e) => await TimerNtpSync_ElapsedAsync();
+            timerNtpSync.Elapsed += TimerNtpSync_Elapsed;
             timerNtpSync.Interval = 1000 * 60 * 60 * 2; // 每2小时同步一次
             timerNtpSync.Start();
             timerKillProcess.Start();
@@ -339,6 +339,14 @@ namespace Ink_Canvas
             catch (Exception)
             {
             }
+        }
+
+        /// <summary>
+        /// NTP同步定时器事件包装方法（同步版本，用于正确订阅/取消订阅）
+        /// </summary>
+        private void TimerNtpSync_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            _ = TimerNtpSync_ElapsedAsync();
         }
 
         /// <summary>
@@ -612,17 +620,17 @@ namespace Ink_Canvas
 
                     if (arg.Contains("EasiNote"))
                     {
-                        Dispatcher.Invoke(() =>
+                        Dispatcher.BeginInvoke(new Action(() =>
                         {
-                            ShowNotification("“希沃白板 5”已自动关闭");
-                        });
+                            ShowNotification("「希沃白板 5」已自动关闭");
+                        }));
                     }
 
                     if (arg.Contains("HiteAnnotation"))
                     {
-                        Dispatcher.Invoke(() =>
+                        Dispatcher.BeginInvoke(new Action(() =>
                         {
-                            ShowNotification("“鸿合屏幕书写”已自动关闭");
+                            ShowNotification("「鸿合屏幕书写」已自动关闭");
                             if (Settings.Automation.IsAutoKillHiteAnnotation && Settings.Automation.IsAutoEnterAnnotationAfterKillHite)
                             {
                                 // 检查是否处于收纳状态，如果是则先展开浮动栏
@@ -638,47 +646,47 @@ namespace Ink_Canvas
                                     PenIcon_Click(null, null);
                                 }
                             }
-                        });
+                        }));
                     }
 
                     if (arg.Contains("Ink Canvas Annotation") || arg.Contains("Ink Canvas Artistry"))
                     {
-                        Dispatcher.Invoke(() =>
+                        Dispatcher.BeginInvoke(new Action(() =>
                         {
-                            ShowNewMessage("“ICA”已自动关闭");
-                        });
+                            ShowNewMessage("「ICA」已自动关闭");
+                        }));
                     }
 
                     if (arg.Contains("\"Ink Canvas.exe\""))
                     {
-                        Dispatcher.Invoke(() =>
+                        Dispatcher.BeginInvoke(new Action(() =>
                         {
-                            ShowNotification("“Ink Canvas”已自动关闭");
-                        });
+                            ShowNotification("「Ink Canvas」已自动关闭");
+                        }));
                     }
 
                     if (arg.Contains("Inkeys"))
                     {
-                        Dispatcher.Invoke(() =>
+                        Dispatcher.BeginInvoke(new Action(() =>
                         {
-                            ShowNotification("“智绘教Inkeys”已自动关闭");
-                        });
+                            ShowNotification("「智绘教 Inkeys」已自动关闭");
+                        }));
                     }
 
                     if (arg.Contains("VcomTeach"))
                     {
-                        Dispatcher.Invoke(() =>
+                        Dispatcher.BeginInvoke(new Action(() =>
                         {
-                            ShowNotification("“优教授课端”已自动关闭");
-                        });
+                            ShowNotification("「优教授课端」已自动关闭");
+                        }));
                     }
 
                     if (arg.Contains("DesktopAnnotation"))
                     {
-                        Dispatcher.Invoke(() =>
+                        Dispatcher.BeginInvoke(new Action(() =>
                         {
-                            ShowNotification("“希沃桌面2.0 桌面批注”已自动关闭");
-                        });
+                            ShowNotification("「希沃桌面 2.0 桌面批注」已自动关闭");
+                        }));
                     }
                 }
             }
@@ -1463,7 +1471,7 @@ namespace Ink_Canvas
                 if (timerNtpSync != null)
                 {
                     timerNtpSync.Stop();
-                    timerNtpSync.Elapsed -= async (s, e) => await TimerNtpSync_ElapsedAsync();
+                    timerNtpSync.Elapsed -= TimerNtpSync_Elapsed;
                     timerNtpSync.Dispose();
                     timerNtpSync = null;
                 }
@@ -1573,16 +1581,13 @@ namespace Ink_Canvas
                     return;
                 }
 
-                // 切换到批注模式
+                // 切换到批注模式（DispatcherTimer已在UI线程，无需Invoke）
                 try
                 {
                     if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
-                    Dispatcher.Invoke(() =>
-                    {
-                        PenIcon_Click(null, null);
-                        StopEraserAutoSwitchBackTimer();
-                        LogHelper.WriteLogToFile("橡皮擦自动切换回批注模式", LogHelper.LogType.Event);
-                    });
+                    PenIcon_Click(null, null);
+                    StopEraserAutoSwitchBackTimer();
+                    LogHelper.WriteLogToFile("橡皮擦自动切换回批注模式", LogHelper.LogType.Event);
                 }
                 catch (Exception) { }
             }

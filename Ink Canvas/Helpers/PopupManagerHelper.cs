@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 
 namespace Ink_Canvas.Helpers
 {
-    public class PopupManagerHelper
+    public class PopupManagerHelper : IDisposable
     {
         #region Win32 API
 
@@ -308,12 +308,29 @@ namespace Ink_Canvas.Helpers
                     popup.Closed -= OnPopupClosed;
                 }
                 _registeredPopups.Clear();
-                _activeInstances.Remove(this);
+                lock (_activeInstances)
+                {
+                    _activeInstances.Remove(this);
+                }
                 _isInitialized = false;
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[PopupManager] Cleanup error: {ex.Message}");
+            }
+        }
+
+        private bool _disposed = false;
+
+        /// <summary>
+        /// 释放资源，防止内存泄漏
+        /// </summary>
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                Cleanup();
+                _disposed = true;
             }
         }
 
