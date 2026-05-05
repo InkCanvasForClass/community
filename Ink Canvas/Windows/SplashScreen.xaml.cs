@@ -383,13 +383,13 @@ namespace Ink_Canvas.Windows
                 // 如果选择自定义样式但没有选择图片，使用随机样式
                 if (splashStyle == 7)
                 {
-                    actualStyle = GetActualStyle(0); // 使用随机
-                    string randomImageName = GetImageNameByStyle(0);
+                    actualStyle = GetActualStyle(0); // 使用随机，此方法会返回解析后的实际样式(2-6)
+                    string randomImageName = GetImageNameByStyle(actualStyle);
                     return $"pack://application:,,,/Resources/Startup-animation/{randomImageName}";
                 }
 
                 actualStyle = GetActualStyle(splashStyle);
-                string imageName = GetImageNameByStyle(splashStyle);
+                string imageName = GetImageNameByStyle(actualStyle);
                 return $"pack://application:,,,/Resources/Startup-animation/{imageName}";
             }
             catch
