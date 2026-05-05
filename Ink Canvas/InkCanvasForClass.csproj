@@ -74,6 +74,9 @@
     <PackageProjectUrl>https://inkcanvasforclass.github.io</PackageProjectUrl>
     <FileVersion>bundled</FileVersion>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishReadyToRunShowWarnings>true</PublishReadyToRunShowWarnings>
+    <PublishReadyToRunEmitSymbols>true</PublishReadyToRunEmitSymbols>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM64'">
     <OutputPath>bin\$(Configuration)\$(Platform)\</OutputPath>
@@ -415,6 +418,7 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\DeveloperAvatars\dubi906w.jpg" />
+    <Resource Include="Resources\DeveloperAvatars\CreeperAWA.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\new-icons\gesture.png" />
