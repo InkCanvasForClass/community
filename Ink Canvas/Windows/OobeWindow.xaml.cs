@@ -111,7 +111,6 @@ namespace Ink_Canvas.Windows
                 {
                     CardTwoFingerZoom.IsOn = _settings.Gesture.IsEnableTwoFingerZoom;
                     CardTwoFingerTranslate.IsOn = _settings.Gesture.IsEnableTwoFingerTranslate;
-                    CardAutoSwitchTwoFingerGesture.IsOn = _settings.Gesture.AutoSwitchTwoFingerGesture;
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -223,7 +222,6 @@ namespace Ink_Canvas.Windows
                 {
                     _settings.Gesture.IsEnableTwoFingerZoom = CardTwoFingerZoom.IsOn;
                     _settings.Gesture.IsEnableTwoFingerTranslate = CardTwoFingerTranslate.IsOn;
-                    _settings.Gesture.AutoSwitchTwoFingerGesture = CardAutoSwitchTwoFingerGesture.IsOn;
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }

@@ -79,7 +79,6 @@ namespace Ink_Canvas
             Color boardBgColor, boardIconColor, boardTextColor, boardBorderColor;
             if (isLightTheme)
             {
-                // 浅色主题
                 boardBgColor = Color.FromRgb(244, 244, 245);
                 boardIconColor = Color.FromRgb(24, 24, 27);
                 boardTextColor = Color.FromRgb(24, 24, 27);
@@ -87,20 +86,47 @@ namespace Ink_Canvas
             }
             else
             {
-                // 深色主题
                 boardBgColor = Color.FromRgb(39, 39, 42);
                 boardIconColor = Color.FromRgb(244, 244, 245);
                 boardTextColor = Color.FromRgb(244, 244, 245);
                 boardBorderColor = Color.FromRgb(113, 113, 122);
             }
 
-            if (ToggleSwitchEnableMultiTouchMode.IsOn)
+            bool floatingBarAnyOn = Settings.Gesture.IsEnableMultiTouchMode
+                || Settings.Gesture.IsEnableTwoFingerZoom
+                || Settings.Gesture.IsEnableTwoFingerTranslate
+                || Settings.Gesture.IsEnableTwoFingerRotation;
+            bool boardAnyOn = Settings.Gesture.IsEnableMultiTouchModeBoard
+                || Settings.Gesture.IsEnableTwoFingerZoomBoard
+                || Settings.Gesture.IsEnableTwoFingerTranslateBoard
+                || Settings.Gesture.IsEnableTwoFingerRotationBoard;
+
+            TwoFingerGestureSimpleStackPanel.Opacity = 1;
+            TwoFingerGestureSimpleStackPanel.IsHitTestVisible = true;
+
+            if (floatingBarAnyOn)
             {
-                TwoFingerGestureSimpleStackPanel.Opacity = 0.5;
-                TwoFingerGestureSimpleStackPanel.IsHitTestVisible = false;
+                EnableTwoFingerGestureBtn.Source =
+                    new BitmapImage(new Uri("/Resources/new-icons/gesture-enabled.png", UriKind.Relative));
+            }
+            else
+            {
                 EnableTwoFingerGestureBtn.Source =
                     new BitmapImage(new Uri(gestureIconPath, UriKind.Relative));
+            }
 
+            if (boardAnyOn)
+            {
+                BoardGesture.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                BoardGesture.IconGeometryDrawing.Brush = new SolidColorBrush(Colors.GhostWhite);
+                BoardGesture.IconGeometryDrawing2.Brush = new SolidColorBrush(Colors.GhostWhite);
+                BoardGesture.Foreground = new SolidColorBrush(Colors.GhostWhite);
+                BoardGesture.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                BoardGesture.IconGeometryDrawing.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.EnabledGestureIcon);
+                BoardGesture.IconGeometryDrawing2.Geometry = Geometry.Parse("F0 M24,24z M0,0z " + XamlGraphicsIconGeometries.EnabledGestureIconBadgeCheck);
+            }
+            else
+            {
                 BoardGesture.Background = new SolidColorBrush(boardBgColor);
                 BoardGesture.IconGeometryDrawing.Brush = new SolidColorBrush(boardIconColor);
                 BoardGesture.IconGeometryDrawing2.Brush = new SolidColorBrush(boardIconColor);
@@ -108,37 +134,6 @@ namespace Ink_Canvas
                 BoardGesture.BorderBrush = new SolidColorBrush(boardBorderColor);
                 BoardGesture.IconGeometryDrawing.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.DisabledGestureIcon);
                 BoardGesture.IconGeometryDrawing2.Geometry = Geometry.Parse("F0 M24,24z M0,0z");
-            }
-            else
-            {
-                TwoFingerGestureSimpleStackPanel.Opacity = 1;
-                TwoFingerGestureSimpleStackPanel.IsHitTestVisible = true;
-                if (Settings.Gesture.IsEnableTwoFingerGesture)
-                {
-                    EnableTwoFingerGestureBtn.Source =
-                        new BitmapImage(new Uri("/Resources/new-icons/gesture-enabled.png", UriKind.Relative));
-
-                    BoardGesture.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                    BoardGesture.IconGeometryDrawing.Brush = new SolidColorBrush(Colors.GhostWhite);
-                    BoardGesture.IconGeometryDrawing2.Brush = new SolidColorBrush(Colors.GhostWhite);
-                    BoardGesture.Foreground = new SolidColorBrush(Colors.GhostWhite);
-                    BoardGesture.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                    BoardGesture.IconGeometryDrawing.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.EnabledGestureIcon);
-                    BoardGesture.IconGeometryDrawing2.Geometry = Geometry.Parse("F0 M24,24z M0,0z " + XamlGraphicsIconGeometries.EnabledGestureIconBadgeCheck);
-                }
-                else
-                {
-                    EnableTwoFingerGestureBtn.Source =
-                        new BitmapImage(new Uri(gestureIconPath, UriKind.Relative));
-
-                    BoardGesture.Background = new SolidColorBrush(boardBgColor);
-                    BoardGesture.IconGeometryDrawing.Brush = new SolidColorBrush(boardIconColor);
-                    BoardGesture.IconGeometryDrawing2.Brush = new SolidColorBrush(boardIconColor);
-                    BoardGesture.Foreground = new SolidColorBrush(boardTextColor);
-                    BoardGesture.BorderBrush = new SolidColorBrush(boardBorderColor);
-                    BoardGesture.IconGeometryDrawing.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.DisabledGestureIcon);
-                    BoardGesture.IconGeometryDrawing2.Geometry = Geometry.Parse("F0 M24,24z M0,0z");
-                }
             }
         }
 
@@ -743,12 +738,6 @@ namespace Ink_Canvas
                     BtnHideInkCanvas_Click(null, null);
                 }
 
-                if (Settings.Gesture.AutoSwitchTwoFingerGesture) // 自动关闭多指书写、开启双指移动
-                {
-                    ToggleSwitchEnableTwoFingerTranslate.IsOn = true;
-                    if (isInMultiTouchMode) ToggleSwitchEnableMultiTouchMode.IsOn = false;
-                }
-
                 if (Settings.Appearance.EnableTimeDisplayInWhiteboardMode)
                 {
                     WaterMarkTime.Visibility = Visibility.Visible;
@@ -873,10 +862,6 @@ namespace Ink_Canvas
 
                 if (System.Windows.Controls.Canvas.GetLeft(FloatingbarSelectionBG) != 28) PenIcon_Click(null, null);
 
-                if (Settings.Gesture.AutoSwitchTwoFingerGesture) // 自动启用多指书写
-                    ToggleSwitchEnableTwoFingerTranslate.IsOn = false;
-                // 2024.5.2 need to be tested
-                // if (!isInMultiTouchMode) ToggleSwitchEnableMultiTouchMode.IsOn = true;
                 WaterMarkTime.Visibility = Visibility.Collapsed;
                 WaterMarkDate.Visibility = Visibility.Collapsed;
                 BlackBoardWaterMark.Visibility = Visibility.Collapsed;

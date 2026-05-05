@@ -364,11 +364,6 @@
                                                                   Icon="{x:Static ui:SegoeFluentIcons.Touch}"
                                                                   SwitchName="ToggleSwitchTwoFingerTranslate" />
 
-                                    <controls:LabeledSettingsCard x:Name="CardAutoSwitchTwoFingerGesture"
-                                                                  Header="进出白板模式时自动切换双指手势"
-                                                                  Icon="{x:Static ui:SegoeFluentIcons.Switch}"
-                                                                  SwitchName="ToggleSwitchAutoSwitchTwoFingerGesture" />
-
                                     <controls:LabeledSettingsCard x:Name="CardEnablePalmEraser"
                                                                   Header="启用手掌擦"
                                                                   Description="多触点且接触面积较大时临时切换为橡皮。"

@@ -42,8 +42,6 @@ namespace Ink_Canvas
             if (isDisplayingOrHidingBlackboard) return;
             isDisplayingOrHidingBlackboard = true;
             HideSubPanelsImmediately();
-            if (Settings.Gesture.AutoSwitchTwoFingerGesture) // 自动启用多指书写
-                ToggleSwitchEnableTwoFingerTranslate.IsOn = false;
             WaterMarkTime.Visibility = Visibility.Collapsed;
             WaterMarkDate.Visibility = Visibility.Collapsed;
             BlackBoardWaterMark.Visibility = Visibility.Collapsed;

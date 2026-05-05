@@ -600,22 +600,22 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            // 如果多指书写模式启用，强制禁用双指手势
-            if (ToggleSwitchEnableMultiTouchMode.IsOn)
+            var toggle = (iNKORE.UI.WPF.Modern.Controls.ToggleSwitch)sender;
+            bool isOn = toggle.IsOn;
+
+            if (sender == BoardToggleSwitchEnableTwoFingerZoom)
+                Settings.Gesture.IsEnableTwoFingerZoomBoard = isOn;
+            else
+                Settings.Gesture.IsEnableTwoFingerZoom = isOn;
+
+            if (isOn)
             {
-                ToggleSwitchEnableTwoFingerZoom.IsOn = false;
-                BoardToggleSwitchEnableTwoFingerZoom.IsOn = false;
-                Settings.Gesture.IsEnableTwoFingerZoom = false;
-                CheckEnableTwoFingerGestureBtnColorPrompt();
-                SaveSettingsToFile();
-                return;
+                if (sender == BoardToggleSwitchEnableTwoFingerZoom)
+                    BoardToggleSwitchEnableMultiTouchMode.IsOn = false;
+                else
+                    ToggleSwitchEnableMultiTouchMode.IsOn = false;
             }
 
-            if (sender == ToggleSwitchEnableTwoFingerZoom)
-                BoardToggleSwitchEnableTwoFingerZoom.IsOn = ToggleSwitchEnableTwoFingerZoom.IsOn;
-            else
-                ToggleSwitchEnableTwoFingerZoom.IsOn = BoardToggleSwitchEnableTwoFingerZoom.IsOn;
-            Settings.Gesture.IsEnableTwoFingerZoom = ToggleSwitchEnableTwoFingerZoom.IsOn;
             CheckEnableTwoFingerGestureBtnColorPrompt();
             SaveSettingsToFile();
         }
@@ -623,12 +623,16 @@ namespace Ink_Canvas
         private void ToggleSwitchEnableMultiTouchMode_Toggled(object sender, RoutedEventArgs e)
         {
             //if (!isLoaded) return;
-            if (sender == ToggleSwitchEnableMultiTouchMode)
-                BoardToggleSwitchEnableMultiTouchMode.IsOn = ToggleSwitchEnableMultiTouchMode.IsOn;
-            else
-                ToggleSwitchEnableMultiTouchMode.IsOn = BoardToggleSwitchEnableMultiTouchMode.IsOn;
+            var toggle = (iNKORE.UI.WPF.Modern.Controls.ToggleSwitch)sender;
+            bool isOn = toggle.IsOn;
+            bool isBoardSender = sender == BoardToggleSwitchEnableMultiTouchMode;
 
-            if (ToggleSwitchEnableMultiTouchMode.IsOn)
+            if (isBoardSender)
+                Settings.Gesture.IsEnableMultiTouchModeBoard = isOn;
+            else
+                Settings.Gesture.IsEnableMultiTouchMode = isOn;
+
+            if (isOn)
             {
                 if (!isInMultiTouchMode)
                 {
@@ -699,32 +703,35 @@ namespace Ink_Canvas
                 }
             }
 
-            Settings.Gesture.IsEnableMultiTouchMode = ToggleSwitchEnableMultiTouchMode.IsOn;
             EnsureRealtimeStylusPipelineBinding();
 
-            // 如果启用多指书写模式，强制禁用所有双指手势
-            if (ToggleSwitchEnableMultiTouchMode.IsOn)
+            // 如果启用多指书写模式，强制禁用同模式下的所有双指手势
+            if (isOn)
             {
-                // 强制关闭所有双指手势设置
-                Settings.Gesture.IsEnableTwoFingerTranslate = false;
-                Settings.Gesture.IsEnableTwoFingerZoom = false;
-                Settings.Gesture.IsEnableTwoFingerRotation = false;
-
-                // 更新UI开关状态
-                if (ToggleSwitchEnableTwoFingerTranslate != null)
-                    ToggleSwitchEnableTwoFingerTranslate.IsOn = false;
-                if (ToggleSwitchEnableTwoFingerZoom != null)
-                    ToggleSwitchEnableTwoFingerZoom.IsOn = false;
-                if (ToggleSwitchEnableTwoFingerRotation != null)
-                    ToggleSwitchEnableTwoFingerRotation.IsOn = false;
-
-                // 更新设置窗口中的开关状态
-                if (BoardToggleSwitchEnableTwoFingerTranslate != null)
-                    BoardToggleSwitchEnableTwoFingerTranslate.IsOn = false;
-                if (BoardToggleSwitchEnableTwoFingerZoom != null)
-                    BoardToggleSwitchEnableTwoFingerZoom.IsOn = false;
-                if (BoardToggleSwitchEnableTwoFingerRotation != null)
-                    BoardToggleSwitchEnableTwoFingerRotation.IsOn = false;
+                if (isBoardSender)
+                {
+                    Settings.Gesture.IsEnableTwoFingerTranslateBoard = false;
+                    Settings.Gesture.IsEnableTwoFingerZoomBoard = false;
+                    Settings.Gesture.IsEnableTwoFingerRotationBoard = false;
+                    if (BoardToggleSwitchEnableTwoFingerTranslate != null)
+                        BoardToggleSwitchEnableTwoFingerTranslate.IsOn = false;
+                    if (BoardToggleSwitchEnableTwoFingerZoom != null)
+                        BoardToggleSwitchEnableTwoFingerZoom.IsOn = false;
+                    if (BoardToggleSwitchEnableTwoFingerRotation != null)
+                        BoardToggleSwitchEnableTwoFingerRotation.IsOn = false;
+                }
+                else
+                {
+                    Settings.Gesture.IsEnableTwoFingerTranslate = false;
+                    Settings.Gesture.IsEnableTwoFingerZoom = false;
+                    Settings.Gesture.IsEnableTwoFingerRotation = false;
+                    if (ToggleSwitchEnableTwoFingerTranslate != null)
+                        ToggleSwitchEnableTwoFingerTranslate.IsOn = false;
+                    if (ToggleSwitchEnableTwoFingerZoom != null)
+                        ToggleSwitchEnableTwoFingerZoom.IsOn = false;
+                    if (ToggleSwitchEnableTwoFingerRotation != null)
+                        ToggleSwitchEnableTwoFingerRotation.IsOn = false;
+                }
             }
 
             CheckEnableTwoFingerGestureBtnColorPrompt();
@@ -735,22 +742,22 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            // 如果多指书写模式启用，强制禁用双指手势
-            if (ToggleSwitchEnableMultiTouchMode.IsOn)
+            var toggle = (iNKORE.UI.WPF.Modern.Controls.ToggleSwitch)sender;
+            bool isOn = toggle.IsOn;
+
+            if (sender == BoardToggleSwitchEnableTwoFingerTranslate)
+                Settings.Gesture.IsEnableTwoFingerTranslateBoard = isOn;
+            else
+                Settings.Gesture.IsEnableTwoFingerTranslate = isOn;
+
+            if (isOn)
             {
-                ToggleSwitchEnableTwoFingerTranslate.IsOn = false;
-                BoardToggleSwitchEnableTwoFingerTranslate.IsOn = false;
-                Settings.Gesture.IsEnableTwoFingerTranslate = false;
-                CheckEnableTwoFingerGestureBtnColorPrompt();
-                SaveSettingsToFile();
-                return;
+                if (sender == BoardToggleSwitchEnableTwoFingerTranslate)
+                    BoardToggleSwitchEnableMultiTouchMode.IsOn = false;
+                else
+                    ToggleSwitchEnableMultiTouchMode.IsOn = false;
             }
 
-            if (sender == ToggleSwitchEnableTwoFingerTranslate)
-                BoardToggleSwitchEnableTwoFingerTranslate.IsOn = ToggleSwitchEnableTwoFingerTranslate.IsOn;
-            else
-                ToggleSwitchEnableTwoFingerTranslate.IsOn = BoardToggleSwitchEnableTwoFingerTranslate.IsOn;
-            Settings.Gesture.IsEnableTwoFingerTranslate = ToggleSwitchEnableTwoFingerTranslate.IsOn;
             CheckEnableTwoFingerGestureBtnColorPrompt();
             SaveSettingsToFile();
         }
@@ -759,22 +766,22 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            // 如果多指书写模式启用，强制禁用双指手势
-            if (ToggleSwitchEnableMultiTouchMode.IsOn)
+            var toggle = (iNKORE.UI.WPF.Modern.Controls.ToggleSwitch)sender;
+            bool isOn = toggle.IsOn;
+
+            if (sender == BoardToggleSwitchEnableTwoFingerRotation)
+                Settings.Gesture.IsEnableTwoFingerRotationBoard = isOn;
+            else
+                Settings.Gesture.IsEnableTwoFingerRotation = isOn;
+
+            if (isOn)
             {
-                ToggleSwitchEnableTwoFingerRotation.IsOn = false;
-                BoardToggleSwitchEnableTwoFingerRotation.IsOn = false;
-                Settings.Gesture.IsEnableTwoFingerRotation = false;
-                CheckEnableTwoFingerGestureBtnColorPrompt();
-                SaveSettingsToFile();
-                return;
+                if (sender == BoardToggleSwitchEnableTwoFingerRotation)
+                    BoardToggleSwitchEnableMultiTouchMode.IsOn = false;
+                else
+                    ToggleSwitchEnableMultiTouchMode.IsOn = false;
             }
 
-            if (sender == ToggleSwitchEnableTwoFingerRotation)
-                BoardToggleSwitchEnableTwoFingerRotation.IsOn = ToggleSwitchEnableTwoFingerRotation.IsOn;
-            else
-                ToggleSwitchEnableTwoFingerRotation.IsOn = BoardToggleSwitchEnableTwoFingerRotation.IsOn;
-            Settings.Gesture.IsEnableTwoFingerRotation = ToggleSwitchEnableTwoFingerRotation.IsOn;
             CheckEnableTwoFingerGestureBtnColorPrompt();
             SaveSettingsToFile();
         }

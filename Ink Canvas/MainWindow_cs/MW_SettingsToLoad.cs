@@ -353,21 +353,7 @@ namespace Ink_Canvas
             }
 
             // Gesture
-            if (Settings.Gesture != null)
-            {
-                if (Settings.Gesture.AutoSwitchTwoFingerGesture)
-                {
-                    if (Topmost)
-                    {
-                        Settings.Gesture.IsEnableTwoFingerTranslate = false;
-                    }
-                    else
-                    {
-                        Settings.Gesture.IsEnableTwoFingerTranslate = true;
-                    }
-                }
-            }
-            else
+            if (Settings.Gesture == null)
             {
                 Settings.Gesture = new Gesture();
             }

@@ -243,13 +243,6 @@
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{i18n:I18n Key=Gesture_Title}" />
 
-                    <controls:LabeledSettingsCard x:Name="CardAutoSwitchTwoFingerGesture"
-                            Header="{i18n:I18n Key=Gesture_AutoToggleTwoFinger}"
-                            Description="{i18n:I18n Key=Gesture_AutoToggleHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Switch}"
-                            SwitchName="ToggleSwitchAutoSwitchTwoFingerGesture"
-                            Toggled="ToggleSwitchAutoSwitchTwoFingerGesture_Toggled" />
-
                     <controls:LabeledSettingsCard x:Name="CardEnableTwoFingerRotationOnSelection"
                             Header="{i18n:I18n Key=Gesture_AllowRotateScale}"
                             Description="{i18n:I18n Key=Gesture_AllowRotateScaleHint}"
