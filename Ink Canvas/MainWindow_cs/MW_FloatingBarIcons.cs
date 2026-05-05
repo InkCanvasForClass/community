@@ -2893,7 +2893,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
-        private void ColorThemeSwitch_MouseUp(object sender, RoutedEventArgs e)
+        private void ColorThemeSwitch_MouseUp(object sender, MouseButtonEventArgs e)
         {
             isUselightThemeColor = !isUselightThemeColor;
             if (currentMode == 0) isDesktopUselightThemeColor = isUselightThemeColor;
