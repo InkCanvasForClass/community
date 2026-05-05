@@ -57,9 +57,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     CardLaunchSeewoVideoShowcaseForWhiteboardBooth.IsOn = settings.Canvas.LaunchSeewoVideoShowcaseForWhiteboardBooth;
                     ComboBoxHyperbolaAsymptoteOption.SelectedIndex = (int)settings.Canvas.HyperbolaAsymptoteOption;
                     CardShowCircleCenter.IsOn = settings.Canvas.ShowCircleCenter;
-                    int curveMode = 0;
-                    if (settings.Canvas.UseAdvancedBezierSmoothing) curveMode = 2;
+                    int curveMode;
+                    if (settings.Canvas.UseAdvancedBezierSmoothing) curveMode = 0;
                     else if (settings.Canvas.FitToCurve) curveMode = 1;
+                    else curveMode = 2;
                     ComboBoxCurveSmoothingMode.SelectedIndex = curveMode;
                     ToggleSwitchEnableInkFade.IsOn = settings.Canvas.EnableInkFade;
                     InkFadeTimeSlider.Value = settings.Canvas.InkFadeTime;
@@ -242,6 +243,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     break;
             }
             SettingsManager.SaveSettingsToFile();
+            var mw = Application.Current.MainWindow as MainWindow;
+            if (mw != null && mw.inkCanvas != null)
+            {
+                if (SettingsManager.Settings.Canvas.UseAdvancedBezierSmoothing)
+                    mw.inkCanvas.DefaultDrawingAttributes.FitToCurve = false;
+                else
+                    mw.inkCanvas.DefaultDrawingAttributes.FitToCurve = SettingsManager.Settings.Canvas.FitToCurve;
+            }
         }
 
         private void ToggleSwitchEnableInkFade_Toggled(object sender, RoutedEventArgs e)
