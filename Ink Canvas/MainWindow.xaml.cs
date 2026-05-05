@@ -1809,121 +1809,123 @@ namespace Ink_Canvas
         /// <param name="e">关闭事件参数；方法会在需要中止关闭时将 <c>e.Cancel</c> 设为 <c>true</c>。</param>
         private async void Window_Closing(object sender, CancelEventArgs e)
         {
-            LogHelper.WriteLogToFile("Ink Canvas closing", LogHelper.LogType.Event);
-
-            if (_allowCloseAfterExitVerification)
-            {
-                _allowCloseAfterExitVerification = false;
-                return;
-            }
-
-            if (!_forceCloseFromExitOrRestartButton &&
-                IsInPptPresentationMode)
-            {
-                e.Cancel = true;
-                await ExitPptPresentation();
-                LogHelper.WriteLogToFile("Ink Canvas closing converted to exit PPT", LogHelper.LogType.Event);
-                return;
-            }
-            if (!_forceCloseFromExitOrRestartButton && currentMode != 0)
-            {
-                e.Cancel = true;
-                CloseWhiteboardImmediately();
-                LogHelper.WriteLogToFile("Ink Canvas closing converted to exit whiteboard", LogHelper.LogType.Event);
-                return;
-            }
-
             try
             {
-                // 快抽按钮现在集成在主窗口中，不需要单独关闭
+                LogHelper.WriteLogToFile("Ink Canvas closing", LogHelper.LogType.Event);
+
+                if (_allowCloseAfterExitVerification)
+                {
+                    _allowCloseAfterExitVerification = false;
+                    return;
+                }
+
+                if (!_forceCloseFromExitOrRestartButton &&
+                    IsInPptPresentationMode)
+                {
+                    e.Cancel = true;
+                    await ExitPptPresentation();
+                    LogHelper.WriteLogToFile("Ink Canvas closing converted to exit PPT", LogHelper.LogType.Event);
+                    return;
+                }
+                if (!_forceCloseFromExitOrRestartButton && currentMode != 0)
+                {
+                    e.Cancel = true;
+                    CloseWhiteboardImmediately();
+                    LogHelper.WriteLogToFile("Ink Canvas closing converted to exit whiteboard", LogHelper.LogType.Event);
+                    return;
+                }
+
+                try
+                {
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"关闭快抽悬浮按钮时出错: {ex.Message}", LogHelper.LogType.Error);
+                }
+
+                try
+                {
+                    if (!App.IsUpdateInstalling && SecurityManager.IsPasswordRequiredForExit(Settings))
+                    {
+                        e.Cancel = true;
+                        if (_isExitVerificationInProgress) return;
+
+                        _isExitVerificationInProgress = true;
+                        await Dispatcher.BeginInvoke(new Action(async () =>
+                        {
+                            try
+                            {
+                                bool ok = await SecurityManager.PromptAndVerifyAsync(Settings, this, "退出验证", "请输入安全密码以退出软件。");
+                                if (!ok)
+                                {
+                                    _forceCloseFromExitOrRestartButton = false;
+                                    LogHelper.WriteLogToFile("Ink Canvas closing cancelled by security password", LogHelper.LogType.Event);
+                                    return;
+                                }
+
+                                _allowCloseAfterExitVerification = true;
+                                Close();
+                            }
+                            catch
+                            {
+                            }
+                            finally
+                            {
+                                _isExitVerificationInProgress = false;
+                            }
+                        }), DispatcherPriority.Normal);
+                        return;
+                    }
+                }
+                catch
+                {
+                }
+
+                if (!CloseIsFromButton && Settings.Advanced.IsSecondConfirmWhenShutdownApp)
+                {
+                    var result1 = MessageBox.Show("是否继续关闭 InkCanvasForClass，这将丢失当前未保存的墨迹。", "InkCanvasForClass",
+                        MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+
+                    if (result1 == MessageBoxResult.Cancel)
+                    {
+                        _forceCloseFromExitOrRestartButton = false;
+                        e.Cancel = true;
+                        LogHelper.WriteLogToFile("Ink Canvas closing cancelled at first confirmation", LogHelper.LogType.Event);
+                        return;
+                    }
+
+                    var result2 = MessageBox.Show("真的狠心关闭 InkCanvasForClass吗？", "InkCanvasForClass",
+                        MessageBoxButton.OKCancel, MessageBoxImage.Error);
+
+                    if (result2 == MessageBoxResult.Cancel)
+                    {
+                        _forceCloseFromExitOrRestartButton = false;
+                        e.Cancel = true;
+                        LogHelper.WriteLogToFile("Ink Canvas closing cancelled at second confirmation", LogHelper.LogType.Event);
+                        return;
+                    }
+
+                    var result3 = MessageBox.Show("最后确认：确定要关闭 InkCanvasForClass 吗？", "InkCanvasForClass",
+                        MessageBoxButton.OKCancel, MessageBoxImage.Question);
+
+                    if (result3 == MessageBoxResult.Cancel)
+                    {
+                        _forceCloseFromExitOrRestartButton = false;
+                        e.Cancel = true;
+                        LogHelper.WriteLogToFile("Ink Canvas closing cancelled at final confirmation", LogHelper.LogType.Event);
+                        return;
+                    }
+
+                    e.Cancel = false;
+                    LogHelper.WriteLogToFile("Ink Canvas closing confirmed by user", LogHelper.LogType.Event);
+                }
+
+                if (e.Cancel) LogHelper.WriteLogToFile("Ink Canvas closing cancelled", LogHelper.LogType.Event);
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"关闭快抽悬浮按钮时出错: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"关闭异常: {ex}", LogHelper.LogType.Error);
             }
-
-            try
-            {
-                if (!App.IsUpdateInstalling && SecurityManager.IsPasswordRequiredForExit(Settings))
-                {
-                    e.Cancel = true;
-                    if (_isExitVerificationInProgress) return;
-
-                    _isExitVerificationInProgress = true;
-                    await Dispatcher.BeginInvoke(new Action(async () =>
-                    {
-                        try
-                        {
-                            bool ok = await SecurityManager.PromptAndVerifyAsync(Settings, this, "退出验证", "请输入安全密码以退出软件。");
-                            if (!ok)
-                            {
-                                _forceCloseFromExitOrRestartButton = false;
-                                LogHelper.WriteLogToFile("Ink Canvas closing cancelled by security password", LogHelper.LogType.Event);
-                                return;
-                            }
-
-                            _allowCloseAfterExitVerification = true;
-                            Close();
-                        }
-                        catch
-                        {
-                        }
-                        finally
-                        {
-                            _isExitVerificationInProgress = false;
-                        }
-                    }), DispatcherPriority.Normal);
-                    return;
-                }
-            }
-            catch
-            {
-            }
-
-            if (!CloseIsFromButton && Settings.Advanced.IsSecondConfirmWhenShutdownApp)
-            {
-                // 第一个确认对话框
-                var result1 = MessageBox.Show("是否继续关闭 InkCanvasForClass，这将丢失当前未保存的墨迹。", "InkCanvasForClass",
-                    MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-
-                if (result1 == MessageBoxResult.Cancel)
-                {
-                    _forceCloseFromExitOrRestartButton = false;
-                    e.Cancel = true;
-                    LogHelper.WriteLogToFile("Ink Canvas closing cancelled at first confirmation", LogHelper.LogType.Event);
-                    return;
-                }
-
-                // 第二个确认对话框
-                var result2 = MessageBox.Show("真的狠心关闭 InkCanvasForClass吗？", "InkCanvasForClass",
-                    MessageBoxButton.OKCancel, MessageBoxImage.Error);
-
-                if (result2 == MessageBoxResult.Cancel)
-                {
-                    _forceCloseFromExitOrRestartButton = false;
-                    e.Cancel = true;
-                    LogHelper.WriteLogToFile("Ink Canvas closing cancelled at second confirmation", LogHelper.LogType.Event);
-                    return;
-                }
-
-                // 第三个最终确认对话框
-                var result3 = MessageBox.Show("最后确认：确定要关闭 InkCanvasForClass 吗？", "InkCanvasForClass",
-                    MessageBoxButton.OKCancel, MessageBoxImage.Question);
-
-                if (result3 == MessageBoxResult.Cancel)
-                {
-                    _forceCloseFromExitOrRestartButton = false;
-                    e.Cancel = true;
-                    LogHelper.WriteLogToFile("Ink Canvas closing cancelled at final confirmation", LogHelper.LogType.Event);
-                    return;
-                }
-
-                // 所有确认都通过，允许关闭
-                e.Cancel = false;
-                LogHelper.WriteLogToFile("Ink Canvas closing confirmed by user", LogHelper.LogType.Event);
-            }
-
-            if (e.Cancel) LogHelper.WriteLogToFile("Ink Canvas closing cancelled", LogHelper.LogType.Event);
         }
 
         [DllImport("user32.dll", SetLastError = true)]
