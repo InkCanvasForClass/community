@@ -819,6 +819,11 @@ namespace Ink_Canvas
 
         internal void ApplyQuickPanelBottomOffset(double offset)
         {
+            LeftSidePanel.BeginAnimation(FrameworkElement.MarginProperty, null);
+            RightSidePanel.BeginAnimation(FrameworkElement.MarginProperty, null);
+            LeftUnFoldButtonQuickPanel.BeginAnimation(FrameworkElement.MarginProperty, null);
+            RightUnFoldButtonQuickPanel.BeginAnimation(FrameworkElement.MarginProperty, null);
+
             var leftPanelMargin = LeftSidePanel.Margin;
             LeftSidePanel.Margin = new Thickness(leftPanelMargin.Left, leftPanelMargin.Top, leftPanelMargin.Right, offset);
 
