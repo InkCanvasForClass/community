@@ -1719,31 +1719,14 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">触发事件的源对象（通常由系统事件触发）。</param>
         /// <param name="e">事件参数（未使用）。</param>
+        public DelayAction dpiChangedDelayAction = new DelayAction();
+
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e)
         {
             if (!Settings.Advanced.IsEnableResolutionChangeDetection) return;
             ShowNotification($"检测到显示器信息变化，变为{Screen.PrimaryScreen.Bounds.Width}x{Screen.PrimaryScreen.Bounds.Height}）");
-            new Thread(() =>
-            {
-                var isFloatingBarOutsideScreen = false;
-                var isInPPTPresentationMode = false;
-                Dispatcher.Invoke(() =>
-                {
-                    isFloatingBarOutsideScreen = IsOutsideOfScreenHelper.IsOutsideOfScreen(ViewboxFloatingBar);
-                    isInPPTPresentationMode = IsInPptPresentationMode;
-                });
-                if (isFloatingBarOutsideScreen) dpiChangedDelayAction.DebounceAction(3000, null, () =>
-                {
-                    if (!isFloatingBarFolded)
-                    {
-                        if (isInPPTPresentationMode) ViewboxFloatingBarMarginAnimation(60);
-                        else ViewboxFloatingBarMarginAnimation(100, true);
-                    }
-                });
-            }).Start();
+            HandleFloatingBarRecovery();
         }
-
-        public DelayAction dpiChangedDelayAction = new DelayAction();
 
         private void MainWindow_OnDpiChanged(object sender, DpiChangedEventArgs e)
         {
@@ -1751,7 +1734,6 @@ namespace Ink_Canvas
             {
                 ShowNotification($"系统DPI发生变化，从 {e.OldDpi.DpiScaleX}x{e.OldDpi.DpiScaleY} 变化为 {e.NewDpi.DpiScaleX}x{e.NewDpi.DpiScaleY}");
 
-                // 如果TimerContainer可见，调整其尺寸
                 Dispatcher.Invoke(() =>
                 {
                     var timerContainer = FindName("TimerContainer") as FrameworkElement;
@@ -1761,7 +1743,15 @@ namespace Ink_Canvas
                     }
                 });
 
-                new Thread(() =>
+                HandleFloatingBarRecovery();
+            }
+        }
+
+        private void HandleFloatingBarRecovery()
+        {
+            new Thread(() =>
+            {
+                try
                 {
                     var isFloatingBarOutsideScreen = false;
                     var isInPPTPresentationMode = false;
@@ -1778,8 +1768,12 @@ namespace Ink_Canvas
                             else ViewboxFloatingBarMarginAnimation(100, true);
                         }
                     });
-                }).Start();
-            }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"浮动工具栏恢复失败: {ex.Message}", LogHelper.LogType.Warning);
+                }
+            }).Start();
         }
 
         /// <summary>
