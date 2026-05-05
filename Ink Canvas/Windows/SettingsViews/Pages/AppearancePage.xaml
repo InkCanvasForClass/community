@@ -140,7 +140,7 @@
                         </ui:SettingsCard.HeaderIcon>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="ViewboxFloatingBarActualScaleText"
-                                       Text="1.50x"
+                                       Text="1.00x"
                                        VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                             <TextBlock Text=" (" VerticalAlignment="Center" FontSize="11" Foreground="Gray"/>
                             <TextBlock x:Name="ViewboxFloatingBarScaleSliderText"

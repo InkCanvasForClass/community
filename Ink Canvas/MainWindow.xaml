@@ -1111,7 +1111,7 @@
                      UseLayoutRounding="True" SnapsToDevicePixels="True"
                      RenderTransformOrigin="0.5,0.5">
                 <Viewbox.LayoutTransform>
-                    <ScaleTransform x:Name="ViewboxFloatingBarScaleTransform" ScaleX="1.5" ScaleY="1.5" />
+                    <ScaleTransform x:Name="ViewboxFloatingBarScaleTransform" ScaleX="1" ScaleY="1" />
                 </Viewbox.LayoutTransform>
                 <ikw:SimpleStackPanel Orientation="Horizontal">
                     <!--拖动图标-->
