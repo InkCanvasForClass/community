@@ -2024,6 +2024,11 @@ namespace Ink_Canvas
                 {
                     pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY;
                 }
+                else if (IsInPptPresentationMode)
+                {
+                    pos.Y = screenHeight - floatingBarHeight +
+                           2 * ViewboxFloatingBarScaleTransform.ScaleY;
+                }
                 else if (toolbarHeight == 0)
                 {
                     pos.Y = screenHeight - floatingBarHeight -
@@ -2275,16 +2280,8 @@ namespace Ink_Canvas
 
                 pos.X = (screenWidth - floatingBarWidth) / 2;
 
-                if (toolbarHeight == 0)
-                {
-                    pos.Y = screenHeight - floatingBarHeight -
-                           3 * ViewboxFloatingBarScaleTransform.ScaleY;
-                }
-                else
-                {
-                    pos.Y = screenHeight - floatingBarHeight -
-                           toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
-                }
+                pos.Y = screenHeight - floatingBarHeight +
+                       2 * ViewboxFloatingBarScaleTransform.ScaleY;
 
                 if (pointPPT.X != -1 || pointPPT.Y != -1)
                 {

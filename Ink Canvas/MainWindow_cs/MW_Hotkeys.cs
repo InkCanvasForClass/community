@@ -88,7 +88,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">执行路由事件参数</param>
-        internal void KeyExit(object sender, ExecutedRoutedEventArgs e)
+        internal async void KeyExit(object sender, ExecutedRoutedEventArgs e)
         {
             if (currentMode != 0)
             {
@@ -96,7 +96,7 @@ namespace Ink_Canvas
                 return;
             }
 
-            if (IsInPptPresentationMode) ExitPptPresentation();
+            if (IsInPptPresentationMode) await ExitPptPresentation();
         }
 
         /// <summary>

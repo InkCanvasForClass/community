@@ -1807,7 +1807,7 @@ namespace Ink_Canvas
         /// </remarks>
         /// <param name="sender">触发关闭事件的源对象（通常为窗口本身）。</param>
         /// <param name="e">关闭事件参数；方法会在需要中止关闭时将 <c>e.Cancel</c> 设为 <c>true</c>。</param>
-        private void Window_Closing(object sender, CancelEventArgs e)
+        private async void Window_Closing(object sender, CancelEventArgs e)
         {
             LogHelper.WriteLogToFile("Ink Canvas closing", LogHelper.LogType.Event);
 
@@ -1821,7 +1821,7 @@ namespace Ink_Canvas
                 IsInPptPresentationMode)
             {
                 e.Cancel = true;
-                ExitPptPresentation();
+                await ExitPptPresentation();
                 LogHelper.WriteLogToFile("Ink Canvas closing converted to exit PPT", LogHelper.LogType.Event);
                 return;
             }
@@ -1850,7 +1850,7 @@ namespace Ink_Canvas
                     if (_isExitVerificationInProgress) return;
 
                     _isExitVerificationInProgress = true;
-                    Dispatcher.BeginInvoke(new Action(async () =>
+                    await Dispatcher.BeginInvoke(new Action(async () =>
                     {
                         try
                         {
@@ -2427,10 +2427,9 @@ namespace Ink_Canvas
             ShowPage(currentPageIndex);
         }
         // 快速面板退出PPT放映按钮事件
-        private void ExitPPTSlideShow_MouseUp(object sender, MouseButtonEventArgs e)
+        private async void ExitPPTSlideShow_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            // 直接调用PPT放映结束按钮的逻辑
-            ExitPptPresentation();
+            await ExitPptPresentation();
         }
 
         private void HistoryRollbackButton_Click(object sender, RoutedEventArgs e)
