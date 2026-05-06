@@ -4450,13 +4450,6 @@ private bool forceEraser;
         {
             if (element is FrameworkElement fe)
             {
-                // 对于SimpleStackPanel，使用其实际宽度
-                if (fe.GetType().Name == "SimpleStackPanel")
-                {
-                    return fe.ActualWidth > 0 ? fe.ActualWidth : 28; // 默认宽度28
-                }
-
-                // 对于其他元素，使用其宽度或默认宽度
                 return fe.ActualWidth > 0 ? fe.ActualWidth : 28;
             }
             return 28; // 默认宽度
