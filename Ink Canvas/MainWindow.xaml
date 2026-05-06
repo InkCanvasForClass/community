@@ -1106,7 +1106,7 @@
         <Grid Name="FloatingbarUIForInkReplay">
             <Viewbox Name="ViewboxFloatingBar" Margin="150,250,0,0" Cursor="Arrow"
                      Visibility="Collapsed"  d:Visibility="Visible"
-                     HorizontalAlignment="Left" Height="58" VerticalAlignment="Top"
+                     HorizontalAlignment="Left" VerticalAlignment="Top"
                      Stretch="None"
                      UseLayoutRounding="True" SnapsToDevicePixels="True"
                      RenderTransformOrigin="0.5,0.5">
@@ -1118,8 +1118,7 @@
                     <Border x:Name="BorderFloatingBarMoveControls" Width="36" Height="36" CornerRadius="5"
                             Background="{DynamicResource FloatBarBackground}" BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}"
                             MouseDown="SymbolIconEmoji_MouseDown" MouseUp="SymbolIconEmoji_MouseUp">
-                        <ikw:SimpleStackPanel Margin="0,2,0,2" Orientation="Horizontal"
-                                             HorizontalAlignment="Center">
+                        <ikw:SimpleStackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                             <Image Margin="0"
                                    Name="FloatingbarHeadIconImg"
                                    SnapsToDevicePixels="True"
