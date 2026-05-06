@@ -371,6 +371,10 @@ namespace Ink_Canvas
                     {
                         randWindow.RefreshTheme();
                     }
+                    else if (window is QuickDrawWindow quickDrawWindow)
+                    {
+                        quickDrawWindow.RefreshTheme();
+                    }
                     else if (window is OperatingGuideWindow operatingGuideWindow)
                     {
                         operatingGuideWindow.RefreshTheme();
