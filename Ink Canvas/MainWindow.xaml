@@ -1153,11 +1153,11 @@
                                                          Orientation="Vertical" 
                                                          HorizontalAlignment="Center" 
                                                          Margin="4,0,4,0"
-                                                         Width="60"
-                                                         Height="42"
-                                                         MaxWidth="60"
-                                                         MaxHeight="42"
-                                                         MinWidth="60">
+                                                         
+                                                         
+                                                         
+                                                         
+                                                         >
                                         <!-- 第一行：黑、白、红、橙 -->
                                         <ikw:SimpleStackPanel Orientation="Horizontal" Margin="0,0,0,2">
                                             <controls:ColorPickerButton x:Name="QuickColorBlack" Color="Black" CheckIconFill="White" ButtonSize="13" CheckIconSize="8"
@@ -1188,9 +1188,9 @@
                                                          Orientation="Horizontal" 
                                                          HorizontalAlignment="Center" 
                                                          Margin="4,0,4,0"
-                                                         Height="24"
-                                                         MaxHeight="24"
-                                                         MinWidth="120">
+                                                         
+                                                         
+                                                         >
                                         <!-- 单行显示：黑、白、红、橙、黄、绿 -->
                                         <controls:ColorPickerButton x:Name="QuickColorBlackSingle" Color="Black" CheckIconFill="White" ButtonSize="18" CheckIconSize="10"
                                                                     ButtonMouseDown="FloatingBarToolBtnMouseDownFeedback_Panel" ButtonMouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel" ButtonMouseUp="QuickColorBlack_Click" ToolTip="{i18n:I18n Key=Canvas_Color_Black}"/>

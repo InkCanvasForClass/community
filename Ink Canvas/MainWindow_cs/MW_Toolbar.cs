@@ -42,7 +42,7 @@ namespace Ink_Canvas
         internal GeometryButton BoardImageDrawParallelLine => BoardShapeDrawPopupContent?.DrawParallelLineBtn;
 
         internal void AttachCursorIconView(ToolbarImageButton btn) => Cursor_Icon = btn;
-        internal void AttachPenIconView(ToolbarImageButton btn) => Pen_Icon = btn;
+        internal void AttachPenIconView(ToolbarImageButton btn) { Pen_Icon = btn; PenPalette.PlacementTarget = btn; }
         internal void AttachSymbolIconDelete(ToolbarImageButton btn) => SymbolIconDelete = btn;
         internal void AttachEraserIcon(ToolbarImageButton btn) { Eraser_Icon = btn; EraserSizePanel.PlacementTarget = btn; }
         internal void AttachEraserByStrokesIcon(ToolbarImageButton btn) => EraserByStrokes_Icon = btn;
