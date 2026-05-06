@@ -7,13 +7,15 @@
              xmlns:controls="clr-namespace:Ink_Canvas.Controls"
              mc:Ignorable="d">
     <Border CornerRadius="8" Background="{DynamicResource ToolsPopupBackground}"
-            BorderBrush="#3b82f6" BorderThickness="2">
+            BorderBrush="#3b82f6" BorderThickness="3">
         <ikw:SimpleStackPanel Margin="-1">
             <controls:PopupTitleBar x:Name="TitleBar" Title="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}" />
-            <Border Margin="6,0,6,6" BorderBrush="{DynamicResource ToolsPopupInnerBorderBrush}"
-                    Background="{DynamicResource ToolsPopupInnerBackground}" BorderThickness="1"
+            <Border Margin="9,0,9,9" BorderBrush="{DynamicResource ToolsPopupInnerBorderBrush}"
+                    Background="{DynamicResource ToolsPopupInnerBackground}" BorderThickness="2"
                     CornerRadius="4">
-                <ContentPresenter x:Name="ContentArea" />
+                <Grid Margin="1">
+                    <ContentPresenter x:Name="ContentArea" />
+                </Grid>
             </Border>
         </ikw:SimpleStackPanel>
     </Border>

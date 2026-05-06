@@ -181,9 +181,11 @@ namespace Ink_Canvas
     public class Gesture
     {
         [JsonIgnore]
-        public bool IsEnableTwoFingerGesture => IsEnableTwoFingerZoom || IsEnableTwoFingerTranslate || IsEnableTwoFingerRotation;
+        public bool IsEnableTwoFingerGesture => IsEnableTwoFingerZoom || IsEnableTwoFingerTranslate || IsEnableTwoFingerRotation
+            || IsEnableTwoFingerZoomBoard || IsEnableTwoFingerTranslateBoard || IsEnableTwoFingerRotationBoard;
         [JsonIgnore]
-        public bool IsEnableTwoFingerGestureTranslateOrRotation => IsEnableTwoFingerTranslate || IsEnableTwoFingerRotation;
+        public bool IsEnableTwoFingerGestureTranslateOrRotation => IsEnableTwoFingerTranslate || IsEnableTwoFingerRotation
+            || IsEnableTwoFingerTranslateBoard || IsEnableTwoFingerRotationBoard;
         [JsonProperty("isEnableMultiTouchMode")]
         public bool IsEnableMultiTouchMode { get; set; } = false;
         [JsonProperty("isEnableTwoFingerZoom")]
@@ -196,6 +198,15 @@ namespace Ink_Canvas
         public bool IsEnableTwoFingerRotation { get; set; }
         [JsonProperty("isEnableTwoFingerRotationOnSelection")]
         public bool IsEnableTwoFingerRotationOnSelection { get; set; }
+
+        [JsonProperty("isEnableMultiTouchModeBoard")]
+        public bool IsEnableMultiTouchModeBoard { get; set; } = false;
+        [JsonProperty("isEnableTwoFingerZoomBoard")]
+        public bool IsEnableTwoFingerZoomBoard { get; set; } = true;
+        [JsonProperty("isEnableTwoFingerTranslateBoard")]
+        public bool IsEnableTwoFingerTranslateBoard { get; set; } = true;
+        [JsonProperty("isEnableTwoFingerRotationBoard")]
+        public bool IsEnableTwoFingerRotationBoard { get; set; }
     }
 
     // 更新通道枚举

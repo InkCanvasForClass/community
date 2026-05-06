@@ -10,6 +10,12 @@
     <SolidColorBrush x:Key="QuickDrawFloatingButtonBorderBrush" Color="#33000000"/>
     <SolidColorBrush x:Key="QuickDrawFloatingButtonIconForeground" Color="#FF000000"/>
 
+    <!-- 快抽窗口主题颜色 -->
+    <SolidColorBrush x:Key="QuickDrawWindowBackground" Color="#FFFFFFFF"/>
+    <SolidColorBrush x:Key="QuickDrawWindowBorderBrush" Color="#FFE0E0E0"/>
+    <SolidColorBrush x:Key="QuickDrawWindowTitleForeground" Color="#FF333333"/>
+    <SolidColorBrush x:Key="QuickDrawWindowDigitForeground" Color="#FF333333"/>
+
     <SolidColorBrush x:Key="SettingsPageForeground" Color="Black" />
     <SolidColorBrush x:Key="SettingsPageAnnotationForeground" Color="#666666" />
     <SolidColorBrush x:Key="SettingsPageBorderBrush" Opacity="0.8" Color="Black" />

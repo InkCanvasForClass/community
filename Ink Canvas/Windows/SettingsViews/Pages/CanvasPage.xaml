@@ -125,11 +125,11 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.InkingTool}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxCurveSmoothingMode"
-                                  SelectedIndex="0"
+                                  SelectedIndex="2"
                                   SelectionChanged="ComboBoxCurveSmoothingMode_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_AdvancedBezierSmoothing}" Tag="2" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_WPFBezierSmoothing}" Tag="1" />
                             <ComboBoxItem Content="{i18n:I18n Key=Canvas_CurveSmoothing_Off}" Tag="0" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_WPFBezierSmoothing}" Tag="1" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_AdvancedBezierSmoothing}" Tag="2" />
                         </ComboBox>
                     </ui:SettingsCard>
 
@@ -242,13 +242,6 @@
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{i18n:I18n Key=Gesture_Title}" />
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoSwitchTwoFingerGesture"
-                            Header="{i18n:I18n Key=Gesture_AutoToggleTwoFinger}"
-                            Description="{i18n:I18n Key=Gesture_AutoToggleHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Switch}"
-                            SwitchName="ToggleSwitchAutoSwitchTwoFingerGesture"
-                            Toggled="ToggleSwitchAutoSwitchTwoFingerGesture_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardEnableTwoFingerRotationOnSelection"
                             Header="{i18n:I18n Key=Gesture_AllowRotateScale}"

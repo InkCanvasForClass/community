@@ -75,7 +75,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 if (settings.Gesture != null)
                 {
-                    CardAutoSwitchTwoFingerGesture.IsOn = settings.Gesture.AutoSwitchTwoFingerGesture;
                     CardEnableTwoFingerRotationOnSelection.IsOn = settings.Gesture.IsEnableTwoFingerRotationOnSelection;
                 }
 
@@ -242,6 +241,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     break;
             }
             SettingsManager.SaveSettingsToFile();
+            var mw = Application.Current.MainWindow as MainWindow;
+            if (mw != null && mw.inkCanvas != null)
+            {
+                if (SettingsManager.Settings.Canvas.UseAdvancedBezierSmoothing)
+                    mw.inkCanvas.DefaultDrawingAttributes.FitToCurve = false;
+                else
+                    mw.inkCanvas.DefaultDrawingAttributes.FitToCurve = SettingsManager.Settings.Canvas.FitToCurve;
+            }
         }
 
         private void ToggleSwitchEnableInkFade_Toggled(object sender, RoutedEventArgs e)
@@ -343,13 +350,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdateSliderText(EraserAutoSwitchBackDelaySlider, EraserAutoSwitchBackDelayText, "{0:0}秒");
             if (!_isLoaded) return;
             SettingsManager.Settings.Canvas.EraserAutoSwitchBackDelaySeconds = (int)e.NewValue;
-            SettingsManager.SaveSettingsToFile();
-        }
-
-        private void ToggleSwitchAutoSwitchTwoFingerGesture_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Gesture.AutoSwitchTwoFingerGesture = CardAutoSwitchTwoFingerGesture.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 

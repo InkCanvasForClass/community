@@ -50,7 +50,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (ViewboxFloatingBarScaleTransformValueSlider == null || ViewboxFloatingBarActualScaleText == null) return;
             double val = ViewboxFloatingBarScaleTransformValueSlider.Value;
             double clampedVal = (val > 0.5 && val < 1.25) ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1.0;
-            double actualScale = 1.5 * clampedVal;
+            double actualScale = clampedVal;
             ViewboxFloatingBarActualScaleText.Text = $"{actualScale:F2}x";
         }
 
@@ -415,13 +415,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.SaveSettingsToFile();
 
             double clampedVal = (val > 0.5 && val < 1.25) ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1.0;
-            double actualScale = 1.5 * clampedVal;
+            double actualScale = clampedVal;
             UpdateFloatingBarActualScaleText();
 
             var mw = GetMainWindow();
             if (mw != null)
             {
-                // 应用实际缩放值（基础 1.5 × 用户设置）
                 mw.ViewboxFloatingBarScaleTransform.ScaleX = actualScale;
                 mw.ViewboxFloatingBarScaleTransform.ScaleY = actualScale;
                 if (mw.IsInPptPresentationMode)

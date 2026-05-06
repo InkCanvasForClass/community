@@ -218,6 +218,119 @@ namespace Ink_Canvas
             content.CloseFontIcon.MouseUp += CloseBordertools_MouseUp;
         }
 
+        private bool _penPaletteEventsWired;
+        private bool _eraserPopupEventsWired;
+        private bool _gesturePopupEventsWired;
+
+        private void WireUpPenPaletteEvents()
+        {
+            if (_penPaletteEventsWired) return;
+            _penPaletteEventsWired = true;
+
+            WireUpSinglePenPaletteEvents(PenPalettePopupContent);
+            WireUpSinglePenPaletteEvents(BoardPenPalettePopupContent);
+        }
+
+        private void WireUpSinglePenPaletteEvents(PenPalettePopupContent content)
+        {
+            if (content == null) return;
+
+            content.PenStyleComboBox.SelectionChanged += ComboBoxPenStyle_SelectionChanged;
+            content.NibModeToggle.Toggled += ToggleSwitchEnableNibMode_Toggled;
+            content.InkToShapeToggle.Toggled += ToggleSwitchEnableInkToShape_Toggled;
+            content.InkFadeToggle.Toggled += ToggleSwitchInkFadeInPanel_Toggled;
+            content.InkWidthSlider.ValueChanged += InkWidthSlider_ValueChanged;
+            content.InkAlphaSlider.ValueChanged += InkAlphaSlider_ValueChanged;
+            content.HighlighterWidthSlider.ValueChanged += HighlighterWidthSlider_ValueChanged;
+            content.BrushModeBtn.Click += BoardBrushModeButton_Click;
+            content.BrushModeBtn.MouseUp += BoardBrushModeButton_MouseUp;
+
+            content.DefaultPenTab.MouseUp += SwitchToDefaultPen;
+            content.HighlightPenTab.MouseUp += SwitchToHighlighterPen;
+
+            content.DefaultPenColorBlack.ButtonMouseUp += BtnColorBlack_Click;
+            content.DefaultPenColorWhite.ButtonMouseUp += BtnColorWhite_Click;
+            content.DefaultPenColorRed.ButtonMouseUp += BtnColorRed_Click;
+            content.DefaultPenColorYellow.ButtonMouseUp += BtnColorYellow_Click;
+            content.DefaultPenColorGreen.ButtonMouseUp += BtnColorGreen_Click;
+            content.DefaultPenColorBlue.ButtonMouseUp += BtnColorBlue_Click;
+            content.DefaultPenColorPink.ButtonMouseUp += BtnColorPink_Click;
+            content.DefaultPenColorTeal.ButtonMouseUp += BtnColorTeal_Click;
+            content.DefaultPenColorOrange.ButtonMouseUp += BtnColorOrange_Click;
+
+            content.HighlighterPenColorBlack.ButtonMouseUp += BtnHighlighterColorBlack_Click;
+            content.HighlighterPenColorWhite.ButtonMouseUp += BtnHighlighterColorWhite_Click;
+            content.HighlighterPenColorRed.ButtonMouseUp += BtnHighlighterColorRed_Click;
+            content.HighlighterPenColorYellow.ButtonMouseUp += BtnHighlighterColorYellow_Click;
+            content.HighlighterPenColorGreen.ButtonMouseUp += BtnHighlighterColorGreen_Click;
+            content.HighlighterPenColorZinc.ButtonMouseUp += BtnHighlighterColorZinc_Click;
+            content.HighlighterPenColorBlue.ButtonMouseUp += BtnHighlighterColorBlue_Click;
+            content.HighlighterPenPenColorPurple.ButtonMouseUp += BtnHighlighterColorPurple_Click;
+            content.HighlighterPenColorTeal.ButtonMouseUp += BtnHighlighterColorTeal_Click;
+            content.HighlighterPenColorOrange.ButtonMouseUp += BtnHighlighterColorOrange_Click;
+
+            content.ColorThemeSwitch.MouseUp += ColorThemeSwitch_MouseUp;
+        }
+
+        private void WireUpEraserPopupContentEvents()
+        {
+            if (_eraserPopupEventsWired) return;
+            _eraserPopupEventsWired = true;
+
+            WireUpSingleEraserPopupContentEvents(EraserPopupContent);
+            WireUpSingleEraserPopupContentEvents(BoardEraserPopupContent);
+        }
+
+        private void WireUpSingleEraserPopupContentEvents(EraserPopupContent content)
+        {
+            if (content == null) return;
+
+            content.EraserSizeComboBox.SelectionChanged += ComboBoxEraserSizeFloatingBar_SelectionChanged;
+            content.CircleTab.MouseUp += SwitchToCircleEraser;
+            content.RectangleTab.MouseUp += SwitchToRectangleEraser;
+            content.ClearInkBtn.Click += EraserPanelSymbolIconDelete_MouseUp;
+            content.ClearInkAndHistoryBtn.Click += BoardSymbolIconDeleteInkAndHistories_MouseUp;
+            content.CloseFontIcon.MouseDown += Border_MouseDown;
+            content.CloseFontIcon.MouseUp += CloseBordertools_MouseUp;
+        }
+
+        private void WireUpGesturePopupContentEvents()
+        {
+            if (_gesturePopupEventsWired) return;
+            _gesturePopupEventsWired = true;
+
+            WireUpSingleGesturePopupContentEvents(FloatingBarGesturePopupContent);
+            WireUpSingleGesturePopupContentEvents(BoardGesturePopupContent);
+        }
+
+        private void WireUpSingleGesturePopupContentEvents(GesturePopupContent content)
+        {
+            if (content == null) return;
+
+            content.MultiTouchToggle.Toggled += ToggleSwitchEnableMultiTouchMode_Toggled;
+            content.TwoFingerTranslateToggle.Toggled += ToggleSwitchEnableTwoFingerTranslate_Toggled;
+            content.TwoFingerZoomToggle.Toggled += ToggleSwitchEnableTwoFingerZoom_Toggled;
+            content.TwoFingerRotationToggle.Toggled += ToggleSwitchEnableTwoFingerRotation_Toggled;
+            content.CloseFontIcon.MouseDown += Border_MouseDown;
+            content.CloseFontIcon.MouseUp += CloseBordertools_MouseUp;
+        }
+
+        private bool _imageOptionsPopupEventsWired;
+
+        private void WireUpImageOptionsPopupContentEvents()
+        {
+            if (_imageOptionsPopupEventsWired) return;
+            _imageOptionsPopupEventsWired = true;
+
+            var content = BoardImageOptionsPopupContent;
+            if (content == null) return;
+
+            content.ScreenshotOption.MouseUp += ImageOptionScreenshot_MouseUp;
+            content.SelectFileOption.MouseUp += ImageOptionSelectFile_MouseUp;
+            content.CloseFontIcon.MouseDown += Border_MouseDown;
+            content.CloseFontIcon.MouseUp += CloseBordertools_MouseUp;
+        }
+
         private bool _shapeDrawPopupEventsWired;
         private bool _boardShapeDrawPopupEventsWired;
 
@@ -285,6 +398,10 @@ namespace Ink_Canvas
             WireUpShapeDrawPopupContentEvents();
             WireUpBoardShapeDrawPopupContentEvents();
             WireUpBackgroundPaletteEvents();
+            WireUpPenPaletteEvents();
+            WireUpEraserPopupContentEvents();
+            WireUpGesturePopupContentEvents();
+            WireUpImageOptionsPopupContentEvents();
             BoardBorderToolsPopup.CustomPopupPlacementCallback =
                 (popupSize, targetSize, offset) => new[]
                 {

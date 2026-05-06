@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
              mc:Ignorable="d" d:Width="300">
-    <Grid Margin="8,7,10,5">
+    <Grid Margin="12,8,10,5">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
