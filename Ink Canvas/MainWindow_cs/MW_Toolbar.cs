@@ -81,22 +81,12 @@ namespace Ink_Canvas
         internal Button BoardBrushModeButton => PenPalettePopupContent?.BrushModeBtn;
         internal System.Windows.Shapes.Path BoardBrushModeIcon => PenPalettePopupContent?.BrushModeIcon;
 
-        internal PopupTabTitleBar PenTabTitleBar => PenPalettePopupContent?.TabBar ?? BoardPenPalettePopupContent?.TabBar;
-        internal PopupTabTitleBar BoardPenTabTitleBar => BoardPenPalettePopupContent?.TabBar;
-        internal int PenSelectedTabIndex
-        {
-            get => PenPalettePopupContent?.SelectedTabIndex ?? BoardPenPalettePopupContent?.SelectedTabIndex ?? 0;
-            set
-            {
-                if (PenPalettePopupContent != null) PenPalettePopupContent.SelectedTabIndex = value;
-                if (BoardPenPalettePopupContent != null) BoardPenPalettePopupContent.SelectedTabIndex = value;
-            }
-        }
-        internal int BoardPenSelectedTabIndex
-        {
-            get => BoardPenPalettePopupContent?.SelectedTabIndex ?? 0;
-            set { if (BoardPenPalettePopupContent != null) BoardPenPalettePopupContent.SelectedTabIndex = value; }
-        }
+        internal Border DefaultPenTabButton => PenPalettePopupContent?.DefaultPenTab ?? BoardPenPalettePopupContent?.DefaultPenTab;
+        internal Border HighlightPenTabButton => PenPalettePopupContent?.HighlightPenTab ?? BoardPenPalettePopupContent?.HighlightPenTab;
+        internal FrameworkElement DefaultPenTabButtonIndicator => PenPalettePopupContent?.DefaultPenTabIndicator ?? BoardPenPalettePopupContent?.DefaultPenTabIndicator;
+        internal FrameworkElement HighlightPenTabButtonIndicator => PenPalettePopupContent?.HighlightPenTabIndicator ?? BoardPenPalettePopupContent?.HighlightPenTabIndicator;
+        internal TextBlock DefaultPenTabButtonText => PenPalettePopupContent?.DefaultPenTabText ?? BoardPenPalettePopupContent?.DefaultPenTabText;
+        internal TextBlock HighlightPenTabButtonText => PenPalettePopupContent?.HighlightPenTabText ?? BoardPenPalettePopupContent?.HighlightPenTabText;
 
         internal Viewbox DefaultPenPropsPanel => PenPalettePopupContent?.DefaultPenPropsPanel ?? BoardPenPalettePopupContent?.DefaultPenPropsPanel;
         internal Viewbox HighlighterPenPropsPanel => PenPalettePopupContent?.HighlighterPenPropsPanel ?? BoardPenPalettePopupContent?.HighlighterPenPropsPanel;
@@ -108,7 +98,12 @@ namespace Ink_Canvas
         internal Viewbox BoardDefaultPenColorsPanel => BoardPenPalettePopupContent?.DefaultPenColorsPanel;
         internal Viewbox BoardHighlighterPenColorsPanel => BoardPenPalettePopupContent?.HighlighterPenColorsPanel;
 
-
+        internal Border BoardDefaultPenTabButton => BoardPenPalettePopupContent?.DefaultPenTab;
+        internal Border BoardHighlightPenTabButton => BoardPenPalettePopupContent?.HighlightPenTab;
+        internal FrameworkElement BoardDefaultPenTabButtonIndicator => BoardPenPalettePopupContent?.DefaultPenTabIndicator;
+        internal FrameworkElement BoardHighlightPenTabButtonIndicator => BoardPenPalettePopupContent?.HighlightPenTabIndicator;
+        internal TextBlock BoardDefaultPenTabButtonText => BoardPenPalettePopupContent?.DefaultPenTabText;
+        internal TextBlock BoardHighlightPenTabButtonText => BoardPenPalettePopupContent?.HighlightPenTabText;
 
         internal PenColorButton BorderPenColorBlack => (PenPalettePopupContent ?? BoardPenPalettePopupContent)?.DefaultPenColorBlack;
         internal PenColorButton BorderPenColorWhite => (PenPalettePopupContent ?? BoardPenPalettePopupContent)?.DefaultPenColorWhite;
