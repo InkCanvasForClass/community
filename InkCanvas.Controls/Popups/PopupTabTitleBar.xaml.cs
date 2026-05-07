@@ -32,8 +32,11 @@ namespace Ink_Canvas.Controls
         private static void OnSelectedIndexChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (PopupTabTitleBar)d;
+            var newIndex = (int)e.NewValue;
+            if (newIndex < 0 || newIndex >= control.Tabs.Count)
+                return;
             control.UpdateTabVisuals();
-            control.SelectedIndexChanged?.Invoke(control, (int)e.NewValue);
+            control.SelectedIndexChanged?.Invoke(control, newIndex);
         }
 
         public int SelectedIndex
@@ -152,6 +155,8 @@ namespace Ink_Canvas.Controls
 
         private void UpdateTabVisuals()
         {
+            if (SelectedIndex < 0 || SelectedIndex >= TabsPanel.Children.Count)
+                return;
             for (int i = 0; i < TabsPanel.Children.Count; i++)
             {
                 if (!(TabsPanel.Children[i] is Border border)) continue;

@@ -97,6 +97,7 @@ namespace Ink_Canvas.Controls
 
             TabTitleBar.SelectedIndexChanged += (s, index) =>
             {
+                if (index < 0 || index >= TabTitleBar.Tabs.Count) return;
                 if (index == 0)
                     ShowDefaultPenPanels();
                 else if (index == 1)
