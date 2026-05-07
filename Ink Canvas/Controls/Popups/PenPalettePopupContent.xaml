@@ -86,14 +86,34 @@
                                                Margin="10,0,0,0" FontSize="15" />
                                     <Button x:Name="BoardBrushModeButton" Width="24" Height="24" Margin="8,0,0,0"
                                             VerticalAlignment="Center"
-                                            ToolTip="板刷模式">
-                                        <Viewbox Margin="4" Stretch="Uniform">
+                                            ToolTip="板刷模式"
+                                            Background="Transparent" BorderThickness="0" Padding="0">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="Bd"
+                                                        Background="{TemplateBinding Background}"
+                                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                                        Padding="{TemplateBinding Padding}"
+                                                        CornerRadius="4"
+                                                        Cursor="Hand">
+                                                    <ContentPresenter HorizontalAlignment="Center"
+                                                                      VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="Bd" Property="Background" Value="#22FFFFFF"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsPressed" Value="True">
+                                                        <Setter TargetName="Bd" Property="Background" Value="#44FFFFFF"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                        <Viewbox Width="16" Height="16" Stretch="Uniform">
                                             <Path x:Name="BoardBrushModeIcon"
-                                                  Fill="{DynamicResource FloatBarForeground}" Stretch="Fill">
-                                                <Path.Data>
-                                                    <PathGeometry Figures="M6.7812 6.9375C6.81411 7.06468 6.87172 7.18413 6.95081 7.28903C7.0299 7.39392 7.12891 7.4822 7.24213 7.54882C7.47058 7.68347 7.74313 7.72187 7.99989 7.65557C8.25664 7.58928 8.47657 7.42372 8.61128 7.19531L11.9238 1.57031C12.0584 1.34186 12.0968 1.06928 12.0305 0.812526C11.9642 0.555772 11.7987 0.335869 11.5703 0.201167C11.3418 0.0665197 11.0693 0.028121 10.8125 0.0944166C10.5558 0.160712 10.3358 0.326268 10.2011 0.554683L6.88862 6.17968C6.82183 6.29276 6.77796 6.41788 6.75953 6.54791C6.7411 6.67793 6.74847 6.81031 6.7812 6.9375Z M5.21875 5.09375L10.1662 8.14759C10.7697 8.46231 10.9861 9.26072 10.3308 9.74464L9.70892 9.96117L3.6897 6.43971L3.7074 5.53239C3.99623 4.94715 4.46209 4.71653 5.21875 5.09375Z M3.05377 7.48846L9.04364 10.9631L7.99908 12.5052C7.77811 12.7482 7.86648 13.0797 8.08746 13.2123L9.03766 14.0298H3.66809C1.47755 14.0298 0.471255 11.9653 1.52466 10.1408L3.05377 7.48846Z" />
-                                                </Path.Data>
-                                            </Path>
+                                                  Fill="{DynamicResource FloatBarForeground}"
+                                                  Stretch="Uniform"
+                                                  Data="M6.7812 6.9375C6.81411 7.06468 6.87172 7.18413 6.95081 7.28903C7.0299 7.39392 7.12891 7.4822 7.24213 7.54882C7.47058 7.68347 7.74313 7.72187 7.99989 7.65557C8.25664 7.58928 8.47657 7.42372 8.61128 7.19531L11.9238 1.57031C12.0584 1.34186 12.0968 1.06928 12.0305 0.812526C11.9642 0.555772 11.7987 0.335869 11.5703 0.201167C11.3418 0.0665197 11.0693 0.028121 10.8125 0.0944166C10.5558 0.160712 10.3358 0.326268 10.2011 0.554683L6.88862 6.17968C6.82183 6.29276 6.77796 6.41788 6.75953 6.54791C6.7411 6.67793 6.74847 6.81031 6.7812 6.9375Z M5.21875 5.09375L10.1662 8.14759C10.7697 8.46231 10.9861 9.26072 10.3308 9.74464L9.70892 9.96117L3.6897 6.43971L3.7074 5.53239C3.99623 4.94715 4.46209 4.71653 5.21875 5.09375Z M3.05377 7.48846L9.04364 10.9631L7.99908 12.5052C7.77811 12.7482 7.86648 13.0797 8.08746 13.2123L9.03766 14.0298H3.66809C1.47755 14.0298 0.471255 11.9653 1.52466 10.1408L3.05377 7.48846Z" />
                                         </Viewbox>
                                     </Button>
                                 </StackPanel>

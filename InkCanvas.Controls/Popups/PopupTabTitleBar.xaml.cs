@@ -123,13 +123,13 @@ namespace Ink_Canvas.Controls
 
             var text = new TextBlock
             {
-                Foreground = titleForegroundBrush,
                 FontWeight = FontWeights.Medium,
                 FontSize = 14,
                 TextAlignment = TextAlignment.Center,
                 Text = tabItem.Header ?? "",
                 Margin = new Thickness(4, 0, 4, 0)
             };
+            text.SetResourceReference(TextBlock.ForegroundProperty, "FloatBarForeground");
             contentPanel.Children.Add(text);
 
             Grid.SetRow(contentPanel, 0);
