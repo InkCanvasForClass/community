@@ -10,94 +10,10 @@
              xmlns:helpers="clr-namespace:Ink_Canvas.Helpers"
              xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
              mc:Ignorable="d">
-    <UserControl.Resources>
-        <Style x:Key="AutoFitPenTabLabel9" TargetType="TextBlock">
-            <Setter Property="TextWrapping" Value="NoWrap" />
-            <Setter Property="TextAlignment" Value="Center" />
-            <Setter Property="helpers:AutoFontSizeHelper.IsEnabled" Value="True" />
-            <Setter Property="helpers:AutoFontSizeHelper.MinFontSize" Value="3.5" />
-            <Setter Property="helpers:AutoFontSizeHelper.MaxFontSize" Value="9" />
-            <Setter Property="helpers:AutoFontSizeHelper.Step" Value="0.1" />
-        </Style>
-    </UserControl.Resources>
     <Border CornerRadius="8" Background="{DynamicResource FloatBarBackground}"
             BorderBrush="#2563eb" BorderThickness="1">
         <ikw:SimpleStackPanel Margin="0">
-            <Border BorderBrush="#1e3a8a" Height="32"
-                    BorderThickness="0,0,0,1"
-                    CornerRadius="8,8,0,0" Background="#2563eb"
-                    Margin="-1,-1,-1,0" Padding="1,1,1,0">
-                <ikw:SimpleStackPanel Orientation="Vertical"
-                                     VerticalAlignment="Center">
-                    <ikw:SimpleStackPanel Orientation="Horizontal"
-                                         HorizontalAlignment="Stretch"
-                                         Margin="8,0,0,0" Spacing="2">
-                        <Border x:Name="DefaultPenTabButton"
-                                Background="#48dbeafe" Height="20" Width="36"
-                                CornerRadius="3">
-                            <Canvas>
-                                <ikw:SimpleStackPanel x:Name="DefaultPenTabButtonIndicator"
-                                                     Visibility="Visible"
-                                                     Orientation="Horizontal"
-                                                     Canvas.Left="9" Canvas.Right="9"
-                                                     Canvas.Bottom="0">
-                                    <Border Width="18" Height="2"
-                                            Background="{DynamicResource FloatBarBackground}" CornerRadius="1" />
-                                </ikw:SimpleStackPanel>
-                                <ikw:SimpleStackPanel Orientation="Vertical"
-                                                     Height="20" Width="36">
-                                    <ikw:SimpleStackPanel VerticalAlignment="Center"
-                                                         Orientation="Horizontal"
-                                                         HorizontalAlignment="Center"
-                                                         Margin="0,3">
-                                        <Image Source="/Resources/new-icons/pen-white.png"
-                                               RenderOptions.BitmapScalingMode="HighQuality"
-                                               Height="13" Width="13" />
-                                        <TextBlock x:Name="DefaultPenTabButtonText"
-                                                   Foreground="White" FontWeight="Medium"
-                                                   FontSize="9" TextAlignment="Center"
-                                                   Text="{i18n:I18n Key=Board_Pen}" Margin="2,1,0,0" />
-                                    </ikw:SimpleStackPanel>
-                                </ikw:SimpleStackPanel>
-                            </Canvas>
-                        </Border>
-                        <Border x:Name="HighlightPenTabButton"
-                                Background="Transparent" Height="20" Width="52"
-                                CornerRadius="3">
-                            <Canvas>
-                                <ikw:SimpleStackPanel Visibility="Collapsed"
-                                                     x:Name="HighlightPenTabButtonIndicator"
-                                                     Orientation="Horizontal" Canvas.Left="14"
-                                                     Canvas.Right="14" Canvas.Bottom="0">
-                                    <Border Width="24" Height="2"
-                                            Background="{DynamicResource FloatBarBackground}" CornerRadius="1" />
-                                </ikw:SimpleStackPanel>
-                                <ikw:SimpleStackPanel Orientation="Vertical"
-                                                     Height="20" Width="52">
-                                    <ikw:SimpleStackPanel VerticalAlignment="Center"
-                                                         Orientation="Horizontal"
-                                                         HorizontalAlignment="Center" Margin="0,3">
-                                        <Image Source="/Resources/new-icons/highlighter-white.png"
-                                               RenderOptions.BitmapScalingMode="HighQuality"
-                                               Height="13" Width="13" />
-                                        <TextBlock x:Name="HighlightPenTabButtonText"
-                                                   Foreground="White" FontWeight="Medium"
-                                                   FontSize="9" TextAlignment="Center"
-                                                   Text="{i18n:I18n Key=Board_Highlighter}" Margin="2,1,0,0"
-                                                   Width="35"
-                                                   Style="{StaticResource AutoFitPenTabLabel9}" />
-                                    </ikw:SimpleStackPanel>
-                                </ikw:SimpleStackPanel>
-                            </Canvas>
-                        </Border>
-                        <Image Margin="66,0,0,0"
-                               Source="/Resources/new-icons/close-white.png"
-                               RenderOptions.BitmapScalingMode="HighQuality"
-                               Height="16" Width="16"
-                               x:Name="_CloseIcon" />
-                    </ikw:SimpleStackPanel>
-                </ikw:SimpleStackPanel>
-            </Border>
+            <controls:PopupTabTitleBar x:Name="TabTitleBar" />
             <ikw:SimpleStackPanel>
                 <Viewbox x:Name="_DefaultPenPropsPanel"
                          Margin="12,12,12,0" HorizontalAlignment="Center"
