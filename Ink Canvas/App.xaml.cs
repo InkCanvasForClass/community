@@ -449,6 +449,30 @@ namespace Ink_Canvas
             {
                 var exception = e.ExceptionObject as Exception;
 
+                if (exception is System.Runtime.InteropServices.COMException comEx)
+                {
+                    var hr = (uint)comEx.HResult;
+                    if (hr == 0x80004005 || hr == 0x8001010E || hr == 0x800706B5 ||
+                        hr == 0x800706BA || hr == 0x8001010A || hr == 0x80010001 ||
+                        hr == 0x80010108 || hr == 0x8001010D || hr == 0x800706BE)
+                    {
+                        LogHelper.WriteLogToFile(
+                            $"非UI线程检测到PPT/WPS COM对象异常（已安全处理）: HR=0x{hr:X8}, {comEx.Message}",
+                            LogHelper.LogType.Warning
+                        );
+                        return;
+                    }
+                }
+
+                if (exception is System.Runtime.InteropServices.InvalidComObjectException)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"非UI线程检测到无效COM对象异常（已安全处理）: {exception.Message}",
+                        LogHelper.LogType.Warning
+                    );
+                    return;
+                }
+
                 if (exception is InvalidOperationException invalidOpEx)
                 {
                     string exceptionMessage = invalidOpEx.Message ?? "";
@@ -692,6 +716,32 @@ namespace Ink_Canvas
 
         private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
+            if (e.Exception is System.Runtime.InteropServices.COMException comEx)
+            {
+                var hr = (uint)comEx.HResult;
+                if (hr == 0x80004005 || hr == 0x8001010E || hr == 0x800706B5 ||
+                    hr == 0x800706BA || hr == 0x8001010A || hr == 0x80010001 ||
+                    hr == 0x80010108 || hr == 0x8001010D || hr == 0x800706BE)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"检测到PPT/WPS COM对象异常（已安全处理）: HR=0x{hr:X8}, {comEx.Message}",
+                        LogHelper.LogType.Warning
+                    );
+                    e.Handled = true;
+                    return;
+                }
+            }
+
+            if (e.Exception is System.Runtime.InteropServices.InvalidComObjectException)
+            {
+                LogHelper.WriteLogToFile(
+                    $"检测到无效COM对象异常（已安全处理）: {e.Exception.Message}",
+                    LogHelper.LogType.Warning
+                );
+                e.Handled = true;
+                return;
+            }
+
             // 检查是否是DynamicRenderer线程访问UI对象的已知问题
             if (e.Exception is InvalidOperationException invalidOpEx)
             {
