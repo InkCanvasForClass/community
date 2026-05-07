@@ -118,9 +118,6 @@ namespace Ink_Canvas.Controls
                 contentPanel.Children.Add(icon);
             }
 
-            var titleForegroundBrush = TryFindResource("ToolsPopupTitleForeground") as Brush
-                ?? new SolidColorBrush(Color.FromRgb(0x1e, 0x29, 0x3b));
-
             var text = new TextBlock
             {
                 FontWeight = FontWeights.Medium,

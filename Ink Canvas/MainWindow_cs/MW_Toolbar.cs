@@ -100,13 +100,13 @@ namespace Ink_Canvas
 
         internal Viewbox DefaultPenPropsPanel => PenPalettePopupContent?.DefaultPenPropsPanel ?? BoardPenPalettePopupContent?.DefaultPenPropsPanel;
         internal Viewbox HighlighterPenPropsPanel => PenPalettePopupContent?.HighlighterPenPropsPanel ?? BoardPenPalettePopupContent?.HighlighterPenPropsPanel;
-        internal Viewbox DefaultPenColorsPanel => PenPalettePopupContent?.DefaultPenColorsPanel ?? BoardPenPalettePopupContent?.DefaultPenColorsPanel;
-        internal Viewbox HighlighterPenColorsPanel => PenPalettePopupContent?.HighlighterPenColorsPanel ?? BoardPenPalettePopupContent?.HighlighterPenColorsPanel;
+        internal FrameworkElement DefaultPenColorsPanel => PenPalettePopupContent?.DefaultPenColorsPanel ?? BoardPenPalettePopupContent?.DefaultPenColorsPanel;
+        internal FrameworkElement HighlighterPenColorsPanel => PenPalettePopupContent?.HighlighterPenColorsPanel ?? BoardPenPalettePopupContent?.HighlighterPenColorsPanel;
 
         internal Viewbox BoardDefaultPenPropsPanel => BoardPenPalettePopupContent?.DefaultPenPropsPanel;
         internal Viewbox BoardHighlighterPenPropsPanel => BoardPenPalettePopupContent?.HighlighterPenPropsPanel;
-        internal Viewbox BoardDefaultPenColorsPanel => BoardPenPalettePopupContent?.DefaultPenColorsPanel;
-        internal Viewbox BoardHighlighterPenColorsPanel => BoardPenPalettePopupContent?.HighlighterPenColorsPanel;
+        internal FrameworkElement BoardDefaultPenColorsPanel => BoardPenPalettePopupContent?.DefaultPenColorsPanel;
+        internal FrameworkElement BoardHighlighterPenColorsPanel => BoardPenPalettePopupContent?.HighlighterPenColorsPanel;
 
 
 

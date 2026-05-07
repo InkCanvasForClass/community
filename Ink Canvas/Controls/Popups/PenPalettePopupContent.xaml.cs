@@ -35,8 +35,8 @@ namespace Ink_Canvas.Controls
 
         public Viewbox DefaultPenPropsPanel { get; }
         public Viewbox HighlighterPenPropsPanel { get; }
-        public Viewbox DefaultPenColorsPanel { get; }
-        public Viewbox HighlighterPenColorsPanel { get; }
+        public FrameworkElement DefaultPenColorsPanel { get; }
+        public FrameworkElement HighlighterPenColorsPanel { get; }
 
         public ComboBox PenStyleComboBox => ComboBoxPenStyle;
         public ToggleSwitch NibModeToggle => ToggleSwitchEnableNibMode;
@@ -106,8 +106,8 @@ namespace Ink_Canvas.Controls
 
             DefaultPenPropsPanel = (Viewbox)FindName("_DefaultPenPropsPanel");
             HighlighterPenPropsPanel = (Viewbox)FindName("_HighlighterPenPropsPanel");
-            DefaultPenColorsPanel = (Viewbox)FindName("_DefaultPenColorsPanel");
-            HighlighterPenColorsPanel = (Viewbox)FindName("_HighlighterPenColorsPanel");
+            DefaultPenColorsPanel = (FrameworkElement)FindName("_DefaultPenColorsPanel");
+            HighlighterPenColorsPanel = (FrameworkElement)FindName("_HighlighterPenColorsPanel");
             InkWidthSlider = (Slider)FindName("_InkWidthSlider");
             InkAlphaSlider = (Slider)FindName("_InkAlphaSlider");
             HighlighterWidthSlider = (Slider)FindName("_HighlighterWidthSlider");
