@@ -33,8 +33,8 @@ namespace Ink_Canvas.Controls
             set => TabTitleBar.SelectedIndex = value;
         }
 
-        public Viewbox DefaultPenPropsPanel { get; }
-        public Viewbox HighlighterPenPropsPanel { get; }
+        public FrameworkElement DefaultPenPropsPanel { get; }
+        public FrameworkElement HighlighterPenPropsPanel { get; }
         public FrameworkElement DefaultPenColorsPanel { get; }
         public FrameworkElement HighlighterPenColorsPanel { get; }
 
@@ -104,8 +104,8 @@ namespace Ink_Canvas.Controls
                     ShowHighlighterPenPanels();
             };
 
-            DefaultPenPropsPanel = (Viewbox)FindName("_DefaultPenPropsPanel");
-            HighlighterPenPropsPanel = (Viewbox)FindName("_HighlighterPenPropsPanel");
+            DefaultPenPropsPanel = (FrameworkElement)FindName("_DefaultPenPropsPanel");
+            HighlighterPenPropsPanel = (FrameworkElement)FindName("_HighlighterPenPropsPanel");
             DefaultPenColorsPanel = (FrameworkElement)FindName("_DefaultPenColorsPanel");
             HighlighterPenColorsPanel = (FrameworkElement)FindName("_HighlighterPenColorsPanel");
             InkWidthSlider = (Slider)FindName("_InkWidthSlider");
