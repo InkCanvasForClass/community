@@ -51,6 +51,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 { "ExperimentalPage", typeof(ExperimentalPage) },
                 { "AdvancedPage", typeof(AdvancedPage) },
                 { "StoragePage", typeof(StoragePage) },
+                { "CloudStoragePage", typeof(CloudStoragePage) },
                 { "AutomationPage", typeof(AutomationPage) },
                 { "PowerPointPage", typeof(PowerPointPage) },
                 { "RandomDrawPage", typeof(RandomDrawPage) },
