@@ -306,6 +306,17 @@
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
+                <!-- 云存储 -->
+                <ui:NavigationViewItem
+                    x:Name="CloudStoragePageItem"
+                    Content="云存储"
+                    Tag="CloudStoragePage"
+                    ToolTipService.ToolTip="云存储与自动上传">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}"/>
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
                 <!-- 自动化 -->
                 <ui:NavigationViewItem
                     x:Name="AutomationPageItem"
