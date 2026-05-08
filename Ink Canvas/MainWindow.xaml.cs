@@ -2639,6 +2639,7 @@ namespace Ink_Canvas
         public void ApplyAlwaysOnTop()
         {
             WindowSettingsHelper.ApplyAlwaysOnTop(this);
+            _popupManager?.OnTopmostSettingChanged();
         }
 
         private void StartTopmostMaintenance()

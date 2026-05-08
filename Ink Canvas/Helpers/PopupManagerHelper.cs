@@ -22,9 +22,11 @@ namespace Ink_Canvas.Helpers
         [DllImport("user32.dll")]
         private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
 
+        [DllImport("user32.dll")]
+        private static extern bool IsWindow(IntPtr hWnd);
+
         private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
         private static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
-        private static readonly IntPtr HWND_TOP = IntPtr.Zero;
         private const uint SWP_NOMOVE = 0x0002;
         private const uint SWP_NOSIZE = 0x0001;
         private const uint SWP_NOACTIVATE = 0x0010;
@@ -39,10 +41,14 @@ namespace Ink_Canvas.Helpers
         private static readonly List<PopupManagerHelper> _activeInstances = new List<PopupManagerHelper>();
 
         private readonly List<Popup> _registeredPopups = new List<Popup>();
+        private readonly Dictionary<Popup, IntPtr> _hwndCache = new Dictionary<Popup, IntPtr>();
+        private readonly HashSet<Popup> _openPopups = new HashSet<Popup>();
         private Window _ownerWindow;
         private IntPtr _ownerHwnd = IntPtr.Zero;
         private bool _isInitialized = false;
         private bool _needsUpdate = false;
+        private DispatcherTimer _periodicCheckTimer;
+        private bool _lastTopmostState = false;
         private int _topmostCheckCounter = 0;
         private const int TopmostCheckInterval = 15;
 
@@ -73,6 +79,12 @@ namespace Ink_Canvas.Helpers
 
             try
             {
+                _periodicCheckTimer = new DispatcherTimer
+                {
+                    Interval = TimeSpan.FromMilliseconds(500)
+                };
+                _periodicCheckTimer.Tick += OnPeriodicCheck;
+
                 CompositionTarget.Rendering += OnRendering;
                 _activeInstances.Add(this);
                 _isInitialized = true;
@@ -106,6 +118,8 @@ namespace Ink_Canvas.Helpers
             popup.Opened -= OnPopupOpened;
             popup.Closed -= OnPopupClosed;
             _registeredPopups.Remove(popup);
+            _hwndCache.Remove(popup);
+            _openPopups.Remove(popup);
         }
 
         private void OnPopupOpened(object sender, EventArgs e)
@@ -118,17 +132,19 @@ namespace Ink_Canvas.Helpers
                 child.Visibility = Visibility.Visible;
             }
 
+            _openPopups.Add(popup);
+            _hwndCache.Remove(popup);
+
             FixPopupZOrder(popup);
 
             Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 FixPopupZOrder(popup);
+                if (popup.Child is FrameworkElement child)
+                    FixChildPopups(child);
             }), DispatcherPriority.Loaded);
 
-            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                FixPopupZOrder(popup);
-            }), DispatcherPriority.Background);
+            UpdateTimerState();
         }
 
         private void OnPopupClosed(object sender, EventArgs e)
@@ -139,6 +155,26 @@ namespace Ink_Canvas.Helpers
             if (popup.Child is FrameworkElement child)
             {
                 child.Visibility = Visibility.Collapsed;
+            }
+
+            _openPopups.Remove(popup);
+            _hwndCache.Remove(popup);
+
+            UpdateTimerState();
+        }
+
+        private void UpdateTimerState()
+        {
+            if (_periodicCheckTimer == null) return;
+
+            if (_openPopups.Count > 0 && CheckShouldBeTopmost())
+            {
+                if (!_periodicCheckTimer.IsEnabled)
+                    _periodicCheckTimer.Start();
+            }
+            else
+            {
+                _periodicCheckTimer.Stop();
             }
         }
 
@@ -160,17 +196,15 @@ namespace Ink_Canvas.Helpers
             Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 FixPopupZOrder(popup);
+                if (popup.Child is FrameworkElement child)
+                    FixChildPopups(child);
             }), DispatcherPriority.Render);
-
-            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                FixPopupZOrder(popup);
-            }), DispatcherPriority.Background);
         }
 
         public void BringToFrontLight(Popup popup)
         {
-            BringToFront(popup);
+            if (popup?.Child == null) return;
+            FixPopupZOrder(popup);
         }
 
         public void UpdatePosition(Popup popup)
@@ -193,12 +227,9 @@ namespace Ink_Canvas.Helpers
 
         public void OnOwnerActivated()
         {
-            foreach (var popup in _registeredPopups)
+            foreach (var popup in _openPopups)
             {
-                if (popup.IsOpen)
-                {
-                    FixPopupZOrder(popup);
-                }
+                FixPopupZOrder(popup);
             }
         }
 
@@ -210,17 +241,37 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        public void OnTopmostSettingChanged()
+        {
+            var shouldBeTopmost = CheckShouldBeTopmost();
+
+            if (_lastTopmostState != shouldBeTopmost)
+            {
+                _lastTopmostState = shouldBeTopmost;
+
+                foreach (var popup in _openPopups)
+                {
+                    _hwndCache.Remove(popup);
+                    FixPopupZOrder(popup);
+                }
+            }
+
+            UpdateTimerState();
+        }
+
         #endregion
 
-        #region 内部实现 - 渲染回调
+        #region 内部实现 - 渲染回调与定时器
 
         private void OnRendering(object sender, EventArgs e)
         {
             try
             {
+                if (_openPopups.Count == 0) return;
+
                 if (_needsUpdate)
                 {
-                    foreach (var popup in _registeredPopups)
+                    foreach (var popup in _openPopups)
                     {
                         UpdatePosition(popup);
                     }
@@ -231,12 +282,9 @@ namespace Ink_Canvas.Helpers
                 if (_topmostCheckCounter >= TopmostCheckInterval)
                 {
                     _topmostCheckCounter = 0;
-                    foreach (var popup in _registeredPopups)
+                    foreach (var popup in _openPopups)
                     {
-                        if (popup.IsOpen)
-                        {
-                            FixPopupZOrder(popup);
-                        }
+                        FixPopupZOrder(popup);
                     }
                 }
             }
@@ -246,9 +294,53 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        private void OnPeriodicCheck(object sender, EventArgs e)
+        {
+            if (_periodicCheckTimer == null) return;
+
+            try
+            {
+                if (_openPopups.Count == 0)
+                {
+                    _periodicCheckTimer.Stop();
+                    return;
+                }
+
+                foreach (var popup in _openPopups)
+                {
+                    FixPopupZOrder(popup);
+                    if (popup.Child is FrameworkElement child)
+                        FixChildPopups(child);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[PopupManager] OnPeriodicCheck error: {ex.Message}");
+            }
+        }
+
         #endregion
 
         #region 核心：修复 Popup Z-Order
+
+        private IntPtr GetPopupHwnd(Popup popup)
+        {
+            if (_hwndCache.TryGetValue(popup, out IntPtr cached) && IsWindow(cached))
+            {
+                return cached;
+            }
+
+            var source = PresentationSource.FromVisual(popup.Child) as HwndSource;
+            if (source?.Handle == IntPtr.Zero || !IsWindow(source.Handle))
+            {
+                _hwndCache.Remove(popup);
+                return IntPtr.Zero;
+            }
+
+            var hwnd = source.Handle;
+            _hwndCache[popup] = hwnd;
+            return hwnd;
+        }
 
         private void FixPopupZOrder(Popup popup)
         {
@@ -256,10 +348,9 @@ namespace Ink_Canvas.Helpers
 
             try
             {
-                var source = PresentationSource.FromVisual(popup.Child) as HwndSource;
-                if (source?.Handle == null) return;
+                var popupHwnd = GetPopupHwnd(popup);
+                if (popupHwnd == IntPtr.Zero) return;
 
-                var popupHwnd = source.Handle;
                 var shouldBeTopmost = CheckShouldBeTopmost();
 
                 if (shouldBeTopmost)
@@ -291,6 +382,44 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        private void FixChildPopups(FrameworkElement root)
+        {
+            if (root == null || !CheckShouldBeTopmost()) return;
+
+            try
+            {
+                foreach (var childPopup in FindVisualChildren<Popup>(root))
+                {
+                    if (childPopup.IsOpen && childPopup.Child != null)
+                    {
+                        var source = PresentationSource.FromVisual(childPopup.Child) as HwndSource;
+                        if (source?.Handle != IntPtr.Zero)
+                        {
+                            SetWindowPos(source.Handle, HWND_TOPMOST, 0, 0, 0, 0,
+                                SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[PopupManager] FixChildPopups failed: {ex.Message}");
+            }
+        }
+
+        private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) yield break;
+            int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childrenCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T result) yield return result;
+                foreach (var descendant in FindVisualChildren<T>(child))
+                    yield return descendant;
+            }
+        }
+
         #endregion
 
         #region 清理
@@ -302,12 +431,20 @@ namespace Ink_Canvas.Helpers
             try
             {
                 CompositionTarget.Rendering -= OnRendering;
+                if (_periodicCheckTimer != null)
+                {
+                    _periodicCheckTimer.Stop();
+                    _periodicCheckTimer.Tick -= OnPeriodicCheck;
+                    _periodicCheckTimer = null;
+                }
                 foreach (var popup in _registeredPopups)
                 {
                     popup.Opened -= OnPopupOpened;
                     popup.Closed -= OnPopupClosed;
                 }
                 _registeredPopups.Clear();
+                _hwndCache.Clear();
+                _openPopups.Clear();
                 _activeInstances.Remove(this);
                 _isInitialized = false;
             }

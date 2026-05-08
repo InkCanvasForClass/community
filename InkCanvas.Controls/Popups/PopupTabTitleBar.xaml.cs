@@ -32,8 +32,11 @@ namespace Ink_Canvas.Controls
         private static void OnSelectedIndexChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (PopupTabTitleBar)d;
+            var newIndex = (int)e.NewValue;
+            if (newIndex < 0 || newIndex >= control.Tabs.Count)
+                return;
             control.UpdateTabVisuals();
-            control.SelectedIndexChanged?.Invoke(control, (int)e.NewValue);
+            control.SelectedIndexChanged?.Invoke(control, newIndex);
         }
 
         public int SelectedIndex
@@ -115,18 +118,15 @@ namespace Ink_Canvas.Controls
                 contentPanel.Children.Add(icon);
             }
 
-            var titleForegroundBrush = TryFindResource("ToolsPopupTitleForeground") as Brush
-                ?? new SolidColorBrush(Color.FromRgb(0x1e, 0x29, 0x3b));
-
             var text = new TextBlock
             {
-                Foreground = titleForegroundBrush,
                 FontWeight = FontWeights.Medium,
                 FontSize = 14,
                 TextAlignment = TextAlignment.Center,
                 Text = tabItem.Header ?? "",
                 Margin = new Thickness(4, 0, 4, 0)
             };
+            text.SetResourceReference(TextBlock.ForegroundProperty, "FloatBarForeground");
             contentPanel.Children.Add(text);
 
             Grid.SetRow(contentPanel, 0);
@@ -152,6 +152,8 @@ namespace Ink_Canvas.Controls
 
         private void UpdateTabVisuals()
         {
+            if (SelectedIndex < 0 || SelectedIndex >= TabsPanel.Children.Count)
+                return;
             for (int i = 0; i < TabsPanel.Children.Count; i++)
             {
                 if (!(TabsPanel.Children[i] is Border border)) continue;

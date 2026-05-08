@@ -33,10 +33,10 @@ namespace Ink_Canvas.Controls
             set => TabTitleBar.SelectedIndex = value;
         }
 
-        public Viewbox DefaultPenPropsPanel { get; }
-        public Viewbox HighlighterPenPropsPanel { get; }
-        public Viewbox DefaultPenColorsPanel { get; }
-        public Viewbox HighlighterPenColorsPanel { get; }
+        public FrameworkElement DefaultPenPropsPanel { get; }
+        public FrameworkElement HighlighterPenPropsPanel { get; }
+        public FrameworkElement DefaultPenColorsPanel { get; }
+        public FrameworkElement HighlighterPenColorsPanel { get; }
 
         public ComboBox PenStyleComboBox => ComboBoxPenStyle;
         public ToggleSwitch NibModeToggle => ToggleSwitchEnableNibMode;
@@ -97,16 +97,17 @@ namespace Ink_Canvas.Controls
 
             TabTitleBar.SelectedIndexChanged += (s, index) =>
             {
+                if (index < 0 || index >= TabTitleBar.Tabs.Count) return;
                 if (index == 0)
                     ShowDefaultPenPanels();
                 else if (index == 1)
                     ShowHighlighterPenPanels();
             };
 
-            DefaultPenPropsPanel = (Viewbox)FindName("_DefaultPenPropsPanel");
-            HighlighterPenPropsPanel = (Viewbox)FindName("_HighlighterPenPropsPanel");
-            DefaultPenColorsPanel = (Viewbox)FindName("_DefaultPenColorsPanel");
-            HighlighterPenColorsPanel = (Viewbox)FindName("_HighlighterPenColorsPanel");
+            DefaultPenPropsPanel = (FrameworkElement)FindName("_DefaultPenPropsPanel");
+            HighlighterPenPropsPanel = (FrameworkElement)FindName("_HighlighterPenPropsPanel");
+            DefaultPenColorsPanel = (FrameworkElement)FindName("_DefaultPenColorsPanel");
+            HighlighterPenColorsPanel = (FrameworkElement)FindName("_HighlighterPenColorsPanel");
             InkWidthSlider = (Slider)FindName("_InkWidthSlider");
             InkAlphaSlider = (Slider)FindName("_InkAlphaSlider");
             HighlighterWidthSlider = (Slider)FindName("_HighlighterWidthSlider");
