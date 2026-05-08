@@ -296,6 +296,8 @@ namespace Ink_Canvas.Helpers
 
         private void OnPeriodicCheck(object sender, EventArgs e)
         {
+            if (_periodicCheckTimer == null) return;
+
             try
             {
                 if (_openPopups.Count == 0)
