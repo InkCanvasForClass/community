@@ -788,6 +788,11 @@ namespace Ink_Canvas
                                     int randChickenSoupIndex = new Random().Next(ChickenSoup.GaoKaoPhrases.Length);
                                     BlackBoardWaterMark.Text = ChickenSoup.GaoKaoPhrases[randChickenSoupIndex];
                                 }
+                                else if (Settings.Appearance.ChickenSoupSource == 4)
+                                {
+                                    int randChickenSoupIndex = new Random().Next(ChickenSoup.Tips.Length);
+                                    BlackBoardWaterMark.Text = ChickenSoup.Tips[randChickenSoupIndex];
+                                }
                             }
                             catch
                             {
