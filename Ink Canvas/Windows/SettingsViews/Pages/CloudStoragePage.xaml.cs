@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using Page = iNKORE.UI.WPF.Modern.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -19,7 +20,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
     /// 2. Dlass - 管理Dlass服务端连接和设置，包括用户Token、班级选择和自动上传设置
     /// 3. WebDav - 预留的WebDav连接设置页面
     /// </remarks>
-    public partial class CloudStoragePage : System.Windows.Controls.Page
+    public partial class CloudStoragePage : Page
     {
         private const string APP_ID = "app_WkjocWqsrVY7T6zQV2CfiA";
         private const string APP_SECRET = "o7dx5b5ASGUMcM72PCpmRQYAhSijqaOVHoGyBK0IxbA";
