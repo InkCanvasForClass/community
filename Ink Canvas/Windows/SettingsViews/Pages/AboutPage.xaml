@@ -163,6 +163,7 @@
 
                     <ikw:SimpleStackPanel Spacing="3" Orientation="Vertical" Margin="0,0,0,24">
                         <TextBlock Text="{i18n:I18n Key=About_Copyright}" FontWeight="Bold" TextWrapping="Wrap" />
+                        <TextBlock Text="{i18n:I18n Key=About_PhigrosCr}" FontWeight="Bold" TextWrapping="Wrap" />
                         <TextBlock Text="{i18n:I18n Key=About_OpenSourceSlogan}" FontWeight="Bold"
                                    TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                     </ikw:SimpleStackPanel>

@@ -118,7 +118,7 @@ namespace Ink_Canvas
             "恭祝，恭祝，此战青云平步。祝高考金榜题名。",
         };
 
-        public static string[] Tips = {
+        public static string[] PhigrosTips = {
             "Tip: !!", 
             "Tip: (Not) Sound Only", 
             "Tip: (•▴• )咕咕～", 

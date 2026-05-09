@@ -230,7 +230,7 @@
                                 <ComboBoxItem Content="{i18n:I18n Key=Theme_QuoteSource_Mottos}" />
                                 <ComboBoxItem Content="{i18n:I18n Key=Theme_QuoteSource_GaokaoBless}" />
                                 <ComboBoxItem Content="{i18n:I18n Key=Theme_QuoteSource_Hitokoto}" />
-                                <ComboBoxItem Content="Tips" />
+                                <ComboBoxItem Content="{i18n:I18n Key=Theme_QuoteSource_PhigrosTips}" />
                             </ComboBox>
                             <Button x:Name="BtnHitokotoCustomize" Content="{i18n:I18n Key=Theme_Customize}"
                                     Padding="14,4" MinWidth="65" VerticalAlignment="Center"

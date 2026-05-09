@@ -790,8 +790,8 @@ namespace Ink_Canvas
                                 }
                                 else if (Settings.Appearance.ChickenSoupSource == 4)
                                 {
-                                    int randChickenSoupIndex = new Random().Next(ChickenSoup.Tips.Length);
-                                    BlackBoardWaterMark.Text = ChickenSoup.Tips[randChickenSoupIndex];
+                                    int randChickenSoupIndex = new Random().Next(ChickenSoup.PhigrosTips.Length);
+                                    BlackBoardWaterMark.Text = ChickenSoup.PhigrosTips[randChickenSoupIndex];
                                 }
                             }
                             catch

@@ -774,6 +774,9 @@
   <data name="Theme_QuoteSource_Hitokoto" xml:space="preserve">
     <value>Hitokoto API</value>
   </data>
+  <data name="Theme_QuoteSource_PhigrosTips" xml:space="preserve">
+    <value>Phigros Tips</value>
+  </data>
   <data name="Theme_Customize" xml:space="preserve">
     <value>Custom</value>
   </data>
@@ -1932,6 +1935,9 @@
   <data name="About_Copyright" xml:space="preserve">
     <value>© 2025-2026 CJK_mkp. All rights reserved.</value>
   </data>
+  <data name="About_PhigrosCr" xml:space="preserve">
+    <value>Some content is taken from Phigros</value>
+  </data>
   <data name="About_OpenSourceSlogan" xml:space="preserve">
     <value>We love open-source forever!</value>
   </data>
@@ -2123,6 +2129,9 @@
   </data>
   <data name="Board_DeleteThisPage" xml:space="preserve">
     <value>Delete this page</value>
+  </data>
+  <data name="Board_ResumeNextTime" xml:space="preserve">
+    <value>Resume Next Time</value>
   </data>
   <data name="Notification_TestText" xml:space="preserve">
     <value>Test text</value>
