@@ -628,6 +628,12 @@
   <data name="InkRecog_FixEllipse" xml:space="preserve">
     <value>矫正手绘圆形与椭圆</value>
   </data>
+  <data name="InkRecog_AggressiveOptimization" xml:space="preserve">
+    <value>激进优化模式</value>
+  </data>
+  <data name="InkRecog_AggressiveOptimizationDesc" xml:space="preserve">
+    <value>启用后，快速书写时将跳过积压的识别任务，直接处理最新笔画，避免程序卡顿</value>
+  </data>
   <data name="InkRecog_AutoStraightLine" xml:space="preserve">
     <value>直线自动拉直</value>
   </data>

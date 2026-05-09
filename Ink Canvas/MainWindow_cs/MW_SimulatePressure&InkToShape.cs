@@ -47,6 +47,9 @@ namespace Ink_Canvas
         /// <summary>串行执行墨迹转形状。WinRT 必须在 Dispatcher 上延后执行：若在 StrokeCollected（UI 线程）内对 WinRT 路径同步 GetResult()，AnalyzeAsync 延续再贴回 UI 时会死锁。</summary>
         private static readonly SemaphoreSlim InkToShapeSerial = new SemaphoreSlim(1, 1);
 
+        /// <summary>激进优化模式：用于取消积压的识别任务</summary>
+        private CancellationTokenSource _inkToShapeCancellation;
+
         /// <summary>
         /// 收笔后待参与「手写体字形替换」的最近笔迹（多笔一字/一词时由 WinRT InkAnalyzer 合并为 InkWord）。
         /// </summary>
@@ -601,9 +604,14 @@ namespace Ink_Canvas
                 {
                     async Task InkToShapeProcessCoreAsync()
                     {
-                        await InkToShapeSerial.WaitAsync().ConfigureAwait(true);
-                        try
+                        if (Settings.InkToShape.AggressiveOptimization)
                         {
+                            _inkToShapeCancellation?.Cancel();
+                            _inkToShapeCancellation = new CancellationTokenSource();
+                            var token = _inkToShapeCancellation.Token;
+
+                            await InkToShapeSerial.WaitAsync(token).ConfigureAwait(true);
+
                             newStrokes.Add(e.Stroke);
                             if (newStrokes.Count > 4) newStrokes.RemoveAt(0);
                             for (var i = 0; i < newStrokes.Count; i++)
@@ -614,32 +622,40 @@ namespace Ink_Canvas
                                 if (!inkCanvas.Strokes.Contains(circles[i].Stroke))
                                     circles.RemoveAt(i);
 
-                            // 处理矩形参考线系统
                             ProcessRectangleGuideLines(e.Stroke);
 
                             var shapeMode = ShapeRecognitionRouter.FromSettingsInt(Settings.InkToShape.ShapeRecognitionEngine);
-                            InkShapeRecognitionResult result = InkShapeRecognitionResult.Empty;
+                            InkShapeRecognitionResult result;
 
-                            if (ShapeRecognitionRouter.ResolveUseWinRt(shapeMode) && Helpers.WinRtInkShapeRecognizer.IsApiAvailable)
+                            try
                             {
-                                result = await ModernInkAnalyzer.AnalyzeAsync(newStrokes);
-                            }
-                            else
-                            {
-                                var strokeReco = new StrokeCollection();
-                                result = await InkRecognizeHelper.RecognizeShapeUnifiedAsync(newStrokes, shapeMode);
-                                for (var i = newStrokes.Count - 1; i >= 0; i--)
+                                if (ShapeRecognitionRouter.ResolveUseWinRt(shapeMode) && Helpers.WinRtInkShapeRecognizer.IsApiAvailable)
                                 {
-                                    strokeReco.Add(newStrokes[i]);
-                                    var newResult = await InkRecognizeHelper.RecognizeShapeUnifiedAsync(strokeReco, shapeMode);
-                                    if (newResult.IsSuccess &&
-                                        (newResult.ShapeName == "Circle" || newResult.ShapeName == "Ellipse"))
+                                    result = await ModernInkAnalyzer.AnalyzeAsync(newStrokes).ConfigureAwait(false);
+                                }
+                                else
+                                {
+                                    var strokeReco = new StrokeCollection();
+                                    result = await InkRecognizeHelper.RecognizeShapeUnifiedAsync(newStrokes, shapeMode).ConfigureAwait(false);
+                                    for (var i = newStrokes.Count - 1; i >= 0; i--)
                                     {
-                                        result = newResult;
-                                        break;
+                                        strokeReco.Add(newStrokes[i]);
+                                        var newResult = await InkRecognizeHelper.RecognizeShapeUnifiedAsync(strokeReco, shapeMode).ConfigureAwait(false);
+                                        if (newResult.IsSuccess &&
+                                            (newResult.ShapeName == "Circle" || newResult.ShapeName == "Ellipse"))
+                                        {
+                                            result = newResult;
+                                            break;
+                                        }
                                     }
                                 }
                             }
+                            catch (OperationCanceledException)
+                            {
+                                return;
+                            }
+
+                            if (token.IsCancellationRequested) return;
 
                             if (!result.IsSuccess)
                                 return;

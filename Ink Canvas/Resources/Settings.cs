@@ -831,6 +831,8 @@ namespace Ink_Canvas
         public bool EnableWinRtHandwritingStrokeBeautify { get; set; }
         [JsonProperty("handwritingCorrectionFontFamily")]
         public string HandwritingCorrectionFontFamily { get; set; } = "Ink Free,KaiTi,Segoe Script";
+        [JsonProperty("aggressiveOptimization")]
+        public bool AggressiveOptimization { get; set; }
     }
 
     public class RandSettings

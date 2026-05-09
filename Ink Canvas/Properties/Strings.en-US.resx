@@ -597,6 +597,12 @@
   <data name="InkRecog_FixEllipse" xml:space="preserve">
     <value>Correct circles and ellipses</value>
   </data>
+  <data name="InkRecog_AggressiveOptimization" xml:space="preserve">
+    <value>Aggressive optimization</value>
+  </data>
+  <data name="InkRecog_AggressiveOptimizationDesc" xml:space="preserve">
+    <value>When enabled, skips queued recognition tasks during fast writing and processes only the latest stroke to prevent lag</value>
+  </data>
   <data name="InkRecog_AutoStraightLine" xml:space="preserve">
     <value>Auto-straighten lines</value>
   </data>

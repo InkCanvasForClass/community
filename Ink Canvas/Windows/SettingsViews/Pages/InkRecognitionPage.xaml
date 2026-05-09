@@ -121,6 +121,15 @@
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
+                    <controls:LabeledSettingsCard x:Name="CardAggressiveOptimization"
+                            Header="{i18n:I18n Key=InkRecog_AggressiveOptimization}"
+                            Description="{i18n:I18n Key=InkRecog_AggressiveOptimizationDesc}"
+                            ShowWhen="{Binding IsOn, ElementName=CardEnableInkToShape}"
+                            d:Visibility="Visible"
+                            Icon="{x:Static ui:SegoeFluentIcons.SpeedHigh}"
+                            SwitchName="ToggleSwitchAggressiveOptimization"
+                            Toggled="ToggleSwitchAggressiveOptimization_Toggled" />
+
                     <ui:SettingsExpander x:Name="ExpanderAutoStraightenLine"
                             Header="{i18n:I18n Key=InkRecog_AutoStraightLine}"
                             d:Visibility="Visible" d:IsExpanded="True">

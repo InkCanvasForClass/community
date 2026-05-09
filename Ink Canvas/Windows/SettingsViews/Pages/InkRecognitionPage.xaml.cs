@@ -60,6 +60,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     ToggleCheckboxEnableInkToShapeRectangle.IsChecked = settings.InkToShape.IsInkToShapeRectangle;
                     ToggleCheckboxEnableInkToShapeRounded.IsChecked = settings.InkToShape.IsInkToShapeRounded;
                     LineStraightenSensitivitySlider.Value = settings.InkToShape.LineStraightenSensitivity;
+                    CardAggressiveOptimization.IsOn = settings.InkToShape.AggressiveOptimization;
                 }
 
                 if (settings.Canvas != null)
@@ -175,6 +176,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.InkToShape.IsInkToShapeRounded = (bool)ToggleCheckboxEnableInkToShapeRounded.IsChecked;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchAggressiveOptimization_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.InkToShape.AggressiveOptimization = CardAggressiveOptimization.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 
