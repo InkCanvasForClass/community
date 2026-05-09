@@ -1143,31 +1143,28 @@ namespace Ink_Canvas
                     Fold_Icon.Visibility = Settings.Appearance.IsShowHideButton ? Visibility.Visible : Visibility.Collapsed;
 
                 // 快捷调色盘
-                if (QuickColorPalettePanel != null && QuickColorPaletteSingleRowPanel != null)
+                if (QuickColorPalette != null)
                 {
                     bool shouldShow = Settings.Appearance.IsShowQuickColorPalette && inkCanvas.EditingMode == InkCanvasEditingMode.Ink;
-                    bool wasVisible = QuickColorPalettePanel.Visibility == Visibility.Visible || QuickColorPaletteSingleRowPanel.Visibility == Visibility.Visible;
+                    bool wasVisible = QuickColorPalette.Visibility == Visibility.Visible;
 
                     if (shouldShow)
                     {
-                        // 根据显示模式选择显示哪个面板
+                        QuickColorPalette.Visibility = Visibility.Visible;
                         if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
                         {
-                            // 单行显示模式
-                            QuickColorPalettePanel.Visibility = Visibility.Collapsed;
-                            QuickColorPaletteSingleRowPanel.Visibility = Visibility.Visible;
+                            QuickColorPalette.QuickColorPalettePanel.Visibility = Visibility.Collapsed;
+                            QuickColorPalette.QuickColorPaletteSingleRowPanel.Visibility = Visibility.Visible;
                         }
                         else
                         {
-                            // 双行显示模式
-                            QuickColorPalettePanel.Visibility = Visibility.Visible;
-                            QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
+                            QuickColorPalette.QuickColorPalettePanel.Visibility = Visibility.Visible;
+                            QuickColorPalette.QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
                         }
                     }
                     else
                     {
-                        QuickColorPalettePanel.Visibility = Visibility.Collapsed;
-                        QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
+                        QuickColorPalette.Visibility = Visibility.Collapsed;
                     }
 
                     // 如果快捷调色盘的可见性发生变化，重新计算浮动栏位置

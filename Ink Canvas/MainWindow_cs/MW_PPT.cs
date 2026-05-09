@@ -1209,23 +1209,21 @@ namespace Ink_Canvas
                             if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
                             {
                                 UpdateCurrentToolMode("pen");
-                                SetFloatingBarHighlightPosition("pen");
-                                if (Settings.Appearance.IsShowQuickColorPalette && QuickColorPalettePanel != null && QuickColorPaletteSingleRowPanel != null)
+                                if (Settings.Appearance.IsShowQuickColorPalette && QuickColorPalette != null)
                                 {
-                                    // 根据显示模式选择显示哪个面板
+                                    QuickColorPalette.Visibility = Visibility.Visible;
                                     if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
                                     {
-                                        // 单行显示模式
-                                        QuickColorPalettePanel.Visibility = Visibility.Collapsed;
-                                        QuickColorPaletteSingleRowPanel.Visibility = Visibility.Visible;
+                                        QuickColorPalette.QuickColorPalettePanel.Visibility = Visibility.Collapsed;
+                                        QuickColorPalette.QuickColorPaletteSingleRowPanel.Visibility = Visibility.Visible;
                                     }
                                     else
                                     {
-                                        // 双行显示模式
-                                        QuickColorPalettePanel.Visibility = Visibility.Visible;
-                                        QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
+                                        QuickColorPalette.QuickColorPalettePanel.Visibility = Visibility.Visible;
+                                        QuickColorPalette.QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
                                     }
                                 }
+                                SetFloatingBarHighlightPosition("pen");
                             }
                         }
                         catch (Exception ex)
@@ -1555,13 +1553,9 @@ namespace Ink_Canvas
                         }
 
                         // 退出PPT模式时隐藏快捷调色盘
-                        if (QuickColorPalettePanel != null)
+                        if (QuickColorPalette != null)
                         {
-                            QuickColorPalettePanel.Visibility = Visibility.Collapsed;
-                        }
-                        if (QuickColorPaletteSingleRowPanel != null)
-                        {
-                            QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
+                            QuickColorPalette.Visibility = Visibility.Collapsed;
                         }
 
                         if (GridTransparencyFakeBackground.Background != Brushes.Transparent)
