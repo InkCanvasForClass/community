@@ -159,11 +159,6 @@ namespace Ink_Canvas
                     int randChickenSoupIndex = new Random().Next(ChickenSoup.GaoKaoPhrases.Length);
                     BlackBoardWaterMark.Text = ChickenSoup.GaoKaoPhrases[randChickenSoupIndex];
                 }
-                else if (Settings.Appearance.ChickenSoupSource == 4)
-                {
-                    int randChickenSoupIndex = new Random().Next(ChickenSoup.PhigrosTips.Length);
-                    BlackBoardWaterMark.Text = ChickenSoup.PhigrosTips[randChickenSoupIndex];
-                }
                 else if (Settings.Appearance.ChickenSoupSource == 3)
                 {
                     BlackBoardWaterMark.Text = "正在获取一言...";
@@ -216,6 +211,11 @@ namespace Ink_Canvas
                         LogHelper.WriteLogToFile($"一言 API 请求失败: {ex.Message}", LogHelper.LogType.Warning);
                         BlackBoardWaterMark.Text = "一言功能不可用";
                     }
+                }
+                else if (Settings.Appearance.ChickenSoupSource == 4)
+                {
+                    int randChickenSoupIndex = new Random().Next(ChickenSoup.PhigrosTips.Length);
+                    BlackBoardWaterMark.Text = ChickenSoup.PhigrosTips[randChickenSoupIndex];
                 }
             }
             catch (Exception ex)
