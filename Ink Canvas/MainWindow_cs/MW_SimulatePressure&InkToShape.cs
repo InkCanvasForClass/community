@@ -604,15 +604,25 @@ namespace Ink_Canvas
                 {
                     async Task InkToShapeProcessCoreAsync()
                     {
+                        CancellationToken token = default;
                         if (Settings.InkToShape.AggressiveOptimization)
                         {
                             _inkToShapeCancellation?.Cancel();
                             _inkToShapeCancellation = new CancellationTokenSource();
-                            var token = _inkToShapeCancellation.Token;
+                            token = _inkToShapeCancellation.Token;
+                        }
 
+                        if (token != default)
+                        {
                             await InkToShapeSerial.WaitAsync(token).ConfigureAwait(true);
+                        }
+                        else
+                        {
+                            await InkToShapeSerial.WaitAsync().ConfigureAwait(true);
+                        }
 
-                            newStrokes.Add(e.Stroke);
+                        try
+                        {
                             if (newStrokes.Count > 4) newStrokes.RemoveAt(0);
                             for (var i = 0; i < newStrokes.Count; i++)
                                 if (!inkCanvas.Strokes.Contains(newStrokes[i]))
