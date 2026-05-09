@@ -19,14 +19,6 @@ namespace Ink_Canvas.Controls
             InitializeComponent();
         }
 
-        private void ColorButton_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-        }
-
-        private void ColorButton_MouseLeave(object sender, MouseEventArgs e)
-        {
-        }
-
         private void QuickColorBlack_Click(object sender, RoutedEventArgs e)
             => RaiseEvent(new RoutedEventArgs(ColorClickedEvent, "Black"));
 

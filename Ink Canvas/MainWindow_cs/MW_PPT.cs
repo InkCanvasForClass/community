@@ -1139,13 +1139,13 @@ namespace Ink_Canvas
                     if (Settings.PowerPointSettings.IsAlwaysGoToFirstPageOnReenter)
                     {
                         _pptManager?.TryNavigateToSlide(1);
-                        if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) { try { this.Activate(); } catch { } }
+                        if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) ExceptionHandler.TryExecute(() => this.Activate(), "激活主窗口失败（PPT 重入首页时）");
                     }
                     else if (_shouldNavigateToLastPage && _lastPlaybackPage > 0)
                     {
                         _pptManager?.TryNavigateToSlide(_lastPlaybackPage);
-                        _shouldNavigateToLastPage = false; // 重置标志位
-                        if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) { try { this.Activate(); } catch { } }
+                        _shouldNavigateToLastPage = false;
+                        if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) ExceptionHandler.TryExecute(() => this.Activate(), "激活主窗口失败（PPT 重入末页时）");
                     }
 
                     // 更新UI状态
@@ -1620,7 +1620,7 @@ namespace Ink_Canvas
                 if (Settings.PowerPointSettings.IsAlwaysGoToFirstPageOnReenter)
                 {
                     _pptManager?.TryNavigateToSlide(1);
-                    if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) { try { this.Activate(); } catch { } }
+                    if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) ExceptionHandler.TryExecute(() => this.Activate(), "激活主窗口失败（PPT 重入首页时）");
                 }
                 else if (Settings.PowerPointSettings.IsNotifyPreviousPage)
                 {
@@ -1676,7 +1676,7 @@ namespace Ink_Canvas
                                 {
                                     pres.Windows[1].View.GotoSlide(page);
                                 }
-                                if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) { try { this.Activate(); } catch { } }
+                                if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) ExceptionHandler.TryExecute(() => this.Activate(), "激活主窗口失败（PPT 翻页时）");
                             }
                         }
                         catch (Exception ex)
@@ -2178,7 +2178,7 @@ namespace Ink_Canvas
                     if (t.IsFaulted) { _pptUIManager?.UpdateConnectionStatus(false); return; }
                     if (t.Result)
                     {
-                        if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) try { this.Activate(); } catch { }
+                        if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) ExceptionHandler.TryExecute(() => this.Activate(), "激活主窗口失败（PPT 上一页时）");
                     }
                     else
                     {
@@ -2229,7 +2229,7 @@ namespace Ink_Canvas
                     if (t.IsFaulted) { _pptUIManager?.UpdateConnectionStatus(false); return; }
                     if (t.Result)
                     {
-                        if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) try { this.Activate(); } catch { }
+                        if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) ExceptionHandler.TryExecute(() => this.Activate(), "激活主窗口失败（PPT 下一页时）");
                     }
                     else
                     {
@@ -2315,7 +2315,7 @@ namespace Ink_Canvas
                     {
                         if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext)
                         {
-                            try { this.Activate(); } catch { }
+                            ExceptionHandler.TryExecute(() => this.Activate(), "激活主窗口失败（PPT 导航时）");
                         }
                     }
                     else
@@ -2390,12 +2390,14 @@ namespace Ink_Canvas
             foreach (var bar in bars)
             {
                 if (bar == null) continue;
-                try
-                {
-                    bar.IsPreviewExpanded = false;
-                    bar.PreviewItems = null;
-                }
-                catch { }
+                ExceptionHandler.TryExecute(
+                    () =>
+                    {
+                        bar.IsPreviewExpanded = false;
+                        bar.PreviewItems = null;
+                    },
+                    "重置 PPT 导航栏预览状态失败",
+                    continueOnError: true);
             }
         }
 
@@ -2573,7 +2575,7 @@ namespace Ink_Canvas
                     {
                         if (slide != null)
                         {
-                            try { Marshal.ReleaseComObject(slide); } catch { }
+                            ExceptionHandler.TryExecute(() => Marshal.ReleaseComObject(slide), "释放 PPT Slide COM 对象失败");
                         }
                     }
                 }
@@ -2586,7 +2588,7 @@ namespace Ink_Canvas
             {
                 if (!string.IsNullOrWhiteSpace(tempDir) && Directory.Exists(tempDir))
                 {
-                    try { Directory.Delete(tempDir, true); } catch { }
+                    ExceptionHandler.TryExecute(() => Directory.Delete(tempDir, true), "删除 PPT 临时目录失败");
                 }
             }
 

@@ -96,7 +96,10 @@ namespace Ink_Canvas
                     taskbarIcon.ContextMenu.IsOpen = true;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                ExceptionHandler.HandleException(ex, "显示托盘右键菜单失败", LogHelper.LogType.Warning);
+            }
         }
 
         private void ToggleMainWindowVisibility()

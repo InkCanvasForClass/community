@@ -4477,7 +4477,10 @@ private bool forceEraser;
                     targetButton.Icon.Geometry = Geometry.Parse(GetCorrectIcon(targetIconType, true));
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                ExceptionHandler.HandleException(ex, "更新浮动栏图标高亮状态失败", LogHelper.LogType.Warning);
+            }
         }
 
         private void AnimateFloatingBarHighlightTo(string mode)

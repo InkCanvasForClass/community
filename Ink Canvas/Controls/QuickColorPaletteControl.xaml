@@ -13,23 +13,23 @@
                     Orientation="Vertical">
             <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
                 <controls:ColorPickerButton x:Name="QuickColorBlack" Color="Black" CheckIconFill="White" ButtonSize="13" CheckIconSize="8"
-                                            ButtonMouseDown="ColorButton_MouseDown" ButtonMouseLeave="ColorButton_MouseLeave" ButtonMouseUp="QuickColorBlack_Click" ToolTip="Black"/>
+                                            ButtonMouseUp="QuickColorBlack_Click" ToolTip="Black"/>
                 <controls:ColorPickerButton x:Name="QuickColorWhite" Color="White" CheckIconFill="Black" ButtonSize="13" CheckIconSize="8"
-                                            ButtonMouseDown="ColorButton_MouseDown" ButtonMouseLeave="ColorButton_MouseLeave" ButtonMouseUp="QuickColorWhite_Click" ToolTip="White"/>
+                                            ButtonMouseUp="QuickColorWhite_Click" ToolTip="White"/>
                 <controls:ColorPickerButton x:Name="QuickColorRed" Color="#FF0000" CheckIconFill="White" ButtonSize="13" CheckIconSize="8"
-                                            ButtonMouseDown="ColorButton_MouseDown" ButtonMouseLeave="ColorButton_MouseLeave" ButtonMouseUp="QuickColorRed_Click" ToolTip="Red"/>
+                                            ButtonMouseUp="QuickColorRed_Click" ToolTip="Red"/>
                 <controls:ColorPickerButton x:Name="QuickColorOrange" Color="#FFA500" CheckIconFill="Black" ButtonSize="13" CheckIconSize="8"
-                                            ButtonMouseDown="ColorButton_MouseDown" ButtonMouseLeave="ColorButton_MouseLeave" ButtonMouseUp="QuickColorOrange_Click" ToolTip="Orange"/>
+                                            ButtonMouseUp="QuickColorOrange_Click" ToolTip="Orange"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
                 <controls:ColorPickerButton x:Name="QuickColorYellow" Color="#FFFF00" CheckIconFill="Black" ButtonSize="13" CheckIconSize="8"
-                                            ButtonMouseDown="ColorButton_MouseDown" ButtonMouseLeave="ColorButton_MouseLeave" ButtonMouseUp="QuickColorYellow_Click" ToolTip="Yellow"/>
+                                            ButtonMouseUp="QuickColorYellow_Click" ToolTip="Yellow"/>
                 <controls:ColorPickerButton x:Name="QuickColorGreen" Color="#16A34A" CheckIconFill="Black" ButtonSize="13" CheckIconSize="8"
-                                            ButtonMouseDown="ColorButton_MouseDown" ButtonMouseLeave="ColorButton_MouseLeave" ButtonMouseUp="QuickColorGreen_Click" ToolTip="Green"/>
+                                            ButtonMouseUp="QuickColorGreen_Click" ToolTip="Green"/>
                 <controls:ColorPickerButton x:Name="QuickColorBlue" Color="#2563EB" CheckIconFill="White" ButtonSize="13" CheckIconSize="8"
-                                            ButtonMouseDown="ColorButton_MouseDown" ButtonMouseLeave="ColorButton_MouseLeave" ButtonMouseUp="QuickColorBlue_Click" ToolTip="Blue"/>
+                                            ButtonMouseUp="QuickColorBlue_Click" ToolTip="Blue"/>
                 <controls:ColorPickerButton x:Name="QuickColorPurple" Color="#9333EA" CheckIconFill="White" ButtonSize="13" CheckIconSize="8"
-                                            ButtonMouseDown="ColorButton_MouseDown" ButtonMouseLeave="ColorButton_MouseLeave" ButtonMouseUp="QuickColorPurple_Click" ToolTip="Purple"/>
+                                            ButtonMouseUp="QuickColorPurple_Click" ToolTip="Purple"/>
             </StackPanel>
         </StackPanel>
         <StackPanel Name="QuickColorPaletteSingleRowPanel"
@@ -38,17 +38,17 @@
                     Margin="4,0,4,0"
                     Visibility="Collapsed">
             <controls:ColorPickerButton x:Name="QuickColorBlackSingle" Color="Black" CheckIconFill="White" ButtonSize="18" CheckIconSize="10"
-                                        ButtonMouseDown="ColorButton_MouseDown" ButtonMouseLeave="ColorButton_MouseLeave" ButtonMouseUp="QuickColorBlack_Click" ToolTip="Black"/>
+                                        ButtonMouseUp="QuickColorBlack_Click" ToolTip="Black"/>
             <controls:ColorPickerButton x:Name="QuickColorWhiteSingle" Color="White" CheckIconFill="Black" ButtonSize="18" CheckIconSize="10"
-                                        ButtonMouseDown="ColorButton_MouseDown" ButtonMouseLeave="ColorButton_MouseLeave" ButtonMouseUp="QuickColorWhite_Click" ToolTip="White"/>
+                                        ButtonMouseUp="QuickColorWhite_Click" ToolTip="White"/>
             <controls:ColorPickerButton x:Name="QuickColorRedSingle" Color="#FF0000" CheckIconFill="White" ButtonSize="18" CheckIconSize="10"
-                                        ButtonMouseDown="ColorButton_MouseDown" ButtonMouseLeave="ColorButton_MouseLeave" ButtonMouseUp="QuickColorRed_Click" ToolTip="Red"/>
+                                        ButtonMouseUp="QuickColorRed_Click" ToolTip="Red"/>
             <controls:ColorPickerButton x:Name="QuickColorOrangeSingle" Color="#FFA500" CheckIconFill="Black" ButtonSize="18" CheckIconSize="10"
-                                        ButtonMouseDown="ColorButton_MouseDown" ButtonMouseLeave="ColorButton_MouseLeave" ButtonMouseUp="QuickColorOrange_Click" ToolTip="Orange"/>
+                                        ButtonMouseUp="QuickColorOrange_Click" ToolTip="Orange"/>
             <controls:ColorPickerButton x:Name="QuickColorYellowSingle" Color="#FFFF00" CheckIconFill="Black" ButtonSize="18" CheckIconSize="10"
-                                        ButtonMouseDown="ColorButton_MouseDown" ButtonMouseLeave="ColorButton_MouseLeave" ButtonMouseUp="QuickColorYellow_Click" ToolTip="Yellow"/>
+                                        ButtonMouseUp="QuickColorYellow_Click" ToolTip="Yellow"/>
             <controls:ColorPickerButton x:Name="QuickColorGreenSingle" Color="#16A34A" CheckIconFill="Black" ButtonSize="18" CheckIconSize="10"
-                                        ButtonMouseDown="ColorButton_MouseDown" ButtonMouseLeave="ColorButton_MouseLeave" ButtonMouseUp="QuickColorGreen_Click" ToolTip="Green"/>
+                                        ButtonMouseUp="QuickColorGreen_Click" ToolTip="Green"/>
         </StackPanel>
     </StackPanel>
 </UserControl>
