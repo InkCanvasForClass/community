@@ -254,11 +254,13 @@ namespace Ink_Canvas
             LogHelper.WriteLogToFile("MW_Toolbar: RebuildToolbar 开始", LogHelper.LogType.Info);
             try
             {
+                _lastHighlightButton = null;
                 ToolbarRegistry.ClearInjected(StackPanelFloatingBar);
                 InitializeToolbarPlugins();
                 UpdateToolbarComponentVisibility();
                 ApplyFloatingBarIconHighlightImmediate(_currentToolMode);
                 RefreshFloatingBarButtonColors();
+                SetFloatingBarHighlightPosition(_currentToolMode);
                 LogHelper.WriteLogToFile("MW_Toolbar: RebuildToolbar 完成", LogHelper.LogType.Info);
             }
             catch (Exception ex)

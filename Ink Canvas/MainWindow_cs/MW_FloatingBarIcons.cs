@@ -579,8 +579,6 @@ namespace Ink_Canvas
                         }
                     case "shape":
                         {
-                            // 对图形模式进行特殊处理，不修改按钮UI状态
-                            // 只隐藏相关面板，但保持图形绘制模式
                             break;
                         }
                 }
@@ -4365,6 +4363,7 @@ private bool forceEraser;
         /// <param name="mode">模式名称</param>
         private ToolbarImageButton _lastHighlightButton;
         private string _pendingHighlightMode;
+        private int _highlightPositionVersion;
 
         private void SetFloatingBarHighlightPosition(string mode)
         {
@@ -4373,9 +4372,10 @@ private bool forceEraser;
             ApplyFloatingBarIconHighlightImmediate(mode);
 
             _pendingHighlightMode = mode;
+            int version = ++_highlightPositionVersion;
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                if (_pendingHighlightMode != mode) return;
+                if (_highlightPositionVersion != version) return;
                 AnimateFloatingBarHighlightTo(mode);
             }), System.Windows.Threading.DispatcherPriority.Loaded);
         }
@@ -4486,7 +4486,7 @@ private bool forceEraser;
                         break;
                 }
 
-                if (StackPanelFloatingBar == null || targetButton == null || targetButton.Visibility != Visibility.Visible)
+                if (StackPanelFloatingBar == null || targetButton == null || !IsElementVisibleInTree(targetButton))
                 {
                     FloatingbarSelectionBG.Visibility = Visibility.Hidden;
                     if (FloatingbarIndicatorBar != null) FloatingbarIndicatorBar.Visibility = Visibility.Hidden;
@@ -4549,11 +4549,21 @@ private bool forceEraser;
 
                 double prevPos;
                 double prevWidth;
-                if (_lastHighlightButton != null && _lastHighlightButton.Visibility == Visibility.Visible)
+                if (_lastHighlightButton != null && IsElementVisibleInTree(_lastHighlightButton))
                 {
-                    var lastOrigin = _lastHighlightButton.TransformToAncestor(StackPanelFloatingBar).Transform(new Point(0, 0));
-                    prevPos = lastOrigin.X;
-                    prevWidth = _lastHighlightButton.ActualWidth > 0 ? _lastHighlightButton.ActualWidth : 28;
+                    try
+                    {
+                        var lastOrigin = _lastHighlightButton.TransformToAncestor(StackPanelFloatingBar).Transform(new Point(0, 0));
+                        prevPos = lastOrigin.X;
+                        prevWidth = _lastHighlightButton.ActualWidth > 0 ? _lastHighlightButton.ActualWidth : 28;
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        prevPos = System.Windows.Controls.Canvas.GetLeft(FloatingbarSelectionBG);
+                        if (double.IsNaN(prevPos)) prevPos = 0;
+                        prevWidth = FloatingbarSelectionBG.ActualWidth;
+                        if (double.IsNaN(prevWidth) || prevWidth <= 0) prevWidth = 28;
+                    }
                 }
                 else
                 {
@@ -4797,6 +4807,18 @@ private bool forceEraser;
             }
 
             _lastHighlightButton = null;
+        }
+
+        private bool IsElementVisibleInTree(FrameworkElement element)
+        {
+            if (element == null || element.Visibility != Visibility.Visible) return false;
+            var parent = VisualTreeHelper.GetParent(element);
+            while (parent != null)
+            {
+                if (parent is FrameworkElement fe && fe.Visibility != Visibility.Visible) return false;
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+            return true;
         }
 
         /// <summary>
