@@ -336,7 +336,7 @@ namespace Ink_Canvas
             ThemeHelper.ApplyTheme(this, settings, theme =>
             {
                 ApplyThemeResources(theme);
-                RefreshModernBorder();
+                WindowBackdropHelper.Apply(this, settings);
                 UpdateRollCallModeTabSelection();
             });
         }
@@ -1894,17 +1894,6 @@ namespace Ink_Canvas
             rollCallTimer?.Stop();
         }
 
-        private void CloseButton_Click(object sender, RoutedEventArgs e)
-        {
-            Close();
-        }
-
-        private void WindowDragMove(object sender, MouseEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed)
-                DragMove();
-        }
-
         private void Window_MouseMove(object sender, MouseEventArgs e)
         {
             lastActivityTime = DateTime.Now;
@@ -1915,20 +1904,6 @@ namespace Ink_Canvas
             lastActivityTime = DateTime.Now;
         }
 
-        private void RefreshModernBorder()
-        {
-            try
-            {
-                if (MainBorder != null)
-                {
-                    MainBorder.SetResourceReference(Border.BorderBrushProperty, "CardStrokeColorDefaultBrush");
-                }
-            }
-            catch
-            {
-                // 忽略错误
-            }
-        }
         #endregion
 
         #region Win32 API 声明和置顶管理

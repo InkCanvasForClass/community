@@ -4,12 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-        xmlns:controls="clr-namespace:Ink_Canvas.Windows.Controls"
         Topmost="True"
-        Background="Transparent"
+        Background="{DynamicResource ApplicationPageBackgroundThemeBrush}"
         mc:Ignorable="d"
-        WindowStyle="None"
-        AllowsTransparency="True"
         Loaded="RollCallWindow_Loaded"
         Closing="Window_Closing"
         WindowStartupLocation="CenterScreen"
@@ -18,12 +15,14 @@
         Title="Ink Canvas 画板 - 点名"
         Height="500"
         Width="800"
-        ui:ThemeManager.IsThemeAware="True">
+        ui:ThemeManager.IsThemeAware="True"
+        ui:WindowHelper.SystemBackdropType="None"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        ui:WindowHelper.CornerStyle="Round">
 
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Controls/WinUI3CloseButton.xaml" />
                 <ResourceDictionary Source="../Resources/NewRollCallWindowResources.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
@@ -89,61 +88,17 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <Border x:Name="MainBorder"
-            Margin="8"
-            CornerRadius="8"
-            BorderThickness="1"
-            Background="{DynamicResource {x:Static ui:ThemeKeys.AcrylicBackgroundFillColorDefaultBrushKey}}"
-            BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.CardStrokeColorDefaultBrushKey}}"
-            MouseLeftButtonDown="WindowDragMove">
-        <Grid>
-            <controls:WinUI3CloseButton x:Name="CloseButton"
-                                        HorizontalAlignment="Right"
-                                        VerticalAlignment="Top"
-                                        Panel.ZIndex="10"
-                                        Cursor="Hand"
-                                        Click="CloseButton_Click"
-                                        Content="x" />
-
+    <Grid x:Name="MainRoot" Background="Transparent">
             <Viewbox x:Name="MainViewController" Margin="22,18,22,20">
                 <Grid Width="1000" Height="550">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="56" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="76" />
                     </Grid.RowDefinitions>
 
-                    <Grid x:Name="TitleBar"
-                          Grid.Row="0"
-                          Margin="0,0,104,0"
-                          Background="Transparent"
-                          MouseLeftButtonDown="WindowDragMove">
-                        <StackPanel Margin="4,0,0,0"
-                                    Orientation="Horizontal"
-                                    VerticalAlignment="Center">
-                            <Border Width="36"
-                                    Height="36"
-                                    CornerRadius="8"
-                                    Background="{DynamicResource {x:Static ui:ThemeKeys.LayerFillColorDefaultBrushKey}}"
-                                    BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.CardStrokeColorDefaultBrushKey}}"
-                                    BorderThickness="1">
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.People}"
-                                             FontSize="18"
-                                             Foreground="{DynamicResource {x:Static ui:ThemeKeys.AccentTextFillColorPrimaryBrushKey}}" />
-                            </Border>
-                            <TextBlock x:Name="TitleText"
-                                       Margin="12,0,0,0"
-                                       VerticalAlignment="Center"
-                                       Text="点名"
-                                       FontSize="24"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" />
-                        </StackPanel>
-                    </Grid>
-
                     <Grid x:Name="MainContentGrid"
-                          Grid.Row="1"
-                          Margin="0,2,0,10">
+                          Grid.Row="0"
+                          Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="500" />
                             <ColumnDefinition Width="18" />
@@ -356,7 +311,7 @@
                         </Grid>
                     </Grid>
 
-                    <Grid Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                    <Grid Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Bottom">
                         <Border Width="420" Height="64" Style="{StaticResource ModernRollCallCardStyle}" Padding="10" />
                         <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Center"
@@ -408,6 +363,5 @@
                     </Grid>
                 </Grid>
             </Viewbox>
-        </Grid>
-    </Border>
+    </Grid>
 </Window>
