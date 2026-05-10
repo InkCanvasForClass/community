@@ -153,6 +153,13 @@
                         </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
 
+                    <ui:SettingsCard Header="{i18n:I18n Key=CloudStorage_Manage}" Description="Dlass 与 WebDav 上传设置"
+                        IsClickEnabled="True" Click="QuickNavCard_Click" Tag="CloudStoragePage">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}" />
+                        </ui:SettingsCard.HeaderIcon>
+                    </ui:SettingsCard>
+
                     <ui:SettingsCard Header="随机点名" Description="随机点名与计时器"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="RandomDrawPage">
                         <ui:SettingsCard.HeaderIcon>
