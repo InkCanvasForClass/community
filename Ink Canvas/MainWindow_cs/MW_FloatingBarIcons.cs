@@ -2066,8 +2066,9 @@ namespace Ink_Canvas
             double floatingBarHeight = baseHeight * ViewboxFloatingBarScaleTransform.ScaleY;
 
 
-            if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
-                (QuickColorPaletteSingleRowPanel != null && QuickColorPaletteSingleRowPanel.Visibility == Visibility.Visible))
+            if (QuickColorPalette != null &&
+                (QuickColorPalette.QuickColorPalettePanel.Visibility == Visibility.Visible ||
+                 QuickColorPalette.QuickColorPaletteSingleRowPanel.Visibility == Visibility.Visible))
             {
                 if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
                 {
@@ -4501,6 +4502,10 @@ private bool forceEraser;
                     highlightBarColor = Color.FromRgb(37, 99, 235);
 
                 if (isFloatingBarFolded || (BorderFloatingBarMainControls != null && BorderFloatingBarMainControls.Visibility == Visibility.Collapsed))
+                {
+                    return;
+                }
+
                 var foregroundBrush = new SolidColorBrush(FloatBarForegroundColor);
 
                 void ResetIcon(ToolbarImageButton button, string iconType)
@@ -4510,7 +4515,6 @@ private bool forceEraser;
                     button.Icon.Geometry = Geometry.Parse(GetCorrectIcon(iconType, false));
                 }
 
-                FrameworkElement targetButton = null;
                 ResetIcon(Cursor_Icon, "cursor");
                 ResetIcon(Pen_Icon, "pen");
                 ResetIcon(Eraser_Icon, "eraserCircle");
@@ -4522,13 +4526,11 @@ private bool forceEraser;
 
                 switch (mode)
                 {
-                    case "cursor": targetButton = Cursor_Icon; break;
+                    case "cursor":
+                        targetButton = Cursor_Icon;
+                        targetIconType = "cursor";
+                        break;
                     case "pen":
-                    case "color": targetButton = Pen_Icon; break;
-                    case "eraser": targetButton = Eraser_Icon; break;
-                    case "eraserByStrokes": targetButton = EraserByStrokes_Icon; break;
-                    case "select": targetButton = SymbolIconSelect; break;
-                    case "shape": targetButton = ShapeDrawFloatingBarBtn; break;
                     case "color":
                         targetButton = Pen_Icon;
                         targetIconType = "pen";
@@ -4544,6 +4546,9 @@ private bool forceEraser;
                     case "select":
                         targetButton = SymbolIconSelect;
                         targetIconType = "lassoSelect";
+                        break;
+                    case "shape":
+                        targetButton = ShapeDrawFloatingBarBtn;
                         break;
                 }
 
@@ -4605,11 +4610,22 @@ private bool forceEraser;
                     return;
                 }
 
-                Dispatcher.Invoke(new Action(() =>
+                Color highlightBackgroundColor;
+                Color highlightBarColor;
+                bool isDarkTheme = Settings.Appearance.Theme == 1 ||
+                                   (Settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
+
+                if (isDarkTheme)
                 {
-                    try
-                    {
-                        if (targetButton == null || StackPanelFloatingBar == null) return;
+                    highlightBackgroundColor = Color.FromArgb(21, 102, 204, 255);
+                    highlightBarColor = Color.FromRgb(102, 204, 255);
+                }
+                else
+                {
+                    highlightBackgroundColor = Color.FromArgb(21, 59, 130, 246);
+                    highlightBarColor = Color.FromRgb(37, 99, 235);
+                }
+
                 var buttonOrigin = targetButton.TransformToAncestor(StackPanelFloatingBar).Transform(new Point(0, 0));
                 double nextWidth = targetButton.ActualWidth > 0 ? targetButton.ActualWidth : 28;
                 double nextPos = buttonOrigin.X;
@@ -4621,95 +4637,18 @@ private bool forceEraser;
                     return;
                 }
 
-                        var transform = targetButton.TransformToAncestor(StackPanelFloatingBar);
-                        var buttonOrigin = transform.Transform(new Point(0, 0));
+                double buttonCenterX = buttonOrigin.X + targetButton.ActualWidth / 2.0;
+                double highlightWidth = targetButton.ActualWidth;
 
-                        double buttonCenterX = buttonOrigin.X + targetButton.ActualWidth / 2.0;
-                        double highlightWidth = targetButton.ActualWidth;
+                if (highlightWidth <= 0)
+                {
+                    FloatingbarSelectionBG.Visibility = Visibility.Hidden;
+                    if (FloatingbarIndicatorBar != null) FloatingbarIndicatorBar.Visibility = Visibility.Hidden;
+                    return;
+                }
 
-                        if (highlightWidth <= 0)
-                        {
-                            FloatingbarSelectionBG.Visibility = Visibility.Hidden;
-                            return;
-                        }
+                double position = buttonCenterX - highlightWidth / 2.0;
 
-                        double position = buttonCenterX - highlightWidth / 2.0;
-
-                        Color highlightBackgroundColor;
-                        Color highlightBarColor;
-                        bool isDarkTheme = Settings.Appearance.Theme == 1 ||
-                                           (Settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
-
-                        if (isDarkTheme)
-                        {
-                            highlightBackgroundColor = Color.FromArgb(21, 102, 204, 255);
-                            highlightBarColor = Color.FromRgb(102, 204, 255);
-                        }
-                        else
-                        {
-                            highlightBackgroundColor = Color.FromArgb(21, 59, 130, 246);
-                            highlightBarColor = Color.FromRgb(37, 99, 235);
-                        }
-
-                        void ResetFloatingBarToolIconHighlights()
-                        {
-                            var foregroundBrush = new SolidColorBrush(FloatBarForegroundColor);
-                            void ResetIcon(ToolbarImageButton button, string iconType)
-                            {
-                                if (button == null) return;
-                                button.Icon.Brush = foregroundBrush;
-                                button.Icon.Geometry = Geometry.Parse(GetCorrectIcon(iconType, false));
-                            }
-                            ResetIcon(Cursor_Icon, "cursor");
-                            ResetIcon(Pen_Icon, "pen");
-                            ResetIcon(Eraser_Icon, "eraserCircle");
-                            ResetIcon(EraserByStrokes_Icon, "eraserStroke");
-                            ResetIcon(SymbolIconSelect, "lassoSelect");
-                        }
-
-                        void ApplyFloatingBarToolIconHighlight(string toolMode, Color highlightColor)
-                        {
-                            var highlightBrush = new SolidColorBrush(highlightColor);
-                            void HighlightIcon(ToolbarImageButton button, string iconType)
-                            {
-                                if (button == null) return;
-                                button.Icon.Brush = highlightBrush;
-                                button.Icon.Geometry = Geometry.Parse(GetCorrectIcon(iconType, true));
-                            }
-                            switch (toolMode)
-                            {
-                                case "cursor": HighlightIcon(Cursor_Icon, "cursor"); break;
-                                case "pen":
-                                case "color": HighlightIcon(Pen_Icon, "pen"); break;
-                                case "eraser": HighlightIcon(Eraser_Icon, "eraserCircle"); break;
-                                case "eraserByStrokes": HighlightIcon(EraserByStrokes_Icon, "eraserStroke"); break;
-                                case "select": HighlightIcon(SymbolIconSelect, "lassoSelect"); break;
-                            }
-                        }
-
-                        FloatingbarSelectionBG.Width = highlightWidth;
-                        FloatingbarSelectionBG.Background = new SolidColorBrush(highlightBackgroundColor);
-                        if (FloatingbarSelectionBG.Child is System.Windows.Controls.Canvas canvas && canvas.Children.Count > 0)
-                        {
-                            var firstChild = canvas.Children[0];
-                            if (firstChild is Border innerBorder)
-                            {
-                                System.Windows.Controls.Canvas.SetLeft(innerBorder, Math.Max(0, (highlightWidth - innerBorder.Width) / 2));
-                                innerBorder.Background = new SolidColorBrush(highlightBarColor);
-                            }
-                        }
-
-                        ResetFloatingBarToolIconHighlights();
-                        ApplyFloatingBarToolIconHighlight(mode, highlightBarColor);
-
-                        FloatingbarSelectionBG.Visibility = Visibility.Visible;
-                        System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, position);
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"设置高光位置失败: {ex.Message}", LogHelper.LogType.Error);
-                    }
-                }), DispatcherPriority.ContextIdle);
                 FloatingbarSelectionBG.Background = new SolidColorBrush(highlightBackgroundColor);
                 if (FloatingbarIndicatorBar != null)
                 {
@@ -4755,8 +4694,8 @@ private bool forceEraser;
 
                 _lastHighlightButton = targetButton;
 
-                FloatingbarSelectionBG.Width = nextWidth;
-                System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, nextPos);
+                FloatingbarSelectionBG.Width = highlightWidth;
+                System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, position);
 
                 if (FloatingbarIndicatorBar == null) return;
 
