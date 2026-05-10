@@ -51,6 +51,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 { "ExperimentalPage", typeof(ExperimentalPage) },
                 { "AdvancedPage", typeof(AdvancedPage) },
                 { "StoragePage", typeof(StoragePage) },
+                { "CloudStoragePage", typeof(CloudStoragePage) },
                 { "AutomationPage", typeof(AutomationPage) },
                 { "PowerPointPage", typeof(PowerPointPage) },
                 { "RandomDrawPage", typeof(RandomDrawPage) },
@@ -337,8 +338,14 @@ namespace Ink_Canvas.Windows.SettingsViews
             }
             catch (Exception ex)
             {
-                Ink_Canvas.Helpers.LogHelper.WriteLogToFile($"SettingsWindow: 导航到 {pageTag} 异常: {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}", Ink_Canvas.Helpers.LogHelper.LogType.Error);
-                MessageBox.Show($"导航到页面时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                var detail = ex.ToString();
+                if (ex.InnerException != null)
+                {
+                    detail += "\nInnerException:\n" + ex.InnerException;
+                }
+
+                Ink_Canvas.Helpers.LogHelper.WriteLogToFile($"SettingsWindow: 导航到 {pageTag} 异常: {detail}", Ink_Canvas.Helpers.LogHelper.LogType.Error);
+                MessageBox.Show($"导航到页面时出错: {ex.InnerException?.Message ?? ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {

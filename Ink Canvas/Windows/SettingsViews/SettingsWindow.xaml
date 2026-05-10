@@ -306,6 +306,16 @@
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
+                <ui:NavigationViewItem
+                    x:Name="CloudStoragePageItem"
+                    Content="{i18n:I18n Key=CloudStorage_Manage}"
+                    Tag="CloudStoragePage"
+                    ToolTipService.ToolTip="{i18n:I18n Key=CloudStorage_Manage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}"/>
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
                 <!-- 自动化 -->
                 <ui:NavigationViewItem
                     x:Name="AutomationPageItem"
