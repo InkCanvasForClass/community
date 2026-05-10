@@ -9,7 +9,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         public override ToolbarSlot DefaultSlot => ToolbarSlot.FloatingBarMain;
         public override int DefaultOrder => 120;
         public override ToolbarInsertPosition DefaultPosition => ToolbarInsertPosition.AfterAnchor;
-        public override string DefaultAnchorName => "QuickColorPaletteSingleRowPanel";
+        public override string DefaultAnchorName => "QuickColorPaletteContainer";
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.ToggleInkFreeze_MouseUp(sender, e);

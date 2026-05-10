@@ -4,14 +4,13 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-             mc:Ignorable="d"
-             d:DesignHeight="45" d:DesignWidth="28">
+             mc:Ignorable="d">
     <ikw:SimpleStackPanel Name="ButtonPanel"
                      MouseDown="ButtonPanel_MouseDown"
                      MouseLeave="ButtonPanel_MouseLeave"
                      MouseUp="ButtonPanel_MouseUp"
                      Background="Transparent" Orientation="Vertical"
-                     HorizontalAlignment="Center" Width="28" Margin="0,-2">
+                     HorizontalAlignment="Center" Width="28" Height="32">
         <Image x:Name="ButtonImage" RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0">
             <Image.Source>
                 <DrawingImage>

@@ -207,6 +207,28 @@ namespace Ink_Canvas
         internal Border BlackboardModeBtn => BackgroundPalettePopupContent?.BlackboardBtn;
         #endregion
 
+        #region QuickColorPalette property mappings
+        private QuickColorPaletteControl _quickColorPalette;
+
+        internal QuickColorPaletteControl QuickColorPalette
+        {
+            get
+            {
+                if (_quickColorPalette != null) return _quickColorPalette;
+                if (StackPanelFloatingBar == null) return null;
+                foreach (var child in StackPanelFloatingBar.Children)
+                {
+                    if (child is QuickColorPaletteControl control)
+                    {
+                        _quickColorPalette = control;
+                        return control;
+                    }
+                }
+                return null;
+            }
+        }
+        #endregion
+
         internal void InitializeToolbarPlugins()
         {
             LogHelper.WriteLogToFile("MW_Toolbar: InitializeToolbarPlugins 开始", LogHelper.LogType.Info);

@@ -46,7 +46,10 @@ namespace Ink_Canvas
                     mutex = null;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                ExceptionHandler.HandleException(ex, "释放互斥体失败（重启时）", LogHelper.LogType.Warning);
+            }
         }
 
         public static string[] StartArgs;
@@ -1648,7 +1651,10 @@ namespace Ink_Canvas
             {
                 IpcIACoreClient.Instance.Dispose();
             }
-            catch { }
+            catch (Exception ex)
+            {
+                ExceptionHandler.HandleException(ex, "释放 IpcIACoreClient 失败", LogHelper.LogType.Warning);
+            }
 
             // 卸载所有插件
             try
