@@ -288,6 +288,7 @@ namespace Ink_Canvas.Windows
         // JSON文件路径
         private static readonly string ConfigsFolder = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs");
         private static readonly string RecentTimersJsonPath = System.IO.Path.Combine(ConfigsFolder, "RecentTimers.json");
+        private bool _isRecentTimersTabSelected;
 
         private void InitializeUI()
         {
@@ -299,32 +300,10 @@ namespace Ink_Canvas.Windows
 
         private void InitializeTabState()
         {
-            // 设置默认选中CommonTab
-            CommonTimersGrid.Visibility = Visibility.Visible;
-            RecentTimersGrid.Visibility = Visibility.Collapsed;
-
-            // 设置tab文字颜色和样式
-            var commonText = this.FindName("CommonTabText") as TextBlock;
-            var recentText = this.FindName("RecentTabText") as TextBlock;
-            if (commonText != null)
+            _isRecentTimersTabSelected = false;
+            if (TimerQuickTabControl != null)
             {
-                commonText.FontWeight = FontWeights.Bold;
-                commonText.Opacity = 1.0;
-                commonText.Foreground = new SolidColorBrush(Colors.White);
-            }
-            if (recentText != null)
-            {
-                recentText.FontWeight = FontWeights.Normal;
-                recentText.Opacity = 0.8;
-                recentText.Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
-            }
-
-            // 设置指示器位置
-            var indicator = this.FindName("SegmentedIndicator") as Border;
-            if (indicator != null)
-            {
-                indicator.CornerRadius = new CornerRadius(7.5, 0, 0, 7.5);
-                indicator.Margin = new Thickness(0, 0, 0, 0);
+                TimerQuickTabControl.SelectedIndex = 0;
             }
         }
 
@@ -348,7 +327,7 @@ namespace Ink_Canvas.Windows
         {
             ThemeHelper.ApplyTheme(this, settings, theme =>
             {
-                if (theme == "Dark") SetDarkThemeBorder();
+                RefreshModernBorder();
                 // 复用当前状态下的显示逻辑，避免把暂停/超时/运行中的读数重置为初始设定时间。
                 RefreshDigitDisplayForCurrentState();
             });
@@ -990,74 +969,12 @@ namespace Ink_Canvas.Windows
             CloseRequested?.Invoke(this, EventArgs.Empty);
         }
 
-        private void CommonTab_Click(object sender, RoutedEventArgs e)
+        private void TimerQuickTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (e.OriginalSource != TimerQuickTabControl) return;
+
             UpdateActivityTime();
-            CommonTimersGrid.Visibility = Visibility.Visible;
-            RecentTimersGrid.Visibility = Visibility.Collapsed;
-
-            // 更新字体粗细、透明度和颜色
-            var commonText = this.FindName("CommonTabText") as TextBlock;
-            var recentText = this.FindName("RecentTabText") as TextBlock;
-            if (commonText != null)
-            {
-                commonText.FontWeight = FontWeights.Bold;
-                commonText.Opacity = 1.0;
-                commonText.Foreground = new SolidColorBrush(Colors.White);
-            }
-            if (recentText != null)
-            {
-                recentText.FontWeight = FontWeights.Normal;
-                recentText.Opacity = 0.8;
-                recentText.Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
-            }
-
-            // 移动指示器到左侧
-            var indicator = this.FindName("SegmentedIndicator") as Border;
-            if (indicator != null)
-            {
-                // 设置左侧圆角
-                indicator.CornerRadius = new CornerRadius(7.5, 0, 0, 7.5);
-                var animation = new System.Windows.Media.Animation.ThicknessAnimation(
-                    new Thickness(0, 0, 0, 0),
-                    TimeSpan.FromMilliseconds(200));
-                indicator.BeginAnimation(Border.MarginProperty, animation);
-            }
-        }
-
-        private void RecentTab_Click(object sender, RoutedEventArgs e)
-        {
-            UpdateActivityTime();
-            CommonTimersGrid.Visibility = Visibility.Collapsed;
-            RecentTimersGrid.Visibility = Visibility.Visible;
-
-            // 更新字体粗细、透明度和颜色
-            var commonText = this.FindName("CommonTabText") as TextBlock;
-            var recentText = this.FindName("RecentTabText") as TextBlock;
-            if (commonText != null)
-            {
-                commonText.FontWeight = FontWeights.Normal;
-                commonText.Opacity = 0.8;
-                commonText.Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
-            }
-            if (recentText != null)
-            {
-                recentText.FontWeight = FontWeights.Bold;
-                recentText.Opacity = 1.0;
-                recentText.Foreground = new SolidColorBrush(Colors.White);
-            }
-
-            // 移动指示器到右侧
-            var indicator = this.FindName("SegmentedIndicator") as Border;
-            if (indicator != null)
-            {
-                // 设置右侧圆角
-                indicator.CornerRadius = new CornerRadius(0, 7.5, 7.5, 0);
-                var animation = new System.Windows.Media.Animation.ThicknessAnimation(
-                    new Thickness(118, 0, 0, 0),
-                    TimeSpan.FromMilliseconds(200));
-                indicator.BeginAnimation(Border.MarginProperty, animation);
-            }
+            _isRecentTimersTabSelected = TimerQuickTabControl.SelectedIndex == 1;
         }
 
         // 常用计时事件处理
@@ -1274,14 +1191,13 @@ namespace Ink_Canvas.Windows
             }
         }
 
-        // 设置深色主题下的灰色边框
-        private void SetDarkThemeBorder()
+        private void RefreshModernBorder()
         {
             try
             {
                 if (MainBorder != null)
                 {
-                    MainBorder.BorderBrush = new SolidColorBrush(Color.FromRgb(64, 64, 64));
+                    MainBorder.SetResourceReference(Border.BorderBrushProperty, "CardStrokeColorDefaultBrush");
                 }
             }
             catch
