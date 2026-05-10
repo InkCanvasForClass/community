@@ -2183,9 +2183,6 @@
   <data name="Board_DeleteThisPage" xml:space="preserve">
     <value>删除此页</value>
   </data>
-  <data name="Board_ResumeNextTime" xml:space="preserve">
-    <value>下次恢复</value>
-  </data>
   <data name="Notification_TestText" xml:space="preserve">
     <value>测试文本</value>
   </data>

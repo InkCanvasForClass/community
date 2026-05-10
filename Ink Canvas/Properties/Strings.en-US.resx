@@ -2130,9 +2130,6 @@
   <data name="Board_DeleteThisPage" xml:space="preserve">
     <value>Delete this page</value>
   </data>
-  <data name="Board_ResumeNextTime" xml:space="preserve">
-    <value>Resume Next Time</value>
-  </data>
   <data name="Notification_TestText" xml:space="preserve">
     <value>Test text</value>
   </data>
