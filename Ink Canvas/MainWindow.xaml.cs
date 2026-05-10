@@ -245,8 +245,11 @@ namespace Ink_Canvas
             content.BrushModeBtn.Click += BoardBrushModeButton_Click;
             content.BrushModeBtn.MouseUp += BoardBrushModeButton_MouseUp;
 
-            content.DefaultPenTab.MouseUp += SwitchToDefaultPen;
-            content.HighlightPenTab.MouseUp += SwitchToHighlighterPen;
+            content.TabBar.SelectedIndexChanged += (s, idx) =>
+            {
+                if (idx == 0) SwitchToDefaultPen(s, null);
+                else if (idx == 1) SwitchToHighlighterPen(s, null);
+            };
 
             content.DefaultPenColorBlack.ButtonMouseUp += BtnColorBlack_Click;
             content.DefaultPenColorWhite.ButtonMouseUp += BtnColorWhite_Click;
@@ -2679,6 +2682,7 @@ namespace Ink_Canvas
         public void ApplyAlwaysOnTop()
         {
             WindowSettingsHelper.ApplyAlwaysOnTop(this);
+            _popupManager?.OnTopmostSettingChanged();
         }
 
         private void StartTopmostMaintenance()

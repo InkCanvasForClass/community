@@ -43,7 +43,7 @@ namespace Ink_Canvas
         internal GeometryButton BoardImageDrawParallelLine => BoardShapeDrawPopupContent?.DrawParallelLineBtn;
 
         internal void AttachCursorIconView(ToolbarImageButton btn) => Cursor_Icon = btn;
-        internal void AttachPenIconView(ToolbarImageButton btn) => Pen_Icon = btn;
+        internal void AttachPenIconView(ToolbarImageButton btn) { Pen_Icon = btn; PenPalette.PlacementTarget = btn; }
         internal void AttachSymbolIconDelete(ToolbarImageButton btn) => SymbolIconDelete = btn;
         internal void AttachEraserIcon(ToolbarImageButton btn) { Eraser_Icon = btn; EraserSizePanel.PlacementTarget = btn; }
         internal void AttachEraserByStrokesIcon(ToolbarImageButton btn) => EraserByStrokes_Icon = btn;
@@ -82,29 +82,34 @@ namespace Ink_Canvas
         internal Button BoardBrushModeButton => PenPalettePopupContent?.BrushModeBtn;
         internal System.Windows.Shapes.Path BoardBrushModeIcon => PenPalettePopupContent?.BrushModeIcon;
 
-        internal Border DefaultPenTabButton => PenPalettePopupContent?.DefaultPenTab ?? BoardPenPalettePopupContent?.DefaultPenTab;
-        internal Border HighlightPenTabButton => PenPalettePopupContent?.HighlightPenTab ?? BoardPenPalettePopupContent?.HighlightPenTab;
-        internal FrameworkElement DefaultPenTabButtonIndicator => PenPalettePopupContent?.DefaultPenTabIndicator ?? BoardPenPalettePopupContent?.DefaultPenTabIndicator;
-        internal FrameworkElement HighlightPenTabButtonIndicator => PenPalettePopupContent?.HighlightPenTabIndicator ?? BoardPenPalettePopupContent?.HighlightPenTabIndicator;
-        internal TextBlock DefaultPenTabButtonText => PenPalettePopupContent?.DefaultPenTabText ?? BoardPenPalettePopupContent?.DefaultPenTabText;
-        internal TextBlock HighlightPenTabButtonText => PenPalettePopupContent?.HighlightPenTabText ?? BoardPenPalettePopupContent?.HighlightPenTabText;
+        internal PopupTabTitleBar PenTabTitleBar => PenPalettePopupContent?.TabBar ?? BoardPenPalettePopupContent?.TabBar;
+        internal PopupTabTitleBar BoardPenTabTitleBar => BoardPenPalettePopupContent?.TabBar;
+        internal int PenSelectedTabIndex
+        {
+            get => PenPalettePopupContent?.SelectedTabIndex ?? BoardPenPalettePopupContent?.SelectedTabIndex ?? 0;
+            set
+            {
+                if (PenPalettePopupContent != null) PenPalettePopupContent.SelectedTabIndex = value;
+                if (BoardPenPalettePopupContent != null) BoardPenPalettePopupContent.SelectedTabIndex = value;
+            }
+        }
+        internal int BoardPenSelectedTabIndex
+        {
+            get => BoardPenPalettePopupContent?.SelectedTabIndex ?? 0;
+            set { if (BoardPenPalettePopupContent != null) BoardPenPalettePopupContent.SelectedTabIndex = value; }
+        }
 
-        internal Viewbox DefaultPenPropsPanel => PenPalettePopupContent?.DefaultPenPropsPanel ?? BoardPenPalettePopupContent?.DefaultPenPropsPanel;
-        internal Viewbox HighlighterPenPropsPanel => PenPalettePopupContent?.HighlighterPenPropsPanel ?? BoardPenPalettePopupContent?.HighlighterPenPropsPanel;
-        internal Viewbox DefaultPenColorsPanel => PenPalettePopupContent?.DefaultPenColorsPanel ?? BoardPenPalettePopupContent?.DefaultPenColorsPanel;
-        internal Viewbox HighlighterPenColorsPanel => PenPalettePopupContent?.HighlighterPenColorsPanel ?? BoardPenPalettePopupContent?.HighlighterPenColorsPanel;
+        internal FrameworkElement DefaultPenPropsPanel => PenPalettePopupContent?.DefaultPenPropsPanel ?? BoardPenPalettePopupContent?.DefaultPenPropsPanel;
+        internal FrameworkElement HighlighterPenPropsPanel => PenPalettePopupContent?.HighlighterPenPropsPanel ?? BoardPenPalettePopupContent?.HighlighterPenPropsPanel;
+        internal FrameworkElement DefaultPenColorsPanel => PenPalettePopupContent?.DefaultPenColorsPanel ?? BoardPenPalettePopupContent?.DefaultPenColorsPanel;
+        internal FrameworkElement HighlighterPenColorsPanel => PenPalettePopupContent?.HighlighterPenColorsPanel ?? BoardPenPalettePopupContent?.HighlighterPenColorsPanel;
 
-        internal Viewbox BoardDefaultPenPropsPanel => BoardPenPalettePopupContent?.DefaultPenPropsPanel;
-        internal Viewbox BoardHighlighterPenPropsPanel => BoardPenPalettePopupContent?.HighlighterPenPropsPanel;
-        internal Viewbox BoardDefaultPenColorsPanel => BoardPenPalettePopupContent?.DefaultPenColorsPanel;
-        internal Viewbox BoardHighlighterPenColorsPanel => BoardPenPalettePopupContent?.HighlighterPenColorsPanel;
+        internal FrameworkElement BoardDefaultPenPropsPanel => BoardPenPalettePopupContent?.DefaultPenPropsPanel;
+        internal FrameworkElement BoardHighlighterPenPropsPanel => BoardPenPalettePopupContent?.HighlighterPenPropsPanel;
+        internal FrameworkElement BoardDefaultPenColorsPanel => BoardPenPalettePopupContent?.DefaultPenColorsPanel;
+        internal FrameworkElement BoardHighlighterPenColorsPanel => BoardPenPalettePopupContent?.HighlighterPenColorsPanel;
 
-        internal Border BoardDefaultPenTabButton => BoardPenPalettePopupContent?.DefaultPenTab;
-        internal Border BoardHighlightPenTabButton => BoardPenPalettePopupContent?.HighlightPenTab;
-        internal FrameworkElement BoardDefaultPenTabButtonIndicator => BoardPenPalettePopupContent?.DefaultPenTabIndicator;
-        internal FrameworkElement BoardHighlightPenTabButtonIndicator => BoardPenPalettePopupContent?.HighlightPenTabIndicator;
-        internal TextBlock BoardDefaultPenTabButtonText => BoardPenPalettePopupContent?.DefaultPenTabText;
-        internal TextBlock BoardHighlightPenTabButtonText => BoardPenPalettePopupContent?.HighlightPenTabText;
+
 
         internal PenColorButton BorderPenColorBlack => (PenPalettePopupContent ?? BoardPenPalettePopupContent)?.DefaultPenColorBlack;
         internal PenColorButton BorderPenColorWhite => (PenPalettePopupContent ?? BoardPenPalettePopupContent)?.DefaultPenColorWhite;
@@ -201,6 +206,28 @@ namespace Ink_Canvas
         internal Button ApplyBackgroundColorBtn => BackgroundPalettePopupContent?.ApplyBtn;
         internal Border WhiteboardModeBtn => BackgroundPalettePopupContent?.WhiteboardBtn;
         internal Border BlackboardModeBtn => BackgroundPalettePopupContent?.BlackboardBtn;
+        #endregion
+
+        #region QuickColorPalette property mappings
+        private QuickColorPaletteControl _quickColorPalette;
+
+        internal QuickColorPaletteControl QuickColorPalette
+        {
+            get
+            {
+                if (_quickColorPalette != null) return _quickColorPalette;
+                if (StackPanelFloatingBar == null) return null;
+                foreach (var child in StackPanelFloatingBar.Children)
+                {
+                    if (child is QuickColorPaletteControl control)
+                    {
+                        _quickColorPalette = control;
+                        return control;
+                    }
+                }
+                return null;
+            }
+        }
         #endregion
 
         internal void InitializeToolbarPlugins()

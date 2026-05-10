@@ -753,7 +753,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (_taskbar is FrameworkElement fe)
                     fe.Visibility = CardEnableTrayIcon.IsOn ? Visibility.Visible : Visibility.Collapsed;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                ExceptionHandler.HandleException(ex, "更新托盘图标可见性失败", LogHelper.LogType.Warning);
+            }
         }
 
         private void ComboBoxTrayLeftClickAction_SelectionChanged(object sender, SelectionChangedEventArgs e)

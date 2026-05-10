@@ -431,3 +431,5 @@ FodyWeavers.xsd
 telemetry_dsn.txt
 **/telemetry_dsn.txt
 /Ink Canvas/.trae
+/ClassIsland-1.7.0.1
+/.idea

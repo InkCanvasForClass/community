@@ -10,295 +10,208 @@
              xmlns:helpers="clr-namespace:Ink_Canvas.Helpers"
              xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
              mc:Ignorable="d">
-    <UserControl.Resources>
-        <Style x:Key="AutoFitPenTabLabel9" TargetType="TextBlock">
-            <Setter Property="TextWrapping" Value="NoWrap" />
-            <Setter Property="TextAlignment" Value="Center" />
-            <Setter Property="helpers:AutoFontSizeHelper.IsEnabled" Value="True" />
-            <Setter Property="helpers:AutoFontSizeHelper.MinFontSize" Value="3.5" />
-            <Setter Property="helpers:AutoFontSizeHelper.MaxFontSize" Value="9" />
-            <Setter Property="helpers:AutoFontSizeHelper.Step" Value="0.1" />
-        </Style>
-    </UserControl.Resources>
-    <Border CornerRadius="8" Background="{DynamicResource FloatBarBackground}"
-            BorderBrush="#2563eb" BorderThickness="1">
-        <ikw:SimpleStackPanel Margin="0">
-            <Border BorderBrush="#1e3a8a" Height="32"
-                    BorderThickness="0,0,0,1"
-                    CornerRadius="8,8,0,0" Background="#2563eb"
-                    Margin="-1,-1,-1,0" Padding="1,1,1,0">
-                <ikw:SimpleStackPanel Orientation="Vertical"
-                                     VerticalAlignment="Center">
-                    <ikw:SimpleStackPanel Orientation="Horizontal"
-                                         HorizontalAlignment="Stretch"
-                                         Margin="8,0,0,0" Spacing="2">
-                        <Border x:Name="DefaultPenTabButton"
-                                Background="#48dbeafe" Height="20" Width="36"
-                                CornerRadius="3">
-                            <Canvas>
-                                <ikw:SimpleStackPanel x:Name="DefaultPenTabButtonIndicator"
-                                                     Visibility="Visible"
-                                                     Orientation="Horizontal"
-                                                     Canvas.Left="9" Canvas.Right="9"
-                                                     Canvas.Bottom="0">
-                                    <Border Width="18" Height="2"
-                                            Background="{DynamicResource FloatBarBackground}" CornerRadius="1" />
-                                </ikw:SimpleStackPanel>
-                                <ikw:SimpleStackPanel Orientation="Vertical"
-                                                     Height="20" Width="36">
-                                    <ikw:SimpleStackPanel VerticalAlignment="Center"
-                                                         Orientation="Horizontal"
-                                                         HorizontalAlignment="Center"
-                                                         Margin="0,3">
-                                        <Image Source="/Resources/new-icons/pen-white.png"
-                                               RenderOptions.BitmapScalingMode="HighQuality"
-                                               Height="13" Width="13" />
-                                        <TextBlock x:Name="DefaultPenTabButtonText"
-                                                   Foreground="White" FontWeight="Medium"
-                                                   FontSize="9" TextAlignment="Center"
-                                                   Text="{i18n:I18n Key=Board_Pen}" Margin="2,1,0,0" />
-                                    </ikw:SimpleStackPanel>
-                                </ikw:SimpleStackPanel>
-                            </Canvas>
-                        </Border>
-                        <Border x:Name="HighlightPenTabButton"
-                                Background="Transparent" Height="20" Width="52"
-                                CornerRadius="3">
-                            <Canvas>
-                                <ikw:SimpleStackPanel Visibility="Collapsed"
-                                                     x:Name="HighlightPenTabButtonIndicator"
-                                                     Orientation="Horizontal" Canvas.Left="14"
-                                                     Canvas.Right="14" Canvas.Bottom="0">
-                                    <Border Width="24" Height="2"
-                                            Background="{DynamicResource FloatBarBackground}" CornerRadius="1" />
-                                </ikw:SimpleStackPanel>
-                                <ikw:SimpleStackPanel Orientation="Vertical"
-                                                     Height="20" Width="52">
-                                    <ikw:SimpleStackPanel VerticalAlignment="Center"
-                                                         Orientation="Horizontal"
-                                                         HorizontalAlignment="Center" Margin="0,3">
-                                        <Image Source="/Resources/new-icons/highlighter-white.png"
-                                               RenderOptions.BitmapScalingMode="HighQuality"
-                                               Height="13" Width="13" />
-                                        <TextBlock x:Name="HighlightPenTabButtonText"
-                                                   Foreground="White" FontWeight="Medium"
-                                                   FontSize="9" TextAlignment="Center"
-                                                   Text="{i18n:I18n Key=Board_Highlighter}" Margin="2,1,0,0"
-                                                   Width="35"
-                                                   Style="{StaticResource AutoFitPenTabLabel9}" />
-                                    </ikw:SimpleStackPanel>
-                                </ikw:SimpleStackPanel>
-                            </Canvas>
-                        </Border>
-                        <Image Margin="66,0,0,0"
-                               Source="/Resources/new-icons/close-white.png"
-                               RenderOptions.BitmapScalingMode="HighQuality"
-                               Height="16" Width="16"
-                               x:Name="_CloseIcon" />
-                    </ikw:SimpleStackPanel>
-                </ikw:SimpleStackPanel>
-            </Border>
-            <ikw:SimpleStackPanel>
-                <Viewbox x:Name="_DefaultPenPropsPanel"
-                         Margin="12,12,12,0" HorizontalAlignment="Center"
-                         VerticalAlignment="Center" Stretch="Fill">
+    <Border CornerRadius="8" Background="{DynamicResource ToolsPopupBackground}"
+            BorderBrush="#3b82f6" BorderThickness="3">
+        <ikw:SimpleStackPanel Margin="-1">
+            <controls:PopupTabTitleBar x:Name="TabTitleBar" />
+            <Border Margin="9,0,9,9" BorderBrush="{DynamicResource ToolsPopupInnerBorderBrush}"
+                    Background="{DynamicResource ToolsPopupInnerBackground}" BorderThickness="2"
+                    CornerRadius="4">
+                <Grid Margin="1">
                     <ikw:SimpleStackPanel>
-                        <ikw:SimpleStackPanel Orientation="Horizontal"
-                                             Height="35" Margin="0,0,0,8">
-                            <Label Content="笔锋" Margin="0,0,6,0"
-                                   Foreground="{DynamicResource FloatBarForeground}"
-                                   FontSize="16" FontWeight="Bold"
-                                   VerticalAlignment="Center" />
-                            <ComboBox Height="30" VerticalAlignment="Center"
-                                      x:Name="ComboBoxPenStyle"
-                                      SelectedIndex="1">
-                                <ComboBoxItem Content="实时笔锋" />
-                                <ComboBoxItem Content="基于点集" />
-                                <ComboBoxItem Content="基于速率" />
-                                <ComboBoxItem Content="关闭笔锋" />
-                            </ComboBox>
-                        </ikw:SimpleStackPanel>
-                        <primitives:UniformGrid Columns="3" Width="300"
-                                             Height="55">
-                            <ikw:SimpleStackPanel x:Name="NibModeSimpleStackPanel"
-                                                 Orientation="Horizontal" Width="100">
-                                <Label Content="笔尖模式" FontSize="12"
+                        <ikw:SimpleStackPanel x:Name="_DefaultPenPropsPanel"
+                                 Margin="12,12,12,0" HorizontalAlignment="Center">
+                            <ikw:SimpleStackPanel Orientation="Horizontal"
+                                                 Margin="0,0,0,8">
+                                <Label Content="笔锋" Margin="0,0,6,0"
+                                       Foreground="{DynamicResource FloatBarForeground}"
+                                       FontSize="16" FontWeight="Bold"
                                        VerticalAlignment="Center" />
-                                <ui:ToggleSwitch x:Name="ToggleSwitchEnableNibMode"
-                                                 MinWidth="0"
-                                                 Width="80" Margin="10,0,0,0"
-                                                 IsOn="True" />
+                                <ComboBox VerticalAlignment="Center"
+                                          x:Name="ComboBoxPenStyle"
+                                          SelectedIndex="1">
+                                    <ComboBoxItem Content="实时笔锋" />
+                                    <ComboBoxItem Content="基于点集" />
+                                    <ComboBoxItem Content="基于速率" />
+                                    <ComboBoxItem Content="关闭笔锋" />
+                                </ComboBox>
                             </ikw:SimpleStackPanel>
-                            <ikw:SimpleStackPanel Orientation="Horizontal"
-                                                 Width="100">
-                                <Label Margin="0,0,10,0" Content="墨迹纠正"
-                                       Foreground="{DynamicResource FloatBarForeground}"
-                                       FontSize="12" VerticalAlignment="Center" />
-                                <ui:ToggleSwitch x:Name="FloatingBarToggleSwitchEnableInkToShape"
-                                                 Foreground="{DynamicResource FloatBarForeground}"
-                                                 Width="80"
-                                                 MinWidth="0" />
-                            </ikw:SimpleStackPanel>
-                            <ikw:SimpleStackPanel Orientation="Horizontal"
-                                                 Width="100" x:Name="InkFadeControlPanel1">
-                                <Label Margin="0,0,10,0" Content="墨迹渐隐"
-                                       Foreground="{DynamicResource FloatBarForeground}"
-                                       FontSize="12" VerticalAlignment="Center" />
-                                <ui:ToggleSwitch x:Name="ToggleSwitchInkFadeInPanel"
-                                                 Foreground="{DynamicResource FloatBarForeground}"
-                                                 Width="90"
-                                                 MinWidth="0"
-                                                 IsOn="False" />
-                            </ikw:SimpleStackPanel>
-                        </primitives:UniformGrid>
-                        <StackPanel Orientation="Horizontal" Height="30">
-                            <Label Margin="0,0,10,0" Content="粗细" FontWeight="Bold"
-                                   Foreground="{DynamicResource FloatBarForeground}"
-                                   FontSize="17" VerticalAlignment="Center" />
-                            <Slider x:Name="_InkWidthSlider" Minimum="1"
-                                    Maximum="20" Width="200"
-                                    FontSize="20" IsSnapToTickEnabled="True"
-                                    Value="5"
-                                    TickFrequency="0.1" TickPlacement="None" />
-                            <TextBlock Width="36" TextAlignment="Right"
-                                       Text="{Binding Value, ElementName=InkWidthSlider, Mode=OneWay}"
-                                       FontFamily="Consolas" VerticalAlignment="Center"
-                                       Margin="10,0,0,0" FontSize="15" />
-                            <Button x:Name="BoardBrushModeButton" Width="24" Height="24" Margin="8,0,0,0"
-                                    VerticalAlignment="Center"
-                                    ToolTip="板刷模式">
-                                <Viewbox Margin="4" Stretch="Uniform">
-                                    <Path x:Name="BoardBrushModeIcon"
-                                          Fill="{DynamicResource FloatBarForeground}" Stretch="Fill">
-                                        <Path.Data>
-                                            <PathGeometry Figures="M6.7812 6.9375C6.81411 7.06468 6.87172 7.18413 6.95081 7.28903C7.0299 7.39392 7.12891 7.4822 7.24213 7.54882C7.47058 7.68347 7.74313 7.72187 7.99989 7.65557C8.25664 7.58928 8.47657 7.42372 8.61128 7.19531L11.9238 1.57031C12.0584 1.34186 12.0968 1.06928 12.0305 0.812526C11.9642 0.555772 11.7987 0.335869 11.5703 0.201167C11.3418 0.0665197 11.0693 0.028121 10.8125 0.0944166C10.5558 0.160712 10.3358 0.326268 10.2011 0.554683L6.88862 6.17968C6.82183 6.29276 6.77796 6.41788 6.75953 6.54791C6.7411 6.67793 6.74847 6.81031 6.7812 6.9375Z M5.21875 5.09375L10.1662 8.14759C10.7697 8.46231 10.9861 9.26072 10.3308 9.74464L9.70892 9.96117L3.6897 6.43971L3.7074 5.53239C3.99623 4.94715 4.46209 4.71653 5.21875 5.09375Z M3.05377 7.48846L9.04364 10.9631L7.99908 12.5052C7.77811 12.7482 7.86648 13.0797 8.08746 13.2123L9.03766 14.0298H3.66809C1.47755 14.0298 0.471255 11.9653 1.52466 10.1408L3.05377 7.48846Z" />
-                                        </Path.Data>
-                                    </Path>
-                                </Viewbox>
-                            </Button>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Height="30">
-                            <Label Margin="0,0,10,0" Content="透明" FontWeight="Bold"
-                                   Foreground="{DynamicResource FloatBarForeground}"
-                                   FontSize="17" VerticalAlignment="Center" />
-                            <Slider x:Name="_InkAlphaSlider" Margin="0,0,0,0"
-                                    Minimum="1" Maximum="255" Width="200"
-                                    FontSize="20"
-                                    IsSnapToTickEnabled="True" Value="255"
-                                    TickFrequency="1" TickPlacement="None" />
-                            <TextBlock Width="36" TextAlignment="Right"
-                                       Text="{Binding Value, ElementName=InkAlphaSlider, Mode=OneWay}"
-                                       FontFamily="Consolas" VerticalAlignment="Center"
-                                       Margin="10,0,0,0" FontSize="15" />
-                        </StackPanel>
-                    </ikw:SimpleStackPanel>
-                </Viewbox>
-                <Viewbox x:Name="_HighlighterPenPropsPanel"
-                         Margin="12,8,12,0"
-                         HorizontalAlignment="Center" VerticalAlignment="Center"
-                         Stretch="Fill">
-                    <ikw:SimpleStackPanel>
-                        <StackPanel Orientation="Horizontal" Height="30">
-                            <Label Margin="0,0,10,0" Content="粗细" FontWeight="Bold"
-                                   Foreground="{DynamicResource FloatBarForeground}"
-                                   FontSize="17" VerticalAlignment="Center" />
-                            <Slider x:Name="_HighlighterWidthSlider" Minimum="15"
-                                    Maximum="45" Width="208"
-                                    FontSize="20"
-                                    IsSnapToTickEnabled="True" Value="20"
-                                    TickFrequency="1" TickPlacement="None" />
-                            <TextBlock
-                                Text="{Binding Value, ElementName=HighlighterWidthSlider, Mode=OneWay}"
-                                FontFamily="Consolas" VerticalAlignment="Bottom"
-                                Margin="10,0,0,4.5" FontSize="15" />
-                        </StackPanel>
-                    </ikw:SimpleStackPanel>
-                </Viewbox>
-                <Viewbox x:Name="_DefaultPenColorsPanel"
-                         Margin="0,8,0,0" Stretch="Fill">
-                    <ikw:SimpleStackPanel Width="300" Margin="0,0,0,0">
-                        <Border Width="300" Height="100"
-                                BorderBrush="{DynamicResource IconForeground}"
-                                BorderThickness="0" CornerRadius="5">
-                            <primitives:UniformGrid Rows="2" Height="100">
-                                <ikw:SimpleStackPanel Height="45"
-                                                     Orientation="Horizontal" Width="270">
-                                    <primitives:UniformGrid Columns="5"
-                                                         Width="270" Margin="0">
-                                        <Border x:Name="_ColorThemeSwitch"
-                                                BorderBrush="{DynamicResource FloatBarBorderBrush}"
-                                                BorderThickness="1"
-                                                CornerRadius="100" Width="45">
-                                            <Grid Margin="3">
-                                                <Image x:Name="_ColorThemeSwitchIcon"
-                                                       Source="/Resources/Icons-Fluent/ic_fluent_weather_sunny_24_regular.png"
-                                                       RenderOptions.BitmapScalingMode="HighQuality"
-                                                       VerticalAlignment="Top"
-                                                       Width="23" Height="23" Margin="0,0,0,0" />
-                                                <TextBlock Margin="0,0,0,2"
-                                                           x:Name="ColorThemeSwitchTextBlock"
-                                                           Text="亮系"
-                                                           Foreground="{DynamicResource FloatBarForeground}"
-                                                           VerticalAlignment="Bottom"
-                                                           HorizontalAlignment="Center"
-                                                           FontSize="11" />
-                                            </Grid>
-                                        </Border>
-                                        <controls:PenColorButton x:Name="BorderPenColorBlack" Color="Black" BorderBrushColor="#D3D3D3" CheckIconSource="/Resources/new-icons/checked-white.png" />
-                                        <controls:PenColorButton x:Name="BorderPenColorWhite" Color="White" BorderBrushColor="#71717a" CheckIconSource="/Resources/new-icons/checked-black.png" />
-                                        <controls:PenColorButton x:Name="BorderPenColorRed" Color="#dc2626" BorderBrushColor="#7f1d1d" />
-                                        <controls:PenColorButton x:Name="BorderPenColorYellow" Color="#eab308" BorderBrushColor="#713f12" />
-                                    </primitives:UniformGrid>
+                            <primitives:UniformGrid Columns="3" Width="300">
+                                <ikw:SimpleStackPanel x:Name="NibModeSimpleStackPanel"
+                                                     Orientation="Horizontal" Width="100">
+                                    <Label Content="笔尖模式" FontSize="12"
+                                           VerticalAlignment="Center" />
+                                    <ui:ToggleSwitch x:Name="ToggleSwitchEnableNibMode"
+                                                     MinWidth="0"
+                                                     Width="80" Margin="10,0,0,0"
+                                                     IsOn="True" />
                                 </ikw:SimpleStackPanel>
-                                <ikw:SimpleStackPanel Height="45"
-                                                     Orientation="Horizontal" Width="270">
-                                    <primitives:UniformGrid Columns="5"
-                                                         Width="270" Margin="0">
-                                        <controls:PenColorButton x:Name="BorderPenColorGreen" Color="#16a34a" BorderBrushColor="#14532d" />
-                                        <controls:PenColorButton x:Name="BorderPenColorBlue" Color="#2563eb" BorderBrushColor="#1e3a8a" />
-                                        <controls:PenColorButton x:Name="BorderPenColorPink" Color="#db2777" BorderBrushColor="#831843" />
-                                        <controls:PenColorButton x:Name="BorderPenColorTeal" Color="#0d9488" BorderBrushColor="#134e4a" />
-                                        <controls:PenColorButton x:Name="BorderPenColorOrange" Color="#ea580c" BorderBrushColor="#7c2d12" />
-                                    </primitives:UniformGrid>
+                                <ikw:SimpleStackPanel Orientation="Horizontal"
+                                                     Width="100">
+                                    <Label Margin="0,0,10,0" Content="墨迹纠正"
+                                           Foreground="{DynamicResource FloatBarForeground}"
+                                           FontSize="12" VerticalAlignment="Center" />
+                                    <ui:ToggleSwitch x:Name="FloatingBarToggleSwitchEnableInkToShape"
+                                                     Foreground="{DynamicResource FloatBarForeground}"
+                                                     Width="80"
+                                                     MinWidth="0" />
+                                </ikw:SimpleStackPanel>
+                                <ikw:SimpleStackPanel Orientation="Horizontal"
+                                                     Width="100" x:Name="InkFadeControlPanel1">
+                                    <Label Margin="0,0,10,0" Content="墨迹渐隐"
+                                           Foreground="{DynamicResource FloatBarForeground}"
+                                           FontSize="12" VerticalAlignment="Center" />
+                                    <ui:ToggleSwitch x:Name="ToggleSwitchInkFadeInPanel"
+                                                     Foreground="{DynamicResource FloatBarForeground}"
+                                                     Width="90"
+                                                     MinWidth="0"
+                                                     IsOn="False" />
                                 </ikw:SimpleStackPanel>
                             </primitives:UniformGrid>
-                        </Border>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                <Label Margin="0,0,10,0" Content="粗细" FontWeight="Bold"
+                                       Foreground="{DynamicResource FloatBarForeground}"
+                                       FontSize="17" VerticalAlignment="Center" />
+                                <Slider x:Name="_InkWidthSlider" Minimum="1"
+                                        Maximum="20" Width="200"
+                                        FontSize="20" IsSnapToTickEnabled="True"
+                                        Value="5"
+                                        TickFrequency="0.1" TickPlacement="None" />
+                                <TextBlock Width="36" TextAlignment="Right"
+                                           Text="{Binding Value, ElementName=InkWidthSlider, Mode=OneWay}"
+                                           FontFamily="Consolas" VerticalAlignment="Center"
+                                           Margin="10,0,0,0" FontSize="15" />
+                                <Button x:Name="BoardBrushModeButton" Width="24" Height="24" Margin="8,0,0,0"
+                                        VerticalAlignment="Center"
+                                        ToolTip="板刷模式"
+                                        Background="Transparent" BorderThickness="0" Padding="0">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="Bd"
+                                                    Background="{TemplateBinding Background}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    Padding="{TemplateBinding Padding}"
+                                                    CornerRadius="4"
+                                                    Cursor="Hand">
+                                                <ContentPresenter HorizontalAlignment="Center"
+                                                                  VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="#22FFFFFF"/>
+                                                </Trigger>
+                                                <Trigger Property="IsPressed" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="#44FFFFFF"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                    <Viewbox Width="16" Height="16" Stretch="Uniform">
+                                        <Path x:Name="BoardBrushModeIcon"
+                                              Fill="{DynamicResource FloatBarForeground}"
+                                              Stretch="Uniform"
+                                              Data="M6.7812 6.9375C6.81411 7.06468 6.87172 7.18413 6.95081 7.28903C7.0299 7.39392 7.12891 7.4822 7.24213 7.54882C7.47058 7.68347 7.74313 7.72187 7.99989 7.65557C8.25664 7.58928 8.47657 7.42372 8.61128 7.19531L11.9238 1.57031C12.0584 1.34186 12.0968 1.06928 12.0305 0.812526C11.9642 0.555772 11.7987 0.335869 11.5703 0.201167C11.3418 0.0665197 11.0693 0.028121 10.8125 0.0944166C10.5558 0.160712 10.3358 0.326268 10.2011 0.554683L6.88862 6.17968C6.82183 6.29276 6.77796 6.41788 6.75953 6.54791C6.7411 6.67793 6.74847 6.81031 6.7812 6.9375Z M5.21875 5.09375L10.1662 8.14759C10.7697 8.46231 10.9861 9.26072 10.3308 9.74464L9.70892 9.96117L3.6897 6.43971L3.7074 5.53239C3.99623 4.94715 4.46209 4.71653 5.21875 5.09375Z M3.05377 7.48846L9.04364 10.9631L7.99908 12.5052C7.77811 12.7482 7.86648 13.0797 8.08746 13.2123L9.03766 14.0298H3.66809C1.47755 14.0298 0.471255 11.9653 1.52466 10.1408L3.05377 7.48846Z" />
+                                    </Viewbox>
+                                </Button>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Margin="0,0,10,0" Content="透明" FontWeight="Bold"
+                                       Foreground="{DynamicResource FloatBarForeground}"
+                                       FontSize="17" VerticalAlignment="Center" />
+                                <Slider x:Name="_InkAlphaSlider" Margin="0,0,0,0"
+                                        Minimum="1" Maximum="255" Width="200"
+                                        FontSize="20"
+                                        IsSnapToTickEnabled="True" Value="255"
+                                        TickFrequency="1" TickPlacement="None" />
+                                <TextBlock Width="36" TextAlignment="Right"
+                                           Text="{Binding Value, ElementName=InkAlphaSlider, Mode=OneWay}"
+                                           FontFamily="Consolas" VerticalAlignment="Center"
+                                           Margin="10,0,0,0" FontSize="15" />
+                            </StackPanel>
+                        </ikw:SimpleStackPanel>
+                        <ikw:SimpleStackPanel x:Name="_HighlighterPenPropsPanel"
+                                 Margin="12,8,12,0" HorizontalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <Label Margin="0,0,10,0" Content="粗细" FontWeight="Bold"
+                                       Foreground="{DynamicResource FloatBarForeground}"
+                                       FontSize="17" VerticalAlignment="Center" />
+                                <Slider x:Name="_HighlighterWidthSlider" Minimum="15"
+                                        Maximum="45" Width="208"
+                                        FontSize="20"
+                                        IsSnapToTickEnabled="True" Value="20"
+                                        TickFrequency="1" TickPlacement="None" />
+                                <TextBlock
+                                    Text="{Binding Value, ElementName=HighlighterWidthSlider, Mode=OneWay}"
+                                    FontFamily="Consolas" VerticalAlignment="Bottom"
+                                    Margin="10,0,0,4.5" FontSize="15" />
+                            </StackPanel>
+                        </ikw:SimpleStackPanel>
+                        <ikw:SimpleStackPanel x:Name="_DefaultPenColorsPanel" HorizontalAlignment="Center" Spacing="5">
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+                                <Border x:Name="_ColorThemeSwitch"
+                                        BorderBrush="{DynamicResource FloatBarBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="100" Width="45" Height="45">
+                                    <Grid Margin="3">
+                                        <Image x:Name="_ColorThemeSwitchIcon"
+                                                Source="/Resources/Icons-Fluent/ic_fluent_weather_sunny_24_regular.png"
+                                                RenderOptions.BitmapScalingMode="HighQuality"
+                                                VerticalAlignment="Top"
+                                                Width="23" Height="23" Margin="0,0,0,0" />
+                                        <TextBlock Margin="0,0,0,2"
+                                                    x:Name="ColorThemeSwitchTextBlock"
+                                                    Text="亮系"
+                                                    Foreground="{DynamicResource FloatBarForeground}"
+                                                    VerticalAlignment="Bottom"
+                                                    HorizontalAlignment="Center"
+                                                    FontSize="11" />
+                                    </Grid>
+                                </Border>
+                                <controls:PenColorButton x:Name="BorderPenColorBlack" Color="Black" BorderBrushColor="#D3D3D3" CheckIconSource="/Resources/new-icons/checked-white.png" />
+                                <controls:PenColorButton x:Name="BorderPenColorWhite" Color="White" BorderBrushColor="#71717a" CheckIconSource="/Resources/new-icons/checked-black.png" />
+                                <controls:PenColorButton x:Name="BorderPenColorRed" Color="#dc2626" BorderBrushColor="#7f1d1d" />
+                                <controls:PenColorButton x:Name="BorderPenColorYellow" Color="#eab308" BorderBrushColor="#713f12" />
+                            </ikw:SimpleStackPanel>
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+                                <controls:PenColorButton x:Name="BorderPenColorGreen" Color="#16a34a" BorderBrushColor="#14532d" />
+                                <controls:PenColorButton x:Name="BorderPenColorBlue" Color="#2563eb" BorderBrushColor="#1e3a8a" />
+                                <controls:PenColorButton x:Name="BorderPenColorPink" Color="#db2777" BorderBrushColor="#831843" />
+                                <controls:PenColorButton x:Name="BorderPenColorTeal" Color="#0d9488" BorderBrushColor="#134e4a" />
+                                <controls:PenColorButton x:Name="BorderPenColorOrange" Color="#ea580c" BorderBrushColor="#7c2d12" />
+                            </ikw:SimpleStackPanel>
+                        </ikw:SimpleStackPanel>
+                        <ikw:SimpleStackPanel x:Name="_HighlighterPenColorsPanel"
+                                 Margin="0,8,0,8">
+                            <Border Width="300"
+                                    BorderBrush="Black"
+                                    BorderThickness="0" CornerRadius="5">
+                                <primitives:UniformGrid Rows="2">
+                                    <ikw:SimpleStackPanel Orientation="Horizontal" Width="270">
+                                        <primitives:UniformGrid Columns="5"
+                                                             Width="270" Margin="0">
+                                            <controls:PenColorButton x:Name="_HighlighterPenColorBlack" Color="Black" BorderBrushColor="#e4e4e7" IsHighlighter="True" />
+                                            <controls:PenColorButton x:Name="_HighlighterPenColorWhite" Color="White" BorderBrushColor="#dddddd" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
+                                            <controls:PenColorButton x:Name="_HighlighterPenColorRed" Color="#ef4444" BorderBrushColor="#fecaca" IsHighlighter="True" />
+                                            <controls:PenColorButton x:Name="_HighlighterPenColorYellow" Color="#eab308" BorderBrushColor="#fef08a" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
+                                            <controls:PenColorButton x:Name="_HighlighterPenColorGreen" Color="#22c55e" BorderBrushColor="#bbf7d0" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
+                                        </primitives:UniformGrid>
+                                    </ikw:SimpleStackPanel>
+                                    <ikw:SimpleStackPanel Orientation="Horizontal" Width="270">
+                                        <primitives:UniformGrid Columns="5"
+                                                             Width="270" Margin="0">
+                                            <controls:PenColorButton x:Name="_HighlighterPenColorZinc" Color="#71717a" BorderBrushColor="#e4e4e7" IsHighlighter="True" />
+                                            <controls:PenColorButton x:Name="_HighlighterPenColorBlue" Color="#3b82f6" BorderBrushColor="#bfdbfe" IsHighlighter="True" />
+                                            <controls:PenColorButton x:Name="HighlighterPenPenColorPurple" Color="#a855f7" BorderBrushColor="#e9d5ff" IsHighlighter="True" />
+                                            <controls:PenColorButton x:Name="_HighlighterPenColorTeal" Color="#14b8a6" BorderBrushColor="#99f6e4" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
+                                            <controls:PenColorButton x:Name="_HighlighterPenColorOrange" Color="#f97316" BorderBrushColor="#fed7aa" IsHighlighter="True" />
+                                        </primitives:UniformGrid>
+                                    </ikw:SimpleStackPanel>
+                                </primitives:UniformGrid>
+                            </Border>
+                        </ikw:SimpleStackPanel>
                     </ikw:SimpleStackPanel>
-                </Viewbox>
-                <Viewbox x:Name="_HighlighterPenColorsPanel"
-                         Margin="0,8,0,8" Stretch="Fill">
-                    <ikw:SimpleStackPanel Width="300" Margin="0,0,0,0">
-                        <Border Width="300" Height="110"
-                                BorderBrush="Black"
-                                BorderThickness="0" CornerRadius="5">
-                            <primitives:UniformGrid Rows="2" Height="110">
-                                <ikw:SimpleStackPanel Height="45"
-                                                     Orientation="Horizontal" Width="270">
-                                    <primitives:UniformGrid Columns="5"
-                                                         Width="270" Margin="0">
-                                        <controls:PenColorButton x:Name="_HighlighterPenColorBlack" Color="Black" BorderBrushColor="#e4e4e7" IsHighlighter="True" />
-                                        <controls:PenColorButton x:Name="_HighlighterPenColorWhite" Color="White" BorderBrushColor="#dddddd" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
-                                        <controls:PenColorButton x:Name="_HighlighterPenColorRed" Color="#ef4444" BorderBrushColor="#fecaca" IsHighlighter="True" />
-                                        <controls:PenColorButton x:Name="_HighlighterPenColorYellow" Color="#eab308" BorderBrushColor="#fef08a" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
-                                        <controls:PenColorButton x:Name="_HighlighterPenColorGreen" Color="#22c55e" BorderBrushColor="#bbf7d0" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
-                                    </primitives:UniformGrid>
-                                </ikw:SimpleStackPanel>
-                                <ikw:SimpleStackPanel Height="45"
-                                                     Orientation="Horizontal" Width="270">
-                                    <primitives:UniformGrid Columns="5"
-                                                         Width="270" Margin="0">
-                                        <controls:PenColorButton x:Name="_HighlighterPenColorZinc" Color="#71717a" BorderBrushColor="#e4e4e7" IsHighlighter="True" />
-                                        <controls:PenColorButton x:Name="_HighlighterPenColorBlue" Color="#3b82f6" BorderBrushColor="#bfdbfe" IsHighlighter="True" />
-                                        <controls:PenColorButton x:Name="HighlighterPenPenColorPurple" Color="#a855f7" BorderBrushColor="#e9d5ff" IsHighlighter="True" />
-                                        <controls:PenColorButton x:Name="_HighlighterPenColorTeal" Color="#14b8a6" BorderBrushColor="#99f6e4" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
-                                        <controls:PenColorButton x:Name="_HighlighterPenColorOrange" Color="#f97316" BorderBrushColor="#fed7aa" IsHighlighter="True" />
-                                    </primitives:UniformGrid>
-                                </ikw:SimpleStackPanel>
-                            </primitives:UniformGrid>
-                        </Border>
-                    </ikw:SimpleStackPanel>
-                </Viewbox>
-            </ikw:SimpleStackPanel>
+                </Grid>
+            </Border>
         </ikw:SimpleStackPanel>
     </Border>
 </UserControl>

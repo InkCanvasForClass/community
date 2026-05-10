@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using iNKORE.UI.WPF.Modern.Controls;
+using Ink_Canvas.Properties;
 
 namespace Ink_Canvas.Controls
 {
@@ -24,17 +25,18 @@ namespace Ink_Canvas.Controls
             set => SetValue(IsBoardModeProperty, value);
         }
 
-        public Border DefaultPenTab => DefaultPenTabButton;
-        public Border HighlightPenTab => HighlightPenTabButton;
-        public FrameworkElement DefaultPenTabIndicator => DefaultPenTabButtonIndicator;
-        public FrameworkElement HighlightPenTabIndicator => HighlightPenTabButtonIndicator;
-        public TextBlock DefaultPenTabText => DefaultPenTabButtonText;
-        public TextBlock HighlightPenTabText => HighlightPenTabButtonText;
+        public PopupTabTitleBar TabBar => TabTitleBar;
 
-        public Viewbox DefaultPenPropsPanel { get; }
-        public Viewbox HighlighterPenPropsPanel { get; }
-        public Viewbox DefaultPenColorsPanel { get; }
-        public Viewbox HighlighterPenColorsPanel { get; }
+        public int SelectedTabIndex
+        {
+            get => TabTitleBar.SelectedIndex;
+            set => TabTitleBar.SelectedIndex = value;
+        }
+
+        public FrameworkElement DefaultPenPropsPanel { get; }
+        public FrameworkElement HighlighterPenPropsPanel { get; }
+        public FrameworkElement DefaultPenColorsPanel { get; }
+        public FrameworkElement HighlighterPenColorsPanel { get; }
 
         public ComboBox PenStyleComboBox => ComboBoxPenStyle;
         public ToggleSwitch NibModeToggle => ToggleSwitchEnableNibMode;
@@ -73,7 +75,7 @@ namespace Ink_Canvas.Controls
         public PenColorButton HighlighterPenColorTeal { get; }
         public PenColorButton HighlighterPenColorOrange { get; }
 
-        public FontIcon CloseFontIcon => null;
+        public FontIcon CloseFontIcon => TabTitleBar?.CloseFontIcon;
 
         public FrameworkElement NibModePanel => NibModeSimpleStackPanel;
         public FrameworkElement InkFadeControlPanel => InkFadeControlPanel1;
@@ -83,10 +85,29 @@ namespace Ink_Canvas.Controls
         {
             InitializeComponent();
 
-            DefaultPenPropsPanel = (Viewbox)FindName("_DefaultPenPropsPanel");
-            HighlighterPenPropsPanel = (Viewbox)FindName("_HighlighterPenPropsPanel");
-            DefaultPenColorsPanel = (Viewbox)FindName("_DefaultPenColorsPanel");
-            HighlighterPenColorsPanel = (Viewbox)FindName("_HighlighterPenColorsPanel");
+            TabTitleBar.Tabs.Add(new PopupTabItem
+            {
+                Header = Strings.GetString("Board_Pen") ?? "Pen"
+            });
+            TabTitleBar.Tabs.Add(new PopupTabItem
+            {
+                Header = Strings.GetString("Board_Highlighter") ?? "Highlighter"
+            });
+            TabTitleBar.SelectedIndex = 0;
+
+            TabTitleBar.SelectedIndexChanged += (s, index) =>
+            {
+                if (index < 0 || index >= TabTitleBar.Tabs.Count) return;
+                if (index == 0)
+                    ShowDefaultPenPanels();
+                else if (index == 1)
+                    ShowHighlighterPenPanels();
+            };
+
+            DefaultPenPropsPanel = (FrameworkElement)FindName("_DefaultPenPropsPanel");
+            HighlighterPenPropsPanel = (FrameworkElement)FindName("_HighlighterPenPropsPanel");
+            DefaultPenColorsPanel = (FrameworkElement)FindName("_DefaultPenColorsPanel");
+            HighlighterPenColorsPanel = (FrameworkElement)FindName("_HighlighterPenColorsPanel");
             InkWidthSlider = (Slider)FindName("_InkWidthSlider");
             InkAlphaSlider = (Slider)FindName("_InkAlphaSlider");
             HighlighterWidthSlider = (Slider)FindName("_HighlighterWidthSlider");
@@ -103,28 +124,32 @@ namespace Ink_Canvas.Controls
             HighlighterPenColorOrange = (PenColorButton)FindName("_HighlighterPenColorOrange");
         }
 
-        public void SwitchToDefaultPen()
+        private void ShowDefaultPenPanels()
         {
-            DefaultPenTabButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#48dbeafe"));
-            HighlightPenTabButton.Background = Brushes.Transparent;
-            DefaultPenTabButtonIndicator.Visibility = Visibility.Visible;
-            HighlightPenTabButtonIndicator.Visibility = Visibility.Collapsed;
             DefaultPenPropsPanel.Visibility = Visibility.Visible;
             HighlighterPenPropsPanel.Visibility = Visibility.Collapsed;
             DefaultPenColorsPanel.Visibility = Visibility.Visible;
             HighlighterPenColorsPanel.Visibility = Visibility.Collapsed;
         }
 
-        public void SwitchToHighlighterPen()
+        private void ShowHighlighterPenPanels()
         {
-            HighlightPenTabButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#48dbeafe"));
-            DefaultPenTabButton.Background = Brushes.Transparent;
-            HighlightPenTabButtonIndicator.Visibility = Visibility.Visible;
-            DefaultPenTabButtonIndicator.Visibility = Visibility.Collapsed;
             DefaultPenPropsPanel.Visibility = Visibility.Collapsed;
             HighlighterPenPropsPanel.Visibility = Visibility.Visible;
             DefaultPenColorsPanel.Visibility = Visibility.Collapsed;
             HighlighterPenColorsPanel.Visibility = Visibility.Visible;
+        }
+
+        public void SwitchToDefaultPen()
+        {
+            TabTitleBar.SelectedIndex = 0;
+            ShowDefaultPenPanels();
+        }
+
+        public void SwitchToHighlighterPen()
+        {
+            TabTitleBar.SelectedIndex = 1;
+            ShowHighlighterPenPanels();
         }
     }
 }

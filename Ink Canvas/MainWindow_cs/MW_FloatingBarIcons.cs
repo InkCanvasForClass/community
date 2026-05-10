@@ -513,8 +513,6 @@ namespace Ink_Canvas
                         BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
                         BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
                     }
-
-                    HideFloatingBarHighlight();
                 }
 
                 // 根据主题选择高光颜色
@@ -2111,6 +2109,8 @@ namespace Ink_Canvas
             if (MarginFromEdge != -60)
             {
                 if (IsInPptPresentationMode)
+                // 如果快捷调色盘显示，确保有足够空间
+                if (QuickColorPalette?.Visibility == Visibility.Visible)
                 {
                     if (pointPPT.X != -1 || pointPPT.Y != -1)
                     {
@@ -2235,8 +2235,7 @@ namespace Ink_Canvas
 
 
                 // 如果快捷调色盘显示，确保有足够空间
-                if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
-                    (QuickColorPaletteSingleRowPanel != null && QuickColorPaletteSingleRowPanel.Visibility == Visibility.Visible))
+                if (QuickColorPalette?.Visibility == Visibility.Visible)
                 {
                     if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
                     {
@@ -2338,8 +2337,7 @@ namespace Ink_Canvas
 
 
                 // 如果快捷调色盘显示，确保有足够空间
-                if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
-                    (QuickColorPaletteSingleRowPanel != null && QuickColorPaletteSingleRowPanel.Visibility == Visibility.Visible))
+                if (QuickColorPalette?.Visibility == Visibility.Visible)
                 {
                     if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
                     {
@@ -2690,13 +2688,9 @@ namespace Ink_Canvas
             StackPanelCanvasControls.Visibility = Visibility.Collapsed;
 
             // 在鼠标模式下隐藏快捷调色盘
-            if (QuickColorPalettePanel != null)
+            if (QuickColorPalette != null)
             {
-                QuickColorPalettePanel.Visibility = Visibility.Collapsed;
-            }
-            if (QuickColorPaletteSingleRowPanel != null)
-            {
-                QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
+                QuickColorPalette.Visibility = Visibility.Collapsed;
             }
 
             if (!isFloatingBarFolded)
@@ -2735,8 +2729,6 @@ namespace Ink_Canvas
 
             // 停止橡皮擦自动切换计时器（如果正在运行）
             StopEraserAutoSwitchBackTimer();
-
-            SetFloatingBarHighlightPosition("pen");
 
             bool isRealtimePenState = inkCanvas.EditingMode == InkCanvasEditingMode.None
                                       && ShouldUseRealtimeVelocityBrushTip()
@@ -2817,26 +2809,24 @@ namespace Ink_Canvas
                 // 使用集中化的工具模式切换方法
                 SetCurrentToolMode(InkCanvasEditingMode.Ink);
 
-                // 更新模式缓存
-                UpdateCurrentToolMode("pen");
+            UpdateCurrentToolMode("pen");
 
-                // 在批注模式下显示快捷调色盘（如果设置中启用了）
-                if (Settings.Appearance.IsShowQuickColorPalette && QuickColorPalettePanel != null && QuickColorPaletteSingleRowPanel != null)
+            if (Settings.Appearance.IsShowQuickColorPalette && QuickColorPalette != null)
+            {
+                QuickColorPalette.Visibility = Visibility.Visible;
+                if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
                 {
-                    // 根据显示模式选择显示哪个面板
-                    if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
-                    {
-                        // 单行显示模式
-                        QuickColorPalettePanel.Visibility = Visibility.Collapsed;
-                        QuickColorPaletteSingleRowPanel.Visibility = Visibility.Visible;
-                    }
-                    else
-                    {
-                        // 双行显示模式
-                        QuickColorPalettePanel.Visibility = Visibility.Visible;
-                        QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
-                    }
+                    QuickColorPalette.QuickColorPalettePanel.Visibility = Visibility.Collapsed;
+                    QuickColorPalette.QuickColorPaletteSingleRowPanel.Visibility = Visibility.Visible;
                 }
+                else
+                {
+                    QuickColorPalette.QuickColorPalettePanel.Visibility = Visibility.Visible;
+                    QuickColorPalette.QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
+                }
+            }
+
+            SetFloatingBarHighlightPosition("pen");
 
                 forceEraser = false;
                 forcePointEraser = false;
@@ -3218,6 +3208,24 @@ namespace Ink_Canvas
             ScheduleBrushAutoRestore();
         }
 
+        internal void ApplyQuickColorByName(string colorName)
+        {
+            var color = colorName switch
+            {
+                "Black" => Colors.Black,
+                "White" => Colors.White,
+                "Red" => Colors.Red,
+                "Orange" => Color.FromRgb(251, 150, 80),
+                "Yellow" => Colors.Yellow,
+                "Green" => Color.FromRgb(22, 163, 74),
+                "Blue" => Color.FromRgb(37, 99, 235),
+                "Purple" => Color.FromRgb(147, 51, 234),
+                _ => Colors.Black
+            };
+            SetQuickColor(color);
+            ScheduleBrushAutoRestore();
+        }
+
         /// <summary>
         /// 设置并应用快速颜色到当前画笔与相关状态，包括必要时切换到批注模式、更新荧光笔属性与颜色索引、记录桌面/白板的最近颜色，以及刷新调色盘指示器和颜色显示。
         /// </summary>
@@ -3345,23 +3353,26 @@ namespace Ink_Canvas
         /// <param name="selectedColor">当前选中的颜色</param>
         private void UpdateQuickColorPaletteIndicator(Color selectedColor)
         {
+            var qcp = QuickColorPalette;
+            if (qcp == null) return;
+
             // 隐藏所有check图标（双行显示）
-            QuickColorWhite.IsChecked = false;
-            QuickColorOrange.IsChecked = false;
-            QuickColorYellow.IsChecked = false;
-            QuickColorBlack.IsChecked = false;
-            QuickColorBlue.IsChecked = false;
-            QuickColorRed.IsChecked = false;
-            QuickColorGreen.IsChecked = false;
-            QuickColorPurple.IsChecked = false;
+            qcp.QuickColorWhite.IsChecked = false;
+            qcp.QuickColorOrange.IsChecked = false;
+            qcp.QuickColorYellow.IsChecked = false;
+            qcp.QuickColorBlack.IsChecked = false;
+            qcp.QuickColorBlue.IsChecked = false;
+            qcp.QuickColorRed.IsChecked = false;
+            qcp.QuickColorGreen.IsChecked = false;
+            qcp.QuickColorPurple.IsChecked = false;
 
             // 隐藏所有check图标（单行显示）
-            QuickColorWhiteSingle.IsChecked = false;
-            QuickColorOrangeSingle.IsChecked = false;
-            QuickColorYellowSingle.IsChecked = false;
-            QuickColorBlackSingle.IsChecked = false;
-            QuickColorRedSingle.IsChecked = false;
-            QuickColorGreenSingle.IsChecked = false;
+            qcp.QuickColorWhiteSingle.IsChecked = false;
+            qcp.QuickColorOrangeSingle.IsChecked = false;
+            qcp.QuickColorYellowSingle.IsChecked = false;
+            qcp.QuickColorBlackSingle.IsChecked = false;
+            qcp.QuickColorRedSingle.IsChecked = false;
+            qcp.QuickColorGreenSingle.IsChecked = false;
 
             // 显示当前选中颜色的check图标
             // 在荧光笔模式下，使用更宽松的颜色匹配
@@ -3369,21 +3380,21 @@ namespace Ink_Canvas
 
             if (IsColorSimilar(selectedColor, Colors.White, tolerance) || IsColorSimilar(selectedColor, Color.FromRgb(250, 250, 250), tolerance))
             {
-                QuickColorWhite.IsChecked = true;
-                QuickColorWhiteSingle.IsChecked = true;
+                qcp.QuickColorWhite.IsChecked = true;
+                qcp.QuickColorWhiteSingle.IsChecked = true;
             }
             else if (IsColorSimilar(selectedColor, Colors.Black, tolerance))
             {
-                QuickColorBlack.IsChecked = true;
-                QuickColorBlackSingle.IsChecked = true;
+                qcp.QuickColorBlack.IsChecked = true;
+                qcp.QuickColorBlackSingle.IsChecked = true;
             }
             else if (IsColorSimilar(selectedColor, Colors.Yellow, tolerance) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(234, 179, 8), tolerance) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(250, 204, 21), tolerance) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(253, 224, 71), tolerance))
             {
-                QuickColorYellow.IsChecked = true;
-                QuickColorYellowSingle.IsChecked = true;
+                qcp.QuickColorYellow.IsChecked = true;
+                qcp.QuickColorYellowSingle.IsChecked = true;
             }
             else if (IsColorSimilar(selectedColor, Color.FromRgb(255, 165, 0), tolerance) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(251, 150, 80), tolerance) ||
@@ -3392,29 +3403,29 @@ namespace Ink_Canvas
                      IsColorSimilar(selectedColor, Color.FromRgb(251, 146, 60), tolerance) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(253, 126, 20), tolerance))
             {
-                QuickColorOrange.IsChecked = true;
-                QuickColorOrangeSingle.IsChecked = true;
+                qcp.QuickColorOrange.IsChecked = true;
+                qcp.QuickColorOrangeSingle.IsChecked = true;
             }
             else if (IsColorSimilar(selectedColor, Color.FromRgb(37, 99, 235), tolerance))
             {
-                QuickColorBlue.IsChecked = true;
+                qcp.QuickColorBlue.IsChecked = true;
                 // 单行显示模式没有蓝色，所以不设置单行的check
             }
             else if (IsColorSimilar(selectedColor, Colors.Red, tolerance) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(220, 38, 38), tolerance) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(239, 68, 68), tolerance))
             {
-                QuickColorRed.IsChecked = true;
-                QuickColorRedSingle.IsChecked = true;
+                qcp.QuickColorRed.IsChecked = true;
+                qcp.QuickColorRedSingle.IsChecked = true;
             }
             else if (IsColorSimilar(selectedColor, Color.FromRgb(22, 163, 74), tolerance))
             {
-                QuickColorGreen.IsChecked = true;
-                QuickColorGreenSingle.IsChecked = true;
+                qcp.QuickColorGreen.IsChecked = true;
+                qcp.QuickColorGreenSingle.IsChecked = true;
             }
             else if (IsColorSimilar(selectedColor, Color.FromRgb(147, 51, 234), tolerance))
             {
-                QuickColorPurple.IsChecked = true;
+                qcp.QuickColorPurple.IsChecked = true;
                 // 单行显示模式没有紫色，所以不设置单行的check
             }
         }
@@ -4459,21 +4470,56 @@ private bool forceEraser;
         /// 设置浮动栏高光显示位置
         /// </summary>
         /// <param name="mode">模式名称</param>
+        private ToolbarImageButton _lastHighlightButton;
+        private string _pendingHighlightMode;
+
         private void SetFloatingBarHighlightPosition(string mode)
+        {
+            mode = NormalizeToolModeForFreeze(mode);
+
+            ApplyFloatingBarIconHighlightImmediate(mode);
+
+            _pendingHighlightMode = mode;
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (_pendingHighlightMode != mode) return;
+                AnimateFloatingBarHighlightTo(mode);
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+
+        private void ApplyFloatingBarIconHighlightImmediate(string mode)
         {
             try
             {
-                mode = NormalizeToolModeForFreeze(mode);
+                Color highlightBarColor;
+                bool isDarkTheme = Settings.Appearance.Theme == 1 ||
+                                   (Settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
 
-                if (FloatingbarSelectionBG == null) return;
+                if (isDarkTheme)
+                    highlightBarColor = Color.FromRgb(102, 204, 255);
+                else
+                    highlightBarColor = Color.FromRgb(37, 99, 235);
 
                 if (isFloatingBarFolded || (BorderFloatingBarMainControls != null && BorderFloatingBarMainControls.Visibility == Visibility.Collapsed))
+                var foregroundBrush = new SolidColorBrush(FloatBarForegroundColor);
+
+                void ResetIcon(ToolbarImageButton button, string iconType)
                 {
-                    FloatingbarSelectionBG.Visibility = Visibility.Hidden;
-                    return;
+                    if (button == null) return;
+                    button.Icon.Brush = foregroundBrush;
+                    button.Icon.Geometry = Geometry.Parse(GetCorrectIcon(iconType, false));
                 }
 
                 FrameworkElement targetButton = null;
+                ResetIcon(Cursor_Icon, "cursor");
+                ResetIcon(Pen_Icon, "pen");
+                ResetIcon(Eraser_Icon, "eraserCircle");
+                ResetIcon(EraserByStrokes_Icon, "eraserStroke");
+                ResetIcon(SymbolIconSelect, "lassoSelect");
+
+                string targetIconType = null;
+                ToolbarImageButton targetButton = null;
+
                 switch (mode)
                 {
                     case "cursor": targetButton = Cursor_Icon; break;
@@ -4483,12 +4529,79 @@ private bool forceEraser;
                     case "eraserByStrokes": targetButton = EraserByStrokes_Icon; break;
                     case "select": targetButton = SymbolIconSelect; break;
                     case "shape": targetButton = ShapeDrawFloatingBarBtn; break;
+                    case "color":
+                        targetButton = Pen_Icon;
+                        targetIconType = "pen";
+                        break;
+                    case "eraser":
+                        targetButton = Eraser_Icon;
+                        targetIconType = "eraserCircle";
+                        break;
+                    case "eraserByStrokes":
+                        targetButton = EraserByStrokes_Icon;
+                        targetIconType = "eraserStroke";
+                        break;
+                    case "select":
+                        targetButton = SymbolIconSelect;
+                        targetIconType = "lassoSelect";
+                        break;
+                }
+
+                if (targetButton != null && targetIconType != null)
+                {
+                    targetButton.Icon.Brush = new SolidColorBrush(highlightBarColor);
+                    targetButton.Icon.Geometry = Geometry.Parse(GetCorrectIcon(targetIconType, true));
+                }
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler.HandleException(ex, "更新浮动栏图标高亮状态失败", LogHelper.LogType.Warning);
+            }
+        }
+
+        private void AnimateFloatingBarHighlightTo(string mode)
+        {
+            try
+            {
+                if (FloatingbarSelectionBG == null) return;
+
+                if (isFloatingBarFolded || (BorderFloatingBarMainControls != null && BorderFloatingBarMainControls.Visibility == Visibility.Collapsed))
+                {
+                    FloatingbarSelectionBG.Visibility = Visibility.Hidden;
+                    if (FloatingbarIndicatorBar != null) FloatingbarIndicatorBar.Visibility = Visibility.Hidden;
+                    return;
+                }
+
+                ToolbarImageButton targetButton = null;
+
+                switch (mode)
+                {
+                    case "cursor":
+                        targetButton = Cursor_Icon;
+                        break;
+                    case "pen":
+                    case "color":
+                        targetButton = Pen_Icon;
+                        break;
+                    case "eraser":
+                        targetButton = Eraser_Icon;
+                        break;
+                    case "eraserByStrokes":
+                        targetButton = EraserByStrokes_Icon;
+                        break;
+                    case "select":
+                        targetButton = SymbolIconSelect;
+                        break;
+                    case "shape":
+                        targetButton = ShapeDrawFloatingBarBtn;
+                        break;
                 }
 
                 if (targetButton == null || StackPanelFloatingBar == null) return;
                 if (targetButton.Visibility != Visibility.Visible)
                 {
                     FloatingbarSelectionBG.Visibility = Visibility.Hidden;
+                    if (FloatingbarIndicatorBar != null) FloatingbarIndicatorBar.Visibility = Visibility.Hidden;
                     return;
                 }
 
@@ -4497,6 +4610,16 @@ private bool forceEraser;
                     try
                     {
                         if (targetButton == null || StackPanelFloatingBar == null) return;
+                var buttonOrigin = targetButton.TransformToAncestor(StackPanelFloatingBar).Transform(new Point(0, 0));
+                double nextWidth = targetButton.ActualWidth > 0 ? targetButton.ActualWidth : 28;
+                double nextPos = buttonOrigin.X;
+
+                if (nextWidth <= 0)
+                {
+                    FloatingbarSelectionBG.Visibility = Visibility.Hidden;
+                    if (FloatingbarIndicatorBar != null) FloatingbarIndicatorBar.Visibility = Visibility.Hidden;
+                    return;
+                }
 
                         var transform = targetButton.TransformToAncestor(StackPanelFloatingBar);
                         var buttonOrigin = transform.Transform(new Point(0, 0));
@@ -4587,6 +4710,160 @@ private bool forceEraser;
                         LogHelper.WriteLogToFile($"设置高光位置失败: {ex.Message}", LogHelper.LogType.Error);
                     }
                 }), DispatcherPriority.ContextIdle);
+                FloatingbarSelectionBG.Background = new SolidColorBrush(highlightBackgroundColor);
+                if (FloatingbarIndicatorBar != null)
+                {
+                    FloatingbarIndicatorBar.Background = new SolidColorBrush(highlightBarColor);
+                }
+
+                FloatingbarSelectionBG.Visibility = Visibility.Visible;
+
+                double indicatorBarWidth = 12;
+                double nextBarLeft = nextPos + Math.Max(0, (nextWidth - indicatorBarWidth) / 2);
+
+                bool isFirstShow = _lastHighlightButton == null;
+
+                if (isFirstShow)
+                {
+                    FloatingbarSelectionBG.Width = nextWidth;
+                    System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, nextPos);
+                    if (FloatingbarIndicatorBar != null)
+                    {
+                        FloatingbarIndicatorBar.Visibility = Visibility.Visible;
+                        FloatingbarIndicatorBar.Width = indicatorBarWidth;
+                        System.Windows.Controls.Canvas.SetLeft(FloatingbarIndicatorBar, nextBarLeft);
+                    }
+                    _lastHighlightButton = targetButton;
+                    return;
+                }
+
+                double prevPos;
+                double prevWidth;
+                if (_lastHighlightButton != null && _lastHighlightButton.Visibility == Visibility.Visible)
+                {
+                    var lastOrigin = _lastHighlightButton.TransformToAncestor(StackPanelFloatingBar).Transform(new Point(0, 0));
+                    prevPos = lastOrigin.X;
+                    prevWidth = _lastHighlightButton.ActualWidth > 0 ? _lastHighlightButton.ActualWidth : 28;
+                }
+                else
+                {
+                    prevPos = System.Windows.Controls.Canvas.GetLeft(FloatingbarSelectionBG);
+                    if (double.IsNaN(prevPos)) prevPos = 0;
+                    prevWidth = FloatingbarSelectionBG.ActualWidth;
+                    if (double.IsNaN(prevWidth) || prevWidth <= 0) prevWidth = 28;
+                }
+
+                _lastHighlightButton = targetButton;
+
+                FloatingbarSelectionBG.Width = nextWidth;
+                System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, nextPos);
+
+                if (FloatingbarIndicatorBar == null) return;
+
+                double prevBarLeft = prevPos + Math.Max(0, (prevWidth - indicatorBarWidth) / 2);
+
+                double distance = Math.Abs(nextBarLeft - prevBarLeft);
+
+                if (distance < 0.5)
+                {
+                    FloatingbarIndicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, null);
+                    FloatingbarIndicatorBar.BeginAnimation(FrameworkElement.WidthProperty, null);
+                    FloatingbarIndicatorBar.Width = indicatorBarWidth;
+                    System.Windows.Controls.Canvas.SetLeft(FloatingbarIndicatorBar, nextBarLeft);
+                    return;
+                }
+
+                FloatingbarIndicatorBar.Visibility = Visibility.Visible;
+                FloatingbarIndicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, null);
+                FloatingbarIndicatorBar.BeginAnimation(FrameworkElement.WidthProperty, null);
+
+                double stretchPhasePercent = 0.4;
+                var duration = TimeSpan.FromMilliseconds(300);
+
+                if (nextBarLeft >= prevBarLeft)
+                {
+                    double stretchedLeft = prevBarLeft;
+                    double stretchedWidth = (nextBarLeft + indicatorBarWidth) - prevBarLeft;
+
+                    var leftAnimation = new DoubleAnimationUsingKeyFrames
+                    {
+                        KeyFrames =
+                        {
+                            new DiscreteDoubleKeyFrame(prevBarLeft, KeyTime.FromPercent(0.0)),
+                            new LinearDoubleKeyFrame(stretchedLeft, KeyTime.FromPercent(stretchPhasePercent)),
+                            new LinearDoubleKeyFrame(nextBarLeft, KeyTime.FromPercent(1.0)),
+                        },
+                        Duration = duration,
+                        FillBehavior = FillBehavior.Stop
+                    };
+                    leftAnimation.Completed += (s, e) =>
+                    {
+                        FloatingbarIndicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, null);
+                        System.Windows.Controls.Canvas.SetLeft(FloatingbarIndicatorBar, nextBarLeft);
+                    };
+
+                    var widthAnimation = new DoubleAnimationUsingKeyFrames
+                    {
+                        KeyFrames =
+                        {
+                            new DiscreteDoubleKeyFrame(indicatorBarWidth, KeyTime.FromPercent(0.0)),
+                            new LinearDoubleKeyFrame(stretchedWidth, KeyTime.FromPercent(stretchPhasePercent)),
+                            new LinearDoubleKeyFrame(indicatorBarWidth, KeyTime.FromPercent(1.0)),
+                        },
+                        Duration = duration,
+                        FillBehavior = FillBehavior.Stop
+                    };
+                    widthAnimation.Completed += (s, e) =>
+                    {
+                        FloatingbarIndicatorBar.BeginAnimation(FrameworkElement.WidthProperty, null);
+                        FloatingbarIndicatorBar.Width = indicatorBarWidth;
+                    };
+
+                    FloatingbarIndicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, leftAnimation);
+                    FloatingbarIndicatorBar.BeginAnimation(FrameworkElement.WidthProperty, widthAnimation);
+                }
+                else
+                {
+                    double stretchedLeft = nextBarLeft;
+                    double stretchedWidth = (prevBarLeft + indicatorBarWidth) - nextBarLeft;
+
+                    var leftAnimation = new DoubleAnimationUsingKeyFrames
+                    {
+                        KeyFrames =
+                        {
+                            new DiscreteDoubleKeyFrame(prevBarLeft, KeyTime.FromPercent(0.0)),
+                            new LinearDoubleKeyFrame(stretchedLeft, KeyTime.FromPercent(stretchPhasePercent)),
+                            new LinearDoubleKeyFrame(nextBarLeft, KeyTime.FromPercent(1.0)),
+                        },
+                        Duration = duration,
+                        FillBehavior = FillBehavior.Stop
+                    };
+                    leftAnimation.Completed += (s, e) =>
+                    {
+                        FloatingbarIndicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, null);
+                        System.Windows.Controls.Canvas.SetLeft(FloatingbarIndicatorBar, nextBarLeft);
+                    };
+
+                    var widthAnimation = new DoubleAnimationUsingKeyFrames
+                    {
+                        KeyFrames =
+                        {
+                            new DiscreteDoubleKeyFrame(indicatorBarWidth, KeyTime.FromPercent(0.0)),
+                            new LinearDoubleKeyFrame(stretchedWidth, KeyTime.FromPercent(stretchPhasePercent)),
+                            new LinearDoubleKeyFrame(indicatorBarWidth, KeyTime.FromPercent(1.0)),
+                        },
+                        Duration = duration,
+                        FillBehavior = FillBehavior.Stop
+                    };
+                    widthAnimation.Completed += (s, e) =>
+                    {
+                        FloatingbarIndicatorBar.BeginAnimation(FrameworkElement.WidthProperty, null);
+                        FloatingbarIndicatorBar.Width = indicatorBarWidth;
+                    };
+
+                    FloatingbarIndicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, leftAnimation);
+                    FloatingbarIndicatorBar.BeginAnimation(FrameworkElement.WidthProperty, widthAnimation);
+                }
             }
             catch (Exception ex)
             {
@@ -4698,6 +4975,17 @@ private bool forceEraser;
                 FloatingbarSelectionBG.Visibility = Visibility.Hidden;
                 System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 0);
             }
+
+            if (FloatingbarIndicatorBar != null)
+            {
+                FloatingbarIndicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, null);
+                FloatingbarIndicatorBar.BeginAnimation(FrameworkElement.WidthProperty, null);
+                FloatingbarIndicatorBar.Visibility = Visibility.Hidden;
+                FloatingbarIndicatorBar.Width = 12;
+                System.Windows.Controls.Canvas.SetLeft(FloatingbarIndicatorBar, 0);
+            }
+
+            _lastHighlightButton = null;
         }
 
         /// <summary>

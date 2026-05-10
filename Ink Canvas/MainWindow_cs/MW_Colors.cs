@@ -524,35 +524,13 @@ namespace Ink_Canvas
                 DefaultPenColorsPanel.Visibility = Visibility.Visible;
                 HighlighterPenColorsPanel.Visibility = Visibility.Collapsed;
                 HighlighterPenPropsPanel.Visibility = Visibility.Collapsed;
-                DefaultPenTabButton.Opacity = 1;
-                DefaultPenTabButtonText.FontWeight = FontWeights.Bold;
-                DefaultPenTabButtonText.Margin = new Thickness(2, 0.5, 0, 0);
-                DefaultPenTabButtonText.FontSize = 9.5;
-                DefaultPenTabButton.Background = new SolidColorBrush(Color.FromArgb(72, 219, 234, 254));
-                DefaultPenTabButtonIndicator.Visibility = Visibility.Visible;
-                HighlightPenTabButton.Opacity = 0.9;
-                HighlightPenTabButtonText.FontWeight = FontWeights.Normal;
-                HighlightPenTabButtonText.FontSize = 9;
-                HighlightPenTabButtonText.Margin = new Thickness(2, 1, 0, 0);
-                HighlightPenTabButton.Background = new SolidColorBrush(Colors.Transparent);
-                HighlightPenTabButtonIndicator.Visibility = Visibility.Collapsed;
+                PenSelectedTabIndex = 0;
 
                 BoardDefaultPenPropsPanel.Visibility = Visibility.Visible;
                 BoardDefaultPenColorsPanel.Visibility = Visibility.Visible;
                 BoardHighlighterPenColorsPanel.Visibility = Visibility.Collapsed;
                 BoardHighlighterPenPropsPanel.Visibility = Visibility.Collapsed;
-                BoardDefaultPenTabButton.Opacity = 1;
-                BoardDefaultPenTabButtonText.FontWeight = FontWeights.Bold;
-                BoardDefaultPenTabButtonText.Margin = new Thickness(2, 0.5, 0, 0);
-                BoardDefaultPenTabButtonText.FontSize = 9.5;
-                BoardDefaultPenTabButton.Background = new SolidColorBrush(Color.FromArgb(72, 219, 234, 254));
-                BoardDefaultPenTabButtonIndicator.Visibility = Visibility.Visible;
-                BoardHighlightPenTabButton.Opacity = 0.9;
-                BoardHighlightPenTabButtonText.FontWeight = FontWeights.Normal;
-                BoardHighlightPenTabButtonText.FontSize = 9;
-                BoardHighlightPenTabButtonText.Margin = new Thickness(2, 1, 0, 0);
-                BoardHighlightPenTabButton.Background = new SolidColorBrush(Colors.Transparent);
-                BoardHighlightPenTabButtonIndicator.Visibility = Visibility.Collapsed;
+                BoardPenSelectedTabIndex = 0;
 
                 // 动态计算面板位置，使其对齐笔按钮（考虑快捷调色盘等动态宽度）
                 await Dispatcher.InvokeAsync(() =>
@@ -570,35 +548,13 @@ namespace Ink_Canvas
                 DefaultPenColorsPanel.Visibility = Visibility.Collapsed;
                 HighlighterPenColorsPanel.Visibility = Visibility.Visible;
                 HighlighterPenPropsPanel.Visibility = Visibility.Visible;
-                DefaultPenTabButton.Opacity = 0.9;
-                DefaultPenTabButtonText.FontWeight = FontWeights.Normal;
-                DefaultPenTabButtonText.FontSize = 9;
-                DefaultPenTabButtonText.Margin = new Thickness(2, 1, 0, 0);
-                DefaultPenTabButton.Background = new SolidColorBrush(Colors.Transparent);
-                DefaultPenTabButtonIndicator.Visibility = Visibility.Collapsed;
-                HighlightPenTabButton.Opacity = 1;
-                HighlightPenTabButtonText.FontWeight = FontWeights.Bold;
-                HighlightPenTabButtonText.FontSize = 9.5;
-                HighlightPenTabButtonText.Margin = new Thickness(2, 0.5, 0, 0);
-                HighlightPenTabButton.Background = new SolidColorBrush(Color.FromArgb(72, 219, 234, 254));
-                HighlightPenTabButtonIndicator.Visibility = Visibility.Visible;
+                PenSelectedTabIndex = 1;
 
                 BoardDefaultPenPropsPanel.Visibility = Visibility.Collapsed;
                 BoardDefaultPenColorsPanel.Visibility = Visibility.Collapsed;
                 BoardHighlighterPenColorsPanel.Visibility = Visibility.Visible;
                 BoardHighlighterPenPropsPanel.Visibility = Visibility.Visible;
-                BoardDefaultPenTabButton.Opacity = 0.9;
-                BoardDefaultPenTabButtonText.FontWeight = FontWeights.Normal;
-                BoardDefaultPenTabButtonText.FontSize = 9;
-                BoardDefaultPenTabButtonText.Margin = new Thickness(2, 1, 0, 0);
-                BoardDefaultPenTabButton.Background = new SolidColorBrush(Colors.Transparent);
-                BoardDefaultPenTabButtonIndicator.Visibility = Visibility.Collapsed;
-                BoardHighlightPenTabButton.Opacity = 1;
-                BoardHighlightPenTabButtonText.FontWeight = FontWeights.Bold;
-                BoardHighlightPenTabButtonText.FontSize = 9.5;
-                BoardHighlightPenTabButtonText.Margin = new Thickness(2, 0.5, 0, 0);
-                BoardHighlightPenTabButton.Background = new SolidColorBrush(Color.FromArgb(72, 219, 234, 254));
-                BoardHighlightPenTabButtonIndicator.Visibility = Visibility.Visible;
+                BoardPenSelectedTabIndex = 1;
 
                 // 动态计算面板位置，使其对齐笔按钮（考虑快捷调色盘等动态宽度）
                 await Dispatcher.InvokeAsync(() =>

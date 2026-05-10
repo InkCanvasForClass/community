@@ -101,7 +101,7 @@ namespace Ink_Canvas.Controls.Toolbar
             {
                 cfg.Slot = ToolbarSlot.FloatingBarMain;
                 cfg.Order = 120;
-                cfg.AnchorName = "QuickColorPaletteSingleRowPanel";
+                cfg.AnchorName = "QuickColorPaletteContainer";
             }
         }
 
