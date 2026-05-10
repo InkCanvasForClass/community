@@ -1115,7 +1115,7 @@
                 </Viewbox.LayoutTransform>
                 <ikw:SimpleStackPanel Orientation="Horizontal">
                     <!--拖动图标-->
-                    <Border x:Name="BorderFloatingBarMoveControls" Width="54" Height="54" CornerRadius="8"
+                    <Border x:Name="BorderFloatingBarMoveControls" Width="50" Height="50" CornerRadius="8"
                             Background="{DynamicResource FloatBarBackground}" BorderThickness="2" BorderBrush="{DynamicResource FloatBarBorderBrush}"
                             MouseDown="SymbolIconEmoji_MouseDown" MouseUp="SymbolIconEmoji_MouseUp"
                             d:Background="Red" d:BorderBrush="Green">
@@ -1128,80 +1128,21 @@
                         </ikw:SimpleStackPanel>
                     </Border>
                     <!--内容区域-->
-                    <Border Padding="2" Visibility="Visible" Height="54" d:Width="100"
+                    <Border Padding="2" Visibility="Visible" Height="50" d:Width="100"
                             Name="BorderFloatingBarMainControls" Background="{DynamicResource FloatBarBackground}" CornerRadius="8"
                             BorderThickness="2" Margin="3,0,0,0"
                             BorderBrush="{DynamicResource FloatBarBorderBrush}"
                             HorizontalAlignment="Left"
                             d:Background="Red" d:BorderBrush="Green">
                         <Grid>
-                            <!--选中时阴影-->
                             <Canvas Name="FloatingbarSelectionBGCanvas" Margin="2,0,2,0">
-                                <Border Name="FloatingbarSelectionBG" Visibility="Hidden" d:Visibility="Visible" Width="28" Height="34"
+                                <Border Name="FloatingbarSelectionBG" Visibility="Hidden" d:Visibility="Visible" Width="28" Height="46"
                                             Canvas.Left="28" Margin="0,-2,0,-2" Background="#153b82f6" />
                                 <Border Name="FloatingbarIndicatorBar" Visibility="Hidden" Width="16" Height="3" d:Visibility="Visible"
                                             Canvas.Left="34" Canvas.Bottom="1" CornerRadius="1.5" Background="#2563eb" />
                             </Canvas>
-                            <ikw:SimpleStackPanel Margin="2,0" Name="StackPanelFloatingBar" Orientation="Horizontal" Cursor="Arrow" HorizontalAlignment="Left">
-                                <!-- Cursor_Icon / Pen_Icon 由 ToolbarRegistry 动态注入（见 Controls/Toolbar/Items/*） -->
-                                <!-- QuickColorPaletteToolItem 注入占位符（快捷调色盘） -->
-                                <Grid Name="QuickColorPaletteInjectionPoint" Width="0" />
-
-                                <!-- SymbolIconDelete 由 ClearToolItem 动态注入（BeforeAnchor=StackPanelCanvasControls） -->
-                                <ikw:SimpleStackPanel Name="StackPanelCanvasControls" Visibility="Visible"
-                                                         Orientation="{Binding ElementName=StackPanelFloatingBar, Path=Orientation}">
-
-
-                                    <!-- Eraser_Icon / EraserByStrokes_Icon / SymbolIconSelect / ShapeDrawFloatingBarBtn 由 ToolbarRegistry 注入（Prepend） -->
-
-                                    <!-- SymbolIconUndo / SymbolIconRedo / CursorWithDelFloatingBarBtn 由 ToolbarRegistry 注入（Append） -->
-                                </ikw:SimpleStackPanel>
-                                <ikw:SimpleStackPanel x:Name="StackPanelFloatingBarEnd"
-                                            Orientation="{Binding ElementName=StackPanelFloatingBar, Path=Orientation}">
-                                    <Border x:Name="FloatingBarEndSeparator" Margin="2,0,2,0" BorderBrush="#71717a" BorderThickness="1,0,0,0" />
-                                    <!-- WhiteboardFloatingBarBtn / ToolsFloatingBarBtn / Fold_Icon 由 ToolbarRegistry 注入（AfterAnchor=FloatingBarEndSeparator） -->
-                                    <Grid Width="0" d:Visibility="Visible">
-                                    </Grid>
-                                </ikw:SimpleStackPanel>
-                            </ikw:SimpleStackPanel>
+                            <ikw:SimpleStackPanel Margin="2,0" Name="StackPanelFloatingBar" Orientation="Horizontal" Cursor="Arrow" HorizontalAlignment="Left" />
                         </Grid>
-                    </Border>
-                    <!--手势图标-->
-                    <ikw:SimpleStackPanel Orientation="{Binding ElementName=StackPanelFloatingBar, Path=Orientation}">
-                        <Border x:Name="EnableTwoFingerGestureBorder" Visibility="Visible" Width="54"
-                            Height="54" CornerRadius="8" Background="{DynamicResource FloatBarBackground}" BorderBrush="{DynamicResource FloatBarBorderBrush}"
-                            BorderThickness="2" d:Background="Red" d:BorderBrush="Green" Margin="3,0,0,0">
-                            <ikw:SimpleStackPanel
-                                MouseUp="TwoFingerGestureBorder_MouseUp" Background="Transparent"
-                                Orientation="Vertical" HorizontalAlignment="Center" Width="54">
-                                <Image x:Name="EnableTwoFingerGestureBtn" Source="{DynamicResource GestureIcon}"
-                                       RenderOptions.BitmapScalingMode="HighQuality" Width="42" Height="27"
-                                       Margin="0,6,0,0" />
-                                <TextBlock x:Name="gestureiconText"
-                                           Text="{i18n:I18n Key=FloatingBar_GestureButton}"
-                                           Foreground="{DynamicResource FloatBarForeground}"
-                                           FontSize="12"
-                                           TextAlignment="Center" />
-                            </ikw:SimpleStackPanel>
-                        </Border>
-                    </ikw:SimpleStackPanel>
-                    <!--退出图标-->
-                    <Border x:Name="BorderFloatingBarExitPPTBtn" Width="54" Height="54" Margin="3,0,0,0"
-                            MouseDown="Border_MouseDown" MouseUp="ImagePPTControlEnd_MouseUp"
-                            Background="{DynamicResource FloatBarBackground}" CornerRadius="8" BorderThickness="2"
-                            BorderBrush="{DynamicResource FloatBarBorderBrush}" d:Background="Red" d:BorderBrush="Green"
-                            Visibility="Collapsed"  d:Visibility="Visible">
-                        <ikw:SimpleStackPanel Background="Transparent" Orientation="Vertical"
-                                             HorizontalAlignment="Center"
-                                             Width="54">
-                            <Image Source="{DynamicResource QuickPanelEndSlideshowIcon}"
-                                   RenderOptions.BitmapScalingMode="HighQuality" Width="42" Height="27"
-                                   Margin="0,6,0,0" />
-                            <TextBlock Text="{i18n:I18n Key=FloatingBar_ExitButton}"
-                                       Foreground="{DynamicResource FloatBarForeground}"
-                                       FontSize="12"
-                                       TextAlignment="Center" />
-                        </ikw:SimpleStackPanel>
                     </Border>
                 </ikw:SimpleStackPanel>
             </Viewbox>

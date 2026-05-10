@@ -244,12 +244,6 @@
                             Icon="{x:Static ui:SegoeFluentIcons.Handwriting}"
                             Toggled="ToggleSwitchEnableFingerGestureSlideShowControl_Toggled"/>
 
-                    <controls:LabeledSettingsCard x:Name="CardShowGestureButtonInSlideShow"
-                            Header="{i18n:I18n Key=PPT_ShowGestureButtonInShow}"
-                            Description="{i18n:I18n Key=PPT_ShowGestureButtonInShowHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
-                            Toggled="ToggleSwitchShowGestureButtonInSlideShow_Toggled"/>
-
                     <controls:LabeledSettingsCard x:Name="CardEnablePPTTimeCapsule"
                             Header="{i18n:I18n Key=PPT_TimeCapsule}"
                             Description="{i18n:I18n Key=PPT_TimeCapsuleHint}"

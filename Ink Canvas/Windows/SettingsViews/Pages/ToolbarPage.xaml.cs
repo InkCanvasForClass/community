@@ -5,44 +5,63 @@ using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Media;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
     public partial class ToolbarPage : Page, IDropTarget
     {
-        public class ToolbarItemViewModel : INotifyPropertyChanged
-        {
-            public string Id { get; }
-            public string DisplayName { get; }
-
-            private int _order;
-            public int Order { get => _order; set { _order = value; OnPropertyChanged(nameof(Order)); } }
-
-            private bool _isVisible = true;
-            public bool IsVisible { get => _isVisible; set { _isVisible = value; OnPropertyChanged(nameof(IsVisible)); } }
-
-            public event PropertyChangedEventHandler PropertyChanged;
-            protected void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-
-            public ToolbarItemViewModel(string id, string displayName, int order, bool isVisible)
-            {
-                Id = id; DisplayName = displayName; _order = order; _isVisible = isVisible;
-            }
-        }
-
         private static readonly string LogTag = "ToolbarPage";
         private bool _isLoaded;
+        private bool _suppressConfigChange;
+        private bool _suppressSave;
 
-        public ObservableCollection<ToolbarItemViewModel> MainItems { get; } = new();
-        public ObservableCollection<ToolbarItemViewModel> CanvasItems { get; } = new();
-        public ObservableCollection<ToolbarItemViewModel> EndItems { get; } = new();
+        public ObservableCollection<ToolbarComponentEntry> AddedComponents { get; } = new();
+        public ObservableCollection<ToolbarComponentEntry> GroupChildren { get; } = new();
+        public GroupChildrenDropHandler GroupDropHandler { get; }
+
+        public IReadOnlyList<IToolbarItem> AvailableItems => ToolbarRegistry.Discover();
+
+        public static readonly DependencyProperty SelectedEntryProperty =
+            DependencyProperty.Register(nameof(SelectedEntry), typeof(ToolbarComponentEntry), typeof(ToolbarPage),
+                new PropertyMetadata(null, OnSelectedEntryChanged));
+
+        public ToolbarComponentEntry SelectedEntry
+        {
+            get => (ToolbarComponentEntry)GetValue(SelectedEntryProperty);
+            set => SetValue(SelectedEntryProperty, value);
+        }
+
+        private static void OnSelectedEntryChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var page = (ToolbarPage)d;
+            page.UpdatePropertiesPanel();
+        }
+
+        private void UpdatePropertiesPanel()
+        {
+            if (SelectedEntry == null) return;
+            _suppressSave = true;
+            CheckBoxShowSeparateBorder.IsChecked = SelectedEntry.ShowSeparateBorder;
+
+            var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedEntry);
+            ComboBoxRulesetMode.SelectedIndex = (int)ruleset.Mode;
+            CheckBoxRulesetReversed.IsChecked = ruleset.IsReversed;
+            ItemsControlGroups.ItemsSource = ruleset.Groups;
+
+            _suppressSave = false;
+            RefreshGroupChildren();
+        }
 
         public ToolbarPage()
         {
+            GroupDropHandler = new GroupChildrenDropHandler(this);
             InitializeComponent();
             DataContext = this;
             Loaded += OnPageLoaded;
@@ -58,150 +77,161 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _isLoaded = true;
         }
 
+        #region Config file management
+
+        private void RefreshConfigFileList()
+        {
+            _suppressConfigChange = true;
+            ComboBoxConfigFile.Items.Clear();
+            var files = ToolbarRegistry.ListConfigFiles();
+            foreach (var name in files)
+                ComboBoxConfigFile.Items.Add(name);
+
+            var activeName = SettingsManager.Settings?.ToolbarConfigName ?? "default";
+            var idx = files.IndexOf(activeName);
+            ComboBoxConfigFile.SelectedIndex = idx >= 0 ? idx : 0;
+            _suppressConfigChange = false;
+        }
+
+        private void ComboBoxConfigFile_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_suppressConfigChange || !_isLoaded) return;
+            var name = ComboBoxConfigFile.SelectedItem as string;
+            if (string.IsNullOrEmpty(name)) return;
+
+            SettingsManager.Settings.ToolbarConfigName = name;
+            SettingsManager.SaveSettingsToFile();
+            LoadSettings();
+            RebuildMainWindowToolbar();
+        }
+
+        private void ButtonNewConfig_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new InputDialog("请输入配置文件名称：", "新建配置", "")
+            {
+                Owner = Window.GetWindow(this)
+            };
+            if (dialog.ShowDialog() != true) return;
+            var name = dialog.InputText?.Trim();
+            if (string.IsNullOrEmpty(name)) return;
+
+            foreach (var c in System.IO.Path.GetInvalidFileNameChars())
+                name = name.Replace(c, '_');
+
+            var existing = ToolbarRegistry.ListConfigFiles();
+            if (existing.Contains(name, StringComparer.OrdinalIgnoreCase))
+            {
+                MessageBox.Show("同名配置文件已存在。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            ToolbarRegistry.SaveConfigFile(name, ToolbarRegistry.CreateDefaultLayout());
+            SettingsManager.Settings.ToolbarConfigName = name;
+            SettingsManager.SaveSettingsToFile();
+            RefreshConfigFileList();
+            LoadSettings();
+            RebuildMainWindowToolbar();
+        }
+
+        private void ButtonDuplicateConfig_Click(object sender, RoutedEventArgs e)
+        {
+            var currentName = ComboBoxConfigFile.SelectedItem as string;
+            if (string.IsNullOrEmpty(currentName)) return;
+
+            var dialog = new InputDialog("请输入新配置文件名称：", "复制配置", currentName + "_copy")
+            {
+                Owner = Window.GetWindow(this)
+            };
+            if (dialog.ShowDialog() != true) return;
+            var name = dialog.InputText?.Trim();
+            if (string.IsNullOrEmpty(name)) return;
+
+            foreach (var c in System.IO.Path.GetInvalidFileNameChars())
+                name = name.Replace(c, '_');
+
+            var existing = ToolbarRegistry.ListConfigFiles();
+            if (existing.Contains(name, StringComparer.OrdinalIgnoreCase))
+            {
+                MessageBox.Show("同名配置文件已存在。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var layout = ToolbarRegistry.LoadConfigFile(currentName) ?? ToolbarRegistry.CreateDefaultLayout();
+            ToolbarRegistry.SaveConfigFile(name, layout);
+            SettingsManager.Settings.ToolbarConfigName = name;
+            SettingsManager.SaveSettingsToFile();
+            RefreshConfigFileList();
+            LoadSettings();
+            RebuildMainWindowToolbar();
+        }
+
+        private void ButtonDeleteConfig_Click(object sender, RoutedEventArgs e)
+        {
+            var name = ComboBoxConfigFile.SelectedItem as string;
+            if (string.IsNullOrEmpty(name)) return;
+
+            var files = ToolbarRegistry.ListConfigFiles();
+            if (files.Count <= 1)
+            {
+                MessageBox.Show("至少需要保留一个配置文件。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (MessageBox.Show($"确定要删除配置 \"{name}\" 吗？", "确认删除",
+                MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+                return;
+
+            ToolbarRegistry.DeleteConfigFile(name);
+            if (SettingsManager.Settings.ToolbarConfigName == name)
+            {
+                SettingsManager.Settings.ToolbarConfigName = "default";
+                SettingsManager.SaveSettingsToFile();
+            }
+            RefreshConfigFileList();
+            LoadSettings();
+            RebuildMainWindowToolbar();
+        }
+
+        #endregion
+
+        #region Settings load/save
+
         private void LoadSettings()
         {
             LogHelper.WriteLogToFile($"{LogTag}: LoadSettings 开始", LogHelper.LogType.Info);
-            MainItems.Clear(); CanvasItems.Clear(); EndItems.Clear();
+            AddedComponents.Clear();
+            SelectedEntry = null;
+            GroupChildren.Clear();
 
-            var layout = SettingsManager.Settings?.Toolbar ?? new ToolbarLayoutSettings();
-            IReadOnlyList<IToolbarItem> discoveredItems;
-            try { discoveredItems = ToolbarRegistry.Discover(); }
-            catch (Exception ex) { LogHelper.WriteLogToFile($"{LogTag}: Discover 失败: {ex.Message}", LogHelper.LogType.Error); return; }
+            RefreshConfigFileList();
 
-            foreach (var item in discoveredItems)
+            var layout = ToolbarRegistry.LoadActiveConfig();
+            foreach (var entry in layout.Components)
             {
-                try
-                {
-                    if (!layout.Items.TryGetValue(item.Id, out var cfg))
-                    {
-                        cfg = new ToolbarItemConfig
-                        {
-                            Visible = item.DefaultVisible,
-                            Order = item.DefaultOrder,
-                            Slot = item.DefaultSlot,
-                            Position = item.DefaultPosition,
-                            AnchorName = item.DefaultAnchorName
-                        };
-                    }
-                    string displayName;
-                    try { displayName = item.DisplayName ?? item.Id; }
-                    catch { displayName = item.Id; }
-
-                    var vm = new ToolbarItemViewModel(item.Id, displayName, cfg.Order, cfg.Visible);
-                    switch (cfg.Slot)
-                    {
-                        case ToolbarSlot.FloatingBarMain: MainItems.Add(vm); break;
-                        case ToolbarSlot.FloatingBarCanvasControls: CanvasItems.Add(vm); break;
-                        case ToolbarSlot.FloatingBarEnd: EndItems.Add(vm); break;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"{LogTag}: 处理条目失败 [{item?.Id}]: {ex.Message}", LogHelper.LogType.Warning);
-                }
+                AddedComponents.Add(CloneEntry(entry));
             }
 
-            ReorderCollections();
-            LogHelper.WriteLogToFile($"{LogTag}: LoadSettings 完成 Main={MainItems.Count} Canvas={CanvasItems.Count} End={EndItems.Count}", LogHelper.LogType.Info);
+            LogHelper.WriteLogToFile($"{LogTag}: LoadSettings 完成 Count={AddedComponents.Count}", LogHelper.LogType.Info);
         }
 
-        private void ReorderCollections()
+        internal void SaveSettings()
         {
-            SortCollection(MainItems);
-            SortCollection(CanvasItems);
-            SortCollection(EndItems);
-        }
-
-        private static void SortCollection(ObservableCollection<ToolbarItemViewModel> collection)
-        {
-            if (collection == null) return;
-            var sorted = collection.OrderBy(x => x.Order).ToList();
-            for (int i = 0; i < sorted.Count; i++)
-            {
-                var oldIndex = collection.IndexOf(sorted[i]);
-                if (oldIndex != -1 && oldIndex != i)
-                    collection.Move(oldIndex, i);
-            }
-        }
-
-        public new void DragOver(IDropInfo dropInfo)
-        {
-            if (dropInfo.Data is not ToolbarItemViewModel) return;
-            dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
-            dropInfo.Effects = DragDropEffects.Move;
-        }
-
-        public new void Drop(IDropInfo dropInfo)
-        {
-            if (dropInfo.Data is not ToolbarItemViewModel vm) return;
-            if (dropInfo.TargetCollection is not ObservableCollection<ToolbarItemViewModel> target) return;
-
-            var oldIndex = target.IndexOf(vm);
-            var newIndex = oldIndex < dropInfo.UnfilteredInsertIndex ? dropInfo.UnfilteredInsertIndex - 1 : dropInfo.UnfilteredInsertIndex;
-            var finalIndex = Math.Min(newIndex >= target.Count ? target.Count - 1 : newIndex, target.Count);
-
-            if (!target.Contains(vm))
-            {
-                if (dropInfo.DragInfo.SourceCollection is ObservableCollection<ToolbarItemViewModel> source)
-                    source.Remove(vm);
-                target.Insert(dropInfo.UnfilteredInsertIndex, vm);
-            }
-            else if (oldIndex != -1 && oldIndex != finalIndex)
-            {
-                target.Move(oldIndex, finalIndex);
-            }
-
-            UpdateOrdersFromCollection(target);
-            SaveSettings();
-        }
-
-        private static void UpdateOrdersFromCollection(ObservableCollection<ToolbarItemViewModel> collection)
-        {
-            for (int i = 0; i < collection.Count; i++)
-                collection[i].Order = (i + 1) * 10;
-        }
-
-        private void SaveSettings()
-        {
-            if (!_isLoaded) return;
+            if (!_isLoaded || _suppressSave) return;
             try
             {
-                var settings = SettingsManager.Settings;
-                if (settings == null) return;
-                if (settings.Toolbar == null) settings.Toolbar = new ToolbarLayoutSettings();
-                var layout = settings.Toolbar;
-
-                foreach (var vm in MainItems.Concat(CanvasItems).Concat(EndItems))
+                SyncGroupChildrenBack();
+                SyncRulesetBack();
+                var configName = SettingsManager.Settings?.ToolbarConfigName ?? "default";
+                var layout = new ToolbarLayoutSettings();
+                foreach (var entry in AddedComponents)
                 {
-                    if (!layout.Items.TryGetValue(vm.Id, out var cfg))
-                    {
-                        var item = ToolbarRegistry.Discover().FirstOrDefault(i => i.Id == vm.Id);
-                        cfg = new ToolbarItemConfig
-                        {
-                            Visible = item?.DefaultVisible ?? true,
-                            Order = item?.DefaultOrder ?? 0,
-                            Slot = item?.DefaultSlot ?? ToolbarSlot.FloatingBarMain,
-                            Position = item?.DefaultPosition ?? ToolbarInsertPosition.Prepend,
-                            AnchorName = item?.DefaultAnchorName
-                        };
-                        layout.Items[vm.Id] = cfg;
-                    }
-                    cfg.Visible = vm.IsVisible;
-                    cfg.Order = vm.Order;
+                    layout.Components.Add(CloneEntry(entry));
                 }
 
-                SettingsManager.SaveSettingsToFile();
-                LogHelper.WriteLogToFile($"{LogTag}: 设置已保存", LogHelper.LogType.Info);
+                ToolbarRegistry.SaveConfigFile(configName, layout);
+                LogHelper.WriteLogToFile($"{LogTag}: 配置已保存到 [{configName}]", LogHelper.LogType.Info);
 
-                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    try
-                    {
-                        var mainWindow = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
-                        mainWindow?.RebuildToolbar();
-                    }
-                    catch (Exception ex) { LogHelper.WriteLogToFile($"{LogTag}: RebuildToolbar 异常: {ex.Message}", LogHelper.LogType.Error); }
-                }));
+                RebuildMainWindowToolbar();
             }
             catch (Exception ex)
             {
@@ -209,17 +239,152 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
         }
 
+        internal void SyncGroupChildrenBack()
+        {
+            if (SelectedEntry != null && SelectedEntry.IsGroup)
+            {
+                SelectedEntry.Children = new List<ToolbarComponentEntry>(GroupChildren.Select(c => new ToolbarComponentEntry
+                {
+                    Id = c.Id,
+                    HidingRule = c.HidingRule,
+                    ShowSeparateBorder = c.ShowSeparateBorder,
+                    HidingRuleset = c.HidingRuleset?.Clone()
+                }));
+            }
+        }
+
+        private void SyncRulesetBack()
+        {
+            if (SelectedEntry == null) return;
+            var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedEntry);
+            SelectedEntry.HidingRuleset = ruleset;
+            SelectedEntry.HidingRule = ToolbarHidingRule.AlwaysShow;
+        }
+
+        private static ToolbarComponentEntry CloneEntry(ToolbarComponentEntry source)
+        {
+            var clone = new ToolbarComponentEntry
+            {
+                Id = source.Id,
+                HidingRule = source.HidingRule,
+                ShowSeparateBorder = source.ShowSeparateBorder,
+                HidingRuleset = source.HidingRuleset?.Clone()
+            };
+            if (source.Children != null && source.Children.Count > 0)
+            {
+                clone.Children = new List<ToolbarComponentEntry>(
+                    source.Children.Select(c => new ToolbarComponentEntry
+                    {
+                        Id = c.Id,
+                        HidingRule = c.HidingRule,
+                        ShowSeparateBorder = c.ShowSeparateBorder,
+                        HidingRuleset = c.HidingRuleset?.Clone()
+                    }));
+            }
+            return clone;
+        }
+
+        private void RebuildMainWindowToolbar()
+        {
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    var mainWindow = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
+                    mainWindow?.RebuildToolbar();
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"{LogTag}: RebuildToolbar 异常: {ex.Message}", LogHelper.LogType.Error);
+                }
+            }));
+        }
+
+        #endregion
+
+        #region Drag-drop (main AddedList)
+
+        public new void DragOver(IDropInfo dropInfo)
+        {
+            if (dropInfo.Data is IToolbarItem)
+            {
+                dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
+                dropInfo.Effects = DragDropEffects.Copy;
+            }
+            else if (dropInfo.Data is ToolbarComponentEntry)
+            {
+                dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
+                dropInfo.Effects = DragDropEffects.Move;
+            }
+        }
+
+        public new void Drop(IDropInfo dropInfo)
+        {
+            if (dropInfo.Data is IToolbarItem item)
+            {
+                var entry = new ToolbarComponentEntry
+                {
+                    Id = item.Id,
+                    HidingRuleset = item.DefaultHidingRuleset?.Clone(),
+                    ShowSeparateBorder = item.DefaultShowSeparateBorder
+                };
+                if (item.Id == "builtin.group")
+                {
+                    entry.Children = new List<ToolbarComponentEntry>();
+                }
+                var insertIndex = dropInfo.UnfilteredInsertIndex;
+                if (insertIndex < 0 || insertIndex > AddedComponents.Count)
+                    insertIndex = AddedComponents.Count;
+                AddedComponents.Insert(insertIndex, entry);
+                SelectedEntry = entry;
+                SaveSettings();
+            }
+            else if (dropInfo.Data is ToolbarComponentEntry vm)
+            {
+                var oldIndex = AddedComponents.IndexOf(vm);
+                if (oldIndex == -1) return;
+
+                var newIndex = dropInfo.UnfilteredInsertIndex;
+                if (oldIndex < newIndex) newIndex--;
+                newIndex = Math.Max(0, Math.Min(newIndex, AddedComponents.Count - 1));
+
+                if (oldIndex != newIndex)
+                {
+                    AddedComponents.Move(oldIndex, newIndex);
+                }
+                SaveSettings();
+            }
+        }
+
+        #endregion
+
+        #region Item management
+
+        private void RemoveItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement fe && fe.DataContext is ToolbarComponentEntry entry)
+            {
+                AddedComponents.Remove(entry);
+                if (SelectedEntry == entry) SelectedEntry = null;
+                SaveSettings();
+            }
+        }
+
+        private void CheckBoxShowSeparateBorder_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded || SelectedEntry == null) return;
+            SelectedEntry.ShowSeparateBorder = CheckBoxShowSeparateBorder.IsChecked == true;
+            SaveSettings();
+        }
+
         private void ButtonReset_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                SettingsManager.Settings?.Toolbar?.Items.Clear();
+                var configName = SettingsManager.Settings?.ToolbarConfigName ?? "default";
+                ToolbarRegistry.SaveConfigFile(configName, ToolbarRegistry.CreateDefaultLayout());
                 SettingsManager.SaveSettingsToFile();
-                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    try { Application.Current.Windows.OfType<MainWindow>().FirstOrDefault()?.RebuildToolbar(); }
-                    catch (Exception ex) { LogHelper.WriteLogToFile($"{LogTag}: Reset Rebuild 异常: {ex.Message}", LogHelper.LogType.Error); }
-                }));
+                RebuildMainWindowToolbar();
                 LoadSettings();
             }
             catch (Exception ex)
@@ -227,5 +392,344 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 LogHelper.WriteLogToFile($"{LogTag}: ButtonReset 异常: {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}", LogHelper.LogType.Error);
             }
         }
+
+        #endregion
+
+        #region Ruleset editing
+
+        private void ComboBoxRulesetMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded || SelectedEntry == null || _suppressSave) return;
+            var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedEntry);
+            ruleset.Mode = (ToolbarLogicalMode)ComboBoxRulesetMode.SelectedIndex;
+            SelectedEntry.HidingRuleset = ruleset;
+            SelectedEntry.HidingRule = ToolbarHidingRule.AlwaysShow;
+            SaveSettings();
+        }
+
+        private void CheckBoxRulesetReversed_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded || SelectedEntry == null || _suppressSave) return;
+            var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedEntry);
+            ruleset.IsReversed = CheckBoxRulesetReversed.IsChecked == true;
+            SelectedEntry.HidingRuleset = ruleset;
+            SelectedEntry.HidingRule = ToolbarHidingRule.AlwaysShow;
+            SaveSettings();
+        }
+
+        private void ButtonAddGroup_Click(object sender, RoutedEventArgs e)
+        {
+            if (SelectedEntry == null) return;
+            var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedEntry);
+            ruleset.Groups.Add(new ToolbarRuleGroup { Rules = new List<ToolbarRule> { new ToolbarRule() } });
+            SelectedEntry.HidingRuleset = ruleset;
+            SelectedEntry.HidingRule = ToolbarHidingRule.AlwaysShow;
+            ItemsControlGroups.ItemsSource = null;
+            ItemsControlGroups.ItemsSource = ruleset.Groups;
+            SaveSettings();
+        }
+
+        private void ComboBoxGroupMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded || _suppressSave) return;
+            if (sender is FrameworkElement fe && fe.Tag is ToolbarRuleGroup group)
+            {
+                group.Mode = (ToolbarLogicalMode)((ComboBox)sender).SelectedIndex;
+                SaveSettings();
+            }
+        }
+
+        private void CheckBoxGroupReversed_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded || _suppressSave) return;
+            SaveSettings();
+        }
+
+        private void CheckBoxGroupEnabled_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded || _suppressSave) return;
+            SaveSettings();
+        }
+
+        private void ButtonAddRule_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement fe && fe.Tag is ToolbarRuleGroup group)
+            {
+                group.Rules.Add(new ToolbarRule());
+                SaveSettings();
+            }
+        }
+
+        private void ButtonDuplicateGroup_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement fe && fe.Tag is ToolbarRuleGroup group)
+            {
+                var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedEntry);
+                ruleset.Groups.Add(group.Clone());
+                SelectedEntry.HidingRuleset = ruleset;
+                SelectedEntry.HidingRule = ToolbarHidingRule.AlwaysShow;
+                ItemsControlGroups.ItemsSource = null;
+                ItemsControlGroups.ItemsSource = ruleset.Groups;
+                SaveSettings();
+            }
+        }
+
+        private void ButtonDeleteGroup_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement fe && fe.Tag is ToolbarRuleGroup group)
+            {
+                var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedEntry);
+                ruleset.Groups.Remove(group);
+                SelectedEntry.HidingRuleset = ruleset;
+                SelectedEntry.HidingRule = ToolbarHidingRule.AlwaysShow;
+                ItemsControlGroups.ItemsSource = null;
+                ItemsControlGroups.ItemsSource = ruleset.Groups;
+                SaveSettings();
+            }
+        }
+
+        private void ButtonDeleteRule_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement fe && fe.Tag is ToolbarRule rule)
+            {
+                var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedEntry);
+                foreach (var group in ruleset.Groups)
+                {
+                    if (group.Rules.Contains(rule))
+                    {
+                        group.Rules.Remove(rule);
+                        break;
+                    }
+                }
+                SaveSettings();
+            }
+        }
+
+        private void CheckBoxRuleReversed_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded || _suppressSave) return;
+            SaveSettings();
+        }
+
+        private void ComboBoxRuleCondition_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded || _suppressSave) return;
+            SaveSettings();
+        }
+
+        #endregion
+
+        #region Group children
+
+        private void RefreshGroupChildren()
+        {
+            GroupChildren.Clear();
+            if (SelectedEntry == null || !SelectedEntry.IsGroup) return;
+
+            if (SelectedEntry.Children != null)
+            {
+                foreach (var child in SelectedEntry.Children)
+                {
+                    GroupChildren.Add(new ToolbarComponentEntry
+                    {
+                        Id = child.Id,
+                        HidingRule = child.HidingRule,
+                        ShowSeparateBorder = child.ShowSeparateBorder,
+                        HidingRuleset = child.HidingRuleset?.Clone()
+                    });
+                }
+            }
+        }
+
+        private void RemoveGroupChildItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement fe && fe.DataContext is ToolbarComponentEntry entry)
+            {
+                GroupChildren.Remove(entry);
+                SyncGroupChildrenBack();
+                SaveSettings();
+            }
+        }
+
+        #endregion
     }
+
+    public class GroupChildrenDropHandler : IDropTarget
+    {
+        private readonly ToolbarPage _page;
+
+        public GroupChildrenDropHandler(ToolbarPage page)
+        {
+            _page = page;
+        }
+
+        public void DragOver(IDropInfo dropInfo)
+        {
+            if (_page.SelectedEntry == null || !_page.SelectedEntry.IsGroup) return;
+
+            if (dropInfo.Data is IToolbarItem item)
+            {
+                if (item.Id == "builtin.group" || item.Id == "builtin.separator") return;
+                dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
+                dropInfo.Effects = DragDropEffects.Copy;
+            }
+            else if (dropInfo.Data is ToolbarComponentEntry)
+            {
+                dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
+                dropInfo.Effects = DragDropEffects.Move;
+            }
+        }
+
+        public void Drop(IDropInfo dropInfo)
+        {
+            if (_page.SelectedEntry == null || !_page.SelectedEntry.IsGroup) return;
+
+            if (dropInfo.Data is IToolbarItem item)
+            {
+                if (item.Id == "builtin.group" || item.Id == "builtin.separator") return;
+
+                var entry = new ToolbarComponentEntry
+                {
+                    Id = item.Id,
+                    HidingRuleset = item.DefaultHidingRuleset?.Clone(),
+                    ShowSeparateBorder = item.DefaultShowSeparateBorder
+                };
+                var insertIndex = dropInfo.UnfilteredInsertIndex;
+                if (insertIndex < 0 || insertIndex > _page.GroupChildren.Count)
+                    insertIndex = _page.GroupChildren.Count;
+                _page.GroupChildren.Insert(insertIndex, entry);
+                _page.SyncGroupChildrenBack();
+                _page.SaveSettings();
+            }
+            else if (dropInfo.Data is ToolbarComponentEntry vm)
+            {
+                var oldIndex = _page.GroupChildren.IndexOf(vm);
+                if (oldIndex == -1) return;
+
+                var newIndex = dropInfo.UnfilteredInsertIndex;
+                if (oldIndex < newIndex) newIndex--;
+                newIndex = Math.Max(0, Math.Min(newIndex, _page.GroupChildren.Count - 1));
+
+                if (oldIndex != newIndex)
+                {
+                    _page.GroupChildren.Move(oldIndex, newIndex);
+                }
+                _page.SyncGroupChildrenBack();
+                _page.SaveSettings();
+            }
+        }
+    }
+
+    #region Converters
+
+    public class IdToDisplayNameConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is string id)
+            {
+                var items = ToolbarRegistry.Discover();
+                var item = items.FirstOrDefault(i => i.Id == id);
+                return item?.DisplayName ?? id;
+            }
+            return value ?? "";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ConditionIdToNameConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is string id)
+            {
+                var cond = ToolbarRegistry.AvailableConditions.FirstOrDefault(c => c.Key == id);
+                return cond.Value ?? id;
+            }
+            return value ?? "";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class StateToBrushConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is int state)
+            {
+                return state switch
+                {
+                    2 => Brushes.Green,
+                    1 => Brushes.IndianRed,
+                    _ => Brushes.DarkGray
+                };
+            }
+            return Brushes.DarkGray;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class LogicalModeToIntConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is ToolbarLogicalMode mode)
+                return (int)mode;
+            return 0;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is int i)
+                return (ToolbarLogicalMode)i;
+            return ToolbarLogicalMode.Or;
+        }
+    }
+
+    public class InputDialog : Window
+    {
+        public string InputText { get; private set; }
+
+        private TextBox _textBox;
+
+        public InputDialog(string prompt, string title, string defaultValue)
+        {
+            Title = title;
+            Width = 400;
+            Height = 180;
+            WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            ResizeMode = ResizeMode.NoResize;
+
+            var panel = new StackPanel { Margin = new Thickness(16) };
+            panel.Children.Add(new TextBlock { Text = prompt, Margin = new Thickness(0, 0, 0, 8), TextWrapping = TextWrapping.Wrap });
+            _textBox = new TextBox { Text = defaultValue, Margin = new Thickness(0, 0, 0, 12) };
+            _textBox.SelectAll();
+            _textBox.Focus();
+            panel.Children.Add(_textBox);
+
+            var btnPanel = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
+            var okBtn = new Button { Content = "确定", Padding = new Thickness(20, 6, 20, 6), IsDefault = true };
+            okBtn.Click += (s, e) => { InputText = _textBox.Text; DialogResult = true; };
+            var cancelBtn = new Button { Content = "取消", Padding = new Thickness(20, 6, 20, 6), Margin = new Thickness(8, 0, 0, 0), IsCancel = true };
+            btnPanel.Children.Add(okBtn);
+            btnPanel.Children.Add(cancelBtn);
+            panel.Children.Add(btnPanel);
+
+            Content = panel;
+        }
+    }
+
+    #endregion
 }

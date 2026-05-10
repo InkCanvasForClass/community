@@ -1,10 +1,14 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Windows.SettingsViews.Helpers;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Ink_Canvas.Controls.Toolbar
 {
@@ -12,6 +16,136 @@ namespace Ink_Canvas.Controls.Toolbar
     {
         private static List<IToolbarItem> _items;
         internal const string InjectedTag = "ToolbarRegistryInjected";
+
+        private static readonly string ConfigSubDir = Path.Combine("Configs", "ToolbarConfigs");
+
+        public static readonly DependencyProperty HidingRulesetProperty =
+            DependencyProperty.RegisterAttached("HidingRuleset", typeof(ToolbarRuleset), typeof(ToolbarRegistry),
+                new PropertyMetadata(null));
+
+        public static void SetHidingRuleset(FrameworkElement element, ToolbarRuleset value)
+            => element.SetValue(HidingRulesetProperty, value);
+
+        public static ToolbarRuleset GetHidingRuleset(FrameworkElement element)
+            => (ToolbarRuleset)element.GetValue(HidingRulesetProperty);
+
+        public static List<KeyValuePair<string, string>> AvailableConditions { get; } = new List<KeyValuePair<string, string>>
+        {
+            new KeyValuePair<string, string>("isAnnotating", "批注模式"),
+            new KeyValuePair<string, string>("isPptMode", "PPT模式"),
+            new KeyValuePair<string, string>("isGestureEnabled", "手势开关已启用")
+        };
+
+        #region Ruleset evaluation
+
+        public static bool EvaluateRuleset(ToolbarRuleset ruleset, Dictionary<string, bool> context)
+        {
+            if (ruleset == null)
+                return false;
+
+            if (ruleset.Groups == null || ruleset.Groups.Count == 0)
+            {
+                ruleset.State = BoolToState(false);
+                return false;
+            }
+
+            bool result = ruleset.Mode == ToolbarLogicalMode.And;
+
+            foreach (var group in ruleset.Groups)
+            {
+                if (!group.IsEnabled)
+                {
+                    group.State = 0;
+                    continue;
+                }
+
+                bool? groupResult = EvaluateGroup(group, context);
+                group.State = BoolToState(groupResult);
+
+                if (groupResult == null)
+                    continue;
+
+                bool gVal = groupResult.Value;
+                if (!gVal && ruleset.Mode == ToolbarLogicalMode.And)
+                {
+                    result = false;
+                    break;
+                }
+                if (gVal && ruleset.Mode == ToolbarLogicalMode.Or)
+                {
+                    result = true;
+                    break;
+                }
+            }
+
+            result ^= ruleset.IsReversed;
+            ruleset.State = BoolToState(result);
+            return result;
+        }
+
+        private static bool? EvaluateGroup(ToolbarRuleGroup group, Dictionary<string, bool> context)
+        {
+            if (group.Rules == null || group.Rules.Count == 0)
+                return null;
+
+            bool result = group.Mode == ToolbarLogicalMode.And;
+
+            foreach (var rule in group.Rules)
+            {
+                if (string.IsNullOrEmpty(rule.ConditionId))
+                {
+                    rule.State = 0;
+                    continue;
+                }
+
+                bool conditionMet = context.TryGetValue(rule.ConditionId, out var val) && val;
+                bool ruleResult = conditionMet ^ rule.IsReversed;
+                rule.State = BoolToState(ruleResult);
+
+                if (!ruleResult && group.Mode == ToolbarLogicalMode.And)
+                {
+                    result = false;
+                    break;
+                }
+                if (ruleResult && group.Mode == ToolbarLogicalMode.Or)
+                {
+                    result = true;
+                    break;
+                }
+            }
+
+            result ^= group.IsReversed;
+            return result;
+        }
+
+        private static int BoolToState(bool? v) => v switch
+        {
+            true => 2,
+            false => 1,
+            null => 0
+        };
+
+        internal static ToolbarRuleset MigrateHidingRule(ToolbarHidingRule rule)
+        {
+            return rule switch
+            {
+                ToolbarHidingRule.AlwaysShow => ToolbarRuleset.AlwaysShow(),
+                ToolbarHidingRule.AnnotationOnly => ToolbarRuleset.AnnotationOnly(),
+                ToolbarHidingRule.PptOnly => ToolbarRuleset.PptOnly(),
+                ToolbarHidingRule.PptAnnotationOnly => ToolbarRuleset.PptAnnotationOnly(),
+                ToolbarHidingRule.AnnotationOrPptGesture => ToolbarRuleset.GestureRule(),
+                _ => ToolbarRuleset.AlwaysShow()
+            };
+        }
+
+        internal static ToolbarRuleset GetEffectiveRuleset(ToolbarComponentEntry entry)
+        {
+            if (entry.HidingRuleset != null)
+                return entry.HidingRuleset;
+            return MigrateHidingRule(entry.HidingRule);
+        }
+
+        #endregion
 
         public static IReadOnlyList<IToolbarItem> Discover()
         {
@@ -36,6 +170,121 @@ namespace Ink_Canvas.Controls.Toolbar
             return _items;
         }
 
+        #region Config file system
+
+        public static string GetConfigDirectory()
+        {
+            return Path.Combine(App.RootPath, ConfigSubDir);
+        }
+
+        public static string GetConfigFilePath(string name)
+        {
+            return Path.Combine(GetConfigDirectory(), name + ".json");
+        }
+
+        public static List<string> ListConfigFiles()
+        {
+            var dir = GetConfigDirectory();
+            if (!Directory.Exists(dir)) return new List<string>();
+            return Directory.GetFiles(dir, "*.json")
+                .Select(f => Path.GetFileNameWithoutExtension(f))
+                .OrderBy(n => n, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
+        public static ToolbarLayoutSettings LoadConfigFile(string name)
+        {
+            var path = GetConfigFilePath(name);
+            if (!File.Exists(path))
+            {
+                LogHelper.WriteLogToFile($"ToolbarRegistry: 配置文件不存在 [{path}]", LogHelper.LogType.Warning);
+                return null;
+            }
+            try
+            {
+                var json = File.ReadAllText(path);
+                var layout = JsonConvert.DeserializeObject<ToolbarLayoutSettings>(json);
+                LogHelper.WriteLogToFile($"ToolbarRegistry: 加载配置 [{name}] 成功, {layout?.Components?.Count ?? 0} 个条目", LogHelper.LogType.Info);
+                return layout;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"ToolbarRegistry: 加载配置 [{name}] 失败: {ex.Message}", LogHelper.LogType.Error);
+                return null;
+            }
+        }
+
+        public static void SaveConfigFile(string name, ToolbarLayoutSettings layout)
+        {
+            try
+            {
+                var dir = GetConfigDirectory();
+                if (!Directory.Exists(dir))
+                    ProcessProtectionManager.WithWriteAccess(dir, () => Directory.CreateDirectory(dir));
+                var json = JsonConvert.SerializeObject(layout, Formatting.Indented);
+                var path = GetConfigFilePath(name);
+                ProcessProtectionManager.WithWriteAccess(path, () => File.WriteAllText(path, json));
+                LogHelper.WriteLogToFile($"ToolbarRegistry: 保存配置 [{name}] 成功", LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"ToolbarRegistry: 保存配置 [{name}] 失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        public static void DeleteConfigFile(string name)
+        {
+            try
+            {
+                var path = GetConfigFilePath(name);
+                if (File.Exists(path))
+                    ProcessProtectionManager.WithWriteAccess(path, () => File.Delete(path));
+                LogHelper.WriteLogToFile($"ToolbarRegistry: 删除配置 [{name}]", LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"ToolbarRegistry: 删除配置 [{name}] 失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        public static void EnsureDefaultConfigExists()
+        {
+            var dir = GetConfigDirectory();
+            if (!Directory.Exists(dir))
+                ProcessProtectionManager.WithWriteAccess(dir, () => Directory.CreateDirectory(dir));
+
+            var defaultPath = GetConfigFilePath("default");
+            if (!File.Exists(defaultPath))
+            {
+                var layout = CreateDefaultLayout();
+                SaveConfigFile("default", layout);
+                LogHelper.WriteLogToFile("ToolbarRegistry: 首次启动，创建 default.json", LogHelper.LogType.Info);
+            }
+        }
+
+        public static ToolbarLayoutSettings LoadActiveConfig()
+        {
+            var configName = SettingsManager.Settings?.ToolbarConfigName;
+            if (string.IsNullOrWhiteSpace(configName))
+                configName = "default";
+
+            var layout = LoadConfigFile(configName);
+            if (layout != null && layout.Components != null && layout.Components.Count > 0)
+                return layout;
+
+            var files = ListConfigFiles();
+            if (files.Count > 0 && files[0] != configName)
+            {
+                layout = LoadConfigFile(files[0]);
+                if (layout != null && layout.Components != null && layout.Components.Count > 0)
+                    return layout;
+            }
+
+            return CreateDefaultLayout();
+        }
+
+        #endregion
+
         public static void ClearInjected(Panel container)
         {
             if (container == null) return;
@@ -47,164 +296,167 @@ namespace Ink_Canvas.Controls.Toolbar
             LogHelper.WriteLogToFile($"ToolbarRegistry: ClearInjected 清除 {toRemove.Count} 个元素 [{container.Name}]", LogHelper.LogType.Info);
         }
 
-        public static void Populate(IToolbarHost host, IDictionary<ToolbarSlot, Panel> slots, ToolbarLayoutSettings layout)
+        public static void Populate(IToolbarHost host, Panel container, ToolbarLayoutSettings layout)
         {
             LogHelper.WriteLogToFile($"ToolbarRegistry: Populate 开始", LogHelper.LogType.Info);
-            if (host == null || slots == null) { LogHelper.WriteLogToFile("ToolbarRegistry: Populate host 或 slots 为空", LogHelper.LogType.Warning); return; }
-            layout = layout ?? new ToolbarLayoutSettings();
-            MigrateLegacyDefaultLayout(layout);
-
-            var grouped = new Dictionary<ToolbarSlot, List<(IToolbarItem item, ToolbarItemConfig cfg)>>();
-            foreach (var item in Discover())
+            if (host == null || container == null)
             {
-                if (!layout.Items.TryGetValue(item.Id, out var cfg))
-                {
-                    cfg = new ToolbarItemConfig
-                    {
-                        Visible = item.DefaultVisible,
-                        Order = item.DefaultOrder,
-                        Slot = item.DefaultSlot,
-                        Position = item.DefaultPosition,
-                        AnchorName = item.DefaultAnchorName
-                    };
-                }
-                if (!cfg.Visible) continue;
-                if (!grouped.TryGetValue(cfg.Slot, out var list))
-                {
-                    list = new List<(IToolbarItem, ToolbarItemConfig)>();
-                    grouped[cfg.Slot] = list;
-                }
-                list.Add((item, cfg));
-            }
-            LogHelper.WriteLogToFile($"ToolbarRegistry: 分组完成, {grouped.Count} 个 slot 有可见条目", LogHelper.LogType.Info);
-
-            foreach (var kv in grouped)
-            {
-                if (!slots.TryGetValue(kv.Key, out var container) || container == null) continue;
-                LogHelper.WriteLogToFile($"ToolbarRegistry: 注入到 {kv.Key}, 条目数={kv.Value.Count}", LogHelper.LogType.Info);
-                InjectIntoContainer(host, container, kv.Value);
+                LogHelper.WriteLogToFile("ToolbarRegistry: Populate host 或 container 为空", LogHelper.LogType.Warning);
+                return;
             }
 
-            ApplyMenuVisibility(host, layout);
-            LogHelper.WriteLogToFile($"ToolbarRegistry: Populate 完成", LogHelper.LogType.Info);
+            layout = layout ?? CreateDefaultLayout();
+            if (layout.Components == null || layout.Components.Count == 0)
+            {
+                layout = CreateDefaultLayout();
+            }
+
+            var discovered = Discover();
+            var itemMap = discovered.ToDictionary(i => i.Id, i => i);
+
+            PopulateEntries(host, container, layout.Components, itemMap);
+
+            LogHelper.WriteLogToFile($"ToolbarRegistry: Populate 完成, 共添加 {layout.Components.Count} 个条目", LogHelper.LogType.Info);
         }
 
-        private static void MigrateLegacyDefaultLayout(ToolbarLayoutSettings layout)
+        private static void PopulateEntries(IToolbarHost host, Panel container, List<ToolbarComponentEntry> entries, Dictionary<string, IToolbarItem> itemMap)
         {
-            if (layout?.Items == null) return;
-            if (!layout.Items.TryGetValue("builtin.inkFreeze", out var cfg) || cfg == null) return;
-
-            if (cfg.Slot == ToolbarSlot.FloatingBarEnd
-                && cfg.Position == ToolbarInsertPosition.AfterAnchor
-                && cfg.AnchorName == "FloatingBarEndSeparator"
-                && cfg.Order == 130)
+            foreach (var entry in entries)
             {
-                cfg.Slot = ToolbarSlot.FloatingBarMain;
-                cfg.Order = 120;
-                cfg.AnchorName = "QuickColorPaletteContainer";
-            }
-        }
-
-        public static void ApplyMenuVisibility(IToolbarHost host, ToolbarLayoutSettings layout)
-        {
-            if (host == null || layout == null) return;
-            foreach (var item in Discover())
-            {
-                if (string.IsNullOrEmpty(item.MenuPanelName)) continue;
-                bool visible = true;
-                if (layout.Items.TryGetValue(item.Id, out var cfg))
-                    visible = cfg.Visible;
-                try
+                if (entry.IsGroup)
                 {
-                    var menuElement = host.Window.FindName(item.MenuPanelName);
-                    if (menuElement is System.Windows.Controls.Primitives.Popup popup)
-                    {
-                        popup.IsOpen = visible;
-                        LogHelper.WriteLogToFile($"ToolbarRegistry: 菜单 Popup [{item.MenuPanelName}] -> {(visible ? "Open" : "Closed")}", LogHelper.LogType.Info);
-                    }
-                    else if (menuElement is FrameworkElement fe)
-                    {
-                        fe.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
-                        LogHelper.WriteLogToFile($"ToolbarRegistry: 菜单 [{item.MenuPanelName}] -> {(visible ? "Visible" : "Collapsed")}", LogHelper.LogType.Info);
-                    }
-                    else
-                    {
-                        LogHelper.WriteLogToFile($"ToolbarRegistry: 找不到菜单面板 [{item.MenuPanelName}]", LogHelper.LogType.Warning);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"ToolbarRegistry: 设置菜单可见性异常 [{item.MenuPanelName}]: {ex.Message}", LogHelper.LogType.Warning);
-                }
-            }
-        }
-
-        private static void InjectIntoContainer(IToolbarHost host, Panel container,
-            List<(IToolbarItem item, ToolbarItemConfig cfg)> entries)
-        {
-            var prepend = entries.Where(e => e.cfg.Position == ToolbarInsertPosition.Prepend).OrderBy(e => e.cfg.Order).ToList();
-            var append = entries.Where(e => e.cfg.Position == ToolbarInsertPosition.Append).OrderBy(e => e.cfg.Order).ToList();
-            var before = entries.Where(e => e.cfg.Position == ToolbarInsertPosition.BeforeAnchor).ToList();
-            var after = entries.Where(e => e.cfg.Position == ToolbarInsertPosition.AfterAnchor).ToList();
-
-            var prependIndex = 0;
-            foreach (var entry in prepend)
-            {
-                var view = BuildAndRegister(host, entry.item);
-                if (view == null) continue;
-                container.Children.Insert(prependIndex++, view);
-            }
-
-            foreach (var entry in append)
-            {
-                var view = BuildAndRegister(host, entry.item);
-                if (view == null) continue;
-                container.Children.Add(view);
-            }
-
-            foreach (var group in before.GroupBy(e => e.cfg.AnchorName))
-            {
-                var anchor = FindNamedChild(container, group.Key);
-                if (anchor == null)
-                {
-                    LogHelper.WriteLogToFile($"ToolbarRegistry: 未找到锚点 '{group.Key}' (BeforeAnchor)", LogHelper.LogType.Warning);
+                    PopulateGroup(host, container, entry, itemMap);
                     continue;
                 }
-                var idx = container.Children.IndexOf(anchor);
-                foreach (var entry in group.OrderBy(e => e.cfg.Order))
-                {
-                    var view = BuildAndRegister(host, entry.item);
-                    if (view == null) continue;
-                    container.Children.Insert(idx++, view);
-                }
-            }
 
-            foreach (var group in after.GroupBy(e => e.cfg.AnchorName))
-            {
-                var anchor = FindNamedChild(container, group.Key);
-                if (anchor == null)
+                if (!itemMap.TryGetValue(entry.Id, out var item))
                 {
-                    LogHelper.WriteLogToFile($"ToolbarRegistry: 未找到锚点 '{group.Key}' (AfterAnchor)", LogHelper.LogType.Warning);
+                    LogHelper.WriteLogToFile($"ToolbarRegistry: 未找到条目 [{entry.Id}]", LogHelper.LogType.Warning);
                     continue;
                 }
-                var idx = container.Children.IndexOf(anchor) + 1;
-                foreach (var entry in group.OrderBy(e => e.cfg.Order))
+
+                var view = BuildAndRegister(host, item);
+                if (view == null) continue;
+
+                view.Tag = InjectedTag;
+                var ruleset = GetEffectiveRuleset(entry);
+                SetHidingRuleset(view, ruleset);
+
+                FrameworkElement elementToAdd;
+
+                if (entry.ShowSeparateBorder)
                 {
-                    var view = BuildAndRegister(host, entry.item);
-                    if (view == null) continue;
-                    container.Children.Insert(idx++, view);
+                    elementToAdd = WrapInSeparateBorder(view, ruleset);
                 }
+                else
+                {
+                    elementToAdd = view;
+                }
+
+                ApplyInitialVisibility(elementToAdd, ruleset);
+                container.Children.Add(elementToAdd);
+                LogHelper.WriteLogToFile($"ToolbarRegistry: 添加条目 [{entry.Id}]", LogHelper.LogType.Info);
             }
         }
 
-        private static UIElement FindNamedChild(Panel container, string name)
+        private static void PopulateGroup(IToolbarHost host, Panel container, ToolbarComponentEntry groupEntry, Dictionary<string, IToolbarItem> itemMap)
         {
-            if (string.IsNullOrEmpty(name)) return null;
-            foreach (UIElement child in container.Children)
+            if (groupEntry.Children == null || groupEntry.Children.Count == 0)
             {
-                if (child is FrameworkElement fe && fe.Name == name) return child;
+                LogHelper.WriteLogToFile("ToolbarRegistry: 分组组件无子项，跳过", LogHelper.LogType.Warning);
+                return;
             }
-            return null;
+
+            var innerPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal
+            };
+
+            foreach (var childEntry in groupEntry.Children)
+            {
+                if (!itemMap.TryGetValue(childEntry.Id, out var item))
+                {
+                    LogHelper.WriteLogToFile($"ToolbarRegistry: 分组内未找到条目 [{childEntry.Id}]", LogHelper.LogType.Warning);
+                    continue;
+                }
+
+                var childView = BuildAndRegister(host, item);
+                if (childView == null) continue;
+
+                childView.Tag = InjectedTag;
+                childView.Margin = new Thickness(0);
+                innerPanel.Children.Add(childView);
+            }
+
+            FrameworkElement groupElement;
+            var ruleset = GetEffectiveRuleset(groupEntry);
+
+            if (groupEntry.ShowSeparateBorder)
+            {
+                groupElement = WrapInSeparateBorder(innerPanel, ruleset);
+            }
+            else
+            {
+                innerPanel.Tag = InjectedTag;
+                SetHidingRuleset(innerPanel, ruleset);
+                groupElement = innerPanel;
+            }
+
+            ApplyInitialVisibility(groupElement, ruleset);
+            container.Children.Add(groupElement);
+            LogHelper.WriteLogToFile($"ToolbarRegistry: 添加分组 Children={groupEntry.Children.Count}", LogHelper.LogType.Info);
+        }
+
+        private static Border WrapInSeparateBorder(FrameworkElement view, ToolbarRuleset ruleset)
+        {
+            var bgBrush = Application.Current.TryFindResource("FloatBarBackground") as Brush
+                ?? new SolidColorBrush(Colors.White);
+            var borderBrush = Application.Current.TryFindResource("FloatBarBorderBrush") as Brush
+                ?? new SolidColorBrush(Color.FromRgb(0x7D, 0x7D, 0x7D));
+            var wrapper = new Border
+            {
+                Margin = new Thickness(3, 0, 0, 0),
+                Padding = new Thickness(0),
+                Background = bgBrush,
+                CornerRadius = new CornerRadius(8),
+                BorderThickness = new Thickness(2),
+                BorderBrush = borderBrush,
+                Child = view,
+                Tag = InjectedTag
+            };
+            SetHidingRuleset(wrapper, ruleset);
+            return wrapper;
+        }
+
+        private static void ApplyInitialVisibility(FrameworkElement element, ToolbarRuleset ruleset)
+        {
+            element.Visibility = Visibility.Visible;
+        }
+
+        public static void UpdateVisibilityByMode(Panel container, bool isAnnotating, bool isPptMode, bool isGestureEnabled = false)
+        {
+            if (container == null) return;
+
+            var context = new Dictionary<string, bool>
+            {
+                ["isAnnotating"] = isAnnotating,
+                ["isPptMode"] = isPptMode,
+                ["isGestureEnabled"] = isGestureEnabled
+            };
+
+            foreach (var child in container.Children.OfType<FrameworkElement>())
+            {
+                if (child.Tag as string != InjectedTag) continue;
+                var ruleset = GetHidingRuleset(child);
+                if (ruleset == null)
+                {
+                    child.Visibility = Visibility.Visible;
+                    continue;
+                }
+
+                bool shouldHide = EvaluateRuleset(ruleset, context);
+                child.Visibility = shouldHide ? Visibility.Collapsed : Visibility.Visible;
+            }
         }
 
         private static FrameworkElement BuildAndRegister(IToolbarHost host, IToolbarItem item)
@@ -221,6 +473,42 @@ namespace Ink_Canvas.Controls.Toolbar
                 LogHelper.WriteLogToFile($"ToolbarRegistry: 构建 {item.Id} 失败: {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}", LogHelper.LogType.Error);
                 return null;
             }
+        }
+
+        public static ToolbarLayoutSettings CreateDefaultLayout()
+        {
+            return new ToolbarLayoutSettings
+            {
+                Components = new List<ToolbarComponentEntry>
+                {
+                    new ToolbarComponentEntry { Id = "builtin.cursor", HidingRuleset = ToolbarRuleset.AlwaysShow() },
+                    new ToolbarComponentEntry { Id = "builtin.pen", HidingRuleset = ToolbarRuleset.AlwaysShow() },
+                    new ToolbarComponentEntry { Id = "builtin.quickColorPalette", HidingRuleset = ToolbarRuleset.AnnotationOnly() },
+                    new ToolbarComponentEntry { Id = "builtin.inkFreeze", HidingRuleset = ToolbarRuleset.AlwaysShow() },
+                    new ToolbarComponentEntry { Id = "builtin.clear", HidingRuleset = ToolbarRuleset.AlwaysShow() },
+                    new ToolbarComponentEntry
+                    {
+                        Id = "builtin.group",
+                        HidingRuleset = ToolbarRuleset.AnnotationOnly(),
+                        Children = new List<ToolbarComponentEntry>
+                        {
+                            new ToolbarComponentEntry { Id = "builtin.eraser" },
+                            new ToolbarComponentEntry { Id = "builtin.eraserByStrokes" },
+                            new ToolbarComponentEntry { Id = "builtin.select" },
+                            new ToolbarComponentEntry { Id = "builtin.shapeDraw" },
+                            new ToolbarComponentEntry { Id = "builtin.undo" },
+                            new ToolbarComponentEntry { Id = "builtin.redo" },
+                            new ToolbarComponentEntry { Id = "builtin.cursorWithDel" }
+                        }
+                    },
+                    new ToolbarComponentEntry { Id = "builtin.separator", HidingRuleset = ToolbarRuleset.AlwaysShow() },
+                    new ToolbarComponentEntry { Id = "builtin.whiteboard", HidingRuleset = ToolbarRuleset.AlwaysShow() },
+                    new ToolbarComponentEntry { Id = "builtin.tools", HidingRuleset = ToolbarRuleset.AlwaysShow() },
+                    new ToolbarComponentEntry { Id = "builtin.fold", HidingRuleset = ToolbarRuleset.AlwaysShow() },
+                    new ToolbarComponentEntry { Id = "builtin.gesture", HidingRuleset = ToolbarRuleset.GestureRule(), ShowSeparateBorder = true },
+                    new ToolbarComponentEntry { Id = "builtin.exit", HidingRuleset = ToolbarRuleset.PptOnly(), ShowSeparateBorder = true }
+                }
+            };
         }
     }
 }

@@ -49,7 +49,7 @@ namespace Ink_Canvas
                     // 在PPT模式下隐藏手势面板和手势按钮
                     AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
                     AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
-                    EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+                    UpdateToolbarComponentVisibility();
                     SyncPdfPageSidebarWithCanvas();
                 }
 

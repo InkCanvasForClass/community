@@ -98,7 +98,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             CardEnableTwoFingerGestureInPresentationMode.IsOn = ppt.IsEnableTwoFingerGestureInPresentationMode;
             CardEnableFingerGestureSlideShowControl.IsOn = ppt.IsEnableFingerGestureSlideShowControl;
-            CardShowGestureButtonInSlideShow.IsOn = ppt.ShowGestureButtonInSlideShow;
             CardEnablePPTTimeCapsule.IsOn = ppt.EnablePPTTimeCapsule;
             ComboBoxPPTTimeCapsulePosition.SelectedIndex = ppt.PPTTimeCapsulePosition;
             CardShowPPTSidebarByDefault.IsOn = ppt.ShowPPTSidebarByDefault;
@@ -649,16 +648,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             SettingsManager.Settings.PowerPointSettings.IsEnableFingerGestureSlideShowControl = CardEnableFingerGestureSlideShowControl.IsOn;
             SettingsManager.SaveSettingsToFile();
-        }
-
-        private void ToggleSwitchShowGestureButtonInSlideShow_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            var mw = GetMainWindow();
-            SettingsManager.Settings.PowerPointSettings.ShowGestureButtonInSlideShow = CardShowGestureButtonInSlideShow.IsOn;
-            SettingsManager.SaveSettingsToFile();
-            if (mw != null && mw.IsInPptPresentationMode)
-                mw.UpdateGestureButtonVisibilityInPPTMode();
         }
 
         private void ToggleSwitchEnablePPTTimeCapsule_Toggled(object sender, RoutedEventArgs e)

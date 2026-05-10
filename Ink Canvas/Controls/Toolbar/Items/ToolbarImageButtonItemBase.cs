@@ -9,14 +9,11 @@ namespace Ink_Canvas.Controls.Toolbar.Items
     {
         public abstract string Id { get; }
         public abstract string LocalizationKey { get; }
-        public abstract ToolbarSlot DefaultSlot { get; }
-        public abstract int DefaultOrder { get; }
-        public virtual bool DefaultVisible => true;
-        public virtual ToolbarInsertPosition DefaultPosition => ToolbarInsertPosition.Prepend;
-        public virtual string DefaultAnchorName => null;
+        public virtual ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow();
+        public virtual bool DefaultShowSeparateBorder => false;
+        public virtual string Description => "";
 
         public string DisplayName => Strings.GetString(LocalizationKey) ?? LocalizationKey;
-        public virtual string MenuPanelName => null;
 
         protected virtual string IconBrushResourceKey => null;
         protected virtual string LabelBrushResourceKey => null;

@@ -3123,16 +3123,7 @@ namespace Ink_Canvas
         {
             try
             {
-                if (Settings.PowerPointSettings.ShowGestureButtonInSlideShow)
-                {
-                    // 如果启用了PPT放映模式显示手势按钮，则检查是否在批注模式下显示手势按钮
-                    CheckEnableTwoFingerGestureBtnVisibility(true);
-                }
-                else
-                {
-                    // 如果禁用了PPT放映模式显示手势按钮，则隐藏手势按钮
-                    EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
-                }
+                UpdateToolbarComponentVisibility();
             }
             catch (Exception ex)
             {

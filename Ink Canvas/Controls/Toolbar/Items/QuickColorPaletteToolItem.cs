@@ -5,20 +5,10 @@ namespace Ink_Canvas.Controls.Toolbar.Items
     internal sealed class QuickColorPaletteToolItem : IToolbarItem
     {
         public string Id => "builtin.quickColorPalette";
-
-        public ToolbarSlot DefaultSlot => ToolbarSlot.FloatingBarMain;
-
-        public int DefaultOrder => 105;
-
-        public bool DefaultVisible => true;
-
-        public ToolbarInsertPosition DefaultPosition => ToolbarInsertPosition.Prepend;
-
-        public string DefaultAnchorName => null;
-
         public string DisplayName => "Quick Color Palette";
-
-        public string MenuPanelName => null;
+        public string Description => "快速选色面板";
+        public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AnnotationOnly();
+        public bool DefaultShowSeparateBorder => false;
 
         public FrameworkElement BuildView(IToolbarHost host)
         {

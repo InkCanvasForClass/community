@@ -6,10 +6,8 @@ namespace Ink_Canvas.Controls.Toolbar.Items
     {
         public override string Id => "builtin.fold";
         public override string LocalizationKey => "FloatingBar_Hide";
-        public override ToolbarSlot DefaultSlot => ToolbarSlot.FloatingBarEnd;
-        public override int DefaultOrder => 120;
-        public override ToolbarInsertPosition DefaultPosition => ToolbarInsertPosition.AfterAnchor;
-        public override string DefaultAnchorName => "FloatingBarEndSeparator";
+        public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow();
+        public override string Description => "折叠工具栏";
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.FoldFloatingBar_MouseUp(sender, e);

@@ -41,6 +41,9 @@ namespace Ink_Canvas
 
         [JsonProperty("toolbar")]
         public ToolbarLayoutSettings Toolbar { get; set; } = new ToolbarLayoutSettings();
+
+        [JsonProperty("toolbarConfigName")]
+        public string ToolbarConfigName { get; set; } = "default";
     }
 
     public class Security

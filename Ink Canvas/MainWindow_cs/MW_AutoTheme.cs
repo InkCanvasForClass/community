@@ -1,3 +1,4 @@
+using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern;
 using Microsoft.Win32;
@@ -160,35 +161,44 @@ namespace Ink_Canvas
         {
             try
             {
-                SymbolIconDelete.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.DeleteIcon);
-                ShapeDrawFloatingBarBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.ShapesIcon);
-                SymbolIconUndo.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.UndoIcon);
-                SymbolIconRedo.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.RedoIcon);
-                CursorWithDelFloatingBarBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.CursorWithDelFloatingBarBtnIcon);
-                WhiteboardFloatingBarBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.WhiteboardFloatingBarBtnIcon);
-                ToolsFloatingBarBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.ToolsFloatingBarBtnIcon);
-                Fold_Icon.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.FoldIcon);
+                void SetToolbarGeometry(ToolbarImageButton btn, string geometry)
+                {
+                    if (btn != null) btn.Icon.Geometry = Geometry.Parse(geometry);
+                }
+                void SetMenuGeometry(ToolMenuButton btn, string geometry)
+                {
+                    if (btn != null) btn.Icon.Geometry = Geometry.Parse(geometry);
+                }
+
+                SetToolbarGeometry(SymbolIconDelete, XamlGraphicsIconGeometries.DeleteIcon);
+                SetToolbarGeometry(ShapeDrawFloatingBarBtn, XamlGraphicsIconGeometries.ShapesIcon);
+                SetToolbarGeometry(SymbolIconUndo, XamlGraphicsIconGeometries.UndoIcon);
+                SetToolbarGeometry(SymbolIconRedo, XamlGraphicsIconGeometries.RedoIcon);
+                SetToolbarGeometry(CursorWithDelFloatingBarBtn, XamlGraphicsIconGeometries.CursorWithDelFloatingBarBtnIcon);
+                SetToolbarGeometry(WhiteboardFloatingBarBtn, XamlGraphicsIconGeometries.WhiteboardFloatingBarBtnIcon);
+                SetToolbarGeometry(ToolsFloatingBarBtn, XamlGraphicsIconGeometries.ToolsFloatingBarBtnIcon);
+                SetToolbarGeometry(Fold_Icon, XamlGraphicsIconGeometries.FoldIcon);
                 UpdateInkFreezeButtonState();
 
-                TimerToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.TimerIconGeometry);
-                RandomDrawToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.RandomDrawIconGeometry);
-                SingleDrawToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.SingleDrawIconGeometry);
-                SaveToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.SaveIconGeometry);
-                OpenToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.OpenIconGeometry);
-                ReplayToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.ReplayIconGeometry);
-                ScreenshotToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.ScreenshotIconGeometry);
-                ManualToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.ManualIconGeometry);
-                SettingsToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.SettingsIconGeometry);
+                SetMenuGeometry(TimerToolBtn, XamlGraphicsIconGeometries.TimerIconGeometry);
+                SetMenuGeometry(RandomDrawToolBtn, XamlGraphicsIconGeometries.RandomDrawIconGeometry);
+                SetMenuGeometry(SingleDrawToolBtn, XamlGraphicsIconGeometries.SingleDrawIconGeometry);
+                SetMenuGeometry(SaveToolBtn, XamlGraphicsIconGeometries.SaveIconGeometry);
+                SetMenuGeometry(OpenToolBtn, XamlGraphicsIconGeometries.OpenIconGeometry);
+                SetMenuGeometry(ReplayToolBtn, XamlGraphicsIconGeometries.ReplayIconGeometry);
+                SetMenuGeometry(ScreenshotToolBtn, XamlGraphicsIconGeometries.ScreenshotIconGeometry);
+                SetMenuGeometry(ManualToolBtn, XamlGraphicsIconGeometries.ManualIconGeometry);
+                SetMenuGeometry(SettingsToolBtn, XamlGraphicsIconGeometries.SettingsIconGeometry);
 
-                BoardTimerToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.TimerIconGeometry);
-                BoardRandomDrawToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.RandomDrawIconGeometry);
-                BoardSingleDrawToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.SingleDrawIconGeometry);
-                BoardSaveToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.SaveIconGeometry);
-                BoardOpenToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.OpenIconGeometry);
-                BoardReplayToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.ReplayIconGeometry);
-                BoardScreenshotToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.ScreenshotIconGeometry);
-                BoardManualToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.ManualIconGeometry);
-                BoardSettingsToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.SettingsIconGeometry);
+                SetMenuGeometry(BoardTimerToolBtn, XamlGraphicsIconGeometries.TimerIconGeometry);
+                SetMenuGeometry(BoardRandomDrawToolBtn, XamlGraphicsIconGeometries.RandomDrawIconGeometry);
+                SetMenuGeometry(BoardSingleDrawToolBtn, XamlGraphicsIconGeometries.SingleDrawIconGeometry);
+                SetMenuGeometry(BoardSaveToolBtn, XamlGraphicsIconGeometries.SaveIconGeometry);
+                SetMenuGeometry(BoardOpenToolBtn, XamlGraphicsIconGeometries.OpenIconGeometry);
+                SetMenuGeometry(BoardReplayToolBtn, XamlGraphicsIconGeometries.ReplayIconGeometry);
+                SetMenuGeometry(BoardScreenshotToolBtn, XamlGraphicsIconGeometries.ScreenshotIconGeometry);
+                SetMenuGeometry(BoardManualToolBtn, XamlGraphicsIconGeometries.ManualIconGeometry);
+                SetMenuGeometry(BoardSettingsToolBtn, XamlGraphicsIconGeometries.SettingsIconGeometry);
 
                 bool isDarkTheme = IsCurrentThemeDark();
                 Color selectedColor = isDarkTheme ? Color.FromRgb(102, 204, 255) : Color.FromRgb(30, 58, 138);
@@ -198,20 +208,20 @@ namespace Ink_Canvas
                 switch (_currentToolMode)
                 {
                     case "cursor":
-                        Cursor_Icon.Icon.Brush = new SolidColorBrush(selectedColor);
+                        if (Cursor_Icon != null) Cursor_Icon.Icon.Brush = new SolidColorBrush(selectedColor);
                         break;
                     case "pen":
                     case "color":
-                        Pen_Icon.Icon.Brush = new SolidColorBrush(selectedColor);
+                        if (Pen_Icon != null) Pen_Icon.Icon.Brush = new SolidColorBrush(selectedColor);
                         break;
                     case "eraser":
-                        Eraser_Icon.Icon.Brush = new SolidColorBrush(selectedColor);
+                        if (Eraser_Icon != null) Eraser_Icon.Icon.Brush = new SolidColorBrush(selectedColor);
                         break;
                     case "eraserByStrokes":
-                        EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(selectedColor);
+                        if (EraserByStrokes_Icon != null) EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(selectedColor);
                         break;
                     case "select":
-                        SymbolIconSelect.Icon.Brush = new SolidColorBrush(selectedColor);
+                        if (SymbolIconSelect != null) SymbolIconSelect.Icon.Brush = new SolidColorBrush(selectedColor);
                         break;
                 }
             }
@@ -223,18 +233,18 @@ namespace Ink_Canvas
         void SetAllFloatingBarButtonsToColor(Color color)
         {
             var brush = new SolidColorBrush(color);
-            Cursor_Icon.Icon.Brush = brush;
-            Pen_Icon.Icon.Brush = brush;
-            EraserByStrokes_Icon.Icon.Brush = brush;
-            Eraser_Icon.Icon.Brush = brush;
-            SymbolIconSelect.Icon.Brush = brush;
-            ShapeDrawFloatingBarBtn.Icon.Brush = brush;
-            SymbolIconUndo.Icon.Brush = brush;
-            SymbolIconRedo.Icon.Brush = brush;
-            CursorWithDelFloatingBarBtn.Icon.Brush = brush;
-            WhiteboardFloatingBarBtn.Icon.Brush = brush;
-            ToolsFloatingBarBtn.Icon.Brush = brush;
-            Fold_Icon.Icon.Brush = brush;
+            if (Cursor_Icon != null) Cursor_Icon.Icon.Brush = brush;
+            if (Pen_Icon != null) Pen_Icon.Icon.Brush = brush;
+            if (EraserByStrokes_Icon != null) EraserByStrokes_Icon.Icon.Brush = brush;
+            if (Eraser_Icon != null) Eraser_Icon.Icon.Brush = brush;
+            if (SymbolIconSelect != null) SymbolIconSelect.Icon.Brush = brush;
+            if (ShapeDrawFloatingBarBtn != null) ShapeDrawFloatingBarBtn.Icon.Brush = brush;
+            if (SymbolIconUndo != null) SymbolIconUndo.Icon.Brush = brush;
+            if (SymbolIconRedo != null) SymbolIconRedo.Icon.Brush = brush;
+            if (CursorWithDelFloatingBarBtn != null) CursorWithDelFloatingBarBtn.Icon.Brush = brush;
+            if (WhiteboardFloatingBarBtn != null) WhiteboardFloatingBarBtn.Icon.Brush = brush;
+            if (ToolsFloatingBarBtn != null) ToolsFloatingBarBtn.Icon.Brush = brush;
+            if (Fold_Icon != null) Fold_Icon.Icon.Brush = brush;
             if (Freeze_Icon != null) Freeze_Icon.Icon.Brush = brush;
         }
 

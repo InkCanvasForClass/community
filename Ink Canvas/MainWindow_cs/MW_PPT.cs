@@ -1182,19 +1182,7 @@ namespace Ink_Canvas
                     AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
 
                     // 根据设置决定是否在PPT放映模式下显示手势按钮
-                    if (Settings.PowerPointSettings.ShowGestureButtonInSlideShow)
-                    {
-                        // 如果启用了PPT放映模式显示手势按钮，则显示手势按钮
-                        if (Settings.Gesture.IsEnableTwoFingerGesture)
-                        {
-                            CheckEnableTwoFingerGestureBtnVisibility(true);
-                        }
-                    }
-                    else
-                    {
-                        // 如果禁用了PPT放映模式显示手势按钮，则隐藏手势按钮
-                        EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
-                    }
+                    UpdateToolbarComponentVisibility();
 
                     if (Settings.PowerPointSettings.IsShowCanvasAtNewSlideShow &&
                         !Settings.Automation.IsAutoFoldInPPTSlideShow)
@@ -1541,16 +1529,7 @@ namespace Ink_Canvas
                         ResetInkManagerLockState();
 
                         // 退出PPT模式时恢复手势面板和手势按钮的显示状态
-                        if (Settings.Gesture.IsEnableTwoFingerGesture && ToggleSwitchEnableMultiTouchMode.IsOn)
-                        {
-                            // 根据手势设置决定是否显示手势面板和手势按钮
-                            CheckEnableTwoFingerGestureBtnVisibility(true);
-                        }
-                        else
-                        {
-                            // 如果手势功能未启用，确保手势按钮保持隐藏
-                            EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
-                        }
+                        UpdateToolbarComponentVisibility();
 
                         // 退出PPT模式时隐藏快捷调色盘
                         if (QuickColorPalette != null)
@@ -2805,19 +2784,19 @@ namespace Ink_Canvas
         /// <remarks>
         /// 该方法在用户释放PPT结束控制按钮时调用BtnPPTSlideShowEnd_Click方法，实现结束幻灯片放映的功能
         /// </remarks>
-        private async void ImagePPTControlEnd_MouseUp(object sender, MouseButtonEventArgs e)
+        internal async void ImagePPTControlEnd_MouseUp(object sender, MouseButtonEventArgs e)
         {
             await ExitPptPresentation();
         }
 
         private void ShowFloatingBarExitPPTBtn()
         {
-            BorderFloatingBarExitPPTBtn.Visibility = Visibility.Visible;
+            UpdateToolbarComponentVisibility();
         }
 
         private void HideFloatingBarExitPPTBtn()
         {
-            BorderFloatingBarExitPPTBtn.Visibility = Visibility.Collapsed;
+            UpdateToolbarComponentVisibility();
         }
     }
 }

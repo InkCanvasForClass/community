@@ -41,7 +41,7 @@ namespace Ink_Canvas
         /// <summary>
         /// 用於浮動工具欄的"手勢"按鈕和白板工具欄的"手勢"按鈕的點擊事件
         /// </summary>
-        private void TwoFingerGestureBorder_MouseUp(object sender, MouseButtonEventArgs e)
+        internal void TwoFingerGestureBorder_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (TwoFingerGestureBorder.IsOpen || BoardTwoFingerGestureBorder.IsOpen)
             {
@@ -106,13 +106,21 @@ namespace Ink_Canvas
 
             if (floatingBarAnyOn)
             {
-                EnableTwoFingerGestureBtn.Source =
-                    new BitmapImage(new Uri("/Resources/new-icons/gesture-enabled.png", UriKind.Relative));
+                if (Gesture_Icon != null)
+                {
+                    Gesture_Icon.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.EnabledGestureIcon);
+                    Gesture_Icon.IconBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                }
             }
             else
             {
-                EnableTwoFingerGestureBtn.Source =
-                    new BitmapImage(new Uri(gestureIconPath, UriKind.Relative));
+                if (Gesture_Icon != null)
+                {
+                    Gesture_Icon.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.DisabledGestureIcon);
+                    Gesture_Icon.IconBrush = isDarkTheme
+                        ? new SolidColorBrush(Color.FromRgb(244, 244, 245))
+                        : new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                }
             }
 
             if (boardAnyOn)
@@ -142,46 +150,7 @@ namespace Ink_Canvas
         /// </summary>
         private void CheckEnableTwoFingerGestureBtnVisibility(bool isVisible)
         {
-            // 在PPT放映模式下根据设置决定是否显示手势按钮
-            if (IsInPptPresentationMode)
-            {
-                // 如果启用了PPT放映模式显示手势按钮，且当前处于批注模式，则显示手势按钮
-                if (Settings.PowerPointSettings.ShowGestureButtonInSlideShow && isVisible && inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
-                {
-                    EnableTwoFingerGestureBorder.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
-                }
-                return;
-            }
-
-            if (currentMode == 0)
-            {
-                if (GridTransparencyFakeBackground.Background != Brushes.Transparent && isVisible)
-                {
-                }
-                else
-                {
-                    EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
-                    return;
-                }
-            }
-
-            if (StackPanelCanvasControls.Visibility != Visibility.Visible
-                || BorderFloatingBarMainControls.Visibility != Visibility.Visible)
-            {
-                EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
-            }
-            else if (isVisible)
-            {
-                EnableTwoFingerGestureBorder.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
-            }
+            UpdateToolbarComponentVisibility();
         }
 
         #endregion "手勢"按鈕
@@ -319,13 +288,13 @@ namespace Ink_Canvas
                 if (BorderFloatingBarMainControls.Visibility == Visibility.Visible)
                 {
                     BorderFloatingBarMainControls.Visibility = Visibility.Collapsed;
-                    CheckEnableTwoFingerGestureBtnVisibility(false);
+                    UpdateToolbarComponentVisibility();
                     PlaceFloatingBarAfterHeadToggle(headLeft, false);
                 }
                 else
                 {
                     BorderFloatingBarMainControls.Visibility = Visibility.Visible;
-                    CheckEnableTwoFingerGestureBtnVisibility(true);
+                    UpdateToolbarComponentVisibility();
                     PlaceFloatingBarAfterHeadToggle(headLeft, true);
                 }
             }
@@ -2591,10 +2560,10 @@ namespace Ink_Canvas
 
             { /* Old UI removed */ }
             { /* Old UI removed */ }
-            CheckEnableTwoFingerGestureBtnVisibility(false);
+            UpdateToolbarComponentVisibility();
 
 
-            StackPanelCanvasControls.Visibility = Visibility.Collapsed;
+            UpdateToolbarComponentVisibility();
 
             // 在鼠标模式下隐藏快捷调色盘
             if (QuickColorPalette != null)
@@ -2645,7 +2614,7 @@ namespace Ink_Canvas
             bool wasInInkMode = inkCanvas.EditingMode == InkCanvasEditingMode.Ink
                                 || isRealtimePenState
                                 || (Pen_Icon.Background != null
-                                    && StackPanelCanvasControls.Visibility == Visibility.Visible
+                                    && IsAnnotating
                                     && string.Equals(GetCurrentSelectedMode(), "pen", StringComparison.OrdinalIgnoreCase));
             bool wasHighlighter = drawingAttributes.IsHighlighter;
 
@@ -2654,7 +2623,7 @@ namespace Ink_Canvas
                 return;
             }
 
-            if (Pen_Icon.Background == null || StackPanelCanvasControls.Visibility == Visibility.Collapsed)
+            if (Pen_Icon.Background == null || !IsAnnotating)
             {
                 if (isLongPressSelected)
                 {
@@ -2712,9 +2681,7 @@ namespace Ink_Canvas
                     isFullScreenApplied = true; // 标记已应用全屏处理
                 }
 
-                StackPanelCanvasControls.Visibility = Visibility.Visible;
-                //AnimationsHelper.ShowWithSlideFromLeftAndFade(StackPanelCanvasControls);
-                CheckEnableTwoFingerGestureBtnVisibility(true);
+                UpdateToolbarComponentVisibility();
                 // 使用集中化的工具模式切换方法
                 SetCurrentToolMode(InkCanvasEditingMode.Ink);
 
@@ -3393,7 +3360,7 @@ namespace Ink_Canvas
             }
             else
             {
-                if (StackPanelCanvasControls.Visibility == Visibility.Visible)
+                if (IsAnnotating)
                     HideSubPanels("pen");
                 else
                     HideSubPanels("cursor");
@@ -3586,7 +3553,7 @@ private bool forceEraser;
             if (currentMode == 0)
             {
                 // 先回到画笔再清屏，避免 TimeMachine 的相关 bug 影响
-                if (Pen_Icon.Background == null && StackPanelCanvasControls.Visibility == Visibility.Visible)
+                if (Pen_Icon.Background == null && IsAnnotating)
                     PenIcon_Click(null, null);
             }
             else
@@ -3706,7 +3673,7 @@ private bool forceEraser;
                     // 在PPT模式下隐藏手势面板和手势按钮
                     AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
                     AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
-                    EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+                    UpdateToolbarComponentVisibility();
 
                     SaveStrokes(true);
                     ClearStrokes(true);
@@ -3756,7 +3723,7 @@ private bool forceEraser;
                         // 在PPT模式下隐藏手势面板和手势按钮
                         AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
                         AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
-                        EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+                        UpdateToolbarComponentVisibility();
 
                         SaveStrokes();
                         ClearStrokes(true);
@@ -4024,8 +3991,7 @@ private bool forceEraser;
 
             if (GridTransparencyFakeBackground.Background == Brushes.Transparent)
             {
-                StackPanelCanvasControls.Visibility = Visibility.Collapsed;
-                CheckEnableTwoFingerGestureBtnVisibility(false);
+                UpdateToolbarComponentVisibility();
                 HideSubPanels("cursor");
 
                 if (currentMode == 0)
@@ -4035,8 +4001,7 @@ private bool forceEraser;
             }
             else
             {
-                AnimationsHelper.ShowWithSlideFromLeftAndFade(StackPanelCanvasControls);
-                CheckEnableTwoFingerGestureBtnVisibility(true);
+                UpdateToolbarComponentVisibility();
 
                 if (currentMode == 0)
                 {
@@ -4807,7 +4772,8 @@ private bool forceEraser;
         /// </summary>
         private void UpdateTwoFingerGestureBorderPosition()
         {
-            UpdateSubPanelPosition(EnableTwoFingerGestureBorder, TwoFingerGestureBorder, 119);
+            var gestureBorder = Gesture_Icon?.Parent as FrameworkElement ?? Gesture_Icon;
+            UpdateSubPanelPosition(gestureBorder, TwoFingerGestureBorder, 119);
         }
 
         /// <summary>

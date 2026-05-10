@@ -2,7 +2,6 @@ using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar;
 using Ink_Canvas.Helpers;
 using System;
-using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -24,6 +23,8 @@ namespace Ink_Canvas
         internal ToolbarImageButton ToolsFloatingBarBtn { get; private set; }
         internal ToolbarImageButton Fold_Icon { get; private set; }
         internal ToolbarImageButton Freeze_Icon { get; private set; }
+        internal ToolbarImageButton Gesture_Icon { get; private set; }
+        internal ToolbarImageButton Exit_Icon { get; private set; }
 
         internal Panel FloatingBarRootPanel => BorderFloatingBarMoveControls?.Parent as Panel;
         internal iNKORE.UI.WPF.Modern.Controls.ToggleSwitch ToggleSwitchDrawShapeBorderAutoHide { get; } =
@@ -62,6 +63,8 @@ namespace Ink_Canvas
             BorderTools.PlacementTarget = btn;
         }
         internal void AttachFoldIcon(ToolbarImageButton btn) => Fold_Icon = btn;
+        internal void AttachGestureBtn(ToolbarImageButton btn) => Gesture_Icon = btn;
+        internal void AttachExitBtn(ToolbarImageButton btn) => Exit_Icon = btn;
 
         #region PenPalette property mappings
         internal ComboBox ComboBoxPenStyle => PenPalettePopupContent?.PenStyleComboBox ?? BoardPenPalettePopupContent?.PenStyleComboBox;
@@ -234,16 +237,10 @@ namespace Ink_Canvas
             LogHelper.WriteLogToFile("MW_Toolbar: InitializeToolbarPlugins 开始", LogHelper.LogType.Info);
             try
             {
+                ToolbarRegistry.EnsureDefaultConfigExists();
                 ToolbarHost = new ToolbarHost(this);
-                var slots = new Dictionary<ToolbarSlot, Panel>
-                {
-                    { ToolbarSlot.FloatingBarMain, StackPanelFloatingBar },
-                    { ToolbarSlot.FloatingBarCanvasControls, StackPanelCanvasControls },
-                    { ToolbarSlot.FloatingBarEnd, StackPanelFloatingBarEnd },
-                    { ToolbarSlot.BlackboardLeft, BlackboardLeftSide },
-                    { ToolbarSlot.BlackboardRight, BlackboardRightSide }
-                };
-                ToolbarRegistry.Populate(ToolbarHost, slots, Settings?.Toolbar);
+                var layout = ToolbarRegistry.LoadActiveConfig();
+                ToolbarRegistry.Populate(ToolbarHost, StackPanelFloatingBar, layout);
                 LogHelper.WriteLogToFile("MW_Toolbar: InitializeToolbarPlugins 完成", LogHelper.LogType.Info);
             }
             catch (Exception ex)
@@ -258,17 +255,25 @@ namespace Ink_Canvas
             try
             {
                 ToolbarRegistry.ClearInjected(StackPanelFloatingBar);
-                ToolbarRegistry.ClearInjected(StackPanelCanvasControls);
-                ToolbarRegistry.ClearInjected(StackPanelFloatingBarEnd);
-                ToolbarRegistry.ClearInjected(BlackboardLeftSide);
-                ToolbarRegistry.ClearInjected(BlackboardRightSide);
                 InitializeToolbarPlugins();
+                UpdateToolbarComponentVisibility();
+                ApplyFloatingBarIconHighlightImmediate(_currentToolMode);
+                RefreshFloatingBarButtonColors();
                 LogHelper.WriteLogToFile("MW_Toolbar: RebuildToolbar 完成", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"MW_Toolbar: RebuildToolbar 异常: {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}", LogHelper.LogType.Error);
             }
+        }
+
+        internal bool IsAnnotating => _currentToolMode != "cursor";
+
+        internal void UpdateToolbarComponentVisibility()
+        {
+            var isPpt = IsInPptPresentationMode;
+            var isGestureEnabled = Settings?.PowerPointSettings?.ShowGestureButtonInSlideShow ?? false;
+            ToolbarRegistry.UpdateVisibilityByMode(StackPanelFloatingBar, IsAnnotating, isPpt, isGestureEnabled);
         }
     }
 }
