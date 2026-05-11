@@ -18,6 +18,8 @@ namespace Ink_Canvas.Controls.Toolbar.Items
             {
                 Name = "FloatingBarSeparator",
                 Margin = new Thickness(2, 0, 2, 0),
+                Width = 2,
+                MinWidth = 2,
                 BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#71717a")),
                 BorderThickness = new Thickness(1, 0, 0, 0),
                 Tag = ToolbarRegistry.InjectedTag

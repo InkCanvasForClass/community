@@ -73,6 +73,18 @@ namespace Ink_Canvas.Controls
             set => ButtonPanel.Background = value;
         }
 
+        public double LabelFontSize
+        {
+            get => LabelTextBlock.FontSize;
+            set => LabelTextBlock.FontSize = value;
+        }
+
+        public double IconHeight
+        {
+            get => ButtonImage.Height;
+            set => ButtonImage.Height = value;
+        }
+
         public event MouseButtonEventHandler ButtonMouseDown;
         public event MouseEventHandler ButtonMouseLeave;
         public event MouseButtonEventHandler ButtonMouseUp;

@@ -198,8 +198,127 @@
                                           Unchecked="CheckBoxShowSeparateBorder_Changed"/>
                             </ui:SettingsCard>
 
+                            <TextBlock Text="尺寸" FontSize="14" FontWeight="SemiBold" Margin="0,12,0,4"/>
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,4,4">
+                                    <TextBlock Text="固定宽度" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxFixedWidth" Width="80" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="0" Grid.Column="1" Margin="4,0,0,4">
+                                    <TextBlock Text="固定高度" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxFixedHeight" Width="80" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,4,4">
+                                    <TextBlock Text="最小宽度" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxMinWidth" Width="80" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="1" Margin="4,0,0,4">
+                                    <TextBlock Text="最大宽度" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxMaxWidth" Width="80" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,4,0">
+                                    <TextBlock Text="最小高度" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxMinHeight" Width="80" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="2" Grid.Column="1" Margin="4,0,0,0">
+                                    <TextBlock Text="最大高度" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxMaxHeight" Width="80" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Text="对齐" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,4,0">
+                                    <TextBlock Text="水平对齐" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <ComboBox x:Name="ComboBoxHAlign" Width="100" HorizontalAlignment="Left"
+                                              SelectionChanged="ComponentAlignment_Changed">
+                                        <ComboBoxItem Content="默认" Tag=""/>
+                                        <ComboBoxItem Content="左" Tag="Left"/>
+                                        <ComboBoxItem Content="居中" Tag="Center"/>
+                                        <ComboBoxItem Content="右" Tag="Right"/>
+                                        <ComboBoxItem Content="拉伸" Tag="Stretch"/>
+                                    </ComboBox>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="4,0,0,0">
+                                    <TextBlock Text="垂直对齐" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <ComboBox x:Name="ComboBoxVAlign" Width="100" HorizontalAlignment="Left"
+                                              SelectionChanged="ComponentAlignment_Changed">
+                                        <ComboBoxItem Content="默认" Tag=""/>
+                                        <ComboBoxItem Content="上" Tag="Top"/>
+                                        <ComboBoxItem Content="居中" Tag="Center"/>
+                                        <ComboBoxItem Content="下" Tag="Bottom"/>
+                                        <ComboBoxItem Content="拉伸" Tag="Stretch"/>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Text="外观" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,4,0">
+                                    <TextBlock Text="字体大小" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxFontSize" Width="60" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="4,0,4,0">
+                                    <TextBlock Text="图标大小" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxIconSize" Width="60" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Margin="4,0,0,0">
+                                    <TextBlock Text="不透明度" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxOpacity" Width="60" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Text="边距" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                            <TextBlock Text="左, 上, 右, 下" FontSize="12" Opacity="0.65" Margin="0,0,0,4"/>
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="TextBoxMarginLeft" Grid.Column="0" Margin="0,0,2,0"
+                                         TextChanged="ComponentSetting_TextChanged"/>
+                                <TextBox x:Name="TextBoxMarginTop" Grid.Column="1" Margin="2,0,2,0"
+                                         TextChanged="ComponentSetting_TextChanged"/>
+                                <TextBox x:Name="TextBoxMarginRight" Grid.Column="2" Margin="2,0,2,0"
+                                         TextChanged="ComponentSetting_TextChanged"/>
+                                <TextBox x:Name="TextBoxMarginBottom" Grid.Column="3" Margin="2,0,0,0"
+                                         TextChanged="ComponentSetting_TextChanged"/>
+                            </Grid>
+
+                            <Button Content="重置组件设置" Click="ButtonResetComponentSettings_Click"
+                                    Padding="12,6" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+
                             <!-- 分组子组件独立边框设置 -->
-                            <StackPanel x:Name="GroupChildSeparateBorderPanel" Margin="0,8,0,0">
+                            <StackPanel x:Name="GroupChildSeparateBorderPanel" Margin="0,12,0,0">
                                 <StackPanel.Style>
                                     <Style TargetType="StackPanel">
                                         <Setter Property="Visibility" Value="Visible"/>

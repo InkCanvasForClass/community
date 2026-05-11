@@ -396,6 +396,7 @@ namespace Ink_Canvas.Controls.Toolbar
                         var view = BuildAndRegister(host, item);
                         if (view == null) continue;
                         view.Tag = InjectedTag;
+                        ApplyComponentSettings(view, childEntry);
                         var childRuleset = GetEffectiveRuleset(childEntry);
                         SetHidingRuleset(view, childRuleset);
 
@@ -462,6 +463,7 @@ namespace Ink_Canvas.Controls.Toolbar
                     var view = BuildAndRegister(host, item);
                     if (view == null) continue;
                     view.Tag = InjectedTag;
+                    ApplyComponentSettings(view, entry);
                     var ruleset = GetEffectiveRuleset(entry);
                     SetHidingRuleset(view, ruleset);
                     result.Add(new DisplayItem
@@ -661,7 +663,8 @@ namespace Ink_Canvas.Controls.Toolbar
             {
                 Margin = new Thickness(0),
                 Padding = isToolbarButton ? new Thickness(0) : new Thickness(4, 2, 4, 2),
-                Width = isToolbarButton ? 50 : double.NaN,
+                Width = double.NaN,
+                MinWidth = isToolbarButton ? 50 : 0,
                 Height = double.NaN,
                 MinHeight = 50,
                 Background = bgBrush,
@@ -748,6 +751,90 @@ namespace Ink_Canvas.Controls.Toolbar
             {
                 LogHelper.WriteLogToFile($"ToolbarRegistry: 构建 {item.Id} 失败: {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}", LogHelper.LogType.Error);
                 return null;
+            }
+        }
+
+        internal static void ApplyComponentSettings(FrameworkElement view, ToolbarComponentEntry entry)
+        {
+            if (view == null || entry == null) return;
+
+            var fixedWidth = entry.GetSettingDouble(ComponentSettingKeys.FixedWidth);
+            if (fixedWidth.HasValue && fixedWidth.Value > 0)
+                view.Width = fixedWidth.Value;
+            else
+            {
+                var minWidth = entry.GetSettingDouble(ComponentSettingKeys.MinWidth);
+                if (minWidth.HasValue && minWidth.Value > 0) view.MinWidth = minWidth.Value;
+                var maxWidth = entry.GetSettingDouble(ComponentSettingKeys.MaxWidth);
+                if (maxWidth.HasValue && maxWidth.Value > 0) view.MaxWidth = maxWidth.Value;
+            }
+
+            var fixedHeight = entry.GetSettingDouble(ComponentSettingKeys.FixedHeight);
+            if (fixedHeight.HasValue && fixedHeight.Value > 0)
+                view.Height = fixedHeight.Value;
+            else
+            {
+                var minHeight = entry.GetSettingDouble(ComponentSettingKeys.MinHeight);
+                if (minHeight.HasValue && minHeight.Value > 0) view.MinHeight = minHeight.Value;
+                var maxHeight = entry.GetSettingDouble(ComponentSettingKeys.MaxHeight);
+                if (maxHeight.HasValue && maxHeight.Value > 0) view.MaxHeight = maxHeight.Value;
+            }
+
+            var hAlign = entry.GetSettingString(ComponentSettingKeys.HorizontalAlignment);
+            if (!string.IsNullOrEmpty(hAlign))
+            {
+                view.HorizontalAlignment = hAlign switch
+                {
+                    "Left" => HorizontalAlignment.Left,
+                    "Center" => HorizontalAlignment.Center,
+                    "Right" => HorizontalAlignment.Right,
+                    "Stretch" => HorizontalAlignment.Stretch,
+                    _ => view.HorizontalAlignment
+                };
+            }
+
+            var vAlign = entry.GetSettingString(ComponentSettingKeys.VerticalAlignment);
+            if (!string.IsNullOrEmpty(vAlign))
+            {
+                view.VerticalAlignment = vAlign switch
+                {
+                    "Top" => VerticalAlignment.Top,
+                    "Center" => VerticalAlignment.Center,
+                    "Bottom" => VerticalAlignment.Bottom,
+                    "Stretch" => VerticalAlignment.Stretch,
+                    _ => view.VerticalAlignment
+                };
+            }
+
+            var mLeft = entry.GetSettingDouble(ComponentSettingKeys.MarginLeft) ?? 0;
+            var mTop = entry.GetSettingDouble(ComponentSettingKeys.MarginTop) ?? 0;
+            var mRight = entry.GetSettingDouble(ComponentSettingKeys.MarginRight) ?? 0;
+            var mBottom = entry.GetSettingDouble(ComponentSettingKeys.MarginBottom) ?? 0;
+            if (mLeft != 0 || mTop != 0 || mRight != 0 || mBottom != 0)
+                view.Margin = new Thickness(mLeft, mTop, mRight, mBottom);
+
+            var pLeft = entry.GetSettingDouble(ComponentSettingKeys.PaddingLeft);
+            var pTop = entry.GetSettingDouble(ComponentSettingKeys.PaddingTop);
+            var pRight = entry.GetSettingDouble(ComponentSettingKeys.PaddingRight);
+            var pBottom = entry.GetSettingDouble(ComponentSettingKeys.PaddingBottom);
+            if (pLeft.HasValue || pTop.HasValue || pRight.HasValue || pBottom.HasValue)
+            {
+                if (view is Border border)
+                    border.Padding = new Thickness(pLeft ?? 0, pTop ?? 0, pRight ?? 0, pBottom ?? 0);
+            }
+
+            var opacity = entry.GetSettingDouble(ComponentSettingKeys.Opacity);
+            if (opacity.HasValue) view.Opacity = Math.Clamp(opacity.Value, 0, 1);
+
+            if (view is ToolbarImageButton btn)
+            {
+                var fontSize = entry.GetSettingDouble(ComponentSettingKeys.FontSize);
+                if (fontSize.HasValue && fontSize.Value > 0)
+                    btn.LabelFontSize = fontSize.Value;
+
+                var iconSize = entry.GetSettingDouble(ComponentSettingKeys.IconSize);
+                if (iconSize.HasValue && iconSize.Value > 0)
+                    btn.IconHeight = iconSize.Value;
             }
         }
 

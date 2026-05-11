@@ -77,6 +77,25 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _suppressSave = true;
             CheckBoxShowSeparateBorder.IsChecked = SelectedEntry.ShowSeparateBorder;
 
+            TextBoxFixedWidth.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.FixedWidth)?.ToString() ?? "";
+            TextBoxFixedHeight.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.FixedHeight)?.ToString() ?? "";
+            TextBoxMinWidth.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.MinWidth)?.ToString() ?? "";
+            TextBoxMaxWidth.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.MaxWidth)?.ToString() ?? "";
+            TextBoxMinHeight.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.MinHeight)?.ToString() ?? "";
+            TextBoxMaxHeight.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.MaxHeight)?.ToString() ?? "";
+            TextBoxFontSize.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.FontSize)?.ToString() ?? "";
+            TextBoxIconSize.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.IconSize)?.ToString() ?? "";
+            TextBoxOpacity.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.Opacity)?.ToString() ?? "";
+            TextBoxMarginLeft.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.MarginLeft)?.ToString() ?? "";
+            TextBoxMarginTop.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.MarginTop)?.ToString() ?? "";
+            TextBoxMarginRight.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.MarginRight)?.ToString() ?? "";
+            TextBoxMarginBottom.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.MarginBottom)?.ToString() ?? "";
+
+            var hAlign = SelectedEntry.GetSettingString(ComponentSettingKeys.HorizontalAlignment) ?? "";
+            ComboBoxHAlign.SelectedIndex = hAlign switch { "Left" => 1, "Center" => 2, "Right" => 3, "Stretch" => 4, _ => 0 };
+            var vAlign = SelectedEntry.GetSettingString(ComponentSettingKeys.VerticalAlignment) ?? "";
+            ComboBoxVAlign.SelectedIndex = vAlign switch { "Top" => 1, "Center" => 2, "Bottom" => 3, "Stretch" => 4, _ => 0 };
+
             var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedEntry);
             ComboBoxRulesetMode.SelectedIndex = (int)ruleset.Mode;
             CheckBoxRulesetReversed.IsChecked = ruleset.IsReversed;
@@ -270,13 +289,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (SelectedEntry != null && SelectedEntry.IsGroup)
             {
-                SelectedEntry.Children = new List<ToolbarComponentEntry>(GroupChildren.Select(c => new ToolbarComponentEntry
-                {
-                    Id = c.Id,
-                    HidingRule = c.HidingRule,
-                    ShowSeparateBorder = c.ShowSeparateBorder,
-                    HidingRuleset = c.HidingRuleset?.Clone()
-                }));
+                SelectedEntry.Children = new List<ToolbarComponentEntry>(GroupChildren.Select(c => CloneEntry(c)));
             }
         }
 
@@ -297,16 +310,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ShowSeparateBorder = source.ShowSeparateBorder,
                 HidingRuleset = source.HidingRuleset?.Clone()
             };
+            if (source.Settings != null && source.Settings.Count > 0)
+                clone.Settings = new Dictionary<string, object>(source.Settings);
             if (source.Children != null && source.Children.Count > 0)
             {
                 clone.Children = new List<ToolbarComponentEntry>(
-                    source.Children.Select(c => new ToolbarComponentEntry
-                    {
-                        Id = c.Id,
-                        HidingRule = c.HidingRule,
-                        ShowSeparateBorder = c.ShowSeparateBorder,
-                        HidingRuleset = c.HidingRuleset?.Clone()
-                    }));
+                    source.Children.Select(c => CloneEntry(c)));
             }
             return clone;
         }
@@ -401,6 +410,64 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded || SelectedEntry == null) return;
             SelectedEntry.ShowSeparateBorder = CheckBoxShowSeparateBorder.IsChecked == true;
+            SaveSettings();
+        }
+
+        private void ComponentSetting_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!_isLoaded || SelectedEntry == null || _suppressSave) return;
+            WriteComponentSettingsFromUI(SelectedEntry);
+            SaveSettings();
+        }
+
+        private void ComponentAlignment_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded || SelectedEntry == null || _suppressSave) return;
+            WriteComponentSettingsFromUI(SelectedEntry);
+            SaveSettings();
+        }
+
+        private void WriteComponentSettingsFromUI(ToolbarComponentEntry entry)
+        {
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.FixedWidth, TextBoxFixedWidth.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.FixedHeight, TextBoxFixedHeight.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MinWidth, TextBoxMinWidth.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MaxWidth, TextBoxMaxWidth.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MinHeight, TextBoxMinHeight.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MaxHeight, TextBoxMaxHeight.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.FontSize, TextBoxFontSize.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.IconSize, TextBoxIconSize.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.Opacity, TextBoxOpacity.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MarginLeft, TextBoxMarginLeft.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MarginTop, TextBoxMarginTop.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MarginRight, TextBoxMarginRight.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MarginBottom, TextBoxMarginBottom.Text);
+
+            var hAlignTag = (ComboBoxHAlign.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+            if (!string.IsNullOrEmpty(hAlignTag)) entry.SetSetting(ComponentSettingKeys.HorizontalAlignment, hAlignTag);
+            else entry.Settings?.Remove(ComponentSettingKeys.HorizontalAlignment);
+
+            var vAlignTag = (ComboBoxVAlign.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+            if (!string.IsNullOrEmpty(vAlignTag)) entry.SetSetting(ComponentSettingKeys.VerticalAlignment, vAlignTag);
+            else entry.Settings?.Remove(ComponentSettingKeys.VerticalAlignment);
+        }
+
+        private static void WriteDoubleIfNotEmpty(ToolbarComponentEntry entry, string key, string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                entry.Settings?.Remove(key);
+                return;
+            }
+            if (double.TryParse(text, out var val))
+                entry.SetSetting(key, val);
+        }
+
+        private void ButtonResetComponentSettings_Click(object sender, RoutedEventArgs e)
+        {
+            if (SelectedEntry == null) return;
+            SelectedEntry.Settings?.Clear();
+            UpdatePropertiesPanel();
             SaveSettings();
         }
 
@@ -558,13 +625,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 foreach (var child in SelectedEntry.Children)
                 {
-                    GroupChildren.Add(new ToolbarComponentEntry
-                    {
-                        Id = child.Id,
-                        HidingRule = child.HidingRule,
-                        ShowSeparateBorder = child.ShowSeparateBorder,
-                        HidingRuleset = child.HidingRuleset?.Clone()
-                    });
+                    GroupChildren.Add(CloneEntry(child));
                 }
             }
         }
