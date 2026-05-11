@@ -1,3 +1,4 @@
+using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
@@ -238,6 +239,7 @@ namespace Ink_Canvas
         /// </remarks>
         public void UpdateFloatingBarIcon()
         {
+            if (FloatingbarHeadIconImg == null) return;
             int index = Settings.Appearance.FloatingBarImg;
 
             if (index == 0)
@@ -982,7 +984,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
-            ShowNotification("设置已重置为默认推荐设置~");
+            try { ShowNotification("设置已重置为默认推荐设置~"); } catch { }
         }
 
         private async void SpecialVersionResetToSuggestion_Click()
@@ -1007,67 +1009,42 @@ namespace Ink_Canvas
 
         public void UpdateFloatingBarIcons()
         {
-            string currentMode = GetCurrentSelectedMode();
-
-            bool isCursorSolid = currentMode == "cursor";
-            bool isPenSolid = currentMode == "pen" || currentMode == "color";
-            bool isCircleEraserSolid = currentMode == "eraser";
-            bool isStrokeEraserSolid = currentMode == "eraserByStrokes";
-            bool isLassoSolid = currentMode == "select";
-
-            if (Settings.Appearance.UseLegacyFloatingBarUI)
+            try
             {
-                Cursor_Icon.Icon.Geometry = Geometry.Parse(
-                    isCursorSolid
-                        ? XamlGraphicsIconGeometries.LegacySolidCursorIcon
-                        : XamlGraphicsIconGeometries.LegacyLinedCursorIcon);
+                string currentMode = GetCurrentSelectedMode();
 
-                Pen_Icon.Icon.Geometry = Geometry.Parse(
-                    isPenSolid
-                        ? XamlGraphicsIconGeometries.LegacySolidPenIcon
-                        : XamlGraphicsIconGeometries.LegacyLinedPenIcon);
+                bool isCursorSolid = currentMode == "cursor";
+                bool isPenSolid = currentMode == "pen" || currentMode == "color";
+                bool isCircleEraserSolid = currentMode == "eraser";
+                bool isStrokeEraserSolid = currentMode == "eraserByStrokes";
+                bool isLassoSolid = currentMode == "select";
 
-                EraserByStrokes_Icon.Icon.Geometry = Geometry.Parse(
-                    isStrokeEraserSolid
-                        ? XamlGraphicsIconGeometries.LegacySolidEraserStrokeIcon
-                        : XamlGraphicsIconGeometries.LegacyLinedEraserStrokeIcon);
+                void SetIcon(ToolbarImageButton btn, bool isSolid, string solidGeom, string linedGeom)
+                {
+                    if (btn == null) return;
+                    btn.Icon.Geometry = Geometry.Parse(isSolid ? solidGeom : linedGeom);
+                }
 
-                Eraser_Icon.Icon.Geometry = Geometry.Parse(
-                    isCircleEraserSolid
-                        ? XamlGraphicsIconGeometries.LegacySolidEraserCircleIcon
-                        : XamlGraphicsIconGeometries.LegacyLinedEraserCircleIcon);
-
-                SymbolIconSelect.Icon.Geometry = Geometry.Parse(
-                    isLassoSolid
-                        ? XamlGraphicsIconGeometries.LegacySolidLassoSelectIcon
-                        : XamlGraphicsIconGeometries.LegacyLinedLassoSelectIcon);
+                if (Settings.Appearance.UseLegacyFloatingBarUI)
+                {
+                    SetIcon(Cursor_Icon, isCursorSolid, XamlGraphicsIconGeometries.LegacySolidCursorIcon, XamlGraphicsIconGeometries.LegacyLinedCursorIcon);
+                    SetIcon(Pen_Icon, isPenSolid, XamlGraphicsIconGeometries.LegacySolidPenIcon, XamlGraphicsIconGeometries.LegacyLinedPenIcon);
+                    SetIcon(EraserByStrokes_Icon, isStrokeEraserSolid, XamlGraphicsIconGeometries.LegacySolidEraserStrokeIcon, XamlGraphicsIconGeometries.LegacyLinedEraserStrokeIcon);
+                    SetIcon(Eraser_Icon, isCircleEraserSolid, XamlGraphicsIconGeometries.LegacySolidEraserCircleIcon, XamlGraphicsIconGeometries.LegacyLinedEraserCircleIcon);
+                    SetIcon(SymbolIconSelect, isLassoSolid, XamlGraphicsIconGeometries.LegacySolidLassoSelectIcon, XamlGraphicsIconGeometries.LegacyLinedLassoSelectIcon);
+                }
+                else
+                {
+                    SetIcon(Cursor_Icon, isCursorSolid, XamlGraphicsIconGeometries.SolidCursorIcon, XamlGraphicsIconGeometries.LinedCursorIcon);
+                    SetIcon(Pen_Icon, isPenSolid, XamlGraphicsIconGeometries.SolidPenIcon, XamlGraphicsIconGeometries.LinedPenIcon);
+                    SetIcon(EraserByStrokes_Icon, isStrokeEraserSolid, XamlGraphicsIconGeometries.SolidEraserStrokeIcon, XamlGraphicsIconGeometries.LinedEraserStrokeIcon);
+                    SetIcon(Eraser_Icon, isCircleEraserSolid, XamlGraphicsIconGeometries.SolidEraserCircleIcon, XamlGraphicsIconGeometries.LinedEraserCircleIcon);
+                    SetIcon(SymbolIconSelect, isLassoSolid, XamlGraphicsIconGeometries.SolidLassoSelectIcon, XamlGraphicsIconGeometries.LinedLassoSelectIcon);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Cursor_Icon.Icon.Geometry = Geometry.Parse(
-                    isCursorSolid
-                        ? XamlGraphicsIconGeometries.SolidCursorIcon
-                        : XamlGraphicsIconGeometries.LinedCursorIcon);
-
-                Pen_Icon.Icon.Geometry = Geometry.Parse(
-                    isPenSolid
-                        ? XamlGraphicsIconGeometries.SolidPenIcon
-                        : XamlGraphicsIconGeometries.LinedPenIcon);
-
-                EraserByStrokes_Icon.Icon.Geometry = Geometry.Parse(
-                    isStrokeEraserSolid
-                        ? XamlGraphicsIconGeometries.SolidEraserStrokeIcon
-                        : XamlGraphicsIconGeometries.LinedEraserStrokeIcon);
-
-                Eraser_Icon.Icon.Geometry = Geometry.Parse(
-                    isCircleEraserSolid
-                        ? XamlGraphicsIconGeometries.SolidEraserCircleIcon
-                        : XamlGraphicsIconGeometries.LinedEraserCircleIcon);
-
-                SymbolIconSelect.Icon.Geometry = Geometry.Parse(
-                    isLassoSolid
-                        ? XamlGraphicsIconGeometries.SolidLassoSelectIcon
-                        : XamlGraphicsIconGeometries.LinedLassoSelectIcon);
+                LogHelper.WriteLogToFile($"UpdateFloatingBarIcons 失败: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
 

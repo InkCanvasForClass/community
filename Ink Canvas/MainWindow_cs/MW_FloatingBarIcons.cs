@@ -254,16 +254,6 @@ namespace Ink_Canvas
             }
         }
 
-        /// <summary>
-        /// 浮动工具栏鼠标按下事件处理
-        /// </summary>
-        /// <param name="sender">发送者</param>
-        /// <param name="e">鼠标按钮事件参数</param>
-        internal void DragHandleMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            SymbolIconEmoji_MouseDown(sender, e);
-        }
-
         private void SymbolIconEmoji_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (isViewboxFloatingBarMarginAnimationRunning)
@@ -445,18 +435,11 @@ namespace Ink_Canvas
             {
                 if (mode != "clear")
                 {
-                    Cursor_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                    Cursor_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("cursor", false));
-                    Pen_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                    Pen_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("pen", false));
-                    EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                    EraserByStrokes_Icon.Icon.Geometry =
-                        Geometry.Parse(GetCorrectIcon("eraserStroke", false));
-                    Eraser_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                    Eraser_Icon.Icon.Geometry =
-                        Geometry.Parse(GetCorrectIcon("eraserCircle", false));
-                    SymbolIconSelect.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                    SymbolIconSelect.Icon.Geometry = Geometry.Parse(GetCorrectIcon("lassoSelect", false));
+                    if (Cursor_Icon != null) { Cursor_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); Cursor_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("cursor", false)); }
+                    if (Pen_Icon != null) { Pen_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); Pen_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("pen", false)); }
+                    if (EraserByStrokes_Icon != null) { EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); EraserByStrokes_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("eraserStroke", false)); }
+                    if (Eraser_Icon != null) { Eraser_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); Eraser_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("eraserCircle", false)); }
+                    if (SymbolIconSelect != null) { SymbolIconSelect.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); SymbolIconSelect.Icon.Geometry = Geometry.Parse(GetCorrectIcon("lassoSelect", false)); }
 
                     bool isDarkThemeForButtons = Settings.Appearance.Theme == 1 ||
                                                  (Settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
@@ -1818,9 +1801,12 @@ namespace Ink_Canvas
         private FrameworkElement FindDragHandleInRoot()
         {
             if (FloatingBarRootPanel == null) return null;
+            if (BorderFloatingBarMoveControls != null &&
+                FloatingBarRootPanel.Children.Contains(BorderFloatingBarMoveControls))
+                return BorderFloatingBarMoveControls;
             foreach (var child in FloatingBarRootPanel.Children.OfType<FrameworkElement>())
             {
-                if (child.Tag as string == ToolbarRegistry.InjectedTag && IsDragHandleElement(child))
+                if (IsDragHandleElement(child))
                     return child;
             }
             return null;
@@ -1851,7 +1837,7 @@ namespace Ink_Canvas
 
             foreach (var child in rootList)
             {
-                if (child.Tag as string == ToolbarRegistry.InjectedTag && IsDragHandleElement(child))
+                if (IsDragHandleElement(child))
                 {
                     dragElement = child;
                 }
@@ -1899,7 +1885,9 @@ namespace Ink_Canvas
         {
             if (element is Border border)
             {
+                if (border.Name == "BorderFloatingBarMoveControls") return true;
                 var child = border.Child;
+                if (child is Image) return true;
                 if (child is StackPanel panel && panel.Children.Count > 0 && panel.Children[0] is Image)
                     return true;
             }

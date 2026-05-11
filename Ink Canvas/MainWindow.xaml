@@ -1114,6 +1114,19 @@
                     <ScaleTransform x:Name="ViewboxFloatingBarScaleTransform" ScaleX="1" ScaleY="1" />
                 </Viewbox.LayoutTransform>
                 <ikw:SimpleStackPanel Name="StackPanelFloatingBarRoot" Orientation="Horizontal" MaxHeight="50">
+                    <Border Name="BorderFloatingBarMoveControls" Margin="0" Padding="0"
+                            Width="50" Height="50"
+                            Background="{DynamicResource FloatBarBackground}"
+                            CornerRadius="8"
+                            BorderThickness="2"
+                            BorderBrush="{DynamicResource FloatBarBorderBrush}"
+                            MouseDown="SymbolIconEmoji_MouseDown"
+                            MouseUp="SymbolIconEmoji_MouseUp">
+                        <Image Name="FloatingbarHeadIconImg" Margin="0.5"
+                               SnapsToDevicePixels="True"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               RenderOptions.BitmapScalingMode="HighQuality" />
+                    </Border>
                 </ikw:SimpleStackPanel>
             </Viewbox>
         </Grid>
