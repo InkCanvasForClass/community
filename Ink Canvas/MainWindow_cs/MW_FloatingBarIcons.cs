@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Forms;
 using System.Windows.Ink;
 using System.Windows.Input;
@@ -1742,6 +1743,18 @@ namespace Ink_Canvas
             return width > 0 && !double.IsNaN(width) && !double.IsInfinity(width) ? width : fallbackWidth;
         }
 
+        private double GetElementHeightForFloatingBar(FrameworkElement element, double fallbackHeight)
+        {
+            if (element == null) return fallbackHeight;
+
+            var height = element.ActualHeight;
+            if (height <= 0 || double.IsNaN(height)) height = element.DesiredSize.Height;
+            if (height <= 0 || double.IsNaN(height)) height = element.RenderSize.Height;
+            if (height <= 0 || double.IsNaN(height)) height = element.Height;
+
+            return height > 0 && !double.IsNaN(height) && !double.IsInfinity(height) ? height : fallbackHeight;
+        }
+
         private double GetFloatingBarScaledWidth()
         {
             var baseWidth = GetElementWidthForFloatingBar(ViewboxFloatingBar, 200);
@@ -2088,9 +2101,7 @@ namespace Ink_Canvas
                     toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
                 }
 
-                double baseWidth = ViewboxFloatingBar.ActualWidth;
-                if (baseWidth <= 0) baseWidth = ViewboxFloatingBar.DesiredSize.Width;
-                if (baseWidth <= 0) baseWidth = ViewboxFloatingBar.RenderSize.Width;
+                double baseWidth = GetElementWidthForFloatingBar(ViewboxFloatingBar, 200);
                 if (baseWidth <= 0)
                 {
                     baseWidth = 200;
@@ -2098,9 +2109,7 @@ namespace Ink_Canvas
                 }
                 double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
 
-                double baseHeight = ViewboxFloatingBar.ActualHeight;
-                if (baseHeight <= 0) baseHeight = ViewboxFloatingBar.DesiredSize.Height;
-                if (baseHeight <= 0) baseHeight = ViewboxFloatingBar.RenderSize.Height;
+                double baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 58);
                 if (baseHeight <= 0)
                 {
                     baseHeight = 58;
@@ -2235,15 +2244,7 @@ namespace Ink_Canvas
                     toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
                 }
 
-                double baseWidth = ViewboxFloatingBar.ActualWidth;
-                if (baseWidth <= 0)
-                {
-                    baseWidth = ViewboxFloatingBar.DesiredSize.Width;
-                }
-                if (baseWidth <= 0)
-                {
-                    baseWidth = ViewboxFloatingBar.RenderSize.Width;
-                }
+                double baseWidth = GetElementWidthForFloatingBar(ViewboxFloatingBar, 200);
                 if (baseWidth <= 0)
                 {
                     baseWidth = 200;
@@ -2251,15 +2252,7 @@ namespace Ink_Canvas
                 }
                 double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
 
-                double baseHeight = ViewboxFloatingBar.ActualHeight;
-                if (baseHeight <= 0)
-                {
-                    baseHeight = ViewboxFloatingBar.DesiredSize.Height;
-                }
-                if (baseHeight <= 0)
-                {
-                    baseHeight = ViewboxFloatingBar.RenderSize.Height;
-                }
+                double baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 58);
                 if (baseHeight <= 0)
                 {
                     baseHeight = 58;
@@ -2345,16 +2338,7 @@ namespace Ink_Canvas
 
                 // 计算浮动栏位置，考虑快捷调色盘的显示状态
                 // 使用更可靠的方法获取浮动栏宽度
-                double baseWidth = ViewboxFloatingBar.ActualWidth;
-
-                if (baseWidth <= 0)
-                {
-                    baseWidth = ViewboxFloatingBar.DesiredSize.Width;
-                }
-                if (baseWidth <= 0)
-                {
-                    baseWidth = ViewboxFloatingBar.RenderSize.Width;
-                }
+                double baseWidth = GetElementWidthForFloatingBar(ViewboxFloatingBar, 200);
                 if (baseWidth <= 0)
                 {
                     baseWidth = 200;
@@ -2362,9 +2346,7 @@ namespace Ink_Canvas
                 }
                 double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
 
-                double baseHeight = ViewboxFloatingBar.ActualHeight;
-                if (baseHeight <= 0) baseHeight = ViewboxFloatingBar.DesiredSize.Height;
-                if (baseHeight <= 0) baseHeight = ViewboxFloatingBar.RenderSize.Height;
+                double baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 58);
                 if (baseHeight <= 0) baseHeight = 58;
                 double floatingBarHeight = baseHeight * ViewboxFloatingBarScaleTransform.ScaleY;
 
@@ -4852,9 +4834,25 @@ private bool forceEraser;
             try
             {
                 if (button == null || panel == null) return;
+
+                if (panel is Popup popup)
+                {
+                    if (popup.PlacementTarget == null)
+                    {
+                        popup.PlacementTarget = button;
+                    }
+
+                    if (popup.IsOpen)
+                    {
+                        _popupManager?.UpdatePosition(popup);
+                    }
+
+                    return;
+                }
+
                 if (!(panel.Parent is FrameworkElement panelContainer)) return;
 
-                var ancestor = FindContentPanelForButton(button as ToolbarImageButton) ?? GetFirstContentPanel();
+                var ancestor = StackPanelFloatingBarRoot;
                 if (ancestor == null) return;
 
                 var buttonTransform = button.TransformToAncestor(ancestor);
