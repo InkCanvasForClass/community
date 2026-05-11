@@ -159,6 +159,12 @@ namespace Ink_Canvas
         private int _currentSlideShowPosition = 0;
 
         private Dictionary<int, MemoryStream> _memoryStreams = new Dictionary<int, MemoryStream>();
+        private readonly object _pptEnhancedPreviewCacheLock = new object();
+        private List<PptEnhancedPreviewItem> _pptEnhancedPreviewCache;
+        private Task<List<PptEnhancedPreviewItem>> _pptEnhancedPreviewBuildTask;
+        private CancellationTokenSource _pptEnhancedPreviewCacheCts;
+        private int _pptEnhancedPreviewCacheGeneration;
+        private const int PptEnhancedPreviewPreloadDelayMs = 1000;
         private int _previousSlideID = 0;
 
         /// <summary>
@@ -321,6 +327,7 @@ namespace Ink_Canvas
             {
                 _exitPPTModeAfterDisconnectTimer?.Stop();
                 _exitPPTModeAfterDisconnectTimer = null;
+                ResetPptEnhancedPreviewCache();
             }
             catch
             {
@@ -877,6 +884,8 @@ namespace Ink_Canvas
                 Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     // 在初始化墨迹管理器之前，先清理画布上的所有墨迹
+                    ResetPptEnhancedPreviewCache();
+
                     ClearStrokes(true);
 
                     // 清理备份历史记录，防止旧演示文稿的墨迹影响新演示文稿
@@ -930,6 +939,9 @@ namespace Ink_Canvas
             {
                 Application.Current.Dispatcher.InvokeAsync(() =>
                 {
+                    CollapseAllPptNavBarPreviews();
+                    ResetPptEnhancedPreviewCache();
+
                     lock (_memoryStreams)
                     {
                         foreach (var stream in _memoryStreams.Values)
@@ -972,6 +984,7 @@ namespace Ink_Canvas
 
                     if (!isInSlideShow)
                     {
+                        ResetPptEnhancedPreviewCache();
                     }
 
                     // 检查主窗口可见性（用于仅PPT模式）
@@ -1072,6 +1085,8 @@ namespace Ink_Canvas
 
                 _currentSlideShowPosition = currentSlide;
                 _previousSlideID = currentSlide;
+
+                ResetPptEnhancedPreviewCache();
 
                 lock (_memoryStreams)
                 {
@@ -1230,6 +1245,8 @@ namespace Ink_Canvas
                     CheckMainWindowVisibility();
                 });
 
+                SchedulePptEnhancedPreviewPreload();
+
                 if (!isFloatingBarFolded)
                 {
                     new Thread(() =>
@@ -1367,6 +1384,7 @@ namespace Ink_Canvas
             try
             {
                 await Application.Current.Dispatcher.InvokeAsync(() => CollapseAllPptNavBarPreviews());
+                ResetPptEnhancedPreviewCache();
 
                 if (Settings.Automation.IsAutoFoldAfterPPTSlideShow && !isFloatingBarFolded)
                 {
@@ -2266,7 +2284,7 @@ namespace Ink_Canvas
                     }
                     else
                     {
-                        var slides = await RunOnStaAsync(BuildPptPreviewItems);
+                        var slides = await GetOrBuildPptEnhancedPreviewItemsAsync(EnsurePptEnhancedPreviewCacheToken());
                         if (slides == null || slides.Count == 0)
                         {
                             LogHelper.WriteLogToFile("PPT增强预览未生成可用缩略图，改用默认导航", LogHelper.LogType.Warning);
@@ -2284,7 +2302,9 @@ namespace Ink_Canvas
                                 });
                             }
                             targetBar.PreviewItems = items;
-                            targetBar.CurrentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
+                            targetBar.CurrentSlide = _currentSlideShowPosition > 0
+                                ? _currentSlideShowPosition
+                                : (_pptManager?.GetCurrentSlideNumber() ?? 0);
                             targetBar.IsPreviewExpanded = true;
                         }
                     }
@@ -2309,6 +2329,9 @@ namespace Ink_Canvas
                     await Task.Delay(100);
                     ViewboxFloatingBarMarginAnimation(60);
                 }
+            }
+            catch (OperationCanceledException)
+            {
             }
             catch (Exception ex)
             {
@@ -2352,10 +2375,18 @@ namespace Ink_Canvas
             return null;
         }
 
-        private sealed class PptEnhancedPreviewItem
+        private sealed class PptEnhancedPreviewItem : IDisposable
         {
             public int SlideNumber { get; set; }
+            public MemoryStream ThumbnailStream { get; set; }
             public BitmapImage Thumbnail { get; set; }
+
+            public void Dispose()
+            {
+                ThumbnailStream?.Dispose();
+                ThumbnailStream = null;
+                Thumbnail = null;
+            }
         }
 
         private void CollapseAllPptNavBarPreviews()
@@ -2490,15 +2521,175 @@ namespace Ink_Canvas
             }
         }
 
-        private static Task<T> RunOnStaAsync<T>(Func<T> func)
+        private CancellationToken EnsurePptEnhancedPreviewCacheToken()
+        {
+            lock (_pptEnhancedPreviewCacheLock)
+            {
+                if (_pptEnhancedPreviewCacheCts == null)
+                    _pptEnhancedPreviewCacheCts = new CancellationTokenSource();
+
+                return _pptEnhancedPreviewCacheCts.Token;
+            }
+        }
+
+        private void ResetPptEnhancedPreviewCache()
+        {
+            CancellationTokenSource ctsToCancel = null;
+            List<PptEnhancedPreviewItem> cacheToDispose = null;
+
+            lock (_pptEnhancedPreviewCacheLock)
+            {
+                _pptEnhancedPreviewCacheGeneration++;
+                ctsToCancel = _pptEnhancedPreviewCacheCts;
+                _pptEnhancedPreviewCacheCts = null;
+                _pptEnhancedPreviewBuildTask = null;
+                cacheToDispose = _pptEnhancedPreviewCache;
+                _pptEnhancedPreviewCache = null;
+            }
+
+            try
+            {
+                ctsToCancel?.Cancel();
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                ctsToCancel?.Dispose();
+            }
+            catch
+            {
+            }
+
+            DisposePptEnhancedPreviewItems(cacheToDispose);
+        }
+
+        private void SchedulePptEnhancedPreviewPreload()
+        {
+            if (!Settings.PowerPointSettings.EnablePPTButtonEnhancedPreview) return;
+            if (_pptManager?.IsInSlideShow != true) return;
+
+            var token = EnsurePptEnhancedPreviewCacheToken();
+            _ = PreloadPptEnhancedPreviewAfterDelayAsync(token);
+        }
+
+        private async Task PreloadPptEnhancedPreviewAfterDelayAsync(CancellationToken cancellationToken)
+        {
+            try
+            {
+                await Task.Delay(PptEnhancedPreviewPreloadDelayMs, cancellationToken);
+                if (cancellationToken.IsCancellationRequested) return;
+                if (_pptManager?.IsInSlideShow != true) return;
+                if (!Settings.PowerPointSettings.EnablePPTButtonEnhancedPreview) return;
+
+                var slides = await GetOrBuildPptEnhancedPreviewItemsAsync(cancellationToken);
+                if (!cancellationToken.IsCancellationRequested && slides != null && slides.Count > 0)
+                {
+                    LogHelper.WriteLogToFile($"PPT enhanced preview preloaded {slides.Count} thumbnails.", LogHelper.LogType.Trace);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"PPT enhanced preview preload failed: {ex}", LogHelper.LogType.Warning);
+            }
+        }
+
+        private Task<List<PptEnhancedPreviewItem>> GetOrBuildPptEnhancedPreviewItemsAsync(CancellationToken cancellationToken)
+        {
+            lock (_pptEnhancedPreviewCacheLock)
+            {
+                if (_pptEnhancedPreviewCache != null && _pptEnhancedPreviewCache.Count > 0)
+                    return Task.FromResult(_pptEnhancedPreviewCache);
+
+                if (_pptEnhancedPreviewBuildTask != null && !_pptEnhancedPreviewBuildTask.IsCompleted)
+                    return _pptEnhancedPreviewBuildTask;
+
+                int generation = _pptEnhancedPreviewCacheGeneration;
+                var task = RunOnStaAsync(() => BuildPptPreviewItems(cancellationToken), cancellationToken);
+                _pptEnhancedPreviewBuildTask = task;
+
+                task.ContinueWith(
+                    completedTask => StorePptEnhancedPreviewBuildResult(completedTask, generation),
+                    CancellationToken.None,
+                    TaskContinuationOptions.ExecuteSynchronously,
+                    TaskScheduler.Default);
+
+                return task;
+            }
+        }
+
+        private void StorePptEnhancedPreviewBuildResult(Task<List<PptEnhancedPreviewItem>> task, int generation)
+        {
+            List<PptEnhancedPreviewItem> itemsToDispose = null;
+
+            if (task.IsFaulted)
+            {
+                LogHelper.WriteLogToFile($"PPT enhanced preview build failed: {task.Exception?.GetBaseException()}", LogHelper.LogType.Warning);
+            }
+
+            lock (_pptEnhancedPreviewCacheLock)
+            {
+                if (ReferenceEquals(_pptEnhancedPreviewBuildTask, task))
+                    _pptEnhancedPreviewBuildTask = null;
+
+                if (task.Status == TaskStatus.RanToCompletion)
+                {
+                    var result = task.Result;
+                    if (generation == _pptEnhancedPreviewCacheGeneration && result != null && result.Count > 0)
+                    {
+                        itemsToDispose = _pptEnhancedPreviewCache;
+                        _pptEnhancedPreviewCache = result;
+                    }
+                    else
+                    {
+                        itemsToDispose = result;
+                    }
+                }
+            }
+
+            DisposePptEnhancedPreviewItems(itemsToDispose);
+        }
+
+        private static void DisposePptEnhancedPreviewItems(List<PptEnhancedPreviewItem> items)
+        {
+            if (items == null) return;
+            foreach (var item in items)
+                item?.Dispose();
+        }
+
+        private static Task<T> RunOnStaAsync<T>(Func<T> func, CancellationToken cancellationToken = default)
         {
             // Office interop 要求 STA + COM 单元；Task.Run 跑到 MTA 线程池里会触发 RPC_E_WRONG_THREAD
             // 等随机 COM 失败，表现为增强预览空白或崩溃。显式创建 STA worker 在其中执行导出。
-            var tcs = new TaskCompletionSource<T>();
+            if (cancellationToken.IsCancellationRequested)
+                return Task.FromCanceled<T>(cancellationToken);
+
+            var tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
             var thread = new Thread(() =>
             {
-                try { tcs.SetResult(func()); }
-                catch (Exception ex) { tcs.SetException(ex); }
+                try
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        tcs.TrySetCanceled(cancellationToken);
+                        return;
+                    }
+
+                    tcs.TrySetResult(func());
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    tcs.TrySetCanceled(cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    tcs.TrySetException(ex);
+                }
             });
             thread.IsBackground = true;
             thread.SetApartmentState(ApartmentState.STA);
@@ -2506,7 +2697,7 @@ namespace Ink_Canvas
             return tcs.Task;
         }
 
-        private List<PptEnhancedPreviewItem> BuildPptPreviewItems()
+        private List<PptEnhancedPreviewItem> BuildPptPreviewItems(CancellationToken cancellationToken)
         {
             var result = new List<PptEnhancedPreviewItem>();
             string tempDir = null;
@@ -2532,20 +2723,35 @@ namespace Ink_Canvas
 
                 for (int i = 1; i <= count; i++)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     Slide slide = null;
                     try
                     {
                         slide = slides[i];
                         var imagePath = Path.Combine(tempDir, $"slide_{i:0000}.png");
                         slide.Export(imagePath, "PNG", 480, 270);
-                        var image = LoadBitmapImage(imagePath);
-                        if (image == null) continue;
+                        cancellationToken.ThrowIfCancellationRequested();
+
+                        var thumbnailStream = new MemoryStream(File.ReadAllBytes(imagePath), false);
+                        var image = LoadBitmapImage(thumbnailStream);
+                        if (image == null)
+                        {
+                            thumbnailStream.Dispose();
+                            continue;
+                        }
+
+                        thumbnailStream.Position = 0;
 
                         result.Add(new PptEnhancedPreviewItem
                         {
                             SlideNumber = i,
+                            ThumbnailStream = thumbnailStream,
                             Thumbnail = image
                         });
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
                     }
                     catch (Exception ex)
                     {
@@ -2559,6 +2765,11 @@ namespace Ink_Canvas
                         }
                     }
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                DisposePptEnhancedPreviewItems(result);
+                throw;
             }
             catch (Exception ex)
             {
@@ -2575,18 +2786,23 @@ namespace Ink_Canvas
             return result;
         }
 
-        private static BitmapImage LoadBitmapImage(string path)
+        private static BitmapImage LoadBitmapImage(MemoryStream stream)
         {
             try
             {
-                if (!File.Exists(path)) return null;
-                var bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.UriSource = new Uri(path, UriKind.Absolute);
-                bitmap.EndInit();
-                bitmap.Freeze();
-                return bitmap;
+                if (stream == null || stream.Length == 0) return null;
+                lock (stream)
+                {
+                    stream.Position = 0;
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.StreamSource = stream;
+                    bitmap.EndInit();
+                    bitmap.Freeze();
+                    stream.Position = 0;
+                    return bitmap;
+                }
             }
             catch
             {
@@ -2725,6 +2941,7 @@ namespace Ink_Canvas
             try
             {
                 await Application.Current.Dispatcher.InvokeAsync(() => CollapseAllPptNavBarPreviews());
+                ResetPptEnhancedPreviewCache();
 
                 if (Settings.Automation.IsAutoFoldAfterPPTSlideShow && !isFloatingBarFolded)
                 {
