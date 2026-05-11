@@ -174,7 +174,14 @@ namespace Ink_Canvas
             // Startup
             if (isStartup)
             {
-                CursorIcon_Click(null, null);
+                try
+                {
+                    CursorIcon_Click(null, null);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"启动时切换光标模式失败: {ex.Message}", LogHelper.LogType.Warning);
+                }
             }
 
             try
@@ -248,8 +255,10 @@ namespace Ink_Canvas
             }
 
             // Appearance - UI initialization (settings loading moved to AppearancePage)
-            if (Settings.Appearance != null)
+            try
             {
+                if (Settings.Appearance != null)
+                {
                 if (!Settings.Appearance.IsEnableDisPlayNibModeToggler)
                 {
                     NibModeSimpleStackPanel.Visibility = Visibility.Collapsed;
@@ -329,10 +338,15 @@ namespace Ink_Canvas
                     fe.Visibility = Settings.Appearance.EnableTrayIcon ? Visibility.Visible : Visibility.Collapsed;
 
                 SystemEvents_UserPreferenceChanged(null, null);
+                }
+                else
+                {
+                    Settings.Appearance = new Appearance();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Settings.Appearance = new Appearance();
+                LogHelper.WriteLogToFile($"加载外观设置失败: {ex.Message}", LogHelper.LogType.Error);
             }
 
             // PowerPointSettings

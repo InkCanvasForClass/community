@@ -25,8 +25,6 @@ namespace Ink_Canvas
         internal ToolbarImageButton Freeze_Icon { get; private set; }
         internal ToolbarImageButton Gesture_Icon { get; private set; }
         internal ToolbarImageButton Exit_Icon { get; private set; }
-        internal Image FloatingbarHeadIconImg { get; private set; }
-        internal FrameworkElement DragHandleElement { get; private set; }
 
         internal Panel FloatingBarRootPanel => StackPanelFloatingBarRoot;
 
@@ -77,7 +75,6 @@ namespace Ink_Canvas
         internal void AttachFoldIcon(ToolbarImageButton btn) => Fold_Icon = btn;
         internal void AttachGestureBtn(ToolbarImageButton btn) => Gesture_Icon = btn;
         internal void AttachExitBtn(ToolbarImageButton btn) => Exit_Icon = btn;
-        internal void AttachDragHandleView(Image iconImg) => FloatingbarHeadIconImg = iconImg;
 
         #region PenPalette property mappings
         internal ComboBox ComboBoxPenStyle => PenPalettePopupContent?.PenStyleComboBox ?? BoardPenPalettePopupContent?.PenStyleComboBox;

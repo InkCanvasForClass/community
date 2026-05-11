@@ -529,6 +529,7 @@ namespace Ink_Canvas.Controls.Toolbar
             var displayItems = FlattenEntries(host, layout.Components, itemMap);
             var segments = GroupIntoSegments(displayItems);
 
+            bool hasExistingChildren = rootPanel.Children.Count > 0;
             bool isFirst = true;
             foreach (var segment in segments)
             {
@@ -536,7 +537,7 @@ namespace Ink_Canvas.Controls.Toolbar
                 {
                     var item = segment.Items[0];
                     var elementToAdd = WrapInSeparateBorder(item.View, item.Ruleset, item.IsToolbarButton);
-                    elementToAdd.Margin = isFirst ? new Thickness(0) : new Thickness(3, 0, 0, 0);
+                    elementToAdd.Margin = (isFirst && !hasExistingChildren) ? new Thickness(0) : new Thickness(3, 0, 0, 0);
                     ApplyInitialVisibility(elementToAdd, item.Ruleset);
                     rootPanel.Children.Add(elementToAdd);
                     LogHelper.WriteLogToFile($"ToolbarRegistry: 添加独立边框条目到根面板", LogHelper.LogType.Info);
@@ -544,7 +545,7 @@ namespace Ink_Canvas.Controls.Toolbar
                 else
                 {
                     var contentBorder = CreateContentBorder(segment.Items);
-                    contentBorder.Margin = isFirst ? new Thickness(0) : new Thickness(3, 0, 0, 0);
+                    contentBorder.Margin = (isFirst && !hasExistingChildren) ? new Thickness(0) : new Thickness(3, 0, 0, 0);
                     rootPanel.Children.Add(contentBorder);
                     LogHelper.WriteLogToFile($"ToolbarRegistry: 添加内容边框 ({segment.Items.Count} 项) 到根面板", LogHelper.LogType.Info);
                 }
@@ -726,7 +727,6 @@ namespace Ink_Canvas.Controls.Toolbar
             {
                 Components = new List<ToolbarComponentEntry>
                 {
-                    new ToolbarComponentEntry { Id = "builtin.dragHandle", HidingRuleset = ToolbarRuleset.AlwaysShow(), ShowSeparateBorder = true },
                     new ToolbarComponentEntry { Id = "builtin.cursor", HidingRuleset = ToolbarRuleset.AlwaysShow() },
                     new ToolbarComponentEntry { Id = "builtin.pen", HidingRuleset = ToolbarRuleset.AlwaysShow() },
                     new ToolbarComponentEntry { Id = "builtin.quickColorPalette", HidingRuleset = ToolbarRuleset.AnnotationOnly() },
