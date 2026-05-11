@@ -417,32 +417,13 @@ namespace Ink_Canvas.Helpers
             var cached = TryGetCachedOrderedGroups(channel);
             if (cached != null) return cached;
             var groups = ChannelLineGroups[channel];
-            var availableGroups = new List<(UpdateLineGroup group, long delay)>();
 
-            LogHelper.WriteLogToFile($"AutoUpdate | 开始检测通道 {channel} 下所有线路组延迟...");
+            LogHelper.WriteLogToFile($"AutoUpdate | 开始并发检测通道 {channel} 下所有线路组延迟...");
 
+            var testTasks = new List<Task<(UpdateLineGroup group, long delay)>>();
             foreach (var group in groups)
             {
-                string testUrl = null;
-                if (group.GroupName == "智教联盟" || group.GroupName == "inkeys")
-                {
-                    try
-                    {
-                        if (!string.IsNullOrEmpty(group.DownloadUrlFormat))
-                        {
-                            testUrl = group.DownloadUrlFormat.Replace("{0}", "test");
-                            testUrl = AppendX64SuffixBeforeZipExtension(testUrl);
-                        }
-                    }
-                    catch
-                    {
-                        testUrl = null;
-                    }
-                }
-                else
-                {
-                    testUrl = group.VersionUrl;
-                }
+                var testUrl = GetLineGroupTestUrl(group);
 
                 if (string.IsNullOrEmpty(testUrl))
                 {
@@ -451,18 +432,16 @@ namespace Ink_Canvas.Helpers
                 }
 
                 LogHelper.WriteLogToFile($"AutoUpdate | 检测线路组: {group.GroupName} ({testUrl})");
+                testTasks.Add(MeasureLineGroupDelayAsync(group, testUrl));
+            }
 
-                long delay;
+            var availableGroups = new List<(UpdateLineGroup group, long delay)>();
+            var testResults = await Task.WhenAll(testTasks);
 
-                if (group.GroupName == "智教联盟" || group.GroupName == "inkeys")
-                {
-                    delay = await GetDownloadUrlDelay(testUrl);
-                }
-                else
-                {
-                    delay = await GetUrlDelay(testUrl);
-                }
-
+            foreach (var result in testResults)
+            {
+                var group = result.group;
+                var delay = result.delay;
                 if (delay >= 0)
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | 线路组 {group.GroupName} 延迟: {delay}ms");
@@ -503,6 +482,35 @@ namespace Ink_Canvas.Helpers
 
             CacheOrderedGroups(channel, orderedGroups);
             return orderedGroups;
+        }
+
+        private static string GetLineGroupTestUrl(UpdateLineGroup group)
+        {
+            if (group.GroupName == "智教联盟" || group.GroupName == "inkeys")
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(group.DownloadUrlFormat))
+                    {
+                        var testUrl = group.DownloadUrlFormat.Replace("{0}", "test");
+                        return AppendX64SuffixBeforeZipExtension(testUrl);
+                    }
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+
+            return group.VersionUrl;
+        }
+
+        private static async Task<(UpdateLineGroup group, long delay)> MeasureLineGroupDelayAsync(UpdateLineGroup group, string testUrl)
+        {
+            var delay = group.GroupName == "智教联盟" || group.GroupName == "inkeys"
+                ? await GetDownloadUrlDelay(testUrl)
+                : await GetUrlDelay(testUrl);
+            return (group, delay);
         }
 
         // 缓存按延迟排序后的线路组，避免短时间内重复测速
