@@ -189,10 +189,16 @@
 
                         <Grid x:Name="ControlOptionsGrid" Grid.Column="2">
                             <Border Style="{StaticResource ModernRollCallCardStyle}" />
-                            <StackPanel Width="430"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center">
-                                <Grid Margin="0,0,0,16">
+                            <Grid Width="430"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="2" Margin="0,0,0,16">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
@@ -236,7 +242,7 @@
                                     </StackPanel>
                                 </Grid>
 
-                                <StackPanel Margin="0,0,0,16">
+                                <StackPanel Grid.Row="0" Margin="0,0,0,16">
                                     <TextBlock Text="点名模式"
                                                Margin="0,0,0,8"
                                                FontSize="14"
@@ -257,7 +263,7 @@
                                     </TabControl>
                                 </StackPanel>
 
-                                <Grid Margin="0,0,0,16">
+                                <Grid Grid.Row="1" Margin="0,0,0,16">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
@@ -280,7 +286,7 @@
                                     </ComboBox>
                                 </Grid>
 
-                                <StackPanel>
+                                <StackPanel Grid.Row="3">
                                     <TextBlock Text="名单管理"
                                                Margin="0,0,0,8"
                                                FontSize="14"
@@ -307,7 +313,7 @@
                                         </Button>
                                     </UniformGrid>
                                 </StackPanel>
-                            </StackPanel>
+                            </Grid>
                         </Grid>
                     </Grid>
 
