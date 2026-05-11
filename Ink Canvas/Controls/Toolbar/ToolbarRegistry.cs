@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace Ink_Canvas.Controls.Toolbar
@@ -16,6 +17,11 @@ namespace Ink_Canvas.Controls.Toolbar
     {
         private static List<IToolbarItem> _items;
         internal const string InjectedTag = "ToolbarRegistryInjected";
+        internal const string ContentBorderTag = "ToolbarContentBorder";
+        internal const string SelectionCanvasTag = "ToolbarSelectionCanvas";
+        internal const string SelectionBGTag = "ToolbarSelectionBG";
+        internal const string IndicatorBarTag = "ToolbarIndicatorBar";
+        internal const string ContentPanelTag = "ToolbarContentPanel";
 
         private static readonly string ConfigSubDir = Path.Combine("Configs", "ToolbarConfigs");
 
@@ -182,6 +188,11 @@ namespace Ink_Canvas.Controls.Toolbar
             return Path.Combine(GetConfigDirectory(), name + ".json");
         }
 
+        private static string GetBackupFilePath(string name)
+        {
+            return Path.Combine(GetConfigDirectory(), name + ".json.bak");
+        }
+
         public static List<string> ListConfigFiles()
         {
             var dir = GetConfigDirectory();
@@ -197,14 +208,53 @@ namespace Ink_Canvas.Controls.Toolbar
             var path = GetConfigFilePath(name);
             if (!File.Exists(path))
             {
+                var bakPath = GetBackupFilePath(name);
+                if (File.Exists(bakPath))
+                {
+                    LogHelper.WriteLogToFile($"ToolbarRegistry: 主配置文件不存在，尝试加载备份 [{bakPath}]", LogHelper.LogType.Warning);
+                    var bakResult = TryDeserializeConfig(bakPath, name);
+                    if (bakResult != null)
+                    {
+                        SaveConfigFile(name, bakResult);
+                        LogHelper.WriteLogToFile($"ToolbarRegistry: 从备份恢复配置 [{name}] 成功", LogHelper.LogType.Info);
+                    }
+                    return bakResult;
+                }
                 LogHelper.WriteLogToFile($"ToolbarRegistry: 配置文件不存在 [{path}]", LogHelper.LogType.Warning);
                 return null;
             }
+            var result = TryDeserializeConfig(path, name);
+            if (result != null) return result;
+
+            var backupPath = GetBackupFilePath(name);
+            if (File.Exists(backupPath))
+            {
+                LogHelper.WriteLogToFile($"ToolbarRegistry: 主配置文件损坏，尝试加载备份 [{backupPath}]", LogHelper.LogType.Warning);
+                var bakResult = TryDeserializeConfig(backupPath, name);
+                if (bakResult != null)
+                {
+                    SaveConfigFile(name, bakResult);
+                    LogHelper.WriteLogToFile($"ToolbarRegistry: 从备份恢复配置 [{name}] 成功", LogHelper.LogType.Info);
+                }
+                return bakResult;
+            }
+
+            LogHelper.WriteLogToFile($"ToolbarRegistry: 配置 [{name}] 和备份均不可用", LogHelper.LogType.Error);
+            return null;
+        }
+
+        private static ToolbarLayoutSettings TryDeserializeConfig(string path, string name)
+        {
             try
             {
                 var json = File.ReadAllText(path);
                 var layout = JsonConvert.DeserializeObject<ToolbarLayoutSettings>(json);
-                LogHelper.WriteLogToFile($"ToolbarRegistry: 加载配置 [{name}] 成功, {layout?.Components?.Count ?? 0} 个条目", LogHelper.LogType.Info);
+                if (layout?.Components == null || layout.Components.Count == 0)
+                {
+                    LogHelper.WriteLogToFile($"ToolbarRegistry: 配置 [{name}] 内容为空或无效", LogHelper.LogType.Warning);
+                    return null;
+                }
+                LogHelper.WriteLogToFile($"ToolbarRegistry: 加载配置 [{name}] 成功, {layout.Components.Count} 个条目", LogHelper.LogType.Info);
                 return layout;
             }
             catch (Exception ex)
@@ -221,8 +271,23 @@ namespace Ink_Canvas.Controls.Toolbar
                 var dir = GetConfigDirectory();
                 if (!Directory.Exists(dir))
                     ProcessProtectionManager.WithWriteAccess(dir, () => Directory.CreateDirectory(dir));
-                var json = JsonConvert.SerializeObject(layout, Formatting.Indented);
+
                 var path = GetConfigFilePath(name);
+                var bakPath = GetBackupFilePath(name);
+
+                if (File.Exists(path))
+                {
+                    try
+                    {
+                        ProcessProtectionManager.WithWriteAccess(bakPath, () => File.Copy(path, bakPath, true));
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"ToolbarRegistry: 备份配置 [{name}] 失败: {ex.Message}", LogHelper.LogType.Warning);
+                    }
+                }
+
+                var json = JsonConvert.SerializeObject(layout, Formatting.Indented);
                 ProcessProtectionManager.WithWriteAccess(path, () => File.WriteAllText(path, json));
                 LogHelper.WriteLogToFile($"ToolbarRegistry: 保存配置 [{name}] 成功", LogHelper.LogType.Info);
             }
@@ -239,6 +304,9 @@ namespace Ink_Canvas.Controls.Toolbar
                 var path = GetConfigFilePath(name);
                 if (File.Exists(path))
                     ProcessProtectionManager.WithWriteAccess(path, () => File.Delete(path));
+                var bakPath = GetBackupFilePath(name);
+                if (File.Exists(bakPath))
+                    ProcessProtectionManager.WithWriteAccess(bakPath, () => File.Delete(bakPath));
                 LogHelper.WriteLogToFile($"ToolbarRegistry: 删除配置 [{name}]", LogHelper.LogType.Info);
             }
             catch (Exception ex)
@@ -289,19 +357,161 @@ namespace Ink_Canvas.Controls.Toolbar
         {
             if (container == null) return;
             var toRemove = container.Children.OfType<FrameworkElement>()
-                .Where(e => e.Tag as string == InjectedTag)
+                .Where(e => e.Tag as string == InjectedTag || e.Tag as string == ContentBorderTag)
                 .ToList();
             foreach (var element in toRemove)
                 container.Children.Remove(element);
             LogHelper.WriteLogToFile($"ToolbarRegistry: ClearInjected 清除 {toRemove.Count} 个元素 [{container.Name}]", LogHelper.LogType.Info);
         }
 
-        public static void Populate(IToolbarHost host, Panel container, ToolbarLayoutSettings layout)
+        #region Display items and segments
+
+        private class DisplayItem
+        {
+            public FrameworkElement View { get; set; }
+            public ToolbarRuleset Ruleset { get; set; }
+            public bool IsSeparateBorder { get; set; }
+            public bool IsToolbarButton { get; set; }
+        }
+
+        private class Segment
+        {
+            public bool IsSeparateBorder { get; set; }
+            public List<DisplayItem> Items { get; set; } = new();
+        }
+
+        private static List<DisplayItem> FlattenEntries(IToolbarHost host, List<ToolbarComponentEntry> entries, Dictionary<string, IToolbarItem> itemMap)
+        {
+            var result = new List<DisplayItem>();
+            foreach (var entry in entries)
+            {
+                if (entry.IsGroup)
+                {
+                    var groupRuleset = GetEffectiveRuleset(entry);
+                    var groupContentItems = new List<DisplayItem>();
+
+                    foreach (var childEntry in entry.Children)
+                    {
+                        if (!itemMap.TryGetValue(childEntry.Id, out var item)) continue;
+                        var view = BuildAndRegister(host, item);
+                        if (view == null) continue;
+                        view.Tag = InjectedTag;
+                        var childRuleset = GetEffectiveRuleset(childEntry);
+                        SetHidingRuleset(view, childRuleset);
+
+                        if (childEntry.ShowSeparateBorder)
+                        {
+                            if (groupContentItems.Count > 0)
+                            {
+                                result.Add(CreateGroupContentDisplayItem(groupContentItems, groupRuleset));
+                                groupContentItems.Clear();
+                            }
+                            result.Add(new DisplayItem
+                            {
+                                View = view,
+                                Ruleset = childRuleset,
+                                IsSeparateBorder = true,
+                                IsToolbarButton = view is ToolbarImageButton
+                            });
+                        }
+                        else
+                        {
+                            groupContentItems.Add(new DisplayItem
+                            {
+                                View = view,
+                                Ruleset = childRuleset,
+                                IsSeparateBorder = false,
+                                IsToolbarButton = view is ToolbarImageButton
+                            });
+                        }
+                    }
+
+                    if (groupContentItems.Count > 0)
+                    {
+                        result.Add(CreateGroupContentDisplayItem(groupContentItems, groupRuleset));
+                    }
+                }
+                else
+                {
+                    if (!itemMap.TryGetValue(entry.Id, out var item))
+                    {
+                        LogHelper.WriteLogToFile($"ToolbarRegistry: 未找到条目 [{entry.Id}]", LogHelper.LogType.Warning);
+                        continue;
+                    }
+                    var view = BuildAndRegister(host, item);
+                    if (view == null) continue;
+                    view.Tag = InjectedTag;
+                    var ruleset = GetEffectiveRuleset(entry);
+                    SetHidingRuleset(view, ruleset);
+                    result.Add(new DisplayItem
+                    {
+                        View = view,
+                        Ruleset = ruleset,
+                        IsSeparateBorder = entry.ShowSeparateBorder,
+                        IsToolbarButton = view is ToolbarImageButton
+                    });
+                }
+            }
+            return result;
+        }
+
+        private static DisplayItem CreateGroupContentDisplayItem(List<DisplayItem> groupContentItems, ToolbarRuleset groupRuleset)
+        {
+            var innerPanel = new StackPanel { Orientation = Orientation.Horizontal };
+            foreach (var item in groupContentItems)
+            {
+                item.View.Margin = new Thickness(0);
+                innerPanel.Children.Add(item.View);
+            }
+            innerPanel.Tag = InjectedTag;
+            SetHidingRuleset(innerPanel, groupRuleset);
+            return new DisplayItem
+            {
+                View = innerPanel,
+                Ruleset = groupRuleset,
+                IsSeparateBorder = false,
+                IsToolbarButton = false
+            };
+        }
+
+        private static List<Segment> GroupIntoSegments(List<DisplayItem> displayItems)
+        {
+            var segments = new List<Segment>();
+            var currentContentItems = new List<DisplayItem>();
+
+            foreach (var item in displayItems)
+            {
+                if (item.IsSeparateBorder)
+                {
+                    if (currentContentItems.Count > 0)
+                    {
+                        segments.Add(new Segment { IsSeparateBorder = false, Items = new List<DisplayItem>(currentContentItems) });
+                        currentContentItems.Clear();
+                    }
+                    segments.Add(new Segment { IsSeparateBorder = true, Items = new List<DisplayItem> { item } });
+                }
+                else
+                {
+                    currentContentItems.Add(item);
+                }
+            }
+
+            if (currentContentItems.Count > 0)
+            {
+                segments.Add(new Segment { IsSeparateBorder = false, Items = new List<DisplayItem>(currentContentItems) });
+            }
+
+            return segments;
+        }
+
+        #endregion
+
+        public static void Populate(IToolbarHost host, Panel rootPanel, ToolbarLayoutSettings layout)
         {
             LogHelper.WriteLogToFile($"ToolbarRegistry: Populate 开始", LogHelper.LogType.Info);
-            if (host == null || container == null)
+            if (host == null || rootPanel == null)
             {
-                LogHelper.WriteLogToFile("ToolbarRegistry: Populate host 或 container 为空", LogHelper.LogType.Warning);
+                LogHelper.WriteLogToFile("ToolbarRegistry: Populate host/rootPanel 为空", LogHelper.LogType.Warning);
                 return;
             }
 
@@ -314,100 +524,112 @@ namespace Ink_Canvas.Controls.Toolbar
             var discovered = Discover();
             var itemMap = discovered.ToDictionary(i => i.Id, i => i);
 
-            PopulateEntries(host, container, layout.Components, itemMap);
+            ClearInjected(rootPanel);
 
-            LogHelper.WriteLogToFile($"ToolbarRegistry: Populate 完成, 共添加 {layout.Components.Count} 个条目", LogHelper.LogType.Info);
-        }
+            var displayItems = FlattenEntries(host, layout.Components, itemMap);
+            var segments = GroupIntoSegments(displayItems);
 
-        private static void PopulateEntries(IToolbarHost host, Panel container, List<ToolbarComponentEntry> entries, Dictionary<string, IToolbarItem> itemMap)
-        {
-            foreach (var entry in entries)
+            bool isFirst = true;
+            foreach (var segment in segments)
             {
-                if (entry.IsGroup)
+                if (segment.IsSeparateBorder)
                 {
-                    PopulateGroup(host, container, entry, itemMap);
-                    continue;
-                }
-
-                if (!itemMap.TryGetValue(entry.Id, out var item))
-                {
-                    LogHelper.WriteLogToFile($"ToolbarRegistry: 未找到条目 [{entry.Id}]", LogHelper.LogType.Warning);
-                    continue;
-                }
-
-                var view = BuildAndRegister(host, item);
-                if (view == null) continue;
-
-                view.Tag = InjectedTag;
-                var ruleset = GetEffectiveRuleset(entry);
-                SetHidingRuleset(view, ruleset);
-
-                FrameworkElement elementToAdd;
-
-                if (entry.ShowSeparateBorder)
-                {
-                    elementToAdd = WrapInSeparateBorder(view, ruleset);
+                    var item = segment.Items[0];
+                    var elementToAdd = WrapInSeparateBorder(item.View, item.Ruleset, item.IsToolbarButton);
+                    elementToAdd.Margin = isFirst ? new Thickness(0) : new Thickness(3, 0, 0, 0);
+                    ApplyInitialVisibility(elementToAdd, item.Ruleset);
+                    rootPanel.Children.Add(elementToAdd);
+                    LogHelper.WriteLogToFile($"ToolbarRegistry: 添加独立边框条目到根面板", LogHelper.LogType.Info);
                 }
                 else
                 {
-                    elementToAdd = view;
+                    var contentBorder = CreateContentBorder(segment.Items);
+                    contentBorder.Margin = isFirst ? new Thickness(0) : new Thickness(3, 0, 0, 0);
+                    rootPanel.Children.Add(contentBorder);
+                    LogHelper.WriteLogToFile($"ToolbarRegistry: 添加内容边框 ({segment.Items.Count} 项) 到根面板", LogHelper.LogType.Info);
                 }
-
-                ApplyInitialVisibility(elementToAdd, ruleset);
-                container.Children.Add(elementToAdd);
-                LogHelper.WriteLogToFile($"ToolbarRegistry: 添加条目 [{entry.Id}]", LogHelper.LogType.Info);
+                isFirst = false;
             }
+
+            LogHelper.WriteLogToFile($"ToolbarRegistry: Populate 完成, 共 {segments.Count} 个段, {layout.Components.Count} 个条目", LogHelper.LogType.Info);
         }
 
-        private static void PopulateGroup(IToolbarHost host, Panel container, ToolbarComponentEntry groupEntry, Dictionary<string, IToolbarItem> itemMap)
+        private static Border CreateContentBorder(List<DisplayItem> items)
         {
-            if (groupEntry.Children == null || groupEntry.Children.Count == 0)
-            {
-                LogHelper.WriteLogToFile("ToolbarRegistry: 分组组件无子项，跳过", LogHelper.LogType.Warning);
-                return;
-            }
+            var bgBrush = Application.Current.TryFindResource("FloatBarBackground") as Brush
+                ?? new SolidColorBrush(Colors.White);
+            var borderBrush = Application.Current.TryFindResource("FloatBarBorderBrush") as Brush
+                ?? new SolidColorBrush(Color.FromRgb(0x7D, 0x7D, 0x7D));
 
-            var innerPanel = new StackPanel
+            var contentPanel = new StackPanel
             {
-                Orientation = Orientation.Horizontal
+                Orientation = Orientation.Horizontal,
+                Margin = new Thickness(2, 0, 2, 0),
+                Cursor = Cursors.Arrow,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Tag = ContentPanelTag
             };
 
-            foreach (var childEntry in groupEntry.Children)
+            foreach (var item in items)
             {
-                if (!itemMap.TryGetValue(childEntry.Id, out var item))
-                {
-                    LogHelper.WriteLogToFile($"ToolbarRegistry: 分组内未找到条目 [{childEntry.Id}]", LogHelper.LogType.Warning);
-                    continue;
-                }
-
-                var childView = BuildAndRegister(host, item);
-                if (childView == null) continue;
-
-                childView.Tag = InjectedTag;
-                childView.Margin = new Thickness(0);
-                innerPanel.Children.Add(childView);
+                ApplyInitialVisibility(item.View, item.Ruleset);
+                contentPanel.Children.Add(item.View);
             }
 
-            FrameworkElement groupElement;
-            var ruleset = GetEffectiveRuleset(groupEntry);
+            var grid = new Grid();
 
-            if (groupEntry.ShowSeparateBorder)
+            var canvas = new System.Windows.Controls.Canvas
             {
-                groupElement = WrapInSeparateBorder(innerPanel, ruleset);
-            }
-            else
-            {
-                innerPanel.Tag = InjectedTag;
-                SetHidingRuleset(innerPanel, ruleset);
-                groupElement = innerPanel;
-            }
+                Margin = new Thickness(2, 0, 2, 0),
+                Tag = SelectionCanvasTag
+            };
 
-            ApplyInitialVisibility(groupElement, ruleset);
-            container.Children.Add(groupElement);
-            LogHelper.WriteLogToFile($"ToolbarRegistry: 添加分组 Children={groupEntry.Children.Count}", LogHelper.LogType.Info);
+            var selectionBG = new Border
+            {
+                Visibility = Visibility.Hidden,
+                Width = 28,
+                Height = 46,
+                Margin = new Thickness(0, -2, 0, -2),
+                Background = new SolidColorBrush(Color.FromArgb(0x15, 0x3b, 0x82, 0xf6)),
+                Tag = SelectionBGTag
+            };
+            System.Windows.Controls.Canvas.SetLeft(selectionBG, 28);
+            canvas.Children.Add(selectionBG);
+
+            var indicatorBar = new Border
+            {
+                Visibility = Visibility.Hidden,
+                Width = 16,
+                Height = 3,
+                CornerRadius = new CornerRadius(1.5),
+                Background = new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb)),
+                Tag = IndicatorBarTag
+            };
+            System.Windows.Controls.Canvas.SetLeft(indicatorBar, 34);
+            System.Windows.Controls.Canvas.SetBottom(indicatorBar, 1);
+            canvas.Children.Add(indicatorBar);
+
+            grid.Children.Add(canvas);
+            grid.Children.Add(contentPanel);
+
+            var border = new Border
+            {
+                Padding = new Thickness(2),
+                Visibility = Visibility.Visible,
+                Height = 50,
+                Background = bgBrush,
+                CornerRadius = new CornerRadius(8),
+                BorderThickness = new Thickness(2),
+                BorderBrush = borderBrush,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Child = grid,
+                Tag = ContentBorderTag
+            };
+
+            return border;
         }
 
-        private static Border WrapInSeparateBorder(FrameworkElement view, ToolbarRuleset ruleset)
+        private static Border WrapInSeparateBorder(FrameworkElement view, ToolbarRuleset ruleset, bool isToolbarButton)
         {
             var bgBrush = Application.Current.TryFindResource("FloatBarBackground") as Brush
                 ?? new SolidColorBrush(Colors.White);
@@ -415,7 +637,7 @@ namespace Ink_Canvas.Controls.Toolbar
                 ?? new SolidColorBrush(Color.FromRgb(0x7D, 0x7D, 0x7D));
             var wrapper = new Border
             {
-                Margin = new Thickness(3, 0, 0, 0),
+                Margin = new Thickness(0),
                 Padding = new Thickness(0),
                 Background = bgBrush,
                 CornerRadius = new CornerRadius(8),
@@ -424,6 +646,13 @@ namespace Ink_Canvas.Controls.Toolbar
                 Child = view,
                 Tag = InjectedTag
             };
+
+            if (isToolbarButton)
+            {
+                wrapper.Width = 50;
+                view.HorizontalAlignment = HorizontalAlignment.Center;
+            }
+
             SetHidingRuleset(wrapper, ruleset);
             return wrapper;
         }
@@ -433,29 +662,46 @@ namespace Ink_Canvas.Controls.Toolbar
             element.Visibility = Visibility.Visible;
         }
 
-        public static void UpdateVisibilityByMode(Panel container, bool isAnnotating, bool isPptMode, bool isGestureEnabled = false)
+        public static void UpdateVisibilityByMode(Panel rootPanel, bool isAnnotating, bool isPptMode, bool isGestureEnabled = false)
         {
-            if (container == null) return;
-
             var context = new Dictionary<string, bool>
             {
                 ["isAnnotating"] = isAnnotating,
                 ["isPptMode"] = isPptMode,
                 ["isGestureEnabled"] = isGestureEnabled
             };
+            UpdatePanelVisibility(rootPanel, context);
+        }
 
-            foreach (var child in container.Children.OfType<FrameworkElement>())
+        private static void UpdatePanelVisibility(Panel panel, Dictionary<string, bool> context)
+        {
+            if (panel == null) return;
+
+            foreach (var child in panel.Children.OfType<FrameworkElement>())
             {
-                if (child.Tag as string != InjectedTag) continue;
-                var ruleset = GetHidingRuleset(child);
-                if (ruleset == null)
+                if (child.Tag as string == InjectedTag)
                 {
-                    child.Visibility = Visibility.Visible;
-                    continue;
+                    var ruleset = GetHidingRuleset(child);
+                    if (ruleset == null)
+                    {
+                        child.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        bool shouldHide = EvaluateRuleset(ruleset, context);
+                        child.Visibility = shouldHide ? Visibility.Collapsed : Visibility.Visible;
+                    }
                 }
-
-                bool shouldHide = EvaluateRuleset(ruleset, context);
-                child.Visibility = shouldHide ? Visibility.Collapsed : Visibility.Visible;
+                if (child is Border border && border.Tag as string == ContentBorderTag && border.Child is Grid grid)
+                {
+                    foreach (var gridChild in grid.Children.OfType<FrameworkElement>())
+                    {
+                        if (gridChild is StackPanel sp && sp.Tag as string == ContentPanelTag)
+                        {
+                            UpdatePanelVisibility(sp, context);
+                        }
+                    }
+                }
             }
         }
 
@@ -481,6 +727,7 @@ namespace Ink_Canvas.Controls.Toolbar
             {
                 Components = new List<ToolbarComponentEntry>
                 {
+                    new ToolbarComponentEntry { Id = "builtin.dragHandle", HidingRuleset = ToolbarRuleset.AlwaysShow(), ShowSeparateBorder = true },
                     new ToolbarComponentEntry { Id = "builtin.cursor", HidingRuleset = ToolbarRuleset.AlwaysShow() },
                     new ToolbarComponentEntry { Id = "builtin.pen", HidingRuleset = ToolbarRuleset.AlwaysShow() },
                     new ToolbarComponentEntry { Id = "builtin.quickColorPalette", HidingRuleset = ToolbarRuleset.AnnotationOnly() },

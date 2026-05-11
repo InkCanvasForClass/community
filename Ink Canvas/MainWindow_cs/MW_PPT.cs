@@ -1,3 +1,4 @@
+using Ink_Canvas.Controls.Toolbar;
 using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern;
 using Microsoft.Office.Core;
@@ -1175,7 +1176,7 @@ namespace Ink_Canvas
                         BtnHideInkCanvas_Click(null, null);
                     }
 
-                    BorderFloatingBarMainControls.Visibility = Visibility.Visible;
+                    SetFloatingBarContentVisibility(true);
 
                     // 在PPT模式下根据设置决定是否隐藏手势面板和手势按钮
                     AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);

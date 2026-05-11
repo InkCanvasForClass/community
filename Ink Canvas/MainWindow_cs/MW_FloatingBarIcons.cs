@@ -1,8 +1,11 @@
 using Ink_Canvas.Controls;
+using Ink_Canvas.Controls.Toolbar;
 using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -256,6 +259,11 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">鼠标按钮事件参数</param>
+        internal void DragHandleMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            SymbolIconEmoji_MouseDown(sender, e);
+        }
+
         private void SymbolIconEmoji_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (isViewboxFloatingBarMarginAnimationRunning)
@@ -285,15 +293,15 @@ namespace Ink_Canvas
             if (isClick)
             {
                 var headLeft = GetCurrentFloatingBarHeadLeft();
-                if (BorderFloatingBarMainControls.Visibility == Visibility.Visible)
+                if (IsFloatingBarContentVisible())
                 {
-                    BorderFloatingBarMainControls.Visibility = Visibility.Collapsed;
+                    SetFloatingBarContentVisibility(false);
                     UpdateToolbarComponentVisibility();
                     PlaceFloatingBarAfterHeadToggle(headLeft, false);
                 }
                 else
                 {
-                    BorderFloatingBarMainControls.Visibility = Visibility.Visible;
+                    SetFloatingBarContentVisibility(true);
                     UpdateToolbarComponentVisibility();
                     PlaceFloatingBarAfterHeadToggle(headLeft, true);
                 }
@@ -302,7 +310,7 @@ namespace Ink_Canvas
             {
                 PlaceFloatingBarAfterHeadToggle(
                     GetCurrentFloatingBarHeadLeft(),
-                    BorderFloatingBarMainControls.Visibility == Visibility.Visible);
+                    IsFloatingBarContentVisible());
                 _popupManager?.MarkNeedsUpdate();
             }
 
@@ -825,7 +833,7 @@ namespace Ink_Canvas
                         Application.Current.Dispatcher.Invoke(() => { ViewboxFloatingBarMarginAnimation(60); });
                     }).Start();
 
-                if (System.Windows.Controls.Canvas.GetLeft(FloatingbarSelectionBG) != 28) PenIcon_Click(null, null);
+                if (GetSelectionBGLeft() != 28) PenIcon_Click(null, null);
 
                 WaterMarkTime.Visibility = Visibility.Collapsed;
                 WaterMarkDate.Visibility = Visibility.Collapsed;
@@ -1759,7 +1767,63 @@ namespace Ink_Canvas
 
         private double GetFloatingBarHeadScaledWidth()
         {
-            return GetElementWidthForFloatingBar(BorderFloatingBarMoveControls, 36) * GetFloatingBarScaleX();
+            var dragElement = FindDragHandleInRoot();
+            return GetElementWidthForFloatingBar(dragElement, 50) * GetFloatingBarScaleX();
+        }
+
+        private double GetSelectionBGLeft()
+        {
+            var (_, _, contentPanel) = GetFirstContentBorderElements();
+            if (contentPanel == null) return 0;
+            foreach (var border in FloatingBarRootPanel.Children.OfType<Border>())
+            {
+                if (border.Tag as string == ToolbarRegistry.ContentBorderTag && border.Child is Grid grid)
+                {
+                    foreach (var gridChild in grid.Children.OfType<System.Windows.Controls.Canvas>())
+                    {
+                        if (gridChild.Tag as string == ToolbarRegistry.SelectionCanvasTag)
+                        {
+                            foreach (var canvasChild in gridChild.Children.OfType<Border>())
+                            {
+                                if (canvasChild.Tag as string == ToolbarRegistry.SelectionBGTag)
+                                {
+                                    var left = System.Windows.Controls.Canvas.GetLeft(canvasChild);
+                                    return double.IsNaN(left) ? 0 : left;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return 0;
+        }
+
+        private StackPanel GetFirstContentPanel()
+        {
+            if (FloatingBarRootPanel == null) return null;
+            foreach (var border in FloatingBarRootPanel.Children.OfType<Border>())
+            {
+                if (border.Tag as string == ToolbarRegistry.ContentBorderTag && border.Child is Grid grid)
+                {
+                    foreach (var gridChild in grid.Children.OfType<StackPanel>())
+                    {
+                        if (gridChild.Tag as string == ToolbarRegistry.ContentPanelTag)
+                            return gridChild;
+                    }
+                }
+            }
+            return null;
+        }
+
+        private FrameworkElement FindDragHandleInRoot()
+        {
+            if (FloatingBarRootPanel == null) return null;
+            foreach (var child in FloatingBarRootPanel.Children.OfType<FrameworkElement>())
+            {
+                if (child.Tag as string == ToolbarRegistry.InjectedTag && IsDragHandleElement(child))
+                    return child;
+            }
+            return null;
         }
 
         private double GetFloatingBarScreenWidth(bool useWorkingArea)
@@ -1777,30 +1841,135 @@ namespace Ink_Canvas
 
         private void SetFloatingBarHeadPlacement(bool headOnRight)
         {
-            if (FloatingBarRootPanel == null || BorderFloatingBarMoveControls == null) return;
+            if (FloatingBarRootPanel == null) return;
 
-            var children = FloatingBarRootPanel.Children;
-            if (children.Contains(BorderFloatingBarMoveControls))
+            var rootChildren = FloatingBarRootPanel.Children;
+            var rootList = rootChildren.OfType<FrameworkElement>().ToList();
+
+            FrameworkElement dragElement = null;
+            var otherElements = new List<FrameworkElement>();
+
+            foreach (var child in rootList)
             {
-                children.Remove(BorderFloatingBarMoveControls);
+                if (child.Tag as string == ToolbarRegistry.InjectedTag && IsDragHandleElement(child))
+                {
+                    dragElement = child;
+                }
+                else
+                {
+                    otherElements.Add(child);
+                }
             }
+
+            rootChildren.Clear();
 
             if (headOnRight)
             {
-                children.Add(BorderFloatingBarMoveControls);
-                BorderFloatingBarMoveControls.Margin = new Thickness(2, 0, 0, 0);
-                if (BorderFloatingBarMainControls != null)
-                    BorderFloatingBarMainControls.Margin = new Thickness(0);
+                foreach (var elem in otherElements.AsEnumerable().Reverse())
+                {
+                    rootChildren.Add(elem);
+                }
+                if (dragElement != null)
+                {
+                    dragElement.Margin = new Thickness(2, 0, 0, 0);
+                    rootChildren.Add(dragElement);
+                }
+
+                ReverseAllContentPanels();
             }
             else
             {
-                children.Insert(0, BorderFloatingBarMoveControls);
-                BorderFloatingBarMoveControls.Margin = new Thickness(0);
-                if (BorderFloatingBarMainControls != null)
-                    BorderFloatingBarMainControls.Margin = new Thickness(2, 0, 0, 0);
+                if (dragElement != null)
+                {
+                    dragElement.Margin = new Thickness(0);
+                    rootChildren.Add(dragElement);
+                }
+                foreach (var elem in otherElements)
+                {
+                    rootChildren.Add(elem);
+                }
+
+                RestoreAllContentPanels();
             }
 
             isFloatingBarHeadOnRight = headOnRight;
+        }
+
+        private bool IsDragHandleElement(FrameworkElement element)
+        {
+            if (element is Border border)
+            {
+                var child = border.Child;
+                if (child is StackPanel panel && panel.Children.Count > 0 && panel.Children[0] is Image)
+                    return true;
+            }
+            return false;
+        }
+
+        private IEnumerable<StackPanel> GetAllContentPanels()
+        {
+            if (FloatingBarRootPanel == null) yield break;
+            foreach (var child in FloatingBarRootPanel.Children.OfType<Border>())
+            {
+                if (child.Tag as string == ToolbarRegistry.ContentBorderTag && child.Child is Grid grid)
+                {
+                    foreach (var gridChild in grid.Children.OfType<StackPanel>())
+                    {
+                        if (gridChild.Tag as string == ToolbarRegistry.ContentPanelTag)
+                            yield return gridChild;
+                    }
+                }
+            }
+        }
+
+        private Dictionary<StackPanel, List<FrameworkElement>> _normalContentOrders;
+
+        private void ReverseAllContentPanels()
+        {
+            _normalContentOrders = new Dictionary<StackPanel, List<FrameworkElement>>();
+            foreach (var panel in GetAllContentPanels())
+            {
+                _normalContentOrders[panel] = panel.Children.OfType<FrameworkElement>().ToList();
+                var reversed = panel.Children.OfType<FrameworkElement>().Reverse().ToList();
+                panel.Children.Clear();
+                foreach (var child in reversed)
+                    panel.Children.Add(child);
+            }
+        }
+
+        private void RestoreAllContentPanels()
+        {
+            if (_normalContentOrders == null) return;
+            foreach (var kvp in _normalContentOrders)
+            {
+                var panel = kvp.Key;
+                var normalOrder = kvp.Value;
+                var current = panel.Children.OfType<FrameworkElement>().ToList();
+                if (current.SequenceEqual(normalOrder)) continue;
+                panel.Children.Clear();
+                foreach (var child in normalOrder)
+                    panel.Children.Add(child);
+            }
+            _normalContentOrders = null;
+        }
+
+        private bool IsFloatingBarContentVisible()
+        {
+            foreach (var child in FloatingBarRootPanel.Children.OfType<FrameworkElement>())
+            {
+                if (child.Tag as string == ToolbarRegistry.ContentBorderTag)
+                    return child.Visibility == Visibility.Visible;
+            }
+            return false;
+        }
+
+        private void SetFloatingBarContentVisibility(bool visible)
+        {
+            foreach (var child in FloatingBarRootPanel.Children.OfType<FrameworkElement>())
+            {
+                if (child.Tag as string == ToolbarRegistry.ContentBorderTag)
+                    child.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+            }
         }
 
         private double ClampFloatingBarLeft(double left, double floatingBarWidth, double screenWidth)
@@ -4296,12 +4465,11 @@ private bool forceEraser;
             try
             {
                 // 获取浮动栏容器
-                var floatingBarPanel = StackPanelFloatingBar;
+                var floatingBarPanel = GetFirstContentPanel();
                 if (floatingBarPanel == null) return 0;
 
                 double currentPosition = 0;
 
-                // 遍历浮动栏中的所有子元素
                 foreach (var child in floatingBarPanel.Children)
                 {
                     if (child is UIElement element)
@@ -4452,12 +4620,11 @@ private bool forceEraser;
         {
             try
             {
-                if (FloatingbarSelectionBG == null) return;
+                var (selectionBG, indicatorBar, contentPanel) = FindSelectionElementsForMode(mode);
 
-                if (isFloatingBarFolded || (BorderFloatingBarMainControls != null && BorderFloatingBarMainControls.Visibility == Visibility.Collapsed))
+                if (isFloatingBarFolded || !IsFloatingBarContentVisible())
                 {
-                    FloatingbarSelectionBG.Visibility = Visibility.Hidden;
-                    if (FloatingbarIndicatorBar != null) FloatingbarIndicatorBar.Visibility = Visibility.Hidden;
+                    HideAllSelectionHighlights();
                     return;
                 }
 
@@ -4486,21 +4653,19 @@ private bool forceEraser;
                         break;
                 }
 
-                if (StackPanelFloatingBar == null || targetButton == null || !IsElementVisibleInTree(targetButton))
+                if (contentPanel == null || targetButton == null || !IsElementVisibleInTree(targetButton))
                 {
-                    FloatingbarSelectionBG.Visibility = Visibility.Hidden;
-                    if (FloatingbarIndicatorBar != null) FloatingbarIndicatorBar.Visibility = Visibility.Hidden;
+                    HideAllSelectionHighlights();
                     return;
                 }
 
-                var buttonOrigin = targetButton.TransformToAncestor(StackPanelFloatingBar).Transform(new Point(0, 0));
+                var buttonOrigin = targetButton.TransformToAncestor(contentPanel).Transform(new Point(0, 0));
                 double nextWidth = targetButton.ActualWidth > 0 ? targetButton.ActualWidth : 28;
                 double nextPos = buttonOrigin.X;
 
-                if (nextWidth <= 0)
+                if (nextWidth <= 0 || selectionBG == null)
                 {
-                    FloatingbarSelectionBG.Visibility = Visibility.Hidden;
-                    if (FloatingbarIndicatorBar != null) FloatingbarIndicatorBar.Visibility = Visibility.Hidden;
+                    HideAllSelectionHighlights();
                     return;
                 }
 
@@ -4520,13 +4685,15 @@ private bool forceEraser;
                     highlightBarColor = Color.FromRgb(37, 99, 235);
                 }
 
-                FloatingbarSelectionBG.Background = new SolidColorBrush(highlightBackgroundColor);
-                if (FloatingbarIndicatorBar != null)
+                HideAllSelectionHighlights();
+
+                selectionBG.Background = new SolidColorBrush(highlightBackgroundColor);
+                if (indicatorBar != null)
                 {
-                    FloatingbarIndicatorBar.Background = new SolidColorBrush(highlightBarColor);
+                    indicatorBar.Background = new SolidColorBrush(highlightBarColor);
                 }
 
-                FloatingbarSelectionBG.Visibility = Visibility.Visible;
+                selectionBG.Visibility = Visibility.Visible;
 
                 double indicatorBarWidth = 12;
                 double nextBarLeft = nextPos + Math.Max(0, (nextWidth - indicatorBarWidth) / 2);
@@ -4535,13 +4702,13 @@ private bool forceEraser;
 
                 if (isFirstShow)
                 {
-                    FloatingbarSelectionBG.Width = nextWidth;
-                    System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, nextPos);
-                    if (FloatingbarIndicatorBar != null)
+                    selectionBG.Width = nextWidth;
+                    System.Windows.Controls.Canvas.SetLeft(selectionBG, nextPos);
+                    if (indicatorBar != null)
                     {
-                        FloatingbarIndicatorBar.Visibility = Visibility.Visible;
-                        FloatingbarIndicatorBar.Width = indicatorBarWidth;
-                        System.Windows.Controls.Canvas.SetLeft(FloatingbarIndicatorBar, nextBarLeft);
+                        indicatorBar.Visibility = Visibility.Visible;
+                        indicatorBar.Width = indicatorBarWidth;
+                        System.Windows.Controls.Canvas.SetLeft(indicatorBar, nextBarLeft);
                     }
                     _lastHighlightButton = targetButton;
                     return;
@@ -4553,32 +4720,35 @@ private bool forceEraser;
                 {
                     try
                     {
-                        var lastOrigin = _lastHighlightButton.TransformToAncestor(StackPanelFloatingBar).Transform(new Point(0, 0));
+                        var lastPanel = FindContentPanelForButton(_lastHighlightButton);
+                        var lastOrigin = lastPanel != null
+                            ? _lastHighlightButton.TransformToAncestor(lastPanel).Transform(new Point(0, 0))
+                            : new Point(0, 0);
                         prevPos = lastOrigin.X;
                         prevWidth = _lastHighlightButton.ActualWidth > 0 ? _lastHighlightButton.ActualWidth : 28;
                     }
                     catch (InvalidOperationException)
                     {
-                        prevPos = System.Windows.Controls.Canvas.GetLeft(FloatingbarSelectionBG);
+                        prevPos = System.Windows.Controls.Canvas.GetLeft(selectionBG);
                         if (double.IsNaN(prevPos)) prevPos = 0;
-                        prevWidth = FloatingbarSelectionBG.ActualWidth;
+                        prevWidth = selectionBG.ActualWidth;
                         if (double.IsNaN(prevWidth) || prevWidth <= 0) prevWidth = 28;
                     }
                 }
                 else
                 {
-                    prevPos = System.Windows.Controls.Canvas.GetLeft(FloatingbarSelectionBG);
+                    prevPos = System.Windows.Controls.Canvas.GetLeft(selectionBG);
                     if (double.IsNaN(prevPos)) prevPos = 0;
-                    prevWidth = FloatingbarSelectionBG.ActualWidth;
+                    prevWidth = selectionBG.ActualWidth;
                     if (double.IsNaN(prevWidth) || prevWidth <= 0) prevWidth = 28;
                 }
 
                 _lastHighlightButton = targetButton;
 
-                FloatingbarSelectionBG.Width = nextWidth;
-                System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, nextPos);
+                selectionBG.Width = nextWidth;
+                System.Windows.Controls.Canvas.SetLeft(selectionBG, nextPos);
 
-                if (FloatingbarIndicatorBar == null) return;
+                if (indicatorBar == null) return;
 
                 double prevBarLeft = prevPos + Math.Max(0, (prevWidth - indicatorBarWidth) / 2);
 
@@ -4586,16 +4756,16 @@ private bool forceEraser;
 
                 if (distance < 0.5)
                 {
-                    FloatingbarIndicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, null);
-                    FloatingbarIndicatorBar.BeginAnimation(FrameworkElement.WidthProperty, null);
-                    FloatingbarIndicatorBar.Width = indicatorBarWidth;
-                    System.Windows.Controls.Canvas.SetLeft(FloatingbarIndicatorBar, nextBarLeft);
+                    indicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, null);
+                    indicatorBar.BeginAnimation(FrameworkElement.WidthProperty, null);
+                    indicatorBar.Width = indicatorBarWidth;
+                    System.Windows.Controls.Canvas.SetLeft(indicatorBar, nextBarLeft);
                     return;
                 }
 
-                FloatingbarIndicatorBar.Visibility = Visibility.Visible;
-                FloatingbarIndicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, null);
-                FloatingbarIndicatorBar.BeginAnimation(FrameworkElement.WidthProperty, null);
+                indicatorBar.Visibility = Visibility.Visible;
+                indicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, null);
+                indicatorBar.BeginAnimation(FrameworkElement.WidthProperty, null);
 
                 double stretchPhasePercent = 0.4;
                 var duration = TimeSpan.FromMilliseconds(300);
@@ -4618,8 +4788,8 @@ private bool forceEraser;
                     };
                     leftAnimation.Completed += (s, e) =>
                     {
-                        FloatingbarIndicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, null);
-                        System.Windows.Controls.Canvas.SetLeft(FloatingbarIndicatorBar, nextBarLeft);
+                        indicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, null);
+                        System.Windows.Controls.Canvas.SetLeft(indicatorBar, nextBarLeft);
                     };
 
                     var widthAnimation = new DoubleAnimationUsingKeyFrames
@@ -4635,12 +4805,12 @@ private bool forceEraser;
                     };
                     widthAnimation.Completed += (s, e) =>
                     {
-                        FloatingbarIndicatorBar.BeginAnimation(FrameworkElement.WidthProperty, null);
-                        FloatingbarIndicatorBar.Width = indicatorBarWidth;
+                        indicatorBar.BeginAnimation(FrameworkElement.WidthProperty, null);
+                        indicatorBar.Width = indicatorBarWidth;
                     };
 
-                    FloatingbarIndicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, leftAnimation);
-                    FloatingbarIndicatorBar.BeginAnimation(FrameworkElement.WidthProperty, widthAnimation);
+                    indicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, leftAnimation);
+                    indicatorBar.BeginAnimation(FrameworkElement.WidthProperty, widthAnimation);
                 }
                 else
                 {
@@ -4660,8 +4830,8 @@ private bool forceEraser;
                     };
                     leftAnimation.Completed += (s, e) =>
                     {
-                        FloatingbarIndicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, null);
-                        System.Windows.Controls.Canvas.SetLeft(FloatingbarIndicatorBar, nextBarLeft);
+                        indicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, null);
+                        System.Windows.Controls.Canvas.SetLeft(indicatorBar, nextBarLeft);
                     };
 
                     var widthAnimation = new DoubleAnimationUsingKeyFrames
@@ -4677,12 +4847,12 @@ private bool forceEraser;
                     };
                     widthAnimation.Completed += (s, e) =>
                     {
-                        FloatingbarIndicatorBar.BeginAnimation(FrameworkElement.WidthProperty, null);
-                        FloatingbarIndicatorBar.Width = indicatorBarWidth;
+                        indicatorBar.BeginAnimation(FrameworkElement.WidthProperty, null);
+                        indicatorBar.Width = indicatorBarWidth;
                     };
 
-                    FloatingbarIndicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, leftAnimation);
-                    FloatingbarIndicatorBar.BeginAnimation(FrameworkElement.WidthProperty, widthAnimation);
+                    indicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, leftAnimation);
+                    indicatorBar.BeginAnimation(FrameworkElement.WidthProperty, widthAnimation);
                 }
             }
             catch (Exception ex)
@@ -4705,15 +4875,13 @@ private bool forceEraser;
                 if (button == null || panel == null) return;
                 if (!(panel.Parent is FrameworkElement panelContainer)) return;
 
-                var ancestor = StackPanelFloatingBar;
+                var ancestor = FindContentPanelForButton(button as ToolbarImageButton) ?? GetFirstContentPanel();
                 if (ancestor == null) return;
 
-                // 获取按钮中心的X坐标（相对于 StackPanelFloatingBar 坐标系）
                 var buttonTransform = button.TransformToAncestor(ancestor);
                 var buttonOrigin = buttonTransform.Transform(new Point(0, 0));
                 double buttonCenterX = buttonOrigin.X + button.ActualWidth / 2.0;
 
-                // 获取面板容器（零宽度Grid）的X坐标（相对于 StackPanelFloatingBar 坐标系）
                 var containerTransform = panelContainer.TransformToAncestor(ancestor);
                 var containerOrigin = containerTransform.Transform(new Point(0, 0));
                 double containerX = containerOrigin.X;
@@ -4791,22 +4959,164 @@ private bool forceEraser;
         /// </summary>
         private void HideFloatingBarHighlight()
         {
-            if (FloatingbarSelectionBG != null)
-            {
-                FloatingbarSelectionBG.Visibility = Visibility.Hidden;
-                System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 0);
-            }
-
-            if (FloatingbarIndicatorBar != null)
-            {
-                FloatingbarIndicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, null);
-                FloatingbarIndicatorBar.BeginAnimation(FrameworkElement.WidthProperty, null);
-                FloatingbarIndicatorBar.Visibility = Visibility.Hidden;
-                FloatingbarIndicatorBar.Width = 12;
-                System.Windows.Controls.Canvas.SetLeft(FloatingbarIndicatorBar, 0);
-            }
-
+            HideAllSelectionHighlights();
             _lastHighlightButton = null;
+        }
+
+        private void HideAllSelectionHighlights()
+        {
+            if (FloatingBarRootPanel == null) return;
+            foreach (var border in FloatingBarRootPanel.Children.OfType<Border>())
+            {
+                if (border.Tag as string == ToolbarRegistry.ContentBorderTag && border.Child is Grid grid)
+                {
+                    foreach (var gridChild in grid.Children.OfType<System.Windows.Controls.Canvas>())
+                    {
+                        if (gridChild.Tag as string == ToolbarRegistry.SelectionCanvasTag)
+                        {
+                            foreach (var canvasChild in gridChild.Children.OfType<Border>())
+                            {
+                                if (canvasChild.Tag as string == ToolbarRegistry.SelectionBGTag)
+                                {
+                                    canvasChild.Visibility = Visibility.Hidden;
+                                    System.Windows.Controls.Canvas.SetLeft(canvasChild, 0);
+                                }
+                                else if (canvasChild.Tag as string == ToolbarRegistry.IndicatorBarTag)
+                                {
+                                    canvasChild.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, null);
+                                    canvasChild.BeginAnimation(FrameworkElement.WidthProperty, null);
+                                    canvasChild.Visibility = Visibility.Hidden;
+                                    canvasChild.Width = 12;
+                                    System.Windows.Controls.Canvas.SetLeft(canvasChild, 0);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private (Border selectionBG, Border indicatorBar, StackPanel contentPanel) FindSelectionElementsForMode(string mode)
+        {
+            ToolbarImageButton targetButton = null;
+            switch (mode)
+            {
+                case "cursor": targetButton = Cursor_Icon; break;
+                case "pen":
+                case "color": targetButton = Pen_Icon; break;
+                case "eraser": targetButton = Eraser_Icon; break;
+                case "eraserByStrokes": targetButton = EraserByStrokes_Icon; break;
+                case "select": targetButton = SymbolIconSelect; break;
+                case "shape": targetButton = ShapeDrawFloatingBarBtn; break;
+            }
+            return FindSelectionElementsForButton(targetButton);
+        }
+
+        private (Border selectionBG, Border indicatorBar, StackPanel contentPanel) FindSelectionElementsForButton(ToolbarImageButton button)
+        {
+            if (button == null || FloatingBarRootPanel == null) return (null, null, null);
+
+            foreach (var border in FloatingBarRootPanel.Children.OfType<Border>())
+            {
+                if (border.Tag as string != ToolbarRegistry.ContentBorderTag || !(border.Child is Grid grid)) continue;
+
+                StackPanel contentPanel = null;
+                System.Windows.Controls.Canvas selectionCanvas = null;
+
+                foreach (var gridChild in grid.Children.OfType<FrameworkElement>())
+                {
+                    if (gridChild is StackPanel sp && sp.Tag as string == ToolbarRegistry.ContentPanelTag)
+                        contentPanel = sp;
+                    else if (gridChild is System.Windows.Controls.Canvas canvas && canvas.Tag as string == ToolbarRegistry.SelectionCanvasTag)
+                        selectionCanvas = canvas;
+                }
+
+                if (contentPanel == null) continue;
+
+                bool containsButton = IsDescendantOf(button, contentPanel);
+                if (containsButton)
+                {
+                    Border selectionBG = null;
+                    Border indicatorBar = null;
+                    if (selectionCanvas != null)
+                    {
+                        foreach (var canvasChild in selectionCanvas.Children.OfType<Border>())
+                        {
+                            if (canvasChild.Tag as string == ToolbarRegistry.SelectionBGTag)
+                                selectionBG = canvasChild;
+                            else if (canvasChild.Tag as string == ToolbarRegistry.IndicatorBarTag)
+                                indicatorBar = canvasChild;
+                        }
+                    }
+                    return (selectionBG, indicatorBar, contentPanel);
+                }
+            }
+
+            var firstResult = GetFirstContentBorderElements();
+            return firstResult;
+        }
+
+        private StackPanel FindContentPanelForButton(ToolbarImageButton button)
+        {
+            if (button == null || FloatingBarRootPanel == null) return null;
+
+            foreach (var border in FloatingBarRootPanel.Children.OfType<Border>())
+            {
+                if (border.Tag as string != ToolbarRegistry.ContentBorderTag || !(border.Child is Grid grid)) continue;
+
+                foreach (var gridChild in grid.Children.OfType<StackPanel>())
+                {
+                    if (gridChild.Tag as string == ToolbarRegistry.ContentPanelTag && IsDescendantOf(button, gridChild))
+                        return gridChild;
+                }
+            }
+            return null;
+        }
+
+        private (Border, Border, StackPanel) GetFirstContentBorderElements()
+        {
+            if (FloatingBarRootPanel == null) return (null, null, null);
+
+            foreach (var border in FloatingBarRootPanel.Children.OfType<Border>())
+            {
+                if (border.Tag as string != ToolbarRegistry.ContentBorderTag || !(border.Child is Grid grid)) continue;
+
+                Border selectionBG = null;
+                Border indicatorBar = null;
+                StackPanel contentPanel = null;
+
+                foreach (var gridChild in grid.Children.OfType<FrameworkElement>())
+                {
+                    if (gridChild is StackPanel sp && sp.Tag as string == ToolbarRegistry.ContentPanelTag)
+                        contentPanel = sp;
+                    else if (gridChild is System.Windows.Controls.Canvas canvas && canvas.Tag as string == ToolbarRegistry.SelectionCanvasTag)
+                    {
+                        foreach (var canvasChild in canvas.Children.OfType<Border>())
+                        {
+                            if (canvasChild.Tag as string == ToolbarRegistry.SelectionBGTag)
+                                selectionBG = canvasChild;
+                            else if (canvasChild.Tag as string == ToolbarRegistry.IndicatorBarTag)
+                                indicatorBar = canvasChild;
+                        }
+                    }
+                }
+
+                if (contentPanel != null)
+                    return (selectionBG, indicatorBar, contentPanel);
+            }
+            return (null, null, null);
+        }
+
+        private static bool IsDescendantOf(DependencyObject child, DependencyObject parent)
+        {
+            if (child == null || parent == null) return false;
+            var current = System.Windows.Media.VisualTreeHelper.GetParent(child);
+            while (current != null)
+            {
+                if (current == parent) return true;
+                current = System.Windows.Media.VisualTreeHelper.GetParent(current);
+            }
+            return false;
         }
 
         private bool IsElementVisibleInTree(FrameworkElement element)
