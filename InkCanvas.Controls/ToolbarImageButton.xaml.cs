@@ -41,6 +41,8 @@ namespace Ink_Canvas.Controls
 
         public GeometryDrawing Icon => IconGeometryInternal;
 
+        public GeometryDrawing Badge => BadgeGeometryInternal;
+
         public GeometryDrawing GeometryDrawing => IconGeometryInternal;
 
         public static readonly DependencyProperty IconBrushProperty = DependencyProperty.Register(

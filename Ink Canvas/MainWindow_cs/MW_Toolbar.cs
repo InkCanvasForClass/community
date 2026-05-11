@@ -73,7 +73,7 @@ namespace Ink_Canvas
             BorderTools.PlacementTarget = btn;
         }
         internal void AttachFoldIcon(ToolbarImageButton btn) => Fold_Icon = btn;
-        internal void AttachGestureBtn(ToolbarImageButton btn) => Gesture_Icon = btn;
+        internal void AttachGestureBtn(ToolbarImageButton btn) { Gesture_Icon = btn; TwoFingerGestureBorder.PlacementTarget = btn; }
         internal void AttachExitBtn(ToolbarImageButton btn) => Exit_Icon = btn;
 
         #region PenPalette property mappings
@@ -277,6 +277,7 @@ namespace Ink_Canvas
                 UpdateToolbarComponentVisibility();
                 ApplyFloatingBarIconHighlightImmediate(_currentToolMode);
                 RefreshFloatingBarButtonColors();
+                RefreshGestureButtonIcon();
                 SetFloatingBarHighlightPosition(_currentToolMode);
                 LogHelper.WriteLogToFile("MW_Toolbar: RebuildToolbar 完成", LogHelper.LogType.Info);
             }
