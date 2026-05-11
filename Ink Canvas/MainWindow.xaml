@@ -1113,37 +1113,7 @@
                 <Viewbox.LayoutTransform>
                     <ScaleTransform x:Name="ViewboxFloatingBarScaleTransform" ScaleX="1" ScaleY="1" />
                 </Viewbox.LayoutTransform>
-                <ikw:SimpleStackPanel Orientation="Horizontal">
-                    <!--拖动图标-->
-                    <Border x:Name="BorderFloatingBarMoveControls" Width="50" Height="50" CornerRadius="8"
-                            Background="{DynamicResource FloatBarBackground}" BorderThickness="2" BorderBrush="{DynamicResource FloatBarBorderBrush}"
-                            MouseDown="SymbolIconEmoji_MouseDown" MouseUp="SymbolIconEmoji_MouseUp"
-                            d:Background="Red" d:BorderBrush="Green">
-                        <ikw:SimpleStackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Image Margin="0"
-                                   Name="FloatingbarHeadIconImg"
-                                   SnapsToDevicePixels="True"
-                                   RenderOptions.BitmapScalingMode="HighQuality"
-                                   Source="/Resources/Icons-png/icc.png" />
-                        </ikw:SimpleStackPanel>
-                    </Border>
-                    <!--内容区域-->
-                    <Border Padding="2" Visibility="Visible" Height="50" d:Width="100"
-                            Name="BorderFloatingBarMainControls" Background="{DynamicResource FloatBarBackground}" CornerRadius="8"
-                            BorderThickness="2" Margin="3,0,0,0"
-                            BorderBrush="{DynamicResource FloatBarBorderBrush}"
-                            HorizontalAlignment="Left"
-                            d:Background="Red" d:BorderBrush="Green">
-                        <Grid>
-                            <Canvas Name="FloatingbarSelectionBGCanvas" Margin="2,0,2,0">
-                                <Border Name="FloatingbarSelectionBG" Visibility="Hidden" d:Visibility="Visible" Width="28" Height="46"
-                                            Canvas.Left="28" Margin="0,-2,0,-2" Background="#153b82f6" />
-                                <Border Name="FloatingbarIndicatorBar" Visibility="Hidden" Width="16" Height="3" d:Visibility="Visible"
-                                            Canvas.Left="34" Canvas.Bottom="1" CornerRadius="1.5" Background="#2563eb" />
-                            </Canvas>
-                            <ikw:SimpleStackPanel Margin="2,0" Name="StackPanelFloatingBar" Orientation="Horizontal" Cursor="Arrow" HorizontalAlignment="Left" />
-                        </Grid>
-                    </Border>
+                <ikw:SimpleStackPanel Name="StackPanelFloatingBarRoot" Orientation="Horizontal" MaxHeight="50">
                 </ikw:SimpleStackPanel>
             </Viewbox>
         </Grid>

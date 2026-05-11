@@ -25,8 +25,20 @@ namespace Ink_Canvas
         internal ToolbarImageButton Freeze_Icon { get; private set; }
         internal ToolbarImageButton Gesture_Icon { get; private set; }
         internal ToolbarImageButton Exit_Icon { get; private set; }
+        internal Image FloatingbarHeadIconImg { get; private set; }
+        internal FrameworkElement DragHandleElement { get; private set; }
 
-        internal Panel FloatingBarRootPanel => BorderFloatingBarMoveControls?.Parent as Panel;
+        internal Panel FloatingBarRootPanel => StackPanelFloatingBarRoot;
+
+        internal double FloatingBarSelectionBGLeft => GetSelectionBGLeft();
+        internal bool FloatingBarSelectionBGIsHidden
+        {
+            get
+            {
+                var (selectionBG, _, _) = GetFirstContentBorderElements();
+                return selectionBG == null || selectionBG.Visibility != Visibility.Visible;
+            }
+        }
         internal iNKORE.UI.WPF.Modern.Controls.ToggleSwitch ToggleSwitchDrawShapeBorderAutoHide { get; } =
             new iNKORE.UI.WPF.Modern.Controls.ToggleSwitch { IsOn = true };
 
@@ -65,6 +77,7 @@ namespace Ink_Canvas
         internal void AttachFoldIcon(ToolbarImageButton btn) => Fold_Icon = btn;
         internal void AttachGestureBtn(ToolbarImageButton btn) => Gesture_Icon = btn;
         internal void AttachExitBtn(ToolbarImageButton btn) => Exit_Icon = btn;
+        internal void AttachDragHandleView(Image iconImg) => FloatingbarHeadIconImg = iconImg;
 
         #region PenPalette property mappings
         internal ComboBox ComboBoxPenStyle => PenPalettePopupContent?.PenStyleComboBox ?? BoardPenPalettePopupContent?.PenStyleComboBox;
@@ -218,17 +231,24 @@ namespace Ink_Canvas
             get
             {
                 if (_quickColorPalette != null) return _quickColorPalette;
-                if (StackPanelFloatingBar == null) return null;
-                foreach (var child in StackPanelFloatingBar.Children)
-                {
-                    if (child is QuickColorPaletteControl control)
-                    {
-                        _quickColorPalette = control;
-                        return control;
-                    }
-                }
-                return null;
+                if (StackPanelFloatingBarRoot == null) return null;
+                _quickColorPalette = FindDescendant<QuickColorPaletteControl>(StackPanelFloatingBarRoot);
+                return _quickColorPalette;
             }
+        }
+
+        private static T FindDescendant<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) return null;
+            var childrenCount = System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childrenCount; i++)
+            {
+                var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
+                if (child is T result) return result;
+                var descendant = FindDescendant<T>(child);
+                if (descendant != null) return descendant;
+            }
+            return null;
         }
         #endregion
 
@@ -240,7 +260,7 @@ namespace Ink_Canvas
                 ToolbarRegistry.EnsureDefaultConfigExists();
                 ToolbarHost = new ToolbarHost(this);
                 var layout = ToolbarRegistry.LoadActiveConfig();
-                ToolbarRegistry.Populate(ToolbarHost, StackPanelFloatingBar, layout);
+                ToolbarRegistry.Populate(ToolbarHost, StackPanelFloatingBarRoot, layout);
                 LogHelper.WriteLogToFile("MW_Toolbar: InitializeToolbarPlugins 完成", LogHelper.LogType.Info);
             }
             catch (Exception ex)
@@ -255,7 +275,7 @@ namespace Ink_Canvas
             try
             {
                 _lastHighlightButton = null;
-                ToolbarRegistry.ClearInjected(StackPanelFloatingBar);
+                ToolbarRegistry.ClearInjected(StackPanelFloatingBarRoot);
                 InitializeToolbarPlugins();
                 UpdateToolbarComponentVisibility();
                 ApplyFloatingBarIconHighlightImmediate(_currentToolMode);
@@ -275,7 +295,7 @@ namespace Ink_Canvas
         {
             var isPpt = IsInPptPresentationMode;
             var isGestureEnabled = Settings?.PowerPointSettings?.ShowGestureButtonInSlideShow ?? false;
-            ToolbarRegistry.UpdateVisibilityByMode(StackPanelFloatingBar, IsAnnotating, isPpt, isGestureEnabled);
+            ToolbarRegistry.UpdateVisibilityByMode(StackPanelFloatingBarRoot, IsAnnotating, isPpt, isGestureEnabled);
         }
     }
 }

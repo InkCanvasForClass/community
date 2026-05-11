@@ -1,9 +1,11 @@
 using Ink_Canvas.Controls;
+using Ink_Canvas.Controls.Toolbar;
 using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -117,31 +119,43 @@ namespace Ink_Canvas
         {
             try
             {
-                if (FloatingbarSelectionBG != null && FloatingbarSelectionBG.Visibility == Visibility.Visible)
+                bool isDarkTheme = IsCurrentThemeDark();
+
+                Color highlightBackgroundColor;
+                Color highlightBarColor;
+
+                if (isDarkTheme)
                 {
-                    bool isDarkTheme = IsCurrentThemeDark();
+                    highlightBackgroundColor = Color.FromArgb(21, 102, 204, 255);
+                    highlightBarColor = Color.FromRgb(102, 204, 255);
+                }
+                else
+                {
+                    highlightBackgroundColor = Color.FromArgb(21, 59, 130, 246);
+                    highlightBarColor = Color.FromRgb(37, 99, 235);
+                }
 
-                    Color highlightBackgroundColor;
-                    Color highlightBarColor;
-
-                    if (isDarkTheme)
+                if (FloatingBarRootPanel == null) return;
+                foreach (var border in FloatingBarRootPanel.Children.OfType<Border>())
+                {
+                    if (border.Tag as string == ToolbarRegistry.ContentBorderTag && border.Child is Grid grid)
                     {
-                        highlightBackgroundColor = Color.FromArgb(21, 102, 204, 255);
-                        highlightBarColor = Color.FromRgb(102, 204, 255);
-                    }
-                    else
-                    {
-                        highlightBackgroundColor = Color.FromArgb(21, 59, 130, 246);
-                        highlightBarColor = Color.FromRgb(37, 99, 235);
-                    }
-
-                    FloatingbarSelectionBG.Background = new SolidColorBrush(highlightBackgroundColor);
-                    if (FloatingbarSelectionBG.Child is System.Windows.Controls.Canvas canvas && canvas.Children.Count > 0)
-                    {
-                        var firstChild = canvas.Children[0];
-                        if (firstChild is Border innerBorder)
+                        foreach (var gridChild in grid.Children.OfType<System.Windows.Controls.Canvas>())
                         {
-                            innerBorder.Background = new SolidColorBrush(highlightBarColor);
+                            if (gridChild.Tag as string == ToolbarRegistry.SelectionCanvasTag)
+                            {
+                                foreach (var canvasChild in gridChild.Children.OfType<Border>())
+                                {
+                                    if (canvasChild.Tag as string == ToolbarRegistry.SelectionBGTag && canvasChild.Visibility == Visibility.Visible)
+                                    {
+                                        canvasChild.Background = new SolidColorBrush(highlightBackgroundColor);
+                                    }
+                                    else if (canvasChild.Tag as string == ToolbarRegistry.IndicatorBarTag && canvasChild.Visibility == Visibility.Visible)
+                                    {
+                                        canvasChild.Background = new SolidColorBrush(highlightBarColor);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -246,6 +260,8 @@ namespace Ink_Canvas
             if (ToolsFloatingBarBtn != null) ToolsFloatingBarBtn.Icon.Brush = brush;
             if (Fold_Icon != null) Fold_Icon.Icon.Brush = brush;
             if (Freeze_Icon != null) Freeze_Icon.Icon.Brush = brush;
+            if (Gesture_Icon != null) Gesture_Icon.Icon.Brush = brush;
+            if (Exit_Icon != null) Exit_Icon.Icon.Brush = brush;
         }
 
         private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
