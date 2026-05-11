@@ -9,6 +9,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.PptOnly();
         public override bool DefaultShowSeparateBorder => true;
         public override string Description => "退出PPT演示";
+        protected override string IconGeometry => XamlGraphicsIconGeometries.ExitPresentationIconGeometry;
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.ImagePPTControlEnd_MouseUp(sender, e);

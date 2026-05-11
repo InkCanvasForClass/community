@@ -428,7 +428,28 @@ namespace Ink_Canvas.Controls.Toolbar
 
                     if (groupContentItems.Count > 0)
                     {
-                        result.Add(CreateGroupContentDisplayItem(groupContentItems, groupRuleset));
+                        if (entry.ShowSeparateBorder)
+                        {
+                            var innerPanel = new StackPanel { Orientation = Orientation.Horizontal };
+                            foreach (var item in groupContentItems)
+                            {
+                                item.View.Margin = new Thickness(0);
+                                innerPanel.Children.Add(item.View);
+                            }
+                            innerPanel.Tag = InjectedTag;
+                            SetHidingRuleset(innerPanel, groupRuleset);
+                            result.Add(new DisplayItem
+                            {
+                                View = innerPanel,
+                                Ruleset = groupRuleset,
+                                IsSeparateBorder = true,
+                                IsToolbarButton = false
+                            });
+                        }
+                        else
+                        {
+                            result.Add(CreateGroupContentDisplayItem(groupContentItems, groupRuleset));
+                        }
                     }
                 }
                 else
@@ -639,9 +660,10 @@ namespace Ink_Canvas.Controls.Toolbar
             var wrapper = new Border
             {
                 Margin = new Thickness(0),
-                Padding = new Thickness(0),
-                Width = 50,
-                Height = 50,
+                Padding = isToolbarButton ? new Thickness(0) : new Thickness(4, 2, 4, 2),
+                Width = isToolbarButton ? 50 : double.NaN,
+                Height = double.NaN,
+                MinHeight = 50,
                 Background = bgBrush,
                 CornerRadius = new CornerRadius(8),
                 BorderThickness = new Thickness(2),
@@ -650,8 +672,16 @@ namespace Ink_Canvas.Controls.Toolbar
                 Tag = InjectedTag
             };
 
-            view.HorizontalAlignment = HorizontalAlignment.Center;
-            view.VerticalAlignment = VerticalAlignment.Center;
+            if (isToolbarButton)
+            {
+                view.HorizontalAlignment = HorizontalAlignment.Center;
+                view.VerticalAlignment = VerticalAlignment.Center;
+            }
+            else
+            {
+                view.HorizontalAlignment = HorizontalAlignment.Center;
+                view.VerticalAlignment = VerticalAlignment.Center;
+            }
 
             SetHidingRuleset(wrapper, ruleset);
             return wrapper;

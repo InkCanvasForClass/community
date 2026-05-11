@@ -42,6 +42,33 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             var page = (ToolbarPage)d;
             page.UpdatePropertiesPanel();
+            page.SelectedGroupChild = null;
+        }
+
+        public static readonly DependencyProperty SelectedGroupChildProperty =
+            DependencyProperty.Register(nameof(SelectedGroupChild), typeof(ToolbarComponentEntry), typeof(ToolbarPage),
+                new PropertyMetadata(null, OnSelectedGroupChildChanged));
+
+        public ToolbarComponentEntry SelectedGroupChild
+        {
+            get => (ToolbarComponentEntry)GetValue(SelectedGroupChildProperty);
+            set => SetValue(SelectedGroupChildProperty, value);
+        }
+
+        private static void OnSelectedGroupChildChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var page = (ToolbarPage)d;
+            page.UpdateGroupChildPropertiesPanel();
+        }
+
+        public static readonly DependencyProperty SettingsTabIndexProperty =
+            DependencyProperty.Register(nameof(SettingsTabIndex), typeof(int), typeof(ToolbarPage),
+                new PropertyMetadata(0));
+
+        public int SettingsTabIndex
+        {
+            get => (int)GetValue(SettingsTabIndexProperty);
+            set => SetValue(SettingsTabIndexProperty, value);
         }
 
         private void UpdatePropertiesPanel()
@@ -524,6 +551,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void RefreshGroupChildren()
         {
             GroupChildren.Clear();
+            SelectedGroupChild = null;
             if (SelectedEntry == null || !SelectedEntry.IsGroup) return;
 
             if (SelectedEntry.Children != null)
@@ -541,14 +569,168 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
         }
 
+        private void UpdateGroupChildPropertiesPanel()
+        {
+            if (SelectedGroupChild == null) return;
+            _suppressSave = true;
+            CheckBoxGroupChildShowSeparateBorder.IsChecked = SelectedGroupChild.ShowSeparateBorder;
+
+            var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedGroupChild);
+            ComboBoxGroupChildRulesetMode.SelectedIndex = (int)ruleset.Mode;
+            CheckBoxGroupChildRulesetReversed.IsChecked = ruleset.IsReversed;
+            ItemsControlGroupChildGroups.ItemsSource = ruleset.Groups;
+            _suppressSave = false;
+        }
+
         private void RemoveGroupChildItem_Click(object sender, RoutedEventArgs e)
         {
             if (sender is FrameworkElement fe && fe.DataContext is ToolbarComponentEntry entry)
             {
                 GroupChildren.Remove(entry);
+                if (SelectedGroupChild == entry) SelectedGroupChild = null;
                 SyncGroupChildrenBack();
                 SaveSettings();
             }
+        }
+
+        private void CheckBoxGroupChildShowSeparateBorder_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded || SelectedGroupChild == null) return;
+            SelectedGroupChild.ShowSeparateBorder = CheckBoxGroupChildShowSeparateBorder.IsChecked == true;
+            SyncGroupChildrenBack();
+            SaveSettings();
+        }
+
+        private void ComboBoxGroupChildRulesetMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded || SelectedGroupChild == null || _suppressSave) return;
+            var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedGroupChild);
+            ruleset.Mode = (ToolbarLogicalMode)ComboBoxGroupChildRulesetMode.SelectedIndex;
+            SelectedGroupChild.HidingRuleset = ruleset;
+            SelectedGroupChild.HidingRule = ToolbarHidingRule.AlwaysShow;
+            SyncGroupChildrenBack();
+            SaveSettings();
+        }
+
+        private void CheckBoxGroupChildRulesetReversed_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded || SelectedGroupChild == null || _suppressSave) return;
+            var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedGroupChild);
+            ruleset.IsReversed = CheckBoxGroupChildRulesetReversed.IsChecked == true;
+            SelectedGroupChild.HidingRuleset = ruleset;
+            SelectedGroupChild.HidingRule = ToolbarHidingRule.AlwaysShow;
+            SyncGroupChildrenBack();
+            SaveSettings();
+        }
+
+        private void ButtonAddGroupChildGroup_Click(object sender, RoutedEventArgs e)
+        {
+            if (SelectedGroupChild == null) return;
+            var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedGroupChild);
+            ruleset.Groups.Add(new ToolbarRuleGroup { Rules = new List<ToolbarRule> { new ToolbarRule() } });
+            SelectedGroupChild.HidingRuleset = ruleset;
+            SelectedGroupChild.HidingRule = ToolbarHidingRule.AlwaysShow;
+            ItemsControlGroupChildGroups.ItemsSource = null;
+            ItemsControlGroupChildGroups.ItemsSource = ruleset.Groups;
+            SyncGroupChildrenBack();
+            SaveSettings();
+        }
+
+        private void ComboBoxGroupChildGroupMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded || _suppressSave) return;
+            if (sender is FrameworkElement fe && fe.Tag is ToolbarRuleGroup group)
+            {
+                group.Mode = (ToolbarLogicalMode)((ComboBox)sender).SelectedIndex;
+                SyncGroupChildrenBack();
+                SaveSettings();
+            }
+        }
+
+        private void CheckBoxGroupChildGroupReversed_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded || _suppressSave) return;
+            SyncGroupChildrenBack();
+            SaveSettings();
+        }
+
+        private void CheckBoxGroupChildGroupEnabled_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded || _suppressSave) return;
+            SyncGroupChildrenBack();
+            SaveSettings();
+        }
+
+        private void ButtonAddGroupChildRule_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement fe && fe.Tag is ToolbarRuleGroup group)
+            {
+                group.Rules.Add(new ToolbarRule());
+                SyncGroupChildrenBack();
+                SaveSettings();
+            }
+        }
+
+        private void ButtonDuplicateGroupChildGroup_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement fe && fe.Tag is ToolbarRuleGroup group)
+            {
+                var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedGroupChild);
+                ruleset.Groups.Add(group.Clone());
+                SelectedGroupChild.HidingRuleset = ruleset;
+                SelectedGroupChild.HidingRule = ToolbarHidingRule.AlwaysShow;
+                ItemsControlGroupChildGroups.ItemsSource = null;
+                ItemsControlGroupChildGroups.ItemsSource = ruleset.Groups;
+                SyncGroupChildrenBack();
+                SaveSettings();
+            }
+        }
+
+        private void ButtonDeleteGroupChildGroup_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement fe && fe.Tag is ToolbarRuleGroup group)
+            {
+                var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedGroupChild);
+                ruleset.Groups.Remove(group);
+                SelectedGroupChild.HidingRuleset = ruleset;
+                SelectedGroupChild.HidingRule = ToolbarHidingRule.AlwaysShow;
+                ItemsControlGroupChildGroups.ItemsSource = null;
+                ItemsControlGroupChildGroups.ItemsSource = ruleset.Groups;
+                SyncGroupChildrenBack();
+                SaveSettings();
+            }
+        }
+
+        private void ButtonDeleteGroupChildRule_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement fe && fe.Tag is ToolbarRule rule)
+            {
+                var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedGroupChild);
+                foreach (var group in ruleset.Groups)
+                {
+                    if (group.Rules.Contains(rule))
+                    {
+                        group.Rules.Remove(rule);
+                        break;
+                    }
+                }
+                SyncGroupChildrenBack();
+                SaveSettings();
+            }
+        }
+
+        private void CheckBoxGroupChildRuleReversed_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded || _suppressSave) return;
+            SyncGroupChildrenBack();
+            SaveSettings();
+        }
+
+        private void ComboBoxGroupChildRuleCondition_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded || _suppressSave) return;
+            SyncGroupChildrenBack();
+            SaveSettings();
         }
 
         #endregion
@@ -695,6 +877,19 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (value is int i)
                 return (ToolbarLogicalMode)i;
             return ToolbarLogicalMode.Or;
+        }
+    }
+
+    public class NullToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value == null ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 

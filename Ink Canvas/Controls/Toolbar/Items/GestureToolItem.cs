@@ -9,6 +9,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.GestureRule();
         public override bool DefaultShowSeparateBorder => true;
         public override string Description => "手势操作";
+        protected override string IconGeometry => XamlGraphicsIconGeometries.DisabledGestureIcon;
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.TwoFingerGestureBorder_MouseUp(sender, e);
