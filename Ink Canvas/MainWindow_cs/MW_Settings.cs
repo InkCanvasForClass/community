@@ -238,6 +238,7 @@ namespace Ink_Canvas
         /// </remarks>
         public void UpdateFloatingBarIcon()
         {
+            if (FloatingbarHeadIconImg == null) return;
             int index = Settings.Appearance.FloatingBarImg;
 
             if (index == 0)

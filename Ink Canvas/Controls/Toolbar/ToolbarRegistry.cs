@@ -639,6 +639,8 @@ namespace Ink_Canvas.Controls.Toolbar
             {
                 Margin = new Thickness(0),
                 Padding = new Thickness(0),
+                Width = 50,
+                Height = 50,
                 Background = bgBrush,
                 CornerRadius = new CornerRadius(8),
                 BorderThickness = new Thickness(2),
@@ -647,11 +649,8 @@ namespace Ink_Canvas.Controls.Toolbar
                 Tag = InjectedTag
             };
 
-            if (isToolbarButton)
-            {
-                wrapper.Width = 50;
-                view.HorizontalAlignment = HorizontalAlignment.Center;
-            }
+            view.HorizontalAlignment = HorizontalAlignment.Center;
+            view.VerticalAlignment = VerticalAlignment.Center;
 
             SetHidingRuleset(wrapper, ruleset);
             return wrapper;
