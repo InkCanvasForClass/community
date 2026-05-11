@@ -1738,8 +1738,42 @@ namespace Ink_Canvas
             if (width <= 0 || double.IsNaN(width)) width = element.DesiredSize.Width;
             if (width <= 0 || double.IsNaN(width)) width = element.RenderSize.Width;
             if (width <= 0 || double.IsNaN(width)) width = element.Width;
+            if ((width <= 0 || double.IsNaN(width) || double.IsInfinity(width)) && element.IsLoaded)
+            {
+                try
+                {
+                    element.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                    width = element.DesiredSize.Width;
+                }
+                catch
+                {
+                }
+            }
 
             return width > 0 && !double.IsNaN(width) && !double.IsInfinity(width) ? width : fallbackWidth;
+        }
+
+        private double GetElementHeightForFloatingBar(FrameworkElement element, double fallbackHeight)
+        {
+            if (element == null) return fallbackHeight;
+
+            var height = element.ActualHeight;
+            if (height <= 0 || double.IsNaN(height)) height = element.DesiredSize.Height;
+            if (height <= 0 || double.IsNaN(height)) height = element.RenderSize.Height;
+            if (height <= 0 || double.IsNaN(height)) height = element.Height;
+            if ((height <= 0 || double.IsNaN(height) || double.IsInfinity(height)) && element.IsLoaded)
+            {
+                try
+                {
+                    element.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                    height = element.DesiredSize.Height;
+                }
+                catch
+                {
+                }
+            }
+
+            return height > 0 && !double.IsNaN(height) && !double.IsInfinity(height) ? height : fallbackHeight;
         }
 
         private double GetFloatingBarScaledWidth()
@@ -2088,23 +2122,10 @@ namespace Ink_Canvas
                     toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
                 }
 
-                double baseWidth = ViewboxFloatingBar.ActualWidth;
-                if (baseWidth <= 0) baseWidth = ViewboxFloatingBar.DesiredSize.Width;
-                if (baseWidth <= 0) baseWidth = ViewboxFloatingBar.RenderSize.Width;
-                if (baseWidth <= 0)
-                {
-                    baseWidth = 200;
-                    LogHelper.WriteLogToFile($"浮动栏宽度无法获取，使用估算值: {baseWidth}");
-                }
+                double baseWidth = GetElementWidthForFloatingBar(ViewboxFloatingBar, 200);
                 double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
 
-                double baseHeight = ViewboxFloatingBar.ActualHeight;
-                if (baseHeight <= 0) baseHeight = ViewboxFloatingBar.DesiredSize.Height;
-                if (baseHeight <= 0) baseHeight = ViewboxFloatingBar.RenderSize.Height;
-                if (baseHeight <= 0)
-                {
-                    baseHeight = 58;
-                }
+                double baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 58);
                 double floatingBarHeight = baseHeight * ViewboxFloatingBarScaleTransform.ScaleY;
 
 
@@ -2235,35 +2256,10 @@ namespace Ink_Canvas
                     toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
                 }
 
-                double baseWidth = ViewboxFloatingBar.ActualWidth;
-                if (baseWidth <= 0)
-                {
-                    baseWidth = ViewboxFloatingBar.DesiredSize.Width;
-                }
-                if (baseWidth <= 0)
-                {
-                    baseWidth = ViewboxFloatingBar.RenderSize.Width;
-                }
-                if (baseWidth <= 0)
-                {
-                    baseWidth = 200;
-                    LogHelper.WriteLogToFile($"浮动栏宽度无法获取，使用估算值: {baseWidth}");
-                }
+                double baseWidth = GetElementWidthForFloatingBar(ViewboxFloatingBar, 200);
                 double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
 
-                double baseHeight = ViewboxFloatingBar.ActualHeight;
-                if (baseHeight <= 0)
-                {
-                    baseHeight = ViewboxFloatingBar.DesiredSize.Height;
-                }
-                if (baseHeight <= 0)
-                {
-                    baseHeight = ViewboxFloatingBar.RenderSize.Height;
-                }
-                if (baseHeight <= 0)
-                {
-                    baseHeight = 58;
-                }
+                double baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 58);
                 double floatingBarHeight = baseHeight * ViewboxFloatingBarScaleTransform.ScaleY;
 
 
@@ -2345,27 +2341,10 @@ namespace Ink_Canvas
 
                 // 计算浮动栏位置，考虑快捷调色盘的显示状态
                 // 使用更可靠的方法获取浮动栏宽度
-                double baseWidth = ViewboxFloatingBar.ActualWidth;
-
-                if (baseWidth <= 0)
-                {
-                    baseWidth = ViewboxFloatingBar.DesiredSize.Width;
-                }
-                if (baseWidth <= 0)
-                {
-                    baseWidth = ViewboxFloatingBar.RenderSize.Width;
-                }
-                if (baseWidth <= 0)
-                {
-                    baseWidth = 200;
-                    LogHelper.WriteLogToFile($"浮动栏宽度无法获取，使用估算值: {baseWidth}");
-                }
+                double baseWidth = GetElementWidthForFloatingBar(ViewboxFloatingBar, 200);
                 double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
 
-                double baseHeight = ViewboxFloatingBar.ActualHeight;
-                if (baseHeight <= 0) baseHeight = ViewboxFloatingBar.DesiredSize.Height;
-                if (baseHeight <= 0) baseHeight = ViewboxFloatingBar.RenderSize.Height;
-                if (baseHeight <= 0) baseHeight = 58;
+                double baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 58);
                 double floatingBarHeight = baseHeight * ViewboxFloatingBarScaleTransform.ScaleY;
 
 
@@ -4899,6 +4878,37 @@ private bool forceEraser;
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"更新子面板位置失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void UpdateSubPanelPosition(FrameworkElement button, System.Windows.Controls.Primitives.Popup popup, double defaultPopupWidth)
+        {
+            try
+            {
+                if (button == null || popup == null) return;
+
+                if (popup.PlacementTarget != button)
+                    popup.PlacementTarget = button;
+
+                var child = popup.Child as FrameworkElement;
+                if (child != null)
+                {
+                    var width = GetElementWidthForFloatingBar(child, defaultPopupWidth);
+                    if (width > 0 && !double.IsNaN(width) && !double.IsInfinity(width))
+                    {
+                        popup.HorizontalOffset = 0;
+                    }
+                }
+
+                if (popup.IsOpen)
+                {
+                    _popupManager?.UpdatePosition(popup);
+                    _popupManager?.BringToFrontLight(popup);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新 Popup 子面板位置失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
