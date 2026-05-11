@@ -22,6 +22,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             LoadSettings();
             _isLoaded = true;
+            UpdateFileAssociationStatus();
         }
 
         private void AutomationPage_Unloaded(object sender, RoutedEventArgs e)
