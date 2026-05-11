@@ -404,7 +404,7 @@ namespace Ink_Canvas.Controls.Toolbar
                         {
                             if (groupContentItems.Count > 0)
                             {
-                                result.Add(CreateGroupContentDisplayItem(groupContentItems, groupRuleset));
+                                FlushGroupContentItems(result, groupContentItems, groupRuleset, entry.ShowSeparateBorder);
                                 groupContentItems.Clear();
                             }
                             result.Add(new DisplayItem
@@ -429,28 +429,7 @@ namespace Ink_Canvas.Controls.Toolbar
 
                     if (groupContentItems.Count > 0)
                     {
-                        if (entry.ShowSeparateBorder)
-                        {
-                            var innerPanel = new StackPanel { Orientation = Orientation.Horizontal };
-                            foreach (var item in groupContentItems)
-                            {
-                                item.View.Margin = new Thickness(0);
-                                innerPanel.Children.Add(item.View);
-                            }
-                            innerPanel.Tag = InjectedTag;
-                            SetHidingRuleset(innerPanel, groupRuleset);
-                            result.Add(new DisplayItem
-                            {
-                                View = innerPanel,
-                                Ruleset = groupRuleset,
-                                IsSeparateBorder = true,
-                                IsToolbarButton = false
-                            });
-                        }
-                        else
-                        {
-                            result.Add(CreateGroupContentDisplayItem(groupContentItems, groupRuleset));
-                        }
+                        FlushGroupContentItems(result, groupContentItems, groupRuleset, entry.ShowSeparateBorder);
                     }
                 }
                 else
@@ -476,6 +455,34 @@ namespace Ink_Canvas.Controls.Toolbar
                 }
             }
             return result;
+        }
+
+        private static void FlushGroupContentItems(List<DisplayItem> result, List<DisplayItem> groupContentItems, ToolbarRuleset groupRuleset, bool groupShowSeparateBorder)
+        {
+            if (groupContentItems.Count == 0) return;
+
+            if (groupShowSeparateBorder)
+            {
+                var innerPanel = new StackPanel { Orientation = Orientation.Horizontal };
+                foreach (var item in groupContentItems)
+                {
+                    item.View.Margin = new Thickness(0);
+                    innerPanel.Children.Add(item.View);
+                }
+                innerPanel.Tag = InjectedTag;
+                SetHidingRuleset(innerPanel, groupRuleset);
+                result.Add(new DisplayItem
+                {
+                    View = innerPanel,
+                    Ruleset = groupRuleset,
+                    IsSeparateBorder = true,
+                    IsToolbarButton = false
+                });
+            }
+            else
+            {
+                result.Add(CreateGroupContentDisplayItem(groupContentItems, groupRuleset));
+            }
         }
 
         private static DisplayItem CreateGroupContentDisplayItem(List<DisplayItem> groupContentItems, ToolbarRuleset groupRuleset)
