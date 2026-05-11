@@ -192,6 +192,8 @@ namespace Ink_Canvas
                 SetToolbarGeometry(WhiteboardFloatingBarBtn, XamlGraphicsIconGeometries.WhiteboardFloatingBarBtnIcon);
                 SetToolbarGeometry(ToolsFloatingBarBtn, XamlGraphicsIconGeometries.ToolsFloatingBarBtnIcon);
                 SetToolbarGeometry(Fold_Icon, XamlGraphicsIconGeometries.FoldIcon);
+                SetToolbarGeometry(Gesture_Icon, XamlGraphicsIconGeometries.DisabledGestureIcon);
+                SetToolbarGeometry(Exit_Icon, XamlGraphicsIconGeometries.ExitPresentationIconGeometry);
                 UpdateInkFreezeButtonState();
 
                 SetMenuGeometry(TimerToolBtn, XamlGraphicsIconGeometries.TimerIconGeometry);

@@ -1216,16 +1216,7 @@ namespace Ink_Canvas
                                 if (Settings.Appearance.IsShowQuickColorPalette && QuickColorPalette != null)
                                 {
                                     QuickColorPalette.Visibility = Visibility.Visible;
-                                    if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
-                                    {
-                                        QuickColorPalette.QuickColorPalettePanel.Visibility = Visibility.Collapsed;
-                                        QuickColorPalette.QuickColorPaletteSingleRowPanel.Visibility = Visibility.Visible;
-                                    }
-                                    else
-                                    {
-                                        QuickColorPalette.QuickColorPalettePanel.Visibility = Visibility.Visible;
-                                        QuickColorPalette.QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
-                                    }
+                                    QuickColorPalette.DisplayMode = Settings.Appearance.QuickColorPaletteDisplayMode;
                                 }
                                 SetFloatingBarHighlightPosition("pen");
                             }

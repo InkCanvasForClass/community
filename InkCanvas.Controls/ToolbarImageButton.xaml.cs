@@ -41,6 +41,8 @@ namespace Ink_Canvas.Controls
 
         public GeometryDrawing Icon => IconGeometryInternal;
 
+        public GeometryDrawing Badge => BadgeGeometryInternal;
+
         public GeometryDrawing GeometryDrawing => IconGeometryInternal;
 
         public static readonly DependencyProperty IconBrushProperty = DependencyProperty.Register(
@@ -71,6 +73,18 @@ namespace Ink_Canvas.Controls
         {
             get => ButtonPanel.Background;
             set => ButtonPanel.Background = value;
+        }
+
+        public double LabelFontSize
+        {
+            get => LabelTextBlock.FontSize;
+            set => LabelTextBlock.FontSize = value;
+        }
+
+        public double IconHeight
+        {
+            get => ButtonImage.Height;
+            set => ButtonImage.Height = value;
         }
 
         public event MouseButtonEventHandler ButtonMouseDown;

@@ -226,6 +226,54 @@ namespace Ink_Canvas.Controls.Toolbar
         public ToolbarRuleset HidingRuleset { get; set; } = null;
 
         public bool IsGroup => Id == "builtin.group";
+
+        public double? GetSettingDouble(string key)
+        {
+            if (Settings != null && Settings.TryGetValue(key, out var val))
+            {
+                if (val is double d) return d;
+                if (val is long l) return l;
+                if (val is int i) return i;
+                if (val != null && double.TryParse(val.ToString(), out var parsed)) return parsed;
+            }
+            return null;
+        }
+
+        public string GetSettingString(string key)
+        {
+            if (Settings != null && Settings.TryGetValue(key, out var val))
+                return val?.ToString();
+            return null;
+        }
+
+        public void SetSetting(string key, object value)
+        {
+            if (Settings == null) Settings = new Dictionary<string, object>();
+            Settings[key] = value;
+        }
+    }
+
+    public static class ComponentSettingKeys
+    {
+        public const string MinWidth = "minWidth";
+        public const string MaxWidth = "maxWidth";
+        public const string FixedWidth = "fixedWidth";
+        public const string MinHeight = "minHeight";
+        public const string MaxHeight = "maxHeight";
+        public const string FixedHeight = "fixedHeight";
+        public const string FontSize = "fontSize";
+        public const string IconSize = "iconSize";
+        public const string HorizontalAlignment = "horizontalAlignment";
+        public const string VerticalAlignment = "verticalAlignment";
+        public const string MarginLeft = "marginLeft";
+        public const string MarginTop = "marginTop";
+        public const string MarginRight = "marginRight";
+        public const string MarginBottom = "marginBottom";
+        public const string PaddingLeft = "paddingLeft";
+        public const string PaddingTop = "paddingTop";
+        public const string PaddingRight = "paddingRight";
+        public const string PaddingBottom = "paddingBottom";
+        public const string Opacity = "opacity";
     }
 
     public class ToolbarLayoutSettings

@@ -1144,7 +1144,7 @@
             <Popup x:Name="BorderDrawShape" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
                 <localControls:ShapeDrawPopupContent x:Name="ShapeDrawPopupContent" />
             </Popup>
-            <Popup x:Name="TwoFingerGestureBorder" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False" PlacementTarget="{Binding ElementName=EnableTwoFingerGestureBorder}">
+            <Popup x:Name="TwoFingerGestureBorder" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
                 <localControls:GesturePopupContent x:Name="FloatingBarGesturePopupContent" />
             </Popup>
         </Grid>

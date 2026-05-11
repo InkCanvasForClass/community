@@ -113,7 +113,9 @@ namespace Ink_Canvas
                 if (Gesture_Icon != null)
                 {
                     Gesture_Icon.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.EnabledGestureIcon);
+                    Gesture_Icon.Badge.Geometry = Geometry.Parse("F0 M24,24z M0,0z " + XamlGraphicsIconGeometries.EnabledGestureIconBadgeCheck);
                     Gesture_Icon.IconBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                    Gesture_Icon.Badge.Brush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                 }
             }
             else
@@ -121,6 +123,7 @@ namespace Ink_Canvas
                 if (Gesture_Icon != null)
                 {
                     Gesture_Icon.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.DisabledGestureIcon);
+                    Gesture_Icon.Badge.Geometry = Geometry.Parse("F0 M24,24z M0,0z");
                     Gesture_Icon.IconBrush = isDarkTheme
                         ? new SolidColorBrush(Color.FromRgb(244, 244, 245))
                         : new SolidColorBrush(Color.FromRgb(24, 24, 27));
@@ -2827,16 +2830,7 @@ namespace Ink_Canvas
             if (Settings.Appearance.IsShowQuickColorPalette && QuickColorPalette != null)
             {
                 QuickColorPalette.Visibility = Visibility.Visible;
-                if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
-                {
-                    QuickColorPalette.QuickColorPalettePanel.Visibility = Visibility.Collapsed;
-                    QuickColorPalette.QuickColorPaletteSingleRowPanel.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    QuickColorPalette.QuickColorPalettePanel.Visibility = Visibility.Visible;
-                    QuickColorPalette.QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
-                }
+                QuickColorPalette.DisplayMode = Settings.Appearance.QuickColorPaletteDisplayMode;
             }
 
             SetFloatingBarHighlightPosition("pen");
@@ -4936,8 +4930,7 @@ private bool forceEraser;
         /// </summary>
         private void UpdateTwoFingerGestureBorderPosition()
         {
-            var gestureBorder = Gesture_Icon?.Parent as FrameworkElement ?? Gesture_Icon;
-            UpdateSubPanelPosition(gestureBorder, TwoFingerGestureBorder, 119);
+            UpdateSubPanelPosition(Gesture_Icon, TwoFingerGestureBorder, 119);
         }
 
         /// <summary>

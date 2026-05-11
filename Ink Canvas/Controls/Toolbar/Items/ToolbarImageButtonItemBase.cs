@@ -17,6 +17,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
 
         protected virtual string IconBrushResourceKey => null;
         protected virtual string LabelBrushResourceKey => null;
+        protected virtual string IconGeometry => null;
 
         protected abstract void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e);
 
@@ -29,6 +30,8 @@ namespace Ink_Canvas.Controls.Toolbar.Items
                 Label = Strings.GetString(LocalizationKey) ?? LocalizationKey,
                 Tag = "ToolbarRegistryInjected"
             };
+            if (!string.IsNullOrEmpty(IconGeometry))
+                btn.Icon.Geometry = Geometry.Parse(IconGeometry);
             if (!string.IsNullOrEmpty(IconBrushResourceKey))
             {
                 if (btn.TryFindResource(IconBrushResourceKey) is Brush brush) btn.IconBrush = brush;

@@ -7,7 +7,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
     internal sealed class SeparatorToolItem : IToolbarItem
     {
         public string Id => "builtin.separator";
-        public string DisplayName => "Separator";
+        public string DisplayName => "分割线";
         public string Description => "分割线";
         public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow();
         public bool DefaultShowSeparateBorder => false;
@@ -18,6 +18,8 @@ namespace Ink_Canvas.Controls.Toolbar.Items
             {
                 Name = "FloatingBarSeparator",
                 Margin = new Thickness(2, 0, 2, 0),
+                Width = 2,
+                MinWidth = 2,
                 BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#71717a")),
                 BorderThickness = new Thickness(1, 0, 0, 0),
                 Tag = ToolbarRegistry.InjectedTag

@@ -5,7 +5,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
     internal sealed class QuickColorPaletteToolItem : IToolbarItem
     {
         public string Id => "builtin.quickColorPalette";
-        public string DisplayName => "Quick Color Palette";
+        public string DisplayName => "快捷调色盘";
         public string Description => "快速选色面板";
         public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AnnotationOnly();
         public bool DefaultShowSeparateBorder => false;
@@ -16,6 +16,8 @@ namespace Ink_Canvas.Controls.Toolbar.Items
             {
                 Tag = "ToolbarRegistryInjected"
             };
+
+            control.SyncFromSettings();
 
             control.ColorClicked += (s, e) =>
             {

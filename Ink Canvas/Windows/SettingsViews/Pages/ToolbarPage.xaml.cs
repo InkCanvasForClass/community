@@ -42,6 +42,33 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             var page = (ToolbarPage)d;
             page.UpdatePropertiesPanel();
+            page.SelectedGroupChild = null;
+        }
+
+        public static readonly DependencyProperty SelectedGroupChildProperty =
+            DependencyProperty.Register(nameof(SelectedGroupChild), typeof(ToolbarComponentEntry), typeof(ToolbarPage),
+                new PropertyMetadata(null, OnSelectedGroupChildChanged));
+
+        public ToolbarComponentEntry SelectedGroupChild
+        {
+            get => (ToolbarComponentEntry)GetValue(SelectedGroupChildProperty);
+            set => SetValue(SelectedGroupChildProperty, value);
+        }
+
+        private static void OnSelectedGroupChildChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var page = (ToolbarPage)d;
+            page.UpdateGroupChildPropertiesPanel();
+        }
+
+        public static readonly DependencyProperty SettingsTabIndexProperty =
+            DependencyProperty.Register(nameof(SettingsTabIndex), typeof(int), typeof(ToolbarPage),
+                new PropertyMetadata(0));
+
+        public int SettingsTabIndex
+        {
+            get => (int)GetValue(SettingsTabIndexProperty);
+            set => SetValue(SettingsTabIndexProperty, value);
         }
 
         private void UpdatePropertiesPanel()
@@ -49,6 +76,25 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (SelectedEntry == null) return;
             _suppressSave = true;
             CheckBoxShowSeparateBorder.IsChecked = SelectedEntry.ShowSeparateBorder;
+
+            TextBoxFixedWidth.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.FixedWidth)?.ToString() ?? "";
+            TextBoxFixedHeight.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.FixedHeight)?.ToString() ?? "";
+            TextBoxMinWidth.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.MinWidth)?.ToString() ?? "";
+            TextBoxMaxWidth.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.MaxWidth)?.ToString() ?? "";
+            TextBoxMinHeight.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.MinHeight)?.ToString() ?? "";
+            TextBoxMaxHeight.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.MaxHeight)?.ToString() ?? "";
+            TextBoxFontSize.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.FontSize)?.ToString() ?? "";
+            TextBoxIconSize.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.IconSize)?.ToString() ?? "";
+            TextBoxOpacity.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.Opacity)?.ToString() ?? "";
+            TextBoxMarginLeft.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.MarginLeft)?.ToString() ?? "";
+            TextBoxMarginTop.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.MarginTop)?.ToString() ?? "";
+            TextBoxMarginRight.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.MarginRight)?.ToString() ?? "";
+            TextBoxMarginBottom.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.MarginBottom)?.ToString() ?? "";
+
+            var hAlign = SelectedEntry.GetSettingString(ComponentSettingKeys.HorizontalAlignment) ?? "";
+            ComboBoxHAlign.SelectedIndex = hAlign switch { "Left" => 1, "Center" => 2, "Right" => 3, "Stretch" => 4, _ => 0 };
+            var vAlign = SelectedEntry.GetSettingString(ComponentSettingKeys.VerticalAlignment) ?? "";
+            ComboBoxVAlign.SelectedIndex = vAlign switch { "Top" => 1, "Center" => 2, "Bottom" => 3, "Stretch" => 4, _ => 0 };
 
             var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedEntry);
             ComboBoxRulesetMode.SelectedIndex = (int)ruleset.Mode;
@@ -243,13 +289,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (SelectedEntry != null && SelectedEntry.IsGroup)
             {
-                SelectedEntry.Children = new List<ToolbarComponentEntry>(GroupChildren.Select(c => new ToolbarComponentEntry
-                {
-                    Id = c.Id,
-                    HidingRule = c.HidingRule,
-                    ShowSeparateBorder = c.ShowSeparateBorder,
-                    HidingRuleset = c.HidingRuleset?.Clone()
-                }));
+                SelectedEntry.Children = new List<ToolbarComponentEntry>(GroupChildren.Select(c => CloneEntry(c)));
             }
         }
 
@@ -270,16 +310,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ShowSeparateBorder = source.ShowSeparateBorder,
                 HidingRuleset = source.HidingRuleset?.Clone()
             };
+            if (source.Settings != null && source.Settings.Count > 0)
+                clone.Settings = new Dictionary<string, object>(source.Settings);
             if (source.Children != null && source.Children.Count > 0)
             {
                 clone.Children = new List<ToolbarComponentEntry>(
-                    source.Children.Select(c => new ToolbarComponentEntry
-                    {
-                        Id = c.Id,
-                        HidingRule = c.HidingRule,
-                        ShowSeparateBorder = c.ShowSeparateBorder,
-                        HidingRuleset = c.HidingRuleset?.Clone()
-                    }));
+                    source.Children.Select(c => CloneEntry(c)));
             }
             return clone;
         }
@@ -374,6 +410,64 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded || SelectedEntry == null) return;
             SelectedEntry.ShowSeparateBorder = CheckBoxShowSeparateBorder.IsChecked == true;
+            SaveSettings();
+        }
+
+        private void ComponentSetting_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!_isLoaded || SelectedEntry == null || _suppressSave) return;
+            WriteComponentSettingsFromUI(SelectedEntry);
+            SaveSettings();
+        }
+
+        private void ComponentAlignment_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded || SelectedEntry == null || _suppressSave) return;
+            WriteComponentSettingsFromUI(SelectedEntry);
+            SaveSettings();
+        }
+
+        private void WriteComponentSettingsFromUI(ToolbarComponentEntry entry)
+        {
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.FixedWidth, TextBoxFixedWidth.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.FixedHeight, TextBoxFixedHeight.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MinWidth, TextBoxMinWidth.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MaxWidth, TextBoxMaxWidth.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MinHeight, TextBoxMinHeight.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MaxHeight, TextBoxMaxHeight.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.FontSize, TextBoxFontSize.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.IconSize, TextBoxIconSize.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.Opacity, TextBoxOpacity.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MarginLeft, TextBoxMarginLeft.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MarginTop, TextBoxMarginTop.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MarginRight, TextBoxMarginRight.Text);
+            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MarginBottom, TextBoxMarginBottom.Text);
+
+            var hAlignTag = (ComboBoxHAlign.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+            if (!string.IsNullOrEmpty(hAlignTag)) entry.SetSetting(ComponentSettingKeys.HorizontalAlignment, hAlignTag);
+            else entry.Settings?.Remove(ComponentSettingKeys.HorizontalAlignment);
+
+            var vAlignTag = (ComboBoxVAlign.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+            if (!string.IsNullOrEmpty(vAlignTag)) entry.SetSetting(ComponentSettingKeys.VerticalAlignment, vAlignTag);
+            else entry.Settings?.Remove(ComponentSettingKeys.VerticalAlignment);
+        }
+
+        private static void WriteDoubleIfNotEmpty(ToolbarComponentEntry entry, string key, string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                entry.Settings?.Remove(key);
+                return;
+            }
+            if (double.TryParse(text, out var val))
+                entry.SetSetting(key, val);
+        }
+
+        private void ButtonResetComponentSettings_Click(object sender, RoutedEventArgs e)
+        {
+            if (SelectedEntry == null) return;
+            SelectedEntry.Settings?.Clear();
+            UpdatePropertiesPanel();
             SaveSettings();
         }
 
@@ -524,21 +618,29 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void RefreshGroupChildren()
         {
             GroupChildren.Clear();
+            SelectedGroupChild = null;
             if (SelectedEntry == null || !SelectedEntry.IsGroup) return;
 
             if (SelectedEntry.Children != null)
             {
                 foreach (var child in SelectedEntry.Children)
                 {
-                    GroupChildren.Add(new ToolbarComponentEntry
-                    {
-                        Id = child.Id,
-                        HidingRule = child.HidingRule,
-                        ShowSeparateBorder = child.ShowSeparateBorder,
-                        HidingRuleset = child.HidingRuleset?.Clone()
-                    });
+                    GroupChildren.Add(CloneEntry(child));
                 }
             }
+        }
+
+        private void UpdateGroupChildPropertiesPanel()
+        {
+            if (SelectedGroupChild == null) return;
+            _suppressSave = true;
+            CheckBoxGroupChildShowSeparateBorder.IsChecked = SelectedGroupChild.ShowSeparateBorder;
+
+            var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedGroupChild);
+            ComboBoxGroupChildRulesetMode.SelectedIndex = (int)ruleset.Mode;
+            CheckBoxGroupChildRulesetReversed.IsChecked = ruleset.IsReversed;
+            ItemsControlGroupChildGroups.ItemsSource = ruleset.Groups;
+            _suppressSave = false;
         }
 
         private void RemoveGroupChildItem_Click(object sender, RoutedEventArgs e)
@@ -546,9 +648,150 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (sender is FrameworkElement fe && fe.DataContext is ToolbarComponentEntry entry)
             {
                 GroupChildren.Remove(entry);
+                if (SelectedGroupChild == entry) SelectedGroupChild = null;
                 SyncGroupChildrenBack();
                 SaveSettings();
             }
+        }
+
+        private void CheckBoxGroupChildShowSeparateBorder_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded || SelectedGroupChild == null) return;
+            SelectedGroupChild.ShowSeparateBorder = CheckBoxGroupChildShowSeparateBorder.IsChecked == true;
+            SyncGroupChildrenBack();
+            SaveSettings();
+        }
+
+        private void ComboBoxGroupChildRulesetMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded || SelectedGroupChild == null || _suppressSave) return;
+            var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedGroupChild);
+            ruleset.Mode = (ToolbarLogicalMode)ComboBoxGroupChildRulesetMode.SelectedIndex;
+            SelectedGroupChild.HidingRuleset = ruleset;
+            SelectedGroupChild.HidingRule = ToolbarHidingRule.AlwaysShow;
+            SyncGroupChildrenBack();
+            SaveSettings();
+        }
+
+        private void CheckBoxGroupChildRulesetReversed_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded || SelectedGroupChild == null || _suppressSave) return;
+            var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedGroupChild);
+            ruleset.IsReversed = CheckBoxGroupChildRulesetReversed.IsChecked == true;
+            SelectedGroupChild.HidingRuleset = ruleset;
+            SelectedGroupChild.HidingRule = ToolbarHidingRule.AlwaysShow;
+            SyncGroupChildrenBack();
+            SaveSettings();
+        }
+
+        private void ButtonAddGroupChildGroup_Click(object sender, RoutedEventArgs e)
+        {
+            if (SelectedGroupChild == null) return;
+            var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedGroupChild);
+            ruleset.Groups.Add(new ToolbarRuleGroup { Rules = new List<ToolbarRule> { new ToolbarRule() } });
+            SelectedGroupChild.HidingRuleset = ruleset;
+            SelectedGroupChild.HidingRule = ToolbarHidingRule.AlwaysShow;
+            ItemsControlGroupChildGroups.ItemsSource = null;
+            ItemsControlGroupChildGroups.ItemsSource = ruleset.Groups;
+            SyncGroupChildrenBack();
+            SaveSettings();
+        }
+
+        private void ComboBoxGroupChildGroupMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded || _suppressSave) return;
+            if (sender is FrameworkElement fe && fe.Tag is ToolbarRuleGroup group)
+            {
+                group.Mode = (ToolbarLogicalMode)((ComboBox)sender).SelectedIndex;
+                SyncGroupChildrenBack();
+                SaveSettings();
+            }
+        }
+
+        private void CheckBoxGroupChildGroupReversed_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded || _suppressSave) return;
+            SyncGroupChildrenBack();
+            SaveSettings();
+        }
+
+        private void CheckBoxGroupChildGroupEnabled_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded || _suppressSave) return;
+            SyncGroupChildrenBack();
+            SaveSettings();
+        }
+
+        private void ButtonAddGroupChildRule_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement fe && fe.Tag is ToolbarRuleGroup group)
+            {
+                group.Rules.Add(new ToolbarRule());
+                SyncGroupChildrenBack();
+                SaveSettings();
+            }
+        }
+
+        private void ButtonDuplicateGroupChildGroup_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement fe && fe.Tag is ToolbarRuleGroup group)
+            {
+                var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedGroupChild);
+                ruleset.Groups.Add(group.Clone());
+                SelectedGroupChild.HidingRuleset = ruleset;
+                SelectedGroupChild.HidingRule = ToolbarHidingRule.AlwaysShow;
+                ItemsControlGroupChildGroups.ItemsSource = null;
+                ItemsControlGroupChildGroups.ItemsSource = ruleset.Groups;
+                SyncGroupChildrenBack();
+                SaveSettings();
+            }
+        }
+
+        private void ButtonDeleteGroupChildGroup_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement fe && fe.Tag is ToolbarRuleGroup group)
+            {
+                var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedGroupChild);
+                ruleset.Groups.Remove(group);
+                SelectedGroupChild.HidingRuleset = ruleset;
+                SelectedGroupChild.HidingRule = ToolbarHidingRule.AlwaysShow;
+                ItemsControlGroupChildGroups.ItemsSource = null;
+                ItemsControlGroupChildGroups.ItemsSource = ruleset.Groups;
+                SyncGroupChildrenBack();
+                SaveSettings();
+            }
+        }
+
+        private void ButtonDeleteGroupChildRule_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement fe && fe.Tag is ToolbarRule rule)
+            {
+                var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedGroupChild);
+                foreach (var group in ruleset.Groups)
+                {
+                    if (group.Rules.Contains(rule))
+                    {
+                        group.Rules.Remove(rule);
+                        break;
+                    }
+                }
+                SyncGroupChildrenBack();
+                SaveSettings();
+            }
+        }
+
+        private void CheckBoxGroupChildRuleReversed_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded || _suppressSave) return;
+            SyncGroupChildrenBack();
+            SaveSettings();
+        }
+
+        private void ComboBoxGroupChildRuleCondition_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded || _suppressSave) return;
+            SyncGroupChildrenBack();
+            SaveSettings();
         }
 
         #endregion
@@ -695,6 +938,19 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (value is int i)
                 return (ToolbarLogicalMode)i;
             return ToolbarLogicalMode.Or;
+        }
+    }
+
+    public class NullToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value == null ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 
