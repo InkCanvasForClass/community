@@ -40,7 +40,7 @@
             </Style>
 
             <Style x:Key="ModernTimerQuickButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
-                <Setter Property="Width" Value="104" />
+                <Setter Property="Width" Value="108" />
                 <Setter Property="Height" Value="48" />
                 <Setter Property="MinWidth" Value="0" />
                 <Setter Property="Padding" Value="8,0" />
@@ -230,7 +230,7 @@
                             <Border Style="{StaticResource ModernTimerCardStyle}" />
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <TabControl x:Name="TimerQuickTabControl"
-                                            Width="340"
+                                            Width="352"
                                             HorizontalContentAlignment="Center"
                                             Background="Transparent"
                                             BorderThickness="0"
