@@ -1844,6 +1844,7 @@ namespace Ink_Canvas
         private void SetFloatingBarHeadPlacement(bool headOnRight)
         {
             if (FloatingBarRootPanel == null) return;
+            if (isFloatingBarHeadOnRight == headOnRight) return;
 
             var rootChildren = FloatingBarRootPanel.Children;
             var rootList = rootChildren.OfType<FrameworkElement>().ToList();
@@ -1952,7 +1953,12 @@ namespace Ink_Canvas
                 if (current.SequenceEqual(normalOrder)) continue;
                 panel.Children.Clear();
                 foreach (var child in normalOrder)
-                    panel.Children.Add(child);
+                {
+                    if (child.Parent != null && child.Parent != panel)
+                        continue;
+                    if (!panel.Children.Contains(child))
+                        panel.Children.Add(child);
+                }
             }
             _normalContentOrders = null;
         }
@@ -1985,7 +1991,7 @@ namespace Ink_Canvas
         private void PlaceFloatingBarAfterHeadToggle(double headLeft, bool isExpanding)
         {
             ViewboxFloatingBar.UpdateLayout();
-            var screenWidth = GetFloatingBarScreenWidth(false);
+            var screenWidth = GetFloatingBarScreenWidth(Settings.Advanced.IsEnableAvoidFullScreenHelper);
 
             if (!isExpanding)
             {
@@ -2022,6 +2028,7 @@ namespace Ink_Canvas
             var headWidth = GetFloatingBarHeadScaledWidth();
             var nextLeft = requestedLeft;
             var shouldPlaceToolsOnLeft = isFloatingBarHeadOnRight;
+            var wasHeadOnRight = isFloatingBarHeadOnRight;
 
             if (!isFloatingBarHeadOnRight && requestedLeft + floatingBarWidth > screenWidth)
             {
@@ -2034,6 +2041,12 @@ namespace Ink_Canvas
             }
 
             SetFloatingBarHeadPlacement(shouldPlaceToolsOnLeft);
+
+            if (shouldPlaceToolsOnLeft != wasHeadOnRight)
+            {
+                floatingBarWidth = GetFloatingBarScaledWidth();
+            }
+
             return ClampFloatingBarLeft(nextLeft, floatingBarWidth, screenWidth);
         }
 
@@ -2291,6 +2304,9 @@ namespace Ink_Canvas
 
                 if (pointDesktop.X != -1 || pointDesktop.Y != -1) pointDesktop = pos;
 
+                pos.X = NormalizeFloatingBarLeftForScreen(pos.X, floatingBarWidth, screenWidth);
+                pointDesktop = pos;
+
                 var marginAnimation = new ThicknessAnimation
                 {
                     Duration = TimeSpan.FromSeconds(0.35),
@@ -2376,6 +2392,9 @@ namespace Ink_Canvas
                 {
                     pointPPT = pos;
                 }
+
+                pos.X = NormalizeFloatingBarLeftForScreen(pos.X, floatingBarWidth, screenWidth);
+                pointPPT = pos;
 
                 var marginAnimation = new ThicknessAnimation
                 {
