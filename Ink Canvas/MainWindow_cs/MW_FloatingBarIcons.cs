@@ -219,7 +219,7 @@ namespace Ink_Canvas
                     if (!isFloatingBarHeadOnRight && headLeft + floatingBarWidth > screenWidth)
                         shouldFlip = true;
                     else if (isFloatingBarHeadOnRight && headLeft + floatingBarWidth <= screenWidth)
-                        shouldFlip = headLeft > screenWidth / 2;
+                        shouldFlip = false;
                     else
                         shouldFlip = isFloatingBarHeadOnRight;
 
