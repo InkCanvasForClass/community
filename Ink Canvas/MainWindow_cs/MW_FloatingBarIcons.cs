@@ -1849,20 +1849,8 @@ namespace Ink_Canvas
             var rootChildren = FloatingBarRootPanel.Children;
             var rootList = rootChildren.OfType<FrameworkElement>().ToList();
 
-            FrameworkElement dragElement = null;
-            var otherElements = new List<FrameworkElement>();
-
-            foreach (var child in rootList)
-            {
-                if (IsDragHandleElement(child))
-                {
-                    dragElement = child;
-                }
-                else
-                {
-                    otherElements.Add(child);
-                }
-            }
+            var dragElement = FindDragHandleInRoot();
+            var otherElements = rootList.Where(c => c != dragElement).ToList();
 
             rootChildren.Clear();
 
@@ -1887,7 +1875,7 @@ namespace Ink_Canvas
                     dragElement.Margin = new Thickness(0);
                     rootChildren.Add(dragElement);
                 }
-                foreach (var elem in otherElements)
+                foreach (var elem in otherElements.AsEnumerable().Reverse())
                 {
                     rootChildren.Add(elem);
                 }
@@ -2006,6 +1994,7 @@ namespace Ink_Canvas
             var floatingBarWidth = GetFloatingBarScaledWidth();
             var headWidth = GetFloatingBarHeadScaledWidth();
             var shouldPlaceToolsOnLeft = headLeft + floatingBarWidth > screenWidth;
+            var wasHeadOnRight = isFloatingBarHeadOnRight;
 
             SetFloatingBarHeadPlacement(shouldPlaceToolsOnLeft);
             ViewboxFloatingBar.UpdateLayout();
@@ -2013,7 +2002,8 @@ namespace Ink_Canvas
             floatingBarWidth = GetFloatingBarScaledWidth();
             headWidth = GetFloatingBarHeadScaledWidth();
 
-            var nextLeft = shouldPlaceToolsOnLeft
+            var flipped = shouldPlaceToolsOnLeft != wasHeadOnRight;
+            var nextLeft = (shouldPlaceToolsOnLeft || flipped)
                 ? headLeft - Math.Max(0, floatingBarWidth - headWidth)
                 : headLeft;
 
