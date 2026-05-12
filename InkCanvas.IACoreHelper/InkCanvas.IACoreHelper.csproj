@@ -15,8 +15,8 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
@@ -25,7 +25,8 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -35,9 +36,8 @@
   <PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' Or '$(Platform)' == 'x64' Or '$(Platform)' == 'ARM64' ">
     <PlatformTarget>x86</PlatformTarget>
     <OutputPath>bin\$(Configuration)\</OutputPath>
-    <DebugSymbols Condition=" '$(Configuration)' == 'Debug' ">true</DebugSymbols>
-    <DebugType Condition=" '$(Configuration)' == 'Debug' ">full</DebugType>
-    <DebugType Condition=" '$(Configuration)' != 'Debug' ">pdbonly</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
     <Optimize Condition=" '$(Configuration)' == 'Debug' ">false</Optimize>
     <Optimize Condition=" '$(Configuration)' != 'Debug' ">true</Optimize>
     <DefineConstants Condition=" '$(Configuration)' == 'Debug' ">DEBUG;TRACE</DefineConstants>
