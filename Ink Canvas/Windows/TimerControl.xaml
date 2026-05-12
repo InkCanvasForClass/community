@@ -230,7 +230,7 @@
                             <Border Style="{StaticResource ModernTimerCardStyle}" />
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <TabControl x:Name="TimerQuickTabControl"
-                                            Width="328"
+                                            Width="340"
                                             HorizontalContentAlignment="Center"
                                             Background="Transparent"
                                             BorderThickness="0"
