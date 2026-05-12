@@ -645,7 +645,7 @@ namespace Ink_Canvas.Controls.Toolbar
 
             var border = new Border
             {
-                Padding = new Thickness(2),
+                Padding = new Thickness(2, 0, 2, 0),
                 Visibility = Visibility.Visible,
                 Height = 50,
                 Background = bgBrush,
