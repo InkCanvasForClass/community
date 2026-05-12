@@ -2002,13 +2002,25 @@ namespace Ink_Canvas
             floatingBarWidth = GetFloatingBarScaledWidth();
             headWidth = GetFloatingBarHeadScaledWidth();
 
-            var flipped = shouldPlaceToolsOnLeft != wasHeadOnRight;
-            var nextLeft = (shouldPlaceToolsOnLeft || flipped)
+            var nextLeft = shouldPlaceToolsOnLeft
                 ? headLeft - Math.Max(0, floatingBarWidth - headWidth)
                 : headLeft;
 
             pos.X = ClampFloatingBarLeft(nextLeft, floatingBarWidth, screenWidth);
             ViewboxFloatingBar.Margin = new Thickness(pos.X, ViewboxFloatingBar.Margin.Top, -2000, -200);
+
+            if (shouldPlaceToolsOnLeft != wasHeadOnRight)
+            {
+                ViewboxFloatingBar.UpdateLayout();
+                var actualHeadLeft = GetCurrentFloatingBarHeadLeft();
+                var correction = headLeft - actualHeadLeft;
+                if (Math.Abs(correction) > 0.5)
+                {
+                    pos.X += correction;
+                    pos.X = ClampFloatingBarLeft(pos.X, GetFloatingBarScaledWidth(), screenWidth);
+                    ViewboxFloatingBar.Margin = new Thickness(pos.X, ViewboxFloatingBar.Margin.Top, -2000, -200);
+                }
+            }
             SaveFloatingBarPositionPoint();
         }
 
