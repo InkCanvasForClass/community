@@ -4496,6 +4496,7 @@ private bool forceEraser;
         private ToolbarImageButton _lastHighlightButton;
         private string _pendingHighlightMode;
         private int _highlightPositionVersion;
+        private int _highlightLayoutRetryCount;
 
         private void SetFloatingBarHighlightPosition(string mode)
         {
@@ -4504,6 +4505,7 @@ private bool forceEraser;
             ApplyFloatingBarIconHighlightImmediate(mode);
 
             _pendingHighlightMode = mode;
+            _highlightLayoutRetryCount = 0;
             int version = ++_highlightPositionVersion;
             Dispatcher.BeginInvoke(new Action(() =>
             {
@@ -4619,7 +4621,7 @@ private bool forceEraser;
 
                 if (contentPanel == null || targetButton == null || !IsElementVisibleInTree(targetButton))
                 {
-                    HideAllSelectionHighlights();
+                    DeferFloatingBarHighlightIfLayoutPending(mode);
                     return;
                 }
 
@@ -4629,7 +4631,7 @@ private bool forceEraser;
 
                 if (nextWidth <= 0 || selectionBG == null)
                 {
-                    HideAllSelectionHighlights();
+                    DeferFloatingBarHighlightIfLayoutPending(mode);
                     return;
                 }
 
@@ -4658,6 +4660,10 @@ private bool forceEraser;
                 }
 
                 selectionBG.Visibility = Visibility.Visible;
+                if (indicatorBar != null)
+                {
+                    indicatorBar.Visibility = Visibility.Visible;
+                }
 
                 double indicatorBarWidth = 12;
                 double nextBarLeft = nextPos + Math.Max(0, (nextWidth - indicatorBarWidth) / 2);
@@ -4940,6 +4946,23 @@ private bool forceEraser;
         {
             HideAllSelectionHighlights();
             _lastHighlightButton = null;
+        }
+
+        private void DeferFloatingBarHighlightIfLayoutPending(string mode)
+        {
+            if (string.IsNullOrEmpty(mode) || _highlightLayoutRetryCount >= 3)
+            {
+                HideAllSelectionHighlights();
+                return;
+            }
+
+            _highlightLayoutRetryCount++;
+            int version = ++_highlightPositionVersion;
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (_highlightPositionVersion != version) return;
+                AnimateFloatingBarHighlightTo(mode);
+            }), DispatcherPriority.ContextIdle);
         }
 
         private void HideAllSelectionHighlights()
