@@ -208,12 +208,47 @@ namespace Ink_Canvas
                 ViewboxFloatingBar.Margin = new Thickness(xPos, yPos, -2000, -200);
 
                 pos = e.GetPosition(null);
-                if (IsInPptPresentationMode)
-                    pointPPT = new Point(xPos, yPos);
-                else
-                    pointDesktop = new Point(xPos, yPos);
 
-                // 标记需要更新 Popup 位置（使用 PopupManagerHelper）
+                if (IsFloatingBarContentVisible())
+                {
+                    var screenWidth = GetFloatingBarScreenWidth(Settings.Advanced.IsEnableAvoidFullScreenHelper);
+                    var headLeft = GetCurrentFloatingBarHeadLeft();
+                    var floatingBarWidth = GetFloatingBarScaledWidth();
+
+                    bool shouldFlip;
+                    if (!isFloatingBarHeadOnRight && headLeft + floatingBarWidth > screenWidth)
+                        shouldFlip = true;
+                    else if (isFloatingBarHeadOnRight && headLeft + floatingBarWidth <= screenWidth)
+                        shouldFlip = headLeft > screenWidth / 2;
+                    else
+                        shouldFlip = isFloatingBarHeadOnRight;
+
+                    if (shouldFlip != isFloatingBarHeadOnRight)
+                    {
+                        var savedHeadLeft = headLeft;
+                        SetFloatingBarHeadPlacement(shouldFlip);
+                        ViewboxFloatingBar.UpdateLayout();
+
+                        var newWidth = GetFloatingBarScaledWidth();
+                        var newHeadWidth = GetFloatingBarHeadScaledWidth();
+
+                        double newLeft;
+                        if (shouldFlip)
+                            newLeft = savedHeadLeft - Math.Max(0, newWidth - newHeadWidth);
+                        else
+                            newLeft = savedHeadLeft;
+
+                        newLeft = ClampFloatingBarLeft(newLeft, newWidth, screenWidth);
+                        ViewboxFloatingBar.Margin = new Thickness(newLeft, ViewboxFloatingBar.Margin.Top, -2000, -200);
+                    }
+                }
+
+                var currentMargin = ViewboxFloatingBar.Margin;
+                if (IsInPptPresentationMode)
+                    pointPPT = new Point(currentMargin.Left, currentMargin.Top);
+                else
+                    pointDesktop = new Point(currentMargin.Left, currentMargin.Top);
+
                 _popupManager?.MarkNeedsUpdate();
 
                 if (BorderTools.IsOpen) _popupManager?.BringToFront(BorderTools);
