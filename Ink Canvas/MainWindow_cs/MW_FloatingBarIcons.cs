@@ -1897,7 +1897,7 @@ namespace Ink_Canvas
                 }
                 if (dragElement != null)
                 {
-                    dragElement.Margin = new Thickness(2, 0, 0, 0);
+                    dragElement.Margin = new Thickness(3, 0, 0, 0);
                     rootChildren.Add(dragElement);
                 }
 
