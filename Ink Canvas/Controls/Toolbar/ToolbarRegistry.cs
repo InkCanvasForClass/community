@@ -772,6 +772,23 @@ namespace Ink_Canvas.Controls.Toolbar
                             UpdatePanelVisibility(sp, context);
                         }
                     }
+                    bool anyVisible = false;
+                    foreach (var gridChild in grid.Children.OfType<FrameworkElement>())
+                    {
+                        if (gridChild is StackPanel sp && sp.Tag as string == ContentPanelTag)
+                        {
+                            foreach (var spChild in sp.Children.OfType<FrameworkElement>())
+                            {
+                                if (spChild.Visibility == Visibility.Visible)
+                                {
+                                    anyVisible = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (anyVisible) break;
+                    }
+                    border.Visibility = anyVisible ? Visibility.Visible : Visibility.Collapsed;
                 }
             }
         }
