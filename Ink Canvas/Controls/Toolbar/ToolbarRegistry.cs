@@ -45,6 +45,16 @@ namespace Ink_Canvas.Controls.Toolbar
         public static bool GetPreventHideOnDragClick(FrameworkElement element)
             => (bool)element.GetValue(PreventHideOnDragClickProperty);
 
+        public static readonly DependencyProperty IsContentCollapsedByUserProperty =
+            DependencyProperty.RegisterAttached("IsContentCollapsedByUser", typeof(bool), typeof(ToolbarRegistry),
+                new PropertyMetadata(false));
+
+        public static void SetIsContentCollapsedByUser(FrameworkElement element, bool value)
+            => element.SetValue(IsContentCollapsedByUserProperty, value);
+
+        public static bool GetIsContentCollapsedByUser(FrameworkElement element)
+            => (bool)element.GetValue(IsContentCollapsedByUserProperty);
+
         public static List<KeyValuePair<string, string>> AvailableConditions { get; } = new List<KeyValuePair<string, string>>
         {
             new KeyValuePair<string, string>("isAnnotating", "批注模式"),
@@ -738,6 +748,8 @@ namespace Ink_Canvas.Controls.Toolbar
             {
                 if (child.Tag as string == InjectedTag)
                 {
+                    if (GetIsContentCollapsedByUser(child))
+                        continue;
                     var ruleset = GetHidingRuleset(child);
                     if (ruleset == null)
                     {
@@ -751,6 +763,8 @@ namespace Ink_Canvas.Controls.Toolbar
                 }
                 if (child is Border border && border.Tag as string == ContentBorderTag && border.Child is Grid grid)
                 {
+                    if (GetIsContentCollapsedByUser(border))
+                        continue;
                     foreach (var gridChild in grid.Children.OfType<FrameworkElement>())
                     {
                         if (gridChild is StackPanel sp && sp.Tag as string == ContentPanelTag)

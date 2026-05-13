@@ -2010,6 +2010,7 @@ namespace Ink_Canvas
                     if (ToolbarRegistry.GetPreventHideOnDragClick(child))
                         continue;
                     child.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+                    ToolbarRegistry.SetIsContentCollapsedByUser(child, !visible);
                 }
             }
         }
