@@ -317,6 +317,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 InstanceId = Guid.NewGuid().ToString(),
                 HidingRule = source.HidingRule,
                 ShowSeparateBorder = source.ShowSeparateBorder,
+                PreventHideOnDragClick = source.PreventHideOnDragClick,
                 HidingRuleset = source.HidingRuleset?.Clone()
             };
             if (source.Settings != null && source.Settings.Count > 0)
@@ -338,7 +339,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     Id = item.Id,
                     InstanceId = Guid.NewGuid().ToString(),
                     HidingRuleset = item.DefaultHidingRuleset?.Clone(),
-                    ShowSeparateBorder = item.DefaultShowSeparateBorder
+                    ShowSeparateBorder = item.DefaultShowSeparateBorder,
+                    PreventHideOnDragClick = item.DefaultPreventHideOnDragClick
                 };
                 if (item.Id == "builtin.group")
                 {
@@ -393,7 +395,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     Id = item.Id,
                     InstanceId = Guid.NewGuid().ToString(),
                     HidingRuleset = item.DefaultHidingRuleset?.Clone(),
-                    ShowSeparateBorder = item.DefaultShowSeparateBorder
+                    ShowSeparateBorder = item.DefaultShowSeparateBorder,
+                    PreventHideOnDragClick = item.DefaultPreventHideOnDragClick
                 };
                 if (item.Id == "builtin.group")
                 {
@@ -725,7 +728,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     Id = item.Id,
                     InstanceId = Guid.NewGuid().ToString(),
                     HidingRuleset = item.DefaultHidingRuleset?.Clone(),
-                    ShowSeparateBorder = item.DefaultShowSeparateBorder
+                    ShowSeparateBorder = item.DefaultShowSeparateBorder,
+                    PreventHideOnDragClick = item.DefaultPreventHideOnDragClick
                 };
                 var insertIndex = dropInfo.UnfilteredInsertIndex;
                 if (insertIndex < 0 || insertIndex > _page.GroupChildren.Count)

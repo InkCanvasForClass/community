@@ -120,7 +120,11 @@ namespace Ink_Canvas.Controls.Toolbar
         private static bool? EvaluateGroup(ToolbarRuleGroup group, Dictionary<string, bool> context)
         {
             if (group.Rules == null || group.Rules.Count == 0)
-                return null;
+            {
+                bool emptyResult = group.Mode == ToolbarLogicalMode.And;
+                emptyResult ^= group.IsReversed;
+                return emptyResult;
+            }
 
             bool result = group.Mode == ToolbarLogicalMode.And;
 
@@ -408,7 +412,7 @@ namespace Ink_Canvas.Controls.Toolbar
             public List<DisplayItem> Items { get; set; } = new();
         }
 
-        private static List<DisplayItem> FlattenEntries(IToolbarHost host, List<ToolbarComponentEntry> entries, Dictionary<string, IToolbarItem> itemMap, ToolbarRuleset inheritedRuleset = null)
+        private static List<DisplayItem> FlattenEntries(IToolbarHost host, List<ToolbarComponentEntry> entries, Dictionary<string, IToolbarItem> itemMap)
         {
             var result = new List<DisplayItem>();
             foreach (var entry in entries)
@@ -416,10 +420,6 @@ namespace Ink_Canvas.Controls.Toolbar
                 if (entry.IsGroup)
                 {
                     var groupRuleset = GetEffectiveRuleset(entry);
-                    var combinedGroupRuleset = (inheritedRuleset != null) 
-                        ? CombineRulesets(inheritedRuleset, groupRuleset) 
-                        : groupRuleset;
-                    
                     var groupContentItems = new List<DisplayItem>();
 
                     foreach (var childEntry in entry.Children)
@@ -428,10 +428,10 @@ namespace Ink_Canvas.Controls.Toolbar
                         {
                             if (groupContentItems.Count > 0)
                             {
-                                FlushGroupContentItems(result, groupContentItems, combinedGroupRuleset, entry.ShowSeparateBorder);
+                                FlushGroupContentItems(result, groupContentItems, groupRuleset, entry.ShowSeparateBorder);
                                 groupContentItems.Clear();
                             }
-                            var nestedItems = FlattenEntries(host, new List<ToolbarComponentEntry> { childEntry }, itemMap, combinedGroupRuleset);
+                            var nestedItems = FlattenEntries(host, new List<ToolbarComponentEntry> { childEntry }, itemMap);
                             foreach (var nestedItem in nestedItems)
                             {
                                 result.Add(nestedItem);
@@ -445,20 +445,19 @@ namespace Ink_Canvas.Controls.Toolbar
                         view.Tag = InjectedTag;
                         ApplyComponentSettings(view, childEntry);
                         var childRuleset = GetEffectiveRuleset(childEntry);
-                        var combinedChildRuleset = CombineRulesets(combinedGroupRuleset, childRuleset);
-                        SetHidingRuleset(view, combinedChildRuleset);
+                        SetHidingRuleset(view, childRuleset);
 
                         if (childEntry.ShowSeparateBorder)
                         {
                             if (groupContentItems.Count > 0)
                             {
-                                FlushGroupContentItems(result, groupContentItems, combinedGroupRuleset, entry.ShowSeparateBorder);
+                                FlushGroupContentItems(result, groupContentItems, groupRuleset, entry.ShowSeparateBorder);
                                 groupContentItems.Clear();
                             }
                             result.Add(new DisplayItem
                             {
                                 View = view,
-                                Ruleset = combinedChildRuleset,
+                                Ruleset = childRuleset,
                                 IsSeparateBorder = true,
                                 IsToolbarButton = view is ToolbarImageButton
                             });
@@ -468,7 +467,7 @@ namespace Ink_Canvas.Controls.Toolbar
                             groupContentItems.Add(new DisplayItem
                             {
                                 View = view,
-                                Ruleset = combinedChildRuleset,
+                                Ruleset = childRuleset,
                                 IsSeparateBorder = false,
                                 IsToolbarButton = view is ToolbarImageButton
                             });
@@ -477,7 +476,7 @@ namespace Ink_Canvas.Controls.Toolbar
 
                     if (groupContentItems.Count > 0)
                     {
-                        FlushGroupContentItems(result, groupContentItems, combinedGroupRuleset, entry.ShowSeparateBorder);
+                        FlushGroupContentItems(result, groupContentItems, groupRuleset, entry.ShowSeparateBorder);
                     }
                 }
                 else
@@ -492,36 +491,17 @@ namespace Ink_Canvas.Controls.Toolbar
                     view.Tag = InjectedTag;
                     ApplyComponentSettings(view, entry);
                     var ruleset = GetEffectiveRuleset(entry);
-                    var combinedRuleset = (inheritedRuleset != null) 
-                        ? CombineRulesets(inheritedRuleset, ruleset) 
-                        : ruleset;
-                    SetHidingRuleset(view, combinedRuleset);
+                    SetHidingRuleset(view, ruleset);
                     result.Add(new DisplayItem
                     {
                         View = view,
-                        Ruleset = combinedRuleset,
+                        Ruleset = ruleset,
                         IsSeparateBorder = entry.ShowSeparateBorder,
                         IsToolbarButton = view is ToolbarImageButton
                     });
                 }
             }
             return result;
-        }
-
-        private static ToolbarRuleset CombineRulesets(ToolbarRuleset parent, ToolbarRuleset child)
-        {
-            if (parent == null) return child;
-            if (child == null) return parent;
-            
-            // 如果父规则要求隐藏，或者子规则要求隐藏，则最终结果为隐藏
-            var combined = new ToolbarRuleset();
-            combined.Mode = ToolbarLogicalMode.Or;
-            combined.IsReversed = false;
-            
-            combined.Groups.AddRange(parent.Groups.Select(g => g.Clone()));
-            combined.Groups.AddRange(child.Groups.Select(g => g.Clone()));
-            
-            return combined;
         }
 
         private static void FlushGroupContentItems(List<DisplayItem> result, List<DisplayItem> groupContentItems, ToolbarRuleset groupRuleset, bool groupShowSeparateBorder)
@@ -798,6 +778,10 @@ namespace Ink_Canvas.Controls.Toolbar
                         bool shouldHide = EvaluateRuleset(ruleset, context);
                         child.Visibility = shouldHide ? Visibility.Collapsed : Visibility.Visible;
                     }
+                    if (child is Panel innerPanel)
+                    {
+                        UpdatePanelVisibility(innerPanel, context);
+                    }
                 }
                 if (child is Border border && border.Tag as string == ContentBorderTag && border.Child is Grid grid)
                 {
@@ -813,20 +797,34 @@ namespace Ink_Canvas.Controls.Toolbar
                     {
                         if (gridChild is StackPanel sp && sp.Tag as string == ContentPanelTag)
                         {
-                            foreach (var spChild in sp.Children.OfType<FrameworkElement>())
+                            if (HasVisibleLeafContent(sp))
                             {
-                                if (spChild.Visibility == Visibility.Visible)
-                                {
-                                    anyVisible = true;
-                                    break;
-                                }
+                                anyVisible = true;
+                                break;
                             }
                         }
-                        if (anyVisible) break;
                     }
                     border.Visibility = anyVisible ? Visibility.Visible : Visibility.Collapsed;
                 }
             }
+        }
+
+        private static bool HasVisibleLeafContent(FrameworkElement element)
+        {
+            if (element.Visibility != Visibility.Visible) return false;
+            if (element is Panel panel)
+            {
+                foreach (var child in panel.Children.OfType<FrameworkElement>())
+                {
+                    if (HasVisibleLeafContent(child)) return true;
+                }
+                return false;
+            }
+            if (element is Border border && border.Child is FrameworkElement borderChild)
+            {
+                return HasVisibleLeafContent(borderChild);
+            }
+            return true;
         }
 
         private static FrameworkElement BuildAndRegister(IToolbarHost host, IToolbarItem item)

@@ -192,6 +192,10 @@ namespace Ink_Canvas.Controls.Toolbar
         public ToolbarRuleset WithPreventHideOnCollapsed()
         {
             var result = Clone();
+            if (result.Groups.Count == 0)
+            {
+                return result;
+            }
             foreach (var group in result.Groups)
             {
                 group.Rules.Add(new ToolbarRule { ConditionId = "isContentCollapsedByUser", IsReversed = true });
