@@ -14,6 +14,8 @@ namespace Ink_Canvas.Controls.Toolbar
 
         bool DefaultShowSeparateBorder { get; }
 
+        bool DefaultPreventHideOnDragClick { get; }
+
         FrameworkElement BuildView(IToolbarHost host);
     }
 }

@@ -11,6 +11,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         public abstract string LocalizationKey { get; }
         public virtual ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow();
         public virtual bool DefaultShowSeparateBorder => false;
+        public virtual bool DefaultPreventHideOnDragClick => false;
         public virtual string Description => "";
 
         public string DisplayName => Strings.GetString(LocalizationKey) ?? LocalizationKey;

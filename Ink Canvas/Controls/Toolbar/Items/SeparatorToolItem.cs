@@ -11,6 +11,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         public string Description => "分割线";
         public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow();
         public bool DefaultShowSeparateBorder => false;
+        public bool DefaultPreventHideOnDragClick => false;
 
         public FrameworkElement BuildView(IToolbarHost host)
         {

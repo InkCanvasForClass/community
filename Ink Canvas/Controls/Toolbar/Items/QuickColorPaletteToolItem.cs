@@ -9,6 +9,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         public string Description => "快速选色面板";
         public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AnnotationOnly();
         public bool DefaultShowSeparateBorder => false;
+        public bool DefaultPreventHideOnDragClick => false;
 
         public FrameworkElement BuildView(IToolbarHost host)
         {

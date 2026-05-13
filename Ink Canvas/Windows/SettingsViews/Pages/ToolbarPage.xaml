@@ -197,6 +197,11 @@
                                           Checked="CheckBoxShowSeparateBorder_Changed"
                                           Unchecked="CheckBoxShowSeparateBorder_Changed"/>
                             </ui:SettingsCard>
+                            <ui:SettingsCard Header="点击拖动图标不隐藏" Description="点击拖动图标隐藏浮动工具栏时，此组件保持可见">
+                                <CheckBox x:Name="CheckBoxPreventHideOnDragClick"
+                                          Checked="CheckBoxPreventHideOnDragClick_Changed"
+                                          Unchecked="CheckBoxPreventHideOnDragClick_Changed"/>
+                            </ui:SettingsCard>
 
                             <TextBlock Text="尺寸" FontSize="14" FontWeight="SemiBold" Margin="0,12,0,4"/>
                             <Grid Margin="0,0,0,4">
@@ -334,6 +339,11 @@
                                     <CheckBox x:Name="CheckBoxGroupChildShowSeparateBorder"
                                               Checked="CheckBoxGroupChildShowSeparateBorder_Changed"
                                               Unchecked="CheckBoxGroupChildShowSeparateBorder_Changed"/>
+                                </ui:SettingsCard>
+                                <ui:SettingsCard Header="点击拖动图标不隐藏" Description="点击拖动图标隐藏浮动工具栏时，此子组件保持可见">
+                                    <CheckBox x:Name="CheckBoxGroupChildPreventHideOnDragClick"
+                                              Checked="CheckBoxGroupChildPreventHideOnDragClick_Changed"
+                                              Unchecked="CheckBoxGroupChildPreventHideOnDragClick_Changed"/>
                                 </ui:SettingsCard>
                             </StackPanel>
 

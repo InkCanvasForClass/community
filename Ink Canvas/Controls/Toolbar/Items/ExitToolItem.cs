@@ -8,6 +8,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         public override string LocalizationKey => "FloatingBar_ExitButton";
         public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.PptOnly();
         public override bool DefaultShowSeparateBorder => true;
+        public override bool DefaultPreventHideOnDragClick => true;
         public override string Description => "退出PPT演示";
         protected override string IconGeometry => XamlGraphicsIconGeometries.ExitPresentationIconGeometry;
 

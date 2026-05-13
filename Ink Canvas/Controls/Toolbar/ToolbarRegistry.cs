@@ -35,6 +35,16 @@ namespace Ink_Canvas.Controls.Toolbar
         public static ToolbarRuleset GetHidingRuleset(FrameworkElement element)
             => (ToolbarRuleset)element.GetValue(HidingRulesetProperty);
 
+        public static readonly DependencyProperty PreventHideOnDragClickProperty =
+            DependencyProperty.RegisterAttached("PreventHideOnDragClick", typeof(bool), typeof(ToolbarRegistry),
+                new PropertyMetadata(false));
+
+        public static void SetPreventHideOnDragClick(FrameworkElement element, bool value)
+            => element.SetValue(PreventHideOnDragClickProperty, value);
+
+        public static bool GetPreventHideOnDragClick(FrameworkElement element)
+            => (bool)element.GetValue(PreventHideOnDragClickProperty);
+
         public static List<KeyValuePair<string, string>> AvailableConditions { get; } = new List<KeyValuePair<string, string>>
         {
             new KeyValuePair<string, string>("isAnnotating", "批注模式"),
@@ -372,6 +382,7 @@ namespace Ink_Canvas.Controls.Toolbar
             public ToolbarRuleset Ruleset { get; set; }
             public bool IsSeparateBorder { get; set; }
             public bool IsToolbarButton { get; set; }
+            public bool PreventHideOnDragClick { get; set; }
         }
 
         private class Segment
@@ -412,7 +423,8 @@ namespace Ink_Canvas.Controls.Toolbar
                                 View = view,
                                 Ruleset = childRuleset,
                                 IsSeparateBorder = true,
-                                IsToolbarButton = view is ToolbarImageButton
+                                IsToolbarButton = view is ToolbarImageButton,
+                                PreventHideOnDragClick = childEntry.PreventHideOnDragClick || item.DefaultPreventHideOnDragClick
                             });
                         }
                         else
@@ -422,7 +434,8 @@ namespace Ink_Canvas.Controls.Toolbar
                                 View = view,
                                 Ruleset = childRuleset,
                                 IsSeparateBorder = false,
-                                IsToolbarButton = view is ToolbarImageButton
+                                IsToolbarButton = view is ToolbarImageButton,
+                                PreventHideOnDragClick = childEntry.PreventHideOnDragClick || item.DefaultPreventHideOnDragClick
                             });
                         }
                     }
@@ -450,7 +463,8 @@ namespace Ink_Canvas.Controls.Toolbar
                         View = view,
                         Ruleset = ruleset,
                         IsSeparateBorder = entry.ShowSeparateBorder,
-                        IsToolbarButton = view is ToolbarImageButton
+                        IsToolbarButton = view is ToolbarImageButton,
+                        PreventHideOnDragClick = entry.PreventHideOnDragClick || item.DefaultPreventHideOnDragClick
                     });
                 }
             }
@@ -569,12 +583,15 @@ namespace Ink_Canvas.Controls.Toolbar
                     var elementToAdd = WrapInSeparateBorder(item.View, item.Ruleset, item.IsToolbarButton);
                     elementToAdd.Margin = (isFirst && !hasExistingChildren) ? new Thickness(0) : new Thickness(3, 0, 0, 0);
                     ApplyInitialVisibility(elementToAdd, item.Ruleset);
+                    SetPreventHideOnDragClick(elementToAdd, item.PreventHideOnDragClick);
                     rootPanel.Children.Add(elementToAdd);
                     LogHelper.WriteLogToFile($"ToolbarRegistry: 添加独立边框条目到根面板", LogHelper.LogType.Info);
                 }
                 else
                 {
                     var contentBorder = CreateContentBorder(segment.Items);
+                    var segmentPreventHide = segment.Items.Any(i => i.PreventHideOnDragClick);
+                    SetPreventHideOnDragClick(contentBorder, segmentPreventHide);
                     contentBorder.Margin = (isFirst && !hasExistingChildren) ? new Thickness(0) : new Thickness(3, 0, 0, 0);
                     rootPanel.Children.Add(contentBorder);
                     LogHelper.WriteLogToFile($"ToolbarRegistry: 添加内容边框 ({segment.Items.Count} 项) 到根面板", LogHelper.LogType.Info);
@@ -875,8 +892,8 @@ namespace Ink_Canvas.Controls.Toolbar
                     new ToolbarComponentEntry { Id = "builtin.whiteboard", HidingRuleset = ToolbarRuleset.AlwaysShow() },
                     new ToolbarComponentEntry { Id = "builtin.tools", HidingRuleset = ToolbarRuleset.AlwaysShow() },
                     new ToolbarComponentEntry { Id = "builtin.fold", HidingRuleset = ToolbarRuleset.AlwaysShow() },
-                    new ToolbarComponentEntry { Id = "builtin.gesture", HidingRuleset = ToolbarRuleset.GestureRule(), ShowSeparateBorder = true },
-                    new ToolbarComponentEntry { Id = "builtin.exit", HidingRuleset = ToolbarRuleset.PptOnly(), ShowSeparateBorder = true }
+                    new ToolbarComponentEntry { Id = "builtin.gesture", HidingRuleset = ToolbarRuleset.GestureRule(), ShowSeparateBorder = true, PreventHideOnDragClick = true },
+                    new ToolbarComponentEntry { Id = "builtin.exit", HidingRuleset = ToolbarRuleset.PptOnly(), ShowSeparateBorder = true, PreventHideOnDragClick = true }
                 }
             };
         }

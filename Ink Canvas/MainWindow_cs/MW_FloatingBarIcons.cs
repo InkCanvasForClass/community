@@ -1990,8 +1990,12 @@ namespace Ink_Canvas
         {
             foreach (var child in FloatingBarRootPanel.Children.OfType<FrameworkElement>())
             {
-                if (child.Tag as string == ToolbarRegistry.ContentBorderTag)
-                    return child.Visibility == Visibility.Visible;
+                if (child.Tag as string == ToolbarRegistry.ContentBorderTag ||
+                    child.Tag as string == ToolbarRegistry.InjectedTag)
+                {
+                    if (!ToolbarRegistry.GetPreventHideOnDragClick(child))
+                        return child.Visibility == Visibility.Visible;
+                }
             }
             return false;
         }
@@ -2000,8 +2004,13 @@ namespace Ink_Canvas
         {
             foreach (var child in FloatingBarRootPanel.Children.OfType<FrameworkElement>())
             {
-                if (child.Tag as string == ToolbarRegistry.ContentBorderTag)
+                if (child.Tag as string == ToolbarRegistry.ContentBorderTag ||
+                    child.Tag as string == ToolbarRegistry.InjectedTag)
+                {
+                    if (ToolbarRegistry.GetPreventHideOnDragClick(child))
+                        continue;
                     child.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+                }
             }
         }
 

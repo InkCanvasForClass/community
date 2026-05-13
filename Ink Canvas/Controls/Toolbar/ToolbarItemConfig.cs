@@ -216,6 +216,9 @@ namespace Ink_Canvas.Controls.Toolbar
         [JsonProperty("showSeparateBorder")]
         public bool ShowSeparateBorder { get; set; } = false;
 
+        [JsonProperty("preventHideOnDragClick")]
+        public bool PreventHideOnDragClick { get; set; } = false;
+
         [JsonProperty("settings")]
         public Dictionary<string, object> Settings { get; set; } = new Dictionary<string, object>();
 

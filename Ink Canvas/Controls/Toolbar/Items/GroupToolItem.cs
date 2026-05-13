@@ -10,6 +10,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         public string Description => "将多个工具组合在一起显示";
         public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow();
         public bool DefaultShowSeparateBorder => false;
+        public bool DefaultPreventHideOnDragClick => false;
 
         public FrameworkElement BuildView(IToolbarHost host)
         {

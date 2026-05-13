@@ -76,6 +76,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (SelectedEntry == null) return;
             _suppressSave = true;
             CheckBoxShowSeparateBorder.IsChecked = SelectedEntry.ShowSeparateBorder;
+            CheckBoxPreventHideOnDragClick.IsChecked = SelectedEntry.PreventHideOnDragClick;
 
             TextBoxFixedWidth.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.FixedWidth)?.ToString() ?? "";
             TextBoxFixedHeight.Text = SelectedEntry.GetSettingDouble(ComponentSettingKeys.FixedHeight)?.ToString() ?? "";
@@ -308,6 +309,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 Id = source.Id,
                 HidingRule = source.HidingRule,
                 ShowSeparateBorder = source.ShowSeparateBorder,
+                PreventHideOnDragClick = source.PreventHideOnDragClick,
                 HidingRuleset = source.HidingRuleset?.Clone()
             };
             if (source.Settings != null && source.Settings.Count > 0)
@@ -362,7 +364,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 {
                     Id = item.Id,
                     HidingRuleset = item.DefaultHidingRuleset?.Clone(),
-                    ShowSeparateBorder = item.DefaultShowSeparateBorder
+                    ShowSeparateBorder = item.DefaultShowSeparateBorder,
+                    PreventHideOnDragClick = item.DefaultPreventHideOnDragClick
                 };
                 if (item.Id == "builtin.group")
                 {
@@ -410,6 +413,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded || SelectedEntry == null) return;
             SelectedEntry.ShowSeparateBorder = CheckBoxShowSeparateBorder.IsChecked == true;
+            SaveSettings();
+        }
+
+        private void CheckBoxPreventHideOnDragClick_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded || SelectedEntry == null) return;
+            SelectedEntry.PreventHideOnDragClick = CheckBoxPreventHideOnDragClick.IsChecked == true;
             SaveSettings();
         }
 
@@ -635,6 +645,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (SelectedGroupChild == null) return;
             _suppressSave = true;
             CheckBoxGroupChildShowSeparateBorder.IsChecked = SelectedGroupChild.ShowSeparateBorder;
+            CheckBoxGroupChildPreventHideOnDragClick.IsChecked = SelectedGroupChild.PreventHideOnDragClick;
 
             var ruleset = ToolbarRegistry.GetEffectiveRuleset(SelectedGroupChild);
             ComboBoxGroupChildRulesetMode.SelectedIndex = (int)ruleset.Mode;
@@ -658,6 +669,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded || SelectedGroupChild == null) return;
             SelectedGroupChild.ShowSeparateBorder = CheckBoxGroupChildShowSeparateBorder.IsChecked == true;
+            SyncGroupChildrenBack();
+            SaveSettings();
+        }
+
+        private void CheckBoxGroupChildPreventHideOnDragClick_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded || SelectedGroupChild == null) return;
+            SelectedGroupChild.PreventHideOnDragClick = CheckBoxGroupChildPreventHideOnDragClick.IsChecked == true;
             SyncGroupChildrenBack();
             SaveSettings();
         }
@@ -835,7 +854,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 {
                     Id = item.Id,
                     HidingRuleset = item.DefaultHidingRuleset?.Clone(),
-                    ShowSeparateBorder = item.DefaultShowSeparateBorder
+                    ShowSeparateBorder = item.DefaultShowSeparateBorder,
+                    PreventHideOnDragClick = item.DefaultPreventHideOnDragClick
                 };
                 var insertIndex = dropInfo.UnfilteredInsertIndex;
                 if (insertIndex < 0 || insertIndex > _page.GroupChildren.Count)
