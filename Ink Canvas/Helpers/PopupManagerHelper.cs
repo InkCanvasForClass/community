@@ -47,7 +47,6 @@ namespace Ink_Canvas.Helpers
         private IntPtr _ownerHwnd = IntPtr.Zero;
         private bool _isInitialized = false;
         private bool _needsUpdate = false;
-        private DispatcherTimer _periodicCheckTimer;
         private bool _lastTopmostState = false;
         private int _topmostCheckCounter = 0;
         private const int TopmostCheckInterval = 15;
@@ -79,12 +78,6 @@ namespace Ink_Canvas.Helpers
 
             try
             {
-                _periodicCheckTimer = new DispatcherTimer
-                {
-                    Interval = TimeSpan.FromMilliseconds(500)
-                };
-                _periodicCheckTimer.Tick += OnPeriodicCheck;
-
                 CompositionTarget.Rendering += OnRendering;
                 _activeInstances.Add(this);
                 _isInitialized = true;
@@ -143,8 +136,6 @@ namespace Ink_Canvas.Helpers
                 if (popup.Child is FrameworkElement child)
                     FixChildPopups(child);
             }), DispatcherPriority.Loaded);
-
-            UpdateTimerState();
         }
 
         private void OnPopupClosed(object sender, EventArgs e)
@@ -159,23 +150,6 @@ namespace Ink_Canvas.Helpers
 
             _openPopups.Remove(popup);
             _hwndCache.Remove(popup);
-
-            UpdateTimerState();
-        }
-
-        private void UpdateTimerState()
-        {
-            if (_periodicCheckTimer == null) return;
-
-            if (_openPopups.Count > 0 && CheckShouldBeTopmost())
-            {
-                if (!_periodicCheckTimer.IsEnabled)
-                    _periodicCheckTimer.Start();
-            }
-            else
-            {
-                _periodicCheckTimer.Stop();
-            }
         }
 
         #endregion
@@ -230,6 +204,8 @@ namespace Ink_Canvas.Helpers
             foreach (var popup in _openPopups)
             {
                 FixPopupZOrder(popup);
+                if (popup.Child is FrameworkElement child)
+                    FixChildPopups(child);
             }
         }
 
@@ -253,15 +229,15 @@ namespace Ink_Canvas.Helpers
                 {
                     _hwndCache.Remove(popup);
                     FixPopupZOrder(popup);
+                    if (popup.Child is FrameworkElement child)
+                        FixChildPopups(child);
                 }
             }
-
-            UpdateTimerState();
         }
 
         #endregion
 
-        #region 内部实现 - 渲染回调与定时器
+        #region 内部实现 - 渲染回调
 
         private void OnRendering(object sender, EventArgs e)
         {
@@ -285,37 +261,14 @@ namespace Ink_Canvas.Helpers
                     foreach (var popup in _openPopups)
                     {
                         FixPopupZOrder(popup);
+                        if (popup.Child is FrameworkElement child)
+                            FixChildPopups(child);
                     }
                 }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[PopupManager] OnRendering error: {ex.Message}");
-            }
-        }
-
-        private void OnPeriodicCheck(object sender, EventArgs e)
-        {
-            if (_periodicCheckTimer == null) return;
-
-            try
-            {
-                if (_openPopups.Count == 0)
-                {
-                    _periodicCheckTimer.Stop();
-                    return;
-                }
-
-                foreach (var popup in _openPopups)
-                {
-                    FixPopupZOrder(popup);
-                    if (popup.Child is FrameworkElement child)
-                        FixChildPopups(child);
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"[PopupManager] OnPeriodicCheck error: {ex.Message}");
             }
         }
 
@@ -431,12 +384,6 @@ namespace Ink_Canvas.Helpers
             try
             {
                 CompositionTarget.Rendering -= OnRendering;
-                if (_periodicCheckTimer != null)
-                {
-                    _periodicCheckTimer.Stop();
-                    _periodicCheckTimer.Tick -= OnPeriodicCheck;
-                    _periodicCheckTimer = null;
-                }
                 foreach (var popup in _registeredPopups)
                 {
                     popup.Opened -= OnPopupOpened;
