@@ -3041,32 +3041,6 @@ namespace Ink_Canvas
             }
         }
 
-        /// <summary>
-        /// PPT放映模式显示手势按钮开关切换事件处理
-        /// </summary>
-        private void ToggleSwitchShowGestureButtonInSlideShow_Toggled(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (!isLoaded) return;
-                var toggle = sender as ToggleSwitch;
-                Settings.PowerPointSettings.ShowGestureButtonInSlideShow = toggle != null && toggle.IsOn;
-                SaveSettingsToFile();
-
-                // 如果当前在PPT放映模式，需要立即更新手势按钮的显示状态
-                if (IsInPptPresentationMode)
-                {
-                    UpdateGestureButtonVisibilityInPPTMode();
-                }
-
-                LogHelper.WriteLogToFile($"PPT放映模式显示手势按钮已{(Settings.PowerPointSettings.ShowGestureButtonInSlideShow ? "启用" : "禁用")}", LogHelper.LogType.Event);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"切换PPT放映模式显示手势按钮时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
         private void ToggleSwitchEnablePPTTimeCapsule_Toggled(object sender, RoutedEventArgs e)
         {
             try
@@ -3113,21 +3087,6 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"更改PPT时间胶囊位置时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 更新PPT模式下手势按钮的显示状态
-        /// </summary>
-        public void UpdateGestureButtonVisibilityInPPTMode()
-        {
-            try
-            {
-                UpdateToolbarComponentVisibility();
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"更新PPT模式下手势按钮显示状态时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -3383,10 +3342,10 @@ namespace Ink_Canvas
                     _globalHotkeyManager.UpdateHotkeyStateForToolMode(isMouseMode);
                 }
 
-                // 在PPT放映模式下，工具模式切换时需要更新手势按钮的显示状态
+                // 在PPT放映模式下，工具模式切换时需要更新工具栏组件的显示状态
                 if (IsInPptPresentationMode)
                 {
-                    UpdateGestureButtonVisibilityInPPTMode();
+                    UpdateToolbarComponentVisibility();
                 }
 
                 // 执行额外的操作（如果有）

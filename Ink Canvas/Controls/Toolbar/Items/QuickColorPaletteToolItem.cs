@@ -7,7 +7,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         public string Id => "builtin.quickColorPalette";
         public string DisplayName => "快捷调色盘";
         public string Description => "快速选色面板";
-        public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AnnotationOnly();
+        public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AnnotationOnly().WithHideOnCollapsed();
         public bool DefaultShowSeparateBorder => false;
         public bool DefaultPreventHideOnDragClick => false;
 

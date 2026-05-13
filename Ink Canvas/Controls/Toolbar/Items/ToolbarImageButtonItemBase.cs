@@ -9,7 +9,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
     {
         public abstract string Id { get; }
         public abstract string LocalizationKey { get; }
-        public virtual ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow();
+        public virtual ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public virtual bool DefaultShowSeparateBorder => false;
         public virtual bool DefaultPreventHideOnDragClick => false;
         public virtual string Description => "";

@@ -175,33 +175,28 @@ namespace Ink_Canvas.Controls.Toolbar
             };
         }
 
-        public static ToolbarRuleset GestureRule()
+        public ToolbarRuleset WithHideOnCollapsed()
         {
-            return new ToolbarRuleset
+            var result = Clone();
+            result.Groups.Add(new ToolbarRuleGroup
             {
-                Mode = ToolbarLogicalMode.Or,
-                IsReversed = false,
-                Groups = new List<ToolbarRuleGroup>
+                Mode = ToolbarLogicalMode.And,
+                Rules = new List<ToolbarRule>
                 {
-                    new ToolbarRuleGroup
-                    {
-                        Mode = ToolbarLogicalMode.And,
-                        Rules = new List<ToolbarRule>
-                        {
-                            new ToolbarRule { ConditionId = "isAnnotating", IsReversed = true }
-                        }
-                    },
-                    new ToolbarRuleGroup
-                    {
-                        Mode = ToolbarLogicalMode.And,
-                        Rules = new List<ToolbarRule>
-                        {
-                            new ToolbarRule { ConditionId = "isPptMode" },
-                            new ToolbarRule { ConditionId = "isGestureEnabled", IsReversed = true }
-                        }
-                    }
+                    new ToolbarRule { ConditionId = "isContentCollapsedByUser", IsReversed = false }
                 }
-            };
+            });
+            return result;
+        }
+
+        public ToolbarRuleset WithPreventHideOnCollapsed()
+        {
+            var result = Clone();
+            foreach (var group in result.Groups)
+            {
+                group.Rules.Add(new ToolbarRule { ConditionId = "isContentCollapsedByUser", IsReversed = true });
+            }
+            return result;
         }
     }
 
@@ -209,6 +204,10 @@ namespace Ink_Canvas.Controls.Toolbar
     {
         [JsonProperty("id")]
         public string Id { get; set; }
+
+        // 唯一实例 ID，用于区分相同 Id 的不同实例
+        [JsonProperty("instanceId")]
+        public string InstanceId { get; set; }
 
         [JsonProperty("hidingRule")]
         public ToolbarHidingRule HidingRule { get; set; } = ToolbarHidingRule.AlwaysShow;

@@ -292,8 +292,7 @@ namespace Ink_Canvas
         internal void UpdateToolbarComponentVisibility()
         {
             var isPpt = IsInPptPresentationMode;
-            var isGestureEnabled = Settings?.PowerPointSettings?.ShowGestureButtonInSlideShow ?? false;
-            ToolbarRegistry.UpdateVisibilityByMode(StackPanelFloatingBarRoot, IsAnnotating, isPpt, isGestureEnabled);
+            ToolbarRegistry.UpdateVisibilityByMode(StackPanelFloatingBarRoot, IsAnnotating, isPpt);
         }
     }
 }

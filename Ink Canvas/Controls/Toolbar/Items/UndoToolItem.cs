@@ -6,7 +6,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
     {
         public override string Id => "builtin.undo";
         public override string LocalizationKey => "Board_Undo";
-        public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AnnotationOnly();
+        public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AnnotationOnly().WithHideOnCollapsed();
         public override string Description => "撤销";
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)

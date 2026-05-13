@@ -6,7 +6,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
     {
         public override string Id => "builtin.eraserByStrokes";
         public override string LocalizationKey => "FloatingBar_StrokeEraser";
-        public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AnnotationOnly();
+        public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AnnotationOnly().WithHideOnCollapsed();
         public override string Description => "笔画橡皮擦";
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)

@@ -1988,31 +1988,16 @@ namespace Ink_Canvas
 
         private bool IsFloatingBarContentVisible()
         {
-            foreach (var child in FloatingBarRootPanel.Children.OfType<FrameworkElement>())
-            {
-                if (child.Tag as string == ToolbarRegistry.ContentBorderTag ||
-                    child.Tag as string == ToolbarRegistry.InjectedTag)
-                {
-                    if (!ToolbarRegistry.GetPreventHideOnDragClick(child))
-                        return child.Visibility == Visibility.Visible;
-                }
-            }
-            return false;
+            return !ToolbarRegistry.IsContentCollapsedByUser;
         }
 
         private void SetFloatingBarContentVisibility(bool visible)
         {
-            foreach (var child in FloatingBarRootPanel.Children.OfType<FrameworkElement>())
-            {
-                if (child.Tag as string == ToolbarRegistry.ContentBorderTag ||
-                    child.Tag as string == ToolbarRegistry.InjectedTag)
-                {
-                    if (ToolbarRegistry.GetPreventHideOnDragClick(child))
-                        continue;
-                    child.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
-                    ToolbarRegistry.SetIsContentCollapsedByUser(child, !visible);
-                }
-            }
+            ToolbarRegistry.IsContentCollapsedByUser = !visible;
+            ToolbarRegistry.UpdateVisibilityByMode(
+                FloatingBarRootPanel,
+                IsAnnotating,
+                IsInPptPresentationMode);
         }
 
         private double ClampFloatingBarLeft(double left, double floatingBarWidth, double screenWidth)

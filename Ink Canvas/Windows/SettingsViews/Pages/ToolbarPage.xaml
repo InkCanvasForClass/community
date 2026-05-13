@@ -64,11 +64,23 @@
                     BorderThickness="1"
                     CornerRadius="6" Padding="10,8" Margin="3" Width="200"
                     Cursor="Hand">
-                <StackPanel>
-                    <TextBlock Text="{Binding DisplayName}" FontWeight="Medium" FontSize="13"/>
-                    <TextBlock Text="{Binding Description}" Opacity="0.65" FontSize="12"
-                               TextWrapping="Wrap" Margin="0,2,0,0"/>
-                </StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="{Binding DisplayName}" FontWeight="Medium" FontSize="13"/>
+                        <TextBlock Text="{Binding Description}" Opacity="0.65" FontSize="12"
+                                   TextWrapping="Wrap" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                            Click="AddLibraryItem_Click"
+                            Background="Transparent" BorderThickness="0"
+                            Padding="6,4" VerticalAlignment="Center"
+                            ToolTip="添加到已添加组件"
+                            Cursor="Hand"/>
+                </Grid>
             </Border>
         </DataTemplate>
 
@@ -160,6 +172,7 @@
 
             <!-- TabControl: 组件库 / 组件设置 / 高级设置 -->
             <TabControl x:Name="SettingsTabControl" Margin="0,12,0,0"
+                        Style="{StaticResource {x:Static ui:ThemeKeys.TabControlPivotStyleKey}}"
                         SelectedIndex="{Binding SettingsTabIndex}">
 
                 <!-- ===== Tab 1: 组件库 ===== -->
@@ -196,11 +209,6 @@
                                 <CheckBox x:Name="CheckBoxShowSeparateBorder"
                                           Checked="CheckBoxShowSeparateBorder_Changed"
                                           Unchecked="CheckBoxShowSeparateBorder_Changed"/>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="点击拖动图标不隐藏" Description="点击拖动图标隐藏浮动工具栏时，此组件保持可见">
-                                <CheckBox x:Name="CheckBoxPreventHideOnDragClick"
-                                          Checked="CheckBoxPreventHideOnDragClick_Changed"
-                                          Unchecked="CheckBoxPreventHideOnDragClick_Changed"/>
                             </ui:SettingsCard>
 
                             <TextBlock Text="尺寸" FontSize="14" FontWeight="SemiBold" Margin="0,12,0,4"/>
@@ -322,31 +330,6 @@
                             <Button Content="重置组件设置" Click="ButtonResetComponentSettings_Click"
                                     Padding="12,6" HorizontalAlignment="Left" Margin="0,8,0,0"/>
 
-                            <!-- 分组子组件独立边框设置 -->
-                            <StackPanel x:Name="GroupChildSeparateBorderPanel" Margin="0,12,0,0">
-                                <StackPanel.Style>
-                                    <Style TargetType="StackPanel">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding SelectedGroupChild}" Value="{x:Null}">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </StackPanel.Style>
-                                <TextBlock Text="子组件属性" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
-                                <ui:SettingsCard Header="独立边框" Description="为此子组件显示独立的边框包装">
-                                    <CheckBox x:Name="CheckBoxGroupChildShowSeparateBorder"
-                                              Checked="CheckBoxGroupChildShowSeparateBorder_Changed"
-                                              Unchecked="CheckBoxGroupChildShowSeparateBorder_Changed"/>
-                                </ui:SettingsCard>
-                                <ui:SettingsCard Header="点击拖动图标不隐藏" Description="点击拖动图标隐藏浮动工具栏时，此子组件保持可见">
-                                    <CheckBox x:Name="CheckBoxGroupChildPreventHideOnDragClick"
-                                              Checked="CheckBoxGroupChildPreventHideOnDragClick_Changed"
-                                              Unchecked="CheckBoxGroupChildPreventHideOnDragClick_Changed"/>
-                                </ui:SettingsCard>
-                            </StackPanel>
-
                         </ikw:SimpleStackPanel>
                     </ScrollViewer>
                 </TabItem>
@@ -459,120 +442,6 @@
                                     </ItemsControl>
                                 </StackPanel>
                             </Border>
-
-                            <!-- 分组子组件高级设置 -->
-                            <StackPanel x:Name="GroupChildAdvancedPanel" Margin="0,12,0,0">
-                                <StackPanel.Style>
-                                    <Style TargetType="StackPanel">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding SelectedGroupChild}" Value="{x:Null}">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </StackPanel.Style>
-                                <TextBlock Text="子组件按规则隐藏" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                <TextBlock Text="当规则集满足时隐藏此子组件。"
-                                           Opacity="0.65" FontSize="12" Margin="0,0,0,6"/>
-
-                                <Border BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                                        BorderThickness="1" CornerRadius="6" Padding="8"
-                                        Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}">
-                                    <StackPanel>
-                                        <WrapPanel Orientation="Horizontal" Margin="0,0,0,6">
-                                            <ComboBox x:Name="ComboBoxGroupChildRulesetMode"
-                                                      SelectionChanged="ComboBoxGroupChildRulesetMode_SelectionChanged"
-                                                      MinWidth="200">
-                                                <ComboBoxItem Content="当以下任意条件组满足时"/>
-                                                <ComboBoxItem Content="当以下所有条件组满足时"/>
-                                            </ComboBox>
-                                            <CheckBox Content="反转" x:Name="CheckBoxGroupChildRulesetReversed"
-                                                      Checked="CheckBoxGroupChildRulesetReversed_Changed"
-                                                      Unchecked="CheckBoxGroupChildRulesetReversed_Changed"
-                                                      Margin="8,0,0,0" VerticalAlignment="Center"/>
-                                            <Button Content="添加组" Click="ButtonAddGroupChildGroup_Click"
-                                                    Padding="8,4" Margin="8,0,0,0" VerticalAlignment="Center"/>
-                                            <Ellipse x:Name="EllipseGroupChildRulesetState" Width="10" Height="10"
-                                                     Margin="8,0,0,0" VerticalAlignment="Center"
-                                                     Fill="DarkGray"/>
-                                        </WrapPanel>
-
-                                        <ItemsControl x:Name="ItemsControlGroupChildGroups">
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Border BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                                                            BorderThickness="1" CornerRadius="6" Padding="6"
-                                                            Margin="0,4" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}">
-                                                        <StackPanel>
-                                                            <WrapPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                                                <ComboBox SelectedIndex="{Binding Mode, Converter={StaticResource LogicalModeToIntConverter}, Mode=OneWay}"
-                                                                          SelectionChanged="ComboBoxGroupChildGroupMode_SelectionChanged"
-                                                                          MinWidth="180" Tag="{Binding}">
-                                                                    <ComboBoxItem Content="当以下任意条件满足时"/>
-                                                                    <ComboBoxItem Content="当以下所有条件满足时"/>
-                                                                </ComboBox>
-                                                                <CheckBox Content="反转" IsChecked="{Binding IsReversed}"
-                                                                          Checked="CheckBoxGroupChildGroupReversed_Changed"
-                                                                          Unchecked="CheckBoxGroupChildGroupReversed_Changed"
-                                                                          Margin="6,0,0,0" VerticalAlignment="Center"/>
-                                                                <Button Content="规则" Click="ButtonAddGroupChildRule_Click"
-                                                                        Padding="6,2" Margin="6,0,0,0" VerticalAlignment="Center"
-                                                                        Tag="{Binding}"/>
-                                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
-                                                                            VerticalAlignment="Center" Margin="8,0,0,0">
-                                                                    <Ellipse Width="8" Height="8" Margin="0,0,4,0"
-                                                                             Fill="{Binding State, Converter={StaticResource StateToBrushConverter}}"/>
-                                                                    <ui:ToggleSwitch IsOn="{Binding IsEnabled}"
-                                                                                      Toggled="CheckBoxGroupChildGroupEnabled_Changed"
-                                                                                      ToolTip="启用条件组" Margin="0,0,4,0"/>
-                                                                    <Button Content="复制" Click="ButtonDuplicateGroupChildGroup_Click"
-                                                                            Padding="4,2" Margin="0,0,4,0" Tag="{Binding}"/>
-                                                                    <Button Content="删除" Click="ButtonDeleteGroupChildGroup_Click"
-                                                                            Padding="4,2" Tag="{Binding}"/>
-                                                                </StackPanel>
-                                                            </WrapPanel>
-
-                                                            <ItemsControl ItemsSource="{Binding Rules}" Margin="4,0,0,0">
-                                                                <ItemsControl.ItemTemplate>
-                                                                    <DataTemplate>
-                                                                        <Grid Margin="0,2">
-                                                                            <Grid.ColumnDefinitions>
-                                                                                <ColumnDefinition Width="Auto"/>
-                                                                                <ColumnDefinition Width="Auto"/>
-                                                                                <ColumnDefinition Width="Auto"/>
-                                                                                <ColumnDefinition Width="*"/>
-                                                                            </Grid.ColumnDefinitions>
-                                                                            <Button Grid.Column="0" Content="✕" FontSize="10"
-                                                                                    Click="ButtonDeleteGroupChildRule_Click"
-                                                                                    Padding="4,1" Margin="0,0,4,0"
-                                                                                    Tag="{Binding}"/>
-                                                                            <Ellipse Grid.Column="1" Width="8" Height="8"
-                                                                                     Margin="0,0,4,0" VerticalAlignment="Center"
-                                                                                     Fill="{Binding State, Converter={StaticResource StateToBrushConverter}}"/>
-                                                                            <CheckBox Grid.Column="2" Content="反转"
-                                                                                      IsChecked="{Binding IsReversed}"
-                                                                                      Checked="CheckBoxGroupChildRuleReversed_Changed"
-                                                                                      Unchecked="CheckBoxGroupChildRuleReversed_Changed"
-                                                                                      Margin="0,0,4,0"/>
-                                                                            <ComboBox Grid.Column="3"
-                                                                                      SelectedValue="{Binding ConditionId}"
-                                                                                      SelectedValuePath="Key"
-                                                                                      DisplayMemberPath="Value"
-                                                                                      SelectionChanged="ComboBoxGroupChildRuleCondition_SelectionChanged"
-                                                                                      ItemsSource="{x:Static toolbar:ToolbarRegistry.AvailableConditions}"/>
-                                                                        </Grid>
-                                                                    </DataTemplate>
-                                                                </ItemsControl.ItemTemplate>
-                                                            </ItemsControl>
-                                                        </StackPanel>
-                                                    </Border>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
 
                         </ikw:SimpleStackPanel>
                     </ScrollViewer>

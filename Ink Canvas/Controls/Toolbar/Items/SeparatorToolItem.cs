@@ -9,7 +9,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         public string Id => "builtin.separator";
         public string DisplayName => "分割线";
         public string Description => "分割线";
-        public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow();
+        public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public bool DefaultShowSeparateBorder => false;
         public bool DefaultPreventHideOnDragClick => false;
 

@@ -59,8 +59,16 @@ namespace Ink_Canvas.Controls.Toolbar
         {
             new KeyValuePair<string, string>("isAnnotating", "批注模式"),
             new KeyValuePair<string, string>("isPptMode", "PPT模式"),
-            new KeyValuePair<string, string>("isGestureEnabled", "手势开关已启用")
+            new KeyValuePair<string, string>("isContentCollapsedByUser", "工具栏已折叠")
         };
+
+        private static bool _isContentCollapsedByUser = false;
+
+        public static bool IsContentCollapsedByUser
+        {
+            get => _isContentCollapsedByUser;
+            set => _isContentCollapsedByUser = value;
+        }
 
         #region Ruleset evaluation
 
@@ -159,7 +167,7 @@ namespace Ink_Canvas.Controls.Toolbar
                 ToolbarHidingRule.AnnotationOnly => ToolbarRuleset.AnnotationOnly(),
                 ToolbarHidingRule.PptOnly => ToolbarRuleset.PptOnly(),
                 ToolbarHidingRule.PptAnnotationOnly => ToolbarRuleset.PptAnnotationOnly(),
-                ToolbarHidingRule.AnnotationOrPptGesture => ToolbarRuleset.GestureRule(),
+                ToolbarHidingRule.AnnotationOrPptGesture => ToolbarRuleset.AnnotationOnly(),
                 _ => ToolbarRuleset.AlwaysShow()
             };
         }
@@ -392,7 +400,6 @@ namespace Ink_Canvas.Controls.Toolbar
             public ToolbarRuleset Ruleset { get; set; }
             public bool IsSeparateBorder { get; set; }
             public bool IsToolbarButton { get; set; }
-            public bool PreventHideOnDragClick { get; set; }
         }
 
         private class Segment
@@ -401,7 +408,7 @@ namespace Ink_Canvas.Controls.Toolbar
             public List<DisplayItem> Items { get; set; } = new();
         }
 
-        private static List<DisplayItem> FlattenEntries(IToolbarHost host, List<ToolbarComponentEntry> entries, Dictionary<string, IToolbarItem> itemMap)
+        private static List<DisplayItem> FlattenEntries(IToolbarHost host, List<ToolbarComponentEntry> entries, Dictionary<string, IToolbarItem> itemMap, ToolbarRuleset inheritedRuleset = null)
         {
             var result = new List<DisplayItem>();
             foreach (var entry in entries)
@@ -409,32 +416,51 @@ namespace Ink_Canvas.Controls.Toolbar
                 if (entry.IsGroup)
                 {
                     var groupRuleset = GetEffectiveRuleset(entry);
+                    var combinedGroupRuleset = (inheritedRuleset != null) 
+                        ? CombineRulesets(inheritedRuleset, groupRuleset) 
+                        : groupRuleset;
+                    
                     var groupContentItems = new List<DisplayItem>();
 
                     foreach (var childEntry in entry.Children)
                     {
+                        if (childEntry.IsGroup)
+                        {
+                            if (groupContentItems.Count > 0)
+                            {
+                                FlushGroupContentItems(result, groupContentItems, combinedGroupRuleset, entry.ShowSeparateBorder);
+                                groupContentItems.Clear();
+                            }
+                            var nestedItems = FlattenEntries(host, new List<ToolbarComponentEntry> { childEntry }, itemMap, combinedGroupRuleset);
+                            foreach (var nestedItem in nestedItems)
+                            {
+                                result.Add(nestedItem);
+                            }
+                            continue;
+                        }
+
                         if (!itemMap.TryGetValue(childEntry.Id, out var item)) continue;
                         var view = BuildAndRegister(host, item);
                         if (view == null) continue;
                         view.Tag = InjectedTag;
                         ApplyComponentSettings(view, childEntry);
                         var childRuleset = GetEffectiveRuleset(childEntry);
-                        SetHidingRuleset(view, childRuleset);
+                        var combinedChildRuleset = CombineRulesets(combinedGroupRuleset, childRuleset);
+                        SetHidingRuleset(view, combinedChildRuleset);
 
                         if (childEntry.ShowSeparateBorder)
                         {
                             if (groupContentItems.Count > 0)
                             {
-                                FlushGroupContentItems(result, groupContentItems, groupRuleset, entry.ShowSeparateBorder);
+                                FlushGroupContentItems(result, groupContentItems, combinedGroupRuleset, entry.ShowSeparateBorder);
                                 groupContentItems.Clear();
                             }
                             result.Add(new DisplayItem
                             {
                                 View = view,
-                                Ruleset = childRuleset,
+                                Ruleset = combinedChildRuleset,
                                 IsSeparateBorder = true,
-                                IsToolbarButton = view is ToolbarImageButton,
-                                PreventHideOnDragClick = childEntry.PreventHideOnDragClick || item.DefaultPreventHideOnDragClick
+                                IsToolbarButton = view is ToolbarImageButton
                             });
                         }
                         else
@@ -442,17 +468,16 @@ namespace Ink_Canvas.Controls.Toolbar
                             groupContentItems.Add(new DisplayItem
                             {
                                 View = view,
-                                Ruleset = childRuleset,
+                                Ruleset = combinedChildRuleset,
                                 IsSeparateBorder = false,
-                                IsToolbarButton = view is ToolbarImageButton,
-                                PreventHideOnDragClick = childEntry.PreventHideOnDragClick || item.DefaultPreventHideOnDragClick
+                                IsToolbarButton = view is ToolbarImageButton
                             });
                         }
                     }
 
                     if (groupContentItems.Count > 0)
                     {
-                        FlushGroupContentItems(result, groupContentItems, groupRuleset, entry.ShowSeparateBorder);
+                        FlushGroupContentItems(result, groupContentItems, combinedGroupRuleset, entry.ShowSeparateBorder);
                     }
                 }
                 else
@@ -467,18 +492,36 @@ namespace Ink_Canvas.Controls.Toolbar
                     view.Tag = InjectedTag;
                     ApplyComponentSettings(view, entry);
                     var ruleset = GetEffectiveRuleset(entry);
-                    SetHidingRuleset(view, ruleset);
+                    var combinedRuleset = (inheritedRuleset != null) 
+                        ? CombineRulesets(inheritedRuleset, ruleset) 
+                        : ruleset;
+                    SetHidingRuleset(view, combinedRuleset);
                     result.Add(new DisplayItem
                     {
                         View = view,
-                        Ruleset = ruleset,
+                        Ruleset = combinedRuleset,
                         IsSeparateBorder = entry.ShowSeparateBorder,
-                        IsToolbarButton = view is ToolbarImageButton,
-                        PreventHideOnDragClick = entry.PreventHideOnDragClick || item.DefaultPreventHideOnDragClick
+                        IsToolbarButton = view is ToolbarImageButton
                     });
                 }
             }
             return result;
+        }
+
+        private static ToolbarRuleset CombineRulesets(ToolbarRuleset parent, ToolbarRuleset child)
+        {
+            if (parent == null) return child;
+            if (child == null) return parent;
+            
+            // 如果父规则要求隐藏，或者子规则要求隐藏，则最终结果为隐藏
+            var combined = new ToolbarRuleset();
+            combined.Mode = ToolbarLogicalMode.Or;
+            combined.IsReversed = false;
+            
+            combined.Groups.AddRange(parent.Groups.Select(g => g.Clone()));
+            combined.Groups.AddRange(child.Groups.Select(g => g.Clone()));
+            
+            return combined;
         }
 
         private static void FlushGroupContentItems(List<DisplayItem> result, List<DisplayItem> groupContentItems, ToolbarRuleset groupRuleset, bool groupShowSeparateBorder)
@@ -593,15 +636,12 @@ namespace Ink_Canvas.Controls.Toolbar
                     var elementToAdd = WrapInSeparateBorder(item.View, item.Ruleset, item.IsToolbarButton);
                     elementToAdd.Margin = (isFirst && !hasExistingChildren) ? new Thickness(0) : new Thickness(3, 0, 0, 0);
                     ApplyInitialVisibility(elementToAdd, item.Ruleset);
-                    SetPreventHideOnDragClick(elementToAdd, item.PreventHideOnDragClick);
                     rootPanel.Children.Add(elementToAdd);
                     LogHelper.WriteLogToFile($"ToolbarRegistry: 添加独立边框条目到根面板", LogHelper.LogType.Info);
                 }
                 else
                 {
                     var contentBorder = CreateContentBorder(segment.Items);
-                    var segmentPreventHide = segment.Items.Any(i => i.PreventHideOnDragClick);
-                    SetPreventHideOnDragClick(contentBorder, segmentPreventHide);
                     contentBorder.Margin = (isFirst && !hasExistingChildren) ? new Thickness(0) : new Thickness(3, 0, 0, 0);
                     rootPanel.Children.Add(contentBorder);
                     LogHelper.WriteLogToFile($"ToolbarRegistry: 添加内容边框 ({segment.Items.Count} 项) 到根面板", LogHelper.LogType.Info);
@@ -729,13 +769,13 @@ namespace Ink_Canvas.Controls.Toolbar
             element.Visibility = Visibility.Visible;
         }
 
-        public static void UpdateVisibilityByMode(Panel rootPanel, bool isAnnotating, bool isPptMode, bool isGestureEnabled = false)
+        public static void UpdateVisibilityByMode(Panel rootPanel, bool isAnnotating, bool isPptMode)
         {
             var context = new Dictionary<string, bool>
             {
                 ["isAnnotating"] = isAnnotating,
                 ["isPptMode"] = isPptMode,
-                ["isGestureEnabled"] = isGestureEnabled
+                ["isContentCollapsedByUser"] = _isContentCollapsedByUser
             };
             UpdatePanelVisibility(rootPanel, context);
         }
@@ -748,8 +788,6 @@ namespace Ink_Canvas.Controls.Toolbar
             {
                 if (child.Tag as string == InjectedTag)
                 {
-                    if (GetIsContentCollapsedByUser(child))
-                        continue;
                     var ruleset = GetHidingRuleset(child);
                     if (ruleset == null)
                     {
@@ -763,8 +801,6 @@ namespace Ink_Canvas.Controls.Toolbar
                 }
                 if (child is Border border && border.Tag as string == ContentBorderTag && border.Child is Grid grid)
                 {
-                    if (GetIsContentCollapsedByUser(border))
-                        continue;
                     foreach (var gridChild in grid.Children.OfType<FrameworkElement>())
                     {
                         if (gridChild is StackPanel sp && sp.Tag as string == ContentPanelTag)
@@ -899,15 +935,15 @@ namespace Ink_Canvas.Controls.Toolbar
             {
                 Components = new List<ToolbarComponentEntry>
                 {
-                    new ToolbarComponentEntry { Id = "builtin.cursor", HidingRuleset = ToolbarRuleset.AlwaysShow() },
-                    new ToolbarComponentEntry { Id = "builtin.pen", HidingRuleset = ToolbarRuleset.AlwaysShow() },
-                    new ToolbarComponentEntry { Id = "builtin.quickColorPalette", HidingRuleset = ToolbarRuleset.AnnotationOnly() },
-                    new ToolbarComponentEntry { Id = "builtin.inkFreeze", HidingRuleset = ToolbarRuleset.AlwaysShow() },
-                    new ToolbarComponentEntry { Id = "builtin.clear", HidingRuleset = ToolbarRuleset.AlwaysShow() },
+                    new ToolbarComponentEntry { Id = "builtin.cursor", HidingRuleset = ToolbarRuleset.AlwaysShow().WithHideOnCollapsed() },
+                    new ToolbarComponentEntry { Id = "builtin.pen", HidingRuleset = ToolbarRuleset.AlwaysShow().WithHideOnCollapsed() },
+                    new ToolbarComponentEntry { Id = "builtin.quickColorPalette", HidingRuleset = ToolbarRuleset.AnnotationOnly().WithHideOnCollapsed() },
+                    new ToolbarComponentEntry { Id = "builtin.inkFreeze", HidingRuleset = ToolbarRuleset.AlwaysShow().WithHideOnCollapsed() },
+                    new ToolbarComponentEntry { Id = "builtin.clear", HidingRuleset = ToolbarRuleset.AlwaysShow().WithHideOnCollapsed() },
                     new ToolbarComponentEntry
                     {
                         Id = "builtin.group",
-                        HidingRuleset = ToolbarRuleset.AnnotationOnly(),
+                        HidingRuleset = ToolbarRuleset.AnnotationOnly().WithHideOnCollapsed(),
                         Children = new List<ToolbarComponentEntry>
                         {
                             new ToolbarComponentEntry { Id = "builtin.eraser" },
@@ -919,12 +955,12 @@ namespace Ink_Canvas.Controls.Toolbar
                             new ToolbarComponentEntry { Id = "builtin.cursorWithDel" }
                         }
                     },
-                    new ToolbarComponentEntry { Id = "builtin.separator", HidingRuleset = ToolbarRuleset.AlwaysShow() },
-                    new ToolbarComponentEntry { Id = "builtin.whiteboard", HidingRuleset = ToolbarRuleset.AlwaysShow() },
-                    new ToolbarComponentEntry { Id = "builtin.tools", HidingRuleset = ToolbarRuleset.AlwaysShow() },
-                    new ToolbarComponentEntry { Id = "builtin.fold", HidingRuleset = ToolbarRuleset.AlwaysShow() },
-                    new ToolbarComponentEntry { Id = "builtin.gesture", HidingRuleset = ToolbarRuleset.GestureRule(), ShowSeparateBorder = true, PreventHideOnDragClick = true },
-                    new ToolbarComponentEntry { Id = "builtin.exit", HidingRuleset = ToolbarRuleset.PptOnly(), ShowSeparateBorder = true, PreventHideOnDragClick = true }
+                    new ToolbarComponentEntry { Id = "builtin.separator", HidingRuleset = ToolbarRuleset.AlwaysShow().WithHideOnCollapsed() },
+                    new ToolbarComponentEntry { Id = "builtin.whiteboard", HidingRuleset = ToolbarRuleset.AlwaysShow().WithHideOnCollapsed() },
+                    new ToolbarComponentEntry { Id = "builtin.tools", HidingRuleset = ToolbarRuleset.AlwaysShow().WithHideOnCollapsed() },
+                    new ToolbarComponentEntry { Id = "builtin.fold", HidingRuleset = ToolbarRuleset.AlwaysShow().WithPreventHideOnCollapsed() },
+                    new ToolbarComponentEntry { Id = "builtin.gesture", HidingRuleset = ToolbarRuleset.AnnotationOnly().WithPreventHideOnCollapsed(), ShowSeparateBorder = true },
+                    new ToolbarComponentEntry { Id = "builtin.exit", HidingRuleset = ToolbarRuleset.PptOnly().WithPreventHideOnCollapsed(), ShowSeparateBorder = true }
                 }
             };
         }

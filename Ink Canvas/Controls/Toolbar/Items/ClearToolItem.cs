@@ -6,7 +6,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
     {
         public override string Id => "builtin.clear";
         public override string LocalizationKey => "FloatingBar_Clear";
-        public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow();
+        public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public override string Description => "清除墨迹";
 
         protected override string IconBrushResourceKey => "RedBrush";

@@ -8,7 +8,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         public string Id => "builtin.group";
         public string DisplayName => "分组";
         public string Description => "将多个工具组合在一起显示";
-        public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow();
+        public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public bool DefaultShowSeparateBorder => false;
         public bool DefaultPreventHideOnDragClick => false;
 

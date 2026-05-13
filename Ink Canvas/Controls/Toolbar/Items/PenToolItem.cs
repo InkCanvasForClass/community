@@ -6,7 +6,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
     {
         public override string Id => "builtin.pen";
         public override string LocalizationKey => "FloatingBar_Annotate";
-        public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow();
+        public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public override string Description => "画笔工具";
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)

@@ -6,7 +6,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
     {
         public override string Id => "builtin.inkFreeze";
         public override string LocalizationKey => "FloatingBar_Freeze";
-        public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow();
+        public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public override string Description => "墨迹冻结";
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
