@@ -116,6 +116,7 @@ namespace Ink_Canvas.Helpers
                     {
                         // Old UI removed:                         _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Visible;
                         _mainWindow.IsInPptPresentationMode = false;
+                        _mainWindow.UpdateToolbarComponentVisibility();
                         HideAllNavigationPanels();
                         _mainWindow.UpdatePPTTimeCapsuleVisibility();
                         _mainWindow.UpdatePPTQuickPanelVisibility();
