@@ -228,8 +228,15 @@ namespace Ink_Canvas
             get
             {
                 if (_quickColorPalette != null) return _quickColorPalette;
-                if (StackPanelFloatingBarRoot == null) return null;
-                _quickColorPalette = FindDescendant<QuickColorPaletteControl>(StackPanelFloatingBarRoot);
+                if (ToolbarHost != null)
+                {
+                    _quickColorPalette = ToolbarHost.FindView("builtin.quickColorPalette") as QuickColorPaletteControl;
+                    if (_quickColorPalette != null) return _quickColorPalette;
+                }
+                if (StackPanelFloatingBarRoot != null)
+                {
+                    _quickColorPalette = FindDescendant<QuickColorPaletteControl>(StackPanelFloatingBarRoot);
+                }
                 return _quickColorPalette;
             }
         }
@@ -272,6 +279,7 @@ namespace Ink_Canvas
             try
             {
                 _lastHighlightButton = null;
+                _quickColorPalette = null;
                 ToolbarRegistry.ClearInjected(StackPanelFloatingBarRoot);
                 InitializeToolbarPlugins();
                 UpdateToolbarComponentVisibility();
@@ -279,6 +287,10 @@ namespace Ink_Canvas
                 RefreshFloatingBarButtonColors();
                 RefreshGestureButtonIcon();
                 SetFloatingBarHighlightPosition(_currentToolMode);
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    UpdateQuickColorPaletteIndicator(inkCanvas.DefaultDrawingAttributes.Color);
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
                 LogHelper.WriteLogToFile("MW_Toolbar: RebuildToolbar 完成", LogHelper.LogType.Info);
             }
             catch (Exception ex)

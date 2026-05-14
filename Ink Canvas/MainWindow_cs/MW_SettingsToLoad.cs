@@ -404,7 +404,6 @@ namespace Ink_Canvas
                         ? Visibility.Visible 
                         : Visibility.Collapsed;
                 }
-                UpdateQuickColorPaletteIndicator(drawingAttributes.Color);
             }
             catch (Exception ex)
             {
@@ -657,6 +656,11 @@ namespace Ink_Canvas
             }
 
             RefreshFloatingBarScreenFollowState();
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                UpdateQuickColorPaletteIndicator(inkCanvas.DefaultDrawingAttributes.Color);
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
 
         }
 

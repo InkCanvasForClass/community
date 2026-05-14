@@ -3412,80 +3412,15 @@ namespace Ink_Canvas
         private void UpdateQuickColorPaletteIndicator(Color selectedColor)
         {
             var qcp = QuickColorPalette;
-            if (qcp == null) return;
+            if (qcp == null)
+            {
+                LogHelper.WriteLogToFile($"UpdateQuickColorPaletteIndicator: QuickColorPalette 为 null，ToolbarHost={ToolbarHost != null}, StackPanelFloatingBarRoot={StackPanelFloatingBarRoot != null}", LogHelper.LogType.Warning);
+                return;
+            }
 
-            // 隐藏所有check图标（双行显示）
-            qcp.QuickColorWhite.IsChecked = false;
-            qcp.QuickColorOrange.IsChecked = false;
-            qcp.QuickColorYellow.IsChecked = false;
-            qcp.QuickColorBlack.IsChecked = false;
-            qcp.QuickColorBlue.IsChecked = false;
-            qcp.QuickColorRed.IsChecked = false;
-            qcp.QuickColorGreen.IsChecked = false;
-            qcp.QuickColorPurple.IsChecked = false;
-
-            // 隐藏所有check图标（单行显示）
-            qcp.QuickColorWhiteSingle.IsChecked = false;
-            qcp.QuickColorOrangeSingle.IsChecked = false;
-            qcp.QuickColorYellowSingle.IsChecked = false;
-            qcp.QuickColorBlackSingle.IsChecked = false;
-            qcp.QuickColorRedSingle.IsChecked = false;
-            qcp.QuickColorGreenSingle.IsChecked = false;
-
-            // 显示当前选中颜色的check图标
-            // 在荧光笔模式下，使用更宽松的颜色匹配
-            int tolerance = (penType == 1) ? 25 : 15; // 荧光笔模式使用更大的容差
-
-            if (IsColorSimilar(selectedColor, Colors.White, tolerance) || IsColorSimilar(selectedColor, Color.FromRgb(250, 250, 250), tolerance))
-            {
-                qcp.QuickColorWhite.IsChecked = true;
-                qcp.QuickColorWhiteSingle.IsChecked = true;
-            }
-            else if (IsColorSimilar(selectedColor, Colors.Black, tolerance))
-            {
-                qcp.QuickColorBlack.IsChecked = true;
-                qcp.QuickColorBlackSingle.IsChecked = true;
-            }
-            else if (IsColorSimilar(selectedColor, Colors.Yellow, tolerance) ||
-                     IsColorSimilar(selectedColor, Color.FromRgb(234, 179, 8), tolerance) ||
-                     IsColorSimilar(selectedColor, Color.FromRgb(250, 204, 21), tolerance) ||
-                     IsColorSimilar(selectedColor, Color.FromRgb(253, 224, 71), tolerance))
-            {
-                qcp.QuickColorYellow.IsChecked = true;
-                qcp.QuickColorYellowSingle.IsChecked = true;
-            }
-            else if (IsColorSimilar(selectedColor, Color.FromRgb(255, 165, 0), tolerance) ||
-                     IsColorSimilar(selectedColor, Color.FromRgb(251, 150, 80), tolerance) ||
-                     IsColorSimilar(selectedColor, Color.FromRgb(249, 115, 22), tolerance) ||
-                     IsColorSimilar(selectedColor, Color.FromRgb(234, 88, 12), tolerance) ||
-                     IsColorSimilar(selectedColor, Color.FromRgb(251, 146, 60), tolerance) ||
-                     IsColorSimilar(selectedColor, Color.FromRgb(253, 126, 20), tolerance))
-            {
-                qcp.QuickColorOrange.IsChecked = true;
-                qcp.QuickColorOrangeSingle.IsChecked = true;
-            }
-            else if (IsColorSimilar(selectedColor, Color.FromRgb(37, 99, 235), tolerance))
-            {
-                qcp.QuickColorBlue.IsChecked = true;
-                // 单行显示模式没有蓝色，所以不设置单行的check
-            }
-            else if (IsColorSimilar(selectedColor, Colors.Red, tolerance) ||
-                     IsColorSimilar(selectedColor, Color.FromRgb(220, 38, 38), tolerance) ||
-                     IsColorSimilar(selectedColor, Color.FromRgb(239, 68, 68), tolerance))
-            {
-                qcp.QuickColorRed.IsChecked = true;
-                qcp.QuickColorRedSingle.IsChecked = true;
-            }
-            else if (IsColorSimilar(selectedColor, Color.FromRgb(22, 163, 74), tolerance))
-            {
-                qcp.QuickColorGreen.IsChecked = true;
-                qcp.QuickColorGreenSingle.IsChecked = true;
-            }
-            else if (IsColorSimilar(selectedColor, Color.FromRgb(147, 51, 234), tolerance))
-            {
-                qcp.QuickColorPurple.IsChecked = true;
-                // 单行显示模式没有紫色，所以不设置单行的check
-            }
+            int tolerance = (penType == 1) ? 25 : 15;
+            qcp.ClearAllChecked();
+            qcp.SetCheckedByColor(selectedColor, tolerance);
         }
 
         /// <summary>
