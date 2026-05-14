@@ -280,6 +280,7 @@ namespace Ink_Canvas.Controls.Toolbar
         public const string PaddingRight = "paddingRight";
         public const string PaddingBottom = "paddingBottom";
         public const string Opacity = "opacity";
+        public const string DisplayMode = "displayMode";
     }
 
     public class ToolbarLayoutSettings

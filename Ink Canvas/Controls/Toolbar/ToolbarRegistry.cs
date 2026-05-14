@@ -1,3 +1,4 @@
+using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Newtonsoft.Json;
@@ -924,6 +925,13 @@ namespace Ink_Canvas.Controls.Toolbar
                 var iconSize = entry.GetSettingDouble(ComponentSettingKeys.IconSize);
                 if (iconSize.HasValue && iconSize.Value > 0)
                     btn.IconHeight = iconSize.Value;
+            }
+
+            if (view is QuickColorPaletteControl qcp)
+            {
+                var displayMode = entry.GetSettingString(ComponentSettingKeys.DisplayMode);
+                if (!string.IsNullOrEmpty(displayMode) && int.TryParse(displayMode, out var mode))
+                    qcp.DisplayMode = mode;
             }
         }
 

@@ -100,6 +100,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var vAlign = entry.GetSettingString(ComponentSettingKeys.VerticalAlignment) ?? "";
             ComboBoxVAlign.SelectedIndex = vAlign switch { "Top" => 1, "Center" => 2, "Bottom" => 3, "Stretch" => 4, _ => 0 };
 
+            var isQuickColorPalette = entry.Id == "builtin.quickColorPalette";
+            PanelQuickColorPaletteDisplayMode.Visibility = isQuickColorPalette ? Visibility.Visible : Visibility.Collapsed;
+            if (isQuickColorPalette)
+            {
+                var displayMode = entry.GetSettingString(ComponentSettingKeys.DisplayMode) ?? "1";
+                ComboBoxDisplayMode.SelectedIndex = displayMode == "0" ? 1 : 0;
+            }
+
             var ruleset = ToolbarRegistry.GetEffectiveRuleset(entry);
             ComboBoxRulesetMode.SelectedIndex = (int)ruleset.Mode;
             CheckBoxRulesetReversed.IsChecked = ruleset.IsReversed;
@@ -458,6 +466,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded || ActiveEntry == null || _suppressSave) return;
             WriteComponentSettingsFromUI(ActiveEntry);
+            SaveSettings();
+        }
+
+        private void ComboBoxDisplayMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded || ActiveEntry == null || _suppressSave) return;
+            var tag = (ComboBoxDisplayMode.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+            if (!string.IsNullOrEmpty(tag))
+                ActiveEntry.SetSetting(ComponentSettingKeys.DisplayMode, tag);
             SaveSettings();
         }
 

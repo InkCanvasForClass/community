@@ -211,6 +211,16 @@
                                           Unchecked="CheckBoxShowSeparateBorder_Changed"/>
                             </ui:SettingsCard>
 
+                            <StackPanel x:Name="PanelQuickColorPaletteDisplayMode" Visibility="Collapsed">
+                                <ui:SettingsCard Header="显示模式" Description="选择快捷调色盘的颜色数量">
+                                    <ComboBox x:Name="ComboBoxDisplayMode" Width="120"
+                                              SelectionChanged="ComboBoxDisplayMode_SelectionChanged">
+                                        <ComboBoxItem Content="双行8色" Tag="1"/>
+                                        <ComboBoxItem Content="单行6色" Tag="0"/>
+                                    </ComboBox>
+                                </ui:SettingsCard>
+                            </StackPanel>
+
                             <TextBlock Text="尺寸" FontSize="14" FontWeight="SemiBold" Margin="0,12,0,4"/>
                             <Grid Margin="0,0,0,4">
                                 <Grid.ColumnDefinitions>

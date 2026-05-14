@@ -404,6 +404,7 @@ namespace Ink_Canvas
                         ? Visibility.Visible 
                         : Visibility.Collapsed;
                 }
+                UpdateQuickColorPaletteIndicator(drawingAttributes.Color);
             }
             catch (Exception ex)
             {
