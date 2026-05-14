@@ -624,7 +624,7 @@ namespace Ink_Canvas
 
         private void ToggleSwitchEnableMultiTouchMode_Toggled(object sender, RoutedEventArgs e)
         {
-            //if (!isLoaded) return;
+            if (!isLoaded) return;
             var toggle = (iNKORE.UI.WPF.Modern.Controls.ToggleSwitch)sender;
             bool isOn = toggle.IsOn;
             bool isBoardSender = sender == BoardToggleSwitchEnableMultiTouchMode;

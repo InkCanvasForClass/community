@@ -371,6 +371,29 @@ namespace Ink_Canvas
                 Settings.Gesture = new Gesture();
             }
 
+            try
+            {
+                if (FloatingBarGesturePopupContent != null)
+                {
+                    FloatingBarGesturePopupContent.MultiTouchToggle.IsOn = Settings.Gesture.IsEnableMultiTouchMode;
+                    FloatingBarGesturePopupContent.TwoFingerTranslateToggle.IsOn = Settings.Gesture.IsEnableTwoFingerTranslate;
+                    FloatingBarGesturePopupContent.TwoFingerZoomToggle.IsOn = Settings.Gesture.IsEnableTwoFingerZoom;
+                    FloatingBarGesturePopupContent.TwoFingerRotationToggle.IsOn = Settings.Gesture.IsEnableTwoFingerRotation;
+                }
+
+                if (BoardGesturePopupContent != null)
+                {
+                    BoardGesturePopupContent.MultiTouchToggle.IsOn = Settings.Gesture.IsEnableMultiTouchModeBoard;
+                    BoardGesturePopupContent.TwoFingerTranslateToggle.IsOn = Settings.Gesture.IsEnableTwoFingerTranslateBoard;
+                    BoardGesturePopupContent.TwoFingerZoomToggle.IsOn = Settings.Gesture.IsEnableTwoFingerZoomBoard;
+                    BoardGesturePopupContent.TwoFingerRotationToggle.IsOn = Settings.Gesture.IsEnableTwoFingerRotationBoard;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"同步手势开关状态失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+
             // Canvas
             if (Settings.Canvas != null)
             {
