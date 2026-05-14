@@ -64,23 +64,6 @@ namespace Ink_Canvas.Controls
             var settings = SettingsManager.Settings;
             if (settings?.Appearance == null) return;
             DisplayMode = settings.Appearance.QuickColorPaletteDisplayMode;
-            UpdateToggleButtonText();
-        }
-
-        private void ToggleDisplayMode_Click(object sender, RoutedEventArgs e)
-        {
-            DisplayMode = DisplayMode == 0 ? 1 : 0;
-            SettingsManager.Settings.Appearance.QuickColorPaletteDisplayMode = DisplayMode;
-            SettingsManager.SaveSettingsToFile();
-            UpdateToggleButtonText();
-        }
-
-        private void UpdateToggleButtonText()
-        {
-            if (ToggleDisplayModeText != null)
-            {
-                ToggleDisplayModeText.Text = DisplayMode == 0 ? "8" : "6";
-            }
         }
 
         private void QuickColorBlack_Click(object sender, RoutedEventArgs e)

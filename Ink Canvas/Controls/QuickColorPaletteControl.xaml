@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
-             xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
              mc:Ignorable="d"
              d:DesignHeight="54" d:DesignWidth="120">
     <StackPanel Name="QuickColorPaletteContainer" Orientation="Vertical"
@@ -50,21 +49,5 @@
             <controls:ColorPickerButton x:Name="QuickColorGreenSingle" Color="#16A34A" CheckIconFill="Black" ButtonSize="18" CheckIconSize="10"
                                         ButtonMouseUp="QuickColorGreen_Click" ToolTip="Green"/>
         </StackPanel>
-        <Button x:Name="ToggleDisplayModeBtn"
-                Click="ToggleDisplayMode_Click"
-                Background="Transparent"
-                BorderThickness="0"
-                Cursor="Hand"
-                Padding="0"
-                Margin="0,2,0,0"
-                ToolTip="{i18n:I18n Key=QuickColorPalette_ToggleMode}"
-                VerticalAlignment="Center"
-                HorizontalAlignment="Center">
-            <TextBlock x:Name="ToggleDisplayModeText"
-                       Text="6/8"
-                       FontSize="8"
-                       Foreground="{DynamicResource FloatBarForeground}"
-                       Opacity="0.6"/>
-        </Button>
     </StackPanel>
 </UserControl>
