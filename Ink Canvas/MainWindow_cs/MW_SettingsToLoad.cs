@@ -394,6 +394,22 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"同步手势开关状态失败: {ex.Message}", LogHelper.LogType.Error);
             }
 
+            // 快捷调色盘
+            try
+            {
+                if (QuickColorPalette != null)
+                {
+                    QuickColorPalette.SyncFromSettings();
+                    QuickColorPalette.Visibility = Settings.Appearance.IsShowQuickColorPalette 
+                        ? Visibility.Visible 
+                        : Visibility.Collapsed;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"同步快捷调色盘状态失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+
             // Canvas
             if (Settings.Canvas != null)
             {
