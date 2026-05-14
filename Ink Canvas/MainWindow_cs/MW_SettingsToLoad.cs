@@ -647,17 +647,15 @@ namespace Ink_Canvas
                 Settings.Automation = new Automation();
             }
 
-            // auto align
-            if (IsInPptPresentationMode)
-            {
-                ViewboxFloatingBarMarginAnimation(60);
-            }
-            else
-            {
-                ViewboxFloatingBarMarginAnimation(100, true);
-            }
-
             RefreshFloatingBarScreenFollowState();
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (IsInPptPresentationMode)
+                    ViewboxFloatingBarMarginAnimation(60);
+                else
+                    ViewboxFloatingBarMarginAnimation(100, true);
+            }), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
 
             Dispatcher.BeginInvoke(new Action(() =>
             {

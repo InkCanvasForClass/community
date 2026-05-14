@@ -538,11 +538,6 @@ namespace Ink_Canvas
                 (workingArea.Width - floatingBarWidth) / 2,
                 workingArea.Bottom - 60 - workingArea.Top,
                 -2000, -200);
-            // 新增：只在屏幕模式下初始化浮动栏动画
-            if (currentMode == 0)
-            {
-                ViewboxFloatingBarMarginAnimation(100, true);
-            }
 
             try
             {

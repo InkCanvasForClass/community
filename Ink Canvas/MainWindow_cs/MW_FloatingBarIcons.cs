@@ -2122,7 +2122,10 @@ namespace Ink_Canvas
                 if (!Topmost)
                     MarginFromEdge = -60;
                 else
+                {
                     ViewboxFloatingBar.Visibility = Visibility.Visible;
+                    ViewboxFloatingBar.UpdateLayout();
+                }
                 isViewboxFloatingBarMarginAnimationRunning = true;
 
                 double dpiScaleX = 1, dpiScaleY = 1;
@@ -2266,6 +2269,7 @@ namespace Ink_Canvas
             await Dispatcher.InvokeAsync(() =>
             {
                 ViewboxFloatingBar.Visibility = Visibility.Visible;
+                ViewboxFloatingBar.UpdateLayout();
                 isViewboxFloatingBarMarginAnimationRunning = true;
 
                 double dpiScaleX = 1, dpiScaleY = 1;
@@ -2372,6 +2376,7 @@ namespace Ink_Canvas
             await Dispatcher.InvokeAsync(() =>
             {
                 ViewboxFloatingBar.Visibility = Visibility.Visible;
+                ViewboxFloatingBar.UpdateLayout();
                 isViewboxFloatingBarMarginAnimationRunning = true;
 
                 double dpiScaleX = 1, dpiScaleY = 1;
