@@ -474,7 +474,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded || ActiveEntry == null || _suppressSave) return;
             var tag = (ComboBoxDisplayMode.SelectedItem as ComboBoxItem)?.Tag?.ToString();
             if (!string.IsNullOrEmpty(tag))
+            {
                 ActiveEntry.SetSetting(ComponentSettingKeys.DisplayMode, tag);
+                if (int.TryParse(tag, out var mode))
+                    SettingsManager.Settings.Appearance.QuickColorPaletteDisplayMode = mode;
+            }
             SaveSettings();
         }
 

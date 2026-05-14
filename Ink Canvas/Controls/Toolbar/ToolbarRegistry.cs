@@ -923,6 +923,9 @@ namespace Ink_Canvas.Controls.Toolbar
                 var displayMode = entry.GetSettingString(ComponentSettingKeys.DisplayMode);
                 if (!string.IsNullOrEmpty(displayMode) && int.TryParse(displayMode, out var mode))
                     qcp.DisplayMode = mode;
+                else
+                    // 如果组件设置中没有找到，回退到全局设置
+                    qcp.SyncFromSettings();
             }
         }
 

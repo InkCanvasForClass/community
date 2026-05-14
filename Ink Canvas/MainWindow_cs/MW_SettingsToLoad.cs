@@ -399,7 +399,9 @@ namespace Ink_Canvas
             {
                 if (QuickColorPalette != null)
                 {
-                    QuickColorPalette.SyncFromSettings();
+                    // 注意：不调用 QuickColorPalette.SyncFromSettings()
+                    // 因为工具栏构建时已经通过 ApplyComponentSettings 应用了组件设置中的 DisplayMode
+                    // 这里只设置可见性
                     QuickColorPalette.Visibility = Settings.Appearance.IsShowQuickColorPalette 
                         ? Visibility.Visible 
                         : Visibility.Collapsed;

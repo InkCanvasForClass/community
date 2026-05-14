@@ -18,8 +18,6 @@ namespace Ink_Canvas.Controls.Toolbar.Items
                 Tag = "ToolbarRegistryInjected"
             };
 
-            control.SyncFromSettings();
-
             control.ColorClicked += (s, e) =>
             {
                 if (e.OriginalSource is string colorName)
