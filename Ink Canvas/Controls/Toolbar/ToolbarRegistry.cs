@@ -635,11 +635,6 @@ namespace Ink_Canvas.Controls.Toolbar
 
         private static Border CreateContentBorder(List<DisplayItem> items)
         {
-            var bgBrush = Application.Current.TryFindResource("FloatBarBackground") as Brush
-                ?? new SolidColorBrush(Colors.White);
-            var borderBrush = Application.Current.TryFindResource("FloatBarBorderBrush") as Brush
-                ?? new SolidColorBrush(Color.FromRgb(0x7D, 0x7D, 0x7D));
-
             var contentPanel = new StackPanel
             {
                 Orientation = Orientation.Horizontal,
@@ -696,24 +691,20 @@ namespace Ink_Canvas.Controls.Toolbar
                 Padding = new Thickness(2, 0, 2, 0),
                 Visibility = Visibility.Visible,
                 Height = 50,
-                Background = bgBrush,
                 CornerRadius = new CornerRadius(8),
                 BorderThickness = new Thickness(2),
-                BorderBrush = borderBrush,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 Child = grid,
                 Tag = ContentBorderTag
             };
+            border.SetResourceReference(Border.BackgroundProperty, "FloatBarBackground");
+            border.SetResourceReference(Border.BorderBrushProperty, "FloatBarBorderBrush");
 
             return border;
         }
 
         private static Border WrapInSeparateBorder(FrameworkElement view, ToolbarRuleset ruleset, bool isToolbarButton)
         {
-            var bgBrush = Application.Current.TryFindResource("FloatBarBackground") as Brush
-                ?? new SolidColorBrush(Colors.White);
-            var borderBrush = Application.Current.TryFindResource("FloatBarBorderBrush") as Brush
-                ?? new SolidColorBrush(Color.FromRgb(0x7D, 0x7D, 0x7D));
             var wrapper = new Border
             {
                 Margin = new Thickness(0),
@@ -722,13 +713,13 @@ namespace Ink_Canvas.Controls.Toolbar
                 MinWidth = isToolbarButton ? 50 : 0,
                 Height = double.NaN,
                 MinHeight = 50,
-                Background = bgBrush,
                 CornerRadius = new CornerRadius(8),
                 BorderThickness = new Thickness(2),
-                BorderBrush = borderBrush,
                 Child = view,
                 Tag = InjectedTag
             };
+            wrapper.SetResourceReference(Border.BackgroundProperty, "FloatBarBackground");
+            wrapper.SetResourceReference(Border.BorderBrushProperty, "FloatBarBorderBrush");
 
             if (isToolbarButton)
             {
