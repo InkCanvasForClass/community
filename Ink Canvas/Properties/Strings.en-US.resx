@@ -2337,6 +2337,9 @@ Hide</value>
   <data name="Board_GestureOptions" xml:space="preserve">
     <value>Gesture options</value>
   </data>
+  <data name="QuickColorPalette_ToggleMode" xml:space="preserve">
+    <value>Click to toggle 6/8 color display</value>
+  </data>
   <data name="Startup_NoFocusModeHint" xml:space="preserve">
     <value>Still receive input when window loses focus</value>
   </data>

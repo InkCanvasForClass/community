@@ -2390,6 +2390,9 @@
   <data name="Board_GestureOptions" xml:space="preserve">
     <value>手势选项</value>
   </data>
+  <data name="QuickColorPalette_ToggleMode" xml:space="preserve">
+    <value>点击切换6色/8色显示</value>
+  </data>
   <data name="Startup_NoFocusModeHint" xml:space="preserve">
     <value>窗口失去焦点时仍可接收输入</value>
   </data>
