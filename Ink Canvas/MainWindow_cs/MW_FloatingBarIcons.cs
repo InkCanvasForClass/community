@@ -2160,10 +2160,10 @@ namespace Ink_Canvas
                 }
                 double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
 
-                double baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 58);
+                double baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 72);
                 if (baseHeight <= 0)
                 {
-                    baseHeight = 58;
+                    baseHeight = 72;
                 }
                 double floatingBarHeight = baseHeight * ViewboxFloatingBarScaleTransform.ScaleY;
 
@@ -2175,12 +2175,12 @@ namespace Ink_Canvas
                     if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
                     {
                         // 单行显示模式，自适应宽度，但需要足够空间显示6个颜色
-                        floatingBarWidth = Math.Max(floatingBarWidth, 120 * ViewboxFloatingBarScaleTransform.ScaleX);
+                        floatingBarWidth = Math.Max(floatingBarWidth, 260 * ViewboxFloatingBarScaleTransform.ScaleX);
                     }
                     else
                     {
                         // 双行显示模式，宽度较大
-                        floatingBarWidth = Math.Max(floatingBarWidth, 68 * ViewboxFloatingBarScaleTransform.ScaleX);
+                        floatingBarWidth = Math.Max(floatingBarWidth, 140 * ViewboxFloatingBarScaleTransform.ScaleX);
                     }
                 }
 
@@ -2304,10 +2304,10 @@ namespace Ink_Canvas
                 }
                 double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
 
-                double baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 58);
+                double baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 72);
                 if (baseHeight <= 0)
                 {
-                    baseHeight = 58;
+                    baseHeight = 72;
                 }
                 double floatingBarHeight = baseHeight * ViewboxFloatingBarScaleTransform.ScaleY;
 
@@ -2317,11 +2317,11 @@ namespace Ink_Canvas
                 {
                     if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
                     {
-                        floatingBarWidth = Math.Max(floatingBarWidth, 120 * ViewboxFloatingBarScaleTransform.ScaleX);
+                        floatingBarWidth = Math.Max(floatingBarWidth, 180 * ViewboxFloatingBarScaleTransform.ScaleX);
                     }
                     else
                     {
-                        floatingBarWidth = Math.Max(floatingBarWidth, 68 * ViewboxFloatingBarScaleTransform.ScaleX);
+                        floatingBarWidth = Math.Max(floatingBarWidth, 108 * ViewboxFloatingBarScaleTransform.ScaleX);
                     }
                 }
 
@@ -2402,8 +2402,8 @@ namespace Ink_Canvas
                 }
                 double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
 
-                double baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 58);
-                if (baseHeight <= 0) baseHeight = 58;
+                double baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 72);
+                if (baseHeight <= 0) baseHeight = 72;
                 double floatingBarHeight = baseHeight * ViewboxFloatingBarScaleTransform.ScaleY;
 
 
@@ -2412,11 +2412,11 @@ namespace Ink_Canvas
                 {
                     if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
                     {
-                        floatingBarWidth = Math.Max(floatingBarWidth, 120 * ViewboxFloatingBarScaleTransform.ScaleX);
+                        floatingBarWidth = Math.Max(floatingBarWidth, 180 * ViewboxFloatingBarScaleTransform.ScaleX);
                     }
                     else
                     {
-                        floatingBarWidth = Math.Max(floatingBarWidth, 68 * ViewboxFloatingBarScaleTransform.ScaleX);
+                        floatingBarWidth = Math.Max(floatingBarWidth, 108 * ViewboxFloatingBarScaleTransform.ScaleX);
                     }
                 }
 
@@ -4656,7 +4656,7 @@ private bool forceEraser;
                     indicatorBar.Visibility = Visibility.Visible;
                 }
 
-                double indicatorBarWidth = 12;
+                double indicatorBarWidth = 40;
                 double nextBarLeft = nextPos + Math.Max(0, (nextWidth - indicatorBarWidth) / 2);
 
                 bool isFirstShow = _lastHighlightButton == null;

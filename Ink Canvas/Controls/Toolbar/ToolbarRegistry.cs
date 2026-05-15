@@ -661,25 +661,25 @@ namespace Ink_Canvas.Controls.Toolbar
             var selectionBG = new Border
             {
                 Visibility = Visibility.Hidden,
-                Width = 28,
-                Height = 46,
+                Width = 44,
+                Height = 64,
                 Margin = new Thickness(0, -2, 0, -2),
                 Background = new SolidColorBrush(Color.FromArgb(0x15, 0x3b, 0x82, 0xf6)),
                 Tag = SelectionBGTag
             };
-            System.Windows.Controls.Canvas.SetLeft(selectionBG, 28);
+            System.Windows.Controls.Canvas.SetLeft(selectionBG, 24);
             canvas.Children.Add(selectionBG);
 
             var indicatorBar = new Border
             {
                 Visibility = Visibility.Hidden,
-                Width = 16,
+                Width = 40,
                 Height = 3,
                 CornerRadius = new CornerRadius(1.5),
                 Background = new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb)),
                 Tag = IndicatorBarTag
             };
-            System.Windows.Controls.Canvas.SetLeft(indicatorBar, 34);
+            System.Windows.Controls.Canvas.SetLeft(indicatorBar, 26);
             System.Windows.Controls.Canvas.SetBottom(indicatorBar, 1);
             canvas.Children.Add(indicatorBar);
 
@@ -690,7 +690,7 @@ namespace Ink_Canvas.Controls.Toolbar
             {
                 Padding = new Thickness(2, 0, 2, 0),
                 Visibility = Visibility.Visible,
-                Height = 50,
+                Height = 72,
                 CornerRadius = new CornerRadius(8),
                 BorderThickness = new Thickness(2),
                 HorizontalAlignment = HorizontalAlignment.Left,
@@ -710,9 +710,9 @@ namespace Ink_Canvas.Controls.Toolbar
                 Margin = new Thickness(0),
                 Padding = isToolbarButton ? new Thickness(0) : new Thickness(4, 2, 4, 2),
                 Width = double.NaN,
-                MinWidth = isToolbarButton ? 50 : 0,
+                MinWidth = isToolbarButton ? 72 : 0,
                 Height = double.NaN,
-                MinHeight = 50,
+                MinHeight = 72,
                 CornerRadius = new CornerRadius(8),
                 BorderThickness = new Thickness(2),
                 Child = view,
