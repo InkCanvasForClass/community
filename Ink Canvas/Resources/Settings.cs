@@ -195,9 +195,11 @@ namespace Ink_Canvas
         [JsonProperty("enableInkFade")]
         public bool EnableInkFade { get; set; } = false;
         [JsonProperty("inkFadeTime")]
-        public int InkFadeTime { get; set; } = 3000; // 墨迹渐隐时间（毫秒）
-        [JsonProperty("hideInkFadeControlInPenMenu")]
-        public bool HideInkFadeControlInPenMenu { get; set; } = false; // 是否在笔工具菜单中隐藏墨迹渐隐控制开关
+        public int InkFadeTime { get; set; } = 3000;
+        [JsonProperty("laserPenWidth")]
+        public double LaserPenWidth { get; set; } = 5;
+        [JsonProperty("laserPenAlpha")]
+        public int LaserPenAlpha { get; set; } = 128;
         [JsonProperty("enableBrushAutoRestore")]
         public bool EnableBrushAutoRestore { get; set; } = false;
         [JsonProperty("brushAutoRestoreDelaySeconds")]

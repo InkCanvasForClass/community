@@ -308,14 +308,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             try
             {
                 if (_mainWindow == null) return;
-                var penTypeField = _mainWindow.GetType().GetField("penType",
+                var switchMethod = _mainWindow.GetType().GetMethod(
+                    penTypeIndex == 2 ? "SwitchToLaserPen" : (penTypeIndex == 1 ? "SwitchToHighlighterPen" : "SwitchToDefaultPen"),
                     BindingFlags.NonPublic | BindingFlags.Instance);
-                if (penTypeField != null)
+                if (switchMethod != null)
                 {
-                    penTypeField.SetValue(_mainWindow, penTypeIndex);
-                    var checkPenTypeMethod = _mainWindow.GetType().GetMethod("CheckPenTypeUIState",
-                        BindingFlags.NonPublic | BindingFlags.Instance);
-                    checkPenTypeMethod?.Invoke(_mainWindow, null);
+                    switchMethod.Invoke(_mainWindow, new object[] { null, null });
                 }
             }
             catch (Exception ex)

@@ -83,14 +83,18 @@ namespace Ink_Canvas
         internal iNKORE.UI.WPF.Modern.Controls.ToggleSwitch BoardToggleSwitchEnableNibMode => BoardPenPalettePopupContent?.NibModeToggle;
         internal iNKORE.UI.WPF.Modern.Controls.ToggleSwitch FloatingBarToggleSwitchEnableInkToShape => PenPalettePopupContent?.InkToShapeToggle;
         internal iNKORE.UI.WPF.Modern.Controls.ToggleSwitch BoardToggleSwitchEnableInkToShape => BoardPenPalettePopupContent?.InkToShapeToggle;
-        internal iNKORE.UI.WPF.Modern.Controls.ToggleSwitch ToggleSwitchInkFadeInPanel => PenPalettePopupContent?.InkFadeToggle;
-        internal iNKORE.UI.WPF.Modern.Controls.ToggleSwitch ToggleSwitchInkFadeInPanel2 => PenPalettePopupContent?.InkFadeToggle2;
         internal Slider InkWidthSlider => PenPalettePopupContent?.InkWidthSlider;
         internal Slider BoardInkWidthSlider => BoardPenPalettePopupContent?.InkWidthSlider;
         internal Slider InkAlphaSlider => PenPalettePopupContent?.InkAlphaSlider;
         internal Slider BoardInkAlphaSlider => BoardPenPalettePopupContent?.InkAlphaSlider;
         internal Slider HighlighterWidthSlider => PenPalettePopupContent?.HighlighterWidthSlider;
         internal Slider BoardHighlighterWidthSlider => BoardPenPalettePopupContent?.HighlighterWidthSlider;
+        internal Slider LaserPenWidthSlider => PenPalettePopupContent?.LaserPenWidthSlider ?? BoardPenPalettePopupContent?.LaserPenWidthSlider;
+        internal Slider LaserPenAlphaSlider => PenPalettePopupContent?.LaserPenAlphaSlider ?? BoardPenPalettePopupContent?.LaserPenAlphaSlider;
+        internal Slider LaserPenFadeTimeSlider => PenPalettePopupContent?.LaserPenFadeTimeSlider ?? BoardPenPalettePopupContent?.LaserPenFadeTimeSlider;
+        internal Slider BoardLaserPenWidthSlider => BoardPenPalettePopupContent?.LaserPenWidthSlider;
+        internal Slider BoardLaserPenAlphaSlider => BoardPenPalettePopupContent?.LaserPenAlphaSlider;
+        internal Slider BoardLaserPenFadeTimeSlider => BoardPenPalettePopupContent?.LaserPenFadeTimeSlider;
         internal Button BoardBrushModeButton => PenPalettePopupContent?.BrushModeBtn;
         internal System.Windows.Shapes.Path BoardBrushModeIcon => PenPalettePopupContent?.BrushModeIcon;
 
@@ -113,13 +117,17 @@ namespace Ink_Canvas
 
         internal FrameworkElement DefaultPenPropsPanel => PenPalettePopupContent?.DefaultPenPropsPanel ?? BoardPenPalettePopupContent?.DefaultPenPropsPanel;
         internal FrameworkElement HighlighterPenPropsPanel => PenPalettePopupContent?.HighlighterPenPropsPanel ?? BoardPenPalettePopupContent?.HighlighterPenPropsPanel;
+        internal FrameworkElement LaserPenPropsPanel => PenPalettePopupContent?.LaserPenPropsPanel ?? BoardPenPalettePopupContent?.LaserPenPropsPanel;
         internal FrameworkElement DefaultPenColorsPanel => PenPalettePopupContent?.DefaultPenColorsPanel ?? BoardPenPalettePopupContent?.DefaultPenColorsPanel;
         internal FrameworkElement HighlighterPenColorsPanel => PenPalettePopupContent?.HighlighterPenColorsPanel ?? BoardPenPalettePopupContent?.HighlighterPenColorsPanel;
+        internal FrameworkElement LaserPenColorsPanel => PenPalettePopupContent?.LaserPenColorsPanel ?? BoardPenPalettePopupContent?.LaserPenColorsPanel;
 
         internal FrameworkElement BoardDefaultPenPropsPanel => BoardPenPalettePopupContent?.DefaultPenPropsPanel;
         internal FrameworkElement BoardHighlighterPenPropsPanel => BoardPenPalettePopupContent?.HighlighterPenPropsPanel;
+        internal FrameworkElement BoardLaserPenPropsPanel => BoardPenPalettePopupContent?.LaserPenPropsPanel;
         internal FrameworkElement BoardDefaultPenColorsPanel => BoardPenPalettePopupContent?.DefaultPenColorsPanel;
         internal FrameworkElement BoardHighlighterPenColorsPanel => BoardPenPalettePopupContent?.HighlighterPenColorsPanel;
+        internal FrameworkElement BoardLaserPenColorsPanel => BoardPenPalettePopupContent?.LaserPenColorsPanel;
 
 
 
@@ -165,17 +173,41 @@ namespace Ink_Canvas
         internal PenColorButton BoardHighlighterPenColorTeal => BoardPenPalettePopupContent?.HighlighterPenColorTeal;
         internal PenColorButton BoardHighlighterPenColorOrange => BoardPenPalettePopupContent?.HighlighterPenColorOrange;
 
+        internal PenColorButton LaserPenColorBlack => PenPalettePopupContent?.LaserPenColorBlack ?? BoardPenPalettePopupContent?.LaserPenColorBlack;
+        internal PenColorButton LaserPenColorWhite => PenPalettePopupContent?.LaserPenColorWhite ?? BoardPenPalettePopupContent?.LaserPenColorWhite;
+        internal PenColorButton LaserPenColorRed => PenPalettePopupContent?.LaserPenColorRed ?? BoardPenPalettePopupContent?.LaserPenColorRed;
+        internal PenColorButton LaserPenColorYellow => PenPalettePopupContent?.LaserPenColorYellow ?? BoardPenPalettePopupContent?.LaserPenColorYellow;
+        internal PenColorButton LaserPenColorGreen => PenPalettePopupContent?.LaserPenColorGreen ?? BoardPenPalettePopupContent?.LaserPenColorGreen;
+        internal PenColorButton LaserPenColorBlue => PenPalettePopupContent?.LaserPenColorBlue ?? BoardPenPalettePopupContent?.LaserPenColorBlue;
+        internal PenColorButton LaserPenColorPink => PenPalettePopupContent?.LaserPenColorPink ?? BoardPenPalettePopupContent?.LaserPenColorPink;
+        internal PenColorButton LaserPenColorTeal => PenPalettePopupContent?.LaserPenColorTeal ?? BoardPenPalettePopupContent?.LaserPenColorTeal;
+        internal PenColorButton LaserPenColorOrange => PenPalettePopupContent?.LaserPenColorOrange ?? BoardPenPalettePopupContent?.LaserPenColorOrange;
+
+        internal PenColorButton BoardLaserPenColorBlack => BoardPenPalettePopupContent?.LaserPenColorBlack;
+        internal PenColorButton BoardLaserPenColorWhite => BoardPenPalettePopupContent?.LaserPenColorWhite;
+        internal PenColorButton BoardLaserPenColorRed => BoardPenPalettePopupContent?.LaserPenColorRed;
+        internal PenColorButton BoardLaserPenColorYellow => BoardPenPalettePopupContent?.LaserPenColorYellow;
+        internal PenColorButton BoardLaserPenColorGreen => BoardPenPalettePopupContent?.LaserPenColorGreen;
+        internal PenColorButton BoardLaserPenColorBlue => BoardPenPalettePopupContent?.LaserPenColorBlue;
+        internal PenColorButton BoardLaserPenColorPink => BoardPenPalettePopupContent?.LaserPenColorPink;
+        internal PenColorButton BoardLaserPenColorTeal => BoardPenPalettePopupContent?.LaserPenColorTeal;
+        internal PenColorButton BoardLaserPenColorOrange => BoardPenPalettePopupContent?.LaserPenColorOrange;
+
         internal Border ColorThemeSwitch => PenPalettePopupContent?.ColorThemeSwitch ?? BoardPenPalettePopupContent?.ColorThemeSwitch;
         internal Image ColorThemeSwitchIcon => PenPalettePopupContent?.ColorThemeSwitchIcon ?? BoardPenPalettePopupContent?.ColorThemeSwitchIcon;
         internal TextBlock ColorThemeSwitchTextBlock => PenPalettePopupContent?.ColorThemeSwitchText ?? BoardPenPalettePopupContent?.ColorThemeSwitchText;
         internal Border BoardColorThemeSwitch => BoardPenPalettePopupContent?.ColorThemeSwitch;
         internal Image BoardColorThemeSwitchIcon => BoardPenPalettePopupContent?.ColorThemeSwitchIcon;
         internal TextBlock BoardColorThemeSwitchTextBlock => BoardPenPalettePopupContent?.ColorThemeSwitchText;
+        internal Border LaserPenColorThemeSwitch => PenPalettePopupContent?.LaserPenColorThemeSwitch ?? BoardPenPalettePopupContent?.LaserPenColorThemeSwitch;
+        internal Image LaserPenColorThemeSwitchIcon => PenPalettePopupContent?.LaserPenColorThemeSwitchIcon ?? BoardPenPalettePopupContent?.LaserPenColorThemeSwitchIcon;
+        internal TextBlock LaserPenColorThemeSwitchTextBlock => PenPalettePopupContent?.LaserPenColorThemeSwitchText ?? BoardPenPalettePopupContent?.LaserPenColorThemeSwitchText;
+        internal Border BoardLaserPenColorThemeSwitch => BoardPenPalettePopupContent?.LaserPenColorThemeSwitch;
+        internal Image BoardLaserPenColorThemeSwitchIcon => BoardPenPalettePopupContent?.LaserPenColorThemeSwitchIcon;
+        internal TextBlock BoardLaserPenColorThemeSwitchTextBlock => BoardPenPalettePopupContent?.LaserPenColorThemeSwitchText;
 
         internal FrameworkElement NibModeSimpleStackPanel => PenPalettePopupContent?.NibModePanel ?? BoardPenPalettePopupContent?.NibModePanel;
         internal FrameworkElement BoardNibModeSimpleStackPanel => BoardPenPalettePopupContent?.NibModePanel;
-        internal FrameworkElement InkFadeControlPanel1 => PenPalettePopupContent?.InkFadeControlPanel ?? BoardPenPalettePopupContent?.InkFadeControlPanel;
-        internal FrameworkElement InkFadeControlPanel2 => PenPalettePopupContent?.InkFadeControlPanel2 ?? BoardPenPalettePopupContent?.InkFadeControlPanel2;
         #endregion
 
         #region Eraser property mappings

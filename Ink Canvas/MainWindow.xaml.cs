@@ -241,10 +241,12 @@ namespace Ink_Canvas
             content.PenStyleComboBox.SelectionChanged += ComboBoxPenStyle_SelectionChanged;
             content.NibModeToggle.Toggled += ToggleSwitchEnableNibMode_Toggled;
             content.InkToShapeToggle.Toggled += ToggleSwitchEnableInkToShape_Toggled;
-            content.InkFadeToggle.Toggled += ToggleSwitchInkFadeInPanel_Toggled;
             content.InkWidthSlider.ValueChanged += InkWidthSlider_ValueChanged;
             content.InkAlphaSlider.ValueChanged += InkAlphaSlider_ValueChanged;
             content.HighlighterWidthSlider.ValueChanged += HighlighterWidthSlider_ValueChanged;
+            content.LaserPenWidthSlider.ValueChanged += LaserPenWidthSlider_ValueChanged;
+            content.LaserPenAlphaSlider.ValueChanged += LaserPenAlphaSlider_ValueChanged;
+            content.LaserPenFadeTimeSlider.ValueChanged += LaserPenFadeTimeSlider_ValueChanged;
             content.BrushModeBtn.Click += BoardBrushModeButton_Click;
             content.BrushModeBtn.MouseUp += BoardBrushModeButton_MouseUp;
 
@@ -252,6 +254,7 @@ namespace Ink_Canvas
             {
                 if (idx == 0) SwitchToDefaultPen(s, null);
                 else if (idx == 1) SwitchToHighlighterPen(s, null);
+                else if (idx == 2) SwitchToLaserPen(s, null);
             };
 
             content.DefaultPenColorBlack.ButtonMouseUp += BtnColorBlack_Click;
@@ -275,7 +278,18 @@ namespace Ink_Canvas
             content.HighlighterPenColorTeal.ButtonMouseUp += BtnHighlighterColorTeal_Click;
             content.HighlighterPenColorOrange.ButtonMouseUp += BtnHighlighterColorOrange_Click;
 
+            content.LaserPenColorBlack.ButtonMouseUp += BtnLaserPenColorBlack_Click;
+            content.LaserPenColorWhite.ButtonMouseUp += BtnLaserPenColorWhite_Click;
+            content.LaserPenColorRed.ButtonMouseUp += BtnLaserPenColorRed_Click;
+            content.LaserPenColorYellow.ButtonMouseUp += BtnLaserPenColorYellow_Click;
+            content.LaserPenColorGreen.ButtonMouseUp += BtnLaserPenColorGreen_Click;
+            content.LaserPenColorBlue.ButtonMouseUp += BtnLaserPenColorBlue_Click;
+            content.LaserPenColorPink.ButtonMouseUp += BtnLaserPenColorPink_Click;
+            content.LaserPenColorTeal.ButtonMouseUp += BtnLaserPenColorTeal_Click;
+            content.LaserPenColorOrange.ButtonMouseUp += BtnLaserPenColorOrange_Click;
+
             content.ColorThemeSwitch.MouseUp += ColorThemeSwitch_MouseUp;
+            content.LaserPenColorThemeSwitch.MouseUp += ColorThemeSwitch_MouseUp;
             content.CloseButtonControl.Click += CloseBordertools_Click;
         }
 
@@ -3046,31 +3060,6 @@ namespace Ink_Canvas
             }
         }
 
-        private void ToggleSwitchInkFadeInPanel_Toggled(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var toggle = sender as ToggleSwitch;
-                if (toggle == null) return;
-                Settings.Canvas.EnableInkFade = toggle.IsOn;
-                if (_inkFadeManager != null)
-                {
-                    _inkFadeManager.IsEnabled = Settings.Canvas.EnableInkFade;
-                }
-
-                if (ToggleSwitchInkFadeInPanel2 != null)
-                {
-                    ToggleSwitchInkFadeInPanel2.IsOn = Settings.Canvas.EnableInkFade;
-                }
-
-                SaveSettingsToFile();
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"切换墨迹渐隐功能时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
         private void ComboBoxEraserSizeFloatingBar_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             try
@@ -3094,33 +3083,6 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"切换橡皮擦大小时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 更新墨迹渐隐控制开关的可见性
-        /// </summary>
-        private void UpdateInkFadeControlVisibility()
-        {
-            try
-            {
-                bool isHidden = Settings.Canvas.HideInkFadeControlInPenMenu;
-
-                // 控制 InkFadeControlPanel1（批注子面板中）的可见性
-                if (InkFadeControlPanel1 != null)
-                {
-                    InkFadeControlPanel1.Visibility = isHidden ? Visibility.Collapsed : Visibility.Visible;
-                }
-
-                // 控制 InkFadeControlPanel2（普通画笔面板中）的可见性
-                if (InkFadeControlPanel2 != null)
-                {
-                    InkFadeControlPanel2.Visibility = isHidden ? Visibility.Collapsed : Visibility.Visible;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"更新墨迹渐隐控制面板可见性时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 

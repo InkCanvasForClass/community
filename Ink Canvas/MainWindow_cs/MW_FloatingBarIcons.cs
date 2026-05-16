@@ -3029,7 +3029,7 @@ namespace Ink_Canvas
                 drawingShapeMode = 0;
 
                 // 保持之前的笔类型状态，而不是强制重置
-                if (!wasHighlighter)
+                if (!wasHighlighter && penType != 2)
                 {
                     penType = 0;
                     drawingAttributes.IsHighlighter = false;
@@ -3042,6 +3042,20 @@ namespace Ink_Canvas
                     drawingAttributes.StylusTip = StylusTip.Rectangle;
                     drawingAttributes.Width = Settings.Canvas.HighlighterWidth / 2;
                     drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
+                }
+                // 如果之前是激光笔模式，则保持激光笔属性
+                else if (penType == 2)
+                {
+                    drawingAttributes.IsHighlighter = false;
+                    drawingAttributes.StylusTip = StylusTip.Ellipse;
+                    drawingAttributes.Width = Settings.Canvas.LaserPenWidth;
+                    drawingAttributes.Height = Settings.Canvas.LaserPenWidth;
+                    Settings.Canvas.EnableInkFade = true;
+                    if (_inkFadeManager != null)
+                    {
+                        _inkFadeManager.IsEnabled = true;
+                        _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
+                    }
                 }
 
                 ColorSwitchCheck();
@@ -3059,7 +3073,7 @@ namespace Ink_Canvas
                         drawingShapeMode = 0;
 
                         // 保持之前的笔类型状态，而不是强制重置
-                        if (!wasHighlighter)
+                        if (!wasHighlighter && penType != 2)
                         {
                             penType = 0;
                             drawingAttributes.IsHighlighter = false;
@@ -3072,6 +3086,20 @@ namespace Ink_Canvas
                             drawingAttributes.StylusTip = StylusTip.Rectangle;
                             drawingAttributes.Width = Settings.Canvas.HighlighterWidth / 2;
                             drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
+                        }
+                        // 如果之前是激光笔模式，则保持激光笔属性
+                        else if (penType == 2)
+                        {
+                            drawingAttributes.IsHighlighter = false;
+                            drawingAttributes.StylusTip = StylusTip.Ellipse;
+                            drawingAttributes.Width = Settings.Canvas.LaserPenWidth;
+                            drawingAttributes.Height = Settings.Canvas.LaserPenWidth;
+                            Settings.Canvas.EnableInkFade = true;
+                            if (_inkFadeManager != null)
+                            {
+                                _inkFadeManager.IsEnabled = true;
+                                _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
+                            }
                         }
 
                         // 在非白板模式下，从线擦切换到批注时不直接弹出子面板
@@ -3120,7 +3148,7 @@ namespace Ink_Canvas
                     drawingShapeMode = 0;
 
                     // 保持之前的笔类型状态，而不是强制重置
-                    if (!wasHighlighter)
+                    if (!wasHighlighter && penType != 2)
                     {
                         penType = 0;
                         drawingAttributes.IsHighlighter = false;
@@ -3133,6 +3161,20 @@ namespace Ink_Canvas
                         drawingAttributes.StylusTip = StylusTip.Rectangle;
                         drawingAttributes.Width = Settings.Canvas.HighlighterWidth / 2;
                         drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
+                    }
+                    // 如果之前是激光笔模式，则保持激光笔属性
+                    else if (penType == 2)
+                    {
+                        drawingAttributes.IsHighlighter = false;
+                        drawingAttributes.StylusTip = StylusTip.Ellipse;
+                        drawingAttributes.Width = Settings.Canvas.LaserPenWidth;
+                        drawingAttributes.Height = Settings.Canvas.LaserPenWidth;
+                        Settings.Canvas.EnableInkFade = true;
+                        if (_inkFadeManager != null)
+                        {
+                            _inkFadeManager.IsEnabled = true;
+                            _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
+                        }
                     }
 
                     ColorSwitchCheck();

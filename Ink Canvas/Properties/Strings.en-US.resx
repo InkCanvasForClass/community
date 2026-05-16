@@ -2121,6 +2121,9 @@
   <data name="Board_Highlighter" xml:space="preserve">
     <value>Highlighter</value>
   </data>
+  <data name="Board_LaserPen" xml:space="preserve">
+    <value>Laser Pen</value>
+  </data>
   <data name="Board_Eraser" xml:space="preserve">
     <value>Eraser</value>
   </data>
