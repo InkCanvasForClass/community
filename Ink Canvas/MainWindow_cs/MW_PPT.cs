@@ -1310,9 +1310,18 @@ namespace Ink_Canvas
 
                 Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    var ms = new MemoryStream();
-                    inkCanvas.Strokes.Save(ms);
-                    ms.Position = 0;
+                    MemoryStream ms;
+                    if (inkCanvas.Strokes.Count > 0)
+                    {
+                        ms = new MemoryStream();
+                        inkCanvas.Strokes.Save(ms);
+                        ms.Position = 0;
+                    }
+                    else
+                    {
+                        ms = new MemoryStream();
+                    }
+
                     lock (_memoryStreams)
                     {
                         if (_memoryStreams.ContainsKey(prev))
@@ -1335,27 +1344,30 @@ namespace Ink_Canvas
                     }
                     if (bytesToLoad != null)
                     {
-                        int loadingPage = currentSlide;
-                        Task.Run(() =>
+                        if (bytesToLoad.Length > 8)
                         {
-                            try
+                            int loadingPage = currentSlide;
+                            Task.Run(() =>
                             {
-                                return new StrokeCollection(new MemoryStream(bytesToLoad));
-                            }
-                            catch (Exception ex)
+                                try
+                                {
+                                    return new StrokeCollection(new MemoryStream(bytesToLoad));
+                                }
+                                catch (Exception ex)
+                                {
+                                    LogHelper.WriteLogToFile($"从内存流加载第 {loadingPage} 页墨迹失败: {ex}", LogHelper.LogType.Warning);
+                                    return null;
+                                }
+                            }).ContinueWith(t =>
                             {
-                                LogHelper.WriteLogToFile($"从内存流加载第 {loadingPage} 页墨迹失败: {ex}", LogHelper.LogType.Warning);
-                                return null;
-                            }
-                        }).ContinueWith(t =>
-                        {
-                            if (t.IsFaulted || t.Result == null) return;
-                            Application.Current.Dispatcher.InvokeAsync(() =>
-                            {
-                                if (_currentSlideShowPosition != loadingPage) return;
-                                inkCanvas.Strokes.Add(t.Result);
+                                if (t.IsFaulted || t.Result == null) return;
+                                Application.Current.Dispatcher.InvokeAsync(() =>
+                                {
+                                    if (_currentSlideShowPosition != loadingPage) return;
+                                    inkCanvas.Strokes.Add(t.Result);
+                                });
                             });
-                        });
+                        }
                     }
                 });
                 _previousSlideID = currentSlide;
@@ -1409,11 +1421,20 @@ namespace Ink_Canvas
 
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    if (currentPage > 0 && inkCanvas?.Strokes != null && inkCanvas.Strokes.Count > 0)
+                    if (currentPage > 0 && inkCanvas?.Strokes != null)
                     {
-                        var ms = new MemoryStream();
-                        inkCanvas.Strokes.Save(ms);
-                        ms.Position = 0;
+                        MemoryStream ms;
+                        if (inkCanvas.Strokes.Count > 0)
+                        {
+                            ms = new MemoryStream();
+                            inkCanvas.Strokes.Save(ms);
+                            ms.Position = 0;
+                        }
+                        else
+                        {
+                            ms = new MemoryStream();
+                        }
+
                         lock (_memoryStreams)
                         {
                             if (_memoryStreams.ContainsKey(currentPage))
