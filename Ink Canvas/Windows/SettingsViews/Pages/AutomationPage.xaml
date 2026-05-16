@@ -214,15 +214,13 @@
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Automation_AutoFoldInPPT}">
-                        <ui:SettingsCard.HeaderIcon>
+                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInPPTSlideShow"
+                            Header="{i18n:I18n Key=Automation_AutoFoldInPPT}"
+                            Toggled="ToggleSwitchAutoFoldInPPTSlideShow_Toggled">
+                        <controls:LabeledSettingsCard.HeaderIcon>
                             <ui:ImageIcon Source="/Resources/Icons-png/Powerpoint.png"/>
-                        </ui:SettingsCard.HeaderIcon>
-                        <ui:ToggleSwitch x:Name="CardAutoFoldInPPTSlideShow"
-                                    OnContent="{DynamicResource Common_On}"
-                                    OffContent="{DynamicResource Common_Off}"
-                                    Toggled="ToggleSwitchAutoFoldInPPTSlideShow_Toggled"/>
-                    </ui:SettingsCard>
+                        </controls:LabeledSettingsCard.HeaderIcon>
+                    </controls:LabeledSettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoFoldWhenExitWhiteboard"
                             Header="{i18n:I18n Key=FoldMode_AutoFoldAfterWhiteboard}"
@@ -383,7 +381,6 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
                         </ui:SettingsExpander.HeaderIcon>
                         <ComboBox x:Name="ComboBoxSaveFileNamePreset"
-                                  MinWidth="260"
                                   SelectionChanged="ComboBoxSaveFileNamePreset_SelectionChanged">
                             <ComboBoxItem Content="{i18n:I18n Key=Automation_SaveFileName_Timestamp}" Tag="{}{datetime}"/>
                             <ComboBoxItem Content="{i18n:I18n Key=Automation_SaveFileName_Date}" Tag="{}{date}"/>

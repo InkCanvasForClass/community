@@ -259,7 +259,6 @@
                                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.History}" />
                                 </ui:SettingsCard.HeaderIcon>
                                 <ComboBox x:Name="VersionComboBox"
-                                          MinWidth="220"
                                           DisplayMemberPath="Version"
                                           SelectionChanged="VersionComboBox_SelectionChanged" />
                             </ui:SettingsCard>

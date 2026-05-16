@@ -50,7 +50,6 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FullScreen}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxWindowBackdrop"
-                                  MinWidth="180"
                                   SelectionChanged="ComboBoxWindowBackdrop_SelectionChanged">
                             <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_None}" Tag="None" />
                             <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_Mica}" Tag="Mica" />
@@ -329,7 +328,6 @@
                         </ui:SettingsCard.HeaderIcon>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <ComboBox x:Name="ComboBoxChickenSoupSource"
-                                      Width="240"
                                       SelectionChanged="ComboBoxChickenSoupSource_SelectionChanged">
                                 <ComboBoxItem Content="{i18n:I18n Key=Theme_QuoteSource_OsuQuotes}" />
                                 <ComboBoxItem Content="{i18n:I18n Key=Theme_QuoteSource_Mottos}" />
