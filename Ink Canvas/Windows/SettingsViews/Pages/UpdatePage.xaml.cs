@@ -109,6 +109,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 {
                     CardAutoUpdate.IsOn = settings.Startup.IsAutoUpdate;
                     CardSilentUpdate.IsOn = settings.Startup.IsAutoUpdateWithSilence;
+                    CardSmartUpdate.IsOn = settings.Startup.IsSmartUpdate;
 
                     AutoUpdateWithSilenceTimeComboBox.InitializeAutoUpdateWithSilenceTimeComboBoxOptions(
                         AutoUpdateWithSilenceStartTimeComboBox, AutoUpdateWithSilenceEndTimeComboBox);
@@ -192,6 +193,32 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 Debug.WriteLine($"设置静默更新时出错: {ex.Message}");
+            }
+        }
+
+        private async void ToggleSwitchIsSmartUpdate_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+
+            try
+            {
+                SettingsManager.Settings.Startup.IsSmartUpdate = CardSmartUpdate.IsOn;
+                SettingsManager.SaveSettingsToFile();
+                LogHelper.WriteLogToFile($"Settings | Smart update: {CardSmartUpdate.IsOn}");
+
+                if (SettingsManager.Settings.Startup.IsAutoUpdate)
+                {
+                    var mainWindow = Application.Current.MainWindow as MainWindow;
+                    if (mainWindow != null)
+                    {
+                        mainWindow.ResetUpdateCheckRetry();
+                        await Dispatcher.InvokeAsync(() => mainWindow.AutoUpdate());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"设置智慧更新时出错: {ex.Message}");
             }
         }
 
@@ -520,38 +547,49 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 string apiReleaseNotes = null;
                 AutoUpdateHelper.UpdateLineGroup lineGroup = null;
 
-                // 优先通过 GitHub Releases API 获取最新版本
-                try
-                {
-                    var releases = await AutoUpdateHelper.GetAllGithubReleases(SettingsManager.Settings.Startup.UpdateChannel);
-                    var latest = releases?
-                        .OrderByDescending(r => ParseVersionForSort(r.version))
-                        .Select(r => Tuple.Create(r.version, r.downloadUrl, r.releaseNotes))
-                        .FirstOrDefault();
-                    if (latest != null && !string.IsNullOrEmpty(latest.Item1))
-                    {
-                        var localVersion = new Version(GetCurrentVersion());
-                        var remote = ParseVersionForSort(latest.Item1);
-                        if (remote > localVersion)
-                        {
-                            remoteVersion = latest.Item1.TrimStart('v', 'V');
-                            apiReleaseNotes = latest.Item3;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"UpdatePage | GitHub API 检查更新失败，回退到 CheckForUpdates: {ex.Message}", LogHelper.LogType.Warning);
-                }
-
-                // 回退：调用统一的 CheckForUpdates（包含镜像源 txt 方案）
-                if (string.IsNullOrEmpty(remoteVersion))
+                if (SettingsManager.Settings.Startup.IsSmartUpdate)
                 {
                     var (rv, lg, notes) = await AutoUpdateHelper.CheckForUpdates(
                         SettingsManager.Settings.Startup.UpdateChannel, true, false);
                     remoteVersion = rv;
                     lineGroup = lg;
-                    if (string.IsNullOrEmpty(apiReleaseNotes)) apiReleaseNotes = notes;
+                    apiReleaseNotes = notes;
+                }
+                else
+                {
+                    // 优先通过 GitHub Releases API 获取最新版本
+                    try
+                    {
+                        var releases = await AutoUpdateHelper.GetAllGithubReleases(SettingsManager.Settings.Startup.UpdateChannel);
+                        var latest = releases?
+                            .OrderByDescending(r => ParseVersionForSort(r.version))
+                            .Select(r => Tuple.Create(r.version, r.downloadUrl, r.releaseNotes))
+                            .FirstOrDefault();
+                        if (latest != null && !string.IsNullOrEmpty(latest.Item1))
+                        {
+                            var localVersion = new Version(GetCurrentVersion());
+                            var remote = ParseVersionForSort(latest.Item1);
+                            if (remote > localVersion)
+                            {
+                                remoteVersion = latest.Item1.TrimStart('v', 'V');
+                                apiReleaseNotes = latest.Item3;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"UpdatePage | GitHub API 检查更新失败，回退到 CheckForUpdates: {ex.Message}", LogHelper.LogType.Warning);
+                    }
+
+                    // 回退：调用统一的 CheckForUpdates（包含镜像源 txt 方案）
+                    if (string.IsNullOrEmpty(remoteVersion))
+                    {
+                        var (rv, lg, notes) = await AutoUpdateHelper.CheckForUpdates(
+                            SettingsManager.Settings.Startup.UpdateChannel, true, false);
+                        remoteVersion = rv;
+                        lineGroup = lg;
+                        if (string.IsNullOrEmpty(apiReleaseNotes)) apiReleaseNotes = notes;
+                    }
                 }
 
                 if (!string.IsNullOrEmpty(remoteVersion))

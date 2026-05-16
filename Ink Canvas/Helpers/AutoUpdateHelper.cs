@@ -868,6 +868,176 @@ namespace Ink_Canvas.Helpers
             return (null, null, null, null);
         }
 
+        private class SmartUpdateResult
+        {
+            public bool HasUpdate { get; set; }
+            public string Version { get; set; }
+            public string VersionId { get; set; }
+            public string DownloadUrl { get; set; }
+            public string ReleaseNotes { get; set; }
+            public DateTime? ReleaseTime { get; set; }
+        }
+
+        private static string GetSmartUpdateChannel(UpdateChannel channel)
+        {
+            if (channel == UpdateChannel.Preview) return "preview";
+            if (channel == UpdateChannel.Beta) return "beta";
+            return "stable";
+        }
+
+        private static string GetSmartUpdateOs()
+        {
+            var version = Environment.OSVersion.Version;
+            if (version.Major == 6 && version.Minor == 1) return "win7";
+            if (version.Major >= 10) return "win10";
+            return "windows";
+        }
+
+        private static JToken PickFirstToken(JToken token, params string[] names)
+        {
+            if (token == null) return null;
+            foreach (var name in names)
+            {
+                var found = token.SelectTokens($"$..{name}").FirstOrDefault(t => t.Type != JTokenType.Null && t.Type != JTokenType.Undefined);
+                if (found != null) return found;
+            }
+            return null;
+        }
+
+        private static string PickFirstString(JToken token, params string[] names)
+        {
+            return PickFirstToken(token, names)?.ToString();
+        }
+
+        private static bool PickFirstBool(JToken token, params string[] names)
+        {
+            var value = PickFirstToken(token, names);
+            if (value == null) return false;
+            if (value.Type == JTokenType.Boolean) return value.Value<bool>();
+            var text = value.ToString();
+            return string.Equals(text, "true", StringComparison.OrdinalIgnoreCase) || text == "1";
+        }
+
+        private static SmartUpdateResult ParseSmartUpdateResult(string content)
+        {
+            var json = JToken.Parse(content);
+            DateTime? releaseTime = null;
+            var releaseTimeText = PickFirstString(json, "published_at", "release_time", "created_at", "updated_at");
+            if (!string.IsNullOrWhiteSpace(releaseTimeText) && DateTime.TryParse(releaseTimeText, out var parsedReleaseTime))
+            {
+                releaseTime = parsedReleaseTime;
+            }
+
+            string version = PickFirstString(json, "latest_version", "version", "version_name", "tag_name");
+            string versionId = PickFirstString(json, "version_id", "id");
+            string downloadUrl = PickFirstString(json, "download_url", "download", "url", "file_url");
+            return new SmartUpdateResult
+            {
+                HasUpdate = PickFirstBool(json, "has_update", "update_available", "need_update", "available") ||
+                            !string.IsNullOrWhiteSpace(versionId) ||
+                            !string.IsNullOrWhiteSpace(downloadUrl),
+                Version = string.IsNullOrWhiteSpace(version) ? null : version.TrimStart('v', 'V'),
+                VersionId = versionId,
+                DownloadUrl = downloadUrl,
+                ReleaseNotes = PickFirstString(json, "release_notes", "changelog", "notes", "body", "description"),
+                ReleaseTime = releaseTime
+            };
+        }
+
+        private static async Task<string> ResolveSmartDownloadUrl(string versionId)
+        {
+            if (string.IsNullOrWhiteSpace(versionId)) return null;
+            string url = $"https://dev-api.dy.ci/api/distribute/download/{Uri.EscapeDataString(versionId)}/";
+            using (var handler = new HttpClientHandler { AllowAutoRedirect = false })
+            using (var client = new HttpClient(handler))
+            {
+                client.Timeout = RequestTimeout;
+                var response = await client.GetAsync(url);
+                if ((int)response.StatusCode >= 300 && (int)response.StatusCode < 400 && response.Headers.Location != null)
+                {
+                    return response.Headers.Location.IsAbsoluteUri
+                        ? response.Headers.Location.ToString()
+                        : new Uri(new Uri(url), response.Headers.Location).ToString();
+                }
+
+                string content = (await response.Content.ReadAsStringAsync()).Trim();
+                if (Uri.IsWellFormedUriString(content, UriKind.Absolute)) return content;
+                if (string.IsNullOrWhiteSpace(content)) return null;
+
+                var json = JToken.Parse(content);
+                return PickFirstString(json, "download_url", "download", "url", "file_url", "location");
+            }
+        }
+
+        private static async Task<(bool handled, string remoteVersion, UpdateLineGroup lineGroup, string releaseNotes, DateTime? releaseTime)> CheckSmartUpdate(UpdateChannel channel, bool alwaysGetRemote, bool isVersionFix)
+        {
+            string localVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            string arch = IsX64UpdatePackageSelected() ? "x64" : "x86";
+            string checkUrl = "https://dev-api.dy.ci/api/distribute/check/ICC-CE/" +
+                              $"?version={Uri.EscapeDataString(localVersion)}" +
+                              $"&os={Uri.EscapeDataString(GetSmartUpdateOs())}" +
+                              $"&arch={Uri.EscapeDataString(arch)}" +
+                              $"&channel={Uri.EscapeDataString(GetSmartUpdateChannel(channel))}" +
+                              $"&user_id={Uri.EscapeDataString(DeviceIdentifier.GetDeviceId())}";
+
+            using (var client = new HttpClient())
+            {
+                client.Timeout = RequestTimeout;
+                LogHelper.WriteLogToFile($"AutoUpdate | 使用智慧更新 API 检查: {checkUrl}");
+                string content = await client.GetStringAsync(checkUrl);
+                var result = ParseSmartUpdateResult(content);
+                var group = new UpdateLineGroup { GroupName = "智慧更新", VersionUrl = checkUrl };
+
+                if (!result.HasUpdate)
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | 智慧更新 API 返回当前已是最新");
+                    return (true, null, group, result.ReleaseNotes, result.ReleaseTime);
+                }
+
+                if (string.IsNullOrWhiteSpace(result.Version))
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | 智慧更新 API 未返回版本号，回退到旧逻辑", LogHelper.LogType.Warning);
+                    return (false, null, null, null, null);
+                }
+
+                Version local = new Version(localVersion);
+                Version remote = new Version(result.Version);
+                if (remote <= local && !alwaysGetRemote)
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | 当前版本已是最新 (智慧更新 API)");
+                    return (true, null, group, result.ReleaseNotes, result.ReleaseTime);
+                }
+
+                if (!isVersionFix)
+                {
+                    DateTime releaseTime = result.ReleaseTime ?? DateTime.Now;
+                    DateTime? currentVersionReleaseTime = await GetVersionReleaseTime(localVersion, channel);
+                    bool shouldPush = DeviceIdentifier.ShouldPushUpdate(result.Version, releaseTime, true, currentVersionReleaseTime, localVersion);
+                    if (!shouldPush)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 根据用户优先级({DeviceIdentifier.GetUpdatePriority()})，暂不推送智慧更新 {result.Version}");
+                        return (true, null, group, result.ReleaseNotes, result.ReleaseTime);
+                    }
+                }
+
+                string downloadUrl = result.DownloadUrl;
+                if (string.IsNullOrWhiteSpace(downloadUrl))
+                {
+                    downloadUrl = await ResolveSmartDownloadUrl(result.VersionId);
+                }
+
+                if (string.IsNullOrWhiteSpace(downloadUrl))
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | 智慧更新 API 未返回可用下载链接，回退到旧逻辑", LogHelper.LogType.Warning);
+                    return (false, null, null, null, null);
+                }
+
+                group.DownloadUrlFormat = downloadUrl;
+                LogHelper.WriteLogToFile($"AutoUpdate | 智慧更新 API 发现新版本: {result.Version}");
+                return (true, result.Version, group, result.ReleaseNotes, result.ReleaseTime);
+            }
+        }
+
         // 主要的更新检测方法（优先检测延迟，失败时自动切换线路组）
         // 仅检测新版本时用GitHub API，实际下载时只用线路组
         public static async Task<(string remoteVersion, UpdateLineGroup lineGroup, string releaseNotes)> CheckForUpdates(UpdateChannel channel = UpdateChannel.Release, bool alwaysGetRemote = false, bool isVersionFix = false)
@@ -881,6 +1051,23 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"AutoUpdate | 本地版本: {localVersion}");
                 LogHelper.WriteLogToFile($"AutoUpdate | 设备ID: {DeviceIdentifier.GetDeviceId()}");
                 LogHelper.WriteLogToFile($"AutoUpdate | 更新优先级: {DeviceIdentifier.GetUpdatePriority()}");
+
+                if (MainWindow.Settings?.Startup?.IsSmartUpdate == true)
+                {
+                    try
+                    {
+                        var smart = await CheckSmartUpdate(channel, alwaysGetRemote, isVersionFix);
+                        if (smart.handled)
+                        {
+                            return (smart.remoteVersion, smart.lineGroup, smart.releaseNotes);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 智慧更新 API 检查失败，回退到旧逻辑: {ex.Message}", LogHelper.LogType.Warning);
+                    }
+                }
+
                 LogHelper.WriteLogToFile("AutoUpdate | 优先通过GitHub Releases API检测...");
 
                 // 1. 优先通过GitHub Releases API获取
@@ -1084,8 +1271,18 @@ namespace Ink_Canvas.Helpers
                         break;
                     }
 
-                    string url = string.Format(group.DownloadUrlFormat, version);
-                    url = AppendX64SuffixBeforeZipExtension(url);
+                    string url = group.DownloadUrlFormat != null && group.DownloadUrlFormat.Contains("{0}")
+                        ? string.Format(group.DownloadUrlFormat, version)
+                        : group.DownloadUrlFormat;
+                    if (string.IsNullOrWhiteSpace(url))
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 线路组 {group.GroupName} 缺少下载地址，跳过", LogHelper.LogType.Warning);
+                        continue;
+                    }
+                    if (group.GroupName != "智慧更新")
+                    {
+                        url = AppendX64SuffixBeforeZipExtension(url);
+                    }
                     // 智教联盟需要先获取真实下载地址
                     if (group.GroupName == "智教联盟")
                     {

@@ -1095,6 +1095,12 @@
   <data name="Startup_SilentUpdateHint" xml:space="preserve">
     <value>Silent update installs when the app is idle; no manual action needed.</value>
   </data>
+  <data name="Startup_SmartUpdate" xml:space="preserve">
+    <value>Smart update</value>
+  </data>
+  <data name="Startup_SmartUpdateHint" xml:space="preserve">
+    <value>Use the unified platform API to check for updates and get download links.</value>
+  </data>
   <data name="Startup_UpdateChannel" xml:space="preserve">
     <value>Update channel</value>
   </data>

@@ -1138,6 +1138,12 @@
   <data name="Startup_SilentUpdateHint" xml:space="preserve">
     <value>静默更新将在软件不使用时自动安装，无需手动操作</value>
   </data>
+  <data name="Startup_SmartUpdate" xml:space="preserve">
+    <value>智慧更新</value>
+  </data>
+  <data name="Startup_SmartUpdateHint" xml:space="preserve">
+    <value>开启后使用统一平台 API 检查更新并获取下载链接。</value>
+  </data>
   <data name="Startup_UpdateChannel" xml:space="preserve">
     <value>更新通道</value>
   </data>

@@ -262,6 +262,8 @@ namespace Ink_Canvas
         public UpdateChannel UpdateChannel { get; set; } = UpdateChannel.Release;
         [JsonProperty("updatePackageArchitecture")]
         public UpdatePackageArchitecture UpdatePackageArchitecture { get; set; } = UpdatePackageArchitecture.X86;
+        [JsonProperty("isSmartUpdate")]
+        public bool IsSmartUpdate { get; set; } = true;
         [JsonProperty("skippedVersion")]
         public string SkippedVersion { get; set; } = "";
         [JsonProperty("autoUpdatePauseUntilDate")]
