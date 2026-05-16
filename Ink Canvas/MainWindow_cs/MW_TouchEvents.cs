@@ -1693,6 +1693,7 @@ namespace Ink_Canvas
 
                     if (isPalmEraserActive)
                     {
+                        EraserOverlay_PointerUp(sender);
                         isPalmEraserActive = false;
                         DisableEraserOverlay();
                         if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
