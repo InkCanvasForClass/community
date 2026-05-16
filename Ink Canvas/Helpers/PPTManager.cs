@@ -258,6 +258,7 @@ namespace Ink_Canvas.Helpers
 
                     if (!currentSlideShowState)
                     {
+                        SlideShowEnd?.Invoke(CurrentPresentation);
                     }
                 }
             }
