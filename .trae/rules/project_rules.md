@@ -68,11 +68,13 @@
     </ComboBox>
 </ui:SettingsCard>
 
-<!-- 右侧放 Slider -->
+<!-- 右侧放 Slider + TextBlock（显示当前值） -->
 <ui:SettingsCard Header="{i18n:I18n Key=Advanced_NibModeBoundsWidthHeader}">
     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-        <TextBlock x:Name="SomeText" VerticalAlignment="Center" />
+        <TextBlock x:Name="SomeSliderText" VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
         <Slider x:Name="SomeSlider" Width="200" Minimum="1" Maximum="50"
+                IsSnapToTickEnabled="True" TickFrequency="1" Value="5"
+                TickPlacement="None"
                 ValueChanged="SomeSlider_ValueChanged" />
     </ikw:SimpleStackPanel>
 </ui:SettingsCard>
@@ -92,6 +94,52 @@
 - 设置 `IsClickEnabled="True"` 使卡片可点击（显示右箭头指示）
 - 通过 `Click` 事件处理导航逻辑
 - 不要在右侧内容区域放置控件
+
+**Slider + TextBlock 后端实现：**
+
+Slider 旁的 TextBlock 用于实时显示当前值，需要在后端实现 `UpdateSliderText` 辅助方法和 `ValueChanged` 事件处理。
+
+1. 在页面代码中添加辅助方法（每个设置页面都需要此方法）：
+
+```csharp
+private void UpdateSliderText(Slider slider, TextBlock textBlock, string format)
+{
+    if (slider == null || textBlock == null) return;
+    textBlock.Text = string.Format(format, slider.Value);
+}
+```
+
+2. 实现 Slider 的 `ValueChanged` 事件：
+
+```csharp
+private void SomeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+{
+    UpdateSliderText(SomeSlider, SomeSliderText, "{0:0}");
+    if (!_isLoaded) return;
+    SettingsManager.Settings.SomeSection.SomeProperty = (int)e.NewValue;
+    SettingsManager.SaveSettingsToFile();
+}
+```
+
+**要点：**
+- `UpdateSliderText` 必须在 `if (!_isLoaded) return;` 之前调用，确保页面加载时 TextBlock 就显示初始值
+- `_isLoaded` 守卫防止页面初始化期间重复保存设置
+- 格式字符串常用值：`"{0:0}"` 整数、`"{0:F2}"` 两位小数、`"{0:0} ms"` 带单位
+- 对于浮点数 Slider，需要额外用 `Math.Round` 处理精度：
+
+```csharp
+private void SomeFloatSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+{
+    UpdateSliderText(SomeFloatSlider, SomeFloatSliderText, "{0:F2}");
+    if (!_isLoaded) return;
+    var val = Math.Round(SomeFloatSlider.Value, 2);
+    SomeFloatSlider.Value = val;
+    SettingsManager.Settings.SomeSection.SomeProperty = val;
+    SettingsManager.SaveSettingsToFile();
+}
+```
+
+3. 在 `LoadSettings()` 中设置 Slider 初始值时，`UpdateSliderText` 会自动通过 `ValueChanged` 被调用，无需手动设置 TextBlock 文本。
 
 ### ui:SettingsExpander — 可展开设置组
 
