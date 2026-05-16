@@ -435,6 +435,12 @@
   <data name="Canvas_ShowCircleCenter" xml:space="preserve">
     <value>Show circle center when drawing</value>
   </data>
+  <data name="Canvas_ShowCoordinateUnitMarks" xml:space="preserve">
+    <value>Show centimeter ticks when drawing coordinate systems</value>
+  </data>
+  <data name="Canvas_ShowCoordinateUnitMarksHint" xml:space="preserve">
+    <value>Add ticks every 1 cm when drawing coordinate systems.</value>
+  </data>
   <data name="Canvas_WPFBezier" xml:space="preserve">
     <value>WPF default Bezier smoothing</value>
   </data>

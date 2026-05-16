@@ -120,6 +120,13 @@
                             SwitchName="ToggleSwitchShowCircleCenter"
                             Toggled="ToggleSwitchShowCircleCenter_Toggled" />
 
+                    <controls:LabeledSettingsCard x:Name="CardShowCoordinateUnitMarks"
+                            Header="{i18n:I18n Key=Canvas_ShowCoordinateUnitMarks}"
+                            Description="{i18n:I18n Key=Canvas_ShowCoordinateUnitMarksHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Calculator}"
+                            SwitchName="ToggleSwitchShowCoordinateUnitMarks"
+                            Toggled="ToggleSwitchShowCoordinateUnitMarks_Toggled" />
+
                     <ui:SettingsCard Header="{i18n:I18n Key=Canvas_CurveSmoothingMode}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.InkingTool}" />

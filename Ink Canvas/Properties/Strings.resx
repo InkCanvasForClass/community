@@ -451,6 +451,12 @@
   <data name="Canvas_ShowCircleCenter" xml:space="preserve">
     <value>绘制圆时显示圆心位置</value>
   </data>
+  <data name="Canvas_ShowCoordinateUnitMarks" xml:space="preserve">
+    <value>绘制坐标系时显示厘米刻度</value>
+  </data>
+  <data name="Canvas_ShowCoordinateUnitMarksHint" xml:space="preserve">
+    <value>开启后，绘制坐标系会按 1 cm 间隔自动添加刻度。</value>
+  </data>
   <data name="Canvas_WPFBezier" xml:space="preserve">
     <value>使用 WPF 默认贝塞尔曲线平滑</value>
   </data>

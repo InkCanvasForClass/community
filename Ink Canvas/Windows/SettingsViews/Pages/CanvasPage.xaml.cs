@@ -56,6 +56,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     CardLaunchSeewoVideoShowcaseForWhiteboardBooth.IsOn = settings.Canvas.LaunchSeewoVideoShowcaseForWhiteboardBooth;
                     ComboBoxHyperbolaAsymptoteOption.SelectedIndex = (int)settings.Canvas.HyperbolaAsymptoteOption;
                     CardShowCircleCenter.IsOn = settings.Canvas.ShowCircleCenter;
+                    CardShowCoordinateUnitMarks.IsOn = settings.Canvas.ShowCoordinateUnitMarks;
                     int curveMode = 0;
                     if (settings.Canvas.UseAdvancedBezierSmoothing) curveMode = 2;
                     else if (settings.Canvas.FitToCurve) curveMode = 1;
@@ -211,6 +212,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.Canvas.ShowCircleCenter = CardShowCircleCenter.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchShowCoordinateUnitMarks_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.ShowCoordinateUnitMarks = CardShowCoordinateUnitMarks.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 

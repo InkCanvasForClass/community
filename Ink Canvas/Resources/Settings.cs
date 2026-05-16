@@ -192,6 +192,8 @@ namespace Ink_Canvas
         public bool ClearCanvasAlsoClearImages { get; set; } = true;
         [JsonProperty("showCircleCenter")]
         public bool ShowCircleCenter { get; set; }
+        [JsonProperty("showCoordinateUnitMarks")]
+        public bool ShowCoordinateUnitMarks { get; set; }
         [JsonProperty("enableInkFade")]
         public bool EnableInkFade { get; set; } = false;
         [JsonProperty("inkFadeTime")]

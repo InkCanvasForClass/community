@@ -1338,10 +1338,13 @@ namespace Ink_Canvas
                     break;
                 case 11:
                     _currentCommitType = CommitReason.ShapeDrawing;
-                    strokes.Add(GenerateArrowLineStroke(new Point(2 * iniP.X - (endP.X - 20), iniP.Y),
-                        new Point(endP.X, iniP.Y)));
-                    strokes.Add(GenerateArrowLineStroke(new Point(iniP.X, 2 * iniP.Y - (endP.Y + 20)),
-                        new Point(iniP.X, endP.Y)));
+                    var xAxisStart = new Point(2 * iniP.X - (endP.X - 20), iniP.Y);
+                    var xAxisEnd = new Point(endP.X, iniP.Y);
+                    var yAxisStart = new Point(iniP.X, 2 * iniP.Y - (endP.Y + 20));
+                    var yAxisEnd = new Point(iniP.X, endP.Y);
+                    strokes.Add(GenerateArrowLineStroke(xAxisStart, xAxisEnd));
+                    strokes.Add(GenerateArrowLineStroke(yAxisStart, yAxisEnd));
+                    AddCoordinateUnitMarks(strokes, iniP, xAxisStart, xAxisEnd, yAxisStart, yAxisEnd);
                     try
                     {
                         inkCanvas.Strokes.Remove(lastTempStrokeCollection);
@@ -1357,11 +1360,13 @@ namespace Ink_Canvas
                 case 12:
                     _currentCommitType = CommitReason.ShapeDrawing;
                     if (Math.Abs(iniP.X - endP.X) < 0.01) return;
-                    strokes.Add(GenerateArrowLineStroke(
-                        new Point(iniP.X + (iniP.X - endP.X) / Math.Abs(iniP.X - endP.X) * 25, iniP.Y),
-                        new Point(endP.X, iniP.Y)));
-                    strokes.Add(GenerateArrowLineStroke(new Point(iniP.X, 2 * iniP.Y - (endP.Y + 20)),
-                        new Point(iniP.X, endP.Y)));
+                    xAxisStart = new Point(iniP.X + (iniP.X - endP.X) / Math.Abs(iniP.X - endP.X) * 25, iniP.Y);
+                    xAxisEnd = new Point(endP.X, iniP.Y);
+                    yAxisStart = new Point(iniP.X, 2 * iniP.Y - (endP.Y + 20));
+                    yAxisEnd = new Point(iniP.X, endP.Y);
+                    strokes.Add(GenerateArrowLineStroke(xAxisStart, xAxisEnd));
+                    strokes.Add(GenerateArrowLineStroke(yAxisStart, yAxisEnd));
+                    AddCoordinateUnitMarks(strokes, iniP, xAxisStart, xAxisEnd, yAxisStart, yAxisEnd);
                     try
                     {
                         inkCanvas.Strokes.Remove(lastTempStrokeCollection);
@@ -1377,11 +1382,13 @@ namespace Ink_Canvas
                 case 13:
                     _currentCommitType = CommitReason.ShapeDrawing;
                     if (Math.Abs(iniP.Y - endP.Y) < 0.01) return;
-                    strokes.Add(GenerateArrowLineStroke(new Point(2 * iniP.X - (endP.X - 20), iniP.Y),
-                        new Point(endP.X, iniP.Y)));
-                    strokes.Add(GenerateArrowLineStroke(
-                        new Point(iniP.X, iniP.Y + (iniP.Y - endP.Y) / Math.Abs(iniP.Y - endP.Y) * 25),
-                        new Point(iniP.X, endP.Y)));
+                    xAxisStart = new Point(2 * iniP.X - (endP.X - 20), iniP.Y);
+                    xAxisEnd = new Point(endP.X, iniP.Y);
+                    yAxisStart = new Point(iniP.X, iniP.Y + (iniP.Y - endP.Y) / Math.Abs(iniP.Y - endP.Y) * 25);
+                    yAxisEnd = new Point(iniP.X, endP.Y);
+                    strokes.Add(GenerateArrowLineStroke(xAxisStart, xAxisEnd));
+                    strokes.Add(GenerateArrowLineStroke(yAxisStart, yAxisEnd));
+                    AddCoordinateUnitMarks(strokes, iniP, xAxisStart, xAxisEnd, yAxisStart, yAxisEnd);
                     try
                     {
                         inkCanvas.Strokes.Remove(lastTempStrokeCollection);
@@ -1397,12 +1404,13 @@ namespace Ink_Canvas
                 case 14:
                     _currentCommitType = CommitReason.ShapeDrawing;
                     if (Math.Abs(iniP.X - endP.X) < 0.01 || Math.Abs(iniP.Y - endP.Y) < 0.01) return;
-                    strokes.Add(GenerateArrowLineStroke(
-                        new Point(iniP.X + (iniP.X - endP.X) / Math.Abs(iniP.X - endP.X) * 25, iniP.Y),
-                        new Point(endP.X, iniP.Y)));
-                    strokes.Add(GenerateArrowLineStroke(
-                        new Point(iniP.X, iniP.Y + (iniP.Y - endP.Y) / Math.Abs(iniP.Y - endP.Y) * 25),
-                        new Point(iniP.X, endP.Y)));
+                    xAxisStart = new Point(iniP.X + (iniP.X - endP.X) / Math.Abs(iniP.X - endP.X) * 25, iniP.Y);
+                    xAxisEnd = new Point(endP.X, iniP.Y);
+                    yAxisStart = new Point(iniP.X, iniP.Y + (iniP.Y - endP.Y) / Math.Abs(iniP.Y - endP.Y) * 25);
+                    yAxisEnd = new Point(iniP.X, endP.Y);
+                    strokes.Add(GenerateArrowLineStroke(xAxisStart, xAxisEnd));
+                    strokes.Add(GenerateArrowLineStroke(yAxisStart, yAxisEnd));
+                    AddCoordinateUnitMarks(strokes, iniP, xAxisStart, xAxisEnd, yAxisStart, yAxisEnd);
                     try
                     {
                         inkCanvas.Strokes.Remove(lastTempStrokeCollection);
@@ -1417,13 +1425,16 @@ namespace Ink_Canvas
                     break;
                 case 17:
                     _currentCommitType = CommitReason.ShapeDrawing;
-                    strokes.Add(GenerateArrowLineStroke(new Point(iniP.X, iniP.Y),
-                        new Point(iniP.X + Math.Abs(endP.X - iniP.X), iniP.Y)));
-                    strokes.Add(GenerateArrowLineStroke(new Point(iniP.X, iniP.Y),
-                        new Point(iniP.X, iniP.Y - Math.Abs(endP.Y - iniP.Y))));
+                    xAxisStart = new Point(iniP.X, iniP.Y);
+                    xAxisEnd = new Point(iniP.X + Math.Abs(endP.X - iniP.X), iniP.Y);
+                    yAxisStart = new Point(iniP.X, iniP.Y);
+                    yAxisEnd = new Point(iniP.X, iniP.Y - Math.Abs(endP.Y - iniP.Y));
+                    strokes.Add(GenerateArrowLineStroke(xAxisStart, xAxisEnd));
+                    strokes.Add(GenerateArrowLineStroke(yAxisStart, yAxisEnd));
                     d = (Math.Abs(iniP.X - endP.X) + Math.Abs(iniP.Y - endP.Y)) / 2;
-                    strokes.Add(GenerateArrowLineStroke(new Point(iniP.X, iniP.Y),
-                        new Point(iniP.X - d / 1.76, iniP.Y + d / 1.76)));
+                    var zAxisEnd = new Point(iniP.X - d / 1.76, iniP.Y + d / 1.76);
+                    strokes.Add(GenerateArrowLineStroke(new Point(iniP.X, iniP.Y), zAxisEnd));
+                    AddCoordinateUnitMarks(strokes, iniP, xAxisStart, xAxisEnd, yAxisStart, yAxisEnd, zAxisEnd);
                     try
                     {
                         inkCanvas.Strokes.Remove(lastTempStrokeCollection);
@@ -2350,6 +2361,52 @@ namespace Ink_Canvas
                 }
 
             return strokes;
+        }
+
+        private const double CoordinateCentimeterUnitLength = 37.7952755906;
+
+        private void AddCoordinateUnitMarks(StrokeCollection strokes, Point origin, Point xAxisStart, Point xAxisEnd,
+            Point yAxisStart, Point yAxisEnd, Point? zAxisEnd = null)
+        {
+            if (!Settings.Canvas.ShowCoordinateUnitMarks) return;
+
+            AddCoordinateAxisUnitMarks(strokes, origin, xAxisStart, xAxisEnd, CoordinateCentimeterUnitLength, new Vector(0, 1));
+            AddCoordinateAxisUnitMarks(strokes, origin, yAxisStart, yAxisEnd, CoordinateCentimeterUnitLength, new Vector(1, 0));
+            if (zAxisEnd is Point zEnd)
+                AddCoordinateAxisUnitMarks(strokes, origin, origin, zEnd, CoordinateCentimeterUnitLength, new Vector(1, 1));
+        }
+
+        private void AddCoordinateAxisUnitMarks(StrokeCollection strokes, Point origin, Point axisStart, Point axisEnd,
+            double unitLength, Vector tickDirection)
+        {
+            var axisVector = axisEnd - origin;
+            var axisLength = axisVector.Length;
+            if (axisLength < 0.01) return;
+
+            axisVector.Normalize();
+            if (tickDirection.Length < 0.01)
+                tickDirection = new Vector(-axisVector.Y, axisVector.X);
+            tickDirection.Normalize();
+
+            for (var distance = unitLength; distance <= axisLength; distance += unitLength)
+            {
+                var positiveUnitPoint = origin + axisVector * distance;
+                if (IsPointOnSegment(positiveUnitPoint, axisStart, axisEnd))
+                    strokes.Add(GenerateLineStroke(positiveUnitPoint - tickDirection * 5, positiveUnitPoint + tickDirection * 5));
+
+                var negativeUnitPoint = origin - axisVector * distance;
+                if (IsPointOnSegment(negativeUnitPoint, axisStart, axisEnd))
+                    strokes.Add(GenerateLineStroke(negativeUnitPoint - tickDirection * 5, negativeUnitPoint + tickDirection * 5));
+            }
+        }
+
+        private bool IsPointOnSegment(Point point, Point segmentStart, Point segmentEnd)
+        {
+            const double tolerance = 0.5;
+            return point.X >= Math.Min(segmentStart.X, segmentEnd.X) - tolerance &&
+                   point.X <= Math.Max(segmentStart.X, segmentEnd.X) + tolerance &&
+                   point.Y >= Math.Min(segmentStart.Y, segmentEnd.Y) - tolerance &&
+                   point.Y <= Math.Max(segmentStart.Y, segmentEnd.Y) + tolerance;
         }
 
         /// <summary>
