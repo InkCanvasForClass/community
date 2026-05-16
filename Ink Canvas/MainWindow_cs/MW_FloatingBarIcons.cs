@@ -4759,7 +4759,7 @@ private bool forceEraser;
                     return;
                 }
 
-                double nextWidth = targetButton.ActualWidth > 0 ? targetButton.ActualWidth : 45;
+                double nextWidth = targetButton.ActualWidth > 0 ? targetButton.ActualWidth : 44;
                 double nextPos = nextButtonOrigin.X;
                 double nextTop = nextButtonOrigin.Y;
 
@@ -4820,7 +4820,7 @@ private bool forceEraser;
                     try
                     {
                         var prevOrigin = _lastHighlightButton.TransformToAncestor(container).Transform(new Point(0, 0));
-                        double prevWidth = _lastHighlightButton.ActualWidth > 0 ? _lastHighlightButton.ActualWidth : 45;
+                        double prevWidth = _lastHighlightButton.ActualWidth > 0 ? _lastHighlightButton.ActualWidth : 44;
                         prevBarLeft = prevOrigin.X + Math.Max(0, (prevWidth - indicatorBarWidth) / 2);
                     }
                     catch (InvalidOperationException)

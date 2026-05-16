@@ -640,8 +640,6 @@ namespace Ink_Canvas.Controls.Toolbar
                 Orientation = Orientation.Horizontal,
                 Margin = new Thickness(2, 2, 2, 0),
                 Cursor = Cursors.Arrow,
-                HorizontalAlignment = HorizontalAlignment.Left,
-                VerticalAlignment = VerticalAlignment.Stretch,
                 Tag = ContentPanelTag
             };
 
@@ -680,7 +678,6 @@ namespace Ink_Canvas.Controls.Toolbar
                     Margin = new Thickness(2, 2, 2, 0),
                     Cursor = Cursors.Arrow,
                     HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Stretch,
                     Tag = ContentPanelTag
                 };
                 ApplyInitialVisibility(view, ruleset);
@@ -702,14 +699,13 @@ namespace Ink_Canvas.Controls.Toolbar
                 wrapper.SetResourceReference(Border.BorderBrushProperty, "FloatBarBorderBrush");
 
                 view.HorizontalAlignment = HorizontalAlignment.Center;
-                view.VerticalAlignment = VerticalAlignment.Stretch;
             }
             else
             {
                 wrapper = new Border
                 {
                     Margin = new Thickness(0),
-                    Padding = new Thickness(4, 2, 4, 2),
+                    Padding = new Thickness(4, 2, 4, 0),
                     Width = double.NaN,
                     MinWidth = 0,
                     Height = 58,
@@ -722,7 +718,6 @@ namespace Ink_Canvas.Controls.Toolbar
                 wrapper.SetResourceReference(Border.BorderBrushProperty, "FloatBarBorderBrush");
 
                 view.HorizontalAlignment = HorizontalAlignment.Center;
-                view.VerticalAlignment = VerticalAlignment.Center;
             }
 
             SetHidingRuleset(wrapper, ruleset);

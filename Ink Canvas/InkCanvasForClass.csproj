@@ -143,6 +143,7 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <Private>false</Private>
     </ProjectReference>
+    <UpToDateCheckInput Include="..\InkCanvas.Controls\**\*.xaml" />
   </ItemGroup>
   <ItemGroup Condition="'$(MSBuildRuntimeType)' == 'Full'">
     <COMReference Include="IWshRuntimeLibrary">
