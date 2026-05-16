@@ -5,8 +5,8 @@
     xmlns:system="clr-namespace:System;assembly=netstandard">
     
     <Style TargetType="{x:Type local:WinUI3CloseButton}">
-        <Setter Property="Width" Value="46" />
-        <Setter Property="Height" Value="32" />
+        <Setter Property="Width" Value="50" />
+        <Setter Property="Height" Value="36" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource NewTimerWindowButtonForeground}" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -19,7 +19,7 @@
                         Background="{TemplateBinding Background}"
                         BorderBrush="{TemplateBinding BorderBrush}"
                         BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="0,15,0,0">
+                        CornerRadius="0,8,0,0">
                         <ContentPresenter
                             x:Name="PART_ContentPresenter"
                             HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
@@ -53,7 +53,8 @@
     <!-- 关闭按钮图标模板 -->
     <DataTemplate x:Key="CloseButtonIconTemplate" DataType="system:String">
         <TextBlock
-            FontSize="12"
+            FontSize="15"
+            FontWeight="SemiBold"
             Text="✕"
             HorizontalAlignment="Center"
             VerticalAlignment="Center" />
