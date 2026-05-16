@@ -102,7 +102,7 @@ namespace Ink_Canvas.Helpers
                 SettingsManager.SaveSettingsToFile();
 
                 App.IsUIAccessTopMostEnabled = false;
-                RestartApp(IsRunningAsAdmin());
+                RestartApp(false);
             }
             catch (Exception ex)
             {
