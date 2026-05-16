@@ -72,7 +72,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             DetailTimeTextBlock.Text = hasItem ? item.CreatedAt.ToString("yyyy-MM-dd HH:mm") : string.Empty;
             DetailSummaryTextBlock.Text = hasItem ? item.Summary : string.Empty;
             DetailContentTextBlock.Text = hasItem ? (string.IsNullOrWhiteSpace(item.Content) ? item.Summary : item.Content) : string.Empty;
-            OpenActionButton.IsEnabled = hasItem;
         }
 
         private string GetTypeText(NotificationMessageType type)

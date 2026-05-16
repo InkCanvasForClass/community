@@ -142,7 +142,6 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
                         <TextBlock x:Name="DetailTitleTextBlock"
@@ -172,15 +171,6 @@
                                            LineHeight="22" />
                             </StackPanel>
                         </ScrollViewer>
-
-                        <StackPanel Grid.Row="3"
-                                    Orientation="Horizontal"
-                                    HorizontalAlignment="Right"
-                                    Margin="0,18,0,0">
-                            <Button x:Name="OpenActionButton"
-                                    Content="{i18n:I18n Key=Notification_ViewDetails}"
-                                    Click="ViewDetailsButton_Click" />
-                        </StackPanel>
                     </Grid>
                 </Border>
 

@@ -128,9 +128,10 @@ namespace Ink_Canvas.Helpers
 
                         var json = await response.Content.ReadAsStringAsync();
                         var items = ParseAnnouncementItems(json);
-                        foreach (var item in items.Where(ShouldShow))
+                        foreach (var item in items)
                         {
-                            EnqueueAnnouncement(item);
+                            AddAnnouncementHistory(ToNotificationMessage(item), item.Id);
+                            if (ShouldShow(item)) EnqueueAnnouncement(item);
                         }
                     }
                 }
@@ -238,10 +239,10 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                var message = JsonConvert.DeserializeObject<AnnouncementWebSocketMessage>(json);
-                if (message?.Type == "announcement_message" && message.Data != null && ShouldShow(message.Data))
+                    var message = JsonConvert.DeserializeObject<AnnouncementWebSocketMessage>(json);
+                if ((message?.Type == "announcement_message" || message?.Type == "announcement") && message.Data != null)
                 {
-                    EnqueueAnnouncement(message.Data);
+                    if (ShouldShow(message.Data)) EnqueueAnnouncement(message.Data);
                     return;
                 }
 
@@ -285,19 +286,25 @@ namespace Ink_Canvas.Helpers
 
         private bool ShouldShow(AnnouncementItem item)
         {
-            if (item == null || string.IsNullOrWhiteSpace(item.Id)) return false;
-            if (!string.IsNullOrWhiteSpace(item.Status) && !string.Equals(item.Status, "published", StringComparison.OrdinalIgnoreCase)) return false;
-            if (settings.Notification.ReadAnnouncementIds?.Contains(item.Id) == true && !IsImportant(item)) return false;
+            return GetSkipReason(item) == null;
+        }
+
+        private string GetSkipReason(AnnouncementItem item)
+        {
+            if (item == null) return "item is null";
+            if (string.IsNullOrWhiteSpace(item.Id)) return "id is empty";
+            if (!string.IsNullOrWhiteSpace(item.Status) && !string.Equals(item.Status, "published", StringComparison.OrdinalIgnoreCase)) return "status is not published";
+            if (settings.Notification.ReadAnnouncementIds?.Contains(item.Id) == true) return "already read";
 
             var now = DateTimeOffset.Now;
-            if (item.ExpiresAt.HasValue && item.ExpiresAt.Value < now) return false;
-            if (item.EndAt.HasValue && item.EndAt.Value < now) return false;
-            if (item.StartAt.HasValue && item.StartAt.Value > now) return false;
+            if (item.ExpiresAt.HasValue && item.ExpiresAt.Value < now) return "expired";
+            if (item.EndAt.HasValue && item.EndAt.Value < now) return "ended";
+            if (item.StartAt.HasValue && item.StartAt.Value > now) return "not started";
 
-            if (!IsVersionMatched(item)) return false;
-            if (!IsChannelMatched(item)) return false;
+            if (!IsVersionMatched(item)) return "version mismatch";
+            if (!IsChannelMatched(item)) return "channel mismatch";
 
-            return true;
+            return null;
         }
 
         private bool IsVersionMatched(AnnouncementItem item)
