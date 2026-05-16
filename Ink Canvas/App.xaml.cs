@@ -1248,7 +1248,7 @@ namespace Ink_Canvas
 
                 try
                 {
-                    IACoreDllExtractor.ExtractIACoreDlls();
+                    await IACoreDllExtractor.ExtractIACoreDllsAsync();
                 }
                 catch (Exception ex)
                 {

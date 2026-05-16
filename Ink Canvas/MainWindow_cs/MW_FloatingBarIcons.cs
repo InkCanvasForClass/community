@@ -192,6 +192,25 @@ namespace Ink_Canvas
         /// <summary>
         /// Popup 管理器（负责置顶和拖动跟随）
         /// </summary>
+        private double _cachedFloatingBarWidth;
+        private double _cachedFloatingBarHeadWidth;
+        private double _cachedScreenWidth;
+        private DateTime _lastFloatingBarSizeCacheTime;
+
+        private void RefreshFloatingBarSizeCache(bool force = false)
+        {
+            var now = DateTime.Now;
+            if (!force && (now - _lastFloatingBarSizeCacheTime).TotalMilliseconds < 100)
+                return;
+
+            var scale = GetFloatingBarScaleX();
+            _cachedFloatingBarWidth = GetElementWidthForFloatingBar(ViewboxFloatingBar, 200) * scale;
+            var dragElement = FindDragHandleInRoot();
+            _cachedFloatingBarHeadWidth = GetElementWidthForFloatingBar(dragElement, 50) * scale;
+            _cachedScreenWidth = GetFloatingBarScreenWidth(Settings.Advanced.IsEnableAvoidFullScreenHelper);
+            _lastFloatingBarSizeCacheTime = now;
+        }
+
         private PopupManagerHelper _popupManager;
 
         /// <summary>
@@ -203,22 +222,23 @@ namespace Ink_Canvas
         {
             if (isDragDropInEffect)
             {
-                var xPos = e.GetPosition(null).X - pos.X + ViewboxFloatingBar.Margin.Left;
-                var yPos = e.GetPosition(null).Y - pos.Y + ViewboxFloatingBar.Margin.Top;
+                var currentPos = e.GetPosition(null);
+                var xPos = currentPos.X - pos.X + ViewboxFloatingBar.Margin.Left;
+                var yPos = currentPos.Y - pos.Y + ViewboxFloatingBar.Margin.Top;
                 ViewboxFloatingBar.Margin = new Thickness(xPos, yPos, -2000, -200);
 
-                pos = e.GetPosition(null);
+                pos = currentPos;
 
                 if (IsFloatingBarContentVisible())
                 {
-                    var screenWidth = GetFloatingBarScreenWidth(Settings.Advanced.IsEnableAvoidFullScreenHelper);
-                    var headLeft = GetCurrentFloatingBarHeadLeft();
-                    var floatingBarWidth = GetFloatingBarScaledWidth();
+                    RefreshFloatingBarSizeCache();
+
+                    var headLeft = ViewboxFloatingBar.Margin.Left + (isFloatingBarHeadOnRight ? Math.Max(0, _cachedFloatingBarWidth - _cachedFloatingBarHeadWidth) : 0);
 
                     bool shouldFlip;
-                    if (!isFloatingBarHeadOnRight && headLeft + floatingBarWidth > screenWidth)
+                    if (!isFloatingBarHeadOnRight && headLeft + _cachedFloatingBarWidth > _cachedScreenWidth)
                         shouldFlip = true;
-                    else if (isFloatingBarHeadOnRight && headLeft + floatingBarWidth <= screenWidth)
+                    else if (isFloatingBarHeadOnRight && headLeft + _cachedFloatingBarWidth <= _cachedScreenWidth)
                         shouldFlip = false;
                     else
                         shouldFlip = isFloatingBarHeadOnRight;
@@ -227,18 +247,16 @@ namespace Ink_Canvas
                     {
                         var savedHeadLeft = headLeft;
                         SetFloatingBarHeadPlacement(shouldFlip);
-                        ViewboxFloatingBar.UpdateLayout();
 
-                        var newWidth = GetFloatingBarScaledWidth();
-                        var newHeadWidth = GetFloatingBarHeadScaledWidth();
+                        RefreshFloatingBarSizeCache(true);
 
                         double newLeft;
                         if (shouldFlip)
-                            newLeft = savedHeadLeft - Math.Max(0, newWidth - newHeadWidth);
+                            newLeft = savedHeadLeft - Math.Max(0, _cachedFloatingBarWidth - _cachedFloatingBarHeadWidth);
                         else
                             newLeft = savedHeadLeft;
 
-                        newLeft = ClampFloatingBarLeft(newLeft, newWidth, screenWidth);
+                        newLeft = ClampFloatingBarLeft(newLeft, _cachedFloatingBarWidth, _cachedScreenWidth);
                         ViewboxFloatingBar.Margin = new Thickness(newLeft, ViewboxFloatingBar.Margin.Top, -2000, -200);
                     }
                 }
@@ -2035,7 +2053,6 @@ namespace Ink_Canvas
 
         private void PlaceFloatingBarAfterHeadToggle(double headLeft, bool isExpanding)
         {
-            ViewboxFloatingBar.UpdateLayout();
             var screenWidth = GetFloatingBarScreenWidth(Settings.Advanced.IsEnableAvoidFullScreenHelper);
 
             if (!isExpanding)
@@ -2054,7 +2071,6 @@ namespace Ink_Canvas
             var wasHeadOnRight = isFloatingBarHeadOnRight;
 
             SetFloatingBarHeadPlacement(shouldPlaceToolsOnLeft);
-            ViewboxFloatingBar.UpdateLayout();
 
             floatingBarWidth = GetFloatingBarScaledWidth();
             headWidth = GetFloatingBarHeadScaledWidth();
@@ -2068,8 +2084,7 @@ namespace Ink_Canvas
 
             if (shouldPlaceToolsOnLeft != wasHeadOnRight)
             {
-                ViewboxFloatingBar.UpdateLayout();
-                var actualHeadLeft = GetCurrentFloatingBarHeadLeft();
+                var actualHeadLeft = ViewboxFloatingBar.Margin.Left + (isFloatingBarHeadOnRight ? Math.Max(0, floatingBarWidth - headWidth) : 0);
                 var correction = headLeft - actualHeadLeft;
                 if (Math.Abs(correction) > 0.5)
                 {
@@ -2111,7 +2126,6 @@ namespace Ink_Canvas
 
         private double GetCurrentFloatingBarHeadLeft()
         {
-            ViewboxFloatingBar.UpdateLayout();
             var floatingBarWidth = GetFloatingBarScaledWidth();
             var headWidth = GetFloatingBarHeadScaledWidth();
             var headOffset = isFloatingBarHeadOnRight

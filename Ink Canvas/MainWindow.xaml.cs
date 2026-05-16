@@ -518,25 +518,34 @@ namespace Ink_Canvas
             // Old UI removed: ViewBoxStackPanelMain.Visibility = Visibility.Collapsed;
             // Old UI removed: ViewBoxStackPanelShapes.Visibility = Visibility.Collapsed;
             var workingArea = Screen.PrimaryScreen.WorkingArea;
-            // 考虑快捷调色盘的宽度，确保浮动栏有足够空间
-            double floatingBarWidth = 284; // 基础宽度
+
+            double dpiScaleX = 1, dpiScaleY = 1;
+            var source = PresentationSource.FromVisual(this);
+            if (source != null)
+            {
+                dpiScaleX = source.CompositionTarget.TransformToDevice.M11;
+                dpiScaleY = source.CompositionTarget.TransformToDevice.M22;
+            }
+
+            double logicalScreenWidth = workingArea.Width / dpiScaleX;
+            double logicalScreenBottom = workingArea.Bottom / dpiScaleY;
+            double logicalScreenTop = workingArea.Top / dpiScaleY;
+
+            double floatingBarWidth = 284;
             if (Settings.Appearance.IsShowQuickColorPalette)
             {
-                // 根据显示模式调整宽度
                 if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
                 {
-                    // 单行显示模式，自适应宽度，但需要足够空间显示6个颜色
                     floatingBarWidth = Math.Max(floatingBarWidth, 120);
                 }
                 else
                 {
-                    // 双行显示模式，宽度较大
                     floatingBarWidth = Math.Max(floatingBarWidth, 820);
                 }
             }
             ViewboxFloatingBar.Margin = new Thickness(
-                (workingArea.Width - floatingBarWidth) / 2,
-                workingArea.Bottom - 60 - workingArea.Top,
+                (logicalScreenWidth - floatingBarWidth) / 2,
+                logicalScreenBottom - 60 - logicalScreenTop,
                 -2000, -200);
 
             try

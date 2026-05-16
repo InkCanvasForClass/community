@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Ink_Canvas.Helpers
 {
@@ -19,7 +20,7 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 在应用启动时释放IACore相关DLL
         /// </summary>
-        public static void ExtractIACoreDlls()
+        public static async Task ExtractIACoreDllsAsync()
         {
             try
             {
@@ -38,7 +39,7 @@ namespace Ink_Canvas.Helpers
                     }
 
                     // 从嵌入资源中释放DLL
-                    if (ExtractDllFromResource(dllName, targetPath))
+                    if (await ExtractDllFromResourceAsync(dllName, targetPath))
                     {
                         LogHelper.WriteLogToFile($"成功释放 {dllName} 到 {targetPath}");
                     }
@@ -59,7 +60,7 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 从嵌入资源中提取DLL文件
         /// </summary>
-        private static bool ExtractDllFromResource(string dllName, string targetPath)
+        private static async Task<bool> ExtractDllFromResourceAsync(string dllName, string targetPath)
         {
             try
             {
@@ -81,10 +82,10 @@ namespace Ink_Canvas.Helpers
                         Directory.CreateDirectory(targetDirectory);
                     }
 
-                    // 写入文件
-                    using (FileStream fileStream = new FileStream(targetPath, FileMode.Create, FileAccess.Write))
+                    // 异步写入文件
+                    using (FileStream fileStream = new FileStream(targetPath, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true))
                     {
-                        resourceStream.CopyTo(fileStream);
+                        await resourceStream.CopyToAsync(fileStream);
                     }
 
                     return true;
