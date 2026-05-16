@@ -215,8 +215,8 @@
                                 <ui:SettingsCard Header="显示模式" Description="选择快捷调色盘的颜色数量">
                                     <ComboBox x:Name="ComboBoxDisplayMode" Width="120"
                                               SelectionChanged="ComboBoxDisplayMode_SelectionChanged">
-                                        <ComboBoxItem Content="双行8色" Tag="1"/>
-                                        <ComboBoxItem Content="单行6色" Tag="0"/>
+                                        <ComboBoxItem Content="双行显示（8 种颜色）" Tag="1"/>
+                                        <ComboBoxItem Content="单行显示（6 种颜色）" Tag="0"/>
                                     </ComboBox>
                                 </ui:SettingsCard>
                             </StackPanel>
