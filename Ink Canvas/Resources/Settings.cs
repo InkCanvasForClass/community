@@ -58,6 +58,8 @@ namespace Ink_Canvas
         public bool TotpEnabled { get; set; } = false;
         [JsonProperty("totpSecret")]
         public string TotpSecret { get; set; } = "";
+        [JsonProperty("totpOnlyMode")]
+        public bool TotpOnlyMode { get; set; } = false;
         [JsonProperty("requirePasswordOnExit")]
         public bool RequirePasswordOnExit { get; set; } = false;
         [JsonProperty("requirePasswordOnEnterSettings")]
@@ -340,6 +342,10 @@ namespace Ink_Canvas
         public bool EnableSplashScreen { get; set; } = false;
         [JsonProperty("splashScreenStyle")]
         public int SplashScreenStyle { get; set; } = 1; // 0-随机, 1-跟随四季, 2-春季, 3-夏季, 4-秋季, 5-冬季, 6-马年限定 
+        [JsonProperty("customSplashImagePath")]
+        public string CustomSplashImagePath { get; set; } = string.Empty;
+        [JsonProperty("customSplashTextPosition")]
+        public int CustomSplashTextPosition { get; set; } = 1; // 0-左下, 1-中下, 2-右下
         [JsonProperty("isShowQuickPanel")]
         public bool IsShowQuickPanel { get; set; } = true;
         [JsonProperty("chickenSoupSource")]
@@ -382,6 +388,8 @@ namespace Ink_Canvas
         public bool EnableHotkeysInMouseMode { get; set; } = false;
         [JsonProperty("language")]
         public string Language { get; set; } = "";
+        [JsonProperty("use24HourTimeFormat")]
+        public bool Use24HourTimeFormat { get; set; } = false;
 
         [JsonProperty("quickPanelBottomOffset")]
         public double QuickPanelBottomOffset { get; set; } = -150;

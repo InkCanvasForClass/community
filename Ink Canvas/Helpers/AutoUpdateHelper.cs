@@ -445,7 +445,6 @@ namespace Ink_Canvas.Helpers
                     continue;
                 }
 
-                LogHelper.WriteLogToFile($"AutoUpdate | 检测线路组: {group.GroupName} ({testUrl})");
                 testTasks.Add(MeasureLineGroupDelayAsync(group, testUrl));
             }
 

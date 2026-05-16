@@ -13,11 +13,12 @@
     <Grid>
         <!-- 启动图片容器 -->
         <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-            <!-- 启动图片 -->
+            <!-- 启动图片（使用邻近缩放） -->
             <Image x:Name="StartupImage" 
                    Width="600" 
                    Height="450"
-                   Stretch="Uniform" />
+                   Stretch="Uniform"
+                   RenderOptions.BitmapScalingMode="NearestNeighbor" />
 
             <!-- 版本号显示 - 右上角 -->
             <TextBlock x:Name="VersionTextBlock" 
@@ -30,7 +31,7 @@
                     Panel.ZIndex="1000" />
         </Grid>
         
-        <!-- 加载文本 -->
+        <!-- 加载文本（带阴影） -->
         <TextBlock x:Name="LoadingText" 
                    Text="正在启动 Ink Canvas..." 
                    FontSize="18" 
@@ -39,14 +40,23 @@
                    Foreground="White"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
-                   Margin="0,200,0,0" />
+                   Margin="0,200,0,0">
+            <TextBlock.Effect>
+                <DropShadowEffect Color="Black" 
+                                  Direction="270" 
+                                  ShadowDepth="2" 
+                                  BlurRadius="5" 
+                                  Opacity="0.7"/>
+            </TextBlock.Effect>
+        </TextBlock>
 
         <!-- 进度条 -->
-        <Grid HorizontalAlignment="Center"
-               VerticalAlignment="Center"
-               Margin="0,276.5,0,0"
-               Width="532"
-               Height="10">
+        <Grid x:Name="ProgressBarContainer"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center"
+              Margin="0,276.5,0,0"
+              Width="532"
+              Height="10">
              <!-- 进度条填充 -->
              <Border x:Name="ProgressBarFill"
                       HorizontalAlignment="Left"

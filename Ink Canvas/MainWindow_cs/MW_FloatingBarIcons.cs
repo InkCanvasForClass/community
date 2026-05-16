@@ -192,6 +192,25 @@ namespace Ink_Canvas
         /// <summary>
         /// Popup 管理器（负责置顶和拖动跟随）
         /// </summary>
+        private double _cachedFloatingBarWidth;
+        private double _cachedFloatingBarHeadWidth;
+        private double _cachedScreenWidth;
+        private DateTime _lastFloatingBarSizeCacheTime;
+
+        private void RefreshFloatingBarSizeCache(bool force = false)
+        {
+            var now = DateTime.Now;
+            if (!force && (now - _lastFloatingBarSizeCacheTime).TotalMilliseconds < 100)
+                return;
+
+            var scale = GetFloatingBarScaleX();
+            _cachedFloatingBarWidth = GetElementWidthForFloatingBar(ViewboxFloatingBar, 200) * scale;
+            var dragElement = FindDragHandleInRoot();
+            _cachedFloatingBarHeadWidth = GetElementWidthForFloatingBar(dragElement, 50) * scale;
+            _cachedScreenWidth = GetFloatingBarScreenWidth(Settings.Advanced.IsEnableAvoidFullScreenHelper);
+            _lastFloatingBarSizeCacheTime = now;
+        }
+
         private PopupManagerHelper _popupManager;
 
         /// <summary>
@@ -203,22 +222,23 @@ namespace Ink_Canvas
         {
             if (isDragDropInEffect)
             {
-                var xPos = e.GetPosition(null).X - pos.X + ViewboxFloatingBar.Margin.Left;
-                var yPos = e.GetPosition(null).Y - pos.Y + ViewboxFloatingBar.Margin.Top;
+                var currentPos = e.GetPosition(null);
+                var xPos = currentPos.X - pos.X + ViewboxFloatingBar.Margin.Left;
+                var yPos = currentPos.Y - pos.Y + ViewboxFloatingBar.Margin.Top;
                 ViewboxFloatingBar.Margin = new Thickness(xPos, yPos, -2000, -200);
 
-                pos = e.GetPosition(null);
+                pos = currentPos;
 
                 if (IsFloatingBarContentVisible())
                 {
-                    var screenWidth = GetFloatingBarScreenWidth(Settings.Advanced.IsEnableAvoidFullScreenHelper);
-                    var headLeft = GetCurrentFloatingBarHeadLeft();
-                    var floatingBarWidth = GetFloatingBarScaledWidth();
+                    RefreshFloatingBarSizeCache();
+
+                    var headLeft = ViewboxFloatingBar.Margin.Left + (isFloatingBarHeadOnRight ? Math.Max(0, _cachedFloatingBarWidth - _cachedFloatingBarHeadWidth) : 0);
 
                     bool shouldFlip;
-                    if (!isFloatingBarHeadOnRight && headLeft + floatingBarWidth > screenWidth)
+                    if (!isFloatingBarHeadOnRight && headLeft + _cachedFloatingBarWidth > _cachedScreenWidth)
                         shouldFlip = true;
-                    else if (isFloatingBarHeadOnRight && headLeft + floatingBarWidth <= screenWidth)
+                    else if (isFloatingBarHeadOnRight && headLeft + _cachedFloatingBarWidth <= _cachedScreenWidth)
                         shouldFlip = false;
                     else
                         shouldFlip = isFloatingBarHeadOnRight;
@@ -227,18 +247,16 @@ namespace Ink_Canvas
                     {
                         var savedHeadLeft = headLeft;
                         SetFloatingBarHeadPlacement(shouldFlip);
-                        ViewboxFloatingBar.UpdateLayout();
 
-                        var newWidth = GetFloatingBarScaledWidth();
-                        var newHeadWidth = GetFloatingBarHeadScaledWidth();
+                        RefreshFloatingBarSizeCache(true);
 
                         double newLeft;
                         if (shouldFlip)
-                            newLeft = savedHeadLeft - Math.Max(0, newWidth - newHeadWidth);
+                            newLeft = savedHeadLeft - Math.Max(0, _cachedFloatingBarWidth - _cachedFloatingBarHeadWidth);
                         else
                             newLeft = savedHeadLeft;
 
-                        newLeft = ClampFloatingBarLeft(newLeft, newWidth, screenWidth);
+                        newLeft = ClampFloatingBarLeft(newLeft, _cachedFloatingBarWidth, _cachedScreenWidth);
                         ViewboxFloatingBar.Margin = new Thickness(newLeft, ViewboxFloatingBar.Margin.Top, -2000, -200);
                     }
                 }
@@ -461,15 +479,6 @@ namespace Ink_Canvas
 
             AnimationsHelper.HidePopupWithSlideAndFade(BackgroundPalette);
 
-            AnimationsHelper.HidePopupWithSlideAndFade(TwoFingerGestureBorder);
-            AnimationsHelper.HidePopupWithSlideAndFade(EraserSizePanel);
-            AnimationsHelper.HidePopupWithSlideAndFade(BoardTwoFingerGestureBorder);
-            if (ToggleSwitchDrawShapeBorderAutoHide.IsOn)
-            {
-                AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
-                AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderDrawShape);
-            }
-
             if (mode != null)
             {
                 if (mode != "clear")
@@ -595,6 +604,24 @@ namespace Ink_Canvas
                                 BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
                                 BoardPen.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
                                 BoardPen.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+
+                                BoardEraser.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
+                                BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
+                                BoardEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                                BoardEraser.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+
+                                BoardSelect.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
+                                BoardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
+                                BoardSelect.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                                BoardSelect.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+
+                                if (BoardInkFreezeBtn != null)
+                                {
+                                    BoardInkFreezeBtn.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
+                                    BoardInkFreezeBtn.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
+                                    BoardInkFreezeBtn.IconBrush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                                    BoardInkFreezeBtn.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                                }
                             }
                             else
                             {
@@ -602,6 +629,24 @@ namespace Ink_Canvas
                                 BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
                                 BoardPen.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
                                 BoardPen.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+
+                                BoardEraser.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
+                                BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
+                                BoardEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                                BoardEraser.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+
+                                BoardSelect.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
+                                BoardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
+                                BoardSelect.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                                BoardSelect.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+
+                                if (BoardInkFreezeBtn != null)
+                                {
+                                    BoardInkFreezeBtn.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
+                                    BoardInkFreezeBtn.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
+                                    BoardInkFreezeBtn.IconBrush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                                    BoardInkFreezeBtn.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                                }
                             }
 
                             SetFloatingBarHighlightPosition("cursor");
@@ -2008,7 +2053,6 @@ namespace Ink_Canvas
 
         private void PlaceFloatingBarAfterHeadToggle(double headLeft, bool isExpanding)
         {
-            ViewboxFloatingBar.UpdateLayout();
             var screenWidth = GetFloatingBarScreenWidth(Settings.Advanced.IsEnableAvoidFullScreenHelper);
 
             if (!isExpanding)
@@ -2027,7 +2071,6 @@ namespace Ink_Canvas
             var wasHeadOnRight = isFloatingBarHeadOnRight;
 
             SetFloatingBarHeadPlacement(shouldPlaceToolsOnLeft);
-            ViewboxFloatingBar.UpdateLayout();
 
             floatingBarWidth = GetFloatingBarScaledWidth();
             headWidth = GetFloatingBarHeadScaledWidth();
@@ -2041,8 +2084,7 @@ namespace Ink_Canvas
 
             if (shouldPlaceToolsOnLeft != wasHeadOnRight)
             {
-                ViewboxFloatingBar.UpdateLayout();
-                var actualHeadLeft = GetCurrentFloatingBarHeadLeft();
+                var actualHeadLeft = ViewboxFloatingBar.Margin.Left + (isFloatingBarHeadOnRight ? Math.Max(0, floatingBarWidth - headWidth) : 0);
                 var correction = headLeft - actualHeadLeft;
                 if (Math.Abs(correction) > 0.5)
                 {
@@ -2084,7 +2126,6 @@ namespace Ink_Canvas
 
         private double GetCurrentFloatingBarHeadLeft()
         {
-            ViewboxFloatingBar.UpdateLayout();
             var floatingBarWidth = GetFloatingBarScaledWidth();
             var headWidth = GetFloatingBarHeadScaledWidth();
             var headOffset = isFloatingBarHeadOnRight
@@ -2107,16 +2148,23 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="MarginFromEdge">边缘边距</param>
         /// <param name="PosXCaculatedWithTaskbarHeight">是否考虑任务栏高度计算位置</param>
+        /// <param name="skipAnimation">是否跳过动画直接定位（用于启动时快速恢复位置）</param>
         public async void ViewboxFloatingBarMarginAnimation(int MarginFromEdge,
-            bool PosXCaculatedWithTaskbarHeight = false)
+            bool PosXCaculatedWithTaskbarHeight = false, bool skipAnimation = false)
         {
-            // 新增：在白板模式下不执行浮动栏动画
             if (currentMode == 1)
             {
                 return;
             }
 
             if (MarginFromEdge == 60) MarginFromEdge = 55;
+
+            if (skipAnimation)
+            {
+                ViewboxFloatingBarMarginAnimationCore(MarginFromEdge, PosXCaculatedWithTaskbarHeight);
+                return;
+            }
+
             await Dispatcher.InvokeAsync(() =>
             {
                 if (!Topmost)
@@ -2127,47 +2175,131 @@ namespace Ink_Canvas
                     ViewboxFloatingBar.UpdateLayout();
                 }
                 isViewboxFloatingBarMarginAnimationRunning = true;
+            });
 
-                double dpiScaleX = 1, dpiScaleY = 1;
-                var source = PresentationSource.FromVisual(this);
-                if (source != null)
-                {
-                    dpiScaleX = source.CompositionTarget.TransformToDevice.M11;
-                    dpiScaleY = source.CompositionTarget.TransformToDevice.M22;
-                }
+            await Task.Delay(200);
 
-                var screen = GetFloatingBarTargetScreen();
-                double screenWidth, screenHeight;
-                double toolbarHeight;
-                if (Settings.Advanced.IsEnableAvoidFullScreenHelper && PosXCaculatedWithTaskbarHeight)
+            await Dispatcher.InvokeAsync(() =>
+            {
+                ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
+                if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
+            });
+        }
+
+        private void ViewboxFloatingBarMarginAnimationCore(int MarginFromEdge,
+            bool PosXCaculatedWithTaskbarHeight = false)
+        {
+            if (!Topmost)
+                MarginFromEdge = -60;
+            else
+                ViewboxFloatingBar.Visibility = Visibility.Visible;
+            isViewboxFloatingBarMarginAnimationRunning = true;
+
+            double dpiScaleX = 1, dpiScaleY = 1;
+            var source = PresentationSource.FromVisual(this);
+            if (source != null)
+            {
+                dpiScaleX = source.CompositionTarget.TransformToDevice.M11;
+                dpiScaleY = source.CompositionTarget.TransformToDevice.M22;
+            }
+
+            var screen = GetFloatingBarTargetScreen();
+            double screenWidth, screenHeight;
+            double toolbarHeight;
+            if (Settings.Advanced.IsEnableAvoidFullScreenHelper && PosXCaculatedWithTaskbarHeight)
+            {
+                screenWidth = screen.WorkingArea.Width / dpiScaleX;
+                screenHeight = screen.WorkingArea.Height / dpiScaleY;
+                toolbarHeight = 0;
+            }
+            else
+            {
+                screenWidth = screen.Bounds.Width / dpiScaleX;
+                screenHeight = screen.Bounds.Height / dpiScaleY;
+                toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
+            }
+
+            double baseWidth = ViewboxFloatingBar.ActualWidth;
+
+            if (baseWidth <= 0)
+            {
+                baseWidth = ViewboxFloatingBar.DesiredSize.Width;
+            }
+
+            if (baseWidth <= 0)
+            {
+                baseWidth = ViewboxFloatingBar.RenderSize.Width;
+            }
+
+            if (baseWidth <= 0)
+            {
+                baseWidth = 200;
+                LogHelper.WriteLogToFile($"浮动栏宽度无法获取，使用估算值: {baseWidth}");
+            }
+
+            double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
+
+            double baseHeight = ViewboxFloatingBar.ActualHeight;
+            if (baseHeight <= 0)
+            {
+                baseHeight = ViewboxFloatingBar.DesiredSize.Height;
+            }
+            if (baseHeight <= 0)
+            {
+                baseHeight = ViewboxFloatingBar.RenderSize.Height;
+            }
+            if (baseHeight <= 0)
+            {
+                baseHeight = 58;
+            }
+            double floatingBarHeight = baseHeight * ViewboxFloatingBarScaleTransform.ScaleY;
+
+
+            if (QuickColorPalette != null &&
+                (QuickColorPalette.QuickColorPalettePanel.Visibility == Visibility.Visible ||
+                 QuickColorPalette.QuickColorPaletteSingleRowPanel.Visibility == Visibility.Visible))
+            {
+                if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
                 {
-                    screenWidth = screen.WorkingArea.Width / dpiScaleX;
-                    screenHeight = screen.WorkingArea.Height / dpiScaleY;
-                    toolbarHeight = 0;
+                    floatingBarWidth = Math.Max(floatingBarWidth, 120 * ViewboxFloatingBarScaleTransform.ScaleX);
                 }
                 else
                 {
-                    screenWidth = screen.Bounds.Width / dpiScaleX;
-                    screenHeight = screen.Bounds.Height / dpiScaleY;
-                    toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
+                    floatingBarWidth = Math.Max(floatingBarWidth, 68 * ViewboxFloatingBarScaleTransform.ScaleX);
+                }
+            }
+
+            pos.X = (screenWidth - floatingBarWidth) / 2;
+
+            if (!PosXCaculatedWithTaskbarHeight)
+            {
+                if (toolbarHeight == 0)
+                {
+                    pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY;
+                }
+                else
+                {
+                    pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY - toolbarHeight;
                 }
 
-                double baseWidth = GetElementWidthForFloatingBar(ViewboxFloatingBar, 200);
+                baseWidth = GetElementWidthForFloatingBar(ViewboxFloatingBar, 200);
                 if (baseWidth <= 0)
                 {
-                    baseWidth = 200;
-                    LogHelper.WriteLogToFile($"浮动栏宽度无法获取，使用估算值: {baseWidth}");
+                    pos.Y = screenHeight - floatingBarHeight -
+                           3 * ViewboxFloatingBarScaleTransform.ScaleY;
                 }
-                double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
+                floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
 
-                double baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 58);
+                baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 58);
                 if (baseHeight <= 0)
                 {
                     baseHeight = 58;
                 }
-                double floatingBarHeight = baseHeight * ViewboxFloatingBarScaleTransform.ScaleY;
+            }
 
-
+            if (MarginFromEdge != -60)
+            {
+                if (IsInPptPresentationMode)
                 // 如果快捷调色盘显示，确保有足够空间
                 if (QuickColorPalette?.Visibility == Visibility.Visible)
                 {
@@ -2183,7 +2315,6 @@ namespace Ink_Canvas
                         floatingBarWidth = Math.Max(floatingBarWidth, 108 * ViewboxFloatingBarScaleTransform.ScaleX);
                     }
                 }
-
                 pos.X = (screenWidth - floatingBarWidth) / 2;
 
                 if (MarginFromEdge < 0)
@@ -2206,53 +2337,24 @@ namespace Ink_Canvas
                            toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
                 }
 
-                if (MarginFromEdge != -60)
+                if (pointDesktop.X != -1 || pointDesktop.Y != -1)
                 {
-                    if (IsInPptPresentationMode)
-                    {
-                        if (pointPPT.X != -1 || pointPPT.Y != -1)
-                        {
-                            if (Math.Abs(pointPPT.Y - pos.Y) > 50)
-                                pos = pointPPT;
-                            else
-                                pointPPT = pos;
-                        }
-                    }
-                    else
-                    {
-                        if (pointDesktop.X != -1 || pointDesktop.Y != -1)
-                        {
-                            if (Math.Abs(pointDesktop.Y - pos.Y) > 50)
-                                pos = pointDesktop;
-                            else
-                                pointDesktop = pos;
-                        }
-                    }
-
-                    pos.X = NormalizeFloatingBarLeftForScreen(pos.X, floatingBarWidth, screenWidth);
-                    if (IsInPptPresentationMode)
-                        pointPPT = pos;
+                    if (Math.Abs(pointDesktop.Y - pos.Y) > 50)
+                        pos = pointDesktop;
                     else
                         pointDesktop = pos;
                 }
 
-                var marginAnimation = new ThicknessAnimation
-                {
-                    Duration = TimeSpan.FromSeconds(0.35),
-                    From = ViewboxFloatingBar.Margin,
-                    To = new Thickness(pos.X, pos.Y, 0, -20),
-                    EasingFunction = new CircleEase()
-                };
-                ViewboxFloatingBar.BeginAnimation(MarginProperty, marginAnimation);
-            });
+                pos.X = NormalizeFloatingBarLeftForScreen(pos.X, floatingBarWidth, screenWidth);
+                if (IsInPptPresentationMode)
+                    pointPPT = pos;
+                else
+                    pointDesktop = pos;
+            }
 
-            await Task.Delay(200);
-
-            await Dispatcher.InvokeAsync(() =>
-            {
-                ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
-                if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
-            });
+            ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, 0, -20);
+            isViewboxFloatingBarMarginAnimationRunning = false;
+            if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
         }
 
         /// <summary>
@@ -3590,20 +3692,8 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         public void ExitApplication(object sender, RoutedEventArgs e)
         {
-            // 立即停止PPT监控，避免关闭过程中定时器继续尝试连接
-            try
-            {
-                _pptManager?.StopMonitoring();
-                LogHelper.WriteLogToFile("PPT监控已停止（准备关闭）", LogHelper.LogType.Trace);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"停止PPT监控时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-
             _forceCloseFromExitOrRestartButton = true;
             App.IsAppExitByUser = true;
-            // 不设置 CloseIsFromButton = true，让它也经过确认流程
             Close();
         }
 
@@ -3651,7 +3741,7 @@ namespace Ink_Canvas
             {
                 if (Ink_Canvas.Helpers.SecurityManager.IsPasswordRequiredForEnterSettings(Settings))
                 {
-                    bool ok = await Ink_Canvas.Helpers.SecurityManager.PromptAndVerifyAsync(Settings, this, "进入设置", "请输入安全密码以进入设置。");
+                    bool ok = await Ink_Canvas.Helpers.SecurityManager.PromptAndVerifyPasswordOrTotpAsync(Settings, this, "进入设置", "请输入安全密码或 TOTP 验证码以进入设置。");
                     if (!ok) return;
                 }
             }
@@ -4473,13 +4563,6 @@ private bool forceEraser;
         {
             if (element is FrameworkElement fe)
             {
-                // 对于SimpleStackPanel，使用其实际宽度
-                if (fe.GetType().Name == "SimpleStackPanel")
-                {
-                    return fe.ActualWidth > 0 ? fe.ActualWidth : 28; // 默认宽度28
-                }
-
-                // 对于其他元素，使用其宽度或默认宽度
                 return fe.ActualWidth > 0 ? fe.ActualWidth : 28;
             }
             return 28; // 默认宽度
@@ -4525,6 +4608,11 @@ private bool forceEraser;
                 else
                     highlightBarColor = Color.FromRgb(37, 99, 235);
 
+                if (isFloatingBarFolded || (BorderFloatingBarMoveControls != null && BorderFloatingBarMoveControls.Visibility == Visibility.Collapsed))
+                {
+                    return;
+                }
+
                 var foregroundBrush = new SolidColorBrush(FloatBarForegroundColor);
 
                 void ResetIcon(ToolbarImageButton button, string iconType)
@@ -4565,6 +4653,9 @@ private bool forceEraser;
                     case "select":
                         targetButton = SymbolIconSelect;
                         targetIconType = "lassoSelect";
+                        break;
+                    case "shape":
+                        targetButton = ShapeDrawFloatingBarBtn;
                         break;
                 }
 

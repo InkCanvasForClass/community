@@ -336,6 +336,18 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
+        /// 在应用程序关闭时调用，确保所有资源被正确释放
+        /// </summary>
+        public static void Shutdown()
+        {
+            lock (_lock)
+            {
+                _enabled = false;
+            }
+            Disable();
+        }
+
+        /// <summary>
         /// 递归地尝试为指定目录及其所有子目录建立并保持目录句柄锁定，跳过配置的排除目录。
         /// </summary>
         /// <param name="root">起始目录的路径；从此路径开始遍历并对符合条件的子目录尝试建立锁定。</param>

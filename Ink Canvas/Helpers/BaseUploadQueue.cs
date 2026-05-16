@@ -31,6 +31,7 @@ namespace Ink_Canvas.Helpers
     {
         public string FilePath { get; set; }
         public int RetryCount { get; set; }
+        public DateTime AddedTime { get; set; }
     }
 
     /// <summary>
@@ -40,6 +41,8 @@ namespace Ink_Canvas.Helpers
     {
         protected const int BATCH_SIZE = 10; // 批量上传大小
         protected const int MAX_RETRY_COUNT = 3; // 最大重试次数
+        protected const int MAX_QUEUE_SIZE = 1000; // 队列最大大小限制
+        protected const int MAX_ITEM_AGE_HOURS = 72; // 队列项最大存活时间（72小时）
 
         /// <summary>
         /// 上传队列
@@ -134,6 +137,7 @@ namespace Ink_Canvas.Helpers
 
                 int restoredCount = 0;
                 int skippedCount = 0;
+                int expiredCount = 0;
 
                 foreach (var item in queueData)
                 {
@@ -141,6 +145,13 @@ namespace Ink_Canvas.Helpers
                     if (!File.Exists(item.FilePath))
                     {
                         skippedCount++;
+                        continue;
+                    }
+
+                    // 检查队列项是否过期
+                    if ((DateTime.Now - item.AddedTime).TotalHours > MAX_ITEM_AGE_HOURS)
+                    {
+                        expiredCount++;
                         continue;
                     }
 
@@ -155,7 +166,8 @@ namespace Ink_Canvas.Helpers
                     _uploadQueue.Enqueue(new UploadQueueItem
                     {
                         FilePath = item.FilePath,
-                        RetryCount = item.RetryCount
+                        RetryCount = item.RetryCount,
+                        AddedTime = item.AddedTime
                     });
                     restoredCount++;
                 }
@@ -164,7 +176,7 @@ namespace Ink_Canvas.Helpers
 
                 if (restoredCount > 0)
                 {
-                    LogHelper.WriteLogToFile($"[{GetType().Name}] 已恢复上传队列：{restoredCount}个文件，跳过{skippedCount}个无效文件", LogHelper.LogType.Event);
+                    LogHelper.WriteLogToFile($"[{GetType().Name}] 已恢复上传队列：{restoredCount}个文件，跳过{skippedCount}个无效文件，过期{expiredCount}个文件", LogHelper.LogType.Event);
                     // 如果恢复了队列，触发处理
                     _ = Task.Run(async () =>
                     {
@@ -178,9 +190,9 @@ namespace Ink_Canvas.Helpers
                         }
                     });
                 }
-                else if (skippedCount > 0)
+                else if (skippedCount > 0 || expiredCount > 0)
                 {
-                    LogHelper.WriteLogToFile($"[{GetType().Name}] 队列恢复完成：跳过{skippedCount}个无效文件", LogHelper.LogType.Event);
+                    LogHelper.WriteLogToFile($"[{GetType().Name}] 队列恢复完成：跳过{skippedCount}个无效文件，过期{expiredCount}个文件", LogHelper.LogType.Event);
                 }
             }
             catch (Exception ex)
@@ -215,7 +227,7 @@ namespace Ink_Canvas.Helpers
                     {
                         FilePath = item.FilePath,
                         RetryCount = item.RetryCount,
-                        AddedTime = DateTime.Now
+                        AddedTime = item.AddedTime
                     });
                 }
 
@@ -275,15 +287,69 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
+        /// 清理队列中的过期项
+        /// </summary>
+        /// <returns>清理的项数</returns>
+        private int CleanupExpiredItems()
+        {
+            int cleanedCount = 0;
+            var tempItems = new List<UploadQueueItem>();
+
+            // 先全部出队
+            while (_uploadQueue.TryDequeue(out UploadQueueItem item))
+            {
+                // 检查是否过期
+                if ((DateTime.Now - item.AddedTime).TotalHours <= MAX_ITEM_AGE_HOURS)
+                {
+                    tempItems.Add(item);
+                }
+                else
+                {
+                    cleanedCount++;
+                }
+            }
+
+            // 重新入队未过期项
+            foreach (var item in tempItems)
+            {
+                _uploadQueue.Enqueue(item);
+            }
+
+            if (cleanedCount > 0)
+            {
+                LogHelper.WriteLogToFile($"[{GetType().Name}] 清理{cleanedCount}个过期队列项", LogHelper.LogType.Event);
+            }
+
+            return cleanedCount;
+        }
+
+        /// <summary>
         /// 将文件加入上传队列
         /// </summary>
         protected void EnqueueFile(string filePath, int retryCount = 0, CancellationToken cancellationToken = default)
         {
-            _uploadQueue.Enqueue(new UploadQueueItem
+            var newItem = new UploadQueueItem
             {
                 FilePath = filePath,
-                RetryCount = retryCount
-            });
+                RetryCount = retryCount,
+                AddedTime = DateTime.Now
+            };
+
+            // 队列大小检查，防止无限增长
+            if (_uploadQueue.Count >= MAX_QUEUE_SIZE)
+            {
+                // 先尝试清理过期项
+                int cleanedCount = CleanupExpiredItems();
+                
+                // 清理后仍然满，则记录警告并跳过
+                if (_uploadQueue.Count >= MAX_QUEUE_SIZE)
+                {
+                    LogHelper.WriteLogToFile($"[{GetType().Name}] 队列已满({MAX_QUEUE_SIZE})，清理{cleanedCount}个过期项后仍满，跳过入队: {Path.GetFileName(filePath)}", LogHelper.LogType.Warning);
+                    return;
+                }
+            }
+
+            _uploadQueue.Enqueue(newItem);
 
             // 异步保存队列到文件
             _ = Task.Run(async () =>

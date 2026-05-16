@@ -109,10 +109,17 @@ namespace Ink_Canvas.Helpers
             {
                 if (_config.UseHardwareAcceleration)
                 {
-                    // 使用硬件加速的同步版本
+                    // 使用硬件加速的同步版本（使用异步等待避免阻塞）
                     var task = _hardwareProcessor.SmoothStrokeWithGPU(originalStroke);
-                    task.Wait(5000); // 5秒超时
-                    result = task.Status == TaskStatus.RanToCompletion ? task.Result : originalStroke;
+                    if (task.Wait(5000)) // 5秒超时
+                    {
+                        result = task.Result;
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile("墨迹平滑超时，返回原始笔画", LogHelper.LogType.Warning);
+                        result = originalStroke;
+                    }
                 }
                 else
                 {
@@ -120,6 +127,11 @@ namespace Ink_Canvas.Helpers
                     var traditionalSmoothing = new AdvancedBezierSmoothing();
                     result = traditionalSmoothing.SmoothStroke(originalStroke);
                 }
+            }
+            catch (AggregateException ex) when (ex.InnerException is OperationCanceledException)
+            {
+                Debug.WriteLine($"同步墨迹平滑被取消: {ex.InnerException.Message}");
+                result = originalStroke;
             }
             catch (Exception ex)
             {

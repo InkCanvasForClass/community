@@ -415,6 +415,7 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\DeveloperAvatars\dubi906w.jpg" />
+    <Resource Include="Resources\DeveloperAvatars\CreeperAWA.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\new-icons\gesture.png" />

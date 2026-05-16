@@ -119,7 +119,7 @@ namespace Ink_Canvas.Properties
         public static string Nav_About => GetString(nameof(Nav_About)) ?? "关于";
         public static string App_Title => GetString(nameof(App_Title)) ?? "InkCanvasforClass";
         public static string Booth_Resolution_Tooltip => GetString(nameof(Booth_Resolution_Tooltip)) ?? "展台/截图分辨率";
-        public static string Tray_TempShowMainWindow => GetString(nameof(Tray_TempShowMainWindow)) ?? "显示主窗口（2分钟）";
+        public static string Tray_TempShowMainWindow => GetString(nameof(Tray_TempShowMainWindow)) ?? "显示主窗口（2 分钟）";
         public static string Tray_OpenSettings => GetString(nameof(Tray_OpenSettings)) ?? "打开设置";
     }
 }

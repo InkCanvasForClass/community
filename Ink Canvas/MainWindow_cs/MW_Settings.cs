@@ -966,7 +966,7 @@ namespace Ink_Canvas
             {
                 if (sender != null && Ink_Canvas.Helpers.SecurityManager.IsPasswordRequiredForResetConfig(Settings))
                 {
-                    bool ok = await Ink_Canvas.Helpers.SecurityManager.PromptAndVerifyAsync(Settings, this, "重置配置验证", "请输入安全密码以确认重置配置。");
+                    bool ok = await Ink_Canvas.Helpers.SecurityManager.PromptAndVerifyPasswordOrTotpAsync(Settings, this, "重置配置验证", "请输入安全密码或 TOTP 验证码以确认重置配置。");
                     if (!ok) return;
                 }
             }

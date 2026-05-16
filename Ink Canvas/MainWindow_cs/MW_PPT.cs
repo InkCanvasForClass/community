@@ -647,19 +647,24 @@ namespace Ink_Canvas
         {
             try
             {
-                _pptManager?.StopMonitoring();
-                _pptManager?.Dispose();
+                if (_pptManager != null)
+                {
+                    _pptManager.StopMonitoring(isShutdown: true);
+                    _pptManager.Dispose();
+                    _pptManager = null;
+                }
+
                 _singlePPTInkManager?.Dispose();
+                _singlePPTInkManager = null;
+
                 _longPressTimer?.Stop();
                 _longPressTimer = null;
-                _pptManager = null;
-                _singlePPTInkManager = null;
+
                 _pptUIManager = null;
 
-                // 清理PowerPoint进程守护
                 StopPowerPointProcessMonitoring();
                 _powerPointProcessMonitorTimer = null;
-                ClosePowerPointApplication();
+
                 ClearStaticInteropState();
 
                 StopPptOnlyVisibilityProbeTimer();

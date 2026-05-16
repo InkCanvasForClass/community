@@ -1244,11 +1244,11 @@ namespace Ink_Canvas
         {
             try
             {
-                await Task.Delay(1200);
+                await Task.Delay(400);
 
                 try
                 {
-                    IACoreDllExtractor.ExtractIACoreDlls();
+                    await IACoreDllExtractor.ExtractIACoreDllsAsync();
                 }
                 catch (Exception ex)
                 {
@@ -1315,7 +1315,6 @@ namespace Ink_Canvas
 
                 try
                 {
-                    await Task.Delay(1500);
                     DeviceIdentifier.RecordAppLaunch();
                     var systemVersion = DeviceIdentifier.GetSystemVersion();
                     if (!string.IsNullOrWhiteSpace(systemVersion))
@@ -1404,6 +1403,7 @@ namespace Ink_Canvas
         private static DateTime startupCompleteHeartbeat = DateTime.MinValue;
         private static DateTime splashScreenStartTime = DateTime.MinValue;
         private static DateTime appStartupStartTime = DateTime.MinValue;
+        private static volatile bool isAppExiting = false;
 
         /// <summary>
         /// 启动并管理应用的心跳与守护检查定时器，监测启动阶段与主线程是否无响应，并在符合配置的情况下尝试静默重启应用。
@@ -1415,6 +1415,7 @@ namespace Ink_Canvas
         /// - 对连续重启次数有保护：若重启计数达到或超过5次，会弹出提示并停止自动重启（重置重启计数并退出进程）。  
         /// - 在 OOBE（首次引导）展示期间不执行守护检查。  
         /// - 该方法会产生外部可观察的副作用：可能启动新进程并调用 Environment.Exit 终止当前进程，或显示消息框。
+        /// - 重启前会等待1秒以确保旧进程资源已释放，避免多实例竞争条件。
         /// </remarks>
         private void StartHeartbeatMonitor()
         {
@@ -1427,6 +1428,8 @@ namespace Ink_Canvas
 
             watchdogTimer = new Timer(_ =>
             {
+                if (isAppExiting)
+                    return;
                 if (IsOobeShowing)
                     return;
 
@@ -1491,6 +1494,7 @@ namespace Ink_Canvas
                             try
                             {
                                 string exePath = Process.GetCurrentProcess().MainModule.FileName;
+                                Thread.Sleep(1000);
                                 Process.Start(exePath);
                             }
                             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -1645,6 +1649,11 @@ namespace Ink_Canvas
 
         private void App_Exit(object sender, ExitEventArgs e)
         {
+            isAppExiting = true;
+
+            try { heartbeatTimer?.Stop(); } catch { }
+            try { watchdogTimer?.Change(Timeout.Infinite, Timeout.Infinite); watchdogTimer?.Dispose(); } catch { }
+
             CleanupTerminationMonitoring();
 
             try
@@ -1655,6 +1664,17 @@ namespace Ink_Canvas
             {
                 ExceptionHandler.HandleException(ex, "释放 IpcIACoreClient 失败", LogHelper.LogType.Warning);
             }
+
+            try
+            {
+                if (mutex != null)
+                {
+                    mutex.ReleaseMutex();
+                    mutex.Dispose();
+                    mutex = null;
+                }
+            }
+            catch { }
 
             // 卸载所有插件
             try

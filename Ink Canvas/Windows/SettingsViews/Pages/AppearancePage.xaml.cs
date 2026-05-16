@@ -7,6 +7,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using ContentDialog = iNKORE.UI.WPF.Modern.Controls.ContentDialog;
@@ -88,6 +89,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             CardEnableSplashScreen.IsOn = settings.Appearance.EnableSplashScreen;
             ComboBoxSplashScreenStyle.SelectedIndex = settings.Appearance.SplashScreenStyle;
+            UpdateCustomSplashImageVisibility();
+
+            if (!string.IsNullOrEmpty(settings.Appearance.CustomSplashImagePath) && 
+                System.IO.File.Exists(settings.Appearance.CustomSplashImagePath))
+            {
+                TextBlockCustomSplashPath.Text = System.IO.Path.GetFileName(settings.Appearance.CustomSplashImagePath);
+                TextBlockCustomSplashPath.ToolTip = settings.Appearance.CustomSplashImagePath;
+            }
+            else
+            {
+                TextBlockCustomSplashPath.Text = "未选择自定义图片";
+                TextBlockCustomSplashPath.ToolTip = null;
+            }
+
+            UpdateTextAlignButtonAppearance(settings.Appearance.CustomSplashTextPosition);
 
             if (settings.Appearance.FloatingBarImg >= ComboBoxFloatingBarImg.Items.Count)
                 settings.Appearance.FloatingBarImg = 0;
@@ -103,6 +119,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             CardEnableDisPlayNibModeToggle.IsOn = settings.Appearance.IsEnableDisPlayNibModeToggler;
             CardEnableTimeDisplayInWhiteboardMode.IsOn = settings.Appearance.EnableTimeDisplayInWhiteboardMode;
+            CardUse24HourTimeFormat.IsOn = settings.Appearance.Use24HourTimeFormat;
             CardEnableChickenSoupInWhiteboardMode.IsOn = settings.Appearance.EnableChickenSoupInWhiteboardMode;
 
             _suppressChickenSoupSourceSelectionChanged = true;
@@ -242,6 +259,98 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             SettingsManager.Settings.Appearance.SplashScreenStyle = ComboBoxSplashScreenStyle.SelectedIndex;
             SettingsManager.SaveSettingsToFile();
+            UpdateCustomSplashImageVisibility();
+        }
+
+        private void UpdateCustomSplashImageVisibility()
+        {
+            bool isCustomSelected = ComboBoxSplashScreenStyle.SelectedIndex == 7;
+            CardCustomSplashImage.Visibility = isCustomSelected ? Visibility.Visible : Visibility.Collapsed;
+            CardCustomSplashTextPosition.Visibility = isCustomSelected ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void BorderTextAlign_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (!_isLoaded) return;
+
+            if (sender is Border border && border.Tag != null)
+            {
+                int selectedIndex = int.Parse(border.Tag.ToString());
+                SettingsManager.Settings.Appearance.CustomSplashTextPosition = selectedIndex;
+                SettingsManager.SaveSettingsToFile();
+                UpdateTextAlignButtonAppearance(selectedIndex);
+            }
+        }
+
+        private void UpdateTextAlignButtonAppearance(int selectedIndex)
+        {
+            AnimateIndicatorToPosition(selectedIndex);
+        }
+
+        private void AnimateIndicatorToPosition(int position)
+        {
+            // 外容器 110px，内边距 1px，每个按钮 36px
+            // 左: X=0, 中: X=36, 右: X=72
+            double targetX = position * 36;
+
+            var animation = new DoubleAnimation
+            {
+                To = targetX,
+                Duration = TimeSpan.FromMilliseconds(200),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+
+            IndicatorTranslateTransform.BeginAnimation(TranslateTransform.XProperty, animation);
+
+            // 跟随系统主题颜色
+            var isDarkTheme = SettingsManager.Settings.Appearance.Theme == 1;
+
+            if (isDarkTheme)
+            {
+                SelectionIndicator.Background = new SolidColorBrush(Color.FromArgb(40, 0, 120, 215));
+                SelectionIndicator.BorderBrush = new SolidColorBrush(Color.FromArgb(150, 0, 120, 215));
+            }
+            else
+            {
+                SelectionIndicator.Background = new SolidColorBrush(Color.FromArgb(25, 0, 120, 215));
+                SelectionIndicator.BorderBrush = new SolidColorBrush(Color.FromArgb(120, 0, 120, 215));
+            }
+        }
+
+        private void ButtonBrowseCustomSplash_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var openFileDialog = new Microsoft.Win32.OpenFileDialog
+                {
+                    Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.webp|All Files|*.*",
+                    Title = "选择自定义启动图片"
+                };
+
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    string selectedPath = openFileDialog.FileName;
+                    if (!string.IsNullOrEmpty(selectedPath))
+                    {
+                        SettingsManager.Settings.Appearance.CustomSplashImagePath = selectedPath;
+                        SettingsManager.SaveSettingsToFile();
+                        TextBlockCustomSplashPath.Text = System.IO.Path.GetFileName(selectedPath);
+                        TextBlockCustomSplashPath.ToolTip = selectedPath;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"选择自定义启动图片时出错: {ex.Message}");
+            }
+        }
+
+        private void ButtonClearCustomSplash_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsManager.Settings.Appearance.CustomSplashImagePath = string.Empty;
+            SettingsManager.SaveSettingsToFile();
+            TextBlockCustomSplashPath.Text = "未选择自定义图片";
+            TextBlockCustomSplashPath.ToolTip = null;
         }
 
         #endregion
@@ -410,6 +519,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 mw.BlackBoardWaterMark.Visibility = CardEnableChickenSoupInWhiteboardMode.IsOn ? Visibility.Visible : Visibility.Collapsed;
             }
+        }
+
+        private void ToggleSwitchUse24HourTimeFormat_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.Use24HourTimeFormat = CardUse24HourTimeFormat.IsOn;
+            SettingsManager.SaveSettingsToFile();
         }
 
         private async void ComboBoxChickenSoupSource_SelectionChanged(object sender, SelectionChangedEventArgs e)

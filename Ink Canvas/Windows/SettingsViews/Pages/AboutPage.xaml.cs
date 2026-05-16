@@ -54,7 +54,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 new AvatarItem { AvatarPath = "/Resources/DeveloperAvatars/Alan-CRL.png", Name = "Alan-CRL" },
                 new AvatarItem { AvatarPath = "/Resources/DeveloperAvatars/PrefacedCorg.jpg", Name = "PrefacedCorg" },
                 new AvatarItem { AvatarPath = "/Resources/DeveloperAvatars/PANDA-JSR.jpg", Name = "PANDA-JSR" },
-                new AvatarItem { AvatarPath = "/Resources/DeveloperAvatars/Super-Yyt.png", Name = "zhaishis(Super-Yyt)" }
+                new AvatarItem { AvatarPath = "/Resources/DeveloperAvatars/Super-Yyt.png", Name = "zhaishis(Super-Yyt)" },
+                new AvatarItem { AvatarPath = "/Resources/DeveloperAvatars/CreeperAWA.png", Name = "CreeperAWA" }
             };
 
             DeveloperItemsControl.ItemsSource = developers;

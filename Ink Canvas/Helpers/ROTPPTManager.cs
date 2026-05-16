@@ -93,7 +93,7 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        public void StopMonitoring()
+        public void StopMonitoring(bool isShutdown = false)
         {
             lock (_monitoringLock)
             {
@@ -101,7 +101,6 @@ namespace Ink_Canvas.Helpers
 
                 if (_monitoringThread != null && _monitoringThread.IsAlive)
                 {
-                    // 等待线程退出，最多等待2秒
                     if (!_monitoringThread.Join(2000))
                     {
                         LogHelper.WriteLogToFile("等待监控线程退出超时", LogHelper.LogType.Warning);

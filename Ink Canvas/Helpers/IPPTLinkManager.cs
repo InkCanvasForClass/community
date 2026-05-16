@@ -24,10 +24,7 @@ namespace Ink_Canvas.Helpers
         /// 开始监视与 PowerPoint 的连接以及幻灯片放映相关状态，并在状态变化时触发对应事件。
         /// </summary>
         void StartMonitoring();
-        /// <summary>
-        /// 停止监控 PowerPoint 的连接与事件，停止接收并处理与演示文稿和幻灯片放映相关的通知。
-        /// </summary>
-        void StopMonitoring();
+        void StopMonitoring(bool isShutdown = false);
 
         /// <summary>
         /// 重新加载或重建与 PowerPoint 的连接。
