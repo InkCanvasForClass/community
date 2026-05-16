@@ -1,11 +1,3 @@
-﻿using AForge.Imaging.Filters;
-using Microsoft.Office.Interop.PowerPoint;
-using Microsoft.VisualBasic.Devices;
-using System.Runtime.Intrinsics.X86;
-using System.Security.Policy;
-using System.Threading;
-using static System.Net.Mime.MediaTypeNames;
-
 namespace Ink_Canvas
 {
     public static class ChickenSoup
