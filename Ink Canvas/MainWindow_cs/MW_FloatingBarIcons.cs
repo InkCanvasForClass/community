@@ -2290,10 +2290,10 @@ namespace Ink_Canvas
                 }
                 floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
 
-                baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 72);
+                double baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 58);
                 if (baseHeight <= 0)
                 {
-                    baseHeight = 72;
+                    baseHeight = 58;
                 }
             }
 
@@ -2307,12 +2307,12 @@ namespace Ink_Canvas
                     if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
                     {
                         // 单行显示模式，自适应宽度，但需要足够空间显示6个颜色
-                        floatingBarWidth = Math.Max(floatingBarWidth, 260 * ViewboxFloatingBarScaleTransform.ScaleX);
+                        floatingBarWidth = Math.Max(floatingBarWidth, 200 * ViewboxFloatingBarScaleTransform.ScaleX);
                     }
                     else
                     {
                         // 双行显示模式，宽度较大
-                        floatingBarWidth = Math.Max(floatingBarWidth, 140 * ViewboxFloatingBarScaleTransform.ScaleX);
+                        floatingBarWidth = Math.Max(floatingBarWidth, 108 * ViewboxFloatingBarScaleTransform.ScaleX);
                     }
                 }
                 pos.X = (screenWidth - floatingBarWidth) / 2;
@@ -2406,10 +2406,10 @@ namespace Ink_Canvas
                 }
                 double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
 
-                double baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 72);
+                double baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 58);
                 if (baseHeight <= 0)
                 {
-                    baseHeight = 72;
+                    baseHeight = 58;
                 }
                 double floatingBarHeight = baseHeight * ViewboxFloatingBarScaleTransform.ScaleY;
 
@@ -2419,11 +2419,11 @@ namespace Ink_Canvas
                 {
                     if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
                     {
-                        floatingBarWidth = Math.Max(floatingBarWidth, 180 * ViewboxFloatingBarScaleTransform.ScaleX);
+                        floatingBarWidth = Math.Max(floatingBarWidth, 140 * ViewboxFloatingBarScaleTransform.ScaleX);
                     }
                     else
                     {
-                        floatingBarWidth = Math.Max(floatingBarWidth, 108 * ViewboxFloatingBarScaleTransform.ScaleX);
+                        floatingBarWidth = Math.Max(floatingBarWidth, 86 * ViewboxFloatingBarScaleTransform.ScaleX);
                     }
                 }
 
@@ -2504,8 +2504,8 @@ namespace Ink_Canvas
                 }
                 double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
 
-                double baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 72);
-                if (baseHeight <= 0) baseHeight = 72;
+                double baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 58);
+                if (baseHeight <= 0) baseHeight = 58;
                 double floatingBarHeight = baseHeight * ViewboxFloatingBarScaleTransform.ScaleY;
 
 
@@ -2514,11 +2514,11 @@ namespace Ink_Canvas
                 {
                     if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
                     {
-                        floatingBarWidth = Math.Max(floatingBarWidth, 180 * ViewboxFloatingBarScaleTransform.ScaleX);
+                        floatingBarWidth = Math.Max(floatingBarWidth, 140 * ViewboxFloatingBarScaleTransform.ScaleX);
                     }
                     else
                     {
-                        floatingBarWidth = Math.Max(floatingBarWidth, 108 * ViewboxFloatingBarScaleTransform.ScaleX);
+                        floatingBarWidth = Math.Max(floatingBarWidth, 86 * ViewboxFloatingBarScaleTransform.ScaleX);
                     }
                 }
 
@@ -3601,6 +3601,11 @@ namespace Ink_Canvas
             HideSubPanels();
         }
 
+        private void CloseBordertools_Click(object sender, RoutedEventArgs e)
+        {
+            HideSubPanels();
+        }
+
         #region Left Side Panel
 
         /// <summary>
@@ -4568,6 +4573,8 @@ private bool forceEraser;
         /// </summary>
         /// <param name="mode">模式名称</param>
         private ToolbarImageButton _lastHighlightButton;
+        private int _indicatorAnimationGeneration;
+        private Storyboard _activeIndicatorStoryboard;
         private string _pendingHighlightMode;
         private int _highlightPositionVersion;
         private int _highlightLayoutRetryCount;
@@ -4708,7 +4715,7 @@ private bool forceEraser;
                 }
 
                 var buttonOrigin = targetButton.TransformToAncestor(contentPanel).Transform(new Point(0, 0));
-                double nextWidth = targetButton.ActualWidth > 0 ? targetButton.ActualWidth : 28;
+                double nextWidth = targetButton.ActualWidth > 0 ? targetButton.ActualWidth : 45;
                 double nextPos = buttonOrigin.X;
 
                 if (nextWidth <= 0 || selectionBG == null)
@@ -4747,7 +4754,7 @@ private bool forceEraser;
                     indicatorBar.Visibility = Visibility.Visible;
                 }
 
-                double indicatorBarWidth = 40;
+                double indicatorBarWidth = 16;
                 double nextBarLeft = nextPos + Math.Max(0, (nextWidth - indicatorBarWidth) / 2);
 
                 bool isFirstShow = _lastHighlightButton == null;
@@ -4758,8 +4765,11 @@ private bool forceEraser;
                     System.Windows.Controls.Canvas.SetLeft(selectionBG, nextPos);
                     if (indicatorBar != null)
                     {
+                        _indicatorAnimationGeneration++;
+                        indicatorBar.RenderTransform = null;
                         indicatorBar.Visibility = Visibility.Visible;
                         indicatorBar.Width = indicatorBarWidth;
+                        indicatorBar.Opacity = 1.0;
                         System.Windows.Controls.Canvas.SetLeft(indicatorBar, nextBarLeft);
                     }
                     _lastHighlightButton = targetButton;
@@ -4777,14 +4787,14 @@ private bool forceEraser;
                             ? _lastHighlightButton.TransformToAncestor(lastPanel).Transform(new Point(0, 0))
                             : new Point(0, 0);
                         prevPos = lastOrigin.X;
-                        prevWidth = _lastHighlightButton.ActualWidth > 0 ? _lastHighlightButton.ActualWidth : 28;
+                        prevWidth = _lastHighlightButton.ActualWidth > 0 ? _lastHighlightButton.ActualWidth : 45;
                     }
                     catch (InvalidOperationException)
                     {
                         prevPos = System.Windows.Controls.Canvas.GetLeft(selectionBG);
                         if (double.IsNaN(prevPos)) prevPos = 0;
                         prevWidth = selectionBG.ActualWidth;
-                        if (double.IsNaN(prevWidth) || prevWidth <= 0) prevWidth = 28;
+                        if (double.IsNaN(prevWidth) || prevWidth <= 0) prevWidth = 45;
                     }
                 }
                 else
@@ -4792,7 +4802,7 @@ private bool forceEraser;
                     prevPos = System.Windows.Controls.Canvas.GetLeft(selectionBG);
                     if (double.IsNaN(prevPos)) prevPos = 0;
                     prevWidth = selectionBG.ActualWidth;
-                    if (double.IsNaN(prevWidth) || prevWidth <= 0) prevWidth = 28;
+                    if (double.IsNaN(prevWidth) || prevWidth <= 0) prevWidth = 45;
                 }
 
                 _lastHighlightButton = targetButton;
@@ -4808,104 +4818,104 @@ private bool forceEraser;
 
                 if (distance < 0.5)
                 {
-                    indicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, null);
-                    indicatorBar.BeginAnimation(FrameworkElement.WidthProperty, null);
+                    _indicatorAnimationGeneration++;
+                    indicatorBar.RenderTransform = null;
                     indicatorBar.Width = indicatorBarWidth;
                     System.Windows.Controls.Canvas.SetLeft(indicatorBar, nextBarLeft);
                     return;
                 }
 
                 indicatorBar.Visibility = Visibility.Visible;
-                indicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, null);
-                indicatorBar.BeginAnimation(FrameworkElement.WidthProperty, null);
 
-                double stretchPhasePercent = 0.4;
-                var duration = TimeSpan.FromMilliseconds(300);
-
-                if (nextBarLeft >= prevBarLeft)
+                if (_activeIndicatorStoryboard != null)
                 {
-                    double stretchedLeft = prevBarLeft;
-                    double stretchedWidth = (nextBarLeft + indicatorBarWidth) - prevBarLeft;
-
-                    var leftAnimation = new DoubleAnimationUsingKeyFrames
-                    {
-                        KeyFrames =
-                        {
-                            new DiscreteDoubleKeyFrame(prevBarLeft, KeyTime.FromPercent(0.0)),
-                            new LinearDoubleKeyFrame(stretchedLeft, KeyTime.FromPercent(stretchPhasePercent)),
-                            new LinearDoubleKeyFrame(nextBarLeft, KeyTime.FromPercent(1.0)),
-                        },
-                        Duration = duration,
-                        FillBehavior = FillBehavior.Stop
-                    };
-                    leftAnimation.Completed += (s, e) =>
-                    {
-                        indicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, null);
-                        System.Windows.Controls.Canvas.SetLeft(indicatorBar, nextBarLeft);
-                    };
-
-                    var widthAnimation = new DoubleAnimationUsingKeyFrames
-                    {
-                        KeyFrames =
-                        {
-                            new DiscreteDoubleKeyFrame(indicatorBarWidth, KeyTime.FromPercent(0.0)),
-                            new LinearDoubleKeyFrame(stretchedWidth, KeyTime.FromPercent(stretchPhasePercent)),
-                            new LinearDoubleKeyFrame(indicatorBarWidth, KeyTime.FromPercent(1.0)),
-                        },
-                        Duration = duration,
-                        FillBehavior = FillBehavior.Stop
-                    };
-                    widthAnimation.Completed += (s, e) =>
-                    {
-                        indicatorBar.BeginAnimation(FrameworkElement.WidthProperty, null);
-                        indicatorBar.Width = indicatorBarWidth;
-                    };
-
-                    indicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, leftAnimation);
-                    indicatorBar.BeginAnimation(FrameworkElement.WidthProperty, widthAnimation);
+                    var oldStoryboard = _activeIndicatorStoryboard;
+                    _activeIndicatorStoryboard = null;
+                    try { oldStoryboard.Stop(indicatorBar); } catch { }
+                    indicatorBar.RenderTransform = null;
+                    indicatorBar.Opacity = 1.0;
                 }
-                else
+
+                _indicatorAnimationGeneration++;
+                indicatorBar.RenderTransform = null;
+
+                double from = prevBarLeft - nextBarLeft;
+                double to = 0;
+                double dimension = indicatorBarWidth;
+                double stretchScale = distance / dimension + 1.0;
+
+                System.Windows.Controls.Canvas.SetLeft(indicatorBar, nextBarLeft);
+                indicatorBar.Width = indicatorBarWidth;
+
+                indicatorBar.RenderTransform = new TransformGroup
                 {
-                    double stretchedLeft = nextBarLeft;
-                    double stretchedWidth = (prevBarLeft + indicatorBarWidth) - nextBarLeft;
+                    Children =
+                    {
+                        new ScaleTransform(),
+                        new TranslateTransform()
+                    }
+                };
 
-                    var leftAnimation = new DoubleAnimationUsingKeyFrames
-                    {
-                        KeyFrames =
-                        {
-                            new DiscreteDoubleKeyFrame(prevBarLeft, KeyTime.FromPercent(0.0)),
-                            new LinearDoubleKeyFrame(stretchedLeft, KeyTime.FromPercent(stretchPhasePercent)),
-                            new LinearDoubleKeyFrame(nextBarLeft, KeyTime.FromPercent(1.0)),
-                        },
-                        Duration = duration,
-                        FillBehavior = FillBehavior.Stop
-                    };
-                    leftAnimation.Completed += (s, e) =>
-                    {
-                        indicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, null);
-                        System.Windows.Controls.Canvas.SetLeft(indicatorBar, nextBarLeft);
-                    };
+                var storyboard = new Storyboard { FillBehavior = FillBehavior.Stop };
 
-                    var widthAnimation = new DoubleAnimationUsingKeyFrames
+                var posAnim = new DoubleAnimationUsingKeyFrames
+                {
+                    KeyFrames =
                     {
-                        KeyFrames =
-                        {
-                            new DiscreteDoubleKeyFrame(indicatorBarWidth, KeyTime.FromPercent(0.0)),
-                            new LinearDoubleKeyFrame(stretchedWidth, KeyTime.FromPercent(stretchPhasePercent)),
-                            new LinearDoubleKeyFrame(indicatorBarWidth, KeyTime.FromPercent(1.0)),
-                        },
-                        Duration = duration,
-                        FillBehavior = FillBehavior.Stop
-                    };
-                    widthAnimation.Completed += (s, e) =>
-                    {
-                        indicatorBar.BeginAnimation(FrameworkElement.WidthProperty, null);
-                        indicatorBar.Width = indicatorBarWidth;
-                    };
+                        new DiscreteDoubleKeyFrame(from < to ? from : (from + (dimension * (1.0 - 1))), KeyTime.FromPercent(0.0)),
+                        new DiscreteDoubleKeyFrame(from < to ? (to + (dimension * (1.0 - 1))) : to, KeyTime.FromPercent(0.333)),
+                    },
+                    Duration = TimeSpan.FromMilliseconds(600)
+                };
 
-                    indicatorBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, leftAnimation);
-                    indicatorBar.BeginAnimation(FrameworkElement.WidthProperty, widthAnimation);
-                }
+                var scaleAnim = new DoubleAnimationUsingKeyFrames
+                {
+                    KeyFrames =
+                    {
+                        new DiscreteDoubleKeyFrame(1.0, KeyTime.FromPercent(0.0)),
+                        new SplineDoubleKeyFrame(stretchScale, KeyTime.FromPercent(0.333), new KeySpline(new Point(0.9, 0.1), new Point(1.0, 0.2))),
+                        new SplineDoubleKeyFrame(1.0, KeyTime.FromPercent(1.0), new KeySpline(new Point(0.1, 0.9), new Point(0.2, 1.0)))
+                    },
+                    Duration = TimeSpan.FromMilliseconds(600)
+                };
+
+                var centerAnim = new DoubleAnimationUsingKeyFrames
+                {
+                    KeyFrames =
+                    {
+                        new DiscreteDoubleKeyFrame(from < to ? 0.0 : dimension, KeyTime.FromPercent(0.0)),
+                        new DiscreteDoubleKeyFrame(from < to ? dimension : 0.0, KeyTime.FromPercent(1.0))
+                    },
+                    Duration = TimeSpan.FromMilliseconds(200)
+                };
+
+                Storyboard.SetTarget(posAnim, indicatorBar);
+                Storyboard.SetTargetProperty(posAnim, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.X)"));
+                Storyboard.SetTarget(scaleAnim, indicatorBar);
+                Storyboard.SetTargetProperty(scaleAnim, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"));
+                Storyboard.SetTarget(centerAnim, indicatorBar);
+                Storyboard.SetTargetProperty(centerAnim, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.CenterX)"));
+
+                storyboard.Children.Add(posAnim);
+                storyboard.Children.Add(scaleAnim);
+                storyboard.Children.Add(centerAnim);
+
+                int currentGeneration = _indicatorAnimationGeneration;
+                _activeIndicatorStoryboard = storyboard;
+                storyboard.Completed += (s, e) =>
+                {
+                    if (currentGeneration != _indicatorAnimationGeneration) return;
+                    _activeIndicatorStoryboard = null;
+                    indicatorBar.RenderTransform = null;
+                };
+
+                storyboard.Begin(indicatorBar, true);
+                storyboard.Pause(indicatorBar);
+                storyboard.SeekAlignedToLastTick(indicatorBar, TimeSpan.Zero, TimeSeekOrigin.BeginTime);
+                Dispatcher.BeginInvoke(() =>
+                {
+                    storyboard.Resume(indicatorBar);
+                }, System.Windows.Threading.DispatcherPriority.Loaded);
             }
             catch (Exception ex)
             {

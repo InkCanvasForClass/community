@@ -158,8 +158,7 @@ namespace Ink_Canvas
             content.ScreenshotBtn.ButtonMouseUp += SymbolIconScreenshot_MouseUp;
             content.ManualBtn.ButtonMouseUp += OperatingGuideWindowIcon_MouseUp;
             content.SettingsBtn.ButtonMouseUp += SymbolIconSettings_Click;
-            content.CloseFontIcon.MouseDown += Border_MouseDown;
-            content.CloseFontIcon.MouseUp += CloseBordertools_MouseUp;
+            content.CloseButtonControl.Click += CloseBordertools_Click;
         }
 
         private void WireUpBackgroundPaletteEvents()
@@ -176,6 +175,7 @@ namespace Ink_Canvas
             content.GSlider.ValueChanged += BackgroundGSlider_ValueChanged;
             content.BSlider.ValueChanged += BackgroundBSlider_ValueChanged;
             content.ApplyBtn.Click += ApplyBackgroundColorBtn_Click;
+            content.CloseButtonControl.Click += CloseBordertools_Click;
         }
 
         private void WireUpBoardShapeDrawPopupContentEvents()
@@ -214,8 +214,7 @@ namespace Ink_Canvas
             content.DrawParabola1Btn.ButtonMouseUp += BtnDrawParabola1_Click;
             content.DrawParabolaWithFocalPointBtn.ButtonMouseUp += BtnDrawParabolaWithFocalPoint_Click;
             content.DrawParabola2Btn.ButtonMouseUp += BtnDrawParabola2_Click;
-            content.CloseFontIcon.MouseDown += Border_MouseDown;
-            content.CloseFontIcon.MouseUp += CloseBordertools_MouseUp;
+            content.CloseButtonControl.Click += CloseBordertools_Click;
         }
 
         private bool _penPaletteEventsWired;
@@ -273,6 +272,7 @@ namespace Ink_Canvas
             content.HighlighterPenColorOrange.ButtonMouseUp += BtnHighlighterColorOrange_Click;
 
             content.ColorThemeSwitch.MouseUp += ColorThemeSwitch_MouseUp;
+            content.CloseButtonControl.Click += CloseBordertools_Click;
         }
 
         private void WireUpEraserPopupContentEvents()
@@ -293,8 +293,7 @@ namespace Ink_Canvas
             content.RectangleTab.MouseUp += SwitchToRectangleEraser;
             content.ClearInkBtn.Click += EraserPanelSymbolIconDelete_MouseUp;
             content.ClearInkAndHistoryBtn.Click += BoardSymbolIconDeleteInkAndHistories_MouseUp;
-            content.CloseFontIcon.MouseDown += Border_MouseDown;
-            content.CloseFontIcon.MouseUp += CloseBordertools_MouseUp;
+            content.CloseButtonControl.Click += CloseBordertools_Click;
         }
 
         private void WireUpGesturePopupContentEvents()
@@ -314,8 +313,7 @@ namespace Ink_Canvas
             content.TwoFingerTranslateToggle.Toggled += ToggleSwitchEnableTwoFingerTranslate_Toggled;
             content.TwoFingerZoomToggle.Toggled += ToggleSwitchEnableTwoFingerZoom_Toggled;
             content.TwoFingerRotationToggle.Toggled += ToggleSwitchEnableTwoFingerRotation_Toggled;
-            content.CloseFontIcon.MouseDown += Border_MouseDown;
-            content.CloseFontIcon.MouseUp += CloseBordertools_MouseUp;
+            content.CloseButtonControl.Click += CloseBordertools_Click;
         }
 
         private bool _imageOptionsPopupEventsWired;
@@ -330,8 +328,7 @@ namespace Ink_Canvas
 
             content.ScreenshotOption.MouseUp += ImageOptionScreenshot_MouseUp;
             content.SelectFileOption.MouseUp += ImageOptionSelectFile_MouseUp;
-            content.CloseFontIcon.MouseDown += Border_MouseDown;
-            content.CloseFontIcon.MouseUp += CloseBordertools_MouseUp;
+            content.CloseButtonControl.Click += CloseBordertools_Click;
         }
 
         private bool _shapeDrawPopupEventsWired;
@@ -373,8 +370,7 @@ namespace Ink_Canvas
             content.DrawParabola1Btn.ButtonMouseUp += BtnDrawParabola1_Click;
             content.DrawParabolaWithFocalPointBtn.ButtonMouseUp += BtnDrawParabolaWithFocalPoint_Click;
             content.DrawParabola2Btn.ButtonMouseUp += BtnDrawParabola2_Click;
-            content.CloseFontIcon.MouseDown += Border_MouseDown;
-            content.CloseFontIcon.MouseUp += CloseBordertools_MouseUp;
+            content.CloseButtonControl.Click += CloseBordertools_Click;
         }
 
         /// <summary>

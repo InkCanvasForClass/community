@@ -1,7 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Markup;
-using iNKORE.UI.WPF.Modern.Controls;
 
 namespace Ink_Canvas.Controls
 {
@@ -34,7 +33,7 @@ namespace Ink_Canvas.Controls
             set => SetValue(InnerContentProperty, value);
         }
 
-        public FontIcon CloseFontIcon => TitleBar?.CloseFontIcon;
+        public Button CloseButtonControl => TitleBar?.CloseButtonControl;
 
         public PopupShellContent()
         {

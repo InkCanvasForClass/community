@@ -1,6 +1,5 @@
 using System.Windows;
 using System.Windows.Controls;
-using iNKORE.UI.WPF.Modern.Controls;
 
 namespace Ink_Canvas.Controls
 {
@@ -31,7 +30,7 @@ namespace Ink_Canvas.Controls
         public GeometryButton DrawParabolaWithFocalPointBtn => ImageDrawParabolaWithFocalPoint;
         public GeometryButton DrawParabola2Btn => ImageDrawParabola2;
 
-        public FontIcon CloseFontIcon => Shell?.CloseFontIcon;
+        public Button CloseButtonControl => Shell?.CloseButtonControl;
 
         public ShapeDrawPopupContent()
         {

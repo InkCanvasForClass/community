@@ -33,7 +33,7 @@ namespace Ink_Canvas.Controls
         public FrameworkElement CircleTabIndicator => CircleEraserTabButtonIndicator;
         public FrameworkElement RectangleTabIndicator => RectangleEraserTabButtonIndicator;
 
-        public FontIcon CloseFontIcon => Shell?.CloseFontIcon;
+        public Button CloseButtonControl => Shell?.CloseButtonControl;
 
         public EraserPopupContent()
         {

@@ -47,7 +47,7 @@ namespace Ink_Canvas.Controls
 
         public ObservableCollection<PopupTabItem> Tabs { get; }
 
-        public FontIcon CloseFontIcon => CloseIcon;
+        public Button CloseButtonControl => CloseButton;
 
         public event EventHandler<int> SelectedIndexChanged;
 
