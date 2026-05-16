@@ -416,9 +416,9 @@ namespace Ink_Canvas.Windows
 
                 case 1: // 跟随四季
                     var month = DateTime.Now.Month;
-                    if (month >= 3 && month <= 5) return 2; // 春季
-                    if (month >= 6 && month <= 8) return 3; // 夏季
-                    if (month >= 9 && month <= 11) return 4; // 秋季
+                    if (month >= 2 && month <= 4) return 2; // 春季
+                    if (month >= 5 && month <= 7) return 3; // 夏季
+                    if (month >= 8 && month <= 10) return 4; // 秋季
                     return 5; // 冬季
 
                 default:
