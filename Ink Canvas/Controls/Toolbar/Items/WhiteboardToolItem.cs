@@ -6,10 +6,8 @@ namespace Ink_Canvas.Controls.Toolbar.Items
     {
         public override string Id => "builtin.whiteboard";
         public override string LocalizationKey => "FloatingBar_Whiteboard";
-        public override ToolbarSlot DefaultSlot => ToolbarSlot.FloatingBarEnd;
-        public override int DefaultOrder => 100;
-        public override ToolbarInsertPosition DefaultPosition => ToolbarInsertPosition.AfterAnchor;
-        public override string DefaultAnchorName => "FloatingBarEndSeparator";
+        public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
+        public override string Description => "白板";
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.ImageBlackboard_MouseUp(sender, e);

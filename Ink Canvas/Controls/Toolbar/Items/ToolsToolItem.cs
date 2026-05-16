@@ -6,11 +6,8 @@ namespace Ink_Canvas.Controls.Toolbar.Items
     {
         public override string Id => "builtin.tools";
         public override string LocalizationKey => "Board_Tools";
-        public override ToolbarSlot DefaultSlot => ToolbarSlot.FloatingBarEnd;
-        public override int DefaultOrder => 110;
-        public override ToolbarInsertPosition DefaultPosition => ToolbarInsertPosition.AfterAnchor;
-        public override string DefaultAnchorName => "FloatingBarEndSeparator";
-        public override string MenuPanelName => "BorderTools";
+        public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
+        public override string Description => "工具";
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.SymbolIconTools_MouseUp(sender, e);

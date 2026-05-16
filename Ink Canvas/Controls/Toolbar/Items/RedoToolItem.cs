@@ -6,9 +6,8 @@ namespace Ink_Canvas.Controls.Toolbar.Items
     {
         public override string Id => "builtin.redo";
         public override string LocalizationKey => "Board_Redo";
-        public override ToolbarSlot DefaultSlot => ToolbarSlot.FloatingBarCanvasControls;
-        public override int DefaultOrder => 310;
-        public override ToolbarInsertPosition DefaultPosition => ToolbarInsertPosition.Append;
+        public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AnnotationOnly().WithHideOnCollapsed();
+        public override string Description => "重做";
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.SymbolIconRedo_MouseUp(sender, e);

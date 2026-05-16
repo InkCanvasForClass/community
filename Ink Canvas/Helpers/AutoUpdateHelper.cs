@@ -26,7 +26,21 @@ namespace Ink_Canvas.Helpers
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(10);
         private static readonly string updatesFolderPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "AutoUpdate");
         private static string statusFilePath;
-
+        private static readonly HashSet<string> UpdateFilesToOverwrite = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "InkCanvas.IACoreHelper.exe",
+            "InkCanvas.IACoreHelper.exe.config",
+            "InkCanvasForClass.deps.json",
+            "InkCanvasForClass.dll",
+            "InkCanvasForClass.dll.config",
+            "InkCanvasForClass.exe",
+            "InkCanvasForClass.runtimeconfig.json"
+        };
+        private static readonly HashSet<string> UpdateDirectoriesToOverwrite = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "en-US",
+            "runtimes"
+        };
         // 全局下载取消令牌；UI 通过 RequestCancelDownload 取消当前下载
         private static CancellationTokenSource _activeDownloadCts;
         private static readonly object _activeDownloadLock = new object();
@@ -417,33 +431,13 @@ namespace Ink_Canvas.Helpers
             var cached = TryGetCachedOrderedGroups(channel);
             if (cached != null) return cached;
             var groups = ChannelLineGroups[channel];
-            var availableGroups = new List<(UpdateLineGroup group, long delay)>();
 
-            LogHelper.WriteLogToFile($"AutoUpdate | 开始检测通道 {channel} 下所有线路组延迟...");
+            LogHelper.WriteLogToFile($"AutoUpdate | 开始并发检测通道 {channel} 下所有线路组延迟...");
 
-            var testUrls = new List<(UpdateLineGroup group, string testUrl)>();
+            var testTasks = new List<Task<(UpdateLineGroup group, long delay)>>();
             foreach (var group in groups)
             {
-                string testUrl = null;
-                if (group.GroupName == "智教联盟" || group.GroupName == "inkeys")
-                {
-                    try
-                    {
-                        if (!string.IsNullOrEmpty(group.DownloadUrlFormat))
-                        {
-                            testUrl = group.DownloadUrlFormat.Replace("{0}", "test");
-                            testUrl = AppendX64SuffixBeforeZipExtension(testUrl);
-                        }
-                    }
-                    catch
-                    {
-                        testUrl = null;
-                    }
-                }
-                else
-                {
-                    testUrl = group.VersionUrl;
-                }
+                var testUrl = GetLineGroupTestUrl(group);
 
                 if (string.IsNullOrEmpty(testUrl))
                 {
@@ -458,17 +452,16 @@ namespace Ink_Canvas.Helpers
             {
                 var (group, testUrl) = entry;
                 LogHelper.WriteLogToFile($"AutoUpdate | 检测线路组: {group.GroupName} ({testUrl})");
+                testTasks.Add(MeasureLineGroupDelayAsync(group, testUrl));
+            }
 
-                long delay;
-                if (group.GroupName == "智教联盟" || group.GroupName == "inkeys")
-                {
-                    delay = await GetDownloadUrlDelay(testUrl);
-                }
-                else
-                {
-                    delay = await GetUrlDelay(testUrl);
-                }
+            var availableGroups = new List<(UpdateLineGroup group, long delay)>();
+            var testResults = await Task.WhenAll(testTasks);
 
+            foreach (var result in testResults)
+            {
+                var group = result.group;
+                var delay = result.delay;
                 if (delay >= 0)
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | 线路组 {group.GroupName} 延迟: {delay}ms");
@@ -520,6 +513,35 @@ namespace Ink_Canvas.Helpers
 
             CacheOrderedGroups(channel, orderedGroups);
             return orderedGroups;
+        }
+
+        private static string GetLineGroupTestUrl(UpdateLineGroup group)
+        {
+            if (group.GroupName == "智教联盟" || group.GroupName == "inkeys")
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(group.DownloadUrlFormat))
+                    {
+                        var testUrl = group.DownloadUrlFormat.Replace("{0}", "test");
+                        return AppendX64SuffixBeforeZipExtension(testUrl);
+                    }
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+
+            return group.VersionUrl;
+        }
+
+        private static async Task<(UpdateLineGroup group, long delay)> MeasureLineGroupDelayAsync(UpdateLineGroup group, string testUrl)
+        {
+            var delay = group.GroupName == "智教联盟" || group.GroupName == "inkeys"
+                ? await GetDownloadUrlDelay(testUrl)
+                : await GetUrlDelay(testUrl);
+            return (group, delay);
         }
 
         // 缓存按延迟排序后的线路组，避免短时间内重复测速
@@ -2074,7 +2096,7 @@ namespace Ink_Canvas.Helpers
         }
 
         // 异步复制目录的辅助方法（带重试机制）
-        private static async Task<bool> CopyDirectoryWithRetryAsync(string sourceDir, string destinationDir)
+        private static async Task<bool> CopyDirectoryWithRetryAsync(string sourceDir, string destinationDir, bool overwriteAllFiles = false)
         {
             var dir = new DirectoryInfo(sourceDir);
             DirectoryInfo[] dirs = dir.GetDirectories();
@@ -2086,14 +2108,11 @@ namespace Ink_Canvas.Helpers
                 Directory.CreateDirectory(destinationDir);
             }
 
-            // 定义需要覆盖的文件列表（仅覆盖主程序和配置文件）
-            string[] filesToOverwrite = { "InkCanvasForClass.exe", "InkCanvasForClass.exe.config" };
-
             // 复制文件
             foreach (FileInfo file in dir.GetFiles())
             {
                 // 只覆盖指定的文件，跳过其他文件
-                if (!filesToOverwrite.Contains(file.Name))
+                if (!overwriteAllFiles && !UpdateFilesToOverwrite.Contains(file.Name))
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | 跳过文件（不在覆盖列表中）: {file.Name}");
                     continue;
@@ -2153,8 +2172,14 @@ namespace Ink_Canvas.Helpers
             // 递归复制子目录
             foreach (DirectoryInfo subDir in dirs)
             {
+                if (!overwriteAllFiles && !UpdateDirectoriesToOverwrite.Contains(subDir.Name))
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 跳过目录（不在覆盖列表中）: {subDir.Name}");
+                    continue;
+                }
+
                 string newDestinationDir = Path.Combine(destinationDir, subDir.Name);
-                bool subDirCopied = await CopyDirectoryWithRetryAsync(subDir.FullName, newDestinationDir);
+                bool subDirCopied = await CopyDirectoryWithRetryAsync(subDir.FullName, newDestinationDir, overwriteAllFiles: true);
                 if (!subDirCopied)
                 {
                     allFilesCopied = false;
@@ -2165,7 +2190,7 @@ namespace Ink_Canvas.Helpers
         }
 
         // 异步复制目录的辅助方法（原版本，保留兼容性）
-        private static async Task CopyDirectoryAsync(string sourceDir, string destinationDir)
+        private static async Task CopyDirectoryAsync(string sourceDir, string destinationDir, bool overwriteAllFiles = false)
         {
             var dir = new DirectoryInfo(sourceDir);
             DirectoryInfo[] dirs = dir.GetDirectories();
@@ -2176,14 +2201,11 @@ namespace Ink_Canvas.Helpers
                 Directory.CreateDirectory(destinationDir);
             }
 
-            // 定义需要覆盖的文件列表（仅覆盖主程序和配置文件）
-            string[] filesToOverwrite = { "InkCanvasForClass.exe", "InkCanvasForClass.exe.config" };
-
             // 复制文件
             foreach (FileInfo file in dir.GetFiles())
             {
                 // 只覆盖指定的文件，跳过其他文件
-                if (!filesToOverwrite.Contains(file.Name))
+                if (!overwriteAllFiles && !UpdateFilesToOverwrite.Contains(file.Name))
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | 跳过文件（不在覆盖列表中）: {file.Name}");
                     continue;
@@ -2213,8 +2235,14 @@ namespace Ink_Canvas.Helpers
             // 递归复制子目录
             foreach (DirectoryInfo subDir in dirs)
             {
+                if (!overwriteAllFiles && !UpdateDirectoriesToOverwrite.Contains(subDir.Name))
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 跳过目录（不在覆盖列表中）: {subDir.Name}");
+                    continue;
+                }
+
                 string newDestinationDir = Path.Combine(destinationDir, subDir.Name);
-                await CopyDirectoryAsync(subDir.FullName, newDestinationDir);
+                await CopyDirectoryAsync(subDir.FullName, newDestinationDir, overwriteAllFiles: true);
             }
         }
 

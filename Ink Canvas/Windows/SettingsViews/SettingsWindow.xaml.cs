@@ -65,7 +65,42 @@ namespace Ink_Canvas.Windows.SettingsViews
             ApplyCurrentTheme();
             global::Ink_Canvas.Helpers.WindowBackdropHelper.Apply(this, Helpers.SettingsManager.Settings);
 
-            _pageTypes = new Dictionary<string, Type>(_staticPageTypes);
+            // 初始化内置页面映射
+            _pageTypes = new Dictionary<string, Type>
+            {
+                { "HomePage", typeof(HomePage) },
+                { "StartupPage", typeof(StartupPage) },
+                { "PrivacyPage", typeof(PrivacyPage) },
+                { "SecurityPage", typeof(SecurityPage) },
+                { "WindowPage", typeof(WindowPage) },
+                { "AppearancePage", typeof(AppearancePage) },
+                { "HotkeyPage", typeof(HotkeyPage) },
+                { "ToolbarPage", typeof(ToolbarPage) },
+                { "UpdatePage", typeof(UpdatePage) },
+                { "ExperimentalPage", typeof(ExperimentalPage) },
+                { "AdvancedPage", typeof(AdvancedPage) },
+                { "StoragePage", typeof(StoragePage) },
+                { "CloudStoragePage", typeof(CloudStoragePage) },
+                { "AutomationPage", typeof(AutomationPage) },
+                { "PowerPointPage", typeof(PowerPointPage) },
+                { "RandomDrawPage", typeof(RandomDrawPage) },
+                { "CanvasPage", typeof(CanvasPage) },
+                { "InkRecognitionPage", typeof(InkRecognitionPage) },
+                { "DebugPage", typeof(DebugPage) },
+                { "FriendlyLinksPage", typeof(FriendlyLinksPage) },
+                { "AboutPage", typeof(AboutPage) },
+                { "Settings", typeof(SettingsPage) },
+                { "PluginPage", typeof(PluginPage) },
+                { "PluginSettingsPage", typeof(PluginSettingsPage) }
+            };
+
+            // 默认选中首页
+            if (NavigationViewControl.MenuItems.Count > 0)
+            {
+                NavigateToPage("HomePage");
+                NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems[0];
+                NavigationViewControl.Header = "首页";
+            }
 
             UpdateAppTitleBarMargin();
 
@@ -344,8 +379,14 @@ namespace Ink_Canvas.Windows.SettingsViews
             }
             catch (Exception ex)
             {
-                Ink_Canvas.Helpers.LogHelper.WriteLogToFile($"SettingsWindow: 导航到 {pageTag} 异常: {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}", Ink_Canvas.Helpers.LogHelper.LogType.Error);
-                MessageBox.Show($"导航到页面时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                var detail = ex.ToString();
+                if (ex.InnerException != null)
+                {
+                    detail += "\nInnerException:\n" + ex.InnerException;
+                }
+
+                Ink_Canvas.Helpers.LogHelper.WriteLogToFile($"SettingsWindow: 导航到 {pageTag} 异常: {detail}", Ink_Canvas.Helpers.LogHelper.LogType.Error);
+                MessageBox.Show($"导航到页面时出错: {ex.InnerException?.Message ?? ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {

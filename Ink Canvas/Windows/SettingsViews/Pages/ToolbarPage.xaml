@@ -7,86 +7,460 @@
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:dd="urn:gong-wpf-dragdrop"
+      xmlns:toolbar="clr-namespace:Ink_Canvas.Controls.Toolbar"
       mc:Ignorable="d"
       Title="工具栏">
 
     <Page.Resources>
-        <Style x:Key="ToolbarItemStyle" TargetType="ListBox">
+        <local:IdToDisplayNameConverter x:Key="IdToNameConverter"/>
+        <local:ConditionIdToNameConverter x:Key="ConditionIdToNameConverter"/>
+        <local:StateToBrushConverter x:Key="StateToBrushConverter"/>
+        <local:LogicalModeToIntConverter x:Key="LogicalModeToIntConverter"/>
+        <local:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+
+        <DataTemplate x:Key="AddedItemTemplate" DataType="{x:Type toolbar:ToolbarComponentEntry}">
+            <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="6" Padding="10,6" Margin="2"
+                    Cursor="Hand">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="&#xE76F;" FontFamily="Segoe MDL2 Assets" FontSize="11"
+                               VerticalAlignment="Center" Margin="0,0,6,0" Opacity="0.45"/>
+                    <TextBlock Text="{Binding Id, Converter={StaticResource IdToNameConverter}}"
+                               VerticalAlignment="Center" FontSize="13"/>
+                    <Button Content="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                            Click="RemoveItem_Click" Margin="8,0,0,0"
+                            Background="Transparent" BorderThickness="0"
+                            Padding="4,2" VerticalAlignment="Center"
+                            Cursor="Hand"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="GroupChildItemTemplate" DataType="{x:Type toolbar:ToolbarComponentEntry}">
+            <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="6" Padding="8,4" Margin="2"
+                    Cursor="Hand">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="&#xE76F;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                               VerticalAlignment="Center" Margin="0,0,4,0" Opacity="0.45"/>
+                    <TextBlock Text="{Binding Id, Converter={StaticResource IdToNameConverter}}"
+                               VerticalAlignment="Center" FontSize="12"/>
+                    <Button Content="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="9"
+                            Click="RemoveGroupChildItem_Click" Margin="6,0,0,0"
+                            Background="Transparent" BorderThickness="0"
+                            Padding="3,1" VerticalAlignment="Center"
+                            Cursor="Hand"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="LibraryItemTemplate">
+            <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="6" Padding="10,8" Margin="3" Width="200"
+                    Cursor="Hand">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="{Binding DisplayName}" FontWeight="Medium" FontSize="13"/>
+                        <TextBlock Text="{Binding Description}" Opacity="0.65" FontSize="12"
+                                   TextWrapping="Wrap" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                            Click="AddLibraryItem_Click"
+                            Background="Transparent" BorderThickness="0"
+                            Padding="6,4" VerticalAlignment="Center"
+                            ToolTip="添加到已添加组件"
+                            Cursor="Hand"/>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <Style x:Key="DragDropListBoxStyle" TargetType="ListBox">
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="dd:DragDrop.IsDragSource" Value="True"/>
             <Setter Property="dd:DragDrop.IsDropTarget" Value="True"/>
             <Setter Property="dd:DragDrop.UseDefaultEffectDataTemplate" Value="False"/>
-            <Setter Property="dd:DragDrop.SelectDroppedItems" Value="True"/>
             <Setter Property="dd:DragDrop.DropTargetAdornerBrush" Value="#2563eb"/>
-            <Setter Property="dd:DragDrop.DropHandler" Value="{Binding}"/>
-            <Setter Property="ScrollViewer.PanningMode" Value="VerticalOnly"/>
-            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
-            <Setter Property="dd:DragDrop.EffectMoveAdornerTemplate">
-                <Setter.Value>
-                    <DataTemplate>
-                        <Border Background="#2563eb" CornerRadius="12" Padding="16,8"
-                                Opacity="0.9">
-                            <TextBlock Text="移动" Foreground="White"
-                                       FontSize="13" FontWeight="Medium"
-                                       VerticalAlignment="Center"/>
-                        </Border>
-                    </DataTemplate>
-                </Setter.Value>
-            </Setter>
+            <Setter Property="ScrollViewer.PanningMode" Value="HorizontalOnly"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
         </Style>
-
-        <DataTemplate x:Key="ToolbarItemTemplate">
-            <Grid Height="44" Margin="0,1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <TextBlock Grid.Column="0" Text="&#xE76F;"
-                           FontFamily="Segoe MDL2 Assets" FontSize="14"
-                           VerticalAlignment="Center" Margin="0,0,10,0" Opacity="0.45"/>
-
-                <TextBlock Grid.Column="1" Text="{Binding DisplayName}"
-                           FontSize="14" VerticalAlignment="Center"/>
-
-                <CheckBox Grid.Column="2" IsChecked="{Binding IsVisible, Mode=TwoWay}"
-                          VerticalAlignment="Center" Margin="12,0,0,0"
-                          ToolTip="显示或隐藏此按钮"/>
-            </Grid>
-        </DataTemplate>
     </Page.Resources>
 
     <ScrollViewer PanningMode="VerticalFirst">
-        <StackPanel Margin="59,0,59,0" MaxWidth="1000">
+        <ikw:SimpleStackPanel Margin="59,0,59,0" MaxWidth="1000" Spacing="4">
 
-            <!-- 主工具栏 -->
-            <TextBlock Text="主工具栏" FontSize="16" FontWeight="Bold" Margin="0,20,0,4"/>
-            <TextBlock Text="拖动调整顺序，开关控制显示。隐藏的按钮不会出现在浮动工具栏中。"
-                       Opacity="0.65" FontSize="12" Margin="0,0,0,8"/>
-            <ListBox Name="MainItemsList" Style="{StaticResource ToolbarItemStyle}"
-                     ItemTemplate="{StaticResource ToolbarItemTemplate}"
-                     ItemsSource="{Binding MainItems}" />
+            <TextBlock Text="配置文件" FontSize="14" FontWeight="SemiBold" Margin="0,20,0,6"/>
+            <DockPanel Margin="0,0,0,4">
+                <ComboBox x:Name="ComboBoxConfigFile" SelectionChanged="ComboBoxConfigFile_SelectionChanged"
+                          MinWidth="200" DockPanel.Dock="Left" VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
+                    <Button Content="新建" Click="ButtonNewConfig_Click" Padding="12,6" Margin="0,0,8,0"/>
+                    <Button Content="复制" Click="ButtonDuplicateConfig_Click" Padding="12,6" Margin="0,0,8,0"/>
+                    <Button Content="删除" Click="ButtonDeleteConfig_Click" Padding="12,6"/>
+                </StackPanel>
+            </DockPanel>
 
-            <!-- 画布控制 -->
-            <TextBlock Text="画布控制" FontSize="16" FontWeight="Bold" Margin="0,24,0,4"/>
-            <TextBlock Text="批注模式下可见的工具按钮排序。"
-                       Opacity="0.65" FontSize="12" Margin="0,0,0,8"/>
-            <ListBox Name="CanvasItemsList" Style="{StaticResource ToolbarItemStyle}"
-                     ItemTemplate="{StaticResource ToolbarItemTemplate}"
-                     ItemsSource="{Binding CanvasItems}" />
+            <TextBlock Text="以下组件将显示在浮动工具栏上，从组件库拖动组件以添加。"
+                       Opacity="0.65" FontSize="13" Margin="0,8,0,12" TextWrapping="Wrap"/>
 
-            <!-- 尾部按钮 -->
-            <TextBlock Text="尾部按钮" FontSize="16" FontWeight="Bold" Margin="0,24,0,4"/>
-            <TextBlock Text="白板、工具、折叠按钮排序。"
-                       Opacity="0.65" FontSize="12" Margin="0,0,0,8"/>
-            <ListBox Name="EndItemsList" Style="{StaticResource ToolbarItemStyle}"
-                     ItemTemplate="{StaticResource ToolbarItemTemplate}"
-                     ItemsSource="{Binding EndItems}" />
+            <TextBlock Text="已添加组件" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,6"/>
+            <Border BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="8" Padding="6"
+                    Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}"
+                    MinHeight="64">
+                <ListBox x:Name="AddedList"
+                         ItemsSource="{Binding AddedComponents}"
+                         ItemTemplate="{StaticResource AddedItemTemplate}"
+                         SelectedItem="{Binding SelectedEntry, Mode=TwoWay}"
+                         Style="{StaticResource DragDropListBoxStyle}"
+                         dd:DragDrop.DropHandler="{Binding}"
+                         MinHeight="48">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                </ListBox>
+            </Border>
+
+            <!-- 分组内组件 -->
+            <StackPanel x:Name="GroupChildrenPanel" Margin="0,8,0,0">
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedEntry.IsGroup}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+                <TextBlock Text="分组内组件" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                <TextBlock Text="拖动组件库中的组件到此处添加，或拖动已有组件排序。"
+                           Opacity="0.65" FontSize="12" Margin="0,0,0,6"/>
+                <Border BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="6" Padding="4"
+                        Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}"
+                        MinHeight="40">
+                    <ListBox x:Name="GroupChildrenListBox"
+                             ItemsSource="{Binding GroupChildren}"
+                             ItemTemplate="{StaticResource GroupChildItemTemplate}"
+                             SelectedItem="{Binding SelectedGroupChild, Mode=TwoWay}"
+                             Style="{StaticResource DragDropListBoxStyle}"
+                             dd:DragDrop.DropHandler="{Binding GroupDropHandler}"
+                             MinHeight="32">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                    </ListBox>
+                </Border>
+            </StackPanel>
+
+            <!-- TabControl: 组件库 / 组件设置 / 高级设置 -->
+            <TabControl x:Name="SettingsTabControl" Margin="0,12,0,0"
+                        Style="{StaticResource {x:Static ui:ThemeKeys.TabControlPivotStyleKey}}"
+                        SelectedIndex="{Binding SettingsTabIndex}">
+
+                <!-- ===== Tab 1: 组件库 ===== -->
+                <TabItem Header="组件库">
+                    <ScrollViewer PanningMode="VerticalFirst" VerticalScrollBarVisibility="Auto">
+                        <ikw:SimpleStackPanel Spacing="4" Margin="0,8,0,0">
+                            <TextBlock Text="拖动组件到上方已添加列表或分组内组件列表以添加到工具栏。"
+                                       Opacity="0.65" FontSize="12" Margin="0,0,0,8"/>
+                            <ListBox ItemsSource="{Binding AvailableItems}"
+                                     ItemTemplate="{StaticResource LibraryItemTemplate}"
+                                     dd:DragDrop.IsDragSource="True"
+                                     Background="Transparent" BorderThickness="0"
+                                     SelectionMode="Single">
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                            </ListBox>
+                        </ikw:SimpleStackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- ===== Tab 2: 组件设置 ===== -->
+                <TabItem Header="组件设置">
+                    <TabItem.Visibility>
+                        <Binding Path="SelectedEntry" Converter="{StaticResource NullToVisibilityConverter}"/>
+                    </TabItem.Visibility>
+                    <ScrollViewer PanningMode="VerticalFirst" VerticalScrollBarVisibility="Auto">
+                        <ikw:SimpleStackPanel Spacing="4" Margin="0,8,0,0">
+
+                            <TextBlock Text="组件属性" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                            <ui:SettingsCard Header="独立边框" Description="为此组件显示独立的边框包装">
+                                <CheckBox x:Name="CheckBoxShowSeparateBorder"
+                                          Checked="CheckBoxShowSeparateBorder_Changed"
+                                          Unchecked="CheckBoxShowSeparateBorder_Changed"/>
+                            </ui:SettingsCard>
+
+                            <StackPanel x:Name="PanelQuickColorPaletteDisplayMode" Visibility="Collapsed">
+                                <ui:SettingsCard Header="显示模式" Description="选择快捷调色盘的颜色数量">
+                                    <ComboBox x:Name="ComboBoxDisplayMode" Width="120"
+                                              SelectionChanged="ComboBoxDisplayMode_SelectionChanged">
+                                        <ComboBoxItem Content="双行8色" Tag="1"/>
+                                        <ComboBoxItem Content="单行6色" Tag="0"/>
+                                    </ComboBox>
+                                </ui:SettingsCard>
+                            </StackPanel>
+
+                            <TextBlock Text="尺寸" FontSize="14" FontWeight="SemiBold" Margin="0,12,0,4"/>
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,4,4">
+                                    <TextBlock Text="固定宽度" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxFixedWidth" Width="80" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="0" Grid.Column="1" Margin="4,0,0,4">
+                                    <TextBlock Text="固定高度" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxFixedHeight" Width="80" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,4,4">
+                                    <TextBlock Text="最小宽度" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxMinWidth" Width="80" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="1" Margin="4,0,0,4">
+                                    <TextBlock Text="最大宽度" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxMaxWidth" Width="80" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,4,0">
+                                    <TextBlock Text="最小高度" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxMinHeight" Width="80" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="2" Grid.Column="1" Margin="4,0,0,0">
+                                    <TextBlock Text="最大高度" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxMaxHeight" Width="80" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Text="对齐" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,4,0">
+                                    <TextBlock Text="水平对齐" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <ComboBox x:Name="ComboBoxHAlign" Width="100" HorizontalAlignment="Left"
+                                              SelectionChanged="ComponentAlignment_Changed">
+                                        <ComboBoxItem Content="默认" Tag=""/>
+                                        <ComboBoxItem Content="左" Tag="Left"/>
+                                        <ComboBoxItem Content="居中" Tag="Center"/>
+                                        <ComboBoxItem Content="右" Tag="Right"/>
+                                        <ComboBoxItem Content="拉伸" Tag="Stretch"/>
+                                    </ComboBox>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="4,0,0,0">
+                                    <TextBlock Text="垂直对齐" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <ComboBox x:Name="ComboBoxVAlign" Width="100" HorizontalAlignment="Left"
+                                              SelectionChanged="ComponentAlignment_Changed">
+                                        <ComboBoxItem Content="默认" Tag=""/>
+                                        <ComboBoxItem Content="上" Tag="Top"/>
+                                        <ComboBoxItem Content="居中" Tag="Center"/>
+                                        <ComboBoxItem Content="下" Tag="Bottom"/>
+                                        <ComboBoxItem Content="拉伸" Tag="Stretch"/>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Text="外观" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,4,0">
+                                    <TextBlock Text="字体大小" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxFontSize" Width="60" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="4,0,4,0">
+                                    <TextBlock Text="图标大小" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxIconSize" Width="60" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Margin="4,0,0,0">
+                                    <TextBlock Text="不透明度" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxOpacity" Width="60" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Text="边距" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                            <TextBlock Text="左, 上, 右, 下" FontSize="12" Opacity="0.65" Margin="0,0,0,4"/>
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="TextBoxMarginLeft" Grid.Column="0" Margin="0,0,2,0"
+                                         TextChanged="ComponentSetting_TextChanged"/>
+                                <TextBox x:Name="TextBoxMarginTop" Grid.Column="1" Margin="2,0,2,0"
+                                         TextChanged="ComponentSetting_TextChanged"/>
+                                <TextBox x:Name="TextBoxMarginRight" Grid.Column="2" Margin="2,0,2,0"
+                                         TextChanged="ComponentSetting_TextChanged"/>
+                                <TextBox x:Name="TextBoxMarginBottom" Grid.Column="3" Margin="2,0,0,0"
+                                         TextChanged="ComponentSetting_TextChanged"/>
+                            </Grid>
+
+                            <Button Content="重置组件设置" Click="ButtonResetComponentSettings_Click"
+                                    Padding="12,6" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+
+                        </ikw:SimpleStackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- ===== Tab 3: 高级设置 ===== -->
+                <TabItem Header="高级设置">
+                    <TabItem.Visibility>
+                        <Binding Path="SelectedEntry" Converter="{StaticResource NullToVisibilityConverter}"/>
+                    </TabItem.Visibility>
+                    <ScrollViewer PanningMode="VerticalFirst" VerticalScrollBarVisibility="Auto">
+                        <ikw:SimpleStackPanel Spacing="4" Margin="0,8,0,0">
+
+                            <TextBlock Text="按规则隐藏" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                            <TextBlock Text="当规则集满足时隐藏此组件。"
+                                       Opacity="0.65" FontSize="12" Margin="0,0,0,8"/>
+
+                            <Border BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                                    BorderThickness="1" CornerRadius="8" Padding="12"
+                                    Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}">
+                                <StackPanel>
+                                    <WrapPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                        <ComboBox x:Name="ComboBoxRulesetMode"
+                                                  SelectionChanged="ComboBoxRulesetMode_SelectionChanged"
+                                                  MinWidth="200">
+                                            <ComboBoxItem Content="当以下任意条件组满足时"/>
+                                            <ComboBoxItem Content="当以下所有条件组满足时"/>
+                                        </ComboBox>
+                                        <CheckBox Content="反转" x:Name="CheckBoxRulesetReversed"
+                                                  Checked="CheckBoxRulesetReversed_Changed"
+                                                  Unchecked="CheckBoxRulesetReversed_Changed"
+                                                  Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                        <Button Content="添加组" Click="ButtonAddGroup_Click"
+                                                Padding="8,4" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                        <Ellipse x:Name="EllipseRulesetState" Width="10" Height="10"
+                                                 Margin="8,0,0,0" VerticalAlignment="Center"
+                                                 Fill="DarkGray"/>
+                                    </WrapPanel>
+
+                                    <ItemsControl x:Name="ItemsControlGroups">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                                                        BorderThickness="1" CornerRadius="6" Padding="8"
+                                                        Margin="0,4" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}">
+                                                    <StackPanel>
+                                                        <WrapPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                                            <ComboBox SelectedIndex="{Binding Mode, Converter={StaticResource LogicalModeToIntConverter}, Mode=OneWay}"
+                                                                      SelectionChanged="ComboBoxGroupMode_SelectionChanged"
+                                                                      MinWidth="180" Tag="{Binding}">
+                                                                <ComboBoxItem Content="当以下任意条件满足时"/>
+                                                                <ComboBoxItem Content="当以下所有条件满足时"/>
+                                                            </ComboBox>
+                                                            <CheckBox Content="反转" IsChecked="{Binding IsReversed}"
+                                                                      Checked="CheckBoxGroupReversed_Changed"
+                                                                      Unchecked="CheckBoxGroupReversed_Changed"
+                                                                      Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                                            <Button Content="规则" Click="ButtonAddRule_Click"
+                                                                    Padding="6,2" Margin="6,0,0,0" VerticalAlignment="Center"
+                                                                    Tag="{Binding}"/>
+                                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                                                                        VerticalAlignment="Center" Margin="8,0,0,0">
+                                                                <Ellipse Width="8" Height="8" Margin="0,0,4,0"
+                                                                         Fill="{Binding State, Converter={StaticResource StateToBrushConverter}}"/>
+                                                                <ui:ToggleSwitch IsOn="{Binding IsEnabled}"
+                                                                                  Toggled="CheckBoxGroupEnabled_Changed"
+                                                                                  ToolTip="启用条件组" Margin="0,0,4,0"/>
+                                                                <Button Content="复制" Click="ButtonDuplicateGroup_Click"
+                                                                        Padding="4,2" Margin="0,0,4,0" Tag="{Binding}"/>
+                                                                <Button Content="删除" Click="ButtonDeleteGroup_Click"
+                                                                        Padding="4,2" Tag="{Binding}"/>
+                                                            </StackPanel>
+                                                        </WrapPanel>
+
+                                                        <ItemsControl ItemsSource="{Binding Rules}" Margin="4,0,0,0">
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <Grid Margin="0,2">
+                                                                        <Grid.ColumnDefinitions>
+                                                                            <ColumnDefinition Width="Auto"/>
+                                                                            <ColumnDefinition Width="Auto"/>
+                                                                            <ColumnDefinition Width="Auto"/>
+                                                                            <ColumnDefinition Width="*"/>
+                                                                        </Grid.ColumnDefinitions>
+                                                                        <Button Grid.Column="0" Content="✕" FontSize="10"
+                                                                                Click="ButtonDeleteRule_Click"
+                                                                                Padding="4,1" Margin="0,0,4,0"
+                                                                                Tag="{Binding}"/>
+                                                                        <Ellipse Grid.Column="1" Width="8" Height="8"
+                                                                                 Margin="0,0,4,0" VerticalAlignment="Center"
+                                                                                 Fill="{Binding State, Converter={StaticResource StateToBrushConverter}}"/>
+                                                                        <CheckBox Grid.Column="2" Content="反转"
+                                                                                  IsChecked="{Binding IsReversed}"
+                                                                                  Checked="CheckBoxRuleReversed_Changed"
+                                                                                  Unchecked="CheckBoxRuleReversed_Changed"
+                                                                                  Margin="0,0,4,0"/>
+                                                                        <ComboBox Grid.Column="3"
+                                                                                  SelectedValue="{Binding ConditionId}"
+                                                                                  SelectedValuePath="Key"
+                                                                                  DisplayMemberPath="Value"
+                                                                                  SelectionChanged="ComboBoxRuleCondition_SelectionChanged"
+                                                                                  ItemsSource="{x:Static toolbar:ToolbarRegistry.AvailableConditions}"/>
+                                                                    </Grid>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+
+                        </ikw:SimpleStackPanel>
+                    </ScrollViewer>
+                </TabItem>
+            </TabControl>
 
             <Button Content="恢复默认布局" Click="ButtonReset_Click"
-                    Padding="20,10" HorizontalAlignment="Left" Margin="0,16,0,0"/>
+                    Padding="20,10" HorizontalAlignment="Left" Margin="0,16,0,20"/>
 
-        </StackPanel>
+        </ikw:SimpleStackPanel>
     </ScrollViewer>
 </ui:Page>

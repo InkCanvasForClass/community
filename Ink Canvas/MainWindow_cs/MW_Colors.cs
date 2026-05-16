@@ -49,7 +49,7 @@ namespace Ink_Canvas
                     // 在PPT模式下隐藏手势面板和手势按钮
                     AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
                     AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
-                    EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+                    UpdateToolbarComponentVisibility();
                     SyncPdfPageSidebarWithCanvas();
                 }
 
@@ -535,10 +535,7 @@ namespace Ink_Canvas
                 // 动态计算面板位置，使其对齐笔按钮（考虑快捷调色盘等动态宽度）
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    PenPalette.BeginAnimation(MarginProperty, null);
-                    var currentMargin = PenPalette.Margin;
-                    // 先设置正确的Top/Bottom，保持当前Left/Right
-                    PenPalette.Margin = new Thickness(currentMargin.Left, -200, currentMargin.Right, 32);
+                    PenPalette.VerticalOffset = 0;
                     UpdatePenPalettePosition();
                 });
             }
@@ -559,10 +556,7 @@ namespace Ink_Canvas
                 // 动态计算面板位置，使其对齐笔按钮（考虑快捷调色盘等动态宽度）
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    PenPalette.BeginAnimation(MarginProperty, null);
-                    var currentMargin = PenPalette.Margin;
-                    // 荧光笔模式面板稍小，使用不同的Top/Bottom
-                    PenPalette.Margin = new Thickness(currentMargin.Left, -157, currentMargin.Right, 32);
+                    PenPalette.VerticalOffset = 0;
                     UpdatePenPalettePosition();
                 });
             }

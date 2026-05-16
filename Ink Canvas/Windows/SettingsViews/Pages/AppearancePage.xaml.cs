@@ -139,17 +139,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ComboBoxUnFoldBtnImg.SelectedIndex = settings.Appearance.UnFoldButtonImageType;
 
             CardUseLegacyFloatingBarUI.IsOn = settings.Appearance.UseLegacyFloatingBarUI;
-            CheckBoxShowShapeButton.IsChecked = settings.Appearance.IsShowShapeButton;
-            CheckBoxShowUndoButton.IsChecked = settings.Appearance.IsShowUndoButton;
-            CheckBoxShowRedoButton.IsChecked = settings.Appearance.IsShowRedoButton;
-            CheckBoxShowClearButton.IsChecked = settings.Appearance.IsShowClearButton;
-            CheckBoxShowWhiteboardButton.IsChecked = settings.Appearance.IsShowWhiteboardButton;
-            CheckBoxShowHideButton.IsChecked = settings.Appearance.IsShowHideButton;
-            CheckBoxShowLassoSelectButton.IsChecked = settings.Appearance.IsShowLassoSelectButton;
-            CheckBoxShowClearAndMouseButton.IsChecked = settings.Appearance.IsShowClearAndMouseButton;
-            CheckBoxShowQuickColorPalette.IsChecked = settings.Appearance.IsShowQuickColorPalette;
-            ComboBoxQuickColorPaletteDisplayMode.SelectedIndex = settings.Appearance.QuickColorPaletteDisplayMode;
-            ComboBoxEraserDisplayOption.SelectedIndex = settings.Appearance.EraserDisplayOption;
 
             CardEnableTrayIcon.IsOn = settings.Appearance.EnableTrayIcon;
 
@@ -687,55 +676,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (mw != null) mw.UpdateFloatingBarIcons();
         }
 
-        private void CheckBoxShowShapeButton_Changed(object sender, RoutedEventArgs e)
+        private void CardFloatingBarButtons_Click(object sender, RoutedEventArgs e)
         {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.IsShowShapeButton = CheckBoxShowShapeButton.IsChecked ?? false;
-            SettingsManager.SaveSettingsToFile();
-            var mw = GetMainWindow();
-            if (mw != null) mw.UpdateFloatingBarButtonsVisibility();
-        }
-
-        private void CheckBoxShowButton_Changed(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            if (sender == CheckBoxShowUndoButton)
-                SettingsManager.Settings.Appearance.IsShowUndoButton = CheckBoxShowUndoButton.IsChecked ?? false;
-            else if (sender == CheckBoxShowRedoButton)
-                SettingsManager.Settings.Appearance.IsShowRedoButton = CheckBoxShowRedoButton.IsChecked ?? false;
-            else if (sender == CheckBoxShowClearButton)
-                SettingsManager.Settings.Appearance.IsShowClearButton = CheckBoxShowClearButton.IsChecked ?? false;
-            else if (sender == CheckBoxShowWhiteboardButton)
-                SettingsManager.Settings.Appearance.IsShowWhiteboardButton = CheckBoxShowWhiteboardButton.IsChecked ?? false;
-            else if (sender == CheckBoxShowHideButton)
-                SettingsManager.Settings.Appearance.IsShowHideButton = CheckBoxShowHideButton.IsChecked ?? false;
-            else if (sender == CheckBoxShowLassoSelectButton)
-                SettingsManager.Settings.Appearance.IsShowLassoSelectButton = CheckBoxShowLassoSelectButton.IsChecked ?? false;
-            else if (sender == CheckBoxShowClearAndMouseButton)
-                SettingsManager.Settings.Appearance.IsShowClearAndMouseButton = CheckBoxShowClearAndMouseButton.IsChecked ?? false;
-            else if (sender == CheckBoxShowQuickColorPalette)
-                SettingsManager.Settings.Appearance.IsShowQuickColorPalette = CheckBoxShowQuickColorPalette.IsChecked ?? false;
-            SettingsManager.SaveSettingsToFile();
-            var mw = GetMainWindow();
-            if (mw != null) mw.UpdateFloatingBarButtonsVisibility();
-        }
-
-        private void ComboBoxQuickColorPaletteDisplayMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.QuickColorPaletteDisplayMode = ComboBoxQuickColorPaletteDisplayMode.SelectedIndex;
-            SettingsManager.SaveSettingsToFile();
-            var mw = GetMainWindow();
-            if (mw != null) mw.UpdateFloatingBarButtonsVisibility();
-        }
-
-        private void ComboBoxEraserDisplayOption_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.EraserDisplayOption = ComboBoxEraserDisplayOption.SelectedIndex;
-            SettingsManager.SaveSettingsToFile();
-            var mw = GetMainWindow();
-            if (mw != null) mw.UpdateFloatingBarButtonsVisibility();
+            var settingsWindow = Application.Current.Windows.OfType<SettingsViews.SettingsWindow>().FirstOrDefault();
+            if (settingsWindow != null)
+                settingsWindow.NavigateToPage("ToolbarPage");
         }
 
         #endregion

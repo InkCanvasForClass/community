@@ -121,7 +121,7 @@ namespace Ink_Canvas
                 isFloatingBarChangingHideMode = true;
                 isFloatingBarFolded = true;
                 if (currentMode != 0) CloseWhiteboardImmediately();
-                if (StackPanelCanvasControls.Visibility == Visibility.Visible)
+                if (IsAnnotating)
                     if (foldFloatingBarByUser && inkCanvas.Strokes.Count > 2)
                         ShowNotification("正在清空墨迹并收纳至侧边栏，可进入批注模式后通过【撤销】功能来恢复原先墨迹。");
                 lastBorderMouseDownObject = sender;

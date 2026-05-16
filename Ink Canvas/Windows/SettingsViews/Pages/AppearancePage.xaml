@@ -385,78 +385,15 @@
                             SwitchName="ToggleSwitchUseLegacyFloatingBarUI"
                             Toggled="ToggleSwitchUseLegacyFloatingBarUI_Toggled" />
 
-                    <ui:SettingsExpander Header="{i18n:I18n Key=Theme_FloatingBarButtonsTitle}"
-                            IsExpanded="True"
-                            d:Visibility="Visible" d:IsExpanded="True">
-                        <ui:SettingsExpander.HeaderIcon>
+                    <ui:SettingsCard Header="{i18n:I18n Key=Theme_FloatingBarButtonsTitle}"
+                            Description="请前往「工具栏」设置页面管理浮动工具栏的组件显示与排序。"
+                            IsClickEnabled="True"
+                            Click="CardFloatingBarButtons_Click">
+                        <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ViewAll}" />
-                        </ui:SettingsExpander.HeaderIcon>
-                        <ui:SettingsExpander.Items>
-                            <ui:SettingsCard ContentAlignment="Left">
-                                <CheckBox x:Name="CheckBoxShowShapeButton" IsChecked="True"
-                                          Content="{i18n:I18n Key=Theme_ShowShapeButton}"
-                                          Checked="CheckBoxShowShapeButton_Changed" Unchecked="CheckBoxShowShapeButton_Changed" />
-                            </ui:SettingsCard>
-                            <ui:SettingsCard ContentAlignment="Left">
-                                <CheckBox x:Name="CheckBoxShowUndoButton" IsChecked="True"
-                                          Content="{i18n:I18n Key=Theme_ShowUndoButton}"
-                                          Checked="CheckBoxShowButton_Changed" Unchecked="CheckBoxShowButton_Changed" />
-                            </ui:SettingsCard>
-                            <ui:SettingsCard ContentAlignment="Left">
-                                <CheckBox x:Name="CheckBoxShowRedoButton" IsChecked="True"
-                                          Content="{i18n:I18n Key=Theme_ShowRedoButton}"
-                                          Checked="CheckBoxShowButton_Changed" Unchecked="CheckBoxShowButton_Changed" />
-                            </ui:SettingsCard>
-                            <ui:SettingsCard ContentAlignment="Left">
-                                <CheckBox x:Name="CheckBoxShowClearButton" IsChecked="True"
-                                          Content="{i18n:I18n Key=Theme_ShowClearButton}"
-                                          Checked="CheckBoxShowButton_Changed" Unchecked="CheckBoxShowButton_Changed" />
-                            </ui:SettingsCard>
-                            <ui:SettingsCard ContentAlignment="Left">
-                                <CheckBox x:Name="CheckBoxShowWhiteboardButton" IsChecked="True"
-                                          Content="{i18n:I18n Key=Theme_ShowWhiteboardButton}"
-                                          Checked="CheckBoxShowButton_Changed" Unchecked="CheckBoxShowButton_Changed" />
-                            </ui:SettingsCard>
-                            <ui:SettingsCard ContentAlignment="Left">
-                                <CheckBox x:Name="CheckBoxShowHideButton" IsChecked="True"
-                                          Content="{i18n:I18n Key=Theme_ShowHideButton}"
-                                          Checked="CheckBoxShowButton_Changed" Unchecked="CheckBoxShowButton_Changed" />
-                            </ui:SettingsCard>
-                            <ui:SettingsCard ContentAlignment="Left">
-                                <CheckBox x:Name="CheckBoxShowLassoSelectButton" IsChecked="True"
-                                          Content="{i18n:I18n Key=Theme_ShowLassoButton}"
-                                          Checked="CheckBoxShowButton_Changed" Unchecked="CheckBoxShowButton_Changed" />
-                            </ui:SettingsCard>
-                            <ui:SettingsCard ContentAlignment="Left">
-                                <CheckBox x:Name="CheckBoxShowClearAndMouseButton" IsChecked="True"
-                                          Content="{i18n:I18n Key=Theme_ShowClearAndMouseButton}"
-                                          Checked="CheckBoxShowButton_Changed" Unchecked="CheckBoxShowButton_Changed" />
-                            </ui:SettingsCard>
-                            <ui:SettingsCard ContentAlignment="Left">
-                                <CheckBox x:Name="CheckBoxShowQuickColorPalette" IsChecked="False"
-                                          Content="{i18n:I18n Key=Theme_ShowQuickPalette}"
-                                          Checked="CheckBoxShowButton_Changed" Unchecked="CheckBoxShowButton_Changed" />
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="{i18n:I18n Key=Theme_QuickPaletteMode}">
-                                <ComboBox x:Name="ComboBoxQuickColorPaletteDisplayMode"
-                                          SelectedIndex="1"
-                                          SelectionChanged="ComboBoxQuickColorPaletteDisplayMode_SelectionChanged">
-                                    <ComboBoxItem Content="{i18n:I18n Key=Theme_QuickPalette_SingleRow}" />
-                                    <ComboBoxItem Content="{i18n:I18n Key=Theme_QuickPalette_DoubleRow}" />
-                                </ComboBox>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="{i18n:I18n Key=Theme_EraserButtonDisplay}">
-                                <ComboBox x:Name="ComboBoxEraserDisplayOption"
-                                          SelectedIndex="0"
-                                          SelectionChanged="ComboBoxEraserDisplayOption_SelectionChanged">
-                                    <ComboBoxItem Content="{i18n:I18n Key=Theme_EraserDisplay_Both}" />
-                                    <ComboBoxItem Content="{i18n:I18n Key=Theme_EraserDisplay_AreaOnly}" />
-                                    <ComboBoxItem Content="{i18n:I18n Key=Theme_EraserDisplay_LineOnly}" />
-                                    <ComboBoxItem Content="{i18n:I18n Key=Theme_EraserDisplay_None}" />
-                                </ComboBox>
-                            </ui:SettingsCard>
-                        </ui:SettingsExpander.Items>
-                    </ui:SettingsExpander>
+                        </ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronRight}" />
+                    </ui:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{i18n:I18n Key=Tray_GroupTitle}" />

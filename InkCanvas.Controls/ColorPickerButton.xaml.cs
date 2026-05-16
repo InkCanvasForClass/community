@@ -32,7 +32,11 @@ namespace Ink_Canvas.Controls
         {
             var button = (ColorPickerButton)d;
             if (button.CheckPath != null)
+            {
                 button.CheckPath.Visibility = (bool)e.NewValue ? Visibility.Visible : Visibility.Collapsed;
+                if ((bool)e.NewValue && button.CheckPath.Fill == null && button.CheckIconFill != null)
+                    button.CheckPath.Fill = button.CheckIconFill;
+            }
         }
 
         public bool IsChecked

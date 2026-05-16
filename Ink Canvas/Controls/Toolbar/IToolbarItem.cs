@@ -6,19 +6,15 @@ namespace Ink_Canvas.Controls.Toolbar
     {
         string Id { get; }
 
-        ToolbarSlot DefaultSlot { get; }
-
-        int DefaultOrder { get; }
-
-        bool DefaultVisible { get; }
-
-        ToolbarInsertPosition DefaultPosition { get; }
-
-        string DefaultAnchorName { get; }
-
         string DisplayName { get; }
 
-        string MenuPanelName { get; }
+        string Description { get; }
+
+        ToolbarRuleset DefaultHidingRuleset { get; }
+
+        bool DefaultShowSeparateBorder { get; }
+
+        bool DefaultPreventHideOnDragClick { get; }
 
         FrameworkElement BuildView(IToolbarHost host);
     }
