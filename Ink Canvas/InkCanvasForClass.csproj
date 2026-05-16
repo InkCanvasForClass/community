@@ -21,11 +21,9 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>2</ApplicationRevision>
-    <ApplicationVersion>2.0.2.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>false</BootstrapperEnabled>
-    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <EmbeddedOnlyCultures>en-US;zh-ME</EmbeddedOnlyCultures>
@@ -68,12 +66,10 @@
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Title>InkCanvasForClass</Title>
-    <Version>1.7</Version>
     <Authors>CJK_mkp</Authors>
     <Product>InkCanvasForClass</Product>
     <Copyright>© Copyright  CJK_mkp 2025-now</Copyright>
     <PackageProjectUrl>https://inkcanvasforclass.github.io</PackageProjectUrl>
-    <FileVersion>bundled</FileVersion>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM64'">
@@ -558,4 +554,12 @@
       <WithCulture>false</WithCulture>
     </EmbeddedResource>
   </ItemGroup>
+  
+  <Target Name="SetAssemblyInformationalVersion" DependsOnTargets="GetBuildVersion" AfterTargets="GetBuildVersion">
+    <PropertyGroup>
+      <_ShortSha>$(GitCommitIdShort)</_ShortSha>
+      <_ShortSha7>$(_ShortSha.Substring(0, 7))</_ShortSha7>
+      <AssemblyInformationalVersion>$(AssemblyVersion).$(_ShortSha7)</AssemblyInformationalVersion>
+    </PropertyGroup>
+  </Target>
 </Project>

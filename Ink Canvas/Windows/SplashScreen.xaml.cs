@@ -257,15 +257,25 @@ namespace Ink_Canvas.Windows
                 if (version != null)
                 {
                     VersionTextBlock.Text = $"v{version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
+                    var informationalVersion = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+                    if (informationalVersion != null)
+                    {
+                        string infoVersion = informationalVersion.InformationalVersion;
+                        int lastDotIndex = infoVersion.LastIndexOf('.');
+                        if (lastDotIndex >= 0 && lastDotIndex < infoVersion.Length - 7)
+                        {
+                            VersionTextBlock.Text += " (" + infoVersion.Substring(lastDotIndex + 1) + ")";
+                        }
+                    }
                 }
                 else
                 {
-                    VersionTextBlock.Text = "v5.0.4.0";
+                    VersionTextBlock.Text = "v1.7.18.10";
                 }
             }
             catch
             {
-                VersionTextBlock.Text = "v5.0.4.0";
+                VersionTextBlock.Text = "v1.7.18.10";
             }
         }
 

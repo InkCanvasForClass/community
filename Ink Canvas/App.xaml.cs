@@ -917,7 +917,19 @@ namespace Ink_Canvas
             await Task.Delay(100);
             RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
-            LogHelper.NewLog(string.Format("Ink Canvas Starting (Version: {0})", Assembly.GetExecutingAssembly().GetName().Version));
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            var informationalVersion = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            string versionString = version.Major + "." + version.Minor + "." + version.Build + "." + version.Revision;
+            if (informationalVersion != null)
+            {
+                string infoVersion = informationalVersion.InformationalVersion;
+                int lastDotIndex = infoVersion.LastIndexOf('.');
+                if (lastDotIndex >= 0 && lastDotIndex < infoVersion.Length - 7)
+                {
+                    versionString += " (" + infoVersion.Substring(lastDotIndex + 1) + ")";
+                }
+            }
+            LogHelper.NewLog(string.Format("Ink Canvas Starting (Version: {0})", versionString));
 
             // 检查是否为最终应用启动（更新后的应用）
             bool isFinalApp = e.Args.Contains("--final-app");
