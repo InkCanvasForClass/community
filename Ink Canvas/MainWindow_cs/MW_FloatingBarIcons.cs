@@ -2164,40 +2164,37 @@ namespace Ink_Canvas
 
             if (MarginFromEdge == 60) MarginFromEdge = 55;
 
-            if (skipAnimation)
-            {
-                ViewboxFloatingBarMarginAnimationCore(MarginFromEdge, PosXCaculatedWithTaskbarHeight);
-                return;
-            }
-
             await Dispatcher.InvokeAsync(() =>
             {
-                if (!Topmost)
-                    MarginFromEdge = -60;
-                else
+                if (skipAnimation)
                 {
-                    ViewboxFloatingBar.Visibility = Visibility.Visible;
-                    ViewboxFloatingBar.UpdateLayout();
+                    ViewboxFloatingBarMarginAnimationCore(MarginFromEdge, PosXCaculatedWithTaskbarHeight, false);
+                    return;
                 }
-                isViewboxFloatingBarMarginAnimationRunning = true;
+
+                ViewboxFloatingBarMarginAnimationCore(MarginFromEdge, PosXCaculatedWithTaskbarHeight, true);
             });
 
-            await Task.Delay(200);
+            await Task.Delay(skipAnimation ? 0 : 200);
 
             await Dispatcher.InvokeAsync(() =>
             {
                 ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
+                isViewboxFloatingBarMarginAnimationRunning = false;
                 if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
             });
         }
 
         private void ViewboxFloatingBarMarginAnimationCore(int MarginFromEdge,
-            bool PosXCaculatedWithTaskbarHeight = false)
+            bool PosXCaculatedWithTaskbarHeight = false, bool animate = false)
         {
             if (!Topmost)
                 MarginFromEdge = -60;
             else
+            {
                 ViewboxFloatingBar.Visibility = Visibility.Visible;
+                ViewboxFloatingBar.UpdateLayout();
+            }
             isViewboxFloatingBarMarginAnimationRunning = true;
 
             double dpiScaleX = 1, dpiScaleY = 1;
@@ -2342,12 +2339,25 @@ namespace Ink_Canvas
                            toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
                 }
 
-                if (pointDesktop.X != -1 || pointDesktop.Y != -1)
+                if (IsInPptPresentationMode)
                 {
-                    if (Math.Abs(pointDesktop.Y - pos.Y) > 50)
-                        pos = pointDesktop;
-                    else
-                        pointDesktop = pos;
+                    if (pointPPT.X != -1 || pointPPT.Y != -1)
+                    {
+                        if (Math.Abs(pointPPT.Y - pos.Y) > 50)
+                            pos = pointPPT;
+                        else
+                            pointPPT = pos;
+                    }
+                }
+                else
+                {
+                    if (pointDesktop.X != -1 || pointDesktop.Y != -1)
+                    {
+                        if (Math.Abs(pointDesktop.Y - pos.Y) > 50)
+                            pos = pointDesktop;
+                        else
+                            pointDesktop = pos;
+                    }
                 }
 
                 pos.X = NormalizeFloatingBarLeftForScreen(pos.X, floatingBarWidth, screenWidth);
@@ -2357,8 +2367,23 @@ namespace Ink_Canvas
                     pointDesktop = pos;
             }
 
-            ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, 0, -20);
-            isViewboxFloatingBarMarginAnimationRunning = false;
+            if (animate)
+            {
+                var marginAnimation = new ThicknessAnimation
+                {
+                    Duration = TimeSpan.FromSeconds(0.35),
+                    From = ViewboxFloatingBar.Margin,
+                    To = new Thickness(pos.X, pos.Y, 0, -20),
+                    EasingFunction = new CircleEase()
+                };
+                ViewboxFloatingBar.BeginAnimation(MarginProperty, marginAnimation);
+            }
+            else
+            {
+                ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, 0, -20);
+            }
+
+            if (!animate) isViewboxFloatingBarMarginAnimationRunning = false;
             if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
         }
 
