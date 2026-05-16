@@ -2,16 +2,34 @@ using System.IO;
 
 namespace InkCanvas.IACoreHelper
 {
-    // Named Pipe 名称，主进程和辅助进程共用
-    internal static class IpcConstants
+    public static class IpcConstants
     {
-        public const string PipeName = "ICC_IACoreHelper_{0}";  // {0} = 主进程 PID
-        public const int RequestTimeout = 5000;                  // ms
+        public const string PipeName = "ICC_IACoreHelper_{0}";
+        public const string SharedMemoryName = "ICC_IACoreHelper_Shared_{0}_{1}";
+        public const int RequestTimeout = 5000;
+        public const int ProtocolVersion = 2;
+        public const int SharedMemoryHeaderSize = 24;
+        public const int DefaultSharedMemoryCapacity = 4 * 1024 * 1024;
+        public const int MaxSharedMemoryCapacity = 32 * 1024 * 1024;
+        public const int SharedMemoryMagic = 0x49414348;
         public const byte CmdRecognize = 0x01;
+        public const byte CmdRecognizeSharedMemory = 0x02;
         public const byte CmdShutdown = 0xFF;
+        public const int StatusOk = 0;
+        public const int StatusError = 1;
+        public const int StatusResponseTooLarge = 2;
     }
 
-    // 单个 StylusPoint 的轻量传输结构
+    public static class SharedMemoryHeader
+    {
+        public const int Magic = 0;
+        public const int Version = 4;
+        public const int RequestLength = 8;
+        public const int ResponseOffset = 12;
+        public const int ResponseLength = 16;
+        public const int Status = 20;
+    }
+
     internal struct StylusPointDto
     {
         public float X;
@@ -19,13 +37,11 @@ namespace InkCanvas.IACoreHelper
         public float Pressure;
     }
 
-    // 单条笔画
     internal class StrokeDto
     {
         public StylusPointDto[] Points;
     }
 
-    // 识别请求（主进程 → 辅助进程）
     internal class RecognizeRequest
     {
         public StrokeDto[] Strokes;
@@ -33,6 +49,11 @@ namespace InkCanvas.IACoreHelper
         public void WriteTo(BinaryWriter w)
         {
             w.Write(IpcConstants.CmdRecognize);
+            WritePayloadTo(w);
+        }
+
+        public void WritePayloadTo(BinaryWriter w)
+        {
             w.Write(Strokes.Length);
             foreach (var stroke in Strokes)
             {
@@ -62,18 +83,17 @@ namespace InkCanvas.IACoreHelper
         }
     }
 
-    // 识别响应（辅助进程 → 主进程）
     internal class RecognizeResponse
     {
         public bool Success;
-        public string ShapeName;        // e.g. "Circle", "Rectangle", "Triangle" ...
+        public string ShapeName;
         public float CentroidX;
         public float CentroidY;
         public float ShapeWidth;
         public float ShapeHeight;
         public float[] HotPointsX;
         public float[] HotPointsY;
-        public int[] StrokeIndices;   // 参与识别的笔画在原始数组中的下标
+        public int[] StrokeIndices;
 
         public void WriteTo(BinaryWriter w)
         {
