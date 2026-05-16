@@ -29,7 +29,6 @@ namespace Ink_Canvas
         private DateTime lastFreezeBlockNotificationUtc = DateTime.MinValue;
 
         private Ink_Canvas.Controls.BoardToolbarButton BoardInkFreezeBtn;
-        private System.Windows.Controls.StackPanel StackPanelCanvasControls;
 
         private int GetCurrentFreezePageIndex()
             => currentMode == 0 ? 0 : CurrentWhiteboardIndex;
@@ -286,9 +285,6 @@ namespace Ink_Canvas
                 _globalHotkeyManager?.UpdateHotkeyStateForToolMode(true);
                 UpdateCurrentToolMode("cursor");
                 SetFloatingBarHighlightPosition("cursor");
-
-                if (currentMode == 0 && StackPanelCanvasControls != null)
-                    StackPanelCanvasControls.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex)
             {
