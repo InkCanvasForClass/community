@@ -846,20 +846,7 @@ namespace Ink_Canvas
                     else
                     {
                         LogHelper.WriteLogToFile("PPT连接已断开", LogHelper.LogType.Event);
-                        bool needManualSlideShowEnd = _currentSlideShowPosition > 0 || (inkCanvas?.Strokes?.Count ?? 0) > 0;
-                        lock (_memoryStreams)
-                        {
-                            needManualSlideShowEnd = needManualSlideShowEnd || _memoryStreams.Count > 0;
-                        }
-
-                        if (needManualSlideShowEnd)
-                            _ = SaveAndHandleDisconnectedSlideShowEnd();
-                        else
-                        {
-                            _singlePPTInkManager?.ClearAllStrokes();
-                            ResetPPTStateVariables();
-                        }
-
+                        _singlePPTInkManager?.ClearAllStrokes();
                         _exitPPTModeAfterDisconnectTimer?.Stop();
                         _exitPPTModeAfterDisconnectTimer = null;
                         _pptUIManager?.UpdateSlideShowStatus(false);
@@ -867,6 +854,7 @@ namespace Ink_Canvas
 
                         // 隐藏浮动栏退出PPT按钮
                         HideFloatingBarExitPPTBtn();
+                        ResetPPTStateVariables();
                         _ = HandleManualSlideShowEnd();
                         if (Settings.PowerPointSettings.UseRotPptLink)
                             _pptManager?.ReloadConnection();
@@ -1383,23 +1371,6 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="pres">触发结束事件的 PowerPoint 演示文稿（Presentation）实例，用于保存墨迹并尝试读取放映时的当前页码。</param>
         private async void OnPPTSlideShowEnd(Presentation pres)
-        {
-            await OnPPTSlideShowEndAsync(pres);
-        }
-
-        private async Task SaveAndHandleDisconnectedSlideShowEnd()
-        {
-            try
-            {
-                await OnPPTSlideShowEndAsync(_pptManager?.GetCurrentActivePresentation() as Presentation);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"断开连接时保存PPT墨迹失败: {ex}", LogHelper.LogType.Error);
-            }
-        }
-
-        private async Task OnPPTSlideShowEndAsync(Presentation pres)
         {
             try
             {
