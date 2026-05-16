@@ -528,8 +528,32 @@
   <data name="Crash_NoAction" xml:space="preserve">
     <value>No action</value>
   </data>
+  <data name="Crash_ShowCrashWindow" xml:space="preserve">
+    <value>Show crash details (no restart)</value>
+  </data>
+  <data name="CrashWindowTitle" xml:space="preserve">
+    <value>Crash details - InkCanvasForClass</value>
+  </data>
+  <data name="CrashWindowHeader" xml:space="preserve">
+    <value>InkCanvasForClass encountered an unhandled exception</value>
+  </data>
+  <data name="CrashWindowDescription" xml:space="preserve">
+    <value>Crash details are shown below. You can copy them and send them to the developers.</value>
+  </data>
+  <data name="CrashWindowFooter" xml:space="preserve">
+    <value>The current setting only shows crash details and will not restart automatically.</value>
+  </data>
+  <data name="CrashWindowCopy" xml:space="preserve">
+    <value>Copy details</value>
+  </data>
+  <data name="CrashWindowClose" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="CrashWindowNoDetails" xml:space="preserve">
+    <value>No crash details are available.</value>
+  </data>
   <data name="Crash_Hint" xml:space="preserve">
-    <value>Silent restart: automatically restart without prompt. No action: only log, do not restart.</value>
+    <value>Silent restart: automatically restart without prompt. No action: only log, do not restart. Show crash details: display error details without restarting.</value>
   </data>
   <data name="Gesture_Title" xml:space="preserve">
     <value>Gestures</value>

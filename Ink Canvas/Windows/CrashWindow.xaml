@@ -1,0 +1,167 @@
+<Window x:Class="Ink_Canvas.CrashWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+        mc:Ignorable="d"
+        Title="崩溃详情 - InkCanvasForClass"
+        Height="640" Width="760"
+        MinHeight="420" MinWidth="560"
+        WindowStartupLocation="CenterScreen"
+        Topmost="True"
+        ui:ThemeManager.IsThemeAware="True"
+        ui:TitleBar.ExtendViewIntoTitleBar="True"
+        ui:WindowHelper.SystemBackdropType="None"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        ui:TitleBar.Height="48"
+        Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ui:ThemeResources CanBeAccessedAcrossThreads="True">
+                    <ui:ThemeResources.ThemeDictionaries />
+                </ui:ThemeResources>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                x:Name="AppTitleBar"
+                Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.Height)}"
+                Background="Transparent"
+                IsHitTestVisible="True"
+                Canvas.ZIndex="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="137" />
+                </Grid.ColumnDefinitions>
+                <ikw:SimpleStackPanel Grid.Column="0"
+                                      Orientation="Horizontal"
+                                      Spacing="12"
+                                      VerticalAlignment="Center"
+                                      Margin="16,0,0,0">
+                    <Image Source="\Resources\icc.ico" Width="20"
+                           RenderOptions.BitmapScalingMode="HighQuality" />
+                    <TextBlock VerticalAlignment="Center"
+                               Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=Title}"
+                               TextWrapping="NoWrap" />
+                </ikw:SimpleStackPanel>
+
+                <Rectangle Grid.Column="2"
+                           Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.SystemOverlayRightInset)}" />
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1"
+                Padding="40,18,40,18"
+                BorderThickness="0,0,0,1"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#1FE81123" Offset="0" />
+                    <GradientStop Color="#0AF97316" Offset="1" />
+                </LinearGradientBrush>
+            </Border.Background>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Border Grid.Column="0" Grid.RowSpan="2"
+                        Width="48" Height="48"
+                        Margin="0,0,16,0"
+                        VerticalAlignment="Top"
+                        CornerRadius="10"
+                        Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Warning}"
+                                 FontSize="24"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center" />
+                </Border>
+
+                <TextBlock Grid.Column="1" Grid.Row="0"
+                           Style="{DynamicResource TitleTextBlockStyle}"
+                           Text="InkCanvasForClass 发生了未处理异常" />
+                <TextBlock Grid.Column="1" Grid.Row="1"
+                           Style="{DynamicResource BodyTextBlockStyle}"
+                           Margin="0,4,0,0"
+                           Opacity="0.85"
+                           TextWrapping="Wrap"
+                           Text="以下是本次崩溃的详细信息。你可以复制内容并反馈给开发者。" />
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="2" Margin="40,16,40,16">
+            <TextBox x:Name="TextBoxCrashInfo"
+                     FontFamily="Consolas"
+                     FontSize="12"
+                     TextWrapping="NoWrap"
+                     AcceptsReturn="True"
+                     AcceptsTab="True"
+                     IsReadOnly="True"
+                     VerticalScrollBarVisibility="Auto"
+                     HorizontalScrollBarVisibility="Auto" />
+        </Grid>
+
+        <Border Grid.Row="3"
+                Padding="40,12,40,16"
+                BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           VerticalAlignment="Center"
+                           Style="{DynamicResource CaptionTextBlockStyle}"
+                           Opacity="0.7"
+                           TextWrapping="Wrap"
+                           Text="当前设置为仅显示崩溃详情，不会自动重启。" />
+
+                <Button Grid.Column="1"
+                        MinWidth="96"
+                        Height="32"
+                        Margin="0,0,8,0"
+                        Click="ButtonCopy_Click">
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Copy}" FontSize="12" />
+                        <TextBlock Text="复制详情" />
+                    </ikw:SimpleStackPanel>
+                </Button>
+
+                <Button Grid.Column="2"
+                        MinWidth="96"
+                        Height="32"
+                        IsDefault="True"
+                        Style="{DynamicResource AccentButtonStyle}"
+                        Click="ButtonClose_Click">
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Accept}" FontSize="12" />
+                        <TextBlock Text="关闭" />
+                    </ikw:SimpleStackPanel>
+                </Button>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

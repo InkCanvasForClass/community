@@ -87,7 +87,9 @@ namespace Ink_Canvas.Windows
                     ComboBoxTelemetryUploadLevel.SelectedIndex = (int)_settings.Startup.TelemetryUploadLevel;
                     CardFoldAtStartup.IsOn = _settings.Startup.IsFoldAtStartup;
                     CardAutoUpdate.IsOn = _settings.Startup.IsAutoUpdate;
-                    ComboBoxCrashAction.SelectedIndex = _settings.Startup.CrashAction == 0 ? 0 : 1;
+                    int crashAction = _settings.Startup.CrashAction;
+                    if (crashAction < 0 || crashAction > 2) crashAction = 0;
+                    ComboBoxCrashAction.SelectedIndex = crashAction;
                     CheckBoxPrivacyAccepted.IsChecked = _settings.Startup.HasAcceptedTelemetryPrivacy;
                 }
             }
@@ -198,7 +200,9 @@ namespace Ink_Canvas.Windows
                     _settings.Startup.TelemetryUploadLevel = (TelemetryUploadLevel)level;
                     _settings.Startup.IsFoldAtStartup = CardFoldAtStartup.IsOn;
                     _settings.Startup.IsAutoUpdate = CardAutoUpdate.IsOn;
-                    _settings.Startup.CrashAction = ComboBoxCrashAction.SelectedIndex == 1 ? 1 : 0;
+                    int crashAction = ComboBoxCrashAction.SelectedIndex;
+                    if (crashAction < 0 || crashAction > 2) crashAction = 0;
+                    _settings.Startup.CrashAction = crashAction;
                     _settings.Startup.HasAcceptedTelemetryPrivacy = CheckBoxPrivacyAccepted.IsChecked == true;
                 }
             }

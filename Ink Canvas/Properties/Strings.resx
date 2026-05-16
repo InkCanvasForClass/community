@@ -544,8 +544,32 @@
   <data name="Crash_NoAction" xml:space="preserve">
     <value>无操作</value>
   </data>
+  <data name="Crash_ShowCrashWindow" xml:space="preserve">
+    <value>弹出崩溃详情窗口（不重启）</value>
+  </data>
+  <data name="CrashWindowTitle" xml:space="preserve">
+    <value>崩溃详情 - InkCanvasForClass</value>
+  </data>
+  <data name="CrashWindowHeader" xml:space="preserve">
+    <value>InkCanvasForClass 发生了未处理异常</value>
+  </data>
+  <data name="CrashWindowDescription" xml:space="preserve">
+    <value>以下是本次崩溃的详细信息。你可以复制内容并反馈给开发者。</value>
+  </data>
+  <data name="CrashWindowFooter" xml:space="preserve">
+    <value>当前设置为仅显示崩溃详情，不会自动重启。</value>
+  </data>
+  <data name="CrashWindowCopy" xml:space="preserve">
+    <value>复制详情</value>
+  </data>
+  <data name="CrashWindowClose" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="CrashWindowNoDetails" xml:space="preserve">
+    <value>没有可用的崩溃详情。</value>
+  </data>
   <data name="Crash_Hint" xml:space="preserve">
-    <value>静默重启：崩溃后自动重启软件，无提示。无操作：崩溃后仅记录日志，不自动重启。</value>
+    <value>静默重启：崩溃后自动重启软件，无提示。无操作：崩溃后仅记录日志，不自动重启。弹出崩溃详情窗口：显示错误详情，不自动重启。</value>
   </data>
   <data name="Gesture_Title" xml:space="preserve">
     <value>手势</value>

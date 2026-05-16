@@ -781,6 +781,19 @@ namespace Ink_Canvas
 
             SyncCrashActionFromSettings(); // 崩溃时同步最新设置
 
+            if (CrashAction == CrashActionType.ShowCrashWindow)
+            {
+                try
+                {
+                    new CrashWindow
+                    {
+                        CrashInfo = lastErrorMessage
+                    }.ShowDialog();
+                }
+                catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+                return;
+            }
+
             if (CrashAction == CrashActionType.SilentRestart && !IsAppExitByUser)
             {
                 StartupCount.Increment();
@@ -1392,7 +1405,8 @@ namespace Ink_Canvas
         public enum CrashActionType
         {
             SilentRestart,
-            NoAction
+            NoAction,
+            ShowCrashWindow
         }
 
         // 心跳相关

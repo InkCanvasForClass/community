@@ -50,7 +50,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 {
                     CardEnableNibMode.IsOn = settings.Startup.IsEnableNibMode;
 
-                    ComboBoxCrashAction.SelectedIndex = settings.Startup.CrashAction;
+                    int crashAction = settings.Startup.CrashAction;
+                    if (crashAction < 0 || crashAction > 2) crashAction = 0;
+                    ComboBoxCrashAction.SelectedIndex = crashAction;
                 }
             }
             catch (Exception ex)
@@ -214,6 +216,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     case "1":
                         App.CrashAction = App.CrashActionType.NoAction;
                         SettingsManager.Settings.Startup.CrashAction = 1;
+                        break;
+                    case "2":
+                        App.CrashAction = App.CrashActionType.ShowCrashWindow;
+                        SettingsManager.Settings.Startup.CrashAction = 2;
                         break;
                 }
                 SettingsManager.SaveSettingsToFile();
