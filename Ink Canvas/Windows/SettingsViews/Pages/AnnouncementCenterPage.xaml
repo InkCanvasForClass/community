@@ -6,81 +6,192 @@
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
-      xmlns:sys="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d"
       Title="{i18n:I18n Key=Announcement_CenterTitle}">
 
-    <Grid Margin="59,0,59,0">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-        <Grid.Resources>
-            <Style x:Key="SettingsSectionHeaderTextBlockStyle"
-                   BasedOn="{StaticResource BodyStrongTextBlockStyle}"
-                   TargetType="TextBlock">
-                <Setter Property="Margin" Value="1,30,0,6" />
-            </Style>
-        </Grid.Resources>
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <Grid Margin="59,0,59,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.Resources>
+                <Style x:Key="SettingsSectionHeaderTextBlockStyle"
+                       BasedOn="{StaticResource BodyStrongTextBlockStyle}"
+                       TargetType="TextBlock">
+                    <Setter Property="Margin" Value="1,30,0,6" />
+                </Style>
+                <Style x:Key="AnnouncementMetaTextBlockStyle"
+                       BasedOn="{StaticResource CaptionTextBlockStyle}"
+                       TargetType="TextBlock">
+                    <Setter Property="Opacity" Value="0.65" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                </Style>
+            </Grid.Resources>
 
-        <TextBlock Text="{i18n:I18n Key=Announcement_CenterTitle}"
-                   Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
+            <TextBlock Text="{i18n:I18n Key=Announcement_CenterTitle}"
+                       Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
 
-        <ListBox x:Name="AnnouncementListBox"
-                 Grid.Row="1"
-                 BorderThickness="0"
-                 Margin="0,8,0,0">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <Border Padding="12"
-                            Margin="0,0,0,8"
-                            CornerRadius="8"
-                            Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
-                        <StackPanel>
-                            <DockPanel LastChildFill="True">
-                                <TextBlock Text="{Binding Type}"
-                                           DockPanel.Dock="Right"
-                                           Opacity="0.65"
-                                           FontSize="12" />
-                                <TextBlock Text="{Binding Title}"
-                                           FontWeight="SemiBold"
-                                           TextTrimming="CharacterEllipsis" />
-                            </DockPanel>
-                            <TextBlock Text="{Binding Summary}"
-                                       Margin="0,6,0,0"
-                                       TextWrapping="Wrap"
-                                       Opacity="0.8" />
-                            <TextBlock Text="{Binding CreatedAt, StringFormat={}{0:yyyy-MM-dd HH:mm}}"
-                                       Margin="0,8,0,0"
-                                       FontSize="12"
-                                       Opacity="0.55" />
+            <Border Grid.Row="1"
+                    Margin="0,8,0,12"
+                    Padding="16"
+                    CornerRadius="10"
+                    Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <ui:FontIcon Grid.Column="0"
+                                 Width="36"
+                                 Height="36"
+                                 Margin="0,0,14,0"
+                                 Icon="{x:Static ui:SegoeFluentIcons.Message}"
+                                 FontSize="24"
+                                 VerticalAlignment="Top" />
+
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="{i18n:I18n Key=Announcement_CenterHint}"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap" />
+                        <TextBlock x:Name="AnnouncementCountTextBlock"
+                                   Margin="0,6,0,0"
+                                   Opacity="0.72"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Margin="16,0,0,0">
+                        <Button Content="{i18n:I18n Key=Notification_ProviderRefresh}"
+                                Margin="0,0,8,0"
+                                Click="RefreshButton_Click" />
+                        <Button Content="{i18n:I18n Key=Announcement_ClearHistory}"
+                                Click="ClearHistoryButton_Click" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="320" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0"
+                        CornerRadius="10"
+                        Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+                    <ListBox x:Name="AnnouncementListBox"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             SelectionChanged="AnnouncementListBox_SelectionChanged">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="12" Margin="4" CornerRadius="8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <ui:FontIcon Grid.Column="0"
+                                                     Width="28"
+                                                     Height="28"
+                                                     Margin="0,2,10,0"
+                                                     Icon="{x:Static ui:SegoeFluentIcons.Message}"
+                                                     Opacity="0.85" />
+                                        <StackPanel Grid.Column="1">
+                                            <DockPanel LastChildFill="True">
+                                                <TextBlock Text="{Binding Type}"
+                                                           DockPanel.Dock="Right"
+                                                           Style="{StaticResource AnnouncementMetaTextBlockStyle}"
+                                                           FontSize="11"
+                                                           Margin="8,0,0,0" />
+                                                <TextBlock Text="{Binding Title}"
+                                                           FontWeight="SemiBold"
+                                                           TextTrimming="CharacterEllipsis" />
+                                            </DockPanel>
+                                            <TextBlock Text="{Binding Summary}"
+                                                       Margin="0,5,0,0"
+                                                       MaxHeight="42"
+                                                       TextWrapping="Wrap"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Opacity="0.76" />
+                                            <TextBlock Text="{Binding CreatedAt, StringFormat={}{0:yyyy-MM-dd HH:mm}}"
+                                                       Margin="0,7,0,0"
+                                                       Style="{StaticResource AnnouncementMetaTextBlockStyle}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Border>
+
+                <Border Grid.Column="2"
+                        Padding="20"
+                        CornerRadius="10"
+                        Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock x:Name="DetailTitleTextBlock"
+                                   FontSize="22"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap" />
+
+                        <ikw:SimpleStackPanel Grid.Row="1"
+                                              Margin="0,10,0,16"
+                                              Orientation="Horizontal"
+                                              Spacing="12">
+                            <TextBlock x:Name="DetailTypeTextBlock"
+                                       Style="{StaticResource AnnouncementMetaTextBlockStyle}" />
+                            <TextBlock x:Name="DetailTimeTextBlock"
+                                       Style="{StaticResource AnnouncementMetaTextBlockStyle}" />
+                        </ikw:SimpleStackPanel>
+
+                        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <TextBlock x:Name="DetailSummaryTextBlock"
+                                           Margin="0,0,0,14"
+                                           FontSize="15"
+                                           TextWrapping="Wrap"
+                                           Opacity="0.82" />
+                                <TextBlock x:Name="DetailContentTextBlock"
+                                           TextWrapping="Wrap"
+                                           LineHeight="22" />
+                            </StackPanel>
+                        </ScrollViewer>
+
+                        <StackPanel Grid.Row="3"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Right"
+                                    Margin="0,18,0,0">
+                            <Button x:Name="OpenActionButton"
+                                    Content="{i18n:I18n Key=Notification_ViewDetails}"
+                                    Click="ViewDetailsButton_Click" />
                         </StackPanel>
-                    </Border>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+                    </Grid>
+                </Border>
 
-        <TextBlock x:Name="EmptyTextBlock"
-                   Grid.Row="1"
-                   Text="{i18n:I18n Key=Announcement_NoItems}"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   Opacity="0.65"
-                   Visibility="Collapsed" />
-
-        <StackPanel Grid.Row="2"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Margin="0,16,0,0">
-            <Button Content="{i18n:I18n Key=Announcement_ClearHistory}"
-                    Margin="0,0,8,0"
-                    Click="ClearHistoryButton_Click" />
-            <Button Content="{i18n:I18n Key=Notification_ViewDetails}"
-                    Margin="0,0,8,0"
-                    Click="ViewDetailsButton_Click" />
-            <Button Content="{i18n:I18n Key=Notification_ProviderRefresh}"
-                    Click="RefreshButton_Click" />
-        </StackPanel>
-    </Grid>
+                <TextBlock x:Name="EmptyTextBlock"
+                           Grid.ColumnSpan="3"
+                           Text="{i18n:I18n Key=Announcement_NoItems}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Opacity="0.65"
+                           Visibility="Collapsed" />
+            </Grid>
+        </Grid>
+    </ScrollViewer>
 </ui:Page>

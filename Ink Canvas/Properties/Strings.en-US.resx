@@ -3249,6 +3249,24 @@ Hide</value>
   <data name="Announcement_ClearHistory" xml:space="preserve">
     <value>Clear history</value>
   </data>
+  <data name="Announcement_ItemCount" xml:space="preserve">
+    <value>{0} announcements. Select an item on the left to view details.</value>
+  </data>
+  <data name="Notification_Type_Update" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="Notification_Type_Urgent" xml:space="preserve">
+    <value>Urgent</value>
+  </data>
+  <data name="Notification_Type_Important" xml:space="preserve">
+    <value>Important</value>
+  </data>
+  <data name="Notification_Type_Reminder" xml:space="preserve">
+    <value>Reminder</value>
+  </data>
+  <data name="Notification_Type_Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
   <data name="Notification_ViewHistory" xml:space="preserve">
     <value>View history</value>
   </data>

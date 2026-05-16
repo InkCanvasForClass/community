@@ -3305,6 +3305,24 @@
   <data name="Announcement_ClearHistory" xml:space="preserve">
     <value>清空历史</value>
   </data>
+  <data name="Announcement_ItemCount" xml:space="preserve">
+    <value>共 {0} 条公告，选择左侧条目查看详情。</value>
+  </data>
+  <data name="Notification_Type_Update" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="Notification_Type_Urgent" xml:space="preserve">
+    <value>紧急</value>
+  </data>
+  <data name="Notification_Type_Important" xml:space="preserve">
+    <value>重要</value>
+  </data>
+  <data name="Notification_Type_Reminder" xml:space="preserve">
+    <value>提醒</value>
+  </data>
+  <data name="Notification_Type_Other" xml:space="preserve">
+    <value>其他</value>
+  </data>
   <data name="Notification_ViewHistory" xml:space="preserve">
     <value>查看历史</value>
   </data>
