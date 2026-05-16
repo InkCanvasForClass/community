@@ -242,6 +242,7 @@ namespace Ink_Canvas
             content.HighlighterWidthSlider.ValueChanged += HighlighterWidthSlider_ValueChanged;
             content.LaserPenWidthSlider.ValueChanged += LaserPenWidthSlider_ValueChanged;
             content.LaserPenAlphaSlider.ValueChanged += LaserPenAlphaSlider_ValueChanged;
+            content.LaserPenFadeTimeSlider.ValueChanged += LaserPenFadeTimeSlider_ValueChanged;
             content.BrushModeBtn.Click += BoardBrushModeButton_Click;
             content.BrushModeBtn.MouseUp += BoardBrushModeButton_MouseUp;
 
@@ -284,6 +285,7 @@ namespace Ink_Canvas
             content.LaserPenColorOrange.ButtonMouseUp += BtnLaserPenColorOrange_Click;
 
             content.ColorThemeSwitch.MouseUp += ColorThemeSwitch_MouseUp;
+            content.LaserPenColorThemeSwitch.MouseUp += ColorThemeSwitch_MouseUp;
             content.CloseButtonControl.Click += CloseBordertools_Click;
         }
 

@@ -604,6 +604,17 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void LaserPenFadeTimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!isLoaded) return;
+            Settings.Canvas.InkFadeTime = (int)((Slider)sender).Value * 1000;
+            if (_inkFadeManager != null)
+            {
+                _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
+            }
+            SaveSettingsToFile();
+        }
+
         /// <summary>
         /// 根据组合框的当前选择更新双曲线渐近线选项（Settings.Canvas.HyperbolaAsymptoteOption），并将更改保存到设置文件。
         /// </summary>

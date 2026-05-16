@@ -91,8 +91,10 @@ namespace Ink_Canvas
         internal Slider BoardHighlighterWidthSlider => BoardPenPalettePopupContent?.HighlighterWidthSlider;
         internal Slider LaserPenWidthSlider => PenPalettePopupContent?.LaserPenWidthSlider ?? BoardPenPalettePopupContent?.LaserPenWidthSlider;
         internal Slider LaserPenAlphaSlider => PenPalettePopupContent?.LaserPenAlphaSlider ?? BoardPenPalettePopupContent?.LaserPenAlphaSlider;
+        internal Slider LaserPenFadeTimeSlider => PenPalettePopupContent?.LaserPenFadeTimeSlider ?? BoardPenPalettePopupContent?.LaserPenFadeTimeSlider;
         internal Slider BoardLaserPenWidthSlider => BoardPenPalettePopupContent?.LaserPenWidthSlider;
         internal Slider BoardLaserPenAlphaSlider => BoardPenPalettePopupContent?.LaserPenAlphaSlider;
+        internal Slider BoardLaserPenFadeTimeSlider => BoardPenPalettePopupContent?.LaserPenFadeTimeSlider;
         internal Button BoardBrushModeButton => PenPalettePopupContent?.BrushModeBtn;
         internal System.Windows.Shapes.Path BoardBrushModeIcon => PenPalettePopupContent?.BrushModeIcon;
 
@@ -197,6 +199,12 @@ namespace Ink_Canvas
         internal Border BoardColorThemeSwitch => BoardPenPalettePopupContent?.ColorThemeSwitch;
         internal Image BoardColorThemeSwitchIcon => BoardPenPalettePopupContent?.ColorThemeSwitchIcon;
         internal TextBlock BoardColorThemeSwitchTextBlock => BoardPenPalettePopupContent?.ColorThemeSwitchText;
+        internal Border LaserPenColorThemeSwitch => PenPalettePopupContent?.LaserPenColorThemeSwitch ?? BoardPenPalettePopupContent?.LaserPenColorThemeSwitch;
+        internal Image LaserPenColorThemeSwitchIcon => PenPalettePopupContent?.LaserPenColorThemeSwitchIcon ?? BoardPenPalettePopupContent?.LaserPenColorThemeSwitchIcon;
+        internal TextBlock LaserPenColorThemeSwitchTextBlock => PenPalettePopupContent?.LaserPenColorThemeSwitchText ?? BoardPenPalettePopupContent?.LaserPenColorThemeSwitchText;
+        internal Border BoardLaserPenColorThemeSwitch => BoardPenPalettePopupContent?.LaserPenColorThemeSwitch;
+        internal Image BoardLaserPenColorThemeSwitchIcon => BoardPenPalettePopupContent?.LaserPenColorThemeSwitchIcon;
+        internal TextBlock BoardLaserPenColorThemeSwitchTextBlock => BoardPenPalettePopupContent?.LaserPenColorThemeSwitchText;
 
         internal FrameworkElement NibModeSimpleStackPanel => PenPalettePopupContent?.NibModePanel ?? BoardPenPalettePopupContent?.NibModePanel;
         internal FrameworkElement BoardNibModeSimpleStackPanel => BoardPenPalettePopupContent?.NibModePanel;

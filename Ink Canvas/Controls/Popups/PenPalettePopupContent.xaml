@@ -66,8 +66,8 @@
                                         FontSize="20" IsSnapToTickEnabled="True"
                                         Value="5"
                                         TickFrequency="0.1" TickPlacement="None" />
-                                <TextBlock Width="36" TextAlignment="Right"
-                                           Text="{Binding Value, ElementName=InkWidthSlider, Mode=OneWay}"
+                                <TextBlock Width="45" TextAlignment="Left"
+                                           Text="{Binding Value, ElementName=_InkWidthSlider, Mode=OneWay}"
                                            FontFamily="Consolas" VerticalAlignment="Center"
                                            Margin="10,0,0,0" FontSize="15" />
                                 <Button x:Name="BoardBrushModeButton" Width="24" Height="24" Margin="8,0,0,0"
@@ -112,8 +112,8 @@
                                         FontSize="20"
                                         IsSnapToTickEnabled="True" Value="255"
                                         TickFrequency="1" TickPlacement="None" />
-                                <TextBlock Width="36" TextAlignment="Right"
-                                           Text="{Binding Value, ElementName=InkAlphaSlider, Mode=OneWay}"
+                                <TextBlock Width="45" TextAlignment="Left"
+                                           Text="{Binding Value, ElementName=_InkAlphaSlider, Mode=OneWay}"
                                            FontFamily="Consolas" VerticalAlignment="Center"
                                            Margin="10,0,0,0" FontSize="15" />
                             </StackPanel>
@@ -129,10 +129,10 @@
                                         FontSize="20"
                                         IsSnapToTickEnabled="True" Value="20"
                                         TickFrequency="1" TickPlacement="None" />
-                                <TextBlock
-                                    Text="{Binding Value, ElementName=HighlighterWidthSlider, Mode=OneWay}"
-                                    FontFamily="Consolas" VerticalAlignment="Bottom"
-                                    Margin="10,0,0,4.5" FontSize="15" />
+                                <TextBlock Width="45" TextAlignment="Left"
+                                    Text="{Binding Value, ElementName=_HighlighterWidthSlider, Mode=OneWay}"
+                                    FontFamily="Consolas" VerticalAlignment="Center"
+                                    Margin="10,0,0,0" FontSize="15" />
                             </StackPanel>
                         </ikw:SimpleStackPanel>
                         <ikw:SimpleStackPanel x:Name="_LaserPenPropsPanel"
@@ -146,12 +146,12 @@
                                         FontSize="20" IsSnapToTickEnabled="True"
                                         Value="5"
                                         TickFrequency="0.1" TickPlacement="None" />
-                                <TextBlock Width="36" TextAlignment="Right"
-                                           Text="{Binding Value, ElementName=LaserPenWidthSlider, Mode=OneWay}"
+                                <TextBlock Width="45" TextAlignment="Left"
+                                           Text="{Binding Value, ElementName=_LaserPenWidthSlider, Mode=OneWay}"
                                            FontFamily="Consolas" VerticalAlignment="Center"
                                            Margin="10,0,0,0" FontSize="15" />
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                                 <Label Margin="0,0,10,0" Content="透明" FontWeight="Bold"
                                        Foreground="{DynamicResource FloatBarForeground}"
                                        FontSize="17" VerticalAlignment="Center" />
@@ -160,8 +160,22 @@
                                         FontSize="20"
                                         IsSnapToTickEnabled="True" Value="128"
                                         TickFrequency="1" TickPlacement="None" />
-                                <TextBlock Width="36" TextAlignment="Right"
-                                           Text="{Binding Value, ElementName=LaserPenAlphaSlider, Mode=OneWay}"
+                                <TextBlock Width="45" TextAlignment="Left"
+                                           Text="{Binding Value, ElementName=_LaserPenAlphaSlider, Mode=OneWay}"
+                                           FontFamily="Consolas" VerticalAlignment="Center"
+                                           Margin="10,0,0,0" FontSize="15" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Margin="0,0,10,0" Content="渐隐" FontWeight="Bold"
+                                       Foreground="{DynamicResource FloatBarForeground}"
+                                       FontSize="17" VerticalAlignment="Center" />
+                                <Slider x:Name="_LaserPenFadeTimeSlider" Minimum="1"
+                                        Maximum="15" Width="200"
+                                        FontSize="20" IsSnapToTickEnabled="True"
+                                        Value="3"
+                                        TickFrequency="1" TickPlacement="None" />
+                                <TextBlock Width="45" TextAlignment="Left"
+                                           Text="{Binding Value, ElementName=_LaserPenFadeTimeSlider, Mode=OneWay, StringFormat={}{0:0}s}"
                                            FontFamily="Consolas" VerticalAlignment="Center"
                                            Margin="10,0,0,0" FontSize="15" />
                             </StackPanel>
@@ -231,6 +245,25 @@
                         </ikw:SimpleStackPanel>
                         <ikw:SimpleStackPanel x:Name="_LaserPenColorsPanel" HorizontalAlignment="Center" Spacing="5">
                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+                                <Border x:Name="_LaserPenColorThemeSwitch"
+                                        BorderBrush="{DynamicResource FloatBarBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="100" Width="45" Height="45">
+                                    <Grid Margin="3">
+                                        <Image x:Name="_LaserPenColorThemeSwitchIcon"
+                                                Source="/Resources/Icons-Fluent/ic_fluent_weather_sunny_24_regular.png"
+                                                RenderOptions.BitmapScalingMode="HighQuality"
+                                                VerticalAlignment="Top"
+                                                Width="23" Height="23" Margin="0,0,0,0" />
+                                        <TextBlock Margin="0,0,0,2"
+                                                    x:Name="_LaserPenColorThemeSwitchTextBlock"
+                                                    Text="亮系"
+                                                    Foreground="{DynamicResource FloatBarForeground}"
+                                                    VerticalAlignment="Bottom"
+                                                    HorizontalAlignment="Center"
+                                                    FontSize="11" />
+                                    </Grid>
+                                </Border>
                                 <controls:PenColorButton x:Name="_LaserPenColorBlack" Color="Black" BorderBrushColor="#D3D3D3" CheckIconSource="/Resources/new-icons/checked-white.png" />
                                 <controls:PenColorButton x:Name="_LaserPenColorWhite" Color="White" BorderBrushColor="#71717a" CheckIconSource="/Resources/new-icons/checked-black.png" />
                                 <controls:PenColorButton x:Name="_LaserPenColorRed" Color="#dc2626" BorderBrushColor="#7f1d1d" />

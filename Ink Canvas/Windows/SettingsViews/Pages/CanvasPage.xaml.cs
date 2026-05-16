@@ -25,7 +25,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void UpdateAllSliderTexts()
         {
-            UpdateSliderText(InkFadeTimeSlider, InkFadeTimeText, "{0:0}ms");
             UpdateSliderText(BrushAutoRestoreWidthSlider, BrushAutoRestoreWidthText, "{0:F2}");
             UpdateSliderText(BrushAutoRestoreAlphaSlider, BrushAutoRestoreAlphaText, "{0:0}");
             UpdateSliderText(EraserAutoSwitchBackDelaySlider, EraserAutoSwitchBackDelayText, "{0:0}秒");
@@ -61,8 +60,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     if (settings.Canvas.UseAdvancedBezierSmoothing) curveMode = 2;
                     else if (settings.Canvas.FitToCurve) curveMode = 1;
                     ComboBoxCurveSmoothingMode.SelectedIndex = curveMode;
-                    ToggleSwitchEnableInkFade.IsOn = settings.Canvas.EnableInkFade;
-                    InkFadeTimeSlider.Value = settings.Canvas.InkFadeTime;
                     ToggleSwitchBrushAutoRestore.IsOn = settings.Canvas.EnableBrushAutoRestore;
                     BrushAutoRestoreTimesTextBox.Text = settings.Canvas.BrushAutoRestoreTimes ?? string.Empty;
                     LoadBrushAutoRestoreColor(settings.Canvas.BrushAutoRestoreColor);
@@ -90,7 +87,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             _isLoaded = true;
 
-            ExpanderEnableInkFade.IsExpanded = ToggleSwitchEnableInkFade.IsOn;
             ExpanderBrushAutoRestore.IsExpanded = ToggleSwitchBrushAutoRestore.IsOn;
             ExpanderEnableEraserAutoSwitchBack.IsExpanded = ToggleSwitchEnableEraserAutoSwitchBack.IsOn;
             ExpanderEnablePalmEraser.IsExpanded = ToggleSwitchEnablePalmEraser.IsOn;
@@ -247,32 +243,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     mw.inkCanvas.DefaultDrawingAttributes.FitToCurve = false;
                 else
                     mw.inkCanvas.DefaultDrawingAttributes.FitToCurve = SettingsManager.Settings.Canvas.FitToCurve;
-            }
-        }
-
-        private void ToggleSwitchEnableInkFade_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.EnableInkFade = ToggleSwitchEnableInkFade.IsOn;
-            ExpanderEnableInkFade.IsExpanded = ToggleSwitchEnableInkFade.IsOn;
-            SettingsManager.SaveSettingsToFile();
-            var mw = Application.Current.MainWindow as MainWindow;
-            if (mw != null)
-            {
-                mw.UpdateInkFadeManager(ToggleSwitchEnableInkFade.IsOn, SettingsManager.Settings.Canvas.InkFadeTime);
-            }
-        }
-
-        private void InkFadeTimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            UpdateSliderText(InkFadeTimeSlider, InkFadeTimeText, "{0:0}ms");
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.InkFadeTime = (int)e.NewValue;
-            SettingsManager.SaveSettingsToFile();
-            var mw = Application.Current.MainWindow as MainWindow;
-            if (mw != null && SettingsManager.Settings.Canvas.EnableInkFade)
-            {
-                mw.UpdateInkFadeManager(true, (int)e.NewValue);
             }
         }
 

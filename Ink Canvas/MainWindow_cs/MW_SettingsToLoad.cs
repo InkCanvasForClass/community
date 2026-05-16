@@ -706,10 +706,14 @@ namespace Ink_Canvas
                     LaserPenWidthSlider.Value = Settings.Canvas.LaserPenWidth;
                 if (LaserPenAlphaSlider != null)
                     LaserPenAlphaSlider.Value = Settings.Canvas.LaserPenAlpha;
+                if (LaserPenFadeTimeSlider != null)
+                    LaserPenFadeTimeSlider.Value = Math.Max(1, Math.Min(15, Settings.Canvas.InkFadeTime / 1000));
                 if (BoardLaserPenWidthSlider != null)
                     BoardLaserPenWidthSlider.Value = Settings.Canvas.LaserPenWidth;
                 if (BoardLaserPenAlphaSlider != null)
                     BoardLaserPenAlphaSlider.Value = Settings.Canvas.LaserPenAlpha;
+                if (BoardLaserPenFadeTimeSlider != null)
+                    BoardLaserPenFadeTimeSlider.Value = Math.Max(1, Math.Min(15, Settings.Canvas.InkFadeTime / 1000));
 
                 LogHelper.WriteLogToFile("墨迹渐隐设置已加载", LogHelper.LogType.Trace);
             }

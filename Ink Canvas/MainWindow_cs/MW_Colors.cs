@@ -349,6 +349,22 @@ namespace Ink_Canvas
                 BorderPenColorOrange.Color = Color.FromRgb(249, 115, 22);
                 BoardBorderPenColorOrange.Color = Color.FromRgb(249, 115, 22);
 
+                // 更新激光笔颜色
+                LaserPenColorRed.Color = Color.FromRgb(239, 68, 68);
+                BoardLaserPenColorRed.Color = Color.FromRgb(239, 68, 68);
+                LaserPenColorGreen.Color = Color.FromRgb(34, 197, 94);
+                BoardLaserPenColorGreen.Color = Color.FromRgb(34, 197, 94);
+                LaserPenColorBlue.Color = Color.FromRgb(59, 130, 246);
+                BoardLaserPenColorBlue.Color = Color.FromRgb(59, 130, 246);
+                LaserPenColorYellow.Color = Color.FromRgb(250, 204, 21);
+                BoardLaserPenColorYellow.Color = Color.FromRgb(250, 204, 21);
+                LaserPenColorPink.Color = Color.FromRgb(236, 72, 153);
+                BoardLaserPenColorPink.Color = Color.FromRgb(236, 72, 153);
+                LaserPenColorTeal.Color = Color.FromRgb(20, 184, 166);
+                BoardLaserPenColorTeal.Color = Color.FromRgb(20, 184, 166);
+                LaserPenColorOrange.Color = Color.FromRgb(249, 115, 22);
+                BoardLaserPenColorOrange.Color = Color.FromRgb(249, 115, 22);
+
                 var newImageSource = new BitmapImage();
                 newImageSource.BeginInit();
                 newImageSource.UriSource = new Uri("/Resources/Icons-Fluent/ic_fluent_weather_moon_24_regular.png",
@@ -356,9 +372,13 @@ namespace Ink_Canvas
                 newImageSource.EndInit();
                 ColorThemeSwitchIcon.Source = newImageSource;
                 BoardColorThemeSwitchIcon.Source = newImageSource;
+                LaserPenColorThemeSwitchIcon.Source = newImageSource;
+                BoardLaserPenColorThemeSwitchIcon.Source = newImageSource;
 
                 ColorThemeSwitchTextBlock.Text = "暗系";
                 BoardColorThemeSwitchTextBlock.Text = "暗系";
+                LaserPenColorThemeSwitchTextBlock.Text = "暗系";
+                BoardLaserPenColorThemeSwitchTextBlock.Text = "暗系";
             }
             else
             {
@@ -385,6 +405,22 @@ namespace Ink_Canvas
                 BorderPenColorOrange.Color = Color.FromRgb(234, 88, 12);
                 BoardBorderPenColorOrange.Color = Color.FromRgb(234, 88, 12);
 
+                // 更新激光笔颜色
+                LaserPenColorRed.Color = Color.FromRgb(220, 38, 38);
+                BoardLaserPenColorRed.Color = Color.FromRgb(220, 38, 38);
+                LaserPenColorGreen.Color = Color.FromRgb(22, 163, 74);
+                BoardLaserPenColorGreen.Color = Color.FromRgb(22, 163, 74);
+                LaserPenColorBlue.Color = Color.FromRgb(37, 99, 235);
+                BoardLaserPenColorBlue.Color = Color.FromRgb(37, 99, 235);
+                LaserPenColorYellow.Color = Color.FromRgb(234, 179, 8);
+                BoardLaserPenColorYellow.Color = Color.FromRgb(234, 179, 8);
+                LaserPenColorPink.Color = Color.FromRgb(147, 51, 234);
+                BoardLaserPenColorPink.Color = Color.FromRgb(147, 51, 234);
+                LaserPenColorTeal.Color = Color.FromRgb(13, 148, 136);
+                BoardLaserPenColorTeal.Color = Color.FromRgb(13, 148, 136);
+                LaserPenColorOrange.Color = Color.FromRgb(234, 88, 12);
+                BoardLaserPenColorOrange.Color = Color.FromRgb(234, 88, 12);
+
                 var newImageSource = new BitmapImage();
                 newImageSource.BeginInit();
                 newImageSource.UriSource = new Uri("/Resources/Icons-Fluent/ic_fluent_weather_sunny_24_regular.png",
@@ -392,9 +428,13 @@ namespace Ink_Canvas
                 newImageSource.EndInit();
                 ColorThemeSwitchIcon.Source = newImageSource;
                 BoardColorThemeSwitchIcon.Source = newImageSource;
+                LaserPenColorThemeSwitchIcon.Source = newImageSource;
+                BoardLaserPenColorThemeSwitchIcon.Source = newImageSource;
 
                 ColorThemeSwitchTextBlock.Text = "亮系";
                 BoardColorThemeSwitchTextBlock.Text = "亮系";
+                LaserPenColorThemeSwitchTextBlock.Text = "亮系";
+                BoardLaserPenColorThemeSwitchTextBlock.Text = "亮系";
             }
 
             // 改变选中提示
@@ -439,6 +479,27 @@ namespace Ink_Canvas
             BoardHighlighterPenColorWhite.IsChecked = false;
             BoardHighlighterPenColorYellow.IsChecked = false;
             BoardHighlighterPenColorZinc.IsChecked = false;
+
+            // 重置激光笔颜色按钮
+            LaserPenColorBlack.IsChecked = false;
+            LaserPenColorWhite.IsChecked = false;
+            LaserPenColorRed.IsChecked = false;
+            LaserPenColorYellow.IsChecked = false;
+            LaserPenColorGreen.IsChecked = false;
+            LaserPenColorBlue.IsChecked = false;
+            LaserPenColorPink.IsChecked = false;
+            LaserPenColorTeal.IsChecked = false;
+            LaserPenColorOrange.IsChecked = false;
+
+            BoardLaserPenColorBlack.IsChecked = false;
+            BoardLaserPenColorWhite.IsChecked = false;
+            BoardLaserPenColorRed.IsChecked = false;
+            BoardLaserPenColorYellow.IsChecked = false;
+            BoardLaserPenColorGreen.IsChecked = false;
+            BoardLaserPenColorBlue.IsChecked = false;
+            BoardLaserPenColorPink.IsChecked = false;
+            BoardLaserPenColorTeal.IsChecked = false;
+            BoardLaserPenColorOrange.IsChecked = false;
 
             switch (inkColor)
             {
@@ -522,6 +583,50 @@ namespace Ink_Canvas
                     HighlighterPenColorOrange.IsChecked = true;
                     BoardHighlighterPenColorOrange.IsChecked = true;
                     break;
+            }
+
+            // 更新激光笔颜色按钮选中状态
+            if (penType == 2)
+            {
+                switch (inkColor)
+                {
+                    case 0:
+                        LaserPenColorBlack.IsChecked = true;
+                        BoardLaserPenColorBlack.IsChecked = true;
+                        break;
+                    case 1:
+                        LaserPenColorRed.IsChecked = true;
+                        BoardLaserPenColorRed.IsChecked = true;
+                        break;
+                    case 2:
+                        LaserPenColorGreen.IsChecked = true;
+                        BoardLaserPenColorGreen.IsChecked = true;
+                        break;
+                    case 3:
+                        LaserPenColorBlue.IsChecked = true;
+                        BoardLaserPenColorBlue.IsChecked = true;
+                        break;
+                    case 4:
+                        LaserPenColorYellow.IsChecked = true;
+                        BoardLaserPenColorYellow.IsChecked = true;
+                        break;
+                    case 5:
+                        LaserPenColorWhite.IsChecked = true;
+                        BoardLaserPenColorWhite.IsChecked = true;
+                        break;
+                    case 6:
+                        LaserPenColorPink.IsChecked = true;
+                        BoardLaserPenColorPink.IsChecked = true;
+                        break;
+                    case 7:
+                        LaserPenColorTeal.IsChecked = true;
+                        BoardLaserPenColorTeal.IsChecked = true;
+                        break;
+                    case 8:
+                        LaserPenColorOrange.IsChecked = true;
+                        BoardLaserPenColorOrange.IsChecked = true;
+                        break;
+                }
             }
 
             // 更新快捷调色盘选择指示器

@@ -48,12 +48,16 @@ namespace Ink_Canvas.Controls
         public Slider HighlighterWidthSlider { get; }
         public Slider LaserPenWidthSlider { get; }
         public Slider LaserPenAlphaSlider { get; }
+        public Slider LaserPenFadeTimeSlider { get; }
         public Button BrushModeBtn => BoardBrushModeButton;
         public Path BrushModeIcon => BoardBrushModeIcon;
 
         public Border ColorThemeSwitch { get; }
         public Image ColorThemeSwitchIcon { get; }
         public TextBlock ColorThemeSwitchText => ColorThemeSwitchTextBlock;
+        public Border LaserPenColorThemeSwitch { get; }
+        public Image LaserPenColorThemeSwitchIcon { get; }
+        public TextBlock LaserPenColorThemeSwitchText => _LaserPenColorThemeSwitchTextBlock;
 
         public PenColorButton DefaultPenColorBlack => BorderPenColorBlack;
         public PenColorButton DefaultPenColorWhite => BorderPenColorWhite;
@@ -130,8 +134,11 @@ namespace Ink_Canvas.Controls
             HighlighterWidthSlider = (Slider)FindName("_HighlighterWidthSlider");
             LaserPenWidthSlider = (Slider)FindName("_LaserPenWidthSlider");
             LaserPenAlphaSlider = (Slider)FindName("_LaserPenAlphaSlider");
+            LaserPenFadeTimeSlider = (Slider)FindName("_LaserPenFadeTimeSlider");
             ColorThemeSwitch = (Border)FindName("_ColorThemeSwitch");
             ColorThemeSwitchIcon = (Image)FindName("_ColorThemeSwitchIcon");
+            LaserPenColorThemeSwitch = (Border)FindName("_LaserPenColorThemeSwitch");
+            LaserPenColorThemeSwitchIcon = (Image)FindName("_LaserPenColorThemeSwitchIcon");
             HighlighterPenColorBlack = (PenColorButton)FindName("_HighlighterPenColorBlack");
             HighlighterPenColorWhite = (PenColorButton)FindName("_HighlighterPenColorWhite");
             HighlighterPenColorRed = (PenColorButton)FindName("_HighlighterPenColorRed");

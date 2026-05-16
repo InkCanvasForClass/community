@@ -364,14 +364,12 @@ namespace Ink_Canvas.Helpers
             {
                 _dispatcher.InvokeAsync(() =>
                 {
-                    // 获取当前透明度和判断是否为高亮笔
                     var currentOpacity = visual.Opacity;
                     var isHighlighter = stroke.DrawingAttributes.IsHighlighter;
 
-                    // 根据墨迹类型选择不同的动画效果
                     if (isHighlighter)
                     {
-                        StartHighlighterFadeAnimation(visual, stroke, currentOpacity);
+                        StartUnifiedFadeAnimation(visual, stroke, currentOpacity, AnimationDuration);
                     }
                     else
                     {
@@ -503,62 +501,56 @@ namespace Ink_Canvas.Helpers
                 var stylusPoints = stroke.StylusPoints;
                 var totalPoints = stylusPoints.Count;
 
-                // 分段算法 - 确保所有墨迹都有足够的动画效果
                 var strokeLength = CalculateStrokeLength(stylusPoints);
                 var segmentCount = CalculateOptimalSegmentCount(totalPoints, strokeLength);
 
-                // 强制最小分段数量，确保短墨迹也有动画效果
                 segmentCount = Math.Max(segmentCount, 4);
 
                 var pointsPerSegment = Math.Max(1, totalPoints / segmentCount);
 
-                // 隐藏原始视觉元素
                 originalVisual.Visibility = Visibility.Hidden;
 
-                var segments = new List<UIElement>();
-                var parent = _mainWindow.inkCanvas?.Parent as Panel;
-                if (parent == null)
-                {
-                    // 如果父容器不是Panel，直接使用InkCanvas
-                    parent = null; // 稍后会检查并使用InkCanvas.Children
-                }
+                var segmentContainer = new System.Windows.Controls.Canvas();
+                var originalAlpha = stroke.DrawingAttributes.Color.A;
+                segmentContainer.Opacity = originalAlpha / 255.0 * opacity;
 
-                // 创建各个分段 - 确保短墨迹也能正确分段
+                var segments = new List<UIElement>();
+
                 for (int i = 0; i < segmentCount; i++)
                 {
                     var startIndex = i * pointsPerSegment;
                     var endIndex = (i == segmentCount - 1) ? totalPoints - 1 : (i + 1) * pointsPerSegment;
 
-                    // 确保有足够的点来创建分段，对于短墨迹特殊处理
                     if (endIndex <= startIndex && totalPoints > 1)
                     {
-                        // 短墨迹：每个点作为一个分段
                         startIndex = i;
                         endIndex = Math.Min(i + 1, totalPoints - 1);
                     }
 
-                    // 为每个分段添加重叠，确保连接处平滑
-                    var overlap = Math.Max(1, pointsPerSegment / 6); // 15%的重叠，平衡平滑与速度
+                    var overlap = Math.Max(1, pointsPerSegment / 6);
                     var actualStartIndex = Math.Max(0, startIndex - overlap);
                     var actualEndIndex = Math.Min(totalPoints - 1, endIndex + overlap);
 
-                    var segment = CreateStrokeSegment(stroke, actualStartIndex, actualEndIndex, opacity);
+                    var segment = CreateStrokeSegment(stroke, actualStartIndex, actualEndIndex,
+                        i == 0, i == segmentCount - 1);
                     if (segment != null)
                     {
                         segments.Add(segment);
-                        if (parent != null)
-                        {
-                            parent.Children.Add(segment);
-                        }
-                        else if (_mainWindow.inkCanvas != null)
-                        {
-                            _mainWindow.inkCanvas.Children.Add(segment);
-                        }
+                        segmentContainer.Children.Add(segment);
                     }
                 }
 
-                // 开始分段渐隐动画
-                StartSegmentedFadeAnimation(segments, stroke, originalVisual, duration);
+                var parent = _mainWindow.inkCanvas?.Parent as Panel;
+                if (parent != null)
+                {
+                    parent.Children.Add(segmentContainer);
+                }
+                else if (_mainWindow.inkCanvas != null)
+                {
+                    _mainWindow.inkCanvas.Children.Add(segmentContainer);
+                }
+
+                StartSegmentedFadeAnimation(segments, stroke, originalVisual, duration, segmentContainer);
             }
             catch (Exception)
             {
@@ -569,11 +561,11 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 创建墨迹分段
         /// </summary>
-        private UIElement CreateStrokeSegment(Stroke originalStroke, int startIndex, int endIndex, double opacity)
+        private UIElement CreateStrokeSegment(Stroke originalStroke, int startIndex, int endIndex,
+            bool isFirstSegment, bool isLastSegment)
         {
             try
             {
-                // 创建分段的 StylusPoint 集合
                 var segmentPoints = new StylusPointCollection();
                 for (int i = startIndex; i <= endIndex && i < originalStroke.StylusPoints.Count; i++)
                 {
@@ -582,35 +574,31 @@ namespace Ink_Canvas.Helpers
 
                 if (segmentPoints.Count < 2) return null;
 
-                // 创建分段墨迹
                 var segmentStroke = new Stroke(segmentPoints)
                 {
                     DrawingAttributes = originalStroke.DrawingAttributes.Clone()
                 };
 
-                // 创建分段的视觉元素
                 var geometry = segmentStroke.GetGeometry();
                 if (geometry == null) return null;
 
                 var drawingAttribs = segmentStroke.DrawingAttributes;
+                var isHighlighter = drawingAttribs.IsHighlighter;
+                var opaqueColor = Color.FromArgb(255, drawingAttribs.Color.R, drawingAttribs.Color.G, drawingAttribs.Color.B);
+
                 var path = new Path
                 {
                     Data = geometry,
-                    Stroke = new SolidColorBrush(drawingAttribs.Color),
+                    Stroke = new SolidColorBrush(opaqueColor),
                     StrokeThickness = drawingAttribs.Width,
-                    StrokeStartLineCap = drawingAttribs.IsHighlighter ? PenLineCap.Flat : PenLineCap.Round,
-                    StrokeEndLineCap = drawingAttribs.IsHighlighter ? PenLineCap.Flat : PenLineCap.Round,
-                    StrokeLineJoin = drawingAttribs.IsHighlighter ? PenLineJoin.Miter : PenLineJoin.Round,
-                    Fill = drawingAttribs.IsHighlighter ? new SolidColorBrush(drawingAttribs.Color) : null,
-                    Opacity = opacity,
+                    StrokeStartLineCap = isFirstSegment ? (isHighlighter ? PenLineCap.Flat : PenLineCap.Round) : PenLineCap.Flat,
+                    StrokeEndLineCap = isLastSegment ? (isHighlighter ? PenLineCap.Flat : PenLineCap.Round) : PenLineCap.Flat,
+                    StrokeLineJoin = isHighlighter ? PenLineJoin.Miter : PenLineJoin.Round,
+                    Fill = isHighlighter ? new SolidColorBrush(opaqueColor) : null,
+                    Opacity = 1.0,
                     UseLayoutRounding = false,
                     SnapsToDevicePixels = false
                 };
-
-                // 设置位置
-                var bounds = geometry.Bounds;
-                System.Windows.Controls.Canvas.SetLeft(path, bounds.Left);
-                System.Windows.Controls.Canvas.SetTop(path, bounds.Top);
 
                 return path;
             }
@@ -623,46 +611,39 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 开始分段渐隐动画
         /// </summary>
-        private void StartSegmentedFadeAnimation(List<UIElement> segments, Stroke originalStroke, UIElement originalVisual, int totalDuration)
+        private void StartSegmentedFadeAnimation(List<UIElement> segments, Stroke originalStroke, UIElement originalVisual, int totalDuration, FrameworkElement container)
         {
             try
             {
-                // 动画时序算法
                 var segmentDuration = CalculateOptimalSegmentDuration(totalDuration, segments.Count);
                 var animationCurve = CreateAppleStyleAnimationCurve(segments.Count, totalDuration);
 
-                // 跟踪动画完成状态
                 var completedSegments = new HashSet<UIElement>();
                 var totalSegments = segments.Count;
 
-                // 渐隐效果 - 使用自然的动画曲线
                 for (int i = 0; i < segments.Count; i++)
                 {
                     var segment = segments[i];
 
-                    // 使用预计算的动画曲线获取延迟时间
                     var delay = animationCurve[i];
 
-                    // 使用定时器延迟启动每个分段的动画
                     var timer = new DispatcherTimer
                     {
                         Interval = TimeSpan.FromMilliseconds(delay)
                     };
 
-                    int segmentIndex = i; // 捕获当前索引
+                    int segmentIndex = i;
                     timer.Tick += (sender, e) =>
                     {
                         StartSingleSegmentFadeAnimation(segment, segmentDuration, () =>
                         {
-                            // 动画完成回调
                             lock (completedSegments)
                             {
                                 completedSegments.Add(segment);
 
-                                // 检查是否所有分段都完成了
                                 if (completedSegments.Count >= totalSegments)
                                 {
-                                    CleanupSegmentedAnimation(segments, originalStroke, originalVisual);
+                                    CleanupSegmentedAnimation(segments, originalStroke, originalVisual, container);
                                 }
                             }
                         });
@@ -672,8 +653,7 @@ namespace Ink_Canvas.Helpers
                     timer.Start();
                 }
 
-                // 设置一个安全超时定时器，防止无限等待
-                var safetyTimeout = totalDuration + (segments.Count * segmentDuration) + 1200; // 额外1.2秒缓冲，确保动画完整
+                var safetyTimeout = totalDuration + (segments.Count * segmentDuration) + 1200;
                 var safetyTimer = new DispatcherTimer
                 {
                     Interval = TimeSpan.FromMilliseconds(safetyTimeout)
@@ -681,7 +661,7 @@ namespace Ink_Canvas.Helpers
 
                 safetyTimer.Tick += (sender, e) =>
                 {
-                    CleanupSegmentedAnimation(segments, originalStroke, originalVisual);
+                    CleanupSegmentedAnimation(segments, originalStroke, originalVisual, container);
                     safetyTimer.Stop();
                 };
 
@@ -690,7 +670,7 @@ namespace Ink_Canvas.Helpers
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"分段渐隐动画失败: {ex}", LogHelper.LogType.Error);
-                CleanupSegmentedAnimation(segments, originalStroke, originalVisual);
+                CleanupSegmentedAnimation(segments, originalStroke, originalVisual, container);
             }
         }
 
@@ -733,26 +713,20 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 清理分段动画
         /// </summary>
-        private void CleanupSegmentedAnimation(List<UIElement> segments, Stroke originalStroke, UIElement originalVisual)
+        private void CleanupSegmentedAnimation(List<UIElement> segments, Stroke originalStroke, UIElement originalVisual, FrameworkElement container)
         {
             try
             {
-                // 移除所有分段
                 var parent = _mainWindow.inkCanvas?.Parent as Panel;
-
-                foreach (var segment in segments)
+                if (parent != null && parent.Children.Contains(container))
                 {
-                    if (parent != null && parent.Children.Contains(segment))
-                    {
-                        parent.Children.Remove(segment);
-                    }
-                    else if (_mainWindow.inkCanvas != null && _mainWindow.inkCanvas.Children.Contains(segment))
-                    {
-                        _mainWindow.inkCanvas.Children.Remove(segment);
-                    }
+                    parent.Children.Remove(container);
+                }
+                else if (_mainWindow.inkCanvas != null && _mainWindow.inkCanvas.Children.Contains(container))
+                {
+                    _mainWindow.inkCanvas.Children.Remove(container);
                 }
 
-                // 清理原始墨迹
                 OnAnimationCompleted(originalVisual, originalStroke);
             }
             catch (Exception ex)
