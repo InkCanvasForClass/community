@@ -641,6 +641,7 @@ namespace Ink_Canvas.Controls.Toolbar
                 Margin = new Thickness(2, 0, 2, 0),
                 Cursor = Cursors.Arrow,
                 HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Top,
                 Tag = ContentPanelTag
             };
 
@@ -661,26 +662,28 @@ namespace Ink_Canvas.Controls.Toolbar
             var selectionBG = new Border
             {
                 Visibility = Visibility.Hidden,
-                Width = 44,
-                Height = 64,
-                Margin = new Thickness(0, -2, 0, -2),
-                Background = new SolidColorBrush(Color.FromArgb(0x15, 0x3b, 0x82, 0xf6)),
+                Width = 45,
+                Height = 47,
+                Margin = new Thickness(0, 0, 0, 0),
+                CornerRadius = new CornerRadius(4),
+                Background = new SolidColorBrush(Color.FromArgb(0x55, 0x3b, 0x82, 0xf6)),
                 Tag = SelectionBGTag
             };
-            System.Windows.Controls.Canvas.SetLeft(selectionBG, 24);
+            System.Windows.Controls.Canvas.SetLeft(selectionBG, 0);
+            System.Windows.Controls.Canvas.SetTop(selectionBG, 0);
             canvas.Children.Add(selectionBG);
 
             var indicatorBar = new Border
             {
                 Visibility = Visibility.Hidden,
-                Width = 40,
+                Width = 16,
                 Height = 3,
-                CornerRadius = new CornerRadius(1.5),
+                CornerRadius = new CornerRadius(2),
                 Background = new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb)),
                 Tag = IndicatorBarTag
             };
-            System.Windows.Controls.Canvas.SetLeft(indicatorBar, 26);
-            System.Windows.Controls.Canvas.SetBottom(indicatorBar, 1);
+            System.Windows.Controls.Canvas.SetLeft(indicatorBar, 14);
+            System.Windows.Controls.Canvas.SetBottom(indicatorBar, 2);
             canvas.Children.Add(indicatorBar);
 
             grid.Children.Add(canvas);
@@ -690,7 +693,7 @@ namespace Ink_Canvas.Controls.Toolbar
             {
                 Padding = new Thickness(2, 0, 2, 0),
                 Visibility = Visibility.Visible,
-                Height = 72,
+                Height = 58,
                 CornerRadius = new CornerRadius(8),
                 BorderThickness = new Thickness(2),
                 HorizontalAlignment = HorizontalAlignment.Left,
@@ -710,9 +713,9 @@ namespace Ink_Canvas.Controls.Toolbar
                 Margin = new Thickness(0),
                 Padding = isToolbarButton ? new Thickness(0) : new Thickness(4, 2, 4, 2),
                 Width = double.NaN,
-                MinWidth = isToolbarButton ? 72 : 0,
+                MinWidth = isToolbarButton ? 58 : 0,
                 Height = double.NaN,
-                MinHeight = 72,
+                MinHeight = 58,
                 CornerRadius = new CornerRadius(8),
                 BorderThickness = new Thickness(2),
                 Child = view,
@@ -724,12 +727,12 @@ namespace Ink_Canvas.Controls.Toolbar
             if (isToolbarButton)
             {
                 view.HorizontalAlignment = HorizontalAlignment.Center;
-                view.VerticalAlignment = VerticalAlignment.Center;
+                view.VerticalAlignment = VerticalAlignment.Top;
             }
             else
             {
                 view.HorizontalAlignment = HorizontalAlignment.Center;
-                view.VerticalAlignment = VerticalAlignment.Center;
+                view.VerticalAlignment = VerticalAlignment.Top;
             }
 
             SetHidingRuleset(wrapper, ruleset);

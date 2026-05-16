@@ -75,7 +75,7 @@ namespace Ink_Canvas.Controls
         public PenColorButton HighlighterPenColorTeal { get; }
         public PenColorButton HighlighterPenColorOrange { get; }
 
-        public FontIcon CloseFontIcon => TabTitleBar?.CloseFontIcon;
+        public Button CloseButtonControl => TabTitleBar?.CloseButtonControl;
 
         public FrameworkElement NibModePanel => NibModeSimpleStackPanel;
         public FrameworkElement InkFadeControlPanel => InkFadeControlPanel1;

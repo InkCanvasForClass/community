@@ -17,7 +17,7 @@ namespace Ink_Canvas.Controls
         public ToggleSwitch TwoFingerZoomToggle => ToggleSwitchEnableTwoFingerZoom;
         public ToggleSwitch TwoFingerRotationToggle => ToggleSwitchEnableTwoFingerRotation;
 
-        public FontIcon CloseFontIcon => Shell?.CloseFontIcon;
+        public Button CloseButtonControl => Shell?.CloseButtonControl;
 
         public FrameworkElement TwoFingerGestureSimpleStackPanel { get; }
 

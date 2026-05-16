@@ -16,7 +16,7 @@ namespace Ink_Canvas.Controls
         public Button ApplyBtn => ApplyBackgroundColorBtn;
         public Border WhiteboardBtn => WhiteboardModeBtn;
         public Border BlackboardBtn => BlackboardModeBtn;
-        public FontIcon CloseFontIcon => Shell?.CloseFontIcon;
+        public Button CloseButtonControl => Shell?.CloseButtonControl;
 
         public BackgroundPalettePopupContent()
         {

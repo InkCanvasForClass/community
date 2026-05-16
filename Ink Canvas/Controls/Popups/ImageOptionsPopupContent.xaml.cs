@@ -1,5 +1,4 @@
 using System.Windows.Controls;
-using iNKORE.UI.WPF.Modern.Controls;
 
 namespace Ink_Canvas.Controls
 {
@@ -7,7 +6,7 @@ namespace Ink_Canvas.Controls
     {
         public Border ScreenshotOption { get; }
         public Border SelectFileOption { get; }
-        public FontIcon CloseFontIcon => Shell?.CloseFontIcon;
+        public Button CloseButtonControl => Shell?.CloseButtonControl;
 
         public ImageOptionsPopupContent()
         {

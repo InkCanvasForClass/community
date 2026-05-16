@@ -1113,9 +1113,9 @@
                 <Viewbox.LayoutTransform>
                     <ScaleTransform x:Name="ViewboxFloatingBarScaleTransform" ScaleX="1" ScaleY="1" />
                 </Viewbox.LayoutTransform>
-                <ikw:SimpleStackPanel Name="StackPanelFloatingBarRoot" Orientation="Horizontal" MaxHeight="72">
+                <ikw:SimpleStackPanel Name="StackPanelFloatingBarRoot" Orientation="Horizontal" MaxHeight="58">
                     <Border Name="BorderFloatingBarMoveControls" Margin="0" Padding="0"
-                            Width="72" Height="72"
+                            Width="58" Height="58"
                             Background="{DynamicResource FloatBarBackground}"
                             CornerRadius="8"
                             BorderThickness="2"
