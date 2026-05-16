@@ -570,14 +570,37 @@ namespace Ink_Canvas
         private void InkAlphaSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!isLoaded) return;
-            // if (sender == BoardInkWidthSlider) InkWidthSlider.Value = ((Slider)sender).Value;
-            // if (sender == InkWidthSlider) BoardInkWidthSlider.Value = ((Slider)sender).Value;
             var NowR = drawingAttributes.Color.R;
             var NowG = drawingAttributes.Color.G;
             var NowB = drawingAttributes.Color.B;
-            // Trace.WriteLine(BitConverter.GetBytes(((Slider)sender).Value));
             drawingAttributes.Color = Color.FromArgb((byte)((Slider)sender).Value, NowR, NowG, NowB);
             Settings.Canvas.InkAlpha = ((Slider)sender).Value;
+            SaveSettingsToFile();
+        }
+
+        private void LaserPenWidthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!isLoaded) return;
+            if (penType == 2)
+            {
+                drawingAttributes.Width = ((Slider)sender).Value;
+                drawingAttributes.Height = ((Slider)sender).Value;
+            }
+            Settings.Canvas.LaserPenWidth = ((Slider)sender).Value;
+            SaveSettingsToFile();
+        }
+
+        private void LaserPenAlphaSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!isLoaded) return;
+            if (penType == 2)
+            {
+                var NowR = drawingAttributes.Color.R;
+                var NowG = drawingAttributes.Color.G;
+                var NowB = drawingAttributes.Color.B;
+                drawingAttributes.Color = Color.FromArgb((byte)((Slider)sender).Value, NowR, NowG, NowB);
+            }
+            Settings.Canvas.LaserPenAlpha = (int)((Slider)sender).Value;
             SaveSettingsToFile();
         }
 

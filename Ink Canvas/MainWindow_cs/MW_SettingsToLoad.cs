@@ -696,32 +696,20 @@ namespace Ink_Canvas
         {
             try
             {
-
-                // 同步批注子面板中的开关状态
-                if (ToggleSwitchInkFadeInPanel != null)
-                {
-                    ToggleSwitchInkFadeInPanel.IsOn = Settings.Canvas.EnableInkFade;
-                }
-
-                // 同步普通画笔面板中的开关状态
-                if (ToggleSwitchInkFadeInPanel2 != null)
-                {
-                    ToggleSwitchInkFadeInPanel2.IsOn = Settings.Canvas.EnableInkFade;
-                }
-
-
-
-
-                // 同步墨迹渐隐管理器的状态
                 if (_inkFadeManager != null)
                 {
                     _inkFadeManager.IsEnabled = Settings.Canvas.EnableInkFade;
                     _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
                 }
 
-
-                // 根据设置更新墨迹渐隐控制开关的可见性
-                UpdateInkFadeControlVisibility();
+                if (LaserPenWidthSlider != null)
+                    LaserPenWidthSlider.Value = Settings.Canvas.LaserPenWidth;
+                if (LaserPenAlphaSlider != null)
+                    LaserPenAlphaSlider.Value = Settings.Canvas.LaserPenAlpha;
+                if (BoardLaserPenWidthSlider != null)
+                    BoardLaserPenWidthSlider.Value = Settings.Canvas.LaserPenWidth;
+                if (BoardLaserPenAlphaSlider != null)
+                    BoardLaserPenAlphaSlider.Value = Settings.Canvas.LaserPenAlpha;
 
                 LogHelper.WriteLogToFile("墨迹渐隐设置已加载", LogHelper.LogType.Trace);
             }

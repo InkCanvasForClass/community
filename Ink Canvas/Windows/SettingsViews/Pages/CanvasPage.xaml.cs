@@ -63,7 +63,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     ComboBoxCurveSmoothingMode.SelectedIndex = curveMode;
                     ToggleSwitchEnableInkFade.IsOn = settings.Canvas.EnableInkFade;
                     InkFadeTimeSlider.Value = settings.Canvas.InkFadeTime;
-                    CardHideInkFadeControlInPenMenu.IsOn = settings.Canvas.HideInkFadeControlInPenMenu;
                     ToggleSwitchBrushAutoRestore.IsOn = settings.Canvas.EnableBrushAutoRestore;
                     BrushAutoRestoreTimesTextBox.Text = settings.Canvas.BrushAutoRestoreTimes ?? string.Empty;
                     LoadBrushAutoRestoreColor(settings.Canvas.BrushAutoRestoreColor);
@@ -261,10 +260,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (mw != null)
             {
                 mw.UpdateInkFadeManager(ToggleSwitchEnableInkFade.IsOn, SettingsManager.Settings.Canvas.InkFadeTime);
-                if (mw.ToggleSwitchInkFadeInPanel != null)
-                    mw.ToggleSwitchInkFadeInPanel.IsOn = ToggleSwitchEnableInkFade.IsOn;
-                if (mw.ToggleSwitchInkFadeInPanel2 != null)
-                    mw.ToggleSwitchInkFadeInPanel2.IsOn = ToggleSwitchEnableInkFade.IsOn;
             }
         }
 
@@ -279,13 +274,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 mw.UpdateInkFadeManager(true, (int)e.NewValue);
             }
-        }
-
-        private void ToggleSwitchHideInkFadeControlInPenMenu_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.HideInkFadeControlInPenMenu = CardHideInkFadeControlInPenMenu.IsOn;
-            SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchBrushAutoRestore_Toggled(object sender, RoutedEventArgs e)

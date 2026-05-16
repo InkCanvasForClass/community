@@ -157,13 +157,6 @@
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
-                    <controls:LabeledSettingsCard x:Name="CardHideInkFadeControlInPenMenu"
-                            Header="{i18n:I18n Key=Canvas_HideInkFadeInPenMenu}"
-                            Description="{i18n:I18n Key=Canvas_HideInkFadeInPenMenuHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Hide}"
-                            SwitchName="ToggleSwitchHideInkFadeControlInPenMenu"
-                            Toggled="ToggleSwitchHideInkFadeControlInPenMenu_Toggled" />
-
                     <ui:SettingsExpander x:Name="ExpanderBrushAutoRestore"
                             Header="{i18n:I18n Key=Canvas_BrushAutoRestore}"
                             Description="{i18n:I18n Key=Canvas_BrushAutoRestoreHint}"

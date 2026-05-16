@@ -2177,6 +2177,9 @@
   <data name="Board_Highlighter" xml:space="preserve">
     <value>荧光笔</value>
   </data>
+  <data name="Board_LaserPen" xml:space="preserve">
+    <value>激光笔</value>
+  </data>
   <data name="Board_Eraser" xml:space="preserve">
     <value>橡皮</value>
   </data>

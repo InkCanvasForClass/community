@@ -992,22 +992,13 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                // 通过反射访问主窗口的penType字段
-                var penTypeField = _mainWindow.GetType().GetField("penType",
+                var switchMethod = _mainWindow.GetType().GetMethod(
+                    penTypeIndex == 2 ? "SwitchToLaserPen" : (penTypeIndex == 1 ? "SwitchToHighlighterPen" : "SwitchToDefaultPen"),
                     BindingFlags.NonPublic | BindingFlags.Instance);
 
-                if (penTypeField != null)
+                if (switchMethod != null)
                 {
-                    penTypeField.SetValue(_mainWindow, penTypeIndex);
-
-                    // 调用CheckPenTypeUIState方法更新UI状态
-                    var checkPenTypeMethod = _mainWindow.GetType().GetMethod("CheckPenTypeUIState",
-                        BindingFlags.NonPublic | BindingFlags.Instance);
-
-                    if (checkPenTypeMethod != null)
-                    {
-                        checkPenTypeMethod.Invoke(_mainWindow, null);
-                    }
+                    switchMethod.Invoke(_mainWindow, new object[] { null, null });
                 }
             }
             catch (Exception ex)
