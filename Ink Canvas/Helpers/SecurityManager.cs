@@ -1,5 +1,6 @@
 using iNKORE.UI.WPF.Controls;
 using iNKORE.UI.WPF.Modern.Controls;
+using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Linq;
 using System.Security.Cryptography;
@@ -7,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Threading;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 
 namespace Ink_Canvas.Helpers
@@ -202,12 +205,40 @@ namespace Ink_Canvas.Helpers
 
             dialog.Content = panel;
 
-            var result = await dialog.ShowAsync();
-            if (result != ContentDialogResult.Primary) return false;
+            bool noFocusModeWasTemporarilyDisabled = false;
+            if (owner != null && owner.IsVisible && settings?.Advanced?.IsNoFocusMode == true)
+            {
+                WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode = true;
+                WindowSettingsHelper.ApplyNoFocusMode(owner);
+                noFocusModeWasTemporarilyDisabled = true;
+            }
 
-            string input = inputBox.Password ?? "";
-            if (!totpOnlyMode && hasPassword && VerifyPassword(settings, input)) return true;
-            return hasTotp && VerifyTotp(settings, input);
+            try
+            {
+                dialog.Opened += (s, e) =>
+                {
+                    inputBox.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        inputBox.Focus();
+                        Keyboard.Focus(inputBox);
+                    }), DispatcherPriority.Input);
+                };
+
+                var result = await dialog.ShowAsync();
+                if (result != ContentDialogResult.Primary) return false;
+
+                string input = inputBox.Password ?? "";
+                if (!totpOnlyMode && hasPassword && VerifyPassword(settings, input)) return true;
+                return hasTotp && VerifyTotp(settings, input);
+            }
+            finally
+            {
+                if (noFocusModeWasTemporarilyDisabled)
+                {
+                    WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode = false;
+                    WindowSettingsHelper.ApplyNoFocusMode(owner);
+                }
+            }
         }
 
         /// <summary>
