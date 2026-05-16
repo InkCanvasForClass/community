@@ -40,13 +40,15 @@
             </Style>
 
             <Style x:Key="ModernTimerQuickButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
-                <Setter Property="Width" Value="108" />
+                <Setter Property="Width" Value="104" />
                 <Setter Property="Height" Value="48" />
                 <Setter Property="MinWidth" Value="0" />
-                <Setter Property="Padding" Value="8,0" />
+                <Setter Property="Padding" Value="6,0" />
                 <Setter Property="Cursor" Value="Hand" />
                 <Setter Property="FontSize" Value="15" />
-                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="FontWeight" Value="Medium" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
             </Style>
 
             <Style x:Key="ModernTimerBottomButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
@@ -230,7 +232,7 @@
                             <Border Style="{StaticResource ModernTimerCardStyle}" />
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <TabControl x:Name="TimerQuickTabControl"
-                                            Width="352"
+                                            Width="368"
                                             HorizontalContentAlignment="Center"
                                             Background="Transparent"
                                             BorderThickness="0"
@@ -239,41 +241,41 @@
                                             SelectionChanged="TimerQuickTabControl_SelectionChanged">
                                     <TabItem Header="常用">
                                         <Grid x:Name="CommonTimersGrid" Margin="0,12,0,0">
-                                            <UniformGrid Rows="2" Columns="3">
-                                                <Button x:Name="Common5MinBtn" Style="{StaticResource ModernTimerQuickButtonStyle}" Margin="0,0,8,8" Click="Common5Min_Click">
+                                            <UniformGrid Rows="2" Columns="3" Margin="2,0,2,0">
+                                                <Button x:Name="Common5MinBtn" Style="{StaticResource ModernTimerQuickButtonStyle}" Margin="0,0,10,8" Click="Common5Min_Click">
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                        <Path Data="M10 15h2a1.5 1.5 0 0 0 0 -3h-2v-3h3.5 M3 12v.01 M21 12v.01 M12 21v.01 M7.5 4.2v.01 M16.5 19.8v.01 M7.5 19.8v.01 M4.2 16.5v.01 M19.8 16.5v.01 M19.8 7.5v.01 M4.2 7.5v.01 M16.5 4.206a9.042 9.042 0 0 0 -4.5 -1.206" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform" Margin="0,0,7,0" />
-                                                        <TextBlock Text="5 分钟" VerticalAlignment="Center" />
+                                                        <Path Data="M10 15h2a1.5 1.5 0 0 0 0 -3h-2v-3h3.5 M3 12v.01 M21 12v.01 M12 21v.01 M7.5 4.2v.01 M16.5 19.8v.01 M7.5 19.8v.01 M4.2 16.5v.01 M19.8 16.5v.01 M19.8 7.5v.01 M4.2 7.5v.01 M16.5 4.206a9.042 9.042 0 0 0 -4.5 -1.206" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.9" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="19" Height="19" Stretch="Uniform" Margin="0,0,6,0" />
+                                                        <TextBlock Text="5 分钟" VerticalAlignment="Center" FontWeight="Medium" />
                                                     </StackPanel>
                                                 </Button>
-                                                <Button x:Name="Common10MinBtn" Style="{StaticResource ModernTimerQuickButtonStyle}" Margin="0,0,8,8" Click="Common10Min_Click">
+                                                <Button x:Name="Common10MinBtn" Style="{StaticResource ModernTimerQuickButtonStyle}" Margin="0,0,10,8" Click="Common10Min_Click">
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                        <Path Data="M9 9v6 M12 11v2a2 2 0 1 0 4 0v-2a2 2 0 1 0 -4 0z M3 12v.01 M21 12v.01 M12 21v.01 M7.5 4.2v.01 M16.5 19.8v.01 M7.5 19.8v.01 M4.2 16.5v.01 M19.8 16.5v.01 M4.2 7.5v.01 M19.81 7.527a8.994 8.994 0 0 0 -7.81 -4.527" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform" Margin="0,0,7,0" />
-                                                        <TextBlock Text="10 分钟" VerticalAlignment="Center" />
+                                                        <Path Data="M9 9v6 M12 11v2a2 2 0 1 0 4 0v-2a2 2 0 1 0 -4 0z M3 12v.01 M21 12v.01 M12 21v.01 M7.5 4.2v.01 M16.5 19.8v.01 M7.5 19.8v.01 M4.2 16.5v.01 M19.8 16.5v.01 M4.2 7.5v.01 M19.81 7.527a8.994 8.994 0 0 0 -7.81 -4.527" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.9" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="19" Height="19" Stretch="Uniform" Margin="0,0,6,0" />
+                                                        <TextBlock Text="10 分钟" VerticalAlignment="Center" FontWeight="Medium" />
                                                     </StackPanel>
                                                 </Button>
                                                 <Button x:Name="Common15MinBtn" Style="{StaticResource ModernTimerQuickButtonStyle}" Margin="0,0,0,8" Click="Common15Min_Click">
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                        <Path Data="M12 15h2a1 1 0 0 0 1 -1v-1a1 1 0 0 0 -1 -1h-2v-3h3 M9 9v6 M3 12v.01 M12 21v.01 M7.5 4.2v.01 M16.5 19.8v.01 M7.5 19.8v.01 M4.2 16.5v.01 M19.8 16.5v.01 M4.2 7.5v.01 M21 12a9 9 0 0 0 -9 -9" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform" Margin="0,0,7,0" />
-                                                        <TextBlock Text="15 分钟" VerticalAlignment="Center" />
+                                                        <Path Data="M12 15h2a1 1 0 0 0 1 -1v-1a1 1 0 0 0 -1 -1h-2v-3h3 M9 9v6 M3 12v.01 M12 21v.01 M7.5 4.2v.01 M16.5 19.8v.01 M7.5 19.8v.01 M4.2 16.5v.01 M19.8 16.5v.01 M4.2 7.5v.01 M21 12a9 9 0 0 0 -9 -9" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.9" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="19" Height="19" Stretch="Uniform" Margin="0,0,6,0" />
+                                                        <TextBlock Text="15 分钟" VerticalAlignment="Center" FontWeight="Medium" />
                                                     </StackPanel>
                                                 </Button>
-                                                <Button x:Name="Common30MinBtn" Style="{StaticResource ModernTimerQuickButtonStyle}" Margin="0,0,8,0" Click="Common30Min_Click">
+                                                <Button x:Name="Common30MinBtn" Style="{StaticResource ModernTimerQuickButtonStyle}" Margin="0,0,10,0" Click="Common30Min_Click">
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                        <Path Data="M14 10.5v3a1.5 1.5 0 0 0 3 0v-3a1.5 1.5 0 0 0 -3 0z M8 9h1.5a1.5 1.5 0 0 1 0 3h-.5h.5a1.5 1.5 0 0 1 0 3h-1.5 M3 12v.01 M7.5 4.2v.01 M7.5 19.8v.01 M4.2 16.5v.01 M4.2 7.5v.01 M12 21a9 9 0 0 0 0 -18" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform" Margin="0,0,7,0" />
-                                                        <TextBlock Text="30 分钟" VerticalAlignment="Center" />
+                                                        <Path Data="M14 10.5v3a1.5 1.5 0 0 0 3 0v-3a1.5 1.5 0 0 0 -3 0z M8 9h1.5a1.5 1.5 0 0 1 0 3h-.5h.5a1.5 1.5 0 0 1 0 3h-1.5 M3 12v.01 M7.5 4.2v.01 M7.5 19.8v.01 M4.2 16.5v.01 M4.2 7.5v.01 M12 21a9 9 0 0 0 0 -18" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.9" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="19" Height="19" Stretch="Uniform" Margin="0,0,6,0" />
+                                                        <TextBlock Text="30 分钟" VerticalAlignment="Center" FontWeight="Medium" />
                                                     </StackPanel>
                                                 </Button>
-                                                <Button x:Name="Common45MinBtn" Style="{StaticResource ModernTimerQuickButtonStyle}" Margin="0,0,8,0" Click="Common45Min_Click">
+                                                <Button x:Name="Common45MinBtn" Style="{StaticResource ModernTimerQuickButtonStyle}" Margin="0,0,10,0" Click="Common45Min_Click">
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                        <Path Data="M13 15h2a1 1 0 0 0 1 -1v-1a1 1 0 0 0 -1 -1h-2v-3h3 M7 9v2a1 1 0 0 0 1 1h1 M10 9v6 M7.5 4.2v.01 M4.2 7.5v.01 M3 12a9 9 0 1 0 9 -9" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform" Margin="0,0,7,0" />
-                                                        <TextBlock Text="45 分钟" VerticalAlignment="Center" />
+                                                        <Path Data="M13 15h2a1 1 0 0 0 1 -1v-1a1 1 0 0 0 -1 -1h-2v-3h3 M7 9v2a1 1 0 0 0 1 1h1 M10 9v6 M7.5 4.2v.01 M4.2 7.5v.01 M3 12a9 9 0 1 0 9 -9" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.9" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="19" Height="19" Stretch="Uniform" Margin="0,0,6,0" />
+                                                        <TextBlock Text="45 分钟" VerticalAlignment="Center" FontWeight="Medium" />
                                                     </StackPanel>
                                                 </Button>
                                                 <Button x:Name="Common60MinBtn" Style="{StaticResource ModernTimerQuickButtonStyle}" Click="Common60Min_Click">
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                        <Path Data="M14 10.5v3a1.5 1.5 0 0 0 3 0v-3a1.5 1.5 0 0 0 -3 0z M11 9h-2a1 1 0 0 0 -1 1v4a1 1 0 0 0 1 1h1a1 1 0 0 0 1 -1v-1a1 1 0 0 0 -1 -1h-2 M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform" Margin="0,0,7,0" />
-                                                        <TextBlock Text="60 分钟" VerticalAlignment="Center" />
+                                                        <Path Data="M14 10.5v3a1.5 1.5 0 0 0 3 0v-3a1.5 1.5 0 0 0 -3 0z M11 9h-2a1 1 0 0 0 -1 1v4a1 1 0 0 0 1 1h1a1 1 0 0 0 1 -1v-1a1 1 0 0 0 -1 -1h-2 M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.9" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="19" Height="19" Stretch="Uniform" Margin="0,0,6,0" />
+                                                        <TextBlock Text="60 分钟" VerticalAlignment="Center" FontWeight="Medium" />
                                                     </StackPanel>
                                                 </Button>
                                             </UniformGrid>
@@ -281,7 +283,7 @@
                                     </TabItem>
                                     <TabItem Header="最近">
                                         <Grid x:Name="RecentTimersGrid" Margin="0,12,0,0">
-                                            <UniformGrid Rows="2" Columns="3">
+                                            <UniformGrid Rows="2" Columns="3" Margin="2,0,2,0">
                                                 <Button x:Name="RecentTimer1Btn" Style="{StaticResource ModernTimerQuickButtonStyle}" Margin="0,0,8,8" Click="RecentTimer1_Click"><TextBlock x:Name="RecentTimer1Text" Text="--:--" /></Button>
                                                 <Button x:Name="RecentTimer2Btn" Style="{StaticResource ModernTimerQuickButtonStyle}" Margin="0,0,8,8" Click="RecentTimer2_Click"><TextBlock x:Name="RecentTimer2Text" Text="--:--" /></Button>
                                                 <Button x:Name="RecentTimer3Btn" Style="{StaticResource ModernTimerQuickButtonStyle}" Margin="0,0,0,8" Click="RecentTimer3_Click"><TextBlock x:Name="RecentTimer3Text" Text="--:--" /></Button>
