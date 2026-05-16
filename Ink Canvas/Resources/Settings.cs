@@ -273,7 +273,7 @@ namespace Ink_Canvas
         [JsonProperty("isFoldAtStartup")]
         public bool IsFoldAtStartup { get; set; }
         [JsonProperty("crashAction")]
-        public int CrashAction { get; set; }
+        public int CrashAction { get; set; } = 2;
         [JsonProperty("telemetryUploadLevel")]
         public TelemetryUploadLevel TelemetryUploadLevel { get; set; } = TelemetryUploadLevel.None;
         [JsonProperty("hasAcceptedTelemetryPrivacy")]

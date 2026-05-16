@@ -692,7 +692,7 @@ namespace Ink_Canvas
         }
 
         // 增加字段保存崩溃后操作设置
-        public static CrashActionType CrashAction = CrashActionType.SilentRestart;
+        public static CrashActionType CrashAction = CrashActionType.ShowCrashWindow;
 
         public static void SyncCrashActionFromSettings()
         {
@@ -704,8 +704,8 @@ namespace Ink_Canvas
                 {
                     var json = File.ReadAllText(settingsPath);
                     dynamic obj = JsonConvert.DeserializeObject(json);
-                    int crashAction = 0;
-                    try { crashAction = (int)(obj["startup"]["crashAction"] ?? 0); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+                    int crashAction = 2;
+                    try { crashAction = (int)(obj["startup"]["crashAction"] ?? 2); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                     CrashAction = (CrashActionType)crashAction;
                 }
                 // 从主窗口同步
