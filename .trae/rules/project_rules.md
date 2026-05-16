@@ -68,11 +68,13 @@
     </ComboBox>
 </ui:SettingsCard>
 
-<!-- 右侧放 Slider -->
+<!-- 右侧放 Slider + TextBlock（显示当前值） -->
 <ui:SettingsCard Header="{i18n:I18n Key=Advanced_NibModeBoundsWidthHeader}">
     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-        <TextBlock x:Name="SomeText" VerticalAlignment="Center" />
+        <TextBlock x:Name="SomeSliderText" VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
         <Slider x:Name="SomeSlider" Width="200" Minimum="1" Maximum="50"
+                IsSnapToTickEnabled="True" TickFrequency="1" Value="5"
+                TickPlacement="None"
                 ValueChanged="SomeSlider_ValueChanged" />
     </ikw:SimpleStackPanel>
 </ui:SettingsCard>
@@ -92,6 +94,52 @@
 - 设置 `IsClickEnabled="True"` 使卡片可点击（显示右箭头指示）
 - 通过 `Click` 事件处理导航逻辑
 - 不要在右侧内容区域放置控件
+
+**Slider + TextBlock 后端实现：**
+
+Slider 旁的 TextBlock 用于实时显示当前值，需要在后端实现 `UpdateSliderText` 辅助方法和 `ValueChanged` 事件处理。
+
+1. 在页面代码中添加辅助方法（每个设置页面都需要此方法）：
+
+```csharp
+private void UpdateSliderText(Slider slider, TextBlock textBlock, string format)
+{
+    if (slider == null || textBlock == null) return;
+    textBlock.Text = string.Format(format, slider.Value);
+}
+```
+
+2. 实现 Slider 的 `ValueChanged` 事件：
+
+```csharp
+private void SomeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+{
+    UpdateSliderText(SomeSlider, SomeSliderText, "{0:0}");
+    if (!_isLoaded) return;
+    SettingsManager.Settings.SomeSection.SomeProperty = (int)e.NewValue;
+    SettingsManager.SaveSettingsToFile();
+}
+```
+
+**要点：**
+- `UpdateSliderText` 必须在 `if (!_isLoaded) return;` 之前调用，确保页面加载时 TextBlock 就显示初始值
+- `_isLoaded` 守卫防止页面初始化期间重复保存设置
+- 格式字符串常用值：`"{0:0}"` 整数、`"{0:F2}"` 两位小数、`"{0:0} ms"` 带单位
+- 对于浮点数 Slider，需要额外用 `Math.Round` 处理精度：
+
+```csharp
+private void SomeFloatSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+{
+    UpdateSliderText(SomeFloatSlider, SomeFloatSliderText, "{0:F2}");
+    if (!_isLoaded) return;
+    var val = Math.Round(SomeFloatSlider.Value, 2);
+    SomeFloatSlider.Value = val;
+    SettingsManager.Settings.SomeSection.SomeProperty = val;
+    SettingsManager.SaveSettingsToFile();
+}
+```
+
+3. 在 `LoadSettings()` 中设置 Slider 初始值时，`UpdateSliderText` 会自动通过 `ValueChanged` 被调用，无需手动设置 TextBlock 文本。
 
 ### ui:SettingsExpander — 可展开设置组
 
@@ -134,7 +182,7 @@
 **子项中使用开关的正确写法：**
 
 ```xml
-<!-- ✅ 正确：子项中使用 ui:SettingsCard + CheckBox -->
+<!-- ✅ 正确：CheckBox 使用 Content 属性显示文本，不要额外加 TextBlock -->
 <ui:SettingsExpander.Items>
     <ui:SettingsCard ContentAlignment="Left">
         <CheckBox x:Name="CheckboxOption1" IsChecked="True"
@@ -144,18 +192,66 @@
     </ui:SettingsCard>
 </ui:SettingsExpander.Items>
 
+<!-- ❌ 错误：不要在 CheckBox 外额外添加 TextBlock 显示标签 -->
+<ui:SettingsExpander.Items>
+    <ui:SettingsCard ContentAlignment="Left">
+        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+            <TextBlock Text="选项1" VerticalAlignment="Center" />
+            <CheckBox x:Name="CheckboxOption1" IsChecked="True" />
+        </ikw:SimpleStackPanel>
+    </ui:SettingsCard>
+</ui:SettingsExpander.Items>
+
 <!-- ❌ 错误：子项中不得使用 controls:LabeledSettingsCard -->
 <ui:SettingsExpander.Items>
     <controls:LabeledSettingsCard Header="选项1" />
 </ui:SettingsExpander.Items>
 ```
 
+### 互斥选项使用 ComboBox
+
+当设置项存在两个或多个互斥选项时，**必须**使用 `ui:SettingsCard` + `ComboBox`，而不要使用多个 `controls:LabeledSettingsCard` 或多个 `CheckBox`。
+
+**互斥选项**是指同一时间只能选择一个的选项，例如"模式A / 模式B"、"启用 / 禁用 / 跟随系统"等。
+
+```xml
+<!-- ✅ 正确：互斥选项使用 ComboBox -->
+<ui:SettingsCard Header="应用主题">
+    <ui:SettingsCard.HeaderIcon>
+        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Personalize}" />
+    </ui:SettingsCard.HeaderIcon>
+    <ComboBox x:Name="ComboBoxTheme"
+              SelectionChanged="ComboBoxTheme_SelectionChanged">
+        <ComboBoxItem Content="浅色" />
+        <ComboBoxItem Content="深色" />
+        <ComboBoxItem Content="跟随系统" />
+    </ComboBox>
+</ui:SettingsCard>
+
+<!-- ❌ 错误：不要用两个 ToggleSwitch 表示互斥选项 -->
+<controls:LabeledSettingsCard Header="浅色模式" ... />
+<controls:LabeledSettingsCard Header="深色模式" ... />
+
+<!-- ❌ 错误：不要用两个 CheckBox 表示互斥选项 -->
+<ui:SettingsCard ContentAlignment="Left">
+    <CheckBox Content="选项A" />
+</ui:SettingsCard>
+<ui:SettingsCard ContentAlignment="Left">
+    <CheckBox Content="选项B" />
+</ui:SettingsCard>
+```
+
+**判断标准：**
+- 选项之间互斥（选了A就不能选B）→ 用 `ComboBox`
+- 选项之间独立（A和B可以同时开/关）→ 用 `controls:LabeledSettingsCard` 或 `CheckBox`
+
 ### 控件选择速查
 
 | 场景 | 使用控件 |
 |------|---------|
-| 带开关的设置项 | `controls:LabeledSettingsCard` |
-| 右侧放 ComboBox/Slider/Button 等 | `ui:SettingsCard` |
+| 带开关的设置项（独立） | `controls:LabeledSettingsCard` |
+| 互斥选项（二选一或多选一） | `ui:SettingsCard` + `ComboBox` |
+| 右侧放 Slider/Button 等 | `ui:SettingsCard` |
 | 点击后导航/跳转 | `ui:SettingsCard` + `IsClickEnabled="True"` |
 | 多个相关设置折叠为一组 | `ui:SettingsExpander` |
 | Expander 子项带开关 | `ui:SettingsCard` + `CheckBox` 或 `ui:ToggleSwitch` |
