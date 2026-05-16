@@ -307,6 +307,7 @@
                                         <ComboBox x:Name="ComboBoxCrashAction">
                                             <ComboBoxItem Content="静默重启软件(推荐)" />
                                             <ComboBoxItem Content="无操作(仅记录日志)" />
+                                            <ComboBoxItem Content="弹出崩溃详情窗口(不重启)" />
                                         </ComboBox>
                                     </ui:SettingsCard>
                                 </ikw:SimpleStackPanel>

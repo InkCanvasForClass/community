@@ -93,6 +93,7 @@
                                   SelectionChanged="ComboBoxCrashAction_SelectionChanged">
                             <ComboBoxItem Content="{i18n:I18n Key=Crash_SilentRestart}" Tag="0" />
                             <ComboBoxItem Content="{i18n:I18n Key=Crash_NoAction}" Tag="1" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Crash_ShowCrashWindow}" Tag="2" />
                         </ComboBox>
                     </ui:SettingsCard>
 
