@@ -13,8 +13,8 @@
         MouseMove="Window_MouseMove"
         MouseEnter="Window_MouseEnter"
         Title="Ink Canvas 画板 - 点名"
-        Height="500"
-        Width="800"
+        Height="520"
+        Width="860"
         ui:ThemeManager.IsThemeAware="True"
         ui:WindowHelper.SystemBackdropType="None"
         ui:WindowHelper.UseModernWindowStyle="True"
@@ -41,16 +41,19 @@
             </Style>
 
             <Style x:Key="ModernRollCallSmallButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
-                <Setter Property="Height" Value="38" />
+                <Setter Property="Height" Value="40" />
                 <Setter Property="MinWidth" Value="0" />
-                <Setter Property="Padding" Value="12,0" />
+                <Setter Property="Padding" Value="10,0" />
                 <Setter Property="Cursor" Value="Hand" />
-                <Setter Property="FontSize" Value="13" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontWeight" Value="Medium" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
             </Style>
 
             <Style x:Key="ModernRollCallIconButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
-                <Setter Property="Width" Value="42" />
-                <Setter Property="Height" Value="36" />
+                <Setter Property="Width" Value="44" />
+                <Setter Property="Height" Value="38" />
                 <Setter Property="MinWidth" Value="0" />
                 <Setter Property="Padding" Value="0" />
                 <Setter Property="Cursor" Value="Hand" />
@@ -58,8 +61,10 @@
 
             <Style x:Key="ModernRollCallPrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
                 <Setter Property="Height" Value="48" />
-                <Setter Property="MinWidth" Value="128" />
-                <Setter Property="Padding" Value="18,0" />
+                <Setter Property="MinWidth" Value="136" />
+                <Setter Property="Padding" Value="20,0" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="FontWeight" Value="Medium" />
                 <Setter Property="Background" Value="{StaticResource RollCallAccentBrush}" />
                 <Setter Property="BorderBrush" Value="{StaticResource RollCallAccentBrush}" />
                 <Setter Property="Foreground" Value="White" />
@@ -74,7 +79,9 @@
             <Style x:Key="ModernRollCallStopButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
                 <Setter Property="Height" Value="48" />
                 <Setter Property="MinWidth" Value="104" />
-                <Setter Property="Padding" Value="16,0" />
+                <Setter Property="Padding" Value="18,0" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="FontWeight" Value="Medium" />
                 <Setter Property="Background" Value="{StaticResource RollCallStopBrush}" />
                 <Setter Property="BorderBrush" Value="{StaticResource RollCallStopBrush}" />
                 <Setter Property="Foreground" Value="White" />
@@ -89,16 +96,16 @@
     </Window.Resources>
 
     <Grid x:Name="MainRoot" Background="Transparent">
-            <Viewbox x:Name="MainViewController" Margin="22,18,22,20">
+            <Viewbox x:Name="MainViewController" Margin="24,20,24,22">
                 <Grid Width="1000" Height="550">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
-                        <RowDefinition Height="76" />
+                        <RowDefinition Height="84" />
                     </Grid.RowDefinitions>
 
                     <Grid x:Name="MainContentGrid"
                           Grid.Row="0"
-                          Margin="0,0,0,10">
+                          Margin="0,0,0,14">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="500" />
                             <ColumnDefinition Width="18" />
@@ -113,8 +120,8 @@
                                   VerticalAlignment="Center">
                                 <StackPanel VerticalAlignment="Center">
                                     <Border x:Name="MainResultContainer"
-                                            Width="420"
-                                            MinHeight="156"
+                                            Width="438"
+                                            MinHeight="164"
                                             HorizontalAlignment="Center"
                                             CornerRadius="8"
                                             Background="{DynamicResource {x:Static ui:ThemeKeys.LayerFillColorDefaultBrushKey}}"
@@ -127,52 +134,52 @@
                                             <TextBlock x:Name="MainResultDisplay"
                                                        Text="点击开始点名"
                                                        FontSize="48"
-                                                       FontWeight="SemiBold"
+                                                       FontWeight="Medium"
                                                        Foreground="{DynamicResource NewRollCallWindowDigitForeground}"
                                                        TextAlignment="Center" />
                                         </Viewbox>
                                     </Border>
 
                                     <Border x:Name="MultiResultContainer"
-                                            Width="420"
+                                            Width="438"
                                             MinHeight="236"
                                             HorizontalAlignment="Center"
                                             CornerRadius="8"
                                             Background="{DynamicResource {x:Static ui:ThemeKeys.LayerFillColorDefaultBrushKey}}"
                                             BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.CardStrokeColorDefaultBrushKey}}"
                                             BorderThickness="1"
-                                            Padding="14"
+                                            Padding="16"
                                             Visibility="Collapsed">
                                     <ScrollViewer x:Name="MultiResultScrollViewer"
                                                   VerticalAlignment="Center"
-                                                  Margin="0,18,0,0"
-                                                  MaxHeight="218"
+                                                  Margin="0"
+                                                  MaxHeight="236"
                                                   VerticalScrollBarVisibility="Auto"
                                                   HorizontalScrollBarVisibility="Disabled">
                                         <UniformGrid x:Name="MultiResultPanel"
                                                      Columns="5"
                                                      Rows="4"
                                                      HorizontalAlignment="Center">
-                                            <Border Width="76" Height="36" Margin="4" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,0"><TextBlock x:Name="Result1Display" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
-                                            <Border Width="76" Height="36" Margin="4" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,0"><TextBlock x:Name="Result2Display" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
-                                            <Border Width="76" Height="36" Margin="4" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,0"><TextBlock x:Name="Result3Display" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
-                                            <Border Width="76" Height="36" Margin="4" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,0"><TextBlock x:Name="Result4Display" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
-                                            <Border Width="76" Height="36" Margin="4" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,0"><TextBlock x:Name="Result5Display" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
-                                            <Border Width="76" Height="36" Margin="4" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,0"><TextBlock x:Name="Result6Display" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
-                                            <Border Width="76" Height="36" Margin="4" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,0"><TextBlock x:Name="Result7Display" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
-                                            <Border Width="76" Height="36" Margin="4" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,0"><TextBlock x:Name="Result8Display" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
-                                            <Border Width="76" Height="36" Margin="4" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,0"><TextBlock x:Name="Result9Display" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
-                                            <Border Width="76" Height="36" Margin="4" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,0"><TextBlock x:Name="Result10Display" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
-                                            <Border Width="76" Height="36" Margin="4" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,0"><TextBlock x:Name="Result11Display" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
-                                            <Border Width="76" Height="36" Margin="4" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,0"><TextBlock x:Name="Result12Display" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
-                                            <Border Width="76" Height="36" Margin="4" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,0"><TextBlock x:Name="Result13Display" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
-                                            <Border Width="76" Height="36" Margin="4" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,0"><TextBlock x:Name="Result14Display" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
-                                            <Border Width="76" Height="36" Margin="4" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,0"><TextBlock x:Name="Result15Display" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
-                                            <Border Width="76" Height="36" Margin="4" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,0"><TextBlock x:Name="Result16Display" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
-                                            <Border Width="76" Height="36" Margin="4" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,0"><TextBlock x:Name="Result17Display" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
-                                            <Border Width="76" Height="36" Margin="4" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,0"><TextBlock x:Name="Result18Display" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
-                                            <Border Width="76" Height="36" Margin="4" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,0"><TextBlock x:Name="Result19Display" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
-                                            <Border Width="76" Height="36" Margin="4" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,0"><TextBlock x:Name="Result20Display" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result1Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result2Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result3Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result4Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result5Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result6Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result7Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result8Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result9Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result10Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result11Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result12Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result13Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result14Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result15Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result16Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result17Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result18Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result19Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result20Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
                                         </UniformGrid>
                                     </ScrollViewer>
                                     </Border>
@@ -206,7 +213,7 @@
                                     <StackPanel>
                                         <TextBlock Text="点名人数"
                                                    FontSize="14"
-                                                   FontWeight="SemiBold"
+                                                   FontWeight="Medium"
                                                    Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" />
                                         <TextBlock x:Name="ListCountDisplay"
                                                    Margin="0,4,0,0"
@@ -231,7 +238,7 @@
                                             <TextBlock x:Name="CountDisplay"
                                                        Text="1"
                                                        FontSize="18"
-                                                       FontWeight="SemiBold"
+                                                       FontWeight="Medium"
                                                        HorizontalAlignment="Center"
                                                        VerticalAlignment="Center"
                                                        Foreground="{DynamicResource NewRollCallWindowDigitForeground}" />
@@ -246,7 +253,7 @@
                                     <TextBlock Text="点名模式"
                                                Margin="0,0,0,8"
                                                FontSize="14"
-                                               FontWeight="SemiBold"
+                                               FontWeight="Medium"
                                                Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" />
                                     <TabControl x:Name="RollCallModeTabControl"
                                                 Width="376"
@@ -271,7 +278,7 @@
                                     <TextBlock Text="外部点名"
                                                VerticalAlignment="Center"
                                                FontSize="14"
-                                               FontWeight="SemiBold"
+                                               FontWeight="Medium"
                                                Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" />
                                     <ComboBox x:Name="ExternalCallerTypeComboBox"
                                               Grid.Column="1"
@@ -290,7 +297,7 @@
                                     <TextBlock Text="名单管理"
                                                Margin="0,0,0,8"
                                                FontSize="14"
-                                               FontWeight="SemiBold"
+                                               FontWeight="Medium"
                                                Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" />
                                     <UniformGrid Columns="3">
                                         <Button x:Name="ImportListBtn" Style="{StaticResource ModernRollCallSmallButtonStyle}" Margin="0,0,8,0" Click="ImportList_Click">
@@ -339,7 +346,7 @@
                                     <TextBlock x:Name="StartRollCallBtnText"
                                                Text="开始点名"
                                                FontSize="16"
-                                               FontWeight="SemiBold"
+                                               FontWeight="Medium"
                                                Foreground="White" />
                                 </StackPanel>
                             </Button>
@@ -351,7 +358,7 @@
                                     Visibility="Collapsed">
                                 <StackPanel Orientation="Horizontal">
                                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cancel}" FontSize="14" Margin="0,0,8,0" />
-                                    <TextBlock Text="停止" FontSize="16" FontWeight="SemiBold" />
+                                    <TextBlock Text="停止" FontSize="16" FontWeight="Medium" />
                                 </StackPanel>
                             </Button>
 
@@ -362,7 +369,7 @@
                                     Click="Reset_Click">
                                 <StackPanel Orientation="Horizontal">
                                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" FontSize="14" Margin="0,0,8,0" />
-                                    <TextBlock Text="重置" FontSize="16" FontWeight="SemiBold" />
+                                    <TextBlock Text="重置" FontSize="16" FontWeight="Medium" />
                                 </StackPanel>
                             </Button>
                         </StackPanel>
