@@ -850,6 +850,9 @@
   <data name="Theme_QuoteSource_Hitokoto" xml:space="preserve">
     <value>一言（Hitokoto API）</value>
   </data>
+  <data name="Theme_QuoteSource_PhigrosTips" xml:space="preserve">
+    <value>Phigros Tips</value>
+  </data>
   <data name="Theme_Customize" xml:space="preserve">
     <value>自定义</value>
   </data>
@@ -2020,6 +2023,9 @@
   </data>
   <data name="About_Copyright" xml:space="preserve">
     <value>© 2025-2026 CJK_mkp 版权所有</value>
+  </data>
+  <data name="About_PhigrosCr" xml:space="preserve">
+    <value>部分内容取自 Phigros</value>
   </data>
   <data name="About_OpenSourceSlogan" xml:space="preserve">
     <value>我们永远热爱开源！</value>

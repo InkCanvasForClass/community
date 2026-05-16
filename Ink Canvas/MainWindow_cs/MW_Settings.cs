@@ -213,6 +213,11 @@ namespace Ink_Canvas
                         BlackBoardWaterMark.Text = "一言功能不可用";
                     }
                 }
+                else if (Settings.Appearance.ChickenSoupSource == 4)
+                {
+                    int randChickenSoupIndex = new Random().Next(ChickenSoup.PhigrosTips.Length);
+                    BlackBoardWaterMark.Text = ChickenSoup.PhigrosTips[randChickenSoupIndex];
+                }
             }
             catch (Exception ex)
             {
