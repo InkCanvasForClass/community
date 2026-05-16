@@ -7,6 +7,7 @@
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
+      xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       mc:Ignorable="d"
       Title="{i18n:I18n Key=CloudStorage_Manage}">
 
@@ -95,7 +96,6 @@
                         <ui:SettingsCard Header="已保存的 Token"
                                          Description="从本机保存的 Token 列表中选择当前使用项。">
                             <ComboBox x:Name="CmbSavedTokens"
-                                      MinWidth="260"
                                       IsEditable="False"
                                       IsReadOnly="True"
                                       SelectionChanged="CmbSavedTokens_SelectionChanged" />
@@ -146,22 +146,16 @@
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.People}" />
                     </ui:SettingsCard.HeaderIcon>
                     <ComboBox x:Name="CmbClassSelection"
-                              MinWidth="260"
                               IsEditable="False"
                               IsReadOnly="True"
                               SelectionChanged="CmbClassSelection_SelectionChanged" />
                 </ui:SettingsCard>
 
-                <ui:SettingsCard Header="自动上传笔记"
-                                 Description="启用后，保存的 PNG 截图和 ICSTK 墨迹文件会自动上传到所选班级白板。">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Upload}" />
-                    </ui:SettingsCard.HeaderIcon>
-                    <ui:ToggleSwitch x:Name="ToggleSwitchAutoUploadNotes"
-                                     OnContent="{DynamicResource Common_On}"
-                                     OffContent="{DynamicResource Common_Off}"
-                                     Toggled="ToggleSwitchAutoUploadNotes_Toggled" />
-                </ui:SettingsCard>
+                <controls:LabeledSettingsCard x:Name="ToggleSwitchAutoUploadNotes"
+                        Header="自动上传笔记"
+                        Description="启用后，保存的 PNG 截图和 ICSTK 墨迹文件会自动上传到所选班级白板。"
+                        Icon="{x:Static ui:SegoeFluentIcons.Upload}"
+                        Toggled="ToggleSwitchAutoUploadNotes_Toggled" />
 
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                            Text="WebDav" />

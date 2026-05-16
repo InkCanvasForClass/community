@@ -67,8 +67,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             MLAvoidanceHistorySlider.Value = settings.RandSettings.MLAvoidanceHistoryCount;
             MLAvoidanceWeightSlider.Value = settings.RandSettings.MLAvoidanceWeight;
 
-            ToggleSwitchUseLegacyTimerUI.IsOn = settings.RandSettings.UseLegacyTimerUI;
-            ToggleSwitchUseNewStyleUI.IsOn = settings.RandSettings.UseNewStyleUI;
+            if (settings.RandSettings.UseNewStyleUI)
+                ComboBoxTimerUIStyle.SelectedIndex = 2;
+            else if (settings.RandSettings.UseLegacyTimerUI)
+                ComboBoxTimerUIStyle.SelectedIndex = 1;
+            else
+                ComboBoxTimerUIStyle.SelectedIndex = 0;
             ToggleSwitchEnableOvertimeCountUp.IsOn = settings.RandSettings.EnableOvertimeCountUp;
 
             bool canEnableRedText = settings.RandSettings.EnableOvertimeCountUp && settings.RandSettings.EnableOvertimeRedText;
@@ -253,27 +257,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         #region Timer
 
-        private void ToggleSwitchUseLegacyTimerUI_Toggled(object sender, RoutedEventArgs e)
+        private void ComboBoxTimerUIStyle_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.RandSettings.UseLegacyTimerUI = ToggleSwitchUseLegacyTimerUI.IsOn;
-            if (ToggleSwitchUseLegacyTimerUI.IsOn)
-            {
-                ToggleSwitchUseNewStyleUI.IsOn = false;
-                SettingsManager.Settings.RandSettings.UseNewStyleUI = false;
-            }
-            SettingsManager.SaveSettingsToFile();
-        }
-
-        private void ToggleSwitchUseNewStyleUI_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.RandSettings.UseNewStyleUI = ToggleSwitchUseNewStyleUI.IsOn;
-            if (ToggleSwitchUseNewStyleUI.IsOn)
-            {
-                ToggleSwitchUseLegacyTimerUI.IsOn = false;
-                SettingsManager.Settings.RandSettings.UseLegacyTimerUI = false;
-            }
+            var selectedItem = ComboBoxTimerUIStyle.SelectedItem as System.Windows.Controls.ComboBoxItem;
+            var tag = selectedItem?.Tag?.ToString() ?? "Default";
+            SettingsManager.Settings.RandSettings.UseLegacyTimerUI = tag == "Legacy";
+            SettingsManager.Settings.RandSettings.UseNewStyleUI = tag == "NewStyle";
             SettingsManager.SaveSettingsToFile();
         }
 

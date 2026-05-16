@@ -144,15 +144,14 @@
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{i18n:I18n Key=Timer_Title}" />
 
-                    <controls:LabeledSettingsCard x:Name="ToggleSwitchUseLegacyTimerUI"
-                        Header="{i18n:I18n Key=Timer_UseLegacyButtons}"
-                        IsOn="False"
-                        Toggled="ToggleSwitchUseLegacyTimerUI_Toggled"/>
-
-                    <controls:LabeledSettingsCard x:Name="ToggleSwitchUseNewStyleUI"
-                        Header="{i18n:I18n Key=Timer_NewUI}"
-                        IsOn="False"
-                        Toggled="ToggleSwitchUseNewStyleUI_Toggled"/>
+                    <ui:SettingsCard Header="{i18n:I18n Key=Timer_Title}">
+                        <ComboBox x:Name="ComboBoxTimerUIStyle"
+                                  SelectionChanged="ComboBoxTimerUIStyle_SelectionChanged">
+                            <ComboBoxItem Content="默认" Tag="Default" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Timer_UseLegacyButtons}" Tag="Legacy" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Timer_NewUI}" Tag="NewStyle" />
+                        </ComboBox>
+                    </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchEnableOvertimeCountUp"
                         Header="{i18n:I18n Key=Timer_EnableCountUp}"
