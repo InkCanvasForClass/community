@@ -2268,15 +2268,15 @@ namespace Ink_Canvas
                     pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY - toolbarHeight;
                 }
 
-                double baseWidth = GetElementWidthForFloatingBar(ViewboxFloatingBar, 200);
+                baseWidth = GetElementWidthForFloatingBar(ViewboxFloatingBar, 200);
                 if (baseWidth <= 0)
                 {
                     pos.Y = screenHeight - floatingBarHeight -
                            3 * ViewboxFloatingBarScaleTransform.ScaleY;
                 }
-                double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
+                floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
 
-                double baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 72);
+                baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 72);
                 if (baseHeight <= 0)
                 {
                     baseHeight = 72;
@@ -4587,7 +4587,7 @@ private bool forceEraser;
                 else
                     highlightBarColor = Color.FromRgb(37, 99, 235);
 
-                if (isFloatingBarFolded || (BorderFloatingBarMainControls != null && BorderFloatingBarMainControls.Visibility == Visibility.Collapsed))
+                if (isFloatingBarFolded || (BorderFloatingBarMoveControls != null && BorderFloatingBarMoveControls.Visibility == Visibility.Collapsed))
                 {
                     return;
                 }

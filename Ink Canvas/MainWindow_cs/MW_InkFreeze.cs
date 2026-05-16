@@ -28,6 +28,9 @@ namespace Ink_Canvas
         private DateTime freezeCourseRecordedUtc;
         private DateTime lastFreezeBlockNotificationUtc = DateTime.MinValue;
 
+        private Ink_Canvas.Controls.BoardToolbarButton BoardInkFreezeBtn;
+        private System.Windows.Controls.StackPanel StackPanelCanvasControls;
+
         private int GetCurrentFreezePageIndex()
             => currentMode == 0 ? 0 : CurrentWhiteboardIndex;
 
