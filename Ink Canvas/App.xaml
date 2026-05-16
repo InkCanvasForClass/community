@@ -9,7 +9,6 @@
 >
     <Application.Resources>
         <ResourceDictionary>
-            <FontFamily x:Key="HarmonyOSFont">./Resources/Fonts/#HarmonyOS Sans SC</FontFamily>
             <ContextMenu Opened="SysTrayMenu_Opened" Closed="SysTrayMenu_Closed" x:Shared="false" x:Key="SysTrayMenu" Padding="6" ui:ThemeManager.RequestedTheme="Light">
                 <MenuItem IsCheckable="True" IsChecked="False" Checked="HideICCMainWindowTrayIconMenuItem_Checked" Unchecked="HideICCMainWindowTrayIconMenuItem_UnChecked" Name="HideICCMainWindowTrayIconMenuItem">
                     <MenuItem.Header>
