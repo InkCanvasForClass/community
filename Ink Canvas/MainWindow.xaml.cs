@@ -113,7 +113,7 @@ namespace Ink_Canvas
 
         internal static readonly DependencyProperty IsUndoEnabledProperty =
             DependencyProperty.Register(nameof(IsUndoEnabled), typeof(bool), typeof(MainWindow),
-                new PropertyMetadata(true));
+                new PropertyMetadata(false));
         internal bool IsUndoEnabled
         {
             get => (bool)GetValue(IsUndoEnabledProperty);
@@ -122,7 +122,7 @@ namespace Ink_Canvas
 
         internal static readonly DependencyProperty IsRedoEnabledProperty =
             DependencyProperty.Register(nameof(IsRedoEnabled), typeof(bool), typeof(MainWindow),
-                new PropertyMetadata(true));
+                new PropertyMetadata(false));
         internal bool IsRedoEnabled
         {
             get => (bool)GetValue(IsRedoEnabledProperty);
