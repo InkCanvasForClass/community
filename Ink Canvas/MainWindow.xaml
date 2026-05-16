@@ -1113,21 +1113,37 @@
                 <Viewbox.LayoutTransform>
                     <ScaleTransform x:Name="ViewboxFloatingBarScaleTransform" ScaleX="1" ScaleY="1" />
                 </Viewbox.LayoutTransform>
-                <ikw:SimpleStackPanel Name="StackPanelFloatingBarRoot" Orientation="Horizontal" MaxHeight="58">
-                    <Border Name="BorderFloatingBarMoveControls" Margin="0" Padding="0"
-                            Width="58" Height="58"
-                            Background="{DynamicResource FloatBarBackground}"
-                            CornerRadius="8"
-                            BorderThickness="2"
-                            BorderBrush="{DynamicResource FloatBarBorderBrush}"
-                            MouseDown="SymbolIconEmoji_MouseDown"
-                            MouseUp="SymbolIconEmoji_MouseUp">
-                        <Image Name="FloatingbarHeadIconImg" Margin="0.5"
-                               SnapsToDevicePixels="True"
-                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                               RenderOptions.BitmapScalingMode="HighQuality" />
-                    </Border>
-                </ikw:SimpleStackPanel>
+                <Grid Name="GridFloatingBarContainer">
+                    <ikw:SimpleStackPanel Name="StackPanelFloatingBarRoot" Orientation="Horizontal" MaxHeight="58">
+                        <Border Name="BorderFloatingBarMoveControls" Margin="0" Padding="0"
+                                Width="58" Height="58"
+                                Background="{DynamicResource FloatBarBackground}"
+                                CornerRadius="8"
+                                BorderThickness="2"
+                                BorderBrush="{DynamicResource FloatBarBorderBrush}"
+                                MouseDown="SymbolIconEmoji_MouseDown"
+                                MouseUp="SymbolIconEmoji_MouseUp">
+                            <Image Name="FloatingbarHeadIconImg" Margin="0.5"
+                                   SnapsToDevicePixels="True"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   RenderOptions.BitmapScalingMode="HighQuality" />
+                        </Border>
+                    </ikw:SimpleStackPanel>
+                    <Canvas Name="CanvasFloatingBarSelection" IsHitTestVisible="False">
+                        <Border Name="SelectionBGFloatingBar"
+                                Visibility="Hidden"
+                                Width="45" Height="43"
+                                CornerRadius="4"
+                                Background="#303B82F6"
+                                Canvas.Left="0" Canvas.Top="0" />
+                        <Border Name="IndicatorBarFloatingBar"
+                                Visibility="Hidden"
+                                Width="16" Height="3"
+                                CornerRadius="2"
+                                Background="#2563EB"
+                                Canvas.Left="14" Canvas.Bottom="2" />
+                    </Canvas>
+                </Grid>
             </Viewbox>
         </Grid>
         <!--浮动工具栏菜单-->

@@ -21,6 +21,8 @@ namespace Ink_Canvas.Controls.Toolbar.Items
                 Margin = new Thickness(2, 0, 2, 0),
                 Width = 2,
                 MinWidth = 2,
+                Height = 36,
+                VerticalAlignment = VerticalAlignment.Center,
                 BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#71717a")),
                 BorderThickness = new Thickness(1, 0, 0, 0),
                 Tag = ToolbarRegistry.InjectedTag

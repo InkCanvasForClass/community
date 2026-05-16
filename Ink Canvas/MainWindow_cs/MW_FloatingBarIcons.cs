@@ -4584,13 +4584,17 @@ private bool forceEraser;
         {
             try
             {
-                var (selectionBG, indicatorBar, contentPanel) = FindSelectionElementsForMode(mode);
+                var selectionBG = SelectionBGFloatingBar;
+                var indicatorBar = IndicatorBarFloatingBar;
+                var container = GridFloatingBarContainer;
 
                 if (isFloatingBarFolded || !IsFloatingBarContentVisible())
                 {
                     HideAllSelectionHighlights();
                     return;
                 }
+
+                if (selectionBG == null || indicatorBar == null || container == null) return;
 
                 ToolbarImageButton targetButton = null;
 
@@ -4617,17 +4621,28 @@ private bool forceEraser;
                         break;
                 }
 
-                if (contentPanel == null || targetButton == null || !IsElementVisibleInTree(targetButton))
+                if (targetButton == null || !IsElementVisibleInTree(targetButton))
                 {
                     DeferFloatingBarHighlightIfLayoutPending(mode);
                     return;
                 }
 
-                var buttonOrigin = targetButton.TransformToAncestor(contentPanel).Transform(new Point(0, 0));
-                double nextWidth = targetButton.ActualWidth > 0 ? targetButton.ActualWidth : 45;
-                double nextPos = buttonOrigin.X;
+                Point nextButtonOrigin;
+                try
+                {
+                    nextButtonOrigin = targetButton.TransformToAncestor(container).Transform(new Point(0, 0));
+                }
+                catch (InvalidOperationException)
+                {
+                    DeferFloatingBarHighlightIfLayoutPending(mode);
+                    return;
+                }
 
-                if (nextWidth <= 0 || selectionBG == null)
+                double nextWidth = targetButton.ActualWidth > 0 ? targetButton.ActualWidth : 45;
+                double nextPos = nextButtonOrigin.X;
+                double nextTop = nextButtonOrigin.Y;
+
+                if (nextWidth <= 0)
                 {
                     DeferFloatingBarHighlightIfLayoutPending(mode);
                     return;
@@ -4640,88 +4655,74 @@ private bool forceEraser;
 
                 if (isDarkTheme)
                 {
-                    highlightBackgroundColor = Color.FromArgb(21, 102, 204, 255);
+                    highlightBackgroundColor = Color.FromArgb(48, 102, 204, 255);
                     highlightBarColor = Color.FromRgb(102, 204, 255);
                 }
                 else
                 {
-                    highlightBackgroundColor = Color.FromArgb(21, 59, 130, 246);
+                    highlightBackgroundColor = Color.FromArgb(48, 59, 130, 246);
                     highlightBarColor = Color.FromRgb(37, 99, 235);
                 }
 
-                HideAllSelectionHighlights();
-
                 selectionBG.Background = new SolidColorBrush(highlightBackgroundColor);
-                if (indicatorBar != null)
-                {
-                    indicatorBar.Background = new SolidColorBrush(highlightBarColor);
-                }
-
-                selectionBG.Visibility = Visibility.Visible;
-                if (indicatorBar != null)
-                {
-                    indicatorBar.Visibility = Visibility.Visible;
-                }
+                indicatorBar.Background = new SolidColorBrush(highlightBarColor);
 
                 double indicatorBarWidth = 16;
                 double nextBarLeft = nextPos + Math.Max(0, (nextWidth - indicatorBarWidth) / 2);
+                double nextBarTop = nextTop + 2 + 43 + 2;
 
                 bool isFirstShow = _lastHighlightButton == null;
 
                 if (isFirstShow)
                 {
                     selectionBG.Width = nextWidth;
+                    selectionBG.Height = 43;
                     System.Windows.Controls.Canvas.SetLeft(selectionBG, nextPos);
-                    if (indicatorBar != null)
-                    {
-                        _indicatorAnimationGeneration++;
-                        indicatorBar.RenderTransform = null;
-                        indicatorBar.Visibility = Visibility.Visible;
-                        indicatorBar.Width = indicatorBarWidth;
-                        indicatorBar.Opacity = 1.0;
-                        System.Windows.Controls.Canvas.SetLeft(indicatorBar, nextBarLeft);
-                    }
+                    System.Windows.Controls.Canvas.SetTop(selectionBG, nextTop + 2);
+
+                    _indicatorAnimationGeneration++;
+                    indicatorBar.RenderTransform = null;
+                    indicatorBar.Visibility = Visibility.Visible;
+                    indicatorBar.Width = indicatorBarWidth;
+                    indicatorBar.Opacity = 1.0;
+                    System.Windows.Controls.Canvas.SetLeft(indicatorBar, nextBarLeft);
+                    System.Windows.Controls.Canvas.SetTop(indicatorBar, nextBarTop);
+
+                    selectionBG.Visibility = Visibility.Visible;
                     _lastHighlightButton = targetButton;
                     return;
                 }
 
-                double prevPos;
-                double prevWidth;
+                double prevBarLeft;
                 if (_lastHighlightButton != null && IsElementVisibleInTree(_lastHighlightButton))
                 {
                     try
                     {
-                        var lastPanel = FindContentPanelForButton(_lastHighlightButton);
-                        var lastOrigin = lastPanel != null
-                            ? _lastHighlightButton.TransformToAncestor(lastPanel).Transform(new Point(0, 0))
-                            : new Point(0, 0);
-                        prevPos = lastOrigin.X;
-                        prevWidth = _lastHighlightButton.ActualWidth > 0 ? _lastHighlightButton.ActualWidth : 45;
+                        var prevOrigin = _lastHighlightButton.TransformToAncestor(container).Transform(new Point(0, 0));
+                        double prevWidth = _lastHighlightButton.ActualWidth > 0 ? _lastHighlightButton.ActualWidth : 45;
+                        prevBarLeft = prevOrigin.X + Math.Max(0, (prevWidth - indicatorBarWidth) / 2);
                     }
                     catch (InvalidOperationException)
                     {
-                        prevPos = System.Windows.Controls.Canvas.GetLeft(selectionBG);
-                        if (double.IsNaN(prevPos)) prevPos = 0;
-                        prevWidth = selectionBG.ActualWidth;
-                        if (double.IsNaN(prevWidth) || prevWidth <= 0) prevWidth = 45;
+                        prevBarLeft = System.Windows.Controls.Canvas.GetLeft(indicatorBar);
+                        if (double.IsNaN(prevBarLeft)) prevBarLeft = nextBarLeft;
                     }
                 }
                 else
                 {
-                    prevPos = System.Windows.Controls.Canvas.GetLeft(selectionBG);
-                    if (double.IsNaN(prevPos)) prevPos = 0;
-                    prevWidth = selectionBG.ActualWidth;
-                    if (double.IsNaN(prevWidth) || prevWidth <= 0) prevWidth = 45;
+                    prevBarLeft = System.Windows.Controls.Canvas.GetLeft(indicatorBar);
+                    if (double.IsNaN(prevBarLeft)) prevBarLeft = nextBarLeft;
                 }
 
                 _lastHighlightButton = targetButton;
 
                 selectionBG.Width = nextWidth;
+                selectionBG.Height = 43;
                 System.Windows.Controls.Canvas.SetLeft(selectionBG, nextPos);
+                System.Windows.Controls.Canvas.SetTop(selectionBG, nextTop + 2);
+                selectionBG.Visibility = Visibility.Visible;
 
-                if (indicatorBar == null) return;
-
-                double prevBarLeft = prevPos + Math.Max(0, (prevWidth - indicatorBarWidth) / 2);
+                indicatorBar.Visibility = Visibility.Visible;
 
                 double distance = Math.Abs(nextBarLeft - prevBarLeft);
 
@@ -4731,10 +4732,9 @@ private bool forceEraser;
                     indicatorBar.RenderTransform = null;
                     indicatorBar.Width = indicatorBarWidth;
                     System.Windows.Controls.Canvas.SetLeft(indicatorBar, nextBarLeft);
+                    System.Windows.Controls.Canvas.SetTop(indicatorBar, nextBarTop);
                     return;
                 }
-
-                indicatorBar.Visibility = Visibility.Visible;
 
                 if (_activeIndicatorStoryboard != null)
                 {
@@ -4754,6 +4754,7 @@ private bool forceEraser;
                 double stretchScale = distance / dimension + 1.0;
 
                 System.Windows.Controls.Canvas.SetLeft(indicatorBar, nextBarLeft);
+                System.Windows.Controls.Canvas.SetTop(indicatorBar, nextBarTop);
                 indicatorBar.Width = indicatorBarWidth;
 
                 indicatorBar.RenderTransform = new TransformGroup
@@ -4968,35 +4969,17 @@ private bool forceEraser;
 
         private void HideAllSelectionHighlights()
         {
-            if (FloatingBarRootPanel == null) return;
-            foreach (var border in FloatingBarRootPanel.Children.OfType<Border>())
+            if (SelectionBGFloatingBar != null)
             {
-                if (border.Tag as string == ToolbarRegistry.ContentBorderTag && border.Child is Grid grid)
-                {
-                    foreach (var gridChild in grid.Children.OfType<System.Windows.Controls.Canvas>())
-                    {
-                        if (gridChild.Tag as string == ToolbarRegistry.SelectionCanvasTag)
-                        {
-                            foreach (var canvasChild in gridChild.Children.OfType<Border>())
-                            {
-                                if (canvasChild.Tag as string == ToolbarRegistry.SelectionBGTag)
-                                {
-                                    canvasChild.Visibility = Visibility.Hidden;
-                                    System.Windows.Controls.Canvas.SetLeft(canvasChild, 0);
-                                }
-                                else if (canvasChild.Tag as string == ToolbarRegistry.IndicatorBarTag)
-                                {
-                                    canvasChild.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, null);
-                                    canvasChild.BeginAnimation(FrameworkElement.WidthProperty, null);
-                                    canvasChild.Visibility = Visibility.Hidden;
-                                    canvasChild.Width = 12;
-                                    System.Windows.Controls.Canvas.SetLeft(canvasChild, 0);
-                                }
-                            }
-                        }
-                    }
-                }
+                SelectionBGFloatingBar.Visibility = Visibility.Hidden;
             }
+            if (IndicatorBarFloatingBar != null)
+            {
+                IndicatorBarFloatingBar.BeginAnimation(System.Windows.Controls.Canvas.LeftProperty, null);
+                IndicatorBarFloatingBar.RenderTransform = null;
+                IndicatorBarFloatingBar.Visibility = Visibility.Hidden;
+            }
+            _lastHighlightButton = null;
         }
 
         private (Border selectionBG, Border indicatorBar, StackPanel contentPanel) FindSelectionElementsForMode(string mode)
@@ -5036,7 +5019,7 @@ private bool forceEraser;
 
                 if (contentPanel == null) continue;
 
-                bool containsButton = IsDescendantOf(button, contentPanel);
+                bool containsButton = ContainsButton(contentPanel, button);
                 if (containsButton)
                 {
                     Border selectionBG = null;
@@ -5059,6 +5042,18 @@ private bool forceEraser;
             return firstResult;
         }
 
+        private static bool ContainsButton(Panel panel, ToolbarImageButton button)
+        {
+            foreach (var child in panel.Children)
+            {
+                if (child == button) return true;
+                if (child is Panel innerPanel && ContainsButton(innerPanel, button)) return true;
+                if (child is ContentControl cc && cc.Content == button) return true;
+                if (child is Decorator decorator && decorator.Child == button) return true;
+            }
+            return false;
+        }
+
         private StackPanel FindContentPanelForButton(ToolbarImageButton button)
         {
             if (button == null || FloatingBarRootPanel == null) return null;
@@ -5069,7 +5064,7 @@ private bool forceEraser;
 
                 foreach (var gridChild in grid.Children.OfType<StackPanel>())
                 {
-                    if (gridChild.Tag as string == ToolbarRegistry.ContentPanelTag && IsDescendantOf(button, gridChild))
+                    if (gridChild.Tag as string == ToolbarRegistry.ContentPanelTag && ContainsButton(gridChild, button))
                         return gridChild;
                 }
             }
@@ -5113,7 +5108,13 @@ private bool forceEraser;
         private static bool IsDescendantOf(DependencyObject child, DependencyObject parent)
         {
             if (child == null || parent == null) return false;
-            var current = System.Windows.Media.VisualTreeHelper.GetParent(child);
+            var current = LogicalTreeHelper.GetParent(child);
+            while (current != null)
+            {
+                if (current == parent) return true;
+                current = LogicalTreeHelper.GetParent(current);
+            }
+            current = System.Windows.Media.VisualTreeHelper.GetParent(child);
             while (current != null)
             {
                 if (current == parent) return true;

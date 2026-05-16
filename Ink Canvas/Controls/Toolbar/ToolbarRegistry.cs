@@ -638,10 +638,10 @@ namespace Ink_Canvas.Controls.Toolbar
             var contentPanel = new StackPanel
             {
                 Orientation = Orientation.Horizontal,
-                Margin = new Thickness(2, 0, 2, 0),
+                Margin = new Thickness(2, 2, 2, 0),
                 Cursor = Cursors.Arrow,
                 HorizontalAlignment = HorizontalAlignment.Left,
-                VerticalAlignment = VerticalAlignment.Top,
+                VerticalAlignment = VerticalAlignment.Stretch,
                 Tag = ContentPanelTag
             };
 
@@ -651,44 +651,6 @@ namespace Ink_Canvas.Controls.Toolbar
                 contentPanel.Children.Add(item.View);
             }
 
-            var grid = new Grid();
-
-            var canvas = new System.Windows.Controls.Canvas
-            {
-                Margin = new Thickness(2, 0, 2, 0),
-                Tag = SelectionCanvasTag
-            };
-
-            var selectionBG = new Border
-            {
-                Visibility = Visibility.Hidden,
-                Width = 45,
-                Height = 47,
-                Margin = new Thickness(0, 0, 0, 0),
-                CornerRadius = new CornerRadius(4),
-                Background = new SolidColorBrush(Color.FromArgb(0x55, 0x3b, 0x82, 0xf6)),
-                Tag = SelectionBGTag
-            };
-            System.Windows.Controls.Canvas.SetLeft(selectionBG, 0);
-            System.Windows.Controls.Canvas.SetTop(selectionBG, 0);
-            canvas.Children.Add(selectionBG);
-
-            var indicatorBar = new Border
-            {
-                Visibility = Visibility.Hidden,
-                Width = 16,
-                Height = 3,
-                CornerRadius = new CornerRadius(2),
-                Background = new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb)),
-                Tag = IndicatorBarTag
-            };
-            System.Windows.Controls.Canvas.SetLeft(indicatorBar, 14);
-            System.Windows.Controls.Canvas.SetBottom(indicatorBar, 2);
-            canvas.Children.Add(indicatorBar);
-
-            grid.Children.Add(canvas);
-            grid.Children.Add(contentPanel);
-
             var border = new Border
             {
                 Padding = new Thickness(2, 0, 2, 0),
@@ -697,7 +659,7 @@ namespace Ink_Canvas.Controls.Toolbar
                 CornerRadius = new CornerRadius(8),
                 BorderThickness = new Thickness(2),
                 HorizontalAlignment = HorizontalAlignment.Left,
-                Child = grid,
+                Child = contentPanel,
                 Tag = ContentBorderTag
             };
             border.SetResourceReference(Border.BackgroundProperty, "FloatBarBackground");
@@ -708,31 +670,59 @@ namespace Ink_Canvas.Controls.Toolbar
 
         private static Border WrapInSeparateBorder(FrameworkElement view, ToolbarRuleset ruleset, bool isToolbarButton)
         {
-            var wrapper = new Border
-            {
-                Margin = new Thickness(0),
-                Padding = isToolbarButton ? new Thickness(0) : new Thickness(4, 2, 4, 2),
-                Width = double.NaN,
-                MinWidth = isToolbarButton ? 58 : 0,
-                Height = double.NaN,
-                MinHeight = 58,
-                CornerRadius = new CornerRadius(8),
-                BorderThickness = new Thickness(2),
-                Child = view,
-                Tag = InjectedTag
-            };
-            wrapper.SetResourceReference(Border.BackgroundProperty, "FloatBarBackground");
-            wrapper.SetResourceReference(Border.BorderBrushProperty, "FloatBarBorderBrush");
+            Border wrapper;
 
             if (isToolbarButton)
             {
+                var contentPanel = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    Margin = new Thickness(2, 2, 2, 0),
+                    Cursor = Cursors.Arrow,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Stretch,
+                    Tag = ContentPanelTag
+                };
+                ApplyInitialVisibility(view, ruleset);
+                contentPanel.Children.Add(view);
+
+                wrapper = new Border
+                {
+                    Margin = new Thickness(0),
+                    Padding = new Thickness(0),
+                    Width = double.NaN,
+                    MinWidth = 58,
+                    Height = 58,
+                    CornerRadius = new CornerRadius(8),
+                    BorderThickness = new Thickness(2),
+                    Child = contentPanel,
+                    Tag = ContentBorderTag
+                };
+                wrapper.SetResourceReference(Border.BackgroundProperty, "FloatBarBackground");
+                wrapper.SetResourceReference(Border.BorderBrushProperty, "FloatBarBorderBrush");
+
                 view.HorizontalAlignment = HorizontalAlignment.Center;
-                view.VerticalAlignment = VerticalAlignment.Top;
+                view.VerticalAlignment = VerticalAlignment.Stretch;
             }
             else
             {
+                wrapper = new Border
+                {
+                    Margin = new Thickness(0),
+                    Padding = new Thickness(4, 2, 4, 2),
+                    Width = double.NaN,
+                    MinWidth = 0,
+                    Height = 58,
+                    CornerRadius = new CornerRadius(8),
+                    BorderThickness = new Thickness(2),
+                    Child = view,
+                    Tag = InjectedTag
+                };
+                wrapper.SetResourceReference(Border.BackgroundProperty, "FloatBarBackground");
+                wrapper.SetResourceReference(Border.BorderBrushProperty, "FloatBarBorderBrush");
+
                 view.HorizontalAlignment = HorizontalAlignment.Center;
-                view.VerticalAlignment = VerticalAlignment.Top;
+                view.VerticalAlignment = VerticalAlignment.Center;
             }
 
             SetHidingRuleset(wrapper, ruleset);
@@ -778,28 +768,37 @@ namespace Ink_Canvas.Controls.Toolbar
                         UpdatePanelVisibility(innerPanel, context);
                     }
                 }
-                if (child is Border border && border.Tag as string == ContentBorderTag && border.Child is Grid grid)
+                if (child is Border border && border.Tag as string == ContentBorderTag)
                 {
-                    foreach (var gridChild in grid.Children.OfType<FrameworkElement>())
+                    if (border.Child is StackPanel sp && sp.Tag as string == ContentPanelTag)
                     {
-                        if (gridChild is StackPanel sp && sp.Tag as string == ContentPanelTag)
-                        {
-                            UpdatePanelVisibility(sp, context);
-                        }
+                        UpdatePanelVisibility(sp, context);
+                        bool anyVisible = HasVisibleLeafContent(sp);
+                        border.Visibility = anyVisible ? Visibility.Visible : Visibility.Collapsed;
                     }
-                    bool anyVisible = false;
-                    foreach (var gridChild in grid.Children.OfType<FrameworkElement>())
+                    else if (border.Child is Grid grid)
                     {
-                        if (gridChild is StackPanel sp && sp.Tag as string == ContentPanelTag)
+                        foreach (var gridChild in grid.Children.OfType<FrameworkElement>())
                         {
-                            if (HasVisibleLeafContent(sp))
+                            if (gridChild is StackPanel sp2 && sp2.Tag as string == ContentPanelTag)
                             {
-                                anyVisible = true;
-                                break;
+                                UpdatePanelVisibility(sp2, context);
                             }
                         }
+                        bool anyVisible = false;
+                        foreach (var gridChild in grid.Children.OfType<FrameworkElement>())
+                        {
+                            if (gridChild is StackPanel sp2 && sp2.Tag as string == ContentPanelTag)
+                            {
+                                if (HasVisibleLeafContent(sp2))
+                                {
+                                    anyVisible = true;
+                                    break;
+                                }
+                            }
+                        }
+                        border.Visibility = anyVisible ? Visibility.Visible : Visibility.Collapsed;
                     }
-                    border.Visibility = anyVisible ? Visibility.Visible : Visibility.Collapsed;
                 }
             }
         }
