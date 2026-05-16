@@ -2290,7 +2290,7 @@ namespace Ink_Canvas
                 }
                 floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
 
-                double baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 58);
+                baseHeight = GetElementHeightForFloatingBar(ViewboxFloatingBar, 58);
                 if (baseHeight <= 0)
                 {
                     baseHeight = 58;
