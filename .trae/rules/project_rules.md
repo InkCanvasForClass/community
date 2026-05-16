@@ -182,7 +182,7 @@ private void SomeFloatSlider_ValueChanged(object sender, RoutedPropertyChangedEv
 **子项中使用开关的正确写法：**
 
 ```xml
-<!-- ✅ 正确：子项中使用 ui:SettingsCard + CheckBox -->
+<!-- ✅ 正确：CheckBox 使用 Content 属性显示文本，不要额外加 TextBlock -->
 <ui:SettingsExpander.Items>
     <ui:SettingsCard ContentAlignment="Left">
         <CheckBox x:Name="CheckboxOption1" IsChecked="True"
@@ -192,18 +192,66 @@ private void SomeFloatSlider_ValueChanged(object sender, RoutedPropertyChangedEv
     </ui:SettingsCard>
 </ui:SettingsExpander.Items>
 
+<!-- ❌ 错误：不要在 CheckBox 外额外添加 TextBlock 显示标签 -->
+<ui:SettingsExpander.Items>
+    <ui:SettingsCard ContentAlignment="Left">
+        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+            <TextBlock Text="选项1" VerticalAlignment="Center" />
+            <CheckBox x:Name="CheckboxOption1" IsChecked="True" />
+        </ikw:SimpleStackPanel>
+    </ui:SettingsCard>
+</ui:SettingsExpander.Items>
+
 <!-- ❌ 错误：子项中不得使用 controls:LabeledSettingsCard -->
 <ui:SettingsExpander.Items>
     <controls:LabeledSettingsCard Header="选项1" />
 </ui:SettingsExpander.Items>
 ```
 
+### 互斥选项使用 ComboBox
+
+当设置项存在两个或多个互斥选项时，**必须**使用 `ui:SettingsCard` + `ComboBox`，而不要使用多个 `controls:LabeledSettingsCard` 或多个 `CheckBox`。
+
+**互斥选项**是指同一时间只能选择一个的选项，例如"模式A / 模式B"、"启用 / 禁用 / 跟随系统"等。
+
+```xml
+<!-- ✅ 正确：互斥选项使用 ComboBox -->
+<ui:SettingsCard Header="应用主题">
+    <ui:SettingsCard.HeaderIcon>
+        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Personalize}" />
+    </ui:SettingsCard.HeaderIcon>
+    <ComboBox x:Name="ComboBoxTheme"
+              SelectionChanged="ComboBoxTheme_SelectionChanged">
+        <ComboBoxItem Content="浅色" />
+        <ComboBoxItem Content="深色" />
+        <ComboBoxItem Content="跟随系统" />
+    </ComboBox>
+</ui:SettingsCard>
+
+<!-- ❌ 错误：不要用两个 ToggleSwitch 表示互斥选项 -->
+<controls:LabeledSettingsCard Header="浅色模式" ... />
+<controls:LabeledSettingsCard Header="深色模式" ... />
+
+<!-- ❌ 错误：不要用两个 CheckBox 表示互斥选项 -->
+<ui:SettingsCard ContentAlignment="Left">
+    <CheckBox Content="选项A" />
+</ui:SettingsCard>
+<ui:SettingsCard ContentAlignment="Left">
+    <CheckBox Content="选项B" />
+</ui:SettingsCard>
+```
+
+**判断标准：**
+- 选项之间互斥（选了A就不能选B）→ 用 `ComboBox`
+- 选项之间独立（A和B可以同时开/关）→ 用 `controls:LabeledSettingsCard` 或 `CheckBox`
+
 ### 控件选择速查
 
 | 场景 | 使用控件 |
 |------|---------|
-| 带开关的设置项 | `controls:LabeledSettingsCard` |
-| 右侧放 ComboBox/Slider/Button 等 | `ui:SettingsCard` |
+| 带开关的设置项（独立） | `controls:LabeledSettingsCard` |
+| 互斥选项（二选一或多选一） | `ui:SettingsCard` + `ComboBox` |
+| 右侧放 Slider/Button 等 | `ui:SettingsCard` |
 | 点击后导航/跳转 | `ui:SettingsCard` + `IsClickEnabled="True"` |
 | 多个相关设置折叠为一组 | `ui:SettingsExpander` |
 | Expander 子项带开关 | `ui:SettingsCard` + `CheckBox` 或 `ui:ToggleSwitch` |
