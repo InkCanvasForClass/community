@@ -246,12 +246,12 @@
                     </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
 
-                <!-- PowerPoint -->
+                <!-- PPT联动 -->
                 <ui:NavigationViewItem
                     x:Name="PowerPointPageItem"
-                    Content="PowerPoint"
+                    Content="PPT联动"
                     Tag="PowerPointPage"
-                    ToolTipService.ToolTip="PowerPoint 设置">
+                    ToolTipService.ToolTip="PPT联动设置">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"/>
                     </ui:NavigationViewItem.Icon>

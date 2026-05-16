@@ -124,6 +124,15 @@
                     </ui:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="PPT联动" />
+                    <ui:SettingsCard Header="PPT联动" Description="PPT联动设置"
+                        IsClickEnabled="True" Click="QuickNavCard_Click" Tag="PowerPointPage">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}" />
+                        </ui:SettingsCard.HeaderIcon>
+                    </ui:SettingsCard>
+
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="其他" />
                     <ui:SettingsCard Header="更新" Description="更新设置"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="UpdatePage">
