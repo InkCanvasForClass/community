@@ -1,0 +1,87 @@
+<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.AnnouncementPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+      xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
+      xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+      xmlns:c="clr-namespace:Ink_Canvas.Converter"
+      xmlns:sys="clr-namespace:System;assembly=mscorlib"
+      mc:Ignorable="d"
+      Title="{i18n:I18n Key=Announcement_PageTitle}">
+
+    <ScrollViewer PanningMode="VerticalFirst">
+        <Grid Margin="59,0,59,0">
+            <FrameworkElement.Resources>
+                <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
+                <Style x:Key="SettingsSectionHeaderTextBlockStyle"
+                       BasedOn="{StaticResource BodyStrongTextBlockStyle}"
+                       TargetType="TextBlock">
+                    <Setter Property="Margin" Value="1,30,0,6" />
+                </Style>
+            </FrameworkElement.Resources>
+
+            <ikw:SimpleStackPanel MaxWidth="1000"
+                                  HorizontalAlignment="Stretch"
+                                  Spacing="{StaticResource SettingsCardSpacing}">
+
+                <TextBlock Text="{i18n:I18n Key=Announcement_PageTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
+
+                <controls:LabeledSettingsCard x:Name="CardEnableAnnouncements"
+                        Header="{i18n:I18n Key=Notification_EnableAnnouncements}"
+                        Description="{i18n:I18n Key=Notification_EnableAnnouncementsHint}"
+                        Icon="{x:Static ui:SegoeFluentIcons.Message}"
+                        Toggled="ToggleSwitchEnableAnnouncements_Toggled" />
+
+                <controls:LabeledSettingsCard x:Name="CardEnableForcePopup"
+                        Header="{i18n:I18n Key=Notification_EnableForcePopup}"
+                        Description="{i18n:I18n Key=Notification_EnableForcePopupHint}"
+                        Icon="{x:Static ui:SegoeFluentIcons.Warning}"
+                        Toggled="ToggleSwitchEnableForcePopup_Toggled" />
+
+                <ui:SettingsCard Header="{i18n:I18n Key=Announcement_CenterTitle}"
+                                 Description="{i18n:I18n Key=Announcement_CenterHint}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BulletedList}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <Button Content="{i18n:I18n Key=Notification_ViewHistory}"
+                            Click="ViewAnnouncementsButton_Click" />
+                </ui:SettingsCard>
+
+                <TextBlock Text="{i18n:I18n Key=Announcement_ConnectionTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
+
+                <ui:SettingsCard Header="{i18n:I18n Key=Announcement_ApiBaseUrl}"
+                                 Description="{i18n:I18n Key=Announcement_ApiBaseUrlHint}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <TextBox x:Name="ApiBaseUrlTextBox"
+                             MinWidth="360"
+                             TextChanged="ApiBaseUrlTextBox_TextChanged" />
+                </ui:SettingsCard>
+
+                <ui:SettingsCard Header="{i18n:I18n Key=Announcement_WebSocketUrl}"
+                                 Description="{i18n:I18n Key=Announcement_WebSocketUrlHint}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Globe}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <TextBox x:Name="WebSocketUrlTextBox"
+                             MinWidth="360"
+                             TextChanged="WebSocketUrlTextBox_TextChanged" />
+                </ui:SettingsCard>
+
+                <ui:SettingsCard Header="{i18n:I18n Key=Announcement_Token}"
+                                 Description="{i18n:I18n Key=Announcement_TokenHint}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Permissions}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <TextBox x:Name="TokenTextBox"
+                             MinWidth="360"
+                             TextChanged="TokenTextBox_TextChanged" />
+                </ui:SettingsCard>
+            </ikw:SimpleStackPanel>
+        </Grid>
+    </ScrollViewer>
+</ui:Page>

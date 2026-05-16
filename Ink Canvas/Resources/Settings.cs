@@ -39,11 +39,62 @@ namespace Ink_Canvas
         [JsonProperty("security")]
         public Security Security { get; set; } = new Security();
 
+        [JsonProperty("notification")]
+        public NotificationSettings Notification { get; set; } = new NotificationSettings();
+
         [JsonProperty("toolbar")]
         public ToolbarLayoutSettings Toolbar { get; set; } = new ToolbarLayoutSettings();
 
         [JsonProperty("toolbarConfigName")]
         public string ToolbarConfigName { get; set; } = "default";
+    }
+
+    public class NotificationSettings
+    {
+        [JsonProperty("isAnnouncementEnabled")]
+        public bool IsAnnouncementEnabled { get; set; } = true;
+
+        [JsonProperty("isDynamicNotificationEnabled")]
+        public bool IsDynamicNotificationEnabled { get; set; } = true;
+
+        [JsonProperty("isWindowsToastEnabled")]
+        public bool IsWindowsToastEnabled { get; set; } = true;
+
+        [JsonProperty("isForcePopupEnabled")]
+        public bool IsForcePopupEnabled { get; set; } = true;
+
+        [JsonProperty("announcementApiBaseUrl")]
+        public string AnnouncementApiBaseUrl { get; set; } = "https://dev-api.dy.ci/api/announcement/client/announcements/";
+
+        [JsonProperty("announcementWebSocketUrl")]
+        public string AnnouncementWebSocketUrl { get; set; } = string.Empty;
+
+        [JsonProperty("announcementSoftwareToken")]
+        public string AnnouncementSoftwareToken { get; set; } = "d7dd5a04175844318da871a40b7bc59d";
+
+        [JsonProperty("placement")]
+        public string Placement { get; set; } = "TopCenter";
+
+        [JsonProperty("animationMode")]
+        public string AnimationMode { get; set; } = "Standard";
+
+        [JsonProperty("updateDurationSeconds")]
+        public int UpdateDurationSeconds { get; set; } = 5;
+
+        [JsonProperty("urgentDurationSeconds")]
+        public int UrgentDurationSeconds { get; set; } = 10;
+
+        [JsonProperty("importantDurationSeconds")]
+        public int ImportantDurationSeconds { get; set; } = 10;
+
+        [JsonProperty("reminderDurationSeconds")]
+        public int ReminderDurationSeconds { get; set; } = 10;
+
+        [JsonProperty("otherDurationSeconds")]
+        public int OtherDurationSeconds { get; set; } = 5;
+
+        [JsonProperty("readAnnouncementIds")]
+        public List<string> ReadAnnouncementIds { get; set; } = new List<string>();
     }
 
     public class Security

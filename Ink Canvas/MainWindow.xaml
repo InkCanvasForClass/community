@@ -1600,7 +1600,7 @@
             <Windows:PPTTimeCapsule x:Name="PPTTimeCapsule"/>
         </Border>
         <!-- 包装层：PPT 放映快捷面板，代码中 4 处控制 Visibility/位置，非死代码 -->
-        <Border x:Name="PPTQuickPanelContainer" 
+        <Border x:Name="PPTQuickPanelContainer"
                 Visibility="Collapsed"  d:Visibility="Visible"
                 Panel.ZIndex="999"
                 HorizontalAlignment="Right"
@@ -1608,5 +1608,9 @@
                 Margin="0,50,0,0">
             <Windows:PPTQuickPanel x:Name="PPTQuickPanel"/>
         </Border>
+        <localControls:DynamicNotificationControl x:Name="DynamicNotification"
+                Panel.ZIndex="1100"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top" />
     </Grid>
 </helpers:PerformanceTransparentWin>

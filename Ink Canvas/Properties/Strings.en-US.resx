@@ -2196,6 +2196,24 @@
   <data name="Notification_TestText" xml:space="preserve">
     <value>Test text</value>
   </data>
+  <data name="Notification_DefaultTitle" xml:space="preserve">
+    <value>Notification</value>
+  </data>
+  <data name="Notification_UpdateTitle" xml:space="preserve">
+    <value>New version available</value>
+  </data>
+  <data name="Notification_NewVersion" xml:space="preserve">
+    <value>New version available: {0}</value>
+  </data>
+  <data name="Notification_ViewDetails" xml:space="preserve">
+    <value>View details</value>
+  </data>
+  <data name="Notification_Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Announcement_LoadFailed" xml:space="preserve">
+    <value>Failed to load announcements</value>
+  </data>
   <data name="OldUI_Exit" xml:space="preserve">
     <value>Exit</value>
   </data>
@@ -3062,5 +3080,221 @@ Hide</value>
   </data>
   <data name="Automation_SaveFileName_CustomTemplate_Desc" xml:space="preserve">
     <value>Available placeholders: {date} {time} {datetime} {mode} {page} {count} {type}</value>
+  </data>
+  <data name="Notification_PageTitle" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
+  <data name="Notification_NavTooltip" xml:space="preserve">
+    <value>Announcement, message reminder, and dynamic notification settings</value>
+  </data>
+  <data name="Notification_SettingsTitle" xml:space="preserve">
+    <value>Notification settings</value>
+  </data>
+  <data name="Notification_GroupTitle" xml:space="preserve">
+    <value>Notification management</value>
+  </data>
+  <data name="Notification_EnableAnnouncements" xml:space="preserve">
+    <value>Enable announcements</value>
+  </data>
+  <data name="Notification_EnableAnnouncementsHint" xml:space="preserve">
+    <value>Fetch announcements after startup and receive realtime announcement pushes.</value>
+  </data>
+  <data name="Notification_EnableDynamic" xml:space="preserve">
+    <value>Enable dynamic notifications</value>
+  </data>
+  <data name="Notification_EnableDynamicHint" xml:space="preserve">
+    <value>Use a top pill notification for announcements, updates, and local messages.</value>
+  </data>
+  <data name="Notification_EnableWindowsToast" xml:space="preserve">
+    <value>Enable Windows system notifications</value>
+  </data>
+  <data name="Notification_EnableWindowsToastHint" xml:space="preserve">
+    <value>Important notices and updates may also appear as system toasts.</value>
+  </data>
+  <data name="Notification_EnableForcePopup" xml:space="preserve">
+    <value>Enable important announcement popups</value>
+  </data>
+  <data name="Notification_EnableForcePopupHint" xml:space="preserve">
+    <value>Important announcements can open expanded by default while remaining dismissible.</value>
+  </data>
+  <data name="Notification_BehaviorTitle" xml:space="preserve">
+    <value>Display behavior</value>
+  </data>
+  <data name="Notification_Placement" xml:space="preserve">
+    <value>Dynamic notification position</value>
+  </data>
+  <data name="Notification_PlacementHint" xml:space="preserve">
+    <value>Choose where dynamic notifications appear in the main window.</value>
+  </data>
+  <data name="Notification_PlacementTopCenter" xml:space="preserve">
+    <value>Top center</value>
+  </data>
+  <data name="Notification_PlacementTopRight" xml:space="preserve">
+    <value>Top right</value>
+  </data>
+  <data name="Notification_PlacementTopLeft" xml:space="preserve">
+    <value>Top left</value>
+  </data>
+  <data name="Notification_AnimationMode" xml:space="preserve">
+    <value>Animation mode</value>
+  </data>
+  <data name="Notification_AnimationModeHint" xml:space="preserve">
+    <value>Control animation intensity for notification enter, expand, and exit.</value>
+  </data>
+  <data name="Notification_AnimationOff" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="Notification_AnimationSimple" xml:space="preserve">
+    <value>Simple</value>
+  </data>
+  <data name="Notification_AnimationStandard" xml:space="preserve">
+    <value>Standard</value>
+  </data>
+  <data name="Notification_UpdateDuration" xml:space="preserve">
+    <value>Update notification duration</value>
+  </data>
+  <data name="Notification_UpdateDurationHint" xml:space="preserve">
+    <value>Seconds before update messages close automatically.</value>
+  </data>
+  <data name="Notification_UrgentDuration" xml:space="preserve">
+    <value>Urgent notification duration</value>
+  </data>
+  <data name="Notification_UrgentDurationHint" xml:space="preserve">
+    <value>Seconds before urgent messages close automatically.</value>
+  </data>
+  <data name="Notification_ImportantDuration" xml:space="preserve">
+    <value>Important notification duration</value>
+  </data>
+  <data name="Notification_ImportantDurationHint" xml:space="preserve">
+    <value>Seconds before important messages close automatically.</value>
+  </data>
+  <data name="Notification_ReminderDuration" xml:space="preserve">
+    <value>Reminder notification duration</value>
+  </data>
+  <data name="Notification_ReminderDurationHint" xml:space="preserve">
+    <value>Seconds before reminder messages close automatically.</value>
+  </data>
+  <data name="Notification_OtherDuration" xml:space="preserve">
+    <value>Other notification duration</value>
+  </data>
+  <data name="Notification_OtherDurationHint" xml:space="preserve">
+    <value>Seconds before other messages close automatically.</value>
+  </data>
+  <data name="Notification_ActionsTitle" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Notification_Test" xml:space="preserve">
+    <value>Test notification</value>
+  </data>
+  <data name="Notification_TestHint" xml:space="preserve">
+    <value>Send a test notification to the message queue immediately.</value>
+  </data>
+  <data name="Notification_TestButton" xml:space="preserve">
+    <value>Send test notification</value>
+  </data>
+  <data name="Notification_TestTitle" xml:space="preserve">
+    <value>Notification test</value>
+  </data>
+  <data name="Notification_TestSummary" xml:space="preserve">
+    <value>Dynamic notifications and the message queue are working.</value>
+  </data>
+  <data name="Announcement_PageTitle" xml:space="preserve">
+    <value>Announcements</value>
+  </data>
+  <data name="Announcement_NavTooltip" xml:space="preserve">
+    <value>Remote announcement, realtime push, and announcement history settings</value>
+  </data>
+  <data name="Announcement_ConnectionTitle" xml:space="preserve">
+    <value>Connection settings</value>
+  </data>
+  <data name="Announcement_ConnectionHint" xml:space="preserve">
+    <value>Configure the announcement HTTP API, WebSocket realtime push URL, and access token.</value>
+  </data>
+  <data name="Announcement_ApiBaseUrl" xml:space="preserve">
+    <value>Announcement API URL</value>
+  </data>
+  <data name="Announcement_ApiBaseUrlHint" xml:space="preserve">
+    <value>Base server URL used to fetch announcement lists.</value>
+  </data>
+  <data name="Announcement_WebSocketUrl" xml:space="preserve">
+    <value>Realtime push URL</value>
+  </data>
+  <data name="Announcement_WebSocketUrlHint" xml:space="preserve">
+    <value>Leave empty to derive the WebSocket URL from the API URL automatically.</value>
+  </data>
+  <data name="Announcement_Token" xml:space="preserve">
+    <value>Announcement access token</value>
+  </data>
+  <data name="Announcement_TokenHint" xml:space="preserve">
+    <value>Access token used by the announcement system to identify this software.</value>
+  </data>
+  <data name="Announcement_CenterTitle" xml:space="preserve">
+    <value>Announcement center</value>
+  </data>
+  <data name="Announcement_CenterHint" xml:space="preserve">
+    <value>View received remote announcements and realtime push messages.</value>
+  </data>
+  <data name="Announcement_NoItems" xml:space="preserve">
+    <value>No announcements</value>
+  </data>
+  <data name="Announcement_ClearHistory" xml:space="preserve">
+    <value>Clear history</value>
+  </data>
+  <data name="Notification_ViewHistory" xml:space="preserve">
+    <value>View history</value>
+  </data>
+  <data name="Notification_ProviderTitle" xml:space="preserve">
+    <value>Reminder providers</value>
+  </data>
+  <data name="Notification_ProviderManagement" xml:space="preserve">
+    <value>Reminder provider management</value>
+  </data>
+  <data name="Notification_ProviderManagementHint" xml:space="preserve">
+    <value>View enabled and runtime status for announcement, local message, and system notification providers.</value>
+  </data>
+  <data name="Notification_ProviderRefresh" xml:space="preserve">
+    <value>Refresh status</value>
+  </data>
+  <data name="Notification_Provider_Announcement" xml:space="preserve">
+    <value>Announcement provider</value>
+  </data>
+  <data name="Notification_Provider_AnnouncementDesc" xml:space="preserve">
+    <value>Fetch remote announcements and receive realtime pushes.</value>
+  </data>
+  <data name="Notification_Provider_Local" xml:space="preserve">
+    <value>Local message provider</value>
+  </data>
+  <data name="Notification_Provider_LocalDesc" xml:space="preserve">
+    <value>Receives app internal prompts, errors, and plugin messages.</value>
+  </data>
+  <data name="Notification_Provider_WindowsToast" xml:space="preserve">
+    <value>Windows system notifications</value>
+  </data>
+  <data name="Notification_Provider_WindowsToastDesc" xml:space="preserve">
+    <value>Also display messages as system toasts or tray balloons.</value>
+  </data>
+  <data name="Notification_Provider_Starting" xml:space="preserve">
+    <value>Starting</value>
+  </data>
+  <data name="Notification_Provider_Running" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="Notification_Provider_Stopped" xml:space="preserve">
+    <value>Stopped</value>
+  </data>
+  <data name="Notification_Provider_Disabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="Notification_Provider_NoToken" xml:space="preserve">
+    <value>Token not configured</value>
+  </data>
+  <data name="Notification_Provider_Reconnecting" xml:space="preserve">
+    <value>Reconnecting</value>
+  </data>
+  <data name="Notification_Provider_HttpOnly" xml:space="preserve">
+    <value>HTTP polling available, realtime push unavailable</value>
+  </data>
+  <data name="Notification_Provider_WaitingRestart" xml:space="preserve">
+    <value>Takes effect on next startup</value>
   </data>
 </root>

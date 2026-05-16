@@ -273,6 +273,37 @@
                     </ui:NavigationViewItem.InfoBadge>
                 </ui:NavigationViewItem>
 
+                <!-- 通知设置 -->
+                <ui:NavigationViewItem
+                    x:Name="NotificationPageItem"
+                    Content="{i18n:I18n Key=Notification_PageTitle}"
+                    SelectsOnInvoked="False"
+                    ToolTipService.ToolTip="{i18n:I18n Key=Notification_NavTooltip}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Message}"/>
+                    </ui:NavigationViewItem.Icon>
+                    <ui:NavigationViewItem.MenuItems>
+                        <ui:NavigationViewItem
+                            x:Name="NotificationSettingsPageItem"
+                            Content="{i18n:I18n Key=Notification_SettingsTitle}"
+                            Tag="NotificationPage"
+                            ToolTipService.ToolTip="{i18n:I18n Key=Notification_NavTooltip}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Message}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="AnnouncementCenterPageItem"
+                            Content="{i18n:I18n Key=Announcement_CenterTitle}"
+                            Tag="AnnouncementCenterPage"
+                            ToolTipService.ToolTip="{i18n:I18n Key=Announcement_CenterHint}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BulletedList}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                    </ui:NavigationViewItem.MenuItems>
+                </ui:NavigationViewItem>
+
                 <!-- 实验性选项 -->
                 <ui:NavigationViewItem
                     x:Name="ExperimentalPageItem"

@@ -1,4 +1,6 @@
 using H.NotifyIcon;
+using Ink_Canvas.Models;
+using Ink_Canvas.Properties;
 using Microsoft.Toolkit.Uwp.Notifications;
 using System;
 using System.Windows;
@@ -11,17 +13,30 @@ namespace Ink_Canvas.Helpers
 
         public static void ShowNewVersionToast(string version)
         {
+            ShowToast(new NotificationMessage
+            {
+                Type = NotificationMessageType.Update,
+                Level = NotificationMessageLevel.Normal,
+                Title = "InkCanvasForClass CE",
+                Summary = string.Format(Strings.GetString("Notification_NewVersion") ?? "发现新版本：{0}", version),
+                DisplaySeconds = 5
+            });
+        }
+
+        public static void ShowToast(NotificationMessage message)
+        {
             try
             {
+                if (message == null) return;
                 var os = Environment.OSVersion.Version;
 
                 if (os.Major == 6 && os.Minor == 1)
                 {
-                    ShowBalloonForWin7(version);
+                    ShowBalloonForWin7(message);
                 }
                 else
                 {
-                    ShowToastForModernWindows(version);
+                    ShowToastForModernWindows(message);
                 }
             }
             catch
@@ -29,7 +44,7 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        private static void ShowBalloonForWin7(string version)
+        private static void ShowBalloonForWin7(NotificationMessage message)
         {
             Application.Current?.Dispatcher.Invoke(() =>
             {
@@ -39,10 +54,9 @@ namespace Ink_Canvas.Helpers
                     if (taskbar == null) return;
 
                     taskbar.Visibility = Visibility.Visible;
-
                     taskbar.ShowNotification(
-                        "InkCanvasForClass CE",
-                        $"发现新版本！：{version}");
+                        string.IsNullOrWhiteSpace(message.Title) ? "InkCanvasForClass CE" : message.Title,
+                        message.Summary ?? string.Empty);
                 }
                 catch
                 {
@@ -50,12 +64,15 @@ namespace Ink_Canvas.Helpers
             });
         }
 
-        private static void ShowToastForModernWindows(string version)
+        private static void ShowToastForModernWindows(NotificationMessage message)
         {
-            new ToastContentBuilder()
-                .AddText("InkCanvasForClass CE")
-                .AddText($"发现新版本！：{version}")
-                .Show();
+            var builder = new ToastContentBuilder()
+                .AddText(string.IsNullOrWhiteSpace(message.Title) ? "InkCanvasForClass CE" : message.Title);
+
+            if (!string.IsNullOrWhiteSpace(message.Summary)) builder.AddText(message.Summary);
+            else if (!string.IsNullOrWhiteSpace(message.Content)) builder.AddText(message.Content);
+
+            builder.Show();
         }
     }
 }

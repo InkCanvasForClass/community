@@ -1,7 +1,9 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Models;
 using Ink_Canvas.Windows;
+using Ink_Canvas.Windows.SettingsViews;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using iNKORE.UI.WPF.Modern;
 using iNKORE.UI.WPF.Modern.Controls;
@@ -51,6 +53,8 @@ namespace Ink_Canvas
 
         // 墨迹渐隐管理器
         private InkFadeManager _inkFadeManager;
+        private readonly CancellationTokenSource _notificationProviderCancellation = new CancellationTokenSource();
+        private AnnouncementService _announcementService;
 
         // 悬浮窗拦截管理器
         public FloatingWindowInterceptorManager _floatingWindowInterceptorManager;
@@ -1606,6 +1610,7 @@ namespace Ink_Canvas
                 else ViewboxFloatingBarMarginAnimation(100, true, skipAnimation: true);
             }
             ApplyLanguageFromSettings();
+            InitializeNotificationProviders();
 
             // 启动时根据设置恢复调试控制台显示状态
             if (Settings?.Advanced != null && Settings.Advanced.IsDebugConsoleEnabled)
@@ -2283,8 +2288,38 @@ namespace Ink_Canvas
                     // 检测到新版本
                     LogHelper.WriteLogToFile($"AutoUpdate | New version available: {AvailableLatestVersion}");
 
-                    // 通过 Windows 系统通知提示有新版本
-                    WindowsNotificationHelper.ShowNewVersionToast(AvailableLatestVersion);
+                    var updateMessage = new NotificationMessage
+                    {
+                        Id = "update-" + AvailableLatestVersion,
+                        Type = NotificationMessageType.Update,
+                        Level = NotificationMessageLevel.Normal,
+                        Title = Ink_Canvas.Properties.Strings.GetString("Notification_UpdateTitle") ?? "发现新版本",
+                        Summary = string.Format(Ink_Canvas.Properties.Strings.GetString("Notification_NewVersion") ?? "发现新版本：{0}", AvailableLatestVersion),
+                        Content = AvailableLatestReleaseNotes ?? string.Empty,
+                        Icon = "Update",
+                        ActionText = Ink_Canvas.Properties.Strings.GetString("Notification_ViewDetails") ?? "查看详情",
+                        DisplaySeconds = Settings?.Notification?.UpdateDurationSeconds > 0 ? Settings.Notification.UpdateDurationSeconds : 5,
+                        Source = "update",
+                        Action = () =>
+                        {
+                            try
+                            {
+                                var settingsWindow = new SettingsWindow();
+                                settingsWindow.Show();
+                                settingsWindow.NavigateToPage("UpdatePage");
+                            }
+                            catch (Exception ex)
+                            {
+                                LogHelper.WriteLogToFile($"打开更新设置页失败: {ex.Message}", LogHelper.LogType.Warning);
+                            }
+                        }
+                    };
+
+                    NotificationCenterService.Enqueue(updateMessage);
+                    if (Settings?.Notification?.IsWindowsToastEnabled == true)
+                    {
+                        WindowsNotificationHelper.ShowToast(updateMessage);
+                    }
 
                     // 检查是否是用户选择跳过的版本
                     if (!string.IsNullOrEmpty(Settings.Startup.SkippedVersion) &&

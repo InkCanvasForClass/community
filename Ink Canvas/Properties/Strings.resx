@@ -2252,6 +2252,24 @@
   <data name="Notification_TestText" xml:space="preserve">
     <value>测试文本</value>
   </data>
+  <data name="Notification_DefaultTitle" xml:space="preserve">
+    <value>通知</value>
+  </data>
+  <data name="Notification_UpdateTitle" xml:space="preserve">
+    <value>发现新版本</value>
+  </data>
+  <data name="Notification_NewVersion" xml:space="preserve">
+    <value>发现新版本：{0}</value>
+  </data>
+  <data name="Notification_ViewDetails" xml:space="preserve">
+    <value>查看详情</value>
+  </data>
+  <data name="Notification_Close" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="Announcement_LoadFailed" xml:space="preserve">
+    <value>公告加载失败</value>
+  </data>
   <data name="OldUI_Exit" xml:space="preserve">
     <value>退出</value>
   </data>
@@ -3118,5 +3136,221 @@
   </data>
   <data name="Automation_SaveFileName_CustomTemplate_Desc" xml:space="preserve">
     <value>可用占位符：{date} {time} {datetime} {mode} {page} {count} {type}</value>
+  </data>
+  <data name="Notification_PageTitle" xml:space="preserve">
+    <value>通知</value>
+  </data>
+  <data name="Notification_NavTooltip" xml:space="preserve">
+    <value>公告、消息提醒与灵动通知设置</value>
+  </data>
+  <data name="Notification_SettingsTitle" xml:space="preserve">
+    <value>通知设置</value>
+  </data>
+  <data name="Notification_GroupTitle" xml:space="preserve">
+    <value>通知管理</value>
+  </data>
+  <data name="Notification_EnableAnnouncements" xml:space="preserve">
+    <value>启用公告系统</value>
+  </data>
+  <data name="Notification_EnableAnnouncementsHint" xml:space="preserve">
+    <value>启动后拉取公告，并接收实时公告推送。</value>
+  </data>
+  <data name="Notification_EnableDynamic" xml:space="preserve">
+    <value>启用灵动通知</value>
+  </data>
+  <data name="Notification_EnableDynamicHint" xml:space="preserve">
+    <value>使用顶部胶囊提示承载公告、更新和本地消息。</value>
+  </data>
+  <data name="Notification_EnableWindowsToast" xml:space="preserve">
+    <value>启用 Windows 系统通知</value>
+  </data>
+  <data name="Notification_EnableWindowsToastHint" xml:space="preserve">
+    <value>重要通知和更新可同步显示为系统 Toast。</value>
+  </data>
+  <data name="Notification_EnableForcePopup" xml:space="preserve">
+    <value>启用重要公告强提醒</value>
+  </data>
+  <data name="Notification_EnableForcePopupHint" xml:space="preserve">
+    <value>重要公告允许默认展开显示，但仍可关闭。</value>
+  </data>
+  <data name="Notification_BehaviorTitle" xml:space="preserve">
+    <value>展示行为</value>
+  </data>
+  <data name="Notification_Placement" xml:space="preserve">
+    <value>灵动通知位置</value>
+  </data>
+  <data name="Notification_PlacementHint" xml:space="preserve">
+    <value>选择灵动通知在主窗口中的默认展示位置。</value>
+  </data>
+  <data name="Notification_PlacementTopCenter" xml:space="preserve">
+    <value>顶部居中</value>
+  </data>
+  <data name="Notification_PlacementTopRight" xml:space="preserve">
+    <value>右上角</value>
+  </data>
+  <data name="Notification_PlacementTopLeft" xml:space="preserve">
+    <value>左上角</value>
+  </data>
+  <data name="Notification_AnimationMode" xml:space="preserve">
+    <value>动画效果</value>
+  </data>
+  <data name="Notification_AnimationModeHint" xml:space="preserve">
+    <value>控制灵动通知进入、展开和退出时的动画强度。</value>
+  </data>
+  <data name="Notification_AnimationOff" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="Notification_AnimationSimple" xml:space="preserve">
+    <value>简洁</value>
+  </data>
+  <data name="Notification_AnimationStandard" xml:space="preserve">
+    <value>标准</value>
+  </data>
+  <data name="Notification_UpdateDuration" xml:space="preserve">
+    <value>更新通知展示时长</value>
+  </data>
+  <data name="Notification_UpdateDurationHint" xml:space="preserve">
+    <value>更新类消息自动关闭前停留的秒数。</value>
+  </data>
+  <data name="Notification_UrgentDuration" xml:space="preserve">
+    <value>紧急通知展示时长</value>
+  </data>
+  <data name="Notification_UrgentDurationHint" xml:space="preserve">
+    <value>紧急消息自动关闭前停留的秒数。</value>
+  </data>
+  <data name="Notification_ImportantDuration" xml:space="preserve">
+    <value>重要通知展示时长</value>
+  </data>
+  <data name="Notification_ImportantDurationHint" xml:space="preserve">
+    <value>重要消息自动关闭前停留的秒数。</value>
+  </data>
+  <data name="Notification_ReminderDuration" xml:space="preserve">
+    <value>提醒通知展示时长</value>
+  </data>
+  <data name="Notification_ReminderDurationHint" xml:space="preserve">
+    <value>提醒类消息自动关闭前停留的秒数。</value>
+  </data>
+  <data name="Notification_OtherDuration" xml:space="preserve">
+    <value>其他通知展示时长</value>
+  </data>
+  <data name="Notification_OtherDurationHint" xml:space="preserve">
+    <value>其他消息自动关闭前停留的秒数。</value>
+  </data>
+  <data name="Notification_ActionsTitle" xml:space="preserve">
+    <value>操作</value>
+  </data>
+  <data name="Notification_Test" xml:space="preserve">
+    <value>测试通知</value>
+  </data>
+  <data name="Notification_TestHint" xml:space="preserve">
+    <value>立即向消息队列发送一条测试通知。</value>
+  </data>
+  <data name="Notification_TestButton" xml:space="preserve">
+    <value>发送测试通知</value>
+  </data>
+  <data name="Notification_TestTitle" xml:space="preserve">
+    <value>通知测试</value>
+  </data>
+  <data name="Notification_TestSummary" xml:space="preserve">
+    <value>灵动通知与消息队列运行正常。</value>
+  </data>
+  <data name="Announcement_PageTitle" xml:space="preserve">
+    <value>公告</value>
+  </data>
+  <data name="Announcement_NavTooltip" xml:space="preserve">
+    <value>远端公告、实时推送与公告历史设置</value>
+  </data>
+  <data name="Announcement_ConnectionTitle" xml:space="preserve">
+    <value>连接配置</value>
+  </data>
+  <data name="Announcement_ConnectionHint" xml:space="preserve">
+    <value>配置公告 HTTP API、WebSocket 实时推送地址和访问 Token。</value>
+  </data>
+  <data name="Announcement_ApiBaseUrl" xml:space="preserve">
+    <value>公告 API 地址</value>
+  </data>
+  <data name="Announcement_ApiBaseUrlHint" xml:space="preserve">
+    <value>用于拉取公告列表的服务端基础地址。</value>
+  </data>
+  <data name="Announcement_WebSocketUrl" xml:space="preserve">
+    <value>实时推送地址</value>
+  </data>
+  <data name="Announcement_WebSocketUrlHint" xml:space="preserve">
+    <value>可留空，留空时会根据 API 地址自动生成 WebSocket 地址。</value>
+  </data>
+  <data name="Announcement_Token" xml:space="preserve">
+    <value>公告访问 Token</value>
+  </data>
+  <data name="Announcement_TokenHint" xml:space="preserve">
+    <value>公告系统用于识别软件的访问 Token。</value>
+  </data>
+  <data name="Announcement_CenterTitle" xml:space="preserve">
+    <value>公告中心</value>
+  </data>
+  <data name="Announcement_CenterHint" xml:space="preserve">
+    <value>查看已接收的远端公告和实时推送内容。</value>
+  </data>
+  <data name="Announcement_NoItems" xml:space="preserve">
+    <value>暂无公告</value>
+  </data>
+  <data name="Announcement_ClearHistory" xml:space="preserve">
+    <value>清空历史</value>
+  </data>
+  <data name="Notification_ViewHistory" xml:space="preserve">
+    <value>查看历史</value>
+  </data>
+  <data name="Notification_ProviderTitle" xml:space="preserve">
+    <value>提醒提供商</value>
+  </data>
+  <data name="Notification_ProviderManagement" xml:space="preserve">
+    <value>提醒提供商管理</value>
+  </data>
+  <data name="Notification_ProviderManagementHint" xml:space="preserve">
+    <value>查看公告、本地消息和系统通知提供商的启用与运行状态。</value>
+  </data>
+  <data name="Notification_ProviderRefresh" xml:space="preserve">
+    <value>刷新状态</value>
+  </data>
+  <data name="Notification_Provider_Announcement" xml:space="preserve">
+    <value>公告提供商</value>
+  </data>
+  <data name="Notification_Provider_AnnouncementDesc" xml:space="preserve">
+    <value>拉取远端公告并接收实时推送。</value>
+  </data>
+  <data name="Notification_Provider_Local" xml:space="preserve">
+    <value>本地消息提供商</value>
+  </data>
+  <data name="Notification_Provider_LocalDesc" xml:space="preserve">
+    <value>接收应用内部提示、错误和插件消息。</value>
+  </data>
+  <data name="Notification_Provider_WindowsToast" xml:space="preserve">
+    <value>Windows 系统通知</value>
+  </data>
+  <data name="Notification_Provider_WindowsToastDesc" xml:space="preserve">
+    <value>将消息同步显示为系统 Toast 或托盘气泡。</value>
+  </data>
+  <data name="Notification_Provider_Starting" xml:space="preserve">
+    <value>启动中</value>
+  </data>
+  <data name="Notification_Provider_Running" xml:space="preserve">
+    <value>运行中</value>
+  </data>
+  <data name="Notification_Provider_Stopped" xml:space="preserve">
+    <value>已停止</value>
+  </data>
+  <data name="Notification_Provider_Disabled" xml:space="preserve">
+    <value>已禁用</value>
+  </data>
+  <data name="Notification_Provider_NoToken" xml:space="preserve">
+    <value>未配置 Token</value>
+  </data>
+  <data name="Notification_Provider_Reconnecting" xml:space="preserve">
+    <value>正在重连</value>
+  </data>
+  <data name="Notification_Provider_HttpOnly" xml:space="preserve">
+    <value>HTTP 拉取可用，实时推送不可用</value>
+  </data>
+  <data name="Notification_Provider_WaitingRestart" xml:space="preserve">
+    <value>将在下次启动时生效</value>
   </data>
 </root>
