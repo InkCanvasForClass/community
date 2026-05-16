@@ -272,7 +272,7 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" Margin="0,0,4,0">
                                     <TextBlock Text="水平对齐" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
-                                    <ComboBox x:Name="ComboBoxHAlign" Width="100" HorizontalAlignment="Left"
+                                    <ComboBox x:Name="ComboBoxHAlign" HorizontalAlignment="Left"
                                               SelectionChanged="ComponentAlignment_Changed">
                                         <ComboBoxItem Content="默认" Tag=""/>
                                         <ComboBoxItem Content="左" Tag="Left"/>
@@ -283,7 +283,7 @@
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Margin="4,0,0,0">
                                     <TextBlock Text="垂直对齐" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
-                                    <ComboBox x:Name="ComboBoxVAlign" Width="100" HorizontalAlignment="Left"
+                                    <ComboBox x:Name="ComboBoxVAlign" HorizontalAlignment="Left"
                                               SelectionChanged="ComponentAlignment_Changed">
                                         <ComboBoxItem Content="默认" Tag=""/>
                                         <ComboBoxItem Content="上" Tag="Top"/>
