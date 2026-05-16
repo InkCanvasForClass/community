@@ -445,13 +445,6 @@ namespace Ink_Canvas.Helpers
                     continue;
                 }
 
-                testUrls.Add((group, testUrl));
-            }
-
-            var tasks = testUrls.Select(async entry =>
-            {
-                var (group, testUrl) = entry;
-                LogHelper.WriteLogToFile($"AutoUpdate | 检测线路组: {group.GroupName} ({testUrl})");
                 testTasks.Add(MeasureLineGroupDelayAsync(group, testUrl));
             }
 
@@ -465,22 +458,11 @@ namespace Ink_Canvas.Helpers
                 if (delay >= 0)
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | 线路组 {group.GroupName} 延迟: {delay}ms");
-                    return (group, delay, success: true);
+                    availableGroups.Add((group, delay));
                 }
                 else
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | 线路组 {group.GroupName} 不可用", LogHelper.LogType.Warning);
-                    return (group, delay, success: false);
-                }
-            }).ToArray();
-
-            var results = await Task.WhenAll(tasks);
-
-            foreach (var (group, delay, success) in results)
-            {
-                if (success)
-                {
-                    availableGroups.Add((group, delay));
                 }
             }
 

@@ -461,15 +461,6 @@ namespace Ink_Canvas
 
             AnimationsHelper.HidePopupWithSlideAndFade(BackgroundPalette);
 
-            AnimationsHelper.HidePopupWithSlideAndFade(TwoFingerGestureBorder);
-            AnimationsHelper.HidePopupWithSlideAndFade(EraserSizePanel);
-            AnimationsHelper.HidePopupWithSlideAndFade(BoardTwoFingerGestureBorder);
-            if (ToggleSwitchDrawShapeBorderAutoHide.IsOn)
-            {
-                AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
-                AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderDrawShape);
-            }
-
             if (mode != null)
             {
                 if (mode != "clear")
@@ -2170,6 +2161,7 @@ namespace Ink_Canvas
                     ViewboxFloatingBar.UpdateLayout();
                 }
                 isViewboxFloatingBarMarginAnimationRunning = true;
+            });
 
             await Task.Delay(200);
 
