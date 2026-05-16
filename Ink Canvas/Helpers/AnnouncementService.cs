@@ -147,36 +147,47 @@ namespace Ink_Canvas.Helpers
             {
                 var wsUrl = BuildWebSocketUrl();
                 if (string.IsNullOrWhiteSpace(wsUrl)) return;
+                var connected = false;
 
-                try
+                foreach (var candidateUrl in BuildWebSocketUrlCandidates(wsUrl))
                 {
-                    using (webSocket = new ClientWebSocket())
+                    if (cancellationToken.IsCancellationRequested || disposed) return;
+                    try
                     {
-                        await webSocket.ConnectAsync(new Uri(wsUrl), cancellationToken);
-                        isRealtimePushUnavailable = false;
-                        NotificationProviderRegistry.SetRunning(ProviderId, true, Strings.GetString("Notification_Provider_Running") ?? "运行中");
-                        await ReceiveWebSocketMessagesAsync(webSocket, cancellationToken);
+                        using (webSocket = new ClientWebSocket())
+                        {
+                            await webSocket.ConnectAsync(new Uri(candidateUrl), cancellationToken);
+                            connected = true;
+                            isRealtimePushUnavailable = false;
+                            NotificationProviderRegistry.SetRunning(ProviderId, true, Strings.GetString("Notification_Provider_Running") ?? "运行中");
+                            await ReceiveWebSocketMessagesAsync(webSocket, cancellationToken);
+                        }
+                        break;
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        return;
+                    }
+                    catch (WebSocketException ex) when (IsWebSocketServerError(ex))
+                    {
+                        if (!isRealtimePushUnavailable)
+                        {
+                            LogHelper.WriteLogToFile($"AnnouncementService WebSocket 服务端暂不可用，将继续重连并保留 HTTP 公告拉取通道: {ex.Message}", LogHelper.LogType.Trace);
+                            isRealtimePushUnavailable = true;
+                        }
+                        NotificationProviderRegistry.SetRunning(ProviderId, true, Strings.GetString("Notification_Provider_HttpOnly") ?? "HTTP 拉取可用，实时推送不可用");
+                    }
+                    catch (Exception ex)
+                    {
+                        if (!isRealtimePushUnavailable)
+                        {
+                            LogHelper.WriteLogToFile($"AnnouncementService WebSocket 连接失败: {ex.Message}", LogHelper.LogType.Trace);
+                        }
+                        NotificationProviderRegistry.SetRunning(ProviderId, false, Strings.GetString("Notification_Provider_Reconnecting") ?? "正在重连");
                     }
                 }
-                catch (OperationCanceledException)
-                {
-                    return;
-                }
-                catch (WebSocketException ex) when (IsWebSocketServerError(ex))
-                {
-                    LogHelper.WriteLogToFile($"AnnouncementService WebSocket 服务端不可用，已停止实时推送并保留 HTTP 公告拉取通道: {ex.Message}", LogHelper.LogType.Warning);
-                    isRealtimePushUnavailable = true;
-                    NotificationProviderRegistry.SetRunning(ProviderId, true, Strings.GetString("Notification_Provider_HttpOnly") ?? "HTTP 拉取可用，实时推送不可用");
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    if (!isRealtimePushUnavailable)
-                    {
-                        LogHelper.WriteLogToFile($"AnnouncementService WebSocket 连接失败: {ex.Message}", LogHelper.LogType.Warning);
-                    }
-                    NotificationProviderRegistry.SetRunning(ProviderId, false, Strings.GetString("Notification_Provider_Reconnecting") ?? "正在重连");
-                }
+
+                if (connected) continue;
 
                 try
                 {
@@ -195,6 +206,13 @@ namespace Ink_Canvas.Helpers
                 || ex.Message.Contains("status code \"500\"")
                 || ex.InnerException is HttpRequestException
                 || ex.InnerException is SocketException;
+        }
+
+        private static IEnumerable<string> BuildWebSocketUrlCandidates(string wsUrl)
+        {
+            var trimmed = wsUrl.TrimEnd('/');
+            yield return trimmed + "/";
+            yield return trimmed;
         }
 
         private async Task ReceiveWebSocketMessagesAsync(ClientWebSocket socket, CancellationToken cancellationToken)
@@ -487,7 +505,10 @@ namespace Ink_Canvas.Helpers
             var wsUrl = settings.Notification.AnnouncementWebSocketUrl;
             if (!string.IsNullOrWhiteSpace(wsUrl))
             {
-                return wsUrl.TrimEnd('/') + "/" + Uri.EscapeDataString(token) + "/";
+                var trimmed = wsUrl.TrimEnd('/');
+                if (trimmed.EndsWith("/" + token, StringComparison.OrdinalIgnoreCase)) return trimmed + "/";
+                if (trimmed.EndsWith("/ws/announcement", StringComparison.OrdinalIgnoreCase)) return $"{trimmed}/{Uri.EscapeDataString(token)}/";
+                return trimmed + "/";
             }
 
             var baseUrl = settings.Notification.AnnouncementApiBaseUrl;
