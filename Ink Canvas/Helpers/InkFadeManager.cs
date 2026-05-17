@@ -663,7 +663,8 @@ namespace Ink_Canvas.Helpers
                     timer.Start();
                 }
 
-                var safetyTimeout = totalDuration + (segments.Count * segmentDuration) + 1200;
+                var effectiveDuration = GetEffectiveAnimationDuration();
+                var safetyTimeout = effectiveDuration + (segments.Count * segmentDuration) + 500;
                 var safetyTimer = new DispatcherTimer
                 {
                     Interval = TimeSpan.FromMilliseconds(safetyTimeout)
@@ -821,10 +822,11 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         private int CalculateOptimalSegmentDuration(int totalDuration, int segmentCount)
         {
-            // 平衡速度与动画完整性
-            var baseDuration = totalDuration / Math.Max(segmentCount, 1);
-            var minDuration = 150; // 每段最少150ms，确保动画完整显示
-            var maxDuration = 500; // 每段最多500ms，平衡速度与完整性
+            // 使用有效动画持续时间（考虑倍速）
+            var effectiveDuration = GetEffectiveAnimationDuration();
+            var baseDuration = effectiveDuration / Math.Max(segmentCount, 1);
+            var minDuration = Math.Max(20, (int)(effectiveDuration * 0.05)); // 每段最少5%的动画时间
+            var maxDuration = Math.Max(50, (int)(effectiveDuration * 0.2)); // 每段最多20%的动画时间
 
             return Math.Max(minDuration, Math.Min(maxDuration, baseDuration));
         }
@@ -836,13 +838,15 @@ namespace Ink_Canvas.Helpers
         {
             var curve = new int[segmentCount];
 
-            // 平衡速度与完整性，确保动画有足够时间播放
-            var availableTime = totalDuration * 0.6; // 使用60%的总时间，给动画留足够缓冲
-            var delayBetweenSegments = Math.Max(60, availableTime / Math.Max(segmentCount, 1));
+            // 计算有效动画持续时间（考虑倍速）
+            var effectiveDuration = GetEffectiveAnimationDuration();
+
+            // 动画时间占40%，延迟时间占60%
+            var availableTime = (int)(effectiveDuration * 0.6);
+            var delayBetweenSegments = Math.Max(10, availableTime / Math.Max(segmentCount, 1));
 
             for (int i = 0; i < segmentCount; i++)
             {
-                // 线性延迟，确保每个分段都有足够时间
                 curve[i] = (int)(i * delayBetweenSegments);
             }
 
