@@ -117,7 +117,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ViewboxFloatingBarOpacityValueSlider.Value = settings.Appearance.ViewboxFloatingBarOpacityValue;
             ViewboxFloatingBarOpacityInPPTValueSlider.Value = settings.Appearance.ViewboxFloatingBarOpacityInPPTValue;
 
-            CardEnableDisPlayNibModeToggle.IsOn = settings.Appearance.IsEnableDisPlayNibModeToggler;
             CardEnableTimeDisplayInWhiteboardMode.IsOn = settings.Appearance.EnableTimeDisplayInWhiteboardMode;
             CardUse24HourTimeFormat.IsOn = settings.Appearance.Use24HourTimeFormat;
             CardEnableChickenSoupInWhiteboardMode.IsOn = settings.Appearance.EnableChickenSoupInWhiteboardMode;
@@ -459,20 +458,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         #endregion
 
         #region Display Options
-
-        private void ToggleSwitchEnableDisPlayNibModeToggle_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.IsEnableDisPlayNibModeToggler = CardEnableDisPlayNibModeToggle.IsOn;
-            SettingsManager.SaveSettingsToFile();
-            var mw = GetMainWindow();
-            if (mw != null)
-            {
-                var vis = CardEnableDisPlayNibModeToggle.IsOn ? Visibility.Visible : Visibility.Collapsed;
-                mw.NibModeSimpleStackPanel.Visibility = vis;
-                mw.BoardNibModeSimpleStackPanel.Visibility = vis;
-            }
-        }
 
         private void ViewboxBlackBoardScaleTransformValueSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {

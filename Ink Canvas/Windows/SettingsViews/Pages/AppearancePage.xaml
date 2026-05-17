@@ -281,12 +281,6 @@
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
-                    <controls:LabeledSettingsCard x:Name="CardEnableDisPlayNibModeToggle"
-                            Header="{i18n:I18n Key=Theme_ShowNibButton}"
-                            Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
-                            SwitchName="ToggleSwitchEnableDisPlayNibModeToggle"
-                            Toggled="ToggleSwitchEnableDisPlayNibModeToggle_Toggled" />
-
                     <ui:SettingsCard Header="{i18n:I18n Key=Theme_BlackboardScale80}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BackToWindow}" />

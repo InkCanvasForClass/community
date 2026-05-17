@@ -259,12 +259,6 @@ namespace Ink_Canvas
             {
                 if (Settings.Appearance != null)
                 {
-                if (!Settings.Appearance.IsEnableDisPlayNibModeToggler)
-                {
-                    NibModeSimpleStackPanel.Visibility = Visibility.Collapsed;
-                    BoardNibModeSimpleStackPanel.Visibility = Visibility.Collapsed;
-                }
-
                 if (Settings.Appearance.ViewboxFloatingBarScaleTransformValue != 0)
                 {
                     double userVal = Settings.Appearance.ViewboxFloatingBarScaleTransformValue;

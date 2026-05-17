@@ -56,6 +56,12 @@
                                                      Foreground="{DynamicResource FloatBarForeground}"
                                                      Width="80"
                                                      MinWidth="0" />
+                                    <Label Margin="10,0,10,0" Content="重叠加深"
+                                           Foreground="{DynamicResource FloatBarForeground}"
+                                           FontSize="12" VerticalAlignment="Center" />
+                                    <ui:ToggleSwitch x:Name="ToggleSwitchHighlighterOverlap"
+                                                     Foreground="{DynamicResource FloatBarForeground}"
+                                                     MinWidth="0" Width="80" />
                                 </ikw:SimpleStackPanel>
                             </primitives:UniformGrid>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
@@ -84,17 +90,8 @@
                                            FontFamily="Consolas" VerticalAlignment="Center"
                                            Margin="10,0,0,0" FontSize="15" />
                             </StackPanel>
-                            <ikw:SimpleStackPanel x:Name="_HighlighterOverlapPanel" Orientation="Horizontal"
-                                                 Visibility="Collapsed" Margin="0,0,0,4">
-                                <Label Margin="0,0,10,0" Content="重叠加深"
-                                       Foreground="{DynamicResource FloatBarForeground}"
-                                       FontSize="12" VerticalAlignment="Center" />
-                                <ui:ToggleSwitch x:Name="ToggleSwitchHighlighterOverlap"
-                                                 Foreground="{DynamicResource FloatBarForeground}"
-                                                 MinWidth="0" Width="80" />
-                            </ikw:SimpleStackPanel>
                             <StackPanel x:Name="_LaserPenFadePanel" Orientation="Horizontal" Visibility="Collapsed" Margin="0,0,0,8">
-                                <Label Margin="0,0,10,0" Content="渐隐" FontWeight="Bold"
+                                <Label Margin="0,0,10,0" Content="延迟" FontWeight="Bold"
                                        Foreground="{DynamicResource FloatBarForeground}"
                                        FontSize="17" VerticalAlignment="Center" />
                                 <Slider x:Name="_LaserPenFadeTimeSlider" Minimum="1"
