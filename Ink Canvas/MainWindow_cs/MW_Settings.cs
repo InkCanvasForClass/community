@@ -901,7 +901,6 @@ namespace Ink_Canvas
             Settings.Advanced.EnableMultiScreenSupport = true;
             Settings.Advanced.FollowMouseForScreenSelection = true;
 
-            Settings.Appearance.IsEnableDisPlayNibModeToggler = false;
             Settings.Appearance.IsColorfulViewboxFloatingBar = false;
             Settings.Appearance.ViewboxFloatingBarScaleTransformValue = 1;
             Settings.Appearance.ViewboxBlackBoardScaleTransformValue = 0.8;
