@@ -200,11 +200,8 @@
     <Resource Include="Resources\icc.ico" />
     <Resource Include="Resources\Icons-png\AdmoxBooth.png" />
     <Resource Include="Resources\Icons-png\AdmoxWhiteboard.png" />
-    <Resource Include="Resources\Icons-png\check-box-background.png" />
     <Resource Include="Resources\Icons-png\Donview.png" />
     <Resource Include="Resources\Icons-png\EasiNote3.png" />
-    <Resource Include="Resources\Icons-png\eraser-line.png" />
-    <Resource Include="Resources\Icons-png\eraser-outline.png" />
     <Resource Include="Resources\Icons-png\HiteLightBoard.png" />
     <Resource Include="Resources\Icons-png\ica.png" />
     <Resource Include="Resources\Icons-png\icc-transparent-dark-small.png" />
@@ -222,31 +219,17 @@
     <Resource Include="Resources\Icons-png\kuanneikuhuaji.png" />
     <Resource Include="Resources\Icons-png\kuanshounvhuaji.png" />
     <Resource Include="Resources\Icons-png\MaxHubWhiteboard.png" />
-    <Resource Include="Resources\Icons-png\playCircle.png" />
-    <Resource Include="Resources\Icons-png\redo.png" />
     <Resource Include="Resources\Icons-png\Seewo2Annotation.png" />
-    <Resource Include="Resources\Icons-png\setting.png" />
     <Resource Include="Resources\Icons-png\tiebahuaji.png" />
     <Resource Include="Resources\Icons-png\transparent-grid.png" />
-    <Resource Include="Resources\Icons-png\undo.png" />
-    <Resource Include="Resources\Icons-png\minimize.png" />
-    <Resource Include="Resources\Icons-png\penUpright.png" />
     <Resource Include="Resources\new-icons\multi-touch_white.png" />
     <Resource Include="Resources\new-icons\hand-move_white.png" />
     <Resource Include="Resources\new-icons\zoom_white.png" />
     <Resource Include="Resources\new-icons\rotate_white.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons-png\twoFingelMove-Blue.png" />
-    <Resource Include="Resources\Icons-png\twoFingelMove.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons-png\close-circle.png" />
-  </ItemGroup>
-  <ItemGroup>
+<ItemGroup>
     <Resource Include="Resources\DeveloperAvatars\ChangSakura.png" />
     <Resource Include="Resources\DeveloperAvatars\clover-yan.png" />
-    <Resource Include="Resources\DeveloperAvatars\CN-Ironegg.jpg" />
     <Resource Include="Resources\DeveloperAvatars\jiajiaxd.jpg" />
     <Resource Include="Resources\DeveloperAvatars\kengwang.png" />
     <Resource Include="Resources\DeveloperAvatars\STBBRD.png" />
@@ -255,25 +238,13 @@
     <Resource Include="Resources\DeveloperAvatars\PANDA-JSR.jpg" />
     <Resource Include="Resources\DeveloperAvatars\Super-Yyt.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons-png\down.png" />
-    <Resource Include="Resources\Icons-png\up.png" />
-  </ItemGroup>
-  <ItemGroup>
+<ItemGroup>
     <Resource Include="Resources\Icons-png\EasiCamera.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons-png\Desmos.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_cursor_24_regular.png" />
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_lasso_24_regular.png" />
+<ItemGroup>
     <Resource Include="Resources\Icons-Fluent\ic_fluent_settings_24_regular.png" />
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_whiteboard_24_regular.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_dark_theme_24_regular.png" />
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_dual_screen_span_24_regular.png" />
     <Resource Include="Resources\Icons-Fluent\ic_fluent_timer_24_regular.png" />
   </ItemGroup>
   <ItemGroup>
@@ -290,76 +261,36 @@
       <DesignTime>True</DesignTime>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_cursorWITHdelete_24_regular.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_arrow_circle_left_24_regular.png" />
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_arrow_circle_right_24_regular.png" />
+<ItemGroup>
     <Resource Include="Resources\Icons-Fluent\ic_fluent_weather_moon_24_regular.png" />
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_weather_moon_24_regular_white.png" />
     <Resource Include="Resources\Icons-Fluent\ic_fluent_weather_sunny_24_regular.png" />
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_weather_sunny_24_regular_white.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_signature_24_regular.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_save_24_regular.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_camera_24_regular.png" />
-  </ItemGroup>
-  <ItemGroup>
+<ItemGroup>
     <Resource Include="Resources\Icons-Fluent\ic_fluent_copy_24_regular.png" />
     <Resource Include="Resources\Icons-Fluent\ic_fluent_copy_add_24_regular.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_add_circle_24_regular.png" />
-  </ItemGroup>
-  <ItemGroup>
+<ItemGroup>
     <Resource Include="Resources\Icons-Fluent\ic_fluent_flip_horizontal_24_regular.png" />
     <Resource Include="Resources\Icons-Fluent\ic_fluent_flip_vertical_24_regular.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons-Fluent\ic_fluent_edit_24_regular.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_folder_open_24_regular.png" />
-  </ItemGroup>
-  <ItemGroup>
+<ItemGroup>
     <Resource Include="Resources\Icons-Fluent\ic_fluent_people_money_24_regular.png" />
     <Resource Include="Resources\Icons-Fluent\ic_fluent_person_money_24_regular.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_arrow_rotate_clockwise_24_regular.png" />
     <Resource Include="Resources\Icons-Fluent\ic_fluent_scale_fit_24_regular.png" />
     <Resource Include="Resources\Icons-Fluent\ic_fluent_scale_fit_24_regular_white.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_scales_24_regular.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_arrow_clockwise_24_regular.png" />
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_calendar_sync_24_regular.png" />
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_dismiss_circle_24_regular.png" />
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_drag_24_regular.png" />
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_shapes_24_regular.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_power_24_regular.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_clock_24_regular.png" />
-  </ItemGroup>
-  <ItemGroup>
+<ItemGroup>
     <Resource Include="Resources\Icons-Fluent\ic_fluent_keyboard_24_regular.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons-Fluent\ic_fluent_control_button_24_regular.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_people_24_regular.png" />
     <Resource Include="Resources\Icons-png\VComYouJiao.png" />
     <Resource Include="Resources\Icons-png\WenXiang.png" />
     <Resource Include="Resources\Icons-png\YiYunVisualPresenter.png" />
@@ -376,45 +307,18 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\new-icons\pen-lined.png" />
-    <Resource Include="Resources\new-icons\pen-solid.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\new-icons\cursor-lined.png" />
-    <Resource Include="Resources\new-icons\cursor-solid.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\new-icons\eraser-lined.png" />
-    <Resource Include="Resources\new-icons\eraser-solid.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\new-icons\circle-eraser-lined.png" />
-    <Resource Include="Resources\new-icons\circle-eraser-solid.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\new-icons\lasso-select-lined.png" />
-    <Resource Include="Resources\new-icons\lasso-select-solid.png" />
+<ItemGroup>
     <Resource Include="Resources\new-icons\pen-white.png" />
     <Resource Include="Resources\new-icons\rotate.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\new-icons\trash.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\new-icons\shapes.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\new-icons\eye-off.png" />
-  </ItemGroup>
-  <ItemGroup>
+<ItemGroup>
     <Resource Include="Resources\new-icons\grid.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\new-icons\blackboard.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\new-icons\cursor-clear.png" />
-  </ItemGroup>
-  <ItemGroup>
+<ItemGroup>
     <Resource Include="Resources\DeveloperAvatars\dubi906w.jpg" />
     <Resource Include="Resources\DeveloperAvatars\CreeperAWA.png" />
   </ItemGroup>
@@ -425,19 +329,13 @@
   <ItemGroup>
     <Resource Include="Resources\new-icons\gesture-enabled.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\new-icons\close-white.png" />
-  </ItemGroup>
-  <ItemGroup>
+<ItemGroup>
     <Resource Include="Resources\new-icons\checked-white.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\new-icons\checked-black.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons-png\pressdown-background.png" />
-  </ItemGroup>
-  <ItemGroup>
+<ItemGroup>
     <Resource Include="Resources\Icons-png\geo-icons\arrow.png" />
     <Resource Include="Resources\Icons-png\geo-icons\dashed-line.png" />
     <Resource Include="Resources\Icons-png\geo-icons\dotted-line.png" />
@@ -518,20 +416,7 @@
   <ItemGroup>
     <Resource Include="Resources\Icons-png\PPTTools.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons-png\WPS.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\hatsune-miku1.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons-Fluent\party.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\new-icons\redo.png" />
-    <Resource Include="Resources\new-icons\undo.png" />
-  </ItemGroup>
-  <ItemGroup>
+<ItemGroup>
     <Resource Include="Resources\new-icons\unfold-chevron.png" />
     <Resource Include="Resources\new-icons\zoom.png" />
   </ItemGroup>
@@ -541,7 +426,6 @@
     <Resource Include="Resources\Icons-Fluent\ic_fluent_timer_24_regular-light.png" />
     <Resource Include="Resources\new-icons\blackboard-light.png" />
     <Resource Include="Resources\new-icons\end-slides-show-light.png" />
-    <Resource Include="Resources\new-icons\eye-light.png" />
     <Resource Include="Resources\new-icons\chevron-left-light.png" />
   </ItemGroup>
   <ItemGroup>
