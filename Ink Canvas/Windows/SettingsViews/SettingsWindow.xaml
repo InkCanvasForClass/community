@@ -300,6 +300,11 @@
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BulletedList}"/>
                             </ui:NavigationViewItem.Icon>
+                            <ui:NavigationViewItem.InfoBadge>
+                                <ui:InfoBadge x:Name="AnnouncementUnreadInfoBadge"
+                                              Value="0"
+                                              Visibility="Collapsed" />
+                            </ui:NavigationViewItem.InfoBadge>
                         </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>

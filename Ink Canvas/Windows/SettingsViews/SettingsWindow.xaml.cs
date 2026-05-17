@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Pages;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
@@ -123,14 +124,18 @@ namespace Ink_Canvas.Windows.SettingsViews
                     {
                         LoadPluginSettingsPages();
                         UpdateUpdateBadgeVisibility();
+                        UpdateAnnouncementUnreadBadge();
                     }), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
                 }), System.Windows.Threading.DispatcherPriority.Normal);
 
                 _ = PreloadAllPagesAsync();
             };
 
+            AnnouncementService.UnreadCountChanged += UpdateAnnouncementUnreadBadge;
+
             this.Closed += (sender, e) =>
             {
+                AnnouncementService.UnreadCountChanged -= UpdateAnnouncementUnreadBadge;
                 UnregisterDpiChangedListener();
                 _pages.Clear();
                 _pageTypes.Clear();
@@ -837,6 +842,23 @@ namespace Ink_Canvas.Windows.SettingsViews
                 }
             }
             catch { }
+        }
+
+        public void UpdateAnnouncementUnreadBadge()
+        {
+            Dispatcher.InvokeAsync(() =>
+            {
+                try
+                {
+                    var count = AnnouncementService.GetUnreadCount(Helpers.SettingsManager.Settings);
+                    if (AnnouncementUnreadInfoBadge != null)
+                    {
+                        AnnouncementUnreadInfoBadge.Value = count;
+                        AnnouncementUnreadInfoBadge.Visibility = count > 0 ? Visibility.Visible : Visibility.Collapsed;
+                    }
+                }
+                catch { }
+            });
         }
     }
 }

@@ -25,5 +25,7 @@ namespace Ink_Canvas.Models
         public string ActionUrl { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public bool IsRead { get; set; }
+        public bool IsUnread => !IsRead;
+        public bool IsNew { get; set; }
     }
 }

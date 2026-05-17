@@ -61,6 +61,11 @@ namespace Ink_Canvas
             {
                 try
                 {
+                    if (Settings?.Notification?.IsWindowsToastEnabled == true)
+                    {
+                        WindowsNotificationHelper.ShowToast(message);
+                    }
+
                     if (Settings?.Notification?.IsDynamicNotificationEnabled == true && DynamicNotification != null)
                     {
                         DynamicNotification.Show(message);

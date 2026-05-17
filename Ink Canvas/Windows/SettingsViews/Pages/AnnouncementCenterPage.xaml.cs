@@ -1,12 +1,10 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Models;
-using iNKORE.UI.WPF.Modern.Controls;
-using System.Collections.Generic;
-using System.Diagnostics;
+using Ink_Canvas.Windows.SettingsViews;
+using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
@@ -70,33 +68,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             DetailTitleTextBlock.Text = hasItem ? item.Title : string.Empty;
             DetailTypeTextBlock.Text = hasItem ? GetTypeText(item.Type) : string.Empty;
             DetailTimeTextBlock.Text = hasItem ? item.CreatedAt.ToString("yyyy-MM-dd HH:mm") : string.Empty;
-            DetailSummaryTextBlock.Text = hasItem ? item.Summary : string.Empty;
             DetailContentTextBlock.Text = hasItem ? (string.IsNullOrWhiteSpace(item.Content) ? item.Summary : item.Content) : string.Empty;
+
+            if (hasItem)
+            {
+                AnnouncementService.MarkAsRead(SettingsManager.Settings, item.Id);
+                item.IsRead = true;
+                item.IsNew = false;
+                (Window.GetWindow(this) as SettingsWindow)?.UpdateAnnouncementUnreadBadge();
+            }
         }
 
         private string GetTypeText(NotificationMessageType type)
         {
             var key = "Notification_Type_" + type;
             return Ink_Canvas.Properties.Strings.GetString(key) ?? type.ToString();
-        }
-
-        private void ViewDetailsButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (AnnouncementListBox.SelectedItem is not AnnouncementCenterItem item) return;
-
-            if (!string.IsNullOrWhiteSpace(item.ActionUrl))
-            {
-                try
-                {
-                    Process.Start(new ProcessStartInfo(item.ActionUrl) { UseShellExecute = true });
-                    return;
-                }
-                catch
-                {
-                }
-            }
-
-            MessageBox.Show(string.IsNullOrWhiteSpace(item.Content) ? item.Summary : item.Content, item.Title);
         }
 
         private void ClearHistoryButton_Click(object sender, RoutedEventArgs e)
@@ -106,8 +92,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             LoadAnnouncements();
         }
 
-        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+        private void MarkAllAsReadButton_Click(object sender, RoutedEventArgs e)
         {
+            AnnouncementService.MarkAllAsRead(SettingsManager.Settings);
+            (Window.GetWindow(this) as SettingsWindow)?.UpdateAnnouncementUnreadBadge();
             LoadAnnouncements();
         }
     }

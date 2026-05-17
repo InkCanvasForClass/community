@@ -87,7 +87,8 @@
                            Foreground="#E8FFFFFF"
                            FontSize="13"
                            TextWrapping="Wrap"
-                           MaxHeight="170" />
+                           TextTrimming="CharacterEllipsis"
+                           MaxHeight="96" />
                 <StackPanel Margin="0,12,0,0" Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button x:Name="ActionButton"
                             MinWidth="92"

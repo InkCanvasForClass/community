@@ -6,6 +6,7 @@
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
+      xmlns:converter="clr-namespace:Ink_Canvas.Converter"
       mc:Ignorable="d"
       Title="{i18n:I18n Key=Announcement_CenterTitle}">
 
@@ -17,6 +18,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Grid.Resources>
+                <converter:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
                 <Style x:Key="SettingsSectionHeaderTextBlockStyle"
                        BasedOn="{StaticResource BodyStrongTextBlockStyle}"
                        TargetType="TextBlock">
@@ -68,9 +70,9 @@
                                 Orientation="Horizontal"
                                 VerticalAlignment="Center"
                                 Margin="16,0,0,0">
-                        <Button Content="{i18n:I18n Key=Notification_ProviderRefresh}"
+                        <Button Content="{i18n:I18n Key=Announcement_MarkAllAsRead}"
                                 Margin="0,0,8,0"
-                                Click="RefreshButton_Click" />
+                                Click="MarkAllAsReadButton_Click" />
                         <Button Content="{i18n:I18n Key=Announcement_ClearHistory}"
                                 Click="ClearHistoryButton_Click" />
                     </StackPanel>
@@ -107,6 +109,19 @@
                                                      Opacity="0.85" />
                                         <StackPanel Grid.Column="1">
                                             <DockPanel LastChildFill="True">
+                                                <Grid DockPanel.Dock="Right"
+                                                      Width="18"
+                                                      Height="18"
+                                                      Margin="8,0,0,0"
+                                                      Visibility="{Binding IsUnread, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <Ellipse Fill="{DynamicResource SystemAccentColorBrush}" />
+                                                    <TextBlock Text="1"
+                                                               Foreground="White"
+                                                               FontSize="10"
+                                                               FontWeight="SemiBold"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center" />
+                                                </Grid>
                                                 <TextBlock Text="{Binding Type}"
                                                            DockPanel.Dock="Right"
                                                            Style="{StaticResource AnnouncementMetaTextBlockStyle}"
@@ -161,11 +176,6 @@
 
                         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
                             <StackPanel>
-                                <TextBlock x:Name="DetailSummaryTextBlock"
-                                           Margin="0,0,0,14"
-                                           FontSize="15"
-                                           TextWrapping="Wrap"
-                                           Opacity="0.82" />
                                 <TextBlock x:Name="DetailContentTextBlock"
                                            TextWrapping="Wrap"
                                            LineHeight="22" />

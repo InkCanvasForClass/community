@@ -141,6 +141,20 @@
                         </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
 
+                    <ui:SettingsCard Header="{i18n:I18n Key=Notification_PageTitle}" Description="{i18n:I18n Key=Notification_NavTooltip}"
+                        IsClickEnabled="True" Click="QuickNavCard_Click" Tag="NotificationPage">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Message}" />
+                        </ui:SettingsCard.HeaderIcon>
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard Header="{i18n:I18n Key=Announcement_CenterTitle}" Description="{i18n:I18n Key=Announcement_CenterHint}"
+                        IsClickEnabled="True" Click="QuickNavCard_Click" Tag="AnnouncementCenterPage">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BulletedList}" />
+                        </ui:SettingsCard.HeaderIcon>
+                    </ui:SettingsCard>
+
                     <ui:SettingsCard Header="实验性选项" Description="实验性选项"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="ExperimentalPage">
                         <ui:SettingsCard.HeaderIcon>

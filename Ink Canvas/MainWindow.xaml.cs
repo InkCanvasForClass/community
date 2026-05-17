@@ -2330,10 +2330,6 @@ namespace Ink_Canvas
                     };
 
                     NotificationCenterService.Enqueue(updateMessage);
-                    if (Settings?.Notification?.IsWindowsToastEnabled == true)
-                    {
-                        WindowsNotificationHelper.ShowToast(updateMessage);
-                    }
 
                     // 检查是否是用户选择跳过的版本
                     if (!string.IsNullOrEmpty(Settings.Startup.SkippedVersion) &&

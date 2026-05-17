@@ -32,7 +32,7 @@ namespace Ink_Canvas.Controls
             TitleTextBlock.Text = string.IsNullOrWhiteSpace(message?.Title) ? Strings.GetString("Notification_DefaultTitle") ?? "通知" : message.Title;
             SummaryTextBlock.Text = message?.Summary ?? string.Empty;
             SummaryTextBlock.Visibility = string.IsNullOrWhiteSpace(SummaryTextBlock.Text) ? Visibility.Collapsed : Visibility.Visible;
-            ContentTextBlock.Text = string.IsNullOrWhiteSpace(message?.Content) ? message?.Summary ?? string.Empty : message.Content;
+            ContentTextBlock.Text = string.IsNullOrWhiteSpace(message?.Summary) ? message?.Content ?? string.Empty : message.Summary;
             ActionButton.Content = string.IsNullOrWhiteSpace(message?.ActionText) ? Strings.GetString("Notification_ViewDetails") ?? "查看详情" : message.ActionText;
             ActionButton.Visibility = message?.Action != null || !string.IsNullOrWhiteSpace(message?.ActionUrl) ? Visibility.Visible : Visibility.Collapsed;
             IconGlyph.Icon = GetIcon(message);

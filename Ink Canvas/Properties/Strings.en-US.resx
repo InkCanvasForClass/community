@@ -3282,6 +3282,9 @@ Hide</value>
   <data name="Notification_ProviderRefresh" xml:space="preserve">
     <value>Refresh status</value>
   </data>
+  <data name="Announcement_MarkAllAsRead" xml:space="preserve">
+    <value>Mark all as read</value>
+  </data>
   <data name="Notification_Provider_Announcement" xml:space="preserve">
     <value>Announcement provider</value>
   </data>

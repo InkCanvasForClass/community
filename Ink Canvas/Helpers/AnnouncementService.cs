@@ -26,6 +26,8 @@ namespace Ink_Canvas.Helpers
         private static readonly object HistorySyncRoot = new object();
         private static readonly List<AnnouncementCenterItem> AnnouncementHistory = new List<AnnouncementCenterItem>();
 
+        public static event Action UnreadCountChanged;
+
         public string ProviderId => "announcement";
 
         public static IReadOnlyList<AnnouncementCenterItem> GetAnnouncementHistory()
@@ -42,6 +44,80 @@ namespace Ink_Canvas.Helpers
             {
                 AnnouncementHistory.Clear();
             }
+            UnreadCountChanged?.Invoke();
+        }
+
+        public static int GetUnreadCount(Settings settings)
+        {
+            lock (HistorySyncRoot)
+            {
+                return AnnouncementHistory.Count(x => !IsRead(settings, x.Id));
+            }
+        }
+
+        public static void MarkAsRead(Settings settings, string announcementId)
+        {
+            if (settings?.Notification == null || string.IsNullOrWhiteSpace(announcementId)) return;
+
+            var changed = false;
+            lock (HistorySyncRoot)
+            {
+                if (settings.Notification.ReadAnnouncementIds == null)
+                {
+                    settings.Notification.ReadAnnouncementIds = new List<string>();
+                }
+
+                if (!settings.Notification.ReadAnnouncementIds.Contains(announcementId))
+                {
+                    settings.Notification.ReadAnnouncementIds.Add(announcementId);
+                    changed = true;
+                }
+
+                foreach (var item in AnnouncementHistory.Where(x => x.Id == announcementId))
+                {
+                    if (!item.IsRead || item.IsNew)
+                    {
+                        item.IsRead = true;
+                        item.IsNew = false;
+                        changed = true;
+                    }
+                }
+            }
+
+            if (!changed) return;
+            SettingsManager.SaveSettingsToFile();
+            UnreadCountChanged?.Invoke();
+        }
+
+        public static void MarkAllAsRead(Settings settings)
+        {
+            if (settings?.Notification == null) return;
+
+            lock (HistorySyncRoot)
+            {
+                if (settings.Notification.ReadAnnouncementIds == null)
+                {
+                    settings.Notification.ReadAnnouncementIds = new List<string>();
+                }
+
+                foreach (var item in AnnouncementHistory)
+                {
+                    if (!settings.Notification.ReadAnnouncementIds.Contains(item.Id))
+                    {
+                        settings.Notification.ReadAnnouncementIds.Add(item.Id);
+                    }
+                    item.IsRead = true;
+                    item.IsNew = false;
+                }
+            }
+
+            SettingsManager.SaveSettingsToFile();
+            UnreadCountChanged?.Invoke();
+        }
+
+        private static bool IsRead(Settings settings, string announcementId)
+        {
+            return settings?.Notification?.ReadAnnouncementIds?.Contains(announcementId) == true;
         }
 
         private static AnnouncementCenterItem CloneAnnouncementCenterItem(AnnouncementCenterItem item)
@@ -56,7 +132,8 @@ namespace Ink_Canvas.Helpers
                 Content = item.Content,
                 ActionUrl = item.ActionUrl,
                 CreatedAt = item.CreatedAt,
-                IsRead = item.IsRead
+                IsRead = item.IsRead,
+                IsNew = item.IsNew
             };
         }
 
@@ -130,8 +207,7 @@ namespace Ink_Canvas.Helpers
                         var items = ParseAnnouncementItems(json);
                         foreach (var item in items)
                         {
-                            AddAnnouncementHistory(ToNotificationMessage(item), item.Id);
-                            if (ShouldShow(item)) EnqueueAnnouncement(item);
+                            AddAnnouncementHistory(ToNotificationMessage(item), item.Id, false);
                         }
                     }
                 }
@@ -242,14 +318,14 @@ namespace Ink_Canvas.Helpers
                     var message = JsonConvert.DeserializeObject<AnnouncementWebSocketMessage>(json);
                 if ((message?.Type == "announcement_message" || message?.Type == "announcement") && message.Data != null)
                 {
-                    if (ShouldShow(message.Data)) EnqueueAnnouncement(message.Data);
+                    if (ShouldShow(message.Data)) EnqueueAnnouncement(message.Data, true);
                     return;
                 }
 
                 var item = JsonConvert.DeserializeObject<AnnouncementItem>(json);
                 if (item != null && !string.IsNullOrWhiteSpace(item.Id) && ShouldShow(item))
                 {
-                    EnqueueAnnouncement(item);
+                    EnqueueAnnouncement(item, true);
                 }
             }
             catch (Exception ex)
@@ -339,14 +415,14 @@ namespace Ink_Canvas.Helpers
             return true;
         }
 
-        private void EnqueueAnnouncement(AnnouncementItem item)
+        private void EnqueueAnnouncement(AnnouncementItem item, bool isNew)
         {
             var message = ToNotificationMessage(item);
-            AddAnnouncementHistory(message, item.Id);
+            AddAnnouncementHistory(message, item.Id, isNew);
             NotificationCenterService.Enqueue(message);
         }
 
-        private void AddAnnouncementHistory(NotificationMessage message, string announcementId)
+        private void AddAnnouncementHistory(NotificationMessage message, string announcementId, bool isNew)
         {
             lock (HistorySyncRoot)
             {
@@ -361,10 +437,12 @@ namespace Ink_Canvas.Helpers
                     Content = message.Content,
                     ActionUrl = message.ActionUrl,
                     CreatedAt = message.CreatedAt,
-                    IsRead = settings.Notification.ReadAnnouncementIds?.Contains(announcementId) == true
+                    IsRead = IsRead(settings, announcementId),
+                    IsNew = isNew && !IsRead(settings, announcementId)
                 });
                 if (AnnouncementHistory.Count > 100) AnnouncementHistory.RemoveRange(100, AnnouncementHistory.Count - 100);
             }
+            UnreadCountChanged?.Invoke();
         }
 
         private NotificationMessage ToNotificationMessage(AnnouncementItem item)
@@ -464,12 +542,6 @@ namespace Ink_Canvas.Helpers
                 case "low": return NotificationMessageLevel.Low;
                 default: return NotificationMessageLevel.Normal;
             }
-        }
-
-        private bool IsImportant(AnnouncementItem item)
-        {
-            return string.Equals(item.AnnouncementType, "urgent", StringComparison.OrdinalIgnoreCase)
-                || MapLevel(item.Level, item.AnnouncementType) >= NotificationMessageLevel.High;
         }
 
         private int GetDefaultDisplaySeconds(NotificationMessageType type, NotificationMessageLevel level)

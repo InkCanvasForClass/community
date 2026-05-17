@@ -3338,6 +3338,9 @@
   <data name="Notification_ProviderRefresh" xml:space="preserve">
     <value>刷新状态</value>
   </data>
+  <data name="Announcement_MarkAllAsRead" xml:space="preserve">
+    <value>全部标记已读</value>
+  </data>
   <data name="Notification_Provider_Announcement" xml:space="preserve">
     <value>公告提供商</value>
   </data>
