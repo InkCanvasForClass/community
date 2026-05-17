@@ -110,11 +110,11 @@
                                 <Label Margin="0,0,10,0" Content="倍速" FontWeight="Bold"
                                        Foreground="{DynamicResource FloatBarForeground}"
                                        FontSize="17" VerticalAlignment="Center" />
-                                <Slider x:Name="_LaserPenFadeSpeedSlider" Minimum="0.5"
+                                <Slider x:Name="_LaserPenFadeSpeedSlider" Minimum="0.1"
                                         Maximum="5" Width="200"
                                         FontSize="20" IsSnapToTickEnabled="True"
                                         Value="1"
-                                        TickFrequency="0.5" TickPlacement="None" />
+                                        TickFrequency="0.1" TickPlacement="None" />
                                 <TextBlock x:Name="_LaserPenFadeSpeedText" Width="45" TextAlignment="Left"
                                            FontFamily="Consolas" VerticalAlignment="Center"
                                            Margin="10,0,0,0" FontSize="15" />

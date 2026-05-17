@@ -30,7 +30,7 @@ namespace Ink_Canvas.Helpers
 
         public double FadeSpeedMultiplier { get; set; } = 1.0;
 
-        public int AnimationDuration { get; set; } = 1000;
+        public int AnimationDuration { get; set; } = 2000;
         #endregion
 
         #region Private Fields
@@ -263,7 +263,7 @@ namespace Ink_Canvas.Helpers
         private int GetEffectiveAnimationDuration()
         {
             if (FadeSpeedMultiplier <= 0) FadeSpeedMultiplier = 1.0;
-            return Math.Max(50, (int)(AnimationDuration / FadeSpeedMultiplier));
+            return Math.Max(20, (int)(AnimationDuration / FadeSpeedMultiplier));
         }
 
 

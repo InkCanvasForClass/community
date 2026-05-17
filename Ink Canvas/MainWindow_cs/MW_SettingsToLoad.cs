@@ -709,9 +709,9 @@ namespace Ink_Canvas
                 if (BoardLaserPenFadeTimeSlider != null)
                     BoardLaserPenFadeTimeSlider.Value = Math.Max(1, Math.Min(15, Settings.Canvas.InkFadeTime / 1000));
                 if (LaserPenFadeSpeedSlider != null)
-                    LaserPenFadeSpeedSlider.Value = Math.Max(0.5, Math.Min(5, Settings.Canvas.InkFadeSpeedMultiplier));
+                    LaserPenFadeSpeedSlider.Value = Math.Max(0.1, Math.Min(5, Settings.Canvas.InkFadeSpeedMultiplier));
                 if (BoardLaserPenFadeSpeedSlider != null)
-                    BoardLaserPenFadeSpeedSlider.Value = Math.Max(0.5, Math.Min(5, Settings.Canvas.InkFadeSpeedMultiplier));
+                    BoardLaserPenFadeSpeedSlider.Value = Math.Max(0.1, Math.Min(5, Settings.Canvas.InkFadeSpeedMultiplier));
                 _isUpdatingSliders = false;
 
                 // 初始化滑块文本
