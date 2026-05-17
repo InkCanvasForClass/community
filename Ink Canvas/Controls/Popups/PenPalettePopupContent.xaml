@@ -47,8 +47,7 @@
                                                      IsOn="True" />
                                 </ikw:SimpleStackPanel>
                                 <ikw:SimpleStackPanel x:Name="_InkToShapePanel"
-                                                     Orientation="Horizontal"
-                                                     Width="100">
+                                                     Orientation="Horizontal">
                                     <Label Margin="0,0,10,0" Content="墨迹纠正"
                                            Foreground="{DynamicResource FloatBarForeground}"
                                            FontSize="12" VerticalAlignment="Center" />
@@ -56,7 +55,10 @@
                                                      Foreground="{DynamicResource FloatBarForeground}"
                                                      Width="80"
                                                      MinWidth="0" />
-                                    <Label Margin="10,0,10,0" Content="重叠加深"
+                                </ikw:SimpleStackPanel>
+                                <ikw:SimpleStackPanel x:Name="_HighlighterOverlapPanel"
+                                                     Orientation="Horizontal">
+                                    <Label Margin="0,0,10,0" Content="重叠加深"
                                            Foreground="{DynamicResource FloatBarForeground}"
                                            FontSize="12" VerticalAlignment="Center" />
                                     <ui:ToggleSwitch x:Name="ToggleSwitchHighlighterOverlap"
@@ -151,34 +153,23 @@
                                 <controls:PenColorButton x:Name="BorderPenColorOrange" Color="#ea580c" BorderBrushColor="#7c2d12" />
                             </ikw:SimpleStackPanel>
                         </ikw:SimpleStackPanel>
-                        <ikw:SimpleStackPanel x:Name="_HighlighterPenColorsPanel"
-                                 Margin="0,8,0,8">
-                            <Border Width="300"
-                                    BorderBrush="Black"
-                                    BorderThickness="0" CornerRadius="5">
-                                <primitives:UniformGrid Rows="2">
-                                    <ikw:SimpleStackPanel Orientation="Horizontal" Width="270">
-                                        <primitives:UniformGrid Columns="5"
-                                                             Width="270" Margin="0">
-                                            <controls:PenColorButton x:Name="_HighlighterPenColorBlack" Color="Black" BorderBrushColor="#e4e4e7" IsHighlighter="True" />
-                                            <controls:PenColorButton x:Name="_HighlighterPenColorWhite" Color="White" BorderBrushColor="#dddddd" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
-                                            <controls:PenColorButton x:Name="_HighlighterPenColorRed" Color="#ef4444" BorderBrushColor="#fecaca" IsHighlighter="True" />
-                                            <controls:PenColorButton x:Name="_HighlighterPenColorYellow" Color="#eab308" BorderBrushColor="#fef08a" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
-                                            <controls:PenColorButton x:Name="_HighlighterPenColorGreen" Color="#22c55e" BorderBrushColor="#bbf7d0" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
-                                        </primitives:UniformGrid>
-                                    </ikw:SimpleStackPanel>
-                                    <ikw:SimpleStackPanel Orientation="Horizontal" Width="270">
-                                        <primitives:UniformGrid Columns="5"
-                                                             Width="270" Margin="0">
-                                            <controls:PenColorButton x:Name="_HighlighterPenColorZinc" Color="#71717a" BorderBrushColor="#e4e4e7" IsHighlighter="True" />
-                                            <controls:PenColorButton x:Name="_HighlighterPenColorBlue" Color="#3b82f6" BorderBrushColor="#bfdbfe" IsHighlighter="True" />
-                                            <controls:PenColorButton x:Name="HighlighterPenPenColorPurple" Color="#a855f7" BorderBrushColor="#e9d5ff" IsHighlighter="True" />
-                                            <controls:PenColorButton x:Name="_HighlighterPenColorTeal" Color="#14b8a6" BorderBrushColor="#99f6e4" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
-                                            <controls:PenColorButton x:Name="_HighlighterPenColorOrange" Color="#f97316" BorderBrushColor="#fed7aa" IsHighlighter="True" />
-                                        </primitives:UniformGrid>
-                                    </ikw:SimpleStackPanel>
-                                </primitives:UniformGrid>
-                            </Border>
+                        <ikw:SimpleStackPanel x:Name="_HighlighterPenColorsPanel" Margin="0,0,0,8">
+                            <ikw:SimpleStackPanel Spacing="5" HorizontalAlignment="Center">
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+                                    <controls:PenColorButton x:Name="_HighlighterPenColorBlack" Color="Black" BorderBrushColor="#e4e4e7" IsHighlighter="True" />
+                                    <controls:PenColorButton x:Name="_HighlighterPenColorWhite" Color="White" BorderBrushColor="#dddddd" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
+                                    <controls:PenColorButton x:Name="_HighlighterPenColorRed" Color="#ef4444" BorderBrushColor="#fecaca" IsHighlighter="True" />
+                                    <controls:PenColorButton x:Name="_HighlighterPenColorYellow" Color="#eab308" BorderBrushColor="#fef08a" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
+                                    <controls:PenColorButton x:Name="_HighlighterPenColorGreen" Color="#22c55e" BorderBrushColor="#bbf7d0" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
+                                </ikw:SimpleStackPanel>
+                                <ikw:SimpleStackPanel Orientation="Horizontal"  Spacing="10">
+                                    <controls:PenColorButton x:Name="_HighlighterPenColorZinc" Color="#71717a" BorderBrushColor="#e4e4e7" IsHighlighter="True" />
+                                    <controls:PenColorButton x:Name="_HighlighterPenColorBlue" Color="#3b82f6" BorderBrushColor="#bfdbfe" IsHighlighter="True" />
+                                    <controls:PenColorButton x:Name="HighlighterPenPenColorPurple" Color="#a855f7" BorderBrushColor="#e9d5ff" IsHighlighter="True" />
+                                    <controls:PenColorButton x:Name="_HighlighterPenColorTeal" Color="#14b8a6" BorderBrushColor="#99f6e4" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
+                                    <controls:PenColorButton x:Name="_HighlighterPenColorOrange" Color="#f97316" BorderBrushColor="#fed7aa" IsHighlighter="True" />
+                                </ikw:SimpleStackPanel>
+                            </ikw:SimpleStackPanel>
                         </ikw:SimpleStackPanel>
                         <ikw:SimpleStackPanel x:Name="_LaserPenColorsPanel" HorizontalAlignment="Center" Spacing="5">
                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">

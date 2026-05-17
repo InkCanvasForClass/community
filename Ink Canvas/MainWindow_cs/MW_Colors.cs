@@ -672,7 +672,7 @@ namespace Ink_Canvas
                 LaserPenFadePanel.Visibility = Visibility.Collapsed;
                 LaserPenFadeSpeedPanel.Visibility = Visibility.Collapsed;
                 InkToShapePanel.Visibility = Visibility.Visible;
-                HighlighterOverlapPanel.Visibility = Visibility.Collapsed;
+                HighlighterOverlapPanel.Visibility = Visibility.Visible;
                 DefaultPenColorsPanel.Visibility = Visibility.Visible;
                 HighlighterPenColorsPanel.Visibility = Visibility.Collapsed;
                 LaserPenColorsPanel.Visibility = Visibility.Collapsed;
@@ -682,7 +682,7 @@ namespace Ink_Canvas
                 BoardLaserPenFadePanel.Visibility = Visibility.Collapsed;
                 BoardLaserPenFadeSpeedPanel.Visibility = Visibility.Collapsed;
                 BoardInkToShapePanel.Visibility = Visibility.Visible;
-                BoardHighlighterOverlapPanel.Visibility = Visibility.Collapsed;
+                BoardHighlighterOverlapPanel.Visibility = Visibility.Visible;
                 BoardDefaultPenColorsPanel.Visibility = Visibility.Visible;
                 BoardHighlighterPenColorsPanel.Visibility = Visibility.Collapsed;
                 BoardLaserPenColorsPanel.Visibility = Visibility.Collapsed;
@@ -694,6 +694,8 @@ namespace Ink_Canvas
                 if (BoardPenWidthSlider != null) BoardPenWidthSlider.Value = Settings.Canvas.InkWidth * 2;
                 if (BoardPenAlphaSlider != null) BoardPenAlphaSlider.Value = Settings.Canvas.InkAlpha;
                 _isUpdatingSliders = false;
+                if (HighlighterOverlapToggle != null) HighlighterOverlapToggle.IsOn = Settings.Canvas.HighlighterOverlapEnabled;
+                if (BoardHighlighterOverlapToggle != null) BoardHighlighterOverlapToggle.IsOn = Settings.Canvas.HighlighterOverlapEnabled;
 
                 await Dispatcher.InvokeAsync(() =>
                 {
@@ -744,7 +746,7 @@ namespace Ink_Canvas
                 LaserPenFadePanel.Visibility = Visibility.Visible;
                 LaserPenFadeSpeedPanel.Visibility = Visibility.Visible;
                 InkToShapePanel.Visibility = Visibility.Collapsed;
-                HighlighterOverlapPanel.Visibility = Visibility.Collapsed;
+                HighlighterOverlapPanel.Visibility = Visibility.Visible;
                 DefaultPenColorsPanel.Visibility = Visibility.Collapsed;
                 HighlighterPenColorsPanel.Visibility = Visibility.Collapsed;
                 LaserPenColorsPanel.Visibility = Visibility.Visible;
@@ -754,7 +756,7 @@ namespace Ink_Canvas
                 BoardLaserPenFadePanel.Visibility = Visibility.Visible;
                 BoardLaserPenFadeSpeedPanel.Visibility = Visibility.Visible;
                 BoardInkToShapePanel.Visibility = Visibility.Collapsed;
-                BoardHighlighterOverlapPanel.Visibility = Visibility.Collapsed;
+                BoardHighlighterOverlapPanel.Visibility = Visibility.Visible;
                 BoardDefaultPenColorsPanel.Visibility = Visibility.Collapsed;
                 BoardHighlighterPenColorsPanel.Visibility = Visibility.Collapsed;
                 BoardLaserPenColorsPanel.Visibility = Visibility.Visible;
@@ -766,6 +768,8 @@ namespace Ink_Canvas
                 if (BoardPenWidthSlider != null) BoardPenWidthSlider.Value = Settings.Canvas.LaserPenWidth;
                 if (BoardPenAlphaSlider != null) BoardPenAlphaSlider.Value = Settings.Canvas.LaserPenAlpha;
                 _isUpdatingSliders = false;
+                if (HighlighterOverlapToggle != null) HighlighterOverlapToggle.IsOn = Settings.Canvas.HighlighterOverlapEnabled;
+                if (BoardHighlighterOverlapToggle != null) BoardHighlighterOverlapToggle.IsOn = Settings.Canvas.HighlighterOverlapEnabled;
 
                 await Dispatcher.InvokeAsync(() =>
                 {
@@ -794,7 +798,7 @@ namespace Ink_Canvas
             drawingAttributes.Width = Settings.Canvas.InkWidth;
             drawingAttributes.Height = Settings.Canvas.InkWidth;
             drawingAttributes.StylusTip = StylusTip.Ellipse;
-            drawingAttributes.IsHighlighter = false;
+            drawingAttributes.IsHighlighter = !Settings.Canvas.HighlighterOverlapEnabled;
 
             Settings.Canvas.EnableInkFade = false;
             if (_inkFadeManager != null)
@@ -838,7 +842,7 @@ namespace Ink_Canvas
             drawingAttributes.Width = Settings.Canvas.LaserPenWidth;
             drawingAttributes.Height = Settings.Canvas.LaserPenWidth;
             drawingAttributes.StylusTip = StylusTip.Ellipse;
-            drawingAttributes.IsHighlighter = false;
+            drawingAttributes.IsHighlighter = !Settings.Canvas.HighlighterOverlapEnabled;
 
             Settings.Canvas.EnableInkFade = true;
             if (_inkFadeManager != null)
