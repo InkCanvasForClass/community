@@ -35,16 +35,11 @@
                 <TabControl x:Name="EraserTypeTabControl"
                             Style="{StaticResource {x:Static ui:ThemeKeys.TabControlPivotStyleKey}}"
                             SelectedIndex="0">
-                    <TabItem>
-                        <TabItem.Header>
-                            <TextBlock Text="{i18n:I18n Key=Board_EraserShape_Circle}" />
-                        </TabItem.Header>
-                    </TabItem>
-                    <TabItem>
-                        <TabItem.Header>
-                            <TextBlock Text="{i18n:I18n Key=Board_EraserShape_Blackboard}"/>
-                        </TabItem.Header>
-                    </TabItem>
+                    <TabControl.Resources>
+                        <sys:Double xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Key="PivotHeaderItemFontSize">12</sys:Double>
+                    </TabControl.Resources>
+                    <TabItem Header="{i18n:I18n Key=Board_EraserShape_Circle}" />
+                    <TabItem Header="{i18n:I18n Key=Board_EraserShape_Blackboard}" />
                 </TabControl>
                 <Button x:Name="ClearInkButton" Foreground="White"
                         HorizontalAlignment="Center" Margin="0,6,0,0"
