@@ -28,9 +28,8 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public int FadeTime { get; set; } = 3000;
 
-        /// <summary>
-        /// 渐隐动画持续时间（毫秒）
-        /// </summary>
+        public double FadeSpeedMultiplier { get; set; } = 1.0;
+
         public int AnimationDuration { get; set; } = 1000;
         #endregion
 
@@ -256,6 +255,17 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        public void UpdateFadeSpeedMultiplier(double multiplier)
+        {
+            FadeSpeedMultiplier = multiplier;
+        }
+
+        private int GetEffectiveAnimationDuration()
+        {
+            if (FadeSpeedMultiplier <= 0) FadeSpeedMultiplier = 1.0;
+            return Math.Max(50, (int)(AnimationDuration / FadeSpeedMultiplier));
+        }
+
 
 
         /// <summary>
@@ -369,7 +379,7 @@ namespace Ink_Canvas.Helpers
 
                     if (isHighlighter)
                     {
-                        StartUnifiedFadeAnimation(visual, stroke, currentOpacity, AnimationDuration);
+                        StartUnifiedFadeAnimation(visual, stroke, currentOpacity, GetEffectiveAnimationDuration());
                     }
                     else
                     {
@@ -390,7 +400,7 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                StartProgressiveFadeAnimation(visual, stroke, currentOpacity, AnimationDuration);
+                StartProgressiveFadeAnimation(visual, stroke, currentOpacity, GetEffectiveAnimationDuration());
             }
             catch (Exception ex)
             {
@@ -457,7 +467,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 // 高亮笔使用统一的渐隐动画，与擦除效果一致
-                StartUnifiedFadeAnimation(visual, stroke, currentOpacity, (int)(AnimationDuration * 1.2));
+                StartUnifiedFadeAnimation(visual, stroke, currentOpacity, (int)(GetEffectiveAnimationDuration() * 1.2));
             }
             catch (Exception ex)
             {

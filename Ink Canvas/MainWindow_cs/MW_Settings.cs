@@ -539,8 +539,16 @@ namespace Ink_Canvas
         }
 
 
+        private void UpdateSliderText(Slider slider, TextBlock textBlock, string format)
+        {
+            if (slider == null || textBlock == null) return;
+            textBlock.Text = string.Format(format, slider.Value);
+        }
+
         private void PenWidthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            UpdateSliderText(PenWidthSlider, PenWidthText, "{0:0.0}");
+            UpdateSliderText(BoardPenWidthSlider, BoardPenWidthText, "{0:0.0}");
             if (!isLoaded) return;
             if (_isUpdatingSliders) return;
 
@@ -580,6 +588,8 @@ namespace Ink_Canvas
         /// </remarks>
         private void PenAlphaSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            UpdateSliderText(PenAlphaSlider, PenAlphaText, "{0:0}");
+            UpdateSliderText(BoardPenAlphaSlider, BoardPenAlphaText, "{0:0}");
             if (!isLoaded) return;
             if (_isUpdatingSliders) return;
 
@@ -612,12 +622,29 @@ namespace Ink_Canvas
 
         private void LaserPenFadeTimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            UpdateSliderText(LaserPenFadeTimeSlider, LaserPenFadeTimeText, "{0:0}s");
+            UpdateSliderText(BoardLaserPenFadeTimeSlider, BoardLaserPenFadeTimeText, "{0:0}s");
             if (!isLoaded) return;
             if (_isUpdatingSliders) return;
             Settings.Canvas.InkFadeTime = (int)((Slider)sender).Value * 1000;
             if (_inkFadeManager != null)
             {
                 _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
+            }
+            SaveSettingsToFile();
+        }
+
+        private void LaserPenFadeSpeedSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            UpdateSliderText(LaserPenFadeSpeedSlider, LaserPenFadeSpeedText, "{0:0.0}x");
+            UpdateSliderText(BoardLaserPenFadeSpeedSlider, BoardLaserPenFadeSpeedText, "{0:0.0}x");
+            if (!isLoaded) return;
+            if (_isUpdatingSliders) return;
+            var val = Math.Round(((Slider)sender).Value, 1);
+            Settings.Canvas.InkFadeSpeedMultiplier = val;
+            if (_inkFadeManager != null)
+            {
+                _inkFadeManager.UpdateFadeSpeedMultiplier(val);
             }
             SaveSettingsToFile();
         }

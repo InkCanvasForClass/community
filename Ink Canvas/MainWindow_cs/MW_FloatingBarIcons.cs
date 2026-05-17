@@ -3055,6 +3055,7 @@ namespace Ink_Canvas
                     {
                         _inkFadeManager.IsEnabled = true;
                         _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
+                        _inkFadeManager.UpdateFadeSpeedMultiplier(Settings.Canvas.InkFadeSpeedMultiplier);
                     }
                 }
 
@@ -3099,6 +3100,7 @@ namespace Ink_Canvas
                             {
                                 _inkFadeManager.IsEnabled = true;
                                 _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
+                                _inkFadeManager.UpdateFadeSpeedMultiplier(Settings.Canvas.InkFadeSpeedMultiplier);
                             }
                         }
 
@@ -3174,6 +3176,7 @@ namespace Ink_Canvas
                         {
                             _inkFadeManager.IsEnabled = true;
                             _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
+                            _inkFadeManager.UpdateFadeSpeedMultiplier(Settings.Canvas.InkFadeSpeedMultiplier);
                         }
                     }
 

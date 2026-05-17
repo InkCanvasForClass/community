@@ -700,6 +700,7 @@ namespace Ink_Canvas
                 {
                     _inkFadeManager.IsEnabled = Settings.Canvas.EnableInkFade;
                     _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
+                    _inkFadeManager.UpdateFadeSpeedMultiplier(Settings.Canvas.InkFadeSpeedMultiplier);
                 }
 
                 _isUpdatingSliders = true;
@@ -707,7 +708,21 @@ namespace Ink_Canvas
                     LaserPenFadeTimeSlider.Value = Math.Max(1, Math.Min(15, Settings.Canvas.InkFadeTime / 1000));
                 if (BoardLaserPenFadeTimeSlider != null)
                     BoardLaserPenFadeTimeSlider.Value = Math.Max(1, Math.Min(15, Settings.Canvas.InkFadeTime / 1000));
+                if (LaserPenFadeSpeedSlider != null)
+                    LaserPenFadeSpeedSlider.Value = Math.Max(0.5, Math.Min(5, Settings.Canvas.InkFadeSpeedMultiplier));
+                if (BoardLaserPenFadeSpeedSlider != null)
+                    BoardLaserPenFadeSpeedSlider.Value = Math.Max(0.5, Math.Min(5, Settings.Canvas.InkFadeSpeedMultiplier));
                 _isUpdatingSliders = false;
+
+                // 初始化滑块文本
+                UpdateSliderText(PenWidthSlider, PenWidthText, "{0:0.0}");
+                UpdateSliderText(BoardPenWidthSlider, BoardPenWidthText, "{0:0.0}");
+                UpdateSliderText(PenAlphaSlider, PenAlphaText, "{0:0}");
+                UpdateSliderText(BoardPenAlphaSlider, BoardPenAlphaText, "{0:0}");
+                UpdateSliderText(LaserPenFadeTimeSlider, LaserPenFadeTimeText, "{0:0}s");
+                UpdateSliderText(BoardLaserPenFadeTimeSlider, BoardLaserPenFadeTimeText, "{0:0}s");
+                UpdateSliderText(LaserPenFadeSpeedSlider, LaserPenFadeSpeedText, "{0:0.0}x");
+                UpdateSliderText(BoardLaserPenFadeSpeedSlider, BoardLaserPenFadeSpeedText, "{0:0.0}x");
                 if (HighlighterOverlapToggle != null)
                     HighlighterOverlapToggle.IsOn = Settings.Canvas.HighlighterOverlapEnabled;
                 if (BoardHighlighterOverlapToggle != null)

@@ -245,6 +245,7 @@ namespace Ink_Canvas
             content.PenWidthSlider.ValueChanged += PenWidthSlider_ValueChanged;
             content.PenAlphaSlider.ValueChanged += PenAlphaSlider_ValueChanged;
             content.LaserPenFadeTimeSlider.ValueChanged += LaserPenFadeTimeSlider_ValueChanged;
+            content.LaserPenFadeSpeedSlider.ValueChanged += LaserPenFadeSpeedSlider_ValueChanged;
             content.HighlighterOverlapToggle.Toggled += HighlighterOverlapToggle_Toggled;
 
             content.TabBar.SelectedIndexChanged += (s, idx) =>

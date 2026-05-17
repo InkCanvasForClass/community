@@ -18,6 +18,7 @@ namespace Ink_Canvas.Controls
 
         public FrameworkElement CommonPropsPanel { get; }
         public FrameworkElement LaserPenFadePanel { get; }
+        public FrameworkElement LaserPenFadeSpeedPanel { get; }
         public FrameworkElement InkToShapePanel { get; }
         public FrameworkElement HighlighterOverlapPanel { get; }
         public FrameworkElement DefaultPenColorsPanel { get; }
@@ -30,6 +31,11 @@ namespace Ink_Canvas.Controls
         public Slider PenWidthSlider { get; }
         public Slider PenAlphaSlider { get; }
         public Slider LaserPenFadeTimeSlider { get; }
+        public Slider LaserPenFadeSpeedSlider { get; }
+        public TextBlock PenWidthText { get; }
+        public TextBlock PenAlphaText { get; }
+        public TextBlock LaserPenFadeTimeText { get; }
+        public TextBlock LaserPenFadeSpeedText { get; }
         public ToggleSwitch HighlighterOverlapToggle => ToggleSwitchHighlighterOverlap;
 
         public Border ColorThemeSwitch { get; }
@@ -105,6 +111,7 @@ namespace Ink_Canvas.Controls
 
             CommonPropsPanel = (FrameworkElement)FindName("_CommonPropsPanel");
             LaserPenFadePanel = (FrameworkElement)FindName("_LaserPenFadePanel");
+            LaserPenFadeSpeedPanel = (FrameworkElement)FindName("_LaserPenFadeSpeedPanel");
             InkToShapePanel = (FrameworkElement)FindName("_InkToShapePanel");
             HighlighterOverlapPanel = (FrameworkElement)FindName("_HighlighterOverlapPanel");
             DefaultPenColorsPanel = (FrameworkElement)FindName("_DefaultPenColorsPanel");
@@ -113,6 +120,11 @@ namespace Ink_Canvas.Controls
             PenWidthSlider = (Slider)FindName("_PenWidthSlider");
             PenAlphaSlider = (Slider)FindName("_PenAlphaSlider");
             LaserPenFadeTimeSlider = (Slider)FindName("_LaserPenFadeTimeSlider");
+            LaserPenFadeSpeedSlider = (Slider)FindName("_LaserPenFadeSpeedSlider");
+            PenWidthText = (TextBlock)FindName("_PenWidthText");
+            PenAlphaText = (TextBlock)FindName("_PenAlphaText");
+            LaserPenFadeTimeText = (TextBlock)FindName("_LaserPenFadeTimeText");
+            LaserPenFadeSpeedText = (TextBlock)FindName("_LaserPenFadeSpeedText");
             ColorThemeSwitch = (Border)FindName("_ColorThemeSwitch");
             ColorThemeSwitchIcon = (Image)FindName("_ColorThemeSwitchIcon");
             LaserPenColorThemeSwitch = (Border)FindName("_LaserPenColorThemeSwitch");
@@ -141,6 +153,7 @@ namespace Ink_Canvas.Controls
         {
             CommonPropsPanel.Visibility = Visibility.Visible;
             LaserPenFadePanel.Visibility = Visibility.Collapsed;
+            LaserPenFadeSpeedPanel.Visibility = Visibility.Collapsed;
             InkToShapePanel.Visibility = Visibility.Visible;
             HighlighterOverlapPanel.Visibility = Visibility.Collapsed;
             DefaultPenColorsPanel.Visibility = Visibility.Visible;
@@ -152,6 +165,7 @@ namespace Ink_Canvas.Controls
         {
             CommonPropsPanel.Visibility = Visibility.Visible;
             LaserPenFadePanel.Visibility = Visibility.Collapsed;
+            LaserPenFadeSpeedPanel.Visibility = Visibility.Collapsed;
             InkToShapePanel.Visibility = Visibility.Visible;
             HighlighterOverlapPanel.Visibility = Visibility.Visible;
             DefaultPenColorsPanel.Visibility = Visibility.Collapsed;
@@ -163,6 +177,7 @@ namespace Ink_Canvas.Controls
         {
             CommonPropsPanel.Visibility = Visibility.Visible;
             LaserPenFadePanel.Visibility = Visibility.Visible;
+            LaserPenFadeSpeedPanel.Visibility = Visibility.Visible;
             InkToShapePanel.Visibility = Visibility.Collapsed;
             HighlighterOverlapPanel.Visibility = Visibility.Collapsed;
             DefaultPenColorsPanel.Visibility = Visibility.Collapsed;

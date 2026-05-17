@@ -67,8 +67,7 @@
                                         FontSize="20" IsSnapToTickEnabled="True"
                                         Value="5"
                                         TickFrequency="0.1" TickPlacement="None" />
-                                <TextBlock Width="45" TextAlignment="Left"
-                                           Text="{Binding Value, ElementName=_PenWidthSlider, Mode=OneWay, StringFormat={}{0:0.0}}"
+                                <TextBlock x:Name="_PenWidthText" Width="45" TextAlignment="Left"
                                            FontFamily="Consolas" VerticalAlignment="Center"
                                            Margin="10,0,0,0" FontSize="15" />
                             </StackPanel>
@@ -81,8 +80,7 @@
                                         FontSize="20"
                                         IsSnapToTickEnabled="True" Value="255"
                                         TickFrequency="1" TickPlacement="None" />
-                                <TextBlock Width="45" TextAlignment="Left"
-                                           Text="{Binding Value, ElementName=_PenAlphaSlider, Mode=OneWay, StringFormat={}{0:0}}"
+                                <TextBlock x:Name="_PenAlphaText" Width="45" TextAlignment="Left"
                                            FontFamily="Consolas" VerticalAlignment="Center"
                                            Margin="10,0,0,0" FontSize="15" />
                             </StackPanel>
@@ -95,7 +93,7 @@
                                                  Foreground="{DynamicResource FloatBarForeground}"
                                                  MinWidth="0" Width="80" />
                             </ikw:SimpleStackPanel>
-                            <StackPanel x:Name="_LaserPenFadePanel" Orientation="Horizontal" Visibility="Collapsed">
+                            <StackPanel x:Name="_LaserPenFadePanel" Orientation="Horizontal" Visibility="Collapsed" Margin="0,0,0,8">
                                 <Label Margin="0,0,10,0" Content="渐隐" FontWeight="Bold"
                                        Foreground="{DynamicResource FloatBarForeground}"
                                        FontSize="17" VerticalAlignment="Center" />
@@ -104,8 +102,20 @@
                                         FontSize="20" IsSnapToTickEnabled="True"
                                         Value="3"
                                         TickFrequency="1" TickPlacement="None" />
-                                <TextBlock Width="45" TextAlignment="Left"
-                                           Text="{Binding Value, ElementName=_LaserPenFadeTimeSlider, Mode=OneWay, StringFormat={}{0:0}s}"
+                                <TextBlock x:Name="_LaserPenFadeTimeText" Width="45" TextAlignment="Left"
+                                           FontFamily="Consolas" VerticalAlignment="Center"
+                                           Margin="10,0,0,0" FontSize="15" />
+                            </StackPanel>
+                            <StackPanel x:Name="_LaserPenFadeSpeedPanel" Orientation="Horizontal" Visibility="Collapsed" Margin="0,0,0,8">
+                                <Label Margin="0,0,10,0" Content="倍速" FontWeight="Bold"
+                                       Foreground="{DynamicResource FloatBarForeground}"
+                                       FontSize="17" VerticalAlignment="Center" />
+                                <Slider x:Name="_LaserPenFadeSpeedSlider" Minimum="0.5"
+                                        Maximum="5" Width="200"
+                                        FontSize="20" IsSnapToTickEnabled="True"
+                                        Value="1"
+                                        TickFrequency="0.5" TickPlacement="None" />
+                                <TextBlock x:Name="_LaserPenFadeSpeedText" Width="45" TextAlignment="Left"
                                            FontFamily="Consolas" VerticalAlignment="Center"
                                            Margin="10,0,0,0" FontSize="15" />
                             </StackPanel>

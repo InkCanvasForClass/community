@@ -211,6 +211,8 @@ namespace Ink_Canvas
         public bool EnableInkFade { get; set; } = false;
         [JsonProperty("inkFadeTime")]
         public int InkFadeTime { get; set; } = 3000;
+        [JsonProperty("inkFadeSpeedMultiplier")]
+        public double InkFadeSpeedMultiplier { get; set; } = 1.0;
         [JsonProperty("laserPenWidth")]
         public double LaserPenWidth { get; set; } = 5;
         [JsonProperty("laserPenAlpha")]
