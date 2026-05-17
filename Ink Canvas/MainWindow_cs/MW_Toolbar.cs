@@ -221,18 +221,8 @@ namespace Ink_Canvas
         #region Eraser property mappings
         internal ComboBox ComboBoxEraserSizeFloatingBar => EraserPopupContent?.EraserSizeComboBox ?? BoardEraserPopupContent?.EraserSizeComboBox;
         internal ComboBox BoardComboBoxEraserSize => BoardEraserPopupContent?.EraserSizeComboBox;
-        internal Border CircleEraserTabButton => EraserPopupContent?.CircleTab ?? BoardEraserPopupContent?.CircleTab;
-        internal Border RectangleEraserTabButton => EraserPopupContent?.RectangleTab ?? BoardEraserPopupContent?.RectangleTab;
-        internal FrameworkElement CircleEraserTabButtonIndicator => EraserPopupContent?.CircleTabIndicator ?? BoardEraserPopupContent?.CircleTabIndicator;
-        internal FrameworkElement RectangleEraserTabButtonIndicator => EraserPopupContent?.RectangleTabIndicator ?? BoardEraserPopupContent?.RectangleTabIndicator;
-        internal TextBlock CircleEraserTabButtonText => EraserPopupContent?.CircleTabText ?? BoardEraserPopupContent?.CircleTabText;
-        internal TextBlock RectangleEraserTabButtonText => EraserPopupContent?.RectangleTabText ?? BoardEraserPopupContent?.RectangleTabText;
-        internal Border BoardCircleEraserTabButton => BoardEraserPopupContent?.CircleTab;
-        internal Border BoardRectangleEraserTabButton => BoardEraserPopupContent?.RectangleTab;
-        internal FrameworkElement BoardCircleEraserTabButtonIndicator => BoardEraserPopupContent?.CircleTabIndicator;
-        internal FrameworkElement BoardRectangleEraserTabButtonIndicator => BoardEraserPopupContent?.RectangleTabIndicator;
-        internal TextBlock BoardCircleEraserTabButtonText => BoardEraserPopupContent?.CircleTabText;
-        internal TextBlock BoardRectangleEraserTabButtonText => BoardEraserPopupContent?.RectangleTabText;
+        internal TabControl EraserTypeTab => EraserPopupContent?.EraserTypeTab ?? BoardEraserPopupContent?.EraserTypeTab;
+        internal TabControl BoardEraserTypeTab => BoardEraserPopupContent?.EraserTypeTab;
         #endregion
 
         #region Gesture property mappings

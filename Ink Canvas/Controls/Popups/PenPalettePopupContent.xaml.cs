@@ -8,12 +8,12 @@ namespace Ink_Canvas.Controls
 {
     public partial class PenPalettePopupContent : UserControl
     {
-        public PopupTabTitleBar TabBar => TabTitleBar;
+        public PopupTabTitleBar TabBar => Shell.TabBar;
 
         public int SelectedTabIndex
         {
-            get => TabTitleBar.SelectedIndex;
-            set => TabTitleBar.SelectedIndex = value;
+            get => Shell.SelectedTabIndex;
+            set => Shell.SelectedTabIndex = value;
         }
 
         public FrameworkElement CommonPropsPanel { get; }
@@ -76,7 +76,7 @@ namespace Ink_Canvas.Controls
         public PenColorButton LaserPenColorTeal { get; }
         public PenColorButton LaserPenColorOrange { get; }
 
-        public Button CloseButtonControl => TabTitleBar?.CloseButtonControl;
+        public Button CloseButtonControl => Shell?.CloseButtonControl;
 
         public FrameworkElement NibModePanel => NibModeSimpleStackPanel;
 
@@ -84,23 +84,25 @@ namespace Ink_Canvas.Controls
         {
             InitializeComponent();
 
-            TabTitleBar.Tabs.Add(new PopupTabItem
+            Shell.InnerContent = InnerContentHost.Content;
+
+            Shell.TabBar.Tabs.Add(new PopupTabItem
             {
                 Header = Strings.GetString("Board_Pen") ?? "Pen"
             });
-            TabTitleBar.Tabs.Add(new PopupTabItem
+            Shell.TabBar.Tabs.Add(new PopupTabItem
             {
                 Header = Strings.GetString("Board_Highlighter") ?? "Highlighter"
             });
-            TabTitleBar.Tabs.Add(new PopupTabItem
+            Shell.TabBar.Tabs.Add(new PopupTabItem
             {
                 Header = Strings.GetString("Board_LaserPen") ?? "Laser Pen"
             });
-            TabTitleBar.SelectedIndex = 0;
+            Shell.TabBar.SelectedIndex = 0;
 
-            TabTitleBar.SelectedIndexChanged += (s, index) =>
+            Shell.TabBar.SelectedIndexChanged += (s, index) =>
             {
-                if (index < 0 || index >= TabTitleBar.Tabs.Count) return;
+                if (index < 0 || index >= Shell.TabBar.Tabs.Count) return;
                 if (index == 0)
                     ShowDefaultPenPanels();
                 else if (index == 1)
@@ -155,7 +157,7 @@ namespace Ink_Canvas.Controls
             LaserPenFadePanel.Visibility = Visibility.Collapsed;
             LaserPenFadeSpeedPanel.Visibility = Visibility.Collapsed;
             InkToShapePanel.Visibility = Visibility.Visible;
-            HighlighterOverlapPanel.Visibility = Visibility.Collapsed;
+            HighlighterOverlapPanel.Visibility = Visibility.Visible;
             DefaultPenColorsPanel.Visibility = Visibility.Visible;
             HighlighterPenColorsPanel.Visibility = Visibility.Collapsed;
             LaserPenColorsPanel.Visibility = Visibility.Collapsed;
@@ -179,7 +181,7 @@ namespace Ink_Canvas.Controls
             LaserPenFadePanel.Visibility = Visibility.Visible;
             LaserPenFadeSpeedPanel.Visibility = Visibility.Visible;
             InkToShapePanel.Visibility = Visibility.Collapsed;
-            HighlighterOverlapPanel.Visibility = Visibility.Collapsed;
+            HighlighterOverlapPanel.Visibility = Visibility.Visible;
             DefaultPenColorsPanel.Visibility = Visibility.Collapsed;
             HighlighterPenColorsPanel.Visibility = Visibility.Collapsed;
             LaserPenColorsPanel.Visibility = Visibility.Visible;
@@ -187,19 +189,19 @@ namespace Ink_Canvas.Controls
 
         public void SwitchToDefaultPen()
         {
-            TabTitleBar.SelectedIndex = 0;
+            Shell.TabBar.SelectedIndex = 0;
             ShowDefaultPenPanels();
         }
 
         public void SwitchToHighlighterPen()
         {
-            TabTitleBar.SelectedIndex = 1;
+            Shell.TabBar.SelectedIndex = 1;
             ShowHighlighterPenPanels();
         }
 
         public void SwitchToLaserPen()
         {
-            TabTitleBar.SelectedIndex = 2;
+            Shell.TabBar.SelectedIndex = 2;
             ShowLaserPenPanels();
         }
     }

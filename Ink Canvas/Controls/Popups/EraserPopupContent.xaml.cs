@@ -23,15 +23,9 @@ namespace Ink_Canvas.Controls
         }
 
         public ComboBox EraserSizeComboBox => ComboBoxEraserSize;
-        public Border CircleTab => CircleEraserTabButton;
-        public Border RectangleTab => RectangleEraserTabButton;
+        public TabControl EraserTypeTab => EraserTypeTabControl;
         public Button ClearInkBtn => ClearInkButton;
         public Button ClearInkAndHistoryBtn => ClearInkAndHistoryButton;
-
-        public TextBlock CircleTabText => CircleEraserTabButtonText;
-        public TextBlock RectangleTabText => RectangleEraserTabButtonText;
-        public FrameworkElement CircleTabIndicator => CircleEraserTabButtonIndicator;
-        public FrameworkElement RectangleTabIndicator => RectangleEraserTabButtonIndicator;
 
         public Button CloseButtonControl => Shell?.CloseButtonControl;
 

@@ -13,7 +13,7 @@
         <c:StringToGeometryConverter x:Key="StringToGeometryConverter" />
     </UserControl.Resources>
     <Grid>
-        <controls:PopupShellContent x:Name="Shell" Title="{i18n:I18n Key=Board_SelectImage}" d:Visibility="Collapsed" />
+        <controls:PopupShellContent x:Name="Shell" Title="{i18n:I18n Key=Board_SelectImage}"/>
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
             <ikw:SimpleStackPanel Margin="4" Spacing="2">
                 <Border x:Name="_ScreenshotOption" Background="Transparent" CornerRadius="3" Padding="6,4">

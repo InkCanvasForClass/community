@@ -508,34 +508,18 @@ namespace Ink_Canvas
 
 
 
-        private void SwitchToCircleEraser(object sender, MouseButtonEventArgs e)
+        private void EraserTypeTab_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Canvas.EraserShapeType = 0;
-            SaveSettingsToFile();
-            CheckEraserTypeTab();
-
-            // 使用新的高级橡皮擦形状应用方法
-            ApplyAdvancedEraserShape();
-
-            // 确保当前处于橡皮擦模式时能立即看到效果
-            inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-            inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
-        }
-
-        private void SwitchToRectangleEraser(object sender, MouseButtonEventArgs e)
-        {
-            if (!isLoaded) return;
-            Settings.Canvas.EraserShapeType = 1;
-            SaveSettingsToFile();
-            CheckEraserTypeTab();
-
-            // 使用新的高级橡皮擦形状应用方法
-            ApplyAdvancedEraserShape();
-
-            // 确保当前处于橡皮擦模式时能立即看到效果
-            inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-            inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
+            if (sender is TabControl tabControl)
+            {
+                Settings.Canvas.EraserShapeType = tabControl.SelectedIndex;
+                SaveSettingsToFile();
+                CheckEraserTypeTab();
+                ApplyAdvancedEraserShape();
+                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
+            }
         }
 
 

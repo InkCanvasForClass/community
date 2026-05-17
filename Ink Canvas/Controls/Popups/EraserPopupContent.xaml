@@ -12,94 +12,40 @@
              mc:Ignorable="d">
     <UserControl.Resources>
         <c:StringToGeometryConverter x:Key="StringToGeometryConverter" />
-        <Style x:Key="AutoFitFloatBarLabel9" TargetType="TextBlock">
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="TextAlignment" Value="Center" />
-            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-            <Setter Property="Foreground" Value="{DynamicResource FloatBarForeground}" />
-            <Setter Property="FontWeight" Value="Medium" />
-        </Style>
     </UserControl.Resources>
     <Grid>
         <controls:PopupShellContent x:Name="Shell" Title="{i18n:I18n Key=Board_EraserOptions}" d:Visibility="Collapsed" />
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
-            <ikw:SimpleStackPanel Margin="4">
-                <ikw:SimpleStackPanel Orientation="Horizontal" Margin="0,4,0,0" Spacing="2"
+            <ikw:SimpleStackPanel Margin="10">
+                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="2"
                                      VerticalAlignment="Center"
                                      HorizontalAlignment="Center">
-                    <Label Margin="0,0,0,0" Content="{i18n:I18n Key=Board_Size}" FontWeight="Bold"
-                           Foreground="{DynamicResource FloatBarForeground}" FontSize="10"
+                    <Label Content="{i18n:I18n Key=Board_Size}" FontWeight="Bold"
+                           Foreground="{DynamicResource FloatBarForeground}" FontSize="16"
                            VerticalAlignment="Center" />
-                    <Viewbox Margin="8,0,0,0" Height="20" Width="52">
-                        <ComboBox x:Name="ComboBoxEraserSize"
+                    <ComboBox x:Name="ComboBoxEraserSize"
                                   SelectedIndex="2">
-                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_VerySmall}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_Small}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_Medium}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_Large}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_VeryLarge}" />
-                        </ComboBox>
-                    </Viewbox>
+                        <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_VerySmall}" />
+                        <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_Small}" />
+                        <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_Medium}" />
+                        <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_Large}" />
+                        <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_VeryLarge}" />
+                    </ComboBox>
                 </ikw:SimpleStackPanel>
-                <TextBlock HorizontalAlignment="Center" Margin="0,10,0,6"
-                           Text="{i18n:I18n Key=Board_EraserShape}"
-                           FontWeight="Bold"
-                           Foreground="{DynamicResource FloatBarForeground}"
-                           FontSize="10" VerticalAlignment="Center" />
-                <ikw:SimpleStackPanel Orientation="Horizontal"
-                                     HorizontalAlignment="Center"
-                                     Margin="0,0,0,0" Spacing="4">
-                    <Border x:Name="CircleEraserTabButton"
-                            Background="#48dbeafe" Height="20" Width="40"
-                            CornerRadius="3">
-                        <Canvas>
-                            <ikw:SimpleStackPanel x:Name="CircleEraserTabButtonIndicator"
-                                                 Visibility="Visible" Orientation="Horizontal"
-                                                 Canvas.Left="11" Canvas.Right="11"
-                                                 Canvas.Bottom="0">
-                                <Border Width="18" Height="2"
-                                        Background="{DynamicResource FloatBarBackground}"
-                                        CornerRadius="1" />
-                            </ikw:SimpleStackPanel>
-                            <ikw:SimpleStackPanel Orientation="Vertical" Height="20" Width="40">
-                                <ikw:SimpleStackPanel VerticalAlignment="Center"
-                                                     Orientation="Horizontal"
-                                                     HorizontalAlignment="Center" Margin="0,3">
-                                    <TextBlock x:Name="CircleEraserTabButtonText"
-                                               Foreground="{DynamicResource FloatBarForeground}" FontWeight="Medium"
-                                               FontSize="9" TextAlignment="Center"
-                                               Text="{i18n:I18n Key=Board_EraserShape_Circle}"
-                                               Style="{StaticResource AutoFitFloatBarLabel9}" />
-                                </ikw:SimpleStackPanel>
-                            </ikw:SimpleStackPanel>
-                        </Canvas>
-                    </Border>
-                    <Border x:Name="RectangleEraserTabButton"
-                            Background="Transparent"
-                            Height="20" Width="40" CornerRadius="3">
-                        <Canvas>
-                            <ikw:SimpleStackPanel Visibility="Collapsed"
-                                                 x:Name="RectangleEraserTabButtonIndicator"
-                                                 Orientation="Horizontal" Canvas.Left="11"
-                                                 Canvas.Right="11" Canvas.Bottom="0">
-                                <Border Width="18" Height="2"
-                                        Background="{DynamicResource FloatBarBackground}"
-                                        CornerRadius="1" />
-                            </ikw:SimpleStackPanel>
-                            <ikw:SimpleStackPanel Orientation="Vertical" Height="20" Width="40">
-                                <ikw:SimpleStackPanel VerticalAlignment="Center"
-                                                     Orientation="Horizontal"
-                                                     HorizontalAlignment="Center" Margin="0,3">
-                                    <TextBlock x:Name="RectangleEraserTabButtonText"
-                                               Foreground="{DynamicResource FloatBarForeground}" FontWeight="Medium"
-                                               FontSize="9" TextAlignment="Center"
-                                               Text="{i18n:I18n Key=Board_EraserShape_Blackboard}"
-                                               Style="{StaticResource AutoFitFloatBarLabel9}" />
-                                </ikw:SimpleStackPanel>
-                            </ikw:SimpleStackPanel>
-                        </Canvas>
-                    </Border>
-                </ikw:SimpleStackPanel>
+                <TabControl x:Name="EraserTypeTabControl"
+                            Style="{StaticResource {x:Static ui:ThemeKeys.TabControlPivotStyleKey}}"
+                            SelectedIndex="0">
+                    <TabItem>
+                        <TabItem.Header>
+                            <TextBlock Text="{i18n:I18n Key=Board_EraserShape_Circle}" />
+                        </TabItem.Header>
+                    </TabItem>
+                    <TabItem>
+                        <TabItem.Header>
+                            <TextBlock Text="{i18n:I18n Key=Board_EraserShape_Blackboard}"/>
+                        </TabItem.Header>
+                    </TabItem>
+                </TabControl>
                 <Button x:Name="ClearInkButton" Foreground="White"
                         HorizontalAlignment="Center" Margin="0,6,0,0"
                         MinHeight="28" Padding="12,4">

@@ -305,8 +305,7 @@ namespace Ink_Canvas
             if (content == null) return;
 
             content.EraserSizeComboBox.SelectionChanged += ComboBoxEraserSizeFloatingBar_SelectionChanged;
-            content.CircleTab.MouseUp += SwitchToCircleEraser;
-            content.RectangleTab.MouseUp += SwitchToRectangleEraser;
+            content.EraserTypeTab.SelectionChanged += EraserTypeTab_SelectionChanged;
             content.ClearInkBtn.Click += EraserPanelSymbolIconDelete_MouseUp;
             content.ClearInkAndHistoryBtn.Click += BoardSymbolIconDeleteInkAndHistories_MouseUp;
             content.CloseButtonControl.Click += CloseBordertools_Click;
