@@ -1,5 +1,6 @@
 using Ink_Canvas.Controls.Toolbar;
 using Newtonsoft.Json;
+using OSVersionExtension;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -850,7 +851,7 @@ namespace Ink_Canvas
         public bool IsSecondConfirmWhenShutdownApp { get; set; }
 
         [JsonProperty("isEnableAvoidFullScreenHelper")]
-        public bool IsEnableAvoidFullScreenHelper { get; set; } = true;
+        public bool IsEnableAvoidFullScreenHelper { get; set; } = OSVersion.GetOperatingSystem() >= OSVersionExtension.OperatingSystem.Windows11;
 
         [JsonProperty("isAutoBackupBeforeUpdate")]
         public bool IsAutoBackupBeforeUpdate { get; set; } = true;

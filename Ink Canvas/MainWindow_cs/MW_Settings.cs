@@ -1,6 +1,7 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
+using OSVersionExtension;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -878,7 +879,7 @@ namespace Ink_Canvas
             Settings.Advanced.IsEnableEdgeGestureUtil = false;
             Settings.Advanced.EdgeGestureUtilOnlyAffectBlackboardMode = false;
             Settings.Advanced.IsEnableFullScreenHelper = false;
-            Settings.Advanced.IsEnableAvoidFullScreenHelper = true;
+            Settings.Advanced.IsEnableAvoidFullScreenHelper = OSVersion.GetOperatingSystem() >= OSVersionExtension.OperatingSystem.Windows11;
             Settings.Advanced.IsEnableForceFullScreen = false;
             Settings.Advanced.IsEnableDPIChangeDetection = false;
             Settings.Advanced.IsEnableResolutionChangeDetection = false;
