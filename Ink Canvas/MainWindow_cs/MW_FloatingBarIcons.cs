@@ -3038,7 +3038,7 @@ namespace Ink_Canvas
                 // 如果之前是荧光笔模式，则保持荧光笔属性
                 else if (penType == 1)
                 {
-                    drawingAttributes.IsHighlighter = true;
+                    drawingAttributes.IsHighlighter = !Settings.Canvas.HighlighterOverlapEnabled;
                     drawingAttributes.StylusTip = StylusTip.Rectangle;
                     drawingAttributes.Width = Settings.Canvas.HighlighterWidth / 2;
                     drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
@@ -3082,7 +3082,7 @@ namespace Ink_Canvas
                         // 如果之前是荧光笔模式，则保持荧光笔属性
                         else if (penType == 1)
                         {
-                            drawingAttributes.IsHighlighter = true;
+                            drawingAttributes.IsHighlighter = !Settings.Canvas.HighlighterOverlapEnabled;
                             drawingAttributes.StylusTip = StylusTip.Rectangle;
                             drawingAttributes.Width = Settings.Canvas.HighlighterWidth / 2;
                             drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
@@ -3157,7 +3157,7 @@ namespace Ink_Canvas
                     // 如果之前是荧光笔模式，则保持荧光笔属性
                     else if (penType == 1)
                     {
-                        drawingAttributes.IsHighlighter = true;
+                        drawingAttributes.IsHighlighter = !Settings.Canvas.HighlighterOverlapEnabled;
                         drawingAttributes.StylusTip = StylusTip.Rectangle;
                         drawingAttributes.Width = Settings.Canvas.HighlighterWidth / 2;
                         drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
@@ -3535,12 +3535,12 @@ namespace Ink_Canvas
                 drawingAttributes.Width = Settings.Canvas.HighlighterWidth / 2;
                 drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
                 drawingAttributes.StylusTip = StylusTip.Rectangle;
-                drawingAttributes.IsHighlighter = true;
+                drawingAttributes.IsHighlighter = !Settings.Canvas.HighlighterOverlapEnabled;
 
                 inkCanvas.DefaultDrawingAttributes.Width = Settings.Canvas.HighlighterWidth / 2;
                 inkCanvas.DefaultDrawingAttributes.Height = Settings.Canvas.HighlighterWidth;
                 inkCanvas.DefaultDrawingAttributes.StylusTip = StylusTip.Rectangle;
-                inkCanvas.DefaultDrawingAttributes.IsHighlighter = true;
+                inkCanvas.DefaultDrawingAttributes.IsHighlighter = !Settings.Canvas.HighlighterOverlapEnabled;
 
                 // 确保荧光笔颜色索引正确更新
                 inkCanvas.DefaultDrawingAttributes.Color = drawingAttributes.Color;

@@ -1,7 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Shapes;
 using iNKORE.UI.WPF.Modern.Controls;
 using Ink_Canvas.Properties;
 
@@ -9,22 +8,6 @@ namespace Ink_Canvas.Controls
 {
     public partial class PenPalettePopupContent : UserControl
     {
-        public static readonly DependencyProperty IsBoardModeProperty = DependencyProperty.Register(
-            nameof(IsBoardMode), typeof(bool), typeof(PenPalettePopupContent),
-            new PropertyMetadata(false, OnIsBoardModeChanged));
-
-        private static void OnIsBoardModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var control = (PenPalettePopupContent)d;
-            control.BoardBrushModeButton.Visibility = (bool)e.NewValue ? Visibility.Collapsed : Visibility.Visible;
-        }
-
-        public bool IsBoardMode
-        {
-            get => (bool)GetValue(IsBoardModeProperty);
-            set => SetValue(IsBoardModeProperty, value);
-        }
-
         public PopupTabTitleBar TabBar => TabTitleBar;
 
         public int SelectedTabIndex
@@ -33,9 +16,10 @@ namespace Ink_Canvas.Controls
             set => TabTitleBar.SelectedIndex = value;
         }
 
-        public FrameworkElement DefaultPenPropsPanel { get; }
-        public FrameworkElement HighlighterPenPropsPanel { get; }
-        public FrameworkElement LaserPenPropsPanel { get; }
+        public FrameworkElement CommonPropsPanel { get; }
+        public FrameworkElement LaserPenFadePanel { get; }
+        public FrameworkElement InkToShapePanel { get; }
+        public FrameworkElement HighlighterOverlapPanel { get; }
         public FrameworkElement DefaultPenColorsPanel { get; }
         public FrameworkElement HighlighterPenColorsPanel { get; }
         public FrameworkElement LaserPenColorsPanel { get; }
@@ -43,14 +27,10 @@ namespace Ink_Canvas.Controls
         public ComboBox PenStyleComboBox => ComboBoxPenStyle;
         public ToggleSwitch NibModeToggle => ToggleSwitchEnableNibMode;
         public ToggleSwitch InkToShapeToggle => FloatingBarToggleSwitchEnableInkToShape;
-        public Slider InkWidthSlider { get; }
-        public Slider InkAlphaSlider { get; }
-        public Slider HighlighterWidthSlider { get; }
-        public Slider LaserPenWidthSlider { get; }
-        public Slider LaserPenAlphaSlider { get; }
+        public Slider PenWidthSlider { get; }
+        public Slider PenAlphaSlider { get; }
         public Slider LaserPenFadeTimeSlider { get; }
-        public Button BrushModeBtn => BoardBrushModeButton;
-        public Path BrushModeIcon => BoardBrushModeIcon;
+        public ToggleSwitch HighlighterOverlapToggle => ToggleSwitchHighlighterOverlap;
 
         public Border ColorThemeSwitch { get; }
         public Image ColorThemeSwitchIcon { get; }
@@ -123,17 +103,15 @@ namespace Ink_Canvas.Controls
                     ShowLaserPenPanels();
             };
 
-            DefaultPenPropsPanel = (FrameworkElement)FindName("_DefaultPenPropsPanel");
-            HighlighterPenPropsPanel = (FrameworkElement)FindName("_HighlighterPenPropsPanel");
-            LaserPenPropsPanel = (FrameworkElement)FindName("_LaserPenPropsPanel");
+            CommonPropsPanel = (FrameworkElement)FindName("_CommonPropsPanel");
+            LaserPenFadePanel = (FrameworkElement)FindName("_LaserPenFadePanel");
+            InkToShapePanel = (FrameworkElement)FindName("_InkToShapePanel");
+            HighlighterOverlapPanel = (FrameworkElement)FindName("_HighlighterOverlapPanel");
             DefaultPenColorsPanel = (FrameworkElement)FindName("_DefaultPenColorsPanel");
             HighlighterPenColorsPanel = (FrameworkElement)FindName("_HighlighterPenColorsPanel");
             LaserPenColorsPanel = (FrameworkElement)FindName("_LaserPenColorsPanel");
-            InkWidthSlider = (Slider)FindName("_InkWidthSlider");
-            InkAlphaSlider = (Slider)FindName("_InkAlphaSlider");
-            HighlighterWidthSlider = (Slider)FindName("_HighlighterWidthSlider");
-            LaserPenWidthSlider = (Slider)FindName("_LaserPenWidthSlider");
-            LaserPenAlphaSlider = (Slider)FindName("_LaserPenAlphaSlider");
+            PenWidthSlider = (Slider)FindName("_PenWidthSlider");
+            PenAlphaSlider = (Slider)FindName("_PenAlphaSlider");
             LaserPenFadeTimeSlider = (Slider)FindName("_LaserPenFadeTimeSlider");
             ColorThemeSwitch = (Border)FindName("_ColorThemeSwitch");
             ColorThemeSwitchIcon = (Image)FindName("_ColorThemeSwitchIcon");
@@ -161,9 +139,10 @@ namespace Ink_Canvas.Controls
 
         private void ShowDefaultPenPanels()
         {
-            DefaultPenPropsPanel.Visibility = Visibility.Visible;
-            HighlighterPenPropsPanel.Visibility = Visibility.Collapsed;
-            LaserPenPropsPanel.Visibility = Visibility.Collapsed;
+            CommonPropsPanel.Visibility = Visibility.Visible;
+            LaserPenFadePanel.Visibility = Visibility.Collapsed;
+            InkToShapePanel.Visibility = Visibility.Visible;
+            HighlighterOverlapPanel.Visibility = Visibility.Collapsed;
             DefaultPenColorsPanel.Visibility = Visibility.Visible;
             HighlighterPenColorsPanel.Visibility = Visibility.Collapsed;
             LaserPenColorsPanel.Visibility = Visibility.Collapsed;
@@ -171,9 +150,10 @@ namespace Ink_Canvas.Controls
 
         private void ShowHighlighterPenPanels()
         {
-            DefaultPenPropsPanel.Visibility = Visibility.Collapsed;
-            HighlighterPenPropsPanel.Visibility = Visibility.Visible;
-            LaserPenPropsPanel.Visibility = Visibility.Collapsed;
+            CommonPropsPanel.Visibility = Visibility.Visible;
+            LaserPenFadePanel.Visibility = Visibility.Collapsed;
+            InkToShapePanel.Visibility = Visibility.Visible;
+            HighlighterOverlapPanel.Visibility = Visibility.Visible;
             DefaultPenColorsPanel.Visibility = Visibility.Collapsed;
             HighlighterPenColorsPanel.Visibility = Visibility.Visible;
             LaserPenColorsPanel.Visibility = Visibility.Collapsed;
@@ -181,9 +161,10 @@ namespace Ink_Canvas.Controls
 
         private void ShowLaserPenPanels()
         {
-            DefaultPenPropsPanel.Visibility = Visibility.Collapsed;
-            HighlighterPenPropsPanel.Visibility = Visibility.Collapsed;
-            LaserPenPropsPanel.Visibility = Visibility.Visible;
+            CommonPropsPanel.Visibility = Visibility.Visible;
+            LaserPenFadePanel.Visibility = Visibility.Visible;
+            InkToShapePanel.Visibility = Visibility.Collapsed;
+            HighlighterOverlapPanel.Visibility = Visibility.Collapsed;
             DefaultPenColorsPanel.Visibility = Visibility.Collapsed;
             HighlighterPenColorsPanel.Visibility = Visibility.Collapsed;
             LaserPenColorsPanel.Visibility = Visibility.Visible;

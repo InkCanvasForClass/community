@@ -138,8 +138,12 @@ namespace Ink_Canvas
         public double InkWidth { get; set; } = 2.5;
         [JsonProperty("highlighterWidth")]
         public double HighlighterWidth { get; set; } = 20;
+        [JsonProperty("highlighterOverlapEnabled")]
+        public bool HighlighterOverlapEnabled { get; set; } = false;
         [JsonProperty("inkAlpha")]
         public double InkAlpha { get; set; } = 255;
+        [JsonProperty("highlighterAlpha")]
+        public double HighlighterAlpha { get; set; } = 255;
         [JsonProperty("isShowCursor")]
         public bool IsShowCursor { get; set; }
         /// <summary>笔锋存储值：0 基于点集，1 基于速率，2 关闭，3 实时笔锋（速度与压感混合）。界面下拉顺序为实时笔锋、点集、速率、关闭。</summary>

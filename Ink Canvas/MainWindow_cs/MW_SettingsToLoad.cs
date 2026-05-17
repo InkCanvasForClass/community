@@ -418,16 +418,16 @@ namespace Ink_Canvas
                 drawingAttributes.Height = Settings.Canvas.InkWidth;
                 drawingAttributes.Width = Settings.Canvas.InkWidth;
 
-                InkWidthSlider.Value = Settings.Canvas.InkWidth * 2;
-                HighlighterWidthSlider.Value = Settings.Canvas.HighlighterWidth;
+                PenWidthSlider.Value = Settings.Canvas.InkWidth * 2;
+                PenAlphaSlider.Value = Settings.Canvas.InkAlpha;
+                BoardPenWidthSlider.Value = Settings.Canvas.InkWidth * 2;
+                BoardPenAlphaSlider.Value = Settings.Canvas.InkAlpha;
 
                 int alpha = (int)Settings.Canvas.InkAlpha;
                 if (alpha < 0) alpha = 0; if (alpha > 255) alpha = 255;
                 var inkColor = drawingAttributes.Color;
                 drawingAttributes.Color = Color.FromArgb((byte)alpha, inkColor.R, inkColor.G, inkColor.B);
                 inkCanvas.DefaultDrawingAttributes.Color = drawingAttributes.Color;
-                if (InkAlphaSlider != null) InkAlphaSlider.Value = alpha;
-                if (BoardInkAlphaSlider != null) BoardInkAlphaSlider.Value = alpha;
 
 
 
@@ -702,18 +702,16 @@ namespace Ink_Canvas
                     _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
                 }
 
-                if (LaserPenWidthSlider != null)
-                    LaserPenWidthSlider.Value = Settings.Canvas.LaserPenWidth;
-                if (LaserPenAlphaSlider != null)
-                    LaserPenAlphaSlider.Value = Settings.Canvas.LaserPenAlpha;
+                _isUpdatingSliders = true;
                 if (LaserPenFadeTimeSlider != null)
                     LaserPenFadeTimeSlider.Value = Math.Max(1, Math.Min(15, Settings.Canvas.InkFadeTime / 1000));
-                if (BoardLaserPenWidthSlider != null)
-                    BoardLaserPenWidthSlider.Value = Settings.Canvas.LaserPenWidth;
-                if (BoardLaserPenAlphaSlider != null)
-                    BoardLaserPenAlphaSlider.Value = Settings.Canvas.LaserPenAlpha;
                 if (BoardLaserPenFadeTimeSlider != null)
                     BoardLaserPenFadeTimeSlider.Value = Math.Max(1, Math.Min(15, Settings.Canvas.InkFadeTime / 1000));
+                _isUpdatingSliders = false;
+                if (HighlighterOverlapToggle != null)
+                    HighlighterOverlapToggle.IsOn = Settings.Canvas.HighlighterOverlapEnabled;
+                if (BoardHighlighterOverlapToggle != null)
+                    BoardHighlighterOverlapToggle.IsOn = Settings.Canvas.HighlighterOverlapEnabled;
 
                 LogHelper.WriteLogToFile("墨迹渐隐设置已加载", LogHelper.LogType.Trace);
             }

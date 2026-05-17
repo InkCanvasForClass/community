@@ -850,7 +850,7 @@
                     </Popup>
                     <!--批注菜单-->
                     <Popup x:Name="BoardPenPalette" Placement="Custom" AllowsTransparency="True" StaysOpen="True" PlacementTarget="{Binding ElementName=BoardPen}" IsOpen="False">
-                        <localControls:PenPalettePopupContent x:Name="BoardPenPalettePopupContent" IsBoardMode="True" />
+                        <localControls:PenPalettePopupContent x:Name="BoardPenPalettePopupContent" />
                     </Popup>
                     <!--橡皮菜单-->
                     <Popup x:Name="BoardEraserSizePanel" Placement="Custom" AllowsTransparency="True" StaysOpen="True" PlacementTarget="{Binding ElementName=BoardEraser}" IsOpen="False">

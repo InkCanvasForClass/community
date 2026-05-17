@@ -181,6 +181,12 @@ namespace Ink_Canvas
                 if (settingAlpha >= 0 && settingAlpha <= 255)
                     alpha = settingAlpha;
             }
+            else if (penType == 1 && Settings?.Canvas != null)
+            {
+                double settingAlpha = Settings.Canvas.HighlighterAlpha;
+                if (settingAlpha >= 0 && settingAlpha <= 255)
+                    alpha = settingAlpha;
+            }
             else if (penType == 2 && Settings?.Canvas != null)
             {
                 double settingAlpha = Settings.Canvas.LaserPenAlpha;
@@ -252,35 +258,25 @@ namespace Ink_Canvas
             else if (penType == 1)
             {
                 if (highlighterColor == 100)
-                    // Black
-                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromRgb(0, 0, 0);
+                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 0, 0, 0);
                 else if (highlighterColor == 101)
-                    // White
-                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromRgb(250, 250, 250);
+                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 250, 250, 250);
                 else if (highlighterColor == 102)
-                    // Red
-                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromRgb(239, 68, 68);
+                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 239, 68, 68);
                 else if (highlighterColor == 103)
-                    // Yellow
-                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromRgb(253, 224, 71);
+                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 253, 224, 71);
                 else if (highlighterColor == 104)
-                    // Green
-                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromRgb(74, 222, 128);
+                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 74, 222, 128);
                 else if (highlighterColor == 105)
-                    // Zinc
-                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromRgb(113, 113, 122);
+                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 113, 113, 122);
                 else if (highlighterColor == 106)
-                    // Blue
-                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromRgb(59, 130, 246);
+                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 59, 130, 246);
                 else if (highlighterColor == 107)
-                    // Purple
-                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromRgb(168, 85, 247);
+                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 168, 85, 247);
                 else if (highlighterColor == 108)
-                    // teal
-                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromRgb(45, 212, 191);
+                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 45, 212, 191);
                 else if (highlighterColor == 109)
-                    // Orange
-                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromRgb(249, 115, 22);
+                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 249, 115, 22);
             }
             else if (penType == 2)
             {
@@ -672,21 +668,30 @@ namespace Ink_Canvas
         {
             if (penType == 0)
             {
-                DefaultPenPropsPanel.Visibility = Visibility.Visible;
+                CommonPropsPanel.Visibility = Visibility.Visible;
+                LaserPenFadePanel.Visibility = Visibility.Collapsed;
+                InkToShapePanel.Visibility = Visibility.Visible;
+                HighlighterOverlapPanel.Visibility = Visibility.Collapsed;
                 DefaultPenColorsPanel.Visibility = Visibility.Visible;
                 HighlighterPenColorsPanel.Visibility = Visibility.Collapsed;
-                HighlighterPenPropsPanel.Visibility = Visibility.Collapsed;
-                LaserPenPropsPanel.Visibility = Visibility.Collapsed;
                 LaserPenColorsPanel.Visibility = Visibility.Collapsed;
                 PenSelectedTabIndex = 0;
 
-                BoardDefaultPenPropsPanel.Visibility = Visibility.Visible;
+                BoardCommonPropsPanel.Visibility = Visibility.Visible;
+                BoardLaserPenFadePanel.Visibility = Visibility.Collapsed;
+                BoardInkToShapePanel.Visibility = Visibility.Visible;
+                BoardHighlighterOverlapPanel.Visibility = Visibility.Collapsed;
                 BoardDefaultPenColorsPanel.Visibility = Visibility.Visible;
                 BoardHighlighterPenColorsPanel.Visibility = Visibility.Collapsed;
-                BoardHighlighterPenPropsPanel.Visibility = Visibility.Collapsed;
-                BoardLaserPenPropsPanel.Visibility = Visibility.Collapsed;
                 BoardLaserPenColorsPanel.Visibility = Visibility.Collapsed;
                 BoardPenSelectedTabIndex = 0;
+
+                _isUpdatingSliders = true;
+                if (PenWidthSlider != null) PenWidthSlider.Value = Settings.Canvas.InkWidth * 2;
+                if (PenAlphaSlider != null) PenAlphaSlider.Value = Settings.Canvas.InkAlpha;
+                if (BoardPenWidthSlider != null) BoardPenWidthSlider.Value = Settings.Canvas.InkWidth * 2;
+                if (BoardPenAlphaSlider != null) BoardPenAlphaSlider.Value = Settings.Canvas.InkAlpha;
+                _isUpdatingSliders = false;
 
                 await Dispatcher.InvokeAsync(() =>
                 {
@@ -696,21 +701,32 @@ namespace Ink_Canvas
             }
             else if (penType == 1)
             {
-                DefaultPenPropsPanel.Visibility = Visibility.Collapsed;
+                CommonPropsPanel.Visibility = Visibility.Visible;
+                LaserPenFadePanel.Visibility = Visibility.Collapsed;
+                InkToShapePanel.Visibility = Visibility.Visible;
+                HighlighterOverlapPanel.Visibility = Visibility.Visible;
                 DefaultPenColorsPanel.Visibility = Visibility.Collapsed;
                 HighlighterPenColorsPanel.Visibility = Visibility.Visible;
-                HighlighterPenPropsPanel.Visibility = Visibility.Visible;
-                LaserPenPropsPanel.Visibility = Visibility.Collapsed;
                 LaserPenColorsPanel.Visibility = Visibility.Collapsed;
                 PenSelectedTabIndex = 1;
 
-                BoardDefaultPenPropsPanel.Visibility = Visibility.Collapsed;
+                BoardCommonPropsPanel.Visibility = Visibility.Visible;
+                BoardLaserPenFadePanel.Visibility = Visibility.Collapsed;
+                BoardInkToShapePanel.Visibility = Visibility.Visible;
+                BoardHighlighterOverlapPanel.Visibility = Visibility.Visible;
                 BoardDefaultPenColorsPanel.Visibility = Visibility.Collapsed;
                 BoardHighlighterPenColorsPanel.Visibility = Visibility.Visible;
-                BoardHighlighterPenPropsPanel.Visibility = Visibility.Visible;
-                BoardLaserPenPropsPanel.Visibility = Visibility.Collapsed;
                 BoardLaserPenColorsPanel.Visibility = Visibility.Collapsed;
                 BoardPenSelectedTabIndex = 1;
+
+                _isUpdatingSliders = true;
+                if (PenWidthSlider != null) PenWidthSlider.Value = Settings.Canvas.HighlighterWidth;
+                if (PenAlphaSlider != null) PenAlphaSlider.Value = Settings.Canvas.HighlighterAlpha;
+                if (BoardPenWidthSlider != null) BoardPenWidthSlider.Value = Settings.Canvas.HighlighterWidth;
+                if (BoardPenAlphaSlider != null) BoardPenAlphaSlider.Value = Settings.Canvas.HighlighterAlpha;
+                _isUpdatingSliders = false;
+                if (HighlighterOverlapToggle != null) HighlighterOverlapToggle.IsOn = Settings.Canvas.HighlighterOverlapEnabled;
+                if (BoardHighlighterOverlapToggle != null) BoardHighlighterOverlapToggle.IsOn = Settings.Canvas.HighlighterOverlapEnabled;
 
                 await Dispatcher.InvokeAsync(() =>
                 {
@@ -720,21 +736,30 @@ namespace Ink_Canvas
             }
             else if (penType == 2)
             {
-                DefaultPenPropsPanel.Visibility = Visibility.Collapsed;
+                CommonPropsPanel.Visibility = Visibility.Visible;
+                LaserPenFadePanel.Visibility = Visibility.Visible;
+                InkToShapePanel.Visibility = Visibility.Collapsed;
+                HighlighterOverlapPanel.Visibility = Visibility.Collapsed;
                 DefaultPenColorsPanel.Visibility = Visibility.Collapsed;
                 HighlighterPenColorsPanel.Visibility = Visibility.Collapsed;
-                HighlighterPenPropsPanel.Visibility = Visibility.Collapsed;
-                LaserPenPropsPanel.Visibility = Visibility.Visible;
                 LaserPenColorsPanel.Visibility = Visibility.Visible;
                 PenSelectedTabIndex = 2;
 
-                BoardDefaultPenPropsPanel.Visibility = Visibility.Collapsed;
+                BoardCommonPropsPanel.Visibility = Visibility.Visible;
+                BoardLaserPenFadePanel.Visibility = Visibility.Visible;
+                BoardInkToShapePanel.Visibility = Visibility.Collapsed;
+                BoardHighlighterOverlapPanel.Visibility = Visibility.Collapsed;
                 BoardDefaultPenColorsPanel.Visibility = Visibility.Collapsed;
                 BoardHighlighterPenColorsPanel.Visibility = Visibility.Collapsed;
-                BoardHighlighterPenPropsPanel.Visibility = Visibility.Collapsed;
-                BoardLaserPenPropsPanel.Visibility = Visibility.Visible;
                 BoardLaserPenColorsPanel.Visibility = Visibility.Visible;
                 BoardPenSelectedTabIndex = 2;
+
+                _isUpdatingSliders = true;
+                if (PenWidthSlider != null) PenWidthSlider.Value = Settings.Canvas.LaserPenWidth;
+                if (PenAlphaSlider != null) PenAlphaSlider.Value = Settings.Canvas.LaserPenAlpha;
+                if (BoardPenWidthSlider != null) BoardPenWidthSlider.Value = Settings.Canvas.LaserPenWidth;
+                if (BoardPenAlphaSlider != null) BoardPenAlphaSlider.Value = Settings.Canvas.LaserPenAlpha;
+                _isUpdatingSliders = false;
 
                 await Dispatcher.InvokeAsync(() =>
                 {
@@ -790,7 +815,7 @@ namespace Ink_Canvas
             drawingAttributes.Width = Settings.Canvas.HighlighterWidth / 2;
             drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
             drawingAttributes.StylusTip = StylusTip.Rectangle;
-            drawingAttributes.IsHighlighter = true;
+            drawingAttributes.IsHighlighter = !Settings.Canvas.HighlighterOverlapEnabled;
 
             Settings.Canvas.EnableInkFade = false;
             if (_inkFadeManager != null)
@@ -1058,7 +1083,7 @@ namespace Ink_Canvas
 
         private void BtnLaserPenColorWhite_Click(object sender, RoutedEventArgs e)
         {
-            CheckLastColor(1);
+            CheckLastColor(5);
             penType = 2;
             CheckPenTypeUIState();
             ColorSwitchCheck();
@@ -1066,7 +1091,7 @@ namespace Ink_Canvas
 
         private void BtnLaserPenColorRed_Click(object sender, RoutedEventArgs e)
         {
-            CheckLastColor(2);
+            CheckLastColor(1);
             penType = 2;
             CheckPenTypeUIState();
             ColorSwitchCheck();
@@ -1074,7 +1099,7 @@ namespace Ink_Canvas
 
         private void BtnLaserPenColorYellow_Click(object sender, RoutedEventArgs e)
         {
-            CheckLastColor(3);
+            CheckLastColor(4);
             penType = 2;
             CheckPenTypeUIState();
             ColorSwitchCheck();
@@ -1082,7 +1107,7 @@ namespace Ink_Canvas
 
         private void BtnLaserPenColorGreen_Click(object sender, RoutedEventArgs e)
         {
-            CheckLastColor(4);
+            CheckLastColor(2);
             penType = 2;
             CheckPenTypeUIState();
             ColorSwitchCheck();
@@ -1090,7 +1115,7 @@ namespace Ink_Canvas
 
         private void BtnLaserPenColorBlue_Click(object sender, RoutedEventArgs e)
         {
-            CheckLastColor(5);
+            CheckLastColor(3);
             penType = 2;
             CheckPenTypeUIState();
             ColorSwitchCheck();

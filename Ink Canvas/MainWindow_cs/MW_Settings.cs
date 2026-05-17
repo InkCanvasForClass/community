@@ -539,25 +539,36 @@ namespace Ink_Canvas
         }
 
 
-        private void InkWidthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void PenWidthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!isLoaded) return;
-            if (sender == BoardInkWidthSlider) InkWidthSlider.Value = ((Slider)sender).Value;
-            if (sender == InkWidthSlider) BoardInkWidthSlider.Value = ((Slider)sender).Value;
-            drawingAttributes.Height = ((Slider)sender).Value / 2;
-            drawingAttributes.Width = ((Slider)sender).Value / 2;
-            Settings.Canvas.InkWidth = ((Slider)sender).Value / 2;
-            SaveSettingsToFile();
-        }
+            if (_isUpdatingSliders) return;
 
-        private void HighlighterWidthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (!isLoaded) return;
-            // if (sender == BoardInkWidthSlider) InkWidthSlider.Value = ((Slider)sender).Value;
-            // if (sender == InkWidthSlider) BoardInkWidthSlider.Value = ((Slider)sender).Value;
-            drawingAttributes.Height = ((Slider)sender).Value;
-            drawingAttributes.Width = ((Slider)sender).Value / 2;
-            Settings.Canvas.HighlighterWidth = ((Slider)sender).Value;
+            var value = ((Slider)sender).Value;
+
+            _isUpdatingSliders = true;
+            if (sender == BoardPenWidthSlider) PenWidthSlider.Value = value;
+            else if (sender == PenWidthSlider) BoardPenWidthSlider.Value = value;
+            _isUpdatingSliders = false;
+            
+            if (penType == 0)
+            {
+                drawingAttributes.Height = value / 2;
+                drawingAttributes.Width = value / 2;
+                Settings.Canvas.InkWidth = value / 2;
+            }
+            else if (penType == 1)
+            {
+                drawingAttributes.Height = value;
+                drawingAttributes.Width = value / 2;
+                Settings.Canvas.HighlighterWidth = value;
+            }
+            else if (penType == 2)
+            {
+                drawingAttributes.Width = value;
+                drawingAttributes.Height = value;
+                Settings.Canvas.LaserPenWidth = value;
+            }
             SaveSettingsToFile();
         }
 
@@ -565,48 +576,44 @@ namespace Ink_Canvas
         /// 将画笔不透明度更新为滑块的当前值，并保存到设置中。
         /// </summary>
         /// <remarks>
-        /// 使用滑块的当前值作为 alpha 通道更新 drawingAttributes.Color，同时将该值写入 Settings.Canvas.InkAlpha 并持久化配置文件。
+        /// 使用滑块的当前值作为 alpha 通道更新 drawingAttributes.Color，同时将该值写入对应的设置项并持久化配置文件。
         /// </remarks>
-        private void InkAlphaSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void PenAlphaSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!isLoaded) return;
+            if (_isUpdatingSliders) return;
+
+            var value = ((Slider)sender).Value;
+
+            _isUpdatingSliders = true;
+            if (sender == BoardPenAlphaSlider) PenAlphaSlider.Value = value;
+            else if (sender == PenAlphaSlider) BoardPenAlphaSlider.Value = value;
+            _isUpdatingSliders = false;
+
             var NowR = drawingAttributes.Color.R;
             var NowG = drawingAttributes.Color.G;
             var NowB = drawingAttributes.Color.B;
-            drawingAttributes.Color = Color.FromArgb((byte)((Slider)sender).Value, NowR, NowG, NowB);
-            Settings.Canvas.InkAlpha = ((Slider)sender).Value;
-            SaveSettingsToFile();
-        }
-
-        private void LaserPenWidthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (!isLoaded) return;
-            if (penType == 2)
+            drawingAttributes.Color = Color.FromArgb((byte)value, NowR, NowG, NowB);
+            
+            if (penType == 0)
             {
-                drawingAttributes.Width = ((Slider)sender).Value;
-                drawingAttributes.Height = ((Slider)sender).Value;
+                Settings.Canvas.InkAlpha = value;
             }
-            Settings.Canvas.LaserPenWidth = ((Slider)sender).Value;
-            SaveSettingsToFile();
-        }
-
-        private void LaserPenAlphaSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (!isLoaded) return;
-            if (penType == 2)
+            else if (penType == 1)
             {
-                var NowR = drawingAttributes.Color.R;
-                var NowG = drawingAttributes.Color.G;
-                var NowB = drawingAttributes.Color.B;
-                drawingAttributes.Color = Color.FromArgb((byte)((Slider)sender).Value, NowR, NowG, NowB);
+                Settings.Canvas.HighlighterAlpha = value;
             }
-            Settings.Canvas.LaserPenAlpha = (int)((Slider)sender).Value;
+            else if (penType == 2)
+            {
+                Settings.Canvas.LaserPenAlpha = (int)value;
+            }
             SaveSettingsToFile();
         }
 
         private void LaserPenFadeTimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!isLoaded) return;
+            if (_isUpdatingSliders) return;
             Settings.Canvas.InkFadeTime = (int)((Slider)sender).Value * 1000;
             if (_inkFadeManager != null)
             {
