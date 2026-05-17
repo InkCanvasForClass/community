@@ -36,8 +36,14 @@
                             Style="{StaticResource {x:Static ui:ThemeKeys.TabControlPivotStyleKey}}"
                             SelectedIndex="0">
                     <TabControl.Resources>
-                        <sys:Double xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Key="PivotHeaderItemFontSize">12</sys:Double>
+                        <sys:Double xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Key="PivotHeaderItemFontSize">16</sys:Double>
+                        <Style x:Key="CompactPivotTabItem" TargetType="TabItem" BasedOn="{StaticResource TabItemPivotStyle}">
+                            <Setter Property="Height" Value="32" />
+                        </Style>
                     </TabControl.Resources>
+                    <TabControl.ItemContainerStyle>
+                        <Style TargetType="TabItem" BasedOn="{StaticResource CompactPivotTabItem}" />
+                    </TabControl.ItemContainerStyle>
                     <TabItem Header="{i18n:I18n Key=Board_EraserShape_Circle}" />
                     <TabItem Header="{i18n:I18n Key=Board_EraserShape_Blackboard}" />
                 </TabControl>
