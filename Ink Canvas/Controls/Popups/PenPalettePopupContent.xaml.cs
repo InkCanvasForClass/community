@@ -157,7 +157,7 @@ namespace Ink_Canvas.Controls
             LaserPenFadePanel.Visibility = Visibility.Collapsed;
             LaserPenFadeSpeedPanel.Visibility = Visibility.Collapsed;
             InkToShapePanel.Visibility = Visibility.Visible;
-            HighlighterOverlapPanel.Visibility = Visibility.Visible;
+            HighlighterOverlapPanel.Visibility = Visibility.Collapsed;
             DefaultPenColorsPanel.Visibility = Visibility.Visible;
             HighlighterPenColorsPanel.Visibility = Visibility.Collapsed;
             LaserPenColorsPanel.Visibility = Visibility.Collapsed;
@@ -181,7 +181,7 @@ namespace Ink_Canvas.Controls
             LaserPenFadePanel.Visibility = Visibility.Visible;
             LaserPenFadeSpeedPanel.Visibility = Visibility.Visible;
             InkToShapePanel.Visibility = Visibility.Collapsed;
-            HighlighterOverlapPanel.Visibility = Visibility.Visible;
+            HighlighterOverlapPanel.Visibility = Visibility.Collapsed;
             DefaultPenColorsPanel.Visibility = Visibility.Collapsed;
             HighlighterPenColorsPanel.Visibility = Visibility.Collapsed;
             LaserPenColorsPanel.Visibility = Visibility.Visible;

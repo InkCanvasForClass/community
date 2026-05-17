@@ -1179,9 +1179,12 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
             var toggle = (iNKORE.UI.WPF.Modern.Controls.ToggleSwitch)sender;
-            drawingAttributes.IsHighlighter = !toggle.IsOn;
-            inkCanvas.DefaultDrawingAttributes.IsHighlighter = !toggle.IsOn;
             Settings.Canvas.HighlighterOverlapEnabled = toggle.IsOn;
+            if (penType == 1)
+            {
+                drawingAttributes.IsHighlighter = !toggle.IsOn;
+                inkCanvas.DefaultDrawingAttributes.IsHighlighter = !toggle.IsOn;
+            }
             SaveSettingsToFile();
         }
 
@@ -2819,7 +2822,7 @@ namespace Ink_Canvas
                 }
 
                 // 同步设置状态
-                _inkFadeManager.IsEnabled = Settings.Canvas.EnableInkFade;
+                _inkFadeManager.IsEnabled = penType == 2 && Settings.Canvas.EnableInkFade;
                 _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
 
                 LogHelper.WriteLogToFile("墨迹渐隐管理器已初始化", LogHelper.LogType.Event);

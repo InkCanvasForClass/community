@@ -2980,21 +2980,26 @@ namespace Ink_Canvas
                 if (!wasHighlighter && penType != 2)
                 {
                     penType = 0;
-                    drawingAttributes.IsHighlighter = !Settings.Canvas.HighlighterOverlapEnabled;
+                    drawingAttributes.IsHighlighter = false;
                     drawingAttributes.StylusTip = StylusTip.Ellipse;
+                    Settings.Canvas.EnableInkFade = false;
+                    if (_inkFadeManager != null)
+                        _inkFadeManager.IsEnabled = false;
                 }
-                // 如果之前是荧光笔模式，则保持荧光笔属性
                 else if (penType == 1)
                 {
                     drawingAttributes.IsHighlighter = !Settings.Canvas.HighlighterOverlapEnabled;
                     drawingAttributes.StylusTip = StylusTip.Rectangle;
                     drawingAttributes.Width = Settings.Canvas.HighlighterWidth / 2;
                     drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
+                    Settings.Canvas.EnableInkFade = false;
+                    if (_inkFadeManager != null)
+                        _inkFadeManager.IsEnabled = false;
                 }
                 // 如果之前是激光笔模式，则保持激光笔属性
                 else if (penType == 2)
                 {
-                    drawingAttributes.IsHighlighter = !Settings.Canvas.HighlighterOverlapEnabled;
+                    drawingAttributes.IsHighlighter = false;
                     drawingAttributes.StylusTip = StylusTip.Ellipse;
                     drawingAttributes.Width = Settings.Canvas.LaserPenWidth;
                     drawingAttributes.Height = Settings.Canvas.LaserPenWidth;
@@ -3025,21 +3030,26 @@ namespace Ink_Canvas
                         if (!wasHighlighter && penType != 2)
                         {
                             penType = 0;
-                            drawingAttributes.IsHighlighter = !Settings.Canvas.HighlighterOverlapEnabled;
+                            drawingAttributes.IsHighlighter = false;
                             drawingAttributes.StylusTip = StylusTip.Ellipse;
+                            Settings.Canvas.EnableInkFade = false;
+                            if (_inkFadeManager != null)
+                                _inkFadeManager.IsEnabled = false;
                         }
-                        // 如果之前是荧光笔模式，则保持荧光笔属性
                         else if (penType == 1)
                         {
                             drawingAttributes.IsHighlighter = !Settings.Canvas.HighlighterOverlapEnabled;
                             drawingAttributes.StylusTip = StylusTip.Rectangle;
                             drawingAttributes.Width = Settings.Canvas.HighlighterWidth / 2;
                             drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
+                            Settings.Canvas.EnableInkFade = false;
+                            if (_inkFadeManager != null)
+                                _inkFadeManager.IsEnabled = false;
                         }
                         // 如果之前是激光笔模式，则保持激光笔属性
                         else if (penType == 2)
                         {
-                            drawingAttributes.IsHighlighter = !Settings.Canvas.HighlighterOverlapEnabled;
+                            drawingAttributes.IsHighlighter = false;
                             drawingAttributes.StylusTip = StylusTip.Ellipse;
                             drawingAttributes.Width = Settings.Canvas.LaserPenWidth;
                             drawingAttributes.Height = Settings.Canvas.LaserPenWidth;
@@ -3101,21 +3111,26 @@ namespace Ink_Canvas
                     if (!wasHighlighter && penType != 2)
                     {
                         penType = 0;
-                        drawingAttributes.IsHighlighter = !Settings.Canvas.HighlighterOverlapEnabled;
+                        drawingAttributes.IsHighlighter = false;
                         drawingAttributes.StylusTip = StylusTip.Ellipse;
+                        Settings.Canvas.EnableInkFade = false;
+                        if (_inkFadeManager != null)
+                            _inkFadeManager.IsEnabled = false;
                     }
-                    // 如果之前是荧光笔模式，则保持荧光笔属性
                     else if (penType == 1)
                     {
                         drawingAttributes.IsHighlighter = !Settings.Canvas.HighlighterOverlapEnabled;
                         drawingAttributes.StylusTip = StylusTip.Rectangle;
                         drawingAttributes.Width = Settings.Canvas.HighlighterWidth / 2;
                         drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
+                        Settings.Canvas.EnableInkFade = false;
+                        if (_inkFadeManager != null)
+                            _inkFadeManager.IsEnabled = false;
                     }
                     // 如果之前是激光笔模式，则保持激光笔属性
                     else if (penType == 2)
                     {
-                        drawingAttributes.IsHighlighter = !Settings.Canvas.HighlighterOverlapEnabled;
+                        drawingAttributes.IsHighlighter = false;
                         drawingAttributes.StylusTip = StylusTip.Ellipse;
                         drawingAttributes.Width = Settings.Canvas.LaserPenWidth;
                         drawingAttributes.Height = Settings.Canvas.LaserPenWidth;

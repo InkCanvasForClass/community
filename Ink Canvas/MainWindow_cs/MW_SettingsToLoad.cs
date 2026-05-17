@@ -692,7 +692,7 @@ namespace Ink_Canvas
             {
                 if (_inkFadeManager != null)
                 {
-                    _inkFadeManager.IsEnabled = Settings.Canvas.EnableInkFade;
+                    _inkFadeManager.IsEnabled = penType == 2 && Settings.Canvas.EnableInkFade;
                     _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
                     _inkFadeManager.UpdateFadeSpeedMultiplier(Settings.Canvas.InkFadeSpeedMultiplier);
                 }
