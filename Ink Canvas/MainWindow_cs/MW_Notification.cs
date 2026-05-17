@@ -61,6 +61,12 @@ namespace Ink_Canvas
             {
                 try
                 {
+                    if (IsNotificationSuppressedByDictationDoNotDisturb())
+                    {
+                        NotificationCenterService.NotifyCurrentClosed();
+                        return;
+                    }
+
                     if (Settings?.Notification?.IsWindowsToastEnabled == true)
                     {
                         WindowsNotificationHelper.ShowToast(message);
@@ -81,6 +87,19 @@ namespace Ink_Canvas
                     NotificationCenterService.NotifyCurrentClosed();
                 }
             }));
+        }
+
+        private bool IsNotificationSuppressedByDictationDoNotDisturb()
+        {
+            var notification = Settings?.Notification;
+            if (notification?.IsDictationDoNotDisturbEnabled != true) return false;
+
+            if (notification.IsDictationDoNotDisturbInPptEnabled && IsInPptPresentationMode)
+            {
+                return true;
+            }
+
+            return notification.IsDictationDoNotDisturbInWhiteboardEnabled && currentMode == 1;
         }
 
         private void DynamicNotification_Closed(object sender, EventArgs e)

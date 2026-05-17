@@ -95,6 +95,15 @@ namespace Ink_Canvas
 
         [JsonProperty("readAnnouncementIds")]
         public List<string> ReadAnnouncementIds { get; set; } = new List<string>();
+
+        [JsonProperty("isDictationDoNotDisturbEnabled")]
+        public bool IsDictationDoNotDisturbEnabled { get; set; } = false;
+
+        [JsonProperty("isDictationDoNotDisturbInPptEnabled")]
+        public bool IsDictationDoNotDisturbInPptEnabled { get; set; } = true;
+
+        [JsonProperty("isDictationDoNotDisturbInWhiteboardEnabled")]
+        public bool IsDictationDoNotDisturbInWhiteboardEnabled { get; set; } = true;
     }
 
     public class Security

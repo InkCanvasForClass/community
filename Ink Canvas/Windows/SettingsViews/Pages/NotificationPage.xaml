@@ -90,6 +90,33 @@
                         Icon="{x:Static ui:SegoeFluentIcons.ActionCenterNotification}"
                         Toggled="ToggleSwitchEnableWindowsToast_Toggled" />
 
+                <ui:SettingsExpander Header="{i18n:I18n Key=Notification_DictationDoNotDisturb}"
+                                     Description="{i18n:I18n Key=Notification_DictationDoNotDisturbHint}">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BlockContact}" />
+                    </ui:SettingsExpander.HeaderIcon>
+                    <ui:SettingsExpander.Content>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchDictationDoNotDisturb"
+                                      OnContent="{DynamicResource Common_On}"
+                                      OffContent="{DynamicResource Common_Off}"
+                                      Toggled="ToggleSwitchDictationDoNotDisturb_Toggled" />
+                    </ui:SettingsExpander.Content>
+                    <ui:SettingsExpander.Items>
+                        <ui:SettingsCard Header="{i18n:I18n Key=Notification_DictationDoNotDisturbPpt}"
+                                         Description="{i18n:I18n Key=Notification_DictationDoNotDisturbPptHint}">
+                            <CheckBox x:Name="CheckBoxDictationDoNotDisturbPpt"
+                                      Checked="DictationDoNotDisturbMode_CheckChanged"
+                                      Unchecked="DictationDoNotDisturbMode_CheckChanged" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard Header="{i18n:I18n Key=Notification_DictationDoNotDisturbWhiteboard}"
+                                         Description="{i18n:I18n Key=Notification_DictationDoNotDisturbWhiteboardHint}">
+                            <CheckBox x:Name="CheckBoxDictationDoNotDisturbWhiteboard"
+                                      Checked="DictationDoNotDisturbMode_CheckChanged"
+                                      Unchecked="DictationDoNotDisturbMode_CheckChanged" />
+                        </ui:SettingsCard>
+                    </ui:SettingsExpander.Items>
+                </ui:SettingsExpander>
+
                 <TextBlock Text="{i18n:I18n Key=Notification_ProviderTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
 
                 <ui:SettingsCard Header="{i18n:I18n Key=Notification_ProviderManagement}"

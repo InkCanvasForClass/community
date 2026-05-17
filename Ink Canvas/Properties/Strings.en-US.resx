@@ -3120,6 +3120,24 @@ Hide</value>
   <data name="Notification_EnableWindowsToastHint" xml:space="preserve">
     <value>Important notices and updates may also appear as system toasts.</value>
   </data>
+  <data name="Notification_DictationDoNotDisturb" xml:space="preserve">
+    <value>Popup do not disturb</value>
+  </data>
+  <data name="Notification_DictationDoNotDisturbHint" xml:space="preserve">
+    <value>Suppress popups and system notifications in selected scenarios while keeping messages in history.</value>
+  </data>
+  <data name="Notification_DictationDoNotDisturbPpt" xml:space="preserve">
+    <value>Do not notify during PPT slideshow</value>
+  </data>
+  <data name="Notification_DictationDoNotDisturbPptHint" xml:space="preserve">
+    <value>Suppress dynamic notifications, legacy notifications, and Windows toasts while presenting slides.</value>
+  </data>
+  <data name="Notification_DictationDoNotDisturbWhiteboard" xml:space="preserve">
+    <value>Do not notify in whiteboard mode</value>
+  </data>
+  <data name="Notification_DictationDoNotDisturbWhiteboardHint" xml:space="preserve">
+    <value>Suppress dynamic notifications, legacy notifications, and Windows toasts in whiteboard or blackboard mode.</value>
+  </data>
   <data name="Notification_EnableForcePopup" xml:space="preserve">
     <value>Enable important announcement popups</value>
   </data>
