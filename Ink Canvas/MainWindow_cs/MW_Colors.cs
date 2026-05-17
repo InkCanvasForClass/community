@@ -106,6 +106,8 @@ namespace Ink_Canvas
         /// </summary>
         private int penType;
 
+        private long _stylusDownTimestamp;
+
         /// <summary>
         /// 桌面模式最后使用的墨水颜色
         /// </summary>

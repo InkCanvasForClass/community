@@ -2422,6 +2422,8 @@ namespace Ink_Canvas
         // 手写笔输入
         private void inkCanvas_StylusDown(object sender, StylusDownEventArgs e)
         {
+            _stylusDownTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
             if (IsCurrentPageFrozen && IsFreezeMutatingMode(inkCanvas.EditingMode))
             {
                 TryBlockFrozenPageMutation("修改冻结页面");

@@ -358,7 +358,13 @@ namespace Ink_Canvas
                 // 添加到墨迹渐隐管理器
                 if (_inkFadeManager != null)
                 {
-                    _inkFadeManager.AddFadingStroke(e.Stroke, startPoint, endPoint);
+                    long strokeDurationMs = 0;
+                    if (_stylusDownTimestamp > 0)
+                    {
+                        strokeDurationMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _stylusDownTimestamp;
+                        _stylusDownTimestamp = 0;
+                    }
+                    _inkFadeManager.AddFadingStroke(e.Stroke, startPoint, endPoint, strokeDurationMs);
                 }
                 else
                 {
