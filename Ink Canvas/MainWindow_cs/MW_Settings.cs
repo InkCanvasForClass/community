@@ -1,4 +1,5 @@
 using Ink_Canvas.Controls;
+using Ink_Canvas.Controls.Toolbar;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using OSVersionExtension;
@@ -1036,7 +1037,16 @@ namespace Ink_Canvas
                 isLoaded = false;
                 SetSettingsToRecommendation();
                 SaveSettingsToFile();
+                
+                // 确保工具栏配置也被重置为默认值
+                var configName = SettingsManager.Settings?.ToolbarConfigName ?? "default";
+                ToolbarRegistry.SaveConfigFile(configName, ToolbarRegistry.CreateDefaultLayout());
+                
                 LoadSettings(isStartup: false, skipAutoUpdateCheck: true);
+                
+                // 重置后重建工具栏
+                RebuildToolbar();
+                
                 isLoaded = true;
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -1055,7 +1065,16 @@ namespace Ink_Canvas
                 Settings.Automation.AutoDelSavedFilesDaysThreshold = 15;
                 Settings.Automation.AutoSavedStrokesLocation = @"D:\Ink Canvas\AutoSavedStrokes";
                 SaveSettingsToFile();
+                
+                // 确保工具栏配置也被重置为默认值
+                var configName = SettingsManager.Settings?.ToolbarConfigName ?? "default";
+                ToolbarRegistry.SaveConfigFile(configName, ToolbarRegistry.CreateDefaultLayout());
+                
                 LoadSettings(isStartup: false, skipAutoUpdateCheck: true);
+                
+                // 重置后重建工具栏
+                RebuildToolbar();
+                
                 isLoaded = true;
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }

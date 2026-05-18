@@ -923,6 +923,9 @@ namespace Ink_Canvas.Controls.Toolbar
                 else
                     // 如果组件设置中没有找到，回退到全局设置
                     qcp.SyncFromSettings();
+                
+                // 强制应用显示模式，确保独立边框模式下也能正确显示
+                qcp.ForceApplyDisplayMode();
             }
         }
 

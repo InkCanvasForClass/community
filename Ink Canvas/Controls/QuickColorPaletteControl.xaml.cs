@@ -47,7 +47,7 @@ namespace Ink_Canvas.Controls
 
         private void ApplyDisplayMode()
         {
-            if (QuickColorPalettePanel == null || QuickColorPaletteSingleRowPanel == null) return;
+            if (QuickColorPalettePanel == null || QuickColorPaletteSingleRowPanel == null || QuickColorPaletteContainer == null) return;
 
             if (DisplayMode == 0)
             {
@@ -59,6 +59,8 @@ namespace Ink_Canvas.Controls
                 QuickColorPalettePanel.Visibility = Visibility.Visible;
                 QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
             }
+            
+            QuickColorPaletteContainer.Visibility = Visibility.Visible;
         }
 
         public void SyncFromSettings()
@@ -66,6 +68,26 @@ namespace Ink_Canvas.Controls
             var settings = SettingsManager.Settings;
             if (settings?.Appearance == null) return;
             DisplayMode = settings.Appearance.QuickColorPaletteDisplayMode;
+        }
+
+        /// <summary>
+        /// 强制应用显示模式，确保即使在控件初始化期间也能正确显示
+        /// </summary>
+        public void ForceApplyDisplayMode()
+        {
+            if (IsLoaded)
+            {
+                ApplyDisplayMode();
+            }
+            else
+            {
+                void handler(object s, RoutedEventArgs args)
+                {
+                    Loaded -= handler;
+                    ApplyDisplayMode();
+                }
+                Loaded += handler;
+            }
         }
 
         public void ClearAllChecked()
