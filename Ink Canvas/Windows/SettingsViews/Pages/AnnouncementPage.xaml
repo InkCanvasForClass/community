@@ -81,6 +81,8 @@
                              MinWidth="360"
                              TextChanged="TokenTextBox_TextChanged" />
                 </ui:SettingsCard>
+
+                <Rectangle Height="48" />
             </ikw:SimpleStackPanel>
         </Grid>
     </ScrollViewer>

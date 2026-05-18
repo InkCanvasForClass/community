@@ -168,6 +168,8 @@
                                    TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                     </ikw:SimpleStackPanel>
 
+                    <Rectangle Height="48" />
+
                 </ikw:SimpleStackPanel>
             </Grid>
         </Grid>

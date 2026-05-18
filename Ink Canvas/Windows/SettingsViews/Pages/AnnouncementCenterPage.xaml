@@ -10,12 +10,13 @@
       mc:Ignorable="d"
       Title="{i18n:I18n Key=Announcement_CenterTitle}">
 
-    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+    <ScrollViewer PanningMode="VerticalFirst" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
         <Grid Margin="59,0,59,24">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
+                <RowDefinition Height="48" />
             </Grid.RowDefinitions>
             <Grid.Resources>
                 <converter:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />

@@ -19,6 +19,7 @@
                 </Border>
 
                 <StackPanel x:Name="PluginContainer" />
+                <Rectangle Height="48" />
             </StackPanel>
         </Grid>
     </ScrollViewer>

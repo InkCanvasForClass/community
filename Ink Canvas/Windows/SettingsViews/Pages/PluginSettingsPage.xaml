@@ -8,7 +8,10 @@
     xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
     Title="插件设置"
     mc:Ignorable="d">
-    <Grid>
-        <ContentControl x:Name="PluginSettingsContent" Margin="24" />
-    </Grid>
+    <ScrollViewer PanningMode="VerticalFirst">
+        <Grid>
+            <ContentControl x:Name="PluginSettingsContent" Margin="24" />
+            <Rectangle Height="48" />
+        </Grid>
+    </ScrollViewer>
 </ui:Page>

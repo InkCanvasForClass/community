@@ -271,6 +271,8 @@
                     <Button Content="{i18n:I18n Key=Notification_TestButton}"
                             Click="TestNotificationButton_Click" />
                 </ui:SettingsCard>
+
+                <Rectangle Height="48" />
             </ikw:SimpleStackPanel>
         </Grid>
     </ScrollViewer>

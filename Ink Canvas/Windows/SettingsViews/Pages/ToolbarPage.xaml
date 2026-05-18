@@ -460,6 +460,8 @@
             <Button Content="恢复默认布局" Click="ButtonReset_Click"
                     Padding="20,10" HorizontalAlignment="Left" Margin="0,16,0,20"/>
 
+            <Rectangle Height="48" />
+
         </ikw:SimpleStackPanel>
     </ScrollViewer>
 </ui:Page>
