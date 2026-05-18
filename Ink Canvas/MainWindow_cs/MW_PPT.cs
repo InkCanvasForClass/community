@@ -1218,11 +1218,6 @@ namespace Ink_Canvas
                             if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
                             {
                                 UpdateCurrentToolMode("pen");
-                                if (Settings.Appearance.IsShowQuickColorPalette && QuickColorPalette != null)
-                                {
-                                    QuickColorPalette.Visibility = Visibility.Visible;
-                                    QuickColorPalette.DisplayMode = Settings.Appearance.QuickColorPaletteDisplayMode;
-                                }
                                 SetFloatingBarHighlightPosition("pen");
                             }
                         }
@@ -1567,11 +1562,8 @@ namespace Ink_Canvas
                         // 退出PPT模式时恢复手势面板和手势按钮的显示状态
                         UpdateToolbarComponentVisibility();
 
-                        // 退出PPT模式时隐藏快捷调色盘
-                        if (QuickColorPalette != null)
-                        {
-                            QuickColorPalette.Visibility = Visibility.Collapsed;
-                        }
+                        // 注意：快捷调色盘的可见性现在完全由工具栏规则集管理
+                        // 不需要手动设置，UpdateToolbarComponentVisibility 会处理好
 
                         if (GridTransparencyFakeBackground.Background != Brushes.Transparent)
                             BtnHideInkCanvas_Click(null, null);

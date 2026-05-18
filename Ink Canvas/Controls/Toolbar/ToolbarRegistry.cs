@@ -702,17 +702,28 @@ namespace Ink_Canvas.Controls.Toolbar
             }
             else
             {
+                var contentPanel = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    Margin = new Thickness(2, 2, 2, 0),
+                    Cursor = Cursors.Arrow,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Tag = ContentPanelTag
+                };
+                ApplyInitialVisibility(view, ruleset);
+                contentPanel.Children.Add(view);
+
                 wrapper = new Border
                 {
                     Margin = new Thickness(0),
-                    Padding = new Thickness(4, 2, 4, 0),
+                    Padding = new Thickness(2, 0, 2, 0),
                     Width = double.NaN,
                     MinWidth = 0,
                     Height = 58,
                     CornerRadius = new CornerRadius(8),
                     BorderThickness = new Thickness(2),
-                    Child = view,
-                    Tag = InjectedTag
+                    Child = contentPanel,
+                    Tag = ContentBorderTag
                 };
                 wrapper.SetResourceReference(Border.BackgroundProperty, "FloatBarBackground");
                 wrapper.SetResourceReference(Border.BorderBrushProperty, "FloatBarBorderBrush");

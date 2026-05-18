@@ -2842,11 +2842,7 @@ namespace Ink_Canvas
 
             UpdateToolbarComponentVisibility();
 
-            // 在鼠标模式下隐藏快捷调色盘
-            if (QuickColorPalette != null)
-            {
-                QuickColorPalette.Visibility = Visibility.Collapsed;
-            }
+            // 注意：快捷调色盘的可见性现在完全由工具栏规则集管理，不需要手动设置
 
             if (!isFloatingBarFolded)
             {
@@ -2964,11 +2960,8 @@ namespace Ink_Canvas
 
             UpdateCurrentToolMode("pen");
 
-            if (Settings.Appearance.IsShowQuickColorPalette && QuickColorPalette != null)
-            {
-                QuickColorPalette.Visibility = Visibility.Visible;
-                QuickColorPalette.DisplayMode = Settings.Appearance.QuickColorPaletteDisplayMode;
-            }
+            // 注意：快捷调色盘的可见性和显示模式现在完全由工具栏系统管理
+            // 不需要手动设置，UpdateToolbarComponentVisibility 会处理好
 
             SetFloatingBarHighlightPosition("pen");
 

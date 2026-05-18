@@ -388,23 +388,8 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"同步手势开关状态失败: {ex.Message}", LogHelper.LogType.Error);
             }
 
-            // 快捷调色盘
-            try
-            {
-                if (QuickColorPalette != null)
-                {
-                    // 注意：不调用 QuickColorPalette.SyncFromSettings()
-                    // 因为工具栏构建时已经通过 ApplyComponentSettings 应用了组件设置中的 DisplayMode
-                    // 这里只设置可见性
-                    QuickColorPalette.Visibility = Settings.Appearance.IsShowQuickColorPalette 
-                        ? Visibility.Visible 
-                        : Visibility.Collapsed;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"同步快捷调色盘状态失败: {ex.Message}", LogHelper.LogType.Error);
-            }
+            // 注意：快捷调色盘的可见性现在完全由工具栏规则集管理，不需要手动设置
+            // 所有对 QuickColorPalette.Visibility 的直接操作已移除以避免冲突
 
             // Canvas
             if (Settings.Canvas != null)
