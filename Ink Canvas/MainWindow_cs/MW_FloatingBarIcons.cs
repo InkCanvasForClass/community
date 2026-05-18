@@ -361,6 +361,9 @@ namespace Ink_Canvas
                 _popupManager?.MarkNeedsUpdate();
             }
 
+            // 每次点击或拖动结束后都重新定位高光
+            SetFloatingBarHighlightPosition(_currentToolMode);
+
             GridForFloatingBarDraging.Visibility = Visibility.Collapsed;
         }
 
@@ -4711,12 +4714,6 @@ private bool forceEraser;
                 var indicatorBar = IndicatorBarFloatingBar;
                 var container = GridFloatingBarContainer;
 
-                if (isFloatingBarFolded || !IsFloatingBarContentVisible())
-                {
-                    HideAllSelectionHighlights();
-                    return;
-                }
-
                 if (selectionBG == null || indicatorBar == null || container == null) return;
 
                 ToolbarImageButton targetButton = null;
@@ -4746,7 +4743,8 @@ private bool forceEraser;
 
                 if (targetButton == null || !IsElementVisibleInTree(targetButton))
                 {
-                    DeferFloatingBarHighlightIfLayoutPending(mode);
+                    // 如果目标按钮不可见则隐藏高光
+                    HideAllSelectionHighlights();
                     return;
                 }
 
