@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Windows.SettingsViews.Helpers;
 
 namespace Ink_Canvas
 {
@@ -39,6 +40,7 @@ namespace Ink_Canvas
             _noAction = noAction;
             _windowClose = windowClose;
             InitializeComponent();
+            ThemeHelper.ApplyTheme(this, SettingsManager.Settings);
             WindowBackdropHelper.Apply(this);
             Label.Text = text;
 
@@ -50,15 +52,18 @@ namespace Ink_Canvas
         {
             _hwnd = new WindowInteropHelper(this).Handle;
 
-            Topmost = true;
-            Activate();
-            Focus();
-
-            if (_hwnd != IntPtr.Zero)
+            Dispatcher.BeginInvoke(new Action(() =>
             {
-                SetWindowPos(_hwnd, HWND_TOPMOST, 0, 0, 0, 0,
-                    SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
-            }
+                Topmost = true;
+                Activate();
+                Focus();
+
+                if (_hwnd != IntPtr.Zero)
+                {
+                    SetWindowPos(_hwnd, HWND_TOPMOST, 0, 0, 0, 0,
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
+                }
+            }), DispatcherPriority.Loaded);
 
             _topmostCheckTimer = new DispatcherTimer();
             _topmostCheckTimer.Interval = TimeSpan.FromMilliseconds(100);
