@@ -883,11 +883,11 @@ namespace Ink_Canvas
         /// 操作包括：清理画布墨迹和备份历史记录，初始化墨迹管理器，处理跳转到首页或上次播放页的逻辑，检查隐藏幻灯片和自动播放设置，更新UI连接状态，并记录事件日志。
         /// 所有操作在UI线程异步执行，异常会被捕获并记录为错误日志。
         /// </remarks>
-        private void OnPPTPresentationOpen(Presentation pres)
+        private async void OnPPTPresentationOpen(Presentation pres)
         {
             try
             {
-                Application.Current.Dispatcher.InvokeAsync(async () =>
+                await Application.Current.Dispatcher.InvokeAsync(async () =>
                 {
                     // 在初始化墨迹管理器之前，先清理画布上的所有墨迹
                     ResetPptEnhancedPreviewCache();
