@@ -1025,6 +1025,12 @@ namespace Ink_Canvas
         /// </remarks>
         private async void OnPPTSlideShowBegin(SlideShowWindow wn)
         {
+            if (!Application.Current.Dispatcher.CheckAccess())
+            {
+                _ = Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => OnPPTSlideShowBegin(wn)));
+                return;
+            }
+
             try
             {
                 if (Settings.Automation.IsAutoFoldInPPTSlideShow)
@@ -1139,98 +1145,76 @@ namespace Ink_Canvas
                     }
                 }
 
-                await Application.Current.Dispatcher.InvokeAsync(async () =>
+                if (activePresentation != null && _singlePPTInkManager != null)
                 {
-                    if (activePresentation != null && _singlePPTInkManager != null)
+                    try
                     {
-                        try
+                        _singlePPTInkManager.InitializePresentation(activePresentation);
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+
+                if (Settings.PowerPointSettings.IsAlwaysGoToFirstPageOnReenter)
+                {
+                    _pptManager?.TryNavigateToSlide(1);
+                    if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) ExceptionHandler.TryExecute(() => this.Activate(), "激活主窗口失败（PPT 重入首页时）");
+                }
+                else if (_shouldNavigateToLastPage && _lastPlaybackPage > 0)
+                {
+                    _pptManager?.TryNavigateToSlide(_lastPlaybackPage);
+                    _shouldNavigateToLastPage = false;
+                    if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) ExceptionHandler.TryExecute(() => this.Activate(), "激活主窗口失败（PPT 重入末页时）");
+                }
+
+                _pptUIManager?.UpdateSlideShowStatus(true, currentSlide, totalSlides);
+                _pptUIManager?.SetFloatingBarOpacity(Settings.Appearance.ViewboxFloatingBarOpacityInPPTValue);
+                _pptUIManager?.SetMainPanelMargin(new Thickness(10, 10, 10, 10));
+                _pptUIManager?.UpdateSidebarExitButtons(true);
+                ShowFloatingBarExitPPTBtn();
+
+                if (Settings.PowerPointSettings.IsShowCanvasAtNewSlideShow &&
+                    !Settings.Automation.IsAutoFoldInPPTSlideShow &&
+                    GridTransparencyFakeBackground.Background == Brushes.Transparent && !isFloatingBarFolded)
+                {
+                    BtnHideInkCanvas_Click(null, null);
+                }
+
+                if (currentMode != 0)
+                {
+                    ImageBlackboard_MouseUp(null, null);
+                    BtnHideInkCanvas_Click(null, null);
+                }
+
+                SetFloatingBarContentVisibility(true);
+                AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
+                AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
+                UpdateToolbarComponentVisibility();
+
+                if (Settings.PowerPointSettings.IsShowCanvasAtNewSlideShow &&
+                    !Settings.Automation.IsAutoFoldInPPTSlideShow)
+                {
+                    await Task.Delay(300);
+                    PenIcon_Click(null, null);
+                    BtnColorRed_Click(null, null);
+                    try
+                    {
+                        if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
                         {
-                            _singlePPTInkManager.InitializePresentation(activePresentation);
-                        }
-                        catch (Exception)
-                        {
-                        }
-                    }
-
-                    // 处理跳转到首页或上次播放位置
-                    if (Settings.PowerPointSettings.IsAlwaysGoToFirstPageOnReenter)
-                    {
-                        _pptManager?.TryNavigateToSlide(1);
-                        if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) ExceptionHandler.TryExecute(() => this.Activate(), "激活主窗口失败（PPT 重入首页时）");
-                    }
-                    else if (_shouldNavigateToLastPage && _lastPlaybackPage > 0)
-                    {
-                        _pptManager?.TryNavigateToSlide(_lastPlaybackPage);
-                        _shouldNavigateToLastPage = false;
-                        if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) ExceptionHandler.TryExecute(() => this.Activate(), "激活主窗口失败（PPT 重入末页时）");
-                    }
-
-                    // 更新UI状态
-                    _pptUIManager?.UpdateSlideShowStatus(true, currentSlide, totalSlides);
-
-                    // 设置浮动栏透明度和边距
-                    _pptUIManager?.SetFloatingBarOpacity(Settings.Appearance.ViewboxFloatingBarOpacityInPPTValue);
-                    _pptUIManager?.SetMainPanelMargin(new Thickness(10, 10, 10, 10));
-
-                    // 显示侧边栏退出按钮
-                    _pptUIManager?.UpdateSidebarExitButtons(true);
-
-                    // 显示浮动栏退出PPT按钮
-                    ShowFloatingBarExitPPTBtn();
-
-                    // 处理画板显示
-                    if (Settings.PowerPointSettings.IsShowCanvasAtNewSlideShow &&
-                        !Settings.Automation.IsAutoFoldInPPTSlideShow &&
-                        GridTransparencyFakeBackground.Background == Brushes.Transparent && !isFloatingBarFolded)
-                    {
-                        BtnHideInkCanvas_Click(null, null);
-                    }
-
-                    if (currentMode != 0)
-                    {
-                        ImageBlackboard_MouseUp(null, null);
-                        BtnHideInkCanvas_Click(null, null);
-                    }
-
-                    SetFloatingBarContentVisibility(true);
-
-                    // 在PPT模式下根据设置决定是否隐藏手势面板和手势按钮
-                    AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
-                    AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
-
-                    // 根据设置决定是否在PPT放映模式下显示手势按钮
-                    UpdateToolbarComponentVisibility();
-
-                    if (Settings.PowerPointSettings.IsShowCanvasAtNewSlideShow &&
-                        !Settings.Automation.IsAutoFoldInPPTSlideShow)
-                    {
-                        await Task.Delay(300);
-                        // 先进入批注模式，这会显示调色盘
-                        PenIcon_Click(null, null);
-                        // 然后设置颜色
-                        BtnColorRed_Click(null, null);
-                        try
-                        {
-                            if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
-                            {
-                                UpdateCurrentToolMode("pen");
-                                SetFloatingBarHighlightPosition("pen");
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            LogHelper.WriteLogToFile($"PPT进入批注模式后同步浮动栏高光状态失败: {ex.Message}", LogHelper.LogType.Error);
+                            UpdateCurrentToolMode("pen");
+                            SetFloatingBarHighlightPosition("pen");
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"PPT进入批注模式后同步浮动栏高光状态失败: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                }
 
-                    isEnteredSlideShowEndEvent = false;
-
-                    // 加载当前页墨迹
-                    LoadCurrentSlideInk(currentSlide);
-
-                    // 仅PPT模式：放映开始立即同步主窗口可见性（勿仅依赖 SlideShowStateChanged 定时器）
-                    CheckMainWindowVisibility();
-                });
+                isEnteredSlideShowEndEvent = false;
+                LoadCurrentSlideInk(currentSlide);
+                CheckMainWindowVisibility();
 
                 SchedulePptEnhancedPreviewPreload();
 
