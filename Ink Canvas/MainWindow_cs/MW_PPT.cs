@@ -1,6 +1,7 @@
 using Ink_Canvas.Controls.Toolbar;
 using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern;
+using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Office.Core;
 using Microsoft.Office.Interop.PowerPoint;
 using System;
@@ -886,7 +887,7 @@ namespace Ink_Canvas
         {
             try
             {
-                Application.Current.Dispatcher.InvokeAsync(() =>
+                Application.Current.Dispatcher.InvokeAsync(async () =>
                 {
                     // 在初始化墨迹管理器之前，先清理画布上的所有墨迹
                     ResetPptEnhancedPreviewCache();
@@ -902,7 +903,7 @@ namespace Ink_Canvas
                     _singlePPTInkManager?.InitializePresentation(pres);
 
                     // 处理跳转到首页或上次播放页的逻辑
-                    HandlePresentationOpenNavigation(pres);
+                    await HandlePresentationOpenNavigation(pres);
 
                     // 检查隐藏幻灯片
                     if (Settings.PowerPointSettings.IsNotifyHiddenPage)
@@ -1620,7 +1621,7 @@ namespace Ink_Canvas
         /// 2. 否则，如果设置了显示上次播放页通知，则显示上次播放页通知
         /// 异常会被捕获并记录为错误日志，确保方法执行不会中断。
         /// </remarks>
-        private void HandlePresentationOpenNavigation(Presentation pres)
+        private async Task HandlePresentationOpenNavigation(Presentation pres)
         {
             try
             {
@@ -1631,7 +1632,7 @@ namespace Ink_Canvas
                 }
                 else if (Settings.PowerPointSettings.IsNotifyPreviousPage)
                 {
-                    ShowPreviousPageNotification(pres);
+                    await ShowPreviousPageNotification(pres);
                 }
             }
             catch (Exception ex)
@@ -1654,7 +1655,7 @@ namespace Ink_Canvas
         /// 6. 如果解析成功且页码大于0，则保存上次播放页码并显示跳转提示窗口
         /// 异常会被捕获并记录为错误日志，确保方法执行不会中断。
         /// </remarks>
-        private void ShowPreviousPageNotification(Presentation pres)
+        private async Task ShowPreviousPageNotification(Presentation pres)
         {
             try
             {
@@ -1668,7 +1669,16 @@ namespace Ink_Canvas
                 if (int.TryParse(File.ReadAllText(positionFile), out var page) && page > 0)
                 {
                     _lastPlaybackPage = page;
-                    var yesNoWindow = new YesOrNoNotificationWindow($"上次播放到了第 {page} 页, 是否立即跳转", () =>
+                    var dialog = new ContentDialog
+                    {
+                        Title = "Ink Canvas For Class CE",
+                        PrimaryButtonText = "是",
+                        SecondaryButtonText = "否",
+                        DefaultButton = ContentDialogButton.Primary,
+                        Content = new TextBlock { Text = $"上次播放到了第 {page} 页, 是否立即跳转", TextWrapping = TextWrapping.Wrap }
+                    };
+                    var result = await dialog.ShowAsync();
+                    if (result == ContentDialogResult.Primary)
                     {
                         try
                         {
@@ -1690,16 +1700,6 @@ namespace Ink_Canvas
                         {
                             LogHelper.WriteLogToFile($"跳转到第{page}页失败: {ex}", LogHelper.LogType.Error);
                         }
-                    });
-                    yesNoWindow.Owner = this;
-                    PauseTopmostMaintenance();
-                    try
-                    {
-                        yesNoWindow.ShowDialog();
-                    }
-                    finally
-                    {
-                        ResumeTopmostMaintenance();
                     }
                 }
             }
@@ -1722,7 +1722,7 @@ namespace Ink_Canvas
         /// 5. 无论用户选择如何，都会重置IsShowingRestoreHiddenSlidesWindow标志
         /// 异常会被捕获并记录为错误日志，确保方法执行不会中断。
         /// </remarks>
-        private void CheckAndNotifyHiddenSlides(Presentation pres)
+        private async void CheckAndNotifyHiddenSlides(Presentation pres)
         {
             try
             {
@@ -1742,40 +1742,40 @@ namespace Ink_Canvas
                 if (hasHiddenSlides && !IsShowingRestoreHiddenSlidesWindow)
                 {
                     IsShowingRestoreHiddenSlidesWindow = true;
-                    var yesNoWindow = new YesOrNoNotificationWindow("检测到此演示文档中包含隐藏的幻灯片，是否取消隐藏？",
-                        () =>
+                    var dialog = new ContentDialog
+                    {
+                        Title = "Ink Canvas For Class CE",
+                        PrimaryButtonText = "是",
+                        SecondaryButtonText = "否",
+                        DefaultButton = ContentDialogButton.Primary,
+                        Content = new TextBlock { Text = "检测到此演示文档中包含隐藏的幻灯片，是否取消隐藏？", TextWrapping = TextWrapping.Wrap }
+                    };
+                    var result = await dialog.ShowAsync();
+                    if (result == ContentDialogResult.Primary)
+                    {
+                        try
                         {
-                            try
+                            if (pres?.Slides != null)
                             {
-                                if (pres?.Slides != null)
+                                foreach (Slide slide in pres.Slides)
                                 {
-                                    foreach (Slide slide in pres.Slides)
-                                    {
-                                        if (slide.SlideShowTransition.Hidden == MsoTriState.msoTrue)
-                                            slide.SlideShowTransition.Hidden = MsoTriState.msoFalse;
-                                    }
+                                    if (slide.SlideShowTransition.Hidden == MsoTriState.msoTrue)
+                                        slide.SlideShowTransition.Hidden = MsoTriState.msoFalse;
                                 }
                             }
-                            catch (Exception ex)
-                            {
-                                LogHelper.WriteLogToFile($"取消隐藏幻灯片失败: {ex}", LogHelper.LogType.Error);
-                            }
-                            finally
-                            {
-                                IsShowingRestoreHiddenSlidesWindow = false;
-                            }
-                        },
-                        () => { IsShowingRestoreHiddenSlidesWindow = false; },
-                        () => { IsShowingRestoreHiddenSlidesWindow = false; });
-                    yesNoWindow.Owner = this;
-                    PauseTopmostMaintenance();
-                    try
-                    {
-                        yesNoWindow.ShowDialog();
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"取消隐藏幻灯片失败: {ex}", LogHelper.LogType.Error);
+                        }
+                        finally
+                        {
+                            IsShowingRestoreHiddenSlidesWindow = false;
+                        }
                     }
-                    finally
+                    else
                     {
-                        ResumeTopmostMaintenance();
+                        IsShowingRestoreHiddenSlidesWindow = false;
                     }
                 }
             }
@@ -1799,7 +1799,7 @@ namespace Ink_Canvas
         /// 6. 无论用户选择如何，都会重置IsShowingAutoplaySlidesWindow标志
         /// 异常会被捕获并记录为错误日志，确保方法执行不会中断。
         /// </remarks>
-        private void CheckAndNotifyAutoPlaySettings(Presentation pres)
+        private async void CheckAndNotifyAutoPlaySettings(Presentation pres)
         {
             try
             {
@@ -1822,36 +1822,36 @@ namespace Ink_Canvas
                 if (hasSlideTimings && !IsShowingAutoplaySlidesWindow)
                 {
                     IsShowingAutoplaySlidesWindow = true;
-                    var yesNoWindow = new YesOrNoNotificationWindow("检测到此演示文档中自动播放或排练计时已经启用，可能导致幻灯片自动翻页，是否取消？",
-                        () =>
+                    var dialog = new ContentDialog
+                    {
+                        Title = "Ink Canvas For Class CE",
+                        PrimaryButtonText = "是",
+                        SecondaryButtonText = "否",
+                        DefaultButton = ContentDialogButton.Primary,
+                        Content = new TextBlock { Text = "检测到此演示文档中自动播放或排练计时已经启用，可能导致幻灯片自动翻页，是否取消？", TextWrapping = TextWrapping.Wrap }
+                    };
+                    var result = await dialog.ShowAsync();
+                    if (result == ContentDialogResult.Primary)
+                    {
+                        try
                         {
-                            try
+                            if (pres != null)
                             {
-                                if (pres != null)
-                                {
-                                    pres.SlideShowSettings.AdvanceMode = PpSlideShowAdvanceMode.ppSlideShowManualAdvance;
-                                }
+                                pres.SlideShowSettings.AdvanceMode = PpSlideShowAdvanceMode.ppSlideShowManualAdvance;
                             }
-                            catch (Exception ex)
-                            {
-                                LogHelper.WriteLogToFile($"设置手动播放模式失败: {ex}", LogHelper.LogType.Error);
-                            }
-                            finally
-                            {
-                                IsShowingAutoplaySlidesWindow = false;
-                            }
-                        },
-                        () => { IsShowingAutoplaySlidesWindow = false; },
-                        () => { IsShowingAutoplaySlidesWindow = false; });
-                    yesNoWindow.Owner = this;
-                    PauseTopmostMaintenance();
-                    try
-                    {
-                        yesNoWindow.ShowDialog();
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"设置手动播放模式失败: {ex}", LogHelper.LogType.Error);
+                        }
+                        finally
+                        {
+                            IsShowingAutoplaySlidesWindow = false;
+                        }
                     }
-                    finally
+                    else
                     {
-                        ResumeTopmostMaintenance();
+                        IsShowingAutoplaySlidesWindow = false;
                     }
                 }
             }
