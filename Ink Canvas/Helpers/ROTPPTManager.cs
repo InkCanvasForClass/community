@@ -692,6 +692,19 @@ namespace Ink_Canvas.Helpers
                         LogHelper.WriteLogToFile("成功绑定!", LogHelper.LogType.Event);
                     }
 
+                    // 关键修复：先触发PresentationOpen，再检查放映状态
+                    if (_pptActivePresentation != null)
+                    {
+                        try
+                        {
+                            OnPresentationOpen(_pptActivePresentation);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"初次连接触发PresentationOpen失败: {ex.Message}", LogHelper.LogType.Warning);
+                        }
+                    }
+
                     TryRaiseSlideShowBeginOnConnect();
                 }
                 catch (Exception ex)
