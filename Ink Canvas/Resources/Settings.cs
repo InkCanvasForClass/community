@@ -291,7 +291,7 @@ namespace Ink_Canvas
         Beta
     }
 
-    /// <summary>自动更新要下载的安装包架构（与当前运行进程的位数无关）。默认 32 位包；64 位包对应发布物 ZIP 文件名在 .zip 前增加 -x64。</summary>
+    /// <summary>自动更新要下载的安装包架构。默认跟随当前软件进程架构；64 位包对应发布物 ZIP 文件名在 .zip 前增加 -x64。</summary>
     public enum UpdatePackageArchitecture
     {
         /// <summary>32 位包，例如 InkCanvasForClass.CE.1.7.0.0.zip</summary>
@@ -332,7 +332,7 @@ namespace Ink_Canvas
         [JsonProperty("updateChannel")]
         public UpdateChannel UpdateChannel { get; set; } = UpdateChannel.Release;
         [JsonProperty("updatePackageArchitecture")]
-        public UpdatePackageArchitecture UpdatePackageArchitecture { get; set; } = UpdatePackageArchitecture.X86;
+        public UpdatePackageArchitecture UpdatePackageArchitecture { get; set; } = Environment.Is64BitProcess ? UpdatePackageArchitecture.X64 : UpdatePackageArchitecture.X86;
         [JsonProperty("isSmartUpdate")]
         public bool IsSmartUpdate { get; set; } = true;
         [JsonProperty("skippedVersion")]

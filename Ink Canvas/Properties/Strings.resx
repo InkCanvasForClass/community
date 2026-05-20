@@ -1172,7 +1172,7 @@
     <value>64 位 (x64)</value>
   </data>
   <data name="Startup_UpdatePackageArchitectureHint" xml:space="preserve">
-    <value>选择要下载架构</value>
+    <value>选择要下载的更新包架构，默认跟随当前软件架构</value>
   </data>
   <data name="Startup_UpdateChannelHint" xml:space="preserve">
     <value>稳定版提供可靠更新，预览版提供新功能体验同时拥有较 Beta 版版更强的稳定性，测试版提供新功能抢先体验</value>

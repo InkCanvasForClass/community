@@ -80,7 +80,7 @@ namespace Ink_Canvas.Helpers
             }
             catch
             {
-                return false;
+                return Environment.Is64BitProcess;
             }
         }
 
