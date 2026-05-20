@@ -1,5 +1,6 @@
 using Ink_Canvas.Controls.Toolbar;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Windows.SettingsViews.Helpers;
 using iNKORE.UI.WPF.Modern;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Office.Core;
@@ -63,6 +64,15 @@ namespace Ink_Canvas
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
 
+        [DllImport("user32.dll")]
+        private static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
+
+        [DllImport("user32.dll")]
+        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, IntPtr lpdwProcessId);
+
+        [DllImport("kernel32.dll")]
+        private static extern uint GetCurrentThreadId();
+
         private const int GWL_STYLE = -16;
         private const int WS_VISIBLE = 0x10000000;
         private const int WS_MINIMIZE = 0x20000000;
@@ -70,6 +80,58 @@ namespace Ink_Canvas
         private const uint GW_HWNDPREV = 3;
 
         private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+        private void ForceActivateWindow()
+        {
+            try
+            {
+                bool wasNoFocusMode = Settings.Advanced.IsNoFocusMode;
+                if (wasNoFocusMode)
+                {
+                    WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode = true;
+                    WindowSettingsHelper.ApplyNoFocusMode(this);
+                }
+
+                var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+                var foregroundHwnd = GetForegroundWindow();
+                var foregroundThreadId = GetWindowThreadProcessId(foregroundHwnd, IntPtr.Zero);
+                var currentThreadId = GetCurrentThreadId();
+
+                if (foregroundThreadId != 0 && foregroundThreadId != currentThreadId)
+                {
+                    AttachThreadInput(currentThreadId, foregroundThreadId, true);
+                    SetForegroundWindow(hwnd);
+                    AttachThreadInput(currentThreadId, foregroundThreadId, false);
+                }
+                else
+                {
+                    SetForegroundWindow(hwnd);
+                }
+
+                this.Activate();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"ForceActivateWindow失败: {ex}", LogHelper.LogType.Warning);
+                this.Activate();
+            }
+        }
+
+        private void RestoreNoFocusMode()
+        {
+            try
+            {
+                if (Settings.Advanced.IsNoFocusMode)
+                {
+                    WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode = false;
+                    WindowSettingsHelper.ApplyNoFocusMode(this);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"RestoreNoFocusMode失败: {ex}", LogHelper.LogType.Warning);
+            }
+        }
         #endregion
 
         #region PPT Application Variables
@@ -1648,38 +1710,45 @@ namespace Ink_Canvas
                 if (int.TryParse(File.ReadAllText(positionFile), out var page) && page > 0)
                 {
                     _lastPlaybackPage = page;
-                    this.Activate();
-                    var dialog = new ContentDialog
+                    ForceActivateWindow();
+                    try
                     {
-                        Title = "Ink Canvas For Class CE",
-                        PrimaryButtonText = "是",
-                        SecondaryButtonText = "否",
-                        DefaultButton = ContentDialogButton.Primary,
-                        Content = new TextBlock { Text = $"上次播放到了第 {page} 页, 是否立即跳转", TextWrapping = TextWrapping.Wrap }
-                    };
-                    var result = await dialog.ShowAsync();
-                    if (result == ContentDialogResult.Primary)
-                    {
-                        try
+                        var dialog = new ContentDialog
                         {
-                            var pptApp = _pptManager?.PPTApplication as Microsoft.Office.Interop.PowerPoint.Application;
-                            if (pptApp != null)
+                            Title = "Ink Canvas For Class CE",
+                            PrimaryButtonText = "是",
+                            SecondaryButtonText = "否",
+                            DefaultButton = ContentDialogButton.Primary,
+                            Content = new TextBlock { Text = $"上次播放到了第 {page} 页, 是否立即跳转", TextWrapping = TextWrapping.Wrap }
+                        };
+                        var result = await dialog.ShowAsync();
+                        if (result == ContentDialogResult.Primary)
+                        {
+                            try
                             {
-                                if (pptApp.SlideShowWindows.Count >= 1)
+                                var pptApp = _pptManager?.PPTApplication as Microsoft.Office.Interop.PowerPoint.Application;
+                                if (pptApp != null)
                                 {
-                                    pres.SlideShowWindow.View.GotoSlide(page);
+                                    if (pptApp.SlideShowWindows.Count >= 1)
+                                    {
+                                        pres.SlideShowWindow.View.GotoSlide(page);
+                                    }
+                                    else
+                                    {
+                                        pres.Windows[1].View.GotoSlide(page);
+                                    }
+                                    if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) ExceptionHandler.TryExecute(() => this.Activate(), "激活主窗口失败（PPT 翻页时）");
                                 }
-                                else
-                                {
-                                    pres.Windows[1].View.GotoSlide(page);
-                                }
-                                if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) ExceptionHandler.TryExecute(() => this.Activate(), "激活主窗口失败（PPT 翻页时）");
+                            }
+                            catch (Exception ex)
+                            {
+                                LogHelper.WriteLogToFile($"跳转到第{page}页失败: {ex}", LogHelper.LogType.Error);
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            LogHelper.WriteLogToFile($"跳转到第{page}页失败: {ex}", LogHelper.LogType.Error);
-                        }
+                    }
+                    finally
+                    {
+                        RestoreNoFocusMode();
                     }
                 }
             }
@@ -1722,41 +1791,48 @@ namespace Ink_Canvas
                 if (hasHiddenSlides && !IsShowingRestoreHiddenSlidesWindow)
                 {
                     IsShowingRestoreHiddenSlidesWindow = true;
-                    this.Activate();
-                    var dialog = new ContentDialog
+                    ForceActivateWindow();
+                    try
                     {
-                        Title = "Ink Canvas For Class CE",
-                        PrimaryButtonText = "是",
-                        SecondaryButtonText = "否",
-                        DefaultButton = ContentDialogButton.Primary,
-                        Content = new TextBlock { Text = "检测到此演示文档中包含隐藏的幻灯片，是否取消隐藏？", TextWrapping = TextWrapping.Wrap }
-                    };
-                    var result = await dialog.ShowAsync();
-                    if (result == ContentDialogResult.Primary)
-                    {
-                        try
+                        var dialog = new ContentDialog
                         {
-                            if (pres?.Slides != null)
+                            Title = "Ink Canvas For Class CE",
+                            PrimaryButtonText = "是",
+                            SecondaryButtonText = "否",
+                            DefaultButton = ContentDialogButton.Primary,
+                            Content = new TextBlock { Text = "检测到此演示文档中包含隐藏的幻灯片，是否取消隐藏？", TextWrapping = TextWrapping.Wrap }
+                        };
+                        var result = await dialog.ShowAsync();
+                        if (result == ContentDialogResult.Primary)
+                        {
+                            try
                             {
-                                foreach (Slide slide in pres.Slides)
+                                if (pres?.Slides != null)
                                 {
-                                    if (slide.SlideShowTransition.Hidden == MsoTriState.msoTrue)
-                                        slide.SlideShowTransition.Hidden = MsoTriState.msoFalse;
+                                    foreach (Slide slide in pres.Slides)
+                                    {
+                                        if (slide.SlideShowTransition.Hidden == MsoTriState.msoTrue)
+                                            slide.SlideShowTransition.Hidden = MsoTriState.msoFalse;
+                                    }
                                 }
                             }
+                            catch (Exception ex)
+                            {
+                                LogHelper.WriteLogToFile($"取消隐藏幻灯片失败: {ex}", LogHelper.LogType.Error);
+                            }
+                            finally
+                            {
+                                IsShowingRestoreHiddenSlidesWindow = false;
+                            }
                         }
-                        catch (Exception ex)
-                        {
-                            LogHelper.WriteLogToFile($"取消隐藏幻灯片失败: {ex}", LogHelper.LogType.Error);
-                        }
-                        finally
+                        else
                         {
                             IsShowingRestoreHiddenSlidesWindow = false;
                         }
                     }
-                    else
+                    finally
                     {
-                        IsShowingRestoreHiddenSlidesWindow = false;
+                        RestoreNoFocusMode();
                     }
                 }
             }
@@ -1803,37 +1879,44 @@ namespace Ink_Canvas
                 if (hasSlideTimings && !IsShowingAutoplaySlidesWindow)
                 {
                     IsShowingAutoplaySlidesWindow = true;
-                    this.Activate();
-                    var dialog = new ContentDialog
+                    ForceActivateWindow();
+                    try
                     {
-                        Title = "Ink Canvas For Class CE",
-                        PrimaryButtonText = "是",
-                        SecondaryButtonText = "否",
-                        DefaultButton = ContentDialogButton.Primary,
-                        Content = new TextBlock { Text = "检测到此演示文档中自动播放或排练计时已经启用，可能导致幻灯片自动翻页，是否取消？", TextWrapping = TextWrapping.Wrap }
-                    };
-                    var result = await dialog.ShowAsync();
-                    if (result == ContentDialogResult.Primary)
-                    {
-                        try
+                        var dialog = new ContentDialog
                         {
-                            if (pres != null)
+                            Title = "Ink Canvas For Class CE",
+                            PrimaryButtonText = "是",
+                            SecondaryButtonText = "否",
+                            DefaultButton = ContentDialogButton.Primary,
+                            Content = new TextBlock { Text = "检测到此演示文档中自动播放或排练计时已经启用，可能导致幻灯片自动翻页，是否取消？", TextWrapping = TextWrapping.Wrap }
+                        };
+                        var result = await dialog.ShowAsync();
+                        if (result == ContentDialogResult.Primary)
+                        {
+                            try
                             {
-                                pres.SlideShowSettings.AdvanceMode = PpSlideShowAdvanceMode.ppSlideShowManualAdvance;
+                                if (pres != null)
+                                {
+                                    pres.SlideShowSettings.AdvanceMode = PpSlideShowAdvanceMode.ppSlideShowManualAdvance;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                LogHelper.WriteLogToFile($"设置手动播放模式失败: {ex}", LogHelper.LogType.Error);
+                            }
+                            finally
+                            {
+                                IsShowingAutoplaySlidesWindow = false;
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            LogHelper.WriteLogToFile($"设置手动播放模式失败: {ex}", LogHelper.LogType.Error);
-                        }
-                        finally
+                        else
                         {
                             IsShowingAutoplaySlidesWindow = false;
                         }
                     }
-                    else
+                    finally
                     {
-                        IsShowingAutoplaySlidesWindow = false;
+                        RestoreNoFocusMode();
                     }
                 }
             }
