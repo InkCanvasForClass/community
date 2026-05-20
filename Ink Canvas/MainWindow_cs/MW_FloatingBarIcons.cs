@@ -1920,6 +1920,9 @@ namespace Ink_Canvas
             }
 
             isFloatingBarHeadOnRight = headOnRight;
+
+            // 翻转工具栏后更新高光和指示条位置
+            SetFloatingBarHighlightPosition(_currentToolMode);
         }
 
         private bool IsDragHandleElement(FrameworkElement element)
