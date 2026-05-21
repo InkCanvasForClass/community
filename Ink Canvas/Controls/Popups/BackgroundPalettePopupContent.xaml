@@ -15,22 +15,33 @@
                            Foreground="{DynamicResource TextForeground}"
                            FontSize="10" FontWeight="Bold"
                            HorizontalAlignment="Center"/>
-                <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20">
+                <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
                     <Border x:Name="WhiteboardModeBtn"
-                            Width="60" Height="30"
+                            Width="50" Height="30"
                             Background="#2563eb"
                             CornerRadius="4">
-                        <TextBlock Text="白板" FontSize="10"
+                        <TextBlock Text="白板" FontSize="9"
                                    Foreground="White"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center" />
                     </Border>
                     <Border x:Name="BlackboardModeBtn"
-                            Width="60" Height="30"
-                            Background="LightGray"
+                            Width="50" Height="30"
+                            Background="#162924"
                             CornerRadius="4">
                         <TextBlock Text="黑板"
-                                   Foreground="Black"
+                                   Foreground="White"
+                                   FontSize="9"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </Border>
+                    <Border x:Name="BlackModeBtn"
+                            Width="50" Height="30"
+                            Background="Black"
+                            CornerRadius="4">
+                        <TextBlock Text="纯黑"
+                                   Foreground="White"
+                                   FontSize="9"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center" />
                     </Border>

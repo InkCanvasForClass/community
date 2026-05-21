@@ -23,21 +23,26 @@ namespace Ink_Canvas
         /// - 处理白板/黑板模式切换
         /// - 更新背景颜色和墨迹颜色
         /// </remarks>
+        private int currentBackgroundMode = 0; // 0: 白板, 1: 黑板(深绿), 2: 纯黑
+
         private void BoardChangeBackgroundColorBtn_MouseUp(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
 
-            if (BackgroundPalette.IsOpen)
+            // 循环切换背景模式
+            currentBackgroundMode = (currentBackgroundMode + 1) % 3;
+
+            switch (currentBackgroundMode)
             {
-                AnimationsHelper.HidePopupWithSlideAndFade(BackgroundPalette);
-            }
-            else
-            {
-                HideSubPanels();
-                LoadCustomBackgroundColor();
-                UpdateBackgroundButtonsState();
-                AnimationsHelper.ShowPopupWithSlideAndFade(BackgroundPalette);
-                _popupManager?.BringToFront(BackgroundPalette);
+                case 0: // 白板
+                    WhiteboardModeBtn_MouseUp(sender, null);
+                    break;
+                case 1: // 黑板(深绿)
+                    BlackboardModeBtn_MouseUp(sender, null);
+                    break;
+                case 2: // 纯黑
+                    BlackModeBtn_MouseUp(sender, null);
+                    break;
             }
         }
 
@@ -81,6 +86,31 @@ namespace Ink_Canvas
                 UpdateRGBSliders(defaultBlackboardColor);
                 CustomBackgroundColor = defaultBlackboardColor;
                 string colorHex = $"#{defaultBlackboardColor.R:X2}{defaultBlackboardColor.G:X2}{defaultBlackboardColor.B:X2}";
+                Settings.Canvas.CustomBackgroundColor = colorHex;
+                SaveSettingsToFile();
+            }
+
+            CheckLastColor(5);
+            forceEraser = false;
+            CheckColorTheme(true);
+            UpdateBackgroundButtonsState();
+        }
+
+        private void BlackModeBtn_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            Settings.Canvas.UsingWhiteboard = false;
+            SaveSettingsToFile();
+            ICCWaterMarkWhite.Visibility = Visibility.Visible;
+            ICCWaterMarkDark.Visibility = Visibility.Collapsed;
+
+            Color defaultBlackColor = Color.FromRgb(0, 0, 0);
+
+            if (currentMode == 1)
+            {
+                GridBackgroundCover.Background = new SolidColorBrush(defaultBlackColor);
+                UpdateRGBSliders(defaultBlackColor);
+                CustomBackgroundColor = defaultBlackColor;
+                string colorHex = $"#{defaultBlackColor.R:X2}{defaultBlackColor.G:X2}{defaultBlackColor.B:X2}";
                 Settings.Canvas.CustomBackgroundColor = colorHex;
                 SaveSettingsToFile();
             }

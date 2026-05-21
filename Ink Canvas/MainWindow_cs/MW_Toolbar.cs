@@ -248,6 +248,7 @@ namespace Ink_Canvas
         internal Button ApplyBackgroundColorBtn => BackgroundPalettePopupContent?.ApplyBtn;
         internal Border WhiteboardModeBtn => BackgroundPalettePopupContent?.WhiteboardBtn;
         internal Border BlackboardModeBtn => BackgroundPalettePopupContent?.BlackboardBtn;
+        internal Border BlackModeBtn => BackgroundPalettePopupContent?.BlackModeBtn;
         #endregion
 
         #region QuickColorPalette property mappings
