@@ -885,37 +885,42 @@ namespace Ink_Canvas
         /// </remarks>
         private async void OnPPTPresentationOpen(Presentation pres)
         {
-            if (!Application.Current.Dispatcher.CheckAccess())
-            {
-                _ = Application.Current.Dispatcher.BeginInvoke(new Action(() => OnPPTPresentationOpen(pres)));
-                return;
-            }
-
             try
             {
-                ResetPptEnhancedPreviewCache();
-                ClearStrokes(true);
-                if (TimeMachineHistories != null && TimeMachineHistories.Length > 0)
+                await Application.Current.Dispatcher.InvokeAsync(async () =>
                 {
-                    TimeMachineHistories[0] = null;
-                }
-                _singlePPTInkManager?.InitializePresentation(pres);
+                    // 在初始化墨迹管理器之前，先清理画布上的所有墨迹
+                    ResetPptEnhancedPreviewCache();
 
-                await HandlePresentationOpenNavigation(pres);
+                    ClearStrokes(true);
 
-                if (Settings.PowerPointSettings.IsNotifyHiddenPage)
-                {
-                    CheckAndNotifyHiddenSlides(pres);
-                }
+                    // 清理备份历史记录，防止旧演示文稿的墨迹影响新演示文稿
+                    if (TimeMachineHistories != null && TimeMachineHistories.Length > 0)
+                    {
+                        TimeMachineHistories[0] = null;
+                    }
 
-                if (Settings.PowerPointSettings.IsNotifyAutoPlayPresentation)
-                {
-                    CheckAndNotifyAutoPlaySettings(pres);
-                }
+                    _singlePPTInkManager?.InitializePresentation(pres);
 
-                _pptUIManager?.UpdateConnectionStatus(true);
+                    // 处理跳转到首页或上次播放页的逻辑
+                    await HandlePresentationOpenNavigation(pres);
 
-                LogHelper.WriteLogToFile($"已打开新演示文稿: {pres.Name}，墨迹状态已清理", LogHelper.LogType.Event);
+                    // 检查隐藏幻灯片
+                    if (Settings.PowerPointSettings.IsNotifyHiddenPage)
+                    {
+                        CheckAndNotifyHiddenSlides(pres);
+                    }
+
+                    // 检查自动播放设置
+                    if (Settings.PowerPointSettings.IsNotifyAutoPlayPresentation)
+                    {
+                        CheckAndNotifyAutoPlaySettings(pres);
+                    }
+
+                    _pptUIManager?.UpdateConnectionStatus(true);
+
+                    LogHelper.WriteLogToFile($"已打开新演示文稿: {pres.Name}，墨迹状态已清理", LogHelper.LogType.Event);
+                });
             }
             catch (Exception ex)
             {
@@ -1669,7 +1674,6 @@ namespace Ink_Canvas
                         Title = "Ink Canvas For Class CE",
                         PrimaryButtonText = "是",
                         SecondaryButtonText = "否",
-
                         DefaultButton = ContentDialogButton.Primary,
                         Content = new TextBlock { Text = $"上次播放到了第 {page} 页, 是否立即跳转", TextWrapping = TextWrapping.Wrap }
                     };

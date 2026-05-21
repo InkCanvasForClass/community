@@ -329,21 +329,23 @@ namespace Ink_Canvas.Helpers
                 _cachedIsConnected = true;
 
                 // 在主线程中注册事件，确保COM对象在正确的线程中
-                // 注意：注册事件必须在触发事件之前，并且不能用BeginInvoke延迟！
-                try
+                Application.Current?.Dispatcher?.BeginInvoke(new Action(() =>
                 {
-                    PPTApplication.PresentationOpen += OnPresentationOpen;
-                    PPTApplication.PresentationClose += OnPresentationClose;
-                    PPTApplication.SlideShowBegin += OnSlideShowBegin;
-                    PPTApplication.SlideShowNextSlide += OnSlideShowNextSlide;
-                    PPTApplication.SlideShowEnd += OnSlideShowEnd;
+                    try
+                    {
+                        PPTApplication.PresentationOpen += OnPresentationOpen;
+                        PPTApplication.PresentationClose += OnPresentationClose;
+                        PPTApplication.SlideShowBegin += OnSlideShowBegin;
+                        PPTApplication.SlideShowNextSlide += OnSlideShowNextSlide;
+                        PPTApplication.SlideShowEnd += OnSlideShowEnd;
 
-                    LogHelper.WriteLogToFile("PPT事件注册成功", LogHelper.LogType.Trace);
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"PPT事件注册失败: {ex}", LogHelper.LogType.Error);
-                }
+                        LogHelper.WriteLogToFile("PPT事件注册成功", LogHelper.LogType.Trace);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"PPT事件注册失败: {ex}", LogHelper.LogType.Error);
+                    }
+                }), DispatcherPriority.Normal);
 
                 // 获取当前演示文稿信息
                 UpdateCurrentPresentationInfo();
@@ -354,14 +356,13 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile("成功连接到PPT应用程序", LogHelper.LogType.Event);
 
                 RefreshIsInSlideShowFromCom();
-                // 关键修复：无论是否在放映中，都先触发PresentationOpen，这样OnPPTPresentationOpen的逻辑才能正常运行
-                if (CurrentPresentation != null)
-                {
-                    OnPresentationOpen(CurrentPresentation);
-                }
                 if (_cachedIsInSlideShow)
                 {
                     OnSlideShowBegin(PPTApplication.SlideShowWindows[1]);
+                }
+                else if (CurrentPresentation != null)
+                {
+                    OnPresentationOpen(CurrentPresentation);
                 }
             }
             catch (Exception ex)
