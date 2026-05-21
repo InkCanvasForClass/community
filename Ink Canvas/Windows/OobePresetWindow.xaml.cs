@@ -108,7 +108,7 @@ namespace Ink_Canvas.Windows
             // 自动化
             settings.Automation.IsAutoFoldInPPTSlideShow = false;
             settings.Automation.IsEnableAutoSaveStrokes = true;
-            settings.Automation.IsAutoSaveStrokesAtClear = true;
+            settings.Automation.IsAutoSaveScreenshotAtClear = true;
             settings.Automation.IsSaveScreenshotsInDateFolders = true;
             if (settings.Automation.FloatingWindowInterceptor != null)
                 settings.Automation.FloatingWindowInterceptor.IsEnabled = true;
@@ -163,7 +163,7 @@ namespace Ink_Canvas.Windows
             // 自动化
             settings.Automation.IsAutoFoldInPPTSlideShow = false;
             settings.Automation.IsEnableAutoSaveStrokes = true;
-            settings.Automation.IsAutoSaveStrokesAtClear = true;
+            settings.Automation.IsAutoSaveScreenshotAtClear = true;
             settings.Automation.IsSaveScreenshotsInDateFolders = false;
             if (settings.Automation.FloatingWindowInterceptor != null)
                 settings.Automation.FloatingWindowInterceptor.IsEnabled = false;

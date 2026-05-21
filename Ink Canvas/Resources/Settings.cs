@@ -691,7 +691,7 @@ namespace Ink_Canvas
         public bool IsAutoSaveStrokesAtScreenshot { get; set; }
 
         [JsonProperty("isAutoSaveStrokesAtClear")]
-        public bool IsAutoSaveStrokesAtClear { get; set; }
+        public bool IsAutoSaveScreenshotAtClear { get; set; }
 
         [JsonProperty("isEnablePhotoCorrection")]
         public bool IsEnablePhotoCorrection { get; set; } = false;

@@ -477,7 +477,7 @@ namespace Ink_Canvas
         private void BtnWhiteBoardSwitchNext_Click(object sender, RoutedEventArgs e)
         {
             if (CurrentWhiteboardIndex < WhiteboardTotalCount &&
-                Settings.Automation.IsAutoSaveStrokesAtClear &&
+                Settings.Automation.IsAutoSaveScreenshotAtClear &&
                 inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
                 CaptureAndEnqueueScreenshotSave(isHideNotification: true);
 
@@ -528,7 +528,7 @@ namespace Ink_Canvas
         {
             MarkCurrentPageInkChanged();
             if (WhiteboardTotalCount >= 99) return;
-            if (Settings.Automation.IsAutoSaveStrokesAtClear &&
+            if (Settings.Automation.IsAutoSaveScreenshotAtClear &&
                 inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
                 CaptureAndEnqueueScreenshotSave(isHideNotification: true);
 

@@ -164,7 +164,7 @@ namespace Ink_Canvas.Windows
                     {
                         CardFloatingWindowInterceptor.IsOn = _settings.Automation.FloatingWindowInterceptor.IsEnabled;
                     }
-                    CardAutoSaveStrokesAtClear.IsOn = _settings.Automation.IsAutoSaveStrokesAtClear;
+                    CardAutoSaveStrokesAtClear.IsOn = _settings.Automation.IsAutoSaveScreenshotAtClear;
                     CardSaveScreenshotsInDateFolders.IsOn = _settings.Automation.IsSaveScreenshotsInDateFolders;
                 }
             }
@@ -273,7 +273,7 @@ namespace Ink_Canvas.Windows
                 {
                     _settings.Automation.IsAutoFoldInPPTSlideShow = CardAutoFoldInPPTSlideShow.IsOn;
                     _settings.Automation.IsEnableAutoSaveStrokes = CardEnableAutoSaveStrokes.IsOn;
-                    _settings.Automation.IsAutoSaveStrokesAtClear = CardAutoSaveStrokesAtClear.IsOn;
+                    _settings.Automation.IsAutoSaveScreenshotAtClear = CardAutoSaveStrokesAtClear.IsOn;
                     _settings.Automation.IsSaveScreenshotsInDateFolders = CardSaveScreenshotsInDateFolders.IsOn;
                     if (_settings.Automation.FloatingWindowInterceptor != null)
                     {
@@ -620,7 +620,7 @@ namespace Ink_Canvas.Windows
             }
 
             string themeText;
-            string backdropText = GetSelectedComboBoxContent(ComboBoxWindowBackdrop, Strings.GetString("Theme_WindowBackdrop_None") ?? "None");
+            string backdropText = GetSelectedComboBoxContent(ComboBoxWindowBackdrop, "无背景效果");
             switch (ComboBoxTheme.SelectedIndex)
             {
                 case 0: themeText = "浅色"; break;
@@ -631,7 +631,7 @@ namespace Ink_Canvas.Windows
             AddSummaryRow(SegoeFluentIcons.Shield, "遥测级别", telemetryText);
             AddSummaryRow(SegoeFluentIcons.Sync, "自动检查更新", BoolText(CardAutoUpdate.IsOn));
             AddSummaryRow(SegoeFluentIcons.Personalize, "应用主题", themeText);
-            AddSummaryRow(SegoeFluentIcons.FullScreen, Strings.GetString("Theme_WindowBackdrop") ?? "Theme_WindowBackdrop", backdropText);
+            AddSummaryRow(SegoeFluentIcons.FullScreen, "窗口背景样式", backdropText);
             AddSummaryRow(SegoeFluentIcons.Slideshow, "PowerPoint / WPS 联动", BoolText(CardPptSupport.IsOn));
             AddSummaryRow(SegoeFluentIcons.TouchPointer, "双指缩放 / 平移",
                 $"{BoolText(CardTwoFingerZoom.IsOn)} / {BoolText(CardTwoFingerTranslate.IsOn)}");

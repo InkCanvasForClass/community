@@ -73,7 +73,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             CardSaveScreenshotsInDateFolders.IsOn = auto.IsSaveScreenshotsInDateFolders;
             CardAutoSaveStrokesAtScreenshot.IsOn = auto.IsAutoSaveStrokesAtScreenshot;
-            CardAutoSaveStrokesAtClear.IsOn = auto.IsAutoSaveStrokesAtClear;
+            CardAutoSaveStrokesAtClear.IsOn = auto.IsAutoSaveScreenshotAtClear;
             CardSaveStrokesAsXML.IsOn = auto.IsSaveStrokesAsXML;
             CardEnableAutoSaveStrokes.IsOn = auto.IsEnableAutoSaveStrokes;
 
@@ -420,7 +420,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchAutoSaveStrokesAtClear_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Automation.IsAutoSaveStrokesAtClear = CardAutoSaveStrokesAtClear.IsOn;
+            SettingsManager.Settings.Automation.IsAutoSaveScreenshotAtClear = CardAutoSaveStrokesAtClear.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 

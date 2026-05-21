@@ -6,7 +6,6 @@
       xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       xmlns:c="clr-namespace:Ink_Canvas.Converter"
@@ -162,15 +161,15 @@
                                        Text="自动更新" />
 
                             <controls:LabeledSettingsCard x:Name="CardAutoUpdate"
-                                                          Header="{i18n:I18n Key=Header_AutoUpdate}"
-                                                          Description="{i18n:I18n Key=Startup_AutoUpdateHint}"
+                                                          Header="自动检查更新"
+                                                          Description="开启后将在软件启动时自动检查更新。"
                                                           Icon="{x:Static ui:SegoeFluentIcons.Sync}"
                                                           SwitchName="ToggleSwitchIsAutoUpdate"
                                                           Toggled="ToggleSwitchIsAutoUpdate_Toggled" />
 
                             <controls:LabeledSettingsCard x:Name="CardSilentUpdate"
-                                                          Header="{i18n:I18n Key=Header_SilentUpdate}"
-                                                          Description="{i18n:I18n Key=Startup_SilentUpdateHint}"
+                                                          Header="静默更新"
+                                                          Description="静默更新将在软件不使用时自动安装，无需手动操作"
                                                           Icon="{x:Static ui:SegoeFluentIcons.QuietHours}"
                                                           SwitchName="ToggleSwitchIsAutoUpdateWithSilence"
                                                           ShowWhen="{Binding IsOn, ElementName=CardAutoUpdate}"
@@ -178,14 +177,14 @@
                                                           Toggled="ToggleSwitchIsAutoUpdateWithSilence_Toggled" />
 
                             <controls:LabeledSettingsCard x:Name="CardSmartUpdate"
-                                                          Header="{i18n:I18n Key=Startup_SmartUpdate}"
-                                                          Description="{i18n:I18n Key=Startup_SmartUpdateHint}"
+                                                          Header="智慧更新"
+                                                          Description="开启后使用统一平台 API 检查更新并获取下载链接。"
                                                           Icon="{x:Static ui:SegoeFluentIcons.CloudDownload}"
                                                           SwitchName="ToggleSwitchIsSmartUpdate"
                                                           Toggled="ToggleSwitchIsSmartUpdate_Toggled" />
 
                             <ui:SettingsExpander x:Name="ExpanderSilentUpdateTime"
-                                                 Header="{i18n:I18n Key=Startup_SilentUpdateTimePeriod}"
+                                                 Header="静默更新时间段"
                                                  Visibility="{Binding IsOn, ElementName=CardSilentUpdate, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                  IsExpanded="{Binding IsOn, ElementName=CardSilentUpdate, Mode=OneWay}"
                                                  d:Visibility="Visible" d:IsExpanded="True">
@@ -193,65 +192,66 @@
                                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
                                 </ui:SettingsExpander.HeaderIcon>
                                 <ui:SettingsExpander.Items>
-                                    <ui:SettingsCard Header="{i18n:I18n Key=Startup_SilentUpdateFullHint}">
+                                    <ui:SettingsCard Header="静默更新时间段设置"
+                                                     Description="关闭静默更新后，已完成安装包的下载后将会弹窗询问是否进行更新，开启静默更新后将会在安装包下载完成后每隔十分钟进行如下检测：①处于静默更新时间段内 ②未处于书写模式 ③未处于画板内。若以上检测通过即会关闭软件进行自动更新。">
                                         <ui:SettingsCard.Content>
                                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
                                                 <ikw:SimpleStackPanel Orientation="Horizontal">
                                                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center"
-                                                               Text="{i18n:I18n Key=Startup_StartTime}" FontSize="14" />
+                                                               Text="起始时间" FontSize="14" />
                                                     <ComboBox x:Name="AutoUpdateWithSilenceStartTimeComboBox"
                                                               SelectionChanged="AutoUpdateWithSilenceStartTimeComboBox_SelectionChanged" />
                                                 </ikw:SimpleStackPanel>
                                                 <ikw:SimpleStackPanel Orientation="Horizontal">
                                                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center"
-                                                               Text="{i18n:I18n Key=Startup_EndTime}" FontSize="14" />
+                                                               Text="终止时间" FontSize="14" />
                                                     <ComboBox x:Name="AutoUpdateWithSilenceEndTimeComboBox"
                                                               SelectionChanged="AutoUpdateWithSilenceEndTimeComboBox_SelectionChanged" />
                                                 </ikw:SimpleStackPanel>
                                             </ikw:SimpleStackPanel>
                                         </ui:SettingsCard.Content>
                                     </ui:SettingsCard>
-                                    <ui:SettingsCard Header="{i18n:I18n Key=Startup_TimePeriodHint}" />
+                                    <ui:SettingsCard Header="若终止时间小于起始时间，即将终止时间视为第二天的时间。若起始时间与终止时间相同，即视为全天候时间。" />
                                 </ui:SettingsExpander.Items>
                             </ui:SettingsExpander>
 
                             <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                                        Text="更新通道" />
 
-                            <ui:SettingsCard Header="{i18n:I18n Key=Startup_UpdateChannel}"
-                                             Description="{i18n:I18n Key=Startup_UpdateChannelHint}">
+                            <ui:SettingsCard Header="更新通道"
+                                             Description="稳定版提供可靠更新，预览版提供新功能体验同时拥有较 Beta 版版更强的稳定性，测试版提供新功能抢先体验">
                                 <ui:SettingsCard.HeaderIcon>
                                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.SyncFolder}" />
                                 </ui:SettingsCard.HeaderIcon>
                                 <ComboBox x:Name="UpdateChannelSelector"
                                           SelectionChanged="UpdateChannelSelector_SelectionChanged">
-                                    <ComboBoxItem Content="{i18n:I18n Key=Update_Release}" Tag="Release" />
-                                    <ComboBoxItem Content="{i18n:I18n Key=Update_Preview}" Tag="Preview" />
-                                    <ComboBoxItem Content="{i18n:I18n Key=Update_Beta}" Tag="Beta" />
+                                    <ComboBoxItem Content="稳定版 (Release)" Tag="Release" />
+                                    <ComboBoxItem Content="预览版 (Preview)" Tag="Preview" />
+                                    <ComboBoxItem Content="测试版 (Beta)" Tag="Beta" />
                                 </ComboBox>
                             </ui:SettingsCard>
 
-                            <ui:SettingsCard Header="{i18n:I18n Key=Startup_UpdatePackageArchitecture}"
-                                             Description="{i18n:I18n Key=Startup_UpdatePackageArchitectureHint}">
+                            <ui:SettingsCard Header="软件架构"
+                                             Description="选择要下载的更新包架构，默认跟随当前软件架构">
                                 <ui:SettingsCard.HeaderIcon>
                                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}" />
                                 </ui:SettingsCard.HeaderIcon>
                                 <ComboBox x:Name="UpdatePackageArchitectureSelector"
                                           SelectionChanged="UpdatePackageArchitectureSelector_SelectionChanged">
-                                    <ComboBoxItem Content="{i18n:I18n Key=Update_PackageArch_X86}" Tag="X86" />
-                                    <ComboBoxItem Content="{i18n:I18n Key=Update_PackageArch_X64}" Tag="X64" />
+                                    <ComboBoxItem Content="32 位 (x86)" Tag="X86" />
+                                    <ComboBoxItem Content="64 位 (x64)" Tag="X64" />
                                 </ComboBox>
                             </ui:SettingsCard>
 
                             <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                                        Text="维护" />
 
-                            <ui:SettingsCard Header="{i18n:I18n Key=Btn_FixVersion}"
-                                             Description="{i18n:I18n Key=Startup_FixVersionHint}">
+                            <ui:SettingsCard Header="版本修复"
+                                             Description="版本修复会根据当前选择的通道下载最新版本并执行安装，可用于修复损坏的安装">
                                 <ui:SettingsCard.HeaderIcon>
                                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Repair}" />
                                 </ui:SettingsCard.HeaderIcon>
-                                <Button x:Name="FixVersionButton" Content="{i18n:I18n Key=Btn_FixVersion}"
+                                <Button x:Name="FixVersionButton" Content="版本修复"
                                         Click="FixVersionButton_Click" />
                             </ui:SettingsCard>
                         </ikw:SimpleStackPanel>

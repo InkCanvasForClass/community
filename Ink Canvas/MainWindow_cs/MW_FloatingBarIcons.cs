@@ -892,7 +892,7 @@ namespace Ink_Canvas
                 // 使用PPT UI管理器来正确更新翻页按钮显示状态，确保遵循用户设置
                 _pptUIManager?.UpdateNavigationPanelsVisibility();
 
-                if (Settings.Automation.IsAutoSaveStrokesAtClear &&
+                if (Settings.Automation.IsAutoSaveScreenshotAtClear &&
                     inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber) CaptureAndEnqueueScreenshotSave(true);
 
                 if (!IsInPptPresentationMode)
@@ -1009,7 +1009,7 @@ namespace Ink_Canvas
             }
             else if (inkCanvas.Strokes.Count > 0)
             {
-                if (Settings.Automation.IsAutoSaveStrokesAtClear &&
+                if (Settings.Automation.IsAutoSaveScreenshotAtClear &&
                     inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
                 {
                     if (IsInPptPresentationMode)
@@ -4184,7 +4184,7 @@ private bool forceEraser;
                     if (isLoaded && Settings.Automation.IsAutoClearWhenExitingWritingMode)
                         if (inkCanvas.Strokes.Count > 0)
                         {
-                            if (Settings.Automation.IsAutoSaveStrokesAtClear && inkCanvas.Strokes.Count >
+                            if (Settings.Automation.IsAutoSaveScreenshotAtClear && inkCanvas.Strokes.Count >
                                 Settings.Automation.MinimumAutomationStrokeNumber)
                                 CaptureAndEnqueueScreenshotSave(true);
 
@@ -4200,7 +4200,7 @@ private bool forceEraser;
                         !Settings.PowerPointSettings.IsNoClearStrokeOnSelectWhenInPowerPoint)
                         if (inkCanvas.Strokes.Count > 0)
                         {
-                            if (Settings.Automation.IsAutoSaveStrokesAtClear && inkCanvas.Strokes.Count >
+                            if (Settings.Automation.IsAutoSaveScreenshotAtClear && inkCanvas.Strokes.Count >
                                 Settings.Automation.MinimumAutomationStrokeNumber)
                                 CaptureAndEnqueueScreenshotSave(true);
 

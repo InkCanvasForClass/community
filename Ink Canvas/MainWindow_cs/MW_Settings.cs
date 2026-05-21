@@ -945,7 +945,7 @@ namespace Ink_Canvas
             Settings.Automation.IsAutoKillSeewoLauncher2DesktopAnnotation = false;
             Settings.Automation.IsSaveScreenshotsInDateFolders = false;
             Settings.Automation.IsAutoSaveStrokesAtScreenshot = true;
-            Settings.Automation.IsAutoSaveStrokesAtClear = true;
+            Settings.Automation.IsAutoSaveScreenshotAtClear = true;
             Settings.Automation.IsAutoClearWhenExitingWritingMode = false;
             Settings.Automation.MinimumAutomationStrokeNumber = 0;
             Settings.Automation.AutoDelSavedFiles = AutoDelSavedFilesDays;
