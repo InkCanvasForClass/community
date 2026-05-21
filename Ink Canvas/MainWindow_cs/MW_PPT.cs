@@ -1648,7 +1648,6 @@ namespace Ink_Canvas
                 if (int.TryParse(File.ReadAllText(positionFile), out var page) && page > 0)
                 {
                     _lastPlaybackPage = page;
-                    this.Activate();
                     var dialog = new ContentDialog
                     {
                         Title = "Ink Canvas For Class CE",
@@ -1722,7 +1721,6 @@ namespace Ink_Canvas
                 if (hasHiddenSlides && !IsShowingRestoreHiddenSlidesWindow)
                 {
                     IsShowingRestoreHiddenSlidesWindow = true;
-                    this.Activate();
                     var dialog = new ContentDialog
                     {
                         Title = "Ink Canvas For Class CE",
@@ -1803,7 +1801,6 @@ namespace Ink_Canvas
                 if (hasSlideTimings && !IsShowingAutoplaySlidesWindow)
                 {
                     IsShowingAutoplaySlidesWindow = true;
-                    this.Activate();
                     var dialog = new ContentDialog
                     {
                         Title = "Ink Canvas For Class CE",
