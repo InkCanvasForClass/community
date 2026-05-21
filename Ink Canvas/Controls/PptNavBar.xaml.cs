@@ -15,6 +15,35 @@ namespace Ink_Canvas.Controls
     /// </summary>
     public partial class PptNavBar : UserControl
     {
+        /// <summary>
+        /// 预览模式：禁用所有鼠标交互，仅用于设置界面展示
+        /// </summary>
+        public static readonly DependencyProperty IsPreviewModeProperty = DependencyProperty.Register(
+            nameof(IsPreviewMode), typeof(bool), typeof(PptNavBar),
+            new PropertyMetadata(false, OnIsPreviewModeChanged));
+
+        public bool IsPreviewMode
+        {
+            get => (bool)GetValue(IsPreviewModeProperty);
+            set => SetValue(IsPreviewModeProperty, value);
+        }
+
+        private static void OnIsPreviewModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is PptNavBar bar)
+            {
+                bool isPreview = (bool)e.NewValue;
+                bar.IsHitTestVisible = !isPreview;
+                if (isPreview)
+                {
+                    bar.PreviewList.IsHitTestVisible = false;
+                    bar.PreviewList.Visibility = Visibility.Collapsed;
+                    // Set default values for preview display
+                    bar.CurrentSlide = 1;
+                    bar.TotalSlides = 10;
+                }
+            }
+        }
         public sealed class PreviewItem
         {
             public int SlideNumber { get; set; }
@@ -291,6 +320,7 @@ namespace Ink_Canvas.Controls
 
         private void PreviousButton_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (IsPreviewMode) return;
             _lastDown = sender;
             SetFeedback(PreviousButtonFeedbackBorder, 0.15);
             PreviousPressedDown?.Invoke(this, EventArgs.Empty);
@@ -298,6 +328,7 @@ namespace Ink_Canvas.Controls
 
         private void PreviousButton_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (IsPreviewMode) return;
             SetFeedback(PreviousButtonFeedbackBorder, 0);
             PressEnded?.Invoke(this, EventArgs.Empty);
             if (_lastDown != sender) return;
@@ -307,6 +338,7 @@ namespace Ink_Canvas.Controls
 
         private void PreviousButton_MouseLeave(object sender, MouseEventArgs e)
         {
+            if (IsPreviewMode) return;
             SetFeedback(PreviousButtonFeedbackBorder, 0);
             _lastDown = null;
             PressEnded?.Invoke(this, EventArgs.Empty);
@@ -314,6 +346,7 @@ namespace Ink_Canvas.Controls
 
         private void NextButton_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (IsPreviewMode) return;
             _lastDown = sender;
             SetFeedback(NextButtonFeedbackBorder, 0.15);
             NextPressedDown?.Invoke(this, EventArgs.Empty);
@@ -321,6 +354,7 @@ namespace Ink_Canvas.Controls
 
         private void NextButton_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (IsPreviewMode) return;
             SetFeedback(NextButtonFeedbackBorder, 0);
             PressEnded?.Invoke(this, EventArgs.Empty);
             if (_lastDown != sender) return;
@@ -330,6 +364,7 @@ namespace Ink_Canvas.Controls
 
         private void NextButton_MouseLeave(object sender, MouseEventArgs e)
         {
+            if (IsPreviewMode) return;
             SetFeedback(NextButtonFeedbackBorder, 0);
             _lastDown = null;
             PressEnded?.Invoke(this, EventArgs.Empty);
@@ -337,12 +372,14 @@ namespace Ink_Canvas.Controls
 
         private void PageButton_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (IsPreviewMode) return;
             _lastDown = sender;
             SetFeedback(PageButtonFeedbackBorder, 0.15);
         }
 
         private void PageButton_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (IsPreviewMode) return;
             SetFeedback(PageButtonFeedbackBorder, 0);
             if (_lastDown != sender) return;
             _lastDown = null;
@@ -351,12 +388,14 @@ namespace Ink_Canvas.Controls
 
         private void PageButton_MouseLeave(object sender, MouseEventArgs e)
         {
+            if (IsPreviewMode) return;
             SetFeedback(PageButtonFeedbackBorder, 0);
             _lastDown = null;
         }
 
         private void PreviewList_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (IsPreviewMode) return;
             if (PreviewList.SelectedItem is PreviewItem item)
             {
                 SlideSelected?.Invoke(this, item.SlideNumber);
