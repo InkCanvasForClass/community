@@ -25,6 +25,7 @@ namespace Ink_Canvas
             InitializeComponent();
             this.Focusable = false;
             this.ShowInTaskbar = false;
+            RefreshTheme();
             InitializeSettings();
             LoadNamesFromFile();
             StartQuickDraw();
@@ -218,6 +219,22 @@ namespace Ink_Canvas
         {
             if (e.LeftButton == MouseButtonState.Pressed)
                 DragMove();
+        }
+
+        /// <summary>
+        /// 刷新主题，当主窗口主题切换时调用
+        /// </summary>
+        public void RefreshTheme()
+        {
+            try
+            {
+                ThemeHelper.ApplyTheme(this, MainWindow.Settings);
+                InvalidateVisual();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"刷新快抽窗口主题出错: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
 

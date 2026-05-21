@@ -59,7 +59,7 @@
                             Description="{i18n:I18n Key=InkRecog_HandwritingFontHint}"
                             Visibility="{Binding IsOn, ElementName=CardEnableWinRtHandwritingStrokeBeautify, Converter={StaticResource BooleanToVisibilityConverter}}"
                             d:Visibility="Visible">
-                        <ComboBox x:Name="ComboBoxHandwritingCorrectionFont" MinWidth="220"
+                        <ComboBox x:Name="ComboBoxHandwritingCorrectionFont"
                                   SelectionChanged="ComboBoxHandwritingCorrectionFont_SelectionChanged">
                             <ComboBoxItem Content="Ink Free / 楷体 / Segoe Script" Tag="Ink Free,KaiTi,Segoe Script" />
                             <ComboBoxItem Content="楷体 (KaiTi)" Tag="KaiTi" FontFamily="KaiTi" />

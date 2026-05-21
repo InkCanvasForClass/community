@@ -50,7 +50,6 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FullScreen}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxWindowBackdrop"
-                                  MinWidth="180"
                                   SelectionChanged="ComboBoxWindowBackdrop_SelectionChanged">
                             <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_None}" Tag="None" />
                             <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_Mica}" Tag="Mica" />
@@ -99,7 +98,104 @@
                             <ComboBoxItem Content="{i18n:I18n Key=Theme_Splash_Autumn}" />
                             <ComboBoxItem Content="{i18n:I18n Key=Theme_Splash_Winter}" />
                             <ComboBoxItem Content="{i18n:I18n Key=Theme_Splash_Horse}" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Theme_Splash_Custom}" />
                         </ComboBox>
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard x:Name="CardCustomSplashImage" Header="{i18n:I18n Key=Theme_CustomSplashImage}"
+                                     Description="{i18n:I18n Key=Theme_CustomSplashImage_Desc}"
+                                     Visibility="Collapsed">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Photo}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock x:Name="TextBlockCustomSplashPath"
+                                       Text="{i18n:I18n Key=Theme_CustomSplash_NotSelected}"
+                                       VerticalAlignment="Center"
+                                       MaxWidth="200"
+                                       TextTrimming="CharacterEllipsis"
+                                       Foreground="Gray"/>
+                            <Button x:Name="ButtonBrowseCustomSplash"
+                                    Content="{i18n:I18n Key=Theme_Browse}"
+                                    Padding="10,3"
+                                    Click="ButtonBrowseCustomSplash_Click"/>
+                            <Button x:Name="ButtonClearCustomSplash"
+                                    Content="{i18n:I18n Key=Theme_Clear}"
+                                    Padding="10,3"
+                                    Click="ButtonClearCustomSplash_Click"/>
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard x:Name="CardCustomSplashTextPosition" Header="{i18n:I18n Key=Theme_CustomSplashTextPosition}"
+                                     Description="{i18n:I18n Key=Theme_CustomSplashTextPosition_Desc}"
+                                     Visibility="Collapsed">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AlignCenter}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <Border CornerRadius="4"
+                                BorderThickness="1"
+                                BorderBrush="#30808080"
+                                Background="Transparent"
+                                Width="110"
+                                Height="32">
+                            <Grid ClipToBounds="True">
+                                <!-- 滑动选择指示器 -->
+                                <Border x:Name="SelectionIndicator"
+                                        CornerRadius="3"
+                                        Background="#200078D7"
+                                        BorderBrush="#800078D7"
+                                        BorderThickness="1"
+                                        Width="34"
+                                        Height="28"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
+                                        Margin="1,1,0,1"
+                                        Panel.ZIndex="1">
+                                    <Border.RenderTransform>
+                                        <TranslateTransform x:Name="IndicatorTranslateTransform" X="0"/>
+                                    </Border.RenderTransform>
+                                </Border>
+                                <!-- 按钮层 -->
+                                <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Border x:Name="BorderTextAlignLeft"
+                                            Width="36" Height="30"
+                                            PreviewMouseLeftButtonDown="BorderTextAlign_Click"
+                                            Tag="0"
+                                            Cursor="Hand"
+                                            Panel.ZIndex="2">
+                                        <Canvas>
+                                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AlignLeft}" FontSize="14"
+                                                         Canvas.Left="11" Canvas.Top="8"
+                                                         Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                                        </Canvas>
+                                    </Border>
+                                    <Border x:Name="BorderTextAlignCenter"
+                                            Width="36" Height="30"
+                                            PreviewMouseLeftButtonDown="BorderTextAlign_Click"
+                                            Tag="1"
+                                            Cursor="Hand"
+                                            Panel.ZIndex="2">
+                                        <Canvas>
+                                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AlignCenter}" FontSize="14"
+                                                         Canvas.Left="11" Canvas.Top="8"
+                                                         Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                                        </Canvas>
+                                    </Border>
+                                    <Border x:Name="BorderTextAlignRight"
+                                            Width="36" Height="30"
+                                            PreviewMouseLeftButtonDown="BorderTextAlign_Click"
+                                            Tag="2"
+                                            Cursor="Hand"
+                                            Panel.ZIndex="2">
+                                        <Canvas>
+                                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AlignRight}" FontSize="14"
+                                                         Canvas.Left="11" Canvas.Top="8"
+                                                         Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                                        </Canvas>
+                                    </Border>
+                                </ikw:SimpleStackPanel>
+                            </Grid>
+                        </Border>
                     </ui:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
@@ -140,7 +236,7 @@
                         </ui:SettingsCard.HeaderIcon>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="ViewboxFloatingBarActualScaleText"
-                                       Text="1.50x"
+                                       Text="1.00x"
                                        VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                             <TextBlock Text=" (" VerticalAlignment="Center" FontSize="11" Foreground="Gray"/>
                             <TextBlock x:Name="ViewboxFloatingBarScaleSliderText"
@@ -185,12 +281,6 @@
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
-                    <controls:LabeledSettingsCard x:Name="CardEnableDisPlayNibModeToggle"
-                            Header="{i18n:I18n Key=Theme_ShowNibButton}"
-                            Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
-                            SwitchName="ToggleSwitchEnableDisPlayNibModeToggle"
-                            Toggled="ToggleSwitchEnableDisPlayNibModeToggle_Toggled" />
-
                     <ui:SettingsCard Header="{i18n:I18n Key=Theme_BlackboardScale80}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BackToWindow}" />
@@ -212,6 +302,14 @@
                             SwitchName="ToggleSwitchEnableTimeDisplayInWhiteboardMode"
                             Toggled="ToggleSwitchEnableTimeDisplayInWhiteboardMode_Toggled" />
 
+                    <controls:LabeledSettingsCard x:Name="CardUse24HourTimeFormat"
+                            Header="{i18n:I18n Key=AppearancePanel_24HourTimeFormat}"
+                            Toggled="ToggleSwitchUse24HourTimeFormat_Toggled">
+                        <controls:LabeledSettingsCard.HeaderIcon>
+                            <ui:FontIcon Glyph="&#xE917;" />
+                        </controls:LabeledSettingsCard.HeaderIcon>
+                    </controls:LabeledSettingsCard>
+
                     <controls:LabeledSettingsCard x:Name="CardEnableChickenSoupInWhiteboardMode"
                             Header="{i18n:I18n Key=Theme_ShowQuoteInWhiteboard}"
                             Icon="{x:Static ui:SegoeFluentIcons.Message}"
@@ -224,12 +322,12 @@
                         </ui:SettingsCard.HeaderIcon>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <ComboBox x:Name="ComboBoxChickenSoupSource"
-                                      Width="240"
                                       SelectionChanged="ComboBoxChickenSoupSource_SelectionChanged">
                                 <ComboBoxItem Content="{i18n:I18n Key=Theme_QuoteSource_OsuQuotes}" />
                                 <ComboBoxItem Content="{i18n:I18n Key=Theme_QuoteSource_Mottos}" />
                                 <ComboBoxItem Content="{i18n:I18n Key=Theme_QuoteSource_GaokaoBless}" />
                                 <ComboBoxItem Content="{i18n:I18n Key=Theme_QuoteSource_Hitokoto}" />
+                                <ComboBoxItem Content="{i18n:I18n Key=Theme_QuoteSource_PhigrosTips}" />
                             </ComboBox>
                             <Button x:Name="BtnHitokotoCustomize" Content="{i18n:I18n Key=Theme_Customize}"
                                     Padding="14,4" MinWidth="65" VerticalAlignment="Center"
@@ -243,6 +341,21 @@
                             Icon="{x:Static ui:SegoeFluentIcons.Pinned}"
                             SwitchName="ToggleSwitchEnableQuickPanel"
                             Toggled="ToggleSwitchEnableQuickPanel_Toggled" />
+
+                    <ui:SettingsCard Header="{i18n:I18n Key=Theme_QuickPanelBottomOffset}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronDown}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock x:Name="QuickPanelBottomOffsetText"
+                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                            <Slider x:Name="QuickPanelBottomOffsetSlider" Minimum="-500"
+                                    Maximum="0" Width="200"
+                                    IsSnapToTickEnabled="True" Value="-150" TickFrequency="10"
+                                    TickPlacement="None" AutoToolTipPlacement="None"
+                                    ValueChanged="QuickPanelBottomOffsetSlider_ValueChanged" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
 
                     <ui:SettingsCard Header="{i18n:I18n Key=Theme_UnfoldButtonIcon}">
                         <ui:SettingsCard.HeaderIcon>
@@ -265,78 +378,14 @@
                             SwitchName="ToggleSwitchUseLegacyFloatingBarUI"
                             Toggled="ToggleSwitchUseLegacyFloatingBarUI_Toggled" />
 
-                    <ui:SettingsExpander Header="{i18n:I18n Key=Theme_FloatingBarButtonsTitle}"
-                            IsExpanded="True"
-                            d:Visibility="Visible" d:IsExpanded="True">
-                        <ui:SettingsExpander.HeaderIcon>
+                    <ui:SettingsCard Header="{i18n:I18n Key=Theme_FloatingBarButtonsTitle}"
+                            Description="请前往「工具栏」设置页面管理浮动工具栏的组件显示与排序。"
+                            IsClickEnabled="True"
+                            Click="CardFloatingBarButtons_Click">
+                        <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ViewAll}" />
-                        </ui:SettingsExpander.HeaderIcon>
-                        <ui:SettingsExpander.Items>
-                            <ui:SettingsCard ContentAlignment="Left">
-                                <CheckBox x:Name="CheckBoxShowShapeButton" IsChecked="True"
-                                          Content="{i18n:I18n Key=Theme_ShowShapeButton}"
-                                          Checked="CheckBoxShowShapeButton_Changed" Unchecked="CheckBoxShowShapeButton_Changed" />
-                            </ui:SettingsCard>
-                            <ui:SettingsCard ContentAlignment="Left">
-                                <CheckBox x:Name="CheckBoxShowUndoButton" IsChecked="True"
-                                          Content="{i18n:I18n Key=Theme_ShowUndoButton}"
-                                          Checked="CheckBoxShowButton_Changed" Unchecked="CheckBoxShowButton_Changed" />
-                            </ui:SettingsCard>
-                            <ui:SettingsCard ContentAlignment="Left">
-                                <CheckBox x:Name="CheckBoxShowRedoButton" IsChecked="True"
-                                          Content="{i18n:I18n Key=Theme_ShowRedoButton}"
-                                          Checked="CheckBoxShowButton_Changed" Unchecked="CheckBoxShowButton_Changed" />
-                            </ui:SettingsCard>
-                            <ui:SettingsCard ContentAlignment="Left">
-                                <CheckBox x:Name="CheckBoxShowClearButton" IsChecked="True"
-                                          Content="{i18n:I18n Key=Theme_ShowClearButton}"
-                                          Checked="CheckBoxShowButton_Changed" Unchecked="CheckBoxShowButton_Changed" />
-                            </ui:SettingsCard>
-                            <ui:SettingsCard ContentAlignment="Left">
-                                <CheckBox x:Name="CheckBoxShowWhiteboardButton" IsChecked="True"
-                                          Content="{i18n:I18n Key=Theme_ShowWhiteboardButton}"
-                                          Checked="CheckBoxShowButton_Changed" Unchecked="CheckBoxShowButton_Changed" />
-                            </ui:SettingsCard>
-                            <ui:SettingsCard ContentAlignment="Left">
-                                <CheckBox x:Name="CheckBoxShowHideButton" IsChecked="True"
-                                          Content="{i18n:I18n Key=Theme_ShowHideButton}"
-                                          Checked="CheckBoxShowButton_Changed" Unchecked="CheckBoxShowButton_Changed" />
-                            </ui:SettingsCard>
-                            <ui:SettingsCard ContentAlignment="Left">
-                                <CheckBox x:Name="CheckBoxShowLassoSelectButton" IsChecked="True"
-                                          Content="{i18n:I18n Key=Theme_ShowLassoButton}"
-                                          Checked="CheckBoxShowButton_Changed" Unchecked="CheckBoxShowButton_Changed" />
-                            </ui:SettingsCard>
-                            <ui:SettingsCard ContentAlignment="Left">
-                                <CheckBox x:Name="CheckBoxShowClearAndMouseButton" IsChecked="True"
-                                          Content="{i18n:I18n Key=Theme_ShowClearAndMouseButton}"
-                                          Checked="CheckBoxShowButton_Changed" Unchecked="CheckBoxShowButton_Changed" />
-                            </ui:SettingsCard>
-                            <ui:SettingsCard ContentAlignment="Left">
-                                <CheckBox x:Name="CheckBoxShowQuickColorPalette" IsChecked="False"
-                                          Content="{i18n:I18n Key=Theme_ShowQuickPalette}"
-                                          Checked="CheckBoxShowButton_Changed" Unchecked="CheckBoxShowButton_Changed" />
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="{i18n:I18n Key=Theme_QuickPaletteMode}">
-                                <ComboBox x:Name="ComboBoxQuickColorPaletteDisplayMode"
-                                          SelectedIndex="1"
-                                          SelectionChanged="ComboBoxQuickColorPaletteDisplayMode_SelectionChanged">
-                                    <ComboBoxItem Content="{i18n:I18n Key=Theme_QuickPalette_SingleRow}" />
-                                    <ComboBoxItem Content="{i18n:I18n Key=Theme_QuickPalette_DoubleRow}" />
-                                </ComboBox>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="{i18n:I18n Key=Theme_EraserButtonDisplay}">
-                                <ComboBox x:Name="ComboBoxEraserDisplayOption"
-                                          SelectedIndex="0"
-                                          SelectionChanged="ComboBoxEraserDisplayOption_SelectionChanged">
-                                    <ComboBoxItem Content="{i18n:I18n Key=Theme_EraserDisplay_Both}" />
-                                    <ComboBoxItem Content="{i18n:I18n Key=Theme_EraserDisplay_AreaOnly}" />
-                                    <ComboBoxItem Content="{i18n:I18n Key=Theme_EraserDisplay_LineOnly}" />
-                                    <ComboBoxItem Content="{i18n:I18n Key=Theme_EraserDisplay_None}" />
-                                </ComboBox>
-                            </ui:SettingsCard>
-                        </ui:SettingsExpander.Items>
-                    </ui:SettingsExpander>
+                        </ui:SettingsCard.HeaderIcon>
+                    </ui:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{i18n:I18n Key=Tray_GroupTitle}" />

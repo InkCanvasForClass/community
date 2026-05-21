@@ -336,7 +336,8 @@ namespace Ink_Canvas
             ThemeHelper.ApplyTheme(this, settings, theme =>
             {
                 ApplyThemeResources(theme);
-                if (theme == "Dark") SetDarkThemeBorder();
+                WindowBackdropHelper.Apply(this, settings);
+                UpdateRollCallModeTabSelection();
             });
         }
 
@@ -354,28 +355,28 @@ namespace Ink_Canvas
                 if (theme == "Light")
                 {
                     // 应用浅色主题资源
-                    resources["NewRollCallWindowBackground"] = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-                    resources["NewRollCallWindowBorderBrush"] = new SolidColorBrush(Color.FromRgb(228, 228, 231));
+                    resources["NewRollCallWindowBackground"] = new SolidColorBrush(Color.FromRgb(249, 249, 249));
+                    resources["NewRollCallWindowBorderBrush"] = new SolidColorBrush(Color.FromRgb(235, 235, 235));
                     resources["NewRollCallWindowTitleForeground"] = new SolidColorBrush(Color.FromRgb(24, 24, 27));
                     resources["NewRollCallWindowDigitForeground"] = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                    resources["NewRollCallWindowButtonBackground"] = new SolidColorBrush(Color.FromRgb(244, 244, 245));
+                    resources["NewRollCallWindowButtonBackground"] = new SolidColorBrush(Color.FromRgb(255, 255, 255));
                     resources["NewRollCallWindowButtonForeground"] = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                    resources["NewRollCallWindowPrimaryButtonBackground"] = new SolidColorBrush(Color.FromRgb(76, 175, 80)); // #4CAF50
+                    resources["NewRollCallWindowPrimaryButtonBackground"] = new SolidColorBrush(Color.FromRgb(76, 175, 80));
                     resources["NewRollCallWindowPrimaryButtonForeground"] = new SolidColorBrush(Color.FromRgb(255, 255, 255));
                     resources["NewRollCallWindowSecondaryTextForeground"] = new SolidColorBrush(Color.FromRgb(113, 113, 122));
                 }
                 else
                 {
-                    // 应用深色主题资源 - 与新计时器窗口统一
-                    resources["NewRollCallWindowBackground"] = new SolidColorBrush(Color.FromRgb(31, 31, 31)); // #1f1f1f
-                    resources["NewRollCallWindowBorderBrush"] = new SolidColorBrush(Color.FromRgb(224, 224, 224)); // #E0E0E0
+                    // 应用深色主题资源
+                    resources["NewRollCallWindowBackground"] = new SolidColorBrush(Color.FromRgb(32, 32, 32));
+                    resources["NewRollCallWindowBorderBrush"] = new SolidColorBrush(Color.FromRgb(64, 64, 64));
                     resources["NewRollCallWindowTitleForeground"] = new SolidColorBrush(Colors.White);
                     resources["NewRollCallWindowDigitForeground"] = new SolidColorBrush(Colors.White);
-                    resources["NewRollCallWindowButtonBackground"] = new SolidColorBrush(Color.FromRgb(42, 42, 42)); // #2a2a2a
+                    resources["NewRollCallWindowButtonBackground"] = new SolidColorBrush(Color.FromRgb(45, 45, 45));
                     resources["NewRollCallWindowButtonForeground"] = new SolidColorBrush(Colors.White);
-                    resources["NewRollCallWindowPrimaryButtonBackground"] = new SolidColorBrush(Color.FromRgb(76, 175, 80)); // #4CAF50
+                    resources["NewRollCallWindowPrimaryButtonBackground"] = new SolidColorBrush(Color.FromRgb(76, 175, 80));
                     resources["NewRollCallWindowPrimaryButtonForeground"] = new SolidColorBrush(Colors.White);
-                    resources["NewRollCallWindowSecondaryTextForeground"] = new SolidColorBrush(Color.FromRgb(156, 163, 175)); // #9ca3af
+                    resources["NewRollCallWindowSecondaryTextForeground"] = new SolidColorBrush(Color.FromRgb(156, 163, 175));
                 }
             }
             catch (Exception ex)
@@ -1065,23 +1066,19 @@ namespace Ink_Canvas
         {
             if (results == null || results.Count == 0)
             {
+                ShowSingleResult();
                 MainResultDisplay.Text = "无结果";
-                MultiResultScrollViewer.Visibility = Visibility.Collapsed;
                 return;
             }
 
             if (results.Count == 1)
             {
+                ShowSingleResult();
                 MainResultDisplay.Text = results[0];
-                MainResultDisplay.Visibility = Visibility.Visible;
-                MultiResultScrollViewer.Visibility = Visibility.Collapsed;
             }
             else
             {
-                // 多个结果时，隐藏主显示区域，显示多结果区域
-                MainResultDisplay.Text = "";
-                MainResultDisplay.Visibility = Visibility.Collapsed;
-                MultiResultScrollViewer.Visibility = Visibility.Visible;
+                ShowMultiResult();
 
                 // 显示所有结果（最多20个）
                 Result1Display.Text = results.Count > 0 ? results[0] : "";
@@ -1105,6 +1102,20 @@ namespace Ink_Canvas
                 Result19Display.Text = results.Count > 18 ? results[18] : "";
                 Result20Display.Text = results.Count > 19 ? results[19] : "";
             }
+        }
+
+        private void ShowSingleResult()
+        {
+            MainResultContainer.Visibility = Visibility.Visible;
+            MainResultDisplay.Visibility = Visibility.Visible;
+            MultiResultContainer.Visibility = Visibility.Collapsed;
+        }
+
+        private void ShowMultiResult()
+        {
+            MainResultDisplay.Text = "";
+            MainResultContainer.Visibility = Visibility.Collapsed;
+            MultiResultContainer.Visibility = Visibility.Visible;
         }
         #endregion
 
@@ -1155,11 +1166,11 @@ namespace Ink_Canvas
             {
                 if (SecurityManager.IsPasswordRequiredForModifyOrClearNameList(MainWindow.Settings))
                 {
-                    bool ok = await SecurityManager.PromptAndVerifyAsync(
+                    bool ok = await SecurityManager.PromptAndVerifyPasswordOrTotpAsync(
                         MainWindow.Settings,
                         this,
                         "名单修改验证",
-                        "请输入安全密码以修改点名名单。");
+                        "请输入安全密码或 TOTP 验证码以修改点名名单。");
                     if (!ok) return;
                 }
                 // 打开名单导入窗口，与老点名UI保持一致
@@ -1224,11 +1235,11 @@ namespace Ink_Canvas
             {
                 if (SecurityManager.IsPasswordRequiredForModifyOrClearNameList(MainWindow.Settings))
                 {
-                    bool ok = await SecurityManager.PromptAndVerifyAsync(
+                    bool ok = await SecurityManager.PromptAndVerifyPasswordOrTotpAsync(
                         MainWindow.Settings,
                         this,
                         "名单清空验证",
-                        "请输入安全密码以清空点名名单。");
+                        "请输入安全密码或 TOTP 验证码以清空点名名单。");
                     if (!ok) return;
                 }
                 // 清空名单
@@ -1258,92 +1269,24 @@ namespace Ink_Canvas
         {
             try
             {
-                // 存储选择的模式
                 selectedRollCallMode = mode;
+                UpdateRollCallModeTabSelection();
 
-                // 重置所有按钮状态
-                RandomModeText.FontWeight = FontWeights.Normal;
-                RandomModeText.Opacity = 0.6;
-                RandomModeText.Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
-                SequentialModeText.FontWeight = FontWeights.Normal;
-                SequentialModeText.Opacity = 0.6;
-                SequentialModeText.Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
-                GroupModeText.FontWeight = FontWeights.Normal;
-                GroupModeText.Opacity = 0.6;
-                GroupModeText.Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
-
-                // 重置外部点名模式按钮状态
-                ExternalCallerModeText.FontWeight = FontWeights.Normal;
-                ExternalCallerModeText.Opacity = 0.6;
-                ExternalCallerModeText.Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
-                ExternalCallerModeIndicator.Visibility = Visibility.Collapsed;
-                SegmentedIndicator.Visibility = Visibility.Visible;
-
-                // 设置选中状态和动画
                 switch (mode)
                 {
                     case "Random":
-                        RandomModeText.FontWeight = FontWeights.Bold;
-                        RandomModeText.Opacity = 1.0;
-                        RandomModeText.Foreground = new SolidColorBrush(Colors.White);
-                        SegmentedIndicator.HorizontalAlignment = HorizontalAlignment.Left;
-                        SegmentedIndicator.CornerRadius = new CornerRadius(7.5, 0, 0, 7.5);
-
-                        // 添加动画效果
-                        var randomAnimation = new System.Windows.Media.Animation.ThicknessAnimation(
-                            new Thickness(0, 0, 0, 0),
-                            TimeSpan.FromMilliseconds(200));
-                        SegmentedIndicator.BeginAnimation(Border.MarginProperty, randomAnimation);
-
-                        // 恢复开始点名按钮的原始图标和文字
                         RestoreStartRollCallButton();
                         UpdateStatusDisplay("已选择点名模式: 随机点名");
                         break;
                     case "Sequential":
-                        SequentialModeText.FontWeight = FontWeights.Bold;
-                        SequentialModeText.Opacity = 1.0;
-                        SequentialModeText.Foreground = new SolidColorBrush(Colors.White);
-                        SegmentedIndicator.HorizontalAlignment = HorizontalAlignment.Left;
-                        SegmentedIndicator.CornerRadius = new CornerRadius(0, 0, 0, 0);
-
-                        // 添加动画效果 - 移动到中间位置
-                        var sequentialAnimation = new System.Windows.Media.Animation.ThicknessAnimation(
-                            new Thickness(100, 0, 0, 0),
-                            TimeSpan.FromMilliseconds(200));
-                        SegmentedIndicator.BeginAnimation(Border.MarginProperty, sequentialAnimation);
-
-                        // 恢复开始点名按钮的原始图标和文字
                         RestoreStartRollCallButton();
                         UpdateStatusDisplay("已选择点名模式: 顺序点名");
                         break;
                     case "Group":
-                        GroupModeText.FontWeight = FontWeights.Bold;
-                        GroupModeText.Opacity = 1.0;
-                        GroupModeText.Foreground = new SolidColorBrush(Colors.White);
-                        SegmentedIndicator.HorizontalAlignment = HorizontalAlignment.Left;
-                        SegmentedIndicator.CornerRadius = new CornerRadius(0, 7.5, 7.5, 0);
-
-                        // 添加动画效果 - 移动到右侧位置
-                        var groupAnimation = new System.Windows.Media.Animation.ThicknessAnimation(
-                            new Thickness(200, 0, 0, 0),
-                            TimeSpan.FromMilliseconds(200));
-                        SegmentedIndicator.BeginAnimation(Border.MarginProperty, groupAnimation);
-
-                        // 恢复开始点名按钮的原始图标和文字
                         RestoreStartRollCallButton();
                         UpdateStatusDisplay("已选择点名模式: 分组点名");
                         break;
                     case "External":
-                        // 外部点名模式
-                        ExternalCallerModeText.FontWeight = FontWeights.Bold;
-                        ExternalCallerModeText.Opacity = 1.0;
-                        ExternalCallerModeText.Foreground = new SolidColorBrush(Colors.White);
-                        ExternalCallerModeIndicator.Visibility = Visibility.Visible;
-
-                        // 隐藏其他模式的指示器
-                        SegmentedIndicator.Visibility = Visibility.Collapsed;
-
-                        // 切换到外部点名按钮的图标和文字
                         UpdateStartRollCallButtonForExternal();
                         UpdateStatusDisplay($"已选择点名模式: 外部点名 ({selectedExternalCaller})");
                         break;
@@ -1352,6 +1295,20 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"设置点名模式选择时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void UpdateRollCallModeTabSelection()
+        {
+            if (RollCallModeTabControl == null) return;
+
+            int selectedIndex = selectedRollCallMode == "Sequential" ? 1 :
+                selectedRollCallMode == "Group" ? 2 :
+                selectedRollCallMode == "External" ? 3 : 0;
+
+            if (RollCallModeTabControl.SelectedIndex != selectedIndex)
+            {
+                RollCallModeTabControl.SelectedIndex = selectedIndex;
             }
         }
 
@@ -1366,7 +1323,6 @@ namespace Ink_Canvas
                 if (StartRollCallBtnIcon != null)
                 {
                     StartRollCallBtnIcon.Data = Geometry.Parse(externalCallerBtnIconData);
-                    // 外部点名使用按钮前景色而不是主按钮前景色
                     StartRollCallBtnIcon.Stroke = (Brush)FindResource("NewRollCallWindowButtonForeground");
                 }
 
@@ -1379,6 +1335,8 @@ namespace Ink_Canvas
 
                 // 更新按钮背景色为普通按钮背景
                 StartRollCallBtn.Background = (Brush)FindResource("NewRollCallWindowButtonBackground");
+                StartRollCallBtn.BorderBrush = (Brush)FindResource("NewRollCallWindowBorderBrush");
+                StartRollCallBtn.Foreground = (Brush)FindResource("NewRollCallWindowButtonForeground");
             }
             catch (Exception ex)
             {
@@ -1409,6 +1367,8 @@ namespace Ink_Canvas
 
                 // 恢复按钮背景色为主按钮背景
                 StartRollCallBtn.Background = (Brush)FindResource("NewRollCallWindowPrimaryButtonBackground");
+                StartRollCallBtn.BorderBrush = (Brush)FindResource("NewRollCallWindowPrimaryButtonBackground");
+                StartRollCallBtn.Foreground = (Brush)FindResource("NewRollCallWindowPrimaryButtonForeground");
             }
             catch (Exception ex)
             {
@@ -1416,24 +1376,22 @@ namespace Ink_Canvas
             }
         }
 
-        private void RandomMode_Click(object sender, RoutedEventArgs e)
+        private void RollCallModeTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            SetModeSelection("Random");
-        }
+            if (e.OriginalSource != RollCallModeTabControl) return;
 
-        private void SequentialMode_Click(object sender, RoutedEventArgs e)
-        {
-            SetModeSelection("Sequential");
-        }
+            string mode = RollCallModeTabControl.SelectedIndex switch
+            {
+                1 => "Sequential",
+                2 => "Group",
+                3 => "External",
+                _ => "Random"
+            };
 
-        private void GroupMode_Click(object sender, RoutedEventArgs e)
-        {
-            SetModeSelection("Group");
-        }
-
-        private void ExternalCallerMode_Click(object sender, RoutedEventArgs e)
-        {
-            SetModeSelection("External");
+            if (selectedRollCallMode != mode)
+            {
+                SetModeSelection(mode);
+            }
         }
 
         private void ExternalCallerTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1552,8 +1510,7 @@ namespace Ink_Canvas
             }
 
             MainResultDisplay.Text = "点击开始点名";
-            MainResultDisplay.Visibility = Visibility.Visible;
-            MultiResultScrollViewer.Visibility = Visibility.Collapsed;
+            ShowSingleResult();
             UpdateStatusDisplay("准备就绪");
         }
 
@@ -1583,8 +1540,7 @@ namespace Ink_Canvas
                 // 确保动画期间主显示区域可见
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    MainResultDisplay.Visibility = Visibility.Visible;
-                    MultiResultScrollViewer.Visibility = Visibility.Collapsed;
+                    ShowSingleResult();
                 });
 
                 for (int i = 0; i < animationTimes; i++)
@@ -1597,8 +1553,7 @@ namespace Ink_Canvas
 
                         Application.Current.Dispatcher.Invoke(() =>
                         {
-                            // 确保主显示区域在动画期间保持可见
-                            MainResultDisplay.Visibility = Visibility.Visible;
+                            ShowSingleResult();
                             MainResultDisplay.Text = displayName;
                         });
                     }
@@ -1653,8 +1608,7 @@ namespace Ink_Canvas
                 // 确保动画期间主显示区域可见
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    MainResultDisplay.Visibility = Visibility.Visible;
-                    MultiResultScrollViewer.Visibility = Visibility.Collapsed;
+                    ShowSingleResult();
                 });
 
                 for (int i = 0; i < animationTimes; i++)
@@ -1664,8 +1618,7 @@ namespace Ink_Canvas
 
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        // 确保主显示区域在动画期间保持可见
-                        MainResultDisplay.Visibility = Visibility.Visible;
+                        ShowSingleResult();
                         MainResultDisplay.Text = randomNumber.ToString();
                     });
 
@@ -1850,18 +1803,13 @@ namespace Ink_Canvas
 
                 if (selectedNumbers.Count == 1)
                 {
+                    ShowSingleResult();
                     MainResultDisplay.Text = selectedNumbers[0];
                     UpdateStatusDisplay($"抽选完成：{selectedNumbers[0]}");
                 }
                 else
                 {
-                    MainResultDisplay.Text = "抽选结果";
-                    MultiResultPanel.Visibility = Visibility.Visible;
-
-                    Result1Display.Text = selectedNumbers.Count > 0 ? selectedNumbers[0] : "";
-                    Result2Display.Text = selectedNumbers.Count > 1 ? selectedNumbers[1] : "";
-                    Result3Display.Text = selectedNumbers.Count > 2 ? selectedNumbers[2] : "";
-
+                    ShowResults(selectedNumbers);
                     UpdateStatusDisplay($"抽选完成，共选择 {selectedNumbers.Count} 个数字");
                 }
 
@@ -1946,17 +1894,6 @@ namespace Ink_Canvas
             rollCallTimer?.Stop();
         }
 
-        private void CloseButton_Click(object sender, RoutedEventArgs e)
-        {
-            Close();
-        }
-
-        private void WindowDragMove(object sender, MouseEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed)
-                DragMove();
-        }
-
         private void Window_MouseMove(object sender, MouseEventArgs e)
         {
             lastActivityTime = DateTime.Now;
@@ -1967,20 +1904,6 @@ namespace Ink_Canvas
             lastActivityTime = DateTime.Now;
         }
 
-        private void SetDarkThemeBorder()
-        {
-            try
-            {
-                if (MainBorder != null)
-                {
-                    MainBorder.BorderBrush = new SolidColorBrush(Color.FromRgb(64, 64, 64));
-                }
-            }
-            catch
-            {
-                // 忽略错误
-            }
-        }
         #endregion
 
         #region Win32 API 声明和置顶管理

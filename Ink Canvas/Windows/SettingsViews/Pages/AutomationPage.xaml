@@ -214,15 +214,13 @@
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Automation_AutoFoldInPPT}">
-                        <ui:SettingsCard.HeaderIcon>
+                    <controls:LabeledSettingsCard x:Name="CardAutoFoldInPPTSlideShow"
+                            Header="{i18n:I18n Key=Automation_AutoFoldInPPT}"
+                            Toggled="ToggleSwitchAutoFoldInPPTSlideShow_Toggled">
+                        <controls:LabeledSettingsCard.HeaderIcon>
                             <ui:ImageIcon Source="/Resources/Icons-png/Powerpoint.png"/>
-                        </ui:SettingsCard.HeaderIcon>
-                        <ui:ToggleSwitch x:Name="CardAutoFoldInPPTSlideShow"
-                                    OnContent="{DynamicResource Common_On}"
-                                    OffContent="{DynamicResource Common_Off}"
-                                    Toggled="ToggleSwitchAutoFoldInPPTSlideShow_Toggled"/>
-                    </ui:SettingsCard>
+                        </controls:LabeledSettingsCard.HeaderIcon>
+                    </controls:LabeledSettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoFoldWhenExitWhiteboard"
                             Header="{i18n:I18n Key=FoldMode_AutoFoldAfterWhiteboard}"
@@ -383,7 +381,6 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
                         </ui:SettingsExpander.HeaderIcon>
                         <ComboBox x:Name="ComboBoxSaveFileNamePreset"
-                                  MinWidth="260"
                                   SelectionChanged="ComboBoxSaveFileNamePreset_SelectionChanged">
                             <ComboBoxItem Content="{i18n:I18n Key=Automation_SaveFileName_Timestamp}" Tag="{}{datetime}"/>
                             <ComboBoxItem Content="{i18n:I18n Key=Automation_SaveFileName_Date}" Tag="{}{date}"/>
@@ -544,12 +541,45 @@
 
                     <TextBlock Text="文件关联" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
-                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left">
-                        <Button x:Name="BtnRegisterFileAssociation" Content="注册文件关联" Click="BtnRegisterFileAssociation_Click"/>
-                        <Button x:Name="BtnUnregisterFileAssociation" Content="取消文件关联" Click="BtnUnregisterFileAssociation_Click"/>
-                        <Button x:Name="BtnCheckFileAssociation" Content="检查关联状态" Click="BtnCheckFileAssociation_Click"/>
-                    </ikw:SimpleStackPanel>
-                    <TextBlock x:Name="TextBlockFileAssociationStatus" Margin="0,4,0,0"/>
+                    <ui:SettingsExpander Header="检查关联状态"
+                                         Description="查看 .icstk 文件是否已关联到 Ink Canvas">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}"/>
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:SettingsExpander.Content>
+                            <ikw:SimpleStackPanel Orientation="Horizontal"
+                                                  Spacing="8"
+                                                  VerticalAlignment="Center">
+                                <TextBlock x:Name="TextBlockFileAssociationStatus"
+                                           Text="未检查"
+                                           VerticalAlignment="Center"
+                                           FontWeight="SemiBold"/>
+                                <Button x:Name="BtnCheckFileAssociation"
+                                        Content="检查关联状态"
+                                        Click="BtnCheckFileAssociation_Click"/>
+                            </ikw:SimpleStackPanel>
+                        </ui:SettingsExpander.Content>
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="注册文件关联"
+                                             Description="将 .icstk 文件关联到 Ink Canvas">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <Button x:Name="BtnRegisterFileAssociation"
+                                        Content="注册文件关联"
+                                        Click="BtnRegisterFileAssociation_Click"/>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="取消文件关联"
+                                             Description="移除 .icstk 文件与 Ink Canvas 的关联">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cancel}"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <Button x:Name="BtnUnregisterFileAssociation"
+                                        Content="取消文件关联"
+                                        Click="BtnUnregisterFileAssociation_Click"/>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
 
                     <Rectangle Height="48" />
                 </ikw:SimpleStackPanel>

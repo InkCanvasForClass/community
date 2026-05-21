@@ -6,10 +6,8 @@ namespace Ink_Canvas.Controls.Toolbar.Items
     {
         public override string Id => "builtin.inkFreeze";
         public override string LocalizationKey => "FloatingBar_Freeze";
-        public override ToolbarSlot DefaultSlot => ToolbarSlot.FloatingBarMain;
-        public override int DefaultOrder => 120;
-        public override ToolbarInsertPosition DefaultPosition => ToolbarInsertPosition.AfterAnchor;
-        public override string DefaultAnchorName => "QuickColorPaletteSingleRowPanel";
+        public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
+        public override string Description => "墨迹冻结";
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.ToggleInkFreeze_MouseUp(sender, e);

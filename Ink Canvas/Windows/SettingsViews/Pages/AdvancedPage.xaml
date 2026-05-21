@@ -179,7 +179,7 @@
                                TextWrapping="Wrap" Margin="1,0,0,4" />
 
                     <ui:SettingsCard Header="{i18n:I18n Key=ConfigProfiles_Label}">
-                        <ComboBox x:Name="ComboBoxConfigProfile" MinWidth="180"
+                        <ComboBox x:Name="ComboBoxConfigProfile"
                                   SelectionChanged="ComboBoxConfigProfile_SelectionChanged" />
                     </ui:SettingsCard>
 

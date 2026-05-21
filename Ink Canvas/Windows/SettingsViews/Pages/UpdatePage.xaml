@@ -177,6 +177,13 @@
                                                           d:Visibility="Visible"
                                                           Toggled="ToggleSwitchIsAutoUpdateWithSilence_Toggled" />
 
+                            <controls:LabeledSettingsCard x:Name="CardSmartUpdate"
+                                                          Header="{i18n:I18n Key=Startup_SmartUpdate}"
+                                                          Description="{i18n:I18n Key=Startup_SmartUpdateHint}"
+                                                          Icon="{x:Static ui:SegoeFluentIcons.CloudDownload}"
+                                                          SwitchName="ToggleSwitchIsSmartUpdate"
+                                                          Toggled="ToggleSwitchIsSmartUpdate_Toggled" />
+
                             <ui:SettingsExpander x:Name="ExpanderSilentUpdateTime"
                                                  Header="{i18n:I18n Key=Startup_SilentUpdateTimePeriod}"
                                                  Visibility="{Binding IsOn, ElementName=CardSilentUpdate, Converter={StaticResource BooleanToVisibilityConverter}}"
@@ -259,7 +266,6 @@
                                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.History}" />
                                 </ui:SettingsCard.HeaderIcon>
                                 <ComboBox x:Name="VersionComboBox"
-                                          MinWidth="220"
                                           DisplayMemberPath="Version"
                                           SelectionChanged="VersionComboBox_SelectionChanged" />
                             </ui:SettingsCard>

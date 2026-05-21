@@ -16,7 +16,7 @@ namespace Ink_Canvas.Controls
             set => SetValue(TitleProperty, value);
         }
 
-        public FontIcon CloseFontIcon => CloseIcon;
+        public Button CloseButtonControl => CloseButton;
 
         public PopupTitleBar()
         {

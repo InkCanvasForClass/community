@@ -6,9 +6,8 @@ namespace Ink_Canvas.Controls.Toolbar.Items
     {
         public override string Id => "builtin.cursorWithDel";
         public override string LocalizationKey => "FloatingBar_ClearAndMouse";
-        public override ToolbarSlot DefaultSlot => ToolbarSlot.FloatingBarCanvasControls;
-        public override int DefaultOrder => 320;
-        public override ToolbarInsertPosition DefaultPosition => ToolbarInsertPosition.Append;
+        public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AnnotationOnly().WithHideOnCollapsed();
+        public override string Description => "清除并切换光标";
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.CursorWithDelIcon_Click(sender, e);

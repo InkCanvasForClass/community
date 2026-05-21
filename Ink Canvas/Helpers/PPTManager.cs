@@ -95,11 +95,11 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        public void StopMonitoring()
+        public void StopMonitoring(bool isShutdown = false)
         {
             _unifiedPptTimer?.Stop();
             StopWpsProcessCheckTimer();
-            DisconnectFromPPT();
+            DisconnectFromPPT(isShutdown);
             LogHelper.WriteLogToFile("PPT监控已停止", LogHelper.LogType.Trace);
         }
         #endregion
@@ -328,8 +328,7 @@ namespace Ink_Canvas.Helpers
                 PPTApplication = pptApp;
                 _cachedIsConnected = true;
 
-                // 在主线程中注册事件，确保COM对象在正确的线程中
-                Application.Current?.Dispatcher?.BeginInvoke(new Action(() =>
+                Application.Current?.Dispatcher?.Invoke(new Action(() =>
                 {
                     try
                     {
@@ -345,24 +344,22 @@ namespace Ink_Canvas.Helpers
                     {
                         LogHelper.WriteLogToFile($"PPT事件注册失败: {ex}", LogHelper.LogType.Error);
                     }
-                }), DispatcherPriority.Normal);
+                }));
 
-                // 获取当前演示文稿信息
                 UpdateCurrentPresentationInfo();
 
-                // 触发连接成功事件
                 PPTConnectionChanged?.Invoke(true);
 
                 LogHelper.WriteLogToFile("成功连接到PPT应用程序", LogHelper.LogType.Event);
 
                 RefreshIsInSlideShowFromCom();
+                if (CurrentPresentation != null)
+                {
+                    OnPresentationOpen(CurrentPresentation);
+                }
                 if (_cachedIsInSlideShow)
                 {
                     OnSlideShowBegin(PPTApplication.SlideShowWindows[1]);
-                }
-                else if (CurrentPresentation != null)
-                {
-                    OnPresentationOpen(CurrentPresentation);
                 }
             }
             catch (Exception ex)
@@ -373,24 +370,32 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        private void DisconnectFromPPT()
+        private void DisconnectFromPPT(bool isShutdown = false)
         {
             try
             {
                 if (PPTApplication != null)
                 {
-                    // 取消事件注册 - 使用更安全的方式
-                    try
+                    if (isShutdown)
                     {
-                        // 检查COM对象是否仍然有效
-                        if (Marshal.IsComObject(PPTApplication))
+                        try
                         {
-                            // 尝试在主线程中取消事件注册
+                            PPTApplication.PresentationOpen -= OnPresentationOpen;
+                            PPTApplication.PresentationClose -= OnPresentationClose;
+                            PPTApplication.SlideShowBegin -= OnSlideShowBegin;
+                            PPTApplication.SlideShowNextSlide -= OnSlideShowNextSlide;
+                            PPTApplication.SlideShowEnd -= OnSlideShowEnd;
+                        }
+                        catch { }
+                    }
+                    else if (Marshal.IsComObject(PPTApplication))
+                    {
+                        try
+                        {
                             Application.Current?.Dispatcher?.BeginInvoke(new Action(() =>
                             {
                                 try
                                 {
-                                    // 再次检查PPTApplication是否为null，因为可能在异步操作期间被修改
                                     if (PPTApplication != null && Marshal.IsComObject(PPTApplication))
                                     {
                                         PPTApplication.PresentationOpen -= OnPresentationOpen;
@@ -407,12 +412,10 @@ namespace Ink_Canvas.Helpers
                                 }
                                 catch (InvalidCastException)
                                 {
-                                    // COM对象类型转换失败，通常是因为对象已经被释放
                                     LogHelper.WriteLogToFile("PPT COM对象已被释放，跳过事件注册取消", LogHelper.LogType.Trace);
                                 }
                                 catch (System.Reflection.TargetInvocationException tie) when (tie.InnerException is InvalidComObjectException)
                                 {
-                                    // RCW 已分离：Office Interop 内部通过反射创建 EventProvider 时抛出，是正常情况
                                     LogHelper.WriteLogToFile("PPT COM对象RCW已分离，跳过事件注册取消", LogHelper.LogType.Trace);
                                 }
                                 catch (InvalidComObjectException)
@@ -425,10 +428,10 @@ namespace Ink_Canvas.Helpers
                                 }
                             }), DispatcherPriority.Normal);
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"取消PPT事件注册失败: {ex}", LogHelper.LogType.Warning);
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"取消PPT事件注册失败: {ex}", LogHelper.LogType.Warning);
+                        }
                     }
 
                     SafeReleaseComObject(CurrentSlide, "CurrentSlide");
@@ -464,58 +467,67 @@ namespace Ink_Canvas.Helpers
                 CurrentSlide = null;
                 SlidesCount = 0;
 
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
+                if (!isShutdown)
+                {
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                    GC.Collect();
+                }
 
                 _isModuleUnloading = true;
                 _unifiedPptTimer?.Stop();
 
-                // 触发连接断开事件
                 PPTConnectionChanged?.Invoke(false);
 
                 LogHelper.WriteLogToFile("已断开PPT连接，暂时卸载模块以确保COM完全释放", LogHelper.LogType.Event);
 
-                ThreadPool.QueueUserWorkItem(_ =>
+                if (!isShutdown && !_disposed)
                 {
-                    try
+                    ThreadPool.QueueUserWorkItem(_ =>
                     {
-                        Thread.Sleep(2000);
-
-                        if (_disposed)
-                        {
-                            _isModuleUnloading = false;
-                            return;
-                        }
-
-                        GC.Collect();
-                        GC.WaitForPendingFinalizers();
-                        GC.Collect();
-
-                        Thread.Sleep(1000);
-
-                        _isModuleUnloading = false;
-
                         try
                         {
-                            if (!_disposed)
-                            {
-                                _unifiedPptTimer?.Start();
-                            }
-                        }
-                        catch (ObjectDisposedException)
-                        {
-                            LogHelper.WriteLogToFile("PPT联动模块重载时计时器已释放，跳过重启", LogHelper.LogType.Trace);
-                        }
+                            Thread.Sleep(2000);
 
-                        LogHelper.WriteLogToFile("PPT联动模块已重新加载", LogHelper.LogType.Trace);
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"重新加载PPT联动模块失败: {ex}", LogHelper.LogType.Error);
-                        _isModuleUnloading = false;
-                    }
-                });
+                            if (_disposed)
+                            {
+                                _isModuleUnloading = false;
+                                return;
+                            }
+
+                            GC.Collect();
+                            GC.WaitForPendingFinalizers();
+                            GC.Collect();
+
+                            Thread.Sleep(1000);
+
+                            _isModuleUnloading = false;
+
+                            try
+                            {
+                                if (!_disposed)
+                                {
+                                    _unifiedPptTimer?.Start();
+                                }
+                            }
+                            catch (ObjectDisposedException)
+                            {
+                                LogHelper.WriteLogToFile("PPT联动模块重载时计时器已释放，跳过重启", LogHelper.LogType.Trace);
+                            }
+
+                            LogHelper.WriteLogToFile("PPT联动模块已重新加载", LogHelper.LogType.Trace);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"重新加载PPT联动模块失败: {ex}", LogHelper.LogType.Error);
+                            _isModuleUnloading = false;
+                        }
+                    });
+                }
+                else
+                {
+                    _isModuleUnloading = false;
+                }
             }
             catch (Exception ex)
             {
@@ -2065,7 +2077,7 @@ namespace Ink_Canvas.Helpers
         {
             if (!_disposed)
             {
-                StopMonitoring();
+                StopMonitoring(isShutdown: true);
                 StopWpsProcessCheckTimer();
 
                 _unifiedPptTimer?.Dispose();

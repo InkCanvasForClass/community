@@ -39,6 +39,15 @@
                         NavigateUri="https://github.com/NamePickerOrg/NamePicker" />
                 </ui:SettingsCard>
 
+                <ui:SettingsCard Header="Inkeys"
+                    Description="{i18n:I18n Key=FriendlyLinks_InkeysDescription}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <ui:HyperlinkButton Content="{i18n:I18n Key=FriendlyLinks_Visit}"
+                        NavigateUri="https://github.com/Alan-CRL/Inkeys/" />
+                </ui:SettingsCard>
+
                 <Rectangle Height="48" />
             </ikw:SimpleStackPanel>
         </Grid>

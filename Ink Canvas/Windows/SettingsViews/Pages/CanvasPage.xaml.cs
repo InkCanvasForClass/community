@@ -25,7 +25,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void UpdateAllSliderTexts()
         {
-            UpdateSliderText(InkFadeTimeSlider, InkFadeTimeText, "{0:0}ms");
             UpdateSliderText(BrushAutoRestoreWidthSlider, BrushAutoRestoreWidthText, "{0:F2}");
             UpdateSliderText(BrushAutoRestoreAlphaSlider, BrushAutoRestoreAlphaText, "{0:0}");
             UpdateSliderText(EraserAutoSwitchBackDelaySlider, EraserAutoSwitchBackDelayText, "{0:0}秒");
@@ -57,13 +56,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     CardLaunchSeewoVideoShowcaseForWhiteboardBooth.IsOn = settings.Canvas.LaunchSeewoVideoShowcaseForWhiteboardBooth;
                     ComboBoxHyperbolaAsymptoteOption.SelectedIndex = (int)settings.Canvas.HyperbolaAsymptoteOption;
                     CardShowCircleCenter.IsOn = settings.Canvas.ShowCircleCenter;
+                    CardShowCoordinateUnitMarks.IsOn = settings.Canvas.ShowCoordinateUnitMarks;
                     int curveMode = 0;
                     if (settings.Canvas.UseAdvancedBezierSmoothing) curveMode = 2;
                     else if (settings.Canvas.FitToCurve) curveMode = 1;
                     ComboBoxCurveSmoothingMode.SelectedIndex = curveMode;
-                    ToggleSwitchEnableInkFade.IsOn = settings.Canvas.EnableInkFade;
-                    InkFadeTimeSlider.Value = settings.Canvas.InkFadeTime;
-                    CardHideInkFadeControlInPenMenu.IsOn = settings.Canvas.HideInkFadeControlInPenMenu;
                     ToggleSwitchBrushAutoRestore.IsOn = settings.Canvas.EnableBrushAutoRestore;
                     BrushAutoRestoreTimesTextBox.Text = settings.Canvas.BrushAutoRestoreTimes ?? string.Empty;
                     LoadBrushAutoRestoreColor(settings.Canvas.BrushAutoRestoreColor);
@@ -75,7 +72,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 if (settings.Gesture != null)
                 {
-                    CardAutoSwitchTwoFingerGesture.IsOn = settings.Gesture.AutoSwitchTwoFingerGesture;
                     CardEnableTwoFingerRotationOnSelection.IsOn = settings.Gesture.IsEnableTwoFingerRotationOnSelection;
                 }
 
@@ -92,7 +88,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             _isLoaded = true;
 
-            ExpanderEnableInkFade.IsExpanded = ToggleSwitchEnableInkFade.IsOn;
             ExpanderBrushAutoRestore.IsExpanded = ToggleSwitchBrushAutoRestore.IsOn;
             ExpanderEnableEraserAutoSwitchBack.IsExpanded = ToggleSwitchEnableEraserAutoSwitchBack.IsOn;
             ExpanderEnablePalmEraser.IsExpanded = ToggleSwitchEnablePalmEraser.IsOn;
@@ -220,6 +215,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.SaveSettingsToFile();
         }
 
+        private void ToggleSwitchShowCoordinateUnitMarks_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.ShowCoordinateUnitMarks = CardShowCoordinateUnitMarks.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
         private void ComboBoxCurveSmoothingMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!_isLoaded) return;
@@ -242,43 +244,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     break;
             }
             SettingsManager.SaveSettingsToFile();
-        }
-
-        private void ToggleSwitchEnableInkFade_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.EnableInkFade = ToggleSwitchEnableInkFade.IsOn;
-            ExpanderEnableInkFade.IsExpanded = ToggleSwitchEnableInkFade.IsOn;
-            SettingsManager.SaveSettingsToFile();
             var mw = Application.Current.MainWindow as MainWindow;
-            if (mw != null)
+            if (mw != null && mw.inkCanvas != null)
             {
-                mw.UpdateInkFadeManager(ToggleSwitchEnableInkFade.IsOn, SettingsManager.Settings.Canvas.InkFadeTime);
-                if (mw.ToggleSwitchInkFadeInPanel != null)
-                    mw.ToggleSwitchInkFadeInPanel.IsOn = ToggleSwitchEnableInkFade.IsOn;
-                if (mw.ToggleSwitchInkFadeInPanel2 != null)
-                    mw.ToggleSwitchInkFadeInPanel2.IsOn = ToggleSwitchEnableInkFade.IsOn;
+                if (SettingsManager.Settings.Canvas.UseAdvancedBezierSmoothing)
+                    mw.inkCanvas.DefaultDrawingAttributes.FitToCurve = false;
+                else
+                    mw.inkCanvas.DefaultDrawingAttributes.FitToCurve = SettingsManager.Settings.Canvas.FitToCurve;
             }
-        }
-
-        private void InkFadeTimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            UpdateSliderText(InkFadeTimeSlider, InkFadeTimeText, "{0:0}ms");
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.InkFadeTime = (int)e.NewValue;
-            SettingsManager.SaveSettingsToFile();
-            var mw = Application.Current.MainWindow as MainWindow;
-            if (mw != null && SettingsManager.Settings.Canvas.EnableInkFade)
-            {
-                mw.UpdateInkFadeManager(true, (int)e.NewValue);
-            }
-        }
-
-        private void ToggleSwitchHideInkFadeControlInPenMenu_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.HideInkFadeControlInPenMenu = CardHideInkFadeControlInPenMenu.IsOn;
-            SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchBrushAutoRestore_Toggled(object sender, RoutedEventArgs e)
@@ -343,13 +316,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdateSliderText(EraserAutoSwitchBackDelaySlider, EraserAutoSwitchBackDelayText, "{0:0}秒");
             if (!_isLoaded) return;
             SettingsManager.Settings.Canvas.EraserAutoSwitchBackDelaySeconds = (int)e.NewValue;
-            SettingsManager.SaveSettingsToFile();
-        }
-
-        private void ToggleSwitchAutoSwitchTwoFingerGesture_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Gesture.AutoSwitchTwoFingerGesture = CardAutoSwitchTwoFingerGesture.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 

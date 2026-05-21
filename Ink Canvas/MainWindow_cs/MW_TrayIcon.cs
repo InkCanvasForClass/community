@@ -96,7 +96,10 @@ namespace Ink_Canvas
                     taskbarIcon.ContextMenu.IsOpen = true;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                ExceptionHandler.HandleException(ex, "显示托盘右键菜单失败", LogHelper.LogType.Warning);
+            }
         }
 
         private void ToggleMainWindowVisibility()
@@ -355,7 +358,7 @@ namespace Ink_Canvas
             if (mainWin != null && mainWin.IsLoaded)
             {
                 IsAppExitByUser = true;
-                mainWin.BtnExit_Click(null, null);
+                mainWin.ExitApplication(null, null);
             }
         }
 
@@ -466,7 +469,7 @@ namespace Ink_Canvas
                 var isInPPTPresentationMode = false;
                 Dispatcher.Invoke(() =>
                 {
-                    isInPPTPresentationMode = mainWin.BtnPPTSlideShowEnd.Visibility == Visibility.Visible;
+                    isInPPTPresentationMode = mainWin.IsInPptPresentationMode;
                 });
                 if (!mainWin.isFloatingBarFolded)
                 {

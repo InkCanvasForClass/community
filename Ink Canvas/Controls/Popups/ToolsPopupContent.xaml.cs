@@ -1,6 +1,5 @@
 using System.Windows;
 using System.Windows.Controls;
-using iNKORE.UI.WPF.Modern.Controls;
 
 namespace Ink_Canvas.Controls
 {
@@ -36,11 +35,12 @@ namespace Ink_Canvas.Controls
         public ToolMenuButton ManualBtn => ManualToolBtn;
         public ToolMenuButton SettingsBtn => SettingsToolBtn;
 
-        public FontIcon CloseFontIcon => TitleBar?.CloseFontIcon;
+        public Button CloseButtonControl => Shell?.CloseButtonControl;
 
         public ToolsPopupContent()
         {
             InitializeComponent();
+            Shell.InnerContent = InnerContentHost.Content;
         }
     }
 }

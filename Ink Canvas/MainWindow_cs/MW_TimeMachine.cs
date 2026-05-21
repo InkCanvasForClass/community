@@ -394,9 +394,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void TimeMachine_OnUndoStateChanged(bool status)
         {
-            var result = status ? Visibility.Visible : Visibility.Collapsed;
-            BtnUndo.Visibility = result;
-            BtnUndo.IsEnabled = status;
+            IsUndoEnabled = status;
         }
 
         /// <summary>
@@ -408,9 +406,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void TimeMachine_OnRedoStateChanged(bool status)
         {
-            var result = status ? Visibility.Visible : Visibility.Collapsed;
-            BtnRedo.Visibility = result;
-            BtnRedo.IsEnabled = status;
+            IsRedoEnabled = status;
         }
 
         /// <summary>

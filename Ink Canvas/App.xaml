@@ -9,12 +9,11 @@
 >
     <Application.Resources>
         <ResourceDictionary>
-            <FontFamily x:Key="HarmonyOSFont">./Resources/Fonts/#HarmonyOS Sans SC</FontFamily>
             <ContextMenu Opened="SysTrayMenu_Opened" Closed="SysTrayMenu_Closed" x:Shared="false" x:Key="SysTrayMenu" Padding="6" ui:ThemeManager.RequestedTheme="Light">
                 <MenuItem IsCheckable="True" IsChecked="False" Checked="HideICCMainWindowTrayIconMenuItem_Checked" Unchecked="HideICCMainWindowTrayIconMenuItem_UnChecked" Name="HideICCMainWindowTrayIconMenuItem">
                     <MenuItem.Header>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
-                            <TextBlock Name="HideICCMainWindowTrayIconMenuItemHeaderText" FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="隐藏ICC主窗口" />
+                            <TextBlock Name="HideICCMainWindowTrayIconMenuItemHeaderText" FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="隐藏 ICC-CE 主窗口" />
                         </ikw:SimpleStackPanel>
                     </MenuItem.Header>
                     <MenuItem.Icon>

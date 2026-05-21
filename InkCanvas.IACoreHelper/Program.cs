@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.IO.MemoryMappedFiles;
 using System.IO.Pipes;
 using System.Linq;
 using System.Windows.Ink;
@@ -19,10 +20,11 @@ namespace InkCanvas.IACoreHelper
             }
 
             string pipeName = string.Format(IpcConstants.PipeName, parentPid);
+            string sharedMemoryNamePrefix = string.Format(IpcConstants.SharedMemoryName, parentPid, string.Empty);
 
             try
             {
-                RunPipeServer(pipeName);
+                RunPipeServer(pipeName, sharedMemoryNamePrefix);
             }
             catch (Exception ex)
             {
@@ -30,43 +32,142 @@ namespace InkCanvas.IACoreHelper
             }
         }
 
-        private static void RunPipeServer(string pipeName)
+        private static void RunPipeServer(string pipeName, string sharedMemoryNamePrefix)
         {
-            while (true)
+            MemoryMappedFile sharedMemory = null;
+            string openedSharedMemoryName = null;
+            try
             {
-                using (var server = new NamedPipeServerStream(
-                    pipeName,
-                    PipeDirection.InOut,
-                    1,
-                    PipeTransmissionMode.Byte,
-                    PipeOptions.WriteThrough))
+                while (true)
                 {
-                    server.WaitForConnection();
-
-                    try
+                    using (var server = new NamedPipeServerStream(
+                        pipeName,
+                        PipeDirection.InOut,
+                        1,
+                        PipeTransmissionMode.Byte,
+                        PipeOptions.WriteThrough))
                     {
-                        using (var reader = new BinaryReader(server, System.Text.Encoding.UTF8, leaveOpen: true))
-                        using (var writer = new BinaryWriter(server, System.Text.Encoding.UTF8, leaveOpen: true))
+                        server.WaitForConnection();
+
+                        try
                         {
-                            byte cmd = reader.ReadByte();
-
-                            if (cmd == IpcConstants.CmdShutdown)
-                                return;
-
-                            if (cmd == IpcConstants.CmdRecognize)
+                            using (var reader = new BinaryReader(server, System.Text.Encoding.UTF8, leaveOpen: true))
+                            using (var writer = new BinaryWriter(server, System.Text.Encoding.UTF8, leaveOpen: true))
                             {
-                                var request = RecognizeRequest.ReadFrom(reader);
-                                var response = HandleRecognize(request);
-                                response.WriteTo(writer);
-                                writer.Flush();
+                                byte cmd = reader.ReadByte();
+
+                                if (cmd == IpcConstants.CmdShutdown)
+                                    return;
+
+                                if (cmd == IpcConstants.CmdRecognize)
+                                {
+                                    var request = RecognizeRequest.ReadFrom(reader);
+                                    var response = HandleRecognize(request);
+                                    response.WriteTo(writer);
+                                    writer.Flush();
+                                }
+                                else if (cmd == IpcConstants.CmdRecognizeSharedMemory)
+                                {
+                                    int requestLength = reader.ReadInt32();
+                                    int capacity = reader.ReadInt32();
+                                    int generation = reader.ReadInt32();
+                                    string currentSharedMemoryName = sharedMemoryNamePrefix + generation;
+
+                                    if (sharedMemory == null || currentSharedMemoryName != openedSharedMemoryName)
+                                    {
+                                        sharedMemory?.Dispose();
+                                        sharedMemory = MemoryMappedFile.OpenExisting(currentSharedMemoryName);
+                                        openedSharedMemoryName = currentSharedMemoryName;
+                                    }
+
+                                    int status = HandleSharedMemoryRecognize(sharedMemory, requestLength, capacity, out int responseLength);
+                                    writer.Write(status);
+                                    writer.Write(responseLength);
+                                    writer.Flush();
+                                }
                             }
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.Error.WriteLine("IACoreHelper pipe error: " + ex.Message);
+                        catch (FileNotFoundException)
+                        {
+                            sharedMemory?.Dispose();
+                            sharedMemory = null;
+                            Console.Error.WriteLine("IACoreHelper shared memory missing");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.Error.WriteLine("IACoreHelper pipe error: " + ex.Message);
+                        }
                     }
                 }
+            }
+            finally
+            {
+                sharedMemory?.Dispose();
+            }
+        }
+
+        private static int HandleSharedMemoryRecognize(
+            MemoryMappedFile sharedMemory,
+            int requestLength,
+            int capacity,
+            out int responseLength)
+        {
+            responseLength = 0;
+            try
+            {
+                if (requestLength <= 0 || requestLength > capacity - IpcConstants.SharedMemoryHeaderSize)
+                    return IpcConstants.StatusError;
+
+                RecognizeRequest request;
+                using (var stream = sharedMemory.CreateViewStream(
+                    IpcConstants.SharedMemoryHeaderSize,
+                    requestLength,
+                    MemoryMappedFileAccess.Read))
+                using (var reader = new BinaryReader(stream, System.Text.Encoding.UTF8))
+                {
+                    request = RecognizeRequest.ReadFrom(reader);
+                }
+
+                var response = HandleRecognize(request);
+                int responseOffset = IpcConstants.SharedMemoryHeaderSize + requestLength;
+                int maxResponseLength = capacity - responseOffset;
+                if (maxResponseLength <= 0)
+                    return IpcConstants.StatusResponseTooLarge;
+
+                using (var stream = sharedMemory.CreateViewStream(
+                    responseOffset,
+                    maxResponseLength,
+                    MemoryMappedFileAccess.Write))
+                using (var writer = new BinaryWriter(stream, System.Text.Encoding.UTF8))
+                {
+                    response.WriteTo(writer);
+                    writer.Flush();
+                    responseLength = checked((int)stream.Position);
+                }
+
+                using (var accessor = sharedMemory.CreateViewAccessor(0, IpcConstants.SharedMemoryHeaderSize))
+                {
+                    accessor.Write(SharedMemoryHeader.Magic, IpcConstants.SharedMemoryMagic);
+                    accessor.Write(SharedMemoryHeader.Version, IpcConstants.ProtocolVersion);
+                    accessor.Write(SharedMemoryHeader.RequestLength, requestLength);
+                    accessor.Write(SharedMemoryHeader.ResponseOffset, responseOffset);
+                    accessor.Write(SharedMemoryHeader.ResponseLength, responseLength);
+                    accessor.Write(SharedMemoryHeader.Status, IpcConstants.StatusOk);
+                }
+
+                return IpcConstants.StatusOk;
+            }
+            catch (NotSupportedException)
+            {
+                return IpcConstants.StatusResponseTooLarge;
+            }
+            catch (IOException)
+            {
+                return IpcConstants.StatusResponseTooLarge;
+            }
+            catch
+            {
+                return IpcConstants.StatusError;
             }
         }
 

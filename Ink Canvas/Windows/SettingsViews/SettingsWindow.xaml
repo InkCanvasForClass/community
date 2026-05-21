@@ -246,12 +246,12 @@
                     </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
 
-                <!-- PowerPoint -->
+                <!-- PPT联动 -->
                 <ui:NavigationViewItem
                     x:Name="PowerPointPageItem"
-                    Content="PowerPoint"
+                    Content="PPT联动"
                     Tag="PowerPointPage"
-                    ToolTipService.ToolTip="PowerPoint 设置">
+                    ToolTipService.ToolTip="PPT联动设置">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"/>
                     </ui:NavigationViewItem.Icon>
@@ -271,6 +271,42 @@
                                       MinWidth="8" MinHeight="8"
                                       Visibility="Collapsed"/>
                     </ui:NavigationViewItem.InfoBadge>
+                </ui:NavigationViewItem>
+
+                <!-- 通知设置 -->
+                <ui:NavigationViewItem
+                    x:Name="NotificationPageItem"
+                    Content="{i18n:I18n Key=Notification_PageTitle}"
+                    SelectsOnInvoked="False"
+                    ToolTipService.ToolTip="{i18n:I18n Key=Notification_NavTooltip}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Message}"/>
+                    </ui:NavigationViewItem.Icon>
+                    <ui:NavigationViewItem.MenuItems>
+                        <ui:NavigationViewItem
+                            x:Name="NotificationSettingsPageItem"
+                            Content="{i18n:I18n Key=Notification_SettingsTitle}"
+                            Tag="NotificationPage"
+                            ToolTipService.ToolTip="{i18n:I18n Key=Notification_NavTooltip}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Message}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="AnnouncementCenterPageItem"
+                            Content="{i18n:I18n Key=Announcement_CenterTitle}"
+                            Tag="AnnouncementCenterPage"
+                            ToolTipService.ToolTip="{i18n:I18n Key=Announcement_CenterHint}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BulletedList}"/>
+                            </ui:NavigationViewItem.Icon>
+                            <ui:NavigationViewItem.InfoBadge>
+                                <ui:InfoBadge x:Name="AnnouncementUnreadInfoBadge"
+                                              Value="0"
+                                              Visibility="Collapsed" />
+                            </ui:NavigationViewItem.InfoBadge>
+                        </ui:NavigationViewItem>
+                    </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
 
                 <!-- 实验性选项 -->
@@ -303,6 +339,16 @@
                     ToolTipService.ToolTip="{i18n:I18n Key=Storage_NavTooltip}">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.HardDrive}"/>
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
+                <ui:NavigationViewItem
+                    x:Name="CloudStoragePageItem"
+                    Content="{i18n:I18n Key=CloudStorage_Manage}"
+                    Tag="CloudStoragePage"
+                    ToolTipService.ToolTip="{i18n:I18n Key=CloudStorage_Manage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}"/>
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 

@@ -27,27 +27,17 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            if (BackgroundPalette.Visibility == Visibility.Visible)
+            if (BackgroundPalette.IsOpen)
             {
-                AnimationsHelper.HideWithSlideAndFade(BackgroundPalette);
+                AnimationsHelper.HidePopupWithSlideAndFade(BackgroundPalette);
             }
             else
             {
-                AnimationsHelper.HideWithSlideAndFade(EraserSizePanel);
-                AnimationsHelper.HidePopupWithSlideAndFade(BorderTools);
-                AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
-                AnimationsHelper.HideWithSlideAndFade(PenPalette);
-                AnimationsHelper.HideWithSlideAndFade(BoardPenPalette);
-                AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
-                AnimationsHelper.HideWithSlideAndFade(BoardBorderDrawShape);
-                AnimationsHelper.HideWithSlideAndFade(BoardEraserSizePanel);
-                AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
-                AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
-                AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
-
+                HideSubPanels();
                 LoadCustomBackgroundColor();
                 UpdateBackgroundButtonsState();
-                AnimationsHelper.ShowWithSlideFromBottomAndFade(BackgroundPalette);
+                AnimationsHelper.ShowPopupWithSlideAndFade(BackgroundPalette);
+                _popupManager?.BringToFront(BackgroundPalette);
             }
         }
 

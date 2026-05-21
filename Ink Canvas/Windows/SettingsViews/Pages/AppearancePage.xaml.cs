@@ -7,6 +7,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using ContentDialog = iNKORE.UI.WPF.Modern.Controls.ContentDialog;
@@ -40,6 +41,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdateSliderText(ViewboxFloatingBarOpacityValueSlider, ViewboxFloatingBarOpacityText, "{0:F2}");
             UpdateSliderText(ViewboxFloatingBarOpacityInPPTValueSlider, ViewboxFloatingBarOpacityInPPTText, "{0:F2}");
             UpdateSliderText(ViewboxBlackBoardScaleTransformValueSlider, ViewboxBlackBoardScaleText, "{0:F2}");
+            UpdateSliderText(QuickPanelBottomOffsetSlider, QuickPanelBottomOffsetText, "{0:F0}");
+            UpdateFloatingBarActualScaleText();
+        }
+
+        private void UpdateFloatingBarActualScaleText()
+        {
+            if (ViewboxFloatingBarScaleTransformValueSlider == null || ViewboxFloatingBarActualScaleText == null) return;
+            double val = ViewboxFloatingBarScaleTransformValueSlider.Value;
+            double clampedVal = (val > 0.5 && val < 1.25) ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1.0;
+            double actualScale = clampedVal;
+            ViewboxFloatingBarActualScaleText.Text = $"{actualScale:F2}x";
         }
 
         private void UpdateSliderText(Slider slider, TextBlock textBlock, string format)
@@ -77,6 +89,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             CardEnableSplashScreen.IsOn = settings.Appearance.EnableSplashScreen;
             ComboBoxSplashScreenStyle.SelectedIndex = settings.Appearance.SplashScreenStyle;
+            UpdateCustomSplashImageVisibility();
+
+            if (!string.IsNullOrEmpty(settings.Appearance.CustomSplashImagePath) && 
+                System.IO.File.Exists(settings.Appearance.CustomSplashImagePath))
+            {
+                TextBlockCustomSplashPath.Text = System.IO.Path.GetFileName(settings.Appearance.CustomSplashImagePath);
+                TextBlockCustomSplashPath.ToolTip = settings.Appearance.CustomSplashImagePath;
+            }
+            else
+            {
+                TextBlockCustomSplashPath.Text = "未选择自定义图片";
+                TextBlockCustomSplashPath.ToolTip = null;
+            }
+
+            UpdateTextAlignButtonAppearance(settings.Appearance.CustomSplashTextPosition);
 
             if (settings.Appearance.FloatingBarImg >= ComboBoxFloatingBarImg.Items.Count)
                 settings.Appearance.FloatingBarImg = 0;
@@ -90,8 +117,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ViewboxFloatingBarOpacityValueSlider.Value = settings.Appearance.ViewboxFloatingBarOpacityValue;
             ViewboxFloatingBarOpacityInPPTValueSlider.Value = settings.Appearance.ViewboxFloatingBarOpacityInPPTValue;
 
-            CardEnableDisPlayNibModeToggle.IsOn = settings.Appearance.IsEnableDisPlayNibModeToggler;
             CardEnableTimeDisplayInWhiteboardMode.IsOn = settings.Appearance.EnableTimeDisplayInWhiteboardMode;
+            CardUse24HourTimeFormat.IsOn = settings.Appearance.Use24HourTimeFormat;
             CardEnableChickenSoupInWhiteboardMode.IsOn = settings.Appearance.EnableChickenSoupInWhiteboardMode;
 
             _suppressChickenSoupSourceSelectionChanged = true;
@@ -107,20 +134,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
 
             CardEnableQuickPanel.IsOn = settings.Appearance.IsShowQuickPanel;
+            QuickPanelBottomOffsetSlider.Value = settings.Appearance.QuickPanelBottomOffset;
             ComboBoxUnFoldBtnImg.SelectedIndex = settings.Appearance.UnFoldButtonImageType;
 
             CardUseLegacyFloatingBarUI.IsOn = settings.Appearance.UseLegacyFloatingBarUI;
-            CheckBoxShowShapeButton.IsChecked = settings.Appearance.IsShowShapeButton;
-            CheckBoxShowUndoButton.IsChecked = settings.Appearance.IsShowUndoButton;
-            CheckBoxShowRedoButton.IsChecked = settings.Appearance.IsShowRedoButton;
-            CheckBoxShowClearButton.IsChecked = settings.Appearance.IsShowClearButton;
-            CheckBoxShowWhiteboardButton.IsChecked = settings.Appearance.IsShowWhiteboardButton;
-            CheckBoxShowHideButton.IsChecked = settings.Appearance.IsShowHideButton;
-            CheckBoxShowLassoSelectButton.IsChecked = settings.Appearance.IsShowLassoSelectButton;
-            CheckBoxShowClearAndMouseButton.IsChecked = settings.Appearance.IsShowClearAndMouseButton;
-            CheckBoxShowQuickColorPalette.IsChecked = settings.Appearance.IsShowQuickColorPalette;
-            ComboBoxQuickColorPaletteDisplayMode.SelectedIndex = settings.Appearance.QuickColorPaletteDisplayMode;
-            ComboBoxEraserDisplayOption.SelectedIndex = settings.Appearance.EraserDisplayOption;
 
             CardEnableTrayIcon.IsOn = settings.Appearance.EnableTrayIcon;
 
@@ -241,6 +258,98 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             SettingsManager.Settings.Appearance.SplashScreenStyle = ComboBoxSplashScreenStyle.SelectedIndex;
             SettingsManager.SaveSettingsToFile();
+            UpdateCustomSplashImageVisibility();
+        }
+
+        private void UpdateCustomSplashImageVisibility()
+        {
+            bool isCustomSelected = ComboBoxSplashScreenStyle.SelectedIndex == 7;
+            CardCustomSplashImage.Visibility = isCustomSelected ? Visibility.Visible : Visibility.Collapsed;
+            CardCustomSplashTextPosition.Visibility = isCustomSelected ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void BorderTextAlign_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (!_isLoaded) return;
+
+            if (sender is Border border && border.Tag != null)
+            {
+                int selectedIndex = int.Parse(border.Tag.ToString());
+                SettingsManager.Settings.Appearance.CustomSplashTextPosition = selectedIndex;
+                SettingsManager.SaveSettingsToFile();
+                UpdateTextAlignButtonAppearance(selectedIndex);
+            }
+        }
+
+        private void UpdateTextAlignButtonAppearance(int selectedIndex)
+        {
+            AnimateIndicatorToPosition(selectedIndex);
+        }
+
+        private void AnimateIndicatorToPosition(int position)
+        {
+            // 外容器 110px，内边距 1px，每个按钮 36px
+            // 左: X=0, 中: X=36, 右: X=72
+            double targetX = position * 36;
+
+            var animation = new DoubleAnimation
+            {
+                To = targetX,
+                Duration = TimeSpan.FromMilliseconds(200),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+
+            IndicatorTranslateTransform.BeginAnimation(TranslateTransform.XProperty, animation);
+
+            // 跟随系统主题颜色
+            var isDarkTheme = SettingsManager.Settings.Appearance.Theme == 1;
+
+            if (isDarkTheme)
+            {
+                SelectionIndicator.Background = new SolidColorBrush(Color.FromArgb(40, 0, 120, 215));
+                SelectionIndicator.BorderBrush = new SolidColorBrush(Color.FromArgb(150, 0, 120, 215));
+            }
+            else
+            {
+                SelectionIndicator.Background = new SolidColorBrush(Color.FromArgb(25, 0, 120, 215));
+                SelectionIndicator.BorderBrush = new SolidColorBrush(Color.FromArgb(120, 0, 120, 215));
+            }
+        }
+
+        private void ButtonBrowseCustomSplash_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var openFileDialog = new Microsoft.Win32.OpenFileDialog
+                {
+                    Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.webp|All Files|*.*",
+                    Title = "选择自定义启动图片"
+                };
+
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    string selectedPath = openFileDialog.FileName;
+                    if (!string.IsNullOrEmpty(selectedPath))
+                    {
+                        SettingsManager.Settings.Appearance.CustomSplashImagePath = selectedPath;
+                        SettingsManager.SaveSettingsToFile();
+                        TextBlockCustomSplashPath.Text = System.IO.Path.GetFileName(selectedPath);
+                        TextBlockCustomSplashPath.ToolTip = selectedPath;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"选择自定义启动图片时出错: {ex.Message}");
+            }
+        }
+
+        private void ButtonClearCustomSplash_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsManager.Settings.Appearance.CustomSplashImagePath = string.Empty;
+            SettingsManager.SaveSettingsToFile();
+            TextBlockCustomSplashPath.Text = "未选择自定义图片";
+            TextBlockCustomSplashPath.ToolTip = null;
         }
 
         #endregion
@@ -293,18 +402,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.Settings.Appearance.ViewboxFloatingBarScaleTransformValue = val;
             SettingsManager.SaveSettingsToFile();
 
-            // 计算并显示实际缩放倍率（基础 1.5 × 用户设置）
             double clampedVal = (val > 0.5 && val < 1.25) ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1.0;
-            double actualScale = 1.5 * clampedVal;
-            ViewboxFloatingBarActualScaleText.Text = $"{actualScale:F2}x";
+            double actualScale = clampedVal;
+            UpdateFloatingBarActualScaleText();
 
             var mw = GetMainWindow();
             if (mw != null)
             {
-                // 应用实际缩放值（基础 1.5 × 用户设置）
                 mw.ViewboxFloatingBarScaleTransform.ScaleX = actualScale;
                 mw.ViewboxFloatingBarScaleTransform.ScaleY = actualScale;
-                if (mw.BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                if (mw.IsInPptPresentationMode)
                     mw.ViewboxFloatingBarMarginAnimation(60);
                 else
                     mw.ViewboxFloatingBarMarginAnimation(100, true);
@@ -352,20 +459,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         #region Display Options
 
-        private void ToggleSwitchEnableDisPlayNibModeToggle_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.IsEnableDisPlayNibModeToggler = CardEnableDisPlayNibModeToggle.IsOn;
-            SettingsManager.SaveSettingsToFile();
-            var mw = GetMainWindow();
-            if (mw != null)
-            {
-                var vis = CardEnableDisPlayNibModeToggle.IsOn ? Visibility.Visible : Visibility.Collapsed;
-                mw.NibModeSimpleStackPanel.Visibility = vis;
-                mw.BoardNibModeSimpleStackPanel.Visibility = vis;
-            }
-        }
-
         private void ViewboxBlackBoardScaleTransformValueSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             UpdateSliderText(ViewboxBlackBoardScaleTransformValueSlider, ViewboxBlackBoardScaleText, "{0:F2}");
@@ -411,6 +504,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 mw.BlackBoardWaterMark.Visibility = CardEnableChickenSoupInWhiteboardMode.IsOn ? Visibility.Visible : Visibility.Collapsed;
             }
+        }
+
+        private void ToggleSwitchUse24HourTimeFormat_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.Use24HourTimeFormat = CardUse24HourTimeFormat.IsOn;
+            SettingsManager.SaveSettingsToFile();
         }
 
         private async void ComboBoxChickenSoupSource_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -503,6 +603,22 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.SaveSettingsToFile();
         }
 
+        private void QuickPanelBottomOffsetSlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            UpdateSliderText(QuickPanelBottomOffsetSlider, QuickPanelBottomOffsetText, "{0:F0}");
+            if (!_isLoaded) return;
+            var val = Math.Round(QuickPanelBottomOffsetSlider.Value);
+            if (QuickPanelBottomOffsetSlider.Value != val)
+            {
+                QuickPanelBottomOffsetSlider.Value = val;
+                return;
+            }
+            SettingsManager.Settings.Appearance.QuickPanelBottomOffset = val;
+            SettingsManager.SaveSettingsToFile();
+            var mw = GetMainWindow();
+            if (mw != null) mw.ApplyQuickPanelBottomOffset(val);
+        }
+
         private void ComboBoxUnFoldBtnImg_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!_isLoaded) return;
@@ -545,55 +661,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (mw != null) mw.UpdateFloatingBarIcons();
         }
 
-        private void CheckBoxShowShapeButton_Changed(object sender, RoutedEventArgs e)
+        private void CardFloatingBarButtons_Click(object sender, RoutedEventArgs e)
         {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.IsShowShapeButton = CheckBoxShowShapeButton.IsChecked ?? false;
-            SettingsManager.SaveSettingsToFile();
-            var mw = GetMainWindow();
-            if (mw != null) mw.UpdateFloatingBarButtonsVisibility();
-        }
-
-        private void CheckBoxShowButton_Changed(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            if (sender == CheckBoxShowUndoButton)
-                SettingsManager.Settings.Appearance.IsShowUndoButton = CheckBoxShowUndoButton.IsChecked ?? false;
-            else if (sender == CheckBoxShowRedoButton)
-                SettingsManager.Settings.Appearance.IsShowRedoButton = CheckBoxShowRedoButton.IsChecked ?? false;
-            else if (sender == CheckBoxShowClearButton)
-                SettingsManager.Settings.Appearance.IsShowClearButton = CheckBoxShowClearButton.IsChecked ?? false;
-            else if (sender == CheckBoxShowWhiteboardButton)
-                SettingsManager.Settings.Appearance.IsShowWhiteboardButton = CheckBoxShowWhiteboardButton.IsChecked ?? false;
-            else if (sender == CheckBoxShowHideButton)
-                SettingsManager.Settings.Appearance.IsShowHideButton = CheckBoxShowHideButton.IsChecked ?? false;
-            else if (sender == CheckBoxShowLassoSelectButton)
-                SettingsManager.Settings.Appearance.IsShowLassoSelectButton = CheckBoxShowLassoSelectButton.IsChecked ?? false;
-            else if (sender == CheckBoxShowClearAndMouseButton)
-                SettingsManager.Settings.Appearance.IsShowClearAndMouseButton = CheckBoxShowClearAndMouseButton.IsChecked ?? false;
-            else if (sender == CheckBoxShowQuickColorPalette)
-                SettingsManager.Settings.Appearance.IsShowQuickColorPalette = CheckBoxShowQuickColorPalette.IsChecked ?? false;
-            SettingsManager.SaveSettingsToFile();
-            var mw = GetMainWindow();
-            if (mw != null) mw.UpdateFloatingBarButtonsVisibility();
-        }
-
-        private void ComboBoxQuickColorPaletteDisplayMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.QuickColorPaletteDisplayMode = ComboBoxQuickColorPaletteDisplayMode.SelectedIndex;
-            SettingsManager.SaveSettingsToFile();
-            var mw = GetMainWindow();
-            if (mw != null) mw.UpdateFloatingBarButtonsVisibility();
-        }
-
-        private void ComboBoxEraserDisplayOption_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.EraserDisplayOption = ComboBoxEraserDisplayOption.SelectedIndex;
-            SettingsManager.SaveSettingsToFile();
-            var mw = GetMainWindow();
-            if (mw != null) mw.UpdateFloatingBarButtonsVisibility();
+            var settingsWindow = Application.Current.Windows.OfType<SettingsViews.SettingsWindow>().FirstOrDefault();
+            if (settingsWindow != null)
+                settingsWindow.NavigateToPage("ToolbarPage");
         }
 
         #endregion
@@ -611,7 +683,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (_taskbar is FrameworkElement fe)
                     fe.Visibility = CardEnableTrayIcon.IsOn ? Visibility.Visible : Visibility.Collapsed;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                ExceptionHandler.HandleException(ex, "更新托盘图标可见性失败", LogHelper.LogType.Warning);
+            }
         }
 
         private void ComboBoxTrayLeftClickAction_SelectionChanged(object sender, SelectionChangedEventArgs e)

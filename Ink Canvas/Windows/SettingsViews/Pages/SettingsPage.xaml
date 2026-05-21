@@ -8,10 +8,13 @@
     xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
     Title="设置"
     mc:Ignorable="d">
-    <Grid>
-        <StackPanel Margin="24">
-            <TextBlock Text="设置" Style="{DynamicResource TitleTextBlockStyle}" Margin="0,0,0,16" />
-            <TextBlock Text="这里是设置页面" Style="{DynamicResource BodyTextBlockStyle}" />
-        </StackPanel>
-    </Grid>
+    <ScrollViewer PanningMode="VerticalFirst">
+        <Grid>
+            <StackPanel Margin="24">
+                <TextBlock Text="设置" Style="{DynamicResource TitleTextBlockStyle}" Margin="0,0,0,16" />
+                <TextBlock Text="这里是设置页面" Style="{DynamicResource BodyTextBlockStyle}" />
+                <Rectangle Height="48" />
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </ui:Page>

@@ -174,7 +174,14 @@ namespace Ink_Canvas
             // Startup
             if (isStartup)
             {
-                CursorIcon_Click(null, null);
+                try
+                {
+                    CursorIcon_Click(null, null);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"启动时切换光标模式失败: {ex.Message}", LogHelper.LogType.Warning);
+                }
             }
 
             try
@@ -248,14 +255,10 @@ namespace Ink_Canvas
             }
 
             // Appearance - UI initialization (settings loading moved to AppearancePage)
-            if (Settings.Appearance != null)
+            try
             {
-                if (!Settings.Appearance.IsEnableDisPlayNibModeToggler)
+                if (Settings.Appearance != null)
                 {
-                    NibModeSimpleStackPanel.Visibility = Visibility.Collapsed;
-                    BoardNibModeSimpleStackPanel.Visibility = Visibility.Collapsed;
-                }
-
                 if (Settings.Appearance.ViewboxFloatingBarScaleTransformValue != 0)
                 {
                     double userVal = Settings.Appearance.ViewboxFloatingBarScaleTransformValue;
@@ -264,10 +267,9 @@ namespace Ink_Canvas
                                                userVal <= 0.5 ? 0.5 :
                                                userVal >= 1.25 ? 1.25 : 1.0;
 
-                    // 实际缩放 = 基础倍率(1.5) × 用户设置倍率
-                    double actualScale = 1.5 * clampedUserVal;
+                    double actualScale = clampedUserVal;
 
-                    // 最终范围限制：0.75x ~ 1.875x
+                    // 最终范围限制：0.5x ~ 1.25x
                     ViewboxFloatingBarScaleTransform.ScaleX = actualScale;
                     ViewboxFloatingBarScaleTransform.ScaleY = actualScale;
                 }
@@ -305,15 +307,15 @@ namespace Ink_Canvas
                 ViewboxBlackboardCenterSideScaleTransform.ScaleX = Settings.Appearance.ViewboxBlackBoardScaleTransformValue;
                 ViewboxBlackboardCenterSideScaleTransform.ScaleY = Settings.Appearance.ViewboxBlackBoardScaleTransformValue;
 
+                ApplyQuickPanelBottomOffset(Settings.Appearance.QuickPanelBottomOffset);
+
                 if (Settings.Appearance.IsTransparentButtonBackground)
                 {
-                    BtnExit.Background = new SolidColorBrush(StringToColor("#7F909090"));
+                    { /* Old UI removed */ }
                 }
                 else
                 {
-                    BtnExit.Background = BtnSwitchTheme.Content.ToString() == "深色"
-                        ? new SolidColorBrush(StringToColor("#FFCCCCCC"))
-                        : new SolidColorBrush(StringToColor("#FF555555"));
+                    { /* Old UI removed */ }
                 }
 
                 if (Settings.Appearance.FloatingBarImg >= 12 + Settings.Appearance.CustomFloatingBarImgs.Count)
@@ -330,10 +332,15 @@ namespace Ink_Canvas
                     fe.Visibility = Settings.Appearance.EnableTrayIcon ? Visibility.Visible : Visibility.Collapsed;
 
                 SystemEvents_UserPreferenceChanged(null, null);
+                }
+                else
+                {
+                    Settings.Appearance = new Appearance();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Settings.Appearance = new Appearance();
+                LogHelper.WriteLogToFile($"加载外观设置失败: {ex.Message}", LogHelper.LogType.Error);
             }
 
             // PowerPointSettings
@@ -353,24 +360,36 @@ namespace Ink_Canvas
             }
 
             // Gesture
-            if (Settings.Gesture != null)
-            {
-                if (Settings.Gesture.AutoSwitchTwoFingerGesture)
-                {
-                    if (Topmost)
-                    {
-                        Settings.Gesture.IsEnableTwoFingerTranslate = false;
-                    }
-                    else
-                    {
-                        Settings.Gesture.IsEnableTwoFingerTranslate = true;
-                    }
-                }
-            }
-            else
+            if (Settings.Gesture == null)
             {
                 Settings.Gesture = new Gesture();
             }
+
+            try
+            {
+                if (FloatingBarGesturePopupContent != null)
+                {
+                    FloatingBarGesturePopupContent.MultiTouchToggle.IsOn = Settings.Gesture.IsEnableMultiTouchMode;
+                    FloatingBarGesturePopupContent.TwoFingerTranslateToggle.IsOn = Settings.Gesture.IsEnableTwoFingerTranslate;
+                    FloatingBarGesturePopupContent.TwoFingerZoomToggle.IsOn = Settings.Gesture.IsEnableTwoFingerZoom;
+                    FloatingBarGesturePopupContent.TwoFingerRotationToggle.IsOn = Settings.Gesture.IsEnableTwoFingerRotation;
+                }
+
+                if (BoardGesturePopupContent != null)
+                {
+                    BoardGesturePopupContent.MultiTouchToggle.IsOn = Settings.Gesture.IsEnableMultiTouchModeBoard;
+                    BoardGesturePopupContent.TwoFingerTranslateToggle.IsOn = Settings.Gesture.IsEnableTwoFingerTranslateBoard;
+                    BoardGesturePopupContent.TwoFingerZoomToggle.IsOn = Settings.Gesture.IsEnableTwoFingerZoomBoard;
+                    BoardGesturePopupContent.TwoFingerRotationToggle.IsOn = Settings.Gesture.IsEnableTwoFingerRotationBoard;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"同步手势开关状态失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            // 注意：快捷调色盘的可见性现在完全由工具栏规则集管理，不需要手动设置
+            // 所有对 QuickColorPalette.Visibility 的直接操作已移除以避免冲突
 
             // Canvas
             if (Settings.Canvas != null)
@@ -378,16 +397,16 @@ namespace Ink_Canvas
                 drawingAttributes.Height = Settings.Canvas.InkWidth;
                 drawingAttributes.Width = Settings.Canvas.InkWidth;
 
-                InkWidthSlider.Value = Settings.Canvas.InkWidth * 2;
-                HighlighterWidthSlider.Value = Settings.Canvas.HighlighterWidth;
+                PenWidthSlider.Value = Settings.Canvas.InkWidth * 2;
+                PenAlphaSlider.Value = Settings.Canvas.InkAlpha;
+                BoardPenWidthSlider.Value = Settings.Canvas.InkWidth * 2;
+                BoardPenAlphaSlider.Value = Settings.Canvas.InkAlpha;
 
                 int alpha = (int)Settings.Canvas.InkAlpha;
                 if (alpha < 0) alpha = 0; if (alpha > 255) alpha = 255;
                 var inkColor = drawingAttributes.Color;
                 drawingAttributes.Color = Color.FromArgb((byte)alpha, inkColor.R, inkColor.G, inkColor.B);
                 inkCanvas.DefaultDrawingAttributes.Color = drawingAttributes.Color;
-                if (InkAlphaSlider != null) InkAlphaSlider.Value = alpha;
-                if (BoardInkAlphaSlider != null) BoardInkAlphaSlider.Value = alpha;
 
 
 
@@ -607,17 +626,20 @@ namespace Ink_Canvas
                 Settings.Automation = new Automation();
             }
 
-            // auto align
-            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
-            {
-                ViewboxFloatingBarMarginAnimation(60);
-            }
-            else
-            {
-                ViewboxFloatingBarMarginAnimation(100, true);
-            }
-
             RefreshFloatingBarScreenFollowState();
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (IsInPptPresentationMode)
+                    ViewboxFloatingBarMarginAnimation(60);
+                else
+                    ViewboxFloatingBarMarginAnimation(100, true);
+            }), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                UpdateQuickColorPaletteIndicator(inkCanvas.DefaultDrawingAttributes.Color);
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
 
         }
 
@@ -653,32 +675,37 @@ namespace Ink_Canvas
         {
             try
             {
-
-                // 同步批注子面板中的开关状态
-                if (ToggleSwitchInkFadeInPanel != null)
-                {
-                    ToggleSwitchInkFadeInPanel.IsOn = Settings.Canvas.EnableInkFade;
-                }
-
-                // 同步普通画笔面板中的开关状态
-                if (ToggleSwitchInkFadeInPanel2 != null)
-                {
-                    ToggleSwitchInkFadeInPanel2.IsOn = Settings.Canvas.EnableInkFade;
-                }
-
-
-
-
-                // 同步墨迹渐隐管理器的状态
                 if (_inkFadeManager != null)
                 {
-                    _inkFadeManager.IsEnabled = Settings.Canvas.EnableInkFade;
+                    _inkFadeManager.IsEnabled = penType == 2 && Settings.Canvas.EnableInkFade;
                     _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
+                    _inkFadeManager.UpdateFadeSpeedMultiplier(Settings.Canvas.InkFadeSpeedMultiplier);
                 }
 
+                _isUpdatingSliders = true;
+                if (LaserPenFadeTimeSlider != null)
+                    LaserPenFadeTimeSlider.Value = Math.Max(1, Math.Min(15, Settings.Canvas.InkFadeTime / 1000));
+                if (BoardLaserPenFadeTimeSlider != null)
+                    BoardLaserPenFadeTimeSlider.Value = Math.Max(1, Math.Min(15, Settings.Canvas.InkFadeTime / 1000));
+                if (LaserPenFadeSpeedSlider != null)
+                    LaserPenFadeSpeedSlider.Value = Math.Max(0.1, Math.Min(5, Settings.Canvas.InkFadeSpeedMultiplier));
+                if (BoardLaserPenFadeSpeedSlider != null)
+                    BoardLaserPenFadeSpeedSlider.Value = Math.Max(0.1, Math.Min(5, Settings.Canvas.InkFadeSpeedMultiplier));
+                _isUpdatingSliders = false;
 
-                // 根据设置更新墨迹渐隐控制开关的可见性
-                UpdateInkFadeControlVisibility();
+                // 初始化滑块文本
+                UpdateSliderText(PenWidthSlider, PenWidthText, "{0:0.0}");
+                UpdateSliderText(BoardPenWidthSlider, BoardPenWidthText, "{0:0.0}");
+                UpdateSliderText(PenAlphaSlider, PenAlphaText, "{0:0}");
+                UpdateSliderText(BoardPenAlphaSlider, BoardPenAlphaText, "{0:0}");
+                UpdateSliderText(LaserPenFadeTimeSlider, LaserPenFadeTimeText, "{0:0}s");
+                UpdateSliderText(BoardLaserPenFadeTimeSlider, BoardLaserPenFadeTimeText, "{0:0}s");
+                UpdateSliderText(LaserPenFadeSpeedSlider, LaserPenFadeSpeedText, "{0:0.0}x");
+                UpdateSliderText(BoardLaserPenFadeSpeedSlider, BoardLaserPenFadeSpeedText, "{0:0.0}x");
+                if (HighlighterOverlapToggle != null)
+                    HighlighterOverlapToggle.IsOn = Settings.Canvas.HighlighterOverlapEnabled;
+                if (BoardHighlighterOverlapToggle != null)
+                    BoardHighlighterOverlapToggle.IsOn = Settings.Canvas.HighlighterOverlapEnabled;
 
                 LogHelper.WriteLogToFile("墨迹渐隐设置已加载", LogHelper.LogType.Trace);
             }
@@ -815,6 +842,26 @@ namespace Ink_Canvas
                 userObj.Remove(key);
                 hasChanges = true;
             }
+        }
+
+        internal void ApplyQuickPanelBottomOffset(double offset)
+        {
+            LeftSidePanel.BeginAnimation(FrameworkElement.MarginProperty, null);
+            RightSidePanel.BeginAnimation(FrameworkElement.MarginProperty, null);
+            LeftUnFoldButtonQuickPanel.BeginAnimation(FrameworkElement.MarginProperty, null);
+            RightUnFoldButtonQuickPanel.BeginAnimation(FrameworkElement.MarginProperty, null);
+
+            var leftPanelMargin = LeftSidePanel.Margin;
+            LeftSidePanel.Margin = new Thickness(leftPanelMargin.Left, leftPanelMargin.Top, leftPanelMargin.Right, offset);
+
+            var rightPanelMargin = RightSidePanel.Margin;
+            RightSidePanel.Margin = new Thickness(rightPanelMargin.Left, rightPanelMargin.Top, rightPanelMargin.Right, offset);
+
+            var leftQuickPanelMargin = LeftUnFoldButtonQuickPanel.Margin;
+            LeftUnFoldButtonQuickPanel.Margin = new Thickness(leftQuickPanelMargin.Left, leftQuickPanelMargin.Top, leftQuickPanelMargin.Right, offset);
+
+            var rightQuickPanelMargin = RightUnFoldButtonQuickPanel.Margin;
+            RightUnFoldButtonQuickPanel.Margin = new Thickness(rightQuickPanelMargin.Left, rightQuickPanelMargin.Top, rightQuickPanelMargin.Right, offset);
         }
     }
 }

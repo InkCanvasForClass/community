@@ -90,7 +90,6 @@ namespace Ink_Canvas.Windows
             // 手势
             settings.Gesture.IsEnableTwoFingerZoom = true;
             settings.Gesture.IsEnableTwoFingerTranslate = true;
-            settings.Gesture.AutoSwitchTwoFingerGesture = true;
 
             // 个性化
             settings.Appearance.Theme = 2; // 跟随系统
@@ -146,7 +145,6 @@ namespace Ink_Canvas.Windows
             // 手势
             settings.Gesture.IsEnableTwoFingerZoom = false;
             settings.Gesture.IsEnableTwoFingerTranslate = false;
-            settings.Gesture.AutoSwitchTwoFingerGesture = false;
 
             // 个性化
             settings.Appearance.Theme = 2; // 跟随系统

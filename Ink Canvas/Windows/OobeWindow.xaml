@@ -274,7 +274,7 @@
                                             </ui:SettingsCard>
                                             <ui:SettingsCard Header="遥测级别"
                                                              Description="本软件不会收集课堂内容、学生个人信息或可识别的原始墨迹。详细请见 privacy.txt。">
-                                                <ComboBox x:Name="ComboBoxTelemetryUploadLevel" MinWidth="220">
+                                                <ComboBox x:Name="ComboBoxTelemetryUploadLevel">
                                                     <ComboBoxItem Content="不上传任何匿名使用数据" />
                                                     <ComboBoxItem Content="基础(崩溃信息、版本与系统信息)" />
                                                     <ComboBoxItem Content="可选(功能使用频率等)" />
@@ -304,9 +304,10 @@
                                         <ui:SettingsCard.HeaderIcon>
                                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Warning}" />
                                         </ui:SettingsCard.HeaderIcon>
-                                        <ComboBox x:Name="ComboBoxCrashAction" MinWidth="200">
+                                        <ComboBox x:Name="ComboBoxCrashAction">
                                             <ComboBoxItem Content="静默重启软件(推荐)" />
                                             <ComboBoxItem Content="无操作(仅记录日志)" />
+                                            <ComboBoxItem Content="弹出崩溃详情窗口(不重启)" />
                                         </ComboBox>
                                     </ui:SettingsCard>
                                 </ikw:SimpleStackPanel>
@@ -364,11 +365,6 @@
                                                                   Icon="{x:Static ui:SegoeFluentIcons.Touch}"
                                                                   SwitchName="ToggleSwitchTwoFingerTranslate" />
 
-                                    <controls:LabeledSettingsCard x:Name="CardAutoSwitchTwoFingerGesture"
-                                                                  Header="进出白板模式时自动切换双指手势"
-                                                                  Icon="{x:Static ui:SegoeFluentIcons.Switch}"
-                                                                  SwitchName="ToggleSwitchAutoSwitchTwoFingerGesture" />
-
                                     <controls:LabeledSettingsCard x:Name="CardEnablePalmEraser"
                                                                   Header="启用手掌擦"
                                                                   Description="多触点且接触面积较大时临时切换为橡皮。"
@@ -388,7 +384,7 @@
                                         <ui:SettingsCard.HeaderIcon>
                                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Personalize}" />
                                         </ui:SettingsCard.HeaderIcon>
-                                        <ComboBox x:Name="ComboBoxTheme" MinWidth="160">
+                                        <ComboBox x:Name="ComboBoxTheme">
                                             <ComboBoxItem Content="浅色" />
                                             <ComboBoxItem Content="深色" />
                                             <ComboBoxItem Content="跟随系统" />
@@ -401,7 +397,6 @@
                                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FullScreen}" />
                                         </ui:SettingsCard.HeaderIcon>
                                         <ComboBox x:Name="ComboBoxWindowBackdrop"
-                                                  MinWidth="180"
                                                   SelectionChanged="ComboBoxWindowBackdrop_SelectionChanged">
                                             <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_None}" Tag="None" />
                                             <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_Mica}" Tag="Mica" />

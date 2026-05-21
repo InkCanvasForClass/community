@@ -1,5 +1,6 @@
 using Ink_Canvas.Controls.Toolbar;
 using Newtonsoft.Json;
+using OSVersionExtension;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -39,8 +40,71 @@ namespace Ink_Canvas
         [JsonProperty("security")]
         public Security Security { get; set; } = new Security();
 
+        [JsonProperty("notification")]
+        public NotificationSettings Notification { get; set; } = new NotificationSettings();
+
         [JsonProperty("toolbar")]
         public ToolbarLayoutSettings Toolbar { get; set; } = new ToolbarLayoutSettings();
+
+        [JsonProperty("toolbarConfigName")]
+        public string ToolbarConfigName { get; set; } = "default";
+    }
+
+    public class NotificationSettings
+    {
+        [JsonProperty("isAnnouncementEnabled")]
+        public bool IsAnnouncementEnabled { get; set; } = true;
+
+        [JsonProperty("isDynamicNotificationEnabled")]
+        public bool IsDynamicNotificationEnabled { get; set; } = true;
+
+        [JsonProperty("isWindowsToastEnabled")]
+        public bool IsWindowsToastEnabled { get; set; } = true;
+
+        [JsonProperty("isForcePopupEnabled")]
+        public bool IsForcePopupEnabled { get; set; } = true;
+
+        [JsonProperty("announcementApiBaseUrl")]
+        public string AnnouncementApiBaseUrl { get; set; } = "https://dev-api.dy.ci/api/announcement/client/announcements/";
+
+        [JsonProperty("announcementWebSocketUrl")]
+        public string AnnouncementWebSocketUrl { get; set; } = string.Empty;
+
+        [JsonProperty("announcementSoftwareToken")]
+        public string AnnouncementSoftwareToken { get; set; } = "d7dd5a04175844318da871a40b7bc59d";
+
+        [JsonProperty("placement")]
+        public string Placement { get; set; } = "TopCenter";
+
+        [JsonProperty("animationMode")]
+        public string AnimationMode { get; set; } = "Standard";
+
+        [JsonProperty("updateDurationSeconds")]
+        public int UpdateDurationSeconds { get; set; } = 5;
+
+        [JsonProperty("urgentDurationSeconds")]
+        public int UrgentDurationSeconds { get; set; } = 10;
+
+        [JsonProperty("importantDurationSeconds")]
+        public int ImportantDurationSeconds { get; set; } = 10;
+
+        [JsonProperty("reminderDurationSeconds")]
+        public int ReminderDurationSeconds { get; set; } = 10;
+
+        [JsonProperty("otherDurationSeconds")]
+        public int OtherDurationSeconds { get; set; } = 5;
+
+        [JsonProperty("readAnnouncementIds")]
+        public List<string> ReadAnnouncementIds { get; set; } = new List<string>();
+
+        [JsonProperty("isDictationDoNotDisturbEnabled")]
+        public bool IsDictationDoNotDisturbEnabled { get; set; } = false;
+
+        [JsonProperty("isDictationDoNotDisturbInPptEnabled")]
+        public bool IsDictationDoNotDisturbInPptEnabled { get; set; } = true;
+
+        [JsonProperty("isDictationDoNotDisturbInWhiteboardEnabled")]
+        public bool IsDictationDoNotDisturbInWhiteboardEnabled { get; set; } = true;
     }
 
     public class Security
@@ -55,6 +119,8 @@ namespace Ink_Canvas
         public bool TotpEnabled { get; set; } = false;
         [JsonProperty("totpSecret")]
         public string TotpSecret { get; set; } = "";
+        [JsonProperty("totpOnlyMode")]
+        public bool TotpOnlyMode { get; set; } = false;
         [JsonProperty("requirePasswordOnExit")]
         public bool RequirePasswordOnExit { get; set; } = false;
         [JsonProperty("requirePasswordOnEnterSettings")]
@@ -73,8 +139,12 @@ namespace Ink_Canvas
         public double InkWidth { get; set; } = 2.5;
         [JsonProperty("highlighterWidth")]
         public double HighlighterWidth { get; set; } = 20;
+        [JsonProperty("highlighterOverlapEnabled")]
+        public bool HighlighterOverlapEnabled { get; set; } = false;
         [JsonProperty("inkAlpha")]
         public double InkAlpha { get; set; } = 255;
+        [JsonProperty("highlighterAlpha")]
+        public double HighlighterAlpha { get; set; } = 255;
         [JsonProperty("isShowCursor")]
         public bool IsShowCursor { get; set; }
         /// <summary>笔锋存储值：0 基于点集，1 基于速率，2 关闭，3 实时笔锋（速度与压感混合）。界面下拉顺序为实时笔锋、点集、速率、关闭。</summary>
@@ -136,12 +206,18 @@ namespace Ink_Canvas
         public bool ClearCanvasAlsoClearImages { get; set; } = true;
         [JsonProperty("showCircleCenter")]
         public bool ShowCircleCenter { get; set; }
+        [JsonProperty("showCoordinateUnitMarks")]
+        public bool ShowCoordinateUnitMarks { get; set; }
         [JsonProperty("enableInkFade")]
         public bool EnableInkFade { get; set; } = false;
         [JsonProperty("inkFadeTime")]
-        public int InkFadeTime { get; set; } = 3000; // 墨迹渐隐时间（毫秒）
-        [JsonProperty("hideInkFadeControlInPenMenu")]
-        public bool HideInkFadeControlInPenMenu { get; set; } = false; // 是否在笔工具菜单中隐藏墨迹渐隐控制开关
+        public int InkFadeTime { get; set; } = 3000;
+        [JsonProperty("inkFadeSpeedMultiplier")]
+        public double InkFadeSpeedMultiplier { get; set; } = 1.0;
+        [JsonProperty("laserPenWidth")]
+        public double LaserPenWidth { get; set; } = 5;
+        [JsonProperty("laserPenAlpha")]
+        public int LaserPenAlpha { get; set; } = 128;
         [JsonProperty("enableBrushAutoRestore")]
         public bool EnableBrushAutoRestore { get; set; } = false;
         [JsonProperty("brushAutoRestoreDelaySeconds")]
@@ -179,9 +255,11 @@ namespace Ink_Canvas
     public class Gesture
     {
         [JsonIgnore]
-        public bool IsEnableTwoFingerGesture => IsEnableTwoFingerZoom || IsEnableTwoFingerTranslate || IsEnableTwoFingerRotation;
+        public bool IsEnableTwoFingerGesture => IsEnableTwoFingerZoom || IsEnableTwoFingerTranslate || IsEnableTwoFingerRotation
+            || IsEnableTwoFingerZoomBoard || IsEnableTwoFingerTranslateBoard || IsEnableTwoFingerRotationBoard;
         [JsonIgnore]
-        public bool IsEnableTwoFingerGestureTranslateOrRotation => IsEnableTwoFingerTranslate || IsEnableTwoFingerRotation;
+        public bool IsEnableTwoFingerGestureTranslateOrRotation => IsEnableTwoFingerTranslate || IsEnableTwoFingerRotation
+            || IsEnableTwoFingerTranslateBoard || IsEnableTwoFingerRotationBoard;
         [JsonProperty("isEnableMultiTouchMode")]
         public bool IsEnableMultiTouchMode { get; set; } = false;
         [JsonProperty("isEnableTwoFingerZoom")]
@@ -194,6 +272,15 @@ namespace Ink_Canvas
         public bool IsEnableTwoFingerRotation { get; set; }
         [JsonProperty("isEnableTwoFingerRotationOnSelection")]
         public bool IsEnableTwoFingerRotationOnSelection { get; set; }
+
+        [JsonProperty("isEnableMultiTouchModeBoard")]
+        public bool IsEnableMultiTouchModeBoard { get; set; } = false;
+        [JsonProperty("isEnableTwoFingerZoomBoard")]
+        public bool IsEnableTwoFingerZoomBoard { get; set; } = true;
+        [JsonProperty("isEnableTwoFingerTranslateBoard")]
+        public bool IsEnableTwoFingerTranslateBoard { get; set; } = true;
+        [JsonProperty("isEnableTwoFingerRotationBoard")]
+        public bool IsEnableTwoFingerRotationBoard { get; set; }
     }
 
     // 更新通道枚举
@@ -204,7 +291,7 @@ namespace Ink_Canvas
         Beta
     }
 
-    /// <summary>自动更新要下载的安装包架构（与当前运行进程的位数无关）。默认 32 位包；64 位包对应发布物 ZIP 文件名在 .zip 前增加 -x64。</summary>
+    /// <summary>自动更新要下载的安装包架构。默认跟随当前软件进程架构；64 位包对应发布物 ZIP 文件名在 .zip 前增加 -x64。</summary>
     public enum UpdatePackageArchitecture
     {
         /// <summary>32 位包，例如 InkCanvasForClass.CE.1.7.0.0.zip</summary>
@@ -245,7 +332,9 @@ namespace Ink_Canvas
         [JsonProperty("updateChannel")]
         public UpdateChannel UpdateChannel { get; set; } = UpdateChannel.Release;
         [JsonProperty("updatePackageArchitecture")]
-        public UpdatePackageArchitecture UpdatePackageArchitecture { get; set; } = UpdatePackageArchitecture.X86;
+        public UpdatePackageArchitecture UpdatePackageArchitecture { get; set; } = Environment.Is64BitProcess ? UpdatePackageArchitecture.X64 : UpdatePackageArchitecture.X86;
+        [JsonProperty("isSmartUpdate")]
+        public bool IsSmartUpdate { get; set; } = true;
         [JsonProperty("skippedVersion")]
         public string SkippedVersion { get; set; } = "";
         [JsonProperty("autoUpdatePauseUntilDate")]
@@ -255,7 +344,7 @@ namespace Ink_Canvas
         [JsonProperty("isFoldAtStartup")]
         public bool IsFoldAtStartup { get; set; }
         [JsonProperty("crashAction")]
-        public int CrashAction { get; set; }
+        public int CrashAction { get; set; } = 2;
         [JsonProperty("telemetryUploadLevel")]
         public TelemetryUploadLevel TelemetryUploadLevel { get; set; } = TelemetryUploadLevel.None;
         [JsonProperty("hasAcceptedTelemetryPrivacy")]
@@ -282,8 +371,6 @@ namespace Ink_Canvas
 
     public class Appearance
     {
-        [JsonProperty("isEnableDisPlayNibModeToggler")]
-        public bool IsEnableDisPlayNibModeToggler { get; set; } = true;
         [JsonProperty("isColorfulViewboxFloatingBar")]
         public bool IsColorfulViewboxFloatingBar { get; set; }
         // [JsonProperty("enableViewboxFloatingBarScaleTransform")]
@@ -326,6 +413,10 @@ namespace Ink_Canvas
         public bool EnableSplashScreen { get; set; } = false;
         [JsonProperty("splashScreenStyle")]
         public int SplashScreenStyle { get; set; } = 1; // 0-随机, 1-跟随四季, 2-春季, 3-夏季, 4-秋季, 5-冬季, 6-马年限定 
+        [JsonProperty("customSplashImagePath")]
+        public string CustomSplashImagePath { get; set; } = string.Empty;
+        [JsonProperty("customSplashTextPosition")]
+        public int CustomSplashTextPosition { get; set; } = 1; // 0-左下, 1-中下, 2-右下
         [JsonProperty("isShowQuickPanel")]
         public bool IsShowQuickPanel { get; set; } = true;
         [JsonProperty("chickenSoupSource")]
@@ -368,6 +459,11 @@ namespace Ink_Canvas
         public bool EnableHotkeysInMouseMode { get; set; } = false;
         [JsonProperty("language")]
         public string Language { get; set; } = "";
+        [JsonProperty("use24HourTimeFormat")]
+        public bool Use24HourTimeFormat { get; set; } = false;
+
+        [JsonProperty("quickPanelBottomOffset")]
+        public double QuickPanelBottomOffset { get; set; } = -150;
 
     }
 
@@ -455,8 +551,6 @@ namespace Ink_Canvas
         public bool IsAlwaysGoToFirstPageOnReenter { get; set; }
         [JsonProperty("enablePowerPointEnhancement")]
         public bool EnablePowerPointEnhancement { get; set; } = false;
-        [JsonProperty("showGestureButtonInSlideShow")]
-        public bool ShowGestureButtonInSlideShow { get; set; } = false;
         [JsonProperty("skipAnimationsWhenGoNext")]
         public bool SkipAnimationsWhenGoNext { get; set; } = false;
         [JsonProperty("enablePPTTimeCapsule")]
@@ -757,7 +851,7 @@ namespace Ink_Canvas
         public bool IsSecondConfirmWhenShutdownApp { get; set; }
 
         [JsonProperty("isEnableAvoidFullScreenHelper")]
-        public bool IsEnableAvoidFullScreenHelper { get; set; } = true;
+        public bool IsEnableAvoidFullScreenHelper { get; set; } = OSVersion.GetOperatingSystem() >= OSVersionExtension.OperatingSystem.Windows11;
 
         [JsonProperty("isAutoBackupBeforeUpdate")]
         public bool IsAutoBackupBeforeUpdate { get; set; } = true;

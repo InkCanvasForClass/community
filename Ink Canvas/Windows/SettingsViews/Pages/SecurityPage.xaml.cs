@@ -59,16 +59,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void UpdatePasswordUiState()
         {
             var sec = SettingsManager.Settings?.Security;
-            var enabled = sec != null && sec.PasswordEnabled;
+            var passwordEnabled = sec != null && sec.PasswordEnabled;
+            var totpEnabled = sec != null && sec.TotpEnabled;
 
-            if (BtnSetOrChangePassword != null) BtnSetOrChangePassword.IsEnabled = enabled;
+            if (BtnSetOrChangePassword != null) BtnSetOrChangePassword.IsEnabled = passwordEnabled;
             if (BtnGenerateTotpSecret != null) BtnGenerateTotpSecret.IsEnabled = CardTotpEnabled?.IsOn == true;
             if (TextBoxTotpSecret != null) TextBoxTotpSecret.IsEnabled = CardTotpEnabled?.IsOn == true;
 
-            CardRequirePasswordOnExit.IsEnabled = enabled;
-            CardRequirePasswordOnEnterSettings.IsEnabled = enabled;
-            CardRequirePasswordOnResetConfig.IsEnabled = enabled;
-            CardRequirePasswordOnModifyOrClearNameList.IsEnabled = enabled;
+            CardRequirePasswordOnExit.IsEnabled = passwordEnabled || totpEnabled;
+            CardRequirePasswordOnEnterSettings.IsEnabled = passwordEnabled || totpEnabled;
+            CardRequirePasswordOnResetConfig.IsEnabled = passwordEnabled || totpEnabled;
+            CardRequirePasswordOnModifyOrClearNameList.IsEnabled = passwordEnabled || totpEnabled;
         }
 
         private void SetCardIsOnSilently(Ink_Canvas.Controls.LabeledSettingsCard card, bool value)
@@ -112,8 +113,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 if (SecurityManager.HasPasswordConfigured(settings))
                 {
-                    bool ok = await SecurityManager.PromptAndVerifyAsync(settings, owner,
-                        "关闭安全密码", "请输入当前密码以关闭安全密码功能。");
+                    bool ok = await SecurityManager.PromptAndVerifyPasswordOrTotpAsync(settings, owner,
+                        "关闭安全密码", "请输入安全密码或 TOTP 验证码以关闭安全密码功能。");
                     if (!ok)
                     {
                         SetCardIsOnSilently(CardPasswordEnabled, true);

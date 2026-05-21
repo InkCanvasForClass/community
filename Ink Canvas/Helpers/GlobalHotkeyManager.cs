@@ -992,22 +992,13 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                // 通过反射访问主窗口的penType字段
-                var penTypeField = _mainWindow.GetType().GetField("penType",
+                var switchMethod = _mainWindow.GetType().GetMethod(
+                    penTypeIndex == 2 ? "SwitchToLaserPen" : (penTypeIndex == 1 ? "SwitchToHighlighterPen" : "SwitchToDefaultPen"),
                     BindingFlags.NonPublic | BindingFlags.Instance);
 
-                if (penTypeField != null)
+                if (switchMethod != null)
                 {
-                    penTypeField.SetValue(_mainWindow, penTypeIndex);
-
-                    // 调用CheckPenTypeUIState方法更新UI状态
-                    var checkPenTypeMethod = _mainWindow.GetType().GetMethod("CheckPenTypeUIState",
-                        BindingFlags.NonPublic | BindingFlags.Instance);
-
-                    if (checkPenTypeMethod != null)
-                    {
-                        checkPenTypeMethod.Invoke(_mainWindow, null);
-                    }
+                    switchMethod.Invoke(_mainWindow, new object[] { null, null });
                 }
             }
             catch (Exception ex)
@@ -1299,63 +1290,40 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                // 通过反射访问主窗口的FloatingbarSelectionBG字段
-                var floatingbarSelectionBGField = _mainWindow.GetType().GetField("FloatingbarSelectionBG",
-                    BindingFlags.NonPublic | BindingFlags.Instance);
+                var isHiddenProperty = _mainWindow.GetType().GetProperty("FloatingBarSelectionBGIsHidden",
+                    BindingFlags.Public | BindingFlags.Instance);
 
-                if (floatingbarSelectionBGField != null)
+                if (isHiddenProperty != null)
                 {
-                    var floatingbarSelectionBG = floatingbarSelectionBGField.GetValue(_mainWindow);
-                    if (floatingbarSelectionBG != null)
+                    var isHidden = (bool)isHiddenProperty.GetValue(_mainWindow);
+                    if (isHidden)
                     {
-                        // 检查高光是否可见
-                        var visibilityProperty = floatingbarSelectionBG.GetType().GetProperty("Visibility");
-                        if (visibilityProperty != null)
+                        return true;
+                    }
+
+                    var leftProperty = _mainWindow.GetType().GetProperty("FloatingBarSelectionBGLeft",
+                        BindingFlags.Public | BindingFlags.Instance);
+
+                    if (leftProperty != null)
+                    {
+                        var position = (double)leftProperty.GetValue(_mainWindow);
+
+                        bool isMouseMode;
+
+                        if (position < 5)
                         {
-                            var visibility = visibilityProperty.GetValue(floatingbarSelectionBG);
-                            if (visibility != null && visibility.ToString() == "Hidden")
-                            {
-                                // 高光隐藏，说明没有选中任何工具，此时应该注销快捷键以释放系统快捷键
-                                return true; // 返回true表示应该注销快捷键
-                            }
+                            isMouseMode = true;
+                        }
+                        else if (position < 35)
+                        {
+                            isMouseMode = false;
+                        }
+                        else
+                        {
+                            isMouseMode = false;
                         }
 
-                        // 通过反射访问Canvas.GetLeft方法来获取高光位置
-                        var canvasType = Type.GetType("System.Windows.Controls.Canvas, PresentationFramework");
-                        if (canvasType != null)
-                        {
-                            var getLeftMethod = canvasType.GetMethod("GetLeft", BindingFlags.Public | BindingFlags.Static);
-                            if (getLeftMethod != null)
-                            {
-                                var leftPosition = getLeftMethod.Invoke(null, new[] { floatingbarSelectionBG });
-                                if (leftPosition != null)
-                                {
-                                    var position = Convert.ToDouble(leftPosition);
-
-                                    // 根据高光位置判断当前选中的工具
-                                    // 位置计算基于SetFloatingBarHighlightPosition方法中的逻辑
-                                    bool isMouseMode;
-
-                                    // 简化判断：如果位置接近0，说明是鼠标模式
-                                    // 如果位置接近28，说明是批注模式
-                                    // 如果位置更大，说明是其他工具
-                                    if (position < 5) // 鼠标模式：marginOffset + (cursorWidth - actualHighlightWidth) / 2 ≈ 0
-                                    {
-                                        isMouseMode = true;
-                                    }
-                                    else if (position < 35) // 批注模式：marginOffset + cursorWidth + (penWidth - actualHighlightWidth) / 2 ≈ 28
-                                    {
-                                        isMouseMode = false;
-                                    }
-                                    else // 其他工具（橡皮擦、选择等）
-                                    {
-                                        isMouseMode = false;
-                                    }
-
-                                    return isMouseMode;
-                                }
-                            }
-                        }
+                        return isMouseMode;
                     }
                 }
 

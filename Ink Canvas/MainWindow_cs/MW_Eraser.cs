@@ -166,15 +166,20 @@ namespace Ink_Canvas
             }
 
             // 提交橡皮擦历史记录
-            if (ReplacedStroke != null || AddedStroke != null)
-            {
-                timeMachine.CommitStrokeEraseHistory(ReplacedStroke, AddedStroke);
-                AddedStroke = null;
-                ReplacedStroke = null;
-            }
+            CommitPendingGeometryEraseHistory();
 
             // 橡皮擦自动切换回批注
             HandleEraserOperationEnded();
+        }
+
+        private void CommitPendingGeometryEraseHistory()
+        {
+            if (ReplacedStroke == null && AddedStroke == null) return;
+
+            timeMachine.CommitStrokeEraseHistory(ReplacedStroke, AddedStroke);
+            MarkCurrentPageInkChanged();
+            AddedStroke = null;
+            ReplacedStroke = null;
         }
 
         /// <summary>
@@ -283,6 +288,8 @@ namespace Ink_Canvas
             {
                 eraserFeedback.Visibility = Visibility.Collapsed;
             }
+
+            CommitPendingGeometryEraseHistory();
         }
 
         /// <summary>

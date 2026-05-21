@@ -1365,7 +1365,7 @@ namespace Ink_Canvas
                 return;
             }
 
-            if ((isInMultiTouchMode || Settings.Gesture.IsEnableMultiTouchMode)
+            if ((isInMultiTouchMode || (currentMode == 1 ? Settings.Gesture.IsEnableMultiTouchModeBoard : Settings.Gesture.IsEnableMultiTouchMode))
                 && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
                 && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
                 && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
@@ -1693,6 +1693,7 @@ namespace Ink_Canvas
 
                     if (isPalmEraserActive)
                     {
+                        EraserOverlay_PointerUp(sender);
                         isPalmEraserActive = false;
                         DisableEraserOverlay();
                         if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
@@ -1816,8 +1817,7 @@ namespace Ink_Canvas
             bool hasMultipleManipulators = e.Manipulators.Count() >= 2;
             bool shouldUseTwoFingerGesture = (dec.Count >= 2 && hasMultipleManipulators &&
                                              (Settings.PowerPointSettings.IsEnableTwoFingerGestureInPresentationMode ||
-                                              StackPanelPPTControls.Visibility != Visibility.Visible ||
-                                              StackPanelPPTButtons.Visibility == Visibility.Collapsed)) ||
+                                              !ArePptControlsVisible)) ||
                                             isSingleFingerDragMode;
 
             if (shouldUseTwoFingerGesture)
@@ -1827,7 +1827,15 @@ namespace Ink_Canvas
 
                 var m = new Matrix();
 
-                if (Settings.Gesture.IsEnableTwoFingerTranslate)
+                bool isBoardMode = currentMode == 1;
+                bool enableTranslate = isBoardMode ? Settings.Gesture.IsEnableTwoFingerTranslateBoard : Settings.Gesture.IsEnableTwoFingerTranslate;
+                bool enableRotate = isBoardMode ? Settings.Gesture.IsEnableTwoFingerRotationBoard : Settings.Gesture.IsEnableTwoFingerRotation;
+                bool enableZoom = isBoardMode ? Settings.Gesture.IsEnableTwoFingerZoomBoard : Settings.Gesture.IsEnableTwoFingerZoom;
+                bool enableGestureTranslateOrRotate = (isBoardMode
+                    ? (Settings.Gesture.IsEnableTwoFingerTranslateBoard || Settings.Gesture.IsEnableTwoFingerRotationBoard)
+                    : (Settings.Gesture.IsEnableTwoFingerTranslate || Settings.Gesture.IsEnableTwoFingerRotation));
+
+                if (enableTranslate)
                     m.Translate(trans.X, trans.Y); // 移动
 
                 // 计算中心点（用于缩放和旋转）
@@ -1835,15 +1843,15 @@ namespace Ink_Canvas
                 var center = new Point(fe.ActualWidth / 2, fe.ActualHeight / 2);
                 center = m.Transform(center); // 转换为矩阵缩放和旋转的中心点
 
-                if (Settings.Gesture.IsEnableTwoFingerGestureTranslateOrRotation)
+                if (enableGestureTranslateOrRotate)
                 {
                     var rotate = md.Rotation; // 获得旋转角度
 
-                    if (Settings.Gesture.IsEnableTwoFingerRotation)
+                    if (enableRotate)
                         m.RotateAt(rotate, center.X, center.Y); // 旋转
                 }
 
-                if (Settings.Gesture.IsEnableTwoFingerZoom)
+                if (enableZoom)
                 {
                     var scale = md.Scale; // 获得缩放倍数
                     m.ScaleAt(scale.X, scale.Y, center.X, center.Y); // 缩放
@@ -1869,7 +1877,7 @@ namespace Ink_Canvas
                                 break;
                             }
 
-                        if (!Settings.Gesture.IsEnableTwoFingerZoom) continue;
+                        if (!enableZoom) continue;
                         try
                         {
                             stroke.DrawingAttributes.Width *= md.Scale.X;
@@ -1880,7 +1888,7 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    if (Settings.Gesture.IsEnableTwoFingerZoom)
+                    if (enableZoom)
                     {
                         foreach (var stroke in inkCanvas.Strokes)
                         {

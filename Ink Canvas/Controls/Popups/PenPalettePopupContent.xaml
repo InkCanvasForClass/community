@@ -1,0 +1,197 @@
+<UserControl x:Class="Ink_Canvas.Controls.PenPalettePopupContent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+             xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+             xmlns:primitives="clr-namespace:System.Windows.Controls.Primitives;assembly=PresentationFramework"
+             xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+             xmlns:helpers="clr-namespace:Ink_Canvas.Helpers"
+             xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
+             mc:Ignorable="d">
+    <Grid>
+        <controls:PopupTabShellContent x:Name="Shell"/>
+        <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
+            <ikw:SimpleStackPanel  Margin="10,10,10,15">
+                <ikw:SimpleStackPanel x:Name="_CommonPropsPanel">
+                    <!--笔锋-->
+                    <ikw:SimpleStackPanel Orientation="Horizontal">
+                        <Label Content="笔锋"
+                               Foreground="{DynamicResource FloatBarForeground}"
+                               FontSize="16" FontWeight="Bold"
+                               VerticalAlignment="Center" />
+                        <ComboBox VerticalAlignment="Center"
+                                  x:Name="ComboBoxPenStyle"
+                                  SelectedIndex="1">
+                            <ComboBoxItem Content="实时笔锋" />
+                            <ComboBoxItem Content="基于点集" />
+                            <ComboBoxItem Content="基于速率" />
+                            <ComboBoxItem Content="关闭笔锋" />
+                        </ComboBox>
+                    </ikw:SimpleStackPanel>
+                    <!--笔尖 纠正 加深-->
+                    <ikw:SimpleStackPanel Orientation="Horizontal">
+                        <ikw:SimpleStackPanel x:Name="NibModeSimpleStackPanel" Orientation="Horizontal" Spacing="4">
+                            <Label Content="笔尖模式" FontSize="12"
+                                VerticalAlignment="Center" />
+                            <ui:ToggleSwitch x:Name="ToggleSwitchEnableNibMode"
+                                            MinWidth="0" OnContent="" OffContent="" />
+                        </ikw:SimpleStackPanel>
+                        <ikw:SimpleStackPanel x:Name="_InkToShapePanel" Orientation="Horizontal" Spacing="4">
+                            <Label Content="墨迹纠正" FontSize="12"
+                                VerticalAlignment="Center" />
+                            <ui:ToggleSwitch x:Name="FloatingBarToggleSwitchEnableInkToShape"
+                                            MinWidth="0" OnContent="" OffContent="" />
+                        </ikw:SimpleStackPanel>
+                        <ikw:SimpleStackPanel x:Name="_HighlighterOverlapPanel" Orientation="Horizontal" Spacing="4">
+                            <Label Content="重叠加深" FontSize="12"
+                                VerticalAlignment="Center" />
+                            <ui:ToggleSwitch x:Name="ToggleSwitchHighlighterOverlap"
+                                            MinWidth="0" OnContent="" OffContent="" />
+                        </ikw:SimpleStackPanel>
+                    </ikw:SimpleStackPanel>
+                    <!--粗细-->
+                    <StackPanel Orientation="Horizontal">
+                        <Label Margin="0,0,10,0" Content="粗细" FontWeight="Bold"
+                               FontSize="17" VerticalAlignment="Center" />
+                        <Slider x:Name="_PenWidthSlider" Minimum="1"
+                                Maximum="45" Width="200"
+                                FontSize="20" IsSnapToTickEnabled="True"
+                                Value="5"
+                                TickFrequency="0.1" TickPlacement="None" />
+                        <TextBlock x:Name="_PenWidthText" Width="45" TextAlignment="Left"
+                                   FontFamily="Consolas" VerticalAlignment="Center"
+                                   Margin="10,0,0,0" FontSize="15" />
+                    </StackPanel>
+                    <!--透明度-->
+                    <StackPanel Orientation="Horizontal">
+                        <Label Margin="0,0,10,0" Content="透明" FontWeight="Bold"
+                               FontSize="17" VerticalAlignment="Center" />
+                        <Slider x:Name="_PenAlphaSlider" Margin="0,0,0,0"
+                                Minimum="1" Maximum="255" Width="200"
+                                FontSize="20"
+                                IsSnapToTickEnabled="True" Value="255"
+                                TickFrequency="1" TickPlacement="None" />
+                        <TextBlock x:Name="_PenAlphaText" Width="45" TextAlignment="Left"
+                                   FontFamily="Consolas" VerticalAlignment="Center"
+                                   Margin="10,0,0,0" FontSize="15" />
+                    </StackPanel>
+                    <!--渐隐延迟-->
+                    <StackPanel x:Name="_LaserPenFadePanel" Orientation="Horizontal" Visibility="Collapsed" d:Visibility="Visible">
+                        <Label Margin="0,0,10,0" Content="延迟" FontWeight="Bold"
+                               FontSize="17" VerticalAlignment="Center" />
+                        <Slider x:Name="_LaserPenFadeTimeSlider" Minimum="1"
+                                Maximum="15" Width="200"
+                                FontSize="20" IsSnapToTickEnabled="True"
+                                Value="3"
+                                TickFrequency="1" TickPlacement="None" />
+                        <TextBlock x:Name="_LaserPenFadeTimeText" Width="45" TextAlignment="Left"
+                                   FontFamily="Consolas" VerticalAlignment="Center"
+                                   Margin="10,0,0,0" FontSize="15" />
+                    </StackPanel>
+                    <!--渐隐速度倍率-->
+                    <StackPanel x:Name="_LaserPenFadeSpeedPanel" Orientation="Horizontal" Visibility="Collapsed" d:Visibility="Visible">
+                        <Label Margin="0,0,10,0" Content="倍速" FontWeight="Bold"
+                               FontSize="17" VerticalAlignment="Center" />
+                        <Slider x:Name="_LaserPenFadeSpeedSlider" Minimum="0.1"
+                                Maximum="5" Width="200"
+                                FontSize="20" IsSnapToTickEnabled="True"
+                                Value="1"
+                                TickFrequency="0.1" TickPlacement="None" />
+                        <TextBlock x:Name="_LaserPenFadeSpeedText" Width="45" TextAlignment="Left"
+                                   FontFamily="Consolas" VerticalAlignment="Center"
+                                   Margin="10,0,0,0" FontSize="15" />
+                    </StackPanel>
+                </ikw:SimpleStackPanel>
+                <!--笔调色-->
+                <ikw:SimpleStackPanel x:Name="_DefaultPenColorsPanel" HorizontalAlignment="Center" Spacing="5">
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+                        <Border x:Name="_ColorThemeSwitch"
+                                BorderBrush="{DynamicResource FloatBarBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="100" Width="45" Height="45">
+                            <Grid Margin="3">
+                                <Image x:Name="_ColorThemeSwitchIcon"
+                                        Source="/Resources/Icons-Fluent/ic_fluent_weather_sunny_24_regular.png"
+                                        RenderOptions.BitmapScalingMode="HighQuality"
+                                        VerticalAlignment="Top"
+                                        Width="23" Height="23" Margin="0,0,0,0" />
+                                <TextBlock Margin="0,0,0,2"
+                                            x:Name="ColorThemeSwitchTextBlock"
+                                            Text="亮系"
+                                            Foreground="{DynamicResource FloatBarForeground}"
+                                            VerticalAlignment="Bottom"
+                                            HorizontalAlignment="Center"
+                                            FontSize="11" />
+                            </Grid>
+                        </Border>
+                        <controls:PenColorButton x:Name="BorderPenColorBlack" Color="Black" BorderBrushColor="#D3D3D3" CheckIconSource="/Resources/new-icons/checked-white.png" />
+                        <controls:PenColorButton x:Name="BorderPenColorWhite" Color="White" BorderBrushColor="#71717a" CheckIconSource="/Resources/new-icons/checked-black.png" />
+                        <controls:PenColorButton x:Name="BorderPenColorRed" Color="#dc2626" BorderBrushColor="#7f1d1d" />
+                        <controls:PenColorButton x:Name="BorderPenColorYellow" Color="#eab308" BorderBrushColor="#713f12" />
+                    </ikw:SimpleStackPanel>
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+                        <controls:PenColorButton x:Name="BorderPenColorGreen" Color="#16a34a" BorderBrushColor="#14532d" />
+                        <controls:PenColorButton x:Name="BorderPenColorBlue" Color="#2563eb" BorderBrushColor="#1e3a8a" />
+                        <controls:PenColorButton x:Name="BorderPenColorPink" Color="#db2777" BorderBrushColor="#831843" />
+                        <controls:PenColorButton x:Name="BorderPenColorTeal" Color="#0d9488" BorderBrushColor="#134e4a" />
+                        <controls:PenColorButton x:Name="BorderPenColorOrange" Color="#ea580c" BorderBrushColor="#7c2d12" />
+                    </ikw:SimpleStackPanel>
+                </ikw:SimpleStackPanel>
+                <!--荧光笔调色-->
+                <ikw:SimpleStackPanel x:Name="_HighlighterPenColorsPanel" HorizontalAlignment="Center" Spacing="5">
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+                        <controls:PenColorButton x:Name="_HighlighterPenColorBlack" Color="Black" BorderBrushColor="#e4e4e7" IsHighlighter="True" />
+                        <controls:PenColorButton x:Name="_HighlighterPenColorWhite" Color="White" BorderBrushColor="#dddddd" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
+                        <controls:PenColorButton x:Name="_HighlighterPenColorRed" Color="#ef4444" BorderBrushColor="#fecaca" IsHighlighter="True" />
+                        <controls:PenColorButton x:Name="_HighlighterPenColorYellow" Color="#eab308" BorderBrushColor="#fef08a" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
+                        <controls:PenColorButton x:Name="_HighlighterPenColorGreen" Color="#22c55e" BorderBrushColor="#bbf7d0" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
+                    </ikw:SimpleStackPanel>
+                    <ikw:SimpleStackPanel Orientation="Horizontal"  Spacing="10">
+                        <controls:PenColorButton x:Name="_HighlighterPenColorZinc" Color="#71717a" BorderBrushColor="#e4e4e7" IsHighlighter="True" />
+                        <controls:PenColorButton x:Name="_HighlighterPenColorBlue" Color="#3b82f6" BorderBrushColor="#bfdbfe" IsHighlighter="True" />
+                        <controls:PenColorButton x:Name="HighlighterPenPenColorPurple" Color="#a855f7" BorderBrushColor="#e9d5ff" IsHighlighter="True" />
+                        <controls:PenColorButton x:Name="_HighlighterPenColorTeal" Color="#14b8a6" BorderBrushColor="#99f6e4" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
+                        <controls:PenColorButton x:Name="_HighlighterPenColorOrange" Color="#f97316" BorderBrushColor="#fed7aa" IsHighlighter="True" />
+                    </ikw:SimpleStackPanel>
+                </ikw:SimpleStackPanel>
+                <!--激光笔调色-->
+                <ikw:SimpleStackPanel x:Name="_LaserPenColorsPanel" HorizontalAlignment="Center" Spacing="5">
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+                        <Border x:Name="_LaserPenColorThemeSwitch"
+                                BorderBrush="{DynamicResource FloatBarBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="100" Width="45" Height="45">
+                            <Grid Margin="3">
+                                <Image x:Name="_LaserPenColorThemeSwitchIcon"
+                                        Source="/Resources/Icons-Fluent/ic_fluent_weather_sunny_24_regular.png"
+                                        RenderOptions.BitmapScalingMode="HighQuality"
+                                        VerticalAlignment="Top"
+                                        Width="23" Height="23" Margin="0,0,0,0" />
+                                <TextBlock Margin="0,0,0,2"
+                                            x:Name="_LaserPenColorThemeSwitchTextBlock"
+                                            Text="亮系"
+                                            Foreground="{DynamicResource FloatBarForeground}"
+                                            VerticalAlignment="Bottom"
+                                            HorizontalAlignment="Center"
+                                            FontSize="11" />
+                            </Grid>
+                        </Border>
+                        <controls:PenColorButton x:Name="_LaserPenColorBlack" Color="Black" BorderBrushColor="#D3D3D3" CheckIconSource="/Resources/new-icons/checked-white.png" />
+                        <controls:PenColorButton x:Name="_LaserPenColorWhite" Color="White" BorderBrushColor="#71717a" CheckIconSource="/Resources/new-icons/checked-black.png" />
+                        <controls:PenColorButton x:Name="_LaserPenColorRed" Color="#dc2626" BorderBrushColor="#7f1d1d" />
+                        <controls:PenColorButton x:Name="_LaserPenColorYellow" Color="#eab308" BorderBrushColor="#713f12" />
+                    </ikw:SimpleStackPanel>
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+                        <controls:PenColorButton x:Name="_LaserPenColorGreen" Color="#16a34a" BorderBrushColor="#14532d" />
+                        <controls:PenColorButton x:Name="_LaserPenColorBlue" Color="#2563eb" BorderBrushColor="#1e3a8a" />
+                        <controls:PenColorButton x:Name="_LaserPenColorPink" Color="#db2777" BorderBrushColor="#831843" />
+                        <controls:PenColorButton x:Name="_LaserPenColorTeal" Color="#0d9488" BorderBrushColor="#134e4a" />
+                        <controls:PenColorButton x:Name="_LaserPenColorOrange" Color="#ea580c" BorderBrushColor="#7c2d12" />
+                    </ikw:SimpleStackPanel>
+                </ikw:SimpleStackPanel>
+            </ikw:SimpleStackPanel>
+        </ContentControl>
+    </Grid>
+</UserControl>

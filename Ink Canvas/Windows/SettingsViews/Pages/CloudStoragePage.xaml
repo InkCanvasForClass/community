@@ -1,0 +1,203 @@
+<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.CloudStoragePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+      xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
+      xmlns:sys="clr-namespace:System;assembly=mscorlib"
+      xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+      mc:Ignorable="d"
+      Title="{i18n:I18n Key=CloudStorage_Manage}">
+
+    <ScrollViewer PanningMode="VerticalFirst">
+        <Grid Margin="59,0,59,0">
+            <FrameworkElement.Resources>
+                <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
+                <Style x:Key="SettingsSectionHeaderTextBlockStyle"
+                    BasedOn="{StaticResource BodyStrongTextBlockStyle}"
+                    TargetType="TextBlock">
+                    <Style.Setters>
+                        <Setter Property="Margin" Value="1,30,0,6" />
+                    </Style.Setters>
+                </Style>
+            </FrameworkElement.Resources>
+
+            <ikw:SimpleStackPanel MaxWidth="1000"
+                HorizontalAlignment="Stretch"
+                Spacing="{StaticResource SettingsCardSpacing}">
+
+                <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                           Text="{i18n:I18n Key=CloudStorage_Manage}" />
+
+                <ui:SettingsCard Header="上传延迟"
+                                 Description="设置所有上传提供者共用的延迟时间，范围为 0-60 分钟。">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.QuietHours}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <TextBox x:Name="TxtUniversalUploadDelayMinutes"
+                                 Width="88"
+                                 HorizontalContentAlignment="Right"
+                                 TextChanged="TxtUniversalUploadDelayMinutes_TextChanged"
+                                 PreviewTextInput="TxtUniversalUploadDelayMinutes_PreviewTextInput" />
+                        <TextBlock Text="分钟" VerticalAlignment="Center" />
+                    </ikw:SimpleStackPanel>
+                </ui:SettingsCard>
+
+                <ui:SettingsExpander Header="上传提供者"
+                                     Description="选择自动保存文件可使用的云端上传服务。"
+                                     d:IsExpanded="True">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}" />
+                    </ui:SettingsExpander.HeaderIcon>
+                    <TextBlock Text="" />
+                    <ui:SettingsExpander.Items>
+                        <ui:SettingsCard Header="提供者列表"
+                                         Description="关闭某个提供者后，后续自动保存文件不会再发送到该服务。">
+                            <ItemsControl x:Name="LstUploadProviders">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding Name}"
+                                                       VerticalAlignment="Center" />
+                                            <ui:ToggleSwitch x:Name="ToggleProviderEnabled"
+                                                             Grid.Column="1"
+                                                             IsOn="{Binding IsEnabled, Mode=OneWay}"
+                                                             OnContent="{DynamicResource Common_On}"
+                                                             OffContent="{DynamicResource Common_Off}"
+                                                             Toggled="ToggleProviderEnabled_Toggled" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ui:SettingsCard>
+                    </ui:SettingsExpander.Items>
+                </ui:SettingsExpander>
+
+                <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                           Text="Dlass" />
+
+                <ui:SettingsExpander Header="用户 Token"
+                                     Description="保存并选择用于访问 Dlass 服务端的用户 Token。"
+                                     d:IsExpanded="True">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.People}" />
+                    </ui:SettingsExpander.HeaderIcon>
+                    <TextBlock x:Name="TxtTokenStatus"
+                               Text="未设置Token"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    <ui:SettingsExpander.Items>
+                        <ui:SettingsCard Header="已保存的 Token"
+                                         Description="从本机保存的 Token 列表中选择当前使用项。">
+                            <ComboBox x:Name="CmbSavedTokens"
+                                      IsEditable="False"
+                                      IsReadOnly="True"
+                                      SelectionChanged="CmbSavedTokens_SelectionChanged" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard Header="新增 Token"
+                                         Description="输入新的用户 Token，保存后会自动设为当前 Token。">
+                            <TextBox x:Name="TxtNewToken"
+                                     MinWidth="260"
+                                     MaxLength="500" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard Header="Token 操作">
+                            <WrapPanel Orientation="Horizontal">
+                                <Button x:Name="BtnSaveToken"
+                                        Content="保存Token"
+                                        Margin="0,0,8,0"
+                                        Click="BtnSaveToken_Click" />
+                                <Button x:Name="BtnClearToken"
+                                        Content="删除Token"
+                                        Margin="0,0,8,0"
+                                        Click="BtnClearToken_Click" />
+                                <Button x:Name="BtnOpenDlassDashboard"
+                                        Content="打开 Dlass 控制台"
+                                        Click="BtnOpenDlassDashboard_Click" />
+                            </WrapPanel>
+                        </ui:SettingsCard>
+                    </ui:SettingsExpander.Items>
+                </ui:SettingsExpander>
+
+                <ui:SettingsCard Header="连接状态"
+                                 Description="验证当前 Token，并加载可用班级列表。">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <TextBlock x:Name="TxtConnectionStatus"
+                                   Text="未连接"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <Button x:Name="BtnTestToken"
+                                Content="测试连接"
+                                Click="BtnTestToken_Click" />
+                    </ikw:SimpleStackPanel>
+                </ui:SettingsCard>
+
+                <ui:SettingsCard Header="班级选择"
+                                 Description="连接成功后，将自动加载当前 Token 可用的班级。">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.People}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <ComboBox x:Name="CmbClassSelection"
+                              IsEditable="False"
+                              IsReadOnly="True"
+                              SelectionChanged="CmbClassSelection_SelectionChanged" />
+                </ui:SettingsCard>
+
+                <controls:LabeledSettingsCard x:Name="ToggleSwitchAutoUploadNotes"
+                        Header="自动上传笔记"
+                        Description="启用后，保存的 PNG 截图和 ICSTK 墨迹文件会自动上传到所选班级白板。"
+                        Icon="{x:Static ui:SegoeFluentIcons.Upload}"
+                        Toggled="ToggleSwitchAutoUploadNotes_Toggled" />
+
+                <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                           Text="WebDav" />
+
+                <ui:SettingsExpander Header="WebDav 设置"
+                                     Description="配置 WebDav 服务器地址、账户和上传根目录。"
+                                     d:IsExpanded="True">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Folder}" />
+                    </ui:SettingsExpander.HeaderIcon>
+                    <Border Background="#07aef0dc" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                        <TextBlock Text="Beta" FontSize="10" FontWeight="SemiBold" Foreground="White" />
+                    </Border>
+                    <ui:SettingsExpander.Items>
+                        <ui:SettingsCard Header="WebDav 地址"
+                                         Description="服务器地址，例如 https://example.com/dav。">
+                            <TextBox x:Name="TxtWebDavUrl" MinWidth="320" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard Header="用户名">
+                            <TextBox x:Name="TxtWebDavUsername" MinWidth="320" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard Header="密码">
+                            <PasswordBox x:Name="TxtWebDavPassword" MinWidth="320" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard Header="根目录"
+                                         Description="可留空；填写后文件会上传到该目录下。">
+                            <TextBox x:Name="TxtWebDavRootDirectory" MinWidth="320" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard Header="WebDav 操作">
+                            <WrapPanel Orientation="Horizontal">
+                                <Button Content="保存 WebDav 设置"
+                                        Margin="0,0,8,0"
+                                        Click="BtnSaveWebDav_Click" />
+                                <Button Content="还原"
+                                        Click="BtnCancelWebDav_Click" />
+                            </WrapPanel>
+                        </ui:SettingsCard>
+                    </ui:SettingsExpander.Items>
+                </ui:SettingsExpander>
+
+                <Rectangle Height="48" />
+            </ikw:SimpleStackPanel>
+        </Grid>
+    </ScrollViewer>
+</ui:Page>

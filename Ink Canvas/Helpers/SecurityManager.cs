@@ -1,5 +1,6 @@
 using iNKORE.UI.WPF.Controls;
 using iNKORE.UI.WPF.Modern.Controls;
+using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Linq;
 using System.Security.Cryptography;
@@ -7,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Threading;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 
 namespace Ink_Canvas.Helpers
@@ -40,38 +43,41 @@ namespace Ink_Canvas.Helpers
                && settings.Security.TotpEnabled
                && !string.IsNullOrWhiteSpace(settings.Security.TotpSecret);
 
+        public static bool IsTotpOnlyMode(Settings settings)
+            => settings?.Security != null
+               && settings.Security.TotpOnlyMode
+               && HasTotpConfigured(settings);
+
+        public static bool IsSecurityFeatureEnabled(Settings settings)
+            => IsPasswordFeatureEnabled(settings) || HasTotpConfigured(settings);
+
+        public static bool IsSecurityConfigured(Settings settings)
+            => HasPasswordConfigured(settings) || HasTotpConfigured(settings);
+
         /// <summary>
-        /// 确定在退出应用时是否需要输入密码。
+        /// 确定在退出应用时是否需要输入密码或 TOTP 验证码。
         /// </summary>
-        /// <param name="settings">应用配置；如果为 null，则视为未启用或未配置密码。</param>
-        /// <returns>`true` 当密码功能已启用、已配置密码且设置要求在退出时需要密码，`false` 否则。</returns>
         public static bool IsPasswordRequiredForExit(Settings settings)
-            => IsPasswordFeatureEnabled(settings) && HasPasswordConfigured(settings) && settings.Security.RequirePasswordOnExit;
+            => IsSecurityFeatureEnabled(settings) && IsSecurityConfigured(settings) && settings.Security.RequirePasswordOnExit;
 
         /// <summary>
-        /// 确定在进入设置界面时是否需要输入密码。
+        /// 确定在进入设置界面时是否需要输入密码或 TOTP 验证码。
         /// </summary>
-        /// <param name="settings">应用配置；为 null 或未启用密码功能时视为未配置密码。</param>
-        /// <returns>`true` 如果已启用密码功能、已配置密码且已设置为在进入设置时要求密码，`false` 否则。</returns>
         public static bool IsPasswordRequiredForEnterSettings(Settings settings)
-            => IsPasswordFeatureEnabled(settings) && HasPasswordConfigured(settings) && settings.Security.RequirePasswordOnEnterSettings;
+            => IsSecurityFeatureEnabled(settings) && IsSecurityConfigured(settings) && settings.Security.RequirePasswordOnEnterSettings;
 
         /// <summary>
-        /// 指示在重置配置时是否需要输入密码。
+        /// 指示在重置配置时是否需要输入密码或 TOTP 验证码。
         /// </summary>
-        /// <param name="settings">应用设置对象；如果为 null 或未启用密码功能，则视为不需要密码。</param>
-        /// <returns>`true` 如果已启用密码功能、已有配置的密码且设置要求在重置配置时进行密码验证；`false` 否则。</returns>
         public static bool IsPasswordRequiredForResetConfig(Settings settings)
-            => IsPasswordFeatureEnabled(settings) && HasPasswordConfigured(settings) && settings.Security.RequirePasswordOnResetConfig;
+            => IsSecurityFeatureEnabled(settings) && IsSecurityConfigured(settings) && settings.Security.RequirePasswordOnResetConfig;
 
         /// <summary>
-        /// 指示在修改或清空点名名单前是否需要输入安全密码。
+        /// 指示在修改或清空点名名单前是否需要输入安全密码或 TOTP 验证码。
         /// </summary>
-        /// <param name="settings">应用设置对象。</param>
-        /// <returns>当已启用密码功能、已配置密码且开启了对应开关时返回 true；否则返回 false。</returns>
         public static bool IsPasswordRequiredForModifyOrClearNameList(Settings settings)
-            => IsPasswordFeatureEnabled(settings)
-               && HasPasswordConfigured(settings)
+            => IsSecurityFeatureEnabled(settings)
+               && IsSecurityConfigured(settings)
                && settings.Security.RequirePasswordOnModifyOrClearNameList;
 
         /// <summary>
@@ -145,7 +151,13 @@ namespace Ink_Canvas.Helpers
         {
             bool hasPassword = IsPasswordFeatureEnabled(settings) && HasPasswordConfigured(settings);
             bool hasTotp = HasTotpConfigured(settings);
+            bool totpOnlyMode = IsTotpOnlyMode(settings);
             if (!hasPassword && !hasTotp) return true;
+
+            if (totpOnlyMode)
+            {
+                hasPassword = false;
+            }
 
             var dialog = new ContentDialog
             {
@@ -160,32 +172,73 @@ namespace Ink_Canvas.Helpers
                 Margin = new Thickness(0, 10, 0, 0)
             };
 
-            panel.Children.Add(new TextBlock
-            {
-                Text = message,
-                TextWrapping = TextWrapping.Wrap
-            });
-
             var inputBox = new PasswordBox
             {
                 Height = 32
             };
             panel.Children.Add(inputBox);
+
+            string hintText;
+            if (totpOnlyMode)
+            {
+                hintText = "请输入 6 位 TOTP 验证码。";
+            }
+            else if (hasPassword && hasTotp)
+            {
+                hintText = "请输入安全密码或 6 位 TOTP 验证码。";
+            }
+            else if (hasTotp)
+            {
+                hintText = "请输入 6 位 TOTP 验证码。";
+            }
+            else
+            {
+                hintText = "请输入安全密码。";
+            }
+
             panel.Children.Add(new TextBlock
             {
-                Text = hasPassword && hasTotp ? "可输入安全密码或 6 位 TOTP 验证码。" : (hasTotp ? "请输入 6 位 TOTP 验证码。" : "请输入安全密码。"),
+                Text = hintText,
                 TextWrapping = TextWrapping.Wrap,
                 Opacity = 0.72
             });
 
             dialog.Content = panel;
 
-            var result = await dialog.ShowAsync();
-            if (result != ContentDialogResult.Primary) return false;
+            bool noFocusModeWasTemporarilyDisabled = false;
+            if (owner != null && owner.IsVisible && settings?.Advanced?.IsNoFocusMode == true)
+            {
+                WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode = true;
+                WindowSettingsHelper.ApplyNoFocusMode(owner);
+                noFocusModeWasTemporarilyDisabled = true;
+            }
 
-            string input = inputBox.Password ?? "";
-            if (hasPassword && VerifyPassword(settings, input)) return true;
-            return hasTotp && VerifyTotp(settings, input);
+            try
+            {
+                dialog.Opened += (s, e) =>
+                {
+                    inputBox.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        inputBox.Focus();
+                        Keyboard.Focus(inputBox);
+                    }), DispatcherPriority.Input);
+                };
+
+                var result = await dialog.ShowAsync();
+                if (result != ContentDialogResult.Primary) return false;
+
+                string input = inputBox.Password ?? "";
+                if (!totpOnlyMode && hasPassword && VerifyPassword(settings, input)) return true;
+                return hasTotp && VerifyTotp(settings, input);
+            }
+            finally
+            {
+                if (noFocusModeWasTemporarilyDisabled)
+                {
+                    WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode = false;
+                    WindowSettingsHelper.ApplyNoFocusMode(owner);
+                }
+            }
         }
 
         /// <summary>

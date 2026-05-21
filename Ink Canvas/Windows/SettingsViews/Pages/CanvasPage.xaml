@@ -120,49 +120,25 @@
                             SwitchName="ToggleSwitchShowCircleCenter"
                             Toggled="ToggleSwitchShowCircleCenter_Toggled" />
 
+                    <controls:LabeledSettingsCard x:Name="CardShowCoordinateUnitMarks"
+                            Header="{i18n:I18n Key=Canvas_ShowCoordinateUnitMarks}"
+                            Description="{i18n:I18n Key=Canvas_ShowCoordinateUnitMarksHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Calculator}"
+                            SwitchName="ToggleSwitchShowCoordinateUnitMarks"
+                            Toggled="ToggleSwitchShowCoordinateUnitMarks_Toggled" />
+
                     <ui:SettingsCard Header="{i18n:I18n Key=Canvas_CurveSmoothingMode}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.InkingTool}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxCurveSmoothingMode"
-                                  SelectedIndex="0"
+                                  SelectedIndex="2"
                                   SelectionChanged="ComboBoxCurveSmoothingMode_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_AdvancedBezierSmoothing}" Tag="2" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_WPFBezierSmoothing}" Tag="1" />
                             <ComboBoxItem Content="{i18n:I18n Key=Canvas_CurveSmoothing_Off}" Tag="0" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_WPFBezierSmoothing}" Tag="1" />
+                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_AdvancedBezierSmoothing}" Tag="2" />
                         </ComboBox>
                     </ui:SettingsCard>
-
-                    <ui:SettingsExpander x:Name="ExpanderEnableInkFade"
-                            Header="{i18n:I18n Key=Canvas_EnableInkFade}"
-                            Description="{i18n:I18n Key=Canvas_EnableInkFadeHint}"
-                            d:Visibility="Visible" d:IsExpanded="True">
-                        <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Color}" />
-                        </ui:SettingsExpander.HeaderIcon>
-                        <ui:ToggleSwitch x:Name="ToggleSwitchEnableInkFade"
-                                OnContent="{DynamicResource Common_On}"
-                                OffContent="{DynamicResource Common_Off}"
-                                Toggled="ToggleSwitchEnableInkFade_Toggled" />
-                        <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{i18n:I18n Key=Canvas_InkFadeTime}">
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock x:Name="InkFadeTimeText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                                    <Slider x:Name="InkFadeTimeSlider" Width="200" Minimum="1000" Maximum="10000"
-                                            Value="3000" TickFrequency="1000" IsSnapToTickEnabled="True"
-                                            ValueChanged="InkFadeTimeSlider_ValueChanged" />
-                                </ikw:SimpleStackPanel>
-                            </ui:SettingsCard>
-                        </ui:SettingsExpander.Items>
-                    </ui:SettingsExpander>
-
-                    <controls:LabeledSettingsCard x:Name="CardHideInkFadeControlInPenMenu"
-                            Header="{i18n:I18n Key=Canvas_HideInkFadeInPenMenu}"
-                            Description="{i18n:I18n Key=Canvas_HideInkFadeInPenMenuHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Hide}"
-                            SwitchName="ToggleSwitchHideInkFadeControlInPenMenu"
-                            Toggled="ToggleSwitchHideInkFadeControlInPenMenu_Toggled" />
 
                     <ui:SettingsExpander x:Name="ExpanderBrushAutoRestore"
                             Header="{i18n:I18n Key=Canvas_BrushAutoRestore}"
@@ -242,13 +218,6 @@
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{i18n:I18n Key=Gesture_Title}" />
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoSwitchTwoFingerGesture"
-                            Header="{i18n:I18n Key=Gesture_AutoToggleTwoFinger}"
-                            Description="{i18n:I18n Key=Gesture_AutoToggleHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Switch}"
-                            SwitchName="ToggleSwitchAutoSwitchTwoFingerGesture"
-                            Toggled="ToggleSwitchAutoSwitchTwoFingerGesture_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardEnableTwoFingerRotationOnSelection"
                             Header="{i18n:I18n Key=Gesture_AllowRotateScale}"

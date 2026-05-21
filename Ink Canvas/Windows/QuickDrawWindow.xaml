@@ -9,15 +9,6 @@
         Loaded="QuickDrawWindow_Loaded" Closing="Window_Closing" WindowStartupLocation="CenterScreen"
         Title="快抽窗口" Height="200" Width="400" Focusable="False" ShowInTaskbar="False">
 
-    <Window.Resources>
-        <ResourceDictionary>
-            <!-- 快抽窗口资源 -->
-            <SolidColorBrush x:Key="QuickDrawWindowBackground" Color="#1f1f1f"/>
-            <SolidColorBrush x:Key="QuickDrawWindowBorderBrush" Color="#E0E0E0"/>
-            <SolidColorBrush x:Key="QuickDrawWindowTitleForeground" Color="White"/>
-            <SolidColorBrush x:Key="QuickDrawWindowDigitForeground" Color="White"/>
-        </ResourceDictionary>
-    </Window.Resources>
 
     <Border Background="{DynamicResource QuickDrawWindowBackground}" 
             CornerRadius="15" 

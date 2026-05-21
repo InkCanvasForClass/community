@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
@@ -460,12 +461,35 @@ namespace Ink_Canvas
 
             var basePath = Settings.Automation.AutoSavedStrokesLocation;
             var dateFolder = DateTime.Now.ToString("yyyyMMdd");
+            var safeRelativePath = SanitizeScreenshotRelativePath(fileName);
 
             return Path.Combine(
                 basePath,
                 "Auto Saved - Screenshots",
                 dateFolder,
-                $"{fileName}.png");
+                safeRelativePath + ".png");
+        }
+
+        private static string SanitizeScreenshotRelativePath(string relativePath)
+        {
+            if (string.IsNullOrWhiteSpace(relativePath)) return DateTime.Now.ToString("HH-mm-ss");
+
+            var separators = new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
+            var parts = relativePath
+                .Split(separators, StringSplitOptions.RemoveEmptyEntries)
+                .Select(SanitizePathPart)
+                .Where(part => !string.IsNullOrWhiteSpace(part));
+
+            var sanitized = Path.Combine(parts.ToArray());
+            return string.IsNullOrWhiteSpace(sanitized) ? DateTime.Now.ToString("HH-mm-ss") : sanitized;
+        }
+
+        private static string SanitizePathPart(string pathPart)
+        {
+            var invalidChars = Path.GetInvalidFileNameChars();
+            var chars = pathPart.Select(c => invalidChars.Contains(c) ? '_' : c).ToArray();
+            var sanitized = new string(chars).Trim().TrimEnd('.', ' ');
+            return sanitized == "." || sanitized == ".." ? "_" : sanitized;
         }
 
         /// <summary>

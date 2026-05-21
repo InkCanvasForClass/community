@@ -1,0 +1,55 @@
+<UserControl x:Class="Ink_Canvas.Controls.QuickColorPaletteControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+             mc:Ignorable="d"
+             d:DesignHeight="58" d:DesignWidth="160">
+    <StackPanel Name="QuickColorPaletteContainer" Orientation="Vertical"
+                HorizontalAlignment="Center" VerticalAlignment="Center" Margin="4,2,4,2">
+        <StackPanel Name="QuickColorPalettePanel"
+                    Orientation="Vertical"
+                    VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,1" VerticalAlignment="Center">
+                <controls:ColorPickerButton x:Name="QuickColorBlack" Color="Black" CheckIconFill="White" ButtonSize="17" CheckIconSize="11"
+                                            ButtonMouseUp="QuickColorBlack_Click" ToolTip="Black"/>
+                <controls:ColorPickerButton x:Name="QuickColorWhite" Color="White" CheckIconFill="Black" ButtonSize="17" CheckIconSize="11"
+                                            ButtonMouseUp="QuickColorWhite_Click" ToolTip="White"/>
+                <controls:ColorPickerButton x:Name="QuickColorRed" Color="#FF0000" CheckIconFill="White" ButtonSize="17" CheckIconSize="11"
+                                            ButtonMouseUp="QuickColorRed_Click" ToolTip="Red"/>
+                <controls:ColorPickerButton x:Name="QuickColorOrange" Color="#FFA500" CheckIconFill="Black" ButtonSize="17" CheckIconSize="11"
+                                            ButtonMouseUp="QuickColorOrange_Click" ToolTip="Orange"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,1,0,0" VerticalAlignment="Center">
+                <controls:ColorPickerButton x:Name="QuickColorYellow" Color="#FFFF00" CheckIconFill="Black" ButtonSize="17" CheckIconSize="11"
+                                            ButtonMouseUp="QuickColorYellow_Click" ToolTip="Yellow"/>
+                <controls:ColorPickerButton x:Name="QuickColorGreen" Color="#16A34A" CheckIconFill="Black" ButtonSize="17" CheckIconSize="11"
+                                            ButtonMouseUp="QuickColorGreen_Click" ToolTip="Green"/>
+                <controls:ColorPickerButton x:Name="QuickColorBlue" Color="#2563EB" CheckIconFill="White" ButtonSize="17" CheckIconSize="11"
+                                            ButtonMouseUp="QuickColorBlue_Click" ToolTip="Blue"/>
+                <controls:ColorPickerButton x:Name="QuickColorPurple" Color="#9333EA" CheckIconFill="White" ButtonSize="17" CheckIconSize="11"
+                                            ButtonMouseUp="QuickColorPurple_Click" ToolTip="Purple"/>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Name="QuickColorPaletteSingleRowPanel"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Margin="4,0,4,0"
+                    Visibility="Collapsed">
+            <controls:ColorPickerButton x:Name="QuickColorBlackSingle" Color="Black" CheckIconFill="White" ButtonSize="28" CheckIconSize="16"
+                                        ButtonMouseUp="QuickColorBlack_Click" ToolTip="Black"/>
+            <controls:ColorPickerButton x:Name="QuickColorWhiteSingle" Color="White" CheckIconFill="Black" ButtonSize="28" CheckIconSize="16"
+                                        ButtonMouseUp="QuickColorWhite_Click" ToolTip="White"/>
+            <controls:ColorPickerButton x:Name="QuickColorRedSingle" Color="#FF0000" CheckIconFill="White" ButtonSize="28" CheckIconSize="16"
+                                        ButtonMouseUp="QuickColorRed_Click" ToolTip="Red"/>
+            <controls:ColorPickerButton x:Name="QuickColorOrangeSingle" Color="#FFA500" CheckIconFill="Black" ButtonSize="28" CheckIconSize="16"
+                                        ButtonMouseUp="QuickColorOrange_Click" ToolTip="Orange"/>
+            <controls:ColorPickerButton x:Name="QuickColorYellowSingle" Color="#FFFF00" CheckIconFill="Black" ButtonSize="28" CheckIconSize="16"
+                                        ButtonMouseUp="QuickColorYellow_Click" ToolTip="Yellow"/>
+            <controls:ColorPickerButton x:Name="QuickColorGreenSingle" Color="#16A34A" CheckIconFill="Black" ButtonSize="28" CheckIconSize="16"
+                                        ButtonMouseUp="QuickColorGreen_Click" ToolTip="Green"/>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

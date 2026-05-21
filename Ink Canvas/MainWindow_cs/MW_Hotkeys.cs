@@ -13,7 +13,7 @@ namespace Ink_Canvas
         /// <param name="e">鼠标滚轮事件参数</param>
         private void Window_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (BtnPPTSlideShowEnd.Visibility != Visibility.Visible || currentMode != 0) return;
+            if (!IsInPptPresentationMode || currentMode != 0) return;
             if (e.Delta >= 120)
             {
                 BtnPPTSlidesUp_Click(null, null);
@@ -31,7 +31,7 @@ namespace Ink_Canvas
         /// <param name="e">键盘事件参数</param>
         private void Main_Grid_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (BtnPPTSlideShowEnd.Visibility != Visibility.Visible || currentMode != 0) return;
+            if (!IsInPptPresentationMode || currentMode != 0) return;
 
             if (e.Key == Key.Down || e.Key == Key.PageDown || e.Key == Key.Right || e.Key == Key.N || e.Key == Key.Space)
             {
@@ -88,7 +88,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">执行路由事件参数</param>
-        internal void KeyExit(object sender, ExecutedRoutedEventArgs e)
+        internal async void KeyExit(object sender, ExecutedRoutedEventArgs e)
         {
             if (currentMode != 0)
             {
@@ -96,7 +96,7 @@ namespace Ink_Canvas
                 return;
             }
 
-            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) BtnPPTSlideShowEnd_Click(BtnPPTSlideShowEnd, null);
+            if (IsInPptPresentationMode) await ExitPptPresentation();
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace Ink_Canvas
         /// <remarks>仅当画布控件面板可见时生效</remarks>
         private void KeyChangeToSelect(object sender, ExecutedRoutedEventArgs e)
         {
-            if (StackPanelCanvasControls.Visibility == Visibility.Visible)
+            if (IsAnnotating)
                 SymbolIconSelect_MouseUp(lastBorderMouseDownObject, null);
         }
 
@@ -195,7 +195,7 @@ namespace Ink_Canvas
         /// <remarks>仅当画布控件面板可见时生效</remarks>
         private void KeyDrawLine(object sender, ExecutedRoutedEventArgs e)
         {
-            if (StackPanelCanvasControls.Visibility == Visibility.Visible) BtnDrawLine_Click(lastMouseDownSender, null);
+            if (IsAnnotating) BtnDrawLine_Click(lastMouseDownSender, null);
         }
 
         /// <summary>

@@ -93,7 +93,7 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        public void StopMonitoring()
+        public void StopMonitoring(bool isShutdown = false)
         {
             lock (_monitoringLock)
             {
@@ -101,7 +101,6 @@ namespace Ink_Canvas.Helpers
 
                 if (_monitoringThread != null && _monitoringThread.IsAlive)
                 {
-                    // 等待线程退出，最多等待2秒
                     if (!_monitoringThread.Join(2000))
                     {
                         LogHelper.WriteLogToFile("等待监控线程退出超时", LogHelper.LogType.Warning);
@@ -691,6 +690,19 @@ namespace Ink_Canvas.Helpers
                     catch
                     {
                         LogHelper.WriteLogToFile("成功绑定!", LogHelper.LogType.Event);
+                    }
+
+                    // 关键修复：先触发PresentationOpen，再检查放映状态
+                    if (_pptActivePresentation != null)
+                    {
+                        try
+                        {
+                            OnPresentationOpen(_pptActivePresentation);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"初次连接触发PresentationOpen失败: {ex.Message}", LogHelper.LogType.Warning);
+                        }
                     }
 
                     TryRaiseSlideShowBeginOnConnect();

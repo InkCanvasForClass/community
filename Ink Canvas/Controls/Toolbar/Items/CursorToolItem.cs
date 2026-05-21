@@ -6,8 +6,8 @@ namespace Ink_Canvas.Controls.Toolbar.Items
     {
         public override string Id => "builtin.cursor";
         public override string LocalizationKey => "FloatingBar_Mouse";
-        public override ToolbarSlot DefaultSlot => ToolbarSlot.FloatingBarMain;
-        public override int DefaultOrder => 100;
+        public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
+        public override string Description => "光标工具";
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.CursorIcon_Click(sender, e);

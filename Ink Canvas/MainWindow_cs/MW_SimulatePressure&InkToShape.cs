@@ -340,18 +340,11 @@ namespace Ink_Canvas
         private void inkCanvas_StrokeCollected(object sender, InkCanvasStrokeCollectedEventArgs e)
         {
             var strokeDrawingAttributes = e.Stroke?.DrawingAttributes;
-            bool isBoardBrushStroke = strokeDrawingAttributes != null
-                                      && !strokeDrawingAttributes.IsHighlighter
-                                      && strokeDrawingAttributes.StylusTip == StylusTip.Rectangle
-                                      && Math.Abs(strokeDrawingAttributes.Width - BoardBrushInkWidth) < 0.01
-                                      && Math.Abs(strokeDrawingAttributes.Height - BoardBrushInkHeight) < 0.01;
 
-            // 手写识别须与画布显示分离：在压感/触摸模拟/笔锋/直线拉直等修改 e.Stroke 之前快照原始落笔点集。
             var handwritingRawPointsForRecognizer =
                 CloneStylusPointCollectionForHandwritingInput(e.Stroke?.StylusPoints);
 
-            // 检查是否启用墨迹渐隐功能
-            if (Settings.Canvas.EnableInkFade && !isBoardBrushStroke)
+            if (Settings.Canvas.EnableInkFade)
             {
                 // 获取墨迹的起点和终点
                 var startPoint = e.Stroke.StylusPoints.Count > 0 ? e.Stroke.StylusPoints[0].ToPoint() : new Point();
@@ -365,7 +358,13 @@ namespace Ink_Canvas
                 // 添加到墨迹渐隐管理器
                 if (_inkFadeManager != null)
                 {
-                    _inkFadeManager.AddFadingStroke(e.Stroke, startPoint, endPoint);
+                    long strokeDurationMs = 0;
+                    if (_stylusDownTimestamp > 0)
+                    {
+                        strokeDurationMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _stylusDownTimestamp;
+                        _stylusDownTimestamp = 0;
+                    }
+                    _inkFadeManager.AddFadingStroke(e.Stroke, startPoint, endPoint, strokeDurationMs);
                 }
                 else
                 {
@@ -960,7 +959,6 @@ namespace Ink_Canvas
                                     var canvasStrokeForHw = wsTail ? strokeHw : strokeAfterTail;
                                     ScheduleHandwritingGlyphReplaceAfterStrokeCollected(
                                         canvasStrokeForHw,
-                                        isBoardBrushStroke,
                                         preBrushHwPts);
                                 }
                             }
@@ -987,7 +985,6 @@ namespace Ink_Canvas
                 var canvasStrokeForHw = wasStraightened ? strokeForHandwritingBeautify : strokeAfterTailSync;
                 ScheduleHandwritingGlyphReplaceAfterStrokeCollected(
                     canvasStrokeForHw,
-                    isBoardBrushStroke,
                     preBrushHandwritingPoints);
             }
         }
@@ -3020,12 +3017,9 @@ namespace Ink_Canvas
         /// <param name="preBrushHandwritingPoints">笔锋与后续 InkStyle 压感合成前的点集；为 null 时识别输入与画布笔画一致（兼容旧行为）。</param>
         private void ScheduleHandwritingGlyphReplaceAfterStrokeCollected(
             Stroke strokeForBeautify,
-            bool isBoardBrushStroke,
             StylusPointCollection preBrushHandwritingPoints = null)
         {
             if (!Settings.InkToShape.EnableWinRtHandwritingStrokeBeautify)
-                return;
-            if (isBoardBrushStroke)
                 return;
             if (strokeForBeautify == null || strokeForBeautify.DrawingAttributes?.IsHighlighter == true)
                 return;

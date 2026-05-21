@@ -322,6 +322,63 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        public static bool RestartAsNormalUserWithUIAccess(string extraArgs = null)
+        {
+            try
+            {
+                if (HasUIAccess())
+                {
+                    LogHelper.WriteLogToFile("UIAccess | 当前进程已具有 UIAccess，跳过普通用户 UIAccess 重启");
+                    return true;
+                }
+
+                if (!GetCurrentProcessSessionId(out uint sessionId))
+                {
+                    LogHelper.WriteLogToFile($"UIAccess | 获取当前会话 ID 失败 (LastError={Marshal.GetLastWin32Error()})", LogHelper.LogType.Error);
+                    return false;
+                }
+
+                if (!GetUserPrimaryToken(sessionId, out IntPtr userToken))
+                {
+                    LogHelper.WriteLogToFile($"UIAccess | 获取普通用户令牌失败 (LastError={Marshal.GetLastWin32Error()})", LogHelper.LogType.Error);
+                    return false;
+                }
+
+                try
+                {
+                    if (!GetWinlogonImpersonationToken(sessionId, out IntPtr winlogonToken))
+                    {
+                        LogHelper.WriteLogToFile("UIAccess | 未能获取 winlogon 模拟令牌（需要管理员权限）", LogHelper.LogType.Error);
+                        return false;
+                    }
+
+                    try
+                    {
+                        if (!SetUIAccessOnToken(userToken, winlogonToken))
+                        {
+                            return false;
+                        }
+
+                        LogHelper.WriteLogToFile("UIAccess | 已为普通用户令牌设置 UIAccess");
+                        return LaunchWithToken(userToken, extraArgs);
+                    }
+                    finally
+                    {
+                        CloseHandle(winlogonToken);
+                    }
+                }
+                finally
+                {
+                    CloseHandle(userToken);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"UIAccess | RestartAsNormalUserWithUIAccess 异常: {ex}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
         #endregion
 
         #region Token Manipulation
@@ -399,19 +456,11 @@ namespace Ink_Canvas.Helpers
                     finally { CloseHandle(hSelfDup); }
 
                     // 5. 在副本上设置 UIAccess = TRUE
-                    IntPtr uiBuf = Marshal.AllocHGlobal(sizeof(uint));
-                    try
+                    if (!SetUIAccessOnToken(dupToken, winlogonToken))
                     {
-                        Marshal.WriteInt32(uiBuf, 1);
-                        if (!SetTokenInformation(dupToken, TokenUIAccess, uiBuf, sizeof(uint)))
-                        {
-                            int err = Marshal.GetLastWin32Error();
-                            LogHelper.WriteLogToFile($"UIAccess | SetTokenInformation(UIAccess) 失败: {err}", LogHelper.LogType.Error);
-                            CloseHandle(dupToken);
-                            return false;
-                        }
+                        CloseHandle(dupToken);
+                        return false;
                     }
-                    finally { Marshal.FreeHGlobal(uiBuf); }
 
                     uiaToken = dupToken;
                     return true;
@@ -424,6 +473,36 @@ namespace Ink_Canvas.Helpers
             finally
             {
                 CloseHandle(winlogonToken);
+            }
+        }
+
+        private static bool SetUIAccessOnToken(IntPtr targetToken, IntPtr winlogonToken)
+        {
+            if (!SetThreadToken(IntPtr.Zero, winlogonToken))
+            {
+                LogHelper.WriteLogToFile($"UIAccess | SetThreadToken(winlogon) 失败: {Marshal.GetLastWin32Error()}", LogHelper.LogType.Error);
+                return false;
+            }
+
+            try
+            {
+                IntPtr uiBuf = Marshal.AllocHGlobal(sizeof(uint));
+                try
+                {
+                    Marshal.WriteInt32(uiBuf, 1);
+                    if (!SetTokenInformation(targetToken, TokenUIAccess, uiBuf, sizeof(uint)))
+                    {
+                        int err = Marshal.GetLastWin32Error();
+                        LogHelper.WriteLogToFile($"UIAccess | SetTokenInformation(UIAccess) 失败: {err}", LogHelper.LogType.Error);
+                        return false;
+                    }
+                    return true;
+                }
+                finally { Marshal.FreeHGlobal(uiBuf); }
+            }
+            finally
+            {
+                RevertToSelf();
             }
         }
 

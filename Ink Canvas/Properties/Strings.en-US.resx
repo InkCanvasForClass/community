@@ -435,6 +435,12 @@
   <data name="Canvas_ShowCircleCenter" xml:space="preserve">
     <value>Show circle center when drawing</value>
   </data>
+  <data name="Canvas_ShowCoordinateUnitMarks" xml:space="preserve">
+    <value>Show centimeter ticks when drawing coordinate systems</value>
+  </data>
+  <data name="Canvas_ShowCoordinateUnitMarksHint" xml:space="preserve">
+    <value>Add ticks every 1 cm when drawing coordinate systems.</value>
+  </data>
   <data name="Canvas_WPFBezier" xml:space="preserve">
     <value>WPF default Bezier smoothing</value>
   </data>
@@ -528,8 +534,32 @@
   <data name="Crash_NoAction" xml:space="preserve">
     <value>No action</value>
   </data>
+  <data name="Crash_ShowCrashWindow" xml:space="preserve">
+    <value>Show crash details (no restart)</value>
+  </data>
+  <data name="CrashWindowTitle" xml:space="preserve">
+    <value>Crash details - InkCanvasForClass</value>
+  </data>
+  <data name="CrashWindowHeader" xml:space="preserve">
+    <value>InkCanvasForClass encountered an unhandled exception</value>
+  </data>
+  <data name="CrashWindowDescription" xml:space="preserve">
+    <value>Crash details are shown below. You can copy them and send them to the developers.</value>
+  </data>
+  <data name="CrashWindowFooter" xml:space="preserve">
+    <value>The current setting only shows crash details and will not restart automatically.</value>
+  </data>
+  <data name="CrashWindowCopy" xml:space="preserve">
+    <value>Copy details</value>
+  </data>
+  <data name="CrashWindowClose" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="CrashWindowNoDetails" xml:space="preserve">
+    <value>No crash details are available.</value>
+  </data>
   <data name="Crash_Hint" xml:space="preserve">
-    <value>Silent restart: automatically restart without prompt. No action: only log, do not restart.</value>
+    <value>Silent restart: automatically restart without prompt. No action: only log, do not restart. Show crash details: display error details without restarting.</value>
   </data>
   <data name="Gesture_Title" xml:space="preserve">
     <value>Gestures</value>
@@ -687,26 +717,59 @@
   <data name="Theme_Splash_Horse" xml:space="preserve">
     <value>Year-of-Horse special</value>
   </data>
+  <data name="Theme_Splash_Custom" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="Theme_CustomSplashImage" xml:space="preserve">
+    <value>Custom Splash Image</value>
+  </data>
+  <data name="Theme_CustomSplashImage_Desc" xml:space="preserve">
+    <value>Select a custom image as the splash screen background (supports JPG, PNG, BMP, etc.)</value>
+  </data>
+  <data name="Theme_CustomSplashTextPosition" xml:space="preserve">
+    <value>Text Position</value>
+  </data>
+  <data name="Theme_CustomSplashTextPosition_Desc" xml:space="preserve">
+    <value>Set the position of loading text and progress bar</value>
+  </data>
+  <data name="Theme_TextPosition_BottomLeft" xml:space="preserve">
+    <value>Bottom Left</value>
+  </data>
+  <data name="Theme_TextPosition_BottomCenter" xml:space="preserve">
+    <value>Bottom Center</value>
+  </data>
+  <data name="Theme_TextPosition_BottomRight" xml:space="preserve">
+    <value>Bottom Right</value>
+  </data>
+  <data name="Theme_CustomSplash_NotSelected" xml:space="preserve">
+    <value>No custom image selected</value>
+  </data>
+  <data name="Theme_Browse" xml:space="preserve">
+    <value>Browse</value>
+  </data>
+  <data name="Theme_Clear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
   <data name="Theme_FloatingBarIcon" xml:space="preserve">
     <value>Floating toolbar icon</value>
   </data>
   <data name="Theme_FloatingIcon_IccDefault" xml:space="preserve">
-    <value>“ICC-CE” default</value>
+    <value>"ICC-CE" default</value>
   </data>
   <data name="Theme_FloatingIcon_IccNoShadow" xml:space="preserve">
-    <value>“ICC-CE” no shadow</value>
+    <value>"ICC-CE" no shadow</value>
   </data>
   <data name="Theme_FloatingIcon_IccDark" xml:space="preserve">
-    <value>“ICC-CE” dark</value>
+    <value>"ICC-CE" dark</value>
   </data>
   <data name="Theme_FloatingIcon_IccDarkBreath" xml:space="preserve">
-    <value>“ICC-CE” dark breathing</value>
+    <value>"ICC-CE" dark breathing</value>
   </data>
   <data name="Theme_FloatingIcon_IccWhiteTransparent" xml:space="preserve">
-    <value>“ICC-CE” white transparent</value>
+    <value>"ICC-CE" white transparent</value>
   </data>
   <data name="Theme_FloatingIcon_IccBlackTransparent" xml:space="preserve">
-    <value>“ICC-CE” black transparent</value>
+    <value>"ICC-CE" black transparent</value>
   </data>
   <data name="Theme_FloatingIcon_CoolapkCrossEye" xml:space="preserve">
     <value>Coolapk cross-eye emoji</value>
@@ -774,11 +837,17 @@
   <data name="Theme_QuoteSource_Hitokoto" xml:space="preserve">
     <value>Hitokoto API</value>
   </data>
+  <data name="Theme_QuoteSource_PhigrosTips" xml:space="preserve">
+    <value>Phigros Tips</value>
+  </data>
   <data name="Theme_Customize" xml:space="preserve">
     <value>Custom</value>
   </data>
   <data name="Theme_EnableQuickPanel" xml:space="preserve">
     <value>Enable quick panel in docked mode</value>
+  </data>
+  <data name="Theme_QuickPanelBottomOffset" xml:space="preserve">
+    <value>Quick panel vertical offset</value>
   </data>
   <data name="Theme_UnfoldButtonIcon" xml:space="preserve">
     <value>Un-dock button icon</value>
@@ -922,7 +991,7 @@
     <value>Enabling WPS support may cause lag when closing WPS!</value>
   </data>
   <data name="PPT_WpsSupportHint" xml:space="preserve">
-    <value>WPS is supported, but MS Office and WPS cannot be supported at the same time. To enable WPS support, make sure “WPS Office compatibility with third-party systems and software” is enabled in the WPS config tool, otherwise WPS cannot be detected.</value>
+    <value>WPS is supported, but MS Office and WPS cannot be supported at the same time. To enable WPS support, make sure "WPS Office compatibility with third-party systems and software" is enabled in the WPS config tool, otherwise WPS cannot be detected.</value>
   </data>
   <data name="Canvas_HideStrokeWhenSelecting" xml:space="preserve">
     <value>Hide ink when exiting board mode</value>
@@ -1031,6 +1100,12 @@
   </data>
   <data name="Startup_SilentUpdateHint" xml:space="preserve">
     <value>Silent update installs when the app is idle; no manual action needed.</value>
+  </data>
+  <data name="Startup_SmartUpdate" xml:space="preserve">
+    <value>Smart update</value>
+  </data>
+  <data name="Startup_SmartUpdateHint" xml:space="preserve">
+    <value>Use the unified platform API to check for updates and get download links.</value>
   </data>
   <data name="Startup_UpdateChannel" xml:space="preserve">
     <value>Update channel</value>
@@ -1929,6 +2004,9 @@
   <data name="About_Copyright" xml:space="preserve">
     <value>© 2025-2026 CJK_mkp. All rights reserved.</value>
   </data>
+  <data name="About_PhigrosCr" xml:space="preserve">
+    <value>Some content is taken from Phigros</value>
+  </data>
   <data name="About_OpenSourceSlogan" xml:space="preserve">
     <value>We love open-source forever!</value>
   </data>
@@ -1940,6 +2018,9 @@
   </data>
   <data name="FriendlyLinks_NamePickerDescription" xml:space="preserve">
     <value>Random name picker and drawing tool</value>
+  </data>
+  <data name="FriendlyLinks_InkeysDescription" xml:space="preserve">
+    <value>Smart teaching desktop tool</value>
   </data>
   <data name="FriendlyLinks_Visit" xml:space="preserve">
     <value>Visit</value>
@@ -2049,6 +2130,9 @@
   <data name="Board_Highlighter" xml:space="preserve">
     <value>Highlighter</value>
   </data>
+  <data name="Board_LaserPen" xml:space="preserve">
+    <value>Laser Pen</value>
+  </data>
   <data name="Board_Eraser" xml:space="preserve">
     <value>Eraser</value>
   </data>
@@ -2123,6 +2207,24 @@
   </data>
   <data name="Notification_TestText" xml:space="preserve">
     <value>Test text</value>
+  </data>
+  <data name="Notification_DefaultTitle" xml:space="preserve">
+    <value>Notification</value>
+  </data>
+  <data name="Notification_UpdateTitle" xml:space="preserve">
+    <value>New version available</value>
+  </data>
+  <data name="Notification_NewVersion" xml:space="preserve">
+    <value>New version available: {0}</value>
+  </data>
+  <data name="Notification_ViewDetails" xml:space="preserve">
+    <value>View details</value>
+  </data>
+  <data name="Notification_Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Announcement_LoadFailed" xml:space="preserve">
+    <value>Failed to load announcements</value>
   </data>
   <data name="OldUI_Exit" xml:space="preserve">
     <value>Exit</value>
@@ -2276,6 +2378,36 @@ Hide</value>
   </data>
   <data name="Geometry_DrawCone" xml:space="preserve">
     <value>Cone</value>
+  </data>
+  <data name="Geometry_DrawCoordinate1" xml:space="preserve">
+    <value>Coordinate 1</value>
+  </data>
+  <data name="Geometry_DrawCoordinate2" xml:space="preserve">
+    <value>Coordinate 2</value>
+  </data>
+  <data name="Geometry_DrawCoordinate3" xml:space="preserve">
+    <value>Coordinate 3</value>
+  </data>
+  <data name="Geometry_DrawCoordinate4" xml:space="preserve">
+    <value>Coordinate 4</value>
+  </data>
+  <data name="Geometry_DrawCoordinate5" xml:space="preserve">
+    <value>Coordinate 5</value>
+  </data>
+  <data name="Geometry_DrawHyperbola" xml:space="preserve">
+    <value>Hyperbola</value>
+  </data>
+  <data name="Geometry_DrawHyperbolaWithFocal" xml:space="preserve">
+    <value>Hyperbola (Focal)</value>
+  </data>
+  <data name="Geometry_DrawParabola" xml:space="preserve">
+    <value>Parabola</value>
+  </data>
+  <data name="Geometry_DrawParabolaWithFocal" xml:space="preserve">
+    <value>Parabola (Focal)</value>
+  </data>
+  <data name="Geometry_DrawParabola2" xml:space="preserve">
+    <value>Parabola 2</value>
   </data>
   <data name="FloatingBar_GestureButton" xml:space="preserve">
     <value>Gesture</value>
@@ -2960,5 +3092,260 @@ Hide</value>
   </data>
   <data name="Automation_SaveFileName_CustomTemplate_Desc" xml:space="preserve">
     <value>Available placeholders: {date} {time} {datetime} {mode} {page} {count} {type}</value>
+  </data>
+  <data name="Notification_PageTitle" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
+  <data name="Notification_NavTooltip" xml:space="preserve">
+    <value>Announcement, message reminder, and dynamic notification settings</value>
+  </data>
+  <data name="Notification_SettingsTitle" xml:space="preserve">
+    <value>Notification settings</value>
+  </data>
+  <data name="Notification_GroupTitle" xml:space="preserve">
+    <value>Notification management</value>
+  </data>
+  <data name="Notification_EnableAnnouncements" xml:space="preserve">
+    <value>Enable announcements</value>
+  </data>
+  <data name="Notification_EnableAnnouncementsHint" xml:space="preserve">
+    <value>Fetch announcements after startup and receive realtime announcement pushes.</value>
+  </data>
+  <data name="Notification_EnableDynamic" xml:space="preserve">
+    <value>Enable dynamic notifications</value>
+  </data>
+  <data name="Notification_EnableDynamicHint" xml:space="preserve">
+    <value>Use a top pill notification for announcements, updates, and local messages.</value>
+  </data>
+  <data name="Notification_EnableWindowsToast" xml:space="preserve">
+    <value>Enable Windows system notifications</value>
+  </data>
+  <data name="Notification_EnableWindowsToastHint" xml:space="preserve">
+    <value>Important notices and updates may also appear as system toasts.</value>
+  </data>
+  <data name="Notification_DictationDoNotDisturb" xml:space="preserve">
+    <value>Popup do not disturb</value>
+  </data>
+  <data name="Notification_DictationDoNotDisturbHint" xml:space="preserve">
+    <value>Suppress popups and system notifications in selected scenarios while keeping messages in history.</value>
+  </data>
+  <data name="Notification_DictationDoNotDisturbPpt" xml:space="preserve">
+    <value>Do not notify during PPT slideshow</value>
+  </data>
+  <data name="Notification_DictationDoNotDisturbPptHint" xml:space="preserve">
+    <value>Suppress dynamic notifications, legacy notifications, and Windows toasts while presenting slides.</value>
+  </data>
+  <data name="Notification_DictationDoNotDisturbWhiteboard" xml:space="preserve">
+    <value>Do not notify in whiteboard mode</value>
+  </data>
+  <data name="Notification_DictationDoNotDisturbWhiteboardHint" xml:space="preserve">
+    <value>Suppress dynamic notifications, legacy notifications, and Windows toasts in whiteboard or blackboard mode.</value>
+  </data>
+  <data name="Notification_EnableForcePopup" xml:space="preserve">
+    <value>Enable important announcement popups</value>
+  </data>
+  <data name="Notification_EnableForcePopupHint" xml:space="preserve">
+    <value>Important announcements can open expanded by default while remaining dismissible.</value>
+  </data>
+  <data name="Notification_BehaviorTitle" xml:space="preserve">
+    <value>Display behavior</value>
+  </data>
+  <data name="Notification_Placement" xml:space="preserve">
+    <value>Dynamic notification position</value>
+  </data>
+  <data name="Notification_PlacementHint" xml:space="preserve">
+    <value>Choose where dynamic notifications appear in the main window.</value>
+  </data>
+  <data name="Notification_PlacementTopCenter" xml:space="preserve">
+    <value>Top center</value>
+  </data>
+  <data name="Notification_PlacementTopRight" xml:space="preserve">
+    <value>Top right</value>
+  </data>
+  <data name="Notification_PlacementTopLeft" xml:space="preserve">
+    <value>Top left</value>
+  </data>
+  <data name="Notification_AnimationMode" xml:space="preserve">
+    <value>Animation mode</value>
+  </data>
+  <data name="Notification_AnimationModeHint" xml:space="preserve">
+    <value>Control animation intensity for notification enter, expand, and exit.</value>
+  </data>
+  <data name="Notification_AnimationOff" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="Notification_AnimationSimple" xml:space="preserve">
+    <value>Simple</value>
+  </data>
+  <data name="Notification_AnimationStandard" xml:space="preserve">
+    <value>Standard</value>
+  </data>
+  <data name="Notification_UpdateDuration" xml:space="preserve">
+    <value>Update notification duration</value>
+  </data>
+  <data name="Notification_UpdateDurationHint" xml:space="preserve">
+    <value>Seconds before update messages close automatically.</value>
+  </data>
+  <data name="Notification_UrgentDuration" xml:space="preserve">
+    <value>Urgent notification duration</value>
+  </data>
+  <data name="Notification_UrgentDurationHint" xml:space="preserve">
+    <value>Seconds before urgent messages close automatically.</value>
+  </data>
+  <data name="Notification_ImportantDuration" xml:space="preserve">
+    <value>Important notification duration</value>
+  </data>
+  <data name="Notification_ImportantDurationHint" xml:space="preserve">
+    <value>Seconds before important messages close automatically.</value>
+  </data>
+  <data name="Notification_ReminderDuration" xml:space="preserve">
+    <value>Reminder notification duration</value>
+  </data>
+  <data name="Notification_ReminderDurationHint" xml:space="preserve">
+    <value>Seconds before reminder messages close automatically.</value>
+  </data>
+  <data name="Notification_OtherDuration" xml:space="preserve">
+    <value>Other notification duration</value>
+  </data>
+  <data name="Notification_OtherDurationHint" xml:space="preserve">
+    <value>Seconds before other messages close automatically.</value>
+  </data>
+  <data name="Notification_ActionsTitle" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Notification_Test" xml:space="preserve">
+    <value>Test notification</value>
+  </data>
+  <data name="Notification_TestHint" xml:space="preserve">
+    <value>Send a test notification to the message queue immediately.</value>
+  </data>
+  <data name="Notification_TestButton" xml:space="preserve">
+    <value>Send test notification</value>
+  </data>
+  <data name="Notification_TestTitle" xml:space="preserve">
+    <value>Notification test</value>
+  </data>
+  <data name="Notification_TestSummary" xml:space="preserve">
+    <value>Dynamic notifications and the message queue are working.</value>
+  </data>
+  <data name="Announcement_PageTitle" xml:space="preserve">
+    <value>Announcements</value>
+  </data>
+  <data name="Announcement_NavTooltip" xml:space="preserve">
+    <value>Remote announcement, realtime push, and announcement history settings</value>
+  </data>
+  <data name="Announcement_ConnectionTitle" xml:space="preserve">
+    <value>Connection settings</value>
+  </data>
+  <data name="Announcement_ConnectionHint" xml:space="preserve">
+    <value>Configure the announcement HTTP API, WebSocket realtime push URL, and access token.</value>
+  </data>
+  <data name="Announcement_ApiBaseUrl" xml:space="preserve">
+    <value>Announcement API URL</value>
+  </data>
+  <data name="Announcement_ApiBaseUrlHint" xml:space="preserve">
+    <value>Base server URL used to fetch announcement lists.</value>
+  </data>
+  <data name="Announcement_WebSocketUrl" xml:space="preserve">
+    <value>Realtime push URL</value>
+  </data>
+  <data name="Announcement_WebSocketUrlHint" xml:space="preserve">
+    <value>Leave empty to derive the WebSocket URL from the API URL automatically.</value>
+  </data>
+  <data name="Announcement_Token" xml:space="preserve">
+    <value>Announcement access token</value>
+  </data>
+  <data name="Announcement_TokenHint" xml:space="preserve">
+    <value>Access token used by the announcement system to identify this software.</value>
+  </data>
+  <data name="Announcement_CenterTitle" xml:space="preserve">
+    <value>Announcement center</value>
+  </data>
+  <data name="Announcement_CenterHint" xml:space="preserve">
+    <value>View received remote announcements and realtime push messages.</value>
+  </data>
+  <data name="Announcement_NoItems" xml:space="preserve">
+    <value>No announcements</value>
+  </data>
+  <data name="Announcement_ClearHistory" xml:space="preserve">
+    <value>Clear history</value>
+  </data>
+  <data name="Announcement_ItemCount" xml:space="preserve">
+    <value>{0} announcements. Select an item on the left to view details.</value>
+  </data>
+  <data name="Notification_Type_Update" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="Notification_Type_Urgent" xml:space="preserve">
+    <value>Urgent</value>
+  </data>
+  <data name="Notification_Type_Important" xml:space="preserve">
+    <value>Important</value>
+  </data>
+  <data name="Notification_Type_Reminder" xml:space="preserve">
+    <value>Reminder</value>
+  </data>
+  <data name="Notification_Type_Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="Notification_ViewHistory" xml:space="preserve">
+    <value>View history</value>
+  </data>
+  <data name="Notification_ProviderTitle" xml:space="preserve">
+    <value>Reminder providers</value>
+  </data>
+  <data name="Notification_ProviderManagement" xml:space="preserve">
+    <value>Reminder provider management</value>
+  </data>
+  <data name="Notification_ProviderManagementHint" xml:space="preserve">
+    <value>View enabled and runtime status for announcement, local message, and system notification providers.</value>
+  </data>
+  <data name="Notification_ProviderRefresh" xml:space="preserve">
+    <value>Refresh status</value>
+  </data>
+  <data name="Announcement_MarkAllAsRead" xml:space="preserve">
+    <value>Mark all as read</value>
+  </data>
+  <data name="Notification_Provider_Announcement" xml:space="preserve">
+    <value>Announcement provider</value>
+  </data>
+  <data name="Notification_Provider_AnnouncementDesc" xml:space="preserve">
+    <value>Fetch remote announcements and receive realtime pushes.</value>
+  </data>
+  <data name="Notification_Provider_Local" xml:space="preserve">
+    <value>Local message provider</value>
+  </data>
+  <data name="Notification_Provider_LocalDesc" xml:space="preserve">
+    <value>Receives app internal prompts, errors, and plugin messages.</value>
+  </data>
+  <data name="Notification_Provider_WindowsToast" xml:space="preserve">
+    <value>Windows system notifications</value>
+  </data>
+  <data name="Notification_Provider_WindowsToastDesc" xml:space="preserve">
+    <value>Also display messages as system toasts or tray balloons.</value>
+  </data>
+  <data name="Notification_Provider_Starting" xml:space="preserve">
+    <value>Starting</value>
+  </data>
+  <data name="Notification_Provider_Running" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="Notification_Provider_Stopped" xml:space="preserve">
+    <value>Stopped</value>
+  </data>
+  <data name="Notification_Provider_Disabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="Notification_Provider_NoToken" xml:space="preserve">
+    <value>Token not configured</value>
+  </data>
+  <data name="Notification_Provider_Reconnecting" xml:space="preserve">
+    <value>Reconnecting</value>
+  </data>
+  <data name="Notification_Provider_HttpOnly" xml:space="preserve">
+    <value>HTTP polling available, realtime push unavailable</value>
+  </data>
+  <data name="Notification_Provider_WaitingRestart" xml:space="preserve">
+    <value>Takes effect on next startup</value>
   </data>
 </root>

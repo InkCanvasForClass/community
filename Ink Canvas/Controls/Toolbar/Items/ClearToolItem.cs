@@ -2,18 +2,12 @@ using System.Windows.Input;
 
 namespace Ink_Canvas.Controls.Toolbar.Items
 {
-    /// <summary>
-    /// 清空按钮。位置：夹在颜色面板与 StackPanelCanvasControls 之间，
-    /// 所以用 BeforeAnchor 锚到 StackPanelCanvasControls。
-    /// </summary>
     internal sealed class ClearToolItem : ToolbarImageButtonItemBase
     {
         public override string Id => "builtin.clear";
         public override string LocalizationKey => "FloatingBar_Clear";
-        public override ToolbarSlot DefaultSlot => ToolbarSlot.FloatingBarMain;
-        public override int DefaultOrder => 0;
-        public override ToolbarInsertPosition DefaultPosition => ToolbarInsertPosition.BeforeAnchor;
-        public override string DefaultAnchorName => "StackPanelCanvasControls";
+        public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
+        public override string Description => "清除墨迹";
 
         protected override string IconBrushResourceKey => "RedBrush";
         protected override string LabelBrushResourceKey => "RedBrush";

@@ -1,0 +1,279 @@
+<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.NotificationPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+      xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
+      xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+      xmlns:c="clr-namespace:Ink_Canvas.Converter"
+      xmlns:sys="clr-namespace:System;assembly=mscorlib"
+      mc:Ignorable="d"
+      Title="{i18n:I18n Key=Notification_PageTitle}">
+
+    <ScrollViewer PanningMode="VerticalFirst">
+        <Grid Margin="59,0,59,0">
+            <FrameworkElement.Resources>
+                <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
+                <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+                <Style x:Key="SettingsSectionHeaderTextBlockStyle"
+                       BasedOn="{StaticResource BodyStrongTextBlockStyle}"
+                       TargetType="TextBlock">
+                    <Setter Property="Margin" Value="1,30,0,6" />
+                </Style>
+            </FrameworkElement.Resources>
+
+            <ikw:SimpleStackPanel MaxWidth="1000"
+                                  HorizontalAlignment="Stretch"
+                                  Spacing="{StaticResource SettingsCardSpacing}">
+
+                <TextBlock Text="{i18n:I18n Key=Notification_GroupTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
+
+                <controls:LabeledSettingsCard x:Name="CardEnableAnnouncements"
+                        Header="{i18n:I18n Key=Notification_EnableAnnouncements}"
+                        Description="{i18n:I18n Key=Notification_EnableAnnouncementsHint}"
+                        Icon="{x:Static ui:SegoeFluentIcons.Message}"
+                        Toggled="ToggleSwitchEnableAnnouncements_Toggled" />
+
+                <controls:LabeledSettingsCard x:Name="CardEnableForcePopup"
+                        Header="{i18n:I18n Key=Notification_EnableForcePopup}"
+                        Description="{i18n:I18n Key=Notification_EnableForcePopupHint}"
+                        Icon="{x:Static ui:SegoeFluentIcons.Warning}"
+                        Toggled="ToggleSwitchEnableForcePopup_Toggled" />
+
+                <ui:SettingsCard Header="{i18n:I18n Key=Announcement_CenterTitle}"
+                                 Description="{i18n:I18n Key=Announcement_CenterHint}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BulletedList}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <Button Content="{i18n:I18n Key=Notification_ViewHistory}"
+                            Click="ViewAnnouncementsButton_Click" />
+                </ui:SettingsCard>
+
+                <ui:SettingsExpander Header="{i18n:I18n Key=Announcement_ConnectionTitle}"
+                                     Description="{i18n:I18n Key=Announcement_ConnectionHint}">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}" />
+                    </ui:SettingsExpander.HeaderIcon>
+                    <ui:SettingsExpander.Items>
+                        <ui:SettingsCard Header="{i18n:I18n Key=Announcement_ApiBaseUrl}"
+                                         Description="{i18n:I18n Key=Announcement_ApiBaseUrlHint}">
+                            <TextBox x:Name="ApiBaseUrlTextBox"
+                                     MinWidth="360"
+                                     TextChanged="ApiBaseUrlTextBox_TextChanged" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard Header="{i18n:I18n Key=Announcement_WebSocketUrl}"
+                                         Description="{i18n:I18n Key=Announcement_WebSocketUrlHint}">
+                            <TextBox x:Name="WebSocketUrlTextBox"
+                                     MinWidth="360"
+                                     TextChanged="WebSocketUrlTextBox_TextChanged" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard Header="{i18n:I18n Key=Announcement_Token}"
+                                         Description="{i18n:I18n Key=Announcement_TokenHint}">
+                            <TextBox x:Name="TokenTextBox"
+                                     MinWidth="360"
+                                     TextChanged="TokenTextBox_TextChanged" />
+                        </ui:SettingsCard>
+                    </ui:SettingsExpander.Items>
+                </ui:SettingsExpander>
+
+                <controls:LabeledSettingsCard x:Name="CardEnableDynamic"
+                        Header="{i18n:I18n Key=Notification_EnableDynamic}"
+                        Description="{i18n:I18n Key=Notification_EnableDynamicHint}"
+                        Icon="{x:Static ui:SegoeFluentIcons.Info}"
+                        Toggled="ToggleSwitchEnableDynamic_Toggled" />
+
+                <controls:LabeledSettingsCard x:Name="CardEnableWindowsToast"
+                        Header="{i18n:I18n Key=Notification_EnableWindowsToast}"
+                        Description="{i18n:I18n Key=Notification_EnableWindowsToastHint}"
+                        Icon="{x:Static ui:SegoeFluentIcons.ActionCenterNotification}"
+                        Toggled="ToggleSwitchEnableWindowsToast_Toggled" />
+
+                <ui:SettingsExpander Header="{i18n:I18n Key=Notification_DictationDoNotDisturb}"
+                                     Description="{i18n:I18n Key=Notification_DictationDoNotDisturbHint}">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BlockContact}" />
+                    </ui:SettingsExpander.HeaderIcon>
+                    <ui:SettingsExpander.Content>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchDictationDoNotDisturb"
+                                      OnContent="{DynamicResource Common_On}"
+                                      OffContent="{DynamicResource Common_Off}"
+                                      Toggled="ToggleSwitchDictationDoNotDisturb_Toggled" />
+                    </ui:SettingsExpander.Content>
+                    <ui:SettingsExpander.Items>
+                        <ui:SettingsCard Header="{i18n:I18n Key=Notification_DictationDoNotDisturbPpt}"
+                                         Description="{i18n:I18n Key=Notification_DictationDoNotDisturbPptHint}">
+                            <CheckBox x:Name="CheckBoxDictationDoNotDisturbPpt"
+                                      Checked="DictationDoNotDisturbMode_CheckChanged"
+                                      Unchecked="DictationDoNotDisturbMode_CheckChanged" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard Header="{i18n:I18n Key=Notification_DictationDoNotDisturbWhiteboard}"
+                                         Description="{i18n:I18n Key=Notification_DictationDoNotDisturbWhiteboardHint}">
+                            <CheckBox x:Name="CheckBoxDictationDoNotDisturbWhiteboard"
+                                      Checked="DictationDoNotDisturbMode_CheckChanged"
+                                      Unchecked="DictationDoNotDisturbMode_CheckChanged" />
+                        </ui:SettingsCard>
+                    </ui:SettingsExpander.Items>
+                </ui:SettingsExpander>
+
+                <TextBlock Text="{i18n:I18n Key=Notification_ProviderTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
+
+                <ui:SettingsCard Header="{i18n:I18n Key=Notification_ProviderManagement}"
+                                 Description="{i18n:I18n Key=Notification_ProviderManagementHint}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <Button Content="{i18n:I18n Key=Notification_ProviderRefresh}"
+                            Click="RefreshProvidersButton_Click" />
+                </ui:SettingsCard>
+
+                <ItemsControl x:Name="ProviderItemsControl">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <ui:SettingsCard Header="{Binding DisplayName}"
+                                             Description="{Binding Description}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Status}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                                    <TextBlock Text="{Binding IsRunning}" VerticalAlignment="Center" Opacity="0.65" />
+                                </StackPanel>
+                            </ui:SettingsCard>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <TextBlock Text="{i18n:I18n Key=Notification_BehaviorTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
+
+                <ui:SettingsCard Header="{i18n:I18n Key=Notification_Placement}"
+                                 Description="{i18n:I18n Key=Notification_PlacementHint}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.POI}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <ComboBox x:Name="ComboBoxPlacement"
+                              MinWidth="180"
+                              SelectionChanged="ComboBoxPlacement_SelectionChanged">
+                        <ComboBoxItem Content="{i18n:I18n Key=Notification_PlacementTopCenter}" Tag="TopCenter" />
+                        <ComboBoxItem Content="{i18n:I18n Key=Notification_PlacementTopRight}" Tag="TopRight" />
+                        <ComboBoxItem Content="{i18n:I18n Key=Notification_PlacementTopLeft}" Tag="TopLeft" />
+                    </ComboBox>
+                </ui:SettingsCard>
+
+                <ui:SettingsCard Header="{i18n:I18n Key=Notification_AnimationMode}"
+                                 Description="{i18n:I18n Key=Notification_AnimationModeHint}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Play}"
+                                     FontSize="16" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <ComboBox x:Name="ComboBoxAnimationMode"
+                              MinWidth="180"
+                              SelectionChanged="ComboBoxAnimationMode_SelectionChanged">
+                        <ComboBoxItem Content="{i18n:I18n Key=Notification_AnimationOff}" Tag="Off" />
+                        <ComboBoxItem Content="{i18n:I18n Key=Notification_AnimationSimple}" Tag="Simple" />
+                        <ComboBoxItem Content="{i18n:I18n Key=Notification_AnimationStandard}" Tag="Standard" />
+                    </ComboBox>
+                </ui:SettingsCard>
+
+                <ui:SettingsCard Header="{i18n:I18n Key=Notification_UpdateDuration}"
+                                 Description="{i18n:I18n Key=Notification_UpdateDurationHint}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock x:Name="UpdateDurationText" VerticalAlignment="Center" FontFamily="Consolas" />
+                        <Slider x:Name="UpdateDurationSlider"
+                                Width="220"
+                                Minimum="1"
+                                Maximum="60"
+                                TickFrequency="1"
+                                IsSnapToTickEnabled="True"
+                                ValueChanged="UpdateDurationSlider_ValueChanged" />
+                    </ikw:SimpleStackPanel>
+                </ui:SettingsCard>
+
+                <ui:SettingsCard Header="{i18n:I18n Key=Notification_UrgentDuration}"
+                                 Description="{i18n:I18n Key=Notification_UrgentDurationHint}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Warning}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock x:Name="UrgentDurationText" VerticalAlignment="Center" FontFamily="Consolas" />
+                        <Slider x:Name="UrgentDurationSlider"
+                                Width="220"
+                                Minimum="3"
+                                Maximum="60"
+                                TickFrequency="1"
+                                IsSnapToTickEnabled="True"
+                                ValueChanged="UrgentDurationSlider_ValueChanged" />
+                    </ikw:SimpleStackPanel>
+                </ui:SettingsCard>
+
+                <ui:SettingsCard Header="{i18n:I18n Key=Notification_ImportantDuration}"
+                                 Description="{i18n:I18n Key=Notification_ImportantDurationHint}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Important}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock x:Name="ImportantDurationText" VerticalAlignment="Center" FontFamily="Consolas" />
+                        <Slider x:Name="ImportantDurationSlider"
+                                Width="220"
+                                Minimum="3"
+                                Maximum="60"
+                                TickFrequency="1"
+                                IsSnapToTickEnabled="True"
+                                ValueChanged="ImportantDurationSlider_ValueChanged" />
+                    </ikw:SimpleStackPanel>
+                </ui:SettingsCard>
+
+                <ui:SettingsCard Header="{i18n:I18n Key=Notification_ReminderDuration}"
+                                 Description="{i18n:I18n Key=Notification_ReminderDurationHint}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Stopwatch}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock x:Name="ReminderDurationText" VerticalAlignment="Center" FontFamily="Consolas" />
+                        <Slider x:Name="ReminderDurationSlider"
+                                Width="220"
+                                Minimum="3"
+                                Maximum="60"
+                                TickFrequency="1"
+                                IsSnapToTickEnabled="True"
+                                ValueChanged="ReminderDurationSlider_ValueChanged" />
+                    </ikw:SimpleStackPanel>
+                </ui:SettingsCard>
+
+                <ui:SettingsCard Header="{i18n:I18n Key=Notification_OtherDuration}"
+                                 Description="{i18n:I18n Key=Notification_OtherDurationHint}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Info}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock x:Name="OtherDurationText" VerticalAlignment="Center" FontFamily="Consolas" />
+                        <Slider x:Name="OtherDurationSlider"
+                                Width="220"
+                                Minimum="1"
+                                Maximum="60"
+                                TickFrequency="1"
+                                IsSnapToTickEnabled="True"
+                                ValueChanged="OtherDurationSlider_ValueChanged" />
+                    </ikw:SimpleStackPanel>
+                </ui:SettingsCard>
+
+                <TextBlock Text="{i18n:I18n Key=Notification_ActionsTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
+
+                <ui:SettingsCard Header="{i18n:I18n Key=Notification_Test}"
+                                 Description="{i18n:I18n Key=Notification_TestHint}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Send}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <Button Content="{i18n:I18n Key=Notification_TestButton}"
+                            Click="TestNotificationButton_Click" />
+                </ui:SettingsCard>
+
+                <Rectangle Height="48" />
+            </ikw:SimpleStackPanel>
+        </Grid>
+    </ScrollViewer>
+</ui:Page>

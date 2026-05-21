@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 
 namespace Ink_Canvas.Helpers
 {
-    public class PopupManagerHelper
+    public class PopupManagerHelper : IDisposable
     {
         #region Win32 API
 
@@ -22,9 +22,11 @@ namespace Ink_Canvas.Helpers
         [DllImport("user32.dll")]
         private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
 
+        [DllImport("user32.dll")]
+        private static extern bool IsWindow(IntPtr hWnd);
+
         private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
         private static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
-        private static readonly IntPtr HWND_TOP = IntPtr.Zero;
         private const uint SWP_NOMOVE = 0x0002;
         private const uint SWP_NOSIZE = 0x0001;
         private const uint SWP_NOACTIVATE = 0x0010;
@@ -36,12 +38,18 @@ namespace Ink_Canvas.Helpers
 
         #region 状态管理
 
+        private static readonly List<PopupManagerHelper> _activeInstances = new List<PopupManagerHelper>();
+
         private readonly List<Popup> _registeredPopups = new List<Popup>();
+        private readonly Dictionary<Popup, IntPtr> _hwndCache = new Dictionary<Popup, IntPtr>();
+        private readonly HashSet<Popup> _openPopups = new HashSet<Popup>();
+        private Window _ownerWindow;
+        private IntPtr _ownerHwnd = IntPtr.Zero;
         private bool _isInitialized = false;
-        private bool _offsetToggle = true;
         private bool _needsUpdate = false;
+        private bool _lastTopmostState = false;
         private int _topmostCheckCounter = 0;
-        private const int TopmostCheckInterval = 30;
+        private const int TopmostCheckInterval = 15;
 
         #endregion
 
@@ -58,13 +66,20 @@ namespace Ink_Canvas.Helpers
 
         #region 初始化与注册
 
-        public void Initialize()
+        public void Initialize(Window ownerWindow)
         {
             if (_isInitialized) return;
+
+            _ownerWindow = ownerWindow;
+            if (_ownerWindow != null)
+            {
+                _ownerHwnd = new WindowInteropHelper(_ownerWindow).Handle;
+            }
 
             try
             {
                 CompositionTarget.Rendering += OnRendering;
+                _activeInstances.Add(this);
                 _isInitialized = true;
             }
             catch (Exception ex)
@@ -96,6 +111,8 @@ namespace Ink_Canvas.Helpers
             popup.Opened -= OnPopupOpened;
             popup.Closed -= OnPopupClosed;
             _registeredPopups.Remove(popup);
+            _hwndCache.Remove(popup);
+            _openPopups.Remove(popup);
         }
 
         private void OnPopupOpened(object sender, EventArgs e)
@@ -108,17 +125,17 @@ namespace Ink_Canvas.Helpers
                 child.Visibility = Visibility.Visible;
             }
 
+            _openPopups.Add(popup);
+            _hwndCache.Remove(popup);
+
             FixPopupZOrder(popup);
 
             Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 FixPopupZOrder(popup);
+                if (popup.Child is FrameworkElement child)
+                    FixChildPopups(child);
             }), DispatcherPriority.Loaded);
-
-            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                FixPopupZOrder(popup);
-            }), DispatcherPriority.Background);
         }
 
         private void OnPopupClosed(object sender, EventArgs e)
@@ -130,6 +147,9 @@ namespace Ink_Canvas.Helpers
             {
                 child.Visibility = Visibility.Collapsed;
             }
+
+            _openPopups.Remove(popup);
+            _hwndCache.Remove(popup);
         }
 
         #endregion
@@ -150,17 +170,15 @@ namespace Ink_Canvas.Helpers
             Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 FixPopupZOrder(popup);
+                if (popup.Child is FrameworkElement child)
+                    FixChildPopups(child);
             }), DispatcherPriority.Render);
-
-            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                FixPopupZOrder(popup);
-            }), DispatcherPriority.Background);
         }
 
         public void BringToFrontLight(Popup popup)
         {
-            BringToFront(popup);
+            if (popup?.Child == null) return;
+            FixPopupZOrder(popup);
         }
 
         public void UpdatePosition(Popup popup)
@@ -172,18 +190,8 @@ namespace Ink_Canvas.Helpers
                 var hOffset = popup.HorizontalOffset;
                 var vOffset = popup.VerticalOffset;
 
-                if (_offsetToggle)
-                {
-                    popup.HorizontalOffset = hOffset + 0.001;
-                    popup.VerticalOffset = vOffset + 0.001;
-                }
-                else
-                {
-                    popup.HorizontalOffset = hOffset - 0.001;
-                    popup.VerticalOffset = vOffset - 0.001;
-                }
-
-                _offsetToggle = !_offsetToggle;
+                popup.HorizontalOffset = hOffset + 0.001;
+                popup.VerticalOffset = vOffset + 0.001;
             }
             catch (Exception ex)
             {
@@ -193,11 +201,36 @@ namespace Ink_Canvas.Helpers
 
         public void OnOwnerActivated()
         {
-            foreach (var popup in _registeredPopups)
+            foreach (var popup in _openPopups)
             {
-                if (popup.IsOpen)
+                FixPopupZOrder(popup);
+                if (popup.Child is FrameworkElement child)
+                    FixChildPopups(child);
+            }
+        }
+
+        public static void NotifyTopmostMaintained()
+        {
+            for (int i = 0; i < _activeInstances.Count; i++)
+            {
+                _activeInstances[i].OnOwnerActivated();
+            }
+        }
+
+        public void OnTopmostSettingChanged()
+        {
+            var shouldBeTopmost = CheckShouldBeTopmost();
+
+            if (_lastTopmostState != shouldBeTopmost)
+            {
+                _lastTopmostState = shouldBeTopmost;
+
+                foreach (var popup in _openPopups)
                 {
+                    _hwndCache.Remove(popup);
                     FixPopupZOrder(popup);
+                    if (popup.Child is FrameworkElement child)
+                        FixChildPopups(child);
                 }
             }
         }
@@ -210,9 +243,11 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
+                if (_openPopups.Count == 0) return;
+
                 if (_needsUpdate)
                 {
-                    foreach (var popup in _registeredPopups)
+                    foreach (var popup in _openPopups)
                     {
                         UpdatePosition(popup);
                     }
@@ -223,12 +258,11 @@ namespace Ink_Canvas.Helpers
                 if (_topmostCheckCounter >= TopmostCheckInterval)
                 {
                     _topmostCheckCounter = 0;
-                    foreach (var popup in _registeredPopups)
+                    foreach (var popup in _openPopups)
                     {
-                        if (popup.IsOpen)
-                        {
-                            FixPopupZOrder(popup);
-                        }
+                        FixPopupZOrder(popup);
+                        if (popup.Child is FrameworkElement child)
+                            FixChildPopups(child);
                     }
                 }
             }
@@ -242,43 +276,100 @@ namespace Ink_Canvas.Helpers
 
         #region 核心：修复 Popup Z-Order
 
+        private IntPtr GetPopupHwnd(Popup popup)
+        {
+            if (_hwndCache.TryGetValue(popup, out IntPtr cached) && IsWindow(cached))
+            {
+                return cached;
+            }
+
+            var source = PresentationSource.FromVisual(popup.Child) as HwndSource;
+            if (source?.Handle == IntPtr.Zero || !IsWindow(source.Handle))
+            {
+                _hwndCache.Remove(popup);
+                return IntPtr.Zero;
+            }
+
+            var hwnd = source.Handle;
+            _hwndCache[popup] = hwnd;
+            return hwnd;
+        }
+
         private void FixPopupZOrder(Popup popup)
         {
             if (popup?.Child == null) return;
 
             try
             {
-                var source = PresentationSource.FromVisual(popup.Child) as HwndSource;
-                if (source?.Handle == null) return;
+                var popupHwnd = GetPopupHwnd(popup);
+                if (popupHwnd == IntPtr.Zero) return;
 
-                var hwnd = source.Handle;
-                int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
                 var shouldBeTopmost = CheckShouldBeTopmost();
 
                 if (shouldBeTopmost)
                 {
-                    if ((exStyle & WS_EX_TOPMOST) != 0)
-                    {
-                        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_TOPMOST);
-                    }
-
-                    SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0,
+                    SetWindowPos(popupHwnd, HWND_TOPMOST, 0, 0, 0, 0,
                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
+
+                    if (_ownerHwnd != IntPtr.Zero)
+                    {
+                        SetWindowPos(_ownerHwnd, popupHwnd, 0, 0, 0, 0,
+                            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+                    }
                 }
                 else
                 {
+                    int exStyle = GetWindowLong(popupHwnd, GWL_EXSTYLE);
                     if ((exStyle & WS_EX_TOPMOST) != 0)
                     {
-                        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_TOPMOST);
+                        SetWindowLong(popupHwnd, GWL_EXSTYLE, exStyle & ~WS_EX_TOPMOST);
                     }
 
-                    SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0,
+                    SetWindowPos(popupHwnd, HWND_NOTOPMOST, 0, 0, 0, 0,
                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
                 }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[PopupManager] FixPopupZOrder failed: {ex.Message}");
+            }
+        }
+
+        private void FixChildPopups(FrameworkElement root)
+        {
+            if (root == null || !CheckShouldBeTopmost()) return;
+
+            try
+            {
+                foreach (var childPopup in FindVisualChildren<Popup>(root))
+                {
+                    if (childPopup.IsOpen && childPopup.Child != null)
+                    {
+                        var source = PresentationSource.FromVisual(childPopup.Child) as HwndSource;
+                        if (source?.Handle != IntPtr.Zero)
+                        {
+                            SetWindowPos(source.Handle, HWND_TOPMOST, 0, 0, 0, 0,
+                                SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[PopupManager] FixChildPopups failed: {ex.Message}");
+            }
+        }
+
+        private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) yield break;
+            int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childrenCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T result) yield return result;
+                foreach (var descendant in FindVisualChildren<T>(child))
+                    yield return descendant;
             }
         }
 
@@ -299,11 +390,32 @@ namespace Ink_Canvas.Helpers
                     popup.Closed -= OnPopupClosed;
                 }
                 _registeredPopups.Clear();
+                lock (_activeInstances)
+                {
+                    _activeInstances.Remove(this);
+                }
+                _hwndCache.Clear();
+                _openPopups.Clear();
+                _activeInstances.Remove(this);
                 _isInitialized = false;
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[PopupManager] Cleanup error: {ex.Message}");
+            }
+        }
+
+        private bool _disposed = false;
+
+        /// <summary>
+        /// 释放资源，防止内存泄漏
+        /// </summary>
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                Cleanup();
+                _disposed = true;
             }
         }
 

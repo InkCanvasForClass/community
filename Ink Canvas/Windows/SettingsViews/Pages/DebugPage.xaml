@@ -61,6 +61,8 @@
                         </ui:SettingsCard>
                     </ui:SettingsExpander.Items>
                 </ui:SettingsExpander>
+
+                <Rectangle Height="48" />
             </ikw:SimpleStackPanel>
         </Grid>
     </ScrollViewer>

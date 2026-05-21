@@ -41,6 +41,8 @@ namespace Ink_Canvas.Controls
 
         public GeometryDrawing Icon => IconGeometryInternal;
 
+        public GeometryDrawing Badge => BadgeGeometryInternal;
+
         public GeometryDrawing GeometryDrawing => IconGeometryInternal;
 
         public static readonly DependencyProperty IconBrushProperty = DependencyProperty.Register(
@@ -69,8 +71,20 @@ namespace Ink_Canvas.Controls
 
         public new Brush Background
         {
-            get => ButtonPanel.Background;
-            set => ButtonPanel.Background = value;
+            get => ButtonBorder.Background;
+            set => ButtonBorder.Background = value;
+        }
+
+        public double LabelFontSize
+        {
+            get => LabelTextBlock.FontSize;
+            set => LabelTextBlock.FontSize = value;
+        }
+
+        public double IconHeight
+        {
+            get => ButtonImage.Height;
+            set => ButtonImage.Height = value;
         }
 
         public event MouseButtonEventHandler ButtonMouseDown;
@@ -97,10 +111,10 @@ namespace Ink_Canvas.Controls
             if (!IsEnabled) return;
             if (_lastPressedButton != null && _lastPressedButton != this)
             {
-                _lastPressedButton.Background = Brushes.Transparent;
+                _lastPressedButton.ButtonBorder.Background = Brushes.Transparent;
             }
             _lastPressedButton = this;
-            ButtonPanel.Background = new SolidColorBrush(Color.FromArgb(28, 24, 24, 27));
+            ButtonBorder.Background = new SolidColorBrush(Color.FromArgb(28, 24, 24, 27));
             ButtonMouseDown?.Invoke(this, e);
         }
 
@@ -115,7 +129,7 @@ namespace Ink_Canvas.Controls
             if (!IsEnabled) return;
             if (_lastPressedButton == this)
             {
-                ButtonPanel.Background = Brushes.Transparent;
+                ButtonBorder.Background = Brushes.Transparent;
                 _lastPressedButton = null;
             }
             ButtonMouseUp?.Invoke(this, e);

@@ -3,541 +3,378 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Ink_Canvas"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-        xmlns:controls="clr-namespace:Ink_Canvas.Windows.Controls"
-        Topmost="True" Background="Transparent"
-        mc:Ignorable="d" WindowStyle="None" AllowsTransparency="True"
-        Loaded="RollCallWindow_Loaded" Closing="Window_Closing" WindowStartupLocation="CenterScreen"
-        MouseMove="Window_MouseMove" MouseEnter="Window_MouseEnter"
-        Title="Ink Canvas 画板 - 点名" Height="500" Width="800">
+        Topmost="True"
+        Background="{DynamicResource ApplicationPageBackgroundThemeBrush}"
+        mc:Ignorable="d"
+        Loaded="RollCallWindow_Loaded"
+        Closing="Window_Closing"
+        WindowStartupLocation="CenterScreen"
+        MouseMove="Window_MouseMove"
+        MouseEnter="Window_MouseEnter"
+        Title="Ink Canvas 画板 - 点名"
+        Height="520"
+        Width="860"
+        ui:ThemeManager.IsThemeAware="True"
+        ui:WindowHelper.SystemBackdropType="None"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        ui:WindowHelper.CornerStyle="Round">
 
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Controls/WinUI3CloseButton.xaml" />
                 <ResourceDictionary Source="../Resources/NewRollCallWindowResources.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <SolidColorBrush x:Key="RollCallAccentBrush" Color="#4CAF50" />
+            <SolidColorBrush x:Key="RollCallAccentPointerOverBrush" Color="#43A047" />
+            <SolidColorBrush x:Key="RollCallAccentPressedBrush" Color="#388E3C" />
+            <SolidColorBrush x:Key="RollCallStopBrush" Color="#D13438" />
+            <SolidColorBrush x:Key="RollCallStopPointerOverBrush" Color="#B3261E" />
+
+            <Style x:Key="ModernRollCallCardStyle" TargetType="Border">
+                <Setter Property="Background" Value="{DynamicResource {x:Static ui:ThemeKeys.CardBackgroundFillColorDefaultBrushKey}}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource {x:Static ui:ThemeKeys.CardStrokeColorDefaultBrushKey}}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="Padding" Value="18" />
+            </Style>
+
+            <Style x:Key="ModernRollCallSmallButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
+                <Setter Property="Height" Value="40" />
+                <Setter Property="MinWidth" Value="0" />
+                <Setter Property="Padding" Value="10,0" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontWeight" Value="Medium" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+            </Style>
+
+            <Style x:Key="ModernRollCallIconButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
+                <Setter Property="Width" Value="44" />
+                <Setter Property="Height" Value="38" />
+                <Setter Property="MinWidth" Value="0" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Cursor" Value="Hand" />
+            </Style>
+
+            <Style x:Key="ModernRollCallPrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
+                <Setter Property="Height" Value="48" />
+                <Setter Property="MinWidth" Value="136" />
+                <Setter Property="Padding" Value="20,0" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="FontWeight" Value="Medium" />
+                <Setter Property="Background" Value="{StaticResource RollCallAccentBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource RollCallAccentBrush}" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Style.Resources>
+                    <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPointerOverKey}" Color="#43A047" />
+                    <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPressedKey}" Color="#388E3C" />
+                    <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonForegroundKey}" Color="White" />
+                </Style.Resources>
+            </Style>
+
+            <Style x:Key="ModernRollCallStopButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
+                <Setter Property="Height" Value="48" />
+                <Setter Property="MinWidth" Value="104" />
+                <Setter Property="Padding" Value="18,0" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="FontWeight" Value="Medium" />
+                <Setter Property="Background" Value="{StaticResource RollCallStopBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource RollCallStopBrush}" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Style.Resources>
+                    <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPointerOverKey}" Color="#B3261E" />
+                    <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPressedKey}" Color="#8C1D18" />
+                    <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonForegroundKey}" Color="White" />
+                </Style.Resources>
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
 
-    <Border Background="{DynamicResource NewRollCallWindowBackground}" CornerRadius="15" BorderThickness="1" BorderBrush="{DynamicResource NewRollCallWindowBorderBrush}" Margin="10" x:Name="MainBorder" MouseLeftButtonDown="WindowDragMove">
-        <Grid>
-            <controls:WinUI3CloseButton x:Name="CloseButton" 
-                                        HorizontalAlignment="Right" VerticalAlignment="Top" 
-                                        Margin="0,0,0,0" Cursor="Hand" Click="CloseButton_Click"
-                                        Content="✕"/>
-            <!-- 主要内容区域 -->
-            <Grid>
-                <!-- 使用Viewbox自动缩放内容 -->
-                <Viewbox x:Name="MainViewController" Margin="20,20,20,20">
-                    <Grid Height="550" Width="1000">
-                        <!-- 顶部标题栏 -->
-                        <Grid Height="50" Background="{DynamicResource NewRollCallWindowBackground}" x:Name="TitleBar" VerticalAlignment="Top" MouseLeftButtonDown="WindowDragMove" Margin="0,0,450,0">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="22,0,0,0">
-                                <!-- 点名图标 -->
-                                <Path Data="M5 7C5 8.06087 5.42143 9.07828 6.17157 9.82843C6.92172 10.5786 7.93913 11 9 11C10.0609 11 11.0783 10.5786 11.8284 9.82843C12.5786 9.07828 13 8.06087 13 7C13 5.93913 12.5786 4.92172 11.8284 4.17157C11.0783 3.42143 10.0609 3 9 3C7.93913 3 6.92172 3.42143 6.17157 4.17157C5.42143 4.92172 5 5.93913 5 7Z M3 21V19C3 17.9391 3.42143 16.9217 4.17157 16.1716C4.92172 15.4214 5.93913 15 7 15H11C12.0609 15 13.0783 15.4214 13.8284 16.1716C14.5786 16.9217 15 17.9391 15 19V21 M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89318 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88 M21 21V19C20.9949 18.1172 20.6979 17.2608 20.1553 16.5644C19.6126 15.868 18.8548 15.3707 18 15.15" 
-                                      Stroke="{DynamicResource NewRollCallWindowButtonForeground}" 
-                                      StrokeThickness="2" 
-                                      StrokeLineJoin="Round" 
-                                      Fill="Transparent" 
-                                      Width="24" Height="24" 
-                                      Stretch="Uniform" 
-                                      Margin="0,0,8,0"/>
-                                <!-- 点名文字 -->
-                                <TextBlock Text="点名" FontSize="28" FontWeight="Bold" 
-                                           Foreground="{DynamicResource NewRollCallWindowTitleForeground}" x:Name="TitleText"/>
-                            </StackPanel>
-                        </Grid>
+    <Grid x:Name="MainRoot" Background="Transparent">
+            <Viewbox x:Name="MainViewController" Margin="24,20,24,22">
+                <Grid Width="1000" Height="550">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="84" />
+                    </Grid.RowDefinitions>
 
-                        <!-- 主要内容区域 - 分为左右两部分 -->
-                        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Center" 
-                              x:Name="MainContentGrid" Margin="0,-25,0,25">
-                            <!-- 左侧：结果显示区域 -->
-                            <Grid HorizontalAlignment="Left" VerticalAlignment="Center" 
-                                  x:Name="MainDisplayGrid" Width="500" Margin="-10,0,0,0">
-                                <!-- 结果显示区域 -->
-                                <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <!-- 主结果显示 -->
-                                    <Viewbox Stretch="Uniform" MaxWidth="460" MaxHeight="120" Margin="0,0,0,20">
-                                        <TextBlock x:Name="MainResultDisplay" Text="点击开始点名" FontSize="48" FontWeight="Bold" 
-                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                   Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                   TextAlignment="Center"/>
-                                    </Viewbox>
-                                    
-                                    <!-- 多结果显示区域 - 支持最多20个结果 -->
-                                    <ScrollViewer x:Name="MultiResultScrollViewer" MaxHeight="200" VerticalScrollBarVisibility="Auto" 
-                                                  HorizontalScrollBarVisibility="Disabled" Visibility="Collapsed">
-                                        <StackPanel x:Name="MultiResultPanel" Orientation="Vertical" HorizontalAlignment="Center">
-                                            <!-- 第1行：结果1-5 -->
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
-                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
-                                                    <TextBlock x:Name="Result1Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                               TextAlignment="Center" />
-                                                </Viewbox>
-                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
-                                                    <TextBlock x:Name="Result2Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                               TextAlignment="Center" />
-                                                </Viewbox>
-                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
-                                                    <TextBlock x:Name="Result3Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                               TextAlignment="Center" />
-                                                </Viewbox>
-                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
-                                                    <TextBlock x:Name="Result4Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                               TextAlignment="Center" />
-                                                </Viewbox>
-                                                <Viewbox Width="60" Height="36" Stretch="Uniform" ClipToBounds="True">
-                                                    <TextBlock x:Name="Result5Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                               TextAlignment="Center" />
-                                                </Viewbox>
-                                            </StackPanel>
-                                            <!-- 第2行：结果6-10 -->
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
-                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
-                                                    <TextBlock x:Name="Result6Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                               TextAlignment="Center" />
-                                                </Viewbox>
-                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
-                                                    <TextBlock x:Name="Result7Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                               TextAlignment="Center" />
-                                                </Viewbox>
-                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
-                                                    <TextBlock x:Name="Result8Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                               TextAlignment="Center" />
-                                                </Viewbox>
-                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
-                                                    <TextBlock x:Name="Result9Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                               TextAlignment="Center" />
-                                                </Viewbox>
-                                                <Viewbox Width="60" Height="36" Stretch="Uniform" ClipToBounds="True">
-                                                    <TextBlock x:Name="Result10Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                               TextAlignment="Center" />
-                                                </Viewbox>
-                                            </StackPanel>
-                                            <!-- 第3行：结果11-15 -->
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
-                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
-                                                    <TextBlock x:Name="Result11Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                               TextAlignment="Center" />
-                                                </Viewbox>
-                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
-                                                    <TextBlock x:Name="Result12Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                               TextAlignment="Center" />
-                                                </Viewbox>
-                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
-                                                    <TextBlock x:Name="Result13Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                               TextAlignment="Center" />
-                                                </Viewbox>
-                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
-                                                    <TextBlock x:Name="Result14Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                               TextAlignment="Center" />
-                                                </Viewbox>
-                                                <Viewbox Width="60" Height="36" Stretch="Uniform" ClipToBounds="True">
-                                                    <TextBlock x:Name="Result15Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                               TextAlignment="Center" />
-                                                </Viewbox>
-                                            </StackPanel>
-                                            <!-- 第4行：结果16-20 -->
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
-                                                    <TextBlock x:Name="Result16Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                               TextAlignment="Center" />
-                                                </Viewbox>
-                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
-                                                    <TextBlock x:Name="Result17Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                               TextAlignment="Center" />
-                                                </Viewbox>
-                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
-                                                    <TextBlock x:Name="Result18Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                               TextAlignment="Center" />
-                                                </Viewbox>
-                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
-                                                    <TextBlock x:Name="Result19Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                               TextAlignment="Center" />
-                                                </Viewbox>
-                                                <Viewbox Width="60" Height="36" Stretch="Uniform" ClipToBounds="True">
-                                                    <TextBlock x:Name="Result20Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                               TextAlignment="Center" />
-                                                </Viewbox>
-                                            </StackPanel>
-                                        </StackPanel>
+                    <Grid x:Name="MainContentGrid"
+                          Grid.Row="0"
+                          Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="500" />
+                            <ColumnDefinition Width="18" />
+                            <ColumnDefinition Width="482" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Style="{StaticResource ModernRollCallCardStyle}">
+                            <Grid x:Name="MainDisplayGrid"
+                                  Width="464"
+                                  Height="350"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center">
+                                <StackPanel VerticalAlignment="Center">
+                                    <Border x:Name="MainResultContainer"
+                                            Width="438"
+                                            MinHeight="164"
+                                            HorizontalAlignment="Center"
+                                            CornerRadius="8"
+                                            Background="{DynamicResource {x:Static ui:ThemeKeys.LayerFillColorDefaultBrushKey}}"
+                                            BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.CardStrokeColorDefaultBrushKey}}"
+                                            BorderThickness="1"
+                                            Padding="20">
+                                        <Viewbox Stretch="Uniform"
+                                                 MaxWidth="380"
+                                                 MaxHeight="110">
+                                            <TextBlock x:Name="MainResultDisplay"
+                                                       Text="点击开始点名"
+                                                       FontSize="48"
+                                                       FontWeight="Medium"
+                                                       Foreground="{DynamicResource NewRollCallWindowDigitForeground}"
+                                                       TextAlignment="Center" />
+                                        </Viewbox>
+                                    </Border>
+
+                                    <Border x:Name="MultiResultContainer"
+                                            Width="438"
+                                            MinHeight="236"
+                                            HorizontalAlignment="Center"
+                                            CornerRadius="8"
+                                            Background="{DynamicResource {x:Static ui:ThemeKeys.LayerFillColorDefaultBrushKey}}"
+                                            BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.CardStrokeColorDefaultBrushKey}}"
+                                            BorderThickness="1"
+                                            Padding="16"
+                                            Visibility="Collapsed">
+                                    <ScrollViewer x:Name="MultiResultScrollViewer"
+                                                  VerticalAlignment="Center"
+                                                  Margin="0"
+                                                  MaxHeight="236"
+                                                  VerticalScrollBarVisibility="Auto"
+                                                  HorizontalScrollBarVisibility="Disabled">
+                                        <UniformGrid x:Name="MultiResultPanel"
+                                                     Columns="5"
+                                                     Rows="4"
+                                                     HorizontalAlignment="Center">
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result1Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result2Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result3Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result4Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result5Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result6Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result7Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result8Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result9Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result10Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result11Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result12Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result13Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result14Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result15Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result16Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result17Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result18Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result19Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                            <Border Width="72" Height="32" Margin="5" CornerRadius="6" Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorSecondaryBrushKey}}"><Viewbox Margin="8,1"><TextBlock x:Name="Result20Display" Text="" FontSize="16" FontWeight="Medium" Foreground="{DynamicResource NewRollCallWindowDigitForeground}" /></Viewbox></Border>
+                                        </UniformGrid>
                                     </ScrollViewer>
-                                    
-                                    <!-- 点名状态显示 -->
-                                    <TextBlock x:Name="StatusDisplay" Text="准备就绪" FontSize="16" 
-                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                               Foreground="{DynamicResource NewRollCallWindowSecondaryTextForeground}" 
-                                               TextAlignment="Center" Margin="0,10,0,0"/>
+                                    </Border>
+
+                                    <TextBlock x:Name="StatusDisplay"
+                                               Margin="0,18,0,0"
+                                               Text="准备就绪"
+                                               FontSize="14"
+                                               Foreground="{DynamicResource NewRollCallWindowSecondaryTextForeground}"
+                                               TextAlignment="Center" />
                                 </StackPanel>
                             </Grid>
+                        </Border>
 
-                            <!-- 分割线 -->
-                            <Border Width="2" Background="{DynamicResource NewRollCallWindowButtonForeground}" 
-                                    Opacity="0.3" HorizontalAlignment="Left" VerticalAlignment="Stretch" 
-                                    Margin="500,0,0,0"/>
+                        <Grid x:Name="ControlOptionsGrid" Grid.Column="2">
+                            <Border Style="{StaticResource ModernRollCallCardStyle}" />
+                            <Grid Width="430"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="2" Margin="0,0,0,16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="点名人数"
+                                                   FontSize="14"
+                                                   FontWeight="Medium"
+                                                   Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" />
+                                        <TextBlock x:Name="ListCountDisplay"
+                                                   Margin="0,4,0,0"
+                                                   Text="名单人数: 0"
+                                                   FontSize="12"
+                                                   Foreground="{DynamicResource NewRollCallWindowSecondaryTextForeground}" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1"
+                                                Orientation="Horizontal"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center">
+                                        <Button x:Name="CountMinusBtn" Style="{StaticResource ModernRollCallIconButtonStyle}" Click="CountMinus_Click" ToolTipService.ToolTip="减少人数">
+                                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Remove}" FontSize="12" />
+                                        </Button>
+                                        <Border Width="64"
+                                                Height="36"
+                                                Margin="8,0"
+                                                CornerRadius="8"
+                                                Background="{DynamicResource {x:Static ui:ThemeKeys.LayerFillColorDefaultBrushKey}}"
+                                                BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.CardStrokeColorDefaultBrushKey}}"
+                                                BorderThickness="1">
+                                            <TextBlock x:Name="CountDisplay"
+                                                       Text="1"
+                                                       FontSize="18"
+                                                       FontWeight="Medium"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource NewRollCallWindowDigitForeground}" />
+                                        </Border>
+                                        <Button x:Name="CountPlusBtn" Style="{StaticResource ModernRollCallIconButtonStyle}" Click="CountPlus_Click" ToolTipService.ToolTip="增加人数">
+                                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" FontSize="12" />
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
 
-                            <!-- 右侧：控制选项区域 -->
-                            <Grid HorizontalAlignment="Left" VerticalAlignment="Center" 
-                                  x:Name="ControlOptionsGrid" Width="450" Margin="520,0,0,0" Height="400">
-                                <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                                    <!-- 人数控制区域 -->
-                                    <Grid Margin="0,0,0,20">
-                                        <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                                            <TextBlock Text="点名人数" FontSize="16" FontWeight="Bold" 
-                                                       Foreground="{DynamicResource NewRollCallWindowButtonForeground}" 
-                                                       HorizontalAlignment="Center" Margin="0,0,0,10"/>
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                <Button x:Name="CountMinusBtn" Width="40" Height="40" Background="{DynamicResource NewRollCallWindowButtonBackground}" 
-                                                        BorderThickness="0" Click="CountMinus_Click" Cursor="Hand" Margin="0,0,15,0">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                            </Border>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
-                                                    <Path Data="M5 12l14 0" 
-                                                          Stroke="{DynamicResource NewRollCallWindowButtonForeground}" 
-                                                          StrokeThickness="2" 
-                                                          StrokeStartLineCap="Round" 
-                                                          StrokeEndLineCap="Round"
-                                                          StrokeLineJoin="Round" 
-                                                          Fill="Transparent" 
-                                                          Width="20" Height="20" 
-                                                          Stretch="Uniform"/>
-                                                </Button>
-                                                
-                                                <TextBlock x:Name="CountDisplay" Text="1" FontSize="24" FontWeight="Bold" 
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                           Width="60" TextAlignment="Center"/>
-                                                
+                                <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                                    <TextBlock Text="点名模式"
+                                               Margin="0,0,0,8"
+                                               FontSize="14"
+                                               FontWeight="Medium"
+                                               Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" />
+                                    <TabControl x:Name="RollCallModeTabControl"
+                                                Width="376"
+                                                HorizontalAlignment="Left"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                FontSize="14"
+                                                Style="{StaticResource {x:Static ui:ThemeKeys.TabControlPivotStyleKey}}"
+                                                SelectionChanged="RollCallModeTabControl_SelectionChanged">
+                                        <TabItem Header="随机" />
+                                        <TabItem Header="顺序" />
+                                        <TabItem Header="分组" />
+                                        <TabItem Header="外部" />
+                                    </TabControl>
+                                </StackPanel>
 
-                                                <Button x:Name="CountPlusBtn" Width="40" Height="40" Background="{DynamicResource NewRollCallWindowButtonBackground}" 
-                                                        BorderThickness="0" Click="CountPlus_Click" Cursor="Hand" Margin="15,0,0,0">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                            </Border>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
-                                                    <Path Data="M12 5l0 14 M5 12l14 0" 
-                                                          Stroke="{DynamicResource NewRollCallWindowButtonForeground}" 
-                                                          StrokeThickness="2" 
-                                                          StrokeStartLineCap="Round" 
-                                                          StrokeEndLineCap="Round"
-                                                          StrokeLineJoin="Round" 
-                                                          Fill="Transparent" 
-                                                          Width="20" Height="20" 
-                                                          Stretch="Uniform"/>
-                                                </Button>
+                                <Grid Grid.Row="1" Margin="0,0,0,16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="外部点名"
+                                               VerticalAlignment="Center"
+                                               FontSize="14"
+                                               FontWeight="Medium"
+                                               Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" />
+                                    <ComboBox x:Name="ExternalCallerTypeComboBox"
+                                              Grid.Column="1"
+                                              Width="172"
+                                              Height="36"
+                                              HorizontalAlignment="Right"
+                                              SelectedIndex="0"
+                                              SelectionChanged="ExternalCallerTypeComboBox_SelectionChanged">
+                                        <ComboBoxItem Content="ClassIsland" IsSelected="True" />
+                                        <ComboBoxItem Content="SecRandom" />
+                                        <ComboBoxItem Content="NamePicker" />
+                                    </ComboBox>
+                                </Grid>
+
+                                <StackPanel Grid.Row="3">
+                                    <TextBlock Text="名单管理"
+                                               Margin="0,0,0,8"
+                                               FontSize="14"
+                                               FontWeight="Medium"
+                                               Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" />
+                                    <UniformGrid Columns="3">
+                                        <Button x:Name="ImportListBtn" Style="{StaticResource ModernRollCallSmallButtonStyle}" Margin="0,0,8,0" Click="ImportList_Click">
+                                            <StackPanel Orientation="Horizontal">
+                                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.OpenFile}" FontSize="13" Margin="0,0,6,0" />
+                                                <TextBlock Text="导入" />
                                             </StackPanel>
-                                        </StackPanel>
-                                    </Grid>
-
-                                    <!-- 点名模式选择 -->
-                                    <Grid Margin="0,0,0,20">
-                                        <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                                            <TextBlock Text="点名模式" FontSize="16" FontWeight="Bold" 
-                                                       Foreground="{DynamicResource NewRollCallWindowButtonForeground}" 
-                                                       HorizontalAlignment="Center" Margin="0,0,0,10"/>
-                                             <Border Background="{DynamicResource NewRollCallWindowButtonBackground}" 
-                                                     CornerRadius="8" 
-                                                     BorderThickness="1"
-                                                     BorderBrush="#616161"
-                                                     Width="300" Height="40">
-                                                 <Grid>
-                                                     <!-- 背景指示器 -->
-                                                     <Border x:Name="SegmentedIndicator" 
-                                                             Background="{DynamicResource NewRollCallWindowPrimaryButtonBackground}" 
-                                                             CornerRadius="7.5,0,0,7.5" 
-                                                             Width="100" Height="38" 
-                                                             HorizontalAlignment="Left" 
-                                                             VerticalAlignment="Center" 
-                                                             Margin="0,0,0,0"/>
-                                                     
-                                                     <!-- 按钮容器 -->
-                                                     <Grid>
-                                                         <Button x:Name="RandomModeBtn" 
-                                                                 Width="100" Height="40" 
-                                                                 Background="Transparent" 
-                                                                 BorderThickness="0" 
-                                                                 Click="RandomMode_Click" 
-                                                                 Cursor="Hand" 
-                                                                 HorizontalAlignment="Left">
-                                                             <TextBlock x:Name="RandomModeText" Text="随机点名" FontSize="16" FontWeight="Bold" 
-                                                                        Foreground="{DynamicResource NewRollCallWindowButtonForeground}"/>
-                                                         </Button>
-                                                         <Button x:Name="SequentialModeBtn" 
-                                                                 Width="100" Height="40" 
-                                                                 Background="Transparent" 
-                                                                 BorderThickness="0" 
-                                                                 Click="SequentialMode_Click" 
-                                                                 Cursor="Hand" 
-                                                                 HorizontalAlignment="Center">
-                                                             <TextBlock x:Name="SequentialModeText" Text="顺序点名" FontSize="16" FontWeight="Normal" 
-                                                                        Foreground="{DynamicResource NewRollCallWindowButtonForeground}" Opacity="0.6"/>
-                                                         </Button>
-                                                         <Button x:Name="GroupModeBtn" 
-                                                                 Width="100" Height="40" 
-                                                                 Background="Transparent" 
-                                                                 BorderThickness="0" 
-                                                                 Click="GroupMode_Click" 
-                                                                 Cursor="Hand" 
-                                                                 HorizontalAlignment="Right">
-                                                             <TextBlock x:Name="GroupModeText" Text="分组点名" FontSize="16" FontWeight="Normal" 
-                                                                        Foreground="{DynamicResource NewRollCallWindowButtonForeground}" Opacity="0.6"/>
-                                                         </Button>
-                                                     </Grid>
-                                                 </Grid>
-                                             </Border>
-                                        </StackPanel>
-                                    </Grid>
-
-                                    <!-- 外部点名区域 -->
-                                    <Grid Margin="0,0,0,20">
-                                        <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                                            <TextBlock Text="外部点名" FontSize="16" FontWeight="Bold" 
-                                                       Foreground="{DynamicResource NewRollCallWindowButtonForeground}" 
-                                                       HorizontalAlignment="Center" Margin="0,0,0,10"/>
-                                            
-                                            <!-- 外部点名模式选择 -->
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="10"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
-                                                
-                                                <!-- 外部点名模式Tab -->
-                                                <Border Grid.Column="0"
-                                                        Background="{DynamicResource NewRollCallWindowButtonBackground}" 
-                                                        CornerRadius="8" 
-                                                        BorderThickness="1"
-                                                        BorderBrush="#616161"
-                                                        Width="100" Height="40">
-                                                    <Grid>
-                                                        <!-- 背景指示器 -->
-                                                        <Border x:Name="ExternalCallerModeIndicator" 
-                                                                Background="{DynamicResource NewRollCallWindowPrimaryButtonBackground}" 
-                                                                CornerRadius="7.5" 
-                                                                Width="100" Height="38" 
-                                                                HorizontalAlignment="Left" 
-                                                                VerticalAlignment="Center" 
-                                                                Margin="0,0,0,0"
-                                                                Visibility="Collapsed"/>
-                                                        
-                                                        <!-- 按钮容器 -->
-                                                        <Button x:Name="ExternalCallerModeBtn" 
-                                                                Width="100" Height="40" 
-                                                                Background="Transparent" 
-                                                                BorderThickness="0" 
-                                                                Click="ExternalCallerMode_Click" 
-                                                                Cursor="Hand">
-                                                            <TextBlock x:Name="ExternalCallerModeText" Text="外部点名" FontSize="16" FontWeight="Normal" 
-                                                                       Foreground="{DynamicResource NewRollCallWindowButtonForeground}" Opacity="0.6"/>
-                                                        </Button>
-                                                    </Grid>
-                                                </Border>
-                                                
-                                                <!-- 外部点名类型下拉框 -->
-                                                <ComboBox x:Name="ExternalCallerTypeComboBox"
-                                                          Grid.Column="2"
-                                                          Width="160" Height="40"
-                                                          IsEditable="False"
-                                                          IsReadOnly="True"
-                                                          SelectedIndex="0"
-                                                          Foreground="{DynamicResource NewRollCallWindowButtonForeground}"
-                                                          SelectionChanged="ExternalCallerTypeComboBox_SelectionChanged">
-                                                    <ComboBoxItem Content="ClassIsland" IsSelected="True"/>
-                                                    <ComboBoxItem Content="SecRandom"/>
-                                                    <ComboBoxItem Content="NamePicker"/>
-                                                </ComboBox>
-                                            </Grid>
-                                        </StackPanel>
-                                    </Grid>
-
-                                    <!-- 名单管理区域 -->
-                                    <Grid Margin="0,0,0,20">
-                                        <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                                            <TextBlock Text="名单管理" FontSize="16" FontWeight="Bold" 
-                                                       Foreground="{DynamicResource NewRollCallWindowButtonForeground}" 
-                                                       HorizontalAlignment="Center" Margin="0,0,0,10"/>
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                <Button x:Name="ImportListBtn" Width="90" Height="40" Background="{DynamicResource NewRollCallWindowButtonBackground}" 
-                                                        BorderThickness="0" Click="ImportList_Click" Cursor="Hand" Margin="0,0,10,0">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border Background="{TemplateBinding Background}" CornerRadius="8">
-                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                            </Border>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
-                                                    <TextBlock Text="导入名单" FontSize="14" 
-                                                               Foreground="{DynamicResource NewRollCallWindowButtonForeground}"/>
-                                                </Button>
-                                                <Button x:Name="ClearListBtn" Width="90" Height="40" Background="{DynamicResource NewRollCallWindowButtonBackground}" 
-                                                        BorderThickness="0" Click="ClearList_Click" Cursor="Hand" Margin="0,0,10,0">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border Background="{TemplateBinding Background}" CornerRadius="8">
-                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                            </Border>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
-                                                    <TextBlock Text="清空名单" FontSize="14" 
-                                                               Foreground="{DynamicResource NewRollCallWindowButtonForeground}"/>
-                                                </Button>
-                                                <Button x:Name="ViewHistoryBtn" Width="90" Height="40" Background="{DynamicResource NewRollCallWindowButtonBackground}" 
-                                                        BorderThickness="0" Click="ViewHistory_Click" Cursor="Hand">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border Background="{TemplateBinding Background}" CornerRadius="8">
-                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                            </Border>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
-                                                    <TextBlock Text="查看历史" FontSize="14" 
-                                                               Foreground="{DynamicResource NewRollCallWindowButtonForeground}"/>
-                                                </Button>
+                                        </Button>
+                                        <Button x:Name="ClearListBtn" Style="{StaticResource ModernRollCallSmallButtonStyle}" Margin="0,0,8,0" Click="ClearList_Click">
+                                            <StackPanel Orientation="Horizontal">
+                                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" FontSize="13" Margin="0,0,6,0" />
+                                                <TextBlock Text="清空" />
                                             </StackPanel>
-                                        </StackPanel>
-                                    </Grid>
-
-                                    <!-- 名单统计信息 -->
-                                    <Grid Margin="0,0,0,20">
-                                        <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                                            <TextBlock x:Name="ListCountDisplay" Text="名单人数: 0" FontSize="14" 
-                                                       Foreground="{DynamicResource NewRollCallWindowSecondaryTextForeground}" 
-                                                       HorizontalAlignment="Center"/>
-                                        </StackPanel>
-                                    </Grid>
-
+                                        </Button>
+                                        <Button x:Name="ViewHistoryBtn" Style="{StaticResource ModernRollCallSmallButtonStyle}" Click="ViewHistory_Click">
+                                            <StackPanel Orientation="Horizontal">
+                                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.History}" FontSize="13" Margin="0,0,6,0" />
+                                                <TextBlock Text="历史" />
+                                            </StackPanel>
+                                        </Button>
+                                    </UniformGrid>
                                 </StackPanel>
                             </Grid>
-                        </Grid>
-
-                        <!-- 底部控制按钮区域 -->
-                        <Grid HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,20">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <!-- 开始点名按钮 -->
-                                <Button x:Name="StartRollCallBtn" Width="140" Height="60" Background="{DynamicResource NewRollCallWindowPrimaryButtonBackground}" 
-                                        BorderThickness="0" Click="StartRollCall_Click" Cursor="Hand" Margin="0,0,20,0">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}" CornerRadius="30">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <Path x:Name="StartRollCallBtnIcon" Data="M5 7C5 8.06087 5.42143 9.07828 6.17157 9.82843C6.92172 10.5786 7.93913 11 9 11C10.0609 11 11.0783 10.5786 11.8284 9.82843C12.5786 9.07828 13 8.06087 13 7C13 5.93913 12.5786 4.92172 11.8284 4.17157C11.0783 3.42143 10.0609 3 9 3C7.93913 3 6.92172 3.42143 6.17157 4.17157C5.42143 4.92172 5 5.93913 5 7Z M3 21V19C3 17.9391 3.42143 16.9217 4.17157 16.1716C4.92172 15.4214 5.93913 15 7 15H11C12.0609 15 13.0783 15.4214 13.8284 16.1716C14.5786 16.9217 15 17.9391 15 19V21 M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89318 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88 M21 21V19C20.9949 18.1172 20.6979 17.2608 20.1553 16.5644C19.6126 15.868 18.8548 15.3707 18 15.15" 
-                                              Stroke="{DynamicResource NewRollCallWindowPrimaryButtonForeground}" 
-                                              StrokeThickness="2" 
-                                              Fill="Transparent" 
-                                              Width="20" Height="20" 
-                                              Stretch="Uniform" 
-                                              Margin="0,0,8,0"/>
-                                        <TextBlock x:Name="StartRollCallBtnText" Text="开始点名" FontSize="18" FontWeight="Bold" 
-                                                   Foreground="{DynamicResource NewRollCallWindowPrimaryButtonForeground}"/>
-                                    </StackPanel>
-                                </Button>
-
-                                <!-- 停止点名按钮 -->
-                                <Button x:Name="StopRollCallBtn" Width="100" Height="60" Background="{DynamicResource NewRollCallWindowButtonBackground}" 
-                                        BorderThickness="0" Click="StopRollCall_Click" Cursor="Hand" Margin="0,0,20,0" Visibility="Collapsed">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}" CornerRadius="30">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <Path Data="M6 6l12 12 M18 6l-12 12" 
-                                              Stroke="{DynamicResource NewRollCallWindowButtonForeground}" 
-                                              StrokeThickness="2" 
-                                              StrokeLineJoin="Round" 
-                                              Fill="Transparent" 
-                                              Width="20" Height="20" 
-                                              Stretch="Uniform" 
-                                              Margin="0,0,8,0"/>
-                                        <TextBlock Text="停止" FontSize="18" FontWeight="Bold" 
-                                                   Foreground="{DynamicResource NewRollCallWindowButtonForeground}"/>
-                                    </StackPanel>
-                                </Button>
-
-                                <!-- 重置按钮 -->
-                                <Button x:Name="ResetBtn" Width="140" Height="60" Background="{DynamicResource NewRollCallWindowButtonBackground}" 
-                                        BorderThickness="0" Click="Reset_Click" Cursor="Hand">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}" CornerRadius="30">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <Path Data="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4 M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" 
-                                              Stroke="{DynamicResource NewRollCallWindowButtonForeground}" 
-                                              StrokeThickness="2" 
-                                              StrokeLineJoin="Round" 
-                                              Fill="Transparent" 
-                                              Width="20" Height="20" 
-                                              Stretch="Uniform" 
-                                              Margin="0,0,8,0"/>
-                                        <TextBlock Text="重置" FontSize="18" FontWeight="Bold" 
-                                                   Foreground="{DynamicResource NewRollCallWindowButtonForeground}"/>
-                                    </StackPanel>
-                                </Button>
-                            </StackPanel>
                         </Grid>
                     </Grid>
-                </Viewbox>
-            </Grid>
-        </Grid>
-    </Border>
+
+                    <Grid Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                        <Border Width="420" Height="64" Style="{StaticResource ModernRollCallCardStyle}" Padding="10" />
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center">
+                            <Button x:Name="StartRollCallBtn"
+                                    Style="{StaticResource ModernRollCallPrimaryButtonStyle}"
+                                    Click="StartRollCall_Click"
+                                    Margin="0,0,14,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path x:Name="StartRollCallBtnIcon"
+                                          Width="18"
+                                          Height="18"
+                                          Margin="0,0,8,0"
+                                          Data="M5 7C5 8.06087 5.42143 9.07828 6.17157 9.82843C6.92172 10.5786 7.93913 11 9 11C10.0609 11 11.0783 10.5786 11.8284 9.82843C12.5786 9.07828 13 8.06087 13 7C13 5.93913 12.5786 4.92172 11.8284 4.17157C11.0783 3.42143 10.0609 3 9 3C7.93913 3 6.92172 3.42143 6.17157 4.17157C5.42143 4.92172 5 5.93913 5 7Z M3 21V19C3 17.9391 3.42143 16.9217 4.17157 16.1716C4.92172 15.4214 5.93913 15 7 15H11C12.0609 15 13.0783 15.4214 13.8284 16.1716C14.5786 16.9217 15 17.9391 15 19V21 M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89318 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88 M21 21V19C20.9949 18.1172 20.6979 17.2608 20.1553 16.5644C19.6126 15.868 18.8548 15.3707 18 15.15"
+                                          Stroke="White"
+                                          StrokeThickness="2"
+                                          Fill="Transparent"
+                                          Stretch="Uniform" />
+                                    <TextBlock x:Name="StartRollCallBtnText"
+                                               Text="开始点名"
+                                               FontSize="16"
+                                               FontWeight="Medium"
+                                               Foreground="White" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button x:Name="StopRollCallBtn"
+                                    Style="{StaticResource ModernRollCallStopButtonStyle}"
+                                    Click="StopRollCall_Click"
+                                    Margin="0,0,14,0"
+                                    Visibility="Collapsed">
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cancel}" FontSize="14" Margin="0,0,8,0" />
+                                    <TextBlock Text="停止" FontSize="16" FontWeight="Medium" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button x:Name="ResetBtn"
+                                    Height="48"
+                                    MinWidth="104"
+                                    Padding="16,0"
+                                    Click="Reset_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" FontSize="14" Margin="0,0,8,0" />
+                                    <TextBlock Text="重置" FontSize="16" FontWeight="Medium" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Viewbox>
+    </Grid>
 </Window>
