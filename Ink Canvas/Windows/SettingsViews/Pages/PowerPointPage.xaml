@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
+      xmlns:windows="clr-namespace:Ink_Canvas.Windows"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
@@ -178,28 +179,26 @@
                                 </pptnav:PptNavBar.RenderTransform>
                             </pptnav:PptNavBar>
 
-                            <!-- Top Right Time Capsule Preview -->
-                            <Border x:Name="PPTTimeCapsulePreview"
+                            <!-- Top Right Time Capsule Preview (Actual Control) -->
+                            <Border x:Name="PPTTimeCapsulePreviewContainer"
+                                    Visibility="Collapsed"
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Top"
-                                    Margin="0,8,8,0"
-                                    Padding="8,4"
-                                    Background="#E6FFFFFF"
-                                    BorderBrush="#D1D5DB"
-                                    BorderThickness="1"
-                                    CornerRadius="12"
-                                    Opacity="0.94">
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="4">
-                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Clock}" FontSize="11" Foreground="#111827"/>
-                                    <TextBlock Text="10:24" FontSize="11" FontWeight="SemiBold" Foreground="#111827"/>
-                                </ikw:SimpleStackPanel>
+                                    Margin="0,20,20,0"
+                                    RenderTransformOrigin="1,0"
+                                    IsHitTestVisible="False">
+                                <Border.RenderTransform>
+                                    <ScaleTransform x:Name="PPTTimeCapsulePreviewScaleTransform" ScaleX="1" ScaleY="1"/>
+                                </Border.RenderTransform>
+                                <windows:PPTTimeCapsule x:Name="PPTTimeCapsulePreviewControl"
+                                                        IsHitTestVisible="False"/>
                             </Border>
 
                             <!-- Bottom Center Toolbar Preview -->
                             <Grid x:Name="PPTBottomToolbarPreview"
                                   HorizontalAlignment="Center"
                                   VerticalAlignment="Bottom"
-                                  Margin="0,0,0,8"
+                                  Margin="0,0,0,2"
                                   RenderTransformOrigin="0.5,1"
                                   Opacity="0.96">
                                 <Grid.LayoutTransform>

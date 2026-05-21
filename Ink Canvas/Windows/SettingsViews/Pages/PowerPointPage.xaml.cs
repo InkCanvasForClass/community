@@ -3,6 +3,7 @@ using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
@@ -53,29 +54,66 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void UpdatePreview()
         {
-            if (PreviewLeftSide == null) return;
+            if (PPTBtnPreviewLS == null) return;
 
             bool showPPTButton = CardShowPPTButton.IsOn;
 
-            PreviewLeftSide.Visibility = showPPTButton && CheckboxEnableLSPPTButton.IsOn ? Visibility.Visible : Visibility.Collapsed;
-            PreviewLeftSide.Opacity = PPTLSButtonOpacityValueSlider.Value;
-            PreviewLeftSidePage.Visibility = CheckboxSPPTDisplayPage.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
-            PreviewLeftSide.Margin = new Thickness(2, (int)PPTButtonLeftPositionValueSlider.Value / 15, 0, 0);
+            PPTBtnPreviewLS.Visibility = showPPTButton && CheckboxEnableLSPPTButton.IsOn ? Visibility.Visible : Visibility.Collapsed;
+            PPTBtnPreviewLS.Opacity = PPTLSButtonOpacityValueSlider.Value;
+            ((TranslateTransform)PPTBtnPreviewLS.RenderTransform).X = PPTButtonLeftPositionValueSlider.Value / 15;
 
-            PreviewRightSide.Visibility = showPPTButton && CheckboxEnableRSPPTButton.IsOn ? Visibility.Visible : Visibility.Collapsed;
-            PreviewRightSide.Opacity = PPTRSButtonOpacityValueSlider.Value;
-            PreviewRightSidePage.Visibility = CheckboxSPPTDisplayPage.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
-            PreviewRightSide.Margin = new Thickness(0, (int)PPTButtonRightPositionValueSlider.Value / 15, 2, 0);
+            PPTBtnPreviewRS.Visibility = showPPTButton && CheckboxEnableRSPPTButton.IsOn ? Visibility.Visible : Visibility.Collapsed;
+            PPTBtnPreviewRS.Opacity = PPTRSButtonOpacityValueSlider.Value;
+            ((TranslateTransform)PPTBtnPreviewRS.RenderTransform).X = -PPTButtonRightPositionValueSlider.Value / 15;
 
-            PreviewLeftBottom.Visibility = showPPTButton && CheckboxEnableLBPPTButton.IsOn ? Visibility.Visible : Visibility.Collapsed;
-            PreviewLeftBottom.Opacity = PPTLBButtonOpacityValueSlider.Value;
-            PreviewLeftBottomPage.Visibility = CheckboxBPPTDisplayPage.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
-            PreviewLeftBottom.Margin = new Thickness(2 + (int)PPTButtonLBPositionValueSlider.Value / 15, 0, 0, 2);
+            PPTBtnPreviewLB.Visibility = showPPTButton && CheckboxEnableLBPPTButton.IsOn ? Visibility.Visible : Visibility.Collapsed;
+            PPTBtnPreviewLB.Opacity = PPTLBButtonOpacityValueSlider.Value;
+            ((TranslateTransform)PPTBtnPreviewLB.RenderTransform).X = PPTButtonLBPositionValueSlider.Value / 15;
 
-            PreviewRightBottom.Visibility = showPPTButton && CheckboxEnableRBPPTButton.IsOn ? Visibility.Visible : Visibility.Collapsed;
-            PreviewRightBottom.Opacity = PPTRBButtonOpacityValueSlider.Value;
-            PreviewRightBottomPage.Visibility = CheckboxBPPTDisplayPage.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
-            PreviewRightBottom.Margin = new Thickness(0, 0, 2 + (int)PPTButtonRBPositionValueSlider.Value / 15, 2);
+            PPTBtnPreviewRB.Visibility = showPPTButton && CheckboxEnableRBPPTButton.IsOn ? Visibility.Visible : Visibility.Collapsed;
+            PPTBtnPreviewRB.Opacity = PPTRBButtonOpacityValueSlider.Value;
+            ((TranslateTransform)PPTBtnPreviewRB.RenderTransform).X = -PPTButtonRBPositionValueSlider.Value / 15;
+
+            if (PPTTimeCapsulePreviewContainer == null || CardEnablePPTTimeCapsule == null) return;
+
+            bool showTimeCapsule = CardEnablePPTTimeCapsule.IsOn;
+            PPTTimeCapsulePreviewContainer.Visibility = showTimeCapsule ? Visibility.Visible : Visibility.Collapsed;
+            if (!showTimeCapsule) return;
+
+            int position = ComboBoxPPTTimeCapsulePosition?.SelectedIndex ?? 1;
+            if (position < 0 || position > 2) position = 1;
+
+            switch (position)
+            {
+                case 0:
+                    PPTTimeCapsulePreviewContainer.HorizontalAlignment = HorizontalAlignment.Left;
+                    PPTTimeCapsulePreviewContainer.VerticalAlignment = VerticalAlignment.Top;
+                    PPTTimeCapsulePreviewContainer.Margin = new Thickness(20, 20, 0, 0);
+                    PPTTimeCapsulePreviewContainer.RenderTransformOrigin = new Point(0, 0);
+                    break;
+                case 1:
+                    PPTTimeCapsulePreviewContainer.HorizontalAlignment = HorizontalAlignment.Right;
+                    PPTTimeCapsulePreviewContainer.VerticalAlignment = VerticalAlignment.Top;
+                    PPTTimeCapsulePreviewContainer.Margin = new Thickness(0, 20, 20, 0);
+                    PPTTimeCapsulePreviewContainer.RenderTransformOrigin = new Point(1, 0);
+                    break;
+                default:
+                    PPTTimeCapsulePreviewContainer.HorizontalAlignment = HorizontalAlignment.Center;
+                    PPTTimeCapsulePreviewContainer.VerticalAlignment = VerticalAlignment.Top;
+                    PPTTimeCapsulePreviewContainer.Margin = new Thickness(0, 20, 0, 0);
+                    PPTTimeCapsulePreviewContainer.RenderTransformOrigin = new Point(0.5, 0);
+                    break;
+            }
+
+            if (SliderPPTTimeCapsuleOpacity != null)
+                PPTTimeCapsulePreviewContainer.Opacity = SliderPPTTimeCapsuleOpacity.Value;
+
+            if (PPTTimeCapsulePreviewScaleTransform != null && SliderPPTTimeCapsuleScale != null)
+            {
+                var scale = SliderPPTTimeCapsuleScale.Value;
+                PPTTimeCapsulePreviewScaleTransform.ScaleX = scale;
+                PPTTimeCapsulePreviewScaleTransform.ScaleY = scale;
+            }
         }
 
         private void LoadSettings()
@@ -127,6 +165,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardEnableFingerGestureSlideShowControl.IsOn = ppt.IsEnableFingerGestureSlideShowControl;
             CardEnablePPTTimeCapsule.IsOn = ppt.EnablePPTTimeCapsule;
             ComboBoxPPTTimeCapsulePosition.SelectedIndex = ppt.PPTTimeCapsulePosition;
+            SliderPPTTimeCapsuleOpacity.Value = ppt.PPTTimeCapsuleOpacity;
+            SliderPPTTimeCapsuleScale.Value = ppt.PPTTimeCapsuleScale;
             CardShowPPTSidebarByDefault.IsOn = ppt.ShowPPTSidebarByDefault;
 
             CardAutoSaveScreenShotInPowerPoint.IsOn = ppt.IsAutoSaveScreenShotInPowerPoint;
@@ -746,6 +786,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 mw.UpdatePPTTimeCapsuleVisibility();
                 mw.UpdatePPTQuickPanelVisibility();
             }
+            UpdatePreview();
         }
 
         private void ComboBoxPPTTimeCapsulePosition_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -756,6 +797,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.SaveSettingsToFile();
             if (mw != null && mw.IsInPptPresentationMode)
                 mw.UpdatePPTTimeCapsulePosition();
+            UpdatePreview();
         }
 
         private void SliderPPTTimeCapsuleOpacity_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -772,6 +814,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var mw = GetMainWindow();
             if (mw != null && mw.IsInPptPresentationMode)
                 mw.UpdatePPTTimeCapsuleOpacity();
+            UpdatePreview();
         }
 
         private void SliderPPTTimeCapsuleScale_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -788,6 +831,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var mw = GetMainWindow();
             if (mw != null && mw.IsInPptPresentationMode)
                 mw.UpdatePPTTimeCapsuleScale();
+            UpdatePreview();
         }
 
         private void ButtonResetPPTTimeCapsulePosition_Click(object sender, RoutedEventArgs e)
@@ -795,6 +839,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             var mw = GetMainWindow();
             mw?.ResetPPTTimeCapsuleOffset();
+            UpdatePreview();
         }
 
         #endregion
