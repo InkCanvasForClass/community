@@ -1612,5 +1612,98 @@
                 Panel.ZIndex="1100"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Top" />
+        <Grid x:Name="InlineDialogRoot"
+                Panel.ZIndex="9999"
+                Visibility="Collapsed"
+                Background="{DynamicResource ContentDialogSmokeFill}">
+            <Border x:Name="InlineDialogCard"
+                    MinWidth="{DynamicResource ContentDialogMinWidth}"
+                    MinHeight="{DynamicResource ContentDialogMinHeight}"
+                    MaxWidth="{DynamicResource ContentDialogMaxWidth}"
+                    MaxHeight="{DynamicResource ContentDialogMaxHeight}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Background="{DynamicResource ContentDialogBackground}"
+                    BorderBrush="{DynamicResource ContentDialogBorderBrush}"
+                    BorderThickness="{DynamicResource ContentDialogBorderWidth}"
+                    CornerRadius="{DynamicResource OverlayCornerRadius}"
+                    RenderTransformOrigin="0.5,0.5">
+                <Border.RenderTransform>
+                    <ScaleTransform x:Name="InlineDialogScaleTransform" ScaleX="1.05" ScaleY="1.05" />
+                </Border.RenderTransform>
+                <Border CornerRadius="{DynamicResource OverlayCornerRadius}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Border Padding="{DynamicResource ContentDialogPadding}"
+                                Background="{DynamicResource ContentDialogTopOverlay}"
+                                BorderBrush="{DynamicResource ContentDialogSeparatorBorderBrush}"
+                                BorderThickness="{DynamicResource ContentDialogSeparatorThickness}"
+                                CornerRadius="{DynamicResource OverlayCornerRadius}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <ContentControl x:Name="InlineDialogTitle"
+                                                Margin="{DynamicResource ContentDialogTitleMargin}"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Top"
+                                                FontFamily="{DynamicResource ContentControlThemeFontFamily}"
+                                                FontSize="20"
+                                                FontWeight="SemiBold"
+                                                Foreground="{DynamicResource ContentDialogForeground}"
+                                                IsTabStop="False">
+                                    <ContentControl.Template>
+                                        <ControlTemplate TargetType="ContentControl">
+                                            <ui:ContentPresenterEx Margin="{TemplateBinding Padding}"
+                                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                              Content="{TemplateBinding Content}"
+                                                              TextWrapping="Wrap" />
+                                        </ControlTemplate>
+                                    </ContentControl.Template>
+                                </ContentControl>
+                                <TextBlock x:Name="InlineDialogContent"
+                                           Grid.Row="1"
+                                           FontFamily="{DynamicResource ContentControlThemeFontFamily}"
+                                           FontSize="{DynamicResource ControlContentThemeFontSize}"
+                                           Foreground="{DynamicResource ContentDialogForeground}"
+                                           TextWrapping="Wrap" />
+                            </Grid>
+                        </Border>
+                        <Border Grid.Row="1"
+                                Padding="{DynamicResource ContentDialogPadding}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Bottom"
+                                Background="{DynamicResource ContentDialogBackground}"
+                                CornerRadius="0,0,8,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="{DynamicResource ContentDialogButtonSpacing}" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Button x:Name="InlineDialogSecondaryButton"
+                                        HorizontalAlignment="Stretch"
+                                        Content="否"
+                                        IsTabStop="False"
+                                        Click="InlineDialogSecondaryButton_Click"
+                                        Style="{DynamicResource DefaultButtonStyle}" />
+                                <Button x:Name="InlineDialogPrimaryButton"
+                                        Grid.Column="2"
+                                        HorizontalAlignment="Stretch"
+                                        Content="是"
+                                        IsTabStop="False"
+                                        Click="InlineDialogPrimaryButton_Click"
+                                        Style="{DynamicResource AccentButtonStyle}" />
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Border>
+        </Grid>
     </Grid>
 </helpers:PerformanceTransparentWin>
