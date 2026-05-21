@@ -7,7 +7,9 @@
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
+      xmlns:icons="clr-namespace:Ink_Canvas"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+      xmlns:pptnav="clr-namespace:Ink_Canvas.Controls"
       xmlns:c="clr-namespace:Ink_Canvas.Converter"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d"
@@ -18,6 +20,7 @@
             <FrameworkElement.Resources>
                 <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
                 <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+                <c:StringToGeometryConverter x:Key="StringToGeometryConverter" />
                 <Style x:Key="SettingsSectionHeaderTextBlockStyle"
                     BasedOn="{StaticResource BodyStrongTextBlockStyle}"
                     TargetType="TextBlock">
@@ -71,114 +74,228 @@
                             Icon="{x:Static ui:SegoeFluentIcons.ShowResults}"
                             Toggled="ToggleSwitchShowPPTButton_OnToggled"/>
 
-                    <!-- PPT Flip Buttons Preview -->
+                    <!-- PPT Flip Buttons Preview (Actual PptNavBar Controls) -->
                     <Border x:Name="PreviewContainer"
-                            Width="320"
-                            Height="180"
+                            Width="480"
+                            Height="270"
                             Margin="0,8,0,0"
                             HorizontalAlignment="Center"
                             Background="White"
                             BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1"
                             CornerRadius="8"
+                            ClipToBounds="True"
                             Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid>
-                            <Viewbox x:Name="PreviewLeftSide" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="2,0,0,0"
-                                     Stretch="Uniform" Width="22" Height="66">
-                                <Border Width="50" Background="#f4f4f5" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="6">
-                                    <Border.Effect>
-                                        <DropShadowEffect Color="#000000" BlurRadius="14" ShadowDepth="2" Opacity="0.16"/>
-                                    </Border.Effect>
-                                    <StackPanel Orientation="Vertical">
-                                        <Border Width="50" Height="50" Background="Transparent">
-                                            <Path Fill="#27272a" Width="28" Height="28" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                  Data="F0 M24,24z M0,0z M11.0357,3.3994C11.5682,2.86687,12.4316,2.86687,12.9641,3.3994L19.5096,9.94485C20.0421,10.4774 20.0421,11.3408 19.5096,11.8733 18.9771,12.4059 18.1137,12.4059 17.5811,11.8733L13.3635,7.65575 13.3635,19.6364C13.3635,20.3895 12.753,21 11.9999,21 11.2468,21 10.6363,20.3895 10.6363,19.6364L10.6363,7.65575 6.41869,11.8733C5.88616,12.4059 5.02275,12.4059 4.49022,11.8733 3.95769,11.3408 3.95769,10.4774 4.49022,9.94485L11.0357,3.3994z"/>
-                                        </Border>
-                                        <Border x:Name="PreviewLeftSidePage" MinWidth="50" MinHeight="50" Background="Transparent">
-                                            <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                                <TextBlock Text="1" FontSize="12" FontWeight="Bold" Foreground="#171717"/>
-                                                <TextBlock Text="/ 12" FontSize="8" Foreground="#171717"/>
-                                            </StackPanel>
-                                        </Border>
-                                        <Border Width="50" Height="50" Background="Transparent">
-                                            <Path Fill="#27272a" Width="28" Height="28" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                  Data="F0 M24,24z M0,0z M11.0357,20.6006C11.5682,21.1331,12.4316,21.1331,12.9641,20.6006L19.5096,14.0551C20.0421,13.5226 20.0421,12.6592 19.5096,12.1267 18.9771,11.5941 18.1137,11.5941 17.5811,12.1267L13.3635,16.3443 13.3635,4.36364C13.3635,3.61052 12.753,3 11.9999,3 11.2468,3 10.6363,3.61052 10.6363,4.36364L10.6363,16.3443 6.41869,12.1267C5.88616,11.5941 5.02275,11.5941 4.49022,12.1267 3.95769,12.6592 3.95769,13.5226 4.49022,14.0551L11.0357,20.6006z"/>
-                                        </Border>
-                                    </StackPanel>
+                            <!-- Slide Background -->
+                            <Border CornerRadius="8">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#f8fafc" Offset="0"/>
+                                        <GradientStop Color="#f1f5f9" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <!-- Subtle grid pattern -->
+                                <Border Opacity="0.04">
+                                    <Border.Background>
+                                        <DrawingBrush TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
+                                            <DrawingBrush.Drawing>
+                                                <GeometryDrawing>
+                                                    <GeometryDrawing.Geometry>
+                                                        <LineGeometry StartPoint="0,0" EndPoint="20,0"/>
+                                                    </GeometryDrawing.Geometry>
+                                                    <GeometryDrawing.Pen>
+                                                        <Pen Brush="#94a3b8" Thickness="0.5"/>
+                                                    </GeometryDrawing.Pen>
+                                                </GeometryDrawing>
+                                            </DrawingBrush.Drawing>
+                                        </DrawingBrush>
+                                    </Border.Background>
                                 </Border>
-                            </Viewbox>
-                            <Viewbox x:Name="PreviewRightSide" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,2,0"
-                                     Stretch="Uniform" Width="22" Height="66">
-                                <Border Width="50" Background="#f4f4f5" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="6">
-                                    <Border.Effect>
-                                        <DropShadowEffect Color="#000000" BlurRadius="14" ShadowDepth="2" Opacity="0.16"/>
-                                    </Border.Effect>
-                                    <StackPanel Orientation="Vertical">
-                                        <Border Width="50" Height="50" Background="Transparent">
-                                            <Path Fill="#27272a" Width="28" Height="28" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                  Data="F0 M24,24z M0,0z M11.0357,3.3994C11.5682,2.86687,12.4316,2.86687,12.9641,3.3994L19.5096,9.94485C20.0421,10.4774 20.0421,11.3408 19.5096,11.8733 18.9771,12.4059 18.1137,12.4059 17.5811,11.8733L13.3635,7.65575 13.3635,19.6364C13.3635,20.3895 12.753,21 11.9999,21 11.2468,21 10.6363,20.3895 10.6363,19.6364L10.6363,7.65575 6.41869,11.8733C5.88616,12.4059 5.02275,12.4059 4.49022,11.8733 3.95769,11.3408 3.95769,10.4774 4.49022,9.94485L11.0357,3.3994z"/>
-                                        </Border>
-                                        <Border x:Name="PreviewRightSidePage" MinWidth="50" MinHeight="50" Background="Transparent">
-                                            <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                                <TextBlock Text="1" FontSize="12" FontWeight="Bold" Foreground="#171717"/>
-                                                <TextBlock Text="/ 12" FontSize="8" Foreground="#171717"/>
-                                            </StackPanel>
-                                        </Border>
-                                        <Border Width="50" Height="50" Background="Transparent">
-                                            <Path Fill="#27272a" Width="28" Height="28" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                  Data="F0 M24,24z M0,0z M11.0357,20.6006C11.5682,21.1331,12.4316,21.1331,12.9641,20.6006L19.5096,14.0551C20.0421,13.5226 20.0421,12.6592 19.5096,12.1267 18.9771,11.5941 18.1137,11.5941 17.5811,12.1267L13.3635,16.3443 13.3635,4.36364C13.3635,3.61052 12.753,3 11.9999,3 11.2468,3 10.6363,3.61052 10.6363,4.36364L10.6363,16.3443 6.41869,12.1267C5.88616,11.5941 5.02275,11.5941 4.49022,12.1267 3.95769,12.6592 3.95769,13.5226 4.49022,14.0551L11.0357,20.6006z"/>
-                                        </Border>
-                                    </StackPanel>
+                            </Border>
+
+                            <!-- Left Side PptNavBar (Vertical) -->
+                            <pptnav:PptNavBar x:Name="PPTBtnPreviewLS"
+                                                Direction="LeftSide"
+                                                IsPreviewMode="True"
+                                                Margin="6,0,0,0"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Left"
+                                                Opacity="0.9">
+                                <pptnav:PptNavBar.LayoutTransform>
+                                    <ScaleTransform ScaleX="0.62" ScaleY="0.62"/>
+                                </pptnav:PptNavBar.LayoutTransform>
+                                <pptnav:PptNavBar.RenderTransform>
+                                    <TranslateTransform/>
+                                </pptnav:PptNavBar.RenderTransform>
+                            </pptnav:PptNavBar>
+
+                            <!-- Right Side PptNavBar (Vertical) -->
+                            <pptnav:PptNavBar x:Name="PPTBtnPreviewRS"
+                                                Direction="RightSide"
+                                                IsPreviewMode="True"
+                                                Margin="0,0,6,0"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Right"
+                                                Opacity="0.9">
+                                <pptnav:PptNavBar.LayoutTransform>
+                                    <ScaleTransform ScaleX="0.62" ScaleY="0.62"/>
+                                </pptnav:PptNavBar.LayoutTransform>
+                                <pptnav:PptNavBar.RenderTransform>
+                                    <TranslateTransform/>
+                                </pptnav:PptNavBar.RenderTransform>
+                            </pptnav:PptNavBar>
+
+                            <!-- Bottom Left PptNavBar (Horizontal) -->
+                            <pptnav:PptNavBar x:Name="PPTBtnPreviewLB"
+                                                Direction="LeftBottom"
+                                                IsPreviewMode="True"
+                                                Margin="6,0,0,6"
+                                                VerticalAlignment="Bottom"
+                                                HorizontalAlignment="Left"
+                                                Opacity="0.9">
+                                <pptnav:PptNavBar.LayoutTransform>
+                                    <ScaleTransform ScaleX="0.62" ScaleY="0.62"/>
+                                </pptnav:PptNavBar.LayoutTransform>
+                                <pptnav:PptNavBar.RenderTransform>
+                                    <TranslateTransform/>
+                                </pptnav:PptNavBar.RenderTransform>
+                            </pptnav:PptNavBar>
+
+                            <!-- Bottom Right PptNavBar (Horizontal) -->
+                            <pptnav:PptNavBar x:Name="PPTBtnPreviewRB"
+                                                Direction="RightBottom"
+                                                IsPreviewMode="True"
+                                                Margin="0,0,6,6"
+                                                VerticalAlignment="Bottom"
+                                                HorizontalAlignment="Right"
+                                                Opacity="0.9">
+                                <pptnav:PptNavBar.LayoutTransform>
+                                    <ScaleTransform ScaleX="0.62" ScaleY="0.62"/>
+                                </pptnav:PptNavBar.LayoutTransform>
+                                <pptnav:PptNavBar.RenderTransform>
+                                    <TranslateTransform/>
+                                </pptnav:PptNavBar.RenderTransform>
+                            </pptnav:PptNavBar>
+
+                            <!-- Top Right Time Capsule Preview -->
+                            <Border x:Name="PPTTimeCapsulePreview"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Top"
+                                    Margin="0,8,8,0"
+                                    Padding="8,4"
+                                    Background="#E6FFFFFF"
+                                    BorderBrush="#D1D5DB"
+                                    BorderThickness="1"
+                                    CornerRadius="12"
+                                    Opacity="0.94">
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="4">
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Clock}" FontSize="11" Foreground="#111827"/>
+                                    <TextBlock Text="10:24" FontSize="11" FontWeight="SemiBold" Foreground="#111827"/>
+                                </ikw:SimpleStackPanel>
+                            </Border>
+
+                            <!-- Bottom Center Toolbar Preview -->
+                            <Grid x:Name="PPTBottomToolbarPreview"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Bottom"
+                                  Margin="0,0,0,8"
+                                  RenderTransformOrigin="0.5,1"
+                                  Opacity="0.96">
+                                <Grid.LayoutTransform>
+                                    <ScaleTransform ScaleX="0.92" ScaleY="0.92"/>
+                                </Grid.LayoutTransform>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0"
+                                        Width="36" Height="36"
+                                        Margin="0,0,2,0"
+                                        Background="{DynamicResource FloatBarBackground}"
+                                        BorderBrush="{DynamicResource FloatBarBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="5">
+                                    <ikw:SimpleStackPanel Margin="0,2,0,2" Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <Image Name="PPTBottomToolbarPreviewHeadIcon"
+                                               Source="/Resources/Icons-png/icc.png"
+                                               RenderOptions.BitmapScalingMode="HighQuality"/>
+                                    </ikw:SimpleStackPanel>
                                 </Border>
-                            </Viewbox>
-                            <Viewbox x:Name="PreviewLeftBottom" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="2,0,0,2"
-                                     Stretch="Uniform" Width="66" Height="22">
-                                <Border Height="50" Background="#f4f4f5" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="6">
-                                    <Border.Effect>
-                                        <DropShadowEffect Color="#000000" BlurRadius="14" ShadowDepth="2" Opacity="0.16"/>
-                                    </Border.Effect>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Border Width="50" Height="50" Background="Transparent" CornerRadius="5 5 0 0">
-                                            <Path Fill="#27272a" Width="28" Height="28" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                  Data="F0 M24,24z M0,0z M3.3994,12.9642C2.86687,12.4317,2.86687,11.5683,3.3994,11.0358L9.94485,4.49031C10.4774,3.95777 11.3408,3.95777 11.8733,4.49031 12.4059,5.02284 12.4059,5.88625 11.8733,6.41878L7.65575,10.6364 19.6364,10.6364C20.3895,10.6364 21,11.2469 21,12 21,12.7531 20.3895,13.3636 19.6364,13.3636L7.65575,13.3636 11.8733,17.5812C12.4059,18.1137 12.4059,18.9772 11.8733,19.5097 11.3408,20.0422 10.4774,20.0422 9.94485,19.5097L3.3994,12.9642z"/>
-                                        </Border>
-                                        <Border x:Name="PreviewLeftBottomPage" MinWidth="50" MinHeight="50" Background="Transparent">
-                                            <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                                <TextBlock Text="1" FontSize="12" FontWeight="Bold" Foreground="#171717"/>
-                                                <TextBlock Text="/ 12" FontSize="8" Foreground="#171717"/>
-                                            </StackPanel>
-                                        </Border>
-                                        <Border Width="50" Height="50" Background="Transparent" CornerRadius="0 0 5 5">
-                                            <Path Fill="#27272a" Width="28" Height="28" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                  Data="F0 M24,24z M0,0z M20.6006,12.9642C21.1331,12.4317,21.1331,11.5683,20.6006,11.0358L14.0551,4.49031C13.5226,3.95777 12.6592,3.95777 12.1267,4.49031 11.5941,5.02284 11.5941,5.88625 12.1267,6.41878L16.3443,10.6364 4.36364,10.6364C3.61052,10.6364 3,11.2469 3,12 3,12.7531 3.61052,13.3636 4.36364,13.3636L16.3443,13.3636 12.1267,17.5812C11.5941,18.1137 11.5941,18.9772 12.1267,19.5097 12.6592,20.0422 13.5226,20.0422 14.0551,19.5097L20.6006,12.9642z"/>
-                                        </Border>
-                                    </StackPanel>
+
+                                <Border Grid.Column="1"
+                                        Margin="2,0,0,0"
+                                        Padding="2"
+                                        Height="36"
+                                        Background="{DynamicResource FloatBarBackground}"
+                                        BorderBrush="{DynamicResource FloatBarBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="5">
+                                    <ikw:SimpleStackPanel Margin="2,0" Orientation="Horizontal" Cursor="Arrow">
+                                        <controls:ToolbarImageButton Label="{i18n:I18n Key=FloatingBar_Mouse}" IsHitTestVisible="False">
+                                            <controls:ToolbarImageButton.IconGeometryDrawing>
+                                                <GeometryDrawing Brush="{DynamicResource FloatBarForeground}" Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.SolidCursorIcon}, Converter={StaticResource StringToGeometryConverter}}" />
+                                            </controls:ToolbarImageButton.IconGeometryDrawing>
+                                        </controls:ToolbarImageButton>
+                                        <controls:ToolbarImageButton Label="{i18n:I18n Key=FloatingBar_Annotate}" IsHitTestVisible="False">
+                                            <controls:ToolbarImageButton.IconGeometryDrawing>
+                                                <GeometryDrawing Brush="{DynamicResource FloatBarForeground}" Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.SolidPenIcon}, Converter={StaticResource StringToGeometryConverter}}" />
+                                            </controls:ToolbarImageButton.IconGeometryDrawing>
+                                        </controls:ToolbarImageButton>
+                                        <controls:ToolbarImageButton Label="{i18n:I18n Key=FloatingBar_Freeze}" IsHitTestVisible="False">
+                                            <controls:ToolbarImageButton.IconGeometryDrawing>
+                                                <GeometryDrawing Brush="{DynamicResource FloatBarForeground}" Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.FreezeIconGeometry}, Converter={StaticResource StringToGeometryConverter}}" />
+                                            </controls:ToolbarImageButton.IconGeometryDrawing>
+                                        </controls:ToolbarImageButton>
+                                        <controls:ToolbarImageButton Label="{i18n:I18n Key=FloatingBar_Clear}"
+                                                                     IconBrush="{DynamicResource RedBrush}"
+                                                                     LabelBrush="{DynamicResource RedBrush}"
+                                                                     IsHitTestVisible="False">
+                                            <controls:ToolbarImageButton.IconGeometryDrawing>
+                                                <GeometryDrawing Brush="{DynamicResource RedBrush}" Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.DeleteIcon}, Converter={StaticResource StringToGeometryConverter}}" />
+                                            </controls:ToolbarImageButton.IconGeometryDrawing>
+                                        </controls:ToolbarImageButton>
+                                        <Border Margin="2,0,2,0" BorderBrush="#71717a" BorderThickness="1,0,0,0" />
+                                        <controls:ToolbarImageButton Label="{i18n:I18n Key=FloatingBar_Whiteboard}" IsHitTestVisible="False">
+                                            <controls:ToolbarImageButton.IconGeometryDrawing>
+                                                <GeometryDrawing Brush="{DynamicResource FloatBarForeground}" Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.WhiteboardFloatingBarBtnIcon}, Converter={StaticResource StringToGeometryConverter}}" />
+                                            </controls:ToolbarImageButton.IconGeometryDrawing>
+                                        </controls:ToolbarImageButton>
+                                        <controls:ToolbarImageButton Label="{i18n:I18n Key=Board_Tools}" IsHitTestVisible="False">
+                                            <controls:ToolbarImageButton.IconGeometryDrawing>
+                                                <GeometryDrawing Brush="{DynamicResource FloatBarForeground}" Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.ToolsFloatingBarBtnIcon}, Converter={StaticResource StringToGeometryConverter}}" />
+                                            </controls:ToolbarImageButton.IconGeometryDrawing>
+                                        </controls:ToolbarImageButton>
+                                        <controls:ToolbarImageButton Label="{i18n:I18n Key=FloatingBar_Hide}" IsHitTestVisible="False">
+                                            <controls:ToolbarImageButton.IconGeometryDrawing>
+                                                <GeometryDrawing Brush="{DynamicResource FloatBarForeground}" Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.FoldIcon}, Converter={StaticResource StringToGeometryConverter}}" />
+                                            </controls:ToolbarImageButton.IconGeometryDrawing>
+                                        </controls:ToolbarImageButton>
+                                    </ikw:SimpleStackPanel>
                                 </Border>
-                            </Viewbox>
-                            <Viewbox x:Name="PreviewRightBottom" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,2"
-                                     Stretch="Uniform" Width="66" Height="22">
-                                <Border Height="50" Background="#f4f4f5" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="6">
-                                    <Border.Effect>
-                                        <DropShadowEffect Color="#000000" BlurRadius="14" ShadowDepth="2" Opacity="0.16"/>
-                                    </Border.Effect>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Border Width="50" Height="50" Background="Transparent" CornerRadius="5 5 0 0">
-                                            <Path Fill="#27272a" Width="28" Height="28" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                  Data="F0 M24,24z M0,0z M3.3994,12.9642C2.86687,12.4317,2.86687,11.5683,3.3994,11.0358L9.94485,4.49031C10.4774,3.95777 11.3408,3.95777 11.8733,4.49031 12.4059,5.02284 12.4059,5.88625 11.8733,6.41878L7.65575,10.6364 19.6364,10.6364C20.3895,10.6364 21,11.2469 21,12 21,12.7531 20.3895,13.3636 19.6364,13.3636L7.65575,13.3636 11.8733,17.5812C12.4059,18.1137 12.4059,18.9772 11.8733,19.5097 11.3408,20.0422 10.4774,20.0422 9.94485,19.5097L3.3994,12.9642z"/>
-                                        </Border>
-                                        <Border x:Name="PreviewRightBottomPage" MinWidth="50" MinHeight="50" Background="Transparent">
-                                            <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                                <TextBlock Text="1" FontSize="12" FontWeight="Bold" Foreground="#171717"/>
-                                                <TextBlock Text="/ 12" FontSize="8" Foreground="#171717"/>
-                                            </StackPanel>
-                                        </Border>
-                                        <Border Width="50" Height="50" Background="Transparent" CornerRadius="0 0 5 5">
-                                            <Path Fill="#27272a" Width="28" Height="28" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                  Data="F0 M24,24z M0,0z M20.6006,12.9642C21.1331,12.4317,21.1331,11.5683,20.6006,11.0358L14.0551,4.49031C13.5226,3.95777 12.6592,3.95777 12.1267,4.49031 11.5941,5.02284 11.5941,5.88625 12.1267,6.41878L16.3443,10.6364 4.36364,10.6364C3.61052,10.6364 3,11.2469 3,12 3,12.7531 3.61052,13.3636 4.36364,13.3636L16.3443,13.3636 12.1267,17.5812C11.5941,18.1137 11.5941,18.9772 12.1267,19.5097 12.6592,20.0422 13.5226,20.0422 14.0551,19.5097L20.6006,12.9642z"/>
-                                        </Border>
-                                    </StackPanel>
+
+                                <Border Grid.Column="2"
+                                        Margin="2,0,0,0"
+                                        Width="36" Height="36"
+                                        Background="{DynamicResource FloatBarBackground}"
+                                        BorderBrush="{DynamicResource FloatBarBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="5">
+                                    <ikw:SimpleStackPanel Orientation="Vertical" HorizontalAlignment="Center" Width="28" Margin="0,0">
+                                        <Image Source="/Resources/new-icons/end-slides-show.png"
+                                               RenderOptions.BitmapScalingMode="HighQuality"
+                                               Width="28" Height="17"
+                                               Margin="0,3,0,0"/>
+                                        <TextBlock Text="{i18n:I18n Key=FloatingBar_ExitButton}"
+                                                   Foreground="{DynamicResource FloatBarForeground}"
+                                                   FontSize="8"
+                                                   Margin="0,1,0,0"
+                                                   TextAlignment="Center"/>
+                                    </ikw:SimpleStackPanel>
                                 </Border>
-                            </Viewbox>
+                            </Grid>
                         </Grid>
                     </Border>
 
