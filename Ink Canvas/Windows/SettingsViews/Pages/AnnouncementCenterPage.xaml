@@ -5,10 +5,9 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:converter="clr-namespace:Ink_Canvas.Converter"
       mc:Ignorable="d"
-      Title="{i18n:I18n Key=Announcement_CenterTitle}">
+      Title="公告中心">
 
     <ScrollViewer PanningMode="VerticalFirst" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
         <Grid Margin="59,0,59,24">
@@ -33,7 +32,7 @@
                 </Style>
             </Grid.Resources>
 
-            <TextBlock Text="{i18n:I18n Key=Announcement_CenterTitle}"
+            <TextBlock Text="公告中心"
                        Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
 
             <Border Grid.Row="1"
@@ -57,7 +56,7 @@
                                  VerticalAlignment="Top" />
 
                     <StackPanel Grid.Column="1">
-                        <TextBlock Text="{i18n:I18n Key=Announcement_CenterHint}"
+                        <TextBlock Text="查看已接收的远端公告和实时推送内容。"
                                    FontSize="16"
                                    FontWeight="SemiBold"
                                    TextWrapping="Wrap" />
@@ -71,10 +70,10 @@
                                 Orientation="Horizontal"
                                 VerticalAlignment="Center"
                                 Margin="16,0,0,0">
-                        <Button Content="{i18n:I18n Key=Announcement_MarkAllAsRead}"
+                        <Button Content="全部标记已读"
                                 Margin="0,0,8,0"
                                 Click="MarkAllAsReadButton_Click" />
-                        <Button Content="{i18n:I18n Key=Announcement_ClearHistory}"
+                        <Button Content="清空历史"
                                 Click="ClearHistoryButton_Click" />
                     </StackPanel>
                 </Grid>
@@ -187,7 +186,7 @@
 
                 <TextBlock x:Name="EmptyTextBlock"
                            Grid.ColumnSpan="3"
-                           Text="{i18n:I18n Key=Announcement_NoItems}"
+                           Text="暂无公告"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
                            Opacity="0.65"

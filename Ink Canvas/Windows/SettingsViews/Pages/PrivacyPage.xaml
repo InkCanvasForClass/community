@@ -6,7 +6,6 @@
       xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d"
 
@@ -30,9 +29,9 @@
                     Spacing="{StaticResource SettingsCardSpacing}">
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=About_PrivacyAndTelemetry}" />
+                        Text="隐私与遥测" />
 
-                    <ui:SettingsExpander Header="{i18n:I18n Key=About_PrivacyAndTelemetry}"
+                    <ui:SettingsExpander Header="隐私与遥测"
                             IsExpanded="True"
                             d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
@@ -41,16 +40,16 @@
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard ContentAlignment="Left">
                                 <CheckBox x:Name="CheckBoxTelemetryPrivacyAccepted"
-                                          Content="{i18n:I18n Key=About_PrivacyAgreement}"
+                                          Content="我已阅读并同意 privacy 中的隐私说明"
                                           Checked="CheckBoxTelemetryPrivacyAccepted_Checked"
                                           Unchecked="CheckBoxTelemetryPrivacyAccepted_Checked" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="{i18n:I18n Key=About_TelemetryLabel}">
+                            <ui:SettingsCard Header="匿名使用数据上传：">
                                 <ComboBox x:Name="ComboBoxTelemetryUploadLevel"
                                           SelectionChanged="ComboBoxTelemetryUploadLevel_SelectionChanged">
-                                    <ComboBoxItem Tag="0" Content="{i18n:I18n Key=About_Telemetry_Off}" />
-                                    <ComboBoxItem Tag="1" Content="{i18n:I18n Key=About_Telemetry_Basic}" />
-                                    <ComboBoxItem Tag="2" Content="{i18n:I18n Key=About_Telemetry_Optional}" />
+                                    <ComboBoxItem Tag="0" Content="关闭（不上传）" />
+                                    <ComboBoxItem Tag="1" Content="上传基础数据" />
+                                    <ComboBoxItem Tag="2" Content="上传基础 + 可选数据" />
                                 </ComboBox>
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>

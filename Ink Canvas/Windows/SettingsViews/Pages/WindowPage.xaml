@@ -7,7 +7,6 @@
       xmlns:helpers="clr-namespace:Ink_Canvas.Windows.SettingsViews.Helpers"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       xmlns:c="clr-namespace:Ink_Canvas.Converter"
@@ -40,29 +39,29 @@
                         Text="窗口设置" />
 
                     <controls:LabeledSettingsCard x:Name="CardNoFocusMode"
-                            Header="{i18n:I18n Key=Startup_NoFocusMode}"
-                            Description="{i18n:I18n Key=Startup_NoFocusModeHint}"
+                            Header="窗口无焦点模式"
+                            Description="窗口失去焦点时仍可接收输入"
                             Icon="{x:Static ui:SegoeFluentIcons.View}"
                             SwitchName="ToggleSwitchNoFocusMode"
                             Toggled="ToggleSwitchNoFocusMode_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardWindowMode"
-                            Header="{i18n:I18n Key=Startup_NoBorderMode}"
-                            Description="{i18n:I18n Key=Startup_NoBorderModeHint}"
+                            Header="窗口无边框模式"
+                            Description="隐藏窗口边框，提供更沉浸的体验"
                             Icon="{x:Static ui:SegoeFluentIcons.FullScreen}"
                             SwitchName="ToggleSwitchWindowMode"
                             Toggled="ToggleSwitchWindowMode_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardWindowChromeRendering"
-                            Header="{i18n:I18n Key=Window_WindowChromeRendering}"
-                            Description="{i18n:I18n Key=Window_WindowChromeRenderingHint}"
+                            Header="以 WindowChrome 模式渲染"
+                            Description="使用 DWM/WindowChrome 绘制透明主窗口，通常比 AllowsTransparency 更流畅；需要重启后生效。"
                             Icon="{x:Static ui:SegoeFluentIcons.SpeedHigh}"
                             SwitchName="ToggleSwitchWindowChromeRendering"
                             Toggled="ToggleSwitchWindowChromeRendering_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardAvoidFullScreen"
-                            Header="{i18n:I18n Key=Advanced_AvoidFullScreenHelper}"
-                            Description="{i18n:I18n Key=Advanced_AvoidFullScreenHelperHint}"
+                            Header="启用 AvoidFullScreenHelper"
+                            Description="避免画布全屏，应该可以解决任务栏非置顶和 Win11 任务栏无法点击的问题，会导致左侧或顶部有 AppBar（Dock栏软件）时导致浮动工具栏偏移，重启icc后生效。"
                             Icon="{x:Static ui:SegoeFluentIcons.Cancel}"
                             SwitchName="ToggleSwitchAvoidFullScreen"
                             Toggled="ToggleSwitchAvoidFullScreen_Toggled" />
@@ -89,8 +88,8 @@
                     </controls:LabeledSettingsCard>
 
                     <ui:SettingsExpander x:Name="ExpanderAlwaysOnTop"
-                            Header="{i18n:I18n Key=Startup_TopMost}"
-                            Description="{i18n:I18n Key=Startup_TopMostHint}"
+                            Header="窗口置顶"
+                            Description="窗口始终显示在其他窗口之上"
                             IsExpanded="{Binding IsOn, ElementName=ToggleSwitchAlwaysOnTop, Mode=OneWay}"
                             d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
@@ -104,14 +103,14 @@
                             <helpers:TopMostModeTemplateSelector>
                                 <helpers:TopMostModeTemplateSelector.SelectionTemplate>
                                     <DataTemplate>
-                                        <ui:SettingsCard Header="{i18n:I18n Key=Startup_TopMostMode}">
+                                        <ui:SettingsCard Header="置顶模式">
                                             <StackPanel Orientation="Horizontal">
-                                                <RadioButton Content="{i18n:I18n Key=Startup_TopMostMode_Normal}"
+                                                <RadioButton Content="普通置顶"
                                                         GroupName="TopMostMode"
                                                         Checked="RadioTopMostNormal_Checked"
                                                         Loaded="RadioTopMostNormal_Loaded"
                                                         Margin="0,0,16,0" />
-                                                <RadioButton Content="{i18n:I18n Key=Startup_TopMostMode_UIA}"
+                                                <RadioButton Content="UIA 置顶（需要管理员权限）"
                                                         GroupName="TopMostMode"
                                                         Checked="RadioTopMostUIA_Checked"
                                                         Loaded="RadioTopMostUIA_Loaded" />

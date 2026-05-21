@@ -8,8 +8,7 @@
              xmlns:primitives="clr-namespace:System.Windows.Controls.Primitives;assembly=PresentationFramework"
              xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
              xmlns:helpers="clr-namespace:Ink_Canvas.Helpers"
-             xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
-             mc:Ignorable="d">
+mc:Ignorable="d">
     <Grid>
         <controls:PopupTabShellContent x:Name="Shell"/>
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">

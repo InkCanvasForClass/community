@@ -53,7 +53,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private string GetCountText(int count)
         {
-            var template = Ink_Canvas.Properties.Strings.GetString("Announcement_ItemCount") ?? "共 {0} 条公告";
+            var template = "共 {0} 条公告，选择左侧条目查看详情。";
             return string.Format(template, count);
         }
 
@@ -81,8 +81,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private string GetTypeText(NotificationMessageType type)
         {
-            var key = "Notification_Type_" + type;
-            return Ink_Canvas.Properties.Strings.GetString(key) ?? type.ToString();
+            return type switch
+            {
+                NotificationMessageType.Update => "更新",
+                NotificationMessageType.Urgent => "紧急",
+                NotificationMessageType.Important => "重要",
+                NotificationMessageType.Reminder => "提醒",
+                NotificationMessageType.Other => "其他",
+                _ => type.ToString()
+            };
         }
 
         private void ClearHistoryButton_Click(object sender, RoutedEventArgs e)

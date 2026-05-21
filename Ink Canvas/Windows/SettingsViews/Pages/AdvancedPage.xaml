@@ -6,11 +6,10 @@
       xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       mc:Ignorable="d"
-      Title="{i18n:I18n Key=Advanced_Title}">
+      Title="高级设置">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -30,24 +29,25 @@
                     Spacing="{StaticResource SettingsCardSpacing}">
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=Advanced_Title}" />
+                        Text="高级设置" />
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchIsSpecialScreen"
-                        Header="{i18n:I18n Key=Advanced_SpecialScreenMode}"
+                        Header="特殊屏幕模式"
                         Icon="{x:Static ui:SegoeFluentIcons.Settings}"
                         IsOn="True"
                         Toggled="ToggleSwitchIsSpecialScreen_OnToggled"/>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchDisableHardwareAcceleration"
-                        Header="{i18n:I18n Key=Canvas_DisableHardwareAcceleration}"
-                        Description="{i18n:I18n Key=Canvas_DisableHardwareAccelerationHint}"
+                        Header="关闭硬件加速"
+                        Description="关闭后可提升兼容性，但可能降低性能；部分效果可能需要重启程序后完全生效。"
                         Icon="{x:Static ui:SegoeFluentIcons.Settings}"
                         IsOn="False"
                         Toggled="ToggleSwitchDisableHardwareAcceleration_Toggled"/>
 
                     <ui:SettingsExpander x:Name="CardTouchMultiplier"
-                                         Header="{i18n:I18n Key=Advanced_TouchMultiplier}"
-                                         Description="{i18n:I18n Key=Advanced_TouchMultiplierHint}">
+                                         Header="触摸倍数"
+                                         Description="可在手指触摸画板时显示圆形橡皮或手掌触摸画板时显示的橡皮比
+手掌大很多时调整">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Touch}" />
                         </ui:SettingsExpander.HeaderIcon>
@@ -62,10 +62,10 @@
                                     ValueChanged="TouchMultiplierSlider_ValueChanged" />
                         </ikw:SimpleStackPanel>
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{i18n:I18n Key=Advanced_TouchMultiplierCalibrateHint}"
+                            <ui:SettingsCard Header="在下方区域内用笔尖点击以估计触摸大小倍数"
                                              ContentAlignment="Left">
                                 <ikw:SimpleStackPanel Spacing="8" Margin="0,4,0,4">
-                                    <TextBlock Text="{i18n:I18n Key=Advanced_TouchMultiplierValueHint}"
+                                    <TextBlock Text="数值仅供参考"
                                                Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                                                TextWrapping="Wrap" MaxWidth="420" />
                                     <Border Margin="0,0,20,0" CornerRadius="4" Height="48" Background="Transparent"
@@ -78,13 +78,13 @@
                     </ui:SettingsExpander>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchEraserBindTouchMultiplier"
-                        Header="{i18n:I18n Key=Advanced_EraserBindTouchMultiplier}"
-                        Description="{i18n:I18n Key=Advanced_EraserBindTouchHint}"
+                        Header="橡皮擦绑定触摸大小倍数"
+                        Description="BoundsWidth 参数作为接触面积区分界限"
                         Icon="{x:Static ui:SegoeFluentIcons.EraseTool}"
                         IsOn="True"
                         Toggled="ToggleSwitchEraserBindTouchMultiplier_Toggled"/>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Advanced_NibModeBoundsWidthHeader}">
+                    <ui:SettingsCard Header="笔尖模式 BoundsWidth">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="NibModeBoundsWidthText"
                                        VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -96,7 +96,7 @@
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Advanced_FingerModeBoundsWidthHeader}">
+                    <ui:SettingsCard Header="手指模式 BoundsWidth">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="FingerModeBoundsWidthText"
                                        VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -109,84 +109,84 @@
                     </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchIsQuadIR"
-                        Header="{i18n:I18n Key=Advanced_QuadIRMode}"
+                        Header="四边红外模式"
                         Icon="{x:Static ui:SegoeFluentIcons.FullScreen}"
                         IsOn="True"
                         Toggled="ToggleSwitchIsQuadIR_Toggled"/>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=Advanced_Logging}" />
+                        Text="记录日志" />
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchIsLogEnabled"
-                        Header="{i18n:I18n Key=Advanced_Logging}"
+                        Header="记录日志"
                         Icon="{x:Static ui:SegoeFluentIcons.OpenFile}"
                         IsOn="True"
                         Toggled="ToggleSwitchIsLogEnabled_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchIsSaveLogByDate"
-                        Header="{i18n:I18n Key=Advanced_LogByDate}"
-                        Description="{i18n:I18n Key=Advanced_LogRotateHint}"
+                        Header="日志以日期保存"
+                        Description="日志文件超过 512 KB 时会自动删除。开启日期保存后，日志将保存在 Logs 文件夹中，当文件夹大小超过 5MB 时自动清空。"
                         IsOn="True"
                         Toggled="ToggleSwitchIsSaveLogByDate_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchIsSecondConfimeWhenShutdownApp"
-                        Header="{i18n:I18n Key=Advanced_ConfirmExit}"
+                        Header="关闭软件时二次弹窗确认"
                         Icon="{x:Static ui:SegoeFluentIcons.SignOut}"
                         IsOn="True"
                         Toggled="ToggleSwitchIsSecondConfimeWhenShutdownApp_Toggled"/>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=Backup_Title}" />
+                        Text="设置备份与还原" />
 
-                    <TextBlock Text="{i18n:I18n Key=Backup_Desc}"
+                    <TextBlock Text="可手动备份当前设置或还原之前的备份，自动更新前也会自动备份"
                                Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                                TextWrapping="Wrap" Margin="1,0,0,4" />
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchIsAutoBackupBeforeUpdate"
-                        Header="{i18n:I18n Key=Backup_AutoBeforeUpdate}"
+                        Header="自动更新前备份"
                         IsOn="True"
                         Toggled="ToggleSwitchIsAutoBackupBeforeUpdate_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchIsAutoBackupEnabled"
-                        Header="{i18n:I18n Key=Backup_AutoPeriodic}"
+                        Header="定期自动备份"
                         IsOn="True"
                         Toggled="ToggleSwitchIsAutoBackupEnabled_Toggled"/>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Backup_Interval}"
-                                     Description="{i18n:I18n Key=Backup_Interval_DefaultHint}">
+                    <ui:SettingsCard Header="备份间隔"
+                                     Description="（默认 7 天）">
                         <ComboBox x:Name="ComboBoxAutoBackupInterval"
                                   SelectionChanged="ComboBoxAutoBackupInterval_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=Backup_Interval_1Day}" Tag="1" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Backup_Interval_3Days}" Tag="3" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Backup_Interval_7Days}" Tag="7" IsSelected="True" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Backup_Interval_14Days}" Tag="14" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Backup_Interval_30Days}" Tag="30" />
+                            <ComboBoxItem Content="1 天" Tag="1" />
+                            <ComboBoxItem Content="3 天" Tag="3" />
+                            <ComboBoxItem Content="7 天" Tag="7" IsSelected="True" />
+                            <ComboBoxItem Content="14 天" Tag="14" />
+                            <ComboBoxItem Content="30 天" Tag="30" />
                         </ComboBox>
                     </ui:SettingsCard>
 
                     <ui:SettingsCard ContentAlignment="Left">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <Button x:Name="BtnManualBackup" Content="{i18n:I18n Key=Backup_Manual}" Click="BtnManualBackup_Click" />
-                            <Button x:Name="BtnRestoreBackup" Content="{i18n:I18n Key=Backup_Restore}" Click="BtnRestoreBackup_Click" />
+                            <Button x:Name="BtnManualBackup" Content="手动备份" Click="BtnManualBackup_Click" />
+                            <Button x:Name="BtnRestoreBackup" Content="还原备份" Click="BtnRestoreBackup_Click" />
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=ConfigProfiles_Title}" />
+                        Text="配置文件切换与热重载" />
 
-                    <TextBlock Text="{i18n:I18n Key=ConfigProfiles_Desc}"
+                    <TextBlock Text="选择配置文件即切换并热重载；另存为可将当前配置保存为新配置文件"
                                Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                                TextWrapping="Wrap" Margin="1,0,0,4" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=ConfigProfiles_Label}">
+                    <ui:SettingsCard Header="配置文件：">
                         <ComboBox x:Name="ComboBoxConfigProfile"
                                   SelectionChanged="ComboBoxConfigProfile_SelectionChanged" />
                     </ui:SettingsCard>
 
                     <ui:SettingsCard ContentAlignment="Left">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <Button x:Name="BtnDeleteConfigProfile" Content="{i18n:I18n Key=ConfigProfiles_Delete}" Click="BtnDeleteConfigProfile_Click" />
-                            <Button x:Name="BtnSaveAsConfigProfile" Content="{i18n:I18n Key=ConfigProfiles_SaveAs}" Click="BtnSaveAsConfigProfile_Click" />
+                            <Button x:Name="BtnDeleteConfigProfile" Content="删除配置文件" Click="BtnDeleteConfigProfile_Click" />
+                            <Button x:Name="BtnSaveAsConfigProfile" Content="另存为配置文件" Click="BtnSaveAsConfigProfile_Click" />
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 

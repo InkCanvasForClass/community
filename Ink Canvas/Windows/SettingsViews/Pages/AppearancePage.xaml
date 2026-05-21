@@ -6,11 +6,10 @@
       xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       mc:Ignorable="d"
-      Title="{i18n:I18n Key=Theme_GroupTitle}">
+      Title="个性化">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -30,104 +29,104 @@
                     Spacing="{StaticResource SettingsCardSpacing}">
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=Theme_Label}" />
+                        Text="主题" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Theme_Label}">
+                    <ui:SettingsCard Header="主题">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxTheme"
                                   SelectedIndex="0"
                                   SelectionChanged="ComboBoxTheme_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_Light}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_Dark}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_System}" />
+                            <ComboBoxItem Content="浅色主题" />
+                            <ComboBoxItem Content="深色主题" />
+                            <ComboBoxItem Content="跟随系统" />
                         </ComboBox>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Theme_WindowBackdrop}">
+                    <ui:SettingsCard Header="窗口背景样式">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FullScreen}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxWindowBackdrop"
                                   SelectionChanged="ComboBoxWindowBackdrop_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_None}" Tag="None" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_Mica}" Tag="Mica" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_Acrylic}" Tag="Acrylic" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_Tabbed}" Tag="Tabbed" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_Transient}" Tag="Transient" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_Acrylic10}" Tag="Acrylic10" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_WindowBackdrop_Acrylic11}" Tag="Acrylic11" />
+                            <ComboBoxItem Content="无背景效果" Tag="None" />
+                            <ComboBoxItem Content="云母" Tag="Mica" />
+                            <ComboBoxItem Content="亚克力" Tag="Acrylic" />
+                            <ComboBoxItem Content="Tabbed" Tag="Tabbed" />
+                            <ComboBoxItem Content="Transient" Tag="Transient" />
+                            <ComboBoxItem Content="亚克力 10" Tag="Acrylic10" />
+                            <ComboBoxItem Content="亚克力 11" Tag="Acrylic11" />
                         </ComboBox>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Theme_LanguageLabel}"
-                            Description="{i18n:I18n Key=Theme_Language_RestartHint}">
+                    <ui:SettingsCard Header="界面语言"
+                            Description="更改界面语言后需要重启应用程序才能完全生效。">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Globe}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxLanguage"
                                   SelectedIndex="0"
                                   SelectionChanged="ComboBoxLanguage_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_Language_System}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_Language_ChineseSimplified}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_Language_English}" />
+                            <ComboBoxItem Content="跟随系统" />
+                            <ComboBoxItem Content="简体中文" />
+                            <ComboBoxItem Content="English" />
                         </ComboBox>
                     </ui:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=Theme_EnableSplash}" />
+                        Text="启用启动动画" />
 
                     <controls:LabeledSettingsCard x:Name="CardEnableSplashScreen"
-                            Header="{i18n:I18n Key=Theme_EnableSplash}"
+                            Header="启用启动动画"
                             Icon="{x:Static ui:SegoeFluentIcons.Photo}"
                             SwitchName="ToggleSwitchEnableSplashScreen"
                             Toggled="ToggleSwitchEnableSplashScreen_Toggled" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Theme_SplashStyle}">
+                    <ui:SettingsCard Header="启动动画样式">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Brightness}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxSplashScreenStyle"
                                   SelectedIndex="1"
                                   SelectionChanged="ComboBoxSplashScreenStyle_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_Splash_Random}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_Splash_Seasonal}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_Splash_Spring}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_Splash_Summer}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_Splash_Autumn}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_Splash_Winter}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_Splash_Horse}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_Splash_Custom}" />
+                            <ComboBoxItem Content="随机" />
+                            <ComboBoxItem Content="跟随四季" />
+                            <ComboBoxItem Content="春季" />
+                            <ComboBoxItem Content="夏季" />
+                            <ComboBoxItem Content="秋季" />
+                            <ComboBoxItem Content="冬季" />
+                            <ComboBoxItem Content="马年限定" />
+                            <ComboBoxItem Content="自定义" />
                         </ComboBox>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard x:Name="CardCustomSplashImage" Header="{i18n:I18n Key=Theme_CustomSplashImage}"
-                                     Description="{i18n:I18n Key=Theme_CustomSplashImage_Desc}"
+                    <ui:SettingsCard x:Name="CardCustomSplashImage" Header="自定义启动图片"
+                                     Description="选择自定义图片作为启动动画背景（支持JPG、PNG、BMP等格式）"
                                      Visibility="Collapsed">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Photo}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="TextBlockCustomSplashPath"
-                                       Text="{i18n:I18n Key=Theme_CustomSplash_NotSelected}"
+                                       Text="未选择自定义图片"
                                        VerticalAlignment="Center"
                                        MaxWidth="200"
                                        TextTrimming="CharacterEllipsis"
                                        Foreground="Gray"/>
                             <Button x:Name="ButtonBrowseCustomSplash"
-                                    Content="{i18n:I18n Key=Theme_Browse}"
+                                    Content="浏览"
                                     Padding="10,3"
                                     Click="ButtonBrowseCustomSplash_Click"/>
                             <Button x:Name="ButtonClearCustomSplash"
-                                    Content="{i18n:I18n Key=Theme_Clear}"
+                                    Content="清除"
                                     Padding="10,3"
                                     Click="ButtonClearCustomSplash_Click"/>
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard x:Name="CardCustomSplashTextPosition" Header="{i18n:I18n Key=Theme_CustomSplashTextPosition}"
-                                     Description="{i18n:I18n Key=Theme_CustomSplashTextPosition_Desc}"
+                    <ui:SettingsCard x:Name="CardCustomSplashTextPosition" Header="文字显示位置"
+                                     Description="设置启动时加载文字和进度条的位置"
                                      Visibility="Collapsed">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AlignCenter}" />
@@ -199,38 +198,38 @@
                     </ui:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=Theme_FloatingBarIcon}" />
+                        Text="浮动工具栏图标" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Theme_FloatingBarIcon}">
+                    <ui:SettingsCard Header="浮动工具栏图标">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Photo}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxFloatingBarImg"
                                   SelectedIndex="0"
                                   SelectionChanged="ComboBoxFloatingBarImg_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_FloatingIcon_IccDefault}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_FloatingIcon_IccNoShadow}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_FloatingIcon_IccDark}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_FloatingIcon_IccDarkBreath}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_FloatingIcon_IccWhiteTransparent}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_FloatingIcon_IccBlackTransparent}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_FloatingIcon_CoolapkCrossEye}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_FloatingIcon_CoolapkAbused}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_FloatingIcon_CoolapkSmile}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_FloatingIcon_CoolapkUnderwear}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_FloatingIcon_CoolapkGreenHatDoge}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_FloatingIcon_TiebaEmoji}" />
+                            <ComboBoxItem Content="「ICC-CE」默认" />
+                            <ComboBoxItem Content="「ICC-CE」无阴影" />
+                            <ComboBoxItem Content="「ICC-CE」深色" />
+                            <ComboBoxItem Content="「ICC-CE」深色呼吸版" />
+                            <ComboBoxItem Content="「ICC-CE」白色透明版" />
+                            <ComboBoxItem Content="「ICC-CE」黑色透明版" />
+                            <ComboBoxItem Content="酷安斗鸡眼滑稽" />
+                            <ComboBoxItem Content="酷安受虐滑稽" />
+                            <ComboBoxItem Content="酷安呲牙笑" />
+                            <ComboBoxItem Content="酷安头戴内裤滑稽" />
+                            <ComboBoxItem Content="酷安绿帽Doge" />
+                            <ComboBoxItem Content="贴吧滑稽" />
                         </ComboBox>
                     </ui:SettingsCard>
 
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
-                        <Button x:Name="ButtonAddCustomIcon" Content="{i18n:I18n Key=Theme_Upload}"
+                        <Button x:Name="ButtonAddCustomIcon" Content="上传"
                                 Click="ButtonAddCustomIcon_Click" Padding="10,3"/>
-                        <Button x:Name="ButtonManageCustomIcons" Content="{i18n:I18n Key=Theme_Manage}"
+                        <Button x:Name="ButtonManageCustomIcons" Content="管理"
                                 Click="ButtonManageCustomIcons_Click" Padding="10,3"/>
                     </ikw:SimpleStackPanel>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Theme_FloatingBarScale}">
+                    <ui:SettingsCard Header="浮动工具栏缩放倍数">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}" />
                         </ui:SettingsCard.HeaderIcon>
@@ -250,7 +249,7 @@
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Theme_FloatingBarOpacity}">
+                    <ui:SettingsCard Header="浮动工具栏透明度">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EaseOfAccess}" />
                         </ui:SettingsCard.HeaderIcon>
@@ -265,8 +264,8 @@
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Theme_FloatingBarOpacityInPPT}"
-                            Description="{i18n:I18n Key=Theme_FloatingBarOpacityInPPTHint}">
+                    <ui:SettingsCard Header="浮栏在 PPT 下透明度"
+                            Description="重新进入 PPT 放映后生效">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Play}" />
                         </ui:SettingsCard.HeaderIcon>
@@ -281,7 +280,7 @@
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Theme_BlackboardScale80}">
+                    <ui:SettingsCard Header="白板 UI 缩放倍数">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BackToWindow}" />
                         </ui:SettingsCard.HeaderIcon>
@@ -297,13 +296,13 @@
                     </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardEnableTimeDisplayInWhiteboardMode"
-                            Header="{i18n:I18n Key=Theme_ShowTimeInWhiteboard}"
+                            Header="在白板中显示当前时间和日期"
                             Icon="{x:Static ui:SegoeFluentIcons.Pinned}"
                             SwitchName="ToggleSwitchEnableTimeDisplayInWhiteboardMode"
                             Toggled="ToggleSwitchEnableTimeDisplayInWhiteboardMode_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardUse24HourTimeFormat"
-                            Header="{i18n:I18n Key=AppearancePanel_24HourTimeFormat}"
+                            Header="使用24小时制显示时间"
                             Toggled="ToggleSwitchUse24HourTimeFormat_Toggled">
                         <controls:LabeledSettingsCard.HeaderIcon>
                             <ui:FontIcon Glyph="&#xE917;" />
@@ -311,25 +310,25 @@
                     </controls:LabeledSettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardEnableChickenSoupInWhiteboardMode"
-                            Header="{i18n:I18n Key=Theme_ShowQuoteInWhiteboard}"
+                            Header="在白板中显示信仰の源 1（好喝的/毒的鸡汤）"
                             Icon="{x:Static ui:SegoeFluentIcons.Message}"
                             SwitchName="ToggleSwitchEnableChickenSoupInWhiteboardMode"
                             Toggled="ToggleSwitchEnableChickenSoupInWhiteboardMode_Toggled" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Theme_QuoteSource}">
+                    <ui:SettingsCard Header="信仰の源出自 Where？">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Heart}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <ComboBox x:Name="ComboBoxChickenSoupSource"
                                       SelectionChanged="ComboBoxChickenSoupSource_SelectionChanged">
-                                <ComboBoxItem Content="{i18n:I18n Key=Theme_QuoteSource_OsuQuotes}" />
-                                <ComboBoxItem Content="{i18n:I18n Key=Theme_QuoteSource_Mottos}" />
-                                <ComboBoxItem Content="{i18n:I18n Key=Theme_QuoteSource_GaokaoBless}" />
-                                <ComboBoxItem Content="{i18n:I18n Key=Theme_QuoteSource_Hitokoto}" />
-                                <ComboBoxItem Content="{i18n:I18n Key=Theme_QuoteSource_PhigrosTips}" />
+                                <ComboBoxItem Content="osu!玩家语录" />
+                                <ComboBoxItem Content="励志立志的名言警句" />
+                                <ComboBoxItem Content="高考祝福语" />
+                                <ComboBoxItem Content="一言（Hitokoto API）" />
+                                <ComboBoxItem Content="Phigros Tips" />
                             </ComboBox>
-                            <Button x:Name="BtnHitokotoCustomize" Content="{i18n:I18n Key=Theme_Customize}"
+                            <Button x:Name="BtnHitokotoCustomize" Content="自定义"
                                     Padding="14,4" MinWidth="65" VerticalAlignment="Center"
                                     Click="BtnHitokotoCustomize_Click"
                                     Visibility="Collapsed" />
@@ -337,12 +336,12 @@
                     </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardEnableQuickPanel"
-                            Header="{i18n:I18n Key=Theme_EnableQuickPanel}"
+                            Header="在收纳模式下启用快速面板"
                             Icon="{x:Static ui:SegoeFluentIcons.Pinned}"
                             SwitchName="ToggleSwitchEnableQuickPanel"
                             Toggled="ToggleSwitchEnableQuickPanel_Toggled" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Theme_QuickPanelBottomOffset}">
+                    <ui:SettingsCard Header="快捷面板垂直偏移">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronDown}" />
                         </ui:SettingsCard.HeaderIcon>
@@ -357,28 +356,28 @@
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Theme_UnfoldButtonIcon}">
+                    <ui:SettingsCard Header="取消收纳按钮图标">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronRight}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxUnFoldBtnImg"
                                   SelectedIndex="0"
                                   SelectionChanged="ComboBoxUnFoldBtnImg_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_UnfoldIcon_Arrow}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Theme_UnfoldIcon_Pen}" />
+                            <ComboBoxItem Content="箭头" />
+                            <ComboBoxItem Content="笔" />
                         </ComboBox>
                     </ui:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=Theme_FloatingBarButtonsTitle}" />
+                        Text="浮动栏按钮显示" />
 
                     <controls:LabeledSettingsCard x:Name="CardUseLegacyFloatingBarUI"
-                            Header="{i18n:I18n Key=Theme_UseLegacyFloatingBarUI}"
+                            Header="使用老版浮动栏按钮 UI"
                             Icon="{x:Static ui:SegoeFluentIcons.History}"
                             SwitchName="ToggleSwitchUseLegacyFloatingBarUI"
                             Toggled="ToggleSwitchUseLegacyFloatingBarUI_Toggled" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Theme_FloatingBarButtonsTitle}"
+                    <ui:SettingsCard Header="浮动栏按钮显示"
                             Description="请前往「工具栏」设置页面管理浮动工具栏的组件显示与排序。"
                             IsClickEnabled="True"
                             Click="CardFloatingBarButtons_Click">
@@ -388,51 +387,51 @@
                     </ui:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=Tray_GroupTitle}" />
+                        Text="任务栏托盘图标" />
 
                     <controls:LabeledSettingsCard x:Name="CardEnableTrayIcon"
-                            Header="{i18n:I18n Key=Tray_EnableTrayIcon}"
+                            Header="启用托盘图标"
                             Icon="{x:Static ui:SegoeFluentIcons.Pin}"
                             SwitchName="ToggleSwitchEnableTrayIcon"
                             Toggled="ToggleSwitchEnableTrayIcon_Toggled" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Tray_LeftClickAction}">
+                    <ui:SettingsCard Header="托盘左键点击">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronLeft}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxTrayLeftClickAction"
                                   SelectedIndex="0"
                                   SelectionChanged="ComboBoxTrayLeftClickAction_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_ShowMenu}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_HideShowMainWindow}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_TempShowMainWindow}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_OpenSettings}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_DisableAllHotkeys}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_ForceFullScreen}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_ToggleFoldFloatingBar}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_ResetFloatingBarPosition}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_RestartApp}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_CloseApp}" />
+                            <ComboBoxItem Content="打开菜单" />
+                            <ComboBoxItem Content="隐藏/显示主窗口" />
+                            <ComboBoxItem Content="临时显示主窗口" />
+                            <ComboBoxItem Content="打开设置" />
+                            <ComboBoxItem Content="禁用/启用所有快捷键" />
+                            <ComboBoxItem Content="强制全屏化" />
+                            <ComboBoxItem Content="切换浮动栏收纳模式" />
+                            <ComboBoxItem Content="重置工具栏位置" />
+                            <ComboBoxItem Content="重启软件" />
+                            <ComboBoxItem Content="退出软件" />
                         </ComboBox>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Tray_RightClickAction}">
+                    <ui:SettingsCard Header="托盘右键点击">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronRight}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxTrayRightClickAction"
                                   SelectedIndex="0"
                                   SelectionChanged="ComboBoxTrayRightClickAction_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_ShowMenu}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_HideShowMainWindow}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_TempShowMainWindow}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_OpenSettings}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_DisableAllHotkeys}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_ForceFullScreen}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_ToggleFoldFloatingBar}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_ResetFloatingBarPosition}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_RestartApp}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Tray_ClickAction_CloseApp}" />
+                            <ComboBoxItem Content="打开菜单" />
+                            <ComboBoxItem Content="隐藏/显示主窗口" />
+                            <ComboBoxItem Content="临时显示主窗口" />
+                            <ComboBoxItem Content="打开设置" />
+                            <ComboBoxItem Content="禁用/启用所有快捷键" />
+                            <ComboBoxItem Content="强制全屏化" />
+                            <ComboBoxItem Content="切换浮动栏收纳模式" />
+                            <ComboBoxItem Content="重置工具栏位置" />
+                            <ComboBoxItem Content="重启软件" />
+                            <ComboBoxItem Content="退出软件" />
                         </ComboBox>
                     </ui:SettingsCard>
 

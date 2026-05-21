@@ -6,11 +6,10 @@
       xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       mc:Ignorable="d"
-      Title="{i18n:I18n Key=Random_Title}">
+      Title="随机点名">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -30,40 +29,40 @@
                     Spacing="{StaticResource SettingsCardSpacing}">
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=Random_Title}" />
+                        Text="随机点名" />
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchDisplayRandWindowNamesInputBtn"
-                        Header="{i18n:I18n Key=Random_ShowEditNamesButton}"
+                        Header="显示修改随机点名名单的按钮"
                         Icon="{x:Static ui:SegoeFluentIcons.Edit}"
                         IsOn="True"
                         Toggled="ToggleSwitchDisplayRandWindowNamesInputBtn_OnToggled"/>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchShowRandomAndSingleDraw"
-                        Header="{i18n:I18n Key=Random_EnableButtons}"
+                        Header="启用随机抽和单次抽按钮"
                         IsOn="True"
                         Toggled="ToggleSwitchShowRandomAndSingleDraw_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchEnableQuickDraw"
-                        Header="{i18n:I18n Key=Random_EnableQuickButton}"
+                        Header="启用快抽悬浮按钮"
                         IsOn="True"
                         Toggled="ToggleSwitchEnableQuickDraw_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchExternalCaller"
-                        Header="{i18n:I18n Key=Random_UseExternal}"
+                        Header="直接调用外部点名"
                         IsOn="False"
                         Toggled="ToggleSwitchExternalCaller_Toggled"/>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Random_ExternalTypeLabel}">
+                    <ui:SettingsCard Header="点名类型">
                         <ComboBox x:Name="ComboBoxExternalCallerType"
                                   SelectedIndex="0"
                                   SelectionChanged="ComboBoxExternalCallerType_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=Random_ExternalType_ClassIsland}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Random_ExternalType_SecRandom}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Random_ExternalType_NamePicker}" />
+                            <ComboBoxItem Content="ClassIsland 点名" />
+                            <ComboBoxItem Content="SecRandom 点名" />
+                            <ComboBoxItem Content="NamePicker 点名" />
                         </ComboBox>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Random_OnceCloseDelay}">
+                    <ui:SettingsCard Header="单次抽人窗口关闭延迟">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="RandWindowOnceCloseLatencyText"
                                        VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -75,7 +74,7 @@
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Random_OnceMaxStudents}">
+                    <ui:SettingsCard Header="单次随机点名人数上限">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="RandWindowOnceMaxStudentsText"
                                        VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -88,12 +87,12 @@
                     </ui:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=Random_BackgroundSettingsTitle}" />
+                        Text="点名窗口背景设置(仅老版点名UI有效)" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Random_BackgroundSelectLabel}">
+                    <ui:SettingsCard Header="背景选择：">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                            <Button x:Name="ButtonAddCustomBackground" Content="{i18n:I18n Key=Random_CustomBackground_Upload}" Click="ButtonAddCustomBackground_Click" />
-                            <Button x:Name="ButtonManageBackgrounds" Content="{i18n:I18n Key=Random_CustomBackground_Manage}" Click="ButtonManageBackgrounds_Click" />
+                            <Button x:Name="ButtonAddCustomBackground" Content="上传" Click="ButtonAddCustomBackground_Click" />
+                            <Button x:Name="ButtonManageBackgrounds" Content="管理" Click="ButtonManageBackgrounds_Click" />
                             <ComboBox x:Name="ComboBoxPickNameBackground"
                                       SelectedIndex="0"
                                       SelectionChanged="ComboBoxPickNameBackground_SelectionChanged" />
@@ -101,19 +100,19 @@
                     </ui:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=Random_NewUI_Title}" />
+                        Text="新点名 UI 设置" />
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchUseNewRollCallUI"
-                        Header="{i18n:I18n Key=Random_NewUI_Enable}"
+                        Header="启用新点名 UI"
                         IsOn="True"
                         Toggled="ToggleSwitchUseNewRollCallUI_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchEnableMLAvoidance"
-                        Header="{i18n:I18n Key=Random_ML_AvoidRepeat}"
+                        Header="启用机器学习避免重复"
                         IsOn="True"
                         Toggled="ToggleSwitchEnableMLAvoidance_Toggled"/>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Random_ML_HistoryCount}">
+                    <ui:SettingsCard Header="避免重复历史记录数量">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="MLAvoidanceHistoryText"
                                        VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -125,7 +124,7 @@
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Random_ML_Weight}">
+                    <ui:SettingsCard Header="避免重复权重">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="MLAvoidanceWeightText"
                                        VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -137,33 +136,33 @@
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
-                    <TextBlock Text="{i18n:I18n Key=Random_ML_Hint}"
+                    <TextBlock Text="机器学习算法会分析最近的点名历史，智能避免重复选择相同人员"
                                Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                                TextWrapping="Wrap" Margin="1,0,0,4" />
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=Timer_Title}" />
+                        Text="计时器设置" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Timer_Title}">
+                    <ui:SettingsCard Header="计时器设置">
                         <ComboBox x:Name="ComboBoxTimerUIStyle"
                                   SelectionChanged="ComboBoxTimerUIStyle_SelectionChanged">
                             <ComboBoxItem Content="默认" Tag="Default" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Timer_UseLegacyButtons}" Tag="Legacy" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Timer_NewUI}" Tag="NewStyle" />
+                            <ComboBoxItem Content="使用老版计时器按钮 UI" Tag="Legacy" />
+                            <ComboBoxItem Content="新计时器 UI" Tag="NewStyle" />
                         </ComboBox>
                     </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchEnableOvertimeCountUp"
-                        Header="{i18n:I18n Key=Timer_EnableCountUp}"
+                        Header="启用正计时"
                         IsOn="False"
                         Toggled="ToggleSwitchEnableOvertimeCountUp_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchEnableOvertimeRedText"
-                        Header="{i18n:I18n Key=Timer_OvertimeHighlight}"
+                        Header="超时醒目数字"
                         IsOn="True"
                         Toggled="ToggleSwitchEnableOvertimeRedText_Toggled"/>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Timer_Volume}">
+                    <ui:SettingsCard Header="计时器提醒音量">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="TimerVolumeText"
                                        VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -175,19 +174,19 @@
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Timer_CustomSoundLabel}">
+                    <ui:SettingsCard Header="自定义提醒铃声：">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <Button x:Name="ButtonSelectCustomTimerSound" Content="{i18n:I18n Key=Timer_SelectFile}" Click="ButtonSelectCustomTimerSound_Click" />
-                            <Button x:Name="ButtonResetTimerSound" Content="{i18n:I18n Key=Timer_Reset}" Click="ButtonResetTimerSound_Click" />
+                            <Button x:Name="ButtonSelectCustomTimerSound" Content="选择文件" Click="ButtonSelectCustomTimerSound_Click" />
+                            <Button x:Name="ButtonResetTimerSound" Content="重置" Click="ButtonResetTimerSound_Click" />
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchEnableProgressiveReminder"
-                        Header="{i18n:I18n Key=Timer_Progressive}"
+                        Header="渐进提醒"
                         IsOn="False"
                         Toggled="ToggleSwitchEnableProgressiveReminder_Toggled"/>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Timer_ProgressiveVolume}">
+                    <ui:SettingsCard Header="渐进提醒音量">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="ProgressiveReminderVolumeText"
                                        VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -199,10 +198,10 @@
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Timer_ProgressiveCustomLabel}">
+                    <ui:SettingsCard Header="自定义渐进提醒音频：">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <Button x:Name="ButtonSelectCustomProgressiveReminderSound" Content="{i18n:I18n Key=Timer_ProgressiveSelectFile}" Click="ButtonSelectCustomProgressiveReminderSound_Click" />
-                            <Button x:Name="ButtonResetProgressiveReminderSound" Content="{i18n:I18n Key=Timer_ProgressiveReset}" Click="ButtonResetProgressiveReminderSound_Click" />
+                            <Button x:Name="ButtonSelectCustomProgressiveReminderSound" Content="选择文件" Click="ButtonSelectCustomProgressiveReminderSound_Click" />
+                            <Button x:Name="ButtonResetProgressiveReminderSound" Content="重置" Click="ButtonResetProgressiveReminderSound_Click" />
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 

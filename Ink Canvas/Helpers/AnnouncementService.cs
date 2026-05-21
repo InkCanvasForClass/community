@@ -147,26 +147,26 @@ namespace Ink_Canvas.Helpers
             NotificationProviderRegistry.RegisterOrUpdate(new NotificationProviderStatus
             {
                 ProviderId = ProviderId,
-                DisplayName = Strings.GetString("Notification_Provider_Announcement") ?? "公告提供商",
-                Description = Strings.GetString("Notification_Provider_AnnouncementDesc") ?? "拉取远端公告并接收实时推送。",
+                DisplayName = "公告提供商",
+                Description = "拉取远端公告并接收实时推送。",
                 IsEnabled = settings?.Notification?.IsAnnouncementEnabled == true,
                 IsRunning = false,
-                Status = Strings.GetString("Notification_Provider_Starting") ?? "启动中"
+                Status = "启动中"
             });
 
             if (settings?.Notification?.IsAnnouncementEnabled != true)
             {
-                NotificationProviderRegistry.SetRunning(ProviderId, false, Strings.GetString("Notification_Provider_Disabled") ?? "已禁用");
+                NotificationProviderRegistry.SetRunning(ProviderId, false, "已禁用");
                 return;
             }
             if (string.IsNullOrWhiteSpace(settings.Notification.AnnouncementSoftwareToken))
             {
-                NotificationProviderRegistry.SetRunning(ProviderId, false, Strings.GetString("Notification_Provider_NoToken") ?? "未配置 Token");
+                NotificationProviderRegistry.SetRunning(ProviderId, false, "未配置 Token");
                 return;
             }
 
             await FetchAnnouncementsAsync(cancellationToken);
-            NotificationProviderRegistry.SetRunning(ProviderId, true, Strings.GetString("Notification_Provider_Running") ?? "运行中");
+            NotificationProviderRegistry.SetRunning(ProviderId, true, "运行中");
 
             if (!string.IsNullOrWhiteSpace(BuildWebSocketUrl()))
             {
@@ -180,7 +180,7 @@ namespace Ink_Canvas.Helpers
             webSocket?.Abort();
             webSocket?.Dispose();
             webSocket = null;
-            NotificationProviderRegistry.SetRunning(ProviderId, false, Strings.GetString("Notification_Provider_Stopped") ?? "已停止");
+            NotificationProviderRegistry.SetRunning(ProviderId, false, "已停止");
             return Task.CompletedTask;
         }
 
@@ -236,7 +236,7 @@ namespace Ink_Canvas.Helpers
                             await webSocket.ConnectAsync(new Uri(candidateUrl), cancellationToken);
                             connected = true;
                             isRealtimePushUnavailable = false;
-                            NotificationProviderRegistry.SetRunning(ProviderId, true, Strings.GetString("Notification_Provider_Running") ?? "运行中");
+                            NotificationProviderRegistry.SetRunning(ProviderId, true, "运行中");
                             await ReceiveWebSocketMessagesAsync(webSocket, cancellationToken);
                         }
                         break;
@@ -252,7 +252,7 @@ namespace Ink_Canvas.Helpers
                             LogHelper.WriteLogToFile($"AnnouncementService WebSocket 服务端暂不可用，将继续重连并保留 HTTP 公告拉取通道: {ex.Message}", LogHelper.LogType.Trace);
                             isRealtimePushUnavailable = true;
                         }
-                        NotificationProviderRegistry.SetRunning(ProviderId, true, Strings.GetString("Notification_Provider_HttpOnly") ?? "HTTP 拉取可用，实时推送不可用");
+                        NotificationProviderRegistry.SetRunning(ProviderId, true, "HTTP 拉取可用，实时推送不可用");
                     }
                     catch (Exception ex)
                     {
@@ -260,7 +260,7 @@ namespace Ink_Canvas.Helpers
                         {
                             LogHelper.WriteLogToFile($"AnnouncementService WebSocket 连接失败: {ex.Message}", LogHelper.LogType.Trace);
                         }
-                        NotificationProviderRegistry.SetRunning(ProviderId, false, Strings.GetString("Notification_Provider_Reconnecting") ?? "正在重连");
+                        NotificationProviderRegistry.SetRunning(ProviderId, false, "正在重连");
                     }
                 }
 

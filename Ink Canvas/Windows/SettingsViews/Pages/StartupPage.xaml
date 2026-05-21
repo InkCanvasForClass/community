@@ -6,7 +6,6 @@
       xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       mc:Ignorable="d"
@@ -36,64 +35,64 @@
                 
                     <!-- 开机时运行 -->
                     <controls:LabeledSettingsCard x:Name="CardRunAtStartup"
-                            Header="{i18n:I18n Key=Startup_RunAtStartup}"
-                            Description="{i18n:I18n Key=Startup_RunAtStartupHint}"
+                            Header="开机时运行"
+                            Description="系统启动时自动运行软件"
                             Icon="{x:Static ui:SegoeFluentIcons.Settings}"
                             SwitchName="ToggleSwitchRunAtStartup"
                             Toggled="ToggleSwitchRunAtStartup_Toggled" />
                 
                     <!-- 开机运行后收纳到侧边栏 -->
                     <controls:LabeledSettingsCard x:Name="CardFoldAtStartup"
-                            Header="{i18n:I18n Key=Startup_FoldAtStartup}"
-                            Description="{i18n:I18n Key=Startup_FoldAtStartupHint}"
+                            Header="开机运行后收纳到侧边栏"
+                            Description="开机启动后自动收纳到侧边栏"
                             Icon="{x:Static ui:SegoeFluentIcons.ChevronLeft}"
                             SwitchName="ToggleSwitchFoldAtStartup"
                             Toggled="ToggleSwitchFoldAtStartup_Toggled" />
 
                     <!-- 外部协议调用 -->
                     <controls:LabeledSettingsCard x:Name="CardExternalProtocol"
-                            Header="{i18n:I18n Key=Startup_ExternalProtocol}"
-                            Description="{i18n:I18n Key=Startup_ExternalProtocolHint}"
+                            Header="外部协议调用 (icc://)"
+                            Description="通过 icc:// 协议从外部控制软件"
                             Icon="{x:Static ui:SegoeFluentIcons.Link}"
                             SwitchName="ToggleSwitchExternalProtocol"
                             Toggled="ToggleSwitchExternalProtocol_Toggled" />
 
                     <!-- 运行模式 -->
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=Settings_ModeDesc_1}" />
+                        Text="运行模式" />
 
                     <controls:LabeledSettingsCard x:Name="CardPPTOnlyMode"
-                            Header="{i18n:I18n Key=Mode_PPTOnly}"
-                            Description="{i18n:I18n Key=Settings_ModeDesc}"
+                            Header="仅 PPT 模式"
+                            Description="选择软件运行模式。仅 PPT 模式下，软件将完全隐藏，仅在 PPT 放映时出现。（实验性功能，可能不稳定。）"
                             Icon="{x:Static ui:SegoeFluentIcons.Settings}"
                             SwitchName="ToggleSwitchPPTOnlyMode"
                             Toggled="ToggleSwitchPPTOnlyMode_Toggled" />
 
                     <!-- 笔尖模式 -->
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=Startup_EnableNibMode}" />
+                        Text="笔尖模式" />
 
                     <controls:LabeledSettingsCard x:Name="CardEnableNibMode"
-                            Header="{i18n:I18n Key=Startup_EnableNibMode}"
-                            Description="{i18n:I18n Key=Startup_EnableNibModeHint}"
+                            Header="笔尖模式"
+                            Description="启用后仅响应笔尖触摸，忽略手掌和手指"
                             Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
                             SwitchName="ToggleSwitchEnableNibMode"
                             Toggled="ToggleSwitchEnableNibMode_Toggled" />
 
                     <!-- 崩溃后操作 -->
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=Crash_Title}" />
+                        Text="崩溃后操作" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Crash_Title}"
-                            Description="{i18n:I18n Key=Crash_Desc}">
+                    <ui:SettingsCard Header="崩溃后操作"
+                            Description="请选择软件发生未处理异常时的自动操作：">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Warning}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxCrashAction"
                                   SelectionChanged="ComboBoxCrashAction_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=Crash_SilentRestart}" Tag="0" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Crash_NoAction}" Tag="1" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Crash_ShowCrashWindow}" Tag="2" />
+                            <ComboBoxItem Content="静默重启软件" Tag="0" />
+                            <ComboBoxItem Content="无操作" Tag="1" />
+                            <ComboBoxItem Content="弹出崩溃详情窗口（不重启）" Tag="2" />
                         </ComboBox>
                     </ui:SettingsCard>
 

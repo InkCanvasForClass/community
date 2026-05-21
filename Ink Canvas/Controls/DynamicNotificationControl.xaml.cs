@@ -29,11 +29,11 @@ namespace Ink_Canvas.Controls
             currentMessage = message;
             isExpanded = message?.ForcePopup == true;
 
-            TitleTextBlock.Text = string.IsNullOrWhiteSpace(message?.Title) ? Strings.GetString("Notification_DefaultTitle") ?? "通知" : message.Title;
+            TitleTextBlock.Text = string.IsNullOrWhiteSpace(message?.Title) ? "通知" : message.Title;
             SummaryTextBlock.Text = message?.Summary ?? string.Empty;
             SummaryTextBlock.Visibility = string.IsNullOrWhiteSpace(SummaryTextBlock.Text) ? Visibility.Collapsed : Visibility.Visible;
             ContentTextBlock.Text = string.IsNullOrWhiteSpace(message?.Summary) ? message?.Content ?? string.Empty : message.Summary;
-            ActionButton.Content = string.IsNullOrWhiteSpace(message?.ActionText) ? Strings.GetString("Notification_ViewDetails") ?? "查看详情" : message.ActionText;
+            ActionButton.Content = string.IsNullOrWhiteSpace(message?.ActionText) ? "查看详情" : message.ActionText;
             ActionButton.Visibility = message?.Action != null || !string.IsNullOrWhiteSpace(message?.ActionUrl) ? Visibility.Visible : Visibility.Collapsed;
             IconGlyph.Icon = GetIcon(message);
             ExpandedPanel.Visibility = isExpanded ? Visibility.Visible : Visibility.Collapsed;

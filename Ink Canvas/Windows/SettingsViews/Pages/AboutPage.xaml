@@ -6,7 +6,6 @@
       xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d"
 
@@ -55,39 +54,39 @@
                     Spacing="{StaticResource SettingsCardSpacing}">
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=About_Title}" />
+                        Text="关于" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=About_VersionLabel}">
+                    <ui:SettingsCard Header="版本：">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Info}" />
                         </ui:SettingsCard.HeaderIcon>
                         <TextBlock x:Name="AppVersionTextBlock" Text="1.X.X.X" FontWeight="Bold" VerticalAlignment="Center" />
                     </ui:SettingsCard>
 
-                    <ui:SettingsExpander Header="{i18n:I18n Key=About_DeviceInfo}"
+                    <ui:SettingsExpander Header="设备信息"
                             IsExpanded="True"
                             d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Devices}" />
                         </ui:SettingsExpander.HeaderIcon>
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{i18n:I18n Key=About_DeviceIdLabel}">
-                                <TextBlock x:Name="DeviceIdTextBlock" Text="{i18n:I18n Key=About_DeviceInfo_Loading}" />
+                            <ui:SettingsCard Header="设备 ID：">
+                                <TextBlock x:Name="DeviceIdTextBlock" Text="正在获取..." />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="{i18n:I18n Key=About_UsageFrequencyLabel}">
-                                <TextBlock x:Name="UsageFrequencyTextBlock" Text="{i18n:I18n Key=About_DeviceInfo_Loading}" />
+                            <ui:SettingsCard Header="使用频率：">
+                                <TextBlock x:Name="UsageFrequencyTextBlock" Text="正在获取..." />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="{i18n:I18n Key=About_UpdatePriorityLabel}">
-                                <TextBlock x:Name="UpdatePriorityTextBlock" Text="{i18n:I18n Key=About_DeviceInfo_Loading}" />
+                            <ui:SettingsCard Header="更新优先级：">
+                                <TextBlock x:Name="UpdatePriorityTextBlock" Text="正在获取..." />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="{i18n:I18n Key=About_LaunchCountLabel}">
-                                <TextBlock x:Name="LaunchCountTextBlock" Text="{i18n:I18n Key=About_DeviceInfo_Loading}" />
+                            <ui:SettingsCard Header="启动次数：">
+                                <TextBlock x:Name="LaunchCountTextBlock" Text="正在获取..." />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="{i18n:I18n Key=About_TotalUsageLabel}">
-                                <TextBlock x:Name="TotalUsageTextBlock" Text="{i18n:I18n Key=About_DeviceInfo_Loading}" />
+                            <ui:SettingsCard Header="总使用时长：">
+                                <TextBlock x:Name="TotalUsageTextBlock" Text="正在获取..." />
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="">
-                                <Button x:Name="RefreshDeviceInfoButton" Content="{i18n:I18n Key=About_RefreshDeviceInfo}"
+                                <Button x:Name="RefreshDeviceInfoButton" Content="刷新设备信息"
                                         Click="RefreshDeviceInfo_Click" />
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>
@@ -108,7 +107,7 @@
                                                   Margin="0,3,0,0">
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Info}" FontSize="24"/>
                                 <TextBlock FontSize="16" VerticalAlignment="Center" FontWeight="SemiBold"
-                                           Text="{i18n:I18n Key=About_LicenseTitle}" />
+                                           Text="本软件和 ICA，Ink Canvas 均基于许可证开源" />
                             </ikw:SimpleStackPanel>
 
                             <ikw:SimpleStackPanel Orientation="Vertical" Spacing="12" Grid.Row="1" Margin="5,10">
@@ -120,7 +119,7 @@
                                 </FrameworkElement.Resources>
 
                                 <TextBlock Text="GNU General Public License v3.0" FontSize="20" FontWeight="Bold"/>
-                                <TextBlock Text="{i18n:I18n Key=About_LicenseBody}" FontSize="11"
+                                <TextBlock Text="本强许可协议的许可条件是，在相同许可协议下，提供许可作品的完整源代码和修改，包括使用许可作品的大型作品。版权和许可声明必须保留。贡献者明确授予专利权。" FontSize="11"
                                            Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                 <Separator Opacity="0.2"/>
                             </ikw:SimpleStackPanel>
@@ -134,7 +133,7 @@
                     </Border>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=About_DevelopersLabel}" />
+                        Text="开发者：" />
 
                     <ItemsControl x:Name="DeveloperItemsControl"
                                   ItemTemplate="{StaticResource DeveloperAvatarTemplate}">
@@ -148,7 +147,7 @@
                     <Separator Margin="0,8" />
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=About_ThanksContributors}" />
+                        Text="感谢下列贡献者：" />
 
                     <ItemsControl x:Name="ContributorItemsControl"
                                   ItemTemplate="{StaticResource ContributorAvatarTemplate}">
@@ -162,9 +161,9 @@
                     <Separator Margin="0,8" />
 
                     <ikw:SimpleStackPanel Spacing="3" Orientation="Vertical" Margin="0,0,0,24">
-                        <TextBlock Text="{i18n:I18n Key=About_Copyright}" FontWeight="Bold" TextWrapping="Wrap" />
-                        <TextBlock Text="{i18n:I18n Key=About_PhigrosCr}" FontWeight="Bold" TextWrapping="Wrap" />
-                        <TextBlock Text="{i18n:I18n Key=About_OpenSourceSlogan}" FontWeight="Bold"
+                        <TextBlock Text="© 2025-2026 CJK_mkp 版权所有" FontWeight="Bold" TextWrapping="Wrap" />
+                        <TextBlock Text="部分内容取自 Phigros" FontWeight="Bold" TextWrapping="Wrap" />
+                        <TextBlock Text="我们永远热爱开源！" FontWeight="Bold"
                                    TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                     </ikw:SimpleStackPanel>
 

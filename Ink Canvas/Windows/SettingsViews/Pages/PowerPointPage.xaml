@@ -6,12 +6,11 @@
       xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       xmlns:c="clr-namespace:Ink_Canvas.Converter"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d"
-      Title="{i18n:I18n Key=Nav_PPT_Settings}">
+      Title="PPT设置">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -31,47 +30,47 @@
                     HorizontalAlignment="Stretch"
                     Spacing="{StaticResource SettingsCardSpacing}">
 
-                    <TextBlock Text="{i18n:I18n Key=PPT_GroupTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
+                    <TextBlock Text="PPT联动" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
                     <controls:LabeledSettingsCard x:Name="CardSupportPowerPoint"
-                            Header="{i18n:I18n Key=PPT_SupportPowerPoint}"
+                            Header="Microsoft PowerPoint 支持"
                             Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
                             Toggled="ToggleSwitchSupportPowerPoint_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardPowerPointEnhancement"
-                            Header="{i18n:I18n Key=PPT_Enhancement}"
+                            Header="PowerPoint 联动增强"
                             Icon="{x:Static ui:SegoeFluentIcons.Puzzle}"
                             Toggled="ToggleSwitchPowerPointEnhancement_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardSkipAnimationsWhenGoNext"
-                            Header="{i18n:I18n Key=PPT_SkipAnimations}"
+                            Header="抢占焦点放映（用于跳过 PPT 动画）"
                             Icon="{x:Static ui:SegoeFluentIcons.FastForward}"
                             Toggled="ToggleSwitchSkipAnimationsWhenGoNext_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardUseRotPptLink"
-                            Header="{i18n:I18n Key=PPT_UseRot}"
+                            Header="使用 ROT 联动"
                             Icon="{x:Static ui:SegoeFluentIcons.Link}"
                             Toggled="ToggleSwitchUseRotPptLink_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardSupportWPS"
-                            Header="{i18n:I18n Key=PPT_SupportWPS}"
+                            Header="WPS 支持"
                             Icon="{x:Static ui:SegoeFluentIcons.Document}"
                             Toggled="ToggleSwitchSupportWPS_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardEnableWppProcessKill"
-                            Header="{i18n:I18n Key=PPT_KillWppProcess}"
-                            Description="{i18n:I18n Key=PPT_KillWppHint}"
+                            Header="WPP 进程查杀（防止 WPP 残留进程）"
+                            Description="关闭后将不会自动查杀 WPP 残留进程，可能导致 WPP 关闭 时卡顿或无法彻底退出。"
                             Icon="{x:Static ui:SegoeFluentIcons.Cancel}"
                             Toggled="ToggleSwitchEnableWppProcessKill_Toggled"/>
 
-                    <TextBlock Text="{i18n:I18n Key=PPT_FlipButtonsTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
+                    <TextBlock Text="PPT翻页按钮" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
                     <controls:LabeledSettingsCard x:Name="CardShowPPTButton"
-                            Header="{i18n:I18n Key=PPT_ShowFlipButtons}"
+                            Header="在 PPT 模式下显示翻页按钮"
                             Icon="{x:Static ui:SegoeFluentIcons.ShowResults}"
                             Toggled="ToggleSwitchShowPPTButton_OnToggled"/>
 
-                    <ui:SettingsExpander Header="{i18n:I18n Key=PPT_Position_Left}" d:Visibility="Visible" d:IsExpanded="True"
+                    <ui:SettingsExpander Header="左侧" d:Visibility="Visible" d:IsExpanded="True"
                             Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}"
                             IsExpanded="{Binding IsOn, ElementName=CardShowPPTButton, Mode=OneWay}">
                         <ui:SettingsExpander.HeaderIcon>
@@ -81,14 +80,14 @@
                             <CheckBox x:Name="CheckboxEnableLSPPTButton" Checked="CheckboxEnableLSPPTButton_IsCheckChanged" Unchecked="CheckboxEnableLSPPTButton_IsCheckChanged"/>
                         </ui:SettingsExpander.Content>
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{i18n:I18n Key=PPT_LeftOffset}">
+                            <ui:SettingsCard Header="左侧偏移">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="PPTButtonLeftPositionText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                                     <Slider x:Name="PPTButtonLeftPositionValueSlider" Minimum="-500" Maximum="500" Width="200" IsSnapToTickEnabled="True" TickFrequency="5" ValueChanged="PPTButtonLeftPositionValueSlider_ValueChanged"/>
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="{i18n:I18n Key=PPT_LeftOpacity}" Visibility="{Binding IsChecked, ElementName=CheckboxSPPTHalfOpacity, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <ui:SettingsCard Header="左侧透明度" Visibility="{Binding IsChecked, ElementName=CheckboxSPPTHalfOpacity, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="PPTLSButtonOpacityText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -98,7 +97,7 @@
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
-                    <ui:SettingsExpander Header="{i18n:I18n Key=PPT_Position_Right}"
+                    <ui:SettingsExpander Header="右侧"
                             Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}"
                             IsExpanded="{Binding IsOn, ElementName=CardShowPPTButton, Mode=OneWay}">
                         <ui:SettingsExpander.HeaderIcon>
@@ -108,14 +107,14 @@
                             <CheckBox x:Name="CheckboxEnableRSPPTButton" Checked="CheckboxEnableRSPPTButton_IsCheckChanged" Unchecked="CheckboxEnableRSPPTButton_IsCheckChanged"/>
                         </ui:SettingsExpander.Content>
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{i18n:I18n Key=PPT_RightOffset}">
+                            <ui:SettingsCard Header="右侧偏移">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="PPTButtonRightPositionText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                                     <Slider x:Name="PPTButtonRightPositionValueSlider" Minimum="-500" Maximum="500" Width="200" IsSnapToTickEnabled="True" TickFrequency="5" ValueChanged="PPTButtonRightPositionValueSlider_ValueChanged"/>
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="{i18n:I18n Key=PPT_RightOpacity}" Visibility="{Binding IsChecked, ElementName=CheckboxSPPTHalfOpacity, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <ui:SettingsCard Header="右侧透明度" Visibility="{Binding IsChecked, ElementName=CheckboxSPPTHalfOpacity, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="PPTRSButtonOpacityText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -125,7 +124,7 @@
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
-                    <ui:SettingsExpander Header="{i18n:I18n Key=PPT_Position_LeftBottom}"
+                    <ui:SettingsExpander Header="左下"
                             Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}"
                             IsExpanded="{Binding IsOn, ElementName=CardShowPPTButton, Mode=OneWay}">
                         <ui:SettingsExpander.HeaderIcon>
@@ -135,14 +134,14 @@
                             <CheckBox x:Name="CheckboxEnableLBPPTButton" Checked="CheckboxEnableLBPPTButton_IsCheckChanged" Unchecked="CheckboxEnableLBPPTButton_IsCheckChanged"/>
                         </ui:SettingsExpander.Content>
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{i18n:I18n Key=PPT_LeftBottomOffset}">
+                            <ui:SettingsCard Header="左下偏移">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="PPTButtonLBPositionText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                                     <Slider x:Name="PPTButtonLBPositionValueSlider" Minimum="-100" Maximum="500" Width="200" IsSnapToTickEnabled="True" TickFrequency="5" ValueChanged="PPTButtonLBPositionValueSlider_ValueChanged"/>
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="{i18n:I18n Key=PPT_LeftBottomOpacity}" Visibility="{Binding IsChecked, ElementName=CheckboxBPPTHalfOpacity, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <ui:SettingsCard Header="左下透明度" Visibility="{Binding IsChecked, ElementName=CheckboxBPPTHalfOpacity, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="PPTLBButtonOpacityText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -152,7 +151,7 @@
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
-                    <ui:SettingsExpander Header="{i18n:I18n Key=PPT_Position_RightBottom}"
+                    <ui:SettingsExpander Header="右下"
                             Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}"
                             IsExpanded="{Binding IsOn, ElementName=CardShowPPTButton, Mode=OneWay}">
                         <ui:SettingsExpander.HeaderIcon>
@@ -162,14 +161,14 @@
                             <CheckBox x:Name="CheckboxEnableRBPPTButton" Checked="CheckboxEnableRBPPTButton_IsCheckChanged" Unchecked="CheckboxEnableRBPPTButton_IsCheckChanged"/>
                         </ui:SettingsExpander.Content>
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{i18n:I18n Key=PPT_RightBottomOffset}">
+                            <ui:SettingsCard Header="右下偏移">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="PPTButtonRBPositionText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                                     <Slider x:Name="PPTButtonRBPositionValueSlider" Minimum="-100" Maximum="500" Width="200" IsSnapToTickEnabled="True" TickFrequency="5" ValueChanged="PPTButtonRBPositionValueSlider_ValueChanged"/>
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="{i18n:I18n Key=PPT_RightBottomOpacity}" Visibility="{Binding IsChecked, ElementName=CheckboxBPPTHalfOpacity, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <ui:SettingsCard Header="右下透明度" Visibility="{Binding IsChecked, ElementName=CheckboxBPPTHalfOpacity, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="PPTRBButtonOpacityText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -179,90 +178,90 @@
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=PPT_SideGroupTitle}"
+                    <ui:SettingsCard Header="两侧"
                             Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DockLeft}"/>
                         </ui:SettingsCard.HeaderIcon>
                         <ikw:SimpleStackPanel Orientation="Vertical" Spacing="6">
-                            <CheckBox x:Name="CheckboxSPPTDisplayPage" Content="{i18n:I18n Key=PPT_ShowPageNumber}" Checked="CheckboxSPPTDisplayPage_IsCheckChange" Unchecked="CheckboxSPPTDisplayPage_IsCheckChange"/>
-                            <CheckBox x:Name="CheckboxSPPTHalfOpacity" Content="{i18n:I18n Key=PPT_HalfOpacity}" Checked="CheckboxSPPTHalfOpacity_IsCheckChange" Unchecked="CheckboxSPPTHalfOpacity_IsCheckChange"/>
-                            <CheckBox x:Name="CheckboxSPPTBlackBackground" Content="{i18n:I18n Key=PPT_BlackBackground}" Checked="CheckboxSPPTBlackBackground_IsCheckChange" Unchecked="CheckboxSPPTBlackBackground_IsCheckChange"/>
+                            <CheckBox x:Name="CheckboxSPPTDisplayPage" Content="显示页码" Checked="CheckboxSPPTDisplayPage_IsCheckChange" Unchecked="CheckboxSPPTDisplayPage_IsCheckChange"/>
+                            <CheckBox x:Name="CheckboxSPPTHalfOpacity" Content="半透明" Checked="CheckboxSPPTHalfOpacity_IsCheckChange" Unchecked="CheckboxSPPTHalfOpacity_IsCheckChange"/>
+                            <CheckBox x:Name="CheckboxSPPTBlackBackground" Content="黑色背景" Checked="CheckboxSPPTBlackBackground_IsCheckChange" Unchecked="CheckboxSPPTBlackBackground_IsCheckChange"/>
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=PPT_BottomGroupTitle}"
+                    <ui:SettingsCard Header="左下右下"
                             Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DockBottom}"/>
                         </ui:SettingsCard.HeaderIcon>
                         <ikw:SimpleStackPanel Orientation="Vertical" Spacing="6">
-                            <CheckBox x:Name="CheckboxBPPTDisplayPage" Content="{i18n:I18n Key=PPT_ShowPageNumber}" Checked="CheckboxBPPTDisplayPage_IsCheckChange" Unchecked="CheckboxBPPTDisplayPage_IsCheckChange"/>
-                            <CheckBox x:Name="CheckboxBPPTHalfOpacity" Content="{i18n:I18n Key=PPT_HalfOpacity}" Checked="CheckboxBPPTHalfOpacity_IsCheckChange" Unchecked="CheckboxBPPTHalfOpacity_IsCheckChange"/>
-                            <CheckBox x:Name="CheckboxBPPTBlackBackground" Content="{i18n:I18n Key=PPT_BlackBackground}" Checked="CheckboxBPPTBlackBackground_IsCheckChange" Unchecked="CheckboxBPPTBlackBackground_IsCheckChange"/>
+                            <CheckBox x:Name="CheckboxBPPTDisplayPage" Content="显示页码" Checked="CheckboxBPPTDisplayPage_IsCheckChange" Unchecked="CheckboxBPPTDisplayPage_IsCheckChange"/>
+                            <CheckBox x:Name="CheckboxBPPTHalfOpacity" Content="半透明" Checked="CheckboxBPPTHalfOpacity_IsCheckChange" Unchecked="CheckboxBPPTHalfOpacity_IsCheckChange"/>
+                            <CheckBox x:Name="CheckboxBPPTBlackBackground" Content="黑色背景" Checked="CheckboxBPPTBlackBackground_IsCheckChange" Unchecked="CheckboxBPPTBlackBackground_IsCheckChange"/>
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardEnablePPTButtonPageClickable"
-                            Header="{i18n:I18n Key=PPT_PageButtonClickable}"
-                            Description="{i18n:I18n Key=PPT_PageButtonClickableHint}"
+                            Header="PPT 页码按钮可点击"
+                            Description="开启该选项后，点击页码按钮可唤起页码导航。默认调用 PowerPoint 网格缩略图（WPS 不支持）；可在下方子设置手动开启增强型预览以支持 WPS。"
                             Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
                             Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}"
                             Toggled="ToggleSwitchEnablePPTButtonPageClickable_OnToggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardEnablePPTButtonEnhancedPreview"
-                            Header="{i18n:I18n Key=PPT_EnhancedPreview}"
-                            Description="{i18n:I18n Key=PPT_EnhancedPreviewHint}"
+                            Header="PPT 页码按钮增强型预览"
+                            Description="手动开启后，点击页码按钮将显示缩略图页列表（支持 WPS 与 PowerPoint），并可点击跳转到目标页。"
                             Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
                             Visibility="{Binding IsOn, ElementName=CardEnablePPTButtonPageClickable, Converter={StaticResource BooleanToVisibilityConverter}}"
                             Toggled="ToggleSwitchEnablePPTButtonEnhancedPreview_OnToggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardEnablePPTButtonLongPressPageTurn"
-                            Header="{i18n:I18n Key=PPT_LongPressPageTurn}"
-                            Description="{i18n:I18n Key=PPT_LongPressPageTurnHint}"
+                            Header="PPT 翻页按钮长按翻页"
+                            Description="开启该选项后，长按PPT翻页按钮可以连续翻页，提高翻页效率。"
                             Icon="{x:Static ui:SegoeFluentIcons.Touch}"
                             Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}"
                             Toggled="ToggleSwitchEnablePPTButtonLongPressPageTurn_OnToggled"/>
 
-                    <TextBlock Text="{i18n:I18n Key=PPT_EnterAnnotationOnShow}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
+                    <TextBlock Text="进入 PPT 放映时自动进入批注模式" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
                     <controls:LabeledSettingsCard x:Name="CardShowCanvasAtNewSlideShow"
-                            Header="{i18n:I18n Key=PPT_EnterAnnotationOnShow}"
+                            Header="进入 PPT 放映时自动进入批注模式"
                             Icon="{x:Static ui:SegoeFluentIcons.Edit}"
                             Toggled="ToggleSwitchShowCanvasAtNewSlideShow_Toggled"/>
 
-                    <TextBlock Text="{i18n:I18n Key=Nav_PPT_Settings}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
+                    <TextBlock Text="PPT设置" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
                     <controls:LabeledSettingsCard x:Name="CardEnableTwoFingerGestureInPresentationMode"
-                            Header="{i18n:I18n Key=PPT_TwoFingerGesture}"
+                            Header="允许幻灯片模式下的双指手势"
                             Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
                             Toggled="ToggleSwitchEnableTwoFingerGestureInPresentationMode_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardEnableFingerGestureSlideShowControl"
-                            Header="{i18n:I18n Key=PPT_FingerGestureSlide}"
-                            Description="{i18n:I18n Key=PPT_FingerGestureSlideHint}"
+                            Header="允许使用手指手势进行幻灯片翻页"
+                            Description="允许开启画板时使用手指手势进行幻灯片翻页（启用后，在幻灯片放映模式下，当画板无墨迹时，使用手指（笔尖或手掌无法识别）左右滑动即可控制幻灯片翻页。）"
                             Icon="{x:Static ui:SegoeFluentIcons.Handwriting}"
                             Toggled="ToggleSwitchEnableFingerGestureSlideShowControl_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardEnablePPTTimeCapsule"
-                            Header="{i18n:I18n Key=PPT_TimeCapsule}"
-                            Description="{i18n:I18n Key=PPT_TimeCapsuleHint}"
+                            Header="PPT 时间显示胶囊"
+                            Description="开启后在 PPT 放映模式下显示时间胶囊，可替代最小化计时器窗口"
                             Icon="{x:Static ui:SegoeFluentIcons.QuietHours}"
                             Toggled="ToggleSwitchEnablePPTTimeCapsule_Toggled"/>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=PPT_TimeCapsulePosition}">
+                    <ui:SettingsCard Header="时间胶囊位置：">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Location}"/>
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxPPTTimeCapsulePosition"
                                   SelectionChanged="ComboBoxPPTTimeCapsulePosition_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=PPT_TimeCapsulePos_TL}"/>
-                            <ComboBoxItem Content="{i18n:I18n Key=PPT_TimeCapsulePos_TR}"/>
-                            <ComboBoxItem Content="{i18n:I18n Key=PPT_TimeCapsulePos_Center}"/>
+                            <ComboBoxItem Content="左上角"/>
+                            <ComboBoxItem Content="右上角"/>
+                            <ComboBoxItem Content="顶部居中"/>
                         </ComboBox>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=PPT_TimeCapsuleOpacity}">
+                    <ui:SettingsCard Header="时间胶囊透明度：">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EaseOfAccess}"/>
                         </ui:SettingsCard.HeaderIcon>
@@ -277,7 +276,7 @@
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=PPT_TimeCapsuleScale}">
+                    <ui:SettingsCard Header="时间胶囊大小：">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Zoom}"/>
                         </ui:SettingsCard.HeaderIcon>
@@ -292,55 +291,55 @@
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=PPT_TimeCapsuleResetPosition}"
-                                     Description="{i18n:I18n Key=PPT_TimeCapsuleResetPositionHint}">
+                    <ui:SettingsCard Header="重置位置"
+                                     Description="将时间胶囊重置到默认位置">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Redo}"/>
                         </ui:SettingsCard.HeaderIcon>
-                        <Button Content="{i18n:I18n Key=PPT_TimeCapsuleResetPosition}"
+                        <Button Content="重置位置"
                                 Click="ButtonResetPPTTimeCapsulePosition_Click"/>
                     </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardShowPPTSidebarByDefault"
-                            Header="{i18n:I18n Key=PPT_ShowQuickPanelInShow}"
-                            Description="{i18n:I18n Key=PPT_ShowQuickPanelInShowHint}"
+                            Header="PPT 放映时显示快速面板"
+                            Description="关闭后在 PPT 放映时不显示快速面板"
                             Icon="{x:Static ui:SegoeFluentIcons.OpenPane}"
                             Toggled="ToggleSwitchShowPPTSidebarByDefault_Toggled"/>
 
-                    <TextBlock Text="{i18n:I18n Key=PPT_AutoScreenshot}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
+                    <TextBlock Text="自动幻灯片截屏" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoSaveScreenShotInPowerPoint"
-                            Header="{i18n:I18n Key=PPT_AutoScreenshot}"
-                            Description="{i18n:I18n Key=PPT_AutoScreenshotHint}"
+                            Header="自动幻灯片截屏"
+                            Description="开启 自动幻灯片截屏 后将会在幻灯片有墨迹时翻页自动截屏"
                             Icon="{x:Static ui:SegoeFluentIcons.Camera}"
                             Toggled="ToggleSwitchAutoSaveScreenShotInPowerPoint_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoSaveStrokesInPowerPoint"
-                            Header="{i18n:I18n Key=PPT_AutoSaveStrokes}"
-                            Description="{i18n:I18n Key=PPT_AutoSaveStrokesHint}"
+                            Header="自动保存幻灯片墨迹"
+                            Description="开启 自动保存幻灯片墨迹 后将在结束幻灯片放映时自动将保存已有墨迹，并在下次打开时自动加载（文件名和幻灯片页数都要相同）"
                             Icon="{x:Static ui:SegoeFluentIcons.Save}"
                             Toggled="ToggleSwitchAutoSaveStrokesInPowerPoint_Toggled"/>
 
-                    <TextBlock Text="{i18n:I18n Key=PPT_RememberLastPage}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
+                    <TextBlock Text="记忆并提示上次播放位置" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
                     <controls:LabeledSettingsCard x:Name="CardNotifyPreviousPage"
-                            Header="{i18n:I18n Key=PPT_RememberLastPage}"
-                            Description="{i18n:I18n Key=PPT_RememberLastPageHint}"
+                            Header="记忆并提示上次播放位置"
+                            Description="开启后会记录上次播放的页数，点击"是"后会自动跳转"
                             Icon="{x:Static ui:SegoeFluentIcons.History}"
                             Toggled="ToggleSwitchNotifyPreviousPage_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAlwaysGoToFirstPageOnReenter"
-                            Header="{i18n:I18n Key=PPT_GoToFirstPageOnReenter}"
+                            Header="进入放映时回到首页"
                             Icon="{x:Static ui:SegoeFluentIcons.Rewind}"
                             Toggled="ToggleSwitchAlwaysGoToFirstPageOnReenter_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardNotifyHiddenPage"
-                            Header="{i18n:I18n Key=PPT_NotifyHiddenPage}"
+                            Header="提示隐藏幻灯片"
                             Icon="{x:Static ui:SegoeFluentIcons.Hide}"
                             Toggled="ToggleSwitchNotifyHiddenPage_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardNotifyAutoPlayPresentation"
-                            Header="{i18n:I18n Key=PPT_NotifyAutoPlay}"
+                            Header="提示是否已启用自动播放"
                             Icon="{x:Static ui:SegoeFluentIcons.Play}"
                             Toggled="ToggleSwitchNotifyAutoPlayPresentation_Toggled"/>
 

@@ -6,7 +6,6 @@
              xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
              xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
              xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
-             xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
              xmlns:icons="clr-namespace:Ink_Canvas"
              xmlns:c="clr-namespace:Ink_Canvas.Converter"
              mc:Ignorable="d">
@@ -14,22 +13,22 @@
         <c:StringToGeometryConverter x:Key="StringToGeometryConverter" />
     </UserControl.Resources>
     <Grid>
-        <controls:PopupShellContent x:Name="Shell" Title="{i18n:I18n Key=Board_EraserOptions}" d:Visibility="Collapsed" />
+        <controls:PopupShellContent x:Name="Shell" Title="橡皮选项" d:Visibility="Collapsed" />
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
             <ikw:SimpleStackPanel Margin="10">
                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="2"
                                      VerticalAlignment="Center"
                                      HorizontalAlignment="Center">
-                    <Label Content="{i18n:I18n Key=Board_Size}" FontWeight="Bold"
+                    <Label Content="大小" FontWeight="Bold"
                            Foreground="{DynamicResource FloatBarForeground}" FontSize="16"
                            VerticalAlignment="Center" />
                     <ComboBox x:Name="ComboBoxEraserSize"
                                   SelectedIndex="2">
-                        <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_VerySmall}" />
-                        <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_Small}" />
-                        <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_Medium}" />
-                        <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_Large}" />
-                        <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_VeryLarge}" />
+                        <ComboBoxItem Content="很小" />
+                        <ComboBoxItem Content="较小" />
+                        <ComboBoxItem Content="中等" />
+                        <ComboBoxItem Content="较大" />
+                        <ComboBoxItem Content="很大" />
                     </ComboBox>
                 </ikw:SimpleStackPanel>
                 <TabControl x:Name="EraserTypeTabControl"
@@ -44,8 +43,8 @@
                     <TabControl.ItemContainerStyle>
                         <Style TargetType="TabItem" BasedOn="{StaticResource CompactPivotTabItem}" />
                     </TabControl.ItemContainerStyle>
-                    <TabItem Header="{i18n:I18n Key=Board_EraserShape_Circle}" />
-                    <TabItem Header="{i18n:I18n Key=Board_EraserShape_Blackboard}" />
+                    <TabItem Header="圆形擦" />
+                    <TabItem Header="黑板擦" />
                 </TabControl>
                 <Button x:Name="ClearInkButton" Foreground="White"
                         HorizontalAlignment="Center" Margin="0,6,0,0"
@@ -71,7 +70,7 @@
                             </Image>
                             <TextBlock FontSize="10" VerticalAlignment="Center"
                                        Foreground="White" FontWeight="Bold"
-                                       Text="{i18n:I18n Key=Board_ClearInk}" />
+                                       Text="清空墨迹" />
                         </ikw:SimpleStackPanel>
                     </Button.Content>
                 </Button>
@@ -99,7 +98,7 @@
                             </Image>
                             <TextBlock FontSize="9" VerticalAlignment="Center"
                                        Foreground="White"
-                                       Text="{i18n:I18n Key=Board_ClearInkAndHistory}" />
+                                       Text="清空墨迹和历史" />
                         </ikw:SimpleStackPanel>
                     </Button.Content>
                 </Button>

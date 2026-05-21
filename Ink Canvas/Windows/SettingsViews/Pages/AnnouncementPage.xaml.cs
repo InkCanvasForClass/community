@@ -50,13 +50,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             NotificationProviderRegistry.RegisterOrUpdate(new NotificationProviderStatus
             {
                 ProviderId = "announcement",
-                DisplayName = Ink_Canvas.Properties.Strings.GetString("Notification_Provider_Announcement") ?? "公告提供商",
-                Description = Ink_Canvas.Properties.Strings.GetString("Notification_Provider_AnnouncementDesc") ?? "拉取远端公告并接收实时推送。",
+                DisplayName = "公告提供商",
+                Description = "拉取远端公告并接收实时推送。",
                 IsEnabled = SettingsManager.Settings.Notification.IsAnnouncementEnabled,
                 IsRunning = false,
                 Status = SettingsManager.Settings.Notification.IsAnnouncementEnabled
-                    ? Ink_Canvas.Properties.Strings.GetString("Notification_Provider_WaitingRestart") ?? "将在下次启动时生效"
-                    : Ink_Canvas.Properties.Strings.GetString("Notification_Provider_Disabled") ?? "已禁用"
+                    ? "将在下次启动时生效"
+                    : "已禁用"
             });
         }
 

@@ -5,12 +5,11 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       xmlns:c="clr-namespace:Ink_Canvas.Converter"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d"
-      Title="{i18n:I18n Key=Announcement_PageTitle}">
+      Title="公告">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -27,33 +26,33 @@
                                   HorizontalAlignment="Stretch"
                                   Spacing="{StaticResource SettingsCardSpacing}">
 
-                <TextBlock Text="{i18n:I18n Key=Announcement_PageTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
+                <TextBlock Text="公告" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
 
                 <controls:LabeledSettingsCard x:Name="CardEnableAnnouncements"
-                        Header="{i18n:I18n Key=Notification_EnableAnnouncements}"
-                        Description="{i18n:I18n Key=Notification_EnableAnnouncementsHint}"
+                        Header="启用公告系统"
+                        Description="启动后拉取公告，并接收实时公告推送。"
                         Icon="{x:Static ui:SegoeFluentIcons.Message}"
                         Toggled="ToggleSwitchEnableAnnouncements_Toggled" />
 
                 <controls:LabeledSettingsCard x:Name="CardEnableForcePopup"
-                        Header="{i18n:I18n Key=Notification_EnableForcePopup}"
-                        Description="{i18n:I18n Key=Notification_EnableForcePopupHint}"
+                        Header="启用重要公告强提醒"
+                        Description="重要公告允许默认展开显示，但仍可关闭。"
                         Icon="{x:Static ui:SegoeFluentIcons.Warning}"
                         Toggled="ToggleSwitchEnableForcePopup_Toggled" />
 
-                <ui:SettingsCard Header="{i18n:I18n Key=Announcement_CenterTitle}"
-                                 Description="{i18n:I18n Key=Announcement_CenterHint}">
+                <ui:SettingsCard Header="公告中心"
+                                 Description="查看已接收的远端公告和实时推送内容。">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BulletedList}" />
                     </ui:SettingsCard.HeaderIcon>
-                    <Button Content="{i18n:I18n Key=Notification_ViewHistory}"
+                    <Button Content="查看历史"
                             Click="ViewAnnouncementsButton_Click" />
                 </ui:SettingsCard>
 
-                <TextBlock Text="{i18n:I18n Key=Announcement_ConnectionTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
+                <TextBlock Text="连接配置" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
 
-                <ui:SettingsCard Header="{i18n:I18n Key=Announcement_ApiBaseUrl}"
-                                 Description="{i18n:I18n Key=Announcement_ApiBaseUrlHint}">
+                <ui:SettingsCard Header="公告 API 地址"
+                                 Description="用于拉取公告列表的服务端基础地址。">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}" />
                     </ui:SettingsCard.HeaderIcon>
@@ -62,8 +61,8 @@
                              TextChanged="ApiBaseUrlTextBox_TextChanged" />
                 </ui:SettingsCard>
 
-                <ui:SettingsCard Header="{i18n:I18n Key=Announcement_WebSocketUrl}"
-                                 Description="{i18n:I18n Key=Announcement_WebSocketUrlHint}">
+                <ui:SettingsCard Header="实时推送地址"
+                                 Description="可留空，留空时会根据 API 地址自动生成 WebSocket 地址。">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Globe}" />
                     </ui:SettingsCard.HeaderIcon>
@@ -72,8 +71,8 @@
                              TextChanged="WebSocketUrlTextBox_TextChanged" />
                 </ui:SettingsCard>
 
-                <ui:SettingsCard Header="{i18n:I18n Key=Announcement_Token}"
-                                 Description="{i18n:I18n Key=Announcement_TokenHint}">
+                <ui:SettingsCard Header="公告访问 Token"
+                                 Description="公告系统用于识别软件的访问 Token。">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Permissions}" />
                     </ui:SettingsCard.HeaderIcon>

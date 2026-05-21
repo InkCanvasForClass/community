@@ -5,12 +5,11 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       xmlns:c="clr-namespace:Ink_Canvas.Converter"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d"
-      Title="{i18n:I18n Key=Notification_PageTitle}">
+      Title="通知">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -28,49 +27,49 @@
                                   HorizontalAlignment="Stretch"
                                   Spacing="{StaticResource SettingsCardSpacing}">
 
-                <TextBlock Text="{i18n:I18n Key=Notification_GroupTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
+                <TextBlock Text="通知管理" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
 
                 <controls:LabeledSettingsCard x:Name="CardEnableAnnouncements"
-                        Header="{i18n:I18n Key=Notification_EnableAnnouncements}"
-                        Description="{i18n:I18n Key=Notification_EnableAnnouncementsHint}"
+                        Header="启用公告系统"
+                        Description="启动后拉取公告，并接收实时公告推送。"
                         Icon="{x:Static ui:SegoeFluentIcons.Message}"
                         Toggled="ToggleSwitchEnableAnnouncements_Toggled" />
 
                 <controls:LabeledSettingsCard x:Name="CardEnableForcePopup"
-                        Header="{i18n:I18n Key=Notification_EnableForcePopup}"
-                        Description="{i18n:I18n Key=Notification_EnableForcePopupHint}"
+                        Header="启用重要公告强提醒"
+                        Description="重要公告允许默认展开显示，但仍可关闭。"
                         Icon="{x:Static ui:SegoeFluentIcons.Warning}"
                         Toggled="ToggleSwitchEnableForcePopup_Toggled" />
 
-                <ui:SettingsCard Header="{i18n:I18n Key=Announcement_CenterTitle}"
-                                 Description="{i18n:I18n Key=Announcement_CenterHint}">
+                <ui:SettingsCard Header="公告中心"
+                                 Description="查看已接收的远端公告和实时推送内容。">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BulletedList}" />
                     </ui:SettingsCard.HeaderIcon>
-                    <Button Content="{i18n:I18n Key=Notification_ViewHistory}"
+                    <Button Content="查看历史"
                             Click="ViewAnnouncementsButton_Click" />
                 </ui:SettingsCard>
 
-                <ui:SettingsExpander Header="{i18n:I18n Key=Announcement_ConnectionTitle}"
-                                     Description="{i18n:I18n Key=Announcement_ConnectionHint}">
+                <ui:SettingsExpander Header="连接配置"
+                                     Description="配置公告 HTTP API、WebSocket 实时推送地址和访问 Token。">
                     <ui:SettingsExpander.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}" />
                     </ui:SettingsExpander.HeaderIcon>
                     <ui:SettingsExpander.Items>
-                        <ui:SettingsCard Header="{i18n:I18n Key=Announcement_ApiBaseUrl}"
-                                         Description="{i18n:I18n Key=Announcement_ApiBaseUrlHint}">
+                        <ui:SettingsCard Header="公告 API 地址"
+                                         Description="用于拉取公告列表的服务端基础地址。">
                             <TextBox x:Name="ApiBaseUrlTextBox"
                                      MinWidth="360"
                                      TextChanged="ApiBaseUrlTextBox_TextChanged" />
                         </ui:SettingsCard>
-                        <ui:SettingsCard Header="{i18n:I18n Key=Announcement_WebSocketUrl}"
-                                         Description="{i18n:I18n Key=Announcement_WebSocketUrlHint}">
+                        <ui:SettingsCard Header="实时推送地址"
+                                         Description="可留空，留空时会根据 API 地址自动生成 WebSocket 地址。">
                             <TextBox x:Name="WebSocketUrlTextBox"
                                      MinWidth="360"
                                      TextChanged="WebSocketUrlTextBox_TextChanged" />
                         </ui:SettingsCard>
-                        <ui:SettingsCard Header="{i18n:I18n Key=Announcement_Token}"
-                                         Description="{i18n:I18n Key=Announcement_TokenHint}">
+                        <ui:SettingsCard Header="公告访问 Token"
+                                         Description="公告系统用于识别软件的访问 Token。">
                             <TextBox x:Name="TokenTextBox"
                                      MinWidth="360"
                                      TextChanged="TokenTextBox_TextChanged" />
@@ -79,19 +78,19 @@
                 </ui:SettingsExpander>
 
                 <controls:LabeledSettingsCard x:Name="CardEnableDynamic"
-                        Header="{i18n:I18n Key=Notification_EnableDynamic}"
-                        Description="{i18n:I18n Key=Notification_EnableDynamicHint}"
+                        Header="启用灵动通知"
+                        Description="使用顶部胶囊提示承载公告、更新和本地消息。"
                         Icon="{x:Static ui:SegoeFluentIcons.Info}"
                         Toggled="ToggleSwitchEnableDynamic_Toggled" />
 
                 <controls:LabeledSettingsCard x:Name="CardEnableWindowsToast"
-                        Header="{i18n:I18n Key=Notification_EnableWindowsToast}"
-                        Description="{i18n:I18n Key=Notification_EnableWindowsToastHint}"
+                        Header="启用 Windows 系统通知"
+                        Description="重要通知和更新可同步显示为系统 Toast。"
                         Icon="{x:Static ui:SegoeFluentIcons.ActionCenterNotification}"
                         Toggled="ToggleSwitchEnableWindowsToast_Toggled" />
 
-                <ui:SettingsExpander Header="{i18n:I18n Key=Notification_DictationDoNotDisturb}"
-                                     Description="{i18n:I18n Key=Notification_DictationDoNotDisturbHint}">
+                <ui:SettingsExpander Header="弹窗免打扰"
+                                     Description="指定场景下屏蔽弹窗和系统通知，但消息仍保留在历史中。">
                     <ui:SettingsExpander.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BlockContact}" />
                     </ui:SettingsExpander.HeaderIcon>
@@ -102,14 +101,14 @@
                                       Toggled="ToggleSwitchDictationDoNotDisturb_Toggled" />
                     </ui:SettingsExpander.Content>
                     <ui:SettingsExpander.Items>
-                        <ui:SettingsCard Header="{i18n:I18n Key=Notification_DictationDoNotDisturbPpt}"
-                                         Description="{i18n:I18n Key=Notification_DictationDoNotDisturbPptHint}">
+                        <ui:SettingsCard Header="PPT 放映时不提醒"
+                                         Description="进入 PPT 放映后，不弹出灵动通知、旧通知或 Windows Toast。">
                             <CheckBox x:Name="CheckBoxDictationDoNotDisturbPpt"
                                       Checked="DictationDoNotDisturbMode_CheckChanged"
                                       Unchecked="DictationDoNotDisturbMode_CheckChanged" />
                         </ui:SettingsCard>
-                        <ui:SettingsCard Header="{i18n:I18n Key=Notification_DictationDoNotDisturbWhiteboard}"
-                                         Description="{i18n:I18n Key=Notification_DictationDoNotDisturbWhiteboardHint}">
+                        <ui:SettingsCard Header="白板模式时不提醒"
+                                         Description="进入白板或黑板模式后，不弹出灵动通知、旧通知或 Windows Toast。">
                             <CheckBox x:Name="CheckBoxDictationDoNotDisturbWhiteboard"
                                       Checked="DictationDoNotDisturbMode_CheckChanged"
                                       Unchecked="DictationDoNotDisturbMode_CheckChanged" />
@@ -117,14 +116,14 @@
                     </ui:SettingsExpander.Items>
                 </ui:SettingsExpander>
 
-                <TextBlock Text="{i18n:I18n Key=Notification_ProviderTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
+                <TextBlock Text="提醒提供商" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
 
-                <ui:SettingsCard Header="{i18n:I18n Key=Notification_ProviderManagement}"
-                                 Description="{i18n:I18n Key=Notification_ProviderManagementHint}">
+                <ui:SettingsCard Header="提醒提供商管理"
+                                 Description="查看公告、本地消息和系统通知提供商的启用与运行状态。">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}" />
                     </ui:SettingsCard.HeaderIcon>
-                    <Button Content="{i18n:I18n Key=Notification_ProviderRefresh}"
+                    <Button Content="刷新状态"
                             Click="RefreshProvidersButton_Click" />
                 </ui:SettingsCard>
 
@@ -145,24 +144,24 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <TextBlock Text="{i18n:I18n Key=Notification_BehaviorTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
+                <TextBlock Text="展示行为" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
 
-                <ui:SettingsCard Header="{i18n:I18n Key=Notification_Placement}"
-                                 Description="{i18n:I18n Key=Notification_PlacementHint}">
+                <ui:SettingsCard Header="灵动通知位置"
+                                 Description="选择灵动通知在主窗口中的默认展示位置。">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.POI}" />
                     </ui:SettingsCard.HeaderIcon>
                     <ComboBox x:Name="ComboBoxPlacement"
                               MinWidth="180"
                               SelectionChanged="ComboBoxPlacement_SelectionChanged">
-                        <ComboBoxItem Content="{i18n:I18n Key=Notification_PlacementTopCenter}" Tag="TopCenter" />
-                        <ComboBoxItem Content="{i18n:I18n Key=Notification_PlacementTopRight}" Tag="TopRight" />
-                        <ComboBoxItem Content="{i18n:I18n Key=Notification_PlacementTopLeft}" Tag="TopLeft" />
+                        <ComboBoxItem Content="顶部居中" Tag="TopCenter" />
+                        <ComboBoxItem Content="右上角" Tag="TopRight" />
+                        <ComboBoxItem Content="左上角" Tag="TopLeft" />
                     </ComboBox>
                 </ui:SettingsCard>
 
-                <ui:SettingsCard Header="{i18n:I18n Key=Notification_AnimationMode}"
-                                 Description="{i18n:I18n Key=Notification_AnimationModeHint}">
+                <ui:SettingsCard Header="动画效果"
+                                 Description="控制灵动通知进入、展开和退出时的动画强度。">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Play}"
                                      FontSize="16" />
@@ -170,14 +169,14 @@
                     <ComboBox x:Name="ComboBoxAnimationMode"
                               MinWidth="180"
                               SelectionChanged="ComboBoxAnimationMode_SelectionChanged">
-                        <ComboBoxItem Content="{i18n:I18n Key=Notification_AnimationOff}" Tag="Off" />
-                        <ComboBoxItem Content="{i18n:I18n Key=Notification_AnimationSimple}" Tag="Simple" />
-                        <ComboBoxItem Content="{i18n:I18n Key=Notification_AnimationStandard}" Tag="Standard" />
+                        <ComboBoxItem Content="关闭" Tag="Off" />
+                        <ComboBoxItem Content="简洁" Tag="Simple" />
+                        <ComboBoxItem Content="标准" Tag="Standard" />
                     </ComboBox>
                 </ui:SettingsCard>
 
-                <ui:SettingsCard Header="{i18n:I18n Key=Notification_UpdateDuration}"
-                                 Description="{i18n:I18n Key=Notification_UpdateDurationHint}">
+                <ui:SettingsCard Header="更新通知展示时长"
+                                 Description="更新类消息自动关闭前停留的秒数。">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" />
                     </ui:SettingsCard.HeaderIcon>
@@ -193,8 +192,8 @@
                     </ikw:SimpleStackPanel>
                 </ui:SettingsCard>
 
-                <ui:SettingsCard Header="{i18n:I18n Key=Notification_UrgentDuration}"
-                                 Description="{i18n:I18n Key=Notification_UrgentDurationHint}">
+                <ui:SettingsCard Header="紧急通知展示时长"
+                                 Description="紧急消息自动关闭前停留的秒数。">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Warning}" />
                     </ui:SettingsCard.HeaderIcon>
@@ -210,8 +209,8 @@
                     </ikw:SimpleStackPanel>
                 </ui:SettingsCard>
 
-                <ui:SettingsCard Header="{i18n:I18n Key=Notification_ImportantDuration}"
-                                 Description="{i18n:I18n Key=Notification_ImportantDurationHint}">
+                <ui:SettingsCard Header="重要通知展示时长"
+                                 Description="重要消息自动关闭前停留的秒数。">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Important}" />
                     </ui:SettingsCard.HeaderIcon>
@@ -227,8 +226,8 @@
                     </ikw:SimpleStackPanel>
                 </ui:SettingsCard>
 
-                <ui:SettingsCard Header="{i18n:I18n Key=Notification_ReminderDuration}"
-                                 Description="{i18n:I18n Key=Notification_ReminderDurationHint}">
+                <ui:SettingsCard Header="提醒通知展示时长"
+                                 Description="提醒类消息自动关闭前停留的秒数。">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Stopwatch}" />
                     </ui:SettingsCard.HeaderIcon>
@@ -244,8 +243,8 @@
                     </ikw:SimpleStackPanel>
                 </ui:SettingsCard>
 
-                <ui:SettingsCard Header="{i18n:I18n Key=Notification_OtherDuration}"
-                                 Description="{i18n:I18n Key=Notification_OtherDurationHint}">
+                <ui:SettingsCard Header="其他通知展示时长"
+                                 Description="其他消息自动关闭前停留的秒数。">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Info}" />
                     </ui:SettingsCard.HeaderIcon>
@@ -261,14 +260,14 @@
                     </ikw:SimpleStackPanel>
                 </ui:SettingsCard>
 
-                <TextBlock Text="{i18n:I18n Key=Notification_ActionsTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
+                <TextBlock Text="操作" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
 
-                <ui:SettingsCard Header="{i18n:I18n Key=Notification_Test}"
-                                 Description="{i18n:I18n Key=Notification_TestHint}">
+                <ui:SettingsCard Header="测试通知"
+                                 Description="立即向消息队列发送一条测试通知。">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Send}" />
                     </ui:SettingsCard.HeaderIcon>
-                    <Button Content="{i18n:I18n Key=Notification_TestButton}"
+                    <Button Content="发送测试通知"
                             Click="TestNotificationButton_Click" />
                 </ui:SettingsCard>
 

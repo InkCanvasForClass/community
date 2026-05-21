@@ -14,7 +14,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         public virtual bool DefaultPreventHideOnDragClick => false;
         public virtual string Description => "";
 
-        public string DisplayName => Strings.GetString(LocalizationKey) ?? LocalizationKey;
+        public string DisplayName => LocalizationKey;
 
         protected virtual string IconBrushResourceKey => null;
         protected virtual string LabelBrushResourceKey => null;
@@ -28,7 +28,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         {
             var btn = new ToolbarImageButton
             {
-                Label = Strings.GetString(LocalizationKey) ?? LocalizationKey,
+                Label = LocalizationKey,
                 Tag = "ToolbarRegistryInjected"
             };
             if (!string.IsNullOrEmpty(IconGeometry))

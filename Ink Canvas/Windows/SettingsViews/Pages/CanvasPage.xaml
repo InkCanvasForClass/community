@@ -6,7 +6,6 @@
       xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       xmlns:c="clr-namespace:Ink_Canvas.Converter"
@@ -30,119 +29,119 @@
                     Spacing="{StaticResource SettingsCardSpacing}">
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=Canvas_GroupTitle}" />
+                        Text="画板" />
 
                     <controls:LabeledSettingsCard x:Name="CardShowCursor"
-                            Header="{i18n:I18n Key=Canvas_ShowCursor}"
+                            Header="显示画笔光标"
                             Icon="{x:Static ui:SegoeFluentIcons.PointerHand}"
                             SwitchName="ToggleSwitchShowCursor"
                             Toggled="ToggleSwitchShowCursor_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardEnablePressureTouchMode"
-                            Header="{i18n:I18n Key=Canvas_EnablePressureTouch}"
-                            Description="{i18n:I18n Key=Canvas_EnablePressureTouchHint}"
+                            Header="启用压感触屏模式"
+                            Description="开启后，触屏设备也将支持压感效果，适用于部分支持压感但无法被系统识别的触屏设备。"
                             Icon="{x:Static ui:SegoeFluentIcons.Touch}"
                             SwitchName="ToggleSwitchEnablePressureTouchMode"
                             Toggled="ToggleSwitchEnablePressureTouchMode_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardDisablePressure"
-                            Header="{i18n:I18n Key=Canvas_DisablePressure}"
-                            Description="{i18n:I18n Key=Canvas_DisablePressureHint}"
+                            Header="屏蔽压感"
+                            Description="开启后，将忽略所有设备的压感信息，使所有笔画具有统一的粗细。与压感触屏模式互斥。"
                             Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
                             SwitchName="ToggleSwitchDisablePressure"
                             Toggled="ToggleSwitchDisablePressure_Toggled" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Canvas_EraserSize}"
-                            Description="{i18n:I18n Key=Canvas_EraserSizeHint}">
+                    <ui:SettingsCard Header="橡皮大小"
+                            Description="非实时切换，下一次使用面积擦时生效。">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EraseTool}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxEraserSize"
                                   SelectedIndex="1"
                                   SelectionChanged="ComboBoxEraserSize_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_VerySmall}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_Small}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_Medium}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_Large}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_EraserSize_VeryLarge}" />
+                            <ComboBoxItem Content="很小" />
+                            <ComboBoxItem Content="较小" />
+                            <ComboBoxItem Content="中等" />
+                            <ComboBoxItem Content="较大" />
+                            <ComboBoxItem Content="很大" />
                         </ComboBox>
                     </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardHideStrokeWhenSelecting"
-                            Header="{i18n:I18n Key=Canvas_HideStrokeWhenSelecting}"
-                            Description="{i18n:I18n Key=Canvas_HideStrokeWhenSelectingHint}"
+                            Header="退出画板模式后隐藏墨迹"
+                            Description="开启 退出画板模式后隐藏墨迹 选项后，进入 PPT 模式时未处于批注模式时不会显示墨迹。"
                             Icon="{x:Static ui:SegoeFluentIcons.Hide}"
                             SwitchName="ToggleSwitchHideStrokeWhenSelecting"
                             Toggled="ToggleSwitchHideStrokeWhenSelecting_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardClearCanvasAndClearTimeMachine"
-                            Header="{i18n:I18n Key=Canvas_ClearInkAlsoClearHistory}"
+                            Header="清空墨迹时删除墨迹历史记录"
                             Icon="{x:Static ui:SegoeFluentIcons.Delete}"
                             SwitchName="ToggleSwitchClearCanvasAndClearTimeMachine"
                             Toggled="ToggleSwitchClearCanvasAndClearTimeMachine_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardClearCanvasAlsoClearImages"
-                            Header="{i18n:I18n Key=Canvas_ClearCanvasAlsoClearImages}"
+                            Header="清空画布时同时清空图片"
                             Icon="{x:Static ui:SegoeFluentIcons.Photo}"
                             SwitchName="ToggleSwitchClearCanvasAlsoClearImages"
                             Toggled="ToggleSwitchClearCanvasAlsoClearImages_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardCompressPicturesUploaded"
-                            Header="{i18n:I18n Key=Canvas_CompressPicturesUploaded}"
+                            Header="插入图片时自动压缩（大于1920×1080）"
                             Icon="{x:Static ui:SegoeFluentIcons.Clear}"
                             SwitchName="ToggleSwitchCompressPicturesUploaded"
                             Toggled="ToggleSwitchCompressPicturesUploaded_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardLaunchSeewoVideoShowcaseForWhiteboardBooth"
-                            Header="{i18n:I18n Key=Canvas_LaunchSeewoVideoShowcaseForWhiteboardBooth}"
-                            Description="{i18n:I18n Key=Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint}"
+                            Header="白板展台按钮启动希沃视频展台"
+                            Description="开启后，点击白板工具栏「展台」将打开希沃视频展台（需已安装）；关闭则使用内置展台。"
                             Icon="{x:Static ui:SegoeFluentIcons.Video}"
                             SwitchName="ToggleSwitchLaunchSeewoVideoShowcaseForWhiteboardBooth"
                             Toggled="ToggleSwitchLaunchSeewoVideoShowcaseForWhiteboardBooth_Toggled" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Canvas_KeepHyperbolaAsymptote}"
-                            Description="{i18n:I18n Key=Canvas_HyperbolaAsymptoteHint}">
+                    <ui:SettingsCard Header="保留双曲线渐近线"
+                            Description="请注意，若不保留双曲线渐近线可能会有遇到撤回相关的 BUG 影响使用。">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AreaChart}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxHyperbolaAsymptoteOption"
                                   SelectedIndex="0"
                                   SelectionChanged="ComboBoxHyperbolaAsymptoteOption_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_Yes}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_No}" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_AskEachTime}" />
+                            <ComboBoxItem Content="是" />
+                            <ComboBoxItem Content="否" />
+                            <ComboBoxItem Content="每次询问" />
                         </ComboBox>
                     </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardShowCircleCenter"
-                            Header="{i18n:I18n Key=Canvas_ShowCircleCenter}"
+                            Header="绘制圆时显示圆心位置"
                             Icon="{x:Static ui:SegoeFluentIcons.CircleRing}"
                             SwitchName="ToggleSwitchShowCircleCenter"
                             Toggled="ToggleSwitchShowCircleCenter_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardShowCoordinateUnitMarks"
-                            Header="{i18n:I18n Key=Canvas_ShowCoordinateUnitMarks}"
-                            Description="{i18n:I18n Key=Canvas_ShowCoordinateUnitMarksHint}"
+                            Header="绘制坐标系时显示厘米刻度"
+                            Description="开启后，绘制坐标系会按 1 cm 间隔自动添加刻度。"
                             Icon="{x:Static ui:SegoeFluentIcons.Calculator}"
                             SwitchName="ToggleSwitchShowCoordinateUnitMarks"
                             Toggled="ToggleSwitchShowCoordinateUnitMarks_Toggled" />
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Canvas_CurveSmoothingMode}">
+                    <ui:SettingsCard Header="曲线平滑模式">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.InkingTool}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxCurveSmoothingMode"
                                   SelectedIndex="2"
                                   SelectionChanged="ComboBoxCurveSmoothingMode_SelectionChanged">
-                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_CurveSmoothing_Off}" Tag="0" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_WPFBezierSmoothing}" Tag="1" />
-                            <ComboBoxItem Content="{i18n:I18n Key=Canvas_AdvancedBezierSmoothing}" Tag="2" />
+                            <ComboBoxItem Content="关闭" Tag="0" />
+                            <ComboBoxItem Content="使用 WPF 默认贝塞尔曲线平滑" Tag="1" />
+                            <ComboBoxItem Content="使用高级曲线平滑（推荐）" Tag="2" />
                         </ComboBox>
                     </ui:SettingsCard>
 
                     <ui:SettingsExpander x:Name="ExpanderBrushAutoRestore"
-                            Header="{i18n:I18n Key=Canvas_BrushAutoRestore}"
-                            Description="{i18n:I18n Key=Canvas_BrushAutoRestoreHint}"
+                            Header="启用画笔自动恢复"
+                            Description="启用后，临时修改画笔设置后将在指定时间点自动恢复到你在此处配置的颜色 / 透明度 / 粗细"
                             d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" />
@@ -152,25 +151,25 @@
                                 OffContent="{DynamicResource Common_Off}"
                                 Toggled="ToggleSwitchBrushAutoRestore_Toggled" />
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{i18n:I18n Key=Canvas_AutoRestoreTimePoints}">
+                            <ui:SettingsCard Header="自动恢复时间点 (HH:mm，可多个，用 ; 分隔)">
                                 <TextBox x:Name="BrushAutoRestoreTimesTextBox" Width="260"
                                          TextChanged="BrushAutoRestoreTimesTextBox_TextChanged" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="{i18n:I18n Key=Canvas_RestoreColor}">
+                            <ui:SettingsCard Header="恢复目标颜色">
                                 <ComboBox x:Name="ComboBoxBrushAutoRestoreColor"
                                           SelectionChanged="ComboBoxBrushAutoRestoreColor_SelectionChanged">
-                                    <ComboBoxItem Content="{i18n:I18n Key=Canvas_Color_Default}" Tag="#FFFF0000" />
-                                    <ComboBoxItem Content="{i18n:I18n Key=Canvas_Color_Black}" Tag="#FF000000" />
-                                    <ComboBoxItem Content="{i18n:I18n Key=Canvas_Color_White}" Tag="#FFFFFFFF" />
-                                    <ComboBoxItem Content="{i18n:I18n Key=Canvas_Color_Red}" Tag="#FFFF0000" />
-                                    <ComboBoxItem Content="{i18n:I18n Key=Canvas_Color_Yellow}" Tag="#FFFFFF00" />
-                                    <ComboBoxItem Content="{i18n:I18n Key=Canvas_Color_Blue}" Tag="#FF2563EB" />
-                                    <ComboBoxItem Content="{i18n:I18n Key=Canvas_Color_Green}" Tag="#FF16A34A" />
-                                    <ComboBoxItem Content="{i18n:I18n Key=Canvas_Color_Orange}" Tag="#FFFB9650" />
-                                    <ComboBoxItem Content="{i18n:I18n Key=Canvas_Color_Purple}" Tag="#FF9333EA" />
+                                    <ComboBoxItem Content="默认" Tag="#FFFF0000" />
+                                    <ComboBoxItem Content="黑色" Tag="#FF000000" />
+                                    <ComboBoxItem Content="白色" Tag="#FFFFFFFF" />
+                                    <ComboBoxItem Content="红色" Tag="#FFFF0000" />
+                                    <ComboBoxItem Content="黄色" Tag="#FFFFFF00" />
+                                    <ComboBoxItem Content="蓝色" Tag="#FF2563EB" />
+                                    <ComboBoxItem Content="绿色" Tag="#FF16A34A" />
+                                    <ComboBoxItem Content="橙色" Tag="#FFFB9650" />
+                                    <ComboBoxItem Content="紫色" Tag="#FF9333EA" />
                                 </ComboBox>
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="{i18n:I18n Key=Canvas_RestoreWidth}">
+                            <ui:SettingsCard Header="恢复笔粗细">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="BrushAutoRestoreWidthText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -179,7 +178,7 @@
                                             ValueChanged="BrushAutoRestoreWidthSlider_ValueChanged" />
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="{i18n:I18n Key=Canvas_RestoreOpacity}">
+                            <ui:SettingsCard Header="恢复透明度">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="BrushAutoRestoreAlphaText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -192,8 +191,8 @@
                     </ui:SettingsExpander>
 
                     <ui:SettingsExpander x:Name="ExpanderEnableEraserAutoSwitchBack"
-                            Header="{i18n:I18n Key=Canvas_SwitchBackAfterEraser}"
-                            Description="{i18n:I18n Key=Canvas_SwitchBackAfterEraserHint}"
+                            Header="使用橡皮擦后自动切换回批注模式"
+                            Description="开启后，使用橡皮擦进行擦除操作后静置一段时间将自动切换回批注模式"
                             d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Switch}" />
@@ -203,8 +202,8 @@
                                 OffContent="{DynamicResource Common_Off}"
                                 Toggled="ToggleSwitchEnableEraserAutoSwitchBack_Toggled" />
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{i18n:I18n Key=Canvas_SwitchBackDelay}"
-                                    Description="{i18n:I18n Key=Canvas_SwitchBackDelayHint}">
+                            <ui:SettingsCard Header="自动切换延迟时间"
+                                    Description="若在计时时间内再次进行擦除操作，计时器将重新开始计时">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="EraserAutoSwitchBackDelayText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -217,18 +216,18 @@
                     </ui:SettingsExpander>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{i18n:I18n Key=Gesture_Title}" />
+                        Text="手势" />
 
                     <controls:LabeledSettingsCard x:Name="CardEnableTwoFingerRotationOnSelection"
-                            Header="{i18n:I18n Key=Gesture_AllowRotateScale}"
-                            Description="{i18n:I18n Key=Gesture_AllowRotateScaleHint}"
+                            Header="允许双指旋转与缩放选中的墨迹"
+                            Description="允许选中墨迹后对墨迹进行双指或多指缩放操作（此设置不受「允许双指旋转」设置的影响）"
                             Icon="{x:Static ui:SegoeFluentIcons.Rotate}"
                             SwitchName="ToggleSwitchEnableTwoFingerRotationOnSelection"
                             Toggled="ToggleSwitchEnableTwoFingerRotationOnSelection_Toggled" />
 
                     <ui:SettingsExpander x:Name="ExpanderEnablePalmEraser"
-                            Header="{i18n:I18n Key=Gesture_EnablePalmEraser}"
-                            Description="{i18n:I18n Key=Gesture_PalmHint}"
+                            Header="启用手掌擦"
+                            Description="低敏感度：需要更大的触摸面积和更多触摸点，减少误判；高敏感度：更容易触发手掌擦，但可能误判手指。"
                             d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EraseTool}" />
@@ -238,12 +237,12 @@
                                 OffContent="{DynamicResource Common_Off}"
                                 Toggled="ToggleSwitchEnablePalmEraser_Toggled" />
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{i18n:I18n Key=Gesture_PalmSensitivity}">
+                            <ui:SettingsCard Header="手掌擦敏感度">
                                 <ComboBox x:Name="ComboBoxPalmEraserSensitivity"
                                           SelectionChanged="ComboBoxPalmEraserSensitivity_SelectionChanged">
-                                    <ComboBoxItem Content="{i18n:I18n Key=Gesture_PalmSensitivityLow}" />
-                                    <ComboBoxItem Content="{i18n:I18n Key=Gesture_PalmSensitivityMedium}" />
-                                    <ComboBoxItem Content="{i18n:I18n Key=Gesture_PalmSensitivityHigh}" />
+                                    <ComboBoxItem Content="低敏感度" />
+                                    <ComboBoxItem Content="中敏感度" />
+                                    <ComboBoxItem Content="高敏感度" />
                                 </ComboBox>
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>

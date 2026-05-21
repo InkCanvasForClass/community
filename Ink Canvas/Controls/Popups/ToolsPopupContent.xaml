@@ -6,7 +6,6 @@
              xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
              xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
              xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
-             xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
              xmlns:helpers="clr-namespace:Ink_Canvas.Helpers"
              mc:Ignorable="d">
     <UserControl.Resources>
@@ -22,26 +21,26 @@
         </Style>
     </UserControl.Resources>
     <Grid>
-        <controls:PopupShellContent x:Name="Shell" Title="{i18n:I18n Key=Tools_MoreFeaturesTitle}" d:Visibility="Collapsed" />
+        <controls:PopupShellContent x:Name="Shell" Title="更多功能" d:Visibility="Collapsed" />
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
             <ikw:SimpleStackPanel Margin="2" Spacing="3">
                 <ikw:SimpleStackPanel.Resources>
                     <Style TargetType="Label" BasedOn="{StaticResource AutoFitToolPopupLabel8}" />
                 </ikw:SimpleStackPanel.Resources>
                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="3">
-                    <controls:ToolMenuButton x:Name="TimerToolBtn" Label="{i18n:I18n Key=Tools_Timer}" />
-                    <controls:ToolMenuButton x:Name="RandomDrawToolBtn" Label="{i18n:I18n Key=Tools_RandomDraw}" />
-                    <controls:ToolMenuButton x:Name="SingleDrawToolBtn" Label="{i18n:I18n Key=Tools_SingleDraw}" />
+                    <controls:ToolMenuButton x:Name="TimerToolBtn" Label="计时器" />
+                    <controls:ToolMenuButton x:Name="RandomDrawToolBtn" Label="随机抽" />
+                    <controls:ToolMenuButton x:Name="SingleDrawToolBtn" Label="单次抽" />
                 </ikw:SimpleStackPanel>
                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="3">
-                    <controls:ToolMenuButton x:Name="SaveToolBtn" Label="{i18n:I18n Key=Tools_Save}" />
-                    <controls:ToolMenuButton x:Name="OpenToolBtn" Label="{i18n:I18n Key=Tools_Open}" />
-                    <controls:ToolMenuButton x:Name="ReplayToolBtn" Label="{i18n:I18n Key=Tools_Replay}" />
+                    <controls:ToolMenuButton x:Name="SaveToolBtn" Label="保存" />
+                    <controls:ToolMenuButton x:Name="OpenToolBtn" Label="打开..." />
+                    <controls:ToolMenuButton x:Name="ReplayToolBtn" Label="重播" />
                 </ikw:SimpleStackPanel>
                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="3">
-                    <controls:ToolMenuButton x:Name="ScreenshotToolBtn" Label="{i18n:I18n Key=Tools_Screenshot}" />
-                    <controls:ToolMenuButton x:Name="ManualToolBtn" Label="{i18n:I18n Key=Tools_Manual}" />
-                    <controls:ToolMenuButton x:Name="SettingsToolBtn" Label="{i18n:I18n Key=Tools_Settings}" />
+                    <controls:ToolMenuButton x:Name="ScreenshotToolBtn" Label="截屏" />
+                    <controls:ToolMenuButton x:Name="ManualToolBtn" Label="说明书" />
+                    <controls:ToolMenuButton x:Name="SettingsToolBtn" Label="设置" />
                 </ikw:SimpleStackPanel>
             </ikw:SimpleStackPanel>
         </ContentControl>

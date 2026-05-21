@@ -968,6 +968,24 @@ namespace Ink_Canvas
             }
         }
 
+        private void ApplyLanguageFromSettings()
+        {
+            try
+            {
+                if (Settings?.Appearance == null) return;
+
+                var preferredLanguage = Settings.Appearance.Language ?? string.Empty;
+
+                if (!string.IsNullOrWhiteSpace(preferredLanguage))
+                {
+                    LocalizationHelper.TrySetCulture(preferredLanguage);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"初始化语言选项失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
 
 
         #endregion
@@ -1731,24 +1749,6 @@ namespace Ink_Canvas
             }), DispatcherPriority.Loaded);
         }
 
-        private void ApplyLanguageFromSettings()
-        {
-            try
-            {
-                if (Settings?.Appearance == null) return;
-
-                var preferredLanguage = Settings.Appearance.Language ?? string.Empty;
-
-                if (!string.IsNullOrWhiteSpace(preferredLanguage))
-                {
-                    LocalizationHelper.TrySetCulture(preferredLanguage);
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"初始化语言选项失败: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
 
 
         /// <summary>
@@ -2200,11 +2200,11 @@ namespace Ink_Canvas
                         Id = "update-" + AvailableLatestVersion,
                         Type = NotificationMessageType.Update,
                         Level = NotificationMessageLevel.Normal,
-                        Title = Ink_Canvas.Properties.Strings.GetString("Notification_UpdateTitle") ?? "发现新版本",
-                        Summary = string.Format(Ink_Canvas.Properties.Strings.GetString("Notification_NewVersion") ?? "发现新版本：{0}", AvailableLatestVersion),
+                        Title = "发现新版本",
+                        Summary = string.Format("发现新版本：{0}", AvailableLatestVersion),
                         Content = AvailableLatestReleaseNotes ?? string.Empty,
                         Icon = "Update",
-                        ActionText = Ink_Canvas.Properties.Strings.GetString("Notification_ViewDetails") ?? "查看详情",
+                        ActionText = "查看详情",
                         DisplaySeconds = Settings?.Notification?.UpdateDurationSeconds > 0 ? Settings.Notification.UpdateDurationSeconds : 5,
                         Source = "update",
                         Action = () =>

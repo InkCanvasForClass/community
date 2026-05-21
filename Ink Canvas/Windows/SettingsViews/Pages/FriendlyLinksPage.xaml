@@ -5,10 +5,9 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d"
-      Title="{i18n:I18n Key=FriendlyLinks_Title}">
+      Title="友链">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -28,23 +27,23 @@
                 Spacing="{StaticResource SettingsCardSpacing}">
 
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                    Text="{i18n:I18n Key=FriendlyLinks_Title}" />
+                    Text="友链" />
 
                 <ui:SettingsCard Header="NamePicker"
-                    Description="{i18n:I18n Key=FriendlyLinks_NamePickerDescription}">
+                    Description="随机点名与抽取工具">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />
                     </ui:SettingsCard.HeaderIcon>
-                    <ui:HyperlinkButton Content="{i18n:I18n Key=FriendlyLinks_Visit}"
+                    <ui:HyperlinkButton Content="访问"
                         NavigateUri="https://github.com/NamePickerOrg/NamePicker" />
                 </ui:SettingsCard>
 
                 <ui:SettingsCard Header="Inkeys"
-                    Description="{i18n:I18n Key=FriendlyLinks_InkeysDescription}">
+                    Description="智能教学桌面工具">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />
                     </ui:SettingsCard.HeaderIcon>
-                    <ui:HyperlinkButton Content="{i18n:I18n Key=FriendlyLinks_Visit}"
+                    <ui:HyperlinkButton Content="访问"
                         NavigateUri="https://github.com/Alan-CRL/Inkeys/" />
                 </ui:SettingsCard>
 

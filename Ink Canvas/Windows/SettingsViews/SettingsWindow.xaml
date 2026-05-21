@@ -6,8 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
     xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-    xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
-    Title="InkCanvasForClass 设置"
+Title="InkCanvasForClass 设置"
     Width="1138" Height="750"
     MinWidth="270" MinHeight="220"
     WindowStartupLocation="CenterScreen"
@@ -156,9 +155,9 @@
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
                             x:Name="SecurityPageItem"
-                            Content="{i18n:I18n Key=Settings_Nav_Security}"
+                            Content="安全"
                             Tag="SecurityPage"
-                            ToolTipService.ToolTip="{i18n:I18n Key=Settings_Nav_Security_Tooltip}">
+                            ToolTipService.ToolTip="安全密码与进程保护">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Permissions}"/>
                             </ui:NavigationViewItem.Icon>
@@ -196,9 +195,9 @@
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
                             x:Name="HotkeyPageItem"
-                            Content="{i18n:I18n Key=Settings_Nav_Hotkey}"
+                            Content="快捷键"
                             Tag="HotkeyPage"
-                            ToolTipService.ToolTip="{i18n:I18n Key=Settings_Nav_Hotkey_Tooltip}">
+                            ToolTipService.ToolTip="快捷键设置">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.KeyboardStandard}"/>
                             </ui:NavigationViewItem.Icon>
@@ -276,27 +275,27 @@
                 <!-- 通知设置 -->
                 <ui:NavigationViewItem
                     x:Name="NotificationPageItem"
-                    Content="{i18n:I18n Key=Notification_PageTitle}"
+                    Content="通知"
                     SelectsOnInvoked="False"
-                    ToolTipService.ToolTip="{i18n:I18n Key=Notification_NavTooltip}">
+                    ToolTipService.ToolTip="公告、消息提醒与灵动通知设置">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Message}"/>
                     </ui:NavigationViewItem.Icon>
                     <ui:NavigationViewItem.MenuItems>
                         <ui:NavigationViewItem
                             x:Name="NotificationSettingsPageItem"
-                            Content="{i18n:I18n Key=Notification_SettingsTitle}"
+                            Content="通知设置"
                             Tag="NotificationPage"
-                            ToolTipService.ToolTip="{i18n:I18n Key=Notification_NavTooltip}">
+                            ToolTipService.ToolTip="公告、消息提醒与灵动通知设置">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Message}"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
                             x:Name="AnnouncementCenterPageItem"
-                            Content="{i18n:I18n Key=Announcement_CenterTitle}"
+                            Content="公告中心"
                             Tag="AnnouncementCenterPage"
-                            ToolTipService.ToolTip="{i18n:I18n Key=Announcement_CenterHint}">
+                            ToolTipService.ToolTip="查看已接收的远端公告和实时推送内容。">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BulletedList}"/>
                             </ui:NavigationViewItem.Icon>
@@ -334,9 +333,9 @@
                 <!-- 存储管理 -->
                 <ui:NavigationViewItem
                     x:Name="StoragePageItem"
-                    Content="{i18n:I18n Key=Storage_Title}"
+                    Content="存储管理"
                     Tag="StoragePage"
-                    ToolTipService.ToolTip="{i18n:I18n Key=Storage_NavTooltip}">
+                    ToolTipService.ToolTip="查看与清理 ICC CE 占用的存储空间">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.HardDrive}"/>
                     </ui:NavigationViewItem.Icon>
@@ -344,9 +343,9 @@
 
                 <ui:NavigationViewItem
                     x:Name="CloudStoragePageItem"
-                    Content="{i18n:I18n Key=CloudStorage_Manage}"
+                    Content="云存储管理"
                     Tag="CloudStoragePage"
-                    ToolTipService.ToolTip="{i18n:I18n Key=CloudStorage_Manage}">
+                    ToolTipService.ToolTip="云存储管理">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}"/>
                     </ui:NavigationViewItem.Icon>
@@ -400,7 +399,7 @@
             <ui:NavigationView.FooterMenuItems>
                 <ui:NavigationViewItem
                     x:Name="FriendlyLinksItem"
-                    Content="{i18n:I18n Key=Nav_FriendlyLinks}"
+                    Content="友链"
                     Tag="FriendlyLinksPage">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />

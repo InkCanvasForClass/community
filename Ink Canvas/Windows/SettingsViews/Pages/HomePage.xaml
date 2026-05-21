@@ -6,7 +6,6 @@
       xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d"
 
@@ -38,21 +37,21 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <ui:SettingsCard Header="{i18n:I18n Key=Btn_Restart}" Description="{i18n:I18n Key=Home_RestartApp}"
+                        <ui:SettingsCard Header="重启" Description="重启应用程序"
                         IsClickEnabled="True" Click="BtnRestart_Click" Grid.Column="0">
                             <ui:SettingsCard.HeaderIcon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" />
                             </ui:SettingsCard.HeaderIcon>
                         </ui:SettingsCard>
 
-                        <ui:SettingsCard Header="{i18n:I18n Key=Btn_Reset}" Description="{i18n:I18n Key=Home_ResetSettings}"
+                        <ui:SettingsCard Header="重置" Description="重置为推荐设置"
                         IsClickEnabled="True" Click="BtnResetToSuggestion_Click" Grid.Column="1">
                             <ui:SettingsCard.HeaderIcon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Clear}" />
                             </ui:SettingsCard.HeaderIcon>
                         </ui:SettingsCard>
 
-                        <ui:SettingsCard Header="{i18n:I18n Key=Btn_Exit}" Description="{i18n:I18n Key=Home_ExitApp}"
+                        <ui:SettingsCard Header="退出" Description="退出应用程序"
                         IsClickEnabled="True" Click="BtnExit_Click" Grid.Column="2">
                             <ui:SettingsCard.HeaderIcon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cancel}" />
@@ -148,14 +147,14 @@
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="通知" />
-                    <ui:SettingsCard Header="{i18n:I18n Key=Notification_PageTitle}" Description="{i18n:I18n Key=Notification_NavTooltip}"
+                    <ui:SettingsCard Header="通知" Description="公告、消息提醒与灵动通知设置"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="NotificationPage">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Message}" />
                         </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Announcement_CenterTitle}" Description="{i18n:I18n Key=Announcement_CenterHint}"
+                    <ui:SettingsCard Header="公告中心" Description="查看已接收的远端公告和实时推送内容。"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="AnnouncementCenterPage">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BulletedList}" />
@@ -178,14 +177,14 @@
                         </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=Storage_Title}" Description="{i18n:I18n Key=Storage_NavTooltip}"
+                    <ui:SettingsCard Header="存储管理" Description="查看与清理 ICC CE 占用的存储空间"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="StoragePage">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.HardDrive}" />
                         </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{i18n:I18n Key=CloudStorage_Manage}" Description="Dlass 与 WebDav 上传设置"
+                    <ui:SettingsCard Header="云存储管理" Description="Dlass 与 WebDav 上传设置"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="CloudStoragePage">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}" />

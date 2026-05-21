@@ -85,23 +85,23 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             NotificationProviderRegistry.RegisterOrUpdate(new NotificationProviderStatus
             {
                 ProviderId = "local",
-                DisplayName = Ink_Canvas.Properties.Strings.GetString("Notification_Provider_Local") ?? "本地消息提供商",
-                Description = Ink_Canvas.Properties.Strings.GetString("Notification_Provider_LocalDesc") ?? "接收应用内部提示、错误和插件消息。",
+                DisplayName = "本地消息提供商",
+                Description = "接收应用内部提示、错误和插件消息。",
                 IsEnabled = true,
                 IsRunning = true,
-                Status = Ink_Canvas.Properties.Strings.GetString("Notification_Provider_Running") ?? "运行中"
+                Status = "运行中"
             });
 
             NotificationProviderRegistry.RegisterOrUpdate(new NotificationProviderStatus
             {
                 ProviderId = "windows-toast",
-                DisplayName = Ink_Canvas.Properties.Strings.GetString("Notification_Provider_WindowsToast") ?? "Windows 系统通知",
-                Description = Ink_Canvas.Properties.Strings.GetString("Notification_Provider_WindowsToastDesc") ?? "将消息同步显示为系统 Toast 或托盘气泡。",
+                DisplayName = "Windows 系统通知",
+                Description = "将消息同步显示为系统 Toast 或托盘气泡。",
                 IsEnabled = SettingsManager.Settings.Notification.IsWindowsToastEnabled,
                 IsRunning = SettingsManager.Settings.Notification.IsWindowsToastEnabled,
                 Status = SettingsManager.Settings.Notification.IsWindowsToastEnabled
-                    ? Ink_Canvas.Properties.Strings.GetString("Notification_Provider_Running") ?? "运行中"
-                    : Ink_Canvas.Properties.Strings.GetString("Notification_Provider_Disabled") ?? "已禁用"
+                    ? "运行中"
+                    : "已禁用"
             });
 
             ProviderItemsControl.ItemsSource = NotificationProviderRegistry.GetProviders();
@@ -126,13 +126,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             NotificationProviderRegistry.RegisterOrUpdate(new NotificationProviderStatus
             {
                 ProviderId = "announcement",
-                DisplayName = Ink_Canvas.Properties.Strings.GetString("Notification_Provider_Announcement") ?? "公告提供商",
-                Description = Ink_Canvas.Properties.Strings.GetString("Notification_Provider_AnnouncementDesc") ?? "拉取远端公告并接收实时推送。",
+                DisplayName = "公告提供商",
+                Description = "拉取远端公告并接收实时推送。",
                 IsEnabled = SettingsManager.Settings.Notification.IsAnnouncementEnabled,
                 IsRunning = false,
                 Status = SettingsManager.Settings.Notification.IsAnnouncementEnabled
-                    ? Ink_Canvas.Properties.Strings.GetString("Notification_Provider_WaitingRestart") ?? "将在下次启动时生效"
-                    : Ink_Canvas.Properties.Strings.GetString("Notification_Provider_Disabled") ?? "已禁用"
+                    ? "将在下次启动时生效"
+                    : "已禁用"
             });
             LoadProviders();
         }
@@ -280,8 +280,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 Id = "settings-test-" + Guid.NewGuid().ToString("N"),
                 Type = NotificationMessageType.Other,
                 Level = NotificationMessageLevel.Normal,
-                Title = Ink_Canvas.Properties.Strings.GetString("Notification_TestTitle") ?? "通知测试",
-                Summary = Ink_Canvas.Properties.Strings.GetString("Notification_TestSummary") ?? "灵动通知与消息队列运行正常。",
+                Title = "通知测试",
+                Summary = "灵动通知与消息队列运行正常。",
                 Icon = "Info",
                 DisplaySeconds = SettingsManager.Settings.Notification.OtherDurationSeconds,
                 Source = "local",
