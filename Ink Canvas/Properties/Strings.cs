@@ -1190,49 +1190,5 @@ namespace Ink_Canvas.Properties
                 _ => "#" + group + "." + key
             };
         }
-
-        public static void LoadAllToResources(System.Windows.ResourceDictionary resources)
-        {
-            LoadGroup(AboutStrings.ResourceManager, resources);
-            LoadGroup(AdvancedStrings.ResourceManager, resources);
-            LoadGroup(AnnouncementStrings.ResourceManager, resources);
-            LoadGroup(AutomationStrings.ResourceManager, resources);
-            LoadGroup(BoothStrings.ResourceManager, resources);
-            LoadGroup(BtnStrings.ResourceManager, resources);
-            LoadGroup(CanvasStrings.ResourceManager, resources);
-            LoadGroup(CloudStorageStrings.ResourceManager, resources);
-            LoadGroup(CommonStrings.ResourceManager, resources);
-            LoadGroup(ConfigStrings.ResourceManager, resources);
-            LoadGroup(CrashStrings.ResourceManager, resources);
-            LoadGroup(FloatingBarStrings.ResourceManager, resources);
-            LoadGroup(FriendlyLinksStrings.ResourceManager, resources);
-            LoadGroup(GeometryStrings.ResourceManager, resources);
-            LoadGroup(GestureStrings.ResourceManager, resources);
-            LoadGroup(HomeStrings.ResourceManager, resources);
-            LoadGroup(NavStrings.ResourceManager, resources);
-            LoadGroup(NotificationStrings.ResourceManager, resources);
-            LoadGroup(PPTStrings.ResourceManager, resources);
-            LoadGroup(RandomStrings.ResourceManager, resources);
-            LoadGroup(SecurityStrings.ResourceManager, resources);
-            LoadGroup(StartupStrings.ResourceManager, resources);
-            LoadGroup(StorageStrings.ResourceManager, resources);
-            LoadGroup(ThemeStrings.ResourceManager, resources);
-            LoadGroup(TimerStrings.ResourceManager, resources);
-            LoadGroup(UpdateCenterPanelStrings.ResourceManager, resources);
-            LoadGroup(UpdateStrings.ResourceManager, resources);
-            LoadGroup(WindowStrings.ResourceManager, resources);
-        }
-
-        private static void LoadGroup(ResourceManager rm, System.Windows.ResourceDictionary resources)
-        {
-            var culture = _resourceCulture ?? CultureInfo.CurrentUICulture;
-            var rs = rm.GetResourceSet(culture, true, true);
-            if (rs == null) return;
-            foreach (System.Collections.DictionaryEntry entry in rs)
-            {
-                if (entry.Key is string k && entry.Value is string v)
-                    resources[k] = v;
-            }
-        }
     }
 }

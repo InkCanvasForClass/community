@@ -836,8 +836,6 @@ namespace Ink_Canvas
 
             TryApplyPreferredLanguageFromSettings();
 
-            Strings.LoadAllToResources(Current.Resources);
-
             // 根据设置决定是否显示启动画面
             if (ShouldShowSplashScreen() && !IsLaunchByFileOrUri(e.Args))
             {
@@ -1225,10 +1223,6 @@ namespace Ink_Canvas
                 await Task.Delay(600);
                 Dispatcher.Invoke(() => _taskbar?.ForceCreate());
             });
-            _ = Dispatcher.BeginInvoke(new Action(() =>
-            {
-                // Resource loading now handled by Strings.LoadAllToResources in OnStartup
-            }), DispatcherPriority.ApplicationIdle);
 
             // 处理启动时的URI参数
             string startupUriArg = e.Args.FirstOrDefault(a => a.StartsWith("icc:", StringComparison.OrdinalIgnoreCase));
@@ -1367,15 +1361,6 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"启动时预加载语言失败: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        private void LoadLocalizedResources(System.Resources.ResourceSet resourceSet)
-        {
-            foreach (System.Collections.DictionaryEntry entry in resourceSet)
-            {
-                if (entry.Key is string key && entry.Value is string value)
-                    Current.Resources[key] = value;
             }
         }
 
