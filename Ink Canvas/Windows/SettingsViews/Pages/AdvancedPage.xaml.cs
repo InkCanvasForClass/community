@@ -1,3 +1,4 @@
+using Ink_Canvas.Properties;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using iNKORE.UI.WPF.Modern.Controls;
@@ -406,7 +407,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 Title = "另存为方案",
                 Content = content,
-                PrimaryButtonText = "保存",
+                PrimaryButtonText = FloatingBarStrings.Tools_Save,
                 SecondaryButtonText = "取消",
                 Owner = Window.GetWindow(this) ?? GetMainWindow()
             };

@@ -1,3 +1,4 @@
+using Ink_Canvas.Properties;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Models;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
@@ -50,13 +51,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             NotificationProviderRegistry.RegisterOrUpdate(new NotificationProviderStatus
             {
                 ProviderId = "announcement",
-                DisplayName = "公告提供商",
-                Description = "拉取远端公告并接收实时推送。",
+                DisplayName = NotificationStrings.Provider_Announcement,
+                Description = NotificationStrings.Provider_AnnouncementDesc,
                 IsEnabled = SettingsManager.Settings.Notification.IsAnnouncementEnabled,
                 IsRunning = false,
                 Status = SettingsManager.Settings.Notification.IsAnnouncementEnabled
-                    ? "将在下次启动时生效"
-                    : "已禁用"
+                    ? NotificationStrings.Provider_WaitingRestart
+                    : NotificationStrings.Provider_Disabled
             });
         }
 

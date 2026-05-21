@@ -1,3 +1,4 @@
+using Ink_Canvas.Properties;
 using System;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -196,7 +197,7 @@ namespace Ink_Canvas.Windows
             _blackoutButton.Checked += (s, e) => SetBlackout(true);
             _blackoutButton.Unchecked += (s, e) => SetBlackout(false);
 
-            var closeBtn = new System.Windows.Controls.Button { Content = MakeBtnContent("✕", "关闭") };
+            var closeBtn = new System.Windows.Controls.Button { Content = MakeBtnContent("✕", NotificationStrings.AnimationOff) };
             StyleToolButton(closeBtn);
             closeBtn.Click += (s, e) => Close();
 

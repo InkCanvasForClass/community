@@ -1,4 +1,4 @@
-<UserControl x:Class="Ink_Canvas.Controls.PenPalettePopupContent"
+<UserControl xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Controls.PenPalettePopupContent"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -32,13 +32,13 @@ mc:Ignorable="d">
                     <!--笔尖 纠正 加深-->
                     <ikw:SimpleStackPanel Orientation="Horizontal">
                         <ikw:SimpleStackPanel x:Name="NibModeSimpleStackPanel" Orientation="Horizontal" Spacing="4">
-                            <Label Content="笔尖模式" FontSize="12"
+                            <Label Content="{x:Static props:StartupStrings.EnableNibMode}" FontSize="12"
                                 VerticalAlignment="Center" />
                             <ui:ToggleSwitch x:Name="ToggleSwitchEnableNibMode"
                                             MinWidth="0" OnContent="" OffContent="" />
                         </ikw:SimpleStackPanel>
                         <ikw:SimpleStackPanel x:Name="_InkToShapePanel" Orientation="Horizontal" Spacing="4">
-                            <Label Content="墨迹纠正" FontSize="12"
+                            <Label Content="{x:Static props:CanvasStrings.InkRecog_Title}" FontSize="12"
                                 VerticalAlignment="Center" />
                             <ui:ToggleSwitch x:Name="FloatingBarToggleSwitchEnableInkToShape"
                                             MinWidth="0" OnContent="" OffContent="" />
@@ -52,7 +52,7 @@ mc:Ignorable="d">
                     </ikw:SimpleStackPanel>
                     <!--粗细-->
                     <StackPanel Orientation="Horizontal">
-                        <Label Margin="0,0,10,0" Content="粗细" FontWeight="Bold"
+                        <Label Margin="0,0,10,0" Content="{x:Static props:FloatingBarStrings.OldUI_Thickness}" FontWeight="Bold"
                                FontSize="17" VerticalAlignment="Center" />
                         <Slider x:Name="_PenWidthSlider" Minimum="1"
                                 Maximum="45" Width="200"

@@ -1,4 +1,4 @@
-<ui:Page
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties"
     x:Class="Ink_Canvas.Windows.SettingsViews.Pages.PluginPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
     xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-    Title="插件"
+    Title="{x:Static props:NavStrings.Nav_Plugins}"
     mc:Ignorable="d">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" PanningMode="VerticalFirst">

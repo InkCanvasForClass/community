@@ -1,4 +1,4 @@
-<Window
+<Window xmlns:props="clr-namespace:Ink_Canvas.Properties"
     x:Class="Ink_Canvas.Windows.SettingsViews.SettingsWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -137,9 +137,9 @@ Title="InkCanvasForClass 设置"
                     <ui:NavigationViewItem.MenuItems>
                         <ui:NavigationViewItem
                             x:Name="StartupPageItem"
-                            Content="启动"
+                            Content="{x:Static props:StartupStrings.Start}"
                             Tag="StartupPage"
-                            ToolTipService.ToolTip="启动设置">
+                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Startup}">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Play}"/>
                             </ui:NavigationViewItem.Icon>
@@ -155,9 +155,9 @@ Title="InkCanvasForClass 设置"
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
                             x:Name="SecurityPageItem"
-                            Content="安全"
+                            Content="{x:Static props:NavStrings.Settings_Nav_Security}"
                             Tag="SecurityPage"
-                            ToolTipService.ToolTip="安全密码与进程保护">
+                            ToolTipService.ToolTip="{x:Static props:NavStrings.Settings_Nav_Security_Tooltip}">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Permissions}"/>
                             </ui:NavigationViewItem.Icon>
@@ -186,18 +186,18 @@ Title="InkCanvasForClass 设置"
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
                             x:Name="AppearancePageItem"
-                            Content="个性化"
+                            Content="{x:Static props:ThemeStrings.Theme_GroupTitle}"
                             Tag="AppearancePage"
-                            ToolTipService.ToolTip="个性化设置">
+                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Theme_Settings}">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Personalize}"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
                             x:Name="HotkeyPageItem"
-                            Content="快捷键"
+                            Content="{x:Static props:NavStrings.Nav_Shortcuts}"
                             Tag="HotkeyPage"
-                            ToolTipService.ToolTip="快捷键设置">
+                            ToolTipService.ToolTip="{x:Static props:NavStrings.Settings_Nav_Hotkey_Tooltip}">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.KeyboardStandard}"/>
                             </ui:NavigationViewItem.Icon>
@@ -217,7 +217,7 @@ Title="InkCanvasForClass 设置"
                 <!-- 画板设置 -->
                 <ui:NavigationViewItem
                     x:Name="CanvasPageItem"
-                    Content="画板"
+                    Content="{x:Static props:CanvasStrings.Canvas_GroupTitle}"
                     SelectsOnInvoked="False"
                     ToolTipService.ToolTip="画板与墨迹设置">
                     <ui:NavigationViewItem.Icon>
@@ -226,7 +226,7 @@ Title="InkCanvasForClass 设置"
                     <ui:NavigationViewItem.MenuItems>
                         <ui:NavigationViewItem
                             x:Name="CanvasSubPageItem"
-                            Content="画板"
+                            Content="{x:Static props:CanvasStrings.Canvas_GroupTitle}"
                             Tag="CanvasPage"
                             ToolTipService.ToolTip="画板设置">
                             <ui:NavigationViewItem.Icon>
@@ -235,7 +235,7 @@ Title="InkCanvasForClass 设置"
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
                             x:Name="InkRecognitionPageItem"
-                            Content="墨迹纠正"
+                            Content="{x:Static props:CanvasStrings.InkRecog_Title}"
                             Tag="InkRecognitionPage"
                             ToolTipService.ToolTip="墨迹纠正设置">
                             <ui:NavigationViewItem.Icon>
@@ -248,7 +248,7 @@ Title="InkCanvasForClass 设置"
                 <!-- PPT联动 -->
                 <ui:NavigationViewItem
                     x:Name="PowerPointPageItem"
-                    Content="PPT联动"
+                    Content="{x:Static props:PPTStrings.GroupTitle}"
                     Tag="PowerPointPage"
                     ToolTipService.ToolTip="PPT联动设置">
                     <ui:NavigationViewItem.Icon>
@@ -259,7 +259,7 @@ Title="InkCanvasForClass 设置"
                 <!-- 更新设置 -->
                 <ui:NavigationViewItem
                     x:Name="UpdatePageItem"
-                    Content="更新"
+                    Content="{x:Static props:NotificationStrings.Type_Update}"
                     Tag="UpdatePage"
                     ToolTipService.ToolTip="更新设置">
                     <ui:NavigationViewItem.Icon>
@@ -275,27 +275,27 @@ Title="InkCanvasForClass 设置"
                 <!-- 通知设置 -->
                 <ui:NavigationViewItem
                     x:Name="NotificationPageItem"
-                    Content="通知"
+                    Content="{x:Static props:NotificationStrings.DefaultTitle}"
                     SelectsOnInvoked="False"
-                    ToolTipService.ToolTip="公告、消息提醒与灵动通知设置">
+                    ToolTipService.ToolTip="{x:Static props:NotificationStrings.NavTooltip}">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Message}"/>
                     </ui:NavigationViewItem.Icon>
                     <ui:NavigationViewItem.MenuItems>
                         <ui:NavigationViewItem
                             x:Name="NotificationSettingsPageItem"
-                            Content="通知设置"
+                            Content="{x:Static props:NotificationStrings.SettingsTitle}"
                             Tag="NotificationPage"
-                            ToolTipService.ToolTip="公告、消息提醒与灵动通知设置">
+                            ToolTipService.ToolTip="{x:Static props:NotificationStrings.NavTooltip}">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Message}"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
                             x:Name="AnnouncementCenterPageItem"
-                            Content="公告中心"
+                            Content="{x:Static props:AnnouncementStrings.CenterTitle}"
                             Tag="AnnouncementCenterPage"
-                            ToolTipService.ToolTip="查看已接收的远端公告和实时推送内容。">
+                            ToolTipService.ToolTip="{x:Static props:AnnouncementStrings.CenterHint}">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BulletedList}"/>
                             </ui:NavigationViewItem.Icon>
@@ -311,9 +311,9 @@ Title="InkCanvasForClass 设置"
                 <!-- 实验性选项 -->
                 <ui:NavigationViewItem
                     x:Name="ExperimentalPageItem"
-                    Content="实验性选项"
+                    Content="{x:Static props:AdvancedStrings.Experimental}"
                     Tag="ExperimentalPage"
-                    ToolTipService.ToolTip="实验性选项">
+                    ToolTipService.ToolTip="{x:Static props:AdvancedStrings.Experimental}">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}"/>
                     </ui:NavigationViewItem.Icon>
@@ -322,9 +322,9 @@ Title="InkCanvasForClass 设置"
                 <!-- 高级设置 -->
                 <ui:NavigationViewItem
                     x:Name="AdvancedPageItem"
-                    Content="高级"
+                    Content="{x:Static props:NavStrings.Nav_Advanced}"
                     Tag="AdvancedPage"
-                    ToolTipService.ToolTip="高级设置">
+                    ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Advanced_Settings}">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
                     </ui:NavigationViewItem.Icon>
@@ -333,9 +333,9 @@ Title="InkCanvasForClass 设置"
                 <!-- 存储管理 -->
                 <ui:NavigationViewItem
                     x:Name="StoragePageItem"
-                    Content="存储管理"
+                    Content="{x:Static props:StorageStrings.Storage_Title}"
                     Tag="StoragePage"
-                    ToolTipService.ToolTip="查看与清理 ICC CE 占用的存储空间">
+                    ToolTipService.ToolTip="{x:Static props:StorageStrings.Storage_NavTooltip}">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.HardDrive}"/>
                     </ui:NavigationViewItem.Icon>
@@ -343,9 +343,9 @@ Title="InkCanvasForClass 设置"
 
                 <ui:NavigationViewItem
                     x:Name="CloudStoragePageItem"
-                    Content="云存储管理"
+                    Content="{x:Static props:CloudStorageStrings.CloudStorage_Manage}"
                     Tag="CloudStoragePage"
-                    ToolTipService.ToolTip="云存储管理">
+                    ToolTipService.ToolTip="{x:Static props:CloudStorageStrings.CloudStorage_Manage}">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}"/>
                     </ui:NavigationViewItem.Icon>
@@ -354,9 +354,9 @@ Title="InkCanvasForClass 设置"
                 <!-- 自动化 -->
                 <ui:NavigationViewItem
                     x:Name="AutomationPageItem"
-                    Content="自动化"
+                    Content="{x:Static props:AutomationStrings.Automation_Title}"
                     Tag="AutomationPage"
-                    ToolTipService.ToolTip="自动化设置">
+                    ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Automation_Settings}">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}"/>
                     </ui:NavigationViewItem.Icon>
@@ -365,7 +365,7 @@ Title="InkCanvasForClass 设置"
                 <!-- 随机点名 -->
                 <ui:NavigationViewItem
                     x:Name="RandomDrawPageItem"
-                    Content="随机点名"
+                    Content="{x:Static props:RandomStrings.Random_Title}"
                     Tag="RandomDrawPage"
                     ToolTipService.ToolTip="随机点名与计时器">
                     <ui:NavigationViewItem.Icon>
@@ -387,9 +387,9 @@ Title="InkCanvasForClass 设置"
                 <ui:NavigationViewItemHeader Content="插件设置"/>
                 <ui:NavigationViewItem
                     x:Name="PluginItem"
-                    Content="插件"
+                    Content="{x:Static props:NavStrings.Nav_Plugins}"
                     Tag="PluginPage"
-                    ToolTipService.ToolTip="插件管理">
+                    ToolTipService.ToolTip="{x:Static props:NavStrings.Settings_Plugins}">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Puzzle}"/>
                     </ui:NavigationViewItem.Icon>
@@ -399,7 +399,7 @@ Title="InkCanvasForClass 设置"
             <ui:NavigationView.FooterMenuItems>
                 <ui:NavigationViewItem
                     x:Name="FriendlyLinksItem"
-                    Content="友链"
+                    Content="{x:Static props:NavStrings.Nav_FriendlyLinks}"
                     Tag="FriendlyLinksPage">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />

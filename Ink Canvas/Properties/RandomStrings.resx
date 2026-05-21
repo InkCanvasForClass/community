@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="LuckyRandomPanel_Hint" xml:space="preserve">
+    <value>在随机点名窗口中显示修改名单的按钮</value>
+  </data>
+  <data name="LuckyRandomPanel_Hint_1" xml:space="preserve">
+    <value>在随机点名窗口中显示随机抽和单次抽按钮</value>
+  </data>
+  <data name="LuckyRandomPanel_Hint_10" xml:space="preserve">
+    <value>选择点名窗口的背景</value>
+  </data>
+  <data name="LuckyRandomPanel_Hint_2" xml:space="preserve">
+    <value>启用快速抽人的悬浮按钮</value>
+  </data>
+  <data name="LuckyRandomPanel_Hint_3" xml:space="preserve">
+    <value>使用外部点名工具代替内置点名功能</value>
+  </data>
+  <data name="LuckyRandomPanel_Hint_4" xml:space="preserve">
+    <value>设置单次抽人窗口自动关闭的延迟时间</value>
+  </data>
+  <data name="LuckyRandomPanel_Hint_5" xml:space="preserve">
+    <value>设置单次随机点名最多抽取的人数</value>
+  </data>
+  <data name="LuckyRandomPanel_Hint_6" xml:space="preserve">
+    <value>使用新的点名界面设计</value>
+  </data>
+  <data name="LuckyRandomPanel_Hint_7" xml:space="preserve">
+    <value>使用机器学习算法避免重复抽取相同的人</value>
+  </data>
+  <data name="LuckyRandomPanel_Hint_8" xml:space="preserve">
+    <value>设置用于避免重复的历史记录数量</value>
+  </data>
+  <data name="LuckyRandomPanel_Hint_9" xml:space="preserve">
+    <value>设置机器学习算法避免重复的权重</value>
+  </data>
+  <data name="Random_Background_Default" xml:space="preserve">
+    <value>默认背景</value>
+  </data>
+  <data name="Random_BackgroundSelectLabel" xml:space="preserve">
+    <value>背景选择：</value>
+  </data>
+  <data name="Random_BackgroundSettingsTitle" xml:space="preserve">
+    <value>点名窗口背景设置(仅老版点名UI有效)</value>
+  </data>
+  <data name="Random_CustomBackground_Manage" xml:space="preserve">
+    <value>管理</value>
+  </data>
+  <data name="Random_CustomBackground_Upload" xml:space="preserve">
+    <value>上传</value>
+  </data>
+  <data name="Random_CustomBackgroundLabel" xml:space="preserve">
+    <value>自定义背景：</value>
+  </data>
+  <data name="Random_EnableButtons" xml:space="preserve">
+    <value>启用随机抽和单次抽按钮</value>
+  </data>
+  <data name="Random_EnableQuickButton" xml:space="preserve">
+    <value>启用快抽悬浮按钮</value>
+  </data>
+  <data name="Random_ExternalType_ClassIsland" xml:space="preserve">
+    <value>ClassIsland 点名</value>
+  </data>
+  <data name="Random_ExternalType_NamePicker" xml:space="preserve">
+    <value>NamePicker 点名</value>
+  </data>
+  <data name="Random_ExternalType_SecRandom" xml:space="preserve">
+    <value>SecRandom 点名</value>
+  </data>
+  <data name="Random_ExternalTypeLabel" xml:space="preserve">
+    <value>点名类型</value>
+  </data>
+  <data name="Random_ML_AvoidRepeat" xml:space="preserve">
+    <value>启用机器学习避免重复</value>
+  </data>
+  <data name="Random_ML_Hint" xml:space="preserve">
+    <value>机器学习算法会分析最近的点名历史，智能避免重复选择相同人员</value>
+  </data>
+  <data name="Random_ML_HistoryCount" xml:space="preserve">
+    <value>避免重复历史记录数量</value>
+  </data>
+  <data name="Random_ML_Weight" xml:space="preserve">
+    <value>避免重复权重</value>
+  </data>
+  <data name="Random_NewUI_Enable" xml:space="preserve">
+    <value>启用新点名 UI</value>
+  </data>
+  <data name="Random_NewUI_Title" xml:space="preserve">
+    <value>新点名 UI 设置</value>
+  </data>
+  <data name="Random_OnceCloseDelay" xml:space="preserve">
+    <value>单次抽人窗口关闭延迟</value>
+  </data>
+  <data name="Random_OnceMaxStudents" xml:space="preserve">
+    <value>单次随机点名人数上限</value>
+  </data>
+  <data name="Random_ShowEditNamesButton" xml:space="preserve">
+    <value>显示修改随机点名名单的按钮</value>
+  </data>
+  <data name="Random_Title" xml:space="preserve">
+    <value>随机点名</value>
+  </data>
+  <data name="Random_UseExternal" xml:space="preserve">
+    <value>直接调用外部点名</value>
+  </data>
+</root>

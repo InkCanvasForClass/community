@@ -1,4 +1,4 @@
-<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.FriendlyLinksPage"
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.FriendlyLinksPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -7,7 +7,7 @@
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d"
-      Title="友链">
+      Title="{x:Static props:FriendlyLinksStrings.FriendlyLinks_Title}">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -27,23 +27,23 @@
                 Spacing="{StaticResource SettingsCardSpacing}">
 
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                    Text="友链" />
+                    Text="{x:Static props:FriendlyLinksStrings.FriendlyLinks_Title}" />
 
                 <ui:SettingsCard Header="NamePicker"
-                    Description="随机点名与抽取工具">
+                    Description="{x:Static props:FriendlyLinksStrings.FriendlyLinks_NamePickerDescription}">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />
                     </ui:SettingsCard.HeaderIcon>
-                    <ui:HyperlinkButton Content="访问"
+                    <ui:HyperlinkButton Content="{x:Static props:FriendlyLinksStrings.FriendlyLinks_Visit}"
                         NavigateUri="https://github.com/NamePickerOrg/NamePicker" />
                 </ui:SettingsCard>
 
                 <ui:SettingsCard Header="Inkeys"
-                    Description="智能教学桌面工具">
+                    Description="{x:Static props:FriendlyLinksStrings.FriendlyLinks_InkeysDescription}">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />
                     </ui:SettingsCard.HeaderIcon>
-                    <ui:HyperlinkButton Content="访问"
+                    <ui:HyperlinkButton Content="{x:Static props:FriendlyLinksStrings.FriendlyLinks_Visit}"
                         NavigateUri="https://github.com/Alan-CRL/Inkeys/" />
                 </ui:SettingsCard>
 

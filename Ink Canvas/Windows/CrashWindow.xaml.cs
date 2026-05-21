@@ -24,7 +24,7 @@ namespace Ink_Canvas
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             TextBoxCrashInfo.Text = string.IsNullOrWhiteSpace(CrashInfo)
-                ? "没有可用的崩溃详情。"
+                ? CrashStrings.CrashWindowNoDetails
                 : CrashInfo;
 
             Dispatcher.BeginInvoke(new Action(() =>

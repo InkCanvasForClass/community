@@ -1,4 +1,4 @@
-<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.CloudStoragePage"
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.CloudStoragePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -8,7 +8,7 @@
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       mc:Ignorable="d"
-      Title="云存储管理">
+      Title="{x:Static props:CloudStorageStrings.CloudStorage_Manage}">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -28,7 +28,7 @@
                 Spacing="{StaticResource SettingsCardSpacing}">
 
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                           Text="云存储管理" />
+                           Text="{x:Static props:CloudStorageStrings.CloudStorage_Manage}" />
 
                 <ui:SettingsCard Header="上传延迟"
                                  Description="设置所有上传提供者共用的延迟时间，范围为 0-60 分钟。">

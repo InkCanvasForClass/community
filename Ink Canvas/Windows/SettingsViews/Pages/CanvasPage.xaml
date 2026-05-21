@@ -1,4 +1,4 @@
-<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.CanvasPage"
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.CanvasPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -10,7 +10,7 @@
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       xmlns:c="clr-namespace:Ink_Canvas.Converter"
       mc:Ignorable="d"
-      Title="画板">
+      Title="{x:Static props:CanvasStrings.Canvas_GroupTitle}">
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
             <FrameworkElement.Resources>
@@ -29,119 +29,119 @@
                     Spacing="{StaticResource SettingsCardSpacing}">
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="画板" />
+                        Text="{x:Static props:CanvasStrings.Canvas_GroupTitle}" />
 
                     <controls:LabeledSettingsCard x:Name="CardShowCursor"
-                            Header="显示画笔光标"
+                            Header="{x:Static props:CanvasStrings.Canvas_ShowPenCursor}"
                             Icon="{x:Static ui:SegoeFluentIcons.PointerHand}"
                             SwitchName="ToggleSwitchShowCursor"
                             Toggled="ToggleSwitchShowCursor_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardEnablePressureTouchMode"
-                            Header="启用压感触屏模式"
-                            Description="开启后，触屏设备也将支持压感效果，适用于部分支持压感但无法被系统识别的触屏设备。"
+                            Header="{x:Static props:CanvasStrings.Canvas_EnablePressureTouch}"
+                            Description="{x:Static props:CanvasStrings.Canvas_EnablePressureTouchHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.Touch}"
                             SwitchName="ToggleSwitchEnablePressureTouchMode"
                             Toggled="ToggleSwitchEnablePressureTouchMode_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardDisablePressure"
-                            Header="屏蔽压感"
-                            Description="开启后，将忽略所有设备的压感信息，使所有笔画具有统一的粗细。与压感触屏模式互斥。"
+                            Header="{x:Static props:CanvasStrings.Canvas_IgnorePressure}"
+                            Description="{x:Static props:CanvasStrings.Canvas_DisablePressureHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
                             SwitchName="ToggleSwitchDisablePressure"
                             Toggled="ToggleSwitchDisablePressure_Toggled" />
 
-                    <ui:SettingsCard Header="橡皮大小"
-                            Description="非实时切换，下一次使用面积擦时生效。">
+                    <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_EraserSize}"
+                            Description="{x:Static props:CanvasStrings.Canvas_EraserSizeHint}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EraseTool}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxEraserSize"
                                   SelectedIndex="1"
                                   SelectionChanged="ComboBoxEraserSize_SelectionChanged">
-                            <ComboBoxItem Content="很小" />
-                            <ComboBoxItem Content="较小" />
-                            <ComboBoxItem Content="中等" />
-                            <ComboBoxItem Content="较大" />
-                            <ComboBoxItem Content="很大" />
+                            <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_EraserSize_VerySmall}" />
+                            <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_EraserSize_Small}" />
+                            <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_EraserSize_Medium}" />
+                            <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_EraserSize_Large}" />
+                            <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_EraserSize_VeryLarge}" />
                         </ComboBox>
                     </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardHideStrokeWhenSelecting"
-                            Header="退出画板模式后隐藏墨迹"
-                            Description="开启 退出画板模式后隐藏墨迹 选项后，进入 PPT 模式时未处于批注模式时不会显示墨迹。"
+                            Header="{x:Static props:CanvasStrings.Canvas_HideInkOnExit}"
+                            Description="{x:Static props:CanvasStrings.Canvas_HideStrokeWhenSelectingHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.Hide}"
                             SwitchName="ToggleSwitchHideStrokeWhenSelecting"
                             Toggled="ToggleSwitchHideStrokeWhenSelecting_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardClearCanvasAndClearTimeMachine"
-                            Header="清空墨迹时删除墨迹历史记录"
+                            Header="{x:Static props:CanvasStrings.Canvas_ClearInkAlsoClearHistory}"
                             Icon="{x:Static ui:SegoeFluentIcons.Delete}"
                             SwitchName="ToggleSwitchClearCanvasAndClearTimeMachine"
                             Toggled="ToggleSwitchClearCanvasAndClearTimeMachine_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardClearCanvasAlsoClearImages"
-                            Header="清空画布时同时清空图片"
+                            Header="{x:Static props:CanvasStrings.Canvas_ClearCanvasAlsoClearImages}"
                             Icon="{x:Static ui:SegoeFluentIcons.Photo}"
                             SwitchName="ToggleSwitchClearCanvasAlsoClearImages"
                             Toggled="ToggleSwitchClearCanvasAlsoClearImages_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardCompressPicturesUploaded"
-                            Header="插入图片时自动压缩（大于1920×1080）"
+                            Header="{x:Static props:CanvasStrings.Canvas_CompressPicturesUploaded}"
                             Icon="{x:Static ui:SegoeFluentIcons.Clear}"
                             SwitchName="ToggleSwitchCompressPicturesUploaded"
                             Toggled="ToggleSwitchCompressPicturesUploaded_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardLaunchSeewoVideoShowcaseForWhiteboardBooth"
-                            Header="白板展台按钮启动希沃视频展台"
-                            Description="开启后，点击白板工具栏「展台」将打开希沃视频展台（需已安装）；关闭则使用内置展台。"
+                            Header="{x:Static props:CanvasStrings.Canvas_LaunchSeewoVideoShowcaseForWhiteboardBooth}"
+                            Description="{x:Static props:CanvasStrings.Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.Video}"
                             SwitchName="ToggleSwitchLaunchSeewoVideoShowcaseForWhiteboardBooth"
                             Toggled="ToggleSwitchLaunchSeewoVideoShowcaseForWhiteboardBooth_Toggled" />
 
-                    <ui:SettingsCard Header="保留双曲线渐近线"
-                            Description="请注意，若不保留双曲线渐近线可能会有遇到撤回相关的 BUG 影响使用。">
+                    <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_KeepAsymptote}"
+                            Description="{x:Static props:CanvasStrings.Canvas_HyperbolaAsymptoteHint}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AreaChart}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxHyperbolaAsymptoteOption"
                                   SelectedIndex="0"
                                   SelectionChanged="ComboBoxHyperbolaAsymptoteOption_SelectionChanged">
-                            <ComboBoxItem Content="是" />
-                            <ComboBoxItem Content="否" />
-                            <ComboBoxItem Content="每次询问" />
+                            <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_Yes}" />
+                            <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_No}" />
+                            <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_AskEachTime}" />
                         </ComboBox>
                     </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardShowCircleCenter"
-                            Header="绘制圆时显示圆心位置"
+                            Header="{x:Static props:CanvasStrings.Canvas_ShowCircleCenter}"
                             Icon="{x:Static ui:SegoeFluentIcons.CircleRing}"
                             SwitchName="ToggleSwitchShowCircleCenter"
                             Toggled="ToggleSwitchShowCircleCenter_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardShowCoordinateUnitMarks"
-                            Header="绘制坐标系时显示厘米刻度"
-                            Description="开启后，绘制坐标系会按 1 cm 间隔自动添加刻度。"
+                            Header="{x:Static props:CanvasStrings.Canvas_ShowCoordinateUnitMarks}"
+                            Description="{x:Static props:CanvasStrings.Canvas_ShowCoordinateUnitMarksHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.Calculator}"
                             SwitchName="ToggleSwitchShowCoordinateUnitMarks"
                             Toggled="ToggleSwitchShowCoordinateUnitMarks_Toggled" />
 
-                    <ui:SettingsCard Header="曲线平滑模式">
+                    <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_CurveSmoothingMode}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.InkingTool}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxCurveSmoothingMode"
                                   SelectedIndex="2"
                                   SelectionChanged="ComboBoxCurveSmoothingMode_SelectionChanged">
-                            <ComboBoxItem Content="关闭" Tag="0" />
-                            <ComboBoxItem Content="使用 WPF 默认贝塞尔曲线平滑" Tag="1" />
-                            <ComboBoxItem Content="使用高级曲线平滑（推荐）" Tag="2" />
+                            <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_CurveSmoothing_Off}" Tag="0" />
+                            <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_WPFBezier}" Tag="1" />
+                            <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_AdvancedSmoothing}" Tag="2" />
                         </ComboBox>
                     </ui:SettingsCard>
 
                     <ui:SettingsExpander x:Name="ExpanderBrushAutoRestore"
-                            Header="启用画笔自动恢复"
-                            Description="启用后，临时修改画笔设置后将在指定时间点自动恢复到你在此处配置的颜色 / 透明度 / 粗细"
+                            Header="{x:Static props:CanvasStrings.Canvas_BrushAutoRestore}"
+                            Description="{x:Static props:CanvasStrings.Canvas_BrushAutoRestoreHint}"
                             d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" />
@@ -151,25 +151,25 @@
                                 OffContent="{DynamicResource Common_Off}"
                                 Toggled="ToggleSwitchBrushAutoRestore_Toggled" />
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="自动恢复时间点 (HH:mm，可多个，用 ; 分隔)">
+                            <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_AutoRestoreTimePoints}">
                                 <TextBox x:Name="BrushAutoRestoreTimesTextBox" Width="260"
                                          TextChanged="BrushAutoRestoreTimesTextBox_TextChanged" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="恢复目标颜色">
+                            <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_RestoreColor}">
                                 <ComboBox x:Name="ComboBoxBrushAutoRestoreColor"
                                           SelectionChanged="ComboBoxBrushAutoRestoreColor_SelectionChanged">
-                                    <ComboBoxItem Content="默认" Tag="#FFFF0000" />
-                                    <ComboBoxItem Content="黑色" Tag="#FF000000" />
-                                    <ComboBoxItem Content="白色" Tag="#FFFFFFFF" />
-                                    <ComboBoxItem Content="红色" Tag="#FFFF0000" />
-                                    <ComboBoxItem Content="黄色" Tag="#FFFFFF00" />
-                                    <ComboBoxItem Content="蓝色" Tag="#FF2563EB" />
-                                    <ComboBoxItem Content="绿色" Tag="#FF16A34A" />
-                                    <ComboBoxItem Content="橙色" Tag="#FFFB9650" />
-                                    <ComboBoxItem Content="紫色" Tag="#FF9333EA" />
+                                    <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_Color_Default}" Tag="#FFFF0000" />
+                                    <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_Color_Black}" Tag="#FF000000" />
+                                    <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_Color_White}" Tag="#FFFFFFFF" />
+                                    <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_Color_Red}" Tag="#FFFF0000" />
+                                    <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_Color_Yellow}" Tag="#FFFFFF00" />
+                                    <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_Color_Blue}" Tag="#FF2563EB" />
+                                    <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_Color_Green}" Tag="#FF16A34A" />
+                                    <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_Color_Orange}" Tag="#FFFB9650" />
+                                    <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_Color_Purple}" Tag="#FF9333EA" />
                                 </ComboBox>
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="恢复笔粗细">
+                            <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_RestoreWidth}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="BrushAutoRestoreWidthText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -178,7 +178,7 @@
                                             ValueChanged="BrushAutoRestoreWidthSlider_ValueChanged" />
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="恢复透明度">
+                            <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_RestoreOpacity}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="BrushAutoRestoreAlphaText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -191,8 +191,8 @@
                     </ui:SettingsExpander>
 
                     <ui:SettingsExpander x:Name="ExpanderEnableEraserAutoSwitchBack"
-                            Header="使用橡皮擦后自动切换回批注模式"
-                            Description="开启后，使用橡皮擦进行擦除操作后静置一段时间将自动切换回批注模式"
+                            Header="{x:Static props:CanvasStrings.Canvas_SwitchBackAfterEraser}"
+                            Description="{x:Static props:CanvasStrings.Canvas_SwitchBackAfterEraserHint}"
                             d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Switch}" />
@@ -202,8 +202,8 @@
                                 OffContent="{DynamicResource Common_Off}"
                                 Toggled="ToggleSwitchEnableEraserAutoSwitchBack_Toggled" />
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="自动切换延迟时间"
-                                    Description="若在计时时间内再次进行擦除操作，计时器将重新开始计时">
+                            <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_SwitchBackDelay}"
+                                    Description="{x:Static props:CanvasStrings.Canvas_SwitchBackDelayHint}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="EraserAutoSwitchBackDelayText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -216,18 +216,18 @@
                     </ui:SettingsExpander>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="手势" />
+                        Text="{x:Static props:GestureStrings.Gesture_Title}" />
 
                     <controls:LabeledSettingsCard x:Name="CardEnableTwoFingerRotationOnSelection"
-                            Header="允许双指旋转与缩放选中的墨迹"
-                            Description="允许选中墨迹后对墨迹进行双指或多指缩放操作（此设置不受「允许双指旋转」设置的影响）"
+                            Header="{x:Static props:GestureStrings.Gesture_AllowRotateScale}"
+                            Description="{x:Static props:GestureStrings.Gesture_AllowRotateScaleHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.Rotate}"
                             SwitchName="ToggleSwitchEnableTwoFingerRotationOnSelection"
                             Toggled="ToggleSwitchEnableTwoFingerRotationOnSelection_Toggled" />
 
                     <ui:SettingsExpander x:Name="ExpanderEnablePalmEraser"
-                            Header="启用手掌擦"
-                            Description="低敏感度：需要更大的触摸面积和更多触摸点，减少误判；高敏感度：更容易触发手掌擦，但可能误判手指。"
+                            Header="{x:Static props:GestureStrings.Gesture_EnablePalmEraser}"
+                            Description="{x:Static props:GestureStrings.Gesture_PalmHint}"
                             d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EraseTool}" />
@@ -237,12 +237,12 @@
                                 OffContent="{DynamicResource Common_Off}"
                                 Toggled="ToggleSwitchEnablePalmEraser_Toggled" />
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="手掌擦敏感度">
+                            <ui:SettingsCard Header="{x:Static props:GestureStrings.Gesture_PalmSensitivity}">
                                 <ComboBox x:Name="ComboBoxPalmEraserSensitivity"
                                           SelectionChanged="ComboBoxPalmEraserSensitivity_SelectionChanged">
-                                    <ComboBoxItem Content="低敏感度" />
-                                    <ComboBoxItem Content="中敏感度" />
-                                    <ComboBoxItem Content="高敏感度" />
+                                    <ComboBoxItem Content="{x:Static props:GestureStrings.Gesture_PalmSensitivityLow}" />
+                                    <ComboBoxItem Content="{x:Static props:GestureStrings.Gesture_PalmSensitivityMedium}" />
+                                    <ComboBoxItem Content="{x:Static props:GestureStrings.Gesture_PalmSensitivityHigh}" />
                                 </ComboBox>
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>

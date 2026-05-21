@@ -1,3 +1,4 @@
+using Ink_Canvas.Properties;
 using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 using System;
@@ -691,8 +692,8 @@ namespace Ink_Canvas
             bool isMaxPage = WhiteboardTotalCount >= 99;
 
             // 设置按钮文本
-            BtnLeftWhiteBoardSwitchNext.LabelTextBlockControl.Text = isLastPage ? "新页面" : "下一页";
-            BtnRightWhiteBoardSwitchNext.LabelTextBlockControl.Text = isLastPage ? "新页面" : "下一页";
+            BtnLeftWhiteBoardSwitchNext.LabelTextBlockControl.Text = isLastPage ? "新页面" : FloatingBarStrings.Board_NextPage;
+            BtnRightWhiteBoardSwitchNext.LabelTextBlockControl.Text = isLastPage ? FloatingBarStrings.Board_NewPage : FloatingBarStrings.Board_NextPage;
 
             if (isLastPage)
             {

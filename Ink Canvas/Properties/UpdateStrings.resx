@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Header_AutoUpdate" xml:space="preserve">
+    <value>自动检查更新</value>
+  </data>
+  <data name="Header_SilentUpdate" xml:space="preserve">
+    <value>静默更新</value>
+  </data>
+  <data name="Msg_DownloadFailedTitle" xml:space="preserve">
+    <value>下载失败</value>
+  </data>
+  <data name="Msg_RestartLimit" xml:space="preserve">
+    <value>检测到程序已连续重启 5 次，已停止自动重启。请联系开发者或检查系统环境。</value>
+  </data>
+  <data name="Msg_RestartLimitTitle" xml:space="preserve">
+    <value>重启次数过多</value>
+  </data>
+  <data name="Msg_SkipVersion" xml:space="preserve">
+    <value>已设置跳过版本 {0}，在下次发布新版本之前不会再提示更新。</value>
+  </data>
+  <data name="Msg_SkipVersionTitle" xml:space="preserve">
+    <value>已跳过此版本</value>
+  </data>
+  <data name="Msg_UnexpectedError" xml:space="preserve">
+    <value>抱歉，出现未预期的异常，可能导致 InkCanvasForClass 运行不稳定。\n建议保存墨迹后重启应用。</value>
+  </data>
+  <data name="Msg_UpdateDownloadFailed" xml:space="preserve">
+    <value>更新下载失败，请检查网络连接后重试。</value>
+  </data>
+  <data name="Msg_UpdateReady" xml:space="preserve">
+    <value>更新已下载完成，将在软件关闭时自动安装。</value>
+  </data>
+  <data name="Msg_UpdateReadyTitle" xml:space="preserve">
+    <value>更新已准备就绪</value>
+  </data>
+  <data name="Update_Beta" xml:space="preserve">
+    <value>测试版 (Beta)</value>
+  </data>
+  <data name="Update_Channel" xml:space="preserve">
+    <value>更新通道</value>
+  </data>
+  <data name="Update_PackageArch_X64" xml:space="preserve">
+    <value>64 位 (x64)</value>
+  </data>
+  <data name="Update_PackageArch_X86" xml:space="preserve">
+    <value>32 位 (x86)</value>
+  </data>
+  <data name="Update_Preview" xml:space="preserve">
+    <value>预览版 (Preview)</value>
+  </data>
+  <data name="Update_Release" xml:space="preserve">
+    <value>稳定版 (Release)</value>
+  </data>
+</root>

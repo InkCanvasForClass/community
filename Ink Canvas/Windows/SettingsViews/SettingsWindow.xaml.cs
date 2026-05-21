@@ -1,3 +1,4 @@
+using Ink_Canvas.Properties;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Pages;
 using iNKORE.UI.WPF.Modern.Controls;
@@ -325,7 +326,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             if (args.IsSettingsSelected)
             {
                 NavigateToPage("Settings");
-                NavigationViewControl.Header = "设置";
+                NavigationViewControl.Header = NavStrings.Settings_Title;
                 return;
             }
 
@@ -421,7 +422,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             if (currentPageType == typeof(SettingsPage))
             {
                 NavigationViewControl.SelectedItem = NavigationViewControl.SettingsItem;
-                NavigationViewControl.Header = "设置";
+                NavigationViewControl.Header = NavStrings.Settings_Title;
                 return;
             }
 

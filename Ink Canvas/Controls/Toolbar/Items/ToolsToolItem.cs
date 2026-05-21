@@ -1,3 +1,4 @@
+using Ink_Canvas.Properties;
 using System.Windows.Input;
 
 namespace Ink_Canvas.Controls.Toolbar.Items
@@ -7,7 +8,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         public override string Id => "builtin.tools";
         public override string LocalizationKey => "Board_Tools";
         public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
-        public override string Description => "工具";
+        public override string Description => FloatingBarStrings.Board_Tools;
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.SymbolIconTools_MouseUp(sender, e);

@@ -1,4 +1,4 @@
-<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.WindowPage"
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.WindowPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -39,29 +39,29 @@
                         Text="窗口设置" />
 
                     <controls:LabeledSettingsCard x:Name="CardNoFocusMode"
-                            Header="窗口无焦点模式"
-                            Description="窗口失去焦点时仍可接收输入"
+                            Header="{x:Static props:StartupStrings.NoFocusMode}"
+                            Description="{x:Static props:StartupStrings.NoFocusModeHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.View}"
                             SwitchName="ToggleSwitchNoFocusMode"
                             Toggled="ToggleSwitchNoFocusMode_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardWindowMode"
-                            Header="窗口无边框模式"
-                            Description="隐藏窗口边框，提供更沉浸的体验"
+                            Header="{x:Static props:StartupStrings.NoBorderMode}"
+                            Description="{x:Static props:StartupStrings.NoBorderModeHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.FullScreen}"
                             SwitchName="ToggleSwitchWindowMode"
                             Toggled="ToggleSwitchWindowMode_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardWindowChromeRendering"
-                            Header="以 WindowChrome 模式渲染"
-                            Description="使用 DWM/WindowChrome 绘制透明主窗口，通常比 AllowsTransparency 更流畅；需要重启后生效。"
+                            Header="{x:Static props:WindowStrings.Window_WindowChromeRendering}"
+                            Description="{x:Static props:WindowStrings.Window_WindowChromeRenderingHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.SpeedHigh}"
                             SwitchName="ToggleSwitchWindowChromeRendering"
                             Toggled="ToggleSwitchWindowChromeRendering_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardAvoidFullScreen"
-                            Header="启用 AvoidFullScreenHelper"
-                            Description="避免画布全屏，应该可以解决任务栏非置顶和 Win11 任务栏无法点击的问题，会导致左侧或顶部有 AppBar（Dock栏软件）时导致浮动工具栏偏移，重启icc后生效。"
+                            Header="{x:Static props:AdvancedStrings.AvoidFullScreenHelper}"
+                            Description="{x:Static props:AdvancedStrings.AvoidFullScreenHelperHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.Cancel}"
                             SwitchName="ToggleSwitchAvoidFullScreen"
                             Toggled="ToggleSwitchAvoidFullScreen_Toggled" />
@@ -88,8 +88,8 @@
                     </controls:LabeledSettingsCard>
 
                     <ui:SettingsExpander x:Name="ExpanderAlwaysOnTop"
-                            Header="窗口置顶"
-                            Description="窗口始终显示在其他窗口之上"
+                            Header="{x:Static props:StartupStrings.TopMost}"
+                            Description="{x:Static props:StartupStrings.TopMostHint}"
                             IsExpanded="{Binding IsOn, ElementName=ToggleSwitchAlwaysOnTop, Mode=OneWay}"
                             d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
@@ -103,14 +103,14 @@
                             <helpers:TopMostModeTemplateSelector>
                                 <helpers:TopMostModeTemplateSelector.SelectionTemplate>
                                     <DataTemplate>
-                                        <ui:SettingsCard Header="置顶模式">
+                                        <ui:SettingsCard Header="{x:Static props:StartupStrings.TopMostMode}">
                                             <StackPanel Orientation="Horizontal">
-                                                <RadioButton Content="普通置顶"
+                                                <RadioButton Content="{x:Static props:StartupStrings.TopMostMode_Normal}"
                                                         GroupName="TopMostMode"
                                                         Checked="RadioTopMostNormal_Checked"
                                                         Loaded="RadioTopMostNormal_Loaded"
                                                         Margin="0,0,16,0" />
-                                                <RadioButton Content="UIA 置顶（需要管理员权限）"
+                                                <RadioButton Content="{x:Static props:StartupStrings.TopMostMode_UIA}"
                                                         GroupName="TopMostMode"
                                                         Checked="RadioTopMostUIA_Checked"
                                                         Loaded="RadioTopMostUIA_Loaded" />

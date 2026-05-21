@@ -1,4 +1,4 @@
-<Application x:Class="Ink_Canvas.App"
+<Application xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Ink_Canvas"
@@ -52,7 +52,7 @@
                 <MenuItem Name="OpenSettingsTrayIconMenuItem" Click="OpenSettingsTrayIconMenuItem_Clicked">
                     <MenuItem.Header>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
-                            <TextBlock FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="打开设置" />
+                            <TextBlock FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="{x:Static props:WindowStrings.Tray_ClickAction_OpenSettings}" />
                         </ikw:SimpleStackPanel>
                     </MenuItem.Header>
                     <MenuItem.Icon>
@@ -83,7 +83,7 @@
                 <MenuItem Name="ForceFullScreenTrayIconMenuItem" Click="ForceFullScreenTrayIconMenuItem_Clicked">
                     <MenuItem.Header>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
-                            <TextBlock FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="强制全屏化" />
+                            <TextBlock FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="{x:Static props:WindowStrings.Tray_ClickAction_ForceFullScreen}" />
                             <ikw:SimpleStackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="4" Margin="16,0,0,0">
                                 <Border Padding="4,2,4,1" Background="#e4e4e7" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="2.5">
                                     <TextBlock FontSize="8" Foreground="#3f3f46" FontWeight="Bold" Text="CTRL" />
@@ -161,7 +161,7 @@
                 <MenuItem Name="ResetFloatingBarPositionTrayIconMenuItem" Click="ResetFloatingBarPositionTrayIconMenuItem_Clicked">
                     <MenuItem.Header>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
-                            <TextBlock FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="重置工具栏位置" />
+                            <TextBlock FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="{x:Static props:WindowStrings.Tray_ClickAction_ResetFloatingBarPosition}" />
                             <ikw:SimpleStackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="4" Margin="16,0,0,0">
                                 <Border  Padding="4,2,4,1" Background="#e4e4e7" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="2.5">
                                     <TextBlock FontSize="8" Foreground="#3f3f46" FontWeight="Bold" Text="CTRL" />
@@ -192,7 +192,7 @@
                 <MenuItem Name="RestartAppTrayIconMenuItem" Click="RestartAppTrayIconMenuItem_Clicked">
                     <MenuItem.Header>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
-                            <TextBlock FontSize="14" FontWeight="Bold" VerticalAlignment="Center" Foreground="#2563eb" Text="重启软件" />
+                            <TextBlock FontSize="14" FontWeight="Bold" VerticalAlignment="Center" Foreground="#2563eb" Text="{x:Static props:WindowStrings.Tray_ClickAction_RestartApp}" />
                             <ikw:SimpleStackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="4" Margin="16,0,0,0">
                                 <Border  Padding="4,2,4,1" Background="#e4e4e7" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="2.5">
                                     <TextBlock FontSize="8" Foreground="#3f3f46" FontWeight="Bold" Text="CTRL" />
@@ -224,7 +224,7 @@
                 <MenuItem Name="CloseAppTrayIconMenuItem" Click="CloseAppTrayIconMenuItem_Clicked">
                     <MenuItem.Header>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
-                            <TextBlock FontSize="14" FontWeight="Bold" VerticalAlignment="Center" Foreground="#dc2626" Text="退出软件" />
+                            <TextBlock FontSize="14" FontWeight="Bold" VerticalAlignment="Center" Foreground="#dc2626" Text="{x:Static props:WindowStrings.Tray_ClickAction_CloseApp}" />
                             <ikw:SimpleStackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="4" Margin="16,0,0,0">
                                 <Border  Padding="4,2,4,1" Background="#e4e4e7" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="2.5">
                                     <TextBlock FontSize="8" Foreground="#3f3f46" FontWeight="Bold" Text="CTRL" />

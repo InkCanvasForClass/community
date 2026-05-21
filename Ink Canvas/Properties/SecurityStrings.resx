@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="FileAssoc_Check" xml:space="preserve">
+    <value>检查关联状态</value>
+  </data>
+  <data name="FileAssoc_Desc" xml:space="preserve">
+    <value>管理 .icstk 文件的关联设置，双击 .icstk 文件可直接在 Ink Canvas 中打开</value>
+  </data>
+  <data name="FileAssoc_Register" xml:space="preserve">
+    <value>重新注册关联</value>
+  </data>
+  <data name="FileAssoc_Title" xml:space="preserve">
+    <value>文件关联管理</value>
+  </data>
+  <data name="FileAssoc_Unregister" xml:space="preserve">
+    <value>取消文件关联</value>
+  </data>
+  <data name="SecurityPanel__InkCanvasForClass_Hint" xml:space="preserve">
+    <value>关闭 InkCanvasForClass 时进行密码验证</value>
+  </data>
+  <data name="SecurityPanel__Settingsjson_Hint" xml:space="preserve">
+    <value>重置 Settings.json 前进行二次验证</value>
+  </data>
+  <data name="SecurityPanel_Hint" xml:space="preserve">
+    <value>开启后需要设置密码</value>
+  </data>
+  <data name="SecurityPanel_Hint_1" xml:space="preserve">
+    <value>设置或修改安全密码</value>
+  </data>
+  <data name="SecurityPanel_Hint_2" xml:space="preserve">
+    <value>打开设置面板/新设置窗口时进行验证</value>
+  </data>
+  <data name="SecurityPanel_Hint_3" xml:space="preserve">
+    <value>在修改名单或清空名单前进行密码验证</value>
+  </data>
+  <data name="SecurityPanel_Hint_4" xml:space="preserve">
+    <value>开启后关键文件会被只读占用</value>
+  </data>
+  <data name="SettingsBaseView_Binding_DescriptionHint" xml:space="preserve">
+    <value>{Binding Description}</value>
+  </data>
+  <data name="Tooltip_IccProtocol" xml:space="preserve">
+    <value>通过 icc:// 协议从外部控制软件</value>
+  </data>
+</root>

@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="PowerPointPanel__PPT_Hint" xml:space="preserve">
+    <value>When enabled, also show gesture button in PPT slideshow mode</value>
+  </data>
+  <data name="PowerPointPanel_0Hint" xml:space="preserve">
+    <value>Increase for upward offset, decrease for downward offset, set to 0 for no offset and center placement</value>
+  </data>
+  <data name="PowerPointPanel_0Hint_1" xml:space="preserve">
+    <value>Increase for rightward offset, decrease for leftward offset, set to 0 for no offset and center placement</value>
+  </data>
+  <data name="PowerPointPanel_Hint" xml:space="preserve">
+    <value>Adjust position of left bottom button</value>
+  </data>
+  <data name="PowerPointPanel_Hint_1" xml:space="preserve">
+    <value>Adjust position of right bottom button</value>
+  </data>
+  <data name="PowerPointPanel_Hint_2" xml:space="preserve">
+    <value>Adjust transparency of left page turn button</value>
+  </data>
+  <data name="PowerPointPanel_Hint_3" xml:space="preserve">
+    <value>Adjust transparency of right page turn button</value>
+  </data>
+  <data name="PowerPointPanel_Hint_4" xml:space="preserve">
+    <value>Adjust transparency of left bottom page turn button</value>
+  </data>
+  <data name="PowerPointPanel_Hint_5" xml:space="preserve">
+    <value>Adjust transparency of right bottom page turn button</value>
+  </data>
+  <data name="PowerPointPanel_Hint_6" xml:space="preserve">
+    <value>Allow two-finger gestures in slideshow mode</value>
+  </data>
+  <data name="PowerPointPanel_Hint_7" xml:space="preserve">
+    <value>Select display position of time capsule on screen</value>
+  </data>
+  <data name="PowerPointPanel_Hint_8" xml:space="preserve">
+    <value>Show tip when playing hidden slides</value>
+  </data>
+  <data name="PowerPointPanel_PPTHint" xml:space="preserve">
+    <value>Show page turn control buttons in PPT slideshow mode</value>
+  </data>
+  <data name="PowerPointPanel_PPTHint_1" xml:space="preserve">
+    <value>Auto switch to annotation mode when entering PPT slideshow</value>
+  </data>
+  <data name="PowerPointPanel_PPTHint_2" xml:space="preserve">
+    <value>Auto jump to first page when entering PPT slideshow</value>
+  </data>
+  <data name="PowerPointPanel_PPTHint_3" xml:space="preserve">
+    <value>Show tip when PPT auto plays</value>
+  </data>
+  <data name="PowerPointPanel_quotquotHint" xml:space="preserve">
+    <value>When enabled, will record last played page number and auto jump when clicking Yes</value>
+  </data>
+  <data name="AutoSaveStrokes" xml:space="preserve">
+    <value>Auto-save slide ink</value>
+  </data>
+  <data name="AutoSaveStrokesHint" xml:space="preserve">
+    <value>When on, ink is saved when ending slide show and loaded next time (same file and page).</value>
+  </data>
+  <data name="AutoScreenshot" xml:space="preserve">
+    <value>Auto screenshot on slide change</value>
+  </data>
+  <data name="AutoScreenshotHint" xml:space="preserve">
+    <value>When on, auto-screenshot when turning page with ink on slide.</value>
+  </data>
+  <data name="BlackBackground" xml:space="preserve">
+    <value>Black background</value>
+  </data>
+  <data name="BottomGroupTitle" xml:space="preserve">
+    <value>Bottom left &amp; right</value>
+  </data>
+  <data name="ConflictWithAutoFold" xml:space="preserve">
+    <value>Conflicts with &quot;Auto fold when playing PPT&quot; in Automation!</value>
+  </data>
+  <data name="EnhancedPreview" xml:space="preserve">
+    <value>Enhanced preview for page button</value>
+  </data>
+  <data name="EnhancedPreviewHint" xml:space="preserve">
+    <value>Manually enable this option to show a thumbnail page list when clicking the page button (supports both WPS and PowerPoint), then click a thumbnail to jump.</value>
+  </data>
+  <data name="Enhancement" xml:space="preserve">
+    <value>PowerPoint enhancement</value>
+  </data>
+  <data name="EnterAnnotationOnShow" xml:space="preserve">
+    <value>Enter annotation mode when starting PPT slide show</value>
+  </data>
+  <data name="FingerGestureSlide" xml:space="preserve">
+    <value>Allow finger gesture to turn slides</value>
+  </data>
+  <data name="FingerGestureSlideHint" xml:space="preserve">
+    <value>When canvas is on, finger swipe (not pen) can turn slides in show mode when canvas has no ink.</value>
+  </data>
+  <data name="FlipButtonsTitle" xml:space="preserve">
+    <value>PPT page-turn buttons</value>
+  </data>
+  <data name="GoToFirstPageOnReenter" xml:space="preserve">
+    <value>Go to first slide when entering show</value>
+  </data>
+  <data name="GroupHint" xml:space="preserve">
+    <value>These settings apply during slide show and override others.</value>
+  </data>
+  <data name="GroupTitle" xml:space="preserve">
+    <value>PPT integration</value>
+  </data>
+  <data name="HalfOpacity" xml:space="preserve">
+    <value>Half opacity</value>
+  </data>
+  <data name="KillWppHint" xml:space="preserve">
+    <value>When disabled, leftover WPP processes may cause slow close or cannot exit completely.</value>
+  </data>
+  <data name="KillWppProcess" xml:space="preserve">
+    <value>Kill WPP process (avoid leftovers)</value>
+  </data>
+  <data name="LeftBottomOffset" xml:space="preserve">
+    <value>Bottom left offset</value>
+  </data>
+  <data name="LeftBottomOpacity" xml:space="preserve">
+    <value>Bottom left opacity</value>
+  </data>
+  <data name="LeftOffset" xml:space="preserve">
+    <value>Left offset</value>
+  </data>
+  <data name="LeftOpacity" xml:space="preserve">
+    <value>Left opacity</value>
+  </data>
+  <data name="LongPressPageTurn" xml:space="preserve">
+    <value>PPT long-press to turn page</value>
+  </data>
+  <data name="LongPressPageTurnHint" xml:space="preserve">
+    <value>When enabled, long-press on PPT page button to turn pages continuously.</value>
+  </data>
+  <data name="NotifyAutoPlay" xml:space="preserve">
+    <value>Warn if auto-play is enabled</value>
+  </data>
+  <data name="NotifyHiddenPage" xml:space="preserve">
+    <value>Warn about hidden slides</value>
+  </data>
+  <data name="OffsetHint" xml:space="preserve">
+    <value>Increase for up, decrease for down; 0 = no offset, centered.</value>
+  </data>
+  <data name="OffsetHintHorizontal" xml:space="preserve">
+    <value>Increase for right, decrease for left; 0 = no offset, centered.</value>
+  </data>
+  <data name="PageButtonClickable" xml:space="preserve">
+    <value>PPT page button clickable</value>
+  </data>
+  <data name="PageButtonClickable_SubSettings" xml:space="preserve">
+    <value>Page button click sub-settings</value>
+  </data>
+  <data name="PageButtonClickableHint" xml:space="preserve">
+    <value>Enable page-button navigation on click. By default it uses PowerPoint grid thumbnails (not supported in WPS); use the sub-setting below to manually enable enhanced preview for WPS support.</value>
+  </data>
+  <data name="Position_Left" xml:space="preserve">
+    <value>Left</value>
+  </data>
+  <data name="Position_LeftBottom" xml:space="preserve">
+    <value>Bottom left</value>
+  </data>
+  <data name="Position_Right" xml:space="preserve">
+    <value>Right</value>
+  </data>
+  <data name="Position_RightBottom" xml:space="preserve">
+    <value>Bottom right</value>
+  </data>
+  <data name="RememberLastPage" xml:space="preserve">
+    <value>Remember and prompt last slide position</value>
+  </data>
+  <data name="RememberLastPageHint" xml:space="preserve">
+    <value>When on, last page is recorded; choose Yes to jump to it.</value>
+  </data>
+  <data name="RightBottomOffset" xml:space="preserve">
+    <value>Bottom right offset</value>
+  </data>
+  <data name="RightBottomOpacity" xml:space="preserve">
+    <value>Bottom right opacity</value>
+  </data>
+  <data name="RightOffset" xml:space="preserve">
+    <value>Right offset</value>
+  </data>
+  <data name="RightOpacity" xml:space="preserve">
+    <value>Right opacity</value>
+  </data>
+  <data name="ShowFlipButtons" xml:space="preserve">
+    <value>Show page-turn buttons in PPT mode</value>
+  </data>
+  <data name="ShowGestureButtonInShow" xml:space="preserve">
+    <value>Show gesture buttons in PPT slide show</value>
+  </data>
+  <data name="ShowGestureButtonInShowHint" xml:space="preserve">
+    <value>When on, gesture buttons are shown in PPT slide show.</value>
+  </data>
+  <data name="ShowPageNumber" xml:space="preserve">
+    <value>Show page number</value>
+  </data>
+  <data name="ShowQuickPanelInShow" xml:space="preserve">
+    <value>Show quick panel in PPT slide show</value>
+  </data>
+  <data name="ShowQuickPanelInShowHint" xml:space="preserve">
+    <value>When off, quick panel is hidden in PPT slide show.</value>
+  </data>
+  <data name="SideGroupTitle" xml:space="preserve">
+    <value>Sides</value>
+  </data>
+  <data name="SkipAnimations" xml:space="preserve">
+    <value>Steal focus to skip animations (PPT)</value>
+  </data>
+  <data name="SupportPowerPoint" xml:space="preserve">
+    <value>Microsoft PowerPoint support</value>
+  </data>
+  <data name="SupportWPS" xml:space="preserve">
+    <value>WPS support</value>
+  </data>
+  <data name="TimeCapsule" xml:space="preserve">
+    <value>PPT time capsule</value>
+  </data>
+  <data name="TimeCapsuleHint" xml:space="preserve">
+    <value>When on, show time capsule in PPT show; can replace minimized timer window.</value>
+  </data>
+  <data name="TimeCapsuleOpacity" xml:space="preserve">
+    <value>Time capsule opacity:</value>
+  </data>
+  <data name="TimeCapsulePos_Center" xml:space="preserve">
+    <value>Top center</value>
+  </data>
+  <data name="TimeCapsulePos_TL" xml:space="preserve">
+    <value>Top left</value>
+  </data>
+  <data name="TimeCapsulePos_TR" xml:space="preserve">
+    <value>Top right</value>
+  </data>
+  <data name="TimeCapsulePosition" xml:space="preserve">
+    <value>Time capsule position:</value>
+  </data>
+  <data name="TimeCapsuleResetPosition" xml:space="preserve">
+    <value>Reset position</value>
+  </data>
+  <data name="TimeCapsuleResetPositionHint" xml:space="preserve">
+    <value>Reset time capsule to default position</value>
+  </data>
+  <data name="TimeCapsuleScale" xml:space="preserve">
+    <value>Time capsule scale:</value>
+  </data>
+  <data name="TwoFingerGesture" xml:space="preserve">
+    <value>Allow two-finger gestures in slide show</value>
+  </data>
+  <data name="UseRot" xml:space="preserve">
+    <value>Use ROT integration</value>
+  </data>
+  <data name="WpsHint1" xml:space="preserve">
+    <value>If you only use PowerPoint, do not enable WPS integration. If you use WPS, it is recommended not to use PowerPoint together.</value>
+  </data>
+  <data name="WpsLagWarning" xml:space="preserve">
+    <value>Enabling WPS support may cause lag when closing WPS!</value>
+  </data>
+  <data name="WpsSupportHint" xml:space="preserve">
+    <value>WPS is supported, but MS Office and WPS cannot be supported at the same time. To enable WPS support, make sure &quot;WPS Office compatibility with third-party systems and software&quot; is enabled in the WPS config tool, otherwise WPS cannot be detected.</value>
+  </data>
+</root>

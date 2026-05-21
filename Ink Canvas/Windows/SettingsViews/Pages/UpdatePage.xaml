@@ -1,4 +1,4 @@
-<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.UpdatePage"
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.UpdatePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -11,7 +11,7 @@
       xmlns:c="clr-namespace:Ink_Canvas.Converter"
       xmlns:mdxam="clr-namespace:MdXaml;assembly=MdXaml"
       mc:Ignorable="d"
-      Title="更新">
+      Title="{x:Static props:NotificationStrings.Type_Update}">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -158,18 +158,18 @@
                         <ikw:SimpleStackPanel Margin="0,8,0,0"
                                               Spacing="{StaticResource SettingsCardSpacing}">
                             <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                                       Text="自动更新" />
+                                       Text="{x:Static props:StorageStrings.Storage_Legend_Update}" />
 
                             <controls:LabeledSettingsCard x:Name="CardAutoUpdate"
-                                                          Header="自动检查更新"
-                                                          Description="开启后将在软件启动时自动检查更新。"
+                                                          Header="{x:Static props:UpdateStrings.Header_AutoUpdate}"
+                                                          Description="{x:Static props:StartupStrings.AutoUpdateHint}"
                                                           Icon="{x:Static ui:SegoeFluentIcons.Sync}"
                                                           SwitchName="ToggleSwitchIsAutoUpdate"
                                                           Toggled="ToggleSwitchIsAutoUpdate_Toggled" />
 
                             <controls:LabeledSettingsCard x:Name="CardSilentUpdate"
-                                                          Header="静默更新"
-                                                          Description="静默更新将在软件不使用时自动安装，无需手动操作"
+                                                          Header="{x:Static props:UpdateStrings.Header_SilentUpdate}"
+                                                          Description="{x:Static props:StartupStrings.SilentUpdateHint}"
                                                           Icon="{x:Static ui:SegoeFluentIcons.QuietHours}"
                                                           SwitchName="ToggleSwitchIsAutoUpdateWithSilence"
                                                           ShowWhen="{Binding IsOn, ElementName=CardAutoUpdate}"
@@ -177,14 +177,14 @@
                                                           Toggled="ToggleSwitchIsAutoUpdateWithSilence_Toggled" />
 
                             <controls:LabeledSettingsCard x:Name="CardSmartUpdate"
-                                                          Header="智慧更新"
-                                                          Description="开启后使用统一平台 API 检查更新并获取下载链接。"
+                                                          Header="{x:Static props:StartupStrings.SmartUpdate}"
+                                                          Description="{x:Static props:StartupStrings.SmartUpdateHint}"
                                                           Icon="{x:Static ui:SegoeFluentIcons.CloudDownload}"
                                                           SwitchName="ToggleSwitchIsSmartUpdate"
                                                           Toggled="ToggleSwitchIsSmartUpdate_Toggled" />
 
                             <ui:SettingsExpander x:Name="ExpanderSilentUpdateTime"
-                                                 Header="静默更新时间段"
+                                                 Header="{x:Static props:StartupStrings.SilentUpdate_TimeRange}"
                                                  Visibility="{Binding IsOn, ElementName=CardSilentUpdate, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                  IsExpanded="{Binding IsOn, ElementName=CardSilentUpdate, Mode=OneWay}"
                                                  d:Visibility="Visible" d:IsExpanded="True">
@@ -193,65 +193,65 @@
                                 </ui:SettingsExpander.HeaderIcon>
                                 <ui:SettingsExpander.Items>
                                     <ui:SettingsCard Header="静默更新时间段设置"
-                                                     Description="关闭静默更新后，已完成安装包的下载后将会弹窗询问是否进行更新，开启静默更新后将会在安装包下载完成后每隔十分钟进行如下检测：①处于静默更新时间段内 ②未处于书写模式 ③未处于画板内。若以上检测通过即会关闭软件进行自动更新。">
+                                                     Description="{x:Static props:StartupStrings.SilentUpdateFullHint}">
                                         <ui:SettingsCard.Content>
                                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
                                                 <ikw:SimpleStackPanel Orientation="Horizontal">
                                                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center"
-                                                               Text="起始时间" FontSize="14" />
+                                                               Text="{x:Static props:CommonStrings.Time_Start}" FontSize="14" />
                                                     <ComboBox x:Name="AutoUpdateWithSilenceStartTimeComboBox"
                                                               SelectionChanged="AutoUpdateWithSilenceStartTimeComboBox_SelectionChanged" />
                                                 </ikw:SimpleStackPanel>
                                                 <ikw:SimpleStackPanel Orientation="Horizontal">
                                                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center"
-                                                               Text="终止时间" FontSize="14" />
+                                                               Text="{x:Static props:CommonStrings.Time_End}" FontSize="14" />
                                                     <ComboBox x:Name="AutoUpdateWithSilenceEndTimeComboBox"
                                                               SelectionChanged="AutoUpdateWithSilenceEndTimeComboBox_SelectionChanged" />
                                                 </ikw:SimpleStackPanel>
                                             </ikw:SimpleStackPanel>
                                         </ui:SettingsCard.Content>
                                     </ui:SettingsCard>
-                                    <ui:SettingsCard Header="若终止时间小于起始时间，即将终止时间视为第二天的时间。若起始时间与终止时间相同，即视为全天候时间。" />
+                                    <ui:SettingsCard Header="{x:Static props:StartupStrings.TimePeriodHint}" />
                                 </ui:SettingsExpander.Items>
                             </ui:SettingsExpander>
 
                             <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                                       Text="更新通道" />
+                                       Text="{x:Static props:UpdateStrings.Update_Channel}" />
 
-                            <ui:SettingsCard Header="更新通道"
-                                             Description="稳定版提供可靠更新，预览版提供新功能体验同时拥有较 Beta 版版更强的稳定性，测试版提供新功能抢先体验">
+                            <ui:SettingsCard Header="{x:Static props:UpdateStrings.Update_Channel}"
+                                             Description="{x:Static props:StartupStrings.UpdateChannelHint}">
                                 <ui:SettingsCard.HeaderIcon>
                                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.SyncFolder}" />
                                 </ui:SettingsCard.HeaderIcon>
                                 <ComboBox x:Name="UpdateChannelSelector"
                                           SelectionChanged="UpdateChannelSelector_SelectionChanged">
-                                    <ComboBoxItem Content="稳定版 (Release)" Tag="Release" />
-                                    <ComboBoxItem Content="预览版 (Preview)" Tag="Preview" />
-                                    <ComboBoxItem Content="测试版 (Beta)" Tag="Beta" />
+                                    <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_Release}" Tag="Release" />
+                                    <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_Preview}" Tag="Preview" />
+                                    <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_Beta}" Tag="Beta" />
                                 </ComboBox>
                             </ui:SettingsCard>
 
-                            <ui:SettingsCard Header="软件架构"
-                                             Description="选择要下载的更新包架构，默认跟随当前软件架构">
+                            <ui:SettingsCard Header="{x:Static props:StartupStrings.UpdatePackageArchitecture}"
+                                             Description="{x:Static props:StartupStrings.UpdatePackageArchitectureHint}">
                                 <ui:SettingsCard.HeaderIcon>
                                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}" />
                                 </ui:SettingsCard.HeaderIcon>
                                 <ComboBox x:Name="UpdatePackageArchitectureSelector"
                                           SelectionChanged="UpdatePackageArchitectureSelector_SelectionChanged">
-                                    <ComboBoxItem Content="32 位 (x86)" Tag="X86" />
-                                    <ComboBoxItem Content="64 位 (x64)" Tag="X64" />
+                                    <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageArch_X86}" Tag="X86" />
+                                    <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageArch_X64}" Tag="X64" />
                                 </ComboBox>
                             </ui:SettingsCard>
 
                             <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                                        Text="维护" />
 
-                            <ui:SettingsCard Header="版本修复"
-                                             Description="版本修复会根据当前选择的通道下载最新版本并执行安装，可用于修复损坏的安装">
+                            <ui:SettingsCard Header="{x:Static props:BtnStrings.VersionFix}"
+                                             Description="{x:Static props:StartupStrings.FixVersionHint}">
                                 <ui:SettingsCard.HeaderIcon>
                                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Repair}" />
                                 </ui:SettingsCard.HeaderIcon>
-                                <Button x:Name="FixVersionButton" Content="版本修复"
+                                <Button x:Name="FixVersionButton" Content="{x:Static props:BtnStrings.VersionFix}"
                                         Click="FixVersionButton_Click" />
                             </ui:SettingsCard>
                         </ikw:SimpleStackPanel>

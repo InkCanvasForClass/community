@@ -1,4 +1,4 @@
-<Window x:Class="Ink_Canvas.Windows.SplashScreen"
+<Window xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SplashScreen"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Ink Canvas"
@@ -33,7 +33,7 @@
         
         <!-- 加载文本（带阴影） -->
         <TextBlock x:Name="LoadingText" 
-                   Text="正在启动 Ink Canvas..." 
+                   Text="{x:Static props:HomeStrings.Splash_Starting}" 
                    FontSize="18" 
                    FontFamily="pack://application:,,,/Resources/Fonts/#LXGW WenKai TC"
                    FontWeight="SemiBold"

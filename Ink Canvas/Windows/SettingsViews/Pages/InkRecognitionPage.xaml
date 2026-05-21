@@ -1,4 +1,4 @@
-<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.InkRecognitionPage"
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.InkRecognitionPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -10,7 +10,7 @@
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       xmlns:c="clr-namespace:Ink_Canvas.Converter"
       mc:Ignorable="d"
-      Title="墨迹纠正">
+      Title="{x:Static props:CanvasStrings.InkRecog_Title}">
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
             <FrameworkElement.Resources>
@@ -29,33 +29,33 @@
                     Spacing="{StaticResource SettingsCardSpacing}">
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="墨迹纠正" />
+                        Text="{x:Static props:CanvasStrings.InkRecog_Title}" />
 
                     <controls:LabeledSettingsCard x:Name="CardEnableInkToShape"
-                            Header="启用墨迹识别"
+                            Header="{x:Static props:CanvasStrings.InkRecog_EnableInkRecognition}"
                             Icon="{x:Static ui:SegoeFluentIcons.Draw}"
                             SwitchName="ToggleSwitchEnableInkToShape"
                             Toggled="ToggleSwitchEnableInkToShape_Toggled" />
 
-                    <ui:SettingsCard Header="识别引擎"
-                            Description="自动：在 Windows 10+ 使用 WinRT，否则使用 IACore。可强制指定 IACore 或 WinRT。IACore 通过 IPC 辅助进程运行，在 32/64 位主进程下均可用。">
+                    <ui:SettingsCard Header="{x:Static props:CanvasStrings.InkRecog_ShapeEngine}"
+                            Description="{x:Static props:CanvasStrings.InkRecog_ShapeEngineHint}">
                         <ComboBox x:Name="ComboBoxShapeRecognitionEngine"
                                   SelectionChanged="ComboBoxShapeRecognitionEngine_SelectionChanged">
-                            <ComboBoxItem Content="自动" />
+                            <ComboBoxItem Content="{x:Static props:CanvasStrings.InkRecog_ShapeEngineAuto}" />
                             <ComboBoxItem Content="IACore" />
                             <ComboBoxItem Content="WinRT" />
                         </ComboBox>
                     </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardEnableWinRtHandwritingStrokeBeautify"
-                            Header="WinRT识别转手写体字形"
-                            Description="开启后，调用墨迹纠正 API 时：先使用 WinRT 识别手写文字，再将识别成功的文字用手写风格字体转成字形轮廓墨迹替换原笔画。需 WinRT。"
+                            Header="{x:Static props:CanvasStrings.InkRecog_HandwritingBeautify}"
+                            Description="{x:Static props:CanvasStrings.InkRecog_HandwritingBeautifyHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.PenWorkspace}"
                             SwitchName="ToggleSwitchEnableWinRtHandwritingStrokeBeautify"
                             Toggled="ToggleSwitchEnableWinRtHandwritingStrokeBeautify_Toggled" />
 
-                    <ui:SettingsCard Header="手写体字形字体"
-                            Description="选择用于替换原笔画的手写风格字体。若所选字体不存在，将按列表回退。"
+                    <ui:SettingsCard Header="{x:Static props:CanvasStrings.InkRecog_HandwritingFont}"
+                            Description="{x:Static props:CanvasStrings.InkRecog_HandwritingFontHint}"
                             Visibility="{Binding IsOn, ElementName=CardEnableWinRtHandwritingStrokeBeautify, Converter={StaticResource BooleanToVisibilityConverter}}"
                             d:Visibility="Visible">
                         <ComboBox x:Name="ComboBoxHandwritingCorrectionFont"
@@ -76,7 +76,7 @@
                     </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardEnableInkToShapeNoFakePressureRectangle"
-                            Header="阻止矫正后的矩形带有模拟压感值"
+                            Header="{x:Static props:CanvasStrings.InkRecog_BlockRectFakePressure}"
                             ShowWhen="{Binding IsOn, ElementName=CardEnableInkToShape}"
                             d:Visibility="Visible"
                             Icon="{x:Static ui:SegoeFluentIcons.RectangularClipping}"
@@ -84,7 +84,7 @@
                             Toggled="ToggleSwitchEnableInkToShapeNoFakePressureRectangle_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardEnableInkToShapeNoFakePressureTriangle"
-                            Header="阻止矫正后的三角形带有模拟压感值"
+                            Header="{x:Static props:CanvasStrings.InkRecog_BlockTriFakePressure}"
                             ShowWhen="{Binding IsOn, ElementName=CardEnableInkToShape}"
                             d:Visibility="Visible"
                             Icon="{x:Static ui:SegoeFluentIcons.IncidentTriangle}"
@@ -101,19 +101,19 @@
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard ContentAlignment="Left">
                                 <CheckBox x:Name="ToggleCheckboxEnableInkToShapeTriangle" IsChecked="True"
-                                          Content="矫正手绘三角形"
+                                          Content="{x:Static props:CanvasStrings.InkRecog_FixTriangle}"
                                           Checked="ToggleCheckboxEnableInkToShapeTriangle_CheckedChanged"
                                           Unchecked="ToggleCheckboxEnableInkToShapeTriangle_CheckedChanged" />
                             </ui:SettingsCard>
                             <ui:SettingsCard ContentAlignment="Left">
                                 <CheckBox x:Name="ToggleCheckboxEnableInkToShapeRectangle" IsChecked="True"
-                                          Content="矫正手绘矩形"
+                                          Content="{x:Static props:CanvasStrings.InkRecog_FixRectangle}"
                                           Checked="ToggleCheckboxEnableInkToShapeRectangle_CheckedChanged"
                                           Unchecked="ToggleCheckboxEnableInkToShapeRectangle_CheckedChanged" />
                             </ui:SettingsCard>
                             <ui:SettingsCard ContentAlignment="Left">
                                 <CheckBox x:Name="ToggleCheckboxEnableInkToShapeRounded" IsChecked="True"
-                                          Content="矫正手绘圆形与椭圆"
+                                          Content="{x:Static props:CanvasStrings.InkRecog_FixEllipse}"
                                           Checked="ToggleCheckboxEnableInkToShapeRounded_CheckedChanged"
                                           Unchecked="ToggleCheckboxEnableInkToShapeRounded_CheckedChanged" />
                             </ui:SettingsCard>
@@ -121,7 +121,7 @@
                     </ui:SettingsExpander>
 
                     <ui:SettingsExpander x:Name="ExpanderAutoStraightenLine"
-                            Header="直线自动拉直"
+                            Header="{x:Static props:CanvasStrings.InkRecog_AutoStraightLine}"
                             d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.LineDisplay}" />
@@ -131,7 +131,7 @@
                                 OffContent="{DynamicResource Common_Off}"
                                 Toggled="ToggleSwitchAutoStraightenLine_Toggled" />
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="长度阈值">
+                            <ui:SettingsCard Header="{x:Static props:CanvasStrings.InkRecog_LengthThreshold}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="AutoStraightenLineThresholdText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -140,7 +140,7 @@
                                             ValueChanged="AutoStraightenLineThresholdSlider_ValueChanged" />
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="灵敏度">
+                            <ui:SettingsCard Header="{x:Static props:CanvasStrings.InkRecog_Sensitivity}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="LineStraightenSensitivityText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -149,21 +149,21 @@
                                             ValueChanged="LineStraightenSensitivitySlider_ValueChanged" />
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="高精度直线拉直"
-                                    Description="开启后，当绘制的直线超过设定长度阈值时，将自动调整为完美直线。灵敏度范围 0.05-2.0，越小要求越严格，越弯曲的线条越不容易被拉直；值越大越容易识别为直线。高精度模式下，每隔 10 像素取一个计数点，获取更准确的平均值用于判断。">
+                            <ui:SettingsCard Header="{x:Static props:CanvasStrings.InkRecog_HighPrecisionStraighten}"
+                                    Description="{x:Static props:CanvasStrings.InkRecog_HighPrecisionHint}">
                                 <ui:ToggleSwitch x:Name="ToggleSwitchHighPrecisionLineStraighten"
                                         OnContent="{DynamicResource Common_On}"
                                         OffContent="{DynamicResource Common_Off}"
                                         Toggled="ToggleSwitchHighPrecisionLineStraighten_Toggled" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="停顿拉直"
-                                    Description="书写中停顿时，自动将当前笔画拉直为直线（需同时开启直线自动拉直）。">
+                            <ui:SettingsCard Header="{x:Static props:CanvasStrings.InkRecog_PauseStraightenLine}"
+                                    Description="{x:Static props:CanvasStrings.InkRecog_PauseStraightenHint}">
                                 <ui:ToggleSwitch x:Name="ToggleSwitchPauseStraightenLine"
                                         OnContent="{DynamicResource Common_On}"
                                         OffContent="{DynamicResource Common_Off}"
                                         Toggled="ToggleSwitchPauseStraightenLine_Toggled" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="停顿触发延迟">
+                            <ui:SettingsCard Header="{x:Static props:CanvasStrings.InkRecog_PauseStraightenDelay}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="PauseStraightenDelayText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -176,7 +176,7 @@
                     </ui:SettingsExpander>
 
                     <ui:SettingsExpander x:Name="ExpanderLineEndpointSnapping"
-                            Header="直线端点吸附"
+                            Header="{x:Static props:CanvasStrings.InkRecog_LineEndpointSnapping}"
                             d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />
@@ -186,8 +186,8 @@
                                 OffContent="{DynamicResource Common_Off}"
                                 Toggled="ToggleSwitchLineEndpointSnapping_Toggled" />
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="吸附距离"
-                                    Description="开启后，当绘制的直线端点靠近其他直线端点时，将自动吸附连接。">
+                            <ui:SettingsCard Header="{x:Static props:CanvasStrings.InkRecog_SnappingDistance}"
+                                    Description="{x:Static props:CanvasStrings.InkRecog_LineEndpointSnappingHint}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="LineEndpointSnappingThresholdText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>

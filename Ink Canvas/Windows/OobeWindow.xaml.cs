@@ -579,7 +579,7 @@ namespace Ink_Canvas.Windows
                     subtitle = "双指缩放/平移、手掌擦等。";
                     break;
                 case 3:
-                    title = "个性化";
+                    title = ThemeStrings.Theme_GroupTitle;
                     subtitle = "主题、启动动画、托盘、快速面板与快捷键。";
                     break;
                 case 4:
@@ -591,7 +591,7 @@ namespace Ink_Canvas.Windows
                     subtitle = "自动收纳、墨迹自动保存、悬浮窗拦截与截图保存。";
                     break;
                 case 6:
-                    title = "随机点名";
+                    title = RandomStrings.Random_Title;
                     subtitle = "点名窗口选项。";
                     break;
                 case 7:
@@ -620,18 +620,18 @@ namespace Ink_Canvas.Windows
             }
 
             string themeText;
-            string backdropText = GetSelectedComboBoxContent(ComboBoxWindowBackdrop, "无背景效果");
+            string backdropText = GetSelectedComboBoxContent(ComboBoxWindowBackdrop, ThemeStrings.Theme_WindowBackdrop_None);
             switch (ComboBoxTheme.SelectedIndex)
             {
                 case 0: themeText = "浅色"; break;
-                case 1: themeText = "深色"; break;
-                default: themeText = "跟随系统"; break;
+                case 1: themeText = FloatingBarStrings.OldUI_Dark; break;
+                default: themeText = ThemeStrings.Theme_System; break;
             }
 
             AddSummaryRow(SegoeFluentIcons.Shield, "遥测级别", telemetryText);
-            AddSummaryRow(SegoeFluentIcons.Sync, "自动检查更新", BoolText(CardAutoUpdate.IsOn));
+            AddSummaryRow(SegoeFluentIcons.Sync, UpdateStrings.Header_AutoUpdate, BoolText(CardAutoUpdate.IsOn));
             AddSummaryRow(SegoeFluentIcons.Personalize, "应用主题", themeText);
-            AddSummaryRow(SegoeFluentIcons.FullScreen, "窗口背景样式", backdropText);
+            AddSummaryRow(SegoeFluentIcons.FullScreen, ThemeStrings.Theme_WindowBackdrop, backdropText);
             AddSummaryRow(SegoeFluentIcons.Slideshow, "PowerPoint / WPS 联动", BoolText(CardPptSupport.IsOn));
             AddSummaryRow(SegoeFluentIcons.TouchPointer, "双指缩放 / 平移",
                 $"{BoolText(CardTwoFingerZoom.IsOn)} / {BoolText(CardTwoFingerTranslate.IsOn)}");

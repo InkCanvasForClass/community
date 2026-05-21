@@ -1,3 +1,4 @@
+using Ink_Canvas.Properties;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -385,7 +386,7 @@ namespace Ink_Canvas
                    $"- 激活: {isUsingGeometryEraser}\n" +
                    $"- 尺寸: {eraserWidth:F1}\n" +
                    $"- 形状: {(isEraserCircleShape ? "圆形" : "矩形")}\n" +
-                   $"- 模式: {(isUsingStrokesEraser ? "笔画" : "几何")}";
+                   $"- 模式: {(isUsingStrokesEraser ? "笔画" : FloatingBarStrings.FloatingBar_Geometry)}";
         }
     }
 }

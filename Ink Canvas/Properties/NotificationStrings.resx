@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="ActionsTitle" xml:space="preserve">
+    <value>操作</value>
+  </data>
+  <data name="AnimationMode" xml:space="preserve">
+    <value>动画效果</value>
+  </data>
+  <data name="AnimationModeHint" xml:space="preserve">
+    <value>控制灵动通知进入、展开和退出时的动画强度。</value>
+  </data>
+  <data name="AnimationOff" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="AnimationSimple" xml:space="preserve">
+    <value>简洁</value>
+  </data>
+  <data name="AnimationStandard" xml:space="preserve">
+    <value>标准</value>
+  </data>
+  <data name="BehaviorTitle" xml:space="preserve">
+    <value>展示行为</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="DefaultTitle" xml:space="preserve">
+    <value>通知</value>
+  </data>
+  <data name="DictationDoNotDisturb" xml:space="preserve">
+    <value>弹窗免打扰</value>
+  </data>
+  <data name="DictationDoNotDisturbHint" xml:space="preserve">
+    <value>指定场景下屏蔽弹窗和系统通知，但消息仍保留在历史中。</value>
+  </data>
+  <data name="DictationDoNotDisturbPpt" xml:space="preserve">
+    <value>PPT 放映时不提醒</value>
+  </data>
+  <data name="DictationDoNotDisturbPptHint" xml:space="preserve">
+    <value>进入 PPT 放映后，不弹出灵动通知、旧通知或 Windows Toast。</value>
+  </data>
+  <data name="DictationDoNotDisturbWhiteboard" xml:space="preserve">
+    <value>白板模式时不提醒</value>
+  </data>
+  <data name="DictationDoNotDisturbWhiteboardHint" xml:space="preserve">
+    <value>进入白板或黑板模式后，不弹出灵动通知、旧通知或 Windows Toast。</value>
+  </data>
+  <data name="EnableAnnouncements" xml:space="preserve">
+    <value>启用公告系统</value>
+  </data>
+  <data name="EnableAnnouncementsHint" xml:space="preserve">
+    <value>启动后拉取公告，并接收实时公告推送。</value>
+  </data>
+  <data name="EnableDynamic" xml:space="preserve">
+    <value>启用灵动通知</value>
+  </data>
+  <data name="EnableDynamicHint" xml:space="preserve">
+    <value>使用顶部胶囊提示承载公告、更新和本地消息。</value>
+  </data>
+  <data name="EnableForcePopup" xml:space="preserve">
+    <value>启用重要公告强提醒</value>
+  </data>
+  <data name="EnableForcePopupHint" xml:space="preserve">
+    <value>重要公告允许默认展开显示，但仍可关闭。</value>
+  </data>
+  <data name="EnableWindowsToast" xml:space="preserve">
+    <value>启用 Windows 系统通知</value>
+  </data>
+  <data name="EnableWindowsToastHint" xml:space="preserve">
+    <value>重要通知和更新可同步显示为系统 Toast。</value>
+  </data>
+  <data name="GroupTitle" xml:space="preserve">
+    <value>通知管理</value>
+  </data>
+  <data name="ImportantDuration" xml:space="preserve">
+    <value>重要通知展示时长</value>
+  </data>
+  <data name="ImportantDurationHint" xml:space="preserve">
+    <value>重要消息自动关闭前停留的秒数。</value>
+  </data>
+  <data name="NavTooltip" xml:space="preserve">
+    <value>公告、消息提醒与灵动通知设置</value>
+  </data>
+  <data name="NewVersion" xml:space="preserve">
+    <value>发现新版本：{0}</value>
+  </data>
+  <data name="OtherDuration" xml:space="preserve">
+    <value>其他通知展示时长</value>
+  </data>
+  <data name="OtherDurationHint" xml:space="preserve">
+    <value>其他消息自动关闭前停留的秒数。</value>
+  </data>
+  <data name="PageTitle" xml:space="preserve">
+    <value>通知</value>
+  </data>
+  <data name="Placement" xml:space="preserve">
+    <value>灵动通知位置</value>
+  </data>
+  <data name="PlacementHint" xml:space="preserve">
+    <value>选择灵动通知在主窗口中的默认展示位置。</value>
+  </data>
+  <data name="PlacementTopCenter" xml:space="preserve">
+    <value>顶部居中</value>
+  </data>
+  <data name="PlacementTopLeft" xml:space="preserve">
+    <value>左上角</value>
+  </data>
+  <data name="PlacementTopRight" xml:space="preserve">
+    <value>右上角</value>
+  </data>
+  <data name="Provider_Announcement" xml:space="preserve">
+    <value>公告提供商</value>
+  </data>
+  <data name="Provider_AnnouncementDesc" xml:space="preserve">
+    <value>拉取远端公告并接收实时推送。</value>
+  </data>
+  <data name="Provider_Disabled" xml:space="preserve">
+    <value>已禁用</value>
+  </data>
+  <data name="Provider_HttpOnly" xml:space="preserve">
+    <value>HTTP 拉取可用，实时推送不可用</value>
+  </data>
+  <data name="Provider_Local" xml:space="preserve">
+    <value>本地消息提供商</value>
+  </data>
+  <data name="Provider_LocalDesc" xml:space="preserve">
+    <value>接收应用内部提示、错误和插件消息。</value>
+  </data>
+  <data name="Provider_NoToken" xml:space="preserve">
+    <value>未配置 Token</value>
+  </data>
+  <data name="Provider_Reconnecting" xml:space="preserve">
+    <value>正在重连</value>
+  </data>
+  <data name="Provider_Running" xml:space="preserve">
+    <value>运行中</value>
+  </data>
+  <data name="Provider_Starting" xml:space="preserve">
+    <value>启动中</value>
+  </data>
+  <data name="Provider_Stopped" xml:space="preserve">
+    <value>已停止</value>
+  </data>
+  <data name="Provider_WaitingRestart" xml:space="preserve">
+    <value>将在下次启动时生效</value>
+  </data>
+  <data name="Provider_WindowsToast" xml:space="preserve">
+    <value>Windows 系统通知</value>
+  </data>
+  <data name="Provider_WindowsToastDesc" xml:space="preserve">
+    <value>将消息同步显示为系统 Toast 或托盘气泡。</value>
+  </data>
+  <data name="ProviderManagement" xml:space="preserve">
+    <value>提醒提供商管理</value>
+  </data>
+  <data name="ProviderManagementHint" xml:space="preserve">
+    <value>查看公告、本地消息和系统通知提供商的启用与运行状态。</value>
+  </data>
+  <data name="ProviderRefresh" xml:space="preserve">
+    <value>刷新状态</value>
+  </data>
+  <data name="ProviderTitle" xml:space="preserve">
+    <value>提醒提供商</value>
+  </data>
+  <data name="ReminderDuration" xml:space="preserve">
+    <value>提醒通知展示时长</value>
+  </data>
+  <data name="ReminderDurationHint" xml:space="preserve">
+    <value>提醒类消息自动关闭前停留的秒数。</value>
+  </data>
+  <data name="SettingsTitle" xml:space="preserve">
+    <value>通知设置</value>
+  </data>
+  <data name="Test" xml:space="preserve">
+    <value>测试通知</value>
+  </data>
+  <data name="TestButton" xml:space="preserve">
+    <value>发送测试通知</value>
+  </data>
+  <data name="TestHint" xml:space="preserve">
+    <value>立即向消息队列发送一条测试通知。</value>
+  </data>
+  <data name="TestSummary" xml:space="preserve">
+    <value>灵动通知与消息队列运行正常。</value>
+  </data>
+  <data name="TestText" xml:space="preserve">
+    <value>测试文本</value>
+  </data>
+  <data name="TestTitle" xml:space="preserve">
+    <value>通知测试</value>
+  </data>
+  <data name="Type_Important" xml:space="preserve">
+    <value>重要</value>
+  </data>
+  <data name="Type_Other" xml:space="preserve">
+    <value>其他</value>
+  </data>
+  <data name="Type_Reminder" xml:space="preserve">
+    <value>提醒</value>
+  </data>
+  <data name="Type_Update" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="Type_Urgent" xml:space="preserve">
+    <value>紧急</value>
+  </data>
+  <data name="UpdateDuration" xml:space="preserve">
+    <value>更新通知展示时长</value>
+  </data>
+  <data name="UpdateDurationHint" xml:space="preserve">
+    <value>更新类消息自动关闭前停留的秒数。</value>
+  </data>
+  <data name="UpdateTitle" xml:space="preserve">
+    <value>发现新版本</value>
+  </data>
+  <data name="UrgentDuration" xml:space="preserve">
+    <value>紧急通知展示时长</value>
+  </data>
+  <data name="UrgentDurationHint" xml:space="preserve">
+    <value>紧急消息自动关闭前停留的秒数。</value>
+  </data>
+  <data name="ViewDetails" xml:space="preserve">
+    <value>查看详情</value>
+  </data>
+  <data name="ViewHistory" xml:space="preserve">
+    <value>查看历史</value>
+  </data>
+</root>

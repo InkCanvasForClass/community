@@ -1,3 +1,4 @@
+using Ink_Canvas.Properties;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Models;
 using Ink_Canvas.Windows.SettingsViews;
@@ -53,7 +54,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private string GetCountText(int count)
         {
-            var template = "共 {0} 条公告，选择左侧条目查看详情。";
+            var template = AnnouncementStrings.ItemCount;
             return string.Format(template, count);
         }
 
@@ -83,11 +84,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             return type switch
             {
-                NotificationMessageType.Update => "更新",
-                NotificationMessageType.Urgent => "紧急",
-                NotificationMessageType.Important => "重要",
-                NotificationMessageType.Reminder => "提醒",
-                NotificationMessageType.Other => "其他",
+                NotificationMessageType.Update => NotificationStrings.Type_Update,
+                NotificationMessageType.Urgent => NotificationStrings.Type_Urgent,
+                NotificationMessageType.Important => NotificationStrings.Type_Important,
+                NotificationMessageType.Reminder => NotificationStrings.Type_Reminder,
+                NotificationMessageType.Other => NotificationStrings.Type_Other,
                 _ => type.ToString()
             };
         }

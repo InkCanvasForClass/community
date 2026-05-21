@@ -1,4 +1,4 @@
-<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.StartupPage"
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.StartupPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -10,7 +10,7 @@
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       mc:Ignorable="d"
 
-      Title="启动">
+      Title="{x:Static props:StartupStrings.Start}">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -31,68 +31,68 @@
                 
                     <!-- 启动设置 -->
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="启动设置" />
+                        Text="{x:Static props:NavStrings.Nav_Startup}" />
                 
                     <!-- 开机时运行 -->
                     <controls:LabeledSettingsCard x:Name="CardRunAtStartup"
-                            Header="开机时运行"
-                            Description="系统启动时自动运行软件"
+                            Header="{x:Static props:StartupStrings.RunAtStartup}"
+                            Description="{x:Static props:StartupStrings.RunAtStartupHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.Settings}"
                             SwitchName="ToggleSwitchRunAtStartup"
                             Toggled="ToggleSwitchRunAtStartup_Toggled" />
                 
                     <!-- 开机运行后收纳到侧边栏 -->
                     <controls:LabeledSettingsCard x:Name="CardFoldAtStartup"
-                            Header="开机运行后收纳到侧边栏"
-                            Description="开机启动后自动收纳到侧边栏"
+                            Header="{x:Static props:StartupStrings.FoldAtStartup}"
+                            Description="{x:Static props:StartupStrings.FoldAtStartupHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.ChevronLeft}"
                             SwitchName="ToggleSwitchFoldAtStartup"
                             Toggled="ToggleSwitchFoldAtStartup_Toggled" />
 
                     <!-- 外部协议调用 -->
                     <controls:LabeledSettingsCard x:Name="CardExternalProtocol"
-                            Header="外部协议调用 (icc://)"
-                            Description="通过 icc:// 协议从外部控制软件"
+                            Header="{x:Static props:StartupStrings.ExternalProtocol}"
+                            Description="{x:Static props:StartupStrings.ExternalProtocolHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.Link}"
                             SwitchName="ToggleSwitchExternalProtocol"
                             Toggled="ToggleSwitchExternalProtocol_Toggled" />
 
                     <!-- 运行模式 -->
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="运行模式" />
+                        Text="{x:Static props:NavStrings.Settings_ModeDesc_1}" />
 
                     <controls:LabeledSettingsCard x:Name="CardPPTOnlyMode"
-                            Header="仅 PPT 模式"
-                            Description="选择软件运行模式。仅 PPT 模式下，软件将完全隐藏，仅在 PPT 放映时出现。（实验性功能，可能不稳定。）"
+                            Header="{x:Static props:CommonStrings.Mode_PPTOnly}"
+                            Description="{x:Static props:NavStrings.Settings_ModeDesc}"
                             Icon="{x:Static ui:SegoeFluentIcons.Settings}"
                             SwitchName="ToggleSwitchPPTOnlyMode"
                             Toggled="ToggleSwitchPPTOnlyMode_Toggled" />
 
                     <!-- 笔尖模式 -->
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="笔尖模式" />
+                        Text="{x:Static props:StartupStrings.EnableNibMode}" />
 
                     <controls:LabeledSettingsCard x:Name="CardEnableNibMode"
-                            Header="笔尖模式"
-                            Description="启用后仅响应笔尖触摸，忽略手掌和手指"
+                            Header="{x:Static props:StartupStrings.EnableNibMode}"
+                            Description="{x:Static props:StartupStrings.EnableNibModeHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
                             SwitchName="ToggleSwitchEnableNibMode"
                             Toggled="ToggleSwitchEnableNibMode_Toggled" />
 
                     <!-- 崩溃后操作 -->
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="崩溃后操作" />
+                        Text="{x:Static props:CrashStrings.Crash_Title}" />
 
-                    <ui:SettingsCard Header="崩溃后操作"
-                            Description="请选择软件发生未处理异常时的自动操作：">
+                    <ui:SettingsCard Header="{x:Static props:CrashStrings.Crash_Title}"
+                            Description="{x:Static props:CrashStrings.Crash_Desc}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Warning}" />
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxCrashAction"
                                   SelectionChanged="ComboBoxCrashAction_SelectionChanged">
-                            <ComboBoxItem Content="静默重启软件" Tag="0" />
-                            <ComboBoxItem Content="无操作" Tag="1" />
-                            <ComboBoxItem Content="弹出崩溃详情窗口（不重启）" Tag="2" />
+                            <ComboBoxItem Content="{x:Static props:CrashStrings.Crash_SilentRestart}" Tag="0" />
+                            <ComboBoxItem Content="{x:Static props:CrashStrings.Crash_NoAction}" Tag="1" />
+                            <ComboBoxItem Content="{x:Static props:CrashStrings.Crash_ShowCrashWindow}" Tag="2" />
                         </ComboBox>
                     </ui:SettingsCard>
 

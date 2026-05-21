@@ -1,4 +1,4 @@
-<Window x:Class="Ink_Canvas.Windows.OobePresetWindow"
+<Window xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.OobePresetWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -156,7 +156,7 @@
                                 <Border CornerRadius="4" Padding="6,2"
                                         Background="{DynamicResource SystemControlBackgroundAccentBrush}">
                                     <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
-                                               Foreground="White" Text="自动保存" />
+                                               Foreground="White" Text="{x:Static props:StorageStrings.AutoSave_Title}" />
                                 </Border>
                                 <Border CornerRadius="4" Padding="6,2"
                                         Background="{DynamicResource SystemControlBackgroundAccentBrush}">
@@ -227,7 +227,7 @@
                                 <Border CornerRadius="4" Padding="6,2"
                                         Background="#FF6366F1">
                                     <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
-                                               Foreground="White" Text="自动保存" />
+                                               Foreground="White" Text="{x:Static props:StorageStrings.AutoSave_Title}" />
                                 </Border>
                             </ikw:SimpleStackPanel>
                         </ikw:SimpleStackPanel>

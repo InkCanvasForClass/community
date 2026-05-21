@@ -1,4 +1,4 @@
-<UserControl x:Class="Ink_Canvas.Windows.HotkeyItem"
+<UserControl xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.HotkeyItem"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -20,7 +20,7 @@ mc:Ignorable="d"
                 FontFamily="Consolas"
                 FontWeight="SemiBold"
                 Click="BtnSetHotkey_Click">
-            <TextBlock x:Name="CurrentHotkeyTextBlock" Text="未设置" />
+            <TextBlock x:Name="CurrentHotkeyTextBlock" Text="{x:Static props:CommonStrings.Hotkey_NotSet}" />
         </Button>
     </ui:SettingsCard>
 </UserControl>

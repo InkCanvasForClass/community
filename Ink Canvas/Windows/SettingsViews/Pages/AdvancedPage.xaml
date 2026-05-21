@@ -1,4 +1,4 @@
-<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.AdvancedPage"
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.AdvancedPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -9,7 +9,7 @@
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       mc:Ignorable="d"
-      Title="高级设置">
+      Title="{x:Static props:AdvancedStrings.Title}">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -29,23 +29,23 @@
                     Spacing="{StaticResource SettingsCardSpacing}">
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="高级设置" />
+                        Text="{x:Static props:AdvancedStrings.Title}" />
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchIsSpecialScreen"
-                        Header="特殊屏幕模式"
+                        Header="{x:Static props:AdvancedStrings.SpecialScreenMode}"
                         Icon="{x:Static ui:SegoeFluentIcons.Settings}"
                         IsOn="True"
                         Toggled="ToggleSwitchIsSpecialScreen_OnToggled"/>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchDisableHardwareAcceleration"
-                        Header="关闭硬件加速"
-                        Description="关闭后可提升兼容性，但可能降低性能；部分效果可能需要重启程序后完全生效。"
+                        Header="{x:Static props:CanvasStrings.Canvas_DisableHardwareAcceleration}"
+                        Description="{x:Static props:CanvasStrings.Canvas_DisableHardwareAccelerationHint}"
                         Icon="{x:Static ui:SegoeFluentIcons.Settings}"
                         IsOn="False"
                         Toggled="ToggleSwitchDisableHardwareAcceleration_Toggled"/>
 
                     <ui:SettingsExpander x:Name="CardTouchMultiplier"
-                                         Header="触摸倍数"
+                                         Header="{x:Static props:AdvancedStrings.TouchMultiplier}"
                                          Description="可在手指触摸画板时显示圆形橡皮或手掌触摸画板时显示的橡皮比
 手掌大很多时调整">
                         <ui:SettingsExpander.HeaderIcon>
@@ -62,10 +62,10 @@
                                     ValueChanged="TouchMultiplierSlider_ValueChanged" />
                         </ikw:SimpleStackPanel>
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="在下方区域内用笔尖点击以估计触摸大小倍数"
+                            <ui:SettingsCard Header="{x:Static props:AdvancedStrings.TouchMultiplierCalibrateHint}"
                                              ContentAlignment="Left">
                                 <ikw:SimpleStackPanel Spacing="8" Margin="0,4,0,4">
-                                    <TextBlock Text="数值仅供参考"
+                                    <TextBlock Text="{x:Static props:AdvancedStrings.TouchMultiplierValueHint}"
                                                Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                                                TextWrapping="Wrap" MaxWidth="420" />
                                     <Border Margin="0,0,20,0" CornerRadius="4" Height="48" Background="Transparent"
@@ -78,13 +78,13 @@
                     </ui:SettingsExpander>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchEraserBindTouchMultiplier"
-                        Header="橡皮擦绑定触摸大小倍数"
-                        Description="BoundsWidth 参数作为接触面积区分界限"
+                        Header="{x:Static props:AdvancedStrings.EraserBindTouchMultiplier}"
+                        Description="{x:Static props:AdvancedStrings.EraserBindTouchHint}"
                         Icon="{x:Static ui:SegoeFluentIcons.EraseTool}"
                         IsOn="True"
                         Toggled="ToggleSwitchEraserBindTouchMultiplier_Toggled"/>
 
-                    <ui:SettingsCard Header="笔尖模式 BoundsWidth">
+                    <ui:SettingsCard Header="{x:Static props:AdvancedStrings.NibModeBoundsWidthHeader}">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="NibModeBoundsWidthText"
                                        VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -96,7 +96,7 @@
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="手指模式 BoundsWidth">
+                    <ui:SettingsCard Header="{x:Static props:AdvancedStrings.FingerModeBoundsWidthHeader}">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="FingerModeBoundsWidthText"
                                        VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
@@ -109,84 +109,84 @@
                     </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchIsQuadIR"
-                        Header="四边红外模式"
+                        Header="{x:Static props:AdvancedStrings.QuadIRMode}"
                         Icon="{x:Static ui:SegoeFluentIcons.FullScreen}"
                         IsOn="True"
                         Toggled="ToggleSwitchIsQuadIR_Toggled"/>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="记录日志" />
+                        Text="{x:Static props:AdvancedStrings.Logging}" />
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchIsLogEnabled"
-                        Header="记录日志"
+                        Header="{x:Static props:AdvancedStrings.Logging}"
                         Icon="{x:Static ui:SegoeFluentIcons.OpenFile}"
                         IsOn="True"
                         Toggled="ToggleSwitchIsLogEnabled_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchIsSaveLogByDate"
-                        Header="日志以日期保存"
-                        Description="日志文件超过 512 KB 时会自动删除。开启日期保存后，日志将保存在 Logs 文件夹中，当文件夹大小超过 5MB 时自动清空。"
+                        Header="{x:Static props:AdvancedStrings.LogByDate}"
+                        Description="{x:Static props:AdvancedStrings.LogRotateHint}"
                         IsOn="True"
                         Toggled="ToggleSwitchIsSaveLogByDate_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchIsSecondConfimeWhenShutdownApp"
-                        Header="关闭软件时二次弹窗确认"
+                        Header="{x:Static props:AdvancedStrings.ConfirmExit}"
                         Icon="{x:Static ui:SegoeFluentIcons.SignOut}"
                         IsOn="True"
                         Toggled="ToggleSwitchIsSecondConfimeWhenShutdownApp_Toggled"/>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="设置备份与还原" />
+                        Text="{x:Static props:StorageStrings.Backup_Title}" />
 
-                    <TextBlock Text="可手动备份当前设置或还原之前的备份，自动更新前也会自动备份"
+                    <TextBlock Text="{x:Static props:StorageStrings.Backup_Desc}"
                                Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                                TextWrapping="Wrap" Margin="1,0,0,4" />
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchIsAutoBackupBeforeUpdate"
-                        Header="自动更新前备份"
+                        Header="{x:Static props:StorageStrings.Backup_AutoBeforeUpdate}"
                         IsOn="True"
                         Toggled="ToggleSwitchIsAutoBackupBeforeUpdate_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchIsAutoBackupEnabled"
-                        Header="定期自动备份"
+                        Header="{x:Static props:StorageStrings.Backup_AutoPeriodic}"
                         IsOn="True"
                         Toggled="ToggleSwitchIsAutoBackupEnabled_Toggled"/>
 
-                    <ui:SettingsCard Header="备份间隔"
-                                     Description="（默认 7 天）">
+                    <ui:SettingsCard Header="{x:Static props:StorageStrings.Backup_Interval}"
+                                     Description="{x:Static props:StorageStrings.Backup_Interval_DefaultHint}">
                         <ComboBox x:Name="ComboBoxAutoBackupInterval"
                                   SelectionChanged="ComboBoxAutoBackupInterval_SelectionChanged">
-                            <ComboBoxItem Content="1 天" Tag="1" />
-                            <ComboBoxItem Content="3 天" Tag="3" />
-                            <ComboBoxItem Content="7 天" Tag="7" IsSelected="True" />
-                            <ComboBoxItem Content="14 天" Tag="14" />
-                            <ComboBoxItem Content="30 天" Tag="30" />
+                            <ComboBoxItem Content="{x:Static props:StorageStrings.Backup_Interval_1Day}" Tag="1" />
+                            <ComboBoxItem Content="{x:Static props:StorageStrings.Backup_Interval_3Days}" Tag="3" />
+                            <ComboBoxItem Content="{x:Static props:StorageStrings.Backup_Interval_7Days}" Tag="7" IsSelected="True" />
+                            <ComboBoxItem Content="{x:Static props:StorageStrings.Backup_Interval_14Days}" Tag="14" />
+                            <ComboBoxItem Content="{x:Static props:StorageStrings.Backup_Interval_30Days}" Tag="30" />
                         </ComboBox>
                     </ui:SettingsCard>
 
                     <ui:SettingsCard ContentAlignment="Left">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <Button x:Name="BtnManualBackup" Content="手动备份" Click="BtnManualBackup_Click" />
-                            <Button x:Name="BtnRestoreBackup" Content="还原备份" Click="BtnRestoreBackup_Click" />
+                            <Button x:Name="BtnManualBackup" Content="{x:Static props:StorageStrings.Backup_Manual}" Click="BtnManualBackup_Click" />
+                            <Button x:Name="BtnRestoreBackup" Content="{x:Static props:StorageStrings.Backup_Restore}" Click="BtnRestoreBackup_Click" />
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="配置文件切换与热重载" />
+                        Text="{x:Static props:ConfigStrings.Title}" />
 
-                    <TextBlock Text="选择配置文件即切换并热重载；另存为可将当前配置保存为新配置文件"
+                    <TextBlock Text="{x:Static props:ConfigStrings.Desc}"
                                Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                                TextWrapping="Wrap" Margin="1,0,0,4" />
 
-                    <ui:SettingsCard Header="配置文件：">
+                    <ui:SettingsCard Header="{x:Static props:ConfigStrings.Label}">
                         <ComboBox x:Name="ComboBoxConfigProfile"
                                   SelectionChanged="ComboBoxConfigProfile_SelectionChanged" />
                     </ui:SettingsCard>
 
                     <ui:SettingsCard ContentAlignment="Left">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <Button x:Name="BtnDeleteConfigProfile" Content="删除配置文件" Click="BtnDeleteConfigProfile_Click" />
-                            <Button x:Name="BtnSaveAsConfigProfile" Content="另存为配置文件" Click="BtnSaveAsConfigProfile_Click" />
+                            <Button x:Name="BtnDeleteConfigProfile" Content="{x:Static props:ConfigStrings.Delete}" Click="BtnDeleteConfigProfile_Click" />
+                            <Button x:Name="BtnSaveAsConfigProfile" Content="{x:Static props:ConfigStrings.SaveAs}" Click="BtnSaveAsConfigProfile_Click" />
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 

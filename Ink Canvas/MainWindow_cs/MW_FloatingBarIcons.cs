@@ -1,3 +1,4 @@
+using Ink_Canvas.Properties;
 using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar;
 using Ink_Canvas.Helpers;
@@ -4291,7 +4292,7 @@ private bool forceEraser;
 
         private void InsertImageOptions_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("插入图片")) return;
+            if (TryBlockFrozenPageMutation(FloatingBarStrings.Board_InsertImage)) return;
             // Check if the image options panel is currently visible
             bool isImagePanelVisible = BoardImageOptionsPanel.IsOpen;
 
@@ -4330,7 +4331,7 @@ private bool forceEraser;
 
         private async void ImageOptionSelectFile_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("插入图片")) return;
+            if (TryBlockFrozenPageMutation(FloatingBarStrings.Board_InsertImage)) return;
             // Hide the options panel
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
@@ -4474,7 +4475,7 @@ private bool forceEraser;
         // Keep the old method for backward compatibility
         private async void InsertImage_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("插入图片")) return;
+            if (TryBlockFrozenPageMutation(FloatingBarStrings.Board_InsertImage)) return;
             var dialog = new OpenFileDialog
             {
                 Filter = "图片与 PDF|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf|图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf"

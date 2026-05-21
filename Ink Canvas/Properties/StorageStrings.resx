@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AutoSave_Title" xml:space="preserve">
+    <value>自动保存</value>
+  </data>
+  <data name="Backup_AutoBeforeUpdate" xml:space="preserve">
+    <value>自动更新前备份</value>
+  </data>
+  <data name="Backup_AutoPeriodic" xml:space="preserve">
+    <value>定期自动备份</value>
+  </data>
+  <data name="Backup_Desc" xml:space="preserve">
+    <value>可手动备份当前设置或还原之前的备份，自动更新前也会自动备份</value>
+  </data>
+  <data name="Backup_Interval" xml:space="preserve">
+    <value>备份间隔</value>
+  </data>
+  <data name="Backup_Interval_14Days" xml:space="preserve">
+    <value>14 天</value>
+  </data>
+  <data name="Backup_Interval_1Day" xml:space="preserve">
+    <value>1 天</value>
+  </data>
+  <data name="Backup_Interval_30Days" xml:space="preserve">
+    <value>30 天</value>
+  </data>
+  <data name="Backup_Interval_3Days" xml:space="preserve">
+    <value>3 天</value>
+  </data>
+  <data name="Backup_Interval_7Days" xml:space="preserve">
+    <value>7 天</value>
+  </data>
+  <data name="Backup_Interval_DefaultHint" xml:space="preserve">
+    <value>（默认 7 天）</value>
+  </data>
+  <data name="Backup_Manual" xml:space="preserve">
+    <value>手动备份</value>
+  </data>
+  <data name="Backup_Restore" xml:space="preserve">
+    <value>还原备份</value>
+  </data>
+  <data name="Backup_Title" xml:space="preserve">
+    <value>设置备份与还原</value>
+  </data>
+  <data name="Storage_AutoDeleteHint" xml:space="preserve">
+    <value>请注意如果开启自动删除功能，将会删除自动保存目录下所有后缀名为 .icstk 和 .png 的文件！</value>
+  </data>
+  <data name="Storage_AutoDeleteTitle" xml:space="preserve">
+    <value>定期自动删除超过保存时间的墨迹、截图文件</value>
+  </data>
+  <data name="Storage_AutoSaveHint" xml:space="preserve">
+    <value>开启后将在设定时间间隔自动保存墨迹，仅在画布可见且有墨迹时才会保存</value>
+  </data>
+  <data name="Storage_AutoSaveInk" xml:space="preserve">
+    <value>定时自动保存墨迹</value>
+  </data>
+  <data name="Storage_AutoSaveInkOnScreenshot" xml:space="preserve">
+    <value>截图时自动保存墨迹</value>
+  </data>
+  <data name="Storage_AutoSaveInterval" xml:space="preserve">
+    <value>保存间隔</value>
+  </data>
+  <data name="Storage_AutoSaveInterval_10Min" xml:space="preserve">
+    <value>10 分钟</value>
+  </data>
+  <data name="Storage_AutoSaveInterval_15Min" xml:space="preserve">
+    <value>15 分钟</value>
+  </data>
+  <data name="Storage_AutoSaveInterval_1Min" xml:space="preserve">
+    <value>1 分钟</value>
+  </data>
+  <data name="Storage_AutoSaveInterval_30Min" xml:space="preserve">
+    <value>30 分钟</value>
+  </data>
+  <data name="Storage_AutoSaveInterval_3Min" xml:space="preserve">
+    <value>3 分钟</value>
+  </data>
+  <data name="Storage_AutoSaveInterval_5Min" xml:space="preserve">
+    <value>5 分钟</value>
+  </data>
+  <data name="Storage_AutoSaveInterval_60Min" xml:space="preserve">
+    <value>60 分钟</value>
+  </data>
+  <data name="Storage_AutoScreenshotMinInk" xml:space="preserve">
+    <value>自动截图最小墨迹量</value>
+  </data>
+  <data name="Storage_AutoScreenshotOnClear" xml:space="preserve">
+    <value>清屏时自动截图</value>
+  </data>
+  <data name="Storage_Backups_Desc" xml:space="preserve">
+    <value>位于 Backups 目录的设置 / 配置备份（.json / .zip）</value>
+  </data>
+  <data name="Storage_Backups_Header" xml:space="preserve">
+    <value>备份</value>
+  </data>
+  <data name="Storage_CalculateFailed" xml:space="preserve">
+    <value>计算失败</value>
+  </data>
+  <data name="Storage_Calculating" xml:space="preserve">
+    <value>计算中…</value>
+  </data>
+  <data name="Storage_CategoryDetails" xml:space="preserve">
+    <value>分类详情</value>
+  </data>
+  <data name="Storage_Clean" xml:space="preserve">
+    <value>清理</value>
+  </data>
+  <data name="Storage_CleanFailed" xml:space="preserve">
+    <value>清理失败：{0}</value>
+  </data>
+  <data name="Storage_Confirm_Body" xml:space="preserve">
+    <value>将永久删除「{0}」分类下的所有文件，操作不可恢复。\n是否继续？</value>
+  </data>
+  <data name="Storage_Confirm_Second_Body" xml:space="preserve">
+    <value>再次确认：确定要删除「{0}」吗？</value>
+  </data>
+  <data name="Storage_Confirm_Second_Title" xml:space="preserve">
+    <value>二次确认</value>
+  </data>
+  <data name="Storage_Confirm_Title" xml:space="preserve">
+    <value>清理确认</value>
+  </data>
+  <data name="Storage_Core_Desc" xml:space="preserve">
+    <value>包含 .json 配置文件、.enc 使用统计、.exe 主程序、.dll 文件、.dat 数据文件等</value>
+  </data>
+  <data name="Storage_Core_Header" xml:space="preserve">
+    <value>核心文件</value>
+  </data>
+  <data name="Storage_Core_NotCleanable" xml:space="preserve">
+    <value>核心文件不可清理，以免影响应用正常运行。</value>
+  </data>
+  <data name="Storage_Custom_Desc" xml:space="preserve">
+    <value>自定义图标与点名背景图（icons / backgrounds 等 .png）</value>
+  </data>
+  <data name="Storage_Custom_Header" xml:space="preserve">
+    <value>自定义文件</value>
+  </data>
+  <data name="Storage_Custom_Hint" xml:space="preserve">
+    <value>自定义文件由用户手动添加，不会自动清理，如需删除请前往对应管理界面。</value>
+  </data>
+  <data name="Storage_DiskPercent" xml:space="preserve">
+    <value>占磁盘比例</value>
+  </data>
+  <data name="Storage_Ink_Desc" xml:space="preserve">
+    <value>位于 Saves 目录下的 .icstk / .xml / 截图 .png 等墨迹文件</value>
+  </data>
+  <data name="Storage_Ink_Header" xml:space="preserve">
+    <value>墨迹</value>
+  </data>
+  <data name="Storage_Legend_Backups" xml:space="preserve">
+    <value>备份</value>
+  </data>
+  <data name="Storage_Legend_Core" xml:space="preserve">
+    <value>核心文件</value>
+  </data>
+  <data name="Storage_Legend_Custom" xml:space="preserve">
+    <value>自定义</value>
+  </data>
+  <data name="Storage_Legend_Ink" xml:space="preserve">
+    <value>墨迹</value>
+  </data>
+  <data name="Storage_Legend_Logs" xml:space="preserve">
+    <value>日志</value>
+  </data>
+  <data name="Storage_Legend_Other" xml:space="preserve">
+    <value>其他</value>
+  </data>
+  <data name="Storage_Legend_Plugins" xml:space="preserve">
+    <value>插件</value>
+  </data>
+  <data name="Storage_Legend_Update" xml:space="preserve">
+    <value>自动更新</value>
+  </data>
+  <data name="Storage_Logs_Desc" xml:space="preserve">
+    <value>位于 Logs / Crashs 目录下的 .txt 日志与崩溃报告，可清理</value>
+  </data>
+  <data name="Storage_Logs_Header" xml:space="preserve">
+    <value>日志</value>
+  </data>
+  <data name="Storage_NavTooltip" xml:space="preserve">
+    <value>查看与清理 ICC CE 占用的存储空间</value>
+  </data>
+  <data name="Storage_OpenAppFolder" xml:space="preserve">
+    <value>打开应用目录</value>
+  </data>
+  <data name="Storage_Other_Desc" xml:space="preserve">
+    <value>未归类至上述项目的其他文件</value>
+  </data>
+  <data name="Storage_Other_Header" xml:space="preserve">
+    <value>其他</value>
+  </data>
+  <data name="Storage_PathBrowse" xml:space="preserve">
+    <value>浏览</value>
+  </data>
+  <data name="Storage_PathPermissionHint" xml:space="preserve">
+    <value>请注意检查保存文件夹是否有写入权限</value>
+  </data>
+  <data name="Storage_PathSetToD" xml:space="preserve">
+    <value>设置保存到 D:\Ink Canvas</value>
+  </data>
+  <data name="Storage_PathSetToDocuments" xml:space="preserve">
+    <value>设置保存到 文档</value>
+  </data>
+  <data name="Storage_PathTitle" xml:space="preserve">
+    <value>墨迹与截图的保存路径</value>
+  </data>
+  <data name="Storage_Plugins_Desc" xml:space="preserve">
+    <value>位于 plugins 目录的 .iccpp 插件包</value>
+  </data>
+  <data name="Storage_Plugins_Header" xml:space="preserve">
+    <value>插件</value>
+  </data>
+  <data name="Storage_Plugins_Hint" xml:space="preserve">
+    <value>插件请前往插件管理页面进行卸载。</value>
+  </data>
+  <data name="Storage_Refresh" xml:space="preserve">
+    <value>刷新</value>
+  </data>
+  <data name="Storage_RetentionTitle" xml:space="preserve">
+    <value>保存时长</value>
+  </data>
+  <data name="Storage_RetentionUnitDays" xml:space="preserve">
+    <value>天</value>
+  </data>
+  <data name="Storage_SaveAsXml" xml:space="preserve">
+    <value>保存为 XML 格式</value>
+  </data>
+  <data name="Storage_SaveAsXmlHint" xml:space="preserve">
+    <value>开启后保存墨迹时将使用 XML 格式（ISF 格式），便于查看和编辑墨迹数据</value>
+  </data>
+  <data name="Storage_SaveFullPageHint" xml:space="preserve">
+    <value>开启后自动保存和手动保存墨迹时将以全屏模式保存。如果存在多个画布和墨迹，将把所有页面的墨迹按照每页为单位保存进一个压缩包中（注意，白板的墨迹只能在白板模式下打开，PPT 的墨迹只能在 PPT 放映模式下打开）</value>
+  </data>
+  <data name="Storage_SaveFullPageStrokes" xml:space="preserve">
+    <value>墨迹全页面保存</value>
+  </data>
+  <data name="Storage_ScreenshotsByDateFolder" xml:space="preserve">
+    <value>截图分日期文件夹保存</value>
+  </data>
+  <data name="Storage_Title" xml:space="preserve">
+    <value>存储管理</value>
+  </data>
+  <data name="Storage_TotalUsage" xml:space="preserve">
+    <value>ICC CE 总占用</value>
+  </data>
+  <data name="Storage_Update_Desc" xml:space="preserve">
+    <value>AutoUpdate 目录中的安装包与下载缓存，每次更新完成后会被清理</value>
+  </data>
+  <data name="Storage_Update_Header" xml:space="preserve">
+    <value>自动更新</value>
+  </data>
+</root>

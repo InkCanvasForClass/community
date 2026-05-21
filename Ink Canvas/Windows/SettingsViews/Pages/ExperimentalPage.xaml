@@ -1,4 +1,4 @@
-<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.ExperimentalPage"
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.ExperimentalPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -10,7 +10,7 @@
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       mc:Ignorable="d"
 
-      Title="实验性选项">
+      Title="{x:Static props:AdvancedStrings.Experimental}">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -30,36 +30,36 @@
                     Spacing="{StaticResource SettingsCardSpacing}">
 
                     <controls:LabeledSettingsCard x:Name="CardFullScreenHelper"
-                            Header="启用 FullScreenHelper"
-                            Description="感谢 lindexi 大佬提供的 FullScreenHelper，可以减少任务栏弹出的问题，且支持多显示器自动全屏（虽然对icc来说没什么用就是了），如果遇到一些玄学问题，可以关闭该功能，重启icc后生效。"
+                            Header="{x:Static props:AdvancedStrings.FullScreenHelper}"
+                            Description="{x:Static props:AdvancedStrings.FullScreenHelperHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.FullScreen}"
                             SwitchName="ToggleSwitchFullScreenHelper"
                             Toggled="ToggleSwitchFullScreenHelper_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardEdgeGestureUtil"
-                            Header="启用 EdgeGestureUtil"
-                            Description="EdgeGestureUtil 是 icc 最新引入的可以暂时阻止在使用触摸时触发边缘手势（如 Windows10 环境下，屏幕左边缘滑动进入任务视图，右边缘滑动弹出通知中心；Windows11 环境下，底部向上滑动打开开始菜单），其原理是使用了 System.EdgeGesture.DisableTouchWhenFullscreen （当应用程序窗口处于活动状态且处于全屏模式 (或拥有的窗口) 处于活动状态时，防止边缘手势行为。）来实现的。如果有异常，请关闭该选项，该选项应该能够实时生效。（Win7 和 Win8 用户该选项无法使用）"
+                            Header="{x:Static props:AdvancedStrings.EdgeGestureUtil}"
+                            Description="{x:Static props:AdvancedStrings.EdgeGestureUtilHint_Part1}"
                             Icon="{x:Static ui:SegoeFluentIcons.AlignLeft}"
                             SwitchName="ToggleSwitchEdgeGestureUtil"
                             Toggled="ToggleSwitchEdgeGestureUtil_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardForceFullScreen"
-                            Header="启用 ForceFullScreen"
-                            Description="当检测到窗口大小变化时，自动使用 Win32 API 将本窗口的大小设置为主显示器大小（设备像素大小），不需要可以关闭，实时生效。"
+                            Header="{x:Static props:AdvancedStrings.ForceFullScreen}"
+                            Description="{x:Static props:AdvancedStrings.ForceFullScreenHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.Video}"
                             SwitchName="ToggleSwitchForceFullScreen"
                             Toggled="ToggleSwitchForceFullScreen_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardDPIChangeDetection"
-                            Header="启用 DPIChangeDetection"
-                            Description="当检测到系统 DPI 变化时，会尝试检测 FloatingBar 是否在屏幕内显示，如果不在屏幕内显示将会尝试移动到屏幕内可见区域（DPI调大会触发，如果 DPI 调小是不会触发工具栏位置移动的，请您手动调整）。"
+                            Header="{x:Static props:AdvancedStrings.DPIChangeDetection}"
+                            Description="{x:Static props:AdvancedStrings.DPIChangeDetectionHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.View}"
                             SwitchName="ToggleSwitchDPIChangeDetection"
                             Toggled="ToggleSwitchDPIChangeDetection_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardResolutionChangeDetection"
-                            Header="启用 ResolutionChangeDetection"
-                            Description="当检测到系统分辨率变化时，会尝试检测 FloatingBar 是否在屏幕内显示，如果不在屏幕内显示将会尝试移动到屏幕内可见区域（分辨率调小可能会触发，如果在屏幕内不会自动调整位置，请手动挡）。"
+                            Header="{x:Static props:AdvancedStrings.ResolutionChangeDetection}"
+                            Description="{x:Static props:AdvancedStrings.ResolutionChangeDetectionHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.Accept}"
                             SwitchName="ToggleSwitchResolutionChangeDetection"
                             Toggled="ToggleSwitchResolutionChangeDetection_Toggled" />

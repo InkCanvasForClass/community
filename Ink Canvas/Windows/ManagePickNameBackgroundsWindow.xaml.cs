@@ -1,3 +1,4 @@
+using Ink_Canvas.Properties;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -29,7 +30,7 @@ namespace Ink_Canvas
             if (sender is Button button && button.Tag is CustomPickNameBackground background)
             {
                 // 找到背景在列表中的索引（加8，因为前8个是默认值）
-                int index = Backgrounds.IndexOf(background) + 1; // 增加1因为索引0将是"默认"
+                int index = Backgrounds.IndexOf(background) + 1; // 增加1因为索引0将是CanvasStrings.Canvas_Color_Default
 
                 // 更新设置
                 MainWindow.Settings.RandSettings.SelectedBackgroundIndex = index;

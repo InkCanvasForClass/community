@@ -88,7 +88,7 @@ namespace Ink_Canvas
         // 新增：启动画面相关
         private static SplashScreen _splashScreen;
         private static bool _isSplashScreenShown = false;
-        private static System.Resources.ResourceSet _pendingLocalizedResourceSet;
+        // _pendingLocalizedResourceSet removed - using Strings.LoadAllToResources
         private static readonly Stopwatch startupStopwatch = new Stopwatch();
         private static readonly Stopwatch splashStopwatch = new Stopwatch();
 
@@ -799,7 +799,7 @@ namespace Ink_Canvas
                 StartupCount.Increment();
                 if (StartupCount.GetCount() >= 5)
                 {
-                    MessageBox.Show("检测到程序已连续重启 5 次，已停止自动重启。请联系开发者或检查系统环境。", "重启次数过多", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("检测到程序已连续重启 5 次，已停止自动重启。请联系开发者或检查系统环境。", UpdateStrings.Msg_RestartLimitTitle, MessageBoxButton.OK, MessageBoxImage.Error);
                     StartupCount.Reset();
                     Environment.Exit(1);
                 }
@@ -836,7 +836,7 @@ namespace Ink_Canvas
 
             TryApplyPreferredLanguageFromSettings();
 
-            _pendingLocalizedResourceSet = Strings.ResourceManager.GetResourceSet(CultureInfo.CurrentUICulture, true, true);
+            Strings.LoadAllToResources(Current.Resources);
 
             // 根据设置决定是否显示启动画面
             if (ShouldShowSplashScreen() && !IsLaunchByFileOrUri(e.Args))
@@ -1227,11 +1227,7 @@ namespace Ink_Canvas
             });
             _ = Dispatcher.BeginInvoke(new Action(() =>
             {
-                if (_pendingLocalizedResourceSet != null)
-                {
-                    LoadLocalizedResources(_pendingLocalizedResourceSet);
-                    _pendingLocalizedResourceSet = null;
-                }
+                // Resource loading now handled by Strings.LoadAllToResources in OnStartup
             }), DispatcherPriority.ApplicationIdle);
 
             // 处理启动时的URI参数
@@ -1463,7 +1459,7 @@ namespace Ink_Canvas
                             StartupCount.Increment();
                             if (StartupCount.GetCount() >= 5)
                             {
-                                MessageBox.Show("检测到程序已连续重启 5 次，已停止自动重启。请联系开发者或检查系统环境。", "重启次数过多", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessageBox.Show(UpdateStrings.Msg_RestartLimit, UpdateStrings.Msg_RestartLimitTitle, MessageBoxButton.OK, MessageBoxImage.Error);
                                 StartupCount.Reset();
                                 Environment.Exit(1);
                             }
@@ -1501,7 +1497,7 @@ namespace Ink_Canvas
                             StartupCount.Increment();
                             if (StartupCount.GetCount() >= 5)
                             {
-                                MessageBox.Show("检测到程序已连续重启 5 次，已停止自动重启。请联系开发者或检查系统环境。", "重启次数过多", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessageBox.Show(UpdateStrings.Msg_RestartLimit, UpdateStrings.Msg_RestartLimitTitle, MessageBoxButton.OK, MessageBoxImage.Error);
                                 StartupCount.Reset();
                                 Environment.Exit(1);
                             }
@@ -1580,7 +1576,7 @@ namespace Ink_Canvas
                         StartupCount.Increment();
                         if (StartupCount.GetCount() >= 5)
                         {
-                            MessageBox.Show("检测到程序已连续重启 5 次，已停止自动重启。请联系开发者或检查系统环境。", "重启次数过多", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show("检测到程序已连续重启 5 次，已停止自动重启。请联系开发者或检查系统环境。", UpdateStrings.Msg_RestartLimitTitle, MessageBoxButton.OK, MessageBoxImage.Error);
                             StartupCount.Reset();
                             Environment.Exit(1);
                         }

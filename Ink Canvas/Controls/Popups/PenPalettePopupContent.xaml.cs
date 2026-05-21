@@ -88,15 +88,15 @@ namespace Ink_Canvas.Controls
 
             Shell.TabBar.Tabs.Add(new PopupTabItem
             {
-                Header = "笔"
+                Header = FloatingBarStrings.Board_Pen
             });
             Shell.TabBar.Tabs.Add(new PopupTabItem
             {
-                Header = "荧光笔"
+                Header = FloatingBarStrings.Board_Highlighter
             });
             Shell.TabBar.Tabs.Add(new PopupTabItem
             {
-                Header = "激光笔"
+                Header = FloatingBarStrings.Board_LaserPen
             });
             Shell.TabBar.SelectedIndex = 0;
 

@@ -1,4 +1,4 @@
-<UserControl x:Class="Ink_Canvas.Controls.ToolsPopupContent"
+<UserControl xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Controls.ToolsPopupContent"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -21,26 +21,26 @@
         </Style>
     </UserControl.Resources>
     <Grid>
-        <controls:PopupShellContent x:Name="Shell" Title="更多功能" d:Visibility="Collapsed" />
+        <controls:PopupShellContent x:Name="Shell" Title="{x:Static props:FloatingBarStrings.Tools_MoreFeaturesTitle}" d:Visibility="Collapsed" />
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
             <ikw:SimpleStackPanel Margin="2" Spacing="3">
                 <ikw:SimpleStackPanel.Resources>
                     <Style TargetType="Label" BasedOn="{StaticResource AutoFitToolPopupLabel8}" />
                 </ikw:SimpleStackPanel.Resources>
                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="3">
-                    <controls:ToolMenuButton x:Name="TimerToolBtn" Label="计时器" />
-                    <controls:ToolMenuButton x:Name="RandomDrawToolBtn" Label="随机抽" />
-                    <controls:ToolMenuButton x:Name="SingleDrawToolBtn" Label="单次抽" />
+                    <controls:ToolMenuButton x:Name="TimerToolBtn" Label="{x:Static props:FloatingBarStrings.QuickPanel_Timer}" />
+                    <controls:ToolMenuButton x:Name="RandomDrawToolBtn" Label="{x:Static props:FloatingBarStrings.Tools_RandomDraw}" />
+                    <controls:ToolMenuButton x:Name="SingleDrawToolBtn" Label="{x:Static props:FloatingBarStrings.QuickPanel_SingleDraw}" />
                 </ikw:SimpleStackPanel>
                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="3">
-                    <controls:ToolMenuButton x:Name="SaveToolBtn" Label="保存" />
-                    <controls:ToolMenuButton x:Name="OpenToolBtn" Label="打开..." />
-                    <controls:ToolMenuButton x:Name="ReplayToolBtn" Label="重播" />
+                    <controls:ToolMenuButton x:Name="SaveToolBtn" Label="{x:Static props:FloatingBarStrings.Tools_Save}" />
+                    <controls:ToolMenuButton x:Name="OpenToolBtn" Label="{x:Static props:FloatingBarStrings.Tools_Open}" />
+                    <controls:ToolMenuButton x:Name="ReplayToolBtn" Label="{x:Static props:FloatingBarStrings.Tools_Replay}" />
                 </ikw:SimpleStackPanel>
                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="3">
-                    <controls:ToolMenuButton x:Name="ScreenshotToolBtn" Label="截屏" />
-                    <controls:ToolMenuButton x:Name="ManualToolBtn" Label="说明书" />
-                    <controls:ToolMenuButton x:Name="SettingsToolBtn" Label="设置" />
+                    <controls:ToolMenuButton x:Name="ScreenshotToolBtn" Label="{x:Static props:FloatingBarStrings.Tools_Screenshot}" />
+                    <controls:ToolMenuButton x:Name="ManualToolBtn" Label="{x:Static props:FloatingBarStrings.Tools_Manual}" />
+                    <controls:ToolMenuButton x:Name="SettingsToolBtn" Label="{x:Static props:NavStrings.Settings_Title}" />
                 </ikw:SimpleStackPanel>
             </ikw:SimpleStackPanel>
         </ContentControl>

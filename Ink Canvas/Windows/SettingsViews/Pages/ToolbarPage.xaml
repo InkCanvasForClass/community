@@ -1,4 +1,4 @@
-<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.ToolbarPage"
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.ToolbarPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -215,8 +215,8 @@
                                 <ui:SettingsCard Header="显示模式" Description="选择快捷调色盘的颜色数量">
                                     <ComboBox x:Name="ComboBoxDisplayMode"
                                               SelectionChanged="ComboBoxDisplayMode_SelectionChanged">
-                                        <ComboBoxItem Content="双行显示（8 种颜色）" Tag="1"/>
-                                        <ComboBoxItem Content="单行显示（6 种颜色）" Tag="0"/>
+                                        <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuickPalette_DoubleRow}" Tag="1"/>
+                                        <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuickPalette_SingleRow}" Tag="0"/>
                                     </ComboBox>
                                 </ui:SettingsCard>
                             </StackPanel>
@@ -274,7 +274,7 @@
                                     <TextBlock Text="水平对齐" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
                                     <ComboBox x:Name="ComboBoxHAlign" HorizontalAlignment="Left"
                                               SelectionChanged="ComponentAlignment_Changed">
-                                        <ComboBoxItem Content="默认" Tag=""/>
+                                        <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_Color_Default}" Tag=""/>
                                         <ComboBoxItem Content="左" Tag="Left"/>
                                         <ComboBoxItem Content="居中" Tag="Center"/>
                                         <ComboBoxItem Content="右" Tag="Right"/>
@@ -285,7 +285,7 @@
                                     <TextBlock Text="垂直对齐" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
                                     <ComboBox x:Name="ComboBoxVAlign" HorizontalAlignment="Left"
                                               SelectionChanged="ComponentAlignment_Changed">
-                                        <ComboBoxItem Content="默认" Tag=""/>
+                                        <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_Color_Default}" Tag=""/>
                                         <ComboBoxItem Content="上" Tag="Top"/>
                                         <ComboBoxItem Content="居中" Tag="Center"/>
                                         <ComboBoxItem Content="下" Tag="Bottom"/>
@@ -345,7 +345,7 @@
                 </TabItem>
 
                 <!-- ===== Tab 3: 高级设置 ===== -->
-                <TabItem Header="高级设置">
+                <TabItem Header="{x:Static props:NavStrings.Nav_Advanced_Settings}">
                     <TabItem.Visibility>
                         <Binding Path="SelectedEntry" Converter="{StaticResource NullToVisibilityConverter}"/>
                     </TabItem.Visibility>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Copyright" xml:space="preserve">
+    <value>© 2025-2026 CJK_mkp 版权所有</value>
+  </data>
+  <data name="Dev_ICA" xml:space="preserve">
+    <value>ICA 的开发者</value>
+  </data>
+  <data name="Dev_ICC" xml:space="preserve">
+    <value>ICC 的开发者</value>
+  </data>
+  <data name="Dev_ICCCE" xml:space="preserve">
+    <value>ICC CE 的开发者</value>
+  </data>
+  <data name="Dev_InkCanvas" xml:space="preserve">
+    <value>Ink Canvas 的开发者</value>
+  </data>
+  <data name="DevelopersLabel" xml:space="preserve">
+    <value>开发者：</value>
+  </data>
+  <data name="DeviceIdLabel" xml:space="preserve">
+    <value>设备 ID：</value>
+  </data>
+  <data name="DeviceInfo" xml:space="preserve">
+    <value>设备信息</value>
+  </data>
+  <data name="DeviceInfo_Loading" xml:space="preserve">
+    <value>正在获取...</value>
+  </data>
+  <data name="LaunchCountLabel" xml:space="preserve">
+    <value>启动次数：</value>
+  </data>
+  <data name="LicenseBody" xml:space="preserve">
+    <value>本强许可协议的许可条件是，在相同许可协议下，提供许可作品的完整源代码和修改，包括使用许可作品的大型作品。版权和许可声明必须保留。贡献者明确授予专利权。</value>
+  </data>
+  <data name="LicenseHint" xml:space="preserve">
+    <value>使用和分发本软件前，请您应当且务必知晓相关开源协议，且您应当知晓本软件基于 https://github.com/WXRIW/Ink-Canvas 修改而成。</value>
+  </data>
+  <data name="LicenseTitle" xml:space="preserve">
+    <value>本软件和 ICA，Ink Canvas 均基于许可证开源</value>
+  </data>
+  <data name="OpenSourceSlogan" xml:space="preserve">
+    <value>我们永远热爱开源！</value>
+  </data>
+  <data name="PhigrosCr" xml:space="preserve">
+    <value>部分内容取自 Phigros</value>
+  </data>
+  <data name="PrivacyAgreement" xml:space="preserve">
+    <value>我已阅读并同意 privacy 中的隐私说明</value>
+  </data>
+  <data name="PrivacyAndTelemetry" xml:space="preserve">
+    <value>隐私与遥测</value>
+  </data>
+  <data name="PrivacyCheckboxPrefix" xml:space="preserve">
+    <value>我已阅读并同意 </value>
+  </data>
+  <data name="PrivacyCheckboxSuffix" xml:space="preserve">
+    <value> 中的隐私说明</value>
+  </data>
+  <data name="RefreshDeviceInfo" xml:space="preserve">
+    <value>刷新设备信息</value>
+  </data>
+  <data name="Source_ICA" xml:space="preserve">
+    <value>ICA 仓库源:</value>
+  </data>
+  <data name="Source_ICC" xml:space="preserve">
+    <value>ICC 仓库源:</value>
+  </data>
+  <data name="Source_InkCanvas" xml:space="preserve">
+    <value>Ink Canvas 仓库源:</value>
+  </data>
+  <data name="Telemetry_Basic" xml:space="preserve">
+    <value>上传基础数据</value>
+  </data>
+  <data name="Telemetry_Off" xml:space="preserve">
+    <value>关闭（不上传）</value>
+  </data>
+  <data name="Telemetry_Optional" xml:space="preserve">
+    <value>上传基础 + 可选数据</value>
+  </data>
+  <data name="TelemetryLabel" xml:space="preserve">
+    <value>匿名使用数据上传：</value>
+  </data>
+  <data name="ThanksContributors" xml:space="preserve">
+    <value>感谢下列贡献者：</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>关于</value>
+  </data>
+  <data name="TotalUsageLabel" xml:space="preserve">
+    <value>总使用时长：</value>
+  </data>
+  <data name="UpdatePriorityLabel" xml:space="preserve">
+    <value>更新优先级：</value>
+  </data>
+  <data name="UsageFrequencyLabel" xml:space="preserve">
+    <value>使用频率：</value>
+  </data>
+  <data name="VersionLabel" xml:space="preserve">
+    <value>版本：</value>
+  </data>
+  <data name="App_Title" xml:space="preserve">
+    <value>InkCanvasforClass</value>
+  </data>
+</root>

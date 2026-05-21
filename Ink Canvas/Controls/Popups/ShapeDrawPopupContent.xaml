@@ -1,4 +1,4 @@
-<UserControl x:Class="Ink_Canvas.Controls.ShapeDrawPopupContent"
+<UserControl xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Controls.ShapeDrawPopupContent"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -8,43 +8,43 @@
              xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
 mc:Ignorable="d">
     <Grid>
-        <controls:PopupShellContent x:Name="Shell" Title="图形" d:Visibility="Collapsed" />
+        <controls:PopupShellContent x:Name="Shell" Title="{x:Static props:FloatingBarStrings.Board_Shape}" d:Visibility="Collapsed" />
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
             <ikw:SimpleStackPanel Margin="2" Spacing="1">
                 <ikw:SimpleStackPanel Orientation="Horizontal" Height="38" Spacing="2"
                                      Margin="4,4,4,0">
-                    <controls:GeometryButton x:Name="BoardImageDrawLine" IconSource="{DynamicResource GeoIconLine}" Label="画直线" />
-                    <controls:GeometryButton x:Name="BoardImageDrawDashedLine" IconSource="{DynamicResource GeoIconDashedLine}" Label="画虚线" />
-                    <controls:GeometryButton x:Name="BoardImageDrawDotLine" IconSource="{DynamicResource GeoIconDotLine}" Label="画点线" />
-                    <controls:GeometryButton x:Name="BoardImageDrawArrow" IconSource="{DynamicResource GeoIconArrow}" Label="画箭头" />
-                    <controls:GeometryButton x:Name="BoardImageDrawParallelLine" IconSource="{DynamicResource GeoIconParallelLine}" Label="4平行线" />
-                    <controls:GeometryButton x:Name="BoardImageDrawRectangleCenter" IconSource="{DynamicResource GeoIconRectangleCenter}" Label="中心正方" />
-                    <controls:GeometryButton x:Name="BoardImageDrawCircle" IconSource="{DynamicResource GeoIconCircle}" Label="中心圆" />
-                    <controls:GeometryButton x:Name="BoardImageDrawDashedCircle" IconSource="{DynamicResource GeoIconDashedCircle}" Label="中心虚圆" />
-                    <controls:GeometryButton x:Name="BoardImageDrawEllipseCenter" IconSource="{DynamicResource GeoIconEllipseCenter}" Label="中心椭圆" />
+                    <controls:GeometryButton x:Name="BoardImageDrawLine" IconSource="{DynamicResource GeoIconLine}" Label="{x:Static props:GeometryStrings.DrawLine}" />
+                    <controls:GeometryButton x:Name="BoardImageDrawDashedLine" IconSource="{DynamicResource GeoIconDashedLine}" Label="{x:Static props:GeometryStrings.DrawDashedLine}" />
+                    <controls:GeometryButton x:Name="BoardImageDrawDotLine" IconSource="{DynamicResource GeoIconDotLine}" Label="{x:Static props:GeometryStrings.DrawDottedLine}" />
+                    <controls:GeometryButton x:Name="BoardImageDrawArrow" IconSource="{DynamicResource GeoIconArrow}" Label="{x:Static props:GeometryStrings.DrawArrow}" />
+                    <controls:GeometryButton x:Name="BoardImageDrawParallelLine" IconSource="{DynamicResource GeoIconParallelLine}" Label="{x:Static props:GeometryStrings.DrawParallelLines}" />
+                    <controls:GeometryButton x:Name="BoardImageDrawRectangleCenter" IconSource="{DynamicResource GeoIconRectangleCenter}" Label="{x:Static props:GeometryStrings.DrawCenteredSquare}" />
+                    <controls:GeometryButton x:Name="BoardImageDrawCircle" IconSource="{DynamicResource GeoIconCircle}" Label="{x:Static props:GeometryStrings.DrawCenteredCircle}" />
+                    <controls:GeometryButton x:Name="BoardImageDrawDashedCircle" IconSource="{DynamicResource GeoIconDashedCircle}" Label="{x:Static props:GeometryStrings.DrawCenteredDashedCircle}" />
+                    <controls:GeometryButton x:Name="BoardImageDrawEllipseCenter" IconSource="{DynamicResource GeoIconEllipseCenter}" Label="{x:Static props:GeometryStrings.DrawCenteredEllipse}" />
                 </ikw:SimpleStackPanel>
                 <ikw:SimpleStackPanel x:Name="BoardOnlyRow1" Orientation="Horizontal" Height="38" Spacing="2"
                                      Margin="4,0,4,0">
-                    <controls:GeometryButton x:Name="ImageDrawCoordinate1" IconSource="{DynamicResource DrawShapeImageSource.Coordinate1}" Label="坐标系1" />
-                    <controls:GeometryButton x:Name="ImageDrawCoordinate2" IconSource="{DynamicResource DrawShapeImageSource.Coordinate2}" Label="坐标系2" />
-                    <controls:GeometryButton x:Name="ImageDrawCoordinate3" IconSource="{DynamicResource DrawShapeImageSource.Coordinate3}" Label="坐标系3" />
-                    <controls:GeometryButton x:Name="ImageDrawCoordinate4" IconSource="{DynamicResource DrawShapeImageSource.Coordinate4}" Label="坐标系4" />
-                    <controls:GeometryButton x:Name="ImageDrawCoordinate5" IconSource="{DynamicResource DrawShapeImageSource.Coordinate5}" Label="坐标系5" />
+                    <controls:GeometryButton x:Name="ImageDrawCoordinate1" IconSource="{DynamicResource DrawShapeImageSource.Coordinate1}" Label="{x:Static props:GeometryStrings.DrawCoordinate1}" />
+                    <controls:GeometryButton x:Name="ImageDrawCoordinate2" IconSource="{DynamicResource DrawShapeImageSource.Coordinate2}" Label="{x:Static props:GeometryStrings.DrawCoordinate2}" />
+                    <controls:GeometryButton x:Name="ImageDrawCoordinate3" IconSource="{DynamicResource DrawShapeImageSource.Coordinate3}" Label="{x:Static props:GeometryStrings.DrawCoordinate3}" />
+                    <controls:GeometryButton x:Name="ImageDrawCoordinate4" IconSource="{DynamicResource DrawShapeImageSource.Coordinate4}" Label="{x:Static props:GeometryStrings.DrawCoordinate4}" />
+                    <controls:GeometryButton x:Name="ImageDrawCoordinate5" IconSource="{DynamicResource DrawShapeImageSource.Coordinate5}" Label="{x:Static props:GeometryStrings.DrawCoordinate5}" />
                 </ikw:SimpleStackPanel>
                 <ikw:SimpleStackPanel x:Name="BoardOnlyRow2" Orientation="Horizontal" Height="38" Spacing="2"
                                      Margin="4,0,4,0">
-                    <controls:GeometryButton x:Name="ImageDrawHyperbola" IconSource="{DynamicResource DrawShapeImageSource.Hyperbola}" Label="双曲线" />
-                    <controls:GeometryButton x:Name="ImageDrawHyperbolaWithFocalPoint" IconSource="{DynamicResource DrawShapeImageSource.HyperbolaWithFocalPoint}" Label="双曲线(焦点)" />
-                    <controls:GeometryButton x:Name="ImageDrawParabola1" IconSource="{DynamicResource DrawShapeImageSource.Parabola}" Label="抛物线" />
-                    <controls:GeometryButton x:Name="ImageDrawParabolaWithFocalPoint" IconSource="{DynamicResource DrawShapeImageSource.ParabolaWithFocalPoint}" Label="抛物线(焦点)" />
-                    <controls:GeometryButton x:Name="ImageDrawParabola2" IconSource="{DynamicResource DrawShapeImageSource.Parabola}" Label="抛物线2" />
+                    <controls:GeometryButton x:Name="ImageDrawHyperbola" IconSource="{DynamicResource DrawShapeImageSource.Hyperbola}" Label="{x:Static props:GeometryStrings.DrawHyperbola}" />
+                    <controls:GeometryButton x:Name="ImageDrawHyperbolaWithFocalPoint" IconSource="{DynamicResource DrawShapeImageSource.HyperbolaWithFocalPoint}" Label="{x:Static props:GeometryStrings.DrawHyperbolaWithFocal}" />
+                    <controls:GeometryButton x:Name="ImageDrawParabola1" IconSource="{DynamicResource DrawShapeImageSource.Parabola}" Label="{x:Static props:GeometryStrings.DrawParabola}" />
+                    <controls:GeometryButton x:Name="ImageDrawParabolaWithFocalPoint" IconSource="{DynamicResource DrawShapeImageSource.ParabolaWithFocalPoint}" Label="{x:Static props:GeometryStrings.DrawParabolaWithFocal}" />
+                    <controls:GeometryButton x:Name="ImageDrawParabola2" IconSource="{DynamicResource DrawShapeImageSource.Parabola}" Label="{x:Static props:GeometryStrings.DrawParabola2}" />
                 </ikw:SimpleStackPanel>
                 <ikw:SimpleStackPanel Orientation="Horizontal" Height="38" Spacing="2"
                                      Margin="4,0,4,4">
-                    <controls:GeometryButton x:Name="BoardImageDrawCuboid" IconSource="{DynamicResource GeoIconCuboid}" Label="长方体" />
-                    <controls:GeometryButton x:Name="BoardImageDrawRectangle" IconSource="{DynamicResource GeoIconRectangle}" Label="正方形" />
-                    <controls:GeometryButton x:Name="BoardImageDrawCylinder" IconSource="{DynamicResource GeoIconCylinder}" Label="画圆柱" />
-                    <controls:GeometryButton x:Name="BoardImageDrawCone" IconSource="{DynamicResource GeoIconCone}" Label="画圆锥" />
+                    <controls:GeometryButton x:Name="BoardImageDrawCuboid" IconSource="{DynamicResource GeoIconCuboid}" Label="{x:Static props:GeometryStrings.DrawCuboid}" />
+                    <controls:GeometryButton x:Name="BoardImageDrawRectangle" IconSource="{DynamicResource GeoIconRectangle}" Label="{x:Static props:GeometryStrings.DrawSquare}" />
+                    <controls:GeometryButton x:Name="BoardImageDrawCylinder" IconSource="{DynamicResource GeoIconCylinder}" Label="{x:Static props:GeometryStrings.DrawCylinder}" />
+                    <controls:GeometryButton x:Name="BoardImageDrawCone" IconSource="{DynamicResource GeoIconCone}" Label="{x:Static props:GeometryStrings.DrawCone}" />
                 </ikw:SimpleStackPanel>
             </ikw:SimpleStackPanel>
         </ContentControl>

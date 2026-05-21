@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Header_AutoUpdate" xml:space="preserve">
+    <value>Auto-update</value>
+  </data>
+  <data name="Header_SilentUpdate" xml:space="preserve">
+    <value>Silent update</value>
+  </data>
+  <data name="Msg_DownloadFailedTitle" xml:space="preserve">
+    <value>Download failed</value>
+  </data>
+  <data name="Msg_RestartLimit" xml:space="preserve">
+    <value>App has restarted 5 times. Auto-restart stopped. Contact the developer or check the system.</value>
+  </data>
+  <data name="Msg_RestartLimitTitle" xml:space="preserve">
+    <value>Too many restarts</value>
+  </data>
+  <data name="Msg_SkipVersion" xml:space="preserve">
+    <value>Version {0} skipped; you will not be prompted until a newer version is released.</value>
+  </data>
+  <data name="Msg_SkipVersionTitle" xml:space="preserve">
+    <value>Version skipped</value>
+  </data>
+  <data name="Msg_UnexpectedError" xml:space="preserve">
+    <value>An unexpected error occurred. Save your ink and restart the app.</value>
+  </data>
+  <data name="Msg_UpdateDownloadFailed" xml:space="preserve">
+    <value>Update download failed. Please check your network and try again.</value>
+  </data>
+  <data name="Msg_UpdateReady" xml:space="preserve">
+    <value>Update downloaded. It will install when you close the app.</value>
+  </data>
+  <data name="Msg_UpdateReadyTitle" xml:space="preserve">
+    <value>Update ready</value>
+  </data>
+  <data name="Update_Beta" xml:space="preserve">
+    <value>Beta</value>
+  </data>
+  <data name="Update_Channel" xml:space="preserve">
+    <value>Update channel</value>
+  </data>
+  <data name="Update_PackageArch_X64" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Update_PackageArch_X86" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Update_Preview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="Update_Release" xml:space="preserve">
+    <value>Stable (Release)</value>
+  </data>
+</root>

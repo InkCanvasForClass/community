@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AvoidFullScreenHelper" xml:space="preserve">
+    <value>Enable AvoidFullScreenHelper</value>
+  </data>
+  <data name="AvoidFullScreenHelperHint" xml:space="preserve">
+    <value>Avoid canvas fullscreen; may fix taskbar not on top and Win11 taskbar unclickable. Can cause floating bar offset with AppBar on left/top. Restart ICC to apply.</value>
+  </data>
+  <data name="ConfirmExit" xml:space="preserve">
+    <value>Confirm exit with dialog</value>
+  </data>
+  <data name="DPIChangeDetection" xml:space="preserve">
+    <value>Enable DPIChangeDetection</value>
+  </data>
+  <data name="DPIChangeDetectionHint" xml:space="preserve">
+    <value>When a system DPI change is detected, it tries to keep FloatingBar visible. If it goes off-screen, it will attempt to move it into the visible area. (Increasing DPI may trigger this; decreasing DPI won&apos;t auto-move—adjust manually.)</value>
+  </data>
+  <data name="EdgeGestureUtil" xml:space="preserve">
+    <value>Enable EdgeGestureUtil</value>
+  </data>
+  <data name="EdgeGestureUtilHint_Part1" xml:space="preserve">
+    <value>EdgeGestureUtil is newly introduced in ICC to temporarily block edge gestures when using touch (e.g., on Windows 10: swipe from the left edge to Task View, from the right edge to Action Center; on Windows 11: swipe up from the bottom to open Start). It works by using System.EdgeGesture.DisableTouchWhenFullscreen (When the app window is active and in full-screen mode (or an owned window is active), prevents edge gesture behavior.) If anything is abnormal, turn this option off; it should take effect immediately. (Not available on Windows 7/8.)</value>
+  </data>
+  <data name="EdgeGestureUtilHint_Part2" xml:space="preserve">
+    <value>(When the app window is active and in full-screen mode (or an owned window is active), prevents edge gesture behavior.) If anything is abnormal, turn this option off; it should take effect immediately. (Not available on Windows 7/8.)</value>
+  </data>
+  <data name="EraserBindTouchHint" xml:space="preserve">
+    <value>BoundsWidth is used as contact area threshold</value>
+  </data>
+  <data name="EraserBindTouchMultiplier" xml:space="preserve">
+    <value>Bind eraser to touch size multiplier</value>
+  </data>
+  <data name="Experimental" xml:space="preserve">
+    <value>Experimental</value>
+  </data>
+  <data name="FingerModeBoundsWidthHeader" xml:space="preserve">
+    <value>Finger mode BoundsWidth</value>
+  </data>
+  <data name="ForceFullScreen" xml:space="preserve">
+    <value>Enable ForceFullScreen</value>
+  </data>
+  <data name="ForceFullScreenHint" xml:space="preserve">
+    <value>When a window size change is detected, automatically uses Win32 API to set this window size to the primary monitor size (in device pixels). Turn it off if you don&apos;t need it; takes effect immediately.</value>
+  </data>
+  <data name="FullScreenHelper" xml:space="preserve">
+    <value>Enable FullScreenHelper</value>
+  </data>
+  <data name="FullScreenHelperHint" xml:space="preserve">
+    <value>Thanks to lindexi for FullScreenHelper; reduces taskbar pop-up and supports multi-monitor fullscreen. Disable if you see odd issues; restart ICC to apply.</value>
+  </data>
+  <data name="LogByDate" xml:space="preserve">
+    <value>Save logs by date</value>
+  </data>
+  <data name="Logging" xml:space="preserve">
+    <value>Enable logging</value>
+  </data>
+  <data name="LogRotateHint" xml:space="preserve">
+    <value>Log files over 512 KB are auto-deleted. With date save, logs go to Logs folder; folder is cleared when over 5 MB.</value>
+  </data>
+  <data name="NibModeBoundsWidthHeader" xml:space="preserve">
+    <value>Nib mode BoundsWidth</value>
+  </data>
+  <data name="QuadIRMode" xml:space="preserve">
+    <value>Quad IR mode</value>
+  </data>
+  <data name="ResolutionChangeDetection" xml:space="preserve">
+    <value>Enable ResolutionChangeDetection</value>
+  </data>
+  <data name="ResolutionChangeDetectionHint" xml:space="preserve">
+    <value>When a screen resolution change is detected, it tries to keep FloatingBar visible. If it goes off-screen, it will attempt to move it into the visible area. (Reducing resolution may trigger this; if it&apos;s still on-screen it won&apos;t auto-adjust—adjust manually.)</value>
+  </data>
+  <data name="SpecialScreenMode" xml:space="preserve">
+    <value>Special screen mode</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Advanced</value>
+  </data>
+  <data name="TouchMultiplier" xml:space="preserve">
+    <value>Touch multiplier</value>
+  </data>
+  <data name="TouchMultiplierCalibrateHint" xml:space="preserve">
+    <value>Tap with pen in the area below to estimate touch size multiplier</value>
+  </data>
+  <data name="TouchMultiplierHint" xml:space="preserve">
+    <value>Adjust when finger-touch shows circle eraser or palm eraser is much larger than palm</value>
+  </data>
+  <data name="TouchMultiplierValueHint" xml:space="preserve">
+    <value>Value is for reference only</value>
+  </data>
+  <data name="UriSchemeName" xml:space="preserve">
+    <value>External URI scheme (icc://)</value>
+  </data>
+  <data name="AdvancedPanel__iccfold___iccunfold__Hint" xml:space="preserve">
+    <value>After enabling, can be controlled via commands like icc://fold or icc://unfold</value>
+  </data>
+  <data name="AdvancedPanel_Hint" xml:space="preserve">
+    <value>Enable special screen mode to optimize touch experience</value>
+  </data>
+  <data name="AdvancedPanel_Hint_1" xml:space="preserve">
+    <value>Adjust touch size multiplier</value>
+  </data>
+  <data name="AdvancedPanel_Hint_10" xml:space="preserve">
+    <value>Set interval for regular backup</value>
+  </data>
+  <data name="AdvancedPanel_Hint_11" xml:space="preserve">
+    <value>After enabling, automatically detect and intercept floating windows of similar software</value>
+  </data>
+  <data name="AdvancedPanel_Hint_2" xml:space="preserve">
+    <value>Bind eraser size to touch size multiplier</value>
+  </data>
+  <data name="AdvancedPanel_Hint_3" xml:space="preserve">
+    <value>Nib mode contact area threshold</value>
+  </data>
+  <data name="AdvancedPanel_Hint_4" xml:space="preserve">
+    <value>Finger mode contact area threshold</value>
+  </data>
+  <data name="AdvancedPanel_Hint_5" xml:space="preserve">
+    <value>Enable quad IR touch screen mode</value>
+  </data>
+  <data name="AdvancedPanel_Hint_6" xml:space="preserve">
+    <value>Enable logging function</value>
+  </data>
+  <data name="AdvancedPanel_Hint_7" xml:space="preserve">
+    <value>Show confirmation dialog when closing software</value>
+  </data>
+  <data name="AdvancedPanel_Hint_8" xml:space="preserve">
+    <value>Auto backup current settings before auto update</value>
+  </data>
+  <data name="AdvancedPanel_Hint_9" xml:space="preserve">
+    <value>Regularly auto backup settings file</value>
+  </data>
+  <data name="Debug_ShowConsole_Desc" xml:space="preserve">
+    <value>Show a separate console window for live log output (takes effect immediately; if &quot;Enable logging&quot; is off in settings, no content will be emitted).</value>
+  </data>
+  <data name="Debug_ShowConsole_Header" xml:space="preserve">
+    <value>Show debug console</value>
+  </data>
+</root>

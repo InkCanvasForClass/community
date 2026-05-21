@@ -1,3 +1,4 @@
+using Ink_Canvas.Properties;
 using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar;
 using Ink_Canvas.Helpers;
@@ -2200,11 +2201,11 @@ namespace Ink_Canvas
                         Id = "update-" + AvailableLatestVersion,
                         Type = NotificationMessageType.Update,
                         Level = NotificationMessageLevel.Normal,
-                        Title = "发现新版本",
-                        Summary = string.Format("发现新版本：{0}", AvailableLatestVersion),
+                        Title = NotificationStrings.UpdateTitle,
+                        Summary = string.Format(NotificationStrings.NewVersion, AvailableLatestVersion),
                         Content = AvailableLatestReleaseNotes ?? string.Empty,
                         Icon = "Update",
-                        ActionText = "查看详情",
+                        ActionText = NotificationStrings.ViewDetails,
                         DisplaySeconds = Settings?.Notification?.UpdateDurationSeconds > 0 ? Settings.Notification.UpdateDurationSeconds : 5,
                         Source = "update",
                         Action = () =>
@@ -3605,7 +3606,7 @@ namespace Ink_Canvas
                     }
                 }
             }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("Close") || ex.Message.Contains("关闭") || ex.Message.Contains("Show") || ex.Message.Contains("Visibility"))
+            catch (InvalidOperationException ex) when (ex.Message.Contains("Close") || ex.Message.Contains(NotificationStrings.AnimationOff) || ex.Message.Contains("Show") || ex.Message.Contains("Visibility"))
             {
                 // 窗口已关闭，忽略此异常
                 LogHelper.WriteLogToFile($"检查主窗口可见性时发现窗口已关闭，忽略异常。", LogHelper.LogType.Trace);

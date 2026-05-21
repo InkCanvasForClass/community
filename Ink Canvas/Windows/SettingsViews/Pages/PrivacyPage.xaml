@@ -1,4 +1,4 @@
-<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.PrivacyPage"
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.PrivacyPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -29,9 +29,9 @@
                     Spacing="{StaticResource SettingsCardSpacing}">
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="隐私与遥测" />
+                        Text="{x:Static props:AboutStrings.PrivacyAndTelemetry}" />
 
-                    <ui:SettingsExpander Header="隐私与遥测"
+                    <ui:SettingsExpander Header="{x:Static props:AboutStrings.PrivacyAndTelemetry}"
                             IsExpanded="True"
                             d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
@@ -40,16 +40,16 @@
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard ContentAlignment="Left">
                                 <CheckBox x:Name="CheckBoxTelemetryPrivacyAccepted"
-                                          Content="我已阅读并同意 privacy 中的隐私说明"
+                                          Content="{x:Static props:AboutStrings.PrivacyAgreement}"
                                           Checked="CheckBoxTelemetryPrivacyAccepted_Checked"
                                           Unchecked="CheckBoxTelemetryPrivacyAccepted_Checked" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="匿名使用数据上传：">
+                            <ui:SettingsCard Header="{x:Static props:AboutStrings.TelemetryLabel}">
                                 <ComboBox x:Name="ComboBoxTelemetryUploadLevel"
                                           SelectionChanged="ComboBoxTelemetryUploadLevel_SelectionChanged">
-                                    <ComboBoxItem Tag="0" Content="关闭（不上传）" />
-                                    <ComboBoxItem Tag="1" Content="上传基础数据" />
-                                    <ComboBoxItem Tag="2" Content="上传基础 + 可选数据" />
+                                    <ComboBoxItem Tag="0" Content="{x:Static props:AboutStrings.Telemetry_Off}" />
+                                    <ComboBoxItem Tag="1" Content="{x:Static props:AboutStrings.Telemetry_Basic}" />
+                                    <ComboBoxItem Tag="2" Content="{x:Static props:AboutStrings.Telemetry_Optional}" />
                                 </ComboBox>
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>

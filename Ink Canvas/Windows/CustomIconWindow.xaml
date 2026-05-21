@@ -1,4 +1,4 @@
-<Window x:Class="Ink_Canvas.CustomIconWindow"
+<Window xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.CustomIconWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,7 +6,7 @@
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         xmlns:local="clr-namespace:Ink_Canvas"
         mc:Ignorable="d"
-        Title="自定义浮动栏图标" Height="450" Width="500" WindowStartupLocation="CenterScreen">
+        Title="{x:Static props:ThemeStrings.Theme_CustomFloatingIconLabel}" Height="450" Width="500" WindowStartupLocation="CenterScreen">
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -27,7 +27,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="名称" Width="200" DisplayMemberBinding="{Binding Name}"/>
-                    <GridViewColumn Header="操作" Width="100">
+                    <GridViewColumn Header="{x:Static props:NotificationStrings.ActionsTitle}" Width="100">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <Button Content="删除" Click="DeleteCustomIcon_Click" Tag="{Binding}"/>
@@ -39,7 +39,7 @@
         </ListView>
         
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
-            <Button Content="关闭" Width="80" Click="CloseButton_Click"/>
+            <Button Content="{x:Static props:NotificationStrings.AnimationOff}" Width="80" Click="CloseButton_Click"/>
         </StackPanel>
     </Grid>
 </Window> 

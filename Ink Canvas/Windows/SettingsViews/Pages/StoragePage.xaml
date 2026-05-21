@@ -1,4 +1,4 @@
-<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.StoragePage"
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.StoragePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -8,7 +8,7 @@
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d"
-      Title="存储管理">
+      Title="{x:Static props:StorageStrings.Storage_Title}">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -28,7 +28,7 @@
                 Spacing="{StaticResource SettingsCardSpacing}">
 
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                           Text="存储管理" />
+                           Text="{x:Static props:StorageStrings.Storage_Title}" />
 
                 <!-- 概览卡片 -->
                 <Border Background="{DynamicResource {x:Static ui:ThemeKeys.LayerFillColorDefaultBrushKey}}"
@@ -41,14 +41,14 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <ikw:SimpleStackPanel Orientation="Vertical" Spacing="2">
-                                <TextBlock Text="ICC CE 总占用" FontSize="13"
+                                <TextBlock Text="{x:Static props:StorageStrings.Storage_TotalUsage}" FontSize="13"
                                            Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
                                 <TextBlock x:Name="TotalSizeTextBlock" Text="—"
                                            FontSize="28" FontWeight="SemiBold"/>
                             </ikw:SimpleStackPanel>
                             <ikw:SimpleStackPanel Grid.Column="1" Orientation="Vertical"
                                                   Spacing="2" HorizontalAlignment="Right">
-                                <TextBlock Text="占磁盘比例" FontSize="13"
+                                <TextBlock Text="{x:Static props:StorageStrings.Storage_DiskPercent}" FontSize="13"
                                            Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                                            HorizontalAlignment="Right"/>
                                 <TextBlock x:Name="DiskPercentTextBlock" Text="—"
@@ -97,143 +97,143 @@
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="14">
                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                 <Border Width="10" Height="10" CornerRadius="2" Background="#3B82F6"/>
-                                <TextBlock Text="核心文件" FontSize="12"/>
+                                <TextBlock Text="{x:Static props:StorageStrings.Storage_Legend_Core}" FontSize="12"/>
                             </ikw:SimpleStackPanel>
                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                 <Border Width="10" Height="10" CornerRadius="2" Background="#10B981"/>
-                                <TextBlock Text="日志" FontSize="12"/>
+                                <TextBlock Text="{x:Static props:StorageStrings.Storage_Logs_Header}" FontSize="12"/>
                             </ikw:SimpleStackPanel>
                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                 <Border Width="10" Height="10" CornerRadius="2" Background="#F59E0B"/>
-                                <TextBlock Text="墨迹" FontSize="12"/>
+                                <TextBlock Text="{x:Static props:StorageStrings.Storage_Legend_Ink}" FontSize="12"/>
                             </ikw:SimpleStackPanel>
                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                 <Border Width="10" Height="10" CornerRadius="2" Background="#8B5CF6"/>
-                                <TextBlock Text="备份" FontSize="12"/>
+                                <TextBlock Text="{x:Static props:StorageStrings.Storage_Legend_Backups}" FontSize="12"/>
                             </ikw:SimpleStackPanel>
                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                 <Border Width="10" Height="10" CornerRadius="2" Background="#EC4899"/>
-                                <TextBlock Text="自定义" FontSize="12"/>
+                                <TextBlock Text="{x:Static props:StorageStrings.Storage_Legend_Custom}" FontSize="12"/>
                             </ikw:SimpleStackPanel>
                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                 <Border Width="10" Height="10" CornerRadius="2" Background="#06B6D4"/>
-                                <TextBlock Text="插件" FontSize="12"/>
+                                <TextBlock Text="{x:Static props:StorageStrings.Storage_Plugins_Header}" FontSize="12"/>
                             </ikw:SimpleStackPanel>
                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                 <Border Width="10" Height="10" CornerRadius="2" Background="#EF4444"/>
-                                <TextBlock Text="自动更新" FontSize="12"/>
+                                <TextBlock Text="{x:Static props:StorageStrings.Storage_Legend_Update}" FontSize="12"/>
                             </ikw:SimpleStackPanel>
                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                 <Border Width="10" Height="10" CornerRadius="2" Background="#6B7280"/>
-                                <TextBlock Text="其他" FontSize="12"/>
+                                <TextBlock Text="{x:Static props:StorageStrings.Storage_Legend_Other}" FontSize="12"/>
                             </ikw:SimpleStackPanel>
                         </ikw:SimpleStackPanel>
                     </ikw:SimpleStackPanel>
                 </Border>
 
                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
-                    <Button x:Name="BtnRefresh" Content="刷新" Click="BtnRefresh_Click"/>
-                    <Button x:Name="BtnOpenAppFolder" Content="打开应用目录" Click="BtnOpenAppFolder_Click"/>
+                    <Button x:Name="BtnRefresh" Content="{x:Static props:StorageStrings.Storage_Refresh}" Click="BtnRefresh_Click"/>
+                    <Button x:Name="BtnOpenAppFolder" Content="{x:Static props:StorageStrings.Storage_OpenAppFolder}" Click="BtnOpenAppFolder_Click"/>
                 </ikw:SimpleStackPanel>
 
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                           Text="分类详情" />
+                           Text="{x:Static props:StorageStrings.Storage_CategoryDetails}" />
 
                 <!-- 核心文件 -->
                 <ui:SettingsExpander x:Name="CoreExpander"
-                                     Header="核心文件"
-                                     Description="包含 .json 配置文件、.enc 使用统计、.exe 主程序、.dll 文件、.dat 数据文件等">
+                                     Header="{x:Static props:StorageStrings.Storage_Legend_Core}"
+                                     Description="{x:Static props:StorageStrings.Storage_Core_Desc}">
                     <ui:SettingsExpander.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
                     </ui:SettingsExpander.HeaderIcon>
                     <TextBlock x:Name="CoreSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     <ui:SettingsExpander.Items>
-                        <ui:SettingsCard Description="核心文件不可清理，以免影响应用正常运行。"/>
+                        <ui:SettingsCard Description="{x:Static props:StorageStrings.Storage_Core_NotCleanable}"/>
                     </ui:SettingsExpander.Items>
                 </ui:SettingsExpander>
 
                 <!-- 日志 -->
                 <ui:SettingsCard x:Name="LogsExpander"
-                                 Header="日志"
-                                 Description="位于 Logs / Crashs 目录下的 .txt 日志与崩溃报告，可清理">
+                                 Header="{x:Static props:StorageStrings.Storage_Logs_Header}"
+                                 Description="{x:Static props:StorageStrings.Storage_Logs_Desc}">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.OpenFile}"/>
                     </ui:SettingsCard.HeaderIcon>
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                         <TextBlock x:Name="LogsSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        <Button x:Name="BtnCleanLogs" Content="清理" Click="BtnCleanLogs_Click"/>
+                        <Button x:Name="BtnCleanLogs" Content="{x:Static props:StorageStrings.Storage_Clean}" Click="BtnCleanLogs_Click"/>
                     </ikw:SimpleStackPanel>
                 </ui:SettingsCard>
 
                 <!-- 墨迹 -->
                 <ui:SettingsCard x:Name="InkExpander"
-                                 Header="墨迹"
-                                 Description="位于 Saves 目录下的 .icstk / .xml / 截图 .png 等墨迹文件">
+                                 Header="{x:Static props:StorageStrings.Storage_Legend_Ink}"
+                                 Description="{x:Static props:StorageStrings.Storage_Ink_Desc}">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
                     </ui:SettingsCard.HeaderIcon>
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                         <TextBlock x:Name="InkSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        <Button x:Name="BtnCleanInk" Content="清理" Click="BtnCleanInk_Click"/>
+                        <Button x:Name="BtnCleanInk" Content="{x:Static props:StorageStrings.Storage_Clean}" Click="BtnCleanInk_Click"/>
                     </ikw:SimpleStackPanel>
                 </ui:SettingsCard>
 
                 <!-- 备份 -->
                 <ui:SettingsCard x:Name="BackupsExpander"
-                                 Header="备份"
-                                 Description="位于 Backups 目录的设置 / 配置备份（.json / .zip）">
+                                 Header="{x:Static props:StorageStrings.Storage_Legend_Backups}"
+                                 Description="{x:Static props:StorageStrings.Storage_Backups_Desc}">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}"/>
                     </ui:SettingsCard.HeaderIcon>
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                         <TextBlock x:Name="BackupsSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        <Button x:Name="BtnCleanBackups" Content="清理" Click="BtnCleanBackups_Click"/>
+                        <Button x:Name="BtnCleanBackups" Content="{x:Static props:StorageStrings.Storage_Clean}" Click="BtnCleanBackups_Click"/>
                     </ikw:SimpleStackPanel>
                 </ui:SettingsCard>
 
                 <!-- 自定义文件 -->
                 <ui:SettingsExpander x:Name="CustomExpander"
-                                     Header="自定义文件"
-                                     Description="自定义图标与点名背景图（icons / backgrounds 等 .png）">
+                                     Header="{x:Static props:StorageStrings.Storage_Custom_Header}"
+                                     Description="{x:Static props:StorageStrings.Storage_Custom_Desc}">
                     <ui:SettingsExpander.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Photo}"/>
                     </ui:SettingsExpander.HeaderIcon>
                     <TextBlock x:Name="CustomSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     <ui:SettingsExpander.Items>
-                        <ui:SettingsCard Description="自定义文件由用户手动添加，不会自动清理，如需删除请前往对应管理界面。"/>
+                        <ui:SettingsCard Description="{x:Static props:StorageStrings.Storage_Custom_Hint}"/>
                     </ui:SettingsExpander.Items>
                 </ui:SettingsExpander>
 
                 <!-- 插件 -->
                 <ui:SettingsExpander x:Name="PluginsExpander"
-                                     Header="插件"
-                                     Description="位于 plugins 目录的 .iccpp 插件包">
+                                     Header="{x:Static props:StorageStrings.Storage_Plugins_Header}"
+                                     Description="{x:Static props:StorageStrings.Storage_Plugins_Desc}">
                     <ui:SettingsExpander.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Puzzle}"/>
                     </ui:SettingsExpander.HeaderIcon>
                     <TextBlock x:Name="PluginsSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     <ui:SettingsExpander.Items>
-                        <ui:SettingsCard Description="插件请前往插件管理页面进行卸载。"/>
+                        <ui:SettingsCard Description="{x:Static props:StorageStrings.Storage_Plugins_Hint}"/>
                     </ui:SettingsExpander.Items>
                 </ui:SettingsExpander>
 
                 <!-- 自动更新 -->
                 <ui:SettingsCard x:Name="UpdateExpander"
-                                 Header="自动更新"
-                                 Description="AutoUpdate 目录中的安装包与下载缓存，每次更新完成后会被清理">
+                                 Header="{x:Static props:StorageStrings.Storage_Legend_Update}"
+                                 Description="{x:Static props:StorageStrings.Storage_Update_Desc}">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}"/>
                     </ui:SettingsCard.HeaderIcon>
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                         <TextBlock x:Name="UpdateSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        <Button x:Name="BtnCleanUpdate" Content="清理" Click="BtnCleanUpdate_Click"/>
+                        <Button x:Name="BtnCleanUpdate" Content="{x:Static props:StorageStrings.Storage_Clean}" Click="BtnCleanUpdate_Click"/>
                     </ikw:SimpleStackPanel>
                 </ui:SettingsCard>
 
                 <!-- 其他 -->
                 <ui:SettingsCard x:Name="OtherExpander"
-                                 Header="其他"
-                                 Description="未归类至上述项目的其他文件">
+                                 Header="{x:Static props:StorageStrings.Storage_Legend_Other}"
+                                 Description="{x:Static props:StorageStrings.Storage_Other_Desc}">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.More}"/>
                     </ui:SettingsCard.HeaderIcon>

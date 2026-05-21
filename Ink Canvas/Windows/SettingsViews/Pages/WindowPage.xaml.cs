@@ -1,3 +1,4 @@
+using Ink_Canvas.Properties;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
@@ -53,14 +54,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     var btnItem = _isAdmin
                         ? new TopMostModeButtonItem
                         {
-                            ButtonHeader = "切换到非管理员模式",
-                            ButtonContent = "切换到非管理员模式",
+                            ButtonHeader = StartupStrings.TopMostMode_RestartAsNormal,
+                            ButtonContent = StartupStrings.TopMostMode_RestartAsNormal,
                             RestartAsAdmin = false
                         }
                         : new TopMostModeButtonItem
                         {
-                            ButtonHeader = "重启到管理员模式",
-                            ButtonContent = "重启到管理员模式",
+                            ButtonHeader = StartupStrings.TopMostMode_RestartAsAdmin,
+                            ButtonContent = StartupStrings.TopMostMode_RestartAsAdmin,
                             RestartAsAdmin = true
                         };
                     _topMostModeItems.Add(btnItem);
@@ -199,7 +200,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 SettingsManager.Settings.Startup.EnableWindowChromeRendering = newState;
                 SettingsManager.SaveSettingsToFile();
 
-                var msg = "切换 WindowChrome 渲染模式需要重启软件才能生效，是否立即重启？";
+                var msg = WindowStrings.Window_WindowChromeRendering_RestartRequired;
                 var result = MessageBox.Show(msg, "Ink Canvas", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
                 if (result == MessageBoxResult.Yes)
@@ -298,7 +299,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 App.IsUIAccessTopMostEnabled = false;
 
-                var msg = "切换到普通置顶模式需要重启软件才能生效，是否立即重启？";
+                var msg = StartupStrings.TopMostMode_Normal_RestartRequired;
                 var result = MessageBox.Show(msg, "Ink Canvas", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
                 if (result == MessageBoxResult.Yes)
@@ -328,7 +329,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 SettingsManager.SaveSettingsToFile();
 
-                var msg = "切换到 UIA 置顶模式需要重启软件才能生效，是否立即重启？";
+                var msg = StartupStrings.TopMostMode_UIA_RestartRequired;
                 var result = MessageBox.Show(msg, "Ink Canvas", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
                 if (result == MessageBoxResult.Yes)

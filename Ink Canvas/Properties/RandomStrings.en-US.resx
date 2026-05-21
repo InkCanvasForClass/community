@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="LuckyRandomPanel_Hint" xml:space="preserve">
+    <value>Show button to modify name list in random roll call window</value>
+  </data>
+  <data name="LuckyRandomPanel_Hint_1" xml:space="preserve">
+    <value>Show random draw and single draw buttons in random roll call window</value>
+  </data>
+  <data name="LuckyRandomPanel_Hint_10" xml:space="preserve">
+    <value>Select background for roll call window</value>
+  </data>
+  <data name="LuckyRandomPanel_Hint_2" xml:space="preserve">
+    <value>Enable quick draw floating button</value>
+  </data>
+  <data name="LuckyRandomPanel_Hint_3" xml:space="preserve">
+    <value>Use external roll call tool instead of built-in function</value>
+  </data>
+  <data name="LuckyRandomPanel_Hint_4" xml:space="preserve">
+    <value>Set delay time for single draw window to auto close</value>
+  </data>
+  <data name="LuckyRandomPanel_Hint_5" xml:space="preserve">
+    <value>Set maximum number of people for single random roll call</value>
+  </data>
+  <data name="LuckyRandomPanel_Hint_6" xml:space="preserve">
+    <value>Use new roll call interface design</value>
+  </data>
+  <data name="LuckyRandomPanel_Hint_7" xml:space="preserve">
+    <value>Use machine learning algorithm to avoid drawing same person repeatedly</value>
+  </data>
+  <data name="LuckyRandomPanel_Hint_8" xml:space="preserve">
+    <value>Set history record count for avoiding repetition</value>
+  </data>
+  <data name="LuckyRandomPanel_Hint_9" xml:space="preserve">
+    <value>Set weight for machine learning algorithm to avoid repetition</value>
+  </data>
+  <data name="Random_Background_Default" xml:space="preserve">
+    <value>Default background</value>
+  </data>
+  <data name="Random_BackgroundSelectLabel" xml:space="preserve">
+    <value>Background:</value>
+  </data>
+  <data name="Random_BackgroundSettingsTitle" xml:space="preserve">
+    <value>Roll-call window background (legacy UI only)</value>
+  </data>
+  <data name="Random_CustomBackground_Manage" xml:space="preserve">
+    <value>Manage</value>
+  </data>
+  <data name="Random_CustomBackground_Upload" xml:space="preserve">
+    <value>Upload</value>
+  </data>
+  <data name="Random_CustomBackgroundLabel" xml:space="preserve">
+    <value>Custom background:</value>
+  </data>
+  <data name="Random_EnableButtons" xml:space="preserve">
+    <value>Enable random &amp; single-draw buttons</value>
+  </data>
+  <data name="Random_EnableQuickButton" xml:space="preserve">
+    <value>Enable quick-draw floating button</value>
+  </data>
+  <data name="Random_ExternalType_ClassIsland" xml:space="preserve">
+    <value>ClassIsland</value>
+  </data>
+  <data name="Random_ExternalType_NamePicker" xml:space="preserve">
+    <value>NamePicker</value>
+  </data>
+  <data name="Random_ExternalType_SecRandom" xml:space="preserve">
+    <value>SecRandom</value>
+  </data>
+  <data name="Random_ExternalTypeLabel" xml:space="preserve">
+    <value>Roll-call type</value>
+  </data>
+  <data name="Random_ML_AvoidRepeat" xml:space="preserve">
+    <value>Use machine learning to avoid repeats</value>
+  </data>
+  <data name="Random_ML_Hint" xml:space="preserve">
+    <value>ML analyzes recent roll-call history to avoid repeating the same students.</value>
+  </data>
+  <data name="Random_ML_HistoryCount" xml:space="preserve">
+    <value>History count for avoidance</value>
+  </data>
+  <data name="Random_ML_Weight" xml:space="preserve">
+    <value>Avoidance weight</value>
+  </data>
+  <data name="Random_NewUI_Enable" xml:space="preserve">
+    <value>Enable new roll-call UI</value>
+  </data>
+  <data name="Random_NewUI_Title" xml:space="preserve">
+    <value>New roll-call UI</value>
+  </data>
+  <data name="Random_OnceCloseDelay" xml:space="preserve">
+    <value>Single-draw window close delay</value>
+  </data>
+  <data name="Random_OnceMaxStudents" xml:space="preserve">
+    <value>Max students per single draw</value>
+  </data>
+  <data name="Random_ShowEditNamesButton" xml:space="preserve">
+    <value>Show button to edit name list</value>
+  </data>
+  <data name="Random_Title" xml:space="preserve">
+    <value>Random roll call</value>
+  </data>
+  <data name="Random_UseExternal" xml:space="preserve">
+    <value>Use external roll-call app</value>
+  </data>
+</root>

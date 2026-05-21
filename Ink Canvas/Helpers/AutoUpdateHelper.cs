@@ -1,3 +1,4 @@
+using Ink_Canvas.Properties;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -986,7 +987,7 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"AutoUpdate | 使用智慧更新 API 检查: {checkUrl}");
                 string content = await client.GetStringAsync(checkUrl);
                 var result = ParseSmartUpdateResult(content);
-                var group = new UpdateLineGroup { GroupName = "智慧更新", VersionUrl = checkUrl };
+                var group = new UpdateLineGroup { GroupName = StartupStrings.SmartUpdate, VersionUrl = checkUrl };
 
                 if (!result.HasUpdate)
                 {
@@ -1279,7 +1280,7 @@ namespace Ink_Canvas.Helpers
                         LogHelper.WriteLogToFile($"AutoUpdate | 线路组 {group.GroupName} 缺少下载地址，跳过", LogHelper.LogType.Warning);
                         continue;
                     }
-                    if (group.GroupName != "智慧更新")
+                    if (group.GroupName != StartupStrings.SmartUpdate)
                     {
                         url = AppendX64SuffixBeforeZipExtension(url);
                     }

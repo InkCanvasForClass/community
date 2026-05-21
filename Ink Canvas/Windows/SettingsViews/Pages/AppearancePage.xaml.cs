@@ -1,3 +1,4 @@
+using Ink_Canvas.Properties;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using iNKORE.UI.WPF.Modern.Controls;
@@ -99,7 +100,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
             else
             {
-                TextBlockCustomSplashPath.Text = "未选择自定义图片";
+                TextBlockCustomSplashPath.Text = ThemeStrings.Theme_CustomSplash_NotSelected;
                 TextBlockCustomSplashPath.ToolTip = null;
             }
 
@@ -348,7 +349,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             SettingsManager.Settings.Appearance.CustomSplashImagePath = string.Empty;
             SettingsManager.SaveSettingsToFile();
-            TextBlockCustomSplashPath.Text = "未选择自定义图片";
+            TextBlockCustomSplashPath.Text = ThemeStrings.Theme_CustomSplash_NotSelected;
             TextBlockCustomSplashPath.ToolTip = null;
         }
 
@@ -532,7 +533,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var categories = new System.Collections.Generic.Dictionary<string, string>
             {
                 { "a", "动画" }, { "b", "漫画" }, { "c", "游戏" }, { "d", "文学" },
-                { "e", "原创" }, { "f", "来自网络" }, { "g", "其他" }, { "h", "影视" },
+                { "e", "原创" }, { "f", "来自网络" }, { "g", NotificationStrings.Type_Other }, { "h", "影视" },
                 { "i", "诗词" }, { "j", "网易云" }, { "k", "哲学" }, { "l", "抖机灵" }
             };
 

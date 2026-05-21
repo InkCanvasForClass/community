@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Timer_CustomSoundLabel" xml:space="preserve">
+    <value>自定义提醒铃声：</value>
+  </data>
+  <data name="Timer_EnableCountUp" xml:space="preserve">
+    <value>启用正计时</value>
+  </data>
+  <data name="Timer_NewUI" xml:space="preserve">
+    <value>新计时器 UI</value>
+  </data>
+  <data name="Timer_OvertimeHighlight" xml:space="preserve">
+    <value>超时醒目数字</value>
+  </data>
+  <data name="Timer_Progressive" xml:space="preserve">
+    <value>渐进提醒</value>
+  </data>
+  <data name="Timer_ProgressiveCustomLabel" xml:space="preserve">
+    <value>自定义渐进提醒音频：</value>
+  </data>
+  <data name="Timer_ProgressiveReset" xml:space="preserve">
+    <value>重置</value>
+  </data>
+  <data name="Timer_ProgressiveSelectFile" xml:space="preserve">
+    <value>选择文件</value>
+  </data>
+  <data name="Timer_ProgressiveVolume" xml:space="preserve">
+    <value>渐进提醒音量</value>
+  </data>
+  <data name="Timer_Reset" xml:space="preserve">
+    <value>重置</value>
+  </data>
+  <data name="Timer_SelectFile" xml:space="preserve">
+    <value>选择文件</value>
+  </data>
+  <data name="Timer_Title" xml:space="preserve">
+    <value>计时器设置</value>
+  </data>
+  <data name="Timer_UseLegacyButtons" xml:space="preserve">
+    <value>使用老版计时器按钮 UI</value>
+  </data>
+  <data name="Timer_Volume" xml:space="preserve">
+    <value>计时器提醒音量</value>
+  </data>
+  <data name="TimeRange_Hint" xml:space="preserve">
+    <value>若终止时间小于起始时间…</value>
+  </data>
+  <data name="TimerPanel_Hint" xml:space="preserve">
+    <value>使用旧版本的计时器按钮界面</value>
+  </data>
+  <data name="TimerPanel_Hint_1" xml:space="preserve">
+    <value>使用新样式的计时器界面</value>
+  </data>
+  <data name="TimerPanel_Hint_2" xml:space="preserve">
+    <value>计时器超时后继续正向计时</value>
+  </data>
+  <data name="TimerPanel_Hint_3" xml:space="preserve">
+    <value>计时器超时后数字显示为红色</value>
+  </data>
+  <data name="TimerPanel_Hint_4" xml:space="preserve">
+    <value>设置计时器提醒音的音量</value>
+  </data>
+  <data name="TimerPanel_Hint_5" xml:space="preserve">
+    <value>启用渐进式提醒功能</value>
+  </data>
+  <data name="TimerPanel_Hint_6" xml:space="preserve">
+    <value>设置渐进提醒音的音量</value>
+  </data>
+</root>

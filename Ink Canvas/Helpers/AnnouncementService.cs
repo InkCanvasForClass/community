@@ -147,26 +147,26 @@ namespace Ink_Canvas.Helpers
             NotificationProviderRegistry.RegisterOrUpdate(new NotificationProviderStatus
             {
                 ProviderId = ProviderId,
-                DisplayName = "公告提供商",
-                Description = "拉取远端公告并接收实时推送。",
+                DisplayName = NotificationStrings.Provider_Announcement,
+                Description = NotificationStrings.Provider_AnnouncementDesc,
                 IsEnabled = settings?.Notification?.IsAnnouncementEnabled == true,
                 IsRunning = false,
-                Status = "启动中"
+                Status = NotificationStrings.Provider_Starting
             });
 
             if (settings?.Notification?.IsAnnouncementEnabled != true)
             {
-                NotificationProviderRegistry.SetRunning(ProviderId, false, "已禁用");
+                NotificationProviderRegistry.SetRunning(ProviderId, false, NotificationStrings.Provider_Disabled);
                 return;
             }
             if (string.IsNullOrWhiteSpace(settings.Notification.AnnouncementSoftwareToken))
             {
-                NotificationProviderRegistry.SetRunning(ProviderId, false, "未配置 Token");
+                NotificationProviderRegistry.SetRunning(ProviderId, false, NotificationStrings.Provider_NoToken);
                 return;
             }
 
             await FetchAnnouncementsAsync(cancellationToken);
-            NotificationProviderRegistry.SetRunning(ProviderId, true, "运行中");
+            NotificationProviderRegistry.SetRunning(ProviderId, true, NotificationStrings.Provider_Running);
 
             if (!string.IsNullOrWhiteSpace(BuildWebSocketUrl()))
             {
@@ -180,7 +180,7 @@ namespace Ink_Canvas.Helpers
             webSocket?.Abort();
             webSocket?.Dispose();
             webSocket = null;
-            NotificationProviderRegistry.SetRunning(ProviderId, false, "已停止");
+            NotificationProviderRegistry.SetRunning(ProviderId, false, NotificationStrings.Provider_Stopped);
             return Task.CompletedTask;
         }
 
@@ -236,7 +236,7 @@ namespace Ink_Canvas.Helpers
                             await webSocket.ConnectAsync(new Uri(candidateUrl), cancellationToken);
                             connected = true;
                             isRealtimePushUnavailable = false;
-                            NotificationProviderRegistry.SetRunning(ProviderId, true, "运行中");
+                            NotificationProviderRegistry.SetRunning(ProviderId, true, NotificationStrings.Provider_Running);
                             await ReceiveWebSocketMessagesAsync(webSocket, cancellationToken);
                         }
                         break;
@@ -252,7 +252,7 @@ namespace Ink_Canvas.Helpers
                             LogHelper.WriteLogToFile($"AnnouncementService WebSocket 服务端暂不可用，将继续重连并保留 HTTP 公告拉取通道: {ex.Message}", LogHelper.LogType.Trace);
                             isRealtimePushUnavailable = true;
                         }
-                        NotificationProviderRegistry.SetRunning(ProviderId, true, "HTTP 拉取可用，实时推送不可用");
+                        NotificationProviderRegistry.SetRunning(ProviderId, true, NotificationStrings.Provider_HttpOnly);
                     }
                     catch (Exception ex)
                     {
@@ -260,7 +260,7 @@ namespace Ink_Canvas.Helpers
                         {
                             LogHelper.WriteLogToFile($"AnnouncementService WebSocket 连接失败: {ex.Message}", LogHelper.LogType.Trace);
                         }
-                        NotificationProviderRegistry.SetRunning(ProviderId, false, "正在重连");
+                        NotificationProviderRegistry.SetRunning(ProviderId, false, NotificationStrings.Provider_Reconnecting);
                     }
                 }
 

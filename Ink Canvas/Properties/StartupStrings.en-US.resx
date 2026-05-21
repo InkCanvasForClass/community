@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Channel_Beta" xml:space="preserve">
+    <value>Beta</value>
+  </data>
+  <data name="Channel_Hint" xml:space="preserve">
+    <value>Stable for reliability; Preview for new features.</value>
+  </data>
+  <data name="Channel_Preview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="Channel_Release" xml:space="preserve">
+    <value>Stable (Release)</value>
+  </data>
+  <data name="ManualUpdate_Hint" xml:space="preserve">
+    <value>Check and download now.</value>
+  </data>
+  <data name="Rollback_Hint" xml:space="preserve">
+    <value>Open rollback page.</value>
+  </data>
+  <data name="SilentUpdate_AfterDownloadHint" xml:space="preserve">
+    <value>When silent update is off, you will be prompted after download.</value>
+  </data>
+  <data name="SilentUpdate_Hint" xml:space="preserve">
+    <value>Silent update installs when app is idle.</value>
+  </data>
+  <data name="SilentUpdate_TimeRange" xml:space="preserve">
+    <value>Silent update time range</value>
+  </data>
+  <data name="AutoUpdateHint" xml:space="preserve">
+    <value>Automatically check for updates when the app starts.</value>
+  </data>
+  <data name="EnableNibMode" xml:space="preserve">
+    <value>Nib Mode</value>
+  </data>
+  <data name="EnableNibModeHint" xml:space="preserve">
+    <value>Only respond to pen tip touch, ignore palm and finger</value>
+  </data>
+  <data name="EndTime" xml:space="preserve">
+    <value>End time</value>
+  </data>
+  <data name="ExternalProtocol" xml:space="preserve">
+    <value>External protocol (icc://)</value>
+  </data>
+  <data name="ExternalProtocolHint" xml:space="preserve">
+    <value>Control via icc:// protocol</value>
+  </data>
+  <data name="FixVersionHint" xml:space="preserve">
+    <value>Repair downloads the latest build for the selected channel and reinstalls; use to fix broken installs.</value>
+  </data>
+  <data name="FoldAtStartup" xml:space="preserve">
+    <value>Dock to sidebar after startup</value>
+  </data>
+  <data name="FoldAtStartupHint" xml:space="preserve">
+    <value>Automatically dock to sidebar after startup</value>
+  </data>
+  <data name="HistoryRollbackHint" xml:space="preserve">
+    <value>Opens a page to manually roll back to an earlier version.</value>
+  </data>
+  <data name="ManualUpdateHint" xml:space="preserve">
+    <value>Check and download the latest version now.</value>
+  </data>
+  <data name="MinimizeToSidebar" xml:space="preserve">
+    <value>Minimize to sidebar at startup</value>
+  </data>
+  <data name="NoBorderMode" xml:space="preserve">
+    <value>Borderless</value>
+  </data>
+  <data name="NoBorderModeHint" xml:space="preserve">
+    <value>Hide window border for a more immersive experience</value>
+  </data>
+  <data name="NoFocusMode" xml:space="preserve">
+    <value>No-focus mode</value>
+  </data>
+  <data name="NoFocusModeHint" xml:space="preserve">
+    <value>Still receive input when window loses focus</value>
+  </data>
+  <data name="PPTOnlyModeHint" xml:space="preserve">
+    <value>When enabled, the software will be completely hidden and only appear during PPT slideshow</value>
+  </data>
+  <data name="RunAtLogin" xml:space="preserve">
+    <value>Run at login</value>
+  </data>
+  <data name="RunAtStartup" xml:space="preserve">
+    <value>Run at startup</value>
+  </data>
+  <data name="RunAtStartupHint" xml:space="preserve">
+    <value>Automatically run the software when system starts</value>
+  </data>
+  <data name="SilentUpdateFullHint" xml:space="preserve">
+    <value>When silent update is off, you will be prompted after download. When on, every 10 minutes the app checks: 1) within silent-update time window 2) not in writing mode 3) not in canvas. If all pass, it will close and update.</value>
+  </data>
+  <data name="SilentUpdateHint" xml:space="preserve">
+    <value>Silent update installs when the app is idle; no manual action needed.</value>
+  </data>
+  <data name="SilentUpdateTimePeriod" xml:space="preserve">
+    <value>Silent update time window</value>
+  </data>
+  <data name="SmartUpdate" xml:space="preserve">
+    <value>Smart update</value>
+  </data>
+  <data name="SmartUpdateHint" xml:space="preserve">
+    <value>Use the unified platform API to check for updates and get download links.</value>
+  </data>
+  <data name="Start" xml:space="preserve">
+    <value>Startup</value>
+  </data>
+  <data name="StartTime" xml:space="preserve">
+    <value>Start time</value>
+  </data>
+  <data name="TimePeriodHint" xml:space="preserve">
+    <value>If end &lt; start, end is next day. If start = end, window is 24h.</value>
+  </data>
+  <data name="TopMost" xml:space="preserve">
+    <value>Topmost</value>
+  </data>
+  <data name="TopMostHint" xml:space="preserve">
+    <value>Window always stays on top of other windows</value>
+  </data>
+  <data name="TopMostMode" xml:space="preserve">
+    <value>Topmost Mode</value>
+  </data>
+  <data name="TopMostMode_Normal" xml:space="preserve">
+    <value>Normal Topmost</value>
+  </data>
+  <data name="TopMostMode_Normal_RestartRequired" xml:space="preserve">
+    <value>Switching to normal topmost mode requires a restart to take effect. Restart now?</value>
+  </data>
+  <data name="TopMostMode_RestartAsAdmin" xml:space="preserve">
+    <value>Restart as Administrator</value>
+  </data>
+  <data name="TopMostMode_RestartAsNormal" xml:space="preserve">
+    <value>Switch to Non-Admin Mode</value>
+  </data>
+  <data name="TopMostMode_UIA" xml:space="preserve">
+    <value>UIA Topmost (Requires Admin)</value>
+  </data>
+  <data name="TopMostMode_UIA_RestartRequired" xml:space="preserve">
+    <value>Switching to UIA topmost mode requires a restart to take effect. Restart now?</value>
+  </data>
+  <data name="UIAccessTopMostHint" xml:space="preserve">
+    <value>With UIA topmost on, app needs admin to stay on top. To turn off, fully quit then start again; restart will not disable it.</value>
+  </data>
+  <data name="UIAccessTopMostHint_1" xml:space="preserve">
+    <value>Use UIA method to achieve topmost, requires administrator privileges</value>
+  </data>
+  <data name="UIATopMost" xml:space="preserve">
+    <value>UIA topmost</value>
+  </data>
+  <data name="UIATopMostHint" xml:space="preserve">
+    <value>UIA topmost requires admin to take effect.</value>
+  </data>
+  <data name="UpdateChannel" xml:space="preserve">
+    <value>Update channel</value>
+  </data>
+  <data name="UpdateChannelHint" xml:space="preserve">
+    <value>Stable: reliable updates. Preview: new features with better stability than Beta. Beta: earliest new features.</value>
+  </data>
+  <data name="UpdatePackageArchitecture" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="UpdatePackageArchitectureHint" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="VersionFix_Hint" xml:space="preserve">
+    <value>Download and install latest for current channel.</value>
+  </data>
+</root>

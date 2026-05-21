@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="FileAssoc_Check" xml:space="preserve">
+    <value>Check status</value>
+  </data>
+  <data name="FileAssoc_Desc" xml:space="preserve">
+    <value>Manage .icstk file association so double-click opens in Ink Canvas.</value>
+  </data>
+  <data name="FileAssoc_Register" xml:space="preserve">
+    <value>Register association</value>
+  </data>
+  <data name="FileAssoc_Title" xml:space="preserve">
+    <value>File association</value>
+  </data>
+  <data name="FileAssoc_Unregister" xml:space="preserve">
+    <value>Remove association</value>
+  </data>
+  <data name="SecurityPanel__InkCanvasForClass_Hint" xml:space="preserve">
+    <value>Password verification when closing InkCanvasForClass</value>
+  </data>
+  <data name="SecurityPanel__Settingsjson_Hint" xml:space="preserve">
+    <value>Secondary verification before resetting Settings.json</value>
+  </data>
+  <data name="SecurityPanel_Hint" xml:space="preserve">
+    <value>Need to set password when enabled</value>
+  </data>
+  <data name="SecurityPanel_Hint_1" xml:space="preserve">
+    <value>Set or modify security password</value>
+  </data>
+  <data name="SecurityPanel_Hint_2" xml:space="preserve">
+    <value>Verification when opening settings panel/new settings window</value>
+  </data>
+  <data name="SecurityPanel_Hint_3" xml:space="preserve">
+    <value>Password verification before modifying or clearing name list</value>
+  </data>
+  <data name="SecurityPanel_Hint_4" xml:space="preserve">
+    <value>When enabled, key files will be occupied as read-only</value>
+  </data>
+  <data name="SettingsBaseView_Binding_DescriptionHint" xml:space="preserve">
+    <value>{Binding Description}</value>
+  </data>
+  <data name="Tooltip_IccProtocol" xml:space="preserve">
+    <value>Control via icc:// protocol</value>
+  </data>
+</root>

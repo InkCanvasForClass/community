@@ -1,3 +1,4 @@
+using Ink_Canvas.Properties;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
@@ -666,7 +667,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 if (!ok)
                 {
-                    ApplyState(UpdateUiState.NetworkError, "更新下载失败，请检查网络连接后重试。");
+                    ApplyState(UpdateUiState.NetworkError, UpdateStrings.Msg_UpdateDownloadFailed);
                     return;
                 }
 
@@ -712,7 +713,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 if (!ok)
                 {
-                    ApplyState(UpdateUiState.NetworkError, "更新下载失败，请检查网络连接后重试。");
+                    ApplyState(UpdateUiState.NetworkError, UpdateStrings.Msg_UpdateDownloadFailed);
                     return;
                 }
 
@@ -969,7 +970,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             finally
             {
                 FixVersionButton.IsEnabled = true;
-                FixVersionButton.Content = "版本修复";
+                FixVersionButton.Content = BtnStrings.VersionFix;
             }
         }
 

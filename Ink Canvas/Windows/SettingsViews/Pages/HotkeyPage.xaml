@@ -1,4 +1,4 @@
-<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.HotkeyPage"
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.HotkeyPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -10,7 +10,7 @@
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       xmlns:hk="clr-namespace:Ink_Canvas.Windows"
       mc:Ignorable="d"
-      Title="快捷键">
+      Title="{x:Static props:NavStrings.Nav_Shortcuts}">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -52,17 +52,17 @@
                                Text="基本操作" />
 
                     <hk:HotkeyItem x:Name="UndoHotkey"
-                                   Title="撤销"
+                                   Title="{x:Static props:FloatingBarStrings.Board_Undo}"
                                    Description="撤销上一步操作"
                                    DefaultKey="Z"
                                    DefaultModifiers="Control" />
                     <hk:HotkeyItem x:Name="RedoHotkey"
-                                   Title="重做"
+                                   Title="{x:Static props:FloatingBarStrings.Board_Redo}"
                                    Description="重做上一步操作"
                                    DefaultKey="Y"
                                    DefaultModifiers="Control" />
                     <hk:HotkeyItem x:Name="ClearHotkey"
-                                   Title="清空"
+                                   Title="{x:Static props:FloatingBarStrings.FloatingBar_Clear}"
                                    Description="清空当前画板内容"
                                    DefaultKey="E"
                                    DefaultModifiers="Control" />
@@ -142,7 +142,7 @@
                                    DefaultKey="L"
                                    DefaultModifiers="Alt" />
                     <hk:HotkeyItem x:Name="ScreenshotHotkey"
-                                   Title="截图"
+                                   Title="{x:Static props:FloatingBarStrings.Board_Screenshot}"
                                    Description="保存屏幕截图到桌面"
                                    DefaultKey="C"
                                    DefaultModifiers="Alt" />
@@ -152,12 +152,12 @@
                                    DefaultKey="K"
                                    DefaultModifiers="Alt" />
                     <hk:HotkeyItem x:Name="HideHotkey"
-                                   Title="隐藏"
+                                   Title="{x:Static props:FloatingBarStrings.FloatingBar_Hide}"
                                    Description="隐藏应用程序"
                                    DefaultKey="V"
                                    DefaultModifiers="Alt" />
                     <hk:HotkeyItem x:Name="ExitHotkey"
-                                   Title="退出"
+                                   Title="{x:Static props:FloatingBarStrings.OldUI_Exit}"
                                    Description="退出当前模式或应用程序"
                                    DefaultKey="Escape"
                                    DefaultModifiers="None" />

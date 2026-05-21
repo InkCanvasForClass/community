@@ -1,4 +1,4 @@
-<UserControl x:Class="Ink_Canvas.Controls.EraserPopupContent"
+<UserControl xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Controls.EraserPopupContent"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -13,22 +13,22 @@
         <c:StringToGeometryConverter x:Key="StringToGeometryConverter" />
     </UserControl.Resources>
     <Grid>
-        <controls:PopupShellContent x:Name="Shell" Title="橡皮选项" d:Visibility="Collapsed" />
+        <controls:PopupShellContent x:Name="Shell" Title="{x:Static props:FloatingBarStrings.Board_EraserOptions}" d:Visibility="Collapsed" />
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
             <ikw:SimpleStackPanel Margin="10">
                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="2"
                                      VerticalAlignment="Center"
                                      HorizontalAlignment="Center">
-                    <Label Content="大小" FontWeight="Bold"
+                    <Label Content="{x:Static props:FloatingBarStrings.Board_Size}" FontWeight="Bold"
                            Foreground="{DynamicResource FloatBarForeground}" FontSize="16"
                            VerticalAlignment="Center" />
                     <ComboBox x:Name="ComboBoxEraserSize"
                                   SelectedIndex="2">
-                        <ComboBoxItem Content="很小" />
-                        <ComboBoxItem Content="较小" />
-                        <ComboBoxItem Content="中等" />
-                        <ComboBoxItem Content="较大" />
-                        <ComboBoxItem Content="很大" />
+                        <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_EraserSize_VerySmall}" />
+                        <ComboBoxItem Content="{x:Static props:CommonStrings.Size_Small}" />
+                        <ComboBoxItem Content="{x:Static props:CommonStrings.Size_Medium}" />
+                        <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_EraserSize_Large}" />
+                        <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_EraserSize_VeryLarge}" />
                     </ComboBox>
                 </ikw:SimpleStackPanel>
                 <TabControl x:Name="EraserTypeTabControl"
@@ -43,8 +43,8 @@
                     <TabControl.ItemContainerStyle>
                         <Style TargetType="TabItem" BasedOn="{StaticResource CompactPivotTabItem}" />
                     </TabControl.ItemContainerStyle>
-                    <TabItem Header="圆形擦" />
-                    <TabItem Header="黑板擦" />
+                    <TabItem Header="{x:Static props:FloatingBarStrings.Board_EraserShape_Circle}" />
+                    <TabItem Header="{x:Static props:FloatingBarStrings.Board_EraserShape_Blackboard}" />
                 </TabControl>
                 <Button x:Name="ClearInkButton" Foreground="White"
                         HorizontalAlignment="Center" Margin="0,6,0,0"
@@ -70,7 +70,7 @@
                             </Image>
                             <TextBlock FontSize="10" VerticalAlignment="Center"
                                        Foreground="White" FontWeight="Bold"
-                                       Text="清空墨迹" />
+                                       Text="{x:Static props:FloatingBarStrings.Board_ClearInk}" />
                         </ikw:SimpleStackPanel>
                     </Button.Content>
                 </Button>
@@ -98,7 +98,7 @@
                             </Image>
                             <TextBlock FontSize="9" VerticalAlignment="Center"
                                        Foreground="White"
-                                       Text="清空墨迹和历史" />
+                                       Text="{x:Static props:FloatingBarStrings.Board_ClearInkAndHistory}" />
                         </ikw:SimpleStackPanel>
                     </Button.Content>
                 </Button>

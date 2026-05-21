@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Board_AutoHide" xml:space="preserve">
+    <value>Auto-hide</value>
+  </data>
+  <data name="Board_Background" xml:space="preserve">
+    <value>Background</value>
+  </data>
+  <data name="Board_ClearInk" xml:space="preserve">
+    <value>Clear ink</value>
+  </data>
+  <data name="Board_ClearInkAndHistory" xml:space="preserve">
+    <value>Clear ink &amp; history</value>
+  </data>
+  <data name="Board_DeleteThisPage" xml:space="preserve">
+    <value>Delete this page</value>
+  </data>
+  <data name="Board_Eraser" xml:space="preserve">
+    <value>Eraser</value>
+  </data>
+  <data name="Board_EraserOptions" xml:space="preserve">
+    <value>Eraser options</value>
+  </data>
+  <data name="Board_EraserShape" xml:space="preserve">
+    <value>Eraser shape</value>
+  </data>
+  <data name="Board_EraserShape_Blackboard" xml:space="preserve">
+    <value>Blackboard</value>
+  </data>
+  <data name="Board_EraserShape_Circle" xml:space="preserve">
+    <value>Circle</value>
+  </data>
+  <data name="Board_Exit" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="Board_Gesture" xml:space="preserve">
+    <value>Gesture</value>
+  </data>
+  <data name="Board_GestureOptions" xml:space="preserve">
+    <value>Gesture options</value>
+  </data>
+  <data name="Board_Highlighter" xml:space="preserve">
+    <value>Highlighter</value>
+  </data>
+  <data name="Board_InsertImage" xml:space="preserve">
+    <value>Insert image</value>
+  </data>
+  <data name="Board_LaserPen" xml:space="preserve">
+    <value>Laser Pen</value>
+  </data>
+  <data name="Board_MultiTouchWriting" xml:space="preserve">
+    <value>Multi-touch writing</value>
+  </data>
+  <data name="Board_NewPage" xml:space="preserve">
+    <value>New page</value>
+  </data>
+  <data name="Board_NextPage" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="Board_Page" xml:space="preserve">
+    <value>Page</value>
+  </data>
+  <data name="Board_Pen" xml:space="preserve">
+    <value>Pen</value>
+  </data>
+  <data name="Board_PreviousPage" xml:space="preserve">
+    <value>Previous</value>
+  </data>
+  <data name="Board_Redo" xml:space="preserve">
+    <value>Redo</value>
+  </data>
+  <data name="Board_Screenshot" xml:space="preserve">
+    <value>Screenshot</value>
+  </data>
+  <data name="Board_Select" xml:space="preserve">
+    <value>Select</value>
+  </data>
+  <data name="Board_SelectImage" xml:space="preserve">
+    <value>Select image</value>
+  </data>
+  <data name="Board_Shape" xml:space="preserve">
+    <value>Shapes</value>
+  </data>
+  <data name="Board_ShapeHintLongPress" xml:space="preserve">
+    <value>(Long-press in first row to keep selected)</value>
+  </data>
+  <data name="Board_Size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="Board_StrokeEraser" xml:space="preserve">
+    <value>Stroke eraser</value>
+  </data>
+  <data name="Board_Tools" xml:space="preserve">
+    <value>Tools</value>
+  </data>
+  <data name="Board_TwoFingerMove" xml:space="preserve">
+    <value>Two-finger move</value>
+  </data>
+  <data name="Board_TwoFingerRotate" xml:space="preserve">
+    <value>Two-finger rotate</value>
+  </data>
+  <data name="Board_TwoFingerZoom" xml:space="preserve">
+    <value>Two-finger zoom</value>
+  </data>
+  <data name="Board_Undo" xml:space="preserve">
+    <value>Undo</value>
+  </data>
+  <data name="FloatingBar_Annotate" xml:space="preserve">
+    <value>Annotate</value>
+  </data>
+  <data name="FloatingBar_AreaEraser" xml:space="preserve">
+    <value>Area eraser</value>
+  </data>
+  <data name="FloatingBar_Clear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="FloatingBar_ClearAndMouse" xml:space="preserve">
+    <value>Clear &amp; cursor</value>
+  </data>
+  <data name="FloatingBar_ExitButton" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="FloatingBar_Freeze" xml:space="preserve">
+    <value>Freeze</value>
+  </data>
+  <data name="FloatingBar_Geometry" xml:space="preserve">
+    <value>Geometry</value>
+  </data>
+  <data name="FloatingBar_Gesture_MultiTouchWriting" xml:space="preserve">
+    <value>Multi-touch writing</value>
+  </data>
+  <data name="FloatingBar_Gesture_TwoFingerMove" xml:space="preserve">
+    <value>Two-finger move</value>
+  </data>
+  <data name="FloatingBar_Gesture_TwoFingerRotate" xml:space="preserve">
+    <value>Two-finger rotate</value>
+  </data>
+  <data name="FloatingBar_Gesture_TwoFingerZoom" xml:space="preserve">
+    <value>Two-finger zoom</value>
+  </data>
+  <data name="FloatingBar_GestureButton" xml:space="preserve">
+    <value>Gesture</value>
+  </data>
+  <data name="FloatingBar_GesturePanelTitle" xml:space="preserve">
+    <value>Gesture options</value>
+  </data>
+  <data name="FloatingBar_Hide" xml:space="preserve">
+    <value>Hide</value>
+  </data>
+  <data name="FloatingBar_LassoSelect" xml:space="preserve">
+    <value>Lasso</value>
+  </data>
+  <data name="FloatingBar_Mouse" xml:space="preserve">
+    <value>Mouse</value>
+  </data>
+  <data name="FloatingBar_StrokeEraser" xml:space="preserve">
+    <value>Stroke eraser</value>
+  </data>
+  <data name="FloatingBar_Unfreeze" xml:space="preserve">
+    <value>Unfreeze</value>
+  </data>
+  <data name="FloatingBar_Whiteboard" xml:space="preserve">
+    <value>Board</value>
+  </data>
+  <data name="OldUI_Background" xml:space="preserve">
+    <value>Background</value>
+  </data>
+  <data name="OldUI_Check" xml:space="preserve">
+    <value>Check</value>
+  </data>
+  <data name="OldUI_ClearAndHide" xml:space="preserve">
+    <value>Clear
+&amp;
+Hide</value>
+  </data>
+  <data name="OldUI_Dark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="OldUI_Exit" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="OldUI_HideCanvas" xml:space="preserve">
+    <value>Hide
+canvas</value>
+  </data>
+  <data name="OldUI_Restore" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="OldUI_SingleFingerDrag" xml:space="preserve">
+    <value>One finger
+drag</value>
+  </data>
+  <data name="OldUI_SlideshowEnd" xml:space="preserve">
+    <value>End
+slideshow</value>
+  </data>
+  <data name="OldUI_SlideshowFromStart" xml:space="preserve">
+    <value>From start
+slideshow</value>
+  </data>
+  <data name="OldUI_Thickness" xml:space="preserve">
+    <value>Thickness</value>
+  </data>
+  <data name="QuickPanel_Exit" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="QuickPanel_ExitShow" xml:space="preserve">
+    <value>Exit slide show</value>
+  </data>
+  <data name="QuickPanel_RandomDraw" xml:space="preserve">
+    <value>Random draw</value>
+  </data>
+  <data name="QuickPanel_Show" xml:space="preserve">
+    <value>Annotation bar</value>
+  </data>
+  <data name="QuickPanel_SingleDraw" xml:space="preserve">
+    <value>Single draw</value>
+  </data>
+  <data name="QuickPanel_Timer" xml:space="preserve">
+    <value>Timer</value>
+  </data>
+  <data name="QuickPanel_Whiteboard" xml:space="preserve">
+    <value>Whiteboard</value>
+  </data>
+  <data name="SnapshotPanel__icstk__png_Hint" xml:space="preserve">
+    <value>When enabled, will delete all files with .icstk and .png extensions in auto save directory</value>
+  </data>
+  <data name="SnapshotPanel_Hint" xml:space="preserve">
+    <value>Auto save current canvas screenshot when clearing canvas</value>
+  </data>
+  <data name="SnapshotPanel_Hint_1" xml:space="preserve">
+    <value>Save screenshots to different folders by date</value>
+  </data>
+  <data name="SnapshotPanel_Hint_2" xml:space="preserve">
+    <value>Save current canvas ink data when taking screenshots</value>
+  </data>
+  <data name="SnapshotPanel_Hint_3" xml:space="preserve">
+    <value>When enabled, will auto screenshot when turning pages if slide has ink</value>
+  </data>
+  <data name="SnapshotPanel_Hint_4" xml:space="preserve">
+    <value>Set minimum ink amount required for auto screenshot</value>
+  </data>
+  <data name="Tools_Manual" xml:space="preserve">
+    <value>Manual</value>
+  </data>
+  <data name="Tools_MoreFeaturesTitle" xml:space="preserve">
+    <value>More features</value>
+  </data>
+  <data name="Tools_Open" xml:space="preserve">
+    <value>Open...</value>
+  </data>
+  <data name="Tools_RandomDraw" xml:space="preserve">
+    <value>Random draw</value>
+  </data>
+  <data name="Tools_Replay" xml:space="preserve">
+    <value>Replay</value>
+  </data>
+  <data name="Tools_Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Tools_Screenshot" xml:space="preserve">
+    <value>Screenshot</value>
+  </data>
+  <data name="Tools_Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Tools_SingleDraw" xml:space="preserve">
+    <value>Single draw</value>
+  </data>
+  <data name="Tools_Timer" xml:space="preserve">
+    <value>Timer</value>
+  </data>
+</root>
