@@ -88,19 +88,19 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 case 0:
                     PPTTimeCapsulePreviewContainer.HorizontalAlignment = HorizontalAlignment.Left;
                     PPTTimeCapsulePreviewContainer.VerticalAlignment = VerticalAlignment.Top;
-                    PPTTimeCapsulePreviewContainer.Margin = new Thickness(20, 20, 0, 0);
+                    PPTTimeCapsulePreviewContainer.Margin = new Thickness(10, 10, 0, 0);
                     PPTTimeCapsulePreviewContainer.RenderTransformOrigin = new Point(0, 0);
                     break;
                 case 1:
                     PPTTimeCapsulePreviewContainer.HorizontalAlignment = HorizontalAlignment.Right;
                     PPTTimeCapsulePreviewContainer.VerticalAlignment = VerticalAlignment.Top;
-                    PPTTimeCapsulePreviewContainer.Margin = new Thickness(0, 20, 20, 0);
+                    PPTTimeCapsulePreviewContainer.Margin = new Thickness(0, 10, 10, 0);
                     PPTTimeCapsulePreviewContainer.RenderTransformOrigin = new Point(1, 0);
                     break;
                 default:
                     PPTTimeCapsulePreviewContainer.HorizontalAlignment = HorizontalAlignment.Center;
                     PPTTimeCapsulePreviewContainer.VerticalAlignment = VerticalAlignment.Top;
-                    PPTTimeCapsulePreviewContainer.Margin = new Thickness(0, 20, 0, 0);
+                    PPTTimeCapsulePreviewContainer.Margin = new Thickness(0, 10, 0, 0);
                     PPTTimeCapsulePreviewContainer.RenderTransformOrigin = new Point(0.5, 0);
                     break;
             }
@@ -110,7 +110,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             if (PPTTimeCapsulePreviewScaleTransform != null && SliderPPTTimeCapsuleScale != null)
             {
-                var scale = SliderPPTTimeCapsuleScale.Value;
+                // Preview canvas is much smaller than slideshow, so apply a baseline downscale.
+                var scale = SliderPPTTimeCapsuleScale.Value * 0.62;
                 PPTTimeCapsulePreviewScaleTransform.ScaleX = scale;
                 PPTTimeCapsulePreviewScaleTransform.ScaleY = scale;
             }

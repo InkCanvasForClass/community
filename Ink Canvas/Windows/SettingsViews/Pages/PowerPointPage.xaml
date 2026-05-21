@@ -91,28 +91,9 @@
                             <!-- Slide Background -->
                             <Border CornerRadius="8">
                                 <Border.Background>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                        <GradientStop Color="#f8fafc" Offset="0"/>
-                                        <GradientStop Color="#f1f5f9" Offset="1"/>
-                                    </LinearGradientBrush>
+                                    <ImageBrush ImageSource="/Resources/PresentationExample/ppt-preview-bg.png"
+                                                Stretch="UniformToFill"/>
                                 </Border.Background>
-                                <!-- Subtle grid pattern -->
-                                <Border Opacity="0.04">
-                                    <Border.Background>
-                                        <DrawingBrush TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
-                                            <DrawingBrush.Drawing>
-                                                <GeometryDrawing>
-                                                    <GeometryDrawing.Geometry>
-                                                        <LineGeometry StartPoint="0,0" EndPoint="20,0"/>
-                                                    </GeometryDrawing.Geometry>
-                                                    <GeometryDrawing.Pen>
-                                                        <Pen Brush="#94a3b8" Thickness="0.5"/>
-                                                    </GeometryDrawing.Pen>
-                                                </GeometryDrawing>
-                                            </DrawingBrush.Drawing>
-                                        </DrawingBrush>
-                                    </Border.Background>
-                                </Border>
                             </Border>
 
                             <!-- Left Side PptNavBar (Vertical) -->
