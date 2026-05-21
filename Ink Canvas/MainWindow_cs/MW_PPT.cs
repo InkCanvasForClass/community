@@ -887,7 +887,7 @@ namespace Ink_Canvas
         {
             if (!Application.Current.Dispatcher.CheckAccess())
             {
-                _ = Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => OnPPTPresentationOpen(pres)));
+                _ = Application.Current.Dispatcher.BeginInvoke(new Action(() => OnPPTPresentationOpen(pres)));
                 return;
             }
 
@@ -1669,6 +1669,7 @@ namespace Ink_Canvas
                         Title = "Ink Canvas For Class CE",
                         PrimaryButtonText = "是",
                         SecondaryButtonText = "否",
+
                         DefaultButton = ContentDialogButton.Primary,
                         Content = new TextBlock { Text = $"上次播放到了第 {page} 页, 是否立即跳转", TextWrapping = TextWrapping.Wrap }
                     };
