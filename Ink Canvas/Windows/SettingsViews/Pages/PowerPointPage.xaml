@@ -324,7 +324,7 @@
 
                     <controls:LabeledSettingsCard x:Name="CardNotifyPreviousPage"
                             Header="记忆并提示上次播放位置"
-                            Description="开启后会记录上次播放的页数，点击"是"后会自动跳转"
+                            Description="开启后会记录上次播放的页数，点击「是」后会自动跳转"
                             Icon="{x:Static ui:SegoeFluentIcons.History}"
                             Toggled="ToggleSwitchNotifyPreviousPage_Toggled"/>
 

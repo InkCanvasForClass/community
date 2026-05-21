@@ -201,8 +201,7 @@ namespace Ink_Canvas
                 if (Freeze_Icon != null)
                 {
                     bool isFrozen = IsCurrentPageFrozen;
-                    Freeze_Icon.Label = (isFrozen ? "FloatingBar_Unfreeze" : "FloatingBar_Freeze" ? "解冻" : "冻结")
-                                        ?? (isFrozen ? "解冻" : "冻结");
+                    Freeze_Icon.Label = isFrozen ? "解冻" : "冻结";
                     Freeze_Icon.Icon.Geometry = Geometry.Parse(isFrozen
                         ? XamlGraphicsIconGeometries.UnfreezeIconGeometry
                         : XamlGraphicsIconGeometries.FreezeIconGeometry);
@@ -216,8 +215,7 @@ namespace Ink_Canvas
                 {
                     int pageIndex = GetCurrentFreezePageIndex();
                     bool isFrozen = IsPageFrozen(pageIndex);
-                    BoardInkFreezeBtn.Label = (isFrozen ? "FloatingBar_Unfreeze" : "FloatingBar_Freeze" ? "解冻" : "冻结")
-                                              ?? (isFrozen ? "解冻" : "冻结");
+                    BoardInkFreezeBtn.Label = isFrozen ? "解冻" : "冻结";
                     BoardInkFreezeBtn.IconGeometry = isFrozen
                         ? XamlGraphicsIconGeometries.UnfreezeIconGeometry
                         : XamlGraphicsIconGeometries.FreezeIconGeometry;
