@@ -3348,7 +3348,7 @@ namespace Ink_Canvas
         }
         
         /// <summary>
-        /// 墨迹擦除图标点击事件处理，用于切换到按笔画擦除模式
+        /// 白板模式下的墨迹擦除图标点击事件处理，用于切换到按笔画擦除模式
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
