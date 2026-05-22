@@ -164,7 +164,7 @@ namespace Ink_Canvas
         private Task<List<PptEnhancedPreviewItem>> _pptEnhancedPreviewBuildTask;
         private CancellationTokenSource _pptEnhancedPreviewCacheCts;
         private int _pptEnhancedPreviewCacheGeneration;
-        private const int PptEnhancedPreviewPreloadDelayMs = 1000;
+        private const int PptEnhancedPreviewPreloadDelayMs = 100;
         private int _previousSlideID = 0;
 
         /// <summary>
@@ -846,6 +846,7 @@ namespace Ink_Canvas
                     {
                         _exitPPTModeAfterDisconnectTimer?.Stop();
                         _exitPPTModeAfterDisconnectTimer = null;
+                        SchedulePptEnhancedPreviewPreload();
                         LogHelper.WriteLogToFile("PPT连接已建立", LogHelper.LogType.Event);
                     }
                     else
@@ -917,6 +918,8 @@ namespace Ink_Canvas
                     }
 
                     _pptUIManager?.UpdateConnectionStatus(true);
+
+                    SchedulePptEnhancedPreviewPreload();
 
                     LogHelper.WriteLogToFile($"已打开新演示文稿: {pres.Name}，墨迹状态已清理", LogHelper.LogType.Event);
                 });
@@ -1091,8 +1094,6 @@ namespace Ink_Canvas
                 _currentSlideShowPosition = currentSlide;
                 _previousSlideID = currentSlide;
 
-                ResetPptEnhancedPreviewCache();
-
                 lock (_memoryStreams)
                 {
                     foreach (var stream in _memoryStreams.Values)
@@ -1235,8 +1236,6 @@ namespace Ink_Canvas
                     // 仅PPT模式：放映开始立即同步主窗口可见性（勿仅依赖 SlideShowStateChanged 定时器）
                     CheckMainWindowVisibility();
                 });
-
-                SchedulePptEnhancedPreviewPreload();
 
                 if (!isFloatingBarFolded)
                 {
@@ -2649,7 +2648,7 @@ namespace Ink_Canvas
         private void SchedulePptEnhancedPreviewPreload()
         {
             if (!Settings.PowerPointSettings.EnablePPTButtonEnhancedPreview) return;
-            if (_pptManager?.IsInSlideShow != true) return;
+            if (_pptManager?.IsConnected != true) return;
 
             var token = EnsurePptEnhancedPreviewCacheToken();
             _ = PreloadPptEnhancedPreviewAfterDelayAsync(token);
@@ -2661,7 +2660,7 @@ namespace Ink_Canvas
             {
                 await Task.Delay(PptEnhancedPreviewPreloadDelayMs, cancellationToken);
                 if (cancellationToken.IsCancellationRequested) return;
-                if (_pptManager?.IsInSlideShow != true) return;
+                if (_pptManager?.IsConnected != true) return;
                 if (!Settings.PowerPointSettings.EnablePPTButtonEnhancedPreview) return;
 
                 var slides = await GetOrBuildPptEnhancedPreviewItemsAsync(cancellationToken);
