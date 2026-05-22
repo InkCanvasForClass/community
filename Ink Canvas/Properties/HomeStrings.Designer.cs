@@ -46,6 +46,40 @@ namespace Ink_Canvas.Properties
 
         public static string Home_RestartApp => ResourceManager.GetString(nameof(Home_RestartApp), _resourceCulture);
 
+        public static string Home_AboutApp => ResourceManager.GetString(nameof(Home_AboutApp), _resourceCulture);
+
+        public static string Home_Basic => ResourceManager.GetString(nameof(Home_Basic), _resourceCulture);
+
+        public static string Home_CanvasSettings => ResourceManager.GetString(nameof(Home_CanvasSettings), _resourceCulture);
+
+        public static string Home_CloudStorageSettings => ResourceManager.GetString(nameof(Home_CloudStorageSettings), _resourceCulture);
+
+        public static string Home_InkRecognitionSettings => ResourceManager.GetString(nameof(Home_InkRecognitionSettings), _resourceCulture);
+
+        public static string Home_MainUI => ResourceManager.GetString(nameof(Home_MainUI), _resourceCulture);
+
+        public static string Home_PluginSettings => ResourceManager.GetString(nameof(Home_PluginSettings), _resourceCulture);
+
+        public static string Home_PPTSettings => ResourceManager.GetString(nameof(Home_PPTSettings), _resourceCulture);
+
+        public static string Home_Privacy => ResourceManager.GetString(nameof(Home_Privacy), _resourceCulture);
+
+        public static string Home_PrivacySettings => ResourceManager.GetString(nameof(Home_PrivacySettings), _resourceCulture);
+
+        public static string Home_RandomAndTimer => ResourceManager.GetString(nameof(Home_RandomAndTimer), _resourceCulture);
+
+        public static string Home_Title => ResourceManager.GetString(nameof(Home_Title), _resourceCulture);
+
+        public static string Home_Toolbar => ResourceManager.GetString(nameof(Home_Toolbar), _resourceCulture);
+
+        public static string Home_ToolbarSettings => ResourceManager.GetString(nameof(Home_ToolbarSettings), _resourceCulture);
+
+        public static string Home_UpdateSettings => ResourceManager.GetString(nameof(Home_UpdateSettings), _resourceCulture);
+
+        public static string Home_Window => ResourceManager.GetString(nameof(Home_Window), _resourceCulture);
+
+        public static string Home_WindowSettings => ResourceManager.GetString(nameof(Home_WindowSettings), _resourceCulture);
+
         public static string Splash_Starting => ResourceManager.GetString(nameof(Splash_Starting), _resourceCulture);
     }
 }

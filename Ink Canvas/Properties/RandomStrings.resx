@@ -144,4 +144,25 @@
   <data name="Random_UseExternal" xml:space="preserve">
     <value>直接调用外部点名</value>
   </data>
+  <data name="Random_SelectTimerAlarm" xml:space="preserve">
+    <value>选择计时器提醒铃声</value>
+  </data>
+  <data name="Random_AudioFilter" xml:space="preserve">
+    <value>音频文件 (*.wav)|*.wav|所有文件 (*.*)|*.*</value>
+  </data>
+  <data name="Random_CustomAlarmSuccess" xml:space="preserve">
+    <value>自定义铃声设置成功！</value>
+  </data>
+  <data name="Random_AlarmSetupSuccess" xml:space="preserve">
+    <value>设置成功</value>
+  </data>
+  <data name="Random_ResetAlarmSuccess" xml:space="preserve">
+    <value>已重置为默认铃声！</value>
+  </data>
+  <data name="Random_ResetSuccess" xml:space="preserve">
+    <value>重置成功</value>
+  </data>
+  <data name="Random_SelectProgressiveAlarm" xml:space="preserve">
+    <value>选择渐进提醒音频文件</value>
+  </data>
 </root>

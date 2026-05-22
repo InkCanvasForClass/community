@@ -107,5 +107,37 @@ namespace Ink_Canvas.Properties
         public static string VersionLabel => ResourceManager.GetString(nameof(VersionLabel), _resourceCulture);
 
         public static string App_Title => ResourceManager.GetString(nameof(App_Title), _resourceCulture);
+
+        public static string DeviceInfo_Failed => ResourceManager.GetString(nameof(DeviceInfo_Failed), _resourceCulture);
+
+        public static string Unknown => ResourceManager.GetString(nameof(Unknown), _resourceCulture);
+
+        public static string UpdatePriority_High => ResourceManager.GetString(nameof(UpdatePriority_High), _resourceCulture);
+
+        public static string UpdatePriority_Low => ResourceManager.GetString(nameof(UpdatePriority_Low), _resourceCulture);
+
+        public static string UpdatePriority_Medium => ResourceManager.GetString(nameof(UpdatePriority_Medium), _resourceCulture);
+
+        public static string UsageFrequency_High => ResourceManager.GetString(nameof(UsageFrequency_High), _resourceCulture);
+
+        public static string UsageFrequency_Low => ResourceManager.GetString(nameof(UsageFrequency_Low), _resourceCulture);
+
+        public static string UsageFrequency_Medium => ResourceManager.GetString(nameof(UsageFrequency_Medium), _resourceCulture);
+
+        public static string Privacy_ConfirmDisableTelemetry_Message => ResourceManager.GetString(nameof(Privacy_ConfirmDisableTelemetry_Message), _resourceCulture);
+
+        public static string Privacy_ConfirmDisableTelemetry_Title => ResourceManager.GetString(nameof(Privacy_ConfirmDisableTelemetry_Title), _resourceCulture);
+
+        public static string Privacy_PrivacyAgreementRequired_Message => ResourceManager.GetString(nameof(Privacy_PrivacyAgreementRequired_Message), _resourceCulture);
+
+        public static string Privacy_PrivacyAgreementRequired_Title => ResourceManager.GetString(nameof(Privacy_PrivacyAgreementRequired_Title), _resourceCulture);
+
+        public static string Privacy_PrivacyFileNotFound_Message => ResourceManager.GetString(nameof(Privacy_PrivacyFileNotFound_Message), _resourceCulture);
+
+        public static string Privacy_PrivacyFileNotFound_Title => ResourceManager.GetString(nameof(Privacy_PrivacyFileNotFound_Title), _resourceCulture);
+
+        public static string Privacy_ConfirmRevokePrivacy_Message => ResourceManager.GetString(nameof(Privacy_ConfirmRevokePrivacy_Message), _resourceCulture);
+
+        public static string Privacy_ConfirmRevokePrivacy_Title => ResourceManager.GetString(nameof(Privacy_ConfirmRevokePrivacy_Title), _resourceCulture);
     }
 }

@@ -53,8 +53,8 @@
                             <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_WindowBackdrop_None}" Tag="None" />
                             <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_WindowBackdrop_Mica}" Tag="Mica" />
                             <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_WindowBackdrop_Acrylic}" Tag="Acrylic" />
-                            <ComboBoxItem Content="Tabbed" Tag="Tabbed" />
-                            <ComboBoxItem Content="Transient" Tag="Transient" />
+                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_WindowBackdrop_Tabbed}" Tag="Tabbed" />
+                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_WindowBackdrop_Transient}" Tag="Transient" />
                             <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_WindowBackdrop_Acrylic10}" Tag="Acrylic10" />
                             <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_WindowBackdrop_Acrylic11}" Tag="Acrylic11" />
                         </ComboBox>
@@ -70,7 +70,7 @@
                                   SelectionChanged="ComboBoxLanguage_SelectionChanged">
                             <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_System}" />
                             <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Language_ChineseSimplified}" />
-                            <ComboBoxItem Content="English" />
+                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Language_English}" />
                         </ComboBox>
                     </ui:SettingsCard>
 
@@ -326,7 +326,7 @@
                                 <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuoteSource_Mottos}" />
                                 <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuoteSource_GaokaoBless}" />
                                 <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuoteSource_Hitokoto}" />
-                                <ComboBoxItem Content="Phigros Tips" />
+                                <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuoteSource_PhigrosTips}" />
                             </ComboBox>
                             <Button x:Name="BtnHitokotoCustomize" Content="{x:Static props:ThemeStrings.Theme_Splash_Custom}"
                                     Padding="14,4" MinWidth="65" VerticalAlignment="Center"
@@ -378,7 +378,7 @@
                             Toggled="ToggleSwitchUseLegacyFloatingBarUI_Toggled" />
 
                     <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_FloatingBarButtonsTitle}"
-                            Description="请前往「工具栏」设置页面管理浮动工具栏的组件显示与排序。"
+                            Description="{x:Static props:ThemeStrings.Theme_FloatingBarButtonsDescription}"
                             IsClickEnabled="True"
                             Click="CardFloatingBarButtons_Click">
                         <ui:SettingsCard.HeaderIcon>

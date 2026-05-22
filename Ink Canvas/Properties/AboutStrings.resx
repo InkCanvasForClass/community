@@ -144,4 +144,52 @@
   <data name="App_Title" xml:space="preserve">
     <value>InkCanvasforClass</value>
   </data>
+  <data name="DeviceInfo_Failed" xml:space="preserve">
+    <value>获取失败</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>未知</value>
+  </data>
+  <data name="UpdatePriority_High" xml:space="preserve">
+    <value>高优先级（优先推送更新）</value>
+  </data>
+  <data name="UpdatePriority_Low" xml:space="preserve">
+    <value>低优先级（延迟推送更新）</value>
+  </data>
+  <data name="UpdatePriority_Medium" xml:space="preserve">
+    <value>中优先级（正常推送更新）</value>
+  </data>
+  <data name="UsageFrequency_High" xml:space="preserve">
+    <value>高频用户</value>
+  </data>
+  <data name="UsageFrequency_Low" xml:space="preserve">
+    <value>低频用户</value>
+  </data>
+  <data name="UsageFrequency_Medium" xml:space="preserve">
+    <value>中频用户</value>
+  </data>
+  <data name="Privacy_ConfirmDisableTelemetry_Message" xml:space="preserve">
+    <value>关闭匿名使用数据上传后，将无法继续使用预览/测试通道，系统会自动切换回正式通道（Release）。\n\n是否确认关闭？</value>
+  </data>
+  <data name="Privacy_ConfirmDisableTelemetry_Title" xml:space="preserve">
+    <value>确认关闭遥测</value>
+  </data>
+  <data name="Privacy_PrivacyAgreementRequired_Message" xml:space="preserve">
+    <value>在开启匿名使用数据上传前，请先阅读并勾选上方的隐私说明。</value>
+  </data>
+  <data name="Privacy_PrivacyAgreementRequired_Title" xml:space="preserve">
+    <value>需要同意隐私说明</value>
+  </data>
+  <data name="Privacy_PrivacyFileNotFound_Message" xml:space="preserve">
+    <value>未找到隐私说明文件（privacy / privacy.txt），暂时无法启用匿名使用数据上传。</value>
+  </data>
+  <data name="Privacy_PrivacyFileNotFound_Title" xml:space="preserve">
+    <value>隐私说明缺失</value>
+  </data>
+  <data name="Privacy_ConfirmRevokePrivacy_Message" xml:space="preserve">
+    <value>取消同意隐私说明后，将关闭匿名使用数据上传，并切回正式通道（Release）。\n\n是否确认？</value>
+  </data>
+  <data name="Privacy_ConfirmRevokePrivacy_Title" xml:space="preserve">
+    <value>确认取消隐私同意</value>
+  </data>
 </root>

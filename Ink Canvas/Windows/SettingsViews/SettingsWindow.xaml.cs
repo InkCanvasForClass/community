@@ -105,7 +105,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             {
                 NavigateToPage("HomePage");
                 NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems[0];
-                NavigationViewControl.Header = "首页";
+                NavigationViewControl.Header = NavStrings.Nav_Home;
             }
 
             UpdateAppTitleBarMargin();
@@ -119,7 +119,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 {
                     NavigateToPage("HomePage");
                     NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems[0];
-                    NavigationViewControl.Header = "首页";
+                    NavigationViewControl.Header = NavStrings.Nav_Home;
 
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
@@ -396,7 +396,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 }
 
                 Ink_Canvas.Helpers.LogHelper.WriteLogToFile($"SettingsWindow: 导航到 {pageTag} 异常: {detail}", Ink_Canvas.Helpers.LogHelper.LogType.Error);
-                MessageBox.Show($"导航到页面时出错: {ex.InnerException?.Message ?? ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(NavStrings.Nav_NavigateError, ex.InnerException?.Message ?? ex.Message), NavStrings.Nav_Error, MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -593,7 +593,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"为页面 {tag} 建索引失败: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine(string.Format(NavStrings.Nav_IndexBuildFailed, tag, ex.Message));
                 }
             }
 
@@ -604,7 +604,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 var name = info?.Name;
                 if (!string.IsNullOrWhiteSpace(name))
                 {
-                    _searchIndex.Add(new SearchEntry { Text = $"{name} 设置", PageTag = pageTag });
+                    _searchIndex.Add(new SearchEntry { Text = string.Format(NavStrings.Nav_PluginSettingsFormat, name), PageTag = pageTag });
                 }
             }
 
@@ -766,7 +766,7 @@ namespace Ink_Canvas.Windows.SettingsViews
 
                         var navItem = new NavigationViewItem
                         {
-                            Content = string.Format("{0} 设置", plugin.Name),
+                            Content = string.Format(NavStrings.Nav_PluginSettingsFormat, plugin.Name),
                             Tag = pageTag
                         };
 
@@ -781,7 +781,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine(string.Format("加载插件设置页面时出错: {0}", ex.Message));
+                System.Diagnostics.Debug.WriteLine(string.Format(NavStrings.Nav_LoadPluginSettingsFailed, ex.Message));
             }
         }
         #endregion
@@ -818,14 +818,14 @@ namespace Ink_Canvas.Windows.SettingsViews
                         }
                         catch (Exception ex)
                         {
-                            System.Diagnostics.Debug.WriteLine($"预加载设置页面 {tag} 失败: {ex.Message}");
+                            System.Diagnostics.Debug.WriteLine(string.Format(NavStrings.Nav_PreloadPageFailed, tag, ex.Message));
                         }
                     }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"异步预加载设置页面时出错: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine(string.Format(NavStrings.Nav_PreloadPagesFailed, ex.Message));
             }
         }
 

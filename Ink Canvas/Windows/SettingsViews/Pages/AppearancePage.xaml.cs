@@ -324,7 +324,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 var openFileDialog = new Microsoft.Win32.OpenFileDialog
                 {
                     Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.webp|All Files|*.*",
-                    Title = "选择自定义启动图片"
+                    Title = ThemeStrings.Theme_SelectCustomSplashImage
                 };
 
                 if (openFileDialog.ShowDialog() == true)
@@ -532,13 +532,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             var categories = new System.Collections.Generic.Dictionary<string, string>
             {
-                { "a", "动画" }, { "b", "漫画" }, { "c", "游戏" }, { "d", "文学" },
-                { "e", "原创" }, { "f", "来自网络" }, { "g", NotificationStrings.Type_Other }, { "h", "影视" },
-                { "i", "诗词" }, { "j", "网易云" }, { "k", "哲学" }, { "l", "抖机灵" }
+                { "a", ThemeStrings.Theme_HitokotoCategory_Animation }, { "b", ThemeStrings.Theme_HitokotoCategory_Manga }, { "c", ThemeStrings.Theme_HitokotoCategory_Game }, { "d", ThemeStrings.Theme_HitokotoCategory_Literature },
+                { "e", ThemeStrings.Theme_HitokotoCategory_Original }, { "f", ThemeStrings.Theme_HitokotoCategory_FromWeb }, { "g", NotificationStrings.Type_Other }, { "h", ThemeStrings.Theme_HitokotoCategory_Movie },
+                { "i", ThemeStrings.Theme_HitokotoCategory_Poetry }, { "j", ThemeStrings.Theme_HitokotoCategory_NeteaseCloud }, { "k", ThemeStrings.Theme_HitokotoCategory_Philosophy }, { "l", ThemeStrings.Theme_HitokotoCategory_Humor }
             };
 
             var contentPanel = new StackPanel { Margin = new Thickness(20), Orientation = Orientation.Vertical };
-            var selectAllCheckBox = new CheckBox { Content = "全选", FontSize = 14, Margin = new Thickness(0, 0, 0, 8) };
+            var selectAllCheckBox = new CheckBox { Content = ThemeStrings.Theme_Hitokoto_SelectAll, FontSize = 14, Margin = new Thickness(0, 0, 0, 8) };
             var categoryCheckBoxes = new System.Collections.Generic.Dictionary<string, CheckBox>();
             var savedHitokoto = SettingsManager.Settings.Appearance.HitokotoCategories;
             bool implicitAllCategories = savedHitokoto == null || savedHitokoto.Count == 0;
@@ -575,10 +575,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var mw = GetMainWindow();
             var contentDialog = new ContentDialog
             {
-                Title = "自定义一言分类",
+                Title = ThemeStrings.Theme_Hitokoto_CustomizeTitle,
                 Content = new ScrollViewer { Content = mainPanel, MaxHeight = 400, VerticalScrollBarVisibility = ScrollBarVisibility.Auto },
-                PrimaryButtonText = "确定",
-                SecondaryButtonText = "取消",
+                PrimaryButtonText = CommonStrings.Common_OK,
+                SecondaryButtonText = CommonStrings.Common_Cancel,
                 DefaultButton = ContentDialogButton.Primary,
                 Owner = mw
             };

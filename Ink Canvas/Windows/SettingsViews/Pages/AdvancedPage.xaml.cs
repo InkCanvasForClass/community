@@ -250,12 +250,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 File.WriteAllText(backupPath, settingsJson);
 
                 LogHelper.WriteLogToFile($"成功创建设置备份: {backupPath}");
-                MessageBox.Show($"设置已成功备份到:\n{backupPath}", "备份成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(string.Format(StorageStrings.Backup_SuccessMsg, backupPath), StorageStrings.Backup_SuccessTitle, MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"创建设置备份时出错: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show($"创建备份失败: {ex.Message}", "备份失败", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(StorageStrings.Backup_CreateFailedMsg, ex.Message), StorageStrings.Backup_FailedTitle, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -270,14 +270,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 {
                     Directory.CreateDirectory(backupDir);
                     LogHelper.WriteLogToFile($"创建备份目录: {backupDir}");
-                    MessageBox.Show("没有找到备份文件，请先创建备份", "还原失败", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show(StorageStrings.Restore_NoBackupFound, StorageStrings.Restore_FailedTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
                 var dlg = new Microsoft.Win32.OpenFileDialog();
                 dlg.InitialDirectory = backupDir;
-                dlg.Filter = "设置备份文件|Settings_Backup_*.json|所有JSON文件|*.json";
-                dlg.Title = "选择要还原的备份文件";
+                dlg.Filter = $"{StorageStrings.Restore_FilterLabel}|Settings_Backup_*.json|{StorageStrings.Restore_AllJsonFilter}|*.json";
+                dlg.Title = StorageStrings.Restore_SelectFileTitle;
 
                 if (dlg.ShowDialog() == true)
                 {
@@ -286,7 +286,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                     if (backupSettings != null)
                     {
-                        if (MessageBox.Show("确定要还原选择的备份文件吗？当前设置将被覆盖。", "确认还原",
+                        if (MessageBox.Show(StorageStrings.Restore_ConfirmMsg, StorageStrings.Restore_ConfirmTitle,
                                 MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                         {
                             string currentSettingsJson = Newtonsoft.Json.JsonConvert.SerializeObject(SettingsManager.Settings, Newtonsoft.Json.Formatting.Indented);
@@ -300,19 +300,19 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                             if (mw != null) mw.ReloadSettingsFromFile();
 
                             LogHelper.WriteLogToFile($"成功从备份还原设置: {dlg.FileName}");
-                            MessageBox.Show("设置已成功还原，部分设置可能需要重启软件后生效。", "还原成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                            MessageBox.Show(StorageStrings.Restore_SuccessMsg, StorageStrings.Restore_SuccessTitle, MessageBoxButton.OK, MessageBoxImage.Information);
                         }
                     }
                     else
                     {
-                        MessageBox.Show("无法解析备份文件，文件可能已损坏", "还原失败", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(StorageStrings.Restore_ParseFailed, StorageStrings.Restore_FailedTitle, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"还原设置备份时出错: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show($"还原备份失败: {ex.Message}", "还原失败", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(StorageStrings.Restore_FailedMsg, ex.Message), StorageStrings.Restore_FailedTitle, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -376,7 +376,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     if (mw != null)
                     {
                         mw.ReloadSettingsFromFile();
-                        mw.ShowNotification($"已切换至方案「{name}」");
+                        mw.ShowNotification(string.Format(ConfigStrings.SwitchedToProfile, name));
                     }
                 }
             }
@@ -397,7 +397,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             };
             var label = new System.Windows.Controls.TextBlock
             {
-                Text = "方案名称",
+                Text = ConfigStrings.ProfileNameLabel,
                 Margin = new Thickness(0, 0, 0, 8)
             };
             var content = new iNKORE.UI.WPF.Controls.SimpleStackPanel { Spacing = 6 };
@@ -405,10 +405,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             content.Children.Add(input);
             var dialog = new ContentDialog
             {
-                Title = "另存为方案",
+                Title = ConfigStrings.SaveAsProfileTitle,
                 Content = content,
                 PrimaryButtonText = FloatingBarStrings.Tools_Save,
-                SecondaryButtonText = "取消",
+                SecondaryButtonText = CommonStrings.Common_Cancel,
                 Owner = Window.GetWindow(this) ?? GetMainWindow()
             };
             var result = await dialog.ShowAsync();
@@ -416,7 +416,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var name = input.Text?.Trim();
             if (string.IsNullOrEmpty(name))
             {
-                MessageBox.Show("请输入方案名称。", "另存为方案", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(ConfigStrings.SaveAs_EnterName, ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
             try
@@ -427,15 +427,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     _lastAppliedProfileName = name;
                     RefreshConfigProfileList();
                     var mw = GetMainWindow();
-                    if (mw != null) mw.ShowNotification($"已另存为方案：{name}");
+                    if (mw != null) mw.ShowNotification(string.Format(ConfigStrings.SavedAsProfile, name));
                 }
                 else
-                    MessageBox.Show("保存失败，请查看日志。", "另存为方案", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show(ConfigStrings.SaveAs_Failed, ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"另存为方案失败: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show($"保存失败: {ex.Message}", "另存为方案", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(ConfigStrings.SaveAs_FailedMsg, ex.Message), ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -445,12 +445,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var name = ComboBoxConfigProfile?.SelectedItem as string;
             if (string.IsNullOrEmpty(name))
             {
-                MessageBox.Show("请先选择要删除的配置文件。", "配置文件", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(ConfigStrings.Delete_SelectFirst, ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
             try
             {
-                if (MessageBox.Show($"确定要删除配置文件「{name}」吗？", "确认删除", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+                if (MessageBox.Show(string.Format(ConfigStrings.Delete_ConfirmMsg, name), ConfigStrings.Delete_ConfirmTitle, MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
                     return;
                 if (ConfigProfileManager.DeleteProfile(name))
                 {
@@ -463,21 +463,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                         if (mw != null)
                         {
                             mw.ReloadSettingsFromFile();
-                            mw.ShowNotification($"已删除方案「{name}」，已切换至「{nextName}」");
+                            mw.ShowNotification(string.Format(ConfigStrings.DeletedAndSwitched, name, nextName));
                         }
                     }
                     else
                     {
-                        if (mw != null) mw.ShowNotification($"已删除方案：{name}");
+                        if (mw != null) mw.ShowNotification(string.Format(ConfigStrings.DeletedProfile, name));
                     }
                 }
                 else
-                    MessageBox.Show("删除配置文件失败，请查看日志。", "配置文件", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show(ConfigStrings.Delete_Failed, ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"删除配置文件失败: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show($"删除配置文件失败: {ex.Message}", "配置文件", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(ConfigStrings.Delete_FailedMsg, ex.Message), ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

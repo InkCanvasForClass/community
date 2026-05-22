@@ -205,5 +205,35 @@ namespace Ink_Canvas.Properties
         public static string Storage_Update_Desc => ResourceManager.GetString(nameof(Storage_Update_Desc), _resourceCulture);
 
         public static string Storage_Update_Header => ResourceManager.GetString(nameof(Storage_Update_Header), _resourceCulture);
+
+        public static string Backup_SuccessTitle => ResourceManager.GetString(nameof(Backup_SuccessTitle), _resourceCulture);
+
+        public static string Backup_SuccessMsg => ResourceManager.GetString(nameof(Backup_SuccessMsg), _resourceCulture);
+
+        public static string Backup_FailedTitle => ResourceManager.GetString(nameof(Backup_FailedTitle), _resourceCulture);
+
+        public static string Backup_CreateFailedMsg => ResourceManager.GetString(nameof(Backup_CreateFailedMsg), _resourceCulture);
+
+        public static string Restore_FailedTitle => ResourceManager.GetString(nameof(Restore_FailedTitle), _resourceCulture);
+
+        public static string Restore_NoBackupFound => ResourceManager.GetString(nameof(Restore_NoBackupFound), _resourceCulture);
+
+        public static string Restore_FilterLabel => ResourceManager.GetString(nameof(Restore_FilterLabel), _resourceCulture);
+
+        public static string Restore_AllJsonFilter => ResourceManager.GetString(nameof(Restore_AllJsonFilter), _resourceCulture);
+
+        public static string Restore_SelectFileTitle => ResourceManager.GetString(nameof(Restore_SelectFileTitle), _resourceCulture);
+
+        public static string Restore_ConfirmTitle => ResourceManager.GetString(nameof(Restore_ConfirmTitle), _resourceCulture);
+
+        public static string Restore_ConfirmMsg => ResourceManager.GetString(nameof(Restore_ConfirmMsg), _resourceCulture);
+
+        public static string Restore_SuccessTitle => ResourceManager.GetString(nameof(Restore_SuccessTitle), _resourceCulture);
+
+        public static string Restore_SuccessMsg => ResourceManager.GetString(nameof(Restore_SuccessMsg), _resourceCulture);
+
+        public static string Restore_ParseFailed => ResourceManager.GetString(nameof(Restore_ParseFailed), _resourceCulture);
+
+        public static string Restore_FailedMsg => ResourceManager.GetString(nameof(Restore_FailedMsg), _resourceCulture);
     }
 }

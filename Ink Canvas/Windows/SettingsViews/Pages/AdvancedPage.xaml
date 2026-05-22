@@ -46,8 +46,7 @@
 
                     <ui:SettingsExpander x:Name="CardTouchMultiplier"
                                          Header="{x:Static props:AdvancedStrings.TouchMultiplier}"
-                                         Description="可在手指触摸画板时显示圆形橡皮或手掌触摸画板时显示的橡皮比
-手掌大很多时调整">
+                                         Description="{x:Static props:AdvancedStrings.TouchMultiplierHint}">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Touch}" />
                         </ui:SettingsExpander.HeaderIcon>

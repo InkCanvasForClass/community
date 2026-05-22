@@ -39,9 +39,9 @@ mc:Ignorable="d"
                     Toggled="ToggleSwitchDebugConsole_Toggled"/>
 
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                    Text="图标设置" />
+                    Text="{x:Static props:AdvancedStrings.Debug_IconSettings}" />
 
-                <ui:SettingsExpander Header="SettingsExpander 示例" IsEnabled="True"
+                <ui:SettingsExpander Header="{x:Static props:AdvancedStrings.Debug_SettingsExpanderExample}" IsEnabled="True"
                     IsExpanded="True"
                     d:Visibility="Visible" d:IsExpanded="True">
 

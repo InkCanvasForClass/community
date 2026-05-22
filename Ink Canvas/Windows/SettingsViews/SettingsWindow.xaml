@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
     xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-Title="InkCanvasForClass 设置"
+Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
     Width="1138" Height="750"
     MinWidth="270" MinHeight="220"
     WindowStartupLocation="CenterScreen"
@@ -62,7 +62,7 @@ Title="InkCanvasForClass 设置"
                     <Image Source="\Resources\icc.ico" Width="20" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <TextBlock x:Name="AppTitleText"
                         VerticalAlignment="Center"
-                        Text="应用设置" TextWrapping="NoWrap"/>
+                        Text="{x:Static props:NavStrings.Nav_AppSettings}" TextWrapping="NoWrap"/>
                 </ikw:SimpleStackPanel>
             </Grid>
         </Border>
@@ -105,7 +105,7 @@ Title="InkCanvasForClass 设置"
                     MinWidth="200"
                     VerticalAlignment="Center"
                     x:FieldModifier="public"
-                    PlaceholderText="查找设置"
+                    PlaceholderText="{x:Static props:NavStrings.Nav_SearchSettings}"
                     QuerySubmitted="OnControlsSearchBoxQuerySubmitted"
                     TextChanged="OnControlsSearchBoxTextChanged">
                     <ui:AutoSuggestBox.QueryIcon>
@@ -117,20 +117,20 @@ Title="InkCanvasForClass 设置"
             <ui:NavigationView.MenuItems>
                 <ui:NavigationViewItem
                     x:Name="HomeItem"
-                    Content="首页"
+                    Content="{x:Static props:NavStrings.Nav_Home}"
                     Tag="HomePage"
-                    ToolTipService.ToolTip="快速导航">
+                    ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Home_Tooltip}">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Home}"/>
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
-                <ui:NavigationViewItemHeader Content="ICC CE 设置"/>
+                <ui:NavigationViewItemHeader Content="{x:Static props:NavStrings.Nav_ICCSettings}"/>
                 <!-- 基本设置 -->
                 <ui:NavigationViewItem
                     x:Name="BasicItem"
-                    Content="基本"
+                    Content="{x:Static props:NavStrings.Nav_Basic}"
                     SelectsOnInvoked="False"
-                    ToolTipService.ToolTip="基本设置">
+                    ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Basic_Tooltip}">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Home}"/>
                     </ui:NavigationViewItem.Icon>
@@ -146,9 +146,9 @@ Title="InkCanvasForClass 设置"
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
                             x:Name="PrivacyPageItem"
-                            Content="隐私"
+                            Content="{x:Static props:NavStrings.Nav_Privacy}"
                             Tag="PrivacyPage"
-                            ToolTipService.ToolTip="隐私与遥测设置">
+                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Privacy_Tooltip}">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Shield}"/>
                             </ui:NavigationViewItem.Icon>
@@ -168,18 +168,18 @@ Title="InkCanvasForClass 设置"
                 <!-- 主界面 -->
                 <ui:NavigationViewItem
                     x:Name="MainInterfaceItem"
-                    Content="主界面"
+                    Content="{x:Static props:NavStrings.Nav_MainInterface}"
                     SelectsOnInvoked="False"
-                    ToolTipService.ToolTip="主界面设置">
+                    ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_MainInterface_Tooltip}">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.TVMonitor}"/>
                     </ui:NavigationViewItem.Icon>
                     <ui:NavigationViewItem.MenuItems>
                         <ui:NavigationViewItem
                             x:Name="WindowPageItem"
-                            Content="窗口"
+                            Content="{x:Static props:NavStrings.Nav_Window}"
                             Tag="WindowPage"
-                            ToolTipService.ToolTip="窗口设置">
+                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Window_Tooltip}">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}"/>
                             </ui:NavigationViewItem.Icon>
@@ -204,9 +204,9 @@ Title="InkCanvasForClass 设置"
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
                             x:Name="ToolbarPageItem"
-                            Content="工具栏"
+                            Content="{x:Static props:NavStrings.Nav_Toolbar}"
                             Tag="ToolbarPage"
-                            ToolTipService.ToolTip="工具栏按钮排序与可见性">
+                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Toolbar_Tooltip}">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Rename}"/>
                             </ui:NavigationViewItem.Icon>
@@ -219,7 +219,7 @@ Title="InkCanvasForClass 设置"
                     x:Name="CanvasPageItem"
                     Content="{x:Static props:CanvasStrings.Canvas_GroupTitle}"
                     SelectsOnInvoked="False"
-                    ToolTipService.ToolTip="画板与墨迹设置">
+                    ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_CanvasAndInk_Tooltip}">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
                     </ui:NavigationViewItem.Icon>
@@ -228,7 +228,7 @@ Title="InkCanvasForClass 设置"
                             x:Name="CanvasSubPageItem"
                             Content="{x:Static props:CanvasStrings.Canvas_GroupTitle}"
                             Tag="CanvasPage"
-                            ToolTipService.ToolTip="画板设置">
+                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Canvas_Tooltip}">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
                             </ui:NavigationViewItem.Icon>
@@ -237,7 +237,7 @@ Title="InkCanvasForClass 设置"
                             x:Name="InkRecognitionPageItem"
                             Content="{x:Static props:CanvasStrings.InkRecog_Title}"
                             Tag="InkRecognitionPage"
-                            ToolTipService.ToolTip="墨迹纠正设置">
+                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_InkRecognition_Tooltip}">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Draw}"/>
                             </ui:NavigationViewItem.Icon>
@@ -250,7 +250,7 @@ Title="InkCanvasForClass 设置"
                     x:Name="PowerPointPageItem"
                     Content="{x:Static props:PPTStrings.GroupTitle}"
                     Tag="PowerPointPage"
-                    ToolTipService.ToolTip="PPT联动设置">
+                    ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_PPT_Tooltip}">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"/>
                     </ui:NavigationViewItem.Icon>
@@ -261,7 +261,7 @@ Title="InkCanvasForClass 设置"
                     x:Name="UpdatePageItem"
                     Content="{x:Static props:NotificationStrings.Type_Update}"
                     Tag="UpdatePage"
-                    ToolTipService.ToolTip="更新设置">
+                    ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Update_Tooltip}">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}"/>
                     </ui:NavigationViewItem.Icon>
@@ -367,7 +367,7 @@ Title="InkCanvasForClass 设置"
                     x:Name="RandomDrawPageItem"
                     Content="{x:Static props:RandomStrings.Random_Title}"
                     Tag="RandomDrawPage"
-                    ToolTipService.ToolTip="随机点名与计时器">
+                    ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_RandomDraw_Tooltip}">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.People}"/>
                     </ui:NavigationViewItem.Icon>
@@ -384,7 +384,7 @@ Title="InkCanvasForClass 设置"
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
-                <ui:NavigationViewItemHeader Content="插件设置"/>
+                <ui:NavigationViewItemHeader Content="{x:Static props:NavStrings.Nav_PluginSettings}"/>
                 <ui:NavigationViewItem
                     x:Name="PluginItem"
                     Content="{x:Static props:NavStrings.Nav_Plugins}"
@@ -407,7 +407,7 @@ Title="InkCanvasForClass 设置"
                 </ui:NavigationViewItem>
                 <ui:NavigationViewItem
                     x:Name="AboutItem"
-                    Content="关于 InkCanvasForClass"
+                    Content="{x:Static props:NavStrings.Nav_AboutInkCanvas}"
                     Tag="AboutPage">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="Help" />

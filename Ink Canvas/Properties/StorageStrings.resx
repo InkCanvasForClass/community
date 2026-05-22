@@ -291,4 +291,49 @@
   <data name="Storage_Update_Header" xml:space="preserve">
     <value>自动更新</value>
   </data>
+  <data name="Backup_SuccessTitle" xml:space="preserve">
+    <value>备份成功</value>
+  </data>
+  <data name="Backup_SuccessMsg" xml:space="preserve">
+    <value>设置已成功备份到:\n{0}</value>
+  </data>
+  <data name="Backup_FailedTitle" xml:space="preserve">
+    <value>备份失败</value>
+  </data>
+  <data name="Backup_CreateFailedMsg" xml:space="preserve">
+    <value>创建备份失败: {0}</value>
+  </data>
+  <data name="Restore_FailedTitle" xml:space="preserve">
+    <value>还原失败</value>
+  </data>
+  <data name="Restore_NoBackupFound" xml:space="preserve">
+    <value>没有找到备份文件，请先创建备份</value>
+  </data>
+  <data name="Restore_FilterLabel" xml:space="preserve">
+    <value>设置备份文件</value>
+  </data>
+  <data name="Restore_AllJsonFilter" xml:space="preserve">
+    <value>所有JSON文件</value>
+  </data>
+  <data name="Restore_SelectFileTitle" xml:space="preserve">
+    <value>选择要还原的备份文件</value>
+  </data>
+  <data name="Restore_ConfirmTitle" xml:space="preserve">
+    <value>确认还原</value>
+  </data>
+  <data name="Restore_ConfirmMsg" xml:space="preserve">
+    <value>确定要还原选择的备份文件吗？当前设置将被覆盖。</value>
+  </data>
+  <data name="Restore_SuccessTitle" xml:space="preserve">
+    <value>还原成功</value>
+  </data>
+  <data name="Restore_SuccessMsg" xml:space="preserve">
+    <value>设置已成功还原，部分设置可能需要重启软件后生效。</value>
+  </data>
+  <data name="Restore_ParseFailed" xml:space="preserve">
+    <value>无法解析备份文件，文件可能已损坏</value>
+  </data>
+  <data name="Restore_FailedMsg" xml:space="preserve">
+    <value>还原备份失败: {0}</value>
+  </data>
 </root>

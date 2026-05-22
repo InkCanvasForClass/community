@@ -51,6 +51,57 @@
   <data name="Home_RestartApp" xml:space="preserve">
     <value>Restart application</value>
   </data>
+  <data name="Home_AboutApp" xml:space="preserve">
+    <value>About InkCanvasForClass</value>
+  </data>
+  <data name="Home_Basic" xml:space="preserve">
+    <value>Basic</value>
+  </data>
+  <data name="Home_CanvasSettings" xml:space="preserve">
+    <value>Canvas settings</value>
+  </data>
+  <data name="Home_CloudStorageSettings" xml:space="preserve">
+    <value>Dlass &amp; WebDav upload settings</value>
+  </data>
+  <data name="Home_InkRecognitionSettings" xml:space="preserve">
+    <value>Ink correction settings</value>
+  </data>
+  <data name="Home_MainUI" xml:space="preserve">
+    <value>Main Interface</value>
+  </data>
+  <data name="Home_PluginSettings" xml:space="preserve">
+    <value>Plugin settings</value>
+  </data>
+  <data name="Home_PPTSettings" xml:space="preserve">
+    <value>PPT integration settings</value>
+  </data>
+  <data name="Home_Privacy" xml:space="preserve">
+    <value>Privacy</value>
+  </data>
+  <data name="Home_PrivacySettings" xml:space="preserve">
+    <value>Privacy &amp; telemetry settings</value>
+  </data>
+  <data name="Home_RandomAndTimer" xml:space="preserve">
+    <value>Random picker &amp; timer</value>
+  </data>
+  <data name="Home_Title" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="Home_Toolbar" xml:space="preserve">
+    <value>Toolbar</value>
+  </data>
+  <data name="Home_ToolbarSettings" xml:space="preserve">
+    <value>Toolbar button order and visibility</value>
+  </data>
+  <data name="Home_UpdateSettings" xml:space="preserve">
+    <value>Update settings</value>
+  </data>
+  <data name="Home_Window" xml:space="preserve">
+    <value>Window</value>
+  </data>
+  <data name="Home_WindowSettings" xml:space="preserve">
+    <value>Window settings</value>
+  </data>
   <data name="Splash_Starting" xml:space="preserve">
     <value>Starting Ink Canvas...</value>
   </data>

@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Hotkey_InfoBarTitle" xml:space="preserve">
+    <value>Info</value>
+  </data>
+  <data name="Hotkey_InfoBarMessage" xml:space="preserve">
+    <value>Customize global hotkeys here. Global hotkeys work in all situations, even when the application is not in focus.</value>
+  </data>
+  <data name="Hotkey_MouseMode" xml:space="preserve">
+    <value>Mouse Mode</value>
+  </data>
+  <data name="Hotkey_EnableHotkeysInMouseMode" xml:space="preserve">
+    <value>Enable hotkeys in mouse mode</value>
+  </data>
+  <data name="Hotkey_EnableHotkeysInMouseModeHint" xml:space="preserve">
+    <value>When on, hotkeys will work even in mouse mode</value>
+  </data>
+  <data name="Hotkey_BasicOperations" xml:space="preserve">
+    <value>Basic Operations</value>
+  </data>
+  <data name="Hotkey_UndoDesc" xml:space="preserve">
+    <value>Undo the last operation</value>
+  </data>
+  <data name="Hotkey_RedoDesc" xml:space="preserve">
+    <value>Redo the last operation</value>
+  </data>
+  <data name="Hotkey_ClearDesc" xml:space="preserve">
+    <value>Clear current canvas content</value>
+  </data>
+  <data name="Hotkey_Paste" xml:space="preserve">
+    <value>Paste</value>
+  </data>
+  <data name="Hotkey_PasteDesc" xml:space="preserve">
+    <value>Paste clipboard content</value>
+  </data>
+  <data name="Hotkey_ToolSwitch" xml:space="preserve">
+    <value>Tool Switch</value>
+  </data>
+  <data name="Hotkey_SelectTool" xml:space="preserve">
+    <value>Select Tool</value>
+  </data>
+  <data name="Hotkey_SelectToolDesc" xml:space="preserve">
+    <value>Switch to select tool</value>
+  </data>
+  <data name="Hotkey_DrawTool" xml:space="preserve">
+    <value>Draw Tool</value>
+  </data>
+  <data name="Hotkey_DrawToolDesc" xml:space="preserve">
+    <value>Switch to draw tool</value>
+  </data>
+  <data name="Hotkey_EraserTool" xml:space="preserve">
+    <value>Eraser Tool</value>
+  </data>
+  <data name="Hotkey_EraserToolDesc" xml:space="preserve">
+    <value>Switch to eraser tool</value>
+  </data>
+  <data name="Hotkey_BlackboardTool" xml:space="preserve">
+    <value>Blackboard Tool</value>
+  </data>
+  <data name="Hotkey_BlackboardToolDesc" xml:space="preserve">
+    <value>Switch to blackboard tool</value>
+  </data>
+  <data name="Hotkey_QuitDrawTool" xml:space="preserve">
+    <value>Exit Draw/Whiteboard</value>
+  </data>
+  <data name="Hotkey_QuitDrawToolDesc" xml:space="preserve">
+    <value>Exit drawing mode or whiteboard mode</value>
+  </data>
+  <data name="Hotkey_PenSettings" xml:space="preserve">
+    <value>Pen Settings</value>
+  </data>
+  <data name="Hotkey_Pen1" xml:space="preserve">
+    <value>Pen 1</value>
+  </data>
+  <data name="Hotkey_Pen1Desc" xml:space="preserve">
+    <value>Select pen 1</value>
+  </data>
+  <data name="Hotkey_Pen2" xml:space="preserve">
+    <value>Pen 2</value>
+  </data>
+  <data name="Hotkey_Pen2Desc" xml:space="preserve">
+    <value>Select pen 2</value>
+  </data>
+  <data name="Hotkey_Pen3" xml:space="preserve">
+    <value>Pen 3</value>
+  </data>
+  <data name="Hotkey_Pen3Desc" xml:space="preserve">
+    <value>Select pen 3</value>
+  </data>
+  <data name="Hotkey_Pen4" xml:space="preserve">
+    <value>Pen 4</value>
+  </data>
+  <data name="Hotkey_Pen4Desc" xml:space="preserve">
+    <value>Select pen 4</value>
+  </data>
+  <data name="Hotkey_Pen5" xml:space="preserve">
+    <value>Pen 5</value>
+  </data>
+  <data name="Hotkey_Pen5Desc" xml:space="preserve">
+    <value>Select pen 5</value>
+  </data>
+  <data name="Hotkey_FunctionHotkeys" xml:space="preserve">
+    <value>Function Hotkeys</value>
+  </data>
+  <data name="Hotkey_DrawLine" xml:space="preserve">
+    <value>Draw Line</value>
+  </data>
+  <data name="Hotkey_DrawLineDesc" xml:space="preserve">
+    <value>Draw straight line tool</value>
+  </data>
+  <data name="Hotkey_ScreenshotDesc" xml:space="preserve">
+    <value>Save screenshot to desktop</value>
+  </data>
+  <data name="Hotkey_QuickDraw" xml:space="preserve">
+    <value>Quick Draw</value>
+  </data>
+  <data name="Hotkey_QuickDrawDesc" xml:space="preserve">
+    <value>Open quick draw window (same as floating quick draw button)</value>
+  </data>
+  <data name="Hotkey_HideDesc" xml:space="preserve">
+    <value>Hide application</value>
+  </data>
+  <data name="Hotkey_ExitDesc" xml:space="preserve">
+    <value>Exit current mode or application</value>
+  </data>
+  <data name="Hotkey_ResetToDefault" xml:space="preserve">
+    <value>Reset to Default</value>
+  </data>
+  <data name="Hotkey_SaveSettings" xml:space="preserve">
+    <value>Save Settings</value>
+  </data>
+  <data name="Hotkey_ManagerNotInit" xml:space="preserve">
+    <value>Hotkey manager is not initialized, cannot save changes.</value>
+  </data>
+  <data name="Hotkey_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Hotkey_ConflictMessage" xml:space="preserve">
+    <value>Hotkey {0} is already used by another function. Please choose a different combination.</value>
+  </data>
+  <data name="Hotkey_ConflictTitle" xml:space="preserve">
+    <value>Hotkey Conflict</value>
+  </data>
+  <data name="Hotkey_ConfirmResetMessage" xml:space="preserve">
+    <value>Are you sure you want to reset all hotkeys to default?</value>
+  </data>
+  <data name="Hotkey_ConfirmResetTitle" xml:space="preserve">
+    <value>Confirm Reset</value>
+  </data>
+  <data name="Hotkey_ResetCompleteMessage" xml:space="preserve">
+    <value>Hotkeys have been reset to default.</value>
+  </data>
+  <data name="Hotkey_ResetCompleteTitle" xml:space="preserve">
+    <value>Reset Complete</value>
+  </data>
+  <data name="Hotkey_ResetErrorMessage" xml:space="preserve">
+    <value>Error resetting hotkeys: {0}</value>
+  </data>
+  <data name="Hotkey_SaveSuccessMessage" xml:space="preserve">
+    <value>Hotkey settings saved.</value>
+  </data>
+  <data name="Hotkey_SaveSuccessTitle" xml:space="preserve">
+    <value>Save Successful</value>
+  </data>
+  <data name="Hotkey_SaveErrorMessage" xml:space="preserve">
+    <value>Error saving hotkey settings: {0}</value>
+  </data>
+</root>

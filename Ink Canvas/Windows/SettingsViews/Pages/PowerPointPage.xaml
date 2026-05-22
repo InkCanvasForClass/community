@@ -324,7 +324,7 @@
 
                     <controls:LabeledSettingsCard x:Name="CardNotifyPreviousPage"
                             Header="{x:Static props:PPTStrings.RememberLastPage}"
-                            Description="开启后会记录上次播放的页数，点击「是」后会自动跳转"
+                            Description="{x:Static props:PPTStrings.RememberLastPageHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.History}"
                             Toggled="ToggleSwitchNotifyPreviousPage_Toggled"/>
 

@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.IO;
@@ -92,8 +93,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 SettingsManager.Settings.Startup.UpdateChannel != UpdateChannel.Release)
             {
                 var result = MessageBox.Show(
-                    "关闭匿名使用数据上传后，将无法继续使用预览/测试通道，系统会自动切换回正式通道（Release）。\n\n是否确认关闭？",
-                    "确认关闭遥测",
+                    AboutStrings.Privacy_ConfirmDisableTelemetry_Message,
+                    AboutStrings.Privacy_ConfirmDisableTelemetry_Title,
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Warning);
 
@@ -131,8 +132,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (newLevel != TelemetryUploadLevel.None && !SettingsManager.Settings.Startup.HasAcceptedTelemetryPrivacy)
             {
                 MessageBox.Show(
-                    "在开启匿名使用数据上传前，请先阅读并勾选上方的隐私说明。",
-                    "需要同意隐私说明",
+                    AboutStrings.Privacy_PrivacyAgreementRequired_Message,
+                    AboutStrings.Privacy_PrivacyAgreementRequired_Title,
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
 
@@ -169,8 +170,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (!PrivacyFileExists())
                 {
                     MessageBox.Show(
-                        "未找到隐私说明文件（privacy / privacy.txt），暂时无法启用匿名使用数据上传。",
-                        "隐私说明缺失",
+                        AboutStrings.Privacy_PrivacyFileNotFound_Message,
+                        AboutStrings.Privacy_PrivacyFileNotFound_Title,
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning);
 
@@ -216,8 +217,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             else
             {
                 var result = MessageBox.Show(
-                    "取消同意隐私说明后，将关闭匿名使用数据上传，并切回正式通道（Release）。\n\n是否确认？",
-                    "确认取消隐私同意",
+                    AboutStrings.Privacy_ConfirmRevokePrivacy_Message,
+                    AboutStrings.Privacy_ConfirmRevokePrivacy_Title,
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Warning);
 

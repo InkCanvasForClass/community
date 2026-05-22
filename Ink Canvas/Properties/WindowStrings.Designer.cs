@@ -73,5 +73,17 @@ namespace Ink_Canvas.Properties
         public static string Window_WindowChromeRendering_RestartRequired => ResourceManager.GetString(nameof(Window_WindowChromeRendering_RestartRequired), _resourceCulture);
 
         public static string Window_WindowChromeRenderingHint => ResourceManager.GetString(nameof(Window_WindowChromeRenderingHint), _resourceCulture);
+
+        public static string Title => ResourceManager.GetString(nameof(Title), _resourceCulture);
+
+        public static string WindowSettings => ResourceManager.GetString(nameof(WindowSettings), _resourceCulture);
+
+        public static string MultiScreenSupport => ResourceManager.GetString(nameof(MultiScreenSupport), _resourceCulture);
+
+        public static string MultiScreenSupportHint => ResourceManager.GetString(nameof(MultiScreenSupportHint), _resourceCulture);
+
+        public static string FollowMouseScreen => ResourceManager.GetString(nameof(FollowMouseScreen), _resourceCulture);
+
+        public static string FollowMouseScreenHint => ResourceManager.GetString(nameof(FollowMouseScreenHint), _resourceCulture);
     }
 }

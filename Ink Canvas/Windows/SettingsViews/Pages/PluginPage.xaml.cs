@@ -1,4 +1,5 @@
 using Ink_Canvas.Plugins;
+using Ink_Canvas.Properties;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,14 +27,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 var pluginManager = PluginManager.Instance;
                 var plugins = pluginManager.Plugins;
 
-                PluginCountText.Text = string.Format("已加载 {0} 个插件", plugins.Count);
+                PluginCountText.Text = string.Format(PluginStrings.Plugin_LoadedCount, plugins.Count);
 
                 if (plugins.Count == 0)
                 {
                     PluginContainer.Children.Clear();
                     var noPluginText = new TextBlock
                     {
-                        Text = "没有找到插件，请将插件文件放置在 Plugins 目录中",
+                        Text = PluginStrings.Plugin_NoPlugins,
                         TextWrapping = TextWrapping.Wrap,
                         Foreground = Brushes.Gray,
                         Margin = new Thickness(0, 10, 0, 0)
@@ -52,7 +53,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
             catch (Exception ex)
             {
-                PluginCountText.Text = string.Format("加载插件时出错：{0}", ex.Message);
+                PluginCountText.Text = string.Format(PluginStrings.Plugin_LoadError, ex.Message);
             }
         }
 
@@ -104,7 +105,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             var authorText = new TextBlock
             {
-                Text = string.Format("作者：{0}", pluginInfo.Author),
+                Text = string.Format(PluginStrings.Plugin_Author, pluginInfo.Author),
                 FontSize = 11,
                 Foreground = Brushes.Gray
             };

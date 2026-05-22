@@ -33,7 +33,7 @@
 
                     <TextBlock Text="{x:Static props:AutomationStrings.Automation_AutoFoldTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
-                    <ui:SettingsExpander Header="希沃"
+                    <ui:SettingsExpander Header="{x:Static props:AutomationStrings.AutoFold_Group_Seewo}"
                             d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
@@ -96,7 +96,7 @@
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
-                    <ui:SettingsExpander Header="鸿合"
+                    <ui:SettingsExpander Header="{x:Static props:AutomationStrings.AutoFold_Group_Hite}"
                             d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
@@ -132,7 +132,7 @@
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
-                    <ui:SettingsExpander Header="其他白板"
+                    <ui:SettingsExpander Header="{x:Static props:AutomationStrings.AutoFold_Group_Other}"
                             d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
@@ -314,7 +314,7 @@
                             Toggled="ToggleSwitchAutoSaveStrokesAtClear_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardSaveStrokesAsXML"
-                            Header="墨迹保存为 XML"
+                            Header="{x:Static props:StorageStrings.Storage_SaveAsXml}"
                             Icon="{x:Static ui:SegoeFluentIcons.Save}"
                             Toggled="ToggleSwitchSaveStrokesAsXML_Toggled"/>
 
@@ -339,11 +339,11 @@
                     </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoDelSavedFiles"
-                            Header="自动删除旧保存文件"
+                            Header="{x:Static props:StorageStrings.Storage_AutoDeleteTitle}"
                             Icon="{x:Static ui:SegoeFluentIcons.Delete}"
                             Toggled="ToggleSwitchAutoDelSavedFiles_Toggled"/>
 
-                    <ui:SettingsCard Header="自动删除天数阈值">
+                    <ui:SettingsCard Header="{x:Static props:AutomationStrings.Storage_AutoDeleteDaysThreshold}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Calendar}"/>
                         </ui:SettingsCard.HeaderIcon>
@@ -357,7 +357,7 @@
                         </ComboBox>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="自动化最小笔画数">
+                    <ui:SettingsCard Header="{x:Static props:AutomationStrings.Storage_MinAutomationStrokes}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Calculator}"/>
                         </ui:SettingsCard.HeaderIcon>
@@ -365,7 +365,7 @@
                     </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardSaveFullPageStrokes"
-                            Header="保存全页墨迹"
+                            Header="{x:Static props:StorageStrings.Storage_SaveFullPageStrokes}"
                             Icon="{x:Static ui:SegoeFluentIcons.Save}"
                             Toggled="ToggleSwitchSaveFullPageStrokes_Toggled"/>
 
@@ -403,7 +403,7 @@
 
                     <TextBlock Text="{x:Static props:AutomationStrings.FloatingInterceptor_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
-                    <ui:SettingsExpander Header="希沃"
+                    <ui:SettingsExpander Header="{x:Static props:AutomationStrings.FloatingInterceptor_Group_Seewo}"
                             d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
@@ -538,10 +538,10 @@
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
-                    <TextBlock Text="文件关联" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
+                    <TextBlock Text="{x:Static props:SecurityStrings.FileAssoc_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
                     <ui:SettingsExpander Header="{x:Static props:SecurityStrings.FileAssoc_Check}"
-                                         Description="查看 .icstk 文件是否已关联到 Ink Canvas">
+                                         Description="{x:Static props:AutomationStrings.FileAssoc_CheckDesc}">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}"/>
                         </ui:SettingsExpander.HeaderIcon>
@@ -550,7 +550,7 @@
                                                   Spacing="8"
                                                   VerticalAlignment="Center">
                                 <TextBlock x:Name="TextBlockFileAssociationStatus"
-                                           Text="未检查"
+                                           Text="{x:Static props:AutomationStrings.FileAssoc_NotChecked}"
                                            VerticalAlignment="Center"
                                            FontWeight="SemiBold"/>
                                 <Button x:Name="BtnCheckFileAssociation"
@@ -559,17 +559,17 @@
                             </ikw:SimpleStackPanel>
                         </ui:SettingsExpander.Content>
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="注册文件关联"
-                                             Description="将 .icstk 文件关联到 Ink Canvas">
+                            <ui:SettingsCard Header="{x:Static props:AutomationStrings.FileAssoc_RegisterHeader}"
+                                             Description="{x:Static props:AutomationStrings.FileAssoc_RegisterDesc}">
                                 <ui:SettingsCard.HeaderIcon>
                                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}"/>
                                 </ui:SettingsCard.HeaderIcon>
                                 <Button x:Name="BtnRegisterFileAssociation"
-                                        Content="注册文件关联"
+                                        Content="{x:Static props:AutomationStrings.FileAssoc_RegisterHeader}"
                                         Click="BtnRegisterFileAssociation_Click"/>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{x:Static props:SecurityStrings.FileAssoc_Unregister}"
-                                             Description="移除 .icstk 文件与 Ink Canvas 的关联">
+                                             Description="{x:Static props:AutomationStrings.FileAssoc_UnregisterDesc}">
                                 <ui:SettingsCard.HeaderIcon>
                                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cancel}"/>
                                 </ui:SettingsCard.HeaderIcon>
