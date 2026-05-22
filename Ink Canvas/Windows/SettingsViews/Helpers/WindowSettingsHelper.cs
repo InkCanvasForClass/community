@@ -310,7 +310,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                                 App.watchdogProcess = null;
                             }
 
-                            // 使用 Inkeys 方式：通过 winlogon 模拟令牌为普通用户令牌设置 UIAccess 标志后重启
                             App.IsUIAccessTopMostEnabled = true;
                             App.IsAppExitByUser = true;
                             (Application.Current as App)?.ReleaseMutexForRestart();

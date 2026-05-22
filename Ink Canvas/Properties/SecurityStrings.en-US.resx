@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -45,12 +45,6 @@
   <data name="FileAssoc_Check" xml:space="preserve">
     <value>Check status</value>
   </data>
-  <data name="FileAssoc_Desc" xml:space="preserve">
-    <value>Manage .icstk file association so double-click opens in Ink Canvas.</value>
-  </data>
-  <data name="FileAssoc_Register" xml:space="preserve">
-    <value>Register association</value>
-  </data>
   <data name="FileAssoc_Title" xml:space="preserve">
     <value>File association</value>
   </data>
@@ -72,17 +66,8 @@
   <data name="SecurityPanel_Hint_2" xml:space="preserve">
     <value>Verification when opening settings panel/new settings window</value>
   </data>
-  <data name="SecurityPanel_Hint_3" xml:space="preserve">
-    <value>Password verification before modifying or clearing name list</value>
-  </data>
   <data name="SecurityPanel_Hint_4" xml:space="preserve">
     <value>When enabled, key files will be occupied as read-only</value>
-  </data>
-  <data name="SettingsBaseView_Binding_DescriptionHint" xml:space="preserve">
-    <value>{Binding Description}</value>
-  </data>
-  <data name="Tooltip_IccProtocol" xml:space="preserve">
-    <value>Control via icc:// protocol</value>
   </data>
   <data name="Security_SectionPassword" xml:space="preserve">
     <value>Security Password</value>

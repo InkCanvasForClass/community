@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -42,83 +42,38 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="Nav_About" xml:space="preserve">
-    <value>关于</value>
-  </data>
   <data name="Nav_Advanced" xml:space="preserve">
     <value>高阶玩法</value>
   </data>
   <data name="Nav_Advanced_Settings" xml:space="preserve">
     <value>高阶调教</value>
   </data>
-  <data name="Nav_Automation" xml:space="preserve">
-    <value>自动化</value>
-  </data>
   <data name="Nav_Automation_Settings" xml:space="preserve">
     <value>自动化调教</value>
-  </data>
-  <data name="Nav_Canvas" xml:space="preserve">
-    <value>画布调教</value>
-  </data>
-  <data name="Nav_CrashAction" xml:space="preserve">
-    <value>翻车处理</value>
   </data>
   <data name="Nav_FriendlyLinks" xml:space="preserve">
     <value>友链</value>
   </data>
-  <data name="Nav_Gesture" xml:space="preserve">
-    <value>结印施法</value>
-  </data>
-  <data name="Nav_Gesture_Settings" xml:space="preserve">
-    <value>结印调教</value>
-  </data>
-  <data name="Nav_InkRecognition" xml:space="preserve">
-    <value>墨迹识破</value>
-  </data>
   <data name="Nav_Plugins" xml:space="preserve">
     <value>外挂</value>
-  </data>
-  <data name="Nav_PPT" xml:space="preserve">
-    <value>PPT</value>
   </data>
   <data name="Nav_PPT_Settings" xml:space="preserve">
     <value>PPT调教</value>
   </data>
-  <data name="Nav_RandomWindow" xml:space="preserve">
-    <value>天选之人</value>
-  </data>
-  <data name="Nav_RandomWindow_Settings" xml:space="preserve">
-    <value>天选调教</value>
-  </data>
   <data name="Nav_Shortcuts" xml:space="preserve">
     <value>快捷键</value>
-  </data>
-  <data name="Nav_Shortcuts_Settings" xml:space="preserve">
-    <value>快捷键调教</value>
   </data>
   <data name="Nav_Startup" xml:space="preserve">
     <value>启动调教</value>
   </data>
-  <data name="Nav_Theme" xml:space="preserve">
-    <value>皮肤</value>
-  </data>
   <data name="Nav_Theme_Settings" xml:space="preserve">
     <value>个性化调教</value>
-  </data>
-  <data name="Settings_AutoSaveHint" xml:space="preserve">
-    <value>改了就自动存了，不过有些得重启才生效哦~</value>
-  </data>
-  <data name="Settings_Mode" xml:space="preserve">
-    <value>模式调教</value>
   </data>
   <data name="Settings_ModeDesc" xml:space="preserve">
     <value>选个运行模式。纯 PPT 模式下软件会隐身，只在 PPT 放映时冒出来。（实验性功能，可能翻车）</value>
   </data>
   <data name="Settings_ModeDesc_1" xml:space="preserve">
     <value>运行模式</value>
-  </data>
-  <data name="Settings_Nav_Hotkey" xml:space="preserve">
-    <value>快捷键</value>
   </data>
   <data name="Settings_Nav_Hotkey_Tooltip" xml:space="preserve">
     <value>快捷键调教</value>
@@ -129,17 +84,8 @@
   <data name="Settings_Nav_Security_Tooltip" xml:space="preserve">
     <value>密码保护与防入侵</value>
   </data>
-  <data name="Settings_NewWindow" xml:space="preserve">
-    <value>新调教窗口</value>
-  </data>
-  <data name="Settings_NewWindowDesc" xml:space="preserve">
-    <value>打开新的设置窗口，功能更猛体验更爽。（还在搞）</value>
-  </data>
   <data name="Settings_Plugins" xml:space="preserve">
     <value>外挂管理</value>
-  </data>
-  <data name="Settings_PluginsDesc" xml:space="preserve">
-    <value>装外挂扩展功能，想开就开想关就关，还能加载自定义外挂。</value>
   </data>
   <data name="Settings_Title" xml:space="preserve">
     <value>调教</value>

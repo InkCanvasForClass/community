@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -63,9 +63,6 @@
   <data name="EdgeGestureUtilHint_Part1" xml:space="preserve">
     <value>EdgeGestureUtil is newly introduced in ICC to temporarily block edge gestures when using touch (e.g., on Windows 10: swipe from the left edge to Task View, from the right edge to Action Center; on Windows 11: swipe up from the bottom to open Start). It works by using System.EdgeGesture.DisableTouchWhenFullscreen (When the app window is active and in full-screen mode (or an owned window is active), prevents edge gesture behavior.) If anything is abnormal, turn this option off; it should take effect immediately. (Not available on Windows 7/8.)</value>
   </data>
-  <data name="EdgeGestureUtilHint_Part2" xml:space="preserve">
-    <value>(When the app window is active and in full-screen mode (or an owned window is active), prevents edge gesture behavior.) If anything is abnormal, turn this option off; it should take effect immediately. (Not available on Windows 7/8.)</value>
-  </data>
   <data name="EraserBindTouchHint" xml:space="preserve">
     <value>BoundsWidth is used as contact area threshold</value>
   </data>
@@ -129,56 +126,11 @@
   <data name="TouchMultiplierValueHint" xml:space="preserve">
     <value>Value is for reference only</value>
   </data>
-  <data name="UriSchemeName" xml:space="preserve">
-    <value>External URI scheme (icc://)</value>
-  </data>
-  <data name="AdvancedPanel__iccfold___iccunfold__Hint" xml:space="preserve">
-    <value>After enabling, can be controlled via commands like icc://fold or icc://unfold</value>
-  </data>
-  <data name="AdvancedPanel_Hint" xml:space="preserve">
-    <value>Enable special screen mode to optimize touch experience</value>
-  </data>
-  <data name="AdvancedPanel_Hint_1" xml:space="preserve">
-    <value>Adjust touch size multiplier</value>
-  </data>
-  <data name="AdvancedPanel_Hint_10" xml:space="preserve">
-    <value>Set interval for regular backup</value>
-  </data>
-  <data name="AdvancedPanel_Hint_11" xml:space="preserve">
-    <value>After enabling, automatically detect and intercept floating windows of similar software</value>
-  </data>
-  <data name="AdvancedPanel_Hint_2" xml:space="preserve">
-    <value>Bind eraser size to touch size multiplier</value>
-  </data>
-  <data name="AdvancedPanel_Hint_3" xml:space="preserve">
-    <value>Nib mode contact area threshold</value>
-  </data>
-  <data name="AdvancedPanel_Hint_4" xml:space="preserve">
-    <value>Finger mode contact area threshold</value>
-  </data>
-  <data name="AdvancedPanel_Hint_5" xml:space="preserve">
-    <value>Enable quad IR touch screen mode</value>
-  </data>
-  <data name="AdvancedPanel_Hint_6" xml:space="preserve">
-    <value>Enable logging function</value>
-  </data>
-  <data name="AdvancedPanel_Hint_7" xml:space="preserve">
-    <value>Show confirmation dialog when closing software</value>
-  </data>
-  <data name="AdvancedPanel_Hint_8" xml:space="preserve">
-    <value>Auto backup current settings before auto update</value>
-  </data>
-  <data name="AdvancedPanel_Hint_9" xml:space="preserve">
-    <value>Regularly auto backup settings file</value>
-  </data>
   <data name="Debug_ShowConsole_Desc" xml:space="preserve">
     <value>Show a separate console window for live log output (takes effect immediately; if &quot;Enable logging&quot; is off in settings, no content will be emitted).</value>
   </data>
   <data name="Debug_ShowConsole_Header" xml:space="preserve">
     <value>Show debug console</value>
-  </data>
-  <data name="Debug_Title" xml:space="preserve">
-    <value>Debug</value>
   </data>
   <data name="Debug_IconSettings" xml:space="preserve">
     <value>Icon Settings</value>

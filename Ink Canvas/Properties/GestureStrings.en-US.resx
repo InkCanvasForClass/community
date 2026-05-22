@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -48,12 +48,6 @@
   <data name="Gesture_AllowRotateScaleHint" xml:space="preserve">
     <value>Allows scaling selected ink with two or more fingers (independent of rotate setting).</value>
   </data>
-  <data name="Gesture_AutoToggleHint" xml:space="preserve">
-    <value>When enabled: leaving canvas disables two-finger move; entering whiteboard enables it.</value>
-  </data>
-  <data name="Gesture_AutoToggleTwoFinger" xml:space="preserve">
-    <value>Auto-toggle two-finger move in/out of whiteboard</value>
-  </data>
   <data name="Gesture_EnablePalmEraser" xml:space="preserve">
     <value>Enable palm eraser</value>
   </data>
@@ -74,14 +68,5 @@
   </data>
   <data name="Gesture_Title" xml:space="preserve">
     <value>Gestures</value>
-  </data>
-  <data name="GesturesPanel_Hint" xml:space="preserve">
-    <value>When enabled, automatically disable two-finger move gesture when exiting whiteboard mode, enable when entering whiteboard mode</value>
-  </data>
-  <data name="GesturesPanel_Hint_1" xml:space="preserve">
-    <value>Allow two-finger or multi-finger zoom operations on selected ink</value>
-  </data>
-  <data name="GesturesPanel_Hint_2" xml:space="preserve">
-    <value>When enabled, automatically switch to eraser when two or more touch points with large area, restore original mode after release</value>
   </data>
 </root>

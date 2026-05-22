@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -62,9 +62,6 @@
   </data>
   <data name="EdgeGestureUtilHint_Part1" xml:space="preserve">
     <value>EdgeGestureUtil 是 icc 最新引入的可以暂时阻止在使用触摸时触发边缘手势（如 Windows10 环境下，屏幕左边缘滑动进入任务视图，右边缘滑动弹出通知中心；Windows11 环境下，底部向上滑动打开开始菜单），其原理是使用了 System.EdgeGesture.DisableTouchWhenFullscreen （当应用程序窗口处于活动状态且处于全屏模式 (或拥有的窗口) 处于活动状态时，防止边缘手势行为。）来实现的。如果有异常，请关闭该选项，该选项应该能够实时生效。（Win7 和 Win8 用户该选项无法使用）</value>
-  </data>
-  <data name="EdgeGestureUtilHint_Part2" xml:space="preserve">
-    <value>（当应用程序窗口处于活动状态且处于全屏模式 (或拥有的窗口) 处于活动状态时，防止边缘手势行为。）来实现的。如果有异常，请关闭该选项，该选项应该能够实时生效。（Win7和Win8用户该选项无法使用）</value>
   </data>
   <data name="EraserBindTouchHint" xml:space="preserve">
     <value>BoundsWidth 参数作为接触面积区分界限</value>
@@ -130,56 +127,11 @@
   <data name="TouchMultiplierValueHint" xml:space="preserve">
     <value>数值仅供参考</value>
   </data>
-  <data name="UriSchemeName" xml:space="preserve">
-    <value>外部协议调用 (icc://)</value>
-  </data>
-  <data name="AdvancedPanel__iccfold___iccunfold__Hint" xml:space="preserve">
-    <value>开启后可通过 icc://fold (收纳) 或 icc://unfold (展开) 等命令控制</value>
-  </data>
-  <data name="AdvancedPanel_Hint" xml:space="preserve">
-    <value>启用特殊屏幕模式以优化触摸体验</value>
-  </data>
-  <data name="AdvancedPanel_Hint_1" xml:space="preserve">
-    <value>调整触摸大小的倍数</value>
-  </data>
-  <data name="AdvancedPanel_Hint_10" xml:space="preserve">
-    <value>设置定期备份的时间间隔</value>
-  </data>
-  <data name="AdvancedPanel_Hint_11" xml:space="preserve">
-    <value>开启后自动检测并拦截同类软件的悬浮窗</value>
-  </data>
-  <data name="AdvancedPanel_Hint_2" xml:space="preserve">
-    <value>橡皮擦大小与触摸大小倍数绑定</value>
-  </data>
-  <data name="AdvancedPanel_Hint_3" xml:space="preserve">
-    <value>笔尖模式的接触面积区分界限</value>
-  </data>
-  <data name="AdvancedPanel_Hint_4" xml:space="preserve">
-    <value>手指模式的接触面积区分界限</value>
-  </data>
-  <data name="AdvancedPanel_Hint_5" xml:space="preserve">
-    <value>启用四边红外触摸屏模式</value>
-  </data>
-  <data name="AdvancedPanel_Hint_6" xml:space="preserve">
-    <value>启用日志记录功能</value>
-  </data>
-  <data name="AdvancedPanel_Hint_7" xml:space="preserve">
-    <value>关闭软件时显示确认对话框</value>
-  </data>
-  <data name="AdvancedPanel_Hint_8" xml:space="preserve">
-    <value>在自动更新前自动备份当前设置</value>
-  </data>
-  <data name="AdvancedPanel_Hint_9" xml:space="preserve">
-    <value>定期自动备份设置文件</value>
-  </data>
   <data name="Debug_ShowConsole_Desc" xml:space="preserve">
     <value>显示一个独立的控制台窗口，用于实时输出日志（开启后立即生效；关闭设置中的「启用日志记录」将不会输出内容）。</value>
   </data>
   <data name="Debug_ShowConsole_Header" xml:space="preserve">
     <value>显示调试窗口</value>
-  </data>
-  <data name="Debug_Title" xml:space="preserve">
-    <value>Debug</value>
   </data>
   <data name="Debug_IconSettings" xml:space="preserve">
     <value>图标设置</value>

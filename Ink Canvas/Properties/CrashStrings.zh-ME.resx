@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -44,9 +44,6 @@
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="Crash_Desc" xml:space="preserve">
     <value>软件崩溃了怎么办？选一个自动操作：</value>
-  </data>
-  <data name="Crash_Hint" xml:space="preserve">
-    <value>静默重启：崩了自动重启，啥也不说。无操作：崩了只记日志，摆烂不管。弹窗看详情：显示错误详情，不自动重启。</value>
   </data>
   <data name="Crash_NoAction" xml:space="preserve">
     <value>摆烂不管</value>

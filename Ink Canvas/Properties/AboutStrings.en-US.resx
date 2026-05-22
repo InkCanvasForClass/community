@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -45,18 +45,6 @@
   <data name="Copyright" xml:space="preserve">
     <value>© 2025-2026 CJK_mkp. All rights reserved.</value>
   </data>
-  <data name="Dev_ICA" xml:space="preserve">
-    <value>Developer of ICA</value>
-  </data>
-  <data name="Dev_ICC" xml:space="preserve">
-    <value>Developer of ICC</value>
-  </data>
-  <data name="Dev_ICCCE" xml:space="preserve">
-    <value>Developer of ICC CE</value>
-  </data>
-  <data name="Dev_InkCanvas" xml:space="preserve">
-    <value>Developer of Ink Canvas</value>
-  </data>
   <data name="DevelopersLabel" xml:space="preserve">
     <value>Developers:</value>
   </data>
@@ -75,9 +63,6 @@
   <data name="LicenseBody" xml:space="preserve">
     <value>The strong copyleft license requires that complete source code and modifications of the licensed work (including large works using it) be provided under the same license. Copyright and license notices must be retained. Contributors explicitly grant patent rights.</value>
   </data>
-  <data name="LicenseHint" xml:space="preserve">
-    <value>Before using or distributing this software, you must be aware of the related open-source licenses. This software is based on https://github.com/WXRIW/Ink-Canvas.</value>
-  </data>
   <data name="LicenseTitle" xml:space="preserve">
     <value>This software, ICA and Ink Canvas are all open sourced under a license</value>
   </data>
@@ -93,23 +78,8 @@
   <data name="PrivacyAndTelemetry" xml:space="preserve">
     <value>Privacy &amp; Telemetry</value>
   </data>
-  <data name="PrivacyCheckboxPrefix" xml:space="preserve">
-    <value>I have read and agree to the </value>
-  </data>
-  <data name="PrivacyCheckboxSuffix" xml:space="preserve">
-    <value> privacy statement</value>
-  </data>
   <data name="RefreshDeviceInfo" xml:space="preserve">
     <value>Refresh device info</value>
-  </data>
-  <data name="Source_ICA" xml:space="preserve">
-    <value>ICA repository:</value>
-  </data>
-  <data name="Source_ICC" xml:space="preserve">
-    <value>ICC repository:</value>
-  </data>
-  <data name="Source_InkCanvas" xml:space="preserve">
-    <value>Ink Canvas repository:</value>
   </data>
   <data name="Telemetry_Basic" xml:space="preserve">
     <value>Upload basic data</value>
@@ -140,9 +110,6 @@
   </data>
   <data name="VersionLabel" xml:space="preserve">
     <value>Version:</value>
-  </data>
-  <data name="App_Title" xml:space="preserve">
-    <value>InkCanvasforClass</value>
   </data>
   <data name="DeviceInfo_Failed" xml:space="preserve">
     <value>Failed to retrieve</value>

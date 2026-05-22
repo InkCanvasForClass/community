@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -45,104 +45,14 @@
   <data name="AppearancePanel_24HourTimeFormat" xml:space="preserve">
     <value>用24小时制看时间</value>
   </data>
-  <data name="AppearancePanel_80Hint" xml:space="preserve">
-    <value>把白板缩到80%</value>
-  </data>
-  <data name="AppearancePanel_Hint" xml:space="preserve">
-    <value>选个你喜欢的皮肤</value>
-  </data>
-  <data name="AppearancePanel_Hint_ShowStartupAnimation" xml:space="preserve">
-    <value>启动时放个动画整活</value>
-  </data>
-  <data name="AppearancePanel_Hint_ShowRedoButton" xml:space="preserve">
-    <value>在装备栏里放个重做按钮</value>
-  </data>
-  <data name="AppearancePanel_Hint_ShowClearButton" xml:space="preserve">
-    <value>在装备栏里放个一键清空按钮</value>
-  </data>
-  <data name="AppearancePanel_Hint_ShowWhiteboardButton" xml:space="preserve">
-    <value>在装备栏里放个白板按钮</value>
-  </data>
-  <data name="AppearancePanel_Hint_ShowHideButton" xml:space="preserve">
-    <value>在装备栏里放个隐身按钮</value>
-  </data>
-  <data name="AppearancePanel_Hint_ShowLassoSelectButton" xml:space="preserve">
-    <value>在装备栏里放个套马杆按钮</value>
-  </data>
-  <data name="AppearancePanel_Hint_ShowClearAndMouseButton" xml:space="preserve">
-    <value>在装备栏里放个清并鼠按钮</value>
-  </data>
-  <data name="AppearancePanel_Hint_ShowQuickPalette" xml:space="preserve">
-    <value>在装备栏里放个快捷调色盘</value>
-  </data>
-  <data name="AppearancePanel_Hint_SelectQuickPaletteMode" xml:space="preserve">
-    <value>选个调色盘的显示方式</value>
-  </data>
-  <data name="AppearancePanel_Hint_ShowTrayIcon" xml:space="preserve">
-    <value>在任务栏托盘里露个脸</value>
-  </data>
-  <data name="AppearancePanel_Hint_ShowTimeAndDate" xml:space="preserve">
-    <value>在白板上显示时间和日期</value>
-  </data>
-  <data name="AppearancePanel_Hint_SelectAnimationStyle" xml:space="preserve">
-    <value>选个启动动画的样式</value>
-  </data>
-  <data name="AppearancePanel_Hint_ShowMotivationalQuotes" xml:space="preserve">
-    <value>在白板上显示鸡汤语录</value>
-  </data>
-  <data name="AppearancePanel_Hint_ShowQuickActionsInCollapsed" xml:space="preserve">
-    <value>收纳模式下也能快速操作</value>
-  </data>
-  <data name="AppearancePanel_Hint_SelectUncollapseIconStyle" xml:space="preserve">
-    <value>选个展开按钮的图标样式</value>
-  </data>
-  <data name="AppearancePanel_Hint_AutoAnnotateOnUncollapse" xml:space="preserve">
-    <value>开了之后，退出收纳模式自动切到批注模式，方便你随手画</value>
-  </data>
-  <data name="AppearancePanel_Hint_AutoCollapseOnWhiteboardExit" xml:space="preserve">
-    <value>开了之后，退出白板模式自动缩回侧边栏</value>
-  </data>
-  <data name="AppearancePanel_Hint_SelectToolbarIconStyle" xml:space="preserve">
-    <value>选个装备栏的图标风格</value>
-  </data>
-  <data name="AppearancePanel_Hint_AdjustToolbarSize" xml:space="preserve">
-    <value>调装备栏的大小</value>
-  </data>
-  <data name="AppearancePanel_Hint_AdjustToolbarOpacity" xml:space="preserve">
-    <value>调装备栏的透明度</value>
-  </data>
-  <data name="AppearancePanel_Hint_ShowPenTipModeButton" xml:space="preserve">
-    <value>在调色盘里放个笔尖模式切换按钮</value>
-  </data>
-  <data name="AppearancePanel_Hint_UseLegacyToolbarStyle" xml:space="preserve">
-    <value>用老版装备栏的界面风格</value>
-  </data>
-  <data name="AppearancePanel_Hint_ShowShapeButton" xml:space="preserve">
-    <value>在装备栏里放个图形按钮</value>
-  </data>
-  <data name="AppearancePanel_Hint_ShowUndoButton" xml:space="preserve">
-    <value>在装备栏里放个撤销按钮</value>
-  </data>
-  <data name="AppearancePanel_PPTHint" xml:space="preserve">
-    <value>开了之后，退出 PPT 放映自动收起装备栏</value>
-  </data>
-  <data name="AppearancePanel_PPTPPTHint" xml:space="preserve">
-    <value>PPT 模式下装备栏的透明度（重新进 PPT 放映后生效）</value>
-  </data>
   <data name="Theme_BlackboardScale80" xml:space="preserve">
     <value>白板 UI 缩放倍数</value>
-  </data>
-  <data name="Theme_Browse" xml:space="preserve">
-    <value>翻翻看</value>
   </data>
   <data name="Theme_Clear" xml:space="preserve">
     <value>一键清空</value>
   </data>
   <data name="Theme_CustomFloatingIconLabel" xml:space="preserve">
     <value>自定义装备栏图标</value>
-  </data>
-  <data name="Theme_Customize" xml:space="preserve">
-    <value>搞点自定义</value>
   </data>
   <data name="Theme_CustomSplash_NotSelected" xml:space="preserve">
     <value>还没选图片呢</value>
@@ -167,21 +77,6 @@
   </data>
   <data name="Theme_EnableSplash" xml:space="preserve">
     <value>开启动画整活</value>
-  </data>
-  <data name="Theme_EraserButtonDisplay" xml:space="preserve">
-    <value>橡皮按钮显示</value>
-  </data>
-  <data name="Theme_EraserDisplay_AreaOnly" xml:space="preserve">
-    <value>只显示面积擦</value>
-  </data>
-  <data name="Theme_EraserDisplay_Both" xml:space="preserve">
-    <value>两个都要</value>
-  </data>
-  <data name="Theme_EraserDisplay_LineOnly" xml:space="preserve">
-    <value>只显示线擦</value>
-  </data>
-  <data name="Theme_EraserDisplay_None" xml:space="preserve">
-    <value>都不要</value>
   </data>
   <data name="Theme_FloatingBarButtonsTitle" xml:space="preserve">
     <value>装备栏按钮显示</value>
@@ -255,9 +150,6 @@
   <data name="Theme_Language_RestartHint" xml:space="preserve">
     <value>换了语言得重启才能完全生效哦~</value>
   </data>
-  <data name="Theme_Language_System" xml:space="preserve">
-    <value>跟着系统走</value>
-  </data>
   <data name="Theme_LanguageLabel" xml:space="preserve">
     <value>界面语言</value>
   </data>
@@ -272,9 +164,6 @@
   </data>
   <data name="Theme_QuickPalette_SingleRow" xml:space="preserve">
     <value>单行显示（6 种颜色）</value>
-  </data>
-  <data name="Theme_QuickPaletteMode" xml:space="preserve">
-    <value>快捷调色盘显示模式</value>
   </data>
   <data name="Theme_QuickPanelBottomOffset" xml:space="preserve">
     <value>快捷面板垂直偏移</value>
@@ -297,41 +186,11 @@
   <data name="Theme_QuoteSource_PhigrosTips" xml:space="preserve">
     <value>Phigros Tips</value>
   </data>
-  <data name="Theme_ShowClearAndMouseButton" xml:space="preserve">
-    <value>显示清并鼠按钮</value>
-  </data>
-  <data name="Theme_ShowClearButton" xml:space="preserve">
-    <value>显示一键清空按钮</value>
-  </data>
-  <data name="Theme_ShowHideButton" xml:space="preserve">
-    <value>显示隐身按钮</value>
-  </data>
-  <data name="Theme_ShowLassoButton" xml:space="preserve">
-    <value>显示套马杆按钮</value>
-  </data>
-  <data name="Theme_ShowNibButton" xml:space="preserve">
-    <value>在调色盘里显示 笔尖模式 按钮</value>
-  </data>
-  <data name="Theme_ShowQuickPalette" xml:space="preserve">
-    <value>显示快捷调色盘</value>
-  </data>
   <data name="Theme_ShowQuoteInWhiteboard" xml:space="preserve">
     <value>在白板中显示信仰の源 1（好喝的/毒的鸡汤）</value>
   </data>
-  <data name="Theme_ShowRedoButton" xml:space="preserve">
-    <value>显示重做按钮</value>
-  </data>
-  <data name="Theme_ShowShapeButton" xml:space="preserve">
-    <value>显示图形按钮</value>
-  </data>
   <data name="Theme_ShowTimeInWhiteboard" xml:space="preserve">
     <value>在白板中显示当前时间和日期</value>
-  </data>
-  <data name="Theme_ShowUndoButton" xml:space="preserve">
-    <value>显示撤销按钮</value>
-  </data>
-  <data name="Theme_ShowWhiteboardButton" xml:space="preserve">
-    <value>显示白板按钮</value>
   </data>
   <data name="Theme_Splash_Autumn" xml:space="preserve">
     <value>秋天</value>
@@ -363,23 +222,11 @@
   <data name="Theme_System" xml:space="preserve">
     <value>跟着系统走</value>
   </data>
-  <data name="Theme_TextPosition_BottomCenter" xml:space="preserve">
-    <value>中下</value>
-  </data>
-  <data name="Theme_TextPosition_BottomLeft" xml:space="preserve">
-    <value>左下</value>
-  </data>
-  <data name="Theme_TextPosition_BottomRight" xml:space="preserve">
-    <value>右下</value>
-  </data>
   <data name="Theme_UnfoldButtonIcon" xml:space="preserve">
     <value>展开按钮图标</value>
   </data>
   <data name="Theme_UnfoldIcon_Arrow" xml:space="preserve">
     <value>箭头</value>
-  </data>
-  <data name="Theme_UnfoldIcon_Pen" xml:space="preserve">
-    <value>笔</value>
   </data>
   <data name="Theme_Upload" xml:space="preserve">
     <value>上传</value>
@@ -413,90 +260,6 @@
   </data>
   <data name="Theme_WindowBackdrop_Transient" xml:space="preserve">
     <value>Transient</value>
-  </data>
-  <data name="ThemePanel_80Hint" xml:space="preserve">
-    <value>把白板缩到80%</value>
-  </data>
-  <data name="ThemePanel_Hint" xml:space="preserve">
-    <value>选个你喜欢的皮肤</value>
-  </data>
-  <data name="ThemePanel_Hint_ShowStartupAnimation" xml:space="preserve">
-    <value>启动时放个动画整活</value>
-  </data>
-  <data name="ThemePanel_Hint_ShowRedoButton" xml:space="preserve">
-    <value>在装备栏里放个重做按钮</value>
-  </data>
-  <data name="ThemePanel_Hint_ShowClearButton" xml:space="preserve">
-    <value>在装备栏里放个一键清空按钮</value>
-  </data>
-  <data name="ThemePanel_Hint_ShowWhiteboardButton" xml:space="preserve">
-    <value>在装备栏里放个白板按钮</value>
-  </data>
-  <data name="ThemePanel_Hint_ShowHideButton" xml:space="preserve">
-    <value>在装备栏里放个隐身按钮</value>
-  </data>
-  <data name="ThemePanel_Hint_ShowLassoSelectButton" xml:space="preserve">
-    <value>在装备栏里放个套马杆按钮</value>
-  </data>
-  <data name="ThemePanel_Hint_ShowClearAndMouseButton" xml:space="preserve">
-    <value>在装备栏里放个清并鼠按钮</value>
-  </data>
-  <data name="ThemePanel_Hint_ShowQuickPalette" xml:space="preserve">
-    <value>在装备栏里放个快捷调色盘</value>
-  </data>
-  <data name="ThemePanel_Hint_SelectQuickPaletteMode" xml:space="preserve">
-    <value>选个调色盘的显示方式</value>
-  </data>
-  <data name="ThemePanel_Hint_ShowTrayIcon" xml:space="preserve">
-    <value>在任务栏托盘里露个脸</value>
-  </data>
-  <data name="ThemePanel_Hint_ShowTimeAndDate" xml:space="preserve">
-    <value>在白板上显示时间和日期</value>
-  </data>
-  <data name="ThemePanel_Hint_SelectAnimationStyle" xml:space="preserve">
-    <value>选个启动动画的样式</value>
-  </data>
-  <data name="ThemePanel_Hint_ShowMotivationalQuotes" xml:space="preserve">
-    <value>在白板上显示鸡汤语录</value>
-  </data>
-  <data name="ThemePanel_Hint_ShowQuickActionsInCollapsed" xml:space="preserve">
-    <value>收纳模式下也能快速操作</value>
-  </data>
-  <data name="ThemePanel_Hint_SelectUncollapseIconStyle" xml:space="preserve">
-    <value>选个展开按钮的图标样式</value>
-  </data>
-  <data name="ThemePanel_Hint_AutoAnnotateOnUncollapse" xml:space="preserve">
-    <value>开了之后，退出收纳模式自动切到批注模式，方便你随手画</value>
-  </data>
-  <data name="ThemePanel_Hint_AutoCollapseOnWhiteboardExit" xml:space="preserve">
-    <value>开了之后，退出白板模式自动缩回侧边栏</value>
-  </data>
-  <data name="ThemePanel_Hint_SelectToolbarIconStyle" xml:space="preserve">
-    <value>选个装备栏的图标风格</value>
-  </data>
-  <data name="ThemePanel_Hint_AdjustToolbarSize" xml:space="preserve">
-    <value>调装备栏的大小</value>
-  </data>
-  <data name="ThemePanel_Hint_AdjustToolbarOpacity" xml:space="preserve">
-    <value>调装备栏的透明度</value>
-  </data>
-  <data name="ThemePanel_Hint_ShowPenTipModeButton" xml:space="preserve">
-    <value>在调色盘里放个笔尖模式切换按钮</value>
-  </data>
-  <data name="ThemePanel_Hint_UseLegacyToolbarStyle" xml:space="preserve">
-    <value>用老版装备栏的界面风格</value>
-  </data>
-  <data name="ThemePanel_Hint_ShowShapeButton" xml:space="preserve">
-    <value>在装备栏里放个图形按钮</value>
-  </data>
-  <data name="ThemePanel_Hint_ShowUndoButton" xml:space="preserve">
-    <value>在装备栏里放个撤销按钮</value>
-  </data>
-  <data name="ThemePanel_PPTHint" xml:space="preserve">
-    <value>开了之后，退出 PPT 放映自动收起装备栏</value>
-  </data>
-  <data name="ThemePanel_PPTPPTHint" xml:space="preserve">
-    <value>PPT 模式下装备栏的透明度（重新进 PPT 放映后生效）</value>
   </data>
   <data name="Theme_FloatingBarButtonsDescription" xml:space="preserve">
     <value>去「装备栏」设置页面管理装备栏的组件显示与排序吧。</value>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -42,56 +42,11 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="LuckyRandomPanel_Hint" xml:space="preserve">
-    <value>Show button to modify name list in random roll call window</value>
-  </data>
-  <data name="LuckyRandomPanel_Hint_1" xml:space="preserve">
-    <value>Show random draw and single draw buttons in random roll call window</value>
-  </data>
-  <data name="LuckyRandomPanel_Hint_10" xml:space="preserve">
-    <value>Select background for roll call window</value>
-  </data>
-  <data name="LuckyRandomPanel_Hint_2" xml:space="preserve">
-    <value>Enable quick draw floating button</value>
-  </data>
-  <data name="LuckyRandomPanel_Hint_3" xml:space="preserve">
-    <value>Use external roll call tool instead of built-in function</value>
-  </data>
-  <data name="LuckyRandomPanel_Hint_4" xml:space="preserve">
-    <value>Set delay time for single draw window to auto close</value>
-  </data>
-  <data name="LuckyRandomPanel_Hint_5" xml:space="preserve">
-    <value>Set maximum number of people for single random roll call</value>
-  </data>
-  <data name="LuckyRandomPanel_Hint_6" xml:space="preserve">
-    <value>Use new roll call interface design</value>
-  </data>
-  <data name="LuckyRandomPanel_Hint_7" xml:space="preserve">
-    <value>Use machine learning algorithm to avoid drawing same person repeatedly</value>
-  </data>
-  <data name="LuckyRandomPanel_Hint_8" xml:space="preserve">
-    <value>Set history record count for avoiding repetition</value>
-  </data>
-  <data name="LuckyRandomPanel_Hint_9" xml:space="preserve">
-    <value>Set weight for machine learning algorithm to avoid repetition</value>
-  </data>
-  <data name="Random_Background_Default" xml:space="preserve">
-    <value>Default background</value>
-  </data>
   <data name="Random_BackgroundSelectLabel" xml:space="preserve">
     <value>Background:</value>
   </data>
   <data name="Random_BackgroundSettingsTitle" xml:space="preserve">
     <value>Roll-call window background (legacy UI only)</value>
-  </data>
-  <data name="Random_CustomBackground_Manage" xml:space="preserve">
-    <value>Manage</value>
-  </data>
-  <data name="Random_CustomBackground_Upload" xml:space="preserve">
-    <value>Upload</value>
-  </data>
-  <data name="Random_CustomBackgroundLabel" xml:space="preserve">
-    <value>Custom background:</value>
   </data>
   <data name="Random_EnableButtons" xml:space="preserve">
     <value>Enable random &amp; single-draw buttons</value>

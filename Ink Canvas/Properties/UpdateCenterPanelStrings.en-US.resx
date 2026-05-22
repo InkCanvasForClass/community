@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -42,19 +42,4 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="UpdateCenterPanel_Hint" xml:space="preserve">
-    <value>Select the historical version to rollback to</value>
-  </data>
-  <data name="UpdateCenterPanel_Hint_RollbackVersion" xml:space="preserve">
-    <value>Rollback to the version selected in the dropdown</value>
-  </data>
-  <data name="UpdateCenterPanel_Hint_ReinstallLatest" xml:space="preserve">
-    <value>Download and install the latest version based on the selected channel, can be used to fix corrupted installations</value>
-  </data>
-  <data name="UpdateCenterPanel_Hint_AutoCheckUpdate" xml:space="preserve">
-    <value>Regularly check if new versions are available</value>
-  </data>
-  <data name="UpdateCenterPanel_Hint_AutoInstallUpdate" xml:space="preserve">
-    <value>Automatically install updates when software is not in use, no manual operation required</value>
-  </data>
 </root>

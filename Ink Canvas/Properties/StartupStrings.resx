@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -42,30 +42,6 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="Channel_Beta" xml:space="preserve">
-    <value>测试版 (Beta)</value>
-  </data>
-  <data name="Channel_Hint" xml:space="preserve">
-    <value>稳定版提供可靠更新，预览版提供新功能体验…</value>
-  </data>
-  <data name="Channel_Preview" xml:space="preserve">
-    <value>预览版 (Preview)</value>
-  </data>
-  <data name="Channel_Release" xml:space="preserve">
-    <value>稳定版 (Release)</value>
-  </data>
-  <data name="ManualUpdate_Hint" xml:space="preserve">
-    <value>点击后立即检查并下载最新版本</value>
-  </data>
-  <data name="Rollback_Hint" xml:space="preserve">
-    <value>历史版本回滚，点击后会弹出相应页面…</value>
-  </data>
-  <data name="SilentUpdate_AfterDownloadHint" xml:space="preserve">
-    <value>关闭静默更新后，已完成安装包的下载后将会弹窗询问…</value>
-  </data>
-  <data name="SilentUpdate_Hint" xml:space="preserve">
-    <value>静默更新将在软件不使用时自动安装，无需手动操作</value>
-  </data>
   <data name="SilentUpdate_TimeRange" xml:space="preserve">
     <value>静默更新时间段</value>
   </data>
@@ -77,9 +53,6 @@
   </data>
   <data name="EnableNibModeHint" xml:space="preserve">
     <value>启用后仅响应笔尖触摸，忽略手掌和手指</value>
-  </data>
-  <data name="EndTime" xml:space="preserve">
-    <value>终止时间</value>
   </data>
   <data name="ExternalProtocol" xml:space="preserve">
     <value>外部协议调用 (icc://)</value>
@@ -96,15 +69,6 @@
   <data name="FoldAtStartupHint" xml:space="preserve">
     <value>开机启动后自动收纳到侧边栏</value>
   </data>
-  <data name="HistoryRollbackHint" xml:space="preserve">
-    <value>历史版本回滚，点击后会弹出相应页面供用户手动回滚到之前的版本</value>
-  </data>
-  <data name="ManualUpdateHint" xml:space="preserve">
-    <value>点击后立即检查并下载最新版本</value>
-  </data>
-  <data name="MinimizeToSidebar" xml:space="preserve">
-    <value>开机运行后收纳到侧边栏</value>
-  </data>
   <data name="NoBorderMode" xml:space="preserve">
     <value>窗口无边框模式</value>
   </data>
@@ -116,12 +80,6 @@
   </data>
   <data name="NoFocusModeHint" xml:space="preserve">
     <value>窗口失去焦点时仍可接收输入</value>
-  </data>
-  <data name="PPTOnlyModeHint" xml:space="preserve">
-    <value>启用后，软件将完全隐藏，仅在 PPT 放映时出现</value>
-  </data>
-  <data name="RunAtLogin" xml:space="preserve">
-    <value>开机时运行</value>
   </data>
   <data name="RunAtStartup" xml:space="preserve">
     <value>开机时运行</value>
@@ -135,9 +93,6 @@
   <data name="SilentUpdateHint" xml:space="preserve">
     <value>静默更新将在软件不使用时自动安装，无需手动操作</value>
   </data>
-  <data name="SilentUpdateTimePeriod" xml:space="preserve">
-    <value>静默更新时间段</value>
-  </data>
   <data name="SmartUpdate" xml:space="preserve">
     <value>智慧更新</value>
   </data>
@@ -146,9 +101,6 @@
   </data>
   <data name="Start" xml:space="preserve">
     <value>启动</value>
-  </data>
-  <data name="StartTime" xml:space="preserve">
-    <value>起始时间</value>
   </data>
   <data name="TimePeriodHint" xml:space="preserve">
     <value>若终止时间小于起始时间，即将终止时间视为第二天的时间。若起始时间与终止时间相同，即视为全天候时间。</value>
@@ -183,18 +135,6 @@
   <data name="TopMostMode_UIA_RestartRequired" xml:space="preserve">
     <value>切换到 UIA 置顶模式需要重启软件才能生效，是否立即重启？</value>
   </data>
-  <data name="UIAccessTopMostHint" xml:space="preserve">
-    <value>开启UIA置顶后，软件需要管理员启动才能置顶，关闭此功能需要完全关闭软件后再手动启动，无法使用重启来关闭此功能</value>
-  </data>
-  <data name="UIATopMostHint_RequiresAdmin" xml:space="preserve">
-    <value>使用 UIA 方式实现置顶，需要管理员权限</value>
-  </data>
-  <data name="UIATopMost" xml:space="preserve">
-    <value>UIA 置顶</value>
-  </data>
-  <data name="UIATopMostHint" xml:space="preserve">
-    <value>开启 UIA 置顶后，软件需要管理员权限启动才能置顶…</value>
-  </data>
   <data name="UpdateChannel" xml:space="preserve">
     <value>更新通道</value>
   </data>
@@ -206,8 +146,5 @@
   </data>
   <data name="UpdatePackageArchitectureHint" xml:space="preserve">
     <value>选择要下载的更新包架构，默认跟随当前软件架构</value>
-  </data>
-  <data name="VersionFix_Hint" xml:space="preserve">
-    <value>版本修复会根据当前选择的通道下载最新版本并执行安装…</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -84,14 +84,8 @@
   <data name="Backup_Title" xml:space="preserve">
     <value>Settings backup &amp; restore</value>
   </data>
-  <data name="Storage_AutoDeleteHint" xml:space="preserve">
-    <value>When on, all .icstk and .png files in the auto-save folder may be deleted!</value>
-  </data>
   <data name="Storage_AutoDeleteTitle" xml:space="preserve">
     <value>Auto delete old strokes and screenshots</value>
-  </data>
-  <data name="Storage_AutoSaveHint" xml:space="preserve">
-    <value>When on, strokes are auto-saved at the set interval, only when canvas is visible and has ink.</value>
   </data>
   <data name="Storage_AutoSaveInk" xml:space="preserve">
     <value>Auto-save ink periodically</value>
@@ -122,9 +116,6 @@
   </data>
   <data name="Storage_AutoSaveInterval_60Min" xml:space="preserve">
     <value>60 minutes</value>
-  </data>
-  <data name="Storage_AutoScreenshotMinInk" xml:space="preserve">
-    <value>Minimum ink for auto screenshot</value>
   </data>
   <data name="Storage_AutoScreenshotOnClear" xml:space="preserve">
     <value>Auto screenshot on clear</value>
@@ -165,9 +156,6 @@
   <data name="Storage_Core_Desc" xml:space="preserve">
     <value>Includes .json configs, .enc usage stats, .exe / .dll executables and .dat data files.</value>
   </data>
-  <data name="Storage_Core_Header" xml:space="preserve">
-    <value>Core files</value>
-  </data>
   <data name="Storage_Core_NotCleanable" xml:space="preserve">
     <value>Core files cannot be cleaned to keep the application functional.</value>
   </data>
@@ -201,14 +189,8 @@
   <data name="Storage_Legend_Ink" xml:space="preserve">
     <value>Ink</value>
   </data>
-  <data name="Storage_Legend_Logs" xml:space="preserve">
-    <value>Logs</value>
-  </data>
   <data name="Storage_Legend_Other" xml:space="preserve">
     <value>Other</value>
-  </data>
-  <data name="Storage_Legend_Plugins" xml:space="preserve">
-    <value>Plugins</value>
   </data>
   <data name="Storage_Legend_Update" xml:space="preserve">
     <value>Update</value>
@@ -228,23 +210,8 @@
   <data name="Storage_Other_Desc" xml:space="preserve">
     <value>Files not classified into the categories above.</value>
   </data>
-  <data name="Storage_Other_Header" xml:space="preserve">
-    <value>Other</value>
-  </data>
   <data name="Storage_PathBrowse" xml:space="preserve">
     <value>Browse</value>
-  </data>
-  <data name="Storage_PathPermissionHint" xml:space="preserve">
-    <value>Please ensure the save folder is writable.</value>
-  </data>
-  <data name="Storage_PathSetToD" xml:space="preserve">
-    <value>Set save path to D:\Ink Canvas</value>
-  </data>
-  <data name="Storage_PathSetToDocuments" xml:space="preserve">
-    <value>Set save path to Documents</value>
-  </data>
-  <data name="Storage_PathTitle" xml:space="preserve">
-    <value>Stroke and screenshot save path</value>
   </data>
   <data name="Storage_Plugins_Desc" xml:space="preserve">
     <value>.iccpp plugin packages under the plugins directory.</value>
@@ -258,20 +225,8 @@
   <data name="Storage_Refresh" xml:space="preserve">
     <value>Refresh</value>
   </data>
-  <data name="Storage_RetentionTitle" xml:space="preserve">
-    <value>Retention duration</value>
-  </data>
-  <data name="Storage_RetentionUnitDays" xml:space="preserve">
-    <value>days</value>
-  </data>
   <data name="Storage_SaveAsXml" xml:space="preserve">
     <value>Save as XML format</value>
-  </data>
-  <data name="Storage_SaveAsXmlHint" xml:space="preserve">
-    <value>When on, strokes are saved as XML (ISF) for easier inspection and editing.</value>
-  </data>
-  <data name="Storage_SaveFullPageHint" xml:space="preserve">
-    <value>When on, auto/manual saves store all pages in fullscreen; multiple pages are packed in one archive (whiteboard strokes open only in whiteboard mode; PPT strokes only in slide show mode).</value>
   </data>
   <data name="Storage_SaveFullPageStrokes" xml:space="preserve">
     <value>Save full-page strokes</value>

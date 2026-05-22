@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -42,62 +42,14 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="AskEachTime" xml:space="preserve">
-    <value>Ask each time</value>
-  </data>
-  <data name="CollapseNavSidebar" xml:space="preserve">
-    <value>Collapse sidebar</value>
-  </data>
   <data name="Color" xml:space="preserve">
     <value>Color</value>
-  </data>
-  <data name="Color_Black" xml:space="preserve">
-    <value>Black</value>
-  </data>
-  <data name="Color_Blue" xml:space="preserve">
-    <value>Blue</value>
-  </data>
-  <data name="Color_Default" xml:space="preserve">
-    <value>Default</value>
-  </data>
-  <data name="Color_Green" xml:space="preserve">
-    <value>Green</value>
-  </data>
-  <data name="Color_Orange" xml:space="preserve">
-    <value>Orange</value>
-  </data>
-  <data name="Color_Purple" xml:space="preserve">
-    <value>Purple</value>
-  </data>
-  <data name="Color_Red" xml:space="preserve">
-    <value>Red</value>
-  </data>
-  <data name="Color_White" xml:space="preserve">
-    <value>White</value>
-  </data>
-  <data name="Color_Yellow" xml:space="preserve">
-    <value>Yellow</value>
-  </data>
-  <data name="Common_Close" xml:space="preserve">
-    <value>Close</value>
-  </data>
-  <data name="Common_Off" xml:space="preserve">
-    <value>Off</value>
-  </data>
-  <data name="Common_On" xml:space="preserve">
-    <value>On</value>
   </data>
   <data name="Common_Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
-  <data name="EraserSize_SwitchHint" xml:space="preserve">
-    <value>Takes effect on next area eraser use.</value>
-  </data>
   <data name="Hotkey_NotSet" xml:space="preserve">
     <value>Not set</value>
-  </data>
-  <data name="Mode_Normal" xml:space="preserve">
-    <value>Normal</value>
   </data>
   <data name="Mode_PPTOnly" xml:space="preserve">
     <value>PPT only</value>
@@ -105,23 +57,11 @@
   <data name="No" xml:space="preserve">
     <value>No</value>
   </data>
-  <data name="ShowNavSidebar" xml:space="preserve">
-    <value>Show sidebar</value>
-  </data>
-  <data name="Size_Large" xml:space="preserve">
-    <value>Large</value>
-  </data>
   <data name="Size_Medium" xml:space="preserve">
     <value>Medium</value>
   </data>
   <data name="Size_Small" xml:space="preserve">
     <value>Small</value>
-  </data>
-  <data name="Size_VeryLarge" xml:space="preserve">
-    <value>Very large</value>
-  </data>
-  <data name="Size_VerySmall" xml:space="preserve">
-    <value>Very small</value>
   </data>
   <data name="Time_End" xml:space="preserve">
     <value>End time</value>

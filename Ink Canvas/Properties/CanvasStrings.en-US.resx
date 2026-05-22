@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -42,20 +42,11 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="Canvas_AdvancedBezierSmoothing" xml:space="preserve">
-    <value>Use advanced curve smoothing (recommended)</value>
-  </data>
   <data name="Canvas_AdvancedSmoothing" xml:space="preserve">
     <value>Advanced curve smoothing (recommended)</value>
   </data>
-  <data name="Canvas_AndInk" xml:space="preserve">
-    <value>Canvas &amp; ink</value>
-  </data>
   <data name="Canvas_AskEachTime" xml:space="preserve">
     <value>Ask each time</value>
-  </data>
-  <data name="Canvas_AsymptoteHint" xml:space="preserve">
-    <value>Disabling may cause undo bugs.</value>
   </data>
   <data name="Canvas_AutoRestoreTimePoints" xml:space="preserve">
     <value>Auto-restore time points (HH:mm, multiple with ;)</value>
@@ -69,14 +60,8 @@
   <data name="Canvas_ClearCanvasAlsoClearImages" xml:space="preserve">
     <value>Clear images when clearing canvas</value>
   </data>
-  <data name="Canvas_ClearImageOnClear" xml:space="preserve">
-    <value>Clear images with canvas</value>
-  </data>
   <data name="Canvas_ClearInkAlsoClearHistory" xml:space="preserve">
     <value>Clear ink history when clearing ink</value>
-  </data>
-  <data name="Canvas_ClearInkHistory" xml:space="preserve">
-    <value>Clear ink history when clearing</value>
   </data>
   <data name="Canvas_Color_Black" xml:space="preserve">
     <value>Black</value>
@@ -105,9 +90,6 @@
   <data name="Canvas_Color_Yellow" xml:space="preserve">
     <value>Yellow</value>
   </data>
-  <data name="Canvas_CompressImage" xml:space="preserve">
-    <value>Compress images &gt;1920×1080</value>
-  </data>
   <data name="Canvas_CompressPicturesUploaded" xml:space="preserve">
     <value>Auto-compress images when inserting (larger than 1920x1080)</value>
   </data>
@@ -123,17 +105,8 @@
   <data name="Canvas_DisableHardwareAccelerationHint" xml:space="preserve">
     <value>Improves compatibility but may reduce performance; some effects may require an app restart to fully apply.</value>
   </data>
-  <data name="Canvas_DisablePressure" xml:space="preserve">
-    <value>Ignore pressure</value>
-  </data>
   <data name="Canvas_DisablePressureHint" xml:space="preserve">
     <value>When on, all strokes use uniform thickness; mutually exclusive with pressure-sensitive touch.</value>
-  </data>
-  <data name="Canvas_EnableInkFade" xml:space="preserve">
-    <value>Enable ink fade</value>
-  </data>
-  <data name="Canvas_EnableInkFadeHint" xml:space="preserve">
-    <value>When on, ink is not committed to canvas; it fades after the set time.</value>
   </data>
   <data name="Canvas_EnablePressureTouch" xml:space="preserve">
     <value>Enable pressure-sensitive touch</value>
@@ -165,26 +138,8 @@
   <data name="Canvas_GroupTitle" xml:space="preserve">
     <value>Canvas</value>
   </data>
-  <data name="Canvas_HideFadeInPenMenu" xml:space="preserve">
-    <value>Hide fade in pen menu</value>
-  </data>
-  <data name="Canvas_HideFadeInPenMenuHint" xml:space="preserve">
-    <value>Fade control will be hidden in pen context menu.</value>
-  </data>
-  <data name="Canvas_HideInkFadeInPenMenu" xml:space="preserve">
-    <value>Hide ink fade control in pen menu</value>
-  </data>
-  <data name="Canvas_HideInkFadeInPenMenuHint" xml:space="preserve">
-    <value>When on, the pen context menu will not show the ink fade control.</value>
-  </data>
   <data name="Canvas_HideInkOnExit" xml:space="preserve">
     <value>Hide ink when leaving canvas</value>
-  </data>
-  <data name="Canvas_HideInkOnExitHint" xml:space="preserve">
-    <value>When enabled…</value>
-  </data>
-  <data name="Canvas_HideStrokeWhenSelecting" xml:space="preserve">
-    <value>Hide ink when exiting board mode</value>
   </data>
   <data name="Canvas_HideStrokeWhenSelectingHint" xml:space="preserve">
     <value>When this option is on, ink will not be shown in PPT mode if not in annotation mode.</value>
@@ -195,22 +150,7 @@
   <data name="Canvas_IgnorePressure" xml:space="preserve">
     <value>Ignore pressure</value>
   </data>
-  <data name="Canvas_IgnorePressureHint" xml:space="preserve">
-    <value>Ignore all device pressure.</value>
-  </data>
-  <data name="Canvas_InkFade" xml:space="preserve">
-    <value>Ink fade</value>
-  </data>
-  <data name="Canvas_InkFadeHint" xml:space="preserve">
-    <value>Ink will not be drawn on canvas when enabled.</value>
-  </data>
-  <data name="Canvas_InkFadeTime" xml:space="preserve">
-    <value>Ink fade time</value>
-  </data>
   <data name="Canvas_KeepAsymptote" xml:space="preserve">
-    <value>Keep hyperbola asymptotes</value>
-  </data>
-  <data name="Canvas_KeepHyperbolaAsymptote" xml:space="preserve">
     <value>Keep hyperbola asymptotes</value>
   </data>
   <data name="Canvas_LaunchSeewoVideoShowcaseForWhiteboardBooth" xml:space="preserve">
@@ -221,12 +161,6 @@
   </data>
   <data name="Canvas_No" xml:space="preserve">
     <value>No</value>
-  </data>
-  <data name="Canvas_PressureTouch" xml:space="preserve">
-    <value>Pressure-sensitive touch</value>
-  </data>
-  <data name="Canvas_PressureTouchHint" xml:space="preserve">
-    <value>Touch devices will support pressure.</value>
   </data>
   <data name="Canvas_RestoreColor" xml:space="preserve">
     <value>Restore color</value>
@@ -246,9 +180,6 @@
   <data name="Canvas_ShowCoordinateUnitMarksHint" xml:space="preserve">
     <value>Add ticks every 1 cm when drawing coordinate systems.</value>
   </data>
-  <data name="Canvas_ShowCursor" xml:space="preserve">
-    <value>Show pen cursor</value>
-  </data>
   <data name="Canvas_ShowPenCursor" xml:space="preserve">
     <value>Show pen cursor</value>
   </data>
@@ -267,56 +198,14 @@
   <data name="Canvas_WPFBezier" xml:space="preserve">
     <value>WPF default Bezier smoothing</value>
   </data>
-  <data name="Canvas_WPFBezierSmoothing" xml:space="preserve">
-    <value>Use WPF default Bezier smoothing</value>
-  </data>
   <data name="Canvas_Yes" xml:space="preserve">
     <value>Yes</value>
-  </data>
-  <data name="CanvasAndInkPanel__PPT_Hint" xml:space="preserve">
-    <value>When enabled, ink will not be displayed when entering PPT mode without being in annotation mode</value>
   </data>
   <data name="CanvasAndInkPanel_1920×1080Hint" xml:space="preserve">
     <value></value>
   </data>
-  <data name="CanvasAndInkPanel_Hint" xml:space="preserve">
-    <value>Show pen cursor when drawing</value>
-  </data>
-  <data name="CanvasAndInkPanel_Hint_1" xml:space="preserve">
-    <value>When enabled, touch screen devices will also support pressure sensitivity, suitable for some touch screens that support pressure but cannot be recognized by the system</value>
-  </data>
-  <data name="CanvasAndInkPanel_Hint_2" xml:space="preserve">
-    <value>When enabled, will ignore pressure information from all devices, making all strokes uniform thickness. Mutually exclusive with pressure touch mode</value>
-  </data>
-  <data name="CanvasAndInkPanel_Hint_3" xml:space="preserve">
-    <value>Delete all inserted images when clearing canvas</value>
-  </data>
-  <data name="CanvasAndInkPanel_Hint_4" xml:space="preserve">
-    <value>Show circle center mark when drawing circles</value>
-  </data>
-  <data name="CanvasAndInkPanel_Hint_5" xml:space="preserve">
-    <value>Use improved Bezier curve smoothing algorithm for better drawing effect</value>
-  </data>
-  <data name="CanvasAndInkPanel_Hint_6" xml:space="preserve">
-    <value>When enabled, ink will not be drawn on canvas but remain in wet ink state, disappearing automatically based on fade time</value>
-  </data>
-  <data name="CanvasAndInkPanel_Hint_7" xml:space="preserve">
-    <value>Set time for ink to disappear completely after drawing</value>
-  </data>
-  <data name="CanvasAndInkPanel_Hint_8" xml:space="preserve">
-    <value>When enabled, ink fade control switch will not be shown in context menu after clicking pen tool in main toolbar</value>
-  </data>
   <data name="CanvasAndInkPanel_Hint_9" xml:space="preserve">
     <value>When enabled, will auto save ink at set intervals, only when canvas is visible and has ink</value>
-  </data>
-  <data name="CanvasAndInkPanel_quotquotHint" xml:space="preserve">
-    <value>When enabled, cleared ink cannot be restored via undo function</value>
-  </data>
-  <data name="CanvasAndInkPanel_WPFHint" xml:space="preserve">
-    <value>Use WPF built-in curve smoothing algorithm</value>
-  </data>
-  <data name="CanvasAndInkPanel_XMLISFHint" xml:space="preserve">
-    <value>When enabled, will use XML format (ISF format) when saving ink, for easy viewing and editing of ink data</value>
   </data>
   <data name="InkRecog_AutoStraightLine" xml:space="preserve">
     <value>Auto-straighten lines</value>
@@ -387,35 +276,11 @@
   <data name="InkRecog_ShapeEngineHint" xml:space="preserve">
     <value></value>
   </data>
-  <data name="InkRecog_ShapeEngineIACore" xml:space="preserve">
-    <value></value>
-  </data>
-  <data name="InkRecog_ShapeEngineWinRT" xml:space="preserve">
-    <value></value>
-  </data>
   <data name="InkRecog_SnappingDistance" xml:space="preserve">
     <value>Snapping distance</value>
   </data>
   <data name="InkRecog_Title" xml:space="preserve">
     <value>Ink correction</value>
-  </data>
-  <data name="InkRecognitionPanel_10Hint" xml:space="preserve">
-    <value>In high-precision mode, take a count point every 10 pixels for more accurate average calculation</value>
-  </data>
-  <data name="InkRecognitionPanel_Hint" xml:space="preserve">
-    <value>Automatically recognize hand-drawn shapes and convert to standard shapes</value>
-  </data>
-  <data name="InkRecognitionPanel_Hint_1" xml:space="preserve">
-    <value>Corrected rectangles do not contain simulated pressure information</value>
-  </data>
-  <data name="InkRecognitionPanel_Hint_2" xml:space="preserve">
-    <value>Corrected triangles do not contain simulated pressure information</value>
-  </data>
-  <data name="InkRecognitionPanel_Hint_3" xml:space="preserve">
-    <value>When drawn line exceeds set length threshold, will automatically adjust to perfect straight line</value>
-  </data>
-  <data name="InkRecognitionPanel_Hint_4" xml:space="preserve">
-    <value>When drawn line endpoint is close to other line endpoints, will automatically snap and connect</value>
   </data>
   <data name="InkRecog_Font_InkFreeKaiti" xml:space="preserve">
     <value>Ink Free / KaiTi / Segoe Script</value>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -48,32 +48,14 @@
   <data name="Header_SilentUpdate" xml:space="preserve">
     <value>偷偷更新（静默更新）</value>
   </data>
-  <data name="Msg_DownloadFailedTitle" xml:space="preserve">
-    <value>下载翻车了</value>
-  </data>
   <data name="Msg_RestartLimit" xml:space="preserve">
     <value>检测到程序已经连续重启 5 次了，自动重启已摆烂。快联系开发者或检查一下系统环境吧！</value>
   </data>
   <data name="Msg_RestartLimitTitle" xml:space="preserve">
     <value>重启太多次了，emo了</value>
   </data>
-  <data name="Msg_SkipVersion" xml:space="preserve">
-    <value>已跳过版本 {0}，下次出新版本之前不会再烦你了～</value>
-  </data>
-  <data name="Msg_SkipVersionTitle" xml:space="preserve">
-    <value>这版本不约</value>
-  </data>
-  <data name="Msg_UnexpectedError" xml:space="preserve">
-    <value>好家伙，出现未预期的异常，可能导致 InkCanvasForClass 运行不稳。\n建议先保存墨迹然后重启应用，别硬撑！</value>
-  </data>
   <data name="Msg_UpdateDownloadFailed" xml:space="preserve">
     <value>更新下载翻车了，检查一下网线是不是被猫咬断了？</value>
-  </data>
-  <data name="Msg_UpdateReady" xml:space="preserve">
-    <value>更新已下载完成，关软件时会自动安装，不用你操心～</value>
-  </data>
-  <data name="Msg_UpdateReadyTitle" xml:space="preserve">
-    <value>更新就绪，随时起飞</value>
   </data>
   <data name="Update_Beta" xml:space="preserve">
     <value>测试版 (Beta)（小白鼠专属）</value>
