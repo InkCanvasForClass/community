@@ -249,6 +249,9 @@
   <data name="Theme_Language_English" xml:space="preserve">
     <value>English</value>
   </data>
+  <data name="Theme_Language_MemeChinese" xml:space="preserve">
+    <value>梗体中文</value>
+  </data>
   <data name="Theme_Language_RestartHint" xml:space="preserve">
     <value>更改界面语言后需要重启应用程序才能完全生效。</value>
   </data>

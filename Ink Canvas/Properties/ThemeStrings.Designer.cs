@@ -178,6 +178,8 @@ namespace Ink_Canvas.Properties
 
         public static string Theme_Language_English => ResourceManager.GetString(nameof(Theme_Language_English), _resourceCulture);
 
+        public static string Theme_Language_MemeChinese => ResourceManager.GetString(nameof(Theme_Language_MemeChinese), _resourceCulture);
+
         public static string Theme_Language_RestartHint => ResourceManager.GetString(nameof(Theme_Language_RestartHint), _resourceCulture);
 
         public static string Theme_Language_System => ResourceManager.GetString(nameof(Theme_Language_System), _resourceCulture);

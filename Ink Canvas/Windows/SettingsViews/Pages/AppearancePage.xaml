@@ -71,6 +71,7 @@
                             <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_System}" />
                             <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Language_ChineseSimplified}" />
                             <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Language_English}" />
+                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Language_MemeChinese}" />
                         </ComboBox>
                     </ui:SettingsCard>
 

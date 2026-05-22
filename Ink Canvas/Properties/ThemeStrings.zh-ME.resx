@@ -43,504 +43,504 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="AppearancePanel_24HourTimeFormat" xml:space="preserve">
-    <value></value>
+    <value>用24小时制看时间</value>
   </data>
   <data name="AppearancePanel_80Hint" xml:space="preserve">
-    <value>Scale whiteboard interface to 80%</value>
+    <value>把白板缩到80%</value>
   </data>
   <data name="AppearancePanel_Hint" xml:space="preserve">
-    <value>Select application theme style</value>
+    <value>选个你喜欢的皮肤</value>
   </data>
   <data name="AppearancePanel_Hint_ShowStartupAnimation" xml:space="preserve">
-    <value>Show animation effect at startup</value>
+    <value>启动时放个动画整活</value>
   </data>
   <data name="AppearancePanel_Hint_ShowRedoButton" xml:space="preserve">
-    <value>Show redo button in floating bar</value>
+    <value>在装备栏里放个重做按钮</value>
   </data>
   <data name="AppearancePanel_Hint_ShowClearButton" xml:space="preserve">
-    <value>Show clear button in floating bar</value>
+    <value>在装备栏里放个一键清空按钮</value>
   </data>
   <data name="AppearancePanel_Hint_ShowWhiteboardButton" xml:space="preserve">
-    <value>Show whiteboard button in floating bar</value>
+    <value>在装备栏里放个白板按钮</value>
   </data>
   <data name="AppearancePanel_Hint_ShowHideButton" xml:space="preserve">
-    <value>Show hide button in floating bar</value>
+    <value>在装备栏里放个隐身按钮</value>
   </data>
   <data name="AppearancePanel_Hint_ShowLassoSelectButton" xml:space="preserve">
-    <value>Show lasso select button in floating bar</value>
+    <value>在装备栏里放个套马杆按钮</value>
   </data>
   <data name="AppearancePanel_Hint_ShowClearAndMouseButton" xml:space="preserve">
-    <value>Show clear and mouse button in floating bar</value>
+    <value>在装备栏里放个清并鼠按钮</value>
   </data>
   <data name="AppearancePanel_Hint_ShowQuickPalette" xml:space="preserve">
-    <value>Show quick color palette in floating bar</value>
+    <value>在装备栏里放个快捷调色盘</value>
   </data>
   <data name="AppearancePanel_Hint_SelectQuickPaletteMode" xml:space="preserve">
-    <value>Select quick color palette display mode</value>
+    <value>选个调色盘的显示方式</value>
   </data>
   <data name="AppearancePanel_Hint_ShowTrayIcon" xml:space="preserve">
-    <value>Show icon in taskbar system tray</value>
+    <value>在任务栏托盘里露个脸</value>
   </data>
   <data name="AppearancePanel_Hint_ShowTimeAndDate" xml:space="preserve">
-    <value>Show current time and date in whiteboard interface</value>
+    <value>在白板上显示时间和日期</value>
   </data>
   <data name="AppearancePanel_Hint_SelectAnimationStyle" xml:space="preserve">
-    <value>Select startup animation style</value>
+    <value>选个启动动画的样式</value>
   </data>
   <data name="AppearancePanel_Hint_ShowMotivationalQuotes" xml:space="preserve">
-    <value>Show inspirational quotes in whiteboard interface</value>
+    <value>在白板上显示鸡汤语录</value>
   </data>
   <data name="AppearancePanel_Hint_ShowQuickActionsInCollapsed" xml:space="preserve">
-    <value>Show quick operation panel in folded mode</value>
+    <value>收纳模式下也能快速操作</value>
   </data>
   <data name="AppearancePanel_Hint_SelectUncollapseIconStyle" xml:space="preserve">
-    <value>Select unfold button icon style</value>
+    <value>选个展开按钮的图标样式</value>
   </data>
   <data name="AppearancePanel_Hint_AutoAnnotateOnUncollapse" xml:space="preserve">
-    <value>When enabled, automatically switch to annotation mode when exiting fold mode for quick annotation</value>
+    <value>开了之后，退出收纳模式自动切到批注模式，方便你随手画</value>
   </data>
   <data name="AppearancePanel_Hint_AutoCollapseOnWhiteboardExit" xml:space="preserve">
-    <value>When enabled, will automatically dock to sidebar when exiting whiteboard mode</value>
+    <value>开了之后，退出白板模式自动缩回侧边栏</value>
   </data>
   <data name="AppearancePanel_Hint_SelectToolbarIconStyle" xml:space="preserve">
-    <value>Select floating toolbar icon style</value>
+    <value>选个装备栏的图标风格</value>
   </data>
   <data name="AppearancePanel_Hint_AdjustToolbarSize" xml:space="preserve">
-    <value>Adjust floating toolbar size</value>
+    <value>调装备栏的大小</value>
   </data>
   <data name="AppearancePanel_Hint_AdjustToolbarOpacity" xml:space="preserve">
-    <value>Adjust floating toolbar opacity</value>
+    <value>调装备栏的透明度</value>
   </data>
   <data name="AppearancePanel_Hint_ShowPenTipModeButton" xml:space="preserve">
-    <value>Show nib mode toggle button in color palette window</value>
+    <value>在调色盘里放个笔尖模式切换按钮</value>
   </data>
   <data name="AppearancePanel_Hint_UseLegacyToolbarStyle" xml:space="preserve">
-    <value>Use legacy floating bar button UI style</value>
+    <value>用老版装备栏的界面风格</value>
   </data>
   <data name="AppearancePanel_Hint_ShowShapeButton" xml:space="preserve">
-    <value>Show shape button in floating bar</value>
+    <value>在装备栏里放个图形按钮</value>
   </data>
   <data name="AppearancePanel_Hint_ShowUndoButton" xml:space="preserve">
-    <value>Show undo button in floating bar</value>
+    <value>在装备栏里放个撤销按钮</value>
   </data>
   <data name="AppearancePanel_PPTHint" xml:space="preserve">
-    <value>When enabled, the floating bar will automatically fold after exiting PPT slideshow</value>
+    <value>开了之后，退出 PPT 放映自动收起装备栏</value>
   </data>
   <data name="AppearancePanel_PPTPPTHint" xml:space="preserve">
-    <value>Floating toolbar opacity in PPT mode (effective after re-entering PPT slideshow)</value>
+    <value>PPT 模式下装备栏的透明度（重新进 PPT 放映后生效）</value>
   </data>
   <data name="Theme_BlackboardScale80" xml:space="preserve">
-    <value>Whiteboard UI 80% scale</value>
+    <value>白板 UI 缩放倍数</value>
   </data>
   <data name="Theme_Browse" xml:space="preserve">
-    <value>Browse</value>
+    <value>翻翻看</value>
   </data>
   <data name="Theme_Clear" xml:space="preserve">
-    <value>Clear</value>
+    <value>一键清空</value>
   </data>
   <data name="Theme_CustomFloatingIconLabel" xml:space="preserve">
-    <value>Custom floating icon</value>
+    <value>自定义装备栏图标</value>
   </data>
   <data name="Theme_Customize" xml:space="preserve">
-    <value>Custom</value>
+    <value>搞点自定义</value>
   </data>
   <data name="Theme_CustomSplash_NotSelected" xml:space="preserve">
-    <value>No custom image selected</value>
+    <value>还没选图片呢</value>
   </data>
   <data name="Theme_CustomSplashImage" xml:space="preserve">
-    <value>Custom Splash Image</value>
+    <value>自定义启动图</value>
   </data>
   <data name="Theme_CustomSplashImage_Desc" xml:space="preserve">
-    <value>Select a custom image as the splash screen background (supports JPG, PNG, BMP, etc.)</value>
+    <value>选张图当启动动画背景（JPG、PNG、BMP 都行）</value>
   </data>
   <data name="Theme_CustomSplashTextPosition" xml:space="preserve">
-    <value>Text Position</value>
+    <value>文字显示位置</value>
   </data>
   <data name="Theme_CustomSplashTextPosition_Desc" xml:space="preserve">
-    <value>Set the position of loading text and progress bar</value>
+    <value>设置启动时文字和进度条放哪</value>
   </data>
   <data name="Theme_Dark" xml:space="preserve">
-    <value>Dark theme</value>
+    <value>暗黑模式</value>
   </data>
   <data name="Theme_EnableQuickPanel" xml:space="preserve">
-    <value>Enable quick panel in docked mode</value>
+    <value>收纳模式下开快速面板</value>
   </data>
   <data name="Theme_EnableSplash" xml:space="preserve">
-    <value>Enable startup animation</value>
+    <value>开启动画整活</value>
   </data>
   <data name="Theme_EraserButtonDisplay" xml:space="preserve">
-    <value>Eraser button display</value>
+    <value>橡皮按钮显示</value>
   </data>
   <data name="Theme_EraserDisplay_AreaOnly" xml:space="preserve">
-    <value>Area eraser only</value>
+    <value>只显示面积擦</value>
   </data>
   <data name="Theme_EraserDisplay_Both" xml:space="preserve">
-    <value>Show both</value>
+    <value>两个都要</value>
   </data>
   <data name="Theme_EraserDisplay_LineOnly" xml:space="preserve">
-    <value>Line eraser only</value>
+    <value>只显示线擦</value>
   </data>
   <data name="Theme_EraserDisplay_None" xml:space="preserve">
-    <value>Hide all</value>
+    <value>都不要</value>
   </data>
   <data name="Theme_FloatingBarButtonsTitle" xml:space="preserve">
-    <value>Floating bar buttons</value>
+    <value>装备栏按钮显示</value>
   </data>
   <data name="Theme_FloatingBarIcon" xml:space="preserve">
-    <value>Floating toolbar icon</value>
+    <value>装备栏图标</value>
   </data>
   <data name="Theme_FloatingBarOpacity" xml:space="preserve">
-    <value>Floating toolbar opacity</value>
+    <value>装备栏透明度</value>
   </data>
   <data name="Theme_FloatingBarOpacityInPPT" xml:space="preserve">
-    <value>Floating bar opacity in PPT</value>
+    <value>PPT 下装备栏透明度</value>
   </data>
   <data name="Theme_FloatingBarOpacityInPPTHint" xml:space="preserve">
-    <value>Takes effect after re-entering slide show</value>
+    <value>重新进 PPT 放映后生效</value>
   </data>
   <data name="Theme_FloatingBarScale" xml:space="preserve">
-    <value>Floating toolbar scale</value>
+    <value>装备栏缩放倍数</value>
   </data>
   <data name="Theme_FloatingIcon_CoolapkAbused" xml:space="preserve">
-    <value>Coolapk abused emoji</value>
+    <value>酷安受虐滑稽</value>
   </data>
   <data name="Theme_FloatingIcon_CoolapkCrossEye" xml:space="preserve">
-    <value>Coolapk cross-eye emoji</value>
+    <value>酷安斗鸡眼滑稽</value>
   </data>
   <data name="Theme_FloatingIcon_CoolapkGreenHatDoge" xml:space="preserve">
-    <value>Coolapk green-hat Doge</value>
+    <value>酷安绿帽Doge</value>
   </data>
   <data name="Theme_FloatingIcon_CoolapkSmile" xml:space="preserve">
-    <value>Coolapk grin emoji</value>
+    <value>酷安呲牙笑</value>
   </data>
   <data name="Theme_FloatingIcon_CoolapkUnderwear" xml:space="preserve">
-    <value>Coolapk underwear emoji</value>
+    <value>酷安头戴内裤滑稽</value>
   </data>
   <data name="Theme_FloatingIcon_IccBlackTransparent" xml:space="preserve">
-    <value>&quot;ICC-CE&quot; black transparent</value>
+    <value>「ICC-CE」黑色透明版</value>
   </data>
   <data name="Theme_FloatingIcon_IccDark" xml:space="preserve">
-    <value>&quot;ICC-CE&quot; dark</value>
+    <value>「ICC-CE」深色</value>
   </data>
   <data name="Theme_FloatingIcon_IccDarkBreath" xml:space="preserve">
-    <value>&quot;ICC-CE&quot; dark breathing</value>
+    <value>「ICC-CE」深色呼吸版</value>
   </data>
   <data name="Theme_FloatingIcon_IccDefault" xml:space="preserve">
-    <value>&quot;ICC-CE&quot; default</value>
+    <value>「ICC-CE」默认</value>
   </data>
   <data name="Theme_FloatingIcon_IccNoShadow" xml:space="preserve">
-    <value>&quot;ICC-CE&quot; no shadow</value>
+    <value>「ICC-CE」无阴影</value>
   </data>
   <data name="Theme_FloatingIcon_IccWhiteTransparent" xml:space="preserve">
-    <value>&quot;ICC-CE&quot; white transparent</value>
+    <value>「ICC-CE」白色透明版</value>
   </data>
   <data name="Theme_FloatingIcon_TiebaEmoji" xml:space="preserve">
-    <value>Tieba emoji</value>
+    <value>贴吧滑稽</value>
   </data>
   <data name="Theme_GroupTitle" xml:space="preserve">
-    <value>Personalization</value>
+    <value>个性化</value>
   </data>
   <data name="Theme_Label" xml:space="preserve">
-    <value>Theme</value>
+    <value>皮肤</value>
   </data>
   <data name="Theme_Language_ChineseSimplified" xml:space="preserve">
-    <value>Chinese (Simplified)</value>
+    <value>简体中文</value>
   </data>
   <data name="Theme_Language_English" xml:space="preserve">
     <value>English</value>
   </data>
   <data name="Theme_Language_MemeChinese" xml:space="preserve">
-    <value>Meme Chinese (梗体中文)</value>
+    <value>梗体中文</value>
   </data>
   <data name="Theme_Language_RestartHint" xml:space="preserve">
-    <value>You need to restart the app for language changes to fully take effect.</value>
+    <value>换了语言得重启才能完全生效哦~</value>
   </data>
   <data name="Theme_Language_System" xml:space="preserve">
-    <value>Follow system</value>
+    <value>跟着系统走</value>
   </data>
   <data name="Theme_LanguageLabel" xml:space="preserve">
-    <value>UI language</value>
+    <value>界面语言</value>
   </data>
   <data name="Theme_Light" xml:space="preserve">
-    <value>Light theme</value>
+    <value>亮亮模式</value>
   </data>
   <data name="Theme_Manage" xml:space="preserve">
-    <value>Manage</value>
+    <value>管理</value>
   </data>
   <data name="Theme_QuickPalette_DoubleRow" xml:space="preserve">
-    <value>Double row (8 colors)</value>
+    <value>双行显示（8 种颜色）</value>
   </data>
   <data name="Theme_QuickPalette_SingleRow" xml:space="preserve">
-    <value>Single row (6 colors)</value>
+    <value>单行显示（6 种颜色）</value>
   </data>
   <data name="Theme_QuickPaletteMode" xml:space="preserve">
-    <value>Quick palette display mode</value>
+    <value>快捷调色盘显示模式</value>
   </data>
   <data name="Theme_QuickPanelBottomOffset" xml:space="preserve">
-    <value>Quick panel vertical offset</value>
+    <value>快捷面板垂直偏移</value>
   </data>
   <data name="Theme_QuoteSource" xml:space="preserve">
-    <value>Where is the quote from?</value>
+    <value>信仰の源出自 Where？</value>
   </data>
   <data name="Theme_QuoteSource_GaokaoBless" xml:space="preserve">
-    <value>Gaokao blessings</value>
+    <value>高考祝福语</value>
   </data>
   <data name="Theme_QuoteSource_Hitokoto" xml:space="preserve">
-    <value>Hitokoto API</value>
+    <value>一言（Hitokoto API）</value>
   </data>
   <data name="Theme_QuoteSource_Mottos" xml:space="preserve">
-    <value>Inspirational mottos</value>
+    <value>励志立志的名言警句</value>
   </data>
   <data name="Theme_QuoteSource_OsuQuotes" xml:space="preserve">
-    <value>osu! player quotes</value>
+    <value>osu!玩家语录</value>
   </data>
   <data name="Theme_QuoteSource_PhigrosTips" xml:space="preserve">
     <value>Phigros Tips</value>
   </data>
   <data name="Theme_ShowClearAndMouseButton" xml:space="preserve">
-    <value>Show clear+mouse button</value>
+    <value>显示清并鼠按钮</value>
   </data>
   <data name="Theme_ShowClearButton" xml:space="preserve">
-    <value>Show clear button</value>
+    <value>显示一键清空按钮</value>
   </data>
   <data name="Theme_ShowHideButton" xml:space="preserve">
-    <value>Show hide button</value>
+    <value>显示隐身按钮</value>
   </data>
   <data name="Theme_ShowLassoButton" xml:space="preserve">
-    <value>Show lasso select button</value>
+    <value>显示套马杆按钮</value>
   </data>
   <data name="Theme_ShowNibButton" xml:space="preserve">
-    <value>Show nib-mode button in palette</value>
+    <value>在调色盘里显示 笔尖模式 按钮</value>
   </data>
   <data name="Theme_ShowQuickPalette" xml:space="preserve">
-    <value>Show quick palette</value>
+    <value>显示快捷调色盘</value>
   </data>
   <data name="Theme_ShowQuoteInWhiteboard" xml:space="preserve">
-    <value>Show quotes in whiteboard</value>
+    <value>在白板中显示信仰の源 1（好喝的/毒的鸡汤）</value>
   </data>
   <data name="Theme_ShowRedoButton" xml:space="preserve">
-    <value>Show redo button</value>
+    <value>显示重做按钮</value>
   </data>
   <data name="Theme_ShowShapeButton" xml:space="preserve">
-    <value>Show shape button</value>
+    <value>显示图形按钮</value>
   </data>
   <data name="Theme_ShowTimeInWhiteboard" xml:space="preserve">
-    <value>Show time and date in whiteboard</value>
+    <value>在白板中显示当前时间和日期</value>
   </data>
   <data name="Theme_ShowUndoButton" xml:space="preserve">
-    <value>Show undo button</value>
+    <value>显示撤销按钮</value>
   </data>
   <data name="Theme_ShowWhiteboardButton" xml:space="preserve">
-    <value>Show whiteboard button</value>
+    <value>显示白板按钮</value>
   </data>
   <data name="Theme_Splash_Autumn" xml:space="preserve">
-    <value>Autumn</value>
+    <value>秋天</value>
   </data>
   <data name="Theme_Splash_Custom" xml:space="preserve">
-    <value>Custom</value>
+    <value>自定义</value>
   </data>
   <data name="Theme_Splash_Horse" xml:space="preserve">
-    <value>Year-of-Horse special</value>
+    <value>马年限定</value>
   </data>
   <data name="Theme_Splash_Random" xml:space="preserve">
-    <value>Random</value>
+    <value>随缘</value>
   </data>
   <data name="Theme_Splash_Seasonal" xml:space="preserve">
-    <value>Follow seasons</value>
+    <value>跟着四季走</value>
   </data>
   <data name="Theme_Splash_Spring" xml:space="preserve">
-    <value>Spring</value>
+    <value>春天</value>
   </data>
   <data name="Theme_Splash_Summer" xml:space="preserve">
-    <value>Summer</value>
+    <value>夏天</value>
   </data>
   <data name="Theme_Splash_Winter" xml:space="preserve">
-    <value>Winter</value>
+    <value>冬天</value>
   </data>
   <data name="Theme_SplashStyle" xml:space="preserve">
-    <value>Startup animation style</value>
+    <value>启动动画样式</value>
   </data>
   <data name="Theme_System" xml:space="preserve">
-    <value>Follow system</value>
+    <value>跟着系统走</value>
   </data>
   <data name="Theme_TextPosition_BottomCenter" xml:space="preserve">
-    <value>Bottom Center</value>
+    <value>中下</value>
   </data>
   <data name="Theme_TextPosition_BottomLeft" xml:space="preserve">
-    <value>Bottom Left</value>
+    <value>左下</value>
   </data>
   <data name="Theme_TextPosition_BottomRight" xml:space="preserve">
-    <value>Bottom Right</value>
+    <value>右下</value>
   </data>
   <data name="Theme_UnfoldButtonIcon" xml:space="preserve">
-    <value>Un-dock button icon</value>
+    <value>展开按钮图标</value>
   </data>
   <data name="Theme_UnfoldIcon_Arrow" xml:space="preserve">
-    <value>Arrow</value>
+    <value>箭头</value>
   </data>
   <data name="Theme_UnfoldIcon_Pen" xml:space="preserve">
-    <value>Pen</value>
+    <value>笔</value>
   </data>
   <data name="Theme_Upload" xml:space="preserve">
-    <value>Upload</value>
+    <value>上传</value>
   </data>
   <data name="Theme_UseLegacyFloatingBarUI" xml:space="preserve">
-    <value>Use legacy floating bar UI</value>
+    <value>用老版装备栏 UI</value>
   </data>
   <data name="Theme_WindowBackdrop" xml:space="preserve">
-    <value>Window background style</value>
+    <value>窗口背景样式</value>
   </data>
   <data name="Theme_WindowBackdrop_Acrylic" xml:space="preserve">
-    <value>Acrylic</value>
+    <value>亚克力</value>
   </data>
   <data name="Theme_WindowBackdrop_Acrylic10" xml:space="preserve">
-    <value>Acrylic (Windows 10 compatible)</value>
+    <value>亚克力 10</value>
   </data>
   <data name="Theme_WindowBackdrop_Acrylic11" xml:space="preserve">
-    <value>Acrylic (Windows 11 compatible)</value>
+    <value>亚克力 11</value>
   </data>
   <data name="Theme_WindowBackdrop_Description" xml:space="preserve">
-    <value>Controls Mica, Acrylic, and other background effects for modern windows such as Settings and OOBE.</value>
+    <value>控制设置、OOBE 等现代窗口的云母、亚克力等背景效果。</value>
   </data>
   <data name="Theme_WindowBackdrop_Mica" xml:space="preserve">
-    <value>Mica</value>
+    <value>云母</value>
   </data>
   <data name="Theme_WindowBackdrop_None" xml:space="preserve">
-    <value>No background effect</value>
+    <value>无背景效果</value>
   </data>
   <data name="Theme_WindowBackdrop_Tabbed" xml:space="preserve">
-    <value>Tabbed background</value>
+    <value>Tabbed</value>
   </data>
   <data name="Theme_WindowBackdrop_Transient" xml:space="preserve">
-    <value>Transient background</value>
+    <value>Transient</value>
   </data>
   <data name="ThemePanel_80Hint" xml:space="preserve">
-    <value>Scale whiteboard interface to 80%</value>
+    <value>把白板缩到80%</value>
   </data>
   <data name="ThemePanel_Hint" xml:space="preserve">
-    <value>Select application theme style</value>
+    <value>选个你喜欢的皮肤</value>
   </data>
   <data name="ThemePanel_Hint_ShowStartupAnimation" xml:space="preserve">
-    <value>Show animation effect at startup</value>
+    <value>启动时放个动画整活</value>
   </data>
   <data name="ThemePanel_Hint_ShowRedoButton" xml:space="preserve">
-    <value>Show redo button in floating bar</value>
+    <value>在装备栏里放个重做按钮</value>
   </data>
   <data name="ThemePanel_Hint_ShowClearButton" xml:space="preserve">
-    <value>Show clear button in floating bar</value>
+    <value>在装备栏里放个一键清空按钮</value>
   </data>
   <data name="ThemePanel_Hint_ShowWhiteboardButton" xml:space="preserve">
-    <value>Show whiteboard button in floating bar</value>
+    <value>在装备栏里放个白板按钮</value>
   </data>
   <data name="ThemePanel_Hint_ShowHideButton" xml:space="preserve">
-    <value>Show hide button in floating bar</value>
+    <value>在装备栏里放个隐身按钮</value>
   </data>
   <data name="ThemePanel_Hint_ShowLassoSelectButton" xml:space="preserve">
-    <value>Show lasso select button in floating bar</value>
+    <value>在装备栏里放个套马杆按钮</value>
   </data>
   <data name="ThemePanel_Hint_ShowClearAndMouseButton" xml:space="preserve">
-    <value>Show clear and mouse button in floating bar</value>
+    <value>在装备栏里放个清并鼠按钮</value>
   </data>
   <data name="ThemePanel_Hint_ShowQuickPalette" xml:space="preserve">
-    <value>Show quick color palette in floating bar</value>
+    <value>在装备栏里放个快捷调色盘</value>
   </data>
   <data name="ThemePanel_Hint_SelectQuickPaletteMode" xml:space="preserve">
-    <value>Select quick color palette display mode</value>
+    <value>选个调色盘的显示方式</value>
   </data>
   <data name="ThemePanel_Hint_ShowTrayIcon" xml:space="preserve">
-    <value>Show icon in taskbar system tray</value>
+    <value>在任务栏托盘里露个脸</value>
   </data>
   <data name="ThemePanel_Hint_ShowTimeAndDate" xml:space="preserve">
-    <value>Show current time and date in whiteboard interface</value>
+    <value>在白板上显示时间和日期</value>
   </data>
   <data name="ThemePanel_Hint_SelectAnimationStyle" xml:space="preserve">
-    <value>Select startup animation style</value>
+    <value>选个启动动画的样式</value>
   </data>
   <data name="ThemePanel_Hint_ShowMotivationalQuotes" xml:space="preserve">
-    <value>Show inspirational quotes in whiteboard interface</value>
+    <value>在白板上显示鸡汤语录</value>
   </data>
   <data name="ThemePanel_Hint_ShowQuickActionsInCollapsed" xml:space="preserve">
-    <value>Show quick operation panel in folded mode</value>
+    <value>收纳模式下也能快速操作</value>
   </data>
   <data name="ThemePanel_Hint_SelectUncollapseIconStyle" xml:space="preserve">
-    <value>Select unfold button icon style</value>
+    <value>选个展开按钮的图标样式</value>
   </data>
   <data name="ThemePanel_Hint_AutoAnnotateOnUncollapse" xml:space="preserve">
-    <value>When enabled, automatically switch to annotation mode when exiting fold mode for quick annotation</value>
+    <value>开了之后，退出收纳模式自动切到批注模式，方便你随手画</value>
   </data>
   <data name="ThemePanel_Hint_AutoCollapseOnWhiteboardExit" xml:space="preserve">
-    <value>When enabled, will automatically dock to sidebar when exiting whiteboard mode</value>
+    <value>开了之后，退出白板模式自动缩回侧边栏</value>
   </data>
   <data name="ThemePanel_Hint_SelectToolbarIconStyle" xml:space="preserve">
-    <value>Select floating toolbar icon style</value>
+    <value>选个装备栏的图标风格</value>
   </data>
   <data name="ThemePanel_Hint_AdjustToolbarSize" xml:space="preserve">
-    <value>Adjust floating toolbar size</value>
+    <value>调装备栏的大小</value>
   </data>
   <data name="ThemePanel_Hint_AdjustToolbarOpacity" xml:space="preserve">
-    <value>Adjust floating toolbar opacity</value>
+    <value>调装备栏的透明度</value>
   </data>
   <data name="ThemePanel_Hint_ShowPenTipModeButton" xml:space="preserve">
-    <value>Show nib mode toggle button in color palette window</value>
+    <value>在调色盘里放个笔尖模式切换按钮</value>
   </data>
   <data name="ThemePanel_Hint_UseLegacyToolbarStyle" xml:space="preserve">
-    <value>Use legacy floating bar button UI style</value>
+    <value>用老版装备栏的界面风格</value>
   </data>
   <data name="ThemePanel_Hint_ShowShapeButton" xml:space="preserve">
-    <value>Show shape button in floating bar</value>
+    <value>在装备栏里放个图形按钮</value>
   </data>
   <data name="ThemePanel_Hint_ShowUndoButton" xml:space="preserve">
-    <value>Show undo button in floating bar</value>
+    <value>在装备栏里放个撤销按钮</value>
   </data>
   <data name="ThemePanel_PPTHint" xml:space="preserve">
-    <value>When enabled, the floating bar will automatically fold after exiting PPT slideshow</value>
+    <value>开了之后，退出 PPT 放映自动收起装备栏</value>
   </data>
   <data name="ThemePanel_PPTPPTHint" xml:space="preserve">
-    <value>Floating toolbar opacity in PPT mode (effective after re-entering PPT slideshow)</value>
+    <value>PPT 模式下装备栏的透明度（重新进 PPT 放映后生效）</value>
   </data>
   <data name="Theme_FloatingBarButtonsDescription" xml:space="preserve">
-    <value>Go to the Toolbar settings page to manage floating toolbar component display and ordering.</value>
+    <value>去「装备栏」设置页面管理装备栏的组件显示与排序吧。</value>
   </data>
   <data name="Theme_SelectCustomSplashImage" xml:space="preserve">
-    <value>Select Custom Splash Image</value>
+    <value>选张自定义启动图</value>
   </data>
   <data name="Theme_HitokotoCategory_Animation" xml:space="preserve">
-    <value>Animation</value>
+    <value>动画</value>
   </data>
   <data name="Theme_HitokotoCategory_Manga" xml:space="preserve">
-    <value>Manga</value>
+    <value>漫画</value>
   </data>
   <data name="Theme_HitokotoCategory_Game" xml:space="preserve">
-    <value>Game</value>
+    <value>游戏</value>
   </data>
   <data name="Theme_HitokotoCategory_Literature" xml:space="preserve">
-    <value>Literature</value>
+    <value>文学</value>
   </data>
   <data name="Theme_HitokotoCategory_Original" xml:space="preserve">
-    <value>Original</value>
+    <value>原创</value>
   </data>
   <data name="Theme_HitokotoCategory_FromWeb" xml:space="preserve">
-    <value>From Web</value>
+    <value>来自网络</value>
   </data>
   <data name="Theme_HitokotoCategory_Movie" xml:space="preserve">
-    <value>Movie &amp; TV</value>
+    <value>影视</value>
   </data>
   <data name="Theme_HitokotoCategory_Poetry" xml:space="preserve">
-    <value>Poetry</value>
+    <value>诗词</value>
   </data>
   <data name="Theme_HitokotoCategory_NeteaseCloud" xml:space="preserve">
-    <value>Netease Cloud</value>
+    <value>网易云</value>
   </data>
   <data name="Theme_HitokotoCategory_Philosophy" xml:space="preserve">
-    <value>Philosophy</value>
+    <value>哲学</value>
   </data>
   <data name="Theme_HitokotoCategory_Humor" xml:space="preserve">
-    <value>Humor</value>
+    <value>抖机灵</value>
   </data>
   <data name="Theme_Hitokoto_SelectAll" xml:space="preserve">
-    <value>Select All</value>
+    <value>全都要！</value>
   </data>
   <data name="Theme_Hitokoto_CustomizeTitle" xml:space="preserve">
-    <value>Customize Hitokoto Categories</value>
+    <value>自定义一言分类</value>
   </data>
 </root>

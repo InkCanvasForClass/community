@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Canvas_AdvancedBezierSmoothing" xml:space="preserve">
+    <value>高级曲线平滑（推荐，丝滑体验）</value>
+  </data>
+  <data name="Canvas_AdvancedSmoothing" xml:space="preserve">
+    <value>高级曲线平滑（推荐，丝滑体验）</value>
+  </data>
+  <data name="Canvas_AndInk" xml:space="preserve">
+    <value>画板和墨迹</value>
+  </data>
+  <data name="Canvas_AskEachTime" xml:space="preserve">
+    <value>每次都问我</value>
+  </data>
+  <data name="Canvas_AsymptoteHint" xml:space="preserve">
+    <value>注意！不保留双曲线渐近线的话可能会遇到撤回相关的 BUG，别怪我没提醒…</value>
+  </data>
+  <data name="Canvas_AutoRestoreTimePoints" xml:space="preserve">
+    <value>自动恢复时间点 (HH:mm，可多个，用 ; 分隔)</value>
+  </data>
+  <data name="Canvas_BrushAutoRestore" xml:space="preserve">
+    <value>启用画笔自动恢复（自动回血）</value>
+  </data>
+  <data name="Canvas_BrushAutoRestoreHint" xml:space="preserve">
+    <value>开启后，临时改了画笔设置会在指定时间点自动恢复到你配置的颜色/透明度/粗细，再也不怕忘记调回来了</value>
+  </data>
+  <data name="Canvas_ClearCanvasAlsoClearImages" xml:space="preserve">
+    <value>清空画布时图片也一起清掉</value>
+  </data>
+  <data name="Canvas_ClearImageOnClear" xml:space="preserve">
+    <value>清空画布时图片也一起清掉</value>
+  </data>
+  <data name="Canvas_ClearInkAlsoClearHistory" xml:space="preserve">
+    <value>清空墨迹时历史记录也一起删（断舍离）</value>
+  </data>
+  <data name="Canvas_ClearInkHistory" xml:space="preserve">
+    <value>清空墨迹时历史记录也一起删（断舍离）</value>
+  </data>
+  <data name="Canvas_Color_Black" xml:space="preserve">
+    <value>黑色</value>
+  </data>
+  <data name="Canvas_Color_Blue" xml:space="preserve">
+    <value>蓝色</value>
+  </data>
+  <data name="Canvas_Color_Default" xml:space="preserve">
+    <value>默认</value>
+  </data>
+  <data name="Canvas_Color_Green" xml:space="preserve">
+    <value>绿色</value>
+  </data>
+  <data name="Canvas_Color_Orange" xml:space="preserve">
+    <value>橙色</value>
+  </data>
+  <data name="Canvas_Color_Purple" xml:space="preserve">
+    <value>紫色</value>
+  </data>
+  <data name="Canvas_Color_Red" xml:space="preserve">
+    <value>红色</value>
+  </data>
+  <data name="Canvas_Color_White" xml:space="preserve">
+    <value>白色</value>
+  </data>
+  <data name="Canvas_Color_Yellow" xml:space="preserve">
+    <value>黄色</value>
+  </data>
+  <data name="Canvas_CompressImage" xml:space="preserve">
+    <value>插入大图自动压缩（大于 1920×1080）</value>
+  </data>
+  <data name="Canvas_CompressPicturesUploaded" xml:space="preserve">
+    <value>插入大图自动压缩（大于1920×1080）</value>
+  </data>
+  <data name="Canvas_CurveSmoothing_Off" xml:space="preserve">
+    <value>关闭（原生态手抖风）</value>
+  </data>
+  <data name="Canvas_CurveSmoothingMode" xml:space="preserve">
+    <value>曲线平滑模式</value>
+  </data>
+  <data name="Canvas_DisableHardwareAcceleration" xml:space="preserve">
+    <value>关闭硬件加速（降速换兼容）</value>
+  </data>
+  <data name="Canvas_DisableHardwareAccelerationHint" xml:space="preserve">
+    <value>关闭后兼容性更好但可能变卡；部分效果可能需要重启程序才完全生效。</value>
+  </data>
+  <data name="Canvas_DisablePressure" xml:space="preserve">
+    <value>屏蔽压感（统一粗细）</value>
+  </data>
+  <data name="Canvas_DisablePressureHint" xml:space="preserve">
+    <value>开启后忽略所有设备的压感信息，笔画粗细统一，跟压感触屏模式互斥。</value>
+  </data>
+  <data name="Canvas_EnableInkFade" xml:space="preserve">
+    <value>启用墨迹渐隐（墨迹会消失术）</value>
+  </data>
+  <data name="Canvas_EnableInkFadeHint" xml:space="preserve">
+    <value>开启后墨迹不会画到画布上，而是保持湿墨迹状态，到时间就自动消失，像魔法一样</value>
+  </data>
+  <data name="Canvas_EnablePressureTouch" xml:space="preserve">
+    <value>启用压感触屏模式</value>
+  </data>
+  <data name="Canvas_EnablePressureTouchHint" xml:space="preserve">
+    <value>开启后触屏设备也支持压感效果，适用于部分支持压感但系统不认的触屏。</value>
+  </data>
+  <data name="Canvas_EraserSize" xml:space="preserve">
+    <value>橡皮大小</value>
+  </data>
+  <data name="Canvas_EraserSize_Large" xml:space="preserve">
+    <value>大号</value>
+  </data>
+  <data name="Canvas_EraserSize_Medium" xml:space="preserve">
+    <value>中号</value>
+  </data>
+  <data name="Canvas_EraserSize_Small" xml:space="preserve">
+    <value>小号</value>
+  </data>
+  <data name="Canvas_EraserSize_VeryLarge" xml:space="preserve">
+    <value>巨无霸</value>
+  </data>
+  <data name="Canvas_EraserSize_VerySmall" xml:space="preserve">
+    <value>迷你</value>
+  </data>
+  <data name="Canvas_EraserSizeHint" xml:space="preserve">
+    <value>不是实时切换的，下次用面积擦的时候才生效。</value>
+  </data>
+  <data name="Canvas_GroupTitle" xml:space="preserve">
+    <value>画板</value>
+  </data>
+  <data name="Canvas_HideFadeInPenMenu" xml:space="preserve">
+    <value>在笔工具菜单中隐藏墨迹渐隐控制</value>
+  </data>
+  <data name="Canvas_HideFadeInPenMenuHint" xml:space="preserve">
+    <value>开启后，点笔工具弹出的菜单里不显示…</value>
+  </data>
+  <data name="Canvas_HideInkFadeInPenMenu" xml:space="preserve">
+    <value>在笔工具菜单中隐藏墨迹渐隐控制</value>
+  </data>
+  <data name="Canvas_HideInkFadeInPenMenuHint" xml:space="preserve">
+    <value>开启后，点笔工具弹出的菜单里不显示墨迹渐隐控制开关</value>
+  </data>
+  <data name="Canvas_HideInkOnExit" xml:space="preserve">
+    <value>退出画板模式后隐藏墨迹（眼不见为净）</value>
+  </data>
+  <data name="Canvas_HideInkOnExitHint" xml:space="preserve">
+    <value>开启 退出画板模式后隐藏墨迹 选项后…</value>
+  </data>
+  <data name="Canvas_HideStrokeWhenSelecting" xml:space="preserve">
+    <value>退出画板模式后隐藏墨迹（眼不见为净）</value>
+  </data>
+  <data name="Canvas_HideStrokeWhenSelectingHint" xml:space="preserve">
+    <value>开启后，进 PPT 模式但不在批注模式时不会显示墨迹。</value>
+  </data>
+  <data name="Canvas_HyperbolaAsymptoteHint" xml:space="preserve">
+    <value>注意！不保留双曲线渐近线可能会遇到撤回 BUG 影响使用，别怪我没提醒。</value>
+  </data>
+  <data name="Canvas_IgnorePressure" xml:space="preserve">
+    <value>屏蔽压感（统一粗细）</value>
+  </data>
+  <data name="Canvas_IgnorePressureHint" xml:space="preserve">
+    <value>开启后忽略所有设备的压感信息…</value>
+  </data>
+  <data name="Canvas_InkFade" xml:space="preserve">
+    <value>启用墨迹渐隐（墨迹会消失术）</value>
+  </data>
+  <data name="Canvas_InkFadeHint" xml:space="preserve">
+    <value>开启后墨迹不会画到画布上…</value>
+  </data>
+  <data name="Canvas_InkFadeTime" xml:space="preserve">
+    <value>墨迹渐隐时间（消失倒计时）</value>
+  </data>
+  <data name="Canvas_KeepAsymptote" xml:space="preserve">
+    <value>保留双曲线渐近线</value>
+  </data>
+  <data name="Canvas_KeepHyperbolaAsymptote" xml:space="preserve">
+    <value>保留双曲线渐近线</value>
+  </data>
+  <data name="Canvas_LaunchSeewoVideoShowcaseForWhiteboardBooth" xml:space="preserve">
+    <value>白板展台按钮启动希沃视频展台</value>
+  </data>
+  <data name="Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint" xml:space="preserve">
+    <value>开启后，点白板工具栏「展台」会打开希沃视频展台（需已安装）；关掉则用内置展台。</value>
+  </data>
+  <data name="Canvas_No" xml:space="preserve">
+    <value>不</value>
+  </data>
+  <data name="Canvas_PressureTouch" xml:space="preserve">
+    <value>启用压感触屏模式</value>
+  </data>
+  <data name="Canvas_PressureTouchHint" xml:space="preserve">
+    <value>开启后触屏设备也支持压感效果…</value>
+  </data>
+  <data name="Canvas_RestoreColor" xml:space="preserve">
+    <value>恢复目标颜色</value>
+  </data>
+  <data name="Canvas_RestoreOpacity" xml:space="preserve">
+    <value>恢复透明度</value>
+  </data>
+  <data name="Canvas_RestoreWidth" xml:space="preserve">
+    <value>恢复笔粗细</value>
+  </data>
+  <data name="Canvas_ShowCircleCenter" xml:space="preserve">
+    <value>画圆时显示圆心位置（找圆心不求人）</value>
+  </data>
+  <data name="Canvas_ShowCoordinateUnitMarks" xml:space="preserve">
+    <value>画坐标系时显示厘米刻度</value>
+  </data>
+  <data name="Canvas_ShowCoordinateUnitMarksHint" xml:space="preserve">
+    <value>开启后，画坐标系会按 1 cm 间隔自动添加刻度，数学老师狂喜。</value>
+  </data>
+  <data name="Canvas_ShowCursor" xml:space="preserve">
+    <value>显示画笔光标</value>
+  </data>
+  <data name="Canvas_ShowPenCursor" xml:space="preserve">
+    <value>显示画笔光标</value>
+  </data>
+  <data name="Canvas_SwitchBackAfterEraser" xml:space="preserve">
+    <value>用完橡皮擦自动切回批注模式</value>
+  </data>
+  <data name="Canvas_SwitchBackAfterEraserHint" xml:space="preserve">
+    <value>开启后，用橡皮擦擦完东西静置一会就自动切回批注模式</value>
+  </data>
+  <data name="Canvas_SwitchBackDelay" xml:space="preserve">
+    <value>自动切换延迟时间</value>
+  </data>
+  <data name="Canvas_SwitchBackDelayHint" xml:space="preserve">
+    <value>如果在计时时间内又擦了一下，计时器会重新开始计时</value>
+  </data>
+  <data name="Canvas_WPFBezier" xml:space="preserve">
+    <value>使用 WPF 默认贝塞尔曲线平滑</value>
+  </data>
+  <data name="Canvas_WPFBezierSmoothing" xml:space="preserve">
+    <value>使用 WPF 默认贝塞尔曲线平滑</value>
+  </data>
+  <data name="Canvas_Yes" xml:space="preserve">
+    <value>好</value>
+  </data>
+  <data name="CanvasAndInkPanel__PPT_Hint" xml:space="preserve">
+    <value>开启后，进 PPT 模式但不在批注模式时不会显示墨迹</value>
+  </data>
+  <data name="CanvasAndInkPanel_1920×1080Hint" xml:space="preserve">
+    <value>插入的图片大于 1920×1080 时自动压缩，省内存不卡顿</value>
+  </data>
+  <data name="CanvasAndInkPanel_Hint" xml:space="preserve">
+    <value>绘制时显示画笔光标</value>
+  </data>
+  <data name="CanvasAndInkPanel_Hint_1" xml:space="preserve">
+    <value>开启后触屏设备也支持压感效果，适用于部分支持压感但系统不认的触屏</value>
+  </data>
+  <data name="CanvasAndInkPanel_Hint_2" xml:space="preserve">
+    <value>开启后忽略所有设备的压感信息，笔画粗细统一，跟压感触屏模式互斥</value>
+  </data>
+  <data name="CanvasAndInkPanel_Hint_3" xml:space="preserve">
+    <value>清空画布时连图片一起删，断舍离</value>
+  </data>
+  <data name="CanvasAndInkPanel_Hint_4" xml:space="preserve">
+    <value>画圆时显示圆心标记，找圆心不求人</value>
+  </data>
+  <data name="CanvasAndInkPanel_Hint_5" xml:space="preserve">
+    <value>用改进的贝塞尔曲线平滑算法，画线更丝滑</value>
+  </data>
+  <data name="CanvasAndInkPanel_Hint_6" xml:space="preserve">
+    <value>开启后墨迹不会画到画布上，而是保持湿墨迹状态，到时间就自动消失</value>
+  </data>
+  <data name="CanvasAndInkPanel_Hint_7" xml:space="preserve">
+    <value>设置墨迹从画出来到完全消失的时间</value>
+  </data>
+  <data name="CanvasAndInkPanel_Hint_8" xml:space="preserve">
+    <value>开启后点笔工具弹出的菜单里不显示墨迹渐隐控制开关</value>
+  </data>
+  <data name="CanvasAndInkPanel_Hint_9" xml:space="preserve">
+    <value>开启后按设定时间间隔自动保存墨迹，只在画布可见且有墨迹时才保存</value>
+  </data>
+  <data name="CanvasAndInkPanel_quotquotHint" xml:space="preserve">
+    <value>开启后，清空墨迹后就没法通过"撤销"恢复了，三思而后行</value>
+  </data>
+  <data name="CanvasAndInkPanel_WPFHint" xml:space="preserve">
+    <value>使用 WPF 内置的曲线平滑算法</value>
+  </data>
+  <data name="CanvasAndInkPanel_XMLISFHint" xml:space="preserve">
+    <value>开启后保存墨迹用 XML 格式（ISF 格式），方便查看和编辑墨迹数据</value>
+  </data>
+  <data name="InkRecog_AutoStraightLine" xml:space="preserve">
+    <value>直线自动拉直（手残党福音）</value>
+  </data>
+  <data name="InkRecog_BlockRectFakePressure" xml:space="preserve">
+    <value>阻止矫正后的矩形带模拟压感值</value>
+  </data>
+  <data name="InkRecog_BlockTriFakePressure" xml:space="preserve">
+    <value>阻止矫正后的三角形带模拟压感值</value>
+  </data>
+  <data name="InkRecog_EnableInkRecognition" xml:space="preserve">
+    <value>启用墨迹识别（AI助手上线）</value>
+  </data>
+  <data name="InkRecog_FixEllipse" xml:space="preserve">
+    <value>矫正手绘圆形与椭圆（圆规成精）</value>
+  </data>
+  <data name="InkRecog_FixRectangle" xml:space="preserve">
+    <value>矫正手绘矩形（方方正正）</value>
+  </data>
+  <data name="InkRecog_FixTriangle" xml:space="preserve">
+    <value>矫正手绘三角形（三角达人）</value>
+  </data>
+  <data name="InkRecog_HandwritingBeautify" xml:space="preserve">
+    <value>WinRT识别转手写体字形（字丑救星）</value>
+  </data>
+  <data name="InkRecog_HandwritingBeautifyHint" xml:space="preserve">
+    <value>开启后，调用墨迹纠正 API 时：先用 WinRT 识别手写文字，再把识别成功的文字用手写风格字体转成字形轮廓墨迹替换原笔画。需 WinRT。</value>
+  </data>
+  <data name="InkRecog_HandwritingFont" xml:space="preserve">
+    <value>手写体字形字体</value>
+  </data>
+  <data name="InkRecog_HandwritingFontHint" xml:space="preserve">
+    <value>选择用于替换原笔画的手写风格字体。如果选的字体不存在，会按列表回退。</value>
+  </data>
+  <data name="InkRecog_HighPrecisionHint" xml:space="preserve">
+    <value>开启后，画的直线超过设定长度阈值时自动调整为完美直线。灵敏度范围 0.05-2.0，越小越严格越弯的线越不容易被拉直；值越大越容易识别为直线。高精度模式下每隔 10 像素取一个计数点，判断更准确。</value>
+  </data>
+  <data name="InkRecog_HighPrecisionStraighten" xml:space="preserve">
+    <value>高精度直线拉直（强迫症福音）</value>
+  </data>
+  <data name="InkRecog_LengthThreshold" xml:space="preserve">
+    <value>长度阈值</value>
+  </data>
+  <data name="InkRecog_LineEndpointSnapping" xml:space="preserve">
+    <value>直线端点吸附（自动牵手）</value>
+  </data>
+  <data name="InkRecog_LineEndpointSnappingHint" xml:space="preserve">
+    <value>开启后，画的直线端点靠近其他直线端点时会自动吸附连接，天生一对。</value>
+  </data>
+  <data name="InkRecog_PauseStraightenDelay" xml:space="preserve">
+    <value>停顿触发延迟</value>
+  </data>
+  <data name="InkRecog_PauseStraightenHint" xml:space="preserve">
+    <value>写字时停顿一下，自动把当前笔画拉直为直线（需同时开启直线自动拉直）。</value>
+  </data>
+  <data name="InkRecog_PauseStraightenLine" xml:space="preserve">
+    <value>停顿拉直（想好了再画）</value>
+  </data>
+  <data name="InkRecog_Sensitivity" xml:space="preserve">
+    <value>灵敏度</value>
+  </data>
+  <data name="InkRecog_ShapeEngine" xml:space="preserve">
+    <value>识别引擎</value>
+  </data>
+  <data name="InkRecog_ShapeEngineAuto" xml:space="preserve">
+    <value>自动（智能选择）</value>
+  </data>
+  <data name="InkRecog_ShapeEngineHint" xml:space="preserve">
+    <value>自动：Win10+ 用 WinRT，否则用 IACore。可强制指定 IACore 或 WinRT。IACore 通过 IPC 辅助进程运行，32/64 位主进程都能用。</value>
+  </data>
+  <data name="InkRecog_ShapeEngineIACore" xml:space="preserve">
+    <value>IACore</value>
+  </data>
+  <data name="InkRecog_ShapeEngineWinRT" xml:space="preserve">
+    <value>WinRT</value>
+  </data>
+  <data name="InkRecog_SnappingDistance" xml:space="preserve">
+    <value>吸附距离</value>
+  </data>
+  <data name="InkRecog_Title" xml:space="preserve">
+    <value>墨迹纠正（手残救星）</value>
+  </data>
+  <data name="InkRecognitionPanel_10Hint" xml:space="preserve">
+    <value>高精度模式下每隔 10 像素取一个计数点，判断更准确</value>
+  </data>
+  <data name="InkRecognitionPanel_Hint" xml:space="preserve">
+    <value>自动把手绘图形识别并转换为标准形状，手残也能画出完美图形</value>
+  </data>
+  <data name="InkRecognitionPanel_Hint_1" xml:space="preserve">
+    <value>矫正后的矩形不包含模拟压感信息</value>
+  </data>
+  <data name="InkRecognitionPanel_Hint_2" xml:space="preserve">
+    <value>矫正后的三角形不包含模拟压感信息</value>
+  </data>
+  <data name="InkRecognitionPanel_Hint_3" xml:space="preserve">
+    <value>画的直线超过设定长度阈值时自动调整为完美直线</value>
+  </data>
+  <data name="InkRecognitionPanel_Hint_4" xml:space="preserve">
+    <value>画的直线端点靠近其他直线端点时自动吸附连接。</value>
+  </data>
+  <data name="InkRecog_Font_InkFreeKaiti" xml:space="preserve">
+    <value>Ink Free / 楷体 / Segoe Script</value>
+  </data>
+  <data name="InkRecog_Font_Kaiti" xml:space="preserve">
+    <value>楷体 (KaiTi)</value>
+  </data>
+  <data name="InkRecog_Font_STKaiti" xml:space="preserve">
+    <value>华文楷体 (STKaiti)</value>
+  </data>
+  <data name="InkRecog_Font_STXingkai" xml:space="preserve">
+    <value>华文行楷 (STXingkai)</value>
+  </data>
+  <data name="InkRecog_Font_FangSong" xml:space="preserve">
+    <value>仿宋 (FangSong)</value>
+  </data>
+  <data name="InkRecog_Font_STFangsong" xml:space="preserve">
+    <value>华文仿宋 (STFangsong)</value>
+  </data>
+  <data name="InkRecog_Font_LiSu" xml:space="preserve">
+    <value>隶书 (LiSu)</value>
+  </data>
+  <data name="InkRecog_Font_YouYuan" xml:space="preserve">
+    <value>幼圆 (YouYuan)</value>
+  </data>
+  <data name="InkRecog_ShapeCorrection" xml:space="preserve">
+    <value>形状修正</value>
+  </data>
+  <data name="Canvas_SecondsFormat" xml:space="preserve">
+    <value>{0:0}秒</value>
+  </data>
+</root>

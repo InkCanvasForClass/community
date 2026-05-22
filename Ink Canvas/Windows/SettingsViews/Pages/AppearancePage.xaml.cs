@@ -80,7 +80,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 var lang = settings.Appearance.Language ?? string.Empty;
                 int langIndex = string.IsNullOrWhiteSpace(lang) ? 0 :
                     string.Equals(lang, "zh-CN", StringComparison.OrdinalIgnoreCase) ? 1 :
-                    string.Equals(lang, "en-US", StringComparison.OrdinalIgnoreCase) ? 2 : 0;
+                    string.Equals(lang, "en-US", StringComparison.OrdinalIgnoreCase) ? 2 :
+                    string.Equals(lang, "zh-ME", StringComparison.OrdinalIgnoreCase) ? 3 : 0;
                 ComboBoxLanguage.SelectedIndex = langIndex;
             }
             finally
@@ -193,6 +194,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 {
                     1 => "zh-CN",
                     2 => "en-US",
+                    3 => "zh-ME",
                     _ => string.Empty
                 };
                 SettingsManager.Settings.Appearance.Language = language;
