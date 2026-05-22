@@ -837,6 +837,7 @@ namespace Ink_Canvas.Properties
             dict["Startup_TopMostMode_Normal"] = ("StartupStrings", "TopMostMode_Normal");
             dict["Startup_TopMostMode_Normal_RestartRequired"] = ("StartupStrings", "TopMostMode_Normal_RestartRequired");
             dict["Startup_TopMostMode_RestartAsAdmin"] = ("StartupStrings", "TopMostMode_RestartAsAdmin");
+            dict["Startup_TopMostMode_CurrentUIAccessNormal"] = ("StartupStrings", "TopMostMode_CurrentUIAccessNormal");
             dict["Startup_TopMostMode_RestartAsNormal"] = ("StartupStrings", "TopMostMode_RestartAsNormal");
             dict["Startup_TopMostMode_UIA"] = ("StartupStrings", "TopMostMode_UIA");
             dict["Startup_TopMostMode_UIA_RestartRequired"] = ("StartupStrings", "TopMostMode_UIA_RestartRequired");

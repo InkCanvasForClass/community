@@ -14,6 +14,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
     {
         private bool _isLoaded = false;
         private bool _isAdmin = false;
+        private bool _hasUIAccess = false;
+        private bool CanConfigureUIAccessTopMost => _isAdmin || _hasUIAccess;
         private RadioButton _radioNormal;
         private RadioButton _radioUIA;
         private readonly ObservableCollection<object> _topMostModeItems = new();
@@ -34,6 +36,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             _isLoaded = false;
             _isAdmin = AppRestartHelper.IsRunningAsAdmin();
+            _hasUIAccess = UIAccessHelper.HasUIAccess();
 
             try
             {
@@ -51,10 +54,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     _topMostModeItems.Clear();
                     _topMostModeItems.Add(new TopMostModeSelectionItem());
 
-                    var btnItem = _isAdmin
+                    var btnItem = CanConfigureUIAccessTopMost
                         ? new TopMostModeButtonItem
                         {
-                            ButtonHeader = StartupStrings.TopMostMode_RestartAsNormal,
+                            ButtonHeader = _hasUIAccess && !_isAdmin
+                                ? StartupStrings.TopMostMode_CurrentUIAccessNormal
+                                : StartupStrings.TopMostMode_RestartAsNormal,
                             ButtonContent = StartupStrings.TopMostMode_RestartAsNormal,
                             RestartAsAdmin = false
                         }
@@ -84,10 +89,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             bool wasLoaded = _isLoaded;
             _isLoaded = false;
 
-            _radioNormal.IsEnabled = _isAdmin;
-            _radioUIA.IsEnabled = _isAdmin;
+            _radioNormal.IsEnabled = CanConfigureUIAccessTopMost;
+            _radioUIA.IsEnabled = CanConfigureUIAccessTopMost;
 
-            if (_isAdmin && SettingsManager.Settings.Advanced.EnableUIAccessTopMost)
+            if (CanConfigureUIAccessTopMost && SettingsManager.Settings.Advanced.EnableUIAccessTopMost)
                 _radioUIA.IsChecked = true;
             else
                 _radioNormal.IsChecked = true;

@@ -126,6 +126,8 @@ namespace Ink_Canvas.Properties
 
         public static string TopMostMode_RestartAsAdmin => ResourceManager.GetString(nameof(TopMostMode_RestartAsAdmin), _resourceCulture);
 
+        public static string TopMostMode_CurrentUIAccessNormal => ResourceManager.GetString(nameof(TopMostMode_CurrentUIAccessNormal), _resourceCulture);
+
         public static string TopMostMode_RestartAsNormal => ResourceManager.GetString(nameof(TopMostMode_RestartAsNormal), _resourceCulture);
 
         public static string TopMostMode_UIA => ResourceManager.GetString(nameof(TopMostMode_UIA), _resourceCulture);

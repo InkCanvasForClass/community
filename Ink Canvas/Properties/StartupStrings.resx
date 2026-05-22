@@ -171,6 +171,9 @@
   <data name="TopMostMode_RestartAsAdmin" xml:space="preserve">
     <value>重启到管理员模式</value>
   </data>
+  <data name="TopMostMode_CurrentUIAccessNormal" xml:space="preserve">
+    <value>当前为拥有 UIA 权限的降权进程</value>
+  </data>
   <data name="TopMostMode_RestartAsNormal" xml:space="preserve">
     <value>切换到非管理员模式</value>
   </data>
