@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -60,9 +60,6 @@
   <data name="Timer_ProgressiveCustomLabel" xml:space="preserve">
     <value>自定义渐进提醒音频：</value>
   </data>
-  <data name="Timer_ProgressiveReset" xml:space="preserve">
-    <value>重置</value>
-  </data>
   <data name="Timer_ProgressiveSelectFile" xml:space="preserve">
     <value>选择文件</value>
   </data>
@@ -72,9 +69,6 @@
   <data name="Timer_Reset" xml:space="preserve">
     <value>重置</value>
   </data>
-  <data name="Timer_SelectFile" xml:space="preserve">
-    <value>选择文件</value>
-  </data>
   <data name="Timer_Title" xml:space="preserve">
     <value>计时器设置</value>
   </data>
@@ -83,29 +77,5 @@
   </data>
   <data name="Timer_Volume" xml:space="preserve">
     <value>计时器提醒音量</value>
-  </data>
-  <data name="TimeRange_Hint" xml:space="preserve">
-    <value>若终止时间小于起始时间…</value>
-  </data>
-  <data name="TimerPanel_Hint" xml:space="preserve">
-    <value>使用旧版本的计时器按钮界面</value>
-  </data>
-  <data name="TimerPanel_Hint_UseNewTimerStyle" xml:space="preserve">
-    <value>使用新样式的计时器界面</value>
-  </data>
-  <data name="TimerPanel_Hint_ContinueOnTimeout" xml:space="preserve">
-    <value>计时器超时后继续正向计时</value>
-  </data>
-  <data name="TimerPanel_Hint_ShowRedOnTimeout" xml:space="preserve">
-    <value>计时器超时后数字显示为红色</value>
-  </data>
-  <data name="TimerPanel_Hint_SetAlertVolume" xml:space="preserve">
-    <value>设置计时器提醒音的音量</value>
-  </data>
-  <data name="TimerPanel_Hint_EnableProgressiveAlert" xml:space="preserve">
-    <value>启用渐进式提醒功能</value>
-  </data>
-  <data name="TimerPanel_Hint_SetProgressiveAlertVolume" xml:space="preserve">
-    <value>设置渐进提醒音的音量</value>
   </data>
 </root>

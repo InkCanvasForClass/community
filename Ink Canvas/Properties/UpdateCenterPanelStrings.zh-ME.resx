@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -42,19 +42,4 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="UpdateCenterPanel_Hint" xml:space="preserve">
-    <value>选一个旧版本穿越回去</value>
-  </data>
-  <data name="UpdateCenterPanel_Hint_RollbackVersion" xml:space="preserve">
-    <value>回滚到下拉框里选的版本，时光倒流！</value>
-  </data>
-  <data name="UpdateCenterPanel_Hint_ReinstallLatest" xml:space="preserve">
-    <value>根据当前通道下载最新版本安装，软件装坏了可以用这个抢救一下</value>
-  </data>
-  <data name="UpdateCenterPanel_Hint_AutoCheckUpdate" xml:space="preserve">
-    <value>定期看看有没有新版本可以冲</value>
-  </data>
-  <data name="UpdateCenterPanel_Hint_AutoInstallUpdate" xml:space="preserve">
-    <value>软件闲着的时候偷偷装更新，完全不用你动手，躺平就行</value>
-  </data>
 </root>

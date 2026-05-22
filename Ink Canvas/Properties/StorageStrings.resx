@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -84,14 +84,8 @@
   <data name="Backup_Title" xml:space="preserve">
     <value>设置备份与还原</value>
   </data>
-  <data name="Storage_AutoDeleteHint" xml:space="preserve">
-    <value>请注意如果开启自动删除功能，将会删除自动保存目录下所有后缀名为 .icstk 和 .png 的文件！</value>
-  </data>
   <data name="Storage_AutoDeleteTitle" xml:space="preserve">
     <value>定期自动删除超过保存时间的墨迹、截图文件</value>
-  </data>
-  <data name="Storage_AutoSaveHint" xml:space="preserve">
-    <value>开启后将在设定时间间隔自动保存墨迹，仅在画布可见且有墨迹时才会保存</value>
   </data>
   <data name="Storage_AutoSaveInk" xml:space="preserve">
     <value>定时自动保存墨迹</value>
@@ -122,9 +116,6 @@
   </data>
   <data name="Storage_AutoSaveInterval_60Min" xml:space="preserve">
     <value>60 分钟</value>
-  </data>
-  <data name="Storage_AutoScreenshotMinInk" xml:space="preserve">
-    <value>自动截图最小墨迹量</value>
   </data>
   <data name="Storage_AutoScreenshotOnClear" xml:space="preserve">
     <value>清屏时自动截图</value>
@@ -165,9 +156,6 @@
   <data name="Storage_Core_Desc" xml:space="preserve">
     <value>包含 .json 配置文件、.enc 使用统计、.exe 主程序、.dll 文件、.dat 数据文件等</value>
   </data>
-  <data name="Storage_Core_Header" xml:space="preserve">
-    <value>核心文件</value>
-  </data>
   <data name="Storage_Core_NotCleanable" xml:space="preserve">
     <value>核心文件不可清理，以免影响应用正常运行。</value>
   </data>
@@ -201,14 +189,8 @@
   <data name="Storage_Legend_Ink" xml:space="preserve">
     <value>墨迹</value>
   </data>
-  <data name="Storage_Legend_Logs" xml:space="preserve">
-    <value>日志</value>
-  </data>
   <data name="Storage_Legend_Other" xml:space="preserve">
     <value>其他</value>
-  </data>
-  <data name="Storage_Legend_Plugins" xml:space="preserve">
-    <value>插件</value>
   </data>
   <data name="Storage_Legend_Update" xml:space="preserve">
     <value>自动更新</value>
@@ -228,23 +210,8 @@
   <data name="Storage_Other_Desc" xml:space="preserve">
     <value>未归类至上述项目的其他文件</value>
   </data>
-  <data name="Storage_Other_Header" xml:space="preserve">
-    <value>其他</value>
-  </data>
   <data name="Storage_PathBrowse" xml:space="preserve">
     <value>浏览</value>
-  </data>
-  <data name="Storage_PathPermissionHint" xml:space="preserve">
-    <value>请注意检查保存文件夹是否有写入权限</value>
-  </data>
-  <data name="Storage_PathSetToD" xml:space="preserve">
-    <value>设置保存到 D:\Ink Canvas</value>
-  </data>
-  <data name="Storage_PathSetToDocuments" xml:space="preserve">
-    <value>设置保存到 文档</value>
-  </data>
-  <data name="Storage_PathTitle" xml:space="preserve">
-    <value>墨迹与截图的保存路径</value>
   </data>
   <data name="Storage_Plugins_Desc" xml:space="preserve">
     <value>位于 plugins 目录的 .iccpp 插件包</value>
@@ -258,20 +225,8 @@
   <data name="Storage_Refresh" xml:space="preserve">
     <value>刷新</value>
   </data>
-  <data name="Storage_RetentionTitle" xml:space="preserve">
-    <value>保存时长</value>
-  </data>
-  <data name="Storage_RetentionUnitDays" xml:space="preserve">
-    <value>天</value>
-  </data>
   <data name="Storage_SaveAsXml" xml:space="preserve">
     <value>保存为 XML 格式</value>
-  </data>
-  <data name="Storage_SaveAsXmlHint" xml:space="preserve">
-    <value>开启后保存墨迹时将使用 XML 格式（ISF 格式），便于查看和编辑墨迹数据</value>
-  </data>
-  <data name="Storage_SaveFullPageHint" xml:space="preserve">
-    <value>开启后自动保存和手动保存墨迹时将以全屏模式保存。如果存在多个画布和墨迹，将把所有页面的墨迹按照每页为单位保存进一个压缩包中（注意，白板的墨迹只能在白板模式下打开，PPT 的墨迹只能在 PPT 放映模式下打开）</value>
   </data>
   <data name="Storage_SaveFullPageStrokes" xml:space="preserve">
     <value>墨迹全页面保存</value>

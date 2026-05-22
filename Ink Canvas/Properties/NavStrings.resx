@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -42,83 +42,38 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="Nav_About" xml:space="preserve">
-    <value>关于</value>
-  </data>
   <data name="Nav_Advanced" xml:space="preserve">
     <value>高级</value>
   </data>
   <data name="Nav_Advanced_Settings" xml:space="preserve">
     <value>高级设置</value>
   </data>
-  <data name="Nav_Automation" xml:space="preserve">
-    <value>自动化</value>
-  </data>
   <data name="Nav_Automation_Settings" xml:space="preserve">
     <value>自动化设置</value>
-  </data>
-  <data name="Nav_Canvas" xml:space="preserve">
-    <value>画布设置</value>
-  </data>
-  <data name="Nav_CrashAction" xml:space="preserve">
-    <value>崩溃处理</value>
   </data>
   <data name="Nav_FriendlyLinks" xml:space="preserve">
     <value>友链</value>
   </data>
-  <data name="Nav_Gesture" xml:space="preserve">
-    <value>手势</value>
-  </data>
-  <data name="Nav_Gesture_Settings" xml:space="preserve">
-    <value>手势设置</value>
-  </data>
-  <data name="Nav_InkRecognition" xml:space="preserve">
-    <value>墨迹识别</value>
-  </data>
   <data name="Nav_Plugins" xml:space="preserve">
     <value>插件</value>
-  </data>
-  <data name="Nav_PPT" xml:space="preserve">
-    <value>PPT</value>
   </data>
   <data name="Nav_PPT_Settings" xml:space="preserve">
     <value>PPT设置</value>
   </data>
-  <data name="Nav_RandomWindow" xml:space="preserve">
-    <value>随机选人</value>
-  </data>
-  <data name="Nav_RandomWindow_Settings" xml:space="preserve">
-    <value>随机窗口设置</value>
-  </data>
   <data name="Nav_Shortcuts" xml:space="preserve">
     <value>快捷键</value>
-  </data>
-  <data name="Nav_Shortcuts_Settings" xml:space="preserve">
-    <value>快捷键设置</value>
   </data>
   <data name="Nav_Startup" xml:space="preserve">
     <value>启动设置</value>
   </data>
-  <data name="Nav_Theme" xml:space="preserve">
-    <value>主题</value>
-  </data>
   <data name="Nav_Theme_Settings" xml:space="preserve">
     <value>个性化设置</value>
-  </data>
-  <data name="Settings_AutoSaveHint" xml:space="preserve">
-    <value>设置更改将自动保存，部分设置需要重启软件后生效</value>
-  </data>
-  <data name="Settings_Mode" xml:space="preserve">
-    <value>模式设置</value>
   </data>
   <data name="Settings_ModeDesc" xml:space="preserve">
     <value>选择软件运行模式。仅 PPT 模式下，软件将完全隐藏，仅在 PPT 放映时出现。（实验性功能，可能不稳定。）</value>
   </data>
   <data name="Settings_ModeDesc_1" xml:space="preserve">
     <value>运行模式</value>
-  </data>
-  <data name="Settings_Nav_Hotkey" xml:space="preserve">
-    <value>快捷键</value>
   </data>
   <data name="Settings_Nav_Hotkey_Tooltip" xml:space="preserve">
     <value>快捷键设置</value>
@@ -129,17 +84,8 @@
   <data name="Settings_Nav_Security_Tooltip" xml:space="preserve">
     <value>安全密码与进程保护</value>
   </data>
-  <data name="Settings_NewWindow" xml:space="preserve">
-    <value>新设置窗口</value>
-  </data>
-  <data name="Settings_NewWindowDesc" xml:space="preserve">
-    <value>打开新的设置窗口，提供更丰富的设置选项和更好的用户体验。（开发中）</value>
-  </data>
   <data name="Settings_Plugins" xml:space="preserve">
     <value>插件管理</value>
-  </data>
-  <data name="Settings_PluginsDesc" xml:space="preserve">
-    <value>通过插件扩展InkCanvas的功能。您可以启用或禁用插件，或加载自定义插件。</value>
   </data>
   <data name="Settings_Title" xml:space="preserve">
     <value>设置</value>

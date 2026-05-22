@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -45,12 +45,6 @@
   <data name="FileAssoc_Check" xml:space="preserve">
     <value>检查关联状态</value>
   </data>
-  <data name="FileAssoc_Desc" xml:space="preserve">
-    <value>管理 .icstk 文件的关联设置，双击 .icstk 文件就能直接在 Ink Canvas 里打开，一步到位</value>
-  </data>
-  <data name="FileAssoc_Register" xml:space="preserve">
-    <value>重新注册关联（绑定CP）</value>
-  </data>
   <data name="FileAssoc_Title" xml:space="preserve">
     <value>文件关联管理（CP管理）</value>
   </data>
@@ -72,17 +66,8 @@
   <data name="SecurityPanel_Hint_2" xml:space="preserve">
     <value>打开设置面板/新设置窗口时要验证身份</value>
   </data>
-  <data name="SecurityPanel_Hint_3" xml:space="preserve">
-    <value>修改或清空点名名单前要输密码，防乱来</value>
-  </data>
   <data name="SecurityPanel_Hint_4" xml:space="preserve">
     <value>开启后关键文件会被只读锁定，谁也别想改</value>
-  </data>
-  <data name="SettingsBaseView_Binding_DescriptionHint" xml:space="preserve">
-    <value>{Binding Description}</value>
-  </data>
-  <data name="Tooltip_IccProtocol" xml:space="preserve">
-    <value>通过 icc:// 协议从外部召唤控制软件</value>
   </data>
   <data name="Security_SectionPassword" xml:space="preserve">
     <value>防偷窥密码</value>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -42,57 +42,6 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="PowerPointPanel__PPT_Hint" xml:space="preserve">
-    <value>When enabled, also show gesture button in PPT slideshow mode</value>
-  </data>
-  <data name="PowerPointPanel_0Hint" xml:space="preserve">
-    <value>Increase for upward offset, decrease for downward offset, set to 0 for no offset and center placement</value>
-  </data>
-  <data name="PowerPointPanel_0Hint_1" xml:space="preserve">
-    <value>Increase for rightward offset, decrease for leftward offset, set to 0 for no offset and center placement</value>
-  </data>
-  <data name="PowerPointPanel_Hint" xml:space="preserve">
-    <value>Adjust position of left bottom button</value>
-  </data>
-  <data name="PowerPointPanel_Hint_1" xml:space="preserve">
-    <value>Adjust position of right bottom button</value>
-  </data>
-  <data name="PowerPointPanel_Hint_2" xml:space="preserve">
-    <value>Adjust transparency of left page turn button</value>
-  </data>
-  <data name="PowerPointPanel_Hint_3" xml:space="preserve">
-    <value>Adjust transparency of right page turn button</value>
-  </data>
-  <data name="PowerPointPanel_Hint_4" xml:space="preserve">
-    <value>Adjust transparency of left bottom page turn button</value>
-  </data>
-  <data name="PowerPointPanel_Hint_5" xml:space="preserve">
-    <value>Adjust transparency of right bottom page turn button</value>
-  </data>
-  <data name="PowerPointPanel_Hint_6" xml:space="preserve">
-    <value>Allow two-finger gestures in slideshow mode</value>
-  </data>
-  <data name="PowerPointPanel_Hint_7" xml:space="preserve">
-    <value>Select display position of time capsule on screen</value>
-  </data>
-  <data name="PowerPointPanel_Hint_8" xml:space="preserve">
-    <value>Show tip when playing hidden slides</value>
-  </data>
-  <data name="PowerPointPanel_PPTHint" xml:space="preserve">
-    <value>Show page turn control buttons in PPT slideshow mode</value>
-  </data>
-  <data name="PowerPointPanel_PPTHint_1" xml:space="preserve">
-    <value>Auto switch to annotation mode when entering PPT slideshow</value>
-  </data>
-  <data name="PowerPointPanel_PPTHint_2" xml:space="preserve">
-    <value>Auto jump to first page when entering PPT slideshow</value>
-  </data>
-  <data name="PowerPointPanel_PPTHint_3" xml:space="preserve">
-    <value>Show tip when PPT auto plays</value>
-  </data>
-  <data name="PowerPointPanel_quotquotHint" xml:space="preserve">
-    <value>When enabled, will record last played page number and auto jump when clicking Yes</value>
-  </data>
   <data name="AutoSaveStrokes" xml:space="preserve">
     <value>Auto-save slide ink</value>
   </data>
@@ -110,9 +59,6 @@
   </data>
   <data name="BottomGroupTitle" xml:space="preserve">
     <value>Bottom left &amp; right</value>
-  </data>
-  <data name="ConflictWithAutoFold" xml:space="preserve">
-    <value>Conflicts with &quot;Auto fold when playing PPT&quot; in Automation!</value>
   </data>
   <data name="EnhancedPreview" xml:space="preserve">
     <value>Enhanced preview for page button</value>
@@ -137,9 +83,6 @@
   </data>
   <data name="GoToFirstPageOnReenter" xml:space="preserve">
     <value>Go to first slide when entering show</value>
-  </data>
-  <data name="GroupHint" xml:space="preserve">
-    <value>These settings apply during slide show and override others.</value>
   </data>
   <data name="GroupTitle" xml:space="preserve">
     <value>PPT integration</value>
@@ -177,17 +120,8 @@
   <data name="NotifyHiddenPage" xml:space="preserve">
     <value>Warn about hidden slides</value>
   </data>
-  <data name="OffsetHint" xml:space="preserve">
-    <value>Increase for up, decrease for down; 0 = no offset, centered.</value>
-  </data>
-  <data name="OffsetHintHorizontal" xml:space="preserve">
-    <value>Increase for right, decrease for left; 0 = no offset, centered.</value>
-  </data>
   <data name="PageButtonClickable" xml:space="preserve">
     <value>PPT page button clickable</value>
-  </data>
-  <data name="PageButtonClickable_SubSettings" xml:space="preserve">
-    <value>Page button click sub-settings</value>
   </data>
   <data name="PageButtonClickableHint" xml:space="preserve">
     <value>Enable page-button navigation on click. By default it uses PowerPoint grid thumbnails (not supported in WPS); use the sub-setting below to manually enable enhanced preview for WPS support.</value>
@@ -224,12 +158,6 @@
   </data>
   <data name="ShowFlipButtons" xml:space="preserve">
     <value>Show page-turn buttons in PPT mode</value>
-  </data>
-  <data name="ShowGestureButtonInShow" xml:space="preserve">
-    <value>Show gesture buttons in PPT slide show</value>
-  </data>
-  <data name="ShowGestureButtonInShowHint" xml:space="preserve">
-    <value>When on, gesture buttons are shown in PPT slide show.</value>
   </data>
   <data name="ShowPageNumber" xml:space="preserve">
     <value>Show page number</value>
@@ -287,14 +215,5 @@
   </data>
   <data name="UseRot" xml:space="preserve">
     <value>Use ROT integration</value>
-  </data>
-  <data name="WpsHint1" xml:space="preserve">
-    <value>If you only use PowerPoint, do not enable WPS integration. If you use WPS, it is recommended not to use PowerPoint together.</value>
-  </data>
-  <data name="WpsLagWarning" xml:space="preserve">
-    <value>Enabling WPS support may cause lag when closing WPS!</value>
-  </data>
-  <data name="WpsSupportHint" xml:space="preserve">
-    <value>WPS is supported, but MS Office and WPS cannot be supported at the same time. To enable WPS support, make sure &quot;WPS Office compatibility with third-party systems and software&quot; is enabled in the WPS config tool, otherwise WPS cannot be detected.</value>
   </data>
 </root>

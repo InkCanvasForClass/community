@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -42,83 +42,38 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="Nav_About" xml:space="preserve">
-    <value>About</value>
-  </data>
   <data name="Nav_Advanced" xml:space="preserve">
     <value>Advanced</value>
   </data>
   <data name="Nav_Advanced_Settings" xml:space="preserve">
     <value>Advanced</value>
   </data>
-  <data name="Nav_Automation" xml:space="preserve">
-    <value>Automation</value>
-  </data>
   <data name="Nav_Automation_Settings" xml:space="preserve">
     <value>Automation</value>
-  </data>
-  <data name="Nav_Canvas" xml:space="preserve">
-    <value>Canvas</value>
-  </data>
-  <data name="Nav_CrashAction" xml:space="preserve">
-    <value>Crash Action</value>
   </data>
   <data name="Nav_FriendlyLinks" xml:space="preserve">
     <value>Friendly links</value>
   </data>
-  <data name="Nav_Gesture" xml:space="preserve">
-    <value>Gesture</value>
-  </data>
-  <data name="Nav_Gesture_Settings" xml:space="preserve">
-    <value>Gesture</value>
-  </data>
-  <data name="Nav_InkRecognition" xml:space="preserve">
-    <value>Ink Recognition</value>
-  </data>
   <data name="Nav_Plugins" xml:space="preserve">
     <value>Plugins</value>
-  </data>
-  <data name="Nav_PPT" xml:space="preserve">
-    <value>PPT</value>
   </data>
   <data name="Nav_PPT_Settings" xml:space="preserve">
     <value>PPT</value>
   </data>
-  <data name="Nav_RandomWindow" xml:space="preserve">
-    <value>Random Picker</value>
-  </data>
-  <data name="Nav_RandomWindow_Settings" xml:space="preserve">
-    <value>Random Picker</value>
-  </data>
   <data name="Nav_Shortcuts" xml:space="preserve">
-    <value>Shortcuts</value>
-  </data>
-  <data name="Nav_Shortcuts_Settings" xml:space="preserve">
     <value>Shortcuts</value>
   </data>
   <data name="Nav_Startup" xml:space="preserve">
     <value>Startup</value>
   </data>
-  <data name="Nav_Theme" xml:space="preserve">
-    <value>Theme</value>
-  </data>
   <data name="Nav_Theme_Settings" xml:space="preserve">
     <value>Appearance</value>
-  </data>
-  <data name="Settings_AutoSaveHint" xml:space="preserve">
-    <value>Changes are saved automatically; some require restart.</value>
-  </data>
-  <data name="Settings_Mode" xml:space="preserve">
-    <value>Mode</value>
   </data>
   <data name="Settings_ModeDesc" xml:space="preserve">
     <value>Choose run mode. In PPT-only mode the app is hidden until slide show. (Experimental)</value>
   </data>
   <data name="Settings_ModeDesc_1" xml:space="preserve">
     <value>Run mode</value>
-  </data>
-  <data name="Settings_Nav_Hotkey" xml:space="preserve">
-    <value>Hotkeys</value>
   </data>
   <data name="Settings_Nav_Hotkey_Tooltip" xml:space="preserve">
     <value>Hotkey settings</value>
@@ -129,17 +84,8 @@
   <data name="Settings_Nav_Security_Tooltip" xml:space="preserve">
     <value>Security password and process protection</value>
   </data>
-  <data name="Settings_NewWindow" xml:space="preserve">
-    <value>New settings window</value>
-  </data>
-  <data name="Settings_NewWindowDesc" xml:space="preserve">
-    <value>Open a new settings window. (In development)</value>
-  </data>
   <data name="Settings_Plugins" xml:space="preserve">
     <value>Plugins</value>
-  </data>
-  <data name="Settings_PluginsDesc" xml:space="preserve">
-    <value>Extend Ink Canvas with plugins. Enable, disable, or load custom plugins.</value>
   </data>
   <data name="Settings_Title" xml:space="preserve">
     <value>Settings</value>

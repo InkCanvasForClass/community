@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -48,12 +48,6 @@
   <data name="Gesture_AllowRotateScaleHint" xml:space="preserve">
     <value>选中墨迹后可以用双指或多指缩放操作（不受「允许双指旋转」设置影响），想缩就缩~</value>
   </data>
-  <data name="Gesture_AutoToggleHint" xml:space="preserve">
-    <value>开启后退出画板自动关双指移动，进白板自动开双指移动，智能切换yyds~</value>
-  </data>
-  <data name="Gesture_AutoToggleTwoFinger" xml:space="preserve">
-    <value>进出白板模式自动开关双指移动</value>
-  </data>
   <data name="Gesture_EnablePalmEraser" xml:space="preserve">
     <value>启用手掌擦</value>
   </data>
@@ -74,14 +68,5 @@
   </data>
   <data name="Gesture_Title" xml:space="preserve">
     <value>手势</value>
-  </data>
-  <data name="GesturesPanel_Hint" xml:space="preserve">
-    <value>开启后退出画板自动关双指移动，进白板自动开双指移动，智能切换yyds~</value>
-  </data>
-  <data name="GesturesPanel_Hint_1" xml:space="preserve">
-    <value>选中墨迹后可以用双指或多指缩放操作，想缩就缩~</value>
-  </data>
-  <data name="GesturesPanel_Hint_2" xml:space="preserve">
-    <value>开启后，两个及以上触点且触摸面积较大时自动切换为橡皮擦，抬手后恢复原编辑模式，手掌擦冲鸭~</value>
   </data>
 </root>

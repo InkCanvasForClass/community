@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -42,9 +42,6 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="Board_AutoHide" xml:space="preserve">
-    <value>自动隐藏</value>
-  </data>
   <data name="Board_Background" xml:space="preserve">
     <value>背景</value>
   </data>
@@ -63,23 +60,14 @@
   <data name="Board_EraserOptions" xml:space="preserve">
     <value>橡皮选项</value>
   </data>
-  <data name="Board_EraserShape" xml:space="preserve">
-    <value>橡皮形状</value>
-  </data>
   <data name="Board_EraserShape_Blackboard" xml:space="preserve">
     <value>黑板擦</value>
   </data>
   <data name="Board_EraserShape_Circle" xml:space="preserve">
     <value>圆形擦</value>
   </data>
-  <data name="Board_Exit" xml:space="preserve">
-    <value>退出</value>
-  </data>
   <data name="Board_Gesture" xml:space="preserve">
     <value>手势</value>
-  </data>
-  <data name="Board_GestureOptions" xml:space="preserve">
-    <value>手势选项</value>
   </data>
   <data name="Board_Highlighter" xml:space="preserve">
     <value>荧光笔</value>
@@ -89,9 +77,6 @@
   </data>
   <data name="Board_LaserPen" xml:space="preserve">
     <value>激光笔</value>
-  </data>
-  <data name="Board_MultiTouchWriting" xml:space="preserve">
-    <value>多指书写</value>
   </data>
   <data name="Board_NewPage" xml:space="preserve">
     <value>新页面</value>
@@ -123,26 +108,14 @@
   <data name="Board_Shape" xml:space="preserve">
     <value>图形</value>
   </data>
-  <data name="Board_ShapeHintLongPress" xml:space="preserve">
-    <value>(第一行支持长按保持选中)</value>
-  </data>
   <data name="Board_Size" xml:space="preserve">
     <value>大小</value>
-  </data>
-  <data name="Board_StrokeEraser" xml:space="preserve">
-    <value>墨迹擦</value>
   </data>
   <data name="Board_Tools" xml:space="preserve">
     <value>工具</value>
   </data>
   <data name="Board_TwoFingerMove" xml:space="preserve">
     <value>双指移动</value>
-  </data>
-  <data name="Board_TwoFingerRotate" xml:space="preserve">
-    <value>双指旋转</value>
-  </data>
-  <data name="Board_TwoFingerZoom" xml:space="preserve">
-    <value>双指缩放</value>
   </data>
   <data name="Board_Undo" xml:space="preserve">
     <value>撤销</value>
@@ -171,9 +144,6 @@
   <data name="FloatingBar_Gesture_MultiTouchWriting" xml:space="preserve">
     <value>多指书写</value>
   </data>
-  <data name="FloatingBar_Gesture_TwoFingerMove" xml:space="preserve">
-    <value>双指移动</value>
-  </data>
   <data name="FloatingBar_Gesture_TwoFingerRotate" xml:space="preserve">
     <value>双指旋转</value>
   </data>
@@ -182,9 +152,6 @@
   </data>
   <data name="FloatingBar_GestureButton" xml:space="preserve">
     <value>手势</value>
-  </data>
-  <data name="FloatingBar_GesturePanelTitle" xml:space="preserve">
-    <value>手势选项</value>
   </data>
   <data name="FloatingBar_Hide" xml:space="preserve">
     <value>隐藏</value>
@@ -204,53 +171,17 @@
   <data name="FloatingBar_Whiteboard" xml:space="preserve">
     <value>白板</value>
   </data>
-  <data name="OldUI_Background" xml:space="preserve">
-    <value>背景</value>
-  </data>
-  <data name="OldUI_Check" xml:space="preserve">
-    <value>检查</value>
-  </data>
-  <data name="OldUI_ClearAndHide" xml:space="preserve">
-    <value>清屏
-&amp;
-隐藏</value>
-  </data>
   <data name="OldUI_Dark" xml:space="preserve">
     <value>深色</value>
   </data>
   <data name="OldUI_Exit" xml:space="preserve">
     <value>退出</value>
   </data>
-  <data name="OldUI_HideCanvas" xml:space="preserve">
-    <value>隐藏
-画板</value>
-  </data>
-  <data name="OldUI_Restore" xml:space="preserve">
-    <value>恢复</value>
-  </data>
-  <data name="OldUI_SingleFingerDrag" xml:space="preserve">
-    <value>单指
-拖动</value>
-  </data>
-  <data name="OldUI_SlideshowEnd" xml:space="preserve">
-    <value>结束
-放映</value>
-  </data>
-  <data name="OldUI_SlideshowFromStart" xml:space="preserve">
-    <value>从头
-放映</value>
-  </data>
   <data name="OldUI_Thickness" xml:space="preserve">
     <value>粗细</value>
   </data>
-  <data name="QuickPanel_Exit" xml:space="preserve">
-    <value>退出</value>
-  </data>
   <data name="QuickPanel_ExitShow" xml:space="preserve">
     <value>退出放映</value>
-  </data>
-  <data name="QuickPanel_RandomDraw" xml:space="preserve">
-    <value>随机抽</value>
   </data>
   <data name="QuickPanel_Show" xml:space="preserve">
     <value>批注栏</value>
@@ -260,27 +191,6 @@
   </data>
   <data name="QuickPanel_Timer" xml:space="preserve">
     <value>计时器</value>
-  </data>
-  <data name="QuickPanel_Whiteboard" xml:space="preserve">
-    <value>白板</value>
-  </data>
-  <data name="SnapshotPanel__icstk__png_Hint" xml:space="preserve">
-    <value>开启后将会删除自动保存目录下所有后缀名为 .icstk 和 .png 的文件</value>
-  </data>
-  <data name="SnapshotPanel_Hint" xml:space="preserve">
-    <value>清空画布时自动保存当前画布截图</value>
-  </data>
-  <data name="SnapshotPanel_Hint_SortByDate" xml:space="preserve">
-    <value>截图按日期分类保存到不同文件夹</value>
-  </data>
-  <data name="SnapshotPanel_Hint_SaveInkData" xml:space="preserve">
-    <value>截图时同时保存当前画布的墨迹数据</value>
-  </data>
-  <data name="SnapshotPanel_Hint_AutoScreenshotOnPageTurn" xml:space="preserve">
-    <value>开启后，在幻灯片有墨迹时翻页会自动截屏</value>
-  </data>
-  <data name="SnapshotPanel_Hint_SetMinInkForAutoScreenshot" xml:space="preserve">
-    <value>设置自动截图时所需的最小墨迹量</value>
   </data>
   <data name="Tools_Manual" xml:space="preserve">
     <value>说明书</value>
@@ -302,15 +212,6 @@
   </data>
   <data name="Tools_Screenshot" xml:space="preserve">
     <value>截屏</value>
-  </data>
-  <data name="Tools_Settings" xml:space="preserve">
-    <value>设置</value>
-  </data>
-  <data name="Tools_SingleDraw" xml:space="preserve">
-    <value>单次抽</value>
-  </data>
-  <data name="Tools_Timer" xml:space="preserve">
-    <value>计时器</value>
   </data>
   <data name="ToolbarPage_ConfigProfiles" xml:space="preserve">
     <value>配置文件</value>

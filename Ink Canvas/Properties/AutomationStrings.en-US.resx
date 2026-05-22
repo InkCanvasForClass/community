@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -78,9 +78,6 @@
   <data name="AutoFold_App_SeewoLightBoard5C" xml:space="preserve">
     <value>Seewo Lite Whiteboard 5C</value>
   </data>
-  <data name="AutoFold_App_SeewoPinco" xml:space="preserve">
-    <value>Seewo Pinco</value>
-  </data>
   <data name="AutoFold_App_WenXiangBoard" xml:space="preserve">
     <value>WenXiang Whiteboard</value>
   </data>
@@ -89,9 +86,6 @@
   </data>
   <data name="AutoFold_App_YiYunBooth" xml:space="preserve">
     <value>YiYun visual presenter</value>
-  </data>
-  <data name="AutoFold_IgnoreEasiNoteDesktopAnno" xml:space="preserve">
-    <value>Ignore EN5 desktop annotation window when auto folding</value>
   </data>
   <data name="AutoFold_Mode" xml:space="preserve">
     <value>Fold mode</value>
@@ -122,9 +116,6 @@
   </data>
   <data name="AutoKill_PptToolsHint" xml:space="preserve">
     <value>Killing PPT tools disables Seewo classroom helper. Delete Office.dll in its install folder to stop the PPT toolbar without auto kill.</value>
-  </data>
-  <data name="AutoKill_SameAppTitle" xml:space="preserve">
-    <value>Kill similar apps</value>
   </data>
   <data name="AutoKill_SeewoDesktop2Anno" xml:space="preserve">
     <value>Auto kill Seewo Desktop 2.0 annotation</value>
@@ -189,15 +180,6 @@
   <data name="Automation_UseCustomSaveFileName_Header" xml:space="preserve">
     <value>Use custom save file name</value>
   </data>
-  <data name="AutomationPanel_Hint" xml:space="preserve">
-    <value>When enabled, software with auto fold will remain folded after software exit</value>
-  </data>
-  <data name="AutomationPanel_Hint_1" xml:space="preserve">
-    <value>Auto enter annotation mode after killing Hite screen writing</value>
-  </data>
-  <data name="FloatingInterceptor_App_AiClass" xml:space="preserve">
-    <value>AiClass</value>
-  </data>
   <data name="FloatingInterceptor_App_ChangYanClass" xml:space="preserve">
     <value>Changyan smart classroom</value>
   </data>
@@ -209,12 +191,6 @@
   </data>
   <data name="FloatingInterceptor_App_IntelligentClass" xml:space="preserve">
     <value>Tianyu Education Cloud</value>
-  </data>
-  <data name="FloatingInterceptor_App_SeewoBoard3" xml:space="preserve">
-    <value>Seewo Whiteboard 3</value>
-  </data>
-  <data name="FloatingInterceptor_App_SeewoBoard5" xml:space="preserve">
-    <value>Seewo Whiteboard 5</value>
   </data>
   <data name="FloatingInterceptor_App_SeewoBoard5C" xml:space="preserve">
     <value>Seewo Whiteboard 5C</value>
@@ -234,14 +210,8 @@
   <data name="FloatingInterceptor_App_SeewoPPTTools" xml:space="preserve">
     <value>Seewo PPT Tools</value>
   </data>
-  <data name="FloatingInterceptor_Desc" xml:space="preserve">
-    <value>Detect and block floating windows from similar software</value>
-  </data>
   <data name="FloatingInterceptor_Enable" xml:space="preserve">
     <value>Enable floating window interceptor</value>
-  </data>
-  <data name="FloatingInterceptor_StatusNotRunning" xml:space="preserve">
-    <value>Interceptor not running</value>
   </data>
   <data name="FloatingInterceptor_Title" xml:space="preserve">
     <value>Floating window interceptor</value>
@@ -263,9 +233,6 @@
   </data>
   <data name="FoldMode_ExitToAnnotationHint" xml:space="preserve">
     <value>When on, exiting fold mode switches back to annotation for convenience.</value>
-  </data>
-  <data name="FoldMode_Title" xml:space="preserve">
-    <value>Fold Mode</value>
   </data>
   <data name="AutoFold_Group_Seewo" xml:space="preserve">
     <value>Seewo</value>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -45,29 +45,8 @@
   <data name="Exit" xml:space="preserve">
     <value>Exit</value>
   </data>
-  <data name="FixVersion" xml:space="preserve">
-    <value>Repair installation</value>
-  </data>
-  <data name="HistoryRollback" xml:space="preserve">
-    <value>Rollback to previous version</value>
-  </data>
-  <data name="ManualUpdate" xml:space="preserve">
-    <value>Check for updates</value>
-  </data>
-  <data name="OpenNewSettings" xml:space="preserve">
-    <value>Open new settings</value>
-  </data>
-  <data name="OpenPluginManager" xml:space="preserve">
-    <value>Open plugin manager</value>
-  </data>
-  <data name="Reset" xml:space="preserve">
-    <value>Reset</value>
-  </data>
   <data name="Restart" xml:space="preserve">
     <value>Restart</value>
-  </data>
-  <data name="Rollback" xml:space="preserve">
-    <value>Rollback</value>
   </data>
   <data name="VersionFix" xml:space="preserve">
     <value>Version fix</value>

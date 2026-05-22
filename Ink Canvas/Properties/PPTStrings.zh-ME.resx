@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -42,57 +42,6 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="PowerPointPanel__PPT_Hint" xml:space="preserve">
-    <value>开启后在 PPT 放映时也能看到手势按钮，随时开整~</value>
-  </data>
-  <data name="PowerPointPanel_0Hint" xml:space="preserve">
-    <value>调大往上挪，调小往下挪，0 就是居中，不偏不倚~</value>
-  </data>
-  <data name="PowerPointPanel_0Hint_1" xml:space="preserve">
-    <value>调大往右挪，调小往左挪，0 就是居中，不偏不倚~</value>
-  </data>
-  <data name="PowerPointPanel_Hint" xml:space="preserve">
-    <value>调整左下按钮的位置</value>
-  </data>
-  <data name="PowerPointPanel_Hint_1" xml:space="preserve">
-    <value>调整右下按钮的位置</value>
-  </data>
-  <data name="PowerPointPanel_Hint_2" xml:space="preserve">
-    <value>调整左侧翻页按钮的透明度</value>
-  </data>
-  <data name="PowerPointPanel_Hint_3" xml:space="preserve">
-    <value>调整右侧翻页按钮的透明度</value>
-  </data>
-  <data name="PowerPointPanel_Hint_4" xml:space="preserve">
-    <value>调整左下翻页按钮的透明度</value>
-  </data>
-  <data name="PowerPointPanel_Hint_5" xml:space="preserve">
-    <value>调整右下翻页按钮的透明度</value>
-  </data>
-  <data name="PowerPointPanel_Hint_6" xml:space="preserve">
-    <value>在幻灯片模式下允许双指手势，双指操作冲鸭~</value>
-  </data>
-  <data name="PowerPointPanel_Hint_7" xml:space="preserve">
-    <value>选择时间胶囊在屏幕上住哪</value>
-  </data>
-  <data name="PowerPointPanel_Hint_8" xml:space="preserve">
-    <value>播放隐藏幻灯片时给你提个醒</value>
-  </data>
-  <data name="PowerPointPanel_PPTHint" xml:space="preserve">
-    <value>在 PPT 放映时显示翻页按钮，翻页不用愁~</value>
-  </data>
-  <data name="PowerPointPanel_PPTHint_1" xml:space="preserve">
-    <value>进入 PPT 放映自动切到批注模式，随时批注~</value>
-  </data>
-  <data name="PowerPointPanel_PPTHint_2" xml:space="preserve">
-    <value>进入 PPT 放映自动跳到第一页，从头开始~</value>
-  </data>
-  <data name="PowerPointPanel_PPTHint_3" xml:space="preserve">
-    <value>PPT 自动播放时给你提个醒</value>
-  </data>
-  <data name="PowerPointPanel_quotquotHint" xml:space="preserve">
-    <value>开启后会记住上次看到哪页，点&quot;是&quot;自动跳过去，贴心~</value>
-  </data>
   <data name="AutoSaveStrokes" xml:space="preserve">
     <value>自动保存幻灯片墨迹</value>
   </data>
@@ -110,9 +59,6 @@
   </data>
   <data name="BottomGroupTitle" xml:space="preserve">
     <value>左下右下</value>
-  </data>
-  <data name="ConflictWithAutoFold" xml:space="preserve">
-    <value>这个跟「自动化」里的「放 PPT 时自动收纳」冲突了！别打架~</value>
   </data>
   <data name="EnhancedPreview" xml:space="preserve">
     <value>PPT 页码按钮增强预览</value>
@@ -137,9 +83,6 @@
   </data>
   <data name="GoToFirstPageOnReenter" xml:space="preserve">
     <value>进放映时回到首页</value>
-  </data>
-  <data name="GroupHint" xml:space="preserve">
-    <value>这部分的设置在幻灯片播放时使用，优先级比其他设置高，大佬优先~</value>
   </data>
   <data name="GroupTitle" xml:space="preserve">
     <value>PPT联动</value>
@@ -177,17 +120,8 @@
   <data name="NotifyHiddenPage" xml:space="preserve">
     <value>提示隐藏幻灯片</value>
   </data>
-  <data name="OffsetHint" xml:space="preserve">
-    <value>调大往上挪，调小往下挪，0 就是居中，不偏不倚~</value>
-  </data>
-  <data name="OffsetHintHorizontal" xml:space="preserve">
-    <value>调大往右挪，调小往左挪，0 就是居中，不偏不倚~</value>
-  </data>
   <data name="PageButtonClickable" xml:space="preserve">
     <value>PPT 页码按钮可点击</value>
-  </data>
-  <data name="PageButtonClickable_SubSettings" xml:space="preserve">
-    <value>页码按钮点击子设置</value>
   </data>
   <data name="PageButtonClickableHint" xml:space="preserve">
     <value>开启后，点页码按钮唤起页码导航。默认用 PowerPoint 网格缩略图（WPS 不行）；可以在下面手动开启增强预览来支持 WPS~</value>
@@ -224,12 +158,6 @@
   </data>
   <data name="ShowFlipButtons" xml:space="preserve">
     <value>PPT 模式下显示翻页按钮</value>
-  </data>
-  <data name="ShowGestureButtonInShow" xml:space="preserve">
-    <value>PPT 放映时显示手势按钮</value>
-  </data>
-  <data name="ShowGestureButtonInShowHint" xml:space="preserve">
-    <value>开启后在 PPT 放映时也能看到手势按钮，随时开整~</value>
   </data>
   <data name="ShowPageNumber" xml:space="preserve">
     <value>显示页码</value>
@@ -287,14 +215,5 @@
   </data>
   <data name="UseRot" xml:space="preserve">
     <value>使用 ROT 联动</value>
-  </data>
-  <data name="WpsHint1" xml:space="preserve">
-    <value>只用 PowerPoint 就别开 WPS 联动！用 WPS 就别用 PowerPoint！别脚踏两条船~</value>
-  </data>
-  <data name="WpsLagWarning" xml:space="preserve">
-    <value>开启 WPS 支持后 WPS 关闭时会卡成狗！</value>
-  </data>
-  <data name="WpsSupportHint" xml:space="preserve">
-    <value>可以支持 WPS，但目前没法同时支持 MSOffice 和 WPS。要启用 WPS 支持的话，确保 WPS 在「配置工具」里开了「WPS Office 兼容第三方系统和软件」，不然识别不到 WPS！</value>
   </data>
 </root>
