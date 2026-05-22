@@ -85,6 +85,8 @@ namespace Ink_Canvas.Properties
         public static string Board_Shape => ResourceManager.GetString(nameof(Board_Shape), _resourceCulture);
 
         public static string Board_Size => ResourceManager.GetString(nameof(Board_Size), _resourceCulture);
+        
+        public static string Board_StrokeEraser => ResourceManager.GetString(nameof(Board_StrokeEraser), _resourceCulture);
 
         public static string Board_Tools => ResourceManager.GetString(nameof(Board_Tools), _resourceCulture);
 

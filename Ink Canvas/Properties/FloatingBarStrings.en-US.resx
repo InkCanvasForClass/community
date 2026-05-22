@@ -456,4 +456,7 @@
   <data name="ToolbarCondition_Collapsed" xml:space="preserve">
     <value>Toolbar collapsed</value>
   </data>
+  <data name="Board_StrokeEraser" xml:space="preserve">
+    <value>Storke eraser</value>
+  </data>
 </root>
