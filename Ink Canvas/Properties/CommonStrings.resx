@@ -87,6 +87,9 @@
   <data name="Common_On" xml:space="preserve">
     <value>开</value>
   </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
   <data name="EraserSize_SwitchHint" xml:space="preserve">
     <value>非实时切换，下一次使用面积擦时生效。</value>
   </data>
@@ -128,5 +131,8 @@
   </data>
   <data name="Yes" xml:space="preserve">
     <value>是</value>
+  </data>
+  <data name="Common_OK" xml:space="preserve">
+    <value>确定</value>
   </data>
 </root>

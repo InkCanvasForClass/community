@@ -178,6 +178,8 @@ namespace Ink_Canvas.Properties
 
         public static string Theme_Language_English => ResourceManager.GetString(nameof(Theme_Language_English), _resourceCulture);
 
+        public static string Theme_Language_MemeChinese => ResourceManager.GetString(nameof(Theme_Language_MemeChinese), _resourceCulture);
+
         public static string Theme_Language_RestartHint => ResourceManager.GetString(nameof(Theme_Language_RestartHint), _resourceCulture);
 
         public static string Theme_Language_System => ResourceManager.GetString(nameof(Theme_Language_System), _resourceCulture);
@@ -341,5 +343,35 @@ namespace Ink_Canvas.Properties
         public static string ThemePanel_PPTHint => ResourceManager.GetString(nameof(ThemePanel_PPTHint), _resourceCulture);
 
         public static string ThemePanel_PPTPPTHint => ResourceManager.GetString(nameof(ThemePanel_PPTPPTHint), _resourceCulture);
+
+        public static string Theme_FloatingBarButtonsDescription => ResourceManager.GetString(nameof(Theme_FloatingBarButtonsDescription), _resourceCulture);
+
+        public static string Theme_SelectCustomSplashImage => ResourceManager.GetString(nameof(Theme_SelectCustomSplashImage), _resourceCulture);
+
+        public static string Theme_HitokotoCategory_Animation => ResourceManager.GetString(nameof(Theme_HitokotoCategory_Animation), _resourceCulture);
+
+        public static string Theme_HitokotoCategory_Manga => ResourceManager.GetString(nameof(Theme_HitokotoCategory_Manga), _resourceCulture);
+
+        public static string Theme_HitokotoCategory_Game => ResourceManager.GetString(nameof(Theme_HitokotoCategory_Game), _resourceCulture);
+
+        public static string Theme_HitokotoCategory_Literature => ResourceManager.GetString(nameof(Theme_HitokotoCategory_Literature), _resourceCulture);
+
+        public static string Theme_HitokotoCategory_Original => ResourceManager.GetString(nameof(Theme_HitokotoCategory_Original), _resourceCulture);
+
+        public static string Theme_HitokotoCategory_FromWeb => ResourceManager.GetString(nameof(Theme_HitokotoCategory_FromWeb), _resourceCulture);
+
+        public static string Theme_HitokotoCategory_Movie => ResourceManager.GetString(nameof(Theme_HitokotoCategory_Movie), _resourceCulture);
+
+        public static string Theme_HitokotoCategory_Poetry => ResourceManager.GetString(nameof(Theme_HitokotoCategory_Poetry), _resourceCulture);
+
+        public static string Theme_HitokotoCategory_NeteaseCloud => ResourceManager.GetString(nameof(Theme_HitokotoCategory_NeteaseCloud), _resourceCulture);
+
+        public static string Theme_HitokotoCategory_Philosophy => ResourceManager.GetString(nameof(Theme_HitokotoCategory_Philosophy), _resourceCulture);
+
+        public static string Theme_HitokotoCategory_Humor => ResourceManager.GetString(nameof(Theme_HitokotoCategory_Humor), _resourceCulture);
+
+        public static string Theme_Hitokoto_SelectAll => ResourceManager.GetString(nameof(Theme_Hitokoto_SelectAll), _resourceCulture);
+
+        public static string Theme_Hitokoto_CustomizeTitle => ResourceManager.GetString(nameof(Theme_Hitokoto_CustomizeTitle), _resourceCulture);
     }
 }

@@ -144,4 +144,25 @@
   <data name="Random_UseExternal" xml:space="preserve">
     <value>Use external roll-call app</value>
   </data>
+  <data name="Random_SelectTimerAlarm" xml:space="preserve">
+    <value>Select Timer Alarm Sound</value>
+  </data>
+  <data name="Random_AudioFilter" xml:space="preserve">
+    <value>Audio files (*.wav)|*.wav|All files (*.*)|*.*</value>
+  </data>
+  <data name="Random_CustomAlarmSuccess" xml:space="preserve">
+    <value>Custom alarm set successfully!</value>
+  </data>
+  <data name="Random_AlarmSetupSuccess" xml:space="preserve">
+    <value>Setup Successful</value>
+  </data>
+  <data name="Random_ResetAlarmSuccess" xml:space="preserve">
+    <value>Reset to default alarm!</value>
+  </data>
+  <data name="Random_ResetSuccess" xml:space="preserve">
+    <value>Reset Successful</value>
+  </data>
+  <data name="Random_SelectProgressiveAlarm" xml:space="preserve">
+    <value>Select Progressive Alarm Audio File</value>
+  </data>
 </root>

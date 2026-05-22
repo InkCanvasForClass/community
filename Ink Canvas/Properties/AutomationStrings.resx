@@ -267,4 +267,58 @@
   <data name="FoldMode_Title" xml:space="preserve">
     <value>收纳模式</value>
   </data>
+  <data name="AutoFold_Group_Seewo" xml:space="preserve">
+    <value>希沃</value>
+  </data>
+  <data name="AutoFold_Group_Hite" xml:space="preserve">
+    <value>鸿合</value>
+  </data>
+  <data name="AutoFold_Group_Other" xml:space="preserve">
+    <value>其他白板</value>
+  </data>
+  <data name="FloatingInterceptor_Group_Seewo" xml:space="preserve">
+    <value>希沃</value>
+  </data>
+  <data name="FileAssoc_CheckDesc" xml:space="preserve">
+    <value>查看 .icstk 文件是否已关联到 Ink Canvas</value>
+  </data>
+  <data name="FileAssoc_RegisterHeader" xml:space="preserve">
+    <value>注册文件关联</value>
+  </data>
+  <data name="FileAssoc_RegisterDesc" xml:space="preserve">
+    <value>将 .icstk 文件关联到 Ink Canvas</value>
+  </data>
+  <data name="FileAssoc_UnregisterDesc" xml:space="preserve">
+    <value>移除 .icstk 文件与 Ink Canvas 的关联</value>
+  </data>
+  <data name="FileAssoc_NotChecked" xml:space="preserve">
+    <value>未检查</value>
+  </data>
+  <data name="FileAssoc_RegisterSuccess" xml:space="preserve">
+    <value>文件关联注册成功</value>
+  </data>
+  <data name="FileAssoc_RegisterFailed" xml:space="preserve">
+    <value>文件关联注册失败</value>
+  </data>
+  <data name="FileAssoc_UnregisterSuccess" xml:space="preserve">
+    <value>文件关联已取消</value>
+  </data>
+  <data name="FileAssoc_UnregisterFailed" xml:space="preserve">
+    <value>取消文件关联失败</value>
+  </data>
+  <data name="FileAssoc_Registered" xml:space="preserve">
+    <value>✓ .icstk文件关联已注册</value>
+  </data>
+  <data name="FileAssoc_NotRegistered" xml:space="preserve">
+    <value>✗ .icstk文件关联未注册</value>
+  </data>
+  <data name="FileAssoc_CheckError" xml:space="preserve">
+    <value>✗ 检查文件关联状态时出错</value>
+  </data>
+  <data name="Storage_AutoDeleteDaysThreshold" xml:space="preserve">
+    <value>自动删除天数阈值</value>
+  </data>
+  <data name="Storage_MinAutomationStrokes" xml:space="preserve">
+    <value>自动化最小笔画数</value>
+  </data>
 </root>

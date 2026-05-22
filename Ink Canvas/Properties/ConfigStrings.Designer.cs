@@ -49,5 +49,33 @@ namespace Ink_Canvas.Properties
         public static string SaveAs => ResourceManager.GetString(nameof(SaveAs), _resourceCulture);
 
         public static string Title => ResourceManager.GetString(nameof(Title), _resourceCulture);
+
+        public static string ProfileNameLabel => ResourceManager.GetString(nameof(ProfileNameLabel), _resourceCulture);
+
+        public static string SaveAsProfileTitle => ResourceManager.GetString(nameof(SaveAsProfileTitle), _resourceCulture);
+
+        public static string SaveAs_EnterName => ResourceManager.GetString(nameof(SaveAs_EnterName), _resourceCulture);
+
+        public static string SavedAsProfile => ResourceManager.GetString(nameof(SavedAsProfile), _resourceCulture);
+
+        public static string SaveAs_Failed => ResourceManager.GetString(nameof(SaveAs_Failed), _resourceCulture);
+
+        public static string SaveAs_FailedMsg => ResourceManager.GetString(nameof(SaveAs_FailedMsg), _resourceCulture);
+
+        public static string Delete_SelectFirst => ResourceManager.GetString(nameof(Delete_SelectFirst), _resourceCulture);
+
+        public static string Delete_ConfirmTitle => ResourceManager.GetString(nameof(Delete_ConfirmTitle), _resourceCulture);
+
+        public static string Delete_ConfirmMsg => ResourceManager.GetString(nameof(Delete_ConfirmMsg), _resourceCulture);
+
+        public static string Delete_Failed => ResourceManager.GetString(nameof(Delete_Failed), _resourceCulture);
+
+        public static string Delete_FailedMsg => ResourceManager.GetString(nameof(Delete_FailedMsg), _resourceCulture);
+
+        public static string SwitchedToProfile => ResourceManager.GetString(nameof(SwitchedToProfile), _resourceCulture);
+
+        public static string DeletedAndSwitched => ResourceManager.GetString(nameof(DeletedAndSwitched), _resourceCulture);
+
+        public static string DeletedProfile => ResourceManager.GetString(nameof(DeletedProfile), _resourceCulture);
     }
 }

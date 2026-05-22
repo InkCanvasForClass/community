@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Windows;
@@ -114,7 +115,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (SecurityManager.HasPasswordConfigured(settings))
                 {
                     bool ok = await SecurityManager.PromptAndVerifyPasswordOrTotpAsync(settings, owner,
-                        "关闭安全密码", "请输入安全密码或 TOTP 验证码以关闭安全密码功能。");
+                        SecurityStrings.Security_DisablePasswordTitle, SecurityStrings.Security_DisablePasswordMessage);
                     if (!ok)
                     {
                         SetCardIsOnSilently(CardPasswordEnabled, true);
@@ -212,7 +213,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             var owner = Window.GetWindow(this);
             bool ok = await SecurityManager.PromptAndVerifyPasswordOrTotpAsync(settings, owner,
-                "重置 TOTP 密钥", "请输入安全密码或当前 TOTP 动态验证码以重置密钥。");
+                SecurityStrings.Security_ResetTotpTitle, SecurityStrings.Security_ResetTotpMessage);
             if (!ok) return;
 
             settings.Security.TotpSecret = SecurityManager.GenerateTotpSecret();

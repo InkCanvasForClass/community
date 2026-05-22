@@ -9,7 +9,7 @@
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d"
 
-      Title="首页">
+      Title="{x:Static props:HomeStrings.Home_Title}">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -38,14 +38,14 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <ui:SettingsCard Header="{x:Static props:BtnStrings.Restart}" Description="{x:Static props:HomeStrings.Home_RestartApp}"
-                        IsClickEnabled="True" Click="BtnRestart_Click" Grid.Column="0">
+                        IsClickEnabled="True" Click="BtnRestart_Click" Grid.Column="0" Margin="0,0,4,0">
                             <ui:SettingsCard.HeaderIcon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" />
                             </ui:SettingsCard.HeaderIcon>
                         </ui:SettingsCard>
 
                         <ui:SettingsCard Header="{x:Static props:TimerStrings.Timer_Reset}" Description="{x:Static props:HomeStrings.Home_ResetSettings}"
-                        IsClickEnabled="True" Click="BtnResetToSuggestion_Click" Grid.Column="1">
+                        IsClickEnabled="True" Click="BtnResetToSuggestion_Click" Grid.Column="1" Margin="0,0,4,0">
                             <ui:SettingsCard.HeaderIcon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Clear}" />
                             </ui:SettingsCard.HeaderIcon>
@@ -60,7 +60,7 @@
                     </Grid>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="基本" />
+                        Text="{x:Static props:HomeStrings.Home_Basic}" />
 
                     <ui:SettingsCard Header="{x:Static props:StartupStrings.Start}" Description="{x:Static props:NavStrings.Nav_Startup}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="StartupPage">
@@ -69,7 +69,7 @@
                         </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="隐私" Description="隐私与遥测设置"
+                    <ui:SettingsCard Header="{x:Static props:HomeStrings.Home_Privacy}" Description="{x:Static props:HomeStrings.Home_PrivacySettings}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="PrivacyPage">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Shield}" />
@@ -84,8 +84,8 @@
                     </ui:SettingsCard>
                     
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="主界面" />
-                    <ui:SettingsCard Header="窗口" Description="窗口设置"
+                        Text="{x:Static props:HomeStrings.Home_MainUI}" />
+                    <ui:SettingsCard Header="{x:Static props:HomeStrings.Home_Window}" Description="{x:Static props:HomeStrings.Home_WindowSettings}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="WindowPage">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}" />
@@ -106,7 +106,7 @@
                         </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="工具栏" Description="工具栏按钮排序与可见性"
+                    <ui:SettingsCard Header="{x:Static props:HomeStrings.Home_Toolbar}" Description="{x:Static props:HomeStrings.Home_ToolbarSettings}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="ToolbarPage">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Rename}" />
@@ -115,14 +115,14 @@
                     
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:CanvasStrings.Canvas_GroupTitle}" />
-                    <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_GroupTitle}" Description="画板设置"
+                    <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_GroupTitle}" Description="{x:Static props:HomeStrings.Home_CanvasSettings}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="CanvasPage">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
                         </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:CanvasStrings.InkRecog_Title}" Description="墨迹纠正设置"
+                    <ui:SettingsCard Header="{x:Static props:CanvasStrings.InkRecog_Title}" Description="{x:Static props:HomeStrings.Home_InkRecognitionSettings}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="InkRecognitionPage">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Draw}" />
@@ -131,14 +131,14 @@
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:PPTStrings.GroupTitle}" />
-                    <ui:SettingsCard Header="{x:Static props:PPTStrings.GroupTitle}" Description="PPT联动设置"
+                    <ui:SettingsCard Header="{x:Static props:PPTStrings.GroupTitle}" Description="{x:Static props:HomeStrings.Home_PPTSettings}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="PowerPointPage">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}" />
                         </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:NotificationStrings.Type_Update}" Description="更新设置"
+                    <ui:SettingsCard Header="{x:Static props:NotificationStrings.Type_Update}" Description="{x:Static props:HomeStrings.Home_UpdateSettings}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="UpdatePage">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" />
@@ -184,7 +184,7 @@
                         </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_Manage}" Description="Dlass 与 WebDav 上传设置"
+                    <ui:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_Manage}" Description="{x:Static props:HomeStrings.Home_CloudStorageSettings}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="CloudStoragePage">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}" />
@@ -198,7 +198,7 @@
                         </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:RandomStrings.Random_Title}" Description="随机点名与计时器"
+                    <ui:SettingsCard Header="{x:Static props:RandomStrings.Random_Title}" Description="{x:Static props:HomeStrings.Home_RandomAndTimer}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="RandomDrawPage">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.People}" />
@@ -213,7 +213,7 @@
                     </ui:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="插件设置" />
+                        Text="{x:Static props:HomeStrings.Home_PluginSettings}" />
                     <ui:SettingsCard Header="{x:Static props:NavStrings.Nav_Plugins}" Description="{x:Static props:NavStrings.Settings_Plugins}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="PluginPage">
                         <ui:SettingsCard.HeaderIcon>
@@ -221,7 +221,7 @@
                         </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:AboutStrings.Title}" Description="关于 InkCanvasForClass"
+                    <ui:SettingsCard Header="{x:Static props:AboutStrings.Title}" Description="{x:Static props:HomeStrings.Home_AboutApp}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="AboutPage">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Info}" />

@@ -1,3 +1,4 @@
+using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Diagnostics;
@@ -27,7 +28,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             UpdateSliderText(BrushAutoRestoreWidthSlider, BrushAutoRestoreWidthText, "{0:F2}");
             UpdateSliderText(BrushAutoRestoreAlphaSlider, BrushAutoRestoreAlphaText, "{0:0}");
-            UpdateSliderText(EraserAutoSwitchBackDelaySlider, EraserAutoSwitchBackDelayText, "{0:0}秒");
+            UpdateSliderText(EraserAutoSwitchBackDelaySlider, EraserAutoSwitchBackDelayText, CanvasStrings.Canvas_SecondsFormat);
         }
 
         private void UpdateSliderText(Slider slider, TextBlock textBlock, string format)
@@ -313,7 +314,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void EraserAutoSwitchBackDelaySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            UpdateSliderText(EraserAutoSwitchBackDelaySlider, EraserAutoSwitchBackDelayText, "{0:0}秒");
+            UpdateSliderText(EraserAutoSwitchBackDelaySlider, EraserAutoSwitchBackDelayText, CanvasStrings.Canvas_SecondsFormat);
             if (!_isLoaded) return;
             SettingsManager.Settings.Canvas.EraserAutoSwitchBackDelaySeconds = (int)e.NewValue;
             SettingsManager.SaveSettingsToFile();

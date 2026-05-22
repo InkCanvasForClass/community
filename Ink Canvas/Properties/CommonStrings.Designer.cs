@@ -70,6 +70,8 @@ namespace Ink_Canvas.Properties
 
         public static string Common_On => ResourceManager.GetString(nameof(Common_On), _resourceCulture);
 
+        public static string Common_Cancel => ResourceManager.GetString(nameof(Common_Cancel), _resourceCulture);
+
         public static string EraserSize_SwitchHint => ResourceManager.GetString(nameof(EraserSize_SwitchHint), _resourceCulture);
 
         public static string Hotkey_NotSet => ResourceManager.GetString(nameof(Hotkey_NotSet), _resourceCulture);
@@ -97,5 +99,7 @@ namespace Ink_Canvas.Properties
         public static string Time_Start => ResourceManager.GetString(nameof(Time_Start), _resourceCulture);
 
         public static string Yes => ResourceManager.GetString(nameof(Yes), _resourceCulture);
+
+        public static string Common_OK => ResourceManager.GetString(nameof(Common_OK), _resourceCulture);
     }
 }

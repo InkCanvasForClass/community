@@ -1,3 +1,4 @@
+using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Windows;
@@ -314,8 +315,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
-                Title = "选择计时器提醒铃声",
-                Filter = "音频文件 (*.wav)|*.wav|所有文件 (*.*)|*.*",
+                Title = RandomStrings.Random_SelectTimerAlarm,
+                Filter = RandomStrings.Random_AudioFilter,
                 DefaultExt = "wav"
             };
 
@@ -323,7 +324,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 SettingsManager.Settings.RandSettings.CustomTimerSoundPath = openFileDialog.FileName;
                 SettingsManager.SaveSettingsToFile();
-                MessageBox.Show("自定义铃声设置成功！", "设置成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(RandomStrings.Random_CustomAlarmSuccess, RandomStrings.Random_AlarmSetupSuccess, MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -331,7 +332,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             SettingsManager.Settings.RandSettings.CustomTimerSoundPath = "";
             SettingsManager.SaveSettingsToFile();
-            MessageBox.Show("已重置为默认铃声！", "重置成功", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(RandomStrings.Random_ResetAlarmSuccess, RandomStrings.Random_ResetSuccess, MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void ToggleSwitchEnableProgressiveReminder_Toggled(object sender, RoutedEventArgs e)
@@ -360,8 +361,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
-                Title = "选择渐进提醒音频文件",
-                Filter = "音频文件 (*.wav)|*.wav|所有文件 (*.*)|*.*",
+                Title = RandomStrings.Random_SelectProgressiveAlarm,
+                Filter = RandomStrings.Random_AudioFilter,
                 DefaultExt = "wav"
             };
 

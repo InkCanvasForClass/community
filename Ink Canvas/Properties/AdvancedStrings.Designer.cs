@@ -129,5 +129,11 @@ namespace Ink_Canvas.Properties
         public static string Debug_ShowConsole_Desc => ResourceManager.GetString(nameof(Debug_ShowConsole_Desc), _resourceCulture);
 
         public static string Debug_ShowConsole_Header => ResourceManager.GetString(nameof(Debug_ShowConsole_Header), _resourceCulture);
+
+        public static string Debug_Title => ResourceManager.GetString(nameof(Debug_Title), _resourceCulture);
+
+        public static string Debug_IconSettings => ResourceManager.GetString(nameof(Debug_IconSettings), _resourceCulture);
+
+        public static string Debug_SettingsExpanderExample => ResourceManager.GetString(nameof(Debug_SettingsExpanderExample), _resourceCulture);
     }
 }

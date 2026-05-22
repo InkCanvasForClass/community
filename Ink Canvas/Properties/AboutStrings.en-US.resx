@@ -144,4 +144,52 @@
   <data name="App_Title" xml:space="preserve">
     <value>InkCanvasforClass</value>
   </data>
+  <data name="DeviceInfo_Failed" xml:space="preserve">
+    <value>Failed to retrieve</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="UpdatePriority_High" xml:space="preserve">
+    <value>High priority (updates pushed first)</value>
+  </data>
+  <data name="UpdatePriority_Low" xml:space="preserve">
+    <value>Low priority (delayed updates)</value>
+  </data>
+  <data name="UpdatePriority_Medium" xml:space="preserve">
+    <value>Medium priority (normal updates)</value>
+  </data>
+  <data name="UsageFrequency_High" xml:space="preserve">
+    <value>High frequency user</value>
+  </data>
+  <data name="UsageFrequency_Low" xml:space="preserve">
+    <value>Low frequency user</value>
+  </data>
+  <data name="UsageFrequency_Medium" xml:space="preserve">
+    <value>Medium frequency user</value>
+  </data>
+  <data name="Privacy_ConfirmDisableTelemetry_Message" xml:space="preserve">
+    <value>After disabling anonymous usage data upload, you will not be able to continue using the preview/test channel. The system will automatically switch to the Release channel.\n\nAre you sure you want to disable it?</value>
+  </data>
+  <data name="Privacy_ConfirmDisableTelemetry_Title" xml:space="preserve">
+    <value>Confirm Disable Telemetry</value>
+  </data>
+  <data name="Privacy_PrivacyAgreementRequired_Message" xml:space="preserve">
+    <value>Before enabling anonymous usage data upload, please read and check the privacy notice above.</value>
+  </data>
+  <data name="Privacy_PrivacyAgreementRequired_Title" xml:space="preserve">
+    <value>Privacy Agreement Required</value>
+  </data>
+  <data name="Privacy_PrivacyFileNotFound_Message" xml:space="preserve">
+    <value>Privacy notice file (privacy / privacy.txt) not found. Cannot enable anonymous usage data upload at this time.</value>
+  </data>
+  <data name="Privacy_PrivacyFileNotFound_Title" xml:space="preserve">
+    <value>Privacy Notice Missing</value>
+  </data>
+  <data name="Privacy_ConfirmRevokePrivacy_Message" xml:space="preserve">
+    <value>After revoking privacy agreement, anonymous usage data upload will be disabled and the channel will switch to Release.\n\nAre you sure?</value>
+  </data>
+  <data name="Privacy_ConfirmRevokePrivacy_Title" xml:space="preserve">
+    <value>Confirm Revoke Privacy Agreement</value>
+  </data>
 </root>

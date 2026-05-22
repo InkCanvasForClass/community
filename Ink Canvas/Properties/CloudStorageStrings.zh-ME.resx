@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="CloudStorage_Manage" xml:space="preserve">
+    <value>云端仓库管家</value>
+  </data>
+  <data name="CloudStorage_UploadDelay" xml:space="preserve">
+    <value>上传摸鱼时间</value>
+  </data>
+  <data name="CloudStorage_UploadDelayDesc" xml:space="preserve">
+    <value>给上传加个缓冲期，0-60分钟随便摸，急啥呢~</value>
+  </data>
+  <data name="CloudStorage_Minutes" xml:space="preserve">
+    <value>分钟</value>
+  </data>
+  <data name="CloudStorage_UploadProviders" xml:space="preserve">
+    <value>上传打工人</value>
+  </data>
+  <data name="CloudStorage_UploadProvidersDesc" xml:space="preserve">
+    <value>选谁来帮你把文件搬上云端，挑个靠谱的~</value>
+  </data>
+  <data name="CloudStorage_ProviderList" xml:space="preserve">
+    <value>打工人花名册</value>
+  </data>
+  <data name="CloudStorage_ProviderListDesc" xml:space="preserve">
+    <value>关掉某个打工人后，ta就再也不用搬砖了，自动保存文件不会再找ta~</value>
+  </data>
+  <data name="CloudStorage_Dlass" xml:space="preserve">
+    <value>Dlass</value>
+  </data>
+  <data name="CloudStorage_UserToken" xml:space="preserve">
+    <value>你的通行证</value>
+  </data>
+  <data name="CloudStorage_UserTokenDesc" xml:space="preserve">
+    <value>保存并选择你的 Dlass 通行证，有证才能进~</value>
+  </data>
+  <data name="CloudStorage_TokenNotSet" xml:space="preserve">
+    <value>还没领证呢</value>
+  </data>
+  <data name="CloudStorage_SavedTokens" xml:space="preserve">
+    <value>已收藏的通行证</value>
+  </data>
+  <data name="CloudStorage_SavedTokensDesc" xml:space="preserve">
+    <value>从本地通行证收藏夹里挑一个用~</value>
+  </data>
+  <data name="CloudStorage_NewToken" xml:space="preserve">
+    <value>领个新证</value>
+  </data>
+  <data name="CloudStorage_NewTokenDesc" xml:space="preserve">
+    <value>输入新的通行证，保存后自动设为当前使用，秒切~</value>
+  </data>
+  <data name="CloudStorage_TokenActions" xml:space="preserve">
+    <value>通行证操作台</value>
+  </data>
+  <data name="CloudStorage_SaveToken" xml:space="preserve">
+    <value>存证</value>
+  </data>
+  <data name="CloudStorage_DeleteToken" xml:space="preserve">
+    <value>销证</value>
+  </data>
+  <data name="CloudStorage_OpenDlassDashboard" xml:space="preserve">
+    <value>打开 Dlass 司令部</value>
+  </data>
+  <data name="CloudStorage_ConnectionStatus" xml:space="preserve">
+    <value>连线状态</value>
+  </data>
+  <data name="CloudStorage_ConnectionStatusDesc" xml:space="preserve">
+    <value>验证你的通行证，顺便看看有哪些班级可以加入~</value>
+  </data>
+  <data name="CloudStorage_NotConnected" xml:space="preserve">
+    <value>断线中</value>
+  </data>
+  <data name="CloudStorage_TestConnection" xml:space="preserve">
+    <value>测测连线</value>
+  </data>
+  <data name="CloudStorage_ClassSelection" xml:space="preserve">
+    <value>选班入队</value>
+  </data>
+  <data name="CloudStorage_ClassSelectionDesc" xml:space="preserve">
+    <value>连线成功后，自动加载你的通行证能进的班级~</value>
+  </data>
+  <data name="CloudStorage_AutoUploadNotes" xml:space="preserve">
+    <value>自动上传笔记</value>
+  </data>
+  <data name="CloudStorage_AutoUploadNotesDesc" xml:space="preserve">
+    <value>开启后，保存的截图和墨迹文件会自动飞到所选班级白板，省心yyds~</value>
+  </data>
+  <data name="CloudStorage_WebDav" xml:space="preserve">
+    <value>WebDav</value>
+  </data>
+  <data name="CloudStorage_WebDavSettings" xml:space="preserve">
+    <value>WebDav 调教</value>
+  </data>
+  <data name="CloudStorage_WebDavSettingsDesc" xml:space="preserve">
+    <value>配置 WebDav 服务器地址、账号和上传老巢~</value>
+  </data>
+  <data name="CloudStorage_WebDavUrl" xml:space="preserve">
+    <value>WebDav 地址</value>
+  </data>
+  <data name="CloudStorage_WebDavUrlDesc" xml:space="preserve">
+    <value>服务器地址，比如 https://example.com/dav 这种~</value>
+  </data>
+  <data name="CloudStorage_Username" xml:space="preserve">
+    <value>用户名</value>
+  </data>
+  <data name="CloudStorage_Password" xml:space="preserve">
+    <value>密码</value>
+  </data>
+  <data name="CloudStorage_RootDirectory" xml:space="preserve">
+    <value>老巢目录</value>
+  </data>
+  <data name="CloudStorage_RootDirectoryDesc" xml:space="preserve">
+    <value>可以不填；填了文件就会住进这个目录~</value>
+  </data>
+  <data name="CloudStorage_WebDavActions" xml:space="preserve">
+    <value>WebDav 操作</value>
+  </data>
+  <data name="CloudStorage_SaveWebDavSettings" xml:space="preserve">
+    <value>保存 WebDav 调教</value>
+  </data>
+  <data name="CloudStorage_Restore" xml:space="preserve">
+    <value>回档</value>
+  </data>
+  <data name="CloudStorage_NoSavedToken" xml:space="preserve">
+    <value>（空空如也，还没存证）</value>
+  </data>
+  <data name="CloudStorage_WaitingForConnection" xml:space="preserve">
+    <value>（正在连线中...）</value>
+  </data>
+  <data name="CloudStorage_UnknownTeacher" xml:space="preserve">
+    <value>神秘老师</value>
+  </data>
+  <data name="CloudStorage_NoAvailableClasses" xml:space="preserve">
+    <value>（一个班都没有，栓Q）</value>
+  </data>
+  <data name="CloudStorage_PleaseEnterNewToken" xml:space="preserve">
+    <value>请输入新的通行证~</value>
+  </data>
+  <data name="CloudStorage_Tip" xml:space="preserve">
+    <value>小贴士</value>
+  </data>
+  <data name="CloudStorage_TokenSavedAndSelected" xml:space="preserve">
+    <value>通行证存好了，也选上了，绝绝子~</value>
+  </data>
+  <data name="CloudStorage_Success" xml:space="preserve">
+    <value>搞定！</value>
+  </data>
+  <data name="CloudStorage_SaveTokenError" xml:space="preserve">
+    <value>存证翻车了: </value>
+  </data>
+  <data name="CloudStorage_Error" xml:space="preserve">
+    <value>翻车了</value>
+  </data>
+  <data name="CloudStorage_PleaseSelectToken" xml:space="preserve">
+    <value>先选个证呗~</value>
+  </data>
+  <data name="CloudStorage_ConfirmDeleteToken" xml:space="preserve">
+    <value>确定要销毁这个通行证吗？删了就没了哦~</value>
+  </data>
+  <data name="CloudStorage_Confirm" xml:space="preserve">
+    <value>确认</value>
+  </data>
+  <data name="CloudStorage_WebDavSettingsSaved" xml:space="preserve">
+    <value>WebDav 调教已保存，奥利给~</value>
+  </data>
+  <data name="CloudStorage_SaveWebDavError" xml:space="preserve">
+    <value>保存 WebDav 调教翻车了: </value>
+  </data>
+  <data name="CloudStorage_DlassRegistrationPrompt" xml:space="preserve">
+    <value>Dlass 账号搞了没？\n\n• 搞了：在本页填入通行证就行\n• 没搞：帮你打开浏览器去 Dlass 司令部注册</value>
+  </data>
+  <data name="CloudStorage_DlassRegistrationTitle" xml:space="preserve">
+    <value>Dlass 注册入口</value>
+  </data>
+  <data name="CloudStorage_CannotOpenBrowser" xml:space="preserve">
+    <value>浏览器打不开，栓Q！请手动访问: https://dlass.tech/dashboard</value>
+  </data>
+  <data name="CloudStorage_Testing" xml:space="preserve">
+    <value>测试中，稍等...</value>
+  </data>
+  <data name="CloudStorage_ConnectedFormat" xml:space="preserve">
+    <value>已连线！找到 {0} 个白板，冲鸭~</value>
+  </data>
+  <data name="CloudStorage_ConnectionFailed" xml:space="preserve">
+    <value>连线失败，破防了</value>
+  </data>
+  <data name="CloudStorage_DeleteTokenError" xml:space="preserve">
+    <value>销证翻车了: </value>
+  </data>
+  <data name="CloudStorage_TokenSelected" xml:space="preserve">
+    <value>通行证已选中~</value>
+  </data>
+</root>

@@ -93,4 +93,22 @@
   <data name="Window_WindowChromeRenderingHint" xml:space="preserve">
     <value>Use DWM/WindowChrome for the transparent main window. This is usually smoother than AllowsTransparency and takes effect after restart.</value>
   </data>
+  <data name="Title" xml:space="preserve">
+    <value>Window</value>
+  </data>
+  <data name="WindowSettings" xml:space="preserve">
+    <value>Window Settings</value>
+  </data>
+  <data name="MultiScreenSupport" xml:space="preserve">
+    <value>Multi-Screen Support</value>
+  </data>
+  <data name="MultiScreenSupportHint" xml:space="preserve">
+    <value>Enable multi-screen logic based on current display environment when enabled</value>
+  </data>
+  <data name="FollowMouseScreen" xml:space="preserve">
+    <value>Auto Follow Mouse Display</value>
+  </data>
+  <data name="FollowMouseScreenHint" xml:space="preserve">
+    <value>On by default: automatically use the display where the mouse is as the target display</value>
+  </data>
 </root>

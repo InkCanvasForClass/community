@@ -107,5 +107,69 @@ namespace Ink_Canvas.Properties
         public static string Settings_PluginsDesc => ResourceManager.GetString(nameof(Settings_PluginsDesc), _resourceCulture);
 
         public static string Settings_Title => ResourceManager.GetString(nameof(Settings_Title), _resourceCulture);
+
+        public static string Nav_SettingsWindow_Title => ResourceManager.GetString(nameof(Nav_SettingsWindow_Title), _resourceCulture);
+
+        public static string Nav_AppSettings => ResourceManager.GetString(nameof(Nav_AppSettings), _resourceCulture);
+
+        public static string Nav_SearchSettings => ResourceManager.GetString(nameof(Nav_SearchSettings), _resourceCulture);
+
+        public static string Nav_Home => ResourceManager.GetString(nameof(Nav_Home), _resourceCulture);
+
+        public static string Nav_Home_Tooltip => ResourceManager.GetString(nameof(Nav_Home_Tooltip), _resourceCulture);
+
+        public static string Nav_ICCSettings => ResourceManager.GetString(nameof(Nav_ICCSettings), _resourceCulture);
+
+        public static string Nav_Basic => ResourceManager.GetString(nameof(Nav_Basic), _resourceCulture);
+
+        public static string Nav_Basic_Tooltip => ResourceManager.GetString(nameof(Nav_Basic_Tooltip), _resourceCulture);
+
+        public static string Nav_Privacy => ResourceManager.GetString(nameof(Nav_Privacy), _resourceCulture);
+
+        public static string Nav_Privacy_Tooltip => ResourceManager.GetString(nameof(Nav_Privacy_Tooltip), _resourceCulture);
+
+        public static string Nav_MainInterface => ResourceManager.GetString(nameof(Nav_MainInterface), _resourceCulture);
+
+        public static string Nav_MainInterface_Tooltip => ResourceManager.GetString(nameof(Nav_MainInterface_Tooltip), _resourceCulture);
+
+        public static string Nav_Window => ResourceManager.GetString(nameof(Nav_Window), _resourceCulture);
+
+        public static string Nav_Window_Tooltip => ResourceManager.GetString(nameof(Nav_Window_Tooltip), _resourceCulture);
+
+        public static string Nav_Toolbar => ResourceManager.GetString(nameof(Nav_Toolbar), _resourceCulture);
+
+        public static string Nav_Toolbar_Tooltip => ResourceManager.GetString(nameof(Nav_Toolbar_Tooltip), _resourceCulture);
+
+        public static string Nav_CanvasAndInk_Tooltip => ResourceManager.GetString(nameof(Nav_CanvasAndInk_Tooltip), _resourceCulture);
+
+        public static string Nav_Canvas_Tooltip => ResourceManager.GetString(nameof(Nav_Canvas_Tooltip), _resourceCulture);
+
+        public static string Nav_InkRecognition_Tooltip => ResourceManager.GetString(nameof(Nav_InkRecognition_Tooltip), _resourceCulture);
+
+        public static string Nav_PPT_Tooltip => ResourceManager.GetString(nameof(Nav_PPT_Tooltip), _resourceCulture);
+
+        public static string Nav_Update_Tooltip => ResourceManager.GetString(nameof(Nav_Update_Tooltip), _resourceCulture);
+
+        public static string Nav_RandomDraw_Tooltip => ResourceManager.GetString(nameof(Nav_RandomDraw_Tooltip), _resourceCulture);
+
+        public static string Nav_PluginSettings => ResourceManager.GetString(nameof(Nav_PluginSettings), _resourceCulture);
+
+        public static string Nav_AboutInkCanvas => ResourceManager.GetString(nameof(Nav_AboutInkCanvas), _resourceCulture);
+
+        public static string Nav_NavigateError => ResourceManager.GetString(nameof(Nav_NavigateError), _resourceCulture);
+
+        public static string Nav_Error => ResourceManager.GetString(nameof(Nav_Error), _resourceCulture);
+
+        public static string Nav_PluginSettingsFormat => ResourceManager.GetString(nameof(Nav_PluginSettingsFormat), _resourceCulture);
+
+        public static string Nav_IndexBuildFailed => ResourceManager.GetString(nameof(Nav_IndexBuildFailed), _resourceCulture);
+
+        public static string Nav_LoadPluginSettingsFailed => ResourceManager.GetString(nameof(Nav_LoadPluginSettingsFailed), _resourceCulture);
+
+        public static string Nav_PreloadPageFailed => ResourceManager.GetString(nameof(Nav_PreloadPageFailed), _resourceCulture);
+
+        public static string Nav_PreloadPagesFailed => ResourceManager.GetString(nameof(Nav_PreloadPagesFailed), _resourceCulture);
+
+        public static string Settings_Description => ResourceManager.GetString(nameof(Settings_Description), _resourceCulture);
     }
 }

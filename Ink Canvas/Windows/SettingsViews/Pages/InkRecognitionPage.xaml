@@ -60,14 +60,14 @@
                             d:Visibility="Visible">
                         <ComboBox x:Name="ComboBoxHandwritingCorrectionFont"
                                   SelectionChanged="ComboBoxHandwritingCorrectionFont_SelectionChanged">
-                            <ComboBoxItem Content="Ink Free / 楷体 / Segoe Script" Tag="Ink Free,KaiTi,Segoe Script" />
-                            <ComboBoxItem Content="楷体 (KaiTi)" Tag="KaiTi" FontFamily="KaiTi" />
-                            <ComboBoxItem Content="华文楷体 (STKaiti)" Tag="STKaiti" FontFamily="STKaiti" />
-                            <ComboBoxItem Content="华文行楷 (STXingkai)" Tag="STXingkai" FontFamily="STXingkai" />
-                            <ComboBoxItem Content="仿宋 (FangSong)" Tag="FangSong" FontFamily="FangSong" />
-                            <ComboBoxItem Content="华文仿宋 (STFangsong)" Tag="STFangsong" FontFamily="STFangsong" />
-                            <ComboBoxItem Content="隶书 (LiSu)" Tag="LiSu" FontFamily="LiSu" />
-                            <ComboBoxItem Content="幼圆 (YouYuan)" Tag="YouYuan" FontFamily="YouYuan" />
+                            <ComboBoxItem Content="{x:Static props:CanvasStrings.InkRecog_Font_InkFreeKaiti}" Tag="Ink Free,KaiTi,Segoe Script" />
+                            <ComboBoxItem Content="{x:Static props:CanvasStrings.InkRecog_Font_Kaiti}" Tag="KaiTi" FontFamily="KaiTi" />
+                            <ComboBoxItem Content="{x:Static props:CanvasStrings.InkRecog_Font_STKaiti}" Tag="STKaiti" FontFamily="STKaiti" />
+                            <ComboBoxItem Content="{x:Static props:CanvasStrings.InkRecog_Font_STXingkai}" Tag="STXingkai" FontFamily="STXingkai" />
+                            <ComboBoxItem Content="{x:Static props:CanvasStrings.InkRecog_Font_FangSong}" Tag="FangSong" FontFamily="FangSong" />
+                            <ComboBoxItem Content="{x:Static props:CanvasStrings.InkRecog_Font_STFangsong}" Tag="STFangsong" FontFamily="STFangsong" />
+                            <ComboBoxItem Content="{x:Static props:CanvasStrings.InkRecog_Font_LiSu}" Tag="LiSu" FontFamily="LiSu" />
+                            <ComboBoxItem Content="{x:Static props:CanvasStrings.InkRecog_Font_YouYuan}" Tag="YouYuan" FontFamily="YouYuan" />
                             <ComboBoxItem Content="Ink Free" Tag="Ink Free" FontFamily="Ink Free" />
                             <ComboBoxItem Content="Segoe Script" Tag="Segoe Script" FontFamily="Segoe Script" />
                             <ComboBoxItem Content="Segoe Print" Tag="Segoe Print" FontFamily="Segoe Print" />
@@ -91,7 +91,7 @@
                             SwitchName="ToggleSwitchEnableInkToShapeNoFakePressureTriangle"
                             Toggled="ToggleSwitchEnableInkToShapeNoFakePressureTriangle_Toggled" />
 
-                    <ui:SettingsExpander Header="形状修正"
+                    <ui:SettingsExpander Header="{x:Static props:CanvasStrings.InkRecog_ShapeCorrection}"
                             Visibility="{Binding IsOn, ElementName=CardEnableInkToShape, Converter={StaticResource BooleanToVisibilityConverter}}"
                             IsExpanded="{Binding IsOn, ElementName=CardEnableInkToShape, Mode=OneWay}"
                             d:Visibility="Visible" d:IsExpanded="True">

@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Windows;
@@ -675,7 +676,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 UpdateFileAssociationStatus();
                 var mw = GetMainWindow();
                 if (mw != null)
-                    mw.ShowNotification(success ? "文件关联注册成功" : "文件关联注册失败");
+                    mw.ShowNotification(success ? AutomationStrings.FileAssoc_RegisterSuccess : AutomationStrings.FileAssoc_RegisterFailed);
             }
             catch (Exception ex)
             {
@@ -692,7 +693,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 UpdateFileAssociationStatus();
                 var mw = GetMainWindow();
                 if (mw != null)
-                    mw.ShowNotification(success ? "文件关联已取消" : "取消文件关联失败");
+                    mw.ShowNotification(success ? AutomationStrings.FileAssoc_UnregisterSuccess : AutomationStrings.FileAssoc_UnregisterFailed);
             }
             catch (Exception ex)
             {
@@ -713,18 +714,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 bool isRegistered = FileAssociationManager.IsFileAssociationRegistered();
                 if (isRegistered)
                 {
-                    TextBlockFileAssociationStatus.Text = "✓ .icstk文件关联已注册";
+                    TextBlockFileAssociationStatus.Text = AutomationStrings.FileAssoc_Registered;
                     TextBlockFileAssociationStatus.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.LightGreen);
                 }
                 else
                 {
-                    TextBlockFileAssociationStatus.Text = "✗ .icstk文件关联未注册";
+                    TextBlockFileAssociationStatus.Text = AutomationStrings.FileAssoc_NotRegistered;
                     TextBlockFileAssociationStatus.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.LightCoral);
                 }
             }
             catch (Exception ex)
             {
-                TextBlockFileAssociationStatus.Text = "✗ 检查文件关联状态时出错";
+                TextBlockFileAssociationStatus.Text = AutomationStrings.FileAssoc_CheckError;
                 TextBlockFileAssociationStatus.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.LightCoral);
                 LogHelper.WriteLogToFile($"检查文件关联状态失败: {ex.Message}", LogHelper.LogType.Error);
             }

@@ -67,5 +67,49 @@ namespace Ink_Canvas.Properties
         public static string SettingsBaseView_Binding_DescriptionHint => ResourceManager.GetString(nameof(SettingsBaseView_Binding_DescriptionHint), _resourceCulture);
 
         public static string Tooltip_IccProtocol => ResourceManager.GetString(nameof(Tooltip_IccProtocol), _resourceCulture);
+
+        public static string Security_SectionPassword => ResourceManager.GetString(nameof(Security_SectionPassword), _resourceCulture);
+
+        public static string Security_InfoBarTitle => ResourceManager.GetString(nameof(Security_InfoBarTitle), _resourceCulture);
+
+        public static string Security_PasswordInfoBarMessage => ResourceManager.GetString(nameof(Security_PasswordInfoBarMessage), _resourceCulture);
+
+        public static string Security_EnablePassword => ResourceManager.GetString(nameof(Security_EnablePassword), _resourceCulture);
+
+        public static string Security_PasswordManagement => ResourceManager.GetString(nameof(Security_PasswordManagement), _resourceCulture);
+
+        public static string Security_SetOrChangePassword => ResourceManager.GetString(nameof(Security_SetOrChangePassword), _resourceCulture);
+
+        public static string Security_EnableTotp => ResourceManager.GetString(nameof(Security_EnableTotp), _resourceCulture);
+
+        public static string Security_EnableTotpHint => ResourceManager.GetString(nameof(Security_EnableTotpHint), _resourceCulture);
+
+        public static string Security_TotpSecretKey => ResourceManager.GetString(nameof(Security_TotpSecretKey), _resourceCulture);
+
+        public static string Security_TotpSecretKeyHint => ResourceManager.GetString(nameof(Security_TotpSecretKeyHint), _resourceCulture);
+
+        public static string Security_GenerateOrResetKey => ResourceManager.GetString(nameof(Security_GenerateOrResetKey), _resourceCulture);
+
+        public static string Security_RequirePasswordOnExit => ResourceManager.GetString(nameof(Security_RequirePasswordOnExit), _resourceCulture);
+
+        public static string Security_RequirePasswordOnEnterSettings => ResourceManager.GetString(nameof(Security_RequirePasswordOnEnterSettings), _resourceCulture);
+
+        public static string Security_RequirePasswordOnResetConfig => ResourceManager.GetString(nameof(Security_RequirePasswordOnResetConfig), _resourceCulture);
+
+        public static string Security_RequirePasswordOnModifyOrClearNameList => ResourceManager.GetString(nameof(Security_RequirePasswordOnModifyOrClearNameList), _resourceCulture);
+
+        public static string Security_RequirePasswordOnModifyOrClearNameList_Hint => ResourceManager.GetString(nameof(Security_RequirePasswordOnModifyOrClearNameList_Hint), _resourceCulture);
+
+        public static string Security_ProcessProtection => ResourceManager.GetString(nameof(Security_ProcessProtection), _resourceCulture);
+
+        public static string Security_ProcessProtectionInfoBarMessage => ResourceManager.GetString(nameof(Security_ProcessProtectionInfoBarMessage), _resourceCulture);
+
+        public static string Security_DisablePasswordTitle => ResourceManager.GetString(nameof(Security_DisablePasswordTitle), _resourceCulture);
+
+        public static string Security_DisablePasswordMessage => ResourceManager.GetString(nameof(Security_DisablePasswordMessage), _resourceCulture);
+
+        public static string Security_ResetTotpTitle => ResourceManager.GetString(nameof(Security_ResetTotpTitle), _resourceCulture);
+
+        public static string Security_ResetTotpMessage => ResourceManager.GetString(nameof(Security_ResetTotpMessage), _resourceCulture);
     }
 }

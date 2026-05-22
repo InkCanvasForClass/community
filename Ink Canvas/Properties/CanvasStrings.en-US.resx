@@ -417,4 +417,34 @@
   <data name="InkRecognitionPanel_Hint_4" xml:space="preserve">
     <value>When drawn line endpoint is close to other line endpoints, will automatically snap and connect</value>
   </data>
+  <data name="InkRecog_Font_InkFreeKaiti" xml:space="preserve">
+    <value>Ink Free / KaiTi / Segoe Script</value>
+  </data>
+  <data name="InkRecog_Font_Kaiti" xml:space="preserve">
+    <value>KaiTi</value>
+  </data>
+  <data name="InkRecog_Font_STKaiti" xml:space="preserve">
+    <value>STKaiti</value>
+  </data>
+  <data name="InkRecog_Font_STXingkai" xml:space="preserve">
+    <value>STXingkai</value>
+  </data>
+  <data name="InkRecog_Font_FangSong" xml:space="preserve">
+    <value>FangSong</value>
+  </data>
+  <data name="InkRecog_Font_STFangsong" xml:space="preserve">
+    <value>STFangsong</value>
+  </data>
+  <data name="InkRecog_Font_LiSu" xml:space="preserve">
+    <value>LiSu</value>
+  </data>
+  <data name="InkRecog_Font_YouYuan" xml:space="preserve">
+    <value>YouYuan</value>
+  </data>
+  <data name="InkRecog_ShapeCorrection" xml:space="preserve">
+    <value>Shape Correction</value>
+  </data>
+  <data name="Canvas_SecondsFormat" xml:space="preserve">
+    <value>{0:0} s</value>
+  </data>
 </root>

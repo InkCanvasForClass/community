@@ -12,7 +12,7 @@
       xmlns:c="clr-namespace:Ink_Canvas.Converter"
       mc:Ignorable="d"
 
-      Title="窗口">
+      Title="{x:Static props:WindowStrings.Title}">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -36,7 +36,7 @@
                     Spacing="{StaticResource SettingsCardSpacing}">
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="窗口设置" />
+                        Text="{x:Static props:WindowStrings.WindowSettings}" />
 
                     <controls:LabeledSettingsCard x:Name="CardNoFocusMode"
                             Header="{x:Static props:StartupStrings.NoFocusMode}"
@@ -67,8 +67,8 @@
                             Toggled="ToggleSwitchAvoidFullScreen_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardMultiScreenSupport"
-                            Header="多屏支持"
-                            Description="启用后将根据当前显示器环境启用多屏逻辑"
+                            Header="{x:Static props:WindowStrings.MultiScreenSupport}"
+                            Description="{x:Static props:WindowStrings.MultiScreenSupportHint}"
                             SwitchName="ToggleSwitchMultiScreenSupport"
                             Toggled="ToggleSwitchMultiScreenSupport_Toggled">
                         <controls:LabeledSettingsCard.HeaderIcon>
@@ -77,8 +77,8 @@
                     </controls:LabeledSettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardFollowMouseScreen"
-                            Header="自动跟随鼠标选择显示屏"
-                            Description="默认开启：自动以鼠标所在显示屏作为当前目标显示屏"
+                            Header="{x:Static props:WindowStrings.FollowMouseScreen}"
+                            Description="{x:Static props:WindowStrings.FollowMouseScreenHint}"
                             Visibility="{Binding IsOn, ElementName=CardMultiScreenSupport, Converter={StaticResource BooleanToVisibilityConverter}}"
                             SwitchName="ToggleSwitchFollowMouseScreen"
                             Toggled="ToggleSwitchFollowMouseScreen_Toggled">
