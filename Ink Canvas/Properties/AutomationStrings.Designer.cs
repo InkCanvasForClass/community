@@ -189,5 +189,41 @@ namespace Ink_Canvas.Properties
         public static string FoldMode_ExitToAnnotationHint => ResourceManager.GetString(nameof(FoldMode_ExitToAnnotationHint), _resourceCulture);
 
         public static string FoldMode_Title => ResourceManager.GetString(nameof(FoldMode_Title), _resourceCulture);
+
+        public static string AutoFold_Group_Seewo => ResourceManager.GetString(nameof(AutoFold_Group_Seewo), _resourceCulture);
+
+        public static string AutoFold_Group_Hite => ResourceManager.GetString(nameof(AutoFold_Group_Hite), _resourceCulture);
+
+        public static string AutoFold_Group_Other => ResourceManager.GetString(nameof(AutoFold_Group_Other), _resourceCulture);
+
+        public static string FloatingInterceptor_Group_Seewo => ResourceManager.GetString(nameof(FloatingInterceptor_Group_Seewo), _resourceCulture);
+
+        public static string FileAssoc_CheckDesc => ResourceManager.GetString(nameof(FileAssoc_CheckDesc), _resourceCulture);
+
+        public static string FileAssoc_RegisterHeader => ResourceManager.GetString(nameof(FileAssoc_RegisterHeader), _resourceCulture);
+
+        public static string FileAssoc_RegisterDesc => ResourceManager.GetString(nameof(FileAssoc_RegisterDesc), _resourceCulture);
+
+        public static string FileAssoc_UnregisterDesc => ResourceManager.GetString(nameof(FileAssoc_UnregisterDesc), _resourceCulture);
+
+        public static string FileAssoc_NotChecked => ResourceManager.GetString(nameof(FileAssoc_NotChecked), _resourceCulture);
+
+        public static string FileAssoc_RegisterSuccess => ResourceManager.GetString(nameof(FileAssoc_RegisterSuccess), _resourceCulture);
+
+        public static string FileAssoc_RegisterFailed => ResourceManager.GetString(nameof(FileAssoc_RegisterFailed), _resourceCulture);
+
+        public static string FileAssoc_UnregisterSuccess => ResourceManager.GetString(nameof(FileAssoc_UnregisterSuccess), _resourceCulture);
+
+        public static string FileAssoc_UnregisterFailed => ResourceManager.GetString(nameof(FileAssoc_UnregisterFailed), _resourceCulture);
+
+        public static string FileAssoc_Registered => ResourceManager.GetString(nameof(FileAssoc_Registered), _resourceCulture);
+
+        public static string FileAssoc_NotRegistered => ResourceManager.GetString(nameof(FileAssoc_NotRegistered), _resourceCulture);
+
+        public static string FileAssoc_CheckError => ResourceManager.GetString(nameof(FileAssoc_CheckError), _resourceCulture);
+
+        public static string Storage_AutoDeleteDaysThreshold => ResourceManager.GetString(nameof(Storage_AutoDeleteDaysThreshold), _resourceCulture);
+
+        public static string Storage_MinAutomationStrokes => ResourceManager.GetString(nameof(Storage_MinAutomationStrokes), _resourceCulture);
     }
 }

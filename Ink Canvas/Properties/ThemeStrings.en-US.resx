@@ -249,6 +249,9 @@
   <data name="Theme_Language_English" xml:space="preserve">
     <value>English</value>
   </data>
+  <data name="Theme_Language_MemeChinese" xml:space="preserve">
+    <value>Meme Chinese (梗体中文)</value>
+  </data>
   <data name="Theme_Language_RestartHint" xml:space="preserve">
     <value>You need to restart the app for language changes to fully take effect.</value>
   </data>
@@ -494,5 +497,50 @@
   </data>
   <data name="ThemePanel_PPTPPTHint" xml:space="preserve">
     <value>Floating toolbar opacity in PPT mode (effective after re-entering PPT slideshow)</value>
+  </data>
+  <data name="Theme_FloatingBarButtonsDescription" xml:space="preserve">
+    <value>Go to the Toolbar settings page to manage floating toolbar component display and ordering.</value>
+  </data>
+  <data name="Theme_SelectCustomSplashImage" xml:space="preserve">
+    <value>Select Custom Splash Image</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Animation" xml:space="preserve">
+    <value>Animation</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Manga" xml:space="preserve">
+    <value>Manga</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Game" xml:space="preserve">
+    <value>Game</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Literature" xml:space="preserve">
+    <value>Literature</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Original" xml:space="preserve">
+    <value>Original</value>
+  </data>
+  <data name="Theme_HitokotoCategory_FromWeb" xml:space="preserve">
+    <value>From Web</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Movie" xml:space="preserve">
+    <value>Movie &amp; TV</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Poetry" xml:space="preserve">
+    <value>Poetry</value>
+  </data>
+  <data name="Theme_HitokotoCategory_NeteaseCloud" xml:space="preserve">
+    <value>Netease Cloud</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Philosophy" xml:space="preserve">
+    <value>Philosophy</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Humor" xml:space="preserve">
+    <value>Humor</value>
+  </data>
+  <data name="Theme_Hitokoto_SelectAll" xml:space="preserve">
+    <value>Select All</value>
+  </data>
+  <data name="Theme_Hitokoto_CustomizeTitle" xml:space="preserve">
+    <value>Customize Hitokoto Categories</value>
   </data>
 </root>

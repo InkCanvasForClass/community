@@ -107,5 +107,19 @@ namespace Ink_Canvas.Properties
         public static string Random_Title => ResourceManager.GetString(nameof(Random_Title), _resourceCulture);
 
         public static string Random_UseExternal => ResourceManager.GetString(nameof(Random_UseExternal), _resourceCulture);
+
+        public static string Random_SelectTimerAlarm => ResourceManager.GetString(nameof(Random_SelectTimerAlarm), _resourceCulture);
+
+        public static string Random_AudioFilter => ResourceManager.GetString(nameof(Random_AudioFilter), _resourceCulture);
+
+        public static string Random_CustomAlarmSuccess => ResourceManager.GetString(nameof(Random_CustomAlarmSuccess), _resourceCulture);
+
+        public static string Random_AlarmSetupSuccess => ResourceManager.GetString(nameof(Random_AlarmSetupSuccess), _resourceCulture);
+
+        public static string Random_ResetAlarmSuccess => ResourceManager.GetString(nameof(Random_ResetAlarmSuccess), _resourceCulture);
+
+        public static string Random_ResetSuccess => ResourceManager.GetString(nameof(Random_ResetSuccess), _resourceCulture);
+
+        public static string Random_SelectProgressiveAlarm => ResourceManager.GetString(nameof(Random_SelectProgressiveAlarm), _resourceCulture);
     }
 }

@@ -93,4 +93,22 @@
   <data name="Window_WindowChromeRenderingHint" xml:space="preserve">
     <value>使用 DWM/WindowChrome 绘制透明主窗口，通常比 AllowsTransparency 更流畅；需要重启后生效。</value>
   </data>
+  <data name="Title" xml:space="preserve">
+    <value>窗口</value>
+  </data>
+  <data name="WindowSettings" xml:space="preserve">
+    <value>窗口设置</value>
+  </data>
+  <data name="MultiScreenSupport" xml:space="preserve">
+    <value>多屏支持</value>
+  </data>
+  <data name="MultiScreenSupportHint" xml:space="preserve">
+    <value>启用后将根据当前显示器环境启用多屏逻辑</value>
+  </data>
+  <data name="FollowMouseScreen" xml:space="preserve">
+    <value>自动跟随鼠标选择显示屏</value>
+  </data>
+  <data name="FollowMouseScreenHint" xml:space="preserve">
+    <value>默认开启：自动以鼠标所在显示屏作为当前目标显示屏</value>
+  </data>
 </root>

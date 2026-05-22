@@ -415,6 +415,36 @@
     <value>当绘制的直线超过设定长度阈值时，将自动调整为完美直线</value>
   </data>
   <data name="InkRecognitionPanel_Hint_4" xml:space="preserve">
-    <value>当绘制的直线端点靠近其他直线端点时，将自动吸附连接</value>
+    <value>当绘制的直线端点靠近其他直线端点时，将自动吸附连接。</value>
+  </data>
+  <data name="InkRecog_Font_InkFreeKaiti" xml:space="preserve">
+    <value>Ink Free / 楷体 / Segoe Script</value>
+  </data>
+  <data name="InkRecog_Font_Kaiti" xml:space="preserve">
+    <value>楷体 (KaiTi)</value>
+  </data>
+  <data name="InkRecog_Font_STKaiti" xml:space="preserve">
+    <value>华文楷体 (STKaiti)</value>
+  </data>
+  <data name="InkRecog_Font_STXingkai" xml:space="preserve">
+    <value>华文行楷 (STXingkai)</value>
+  </data>
+  <data name="InkRecog_Font_FangSong" xml:space="preserve">
+    <value>仿宋 (FangSong)</value>
+  </data>
+  <data name="InkRecog_Font_STFangsong" xml:space="preserve">
+    <value>华文仿宋 (STFangsong)</value>
+  </data>
+  <data name="InkRecog_Font_LiSu" xml:space="preserve">
+    <value>隶书 (LiSu)</value>
+  </data>
+  <data name="InkRecog_Font_YouYuan" xml:space="preserve">
+    <value>幼圆 (YouYuan)</value>
+  </data>
+  <data name="InkRecog_ShapeCorrection" xml:space="preserve">
+    <value>形状修正</value>
+  </data>
+  <data name="Canvas_SecondsFormat" xml:space="preserve">
+    <value>{0:0}秒</value>
   </data>
 </root>

@@ -12,7 +12,7 @@
         <Grid>
             <StackPanel Margin="24">
                 <TextBlock Text="{x:Static props:NavStrings.Settings_Title}" Style="{DynamicResource TitleTextBlockStyle}" Margin="0,0,0,16" />
-                <TextBlock Text="这里是设置页面" Style="{DynamicResource BodyTextBlockStyle}" />
+                <TextBlock Text="{x:Static props:NavStrings.Settings_Description}" Style="{DynamicResource BodyTextBlockStyle}" />
                 <Rectangle Height="48" />
             </StackPanel>
         </Grid>

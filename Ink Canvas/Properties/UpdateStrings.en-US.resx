@@ -93,4 +93,178 @@
   <data name="Update_Release" xml:space="preserve">
     <value>Stable (Release)</value>
   </data>
+  <data name="Status_Loading" xml:space="preserve">
+    <value>Loading update status...</value>
+  </data>
+  <data name="Btn_CheckUpdate" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="Btn_DownloadAndInstall" xml:space="preserve">
+    <value>Download and install</value>
+  </data>
+  <data name="Btn_InstallOnExit" xml:space="preserve">
+    <value>Install on exit</value>
+  </data>
+  <data name="Btn_SkipVersion" xml:space="preserve">
+    <value>Skip this version</value>
+  </data>
+  <data name="Tab_Changelog" xml:space="preserve">
+    <value>Changelog</value>
+  </data>
+  <data name="Tab_UpdateSettings" xml:space="preserve">
+    <value>Update settings</value>
+  </data>
+  <data name="SilentUpdate_TimeRangeSettings" xml:space="preserve">
+    <value>Silent update time range settings</value>
+  </data>
+  <data name="Section_Maintenance" xml:space="preserve">
+    <value>Maintenance</value>
+  </data>
+  <data name="Tab_HistoryVersions" xml:space="preserve">
+    <value>Version history</value>
+  </data>
+  <data name="History_SelectVersion" xml:space="preserve">
+    <value>Select a previous version</value>
+  </data>
+  <data name="History_SelectVersionDesc" xml:space="preserve">
+    <value>Select a previous version to roll back (will download and install that version).</value>
+  </data>
+  <data name="Btn_RollbackToVersion" xml:space="preserve">
+    <value>Roll back to this version</value>
+  </data>
+  <data name="Progress_PreparingDownload" xml:space="preserve">
+    <value>Preparing download...</value>
+  </data>
+  <data name="Changelog_SwitchHint" xml:space="preserve">
+    <value>Switch to *Version history* or click *Check for updates* to view the changelog.</value>
+  </data>
+  <data name="Changelog_ClickHint" xml:space="preserve">
+    <value>Click *Check for updates* to get the latest version and changelog.</value>
+  </data>
+  <data name="Status_UpToDate" xml:space="preserve">
+    <value>Already up to date</value>
+  </data>
+  <data name="Status_Checking" xml:space="preserve">
+    <value>Checking for updates...</value>
+  </data>
+  <data name="Progress_ConnectingServer" xml:space="preserve">
+    <value>Connecting to update server...</value>
+  </data>
+  <data name="Status_NewVersionAvailable" xml:space="preserve">
+    <value>New version {0} available</value>
+  </data>
+  <data name="Status_VersionTransition" xml:space="preserve">
+    <value>Current version {0} → {1}</value>
+  </data>
+  <data name="Status_Downloading" xml:space="preserve">
+    <value>Downloading update...</value>
+  </data>
+  <data name="Status_TargetVersion" xml:space="preserve">
+    <value>Target version {0}</value>
+  </data>
+  <data name="Status_Downloaded" xml:space="preserve">
+    <value>Update downloaded</value>
+  </data>
+  <data name="Status_WillInstallOnExit" xml:space="preserve">
+    <value>Will install {0} when the app closes</value>
+  </data>
+  <data name="Status_NetworkError" xml:space="preserve">
+    <value>Network error</value>
+  </data>
+  <data name="Status_NetworkErrorHint" xml:space="preserve">
+    <value>Please check your network connection and try again.</value>
+  </data>
+  <data name="Status_CurrentVersion" xml:space="preserve">
+    <value>Current version {0}</value>
+  </data>
+  <data name="Version_Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="Changelog_Loading" xml:space="preserve">
+    <value>Loading changelog...</value>
+  </data>
+  <data name="Changelog_NoData" xml:space="preserve">
+    <value>No changelog available.</value>
+  </data>
+  <data name="Changelog_LoadFailed" xml:space="preserve">
+    <value>Failed to load changelog: {0}</value>
+  </data>
+  <data name="Progress_DownloadingBackground" xml:space="preserve">
+    <value>Downloading in background...</value>
+  </data>
+  <data name="Status_SkippedVersion" xml:space="preserve">
+    <value>Skipped version {0}</value>
+  </data>
+  <data name="History_Loading" xml:space="preserve">
+    <value>Loading version history...</value>
+  </data>
+  <data name="History_NoData" xml:space="preserve">
+    <value>No version history available.</value>
+  </data>
+  <data name="History_LoadFailed" xml:space="preserve">
+    <value>Failed to load version history: {0}</value>
+  </data>
+  <data name="History_NoChangelog" xml:space="preserve">
+    <value>No changelog</value>
+  </data>
+  <data name="Rollback_DownloadFailedMsg" xml:space="preserve">
+    <value>Download failed: {0}</value>
+  </data>
+  <data name="Rollback_DownloadComplete" xml:space="preserve">
+    <value>Download complete, preparing to install...</value>
+  </data>
+  <data name="Rollback_DownloadFailedRetry" xml:space="preserve">
+    <value>Download failed. Please check your network and try again.</value>
+  </data>
+  <data name="PauseAutoUpdate_Title" xml:space="preserve">
+    <value>Pause auto-update</value>
+  </data>
+  <data name="PauseAutoUpdate_SelectDuration" xml:space="preserve">
+    <value>Choose how long to pause auto-update after rollback:</value>
+  </data>
+  <data name="PauseAutoUpdate_Days" xml:space="preserve">
+    <value>{0} days</value>
+  </data>
+  <data name="FixVersion_ConfirmBody" xml:space="preserve">
+    <value>This will download and install the latest version from the current channel. The app will close and update automatically.\n\nAre you sure you want to fix the version?</value>
+  </data>
+  <data name="FixVersion_ConfirmTitle" xml:space="preserve">
+    <value>Confirm version fix</value>
+  </data>
+  <data name="FixVersion_InProgress" xml:space="preserve">
+    <value>Fixing...</value>
+  </data>
+  <data name="FixVersion_FailedBody" xml:space="preserve">
+    <value>Version fix failed. It may be a network issue or you are already on the latest version.</value>
+  </data>
+  <data name="FixVersion_FailedTitle" xml:space="preserve">
+    <value>Fix failed</value>
+  </data>
+  <data name="FixVersion_ErrorBody" xml:space="preserve">
+    <value>Error during version fix: {0}</value>
+  </data>
+  <data name="FixVersion_ErrorTitle" xml:space="preserve">
+    <value>Fix error</value>
+  </data>
+  <data name="InstallUpdate_Msg" xml:space="preserve">
+    <value>Update downloaded. Click OK to close the app and install the new version!</value>
+  </data>
+  <data name="InstallUpdate_Title" xml:space="preserve">
+    <value>Install update</value>
+  </data>
+  <data name="Btn_OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Channel_PrivacyRequired" xml:space="preserve">
+    <value>Before joining the preview/beta channel, please check &quot;I have read and agree to the privacy notice in privacy&quot; on the About page.</value>
+  </data>
+  <data name="Channel_PrivacyRequiredTitle" xml:space="preserve">
+    <value>Privacy agreement required</value>
+  </data>
+  <data name="Channel_TelemetryRequired" xml:space="preserve">
+    <value>Joining the preview/beta channel requires enabling anonymous basic data upload.\n\nEnable anonymous usage data upload now?</value>
+  </data>
+  <data name="Channel_TelemetryRequiredTitle" xml:space="preserve">
+    <value>Anonymous data upload required</value>
+  </data>
 </root>

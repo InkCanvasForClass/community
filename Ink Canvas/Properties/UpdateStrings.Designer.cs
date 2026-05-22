@@ -73,5 +73,121 @@ namespace Ink_Canvas.Properties
         public static string Update_Preview => ResourceManager.GetString(nameof(Update_Preview), _resourceCulture);
 
         public static string Update_Release => ResourceManager.GetString(nameof(Update_Release), _resourceCulture);
+
+        public static string Status_Loading => ResourceManager.GetString(nameof(Status_Loading), _resourceCulture);
+
+        public static string Btn_CheckUpdate => ResourceManager.GetString(nameof(Btn_CheckUpdate), _resourceCulture);
+
+        public static string Btn_DownloadAndInstall => ResourceManager.GetString(nameof(Btn_DownloadAndInstall), _resourceCulture);
+
+        public static string Btn_InstallOnExit => ResourceManager.GetString(nameof(Btn_InstallOnExit), _resourceCulture);
+
+        public static string Btn_SkipVersion => ResourceManager.GetString(nameof(Btn_SkipVersion), _resourceCulture);
+
+        public static string Tab_Changelog => ResourceManager.GetString(nameof(Tab_Changelog), _resourceCulture);
+
+        public static string Tab_UpdateSettings => ResourceManager.GetString(nameof(Tab_UpdateSettings), _resourceCulture);
+
+        public static string SilentUpdate_TimeRangeSettings => ResourceManager.GetString(nameof(SilentUpdate_TimeRangeSettings), _resourceCulture);
+
+        public static string Section_Maintenance => ResourceManager.GetString(nameof(Section_Maintenance), _resourceCulture);
+
+        public static string Tab_HistoryVersions => ResourceManager.GetString(nameof(Tab_HistoryVersions), _resourceCulture);
+
+        public static string History_SelectVersion => ResourceManager.GetString(nameof(History_SelectVersion), _resourceCulture);
+
+        public static string History_SelectVersionDesc => ResourceManager.GetString(nameof(History_SelectVersionDesc), _resourceCulture);
+
+        public static string Btn_RollbackToVersion => ResourceManager.GetString(nameof(Btn_RollbackToVersion), _resourceCulture);
+
+        public static string Progress_PreparingDownload => ResourceManager.GetString(nameof(Progress_PreparingDownload), _resourceCulture);
+
+        public static string Changelog_SwitchHint => ResourceManager.GetString(nameof(Changelog_SwitchHint), _resourceCulture);
+
+        public static string Changelog_ClickHint => ResourceManager.GetString(nameof(Changelog_ClickHint), _resourceCulture);
+
+        public static string Status_UpToDate => ResourceManager.GetString(nameof(Status_UpToDate), _resourceCulture);
+
+        public static string Status_Checking => ResourceManager.GetString(nameof(Status_Checking), _resourceCulture);
+
+        public static string Progress_ConnectingServer => ResourceManager.GetString(nameof(Progress_ConnectingServer), _resourceCulture);
+
+        public static string Status_NewVersionAvailable => ResourceManager.GetString(nameof(Status_NewVersionAvailable), _resourceCulture);
+
+        public static string Status_VersionTransition => ResourceManager.GetString(nameof(Status_VersionTransition), _resourceCulture);
+
+        public static string Status_Downloading => ResourceManager.GetString(nameof(Status_Downloading), _resourceCulture);
+
+        public static string Status_TargetVersion => ResourceManager.GetString(nameof(Status_TargetVersion), _resourceCulture);
+
+        public static string Status_Downloaded => ResourceManager.GetString(nameof(Status_Downloaded), _resourceCulture);
+
+        public static string Status_WillInstallOnExit => ResourceManager.GetString(nameof(Status_WillInstallOnExit), _resourceCulture);
+
+        public static string Status_NetworkError => ResourceManager.GetString(nameof(Status_NetworkError), _resourceCulture);
+
+        public static string Status_NetworkErrorHint => ResourceManager.GetString(nameof(Status_NetworkErrorHint), _resourceCulture);
+
+        public static string Status_CurrentVersion => ResourceManager.GetString(nameof(Status_CurrentVersion), _resourceCulture);
+
+        public static string Version_Unknown => ResourceManager.GetString(nameof(Version_Unknown), _resourceCulture);
+
+        public static string Changelog_Loading => ResourceManager.GetString(nameof(Changelog_Loading), _resourceCulture);
+
+        public static string Changelog_NoData => ResourceManager.GetString(nameof(Changelog_NoData), _resourceCulture);
+
+        public static string Changelog_LoadFailed => ResourceManager.GetString(nameof(Changelog_LoadFailed), _resourceCulture);
+
+        public static string Progress_DownloadingBackground => ResourceManager.GetString(nameof(Progress_DownloadingBackground), _resourceCulture);
+
+        public static string Status_SkippedVersion => ResourceManager.GetString(nameof(Status_SkippedVersion), _resourceCulture);
+
+        public static string History_Loading => ResourceManager.GetString(nameof(History_Loading), _resourceCulture);
+
+        public static string History_NoData => ResourceManager.GetString(nameof(History_NoData), _resourceCulture);
+
+        public static string History_LoadFailed => ResourceManager.GetString(nameof(History_LoadFailed), _resourceCulture);
+
+        public static string History_NoChangelog => ResourceManager.GetString(nameof(History_NoChangelog), _resourceCulture);
+
+        public static string Rollback_DownloadFailedMsg => ResourceManager.GetString(nameof(Rollback_DownloadFailedMsg), _resourceCulture);
+
+        public static string Rollback_DownloadComplete => ResourceManager.GetString(nameof(Rollback_DownloadComplete), _resourceCulture);
+
+        public static string Rollback_DownloadFailedRetry => ResourceManager.GetString(nameof(Rollback_DownloadFailedRetry), _resourceCulture);
+
+        public static string PauseAutoUpdate_Title => ResourceManager.GetString(nameof(PauseAutoUpdate_Title), _resourceCulture);
+
+        public static string PauseAutoUpdate_SelectDuration => ResourceManager.GetString(nameof(PauseAutoUpdate_SelectDuration), _resourceCulture);
+
+        public static string PauseAutoUpdate_Days => ResourceManager.GetString(nameof(PauseAutoUpdate_Days), _resourceCulture);
+
+        public static string FixVersion_ConfirmBody => ResourceManager.GetString(nameof(FixVersion_ConfirmBody), _resourceCulture);
+
+        public static string FixVersion_ConfirmTitle => ResourceManager.GetString(nameof(FixVersion_ConfirmTitle), _resourceCulture);
+
+        public static string FixVersion_InProgress => ResourceManager.GetString(nameof(FixVersion_InProgress), _resourceCulture);
+
+        public static string FixVersion_FailedBody => ResourceManager.GetString(nameof(FixVersion_FailedBody), _resourceCulture);
+
+        public static string FixVersion_FailedTitle => ResourceManager.GetString(nameof(FixVersion_FailedTitle), _resourceCulture);
+
+        public static string FixVersion_ErrorBody => ResourceManager.GetString(nameof(FixVersion_ErrorBody), _resourceCulture);
+
+        public static string FixVersion_ErrorTitle => ResourceManager.GetString(nameof(FixVersion_ErrorTitle), _resourceCulture);
+
+        public static string InstallUpdate_Msg => ResourceManager.GetString(nameof(InstallUpdate_Msg), _resourceCulture);
+
+        public static string InstallUpdate_Title => ResourceManager.GetString(nameof(InstallUpdate_Title), _resourceCulture);
+
+        public static string Btn_OK => ResourceManager.GetString(nameof(Btn_OK), _resourceCulture);
+
+        public static string Channel_PrivacyRequired => ResourceManager.GetString(nameof(Channel_PrivacyRequired), _resourceCulture);
+
+        public static string Channel_PrivacyRequiredTitle => ResourceManager.GetString(nameof(Channel_PrivacyRequiredTitle), _resourceCulture);
+
+        public static string Channel_TelemetryRequired => ResourceManager.GetString(nameof(Channel_TelemetryRequired), _resourceCulture);
+
+        public static string Channel_TelemetryRequiredTitle => ResourceManager.GetString(nameof(Channel_TelemetryRequiredTitle), _resourceCulture);
     }
 }

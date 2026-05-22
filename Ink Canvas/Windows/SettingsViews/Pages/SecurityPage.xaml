@@ -31,43 +31,43 @@
 
                     <!-- 安全密码 -->
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="安全密码" />
+                        Text="{x:Static props:SecurityStrings.Security_SectionPassword}" />
 
                     <ui:InfoBar IsClosable="False"
                                 IsOpen="True"
                                 Severity="Informational"
-                                Title="说明"
-                                Message="安全密码默认关闭。开启后可用于退出软件、进入设置与重置配置等操作时的二次验证。" />
+                                Title="{x:Static props:SecurityStrings.Security_InfoBarTitle}"
+                                Message="{x:Static props:SecurityStrings.Security_PasswordInfoBarMessage}" />
 
                     <controls:LabeledSettingsCard x:Name="CardPasswordEnabled"
-                            Header="启用安全密码"
+                            Header="{x:Static props:SecurityStrings.Security_EnablePassword}"
                             Description="{x:Static props:SecurityStrings.SecurityPanel_Hint}"
                             Icon="{x:Static ui:SegoeFluentIcons.Permissions}"
                             SwitchName="ToggleSwitchPasswordEnabled"
                             Toggled="ToggleSwitchPasswordEnabled_Toggled" />
 
                     <ui:SettingsCard x:Name="CardPasswordManage"
-                                     Header="密码管理"
+                                     Header="{x:Static props:SecurityStrings.Security_PasswordManagement}"
                                      Description="{x:Static props:SecurityStrings.SecurityPanel_Hint_1}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Lock}" />
                         </ui:SettingsCard.HeaderIcon>
                         <Button x:Name="BtnSetOrChangePassword"
-                                Content="设置/修改密码"
+                                Content="{x:Static props:SecurityStrings.Security_SetOrChangePassword}"
                                 MinWidth="120"
                                 Click="BtnSetOrChangePassword_Click" />
                     </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardTotpEnabled"
-                            Header="启用 TOTP 验证"
-                            Description="可用于冻结笔迹解冻等二次验证"
+                            Header="{x:Static props:SecurityStrings.Security_EnableTotp}"
+                            Description="{x:Static props:SecurityStrings.Security_EnableTotpHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.Permissions}"
                             SwitchName="ToggleSwitchTotpEnabled"
                             Toggled="ToggleSwitchTotpEnabled_Toggled" />
 
                     <ui:SettingsCard x:Name="CardTotpManage"
-                                     Header="TOTP 密钥"
-                                     Description="在身份验证器中手动添加该密钥">
+                                     Header="{x:Static props:SecurityStrings.Security_TotpSecretKey}"
+                                     Description="{x:Static props:SecurityStrings.Security_TotpSecretKeyHint}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Lock}" />
                         </ui:SettingsCard.HeaderIcon>
@@ -76,52 +76,52 @@
                                      Width="260"
                                      IsReadOnly="True" />
                             <Button x:Name="BtnGenerateTotpSecret"
-                                    Content="生成/重置密钥"
+                                    Content="{x:Static props:SecurityStrings.Security_GenerateOrResetKey}"
                                     MinWidth="120"
                                     Click="BtnGenerateTotpSecret_Click" />
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardRequirePasswordOnExit"
-                            Header="退出软件需要验证"
+                            Header="{x:Static props:SecurityStrings.Security_RequirePasswordOnExit}"
                             Description="{x:Static props:SecurityStrings.SecurityPanel__InkCanvasForClass_Hint}"
                             Icon="{x:Static ui:SegoeFluentIcons.SignOut}"
                             SwitchName="ToggleSwitchRequirePasswordOnExit"
                             Toggled="ToggleSwitchRequirePasswordOnExit_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardRequirePasswordOnEnterSettings"
-                            Header="进入设置需要验证"
+                            Header="{x:Static props:SecurityStrings.Security_RequirePasswordOnEnterSettings}"
                             Description="{x:Static props:SecurityStrings.SecurityPanel_Hint_2}"
                             Icon="{x:Static ui:SegoeFluentIcons.Settings}"
                             SwitchName="ToggleSwitchRequirePasswordOnEnterSettings"
                             Toggled="ToggleSwitchRequirePasswordOnEnterSettings_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardRequirePasswordOnResetConfig"
-                            Header="重置配置需要验证"
+                            Header="{x:Static props:SecurityStrings.Security_RequirePasswordOnResetConfig}"
                             Description="{x:Static props:SecurityStrings.SecurityPanel__Settingsjson_Hint}"
                             Icon="{x:Static ui:SegoeFluentIcons.Refresh}"
                             SwitchName="ToggleSwitchRequirePasswordOnResetConfig"
                             Toggled="ToggleSwitchRequirePasswordOnResetConfig_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardRequirePasswordOnModifyOrClearNameList"
-                            Header="修改/清空点名名单需要验证"
-                            Description="对点名名单进行修改或清空前进行验证"
+                            Header="{x:Static props:SecurityStrings.Security_RequirePasswordOnModifyOrClearNameList}"
+                            Description="{x:Static props:SecurityStrings.Security_RequirePasswordOnModifyOrClearNameList_Hint}"
                             Icon="{x:Static ui:SegoeFluentIcons.People}"
                             SwitchName="ToggleSwitchRequirePasswordOnModifyOrClearNameList"
                             Toggled="ToggleSwitchRequirePasswordOnModifyOrClearNameList_Toggled" />
 
                     <!-- 进程保护 -->
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="进程保护" />
+                        Text="{x:Static props:SecurityStrings.Security_ProcessProtection}" />
 
                     <ui:InfoBar IsClosable="False"
                                 IsOpen="True"
                                 Severity="Informational"
-                                Title="说明"
-                                Message="进程保护默认开启：运行期间保护根目录下的程序文件（exe/dll/config）不被外部修改。" />
+                                Title="{x:Static props:SecurityStrings.Security_InfoBarTitle}"
+                                Message="{x:Static props:SecurityStrings.Security_ProcessProtectionInfoBarMessage}" />
 
                     <controls:LabeledSettingsCard x:Name="CardEnableProcessProtection"
-                            Header="进程保护"
+                            Header="{x:Static props:SecurityStrings.Security_ProcessProtection}"
                             Description="{x:Static props:SecurityStrings.SecurityPanel_Hint_4}"
                             Icon="{x:Static ui:SegoeFluentIcons.Shield}"
                             SwitchName="ToggleSwitchEnableProcessProtection"

@@ -45,4 +45,190 @@
   <data name="CloudStorage_Manage" xml:space="preserve">
     <value>云存储管理</value>
   </data>
+  <data name="CloudStorage_UploadDelay" xml:space="preserve">
+    <value>上传延迟</value>
+  </data>
+  <data name="CloudStorage_UploadDelayDesc" xml:space="preserve">
+    <value>设置所有上传提供者共用的延迟时间，范围为 0-60 分钟。</value>
+  </data>
+  <data name="CloudStorage_Minutes" xml:space="preserve">
+    <value>分钟</value>
+  </data>
+  <data name="CloudStorage_UploadProviders" xml:space="preserve">
+    <value>上传提供者</value>
+  </data>
+  <data name="CloudStorage_UploadProvidersDesc" xml:space="preserve">
+    <value>选择自动保存文件可使用的云端上传服务。</value>
+  </data>
+  <data name="CloudStorage_ProviderList" xml:space="preserve">
+    <value>提供者列表</value>
+  </data>
+  <data name="CloudStorage_ProviderListDesc" xml:space="preserve">
+    <value>关闭某个提供者后，后续自动保存文件不会再发送到该服务。</value>
+  </data>
+  <data name="CloudStorage_Dlass" xml:space="preserve">
+    <value>Dlass</value>
+  </data>
+  <data name="CloudStorage_UserToken" xml:space="preserve">
+    <value>用户 Token</value>
+  </data>
+  <data name="CloudStorage_UserTokenDesc" xml:space="preserve">
+    <value>保存并选择用于访问 Dlass 服务端的用户 Token。</value>
+  </data>
+  <data name="CloudStorage_TokenNotSet" xml:space="preserve">
+    <value>未设置Token</value>
+  </data>
+  <data name="CloudStorage_SavedTokens" xml:space="preserve">
+    <value>已保存的 Token</value>
+  </data>
+  <data name="CloudStorage_SavedTokensDesc" xml:space="preserve">
+    <value>从本机保存的 Token 列表中选择当前使用项。</value>
+  </data>
+  <data name="CloudStorage_NewToken" xml:space="preserve">
+    <value>新增 Token</value>
+  </data>
+  <data name="CloudStorage_NewTokenDesc" xml:space="preserve">
+    <value>输入新的用户 Token，保存后会自动设为当前 Token。</value>
+  </data>
+  <data name="CloudStorage_TokenActions" xml:space="preserve">
+    <value>Token 操作</value>
+  </data>
+  <data name="CloudStorage_SaveToken" xml:space="preserve">
+    <value>保存Token</value>
+  </data>
+  <data name="CloudStorage_DeleteToken" xml:space="preserve">
+    <value>删除Token</value>
+  </data>
+  <data name="CloudStorage_OpenDlassDashboard" xml:space="preserve">
+    <value>打开 Dlass 控制台</value>
+  </data>
+  <data name="CloudStorage_ConnectionStatus" xml:space="preserve">
+    <value>连接状态</value>
+  </data>
+  <data name="CloudStorage_ConnectionStatusDesc" xml:space="preserve">
+    <value>验证当前 Token，并加载可用班级列表。</value>
+  </data>
+  <data name="CloudStorage_NotConnected" xml:space="preserve">
+    <value>未连接</value>
+  </data>
+  <data name="CloudStorage_TestConnection" xml:space="preserve">
+    <value>测试连接</value>
+  </data>
+  <data name="CloudStorage_ClassSelection" xml:space="preserve">
+    <value>班级选择</value>
+  </data>
+  <data name="CloudStorage_ClassSelectionDesc" xml:space="preserve">
+    <value>连接成功后，将自动加载当前 Token 可用的班级。</value>
+  </data>
+  <data name="CloudStorage_AutoUploadNotes" xml:space="preserve">
+    <value>自动上传笔记</value>
+  </data>
+  <data name="CloudStorage_AutoUploadNotesDesc" xml:space="preserve">
+    <value>启用后，保存的 PNG 截图和 ICSTK 墨迹文件会自动上传到所选班级白板。</value>
+  </data>
+  <data name="CloudStorage_WebDav" xml:space="preserve">
+    <value>WebDav</value>
+  </data>
+  <data name="CloudStorage_WebDavSettings" xml:space="preserve">
+    <value>WebDav 设置</value>
+  </data>
+  <data name="CloudStorage_WebDavSettingsDesc" xml:space="preserve">
+    <value>配置 WebDav 服务器地址、账户和上传根目录。</value>
+  </data>
+  <data name="CloudStorage_WebDavUrl" xml:space="preserve">
+    <value>WebDav 地址</value>
+  </data>
+  <data name="CloudStorage_WebDavUrlDesc" xml:space="preserve">
+    <value>服务器地址，例如 https://example.com/dav。</value>
+  </data>
+  <data name="CloudStorage_Username" xml:space="preserve">
+    <value>用户名</value>
+  </data>
+  <data name="CloudStorage_Password" xml:space="preserve">
+    <value>密码</value>
+  </data>
+  <data name="CloudStorage_RootDirectory" xml:space="preserve">
+    <value>根目录</value>
+  </data>
+  <data name="CloudStorage_RootDirectoryDesc" xml:space="preserve">
+    <value>可留空；填写后文件会上传到该目录下。</value>
+  </data>
+  <data name="CloudStorage_WebDavActions" xml:space="preserve">
+    <value>WebDav 操作</value>
+  </data>
+  <data name="CloudStorage_SaveWebDavSettings" xml:space="preserve">
+    <value>保存 WebDav 设置</value>
+  </data>
+  <data name="CloudStorage_Restore" xml:space="preserve">
+    <value>还原</value>
+  </data>
+  <data name="CloudStorage_NoSavedToken" xml:space="preserve">
+    <value>（无保存的Token）</value>
+  </data>
+  <data name="CloudStorage_WaitingForConnection" xml:space="preserve">
+    <value>（等待连接）</value>
+  </data>
+  <data name="CloudStorage_UnknownTeacher" xml:space="preserve">
+    <value>未知教师</value>
+  </data>
+  <data name="CloudStorage_NoAvailableClasses" xml:space="preserve">
+    <value>（无可用班级）</value>
+  </data>
+  <data name="CloudStorage_PleaseEnterNewToken" xml:space="preserve">
+    <value>请输入新的用户Token</value>
+  </data>
+  <data name="CloudStorage_Tip" xml:space="preserve">
+    <value>提示</value>
+  </data>
+  <data name="CloudStorage_TokenSavedAndSelected" xml:space="preserve">
+    <value>Token已成功保存并已选择</value>
+  </data>
+  <data name="CloudStorage_Success" xml:space="preserve">
+    <value>成功</value>
+  </data>
+  <data name="CloudStorage_SaveTokenError" xml:space="preserve">
+    <value>保存Token时发生错误: </value>
+  </data>
+  <data name="CloudStorage_Error" xml:space="preserve">
+    <value>错误</value>
+  </data>
+  <data name="CloudStorage_PleaseSelectToken" xml:space="preserve">
+    <value>请先选择一个Token</value>
+  </data>
+  <data name="CloudStorage_ConfirmDeleteToken" xml:space="preserve">
+    <value>确定要删除已选中的Token吗？</value>
+  </data>
+  <data name="CloudStorage_Confirm" xml:space="preserve">
+    <value>确认</value>
+  </data>
+  <data name="CloudStorage_WebDavSettingsSaved" xml:space="preserve">
+    <value>WebDav设置已保存</value>
+  </data>
+  <data name="CloudStorage_SaveWebDavError" xml:space="preserve">
+    <value>保存WebDav设置时发生错误: </value>
+  </data>
+  <data name="CloudStorage_DlassRegistrationPrompt" xml:space="preserve">
+    <value>您是否已经注册了Dlass账号？\n\n• 如果已注册：请在本页填入用户 Token\n• 如果未注册：将打开浏览器跳转到 Dlass 控制台</value>
+  </data>
+  <data name="CloudStorage_DlassRegistrationTitle" xml:space="preserve">
+    <value>Dlass账号注册</value>
+  </data>
+  <data name="CloudStorage_CannotOpenBrowser" xml:space="preserve">
+    <value>无法打开浏览器。请手动访问: https://dlass.tech/dashboard</value>
+  </data>
+  <data name="CloudStorage_Testing" xml:space="preserve">
+    <value>测试中...</value>
+  </data>
+  <data name="CloudStorage_ConnectedFormat" xml:space="preserve">
+    <value>已连接 (找到 {0} 个白板)</value>
+  </data>
+  <data name="CloudStorage_ConnectionFailed" xml:space="preserve">
+    <value>连接失败</value>
+  </data>
+  <data name="CloudStorage_DeleteTokenError" xml:space="preserve">
+    <value>删除Token时发生错误: </value>
+  </data>
+  <data name="CloudStorage_TokenSelected" xml:space="preserve">
+    <value>已选择Token</value>
+  </data>
 </root>

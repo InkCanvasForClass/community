@@ -57,4 +57,46 @@
   <data name="Title" xml:space="preserve">
     <value>配置文件切换与热重载</value>
   </data>
+  <data name="ProfileNameLabel" xml:space="preserve">
+    <value>方案名称</value>
+  </data>
+  <data name="SaveAsProfileTitle" xml:space="preserve">
+    <value>另存为方案</value>
+  </data>
+  <data name="SaveAs_EnterName" xml:space="preserve">
+    <value>请输入方案名称。</value>
+  </data>
+  <data name="SavedAsProfile" xml:space="preserve">
+    <value>已另存为方案：{0}</value>
+  </data>
+  <data name="SaveAs_Failed" xml:space="preserve">
+    <value>保存失败，请查看日志。</value>
+  </data>
+  <data name="SaveAs_FailedMsg" xml:space="preserve">
+    <value>保存失败: {0}</value>
+  </data>
+  <data name="Delete_SelectFirst" xml:space="preserve">
+    <value>请先选择要删除的配置文件。</value>
+  </data>
+  <data name="Delete_ConfirmTitle" xml:space="preserve">
+    <value>确认删除</value>
+  </data>
+  <data name="Delete_ConfirmMsg" xml:space="preserve">
+    <value>确定要删除配置文件「{0}」吗？</value>
+  </data>
+  <data name="Delete_Failed" xml:space="preserve">
+    <value>删除配置文件失败，请查看日志。</value>
+  </data>
+  <data name="Delete_FailedMsg" xml:space="preserve">
+    <value>删除配置文件失败: {0}</value>
+  </data>
+  <data name="SwitchedToProfile" xml:space="preserve">
+    <value>已切换至方案「{0}」</value>
+  </data>
+  <data name="DeletedAndSwitched" xml:space="preserve">
+    <value>已删除方案「{0}」，已切换至「{1}」</value>
+  </data>
+  <data name="DeletedProfile" xml:space="preserve">
+    <value>已删除方案：{0}</value>
+  </data>
 </root>

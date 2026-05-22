@@ -87,13 +87,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (!string.IsNullOrEmpty(_remoteReleaseNotes))
                     ChangelogViewer.Markdown = _remoteReleaseNotes;
                 else
-                    ChangelogViewer.Markdown = "切换到 *历史版本* 或点击 *检查更新* 查看具体更新日志。";
+                    ChangelogViewer.Markdown = UpdateStrings.Changelog_SwitchHint;
                 return;
             }
 
             // 没有缓存的检查结果时，仅展示空白；不主动联网，避免打开页面就触发请求
             ApplyState(UpdateUiState.Idle);
-            ChangelogViewer.Markdown = "点击 *检查更新* 来获取最新版本及更新日志。";
+            ChangelogViewer.Markdown = UpdateStrings.Changelog_ClickHint;
             await System.Threading.Tasks.Task.CompletedTask;
         }
 
@@ -297,8 +297,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (isTestChannel && !SettingsManager.Settings.Startup.HasAcceptedTelemetryPrivacy)
             {
                 MessageBox.Show(
-                    "加入预览 / 测试通道前，请先在关于页面勾选“我已阅读并同意 privacy 中的隐私说明”。",
-                    "需要同意隐私说明",
+                    UpdateStrings.Channel_PrivacyRequired,
+                    UpdateStrings.Channel_PrivacyRequiredTitle,
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
 
@@ -312,8 +312,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (isTestChannel && SettingsManager.Settings.Startup.TelemetryUploadLevel == TelemetryUploadLevel.None)
             {
                 var result = MessageBox.Show(
-                    "加入预览 / 测试通道需要开启匿名基础数据上传。\n\n是否立即开启匿名基础数据上传？",
-                    "需要开启匿名使用数据上传",
+                    UpdateStrings.Channel_TelemetryRequired,
+                    UpdateStrings.Channel_TelemetryRequiredTitle,
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Warning);
 
@@ -417,26 +417,26 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 case UpdateUiState.Idle:
                     StatusIcon.Icon = SegoeFluentIcons.Completed;
-                    StatusTitle.Text = "已是最新版本";
+                    StatusTitle.Text = UpdateStrings.Status_UpToDate;
                     StatusSubtitle.Text = customSubtitle ?? BuildLastCheckSubtitle();
                     CheckUpdateButton.Visibility = Visibility.Visible;
                     break;
 
                 case UpdateUiState.Checking:
                     StatusIcon.Icon = SegoeFluentIcons.Sync;
-                    StatusTitle.Text = "正在检查更新...";
+                    StatusTitle.Text = UpdateStrings.Status_Checking;
                     StatusSubtitle.Text = "";
                     CheckUpdateButton.Visibility = Visibility.Visible;
                     CheckUpdateButton.IsEnabled = false;
                     ProgressPanel.Visibility = Visibility.Visible;
-                    ProgressText.Text = "正在连接更新服务器...";
+                    ProgressText.Text = UpdateStrings.Progress_ConnectingServer;
                     ProgressBar.IsIndeterminate = true;
                     break;
 
                 case UpdateUiState.UpdateAvailable:
                     StatusIcon.Icon = SegoeFluentIcons.Upload;
-                    StatusTitle.Text = $"检测到新版本 {_remoteVersion}";
-                    StatusSubtitle.Text = customSubtitle ?? $"当前版本 {GetCurrentVersion()} → {_remoteVersion}";
+                    StatusTitle.Text = string.Format(UpdateStrings.Status_NewVersionAvailable, _remoteVersion);
+                    StatusSubtitle.Text = customSubtitle ?? string.Format(UpdateStrings.Status_VersionTransition, GetCurrentVersion(), _remoteVersion);
                     UpdateNowButton.Visibility = Visibility.Visible;
                     UpdateLaterButton.Visibility = Visibility.Visible;
                     SkipVersionButton.Visibility = Visibility.Visible;
@@ -444,23 +444,23 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 case UpdateUiState.Downloading:
                     StatusIcon.Icon = SegoeFluentIcons.Download;
-                    StatusTitle.Text = "正在下载更新...";
-                    StatusSubtitle.Text = customSubtitle ?? $"目标版本 {_remoteVersion}";
+                    StatusTitle.Text = UpdateStrings.Status_Downloading;
+                    StatusSubtitle.Text = customSubtitle ?? string.Format(UpdateStrings.Status_TargetVersion, _remoteVersion);
                     ProgressPanel.Visibility = Visibility.Visible;
                     ProgressBar.IsIndeterminate = false;
                     break;
 
                 case UpdateUiState.Downloaded:
                     StatusIcon.Icon = SegoeFluentIcons.Download;
-                    StatusTitle.Text = "更新已下载完成";
-                    StatusSubtitle.Text = customSubtitle ?? $"将在软件关闭时自动安装 {_remoteVersion}";
+                    StatusTitle.Text = UpdateStrings.Status_Downloaded;
+                    StatusSubtitle.Text = customSubtitle ?? string.Format(UpdateStrings.Status_WillInstallOnExit, _remoteVersion);
                     CheckUpdateButton.Visibility = Visibility.Visible;
                     break;
 
                 case UpdateUiState.NetworkError:
                     StatusIcon.Icon = SegoeFluentIcons.Error;
-                    StatusTitle.Text = "网络错误";
-                    StatusSubtitle.Text = customSubtitle ?? "请检查网络连接后重试。";
+                    StatusTitle.Text = UpdateStrings.Status_NetworkError;
+                    StatusSubtitle.Text = customSubtitle ?? UpdateStrings.Status_NetworkErrorHint;
                     CheckUpdateButton.Visibility = Visibility.Visible;
                     break;
             }
@@ -469,7 +469,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private string BuildLastCheckSubtitle()
         {
             string current = GetCurrentVersion();
-            return $"当前版本 {current}";
+            return string.Format(UpdateStrings.Status_CurrentVersion, current);
         }
 
         private static string GetCurrentVersion()
@@ -480,7 +480,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
             catch
             {
-                return "未知";
+                return UpdateStrings.Version_Unknown;
             }
         }
 
@@ -492,7 +492,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             try
             {
-                ChangelogViewer.Markdown = "正在加载更新日志...";
+                ChangelogViewer.Markdown = UpdateStrings.Changelog_Loading;
 
                 // 优先尝试从 GitHub API 获取最新 Release 的 body（带超时，失败则回退到镜像）
                 try
@@ -525,11 +525,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 // 回退到镜像源 UpdateLog.md
                 string md = await AutoUpdateHelper.GetUpdateLog(SettingsManager.Settings.Startup.UpdateChannel);
-                ChangelogViewer.Markdown = string.IsNullOrEmpty(md) ? "暂无更新日志。" : md;
+                ChangelogViewer.Markdown = string.IsNullOrEmpty(md) ? UpdateStrings.Changelog_NoData : md;
             }
             catch (Exception ex)
             {
-                ChangelogViewer.Markdown = $"加载更新日志失败：{ex.Message}";
+                ChangelogViewer.Markdown = string.Format(UpdateStrings.Changelog_LoadFailed, ex.Message);
             }
         }
 
@@ -659,7 +659,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ApplyState(UpdateUiState.Downloading);
             CancelDownloadButton.Visibility = Visibility.Visible;
             ProgressBar.Value = 0;
-            ProgressText.Text = "正在准备下载...";
+            ProgressText.Text = UpdateStrings.Progress_PreparingDownload;
 
             try
             {
@@ -672,8 +672,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 }
 
                 MessageBoxResult result = MessageBox.Show(
-                    "更新已下载完成，点击确定后将关闭软件并安装新版本！",
-                    "安装更新",
+                    UpdateStrings.InstallUpdate_Msg,
+                    UpdateStrings.InstallUpdate_Title,
                     MessageBoxButton.OKCancel,
                     MessageBoxImage.Information);
 
@@ -705,7 +705,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ApplyState(UpdateUiState.Downloading);
             CancelDownloadButton.Visibility = Visibility.Visible;
             ProgressBar.Value = 0;
-            ProgressText.Text = "正在后台下载...";
+            ProgressText.Text = UpdateStrings.Progress_DownloadingBackground;
 
             try
             {
@@ -741,7 +741,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.SaveSettingsToFile();
             LogHelper.WriteLogToFile($"ManualUpdate | User chose to skip version {_remoteVersion}");
 
-            ApplyState(UpdateUiState.Idle, $"已跳过版本 {_remoteVersion}");
+            ApplyState(UpdateUiState.Idle, string.Format(UpdateStrings.Status_SkippedVersion, _remoteVersion));
         }
 
         private void CancelDownloadButton_Click(object sender, RoutedEventArgs e)
@@ -776,7 +776,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             try
             {
                 _isHistoryLoaded = true;
-                ReleaseNotesViewer.Markdown = "正在获取历史版本...";
+                ReleaseNotesViewer.Markdown = UpdateStrings.History_Loading;
                 RollbackButton.IsEnabled = false;
 
                 var releases = await AutoUpdateHelper.GetAllGithubReleases(SettingsManager.Settings.Startup.UpdateChannel);
@@ -793,12 +793,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 }
                 else
                 {
-                    ReleaseNotesViewer.Markdown = "未获取到历史版本信息。";
+                    ReleaseNotesViewer.Markdown = UpdateStrings.History_NoData;
                 }
             }
             catch (Exception ex)
             {
-                ReleaseNotesViewer.Markdown = $"加载历史版本失败：{ex.Message}";
+                ReleaseNotesViewer.Markdown = string.Format(UpdateStrings.History_LoadFailed, ex.Message);
             }
         }
 
@@ -813,7 +813,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _selectedHistoricalItem = VersionComboBox.SelectedItem as VersionItem;
             if (_selectedHistoricalItem != null)
             {
-                ReleaseNotesViewer.Markdown = _selectedHistoricalItem.ReleaseNotes ?? "无更新日志";
+                ReleaseNotesViewer.Markdown = _selectedHistoricalItem.ReleaseNotes ?? UpdateStrings.History_NoChangelog;
                 LogHelper.WriteLogToFile($"HistoryRollback | 用户选择版本: {_selectedHistoricalItem.Version}");
             }
             Keyboard.ClearFocus();
@@ -847,7 +847,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             VersionComboBox.IsEnabled = false;
             RollbackProgressPanel.Visibility = Visibility.Visible;
             RollbackProgressBar.Value = 0;
-            RollbackProgressText.Text = "正在准备下载...";
+            RollbackProgressText.Text = UpdateStrings.Progress_PreparingDownload;
 
             bool downloadSuccess = false;
             try
@@ -866,18 +866,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
             catch (Exception ex)
             {
-                RollbackProgressText.Text = $"下载失败: {ex.Message}";
+                RollbackProgressText.Text = string.Format(UpdateStrings.Rollback_DownloadFailedMsg, ex.Message);
                 LogHelper.WriteLogToFile($"HistoryRollback | 下载异常: {ex.Message}", LogHelper.LogType.Error);
             }
 
             if (downloadSuccess)
             {
                 RollbackProgressBar.Value = 100;
-                RollbackProgressText.Text = "下载完成，准备安装...";
+                RollbackProgressText.Text = UpdateStrings.Rollback_DownloadComplete;
             }
             else
             {
-                RollbackProgressText.Text = "下载失败，请检查网络后重试。";
+                RollbackProgressText.Text = UpdateStrings.Rollback_DownloadFailedRetry;
                 RollbackButton.IsEnabled = true;
                 VersionComboBox.IsEnabled = true;
             }
@@ -887,9 +887,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             var dialog = new ContentDialog
             {
-                Title = "暂停自动更新",
-                PrimaryButtonText = "确定",
-                SecondaryButtonText = "取消"
+                Title = UpdateStrings.PauseAutoUpdate_Title,
+                PrimaryButtonText = UpdateStrings.Btn_OK,
+                SecondaryButtonText = CommonStrings.Common_Cancel
             };
 
             var panel = new iNKORE.UI.WPF.Controls.SimpleStackPanel
@@ -900,7 +900,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             var textBlock = new TextBlock
             {
-                Text = "请选择在回滚后多久不再接收自动更新：",
+                Text = UpdateStrings.PauseAutoUpdate_SelectDuration,
                 FontSize = 14
             };
 
@@ -912,7 +912,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             };
             for (int i = 0; i <= 7; i++)
             {
-                daysComboBox.Items.Add(new ComboBoxItem { Content = $"{i} 天", Tag = i });
+                daysComboBox.Items.Add(new ComboBoxItem { Content = string.Format(UpdateStrings.PauseAutoUpdate_Days, i), Tag = i });
             }
             daysComboBox.SelectedIndex = 0;
 
@@ -936,15 +936,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private async void FixVersionButton_Click(object sender, RoutedEventArgs e)
         {
             var confirm = MessageBox.Show(
-                "此操作将下载当前选择通道的最新版本并安装，软件将自动关闭并更新。\n\n确定要执行版本修复吗？",
-                "版本修复确认",
+                UpdateStrings.FixVersion_ConfirmBody,
+                UpdateStrings.FixVersion_ConfirmTitle,
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
 
             if (confirm != MessageBoxResult.Yes) return;
 
             FixVersionButton.IsEnabled = false;
-            FixVersionButton.Content = "正在修复...";
+            FixVersionButton.Content = UpdateStrings.FixVersion_InProgress;
 
             try
             {
@@ -952,8 +952,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (!result)
                 {
                     MessageBox.Show(
-                        "版本修复失败，可能是网络问题或当前已是最新版本。",
-                        "修复失败",
+                        UpdateStrings.FixVersion_FailedBody,
+                        UpdateStrings.FixVersion_FailedTitle,
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
                 }
@@ -962,8 +962,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 LogHelper.WriteLogToFile($"Error in FixVersionButton_Click: {ex.Message}", LogHelper.LogType.Error);
                 MessageBox.Show(
-                    $"版本修复过程中发生错误: {ex.Message}",
-                    "修复错误",
+                    string.Format(UpdateStrings.FixVersion_ErrorBody, ex.Message),
+                    UpdateStrings.FixVersion_ErrorTitle,
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }

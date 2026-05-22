@@ -84,4 +84,70 @@
   <data name="Tooltip_IccProtocol" xml:space="preserve">
     <value>Control via icc:// protocol</value>
   </data>
+  <data name="Security_SectionPassword" xml:space="preserve">
+    <value>Security Password</value>
+  </data>
+  <data name="Security_InfoBarTitle" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="Security_PasswordInfoBarMessage" xml:space="preserve">
+    <value>Security password is off by default. When enabled, it can be used for secondary verification when exiting, entering settings, or resetting configuration.</value>
+  </data>
+  <data name="Security_EnablePassword" xml:space="preserve">
+    <value>Enable Security Password</value>
+  </data>
+  <data name="Security_PasswordManagement" xml:space="preserve">
+    <value>Password Management</value>
+  </data>
+  <data name="Security_SetOrChangePassword" xml:space="preserve">
+    <value>Set/Change Password</value>
+  </data>
+  <data name="Security_EnableTotp" xml:space="preserve">
+    <value>Enable TOTP Verification</value>
+  </data>
+  <data name="Security_EnableTotpHint" xml:space="preserve">
+    <value>Can be used for secondary verification such as unfreezing ink strokes</value>
+  </data>
+  <data name="Security_TotpSecretKey" xml:space="preserve">
+    <value>TOTP Secret Key</value>
+  </data>
+  <data name="Security_TotpSecretKeyHint" xml:space="preserve">
+    <value>Manually add this key in your authenticator app</value>
+  </data>
+  <data name="Security_GenerateOrResetKey" xml:space="preserve">
+    <value>Generate/Reset Key</value>
+  </data>
+  <data name="Security_RequirePasswordOnExit" xml:space="preserve">
+    <value>Require Verification on Exit</value>
+  </data>
+  <data name="Security_RequirePasswordOnEnterSettings" xml:space="preserve">
+    <value>Require Verification to Enter Settings</value>
+  </data>
+  <data name="Security_RequirePasswordOnResetConfig" xml:space="preserve">
+    <value>Require Verification to Reset Config</value>
+  </data>
+  <data name="Security_RequirePasswordOnModifyOrClearNameList" xml:space="preserve">
+    <value>Require Verification to Modify/Clear Name List</value>
+  </data>
+  <data name="Security_RequirePasswordOnModifyOrClearNameList_Hint" xml:space="preserve">
+    <value>Verify before modifying or clearing the name list</value>
+  </data>
+  <data name="Security_ProcessProtection" xml:space="preserve">
+    <value>Process Protection</value>
+  </data>
+  <data name="Security_ProcessProtectionInfoBarMessage" xml:space="preserve">
+    <value>Process protection is on by default: protects program files (exe/dll/config) in the root directory from external modification while running.</value>
+  </data>
+  <data name="Security_DisablePasswordTitle" xml:space="preserve">
+    <value>Disable Security Password</value>
+  </data>
+  <data name="Security_DisablePasswordMessage" xml:space="preserve">
+    <value>Please enter the security password or TOTP code to disable the security password feature.</value>
+  </data>
+  <data name="Security_ResetTotpTitle" xml:space="preserve">
+    <value>Reset TOTP Secret Key</value>
+  </data>
+  <data name="Security_ResetTotpMessage" xml:space="preserve">
+    <value>Please enter the security password or current TOTP code to reset the key.</value>
+  </data>
 </root>

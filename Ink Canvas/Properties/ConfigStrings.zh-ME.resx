@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Delete" xml:space="preserve">
+    <value>删掉这个方案</value>
+  </data>
+  <data name="Desc" xml:space="preserve">
+    <value>选配置文件就切换并热重载；另存为可以把当前配置存成新方案</value>
+  </data>
+  <data name="Label" xml:space="preserve">
+    <value>配置方案：</value>
+  </data>
+  <data name="SaveAs" xml:space="preserve">
+    <value>另存为新方案</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>配置方案切换与热重载（一键换装）</value>
+  </data>
+  <data name="ProfileNameLabel" xml:space="preserve">
+    <value>方案名称</value>
+  </data>
+  <data name="SaveAsProfileTitle" xml:space="preserve">
+    <value>另存为方案</value>
+  </data>
+  <data name="SaveAs_EnterName" xml:space="preserve">
+    <value>给方案起个名字吧。</value>
+  </data>
+  <data name="SavedAsProfile" xml:space="preserve">
+    <value>已另存为方案：{0}，收工！</value>
+  </data>
+  <data name="SaveAs_Failed" xml:space="preserve">
+    <value>保存翻车了，去看看日志吧。</value>
+  </data>
+  <data name="SaveAs_FailedMsg" xml:space="preserve">
+    <value>保存翻车了: {0}</value>
+  </data>
+  <data name="Delete_SelectFirst" xml:space="preserve">
+    <value>先选一个要删的配置方案啊！</value>
+  </data>
+  <data name="Delete_ConfirmTitle" xml:space="preserve">
+    <value>确认删除（别冲动）</value>
+  </data>
+  <data name="Delete_ConfirmMsg" xml:space="preserve">
+    <value>确定要删掉方案「{0}」吗？删了就没了！</value>
+  </data>
+  <data name="Delete_Failed" xml:space="preserve">
+    <value>删除方案翻车了，去看看日志吧。</value>
+  </data>
+  <data name="Delete_FailedMsg" xml:space="preserve">
+    <value>删除方案翻车了: {0}</value>
+  </data>
+  <data name="SwitchedToProfile" xml:space="preserve">
+    <value>已切换至方案「{0}」，换装成功！</value>
+  </data>
+  <data name="DeletedAndSwitched" xml:space="preserve">
+    <value>已删掉方案「{0}」，已切换至「{1}」</value>
+  </data>
+  <data name="DeletedProfile" xml:space="preserve">
+    <value>已删掉方案：{0}，再见！</value>
+  </data>
+</root>

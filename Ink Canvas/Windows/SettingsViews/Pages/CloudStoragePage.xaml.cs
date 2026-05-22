@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -20,7 +21,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
     {
         private const string AppId = "app_WkjocWqsrVY7T6zQV2CfiA";
         private const string AppSecret = "o7dx5b5ASGUMcM72PCpmRQYAhSijqaOVHoGyBK0IxbA";
-        private const string NoSavedTokenText = "（无保存的Token）";
+        private static string NoSavedTokenText => CloudStorageStrings.CloudStorage_NoSavedToken;
 
         private static readonly Regex NonDigitRegex = new Regex("[^0-9]+", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
@@ -40,7 +41,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private async void CloudStoragePage_Loaded(object sender, RoutedEventArgs e)
         {
             EnsureSettingsObjects();
-            InitializeClassSelectionPlaceholder("（等待连接）");
+            InitializeClassSelectionPlaceholder(CloudStorageStrings.CloudStorage_WaitingForConnection);
             LoadAllSettings();
             InitializeApiClient();
             PromptDlassRegistrationIfNeeded();
@@ -264,7 +265,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 if (classGroups.Count > 0)
                 {
-                    var teacherName = user?.Username ?? "未知教师";
+                    var teacherName = user?.Username ?? CloudStorageStrings.CloudStorage_UnknownTeacher;
                     foreach (var group in classGroups)
                     {
                         var className = group.Key;
@@ -284,7 +285,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 }
                 else
                 {
-                    CmbClassSelection.Items.Add("（无可用班级）");
+                    CmbClassSelection.Items.Add(CloudStorageStrings.CloudStorage_NoAvailableClasses);
                     CmbClassSelection.SelectedIndex = 0;
                     CmbClassSelection.IsEnabled = false;
                 }
@@ -459,7 +460,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 var token = TxtNewToken.Text?.Trim() ?? string.Empty;
                 if (string.IsNullOrEmpty(token))
                 {
-                    MessageBox.Show("请输入新的用户Token", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show(CloudStorageStrings.CloudStorage_PleaseEnterNewToken, CloudStorageStrings.CloudStorage_Tip, MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -467,13 +468,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 SaveUserToken(token);
                 InitializeApiClient();
                 RunWithoutUiEvents(LoadUserToken);
-                MessageBox.Show("Token已成功保存并已选择", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(CloudStorageStrings.CloudStorage_TokenSavedAndSelected, CloudStorageStrings.CloudStorage_Success, MessageBoxButton.OK, MessageBoxImage.Information);
                 _ = TestConnectionAsync();
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"保存Token时出错: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show($"保存Token时发生错误: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"{CloudStorageStrings.CloudStorage_SaveTokenError}{ex.Message}", CloudStorageStrings.CloudStorage_Error, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -484,12 +485,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (CmbSavedTokens.SelectedItem == null ||
                     CmbSavedTokens.SelectedItem.ToString() == NoSavedTokenText)
                 {
-                    MessageBox.Show("请先选择一个Token", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show(CloudStorageStrings.CloudStorage_PleaseSelectToken, CloudStorageStrings.CloudStorage_Tip, MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
                 var selectedToken = CmbSavedTokens.SelectedItem.ToString();
-                var result = MessageBox.Show("确定要删除已选中的Token吗？", "确认", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                var result = MessageBox.Show(CloudStorageStrings.CloudStorage_ConfirmDeleteToken, CloudStorageStrings.CloudStorage_Confirm, MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result != MessageBoxResult.Yes)
                 {
                     return;
@@ -503,14 +504,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 InitializeApiClient();
                 RunWithoutUiEvents(LoadUserToken);
-                InitializeClassSelectionPlaceholder("（等待连接）");
+                InitializeClassSelectionPlaceholder(CloudStorageStrings.CloudStorage_WaitingForConnection);
                 _currentWhiteboards.Clear();
-                SetConnectionStatus("未连接", Colors.Gray);
+                SetConnectionStatus(CloudStorageStrings.CloudStorage_NotConnected, Colors.Gray);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"删除Token时出错: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show($"删除Token时发生错误: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"{CloudStorageStrings.CloudStorage_DeleteTokenError}{ex.Message}", CloudStorageStrings.CloudStorage_Error, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -535,12 +536,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 MainWindow.Settings.Dlass.WebDavRootDirectory = TxtWebDavRootDirectory.Text;
                 MainWindow.SaveSettingsToFile();
 
-                MessageBox.Show("WebDav设置已保存", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(CloudStorageStrings.CloudStorage_WebDavSettingsSaved, CloudStorageStrings.CloudStorage_Success, MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"保存WebDav设置时出错: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show($"保存WebDav设置时发生错误: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"{CloudStorageStrings.CloudStorage_SaveWebDavError}{ex.Message}", CloudStorageStrings.CloudStorage_Error, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -558,10 +559,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             _hasPromptedDlassRegistration = true;
             var result = MessageBox.Show(
-                "您是否已经注册了Dlass账号？\n\n" +
-                "• 如果已注册：请在本页填入用户 Token\n" +
-                "• 如果未注册：将打开浏览器跳转到 Dlass 控制台",
-                "Dlass账号注册",
+                CloudStorageStrings.CloudStorage_DlassRegistrationPrompt,
+                CloudStorageStrings.CloudStorage_DlassRegistrationTitle,
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
 
@@ -585,8 +584,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"打开浏览器时出错: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show("无法打开浏览器。请手动访问: https://dlass.tech/dashboard",
-                    "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(CloudStorageStrings.CloudStorage_CannotOpenBrowser,
+                    CloudStorageStrings.CloudStorage_Tip, MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -596,7 +595,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _connectionTestCts = new CancellationTokenSource();
             var cancellationToken = _connectionTestCts.Token;
 
-            SetConnectionStatus("测试中...", Colors.Gray);
+            SetConnectionStatus(CloudStorageStrings.CloudStorage_Testing, Colors.Gray);
 
             try
             {
@@ -608,8 +607,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 var userToken = GetUserToken();
                 if (string.IsNullOrEmpty(userToken))
                 {
-                    SetConnectionStatus("未设置Token", Colors.Red);
-                    InitializeClassSelectionPlaceholder("（无可用班级）");
+                    SetConnectionStatus(CloudStorageStrings.CloudStorage_TokenNotSet, Colors.Red);
+                    InitializeClassSelectionPlaceholder(CloudStorageStrings.CloudStorage_NoAvailableClasses);
                     return;
                 }
 
@@ -637,7 +636,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 _currentWhiteboards.Clear();
                 _currentWhiteboards.AddRange(whiteboards);
 
-                SetConnectionStatus($"已连接 (找到 {whiteboards.Count} 个白板)", Color.FromRgb(34, 197, 94));
+                SetConnectionStatus(string.Format(CloudStorageStrings.CloudStorage_ConnectedFormat, whiteboards.Count), Color.FromRgb(34, 197, 94));
                 LoadClasses(whiteboards, result.User);
             }
             catch (OperationCanceledException)
@@ -651,9 +650,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 }
 
                 LogHelper.WriteLogToFile($"Dlass API连接测试失败: {ex.Message}", LogHelper.LogType.Error);
-                SetConnectionStatus("连接失败", Colors.Red);
+                SetConnectionStatus(CloudStorageStrings.CloudStorage_ConnectionFailed, Colors.Red);
                 _currentWhiteboards.Clear();
-                InitializeClassSelectionPlaceholder("（无可用班级）");
+                InitializeClassSelectionPlaceholder(CloudStorageStrings.CloudStorage_NoAvailableClasses);
             }
         }
 
@@ -682,12 +681,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (hasToken)
             {
-                TxtTokenStatus.Text = "已选择Token";
+                TxtTokenStatus.Text = CloudStorageStrings.CloudStorage_TokenSelected;
                 TxtTokenStatus.Foreground = new SolidColorBrush(Color.FromRgb(34, 197, 94));
             }
             else
             {
-                TxtTokenStatus.Text = "未设置Token";
+                TxtTokenStatus.Text = CloudStorageStrings.CloudStorage_TokenNotSet;
                 TxtTokenStatus.Foreground = new SolidColorBrush(Color.FromRgb(161, 161, 170));
             }
         }

@@ -12,10 +12,10 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto" PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
             <StackPanel Margin="24">
-                <TextBlock Text="🎨 插件管理" Style="{DynamicResource TitleTextBlockStyle}" Margin="0,0,0,16" />
+                <TextBlock Text="{x:Static props:PluginStrings.Plugin_Title}" Style="{DynamicResource TitleTextBlockStyle}" Margin="0,0,0,16" />
 
                 <Border x:Name="StatusBorder" Background="{DynamicResource InfoAcrylicFillColorDefaultBrush}" Padding="12" CornerRadius="8" Margin="0,0,0,20">
-                    <TextBlock x:Name="PluginCountText" Text="正在加载插件..." Foreground="{DynamicResource InfoTextFillColorPrimaryBrush}" />
+                    <TextBlock x:Name="PluginCountText" Text="{x:Static props:PluginStrings.Plugin_Loading}" Foreground="{DynamicResource InfoTextFillColorPrimaryBrush}" />
                 </Border>
 
                 <StackPanel x:Name="PluginContainer" />

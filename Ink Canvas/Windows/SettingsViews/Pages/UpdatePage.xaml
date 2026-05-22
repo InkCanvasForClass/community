@@ -56,7 +56,7 @@
                         <ikw:SimpleStackPanel Grid.Column="1" Spacing="4">
                             <TextBlock x:Name="StatusTitle"
                                        FontSize="22" FontWeight="SemiBold"
-                                       Text="正在加载更新状态..." />
+                                       Text="{x:Static props:UpdateStrings.Status_Loading}" />
                             <TextBlock x:Name="StatusSubtitle"
                                        Opacity="0.75"
                                        TextWrapping="Wrap"
@@ -84,7 +84,7 @@
                                         Click="CheckUpdateButton_Click">
                                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" FontSize="14" />
-                                        <TextBlock Text="检查更新" />
+                                        <TextBlock Text="{x:Static props:UpdateStrings.Btn_CheckUpdate}" />
                                     </ikw:SimpleStackPanel>
                                 </Button>
                                 <Button x:Name="UpdateNowButton"
@@ -93,7 +93,7 @@
                                         Click="UpdateNowButton_Click">
                                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Download}" FontSize="14" />
-                                        <TextBlock Text="立即下载并安装" />
+                                        <TextBlock Text="{x:Static props:UpdateStrings.Btn_DownloadAndInstall}" />
                                     </ikw:SimpleStackPanel>
                                 </Button>
                                 <Button x:Name="UpdateLaterButton"
@@ -101,7 +101,7 @@
                                         Click="UpdateLaterButton_Click">
                                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.QuietHours}" FontSize="14" />
-                                        <TextBlock Text="退出时安装" />
+                                        <TextBlock Text="{x:Static props:UpdateStrings.Btn_InstallOnExit}" />
                                     </ikw:SimpleStackPanel>
                                 </Button>
                                 <Button x:Name="SkipVersionButton"
@@ -109,7 +109,7 @@
                                         Click="SkipVersionButton_Click">
                                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cancel}" FontSize="14" />
-                                        <TextBlock Text="跳过此版本" />
+                                        <TextBlock Text="{x:Static props:UpdateStrings.Btn_SkipVersion}" />
                                     </ikw:SimpleStackPanel>
                                 </Button>
                                 <Button x:Name="CancelDownloadButton"
@@ -117,7 +117,7 @@
                                         Click="CancelDownloadButton_Click">
                                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cancel}" FontSize="14" />
-                                        <TextBlock Text="取消" />
+                                        <TextBlock Text="{x:Static props:CommonStrings.Common_Cancel}" />
                                     </ikw:SimpleStackPanel>
                                 </Button>
                             </ikw:SimpleStackPanel>
@@ -137,7 +137,7 @@
                         <sys:Double x:Key="PivotHeaderItemFontSize">16</sys:Double>
                     </TabControl.Resources>
                     <!-- 更新日志 -->
-                    <TabItem Header="更新日志">
+                    <TabItem Header="{x:Static props:UpdateStrings.Tab_Changelog}">
                         <Border Margin="0,8,0,0"
                                 Padding="16"
                                 CornerRadius="8"
@@ -154,7 +154,7 @@
                     </TabItem>
 
                     <!-- 更新设置 -->
-                    <TabItem Header="更新设置">
+                    <TabItem Header="{x:Static props:UpdateStrings.Tab_UpdateSettings}">
                         <ikw:SimpleStackPanel Margin="0,8,0,0"
                                               Spacing="{StaticResource SettingsCardSpacing}">
                             <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
@@ -192,7 +192,7 @@
                                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
                                 </ui:SettingsExpander.HeaderIcon>
                                 <ui:SettingsExpander.Items>
-                                    <ui:SettingsCard Header="静默更新时间段设置"
+                                    <ui:SettingsCard Header="{x:Static props:UpdateStrings.SilentUpdate_TimeRangeSettings}"
                                                      Description="{x:Static props:StartupStrings.SilentUpdateFullHint}">
                                         <ui:SettingsCard.Content>
                                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
@@ -244,7 +244,7 @@
                             </ui:SettingsCard>
 
                             <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                                       Text="维护" />
+                                       Text="{x:Static props:UpdateStrings.Section_Maintenance}" />
 
                             <ui:SettingsCard Header="{x:Static props:BtnStrings.VersionFix}"
                                              Description="{x:Static props:StartupStrings.FixVersionHint}">
@@ -258,10 +258,10 @@
                     </TabItem>
 
                     <!-- 历史版本 -->
-                    <TabItem x:Name="HistoryTabItem" Header="历史版本">
+                    <TabItem x:Name="HistoryTabItem" Header="{x:Static props:UpdateStrings.Tab_HistoryVersions}">
                         <ikw:SimpleStackPanel Margin="0,8,0,0" Spacing="12">
-                            <ui:SettingsCard Header="选择历史版本"
-                                             Description="选择一个旧版本进行回滚（将下载并安装该版本）。">
+                            <ui:SettingsCard Header="{x:Static props:UpdateStrings.History_SelectVersion}"
+                                             Description="{x:Static props:UpdateStrings.History_SelectVersionDesc}">
                                 <ui:SettingsCard.HeaderIcon>
                                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.History}" />
                                 </ui:SettingsCard.HeaderIcon>
@@ -292,7 +292,7 @@
                                     Click="RollbackButton_Click">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Undo}" FontSize="14" />
-                                    <TextBlock Text="回滚到此版本" />
+                                    <TextBlock Text="{x:Static props:UpdateStrings.Btn_RollbackToVersion}" />
                                 </ikw:SimpleStackPanel>
                             </Button>
 
@@ -304,7 +304,7 @@
                                     BorderBrush="{DynamicResource SettingsPageBorderBrush}"
                                     BorderThickness="1">
                                 <ikw:SimpleStackPanel Spacing="6">
-                                    <TextBlock x:Name="RollbackProgressText" Text="正在准备下载..." FontSize="13" />
+                                    <TextBlock x:Name="RollbackProgressText" Text="{x:Static props:UpdateStrings.Progress_PreparingDownload}" FontSize="13" />
                                     <ProgressBar x:Name="RollbackProgressBar"
                                                  Style="{DynamicResource DefaultProgressBarStyle}"
                                                  Height="6"

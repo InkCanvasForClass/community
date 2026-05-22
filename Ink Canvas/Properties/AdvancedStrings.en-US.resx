@@ -177,4 +177,13 @@
   <data name="Debug_ShowConsole_Header" xml:space="preserve">
     <value>Show debug console</value>
   </data>
+  <data name="Debug_Title" xml:space="preserve">
+    <value>Debug</value>
+  </data>
+  <data name="Debug_IconSettings" xml:space="preserve">
+    <value>Icon Settings</value>
+  </data>
+  <data name="Debug_SettingsExpanderExample" xml:space="preserve">
+    <value>SettingsExpander Example</value>
+  </data>
 </root>

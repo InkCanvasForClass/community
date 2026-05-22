@@ -249,6 +249,9 @@
   <data name="Theme_Language_English" xml:space="preserve">
     <value>English</value>
   </data>
+  <data name="Theme_Language_MemeChinese" xml:space="preserve">
+    <value>梗体中文</value>
+  </data>
   <data name="Theme_Language_RestartHint" xml:space="preserve">
     <value>更改界面语言后需要重启应用程序才能完全生效。</value>
   </data>
@@ -494,5 +497,50 @@
   </data>
   <data name="ThemePanel_PPTPPTHint" xml:space="preserve">
     <value>在 PPT 模式下，浮动工具栏的透明度（重新进入 PPT 放映后生效）</value>
+  </data>
+  <data name="Theme_FloatingBarButtonsDescription" xml:space="preserve">
+    <value>请前往「工具栏」设置页面管理浮动工具栏的组件显示与排序。</value>
+  </data>
+  <data name="Theme_SelectCustomSplashImage" xml:space="preserve">
+    <value>选择自定义启动图片</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Animation" xml:space="preserve">
+    <value>动画</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Manga" xml:space="preserve">
+    <value>漫画</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Game" xml:space="preserve">
+    <value>游戏</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Literature" xml:space="preserve">
+    <value>文学</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Original" xml:space="preserve">
+    <value>原创</value>
+  </data>
+  <data name="Theme_HitokotoCategory_FromWeb" xml:space="preserve">
+    <value>来自网络</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Movie" xml:space="preserve">
+    <value>影视</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Poetry" xml:space="preserve">
+    <value>诗词</value>
+  </data>
+  <data name="Theme_HitokotoCategory_NeteaseCloud" xml:space="preserve">
+    <value>网易云</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Philosophy" xml:space="preserve">
+    <value>哲学</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Humor" xml:space="preserve">
+    <value>抖机灵</value>
+  </data>
+  <data name="Theme_Hitokoto_SelectAll" xml:space="preserve">
+    <value>全选</value>
+  </data>
+  <data name="Theme_Hitokoto_CustomizeTitle" xml:space="preserve">
+    <value>自定义一言分类</value>
   </data>
 </root>

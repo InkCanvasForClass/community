@@ -84,4 +84,70 @@
   <data name="Tooltip_IccProtocol" xml:space="preserve">
     <value>通过 icc:// 协议从外部控制软件</value>
   </data>
+  <data name="Security_SectionPassword" xml:space="preserve">
+    <value>安全密码</value>
+  </data>
+  <data name="Security_InfoBarTitle" xml:space="preserve">
+    <value>说明</value>
+  </data>
+  <data name="Security_PasswordInfoBarMessage" xml:space="preserve">
+    <value>安全密码默认关闭。开启后可用于退出软件、进入设置与重置配置等操作时的二次验证。</value>
+  </data>
+  <data name="Security_EnablePassword" xml:space="preserve">
+    <value>启用安全密码</value>
+  </data>
+  <data name="Security_PasswordManagement" xml:space="preserve">
+    <value>密码管理</value>
+  </data>
+  <data name="Security_SetOrChangePassword" xml:space="preserve">
+    <value>设置/修改密码</value>
+  </data>
+  <data name="Security_EnableTotp" xml:space="preserve">
+    <value>启用 TOTP 验证</value>
+  </data>
+  <data name="Security_EnableTotpHint" xml:space="preserve">
+    <value>可用于冻结笔迹解冻等二次验证</value>
+  </data>
+  <data name="Security_TotpSecretKey" xml:space="preserve">
+    <value>TOTP 密钥</value>
+  </data>
+  <data name="Security_TotpSecretKeyHint" xml:space="preserve">
+    <value>在身份验证器中手动添加该密钥</value>
+  </data>
+  <data name="Security_GenerateOrResetKey" xml:space="preserve">
+    <value>生成/重置密钥</value>
+  </data>
+  <data name="Security_RequirePasswordOnExit" xml:space="preserve">
+    <value>退出软件需要验证</value>
+  </data>
+  <data name="Security_RequirePasswordOnEnterSettings" xml:space="preserve">
+    <value>进入设置需要验证</value>
+  </data>
+  <data name="Security_RequirePasswordOnResetConfig" xml:space="preserve">
+    <value>重置配置需要验证</value>
+  </data>
+  <data name="Security_RequirePasswordOnModifyOrClearNameList" xml:space="preserve">
+    <value>修改/清空点名名单需要验证</value>
+  </data>
+  <data name="Security_RequirePasswordOnModifyOrClearNameList_Hint" xml:space="preserve">
+    <value>对点名名单进行修改或清空前进行验证</value>
+  </data>
+  <data name="Security_ProcessProtection" xml:space="preserve">
+    <value>进程保护</value>
+  </data>
+  <data name="Security_ProcessProtectionInfoBarMessage" xml:space="preserve">
+    <value>进程保护默认开启：运行期间保护根目录下的程序文件（exe/dll/config）不被外部修改。</value>
+  </data>
+  <data name="Security_DisablePasswordTitle" xml:space="preserve">
+    <value>关闭安全密码</value>
+  </data>
+  <data name="Security_DisablePasswordMessage" xml:space="preserve">
+    <value>请输入安全密码或 TOTP 验证码以关闭安全密码功能。</value>
+  </data>
+  <data name="Security_ResetTotpTitle" xml:space="preserve">
+    <value>重置 TOTP 密钥</value>
+  </data>
+  <data name="Security_ResetTotpMessage" xml:space="preserve">
+    <value>请输入安全密码或当前 TOTP 动态验证码以重置密钥。</value>
+  </data>
 </root>

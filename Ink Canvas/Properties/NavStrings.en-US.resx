@@ -144,4 +144,100 @@
   <data name="Settings_Title" xml:space="preserve">
     <value>Settings</value>
   </data>
+  <data name="Nav_SettingsWindow_Title" xml:space="preserve">
+    <value>InkCanvasForClass Settings</value>
+  </data>
+  <data name="Nav_AppSettings" xml:space="preserve">
+    <value>App Settings</value>
+  </data>
+  <data name="Nav_SearchSettings" xml:space="preserve">
+    <value>Search settings</value>
+  </data>
+  <data name="Nav_Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="Nav_Home_Tooltip" xml:space="preserve">
+    <value>Quick navigation</value>
+  </data>
+  <data name="Nav_ICCSettings" xml:space="preserve">
+    <value>ICC CE Settings</value>
+  </data>
+  <data name="Nav_Basic" xml:space="preserve">
+    <value>Basic</value>
+  </data>
+  <data name="Nav_Basic_Tooltip" xml:space="preserve">
+    <value>Basic settings</value>
+  </data>
+  <data name="Nav_Privacy" xml:space="preserve">
+    <value>Privacy</value>
+  </data>
+  <data name="Nav_Privacy_Tooltip" xml:space="preserve">
+    <value>Privacy &amp; telemetry settings</value>
+  </data>
+  <data name="Nav_MainInterface" xml:space="preserve">
+    <value>Main Interface</value>
+  </data>
+  <data name="Nav_MainInterface_Tooltip" xml:space="preserve">
+    <value>Main interface settings</value>
+  </data>
+  <data name="Nav_Window" xml:space="preserve">
+    <value>Window</value>
+  </data>
+  <data name="Nav_Window_Tooltip" xml:space="preserve">
+    <value>Window settings</value>
+  </data>
+  <data name="Nav_Toolbar" xml:space="preserve">
+    <value>Toolbar</value>
+  </data>
+  <data name="Nav_Toolbar_Tooltip" xml:space="preserve">
+    <value>Toolbar button order &amp; visibility</value>
+  </data>
+  <data name="Nav_CanvasAndInk_Tooltip" xml:space="preserve">
+    <value>Canvas &amp; ink settings</value>
+  </data>
+  <data name="Nav_Canvas_Tooltip" xml:space="preserve">
+    <value>Canvas settings</value>
+  </data>
+  <data name="Nav_InkRecognition_Tooltip" xml:space="preserve">
+    <value>Ink correction settings</value>
+  </data>
+  <data name="Nav_PPT_Tooltip" xml:space="preserve">
+    <value>PPT integration settings</value>
+  </data>
+  <data name="Nav_Update_Tooltip" xml:space="preserve">
+    <value>Update settings</value>
+  </data>
+  <data name="Nav_RandomDraw_Tooltip" xml:space="preserve">
+    <value>Random picker &amp; timer</value>
+  </data>
+  <data name="Nav_PluginSettings" xml:space="preserve">
+    <value>Plugin settings</value>
+  </data>
+  <data name="Nav_AboutInkCanvas" xml:space="preserve">
+    <value>About InkCanvasForClass</value>
+  </data>
+  <data name="Nav_NavigateError" xml:space="preserve">
+    <value>Error navigating to page: {0}</value>
+  </data>
+  <data name="Nav_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Nav_PluginSettingsFormat" xml:space="preserve">
+    <value>{0} Settings</value>
+  </data>
+  <data name="Nav_IndexBuildFailed" xml:space="preserve">
+    <value>Failed to build index for page {0}: {1}</value>
+  </data>
+  <data name="Nav_LoadPluginSettingsFailed" xml:space="preserve">
+    <value>Error loading plugin settings page: {0}</value>
+  </data>
+  <data name="Nav_PreloadPageFailed" xml:space="preserve">
+    <value>Failed to preload settings page {0}: {1}</value>
+  </data>
+  <data name="Nav_PreloadPagesFailed" xml:space="preserve">
+    <value>Error during async preload of settings pages: {0}</value>
+  </data>
+  <data name="Settings_Description" xml:space="preserve">
+    <value>This is the settings page</value>
+  </data>
 </root>

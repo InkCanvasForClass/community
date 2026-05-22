@@ -289,5 +289,25 @@ namespace Ink_Canvas.Properties
         public static string InkRecognitionPanel_Hint_3 => ResourceManager.GetString(nameof(InkRecognitionPanel_Hint_3), _resourceCulture);
 
         public static string InkRecognitionPanel_Hint_4 => ResourceManager.GetString(nameof(InkRecognitionPanel_Hint_4), _resourceCulture);
+
+        public static string InkRecog_Font_InkFreeKaiti => ResourceManager.GetString(nameof(InkRecog_Font_InkFreeKaiti), _resourceCulture);
+
+        public static string InkRecog_Font_Kaiti => ResourceManager.GetString(nameof(InkRecog_Font_Kaiti), _resourceCulture);
+
+        public static string InkRecog_Font_STKaiti => ResourceManager.GetString(nameof(InkRecog_Font_STKaiti), _resourceCulture);
+
+        public static string InkRecog_Font_STXingkai => ResourceManager.GetString(nameof(InkRecog_Font_STXingkai), _resourceCulture);
+
+        public static string InkRecog_Font_FangSong => ResourceManager.GetString(nameof(InkRecog_Font_FangSong), _resourceCulture);
+
+        public static string InkRecog_Font_STFangsong => ResourceManager.GetString(nameof(InkRecog_Font_STFangsong), _resourceCulture);
+
+        public static string InkRecog_Font_LiSu => ResourceManager.GetString(nameof(InkRecog_Font_LiSu), _resourceCulture);
+
+        public static string InkRecog_Font_YouYuan => ResourceManager.GetString(nameof(InkRecog_Font_YouYuan), _resourceCulture);
+
+        public static string InkRecog_ShapeCorrection => ResourceManager.GetString(nameof(InkRecog_ShapeCorrection), _resourceCulture);
+
+        public static string Canvas_SecondsFormat => ResourceManager.GetString(nameof(Canvas_SecondsFormat), _resourceCulture);
     }
 }
