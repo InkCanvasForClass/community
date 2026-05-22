@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using Ink_Canvas.Properties;
 
 namespace Ink_Canvas.Controls.Toolbar.Items
 {
@@ -7,7 +8,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         public override string Id => "builtin.eraserByStrokes";
         public override string LocalizationKey => "FloatingBar_StrokeEraser";
         public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AnnotationOnly().WithHideOnCollapsed();
-        public override string Description => "笔画橡皮擦";
+        public override string Description => FloatingBarStrings.ToolbarItem_Desc_StrokeEraser;
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.EraserIconByStrokes_Click(sender, e);

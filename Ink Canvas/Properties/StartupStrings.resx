@@ -186,7 +186,7 @@
   <data name="UIAccessTopMostHint" xml:space="preserve">
     <value>开启UIA置顶后，软件需要管理员启动才能置顶，关闭此功能需要完全关闭软件后再手动启动，无法使用重启来关闭此功能</value>
   </data>
-  <data name="UIAccessTopMostHint_1" xml:space="preserve">
+  <data name="UIATopMostHint_RequiresAdmin" xml:space="preserve">
     <value>使用 UIA 方式实现置顶，需要管理员权限</value>
   </data>
   <data name="UIATopMost" xml:space="preserve">

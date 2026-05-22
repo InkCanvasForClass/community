@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using Ink_Canvas.Properties;
 
 namespace Ink_Canvas.Controls.Toolbar.Items
 {
@@ -7,7 +8,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         public override string Id => "builtin.pen";
         public override string LocalizationKey => "FloatingBar_Annotate";
         public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
-        public override string Description => "画笔工具";
+        public override string Description => FloatingBarStrings.ToolbarItem_Desc_Pen;
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.PenIcon_Click(sender, e);

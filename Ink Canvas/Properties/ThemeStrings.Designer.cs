@@ -46,53 +46,53 @@ namespace Ink_Canvas.Properties
 
         public static string AppearancePanel_Hint => ResourceManager.GetString(nameof(AppearancePanel_Hint), _resourceCulture);
 
-        public static string AppearancePanel_Hint_1 => ResourceManager.GetString(nameof(AppearancePanel_Hint_1), _resourceCulture);
+        public static string AppearancePanel_Hint_ShowStartupAnimation => ResourceManager.GetString(nameof(AppearancePanel_Hint_ShowStartupAnimation), _resourceCulture);
 
-        public static string AppearancePanel_Hint_10 => ResourceManager.GetString(nameof(AppearancePanel_Hint_10), _resourceCulture);
+        public static string AppearancePanel_Hint_ShowRedoButton => ResourceManager.GetString(nameof(AppearancePanel_Hint_ShowRedoButton), _resourceCulture);
 
-        public static string AppearancePanel_Hint_11 => ResourceManager.GetString(nameof(AppearancePanel_Hint_11), _resourceCulture);
+        public static string AppearancePanel_Hint_ShowClearButton => ResourceManager.GetString(nameof(AppearancePanel_Hint_ShowClearButton), _resourceCulture);
 
-        public static string AppearancePanel_Hint_12 => ResourceManager.GetString(nameof(AppearancePanel_Hint_12), _resourceCulture);
+        public static string AppearancePanel_Hint_ShowWhiteboardButton => ResourceManager.GetString(nameof(AppearancePanel_Hint_ShowWhiteboardButton), _resourceCulture);
 
-        public static string AppearancePanel_Hint_13 => ResourceManager.GetString(nameof(AppearancePanel_Hint_13), _resourceCulture);
+        public static string AppearancePanel_Hint_ShowHideButton => ResourceManager.GetString(nameof(AppearancePanel_Hint_ShowHideButton), _resourceCulture);
 
-        public static string AppearancePanel_Hint_14 => ResourceManager.GetString(nameof(AppearancePanel_Hint_14), _resourceCulture);
+        public static string AppearancePanel_Hint_ShowLassoSelectButton => ResourceManager.GetString(nameof(AppearancePanel_Hint_ShowLassoSelectButton), _resourceCulture);
 
-        public static string AppearancePanel_Hint_15 => ResourceManager.GetString(nameof(AppearancePanel_Hint_15), _resourceCulture);
+        public static string AppearancePanel_Hint_ShowClearAndMouseButton => ResourceManager.GetString(nameof(AppearancePanel_Hint_ShowClearAndMouseButton), _resourceCulture);
 
-        public static string AppearancePanel_Hint_16 => ResourceManager.GetString(nameof(AppearancePanel_Hint_16), _resourceCulture);
+        public static string AppearancePanel_Hint_ShowQuickPalette => ResourceManager.GetString(nameof(AppearancePanel_Hint_ShowQuickPalette), _resourceCulture);
 
-        public static string AppearancePanel_Hint_17 => ResourceManager.GetString(nameof(AppearancePanel_Hint_17), _resourceCulture);
+        public static string AppearancePanel_Hint_SelectQuickPaletteMode => ResourceManager.GetString(nameof(AppearancePanel_Hint_SelectQuickPaletteMode), _resourceCulture);
 
-        public static string AppearancePanel_Hint_18 => ResourceManager.GetString(nameof(AppearancePanel_Hint_18), _resourceCulture);
+        public static string AppearancePanel_Hint_ShowTrayIcon => ResourceManager.GetString(nameof(AppearancePanel_Hint_ShowTrayIcon), _resourceCulture);
 
-        public static string AppearancePanel_Hint_19 => ResourceManager.GetString(nameof(AppearancePanel_Hint_19), _resourceCulture);
+        public static string AppearancePanel_Hint_ShowTimeAndDate => ResourceManager.GetString(nameof(AppearancePanel_Hint_ShowTimeAndDate), _resourceCulture);
 
-        public static string AppearancePanel_Hint_2 => ResourceManager.GetString(nameof(AppearancePanel_Hint_2), _resourceCulture);
+        public static string AppearancePanel_Hint_SelectAnimationStyle => ResourceManager.GetString(nameof(AppearancePanel_Hint_SelectAnimationStyle), _resourceCulture);
 
-        public static string AppearancePanel_Hint_20 => ResourceManager.GetString(nameof(AppearancePanel_Hint_20), _resourceCulture);
+        public static string AppearancePanel_Hint_ShowMotivationalQuotes => ResourceManager.GetString(nameof(AppearancePanel_Hint_ShowMotivationalQuotes), _resourceCulture);
 
-        public static string AppearancePanel_Hint_21 => ResourceManager.GetString(nameof(AppearancePanel_Hint_21), _resourceCulture);
+        public static string AppearancePanel_Hint_ShowQuickActionsInCollapsed => ResourceManager.GetString(nameof(AppearancePanel_Hint_ShowQuickActionsInCollapsed), _resourceCulture);
 
-        public static string AppearancePanel_Hint_22 => ResourceManager.GetString(nameof(AppearancePanel_Hint_22), _resourceCulture);
+        public static string AppearancePanel_Hint_SelectUncollapseIconStyle => ResourceManager.GetString(nameof(AppearancePanel_Hint_SelectUncollapseIconStyle), _resourceCulture);
 
-        public static string AppearancePanel_Hint_23 => ResourceManager.GetString(nameof(AppearancePanel_Hint_23), _resourceCulture);
+        public static string AppearancePanel_Hint_AutoAnnotateOnUncollapse => ResourceManager.GetString(nameof(AppearancePanel_Hint_AutoAnnotateOnUncollapse), _resourceCulture);
 
-        public static string AppearancePanel_Hint_24 => ResourceManager.GetString(nameof(AppearancePanel_Hint_24), _resourceCulture);
+        public static string AppearancePanel_Hint_AutoCollapseOnWhiteboardExit => ResourceManager.GetString(nameof(AppearancePanel_Hint_AutoCollapseOnWhiteboardExit), _resourceCulture);
 
-        public static string AppearancePanel_Hint_3 => ResourceManager.GetString(nameof(AppearancePanel_Hint_3), _resourceCulture);
+        public static string AppearancePanel_Hint_SelectToolbarIconStyle => ResourceManager.GetString(nameof(AppearancePanel_Hint_SelectToolbarIconStyle), _resourceCulture);
 
-        public static string AppearancePanel_Hint_4 => ResourceManager.GetString(nameof(AppearancePanel_Hint_4), _resourceCulture);
+        public static string AppearancePanel_Hint_AdjustToolbarSize => ResourceManager.GetString(nameof(AppearancePanel_Hint_AdjustToolbarSize), _resourceCulture);
 
-        public static string AppearancePanel_Hint_5 => ResourceManager.GetString(nameof(AppearancePanel_Hint_5), _resourceCulture);
+        public static string AppearancePanel_Hint_AdjustToolbarOpacity => ResourceManager.GetString(nameof(AppearancePanel_Hint_AdjustToolbarOpacity), _resourceCulture);
 
-        public static string AppearancePanel_Hint_6 => ResourceManager.GetString(nameof(AppearancePanel_Hint_6), _resourceCulture);
+        public static string AppearancePanel_Hint_ShowPenTipModeButton => ResourceManager.GetString(nameof(AppearancePanel_Hint_ShowPenTipModeButton), _resourceCulture);
 
-        public static string AppearancePanel_Hint_7 => ResourceManager.GetString(nameof(AppearancePanel_Hint_7), _resourceCulture);
+        public static string AppearancePanel_Hint_UseLegacyToolbarStyle => ResourceManager.GetString(nameof(AppearancePanel_Hint_UseLegacyToolbarStyle), _resourceCulture);
 
-        public static string AppearancePanel_Hint_8 => ResourceManager.GetString(nameof(AppearancePanel_Hint_8), _resourceCulture);
+        public static string AppearancePanel_Hint_ShowShapeButton => ResourceManager.GetString(nameof(AppearancePanel_Hint_ShowShapeButton), _resourceCulture);
 
-        public static string AppearancePanel_Hint_9 => ResourceManager.GetString(nameof(AppearancePanel_Hint_9), _resourceCulture);
+        public static string AppearancePanel_Hint_ShowUndoButton => ResourceManager.GetString(nameof(AppearancePanel_Hint_ShowUndoButton), _resourceCulture);
 
         public static string AppearancePanel_PPTHint => ResourceManager.GetString(nameof(AppearancePanel_PPTHint), _resourceCulture);
 
@@ -290,53 +290,53 @@ namespace Ink_Canvas.Properties
 
         public static string ThemePanel_Hint => ResourceManager.GetString(nameof(ThemePanel_Hint), _resourceCulture);
 
-        public static string ThemePanel_Hint_1 => ResourceManager.GetString(nameof(ThemePanel_Hint_1), _resourceCulture);
+        public static string ThemePanel_Hint_ShowStartupAnimation => ResourceManager.GetString(nameof(ThemePanel_Hint_ShowStartupAnimation), _resourceCulture);
 
-        public static string ThemePanel_Hint_10 => ResourceManager.GetString(nameof(ThemePanel_Hint_10), _resourceCulture);
+        public static string ThemePanel_Hint_ShowRedoButton => ResourceManager.GetString(nameof(ThemePanel_Hint_ShowRedoButton), _resourceCulture);
 
-        public static string ThemePanel_Hint_11 => ResourceManager.GetString(nameof(ThemePanel_Hint_11), _resourceCulture);
+        public static string ThemePanel_Hint_ShowClearButton => ResourceManager.GetString(nameof(ThemePanel_Hint_ShowClearButton), _resourceCulture);
 
-        public static string ThemePanel_Hint_12 => ResourceManager.GetString(nameof(ThemePanel_Hint_12), _resourceCulture);
+        public static string ThemePanel_Hint_ShowWhiteboardButton => ResourceManager.GetString(nameof(ThemePanel_Hint_ShowWhiteboardButton), _resourceCulture);
 
-        public static string ThemePanel_Hint_13 => ResourceManager.GetString(nameof(ThemePanel_Hint_13), _resourceCulture);
+        public static string ThemePanel_Hint_ShowHideButton => ResourceManager.GetString(nameof(ThemePanel_Hint_ShowHideButton), _resourceCulture);
 
-        public static string ThemePanel_Hint_14 => ResourceManager.GetString(nameof(ThemePanel_Hint_14), _resourceCulture);
+        public static string ThemePanel_Hint_ShowLassoSelectButton => ResourceManager.GetString(nameof(ThemePanel_Hint_ShowLassoSelectButton), _resourceCulture);
 
-        public static string ThemePanel_Hint_15 => ResourceManager.GetString(nameof(ThemePanel_Hint_15), _resourceCulture);
+        public static string ThemePanel_Hint_ShowClearAndMouseButton => ResourceManager.GetString(nameof(ThemePanel_Hint_ShowClearAndMouseButton), _resourceCulture);
 
-        public static string ThemePanel_Hint_16 => ResourceManager.GetString(nameof(ThemePanel_Hint_16), _resourceCulture);
+        public static string ThemePanel_Hint_ShowQuickPalette => ResourceManager.GetString(nameof(ThemePanel_Hint_ShowQuickPalette), _resourceCulture);
 
-        public static string ThemePanel_Hint_17 => ResourceManager.GetString(nameof(ThemePanel_Hint_17), _resourceCulture);
+        public static string ThemePanel_Hint_SelectQuickPaletteMode => ResourceManager.GetString(nameof(ThemePanel_Hint_SelectQuickPaletteMode), _resourceCulture);
 
-        public static string ThemePanel_Hint_18 => ResourceManager.GetString(nameof(ThemePanel_Hint_18), _resourceCulture);
+        public static string ThemePanel_Hint_ShowTrayIcon => ResourceManager.GetString(nameof(ThemePanel_Hint_ShowTrayIcon), _resourceCulture);
 
-        public static string ThemePanel_Hint_19 => ResourceManager.GetString(nameof(ThemePanel_Hint_19), _resourceCulture);
+        public static string ThemePanel_Hint_ShowTimeAndDate => ResourceManager.GetString(nameof(ThemePanel_Hint_ShowTimeAndDate), _resourceCulture);
 
-        public static string ThemePanel_Hint_2 => ResourceManager.GetString(nameof(ThemePanel_Hint_2), _resourceCulture);
+        public static string ThemePanel_Hint_SelectAnimationStyle => ResourceManager.GetString(nameof(ThemePanel_Hint_SelectAnimationStyle), _resourceCulture);
 
-        public static string ThemePanel_Hint_20 => ResourceManager.GetString(nameof(ThemePanel_Hint_20), _resourceCulture);
+        public static string ThemePanel_Hint_ShowMotivationalQuotes => ResourceManager.GetString(nameof(ThemePanel_Hint_ShowMotivationalQuotes), _resourceCulture);
 
-        public static string ThemePanel_Hint_21 => ResourceManager.GetString(nameof(ThemePanel_Hint_21), _resourceCulture);
+        public static string ThemePanel_Hint_ShowQuickActionsInCollapsed => ResourceManager.GetString(nameof(ThemePanel_Hint_ShowQuickActionsInCollapsed), _resourceCulture);
 
-        public static string ThemePanel_Hint_22 => ResourceManager.GetString(nameof(ThemePanel_Hint_22), _resourceCulture);
+        public static string ThemePanel_Hint_SelectUncollapseIconStyle => ResourceManager.GetString(nameof(ThemePanel_Hint_SelectUncollapseIconStyle), _resourceCulture);
 
-        public static string ThemePanel_Hint_23 => ResourceManager.GetString(nameof(ThemePanel_Hint_23), _resourceCulture);
+        public static string ThemePanel_Hint_AutoAnnotateOnUncollapse => ResourceManager.GetString(nameof(ThemePanel_Hint_AutoAnnotateOnUncollapse), _resourceCulture);
 
-        public static string ThemePanel_Hint_24 => ResourceManager.GetString(nameof(ThemePanel_Hint_24), _resourceCulture);
+        public static string ThemePanel_Hint_AutoCollapseOnWhiteboardExit => ResourceManager.GetString(nameof(ThemePanel_Hint_AutoCollapseOnWhiteboardExit), _resourceCulture);
 
-        public static string ThemePanel_Hint_3 => ResourceManager.GetString(nameof(ThemePanel_Hint_3), _resourceCulture);
+        public static string ThemePanel_Hint_SelectToolbarIconStyle => ResourceManager.GetString(nameof(ThemePanel_Hint_SelectToolbarIconStyle), _resourceCulture);
 
-        public static string ThemePanel_Hint_4 => ResourceManager.GetString(nameof(ThemePanel_Hint_4), _resourceCulture);
+        public static string ThemePanel_Hint_AdjustToolbarSize => ResourceManager.GetString(nameof(ThemePanel_Hint_AdjustToolbarSize), _resourceCulture);
 
-        public static string ThemePanel_Hint_5 => ResourceManager.GetString(nameof(ThemePanel_Hint_5), _resourceCulture);
+        public static string ThemePanel_Hint_AdjustToolbarOpacity => ResourceManager.GetString(nameof(ThemePanel_Hint_AdjustToolbarOpacity), _resourceCulture);
 
-        public static string ThemePanel_Hint_6 => ResourceManager.GetString(nameof(ThemePanel_Hint_6), _resourceCulture);
+        public static string ThemePanel_Hint_ShowPenTipModeButton => ResourceManager.GetString(nameof(ThemePanel_Hint_ShowPenTipModeButton), _resourceCulture);
 
-        public static string ThemePanel_Hint_7 => ResourceManager.GetString(nameof(ThemePanel_Hint_7), _resourceCulture);
+        public static string ThemePanel_Hint_UseLegacyToolbarStyle => ResourceManager.GetString(nameof(ThemePanel_Hint_UseLegacyToolbarStyle), _resourceCulture);
 
-        public static string ThemePanel_Hint_8 => ResourceManager.GetString(nameof(ThemePanel_Hint_8), _resourceCulture);
+        public static string ThemePanel_Hint_ShowShapeButton => ResourceManager.GetString(nameof(ThemePanel_Hint_ShowShapeButton), _resourceCulture);
 
-        public static string ThemePanel_Hint_9 => ResourceManager.GetString(nameof(ThemePanel_Hint_9), _resourceCulture);
+        public static string ThemePanel_Hint_ShowUndoButton => ResourceManager.GetString(nameof(ThemePanel_Hint_ShowUndoButton), _resourceCulture);
 
         public static string ThemePanel_PPTHint => ResourceManager.GetString(nameof(ThemePanel_PPTHint), _resourceCulture);
 

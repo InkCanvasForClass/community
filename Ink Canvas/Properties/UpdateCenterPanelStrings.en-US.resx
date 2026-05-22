@@ -45,16 +45,16 @@
   <data name="UpdateCenterPanel_Hint" xml:space="preserve">
     <value>Select the historical version to rollback to</value>
   </data>
-  <data name="UpdateCenterPanel_Hint_1" xml:space="preserve">
+  <data name="UpdateCenterPanel_Hint_RollbackVersion" xml:space="preserve">
     <value>Rollback to the version selected in the dropdown</value>
   </data>
-  <data name="UpdateCenterPanel_Hint_2" xml:space="preserve">
+  <data name="UpdateCenterPanel_Hint_ReinstallLatest" xml:space="preserve">
     <value>Download and install the latest version based on the selected channel, can be used to fix corrupted installations</value>
   </data>
-  <data name="UpdateCenterPanel_Hint_3" xml:space="preserve">
+  <data name="UpdateCenterPanel_Hint_AutoCheckUpdate" xml:space="preserve">
     <value>Regularly check if new versions are available</value>
   </data>
-  <data name="UpdateCenterPanel_Hint_4" xml:space="preserve">
+  <data name="UpdateCenterPanel_Hint_AutoInstallUpdate" xml:space="preserve">
     <value>Automatically install updates when software is not in use, no manual operation required</value>
   </data>
 </root>

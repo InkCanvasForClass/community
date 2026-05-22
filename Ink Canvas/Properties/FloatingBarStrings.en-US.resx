@@ -270,16 +270,16 @@ slideshow</value>
   <data name="SnapshotPanel_Hint" xml:space="preserve">
     <value>Auto save current canvas screenshot when clearing canvas</value>
   </data>
-  <data name="SnapshotPanel_Hint_1" xml:space="preserve">
+  <data name="SnapshotPanel_Hint_SortByDate" xml:space="preserve">
     <value>Save screenshots to different folders by date</value>
   </data>
-  <data name="SnapshotPanel_Hint_2" xml:space="preserve">
+  <data name="SnapshotPanel_Hint_SaveInkData" xml:space="preserve">
     <value>Save current canvas ink data when taking screenshots</value>
   </data>
-  <data name="SnapshotPanel_Hint_3" xml:space="preserve">
+  <data name="SnapshotPanel_Hint_AutoScreenshotOnPageTurn" xml:space="preserve">
     <value>When enabled, will auto screenshot when turning pages if slide has ink</value>
   </data>
-  <data name="SnapshotPanel_Hint_4" xml:space="preserve">
+  <data name="SnapshotPanel_Hint_SetMinInkForAutoScreenshot" xml:space="preserve">
     <value>Set minimum ink amount required for auto screenshot</value>
   </data>
   <data name="Tools_Manual" xml:space="preserve">
@@ -311,5 +311,248 @@ slideshow</value>
   </data>
   <data name="Tools_Timer" xml:space="preserve">
     <value>Timer</value>
+  </data>
+  <data name="ToolbarPage_ConfigProfiles" xml:space="preserve">
+    <value>Profile</value>
+  </data>
+  <data name="ToolbarPage_NewProfile" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="ToolbarPage_DuplicateProfile" xml:space="preserve">
+    <value>Duplicate</value>
+  </data>
+  <data name="ToolbarPage_DeleteProfile" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="ToolbarPage_AddedComponentsHint" xml:space="preserve">
+    <value>Components below will be shown on the floating toolbar. Drag from the library to add.</value>
+  </data>
+  <data name="ToolbarPage_AddedComponents" xml:space="preserve">
+    <value>Added Components</value>
+  </data>
+  <data name="ToolbarPage_GroupChildren" xml:space="preserve">
+    <value>Group Components</value>
+  </data>
+  <data name="ToolbarPage_GroupChildrenHint" xml:space="preserve">
+    <value>Drag components from the library here to add, or drag to reorder.</value>
+  </data>
+  <data name="ToolbarPage_ComponentLibrary" xml:space="preserve">
+    <value>Library</value>
+  </data>
+  <data name="ToolbarPage_ComponentLibraryHint" xml:space="preserve">
+    <value>Drag components to the added list or group list above to add to toolbar.</value>
+  </data>
+  <data name="ToolbarPage_ComponentSettings" xml:space="preserve">
+    <value>Component Settings</value>
+  </data>
+  <data name="ToolbarPage_ComponentProperties" xml:space="preserve">
+    <value>Properties</value>
+  </data>
+  <data name="ToolbarPage_SeparateBorder" xml:space="preserve">
+    <value>Separate Border</value>
+  </data>
+  <data name="ToolbarPage_SeparateBorderDesc" xml:space="preserve">
+    <value>Display a separate border wrapper for this component</value>
+  </data>
+  <data name="ToolbarPage_DisplayMode" xml:space="preserve">
+    <value>Display Mode</value>
+  </data>
+  <data name="ToolbarPage_QuickPaletteDisplayModeDesc" xml:space="preserve">
+    <value>Choose color count for quick palette</value>
+  </data>
+  <data name="ToolbarPage_Size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="ToolbarPage_FixedWidth" xml:space="preserve">
+    <value>Fixed Width</value>
+  </data>
+  <data name="ToolbarPage_FixedHeight" xml:space="preserve">
+    <value>Fixed Height</value>
+  </data>
+  <data name="ToolbarPage_MinWidth" xml:space="preserve">
+    <value>Min Width</value>
+  </data>
+  <data name="ToolbarPage_MaxWidth" xml:space="preserve">
+    <value>Max Width</value>
+  </data>
+  <data name="ToolbarPage_MinHeight" xml:space="preserve">
+    <value>Min Height</value>
+  </data>
+  <data name="ToolbarPage_MaxHeight" xml:space="preserve">
+    <value>Max Height</value>
+  </data>
+  <data name="ToolbarPage_Alignment" xml:space="preserve">
+    <value>Alignment</value>
+  </data>
+  <data name="ToolbarPage_HorizontalAlignment" xml:space="preserve">
+    <value>Horizontal</value>
+  </data>
+  <data name="ToolbarPage_VerticalAlignment" xml:space="preserve">
+    <value>Vertical</value>
+  </data>
+  <data name="ToolbarPage_Left" xml:space="preserve">
+    <value>Left</value>
+  </data>
+  <data name="ToolbarPage_Center" xml:space="preserve">
+    <value>Center</value>
+  </data>
+  <data name="ToolbarPage_Right" xml:space="preserve">
+    <value>Right</value>
+  </data>
+  <data name="ToolbarPage_Top" xml:space="preserve">
+    <value>Top</value>
+  </data>
+  <data name="ToolbarPage_Bottom" xml:space="preserve">
+    <value>Bottom</value>
+  </data>
+  <data name="ToolbarPage_Stretch" xml:space="preserve">
+    <value>Stretch</value>
+  </data>
+  <data name="ToolbarPage_Appearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="ToolbarPage_FontSize" xml:space="preserve">
+    <value>Font Size</value>
+  </data>
+  <data name="ToolbarPage_IconSize" xml:space="preserve">
+    <value>Icon Size</value>
+  </data>
+  <data name="ToolbarPage_Opacity" xml:space="preserve">
+    <value>Opacity</value>
+  </data>
+  <data name="ToolbarPage_Margin" xml:space="preserve">
+    <value>Margin</value>
+  </data>
+  <data name="ToolbarPage_MarginHint" xml:space="preserve">
+    <value>Left, Top, Right, Bottom</value>
+  </data>
+  <data name="ToolbarPage_ResetComponentSettings" xml:space="preserve">
+    <value>Reset Settings</value>
+  </data>
+  <data name="ToolbarPage_HideByRules" xml:space="preserve">
+    <value>Hide by Rules</value>
+  </data>
+  <data name="ToolbarPage_HideByRulesDesc" xml:space="preserve">
+    <value>Hide this component when the ruleset is satisfied.</value>
+  </data>
+  <data name="ToolbarPage_AnyConditionGroupMet" xml:space="preserve">
+    <value>When any condition group below is met</value>
+  </data>
+  <data name="ToolbarPage_AllConditionGroupsMet" xml:space="preserve">
+    <value>When all condition groups below are met</value>
+  </data>
+  <data name="ToolbarPage_Reverse" xml:space="preserve">
+    <value>Reverse</value>
+  </data>
+  <data name="ToolbarPage_AddGroup" xml:space="preserve">
+    <value>Add Group</value>
+  </data>
+  <data name="ToolbarPage_AnyConditionMet" xml:space="preserve">
+    <value>When any condition below is met</value>
+  </data>
+  <data name="ToolbarPage_AllConditionsMet" xml:space="preserve">
+    <value>When all conditions below are met</value>
+  </data>
+  <data name="ToolbarPage_Rule" xml:space="preserve">
+    <value>Rule</value>
+  </data>
+  <data name="ToolbarPage_EnableConditionGroup" xml:space="preserve">
+    <value>Enable condition group</value>
+  </data>
+  <data name="ToolbarPage_ResetLayout" xml:space="preserve">
+    <value>Reset to Default Layout</value>
+  </data>
+  <data name="ToolbarPage_AddToAdded" xml:space="preserve">
+    <value>Add to added components</value>
+  </data>
+  <data name="ToolbarPage_Duplicate" xml:space="preserve">
+    <value>Duplicate</value>
+  </data>
+  <data name="ToolbarPage_NewConfig" xml:space="preserve">
+    <value>New Profile</value>
+  </data>
+  <data name="ToolbarPage_CopyConfig" xml:space="preserve">
+    <value>Copy Profile</value>
+  </data>
+  <data name="ToolbarPage_EnterConfigName" xml:space="preserve">
+    <value>Enter profile name:</value>
+  </data>
+  <data name="ToolbarPage_EnterNewConfigName" xml:space="preserve">
+    <value>Enter new profile name:</value>
+  </data>
+  <data name="ToolbarPage_DuplicateConfigExists" xml:space="preserve">
+    <value>A profile with the same name already exists.</value>
+  </data>
+  <data name="ToolbarPage_Hint" xml:space="preserve">
+    <value>Hint</value>
+  </data>
+  <data name="ToolbarPage_AtLeastOneConfig" xml:space="preserve">
+    <value>At least one profile must be kept.</value>
+  </data>
+  <data name="ToolbarPage_ConfirmDeleteConfig" xml:space="preserve">
+    <value>Are you sure you want to delete profile</value>
+  </data>
+  <data name="ToolbarPage_ConfirmDelete" xml:space="preserve">
+    <value>Confirm Delete</value>
+  </data>
+  <data name="ToolbarPage_OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="ToolbarPage_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="ToolbarItem_Desc_Cursor" xml:space="preserve">
+    <value>Cursor</value>
+  </data>
+  <data name="ToolbarItem_Desc_Pen" xml:space="preserve">
+    <value>Pen</value>
+  </data>
+  <data name="ToolbarItem_Desc_Clear" xml:space="preserve">
+    <value>Clear ink</value>
+  </data>
+  <data name="ToolbarItem_Desc_InkFreeze" xml:space="preserve">
+    <value>Ink freeze</value>
+  </data>
+  <data name="ToolbarItem_Desc_Eraser" xml:space="preserve">
+    <value>Area eraser</value>
+  </data>
+  <data name="ToolbarItem_Desc_StrokeEraser" xml:space="preserve">
+    <value>Stroke eraser</value>
+  </data>
+  <data name="ToolbarItem_Desc_Select" xml:space="preserve">
+    <value>Lasso select</value>
+  </data>
+  <data name="ToolbarItem_Desc_CursorWithDel" xml:space="preserve">
+    <value>Clear &amp; switch to cursor</value>
+  </data>
+  <data name="ToolbarItem_Desc_Fold" xml:space="preserve">
+    <value>Collapse toolbar</value>
+  </data>
+  <data name="ToolbarItem_Desc_Gesture" xml:space="preserve">
+    <value>Gesture</value>
+  </data>
+  <data name="ToolbarItem_Desc_Exit" xml:space="preserve">
+    <value>Exit presentation</value>
+  </data>
+  <data name="ToolbarItem_Desc_QuickColorPalette" xml:space="preserve">
+    <value>Quick color palette</value>
+  </data>
+  <data name="ToolbarItem_Desc_Group" xml:space="preserve">
+    <value>Group multiple tools together</value>
+  </data>
+  <data name="ToolbarItem_Desc_Separator" xml:space="preserve">
+    <value>Separator</value>
+  </data>
+  <data name="FloatingBar_QuickPaletteMode" xml:space="preserve">
+    <value>Quick Palette</value>
+  </data>
+  <data name="ToolbarCondition_Annotating" xml:space="preserve">
+    <value>Annotation mode</value>
+  </data>
+  <data name="ToolbarCondition_PptMode" xml:space="preserve">
+    <value>PPT mode</value>
+  </data>
+  <data name="ToolbarCondition_Collapsed" xml:space="preserve">
+    <value>Toolbar collapsed</value>
   </data>
 </root>

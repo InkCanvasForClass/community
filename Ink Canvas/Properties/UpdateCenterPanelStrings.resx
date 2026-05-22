@@ -45,16 +45,16 @@
   <data name="UpdateCenterPanel_Hint" xml:space="preserve">
     <value>选择要回滚到的历史版本</value>
   </data>
-  <data name="UpdateCenterPanel_Hint_1" xml:space="preserve">
+  <data name="UpdateCenterPanel_Hint_RollbackVersion" xml:space="preserve">
     <value>回滚到下拉框中选择的版本</value>
   </data>
-  <data name="UpdateCenterPanel_Hint_2" xml:space="preserve">
+  <data name="UpdateCenterPanel_Hint_ReinstallLatest" xml:space="preserve">
     <value>根据当前选择的通道下载最新版本并执行安装，可用于修复损坏的安装</value>
   </data>
-  <data name="UpdateCenterPanel_Hint_3" xml:space="preserve">
+  <data name="UpdateCenterPanel_Hint_AutoCheckUpdate" xml:space="preserve">
     <value>定期检查是否有新版本可用</value>
   </data>
-  <data name="UpdateCenterPanel_Hint_4" xml:space="preserve">
+  <data name="UpdateCenterPanel_Hint_AutoInstallUpdate" xml:space="preserve">
     <value>在软件不使用时自动安装更新，无需手动操作</value>
   </data>
 </root>

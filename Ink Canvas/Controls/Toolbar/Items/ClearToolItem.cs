@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using Ink_Canvas.Properties;
 
 namespace Ink_Canvas.Controls.Toolbar.Items
 {
@@ -7,7 +8,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         public override string Id => "builtin.clear";
         public override string LocalizationKey => "FloatingBar_Clear";
         public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
-        public override string Description => "清除墨迹";
+        public override string Description => FloatingBarStrings.ToolbarItem_Desc_Clear;
 
         protected override string IconBrushResourceKey => "RedBrush";
         protected override string LabelBrushResourceKey => "RedBrush";

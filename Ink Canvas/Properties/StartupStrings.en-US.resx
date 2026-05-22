@@ -183,7 +183,7 @@
   <data name="UIAccessTopMostHint" xml:space="preserve">
     <value>With UIA topmost on, app needs admin to stay on top. To turn off, fully quit then start again; restart will not disable it.</value>
   </data>
-  <data name="UIAccessTopMostHint_1" xml:space="preserve">
+  <data name="UIATopMostHint_RequiresAdmin" xml:space="preserve">
     <value>Use UIA method to achieve topmost, requires administrator privileges</value>
   </data>
   <data name="UIATopMost" xml:space="preserve">

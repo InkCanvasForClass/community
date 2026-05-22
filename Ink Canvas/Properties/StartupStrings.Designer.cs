@@ -136,7 +136,7 @@ namespace Ink_Canvas.Properties
 
         public static string UIAccessTopMostHint => ResourceManager.GetString(nameof(UIAccessTopMostHint), _resourceCulture);
 
-        public static string UIAccessTopMostHint_1 => ResourceManager.GetString(nameof(UIAccessTopMostHint_1), _resourceCulture);
+        public static string UIATopMostHint_RequiresAdmin => ResourceManager.GetString(nameof(UIATopMostHint_RequiresAdmin), _resourceCulture);
 
         public static string UIATopMost => ResourceManager.GetString(nameof(UIATopMost), _resourceCulture);
 

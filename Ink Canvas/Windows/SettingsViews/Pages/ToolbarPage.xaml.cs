@@ -1,6 +1,7 @@
 using GongSolutions.Wpf.DragDrop;
 using Ink_Canvas.Controls.Toolbar;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Collections.Generic;
@@ -166,7 +167,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void ButtonNewConfig_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new InputDialog("请输入配置文件名称：", "新建配置", "")
+            var dialog = new InputDialog(FloatingBarStrings.ToolbarPage_EnterConfigName, FloatingBarStrings.ToolbarPage_NewConfig, "")
             {
                 Owner = Window.GetWindow(this)
             };
@@ -180,7 +181,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var existing = ToolbarRegistry.ListConfigFiles();
             if (existing.Contains(name, StringComparer.OrdinalIgnoreCase))
             {
-                MessageBox.Show("同名配置文件已存在。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(FloatingBarStrings.ToolbarPage_DuplicateConfigExists, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -197,7 +198,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var currentName = ComboBoxConfigFile.SelectedItem as string;
             if (string.IsNullOrEmpty(currentName)) return;
 
-            var dialog = new InputDialog("请输入新配置文件名称：", "复制配置", currentName + "_copy")
+            var dialog = new InputDialog(FloatingBarStrings.ToolbarPage_EnterNewConfigName, FloatingBarStrings.ToolbarPage_CopyConfig, currentName + "_copy")
             {
                 Owner = Window.GetWindow(this)
             };
@@ -211,7 +212,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var existing = ToolbarRegistry.ListConfigFiles();
             if (existing.Contains(name, StringComparer.OrdinalIgnoreCase))
             {
-                MessageBox.Show("同名配置文件已存在。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(FloatingBarStrings.ToolbarPage_DuplicateConfigExists, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -232,11 +233,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var files = ToolbarRegistry.ListConfigFiles();
             if (files.Count <= 1)
             {
-                MessageBox.Show("至少需要保留一个配置文件。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(FloatingBarStrings.ToolbarPage_AtLeastOneConfig, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (MessageBox.Show($"确定要删除配置 \"{name}\" 吗？", "确认删除",
+            if (MessageBox.Show($"{FloatingBarStrings.ToolbarPage_ConfirmDeleteConfig} \"{name}\"?", FloatingBarStrings.ToolbarPage_ConfirmDelete,
                 MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
                 return;
 
@@ -891,9 +892,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             panel.Children.Add(_textBox);
 
             var btnPanel = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
-            var okBtn = new Button { Content = "确定", Padding = new Thickness(20, 6, 20, 6), IsDefault = true };
+            var okBtn = new Button { Content = FloatingBarStrings.ToolbarPage_OK, Padding = new Thickness(20, 6, 20, 6), IsDefault = true };
             okBtn.Click += (s, e) => { InputText = _textBox.Text; DialogResult = true; };
-            var cancelBtn = new Button { Content = "取消", Padding = new Thickness(20, 6, 20, 6), Margin = new Thickness(8, 0, 0, 0), IsCancel = true };
+            var cancelBtn = new Button { Content = FloatingBarStrings.ToolbarPage_Cancel, Padding = new Thickness(20, 6, 20, 6), Margin = new Thickness(8, 0, 0, 0), IsCancel = true };
             btnPanel.Children.Add(okBtn);
             btnPanel.Children.Add(cancelBtn);
             panel.Children.Add(btnPanel);

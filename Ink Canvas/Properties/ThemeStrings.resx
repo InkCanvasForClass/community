@@ -51,76 +51,76 @@
   <data name="AppearancePanel_Hint" xml:space="preserve">
     <value>选择应用程序的主题样式</value>
   </data>
-  <data name="AppearancePanel_Hint_1" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowStartupAnimation" xml:space="preserve">
     <value>启动时显示动画效果</value>
   </data>
-  <data name="AppearancePanel_Hint_10" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowRedoButton" xml:space="preserve">
     <value>在浮动栏中显示重做按钮</value>
   </data>
-  <data name="AppearancePanel_Hint_11" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowClearButton" xml:space="preserve">
     <value>在浮动栏中显示清空按钮</value>
   </data>
-  <data name="AppearancePanel_Hint_12" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowWhiteboardButton" xml:space="preserve">
     <value>在浮动栏中显示白板按钮</value>
   </data>
-  <data name="AppearancePanel_Hint_13" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowHideButton" xml:space="preserve">
     <value>在浮动栏中显示隐藏按钮</value>
   </data>
-  <data name="AppearancePanel_Hint_14" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowLassoSelectButton" xml:space="preserve">
     <value>在浮动栏中显示套索选择按钮</value>
   </data>
-  <data name="AppearancePanel_Hint_15" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowClearAndMouseButton" xml:space="preserve">
     <value>在浮动栏中显示清并鼠按钮</value>
   </data>
-  <data name="AppearancePanel_Hint_16" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowQuickPalette" xml:space="preserve">
     <value>在浮动栏中显示快捷调色盘</value>
   </data>
-  <data name="AppearancePanel_Hint_17" xml:space="preserve">
+  <data name="AppearancePanel_Hint_SelectQuickPaletteMode" xml:space="preserve">
     <value>选择快捷调色盘的显示模式</value>
   </data>
-  <data name="AppearancePanel_Hint_18" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowTrayIcon" xml:space="preserve">
     <value>在任务栏系统托盘显示图标</value>
   </data>
-  <data name="AppearancePanel_Hint_19" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowTimeAndDate" xml:space="preserve">
     <value>在白板界面显示当前时间和日期</value>
   </data>
-  <data name="AppearancePanel_Hint_2" xml:space="preserve">
+  <data name="AppearancePanel_Hint_SelectAnimationStyle" xml:space="preserve">
     <value>选择启动动画的样式</value>
   </data>
-  <data name="AppearancePanel_Hint_20" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowMotivationalQuotes" xml:space="preserve">
     <value>在白板界面显示励志语句</value>
   </data>
-  <data name="AppearancePanel_Hint_21" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowQuickActionsInCollapsed" xml:space="preserve">
     <value>在收纳模式下显示快速操作面板</value>
   </data>
-  <data name="AppearancePanel_Hint_22" xml:space="preserve">
+  <data name="AppearancePanel_Hint_SelectUncollapseIconStyle" xml:space="preserve">
     <value>选择取消收纳按钮的图标样式</value>
   </data>
-  <data name="AppearancePanel_Hint_23" xml:space="preserve">
+  <data name="AppearancePanel_Hint_AutoAnnotateOnUncollapse" xml:space="preserve">
     <value>开启后，退出收纳模式时将自动切换至批注模式，便于快速批注</value>
   </data>
-  <data name="AppearancePanel_Hint_24" xml:space="preserve">
+  <data name="AppearancePanel_Hint_AutoCollapseOnWhiteboardExit" xml:space="preserve">
     <value>开启后，退出白板模式时会自动收纳到侧边栏</value>
   </data>
-  <data name="AppearancePanel_Hint_3" xml:space="preserve">
+  <data name="AppearancePanel_Hint_SelectToolbarIconStyle" xml:space="preserve">
     <value>选择浮动工具栏的图标样式</value>
   </data>
-  <data name="AppearancePanel_Hint_4" xml:space="preserve">
+  <data name="AppearancePanel_Hint_AdjustToolbarSize" xml:space="preserve">
     <value>调整浮动工具栏的大小</value>
   </data>
-  <data name="AppearancePanel_Hint_5" xml:space="preserve">
+  <data name="AppearancePanel_Hint_AdjustToolbarOpacity" xml:space="preserve">
     <value>调整浮动工具栏的透明度</value>
   </data>
-  <data name="AppearancePanel_Hint_6" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowPenTipModeButton" xml:space="preserve">
     <value>在调色盘窗口中显示笔尖模式切换按钮</value>
   </data>
-  <data name="AppearancePanel_Hint_7" xml:space="preserve">
+  <data name="AppearancePanel_Hint_UseLegacyToolbarStyle" xml:space="preserve">
     <value>使用旧版浮动栏按钮的界面样式</value>
   </data>
-  <data name="AppearancePanel_Hint_8" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowShapeButton" xml:space="preserve">
     <value>在浮动栏中显示形状按钮</value>
   </data>
-  <data name="AppearancePanel_Hint_9" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowUndoButton" xml:space="preserve">
     <value>在浮动栏中显示撤销按钮</value>
   </data>
   <data name="AppearancePanel_PPTHint" xml:space="preserve">
@@ -417,76 +417,76 @@
   <data name="ThemePanel_Hint" xml:space="preserve">
     <value>选择应用程序的主题样式</value>
   </data>
-  <data name="ThemePanel_Hint_1" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowStartupAnimation" xml:space="preserve">
     <value>启动时显示动画效果</value>
   </data>
-  <data name="ThemePanel_Hint_10" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowRedoButton" xml:space="preserve">
     <value>在浮动栏中显示重做按钮</value>
   </data>
-  <data name="ThemePanel_Hint_11" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowClearButton" xml:space="preserve">
     <value>在浮动栏中显示清空按钮</value>
   </data>
-  <data name="ThemePanel_Hint_12" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowWhiteboardButton" xml:space="preserve">
     <value>在浮动栏中显示白板按钮</value>
   </data>
-  <data name="ThemePanel_Hint_13" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowHideButton" xml:space="preserve">
     <value>在浮动栏中显示隐藏按钮</value>
   </data>
-  <data name="ThemePanel_Hint_14" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowLassoSelectButton" xml:space="preserve">
     <value>在浮动栏中显示套索选择按钮</value>
   </data>
-  <data name="ThemePanel_Hint_15" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowClearAndMouseButton" xml:space="preserve">
     <value>在浮动栏中显示清并鼠按钮</value>
   </data>
-  <data name="ThemePanel_Hint_16" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowQuickPalette" xml:space="preserve">
     <value>在浮动栏中显示快捷调色盘</value>
   </data>
-  <data name="ThemePanel_Hint_17" xml:space="preserve">
+  <data name="ThemePanel_Hint_SelectQuickPaletteMode" xml:space="preserve">
     <value>选择快捷调色盘的显示模式</value>
   </data>
-  <data name="ThemePanel_Hint_18" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowTrayIcon" xml:space="preserve">
     <value>在任务栏系统托盘显示图标</value>
   </data>
-  <data name="ThemePanel_Hint_19" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowTimeAndDate" xml:space="preserve">
     <value>在白板界面显示当前时间和日期</value>
   </data>
-  <data name="ThemePanel_Hint_2" xml:space="preserve">
+  <data name="ThemePanel_Hint_SelectAnimationStyle" xml:space="preserve">
     <value>选择启动动画的样式</value>
   </data>
-  <data name="ThemePanel_Hint_20" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowMotivationalQuotes" xml:space="preserve">
     <value>在白板界面显示励志语句</value>
   </data>
-  <data name="ThemePanel_Hint_21" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowQuickActionsInCollapsed" xml:space="preserve">
     <value>在收纳模式下显示快速操作面板</value>
   </data>
-  <data name="ThemePanel_Hint_22" xml:space="preserve">
+  <data name="ThemePanel_Hint_SelectUncollapseIconStyle" xml:space="preserve">
     <value>选择取消收纳按钮的图标样式</value>
   </data>
-  <data name="ThemePanel_Hint_23" xml:space="preserve">
+  <data name="ThemePanel_Hint_AutoAnnotateOnUncollapse" xml:space="preserve">
     <value>开启后，退出收纳模式时将自动切换至批注模式，便于快速批注</value>
   </data>
-  <data name="ThemePanel_Hint_24" xml:space="preserve">
+  <data name="ThemePanel_Hint_AutoCollapseOnWhiteboardExit" xml:space="preserve">
     <value>开启后，退出白板模式时会自动收纳到侧边栏</value>
   </data>
-  <data name="ThemePanel_Hint_3" xml:space="preserve">
+  <data name="ThemePanel_Hint_SelectToolbarIconStyle" xml:space="preserve">
     <value>选择浮动工具栏的图标样式</value>
   </data>
-  <data name="ThemePanel_Hint_4" xml:space="preserve">
+  <data name="ThemePanel_Hint_AdjustToolbarSize" xml:space="preserve">
     <value>调整浮动工具栏的大小</value>
   </data>
-  <data name="ThemePanel_Hint_5" xml:space="preserve">
+  <data name="ThemePanel_Hint_AdjustToolbarOpacity" xml:space="preserve">
     <value>调整浮动工具栏的透明度</value>
   </data>
-  <data name="ThemePanel_Hint_6" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowPenTipModeButton" xml:space="preserve">
     <value>在调色盘窗口中显示笔尖模式切换按钮</value>
   </data>
-  <data name="ThemePanel_Hint_7" xml:space="preserve">
+  <data name="ThemePanel_Hint_UseLegacyToolbarStyle" xml:space="preserve">
     <value>使用旧版浮动栏按钮的界面样式</value>
   </data>
-  <data name="ThemePanel_Hint_8" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowShapeButton" xml:space="preserve">
     <value>在浮动栏中显示形状按钮</value>
   </data>
-  <data name="ThemePanel_Hint_9" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowUndoButton" xml:space="preserve">
     <value>在浮动栏中显示撤销按钮</value>
   </data>
   <data name="ThemePanel_PPTHint" xml:space="preserve">

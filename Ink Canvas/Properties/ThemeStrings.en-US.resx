@@ -51,76 +51,76 @@
   <data name="AppearancePanel_Hint" xml:space="preserve">
     <value>Select application theme style</value>
   </data>
-  <data name="AppearancePanel_Hint_1" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowStartupAnimation" xml:space="preserve">
     <value>Show animation effect at startup</value>
   </data>
-  <data name="AppearancePanel_Hint_10" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowRedoButton" xml:space="preserve">
     <value>Show redo button in floating bar</value>
   </data>
-  <data name="AppearancePanel_Hint_11" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowClearButton" xml:space="preserve">
     <value>Show clear button in floating bar</value>
   </data>
-  <data name="AppearancePanel_Hint_12" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowWhiteboardButton" xml:space="preserve">
     <value>Show whiteboard button in floating bar</value>
   </data>
-  <data name="AppearancePanel_Hint_13" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowHideButton" xml:space="preserve">
     <value>Show hide button in floating bar</value>
   </data>
-  <data name="AppearancePanel_Hint_14" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowLassoSelectButton" xml:space="preserve">
     <value>Show lasso select button in floating bar</value>
   </data>
-  <data name="AppearancePanel_Hint_15" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowClearAndMouseButton" xml:space="preserve">
     <value>Show clear and mouse button in floating bar</value>
   </data>
-  <data name="AppearancePanel_Hint_16" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowQuickPalette" xml:space="preserve">
     <value>Show quick color palette in floating bar</value>
   </data>
-  <data name="AppearancePanel_Hint_17" xml:space="preserve">
+  <data name="AppearancePanel_Hint_SelectQuickPaletteMode" xml:space="preserve">
     <value>Select quick color palette display mode</value>
   </data>
-  <data name="AppearancePanel_Hint_18" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowTrayIcon" xml:space="preserve">
     <value>Show icon in taskbar system tray</value>
   </data>
-  <data name="AppearancePanel_Hint_19" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowTimeAndDate" xml:space="preserve">
     <value>Show current time and date in whiteboard interface</value>
   </data>
-  <data name="AppearancePanel_Hint_2" xml:space="preserve">
+  <data name="AppearancePanel_Hint_SelectAnimationStyle" xml:space="preserve">
     <value>Select startup animation style</value>
   </data>
-  <data name="AppearancePanel_Hint_20" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowMotivationalQuotes" xml:space="preserve">
     <value>Show inspirational quotes in whiteboard interface</value>
   </data>
-  <data name="AppearancePanel_Hint_21" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowQuickActionsInCollapsed" xml:space="preserve">
     <value>Show quick operation panel in folded mode</value>
   </data>
-  <data name="AppearancePanel_Hint_22" xml:space="preserve">
+  <data name="AppearancePanel_Hint_SelectUncollapseIconStyle" xml:space="preserve">
     <value>Select unfold button icon style</value>
   </data>
-  <data name="AppearancePanel_Hint_23" xml:space="preserve">
+  <data name="AppearancePanel_Hint_AutoAnnotateOnUncollapse" xml:space="preserve">
     <value>When enabled, automatically switch to annotation mode when exiting fold mode for quick annotation</value>
   </data>
-  <data name="AppearancePanel_Hint_24" xml:space="preserve">
+  <data name="AppearancePanel_Hint_AutoCollapseOnWhiteboardExit" xml:space="preserve">
     <value>When enabled, will automatically dock to sidebar when exiting whiteboard mode</value>
   </data>
-  <data name="AppearancePanel_Hint_3" xml:space="preserve">
+  <data name="AppearancePanel_Hint_SelectToolbarIconStyle" xml:space="preserve">
     <value>Select floating toolbar icon style</value>
   </data>
-  <data name="AppearancePanel_Hint_4" xml:space="preserve">
+  <data name="AppearancePanel_Hint_AdjustToolbarSize" xml:space="preserve">
     <value>Adjust floating toolbar size</value>
   </data>
-  <data name="AppearancePanel_Hint_5" xml:space="preserve">
+  <data name="AppearancePanel_Hint_AdjustToolbarOpacity" xml:space="preserve">
     <value>Adjust floating toolbar opacity</value>
   </data>
-  <data name="AppearancePanel_Hint_6" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowPenTipModeButton" xml:space="preserve">
     <value>Show nib mode toggle button in color palette window</value>
   </data>
-  <data name="AppearancePanel_Hint_7" xml:space="preserve">
+  <data name="AppearancePanel_Hint_UseLegacyToolbarStyle" xml:space="preserve">
     <value>Use legacy floating bar button UI style</value>
   </data>
-  <data name="AppearancePanel_Hint_8" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowShapeButton" xml:space="preserve">
     <value>Show shape button in floating bar</value>
   </data>
-  <data name="AppearancePanel_Hint_9" xml:space="preserve">
+  <data name="AppearancePanel_Hint_ShowUndoButton" xml:space="preserve">
     <value>Show undo button in floating bar</value>
   </data>
   <data name="AppearancePanel_PPTHint" xml:space="preserve">
@@ -417,76 +417,76 @@
   <data name="ThemePanel_Hint" xml:space="preserve">
     <value>Select application theme style</value>
   </data>
-  <data name="ThemePanel_Hint_1" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowStartupAnimation" xml:space="preserve">
     <value>Show animation effect at startup</value>
   </data>
-  <data name="ThemePanel_Hint_10" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowRedoButton" xml:space="preserve">
     <value>Show redo button in floating bar</value>
   </data>
-  <data name="ThemePanel_Hint_11" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowClearButton" xml:space="preserve">
     <value>Show clear button in floating bar</value>
   </data>
-  <data name="ThemePanel_Hint_12" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowWhiteboardButton" xml:space="preserve">
     <value>Show whiteboard button in floating bar</value>
   </data>
-  <data name="ThemePanel_Hint_13" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowHideButton" xml:space="preserve">
     <value>Show hide button in floating bar</value>
   </data>
-  <data name="ThemePanel_Hint_14" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowLassoSelectButton" xml:space="preserve">
     <value>Show lasso select button in floating bar</value>
   </data>
-  <data name="ThemePanel_Hint_15" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowClearAndMouseButton" xml:space="preserve">
     <value>Show clear and mouse button in floating bar</value>
   </data>
-  <data name="ThemePanel_Hint_16" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowQuickPalette" xml:space="preserve">
     <value>Show quick color palette in floating bar</value>
   </data>
-  <data name="ThemePanel_Hint_17" xml:space="preserve">
+  <data name="ThemePanel_Hint_SelectQuickPaletteMode" xml:space="preserve">
     <value>Select quick color palette display mode</value>
   </data>
-  <data name="ThemePanel_Hint_18" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowTrayIcon" xml:space="preserve">
     <value>Show icon in taskbar system tray</value>
   </data>
-  <data name="ThemePanel_Hint_19" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowTimeAndDate" xml:space="preserve">
     <value>Show current time and date in whiteboard interface</value>
   </data>
-  <data name="ThemePanel_Hint_2" xml:space="preserve">
+  <data name="ThemePanel_Hint_SelectAnimationStyle" xml:space="preserve">
     <value>Select startup animation style</value>
   </data>
-  <data name="ThemePanel_Hint_20" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowMotivationalQuotes" xml:space="preserve">
     <value>Show inspirational quotes in whiteboard interface</value>
   </data>
-  <data name="ThemePanel_Hint_21" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowQuickActionsInCollapsed" xml:space="preserve">
     <value>Show quick operation panel in folded mode</value>
   </data>
-  <data name="ThemePanel_Hint_22" xml:space="preserve">
+  <data name="ThemePanel_Hint_SelectUncollapseIconStyle" xml:space="preserve">
     <value>Select unfold button icon style</value>
   </data>
-  <data name="ThemePanel_Hint_23" xml:space="preserve">
+  <data name="ThemePanel_Hint_AutoAnnotateOnUncollapse" xml:space="preserve">
     <value>When enabled, automatically switch to annotation mode when exiting fold mode for quick annotation</value>
   </data>
-  <data name="ThemePanel_Hint_24" xml:space="preserve">
+  <data name="ThemePanel_Hint_AutoCollapseOnWhiteboardExit" xml:space="preserve">
     <value>When enabled, will automatically dock to sidebar when exiting whiteboard mode</value>
   </data>
-  <data name="ThemePanel_Hint_3" xml:space="preserve">
+  <data name="ThemePanel_Hint_SelectToolbarIconStyle" xml:space="preserve">
     <value>Select floating toolbar icon style</value>
   </data>
-  <data name="ThemePanel_Hint_4" xml:space="preserve">
+  <data name="ThemePanel_Hint_AdjustToolbarSize" xml:space="preserve">
     <value>Adjust floating toolbar size</value>
   </data>
-  <data name="ThemePanel_Hint_5" xml:space="preserve">
+  <data name="ThemePanel_Hint_AdjustToolbarOpacity" xml:space="preserve">
     <value>Adjust floating toolbar opacity</value>
   </data>
-  <data name="ThemePanel_Hint_6" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowPenTipModeButton" xml:space="preserve">
     <value>Show nib mode toggle button in color palette window</value>
   </data>
-  <data name="ThemePanel_Hint_7" xml:space="preserve">
+  <data name="ThemePanel_Hint_UseLegacyToolbarStyle" xml:space="preserve">
     <value>Use legacy floating bar button UI style</value>
   </data>
-  <data name="ThemePanel_Hint_8" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowShapeButton" xml:space="preserve">
     <value>Show shape button in floating bar</value>
   </data>
-  <data name="ThemePanel_Hint_9" xml:space="preserve">
+  <data name="ThemePanel_Hint_ShowUndoButton" xml:space="preserve">
     <value>Show undo button in floating bar</value>
   </data>
   <data name="ThemePanel_PPTHint" xml:space="preserve">

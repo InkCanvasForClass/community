@@ -188,13 +188,13 @@ namespace Ink_Canvas.Properties
 
         public static string SnapshotPanel_Hint => ResourceManager.GetString(nameof(SnapshotPanel_Hint), _resourceCulture);
 
-        public static string SnapshotPanel_Hint_1 => ResourceManager.GetString(nameof(SnapshotPanel_Hint_1), _resourceCulture);
+        public static string SnapshotPanel_Hint_SortByDate => ResourceManager.GetString(nameof(SnapshotPanel_Hint_SortByDate), _resourceCulture);
 
-        public static string SnapshotPanel_Hint_2 => ResourceManager.GetString(nameof(SnapshotPanel_Hint_2), _resourceCulture);
+        public static string SnapshotPanel_Hint_SaveInkData => ResourceManager.GetString(nameof(SnapshotPanel_Hint_SaveInkData), _resourceCulture);
 
-        public static string SnapshotPanel_Hint_3 => ResourceManager.GetString(nameof(SnapshotPanel_Hint_3), _resourceCulture);
+        public static string SnapshotPanel_Hint_AutoScreenshotOnPageTurn => ResourceManager.GetString(nameof(SnapshotPanel_Hint_AutoScreenshotOnPageTurn), _resourceCulture);
 
-        public static string SnapshotPanel_Hint_4 => ResourceManager.GetString(nameof(SnapshotPanel_Hint_4), _resourceCulture);
+        public static string SnapshotPanel_Hint_SetMinInkForAutoScreenshot => ResourceManager.GetString(nameof(SnapshotPanel_Hint_SetMinInkForAutoScreenshot), _resourceCulture);
 
         public static string Tools_Manual => ResourceManager.GetString(nameof(Tools_Manual), _resourceCulture);
 
@@ -215,5 +215,167 @@ namespace Ink_Canvas.Properties
         public static string Tools_SingleDraw => ResourceManager.GetString(nameof(Tools_SingleDraw), _resourceCulture);
 
         public static string Tools_Timer => ResourceManager.GetString(nameof(Tools_Timer), _resourceCulture);
+
+        public static string ToolbarCondition_Annotating => ResourceManager.GetString(nameof(ToolbarCondition_Annotating), _resourceCulture);
+
+        public static string ToolbarCondition_Collapsed => ResourceManager.GetString(nameof(ToolbarCondition_Collapsed), _resourceCulture);
+
+        public static string ToolbarCondition_PptMode => ResourceManager.GetString(nameof(ToolbarCondition_PptMode), _resourceCulture);
+
+        public static string ToolbarItem_Desc_Clear => ResourceManager.GetString(nameof(ToolbarItem_Desc_Clear), _resourceCulture);
+
+        public static string ToolbarItem_Desc_Cursor => ResourceManager.GetString(nameof(ToolbarItem_Desc_Cursor), _resourceCulture);
+
+        public static string ToolbarItem_Desc_CursorWithDel => ResourceManager.GetString(nameof(ToolbarItem_Desc_CursorWithDel), _resourceCulture);
+
+        public static string ToolbarItem_Desc_Eraser => ResourceManager.GetString(nameof(ToolbarItem_Desc_Eraser), _resourceCulture);
+
+        public static string ToolbarItem_Desc_Exit => ResourceManager.GetString(nameof(ToolbarItem_Desc_Exit), _resourceCulture);
+
+        public static string ToolbarItem_Desc_Fold => ResourceManager.GetString(nameof(ToolbarItem_Desc_Fold), _resourceCulture);
+
+        public static string ToolbarItem_Desc_Gesture => ResourceManager.GetString(nameof(ToolbarItem_Desc_Gesture), _resourceCulture);
+
+        public static string ToolbarItem_Desc_Group => ResourceManager.GetString(nameof(ToolbarItem_Desc_Group), _resourceCulture);
+
+        public static string ToolbarItem_Desc_InkFreeze => ResourceManager.GetString(nameof(ToolbarItem_Desc_InkFreeze), _resourceCulture);
+
+        public static string ToolbarItem_Desc_Pen => ResourceManager.GetString(nameof(ToolbarItem_Desc_Pen), _resourceCulture);
+
+        public static string ToolbarItem_Desc_QuickColorPalette => ResourceManager.GetString(nameof(ToolbarItem_Desc_QuickColorPalette), _resourceCulture);
+
+        public static string ToolbarItem_Desc_Select => ResourceManager.GetString(nameof(ToolbarItem_Desc_Select), _resourceCulture);
+
+        public static string ToolbarItem_Desc_Separator => ResourceManager.GetString(nameof(ToolbarItem_Desc_Separator), _resourceCulture);
+
+        public static string ToolbarItem_Desc_StrokeEraser => ResourceManager.GetString(nameof(ToolbarItem_Desc_StrokeEraser), _resourceCulture);
+
+        public static string ToolbarPage_AddGroup => ResourceManager.GetString(nameof(ToolbarPage_AddGroup), _resourceCulture);
+
+        public static string ToolbarPage_Alignment => ResourceManager.GetString(nameof(ToolbarPage_Alignment), _resourceCulture);
+
+        public static string ToolbarPage_AddedComponents => ResourceManager.GetString(nameof(ToolbarPage_AddedComponents), _resourceCulture);
+
+        public static string ToolbarPage_AddedComponentsHint => ResourceManager.GetString(nameof(ToolbarPage_AddedComponentsHint), _resourceCulture);
+
+        public static string ToolbarPage_AddToAdded => ResourceManager.GetString(nameof(ToolbarPage_AddToAdded), _resourceCulture);
+
+        public static string ToolbarPage_AllConditionGroupsMet => ResourceManager.GetString(nameof(ToolbarPage_AllConditionGroupsMet), _resourceCulture);
+
+        public static string ToolbarPage_AllConditionsMet => ResourceManager.GetString(nameof(ToolbarPage_AllConditionsMet), _resourceCulture);
+
+        public static string ToolbarPage_AnyConditionGroupMet => ResourceManager.GetString(nameof(ToolbarPage_AnyConditionGroupMet), _resourceCulture);
+
+        public static string ToolbarPage_AnyConditionMet => ResourceManager.GetString(nameof(ToolbarPage_AnyConditionMet), _resourceCulture);
+
+        public static string ToolbarPage_Appearance => ResourceManager.GetString(nameof(ToolbarPage_Appearance), _resourceCulture);
+
+        public static string ToolbarPage_AtLeastOneConfig => ResourceManager.GetString(nameof(ToolbarPage_AtLeastOneConfig), _resourceCulture);
+
+        public static string ToolbarPage_Bottom => ResourceManager.GetString(nameof(ToolbarPage_Bottom), _resourceCulture);
+
+        public static string ToolbarPage_Cancel => ResourceManager.GetString(nameof(ToolbarPage_Cancel), _resourceCulture);
+
+        public static string ToolbarPage_Center => ResourceManager.GetString(nameof(ToolbarPage_Center), _resourceCulture);
+
+        public static string ToolbarPage_ComponentLibrary => ResourceManager.GetString(nameof(ToolbarPage_ComponentLibrary), _resourceCulture);
+
+        public static string ToolbarPage_ComponentLibraryHint => ResourceManager.GetString(nameof(ToolbarPage_ComponentLibraryHint), _resourceCulture);
+
+        public static string ToolbarPage_ComponentProperties => ResourceManager.GetString(nameof(ToolbarPage_ComponentProperties), _resourceCulture);
+
+        public static string ToolbarPage_ComponentSettings => ResourceManager.GetString(nameof(ToolbarPage_ComponentSettings), _resourceCulture);
+
+        public static string ToolbarPage_ConfigProfiles => ResourceManager.GetString(nameof(ToolbarPage_ConfigProfiles), _resourceCulture);
+
+        public static string ToolbarPage_ConfirmDelete => ResourceManager.GetString(nameof(ToolbarPage_ConfirmDelete), _resourceCulture);
+
+        public static string ToolbarPage_ConfirmDeleteConfig => ResourceManager.GetString(nameof(ToolbarPage_ConfirmDeleteConfig), _resourceCulture);
+
+        public static string ToolbarPage_CopyConfig => ResourceManager.GetString(nameof(ToolbarPage_CopyConfig), _resourceCulture);
+
+        public static string ToolbarPage_DeleteProfile => ResourceManager.GetString(nameof(ToolbarPage_DeleteProfile), _resourceCulture);
+
+        public static string ToolbarPage_DisplayMode => ResourceManager.GetString(nameof(ToolbarPage_DisplayMode), _resourceCulture);
+
+        public static string ToolbarPage_Duplicate => ResourceManager.GetString(nameof(ToolbarPage_Duplicate), _resourceCulture);
+
+        public static string ToolbarPage_DuplicateConfigExists => ResourceManager.GetString(nameof(ToolbarPage_DuplicateConfigExists), _resourceCulture);
+
+        public static string ToolbarPage_DuplicateProfile => ResourceManager.GetString(nameof(ToolbarPage_DuplicateProfile), _resourceCulture);
+
+        public static string ToolbarPage_EnableConditionGroup => ResourceManager.GetString(nameof(ToolbarPage_EnableConditionGroup), _resourceCulture);
+
+        public static string ToolbarPage_EnterConfigName => ResourceManager.GetString(nameof(ToolbarPage_EnterConfigName), _resourceCulture);
+
+        public static string ToolbarPage_EnterNewConfigName => ResourceManager.GetString(nameof(ToolbarPage_EnterNewConfigName), _resourceCulture);
+
+        public static string ToolbarPage_FontSize => ResourceManager.GetString(nameof(ToolbarPage_FontSize), _resourceCulture);
+
+        public static string ToolbarPage_FixedHeight => ResourceManager.GetString(nameof(ToolbarPage_FixedHeight), _resourceCulture);
+
+        public static string ToolbarPage_FixedWidth => ResourceManager.GetString(nameof(ToolbarPage_FixedWidth), _resourceCulture);
+
+        public static string ToolbarPage_GroupChildren => ResourceManager.GetString(nameof(ToolbarPage_GroupChildren), _resourceCulture);
+
+        public static string ToolbarPage_GroupChildrenHint => ResourceManager.GetString(nameof(ToolbarPage_GroupChildrenHint), _resourceCulture);
+
+        public static string ToolbarPage_HideByRules => ResourceManager.GetString(nameof(ToolbarPage_HideByRules), _resourceCulture);
+
+        public static string ToolbarPage_HideByRulesDesc => ResourceManager.GetString(nameof(ToolbarPage_HideByRulesDesc), _resourceCulture);
+
+        public static string ToolbarPage_Hint => ResourceManager.GetString(nameof(ToolbarPage_Hint), _resourceCulture);
+
+        public static string ToolbarPage_HorizontalAlignment => ResourceManager.GetString(nameof(ToolbarPage_HorizontalAlignment), _resourceCulture);
+
+        public static string ToolbarPage_IconSize => ResourceManager.GetString(nameof(ToolbarPage_IconSize), _resourceCulture);
+
+        public static string ToolbarPage_Left => ResourceManager.GetString(nameof(ToolbarPage_Left), _resourceCulture);
+
+        public static string ToolbarPage_Margin => ResourceManager.GetString(nameof(ToolbarPage_Margin), _resourceCulture);
+
+        public static string ToolbarPage_MarginHint => ResourceManager.GetString(nameof(ToolbarPage_MarginHint), _resourceCulture);
+
+        public static string ToolbarPage_MaxHeight => ResourceManager.GetString(nameof(ToolbarPage_MaxHeight), _resourceCulture);
+
+        public static string ToolbarPage_MaxWidth => ResourceManager.GetString(nameof(ToolbarPage_MaxWidth), _resourceCulture);
+
+        public static string ToolbarPage_MinHeight => ResourceManager.GetString(nameof(ToolbarPage_MinHeight), _resourceCulture);
+
+        public static string ToolbarPage_MinWidth => ResourceManager.GetString(nameof(ToolbarPage_MinWidth), _resourceCulture);
+
+        public static string ToolbarPage_NewConfig => ResourceManager.GetString(nameof(ToolbarPage_NewConfig), _resourceCulture);
+
+        public static string ToolbarPage_NewProfile => ResourceManager.GetString(nameof(ToolbarPage_NewProfile), _resourceCulture);
+
+        public static string ToolbarPage_OK => ResourceManager.GetString(nameof(ToolbarPage_OK), _resourceCulture);
+
+        public static string ToolbarPage_Opacity => ResourceManager.GetString(nameof(ToolbarPage_Opacity), _resourceCulture);
+
+        public static string ToolbarPage_QuickPaletteDisplayModeDesc => ResourceManager.GetString(nameof(ToolbarPage_QuickPaletteDisplayModeDesc), _resourceCulture);
+
+        public static string ToolbarPage_ResetComponentSettings => ResourceManager.GetString(nameof(ToolbarPage_ResetComponentSettings), _resourceCulture);
+
+        public static string ToolbarPage_ResetLayout => ResourceManager.GetString(nameof(ToolbarPage_ResetLayout), _resourceCulture);
+
+        public static string ToolbarPage_Reverse => ResourceManager.GetString(nameof(ToolbarPage_Reverse), _resourceCulture);
+
+        public static string ToolbarPage_Right => ResourceManager.GetString(nameof(ToolbarPage_Right), _resourceCulture);
+
+        public static string ToolbarPage_Rule => ResourceManager.GetString(nameof(ToolbarPage_Rule), _resourceCulture);
+
+        public static string ToolbarPage_SeparateBorder => ResourceManager.GetString(nameof(ToolbarPage_SeparateBorder), _resourceCulture);
+
+        public static string ToolbarPage_SeparateBorderDesc => ResourceManager.GetString(nameof(ToolbarPage_SeparateBorderDesc), _resourceCulture);
+
+        public static string ToolbarPage_Size => ResourceManager.GetString(nameof(ToolbarPage_Size), _resourceCulture);
+
+        public static string ToolbarPage_Stretch => ResourceManager.GetString(nameof(ToolbarPage_Stretch), _resourceCulture);
+
+        public static string ToolbarPage_Top => ResourceManager.GetString(nameof(ToolbarPage_Top), _resourceCulture);
+
+        public static string ToolbarPage_VerticalAlignment => ResourceManager.GetString(nameof(ToolbarPage_VerticalAlignment), _resourceCulture);
+
+        public static string FloatingBar_QuickPaletteMode => ResourceManager.GetString(nameof(FloatingBar_QuickPaletteMode), _resourceCulture);
     }
 }

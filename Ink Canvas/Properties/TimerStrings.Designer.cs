@@ -72,16 +72,16 @@ namespace Ink_Canvas.Properties
 
         public static string TimerPanel_Hint => ResourceManager.GetString(nameof(TimerPanel_Hint), _resourceCulture);
 
-        public static string TimerPanel_Hint_1 => ResourceManager.GetString(nameof(TimerPanel_Hint_1), _resourceCulture);
+        public static string TimerPanel_Hint_UseNewTimerStyle => ResourceManager.GetString(nameof(TimerPanel_Hint_UseNewTimerStyle), _resourceCulture);
 
-        public static string TimerPanel_Hint_2 => ResourceManager.GetString(nameof(TimerPanel_Hint_2), _resourceCulture);
+        public static string TimerPanel_Hint_ContinueOnTimeout => ResourceManager.GetString(nameof(TimerPanel_Hint_ContinueOnTimeout), _resourceCulture);
 
-        public static string TimerPanel_Hint_3 => ResourceManager.GetString(nameof(TimerPanel_Hint_3), _resourceCulture);
+        public static string TimerPanel_Hint_ShowRedOnTimeout => ResourceManager.GetString(nameof(TimerPanel_Hint_ShowRedOnTimeout), _resourceCulture);
 
-        public static string TimerPanel_Hint_4 => ResourceManager.GetString(nameof(TimerPanel_Hint_4), _resourceCulture);
+        public static string TimerPanel_Hint_SetAlertVolume => ResourceManager.GetString(nameof(TimerPanel_Hint_SetAlertVolume), _resourceCulture);
 
-        public static string TimerPanel_Hint_5 => ResourceManager.GetString(nameof(TimerPanel_Hint_5), _resourceCulture);
+        public static string TimerPanel_Hint_EnableProgressiveAlert => ResourceManager.GetString(nameof(TimerPanel_Hint_EnableProgressiveAlert), _resourceCulture);
 
-        public static string TimerPanel_Hint_6 => ResourceManager.GetString(nameof(TimerPanel_Hint_6), _resourceCulture);
+        public static string TimerPanel_Hint_SetProgressiveAlertVolume => ResourceManager.GetString(nameof(TimerPanel_Hint_SetProgressiveAlertVolume), _resourceCulture);
     }
 }

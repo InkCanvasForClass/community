@@ -90,22 +90,22 @@
   <data name="TimerPanel_Hint" xml:space="preserve">
     <value>Use the old version of the timer button interface</value>
   </data>
-  <data name="TimerPanel_Hint_1" xml:space="preserve">
+  <data name="TimerPanel_Hint_UseNewTimerStyle" xml:space="preserve">
     <value>Use the new style timer interface</value>
   </data>
-  <data name="TimerPanel_Hint_2" xml:space="preserve">
+  <data name="TimerPanel_Hint_ContinueOnTimeout" xml:space="preserve">
     <value>Continue counting up after timer timeout</value>
   </data>
-  <data name="TimerPanel_Hint_3" xml:space="preserve">
+  <data name="TimerPanel_Hint_ShowRedOnTimeout" xml:space="preserve">
     <value>Display numbers in red after timer timeout</value>
   </data>
-  <data name="TimerPanel_Hint_4" xml:space="preserve">
+  <data name="TimerPanel_Hint_SetAlertVolume" xml:space="preserve">
     <value>Set the volume of the timer reminder sound</value>
   </data>
-  <data name="TimerPanel_Hint_5" xml:space="preserve">
+  <data name="TimerPanel_Hint_EnableProgressiveAlert" xml:space="preserve">
     <value>Enable progressive reminder function</value>
   </data>
-  <data name="TimerPanel_Hint_6" xml:space="preserve">
+  <data name="TimerPanel_Hint_SetProgressiveAlertVolume" xml:space="preserve">
     <value>Set the volume of the progressive reminder sound</value>
   </data>
 </root>

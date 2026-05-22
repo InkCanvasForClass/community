@@ -1,5 +1,6 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Newtonsoft.Json;
 using System;
@@ -56,11 +57,11 @@ namespace Ink_Canvas.Controls.Toolbar
         public static bool GetIsContentCollapsedByUser(FrameworkElement element)
             => (bool)element.GetValue(IsContentCollapsedByUserProperty);
 
-        public static List<KeyValuePair<string, string>> AvailableConditions { get; } = new List<KeyValuePair<string, string>>
+        public static List<KeyValuePair<string, string>> AvailableConditions => new List<KeyValuePair<string, string>>
         {
-            new KeyValuePair<string, string>("isAnnotating", "批注模式"),
-            new KeyValuePair<string, string>("isPptMode", "PPT模式"),
-            new KeyValuePair<string, string>("isContentCollapsedByUser", "工具栏已折叠")
+            new KeyValuePair<string, string>("isAnnotating", Strings.GetString("ToolbarCondition_Annotating") ?? "Annotation mode"),
+            new KeyValuePair<string, string>("isPptMode", Strings.GetString("ToolbarCondition_PptMode") ?? "PPT mode"),
+            new KeyValuePair<string, string>("isContentCollapsedByUser", Strings.GetString("ToolbarCondition_Collapsed") ?? "Toolbar collapsed")
         };
 
         private static bool _isContentCollapsedByUser = false;

@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using Ink_Canvas.Properties;
 
 namespace Ink_Canvas.Controls.Toolbar.Items
 {
@@ -7,7 +8,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         public override string Id => "builtin.select";
         public override string LocalizationKey => "FloatingBar_LassoSelect";
         public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AnnotationOnly().WithHideOnCollapsed();
-        public override string Description => "套索选择";
+        public override string Description => FloatingBarStrings.ToolbarItem_Desc_Select;
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.SymbolIconSelect_MouseUp(sender, e);

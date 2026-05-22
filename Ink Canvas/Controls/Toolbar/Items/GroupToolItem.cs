@@ -1,13 +1,14 @@
 using System.Windows;
 using System.Windows.Controls;
+using Ink_Canvas.Properties;
 
 namespace Ink_Canvas.Controls.Toolbar.Items
 {
     internal sealed class GroupToolItem : IToolbarItem
     {
         public string Id => "builtin.group";
-        public string DisplayName => "分组";
-        public string Description => "将多个工具组合在一起显示";
+        public string DisplayName => FloatingBarStrings.ToolbarPage_GroupChildren;
+        public string Description => FloatingBarStrings.ToolbarItem_Desc_Group;
         public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public bool DefaultShowSeparateBorder => false;
         public bool DefaultPreventHideOnDragClick => false;

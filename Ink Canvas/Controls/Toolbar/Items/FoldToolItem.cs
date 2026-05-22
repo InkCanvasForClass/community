@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using Ink_Canvas.Properties;
 
 namespace Ink_Canvas.Controls.Toolbar.Items
 {
@@ -8,7 +9,7 @@ namespace Ink_Canvas.Controls.Toolbar.Items
         public override string LocalizationKey => "FloatingBar_Hide";
         public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public override bool DefaultPreventHideOnDragClick => true;
-        public override string Description => "折叠工具栏";
+        public override string Description => FloatingBarStrings.ToolbarItem_Desc_Fold;
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.FoldFloatingBar_MouseUp(sender, e);

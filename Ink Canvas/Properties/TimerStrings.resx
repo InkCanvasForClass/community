@@ -90,22 +90,22 @@
   <data name="TimerPanel_Hint" xml:space="preserve">
     <value>使用旧版本的计时器按钮界面</value>
   </data>
-  <data name="TimerPanel_Hint_1" xml:space="preserve">
+  <data name="TimerPanel_Hint_UseNewTimerStyle" xml:space="preserve">
     <value>使用新样式的计时器界面</value>
   </data>
-  <data name="TimerPanel_Hint_2" xml:space="preserve">
+  <data name="TimerPanel_Hint_ContinueOnTimeout" xml:space="preserve">
     <value>计时器超时后继续正向计时</value>
   </data>
-  <data name="TimerPanel_Hint_3" xml:space="preserve">
+  <data name="TimerPanel_Hint_ShowRedOnTimeout" xml:space="preserve">
     <value>计时器超时后数字显示为红色</value>
   </data>
-  <data name="TimerPanel_Hint_4" xml:space="preserve">
+  <data name="TimerPanel_Hint_SetAlertVolume" xml:space="preserve">
     <value>设置计时器提醒音的音量</value>
   </data>
-  <data name="TimerPanel_Hint_5" xml:space="preserve">
+  <data name="TimerPanel_Hint_EnableProgressiveAlert" xml:space="preserve">
     <value>启用渐进式提醒功能</value>
   </data>
-  <data name="TimerPanel_Hint_6" xml:space="preserve">
+  <data name="TimerPanel_Hint_SetProgressiveAlertVolume" xml:space="preserve">
     <value>设置渐进提醒音的音量</value>
   </data>
 </root>

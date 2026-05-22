@@ -1,12 +1,13 @@
 using System.Windows;
+using Ink_Canvas.Properties;
 
 namespace Ink_Canvas.Controls.Toolbar.Items
 {
     internal sealed class QuickColorPaletteToolItem : IToolbarItem
     {
         public string Id => "builtin.quickColorPalette";
-        public string DisplayName => "快捷调色盘";
-        public string Description => "快速选色面板";
+        public string DisplayName => FloatingBarStrings.FloatingBar_QuickPaletteMode;
+        public string Description => FloatingBarStrings.ToolbarItem_Desc_QuickColorPalette;
         public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AnnotationOnly().WithHideOnCollapsed();
         public bool DefaultShowSeparateBorder => false;
         public bool DefaultPreventHideOnDragClick => false;

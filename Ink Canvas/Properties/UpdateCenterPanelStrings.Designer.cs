@@ -42,12 +42,12 @@ namespace Ink_Canvas.Properties
 
         public static string UpdateCenterPanel_Hint => ResourceManager.GetString(nameof(UpdateCenterPanel_Hint), _resourceCulture);
 
-        public static string UpdateCenterPanel_Hint_1 => ResourceManager.GetString(nameof(UpdateCenterPanel_Hint_1), _resourceCulture);
+        public static string UpdateCenterPanel_Hint_RollbackVersion => ResourceManager.GetString(nameof(UpdateCenterPanel_Hint_RollbackVersion), _resourceCulture);
 
-        public static string UpdateCenterPanel_Hint_2 => ResourceManager.GetString(nameof(UpdateCenterPanel_Hint_2), _resourceCulture);
+        public static string UpdateCenterPanel_Hint_ReinstallLatest => ResourceManager.GetString(nameof(UpdateCenterPanel_Hint_ReinstallLatest), _resourceCulture);
 
-        public static string UpdateCenterPanel_Hint_3 => ResourceManager.GetString(nameof(UpdateCenterPanel_Hint_3), _resourceCulture);
+        public static string UpdateCenterPanel_Hint_AutoCheckUpdate => ResourceManager.GetString(nameof(UpdateCenterPanel_Hint_AutoCheckUpdate), _resourceCulture);
 
-        public static string UpdateCenterPanel_Hint_4 => ResourceManager.GetString(nameof(UpdateCenterPanel_Hint_4), _resourceCulture);
+        public static string UpdateCenterPanel_Hint_AutoInstallUpdate => ResourceManager.GetString(nameof(UpdateCenterPanel_Hint_AutoInstallUpdate), _resourceCulture);
     }
 }

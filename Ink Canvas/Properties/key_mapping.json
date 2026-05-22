@@ -1,4 +1,4 @@
-﻿{
+{
     "Theme_FloatingIcon_CoolapkUnderwear":  {
                                                 "NewKey":  "Theme_FloatingIcon_CoolapkUnderwear",
                                                 "Group":  "ThemeStrings"
@@ -159,8 +159,8 @@
                                   "NewKey":  "Storage_SaveAsXmlHint",
                                   "Group":  "StorageStrings"
                               },
-    "UpdateCenterPanel_Hint_3":  {
-                                     "NewKey":  "UpdateCenterPanel_Hint_3",
+    "UpdateCenterPanel_Hint_AutoCheckUpdate":  {
+                                     "NewKey":  "UpdateCenterPanel_Hint_AutoCheckUpdate",
                                      "Group":  "UpdateCenterPanelStrings"
                                  },
     "Settings_Plugins":  {
@@ -327,8 +327,8 @@
                                        "NewKey":  "Gesture_PalmSensitivityLow",
                                        "Group":  "GestureStrings"
                                    },
-    "SnapshotPanel_Hint_1":  {
-                                 "NewKey":  "SnapshotPanel_Hint_1",
+    "SnapshotPanel_Hint_SortByDate":  {
+                                 "NewKey":  "SnapshotPanel_Hint_SortByDate",
                                  "Group":  "FloatingBarStrings"
                              },
     "ThemePanel_Hint_24":  {
@@ -411,8 +411,8 @@
                                           "NewKey":  "FoldMode_ExitToAnnotationHint",
                                           "Group":  "AutomationStrings"
                                       },
-    "UpdateCenterPanel_Hint_1":  {
-                                     "NewKey":  "UpdateCenterPanel_Hint_1",
+    "UpdateCenterPanel_Hint_RollbackVersion":  {
+                                     "NewKey":  "UpdateCenterPanel_Hint_RollbackVersion",
                                      "Group":  "UpdateCenterPanelStrings"
                                  },
     "ThemePanel_Hint_15":  {
@@ -435,8 +435,8 @@
                                        "NewKey":  "PlacementHint",
                                        "Group":  "NotificationStrings"
                                    },
-    "TimerPanel_Hint_1":  {
-                              "NewKey":  "TimerPanel_Hint_1",
+    "TimerPanel_Hint_UseNewTimerStyle":  {
+                              "NewKey":  "TimerPanel_Hint_UseNewTimerStyle",
                               "Group":  "TimerStrings"
                           },
     "CanvasAndInkPanel_Hint_5":  {
@@ -655,8 +655,8 @@
                                "NewKey":  "SecurityPanel_Hint",
                                "Group":  "SecurityStrings"
                            },
-    "SnapshotPanel_Hint_3":  {
-                                 "NewKey":  "SnapshotPanel_Hint_3",
+    "SnapshotPanel_Hint_AutoScreenshotOnPageTurn":  {
+                                 "NewKey":  "SnapshotPanel_Hint_AutoScreenshotOnPageTurn",
                                  "Group":  "FloatingBarStrings"
                              },
     "SecurityPanel_Hint_4":  {
@@ -691,8 +691,8 @@
                                 "NewKey":  "Canvas_Color_Orange",
                                 "Group":  "CanvasStrings"
                             },
-    "SnapshotPanel_Hint_2":  {
-                                 "NewKey":  "SnapshotPanel_Hint_2",
+    "SnapshotPanel_Hint_SaveInkData":  {
+                                 "NewKey":  "SnapshotPanel_Hint_SaveInkData",
                                  "Group":  "FloatingBarStrings"
                              },
     "ThemePanel_PPTPPTHint":  {
@@ -751,8 +751,8 @@
                                   "NewKey":  "Nav_Advanced_Settings",
                                   "Group":  "NavStrings"
                               },
-    "TimerPanel_Hint_5":  {
-                              "NewKey":  "TimerPanel_Hint_5",
+    "TimerPanel_Hint_EnableProgressiveAlert":  {
+                              "NewKey":  "TimerPanel_Hint_EnableProgressiveAlert",
                               "Group":  "TimerStrings"
                           },
     "Theme_Manage":  {
@@ -1227,8 +1227,8 @@
                                     "NewKey":  "Gesture_PalmSensitivity",
                                     "Group":  "GestureStrings"
                                 },
-    "TimerPanel_Hint_3":  {
-                              "NewKey":  "TimerPanel_Hint_3",
+    "TimerPanel_Hint_ShowRedOnTimeout":  {
+                              "NewKey":  "TimerPanel_Hint_ShowRedOnTimeout",
                               "Group":  "TimerStrings"
                           },
     "Storage_Update_Desc":  {
@@ -2131,8 +2131,8 @@
                                             "NewKey":  "Theme_FloatingIcon_CoolapkSmile",
                                             "Group":  "ThemeStrings"
                                         },
-    "TimerPanel_Hint_4":  {
-                              "NewKey":  "TimerPanel_Hint_4",
+    "TimerPanel_Hint_SetAlertVolume":  {
+                              "NewKey":  "TimerPanel_Hint_SetAlertVolume",
                               "Group":  "TimerStrings"
                           },
     "Canvas_KeepHyperbolaAsymptote":  {
@@ -2579,8 +2579,8 @@
                                   "NewKey":  "QuickPanel_RandomDraw",
                                   "Group":  "FloatingBarStrings"
                               },
-    "UpdateCenterPanel_Hint_4":  {
-                                     "NewKey":  "UpdateCenterPanel_Hint_4",
+    "UpdateCenterPanel_Hint_AutoInstallUpdate":  {
+                                     "NewKey":  "UpdateCenterPanel_Hint_AutoInstallUpdate",
                                      "Group":  "UpdateCenterPanelStrings"
                                  },
     "Booth_Correction":  {
@@ -2623,8 +2623,8 @@
                           "NewKey":  "Capture",
                           "Group":  "BoothStrings"
                       },
-    "TimerPanel_Hint_6":  {
-                              "NewKey":  "TimerPanel_Hint_6",
+    "TimerPanel_Hint_SetProgressiveAlertVolume":  {
+                              "NewKey":  "TimerPanel_Hint_SetProgressiveAlertVolume",
                               "Group":  "TimerStrings"
                           },
     "PPT_TimeCapsule":  {
@@ -2847,8 +2847,8 @@
                               "NewKey":  "Test",
                               "Group":  "NotificationStrings"
                           },
-    "UpdateCenterPanel_Hint_2":  {
-                                     "NewKey":  "UpdateCenterPanel_Hint_2",
+    "UpdateCenterPanel_Hint_ReinstallLatest":  {
+                                     "NewKey":  "UpdateCenterPanel_Hint_ReinstallLatest",
                                      "Group":  "UpdateCenterPanelStrings"
                                  },
     "Random_Background_Default":  {
@@ -3115,8 +3115,8 @@
                                            "NewKey":  "Canvas_HideStrokeWhenSelecting",
                                            "Group":  "CanvasStrings"
                                        },
-    "Startup_UIAccessTopMostHint_1":  {
-                                          "NewKey":  "UIAccessTopMostHint_1",
+    "Startup_UIATopMostHint_RequiresAdmin":  {
+                                          "NewKey":  "UIATopMostHint_RequiresAdmin",
                                           "Group":  "StartupStrings"
                                       },
     "Storage_Legend_Other":  {
@@ -3263,8 +3263,8 @@
                                    "NewKey":  "TokenHint",
                                    "Group":  "AnnouncementStrings"
                                },
-    "SnapshotPanel_Hint_4":  {
-                                 "NewKey":  "SnapshotPanel_Hint_4",
+    "SnapshotPanel_Hint_SetMinInkForAutoScreenshot":  {
+                                 "NewKey":  "SnapshotPanel_Hint_SetMinInkForAutoScreenshot",
                                  "Group":  "FloatingBarStrings"
                              },
     "Theme_ShowHideButton":  {
@@ -4115,8 +4115,8 @@
                                         "NewKey":  "UrgentDuration",
                                         "Group":  "NotificationStrings"
                                     },
-    "TimerPanel_Hint_2":  {
-                              "NewKey":  "TimerPanel_Hint_2",
+    "TimerPanel_Hint_ContinueOnTimeout":  {
+                              "NewKey":  "TimerPanel_Hint_ContinueOnTimeout",
                               "Group":  "TimerStrings"
                           },
     "Canvas_PressureTouch":  {
