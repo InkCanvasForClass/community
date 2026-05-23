@@ -208,7 +208,10 @@
     <value>保存WebDav设置时发生错误: </value>
   </data>
   <data name="CloudStorage_DlassRegistrationPrompt" xml:space="preserve">
-    <value>您是否已经注册了Dlass账号？\n\n• 如果已注册：请在本页填入用户 Token\n• 如果未注册：将打开浏览器跳转到 Dlass 控制台</value>
+    <value>您是否已经注册了Dlass账号？
+
+• 如果已注册：请在本页填入用户 Token
+• 如果未注册：将打开浏览器跳转到 Dlass 控制台</value>
   </data>
   <data name="CloudStorage_DlassRegistrationTitle" xml:space="preserve">
     <value>Dlass账号注册</value>

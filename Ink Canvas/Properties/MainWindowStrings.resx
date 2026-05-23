@@ -509,7 +509,8 @@
     <value>检测到程序已连续重启 5 次，已停止自动重启。请联系开发者或检查系统环境。</value>
   </data>
   <data name="Main_App_UnexpectedError" xml:space="preserve">
-    <value>抱歉，出现未预期的异常，可能导致 InkCanvasForClass 运行不稳定。\n建议保存墨迹后重启应用。</value>
+    <value>抱歉，出现未预期的异常，可能导致 InkCanvasForClass 运行不稳定。
+    建议保存墨迹后重启应用。</value>
   </data>
   <data name="Main_DisplayChanged" xml:space="preserve">
     <value>检测到显示器信息变化，变为{0}x{1}）</value>
