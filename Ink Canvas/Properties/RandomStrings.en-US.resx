@@ -120,4 +120,286 @@
   <data name="Random_SelectProgressiveAlarm" xml:space="preserve">
     <value>Select Progressive Alarm Audio File</value>
   </data>
+  <data name="Random_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Random_Hint" xml:space="preserve">
+    <value>Hint</value>
+  </data>
+  <data name="Random_Browse" xml:space="preserve">
+    <value>Browse...</value>
+  </data>
+  <data name="Random_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Random_Preview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="Random_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Random_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Random_RollCall_WindowTitle" xml:space="preserve">
+    <value>Ink Canvas - Roll Call</value>
+  </data>
+  <data name="Random_RollCall_ClickToStart" xml:space="preserve">
+    <value>Click to start roll call</value>
+  </data>
+  <data name="Random_RollCall_Ready" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="Random_RollCall_PeopleCount" xml:space="preserve">
+    <value>People count</value>
+  </data>
+  <data name="Random_RollCall_DecreaseCount" xml:space="preserve">
+    <value>Decrease count</value>
+  </data>
+  <data name="Random_RollCall_IncreaseCount" xml:space="preserve">
+    <value>Increase count</value>
+  </data>
+  <data name="Random_RollCall_Mode" xml:space="preserve">
+    <value>Roll-call mode</value>
+  </data>
+  <data name="Random_RollCall_ModeSequential" xml:space="preserve">
+    <value>Sequential</value>
+  </data>
+  <data name="Random_RollCall_ModeGroup" xml:space="preserve">
+    <value>Group</value>
+  </data>
+  <data name="Random_RollCall_ModeExternal" xml:space="preserve">
+    <value>External</value>
+  </data>
+  <data name="Random_RollCall_ExternalCall" xml:space="preserve">
+    <value>External roll call</value>
+  </data>
+  <data name="Random_RollCall_NameListManagement" xml:space="preserve">
+    <value>Name list management</value>
+  </data>
+  <data name="Random_RollCall_Import" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="Random_RollCall_History" xml:space="preserve">
+    <value>History</value>
+  </data>
+  <data name="Random_RollCall_Start" xml:space="preserve">
+    <value>Start roll call</value>
+  </data>
+  <data name="Random_RollCall_Stop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="Random_RollCall_ReadyToDraw" xml:space="preserve">
+    <value>Ready to draw...</value>
+  </data>
+  <data name="Random_RollCall_SingleDrawMode" xml:space="preserve">
+    <value>Single draw mode - 60 numbers</value>
+  </data>
+  <data name="Random_RollCall_NameListCountFormat" xml:space="preserve">
+    <value>Name list count: {0}</value>
+  </data>
+  <data name="Random_RollCall_NoResult" xml:space="preserve">
+    <value>No result</value>
+  </data>
+  <data name="Random_RollCall_ImportedNamesFormat" xml:space="preserve">
+    <value>Imported {0} names</value>
+  </data>
+  <data name="Random_RollCall_ImportFailedFormat" xml:space="preserve">
+    <value>Import name list failed: {0}</value>
+  </data>
+  <data name="Random_RollCall_OpenHistoryFailedFormat" xml:space="preserve">
+    <value>Open history failed: {0}</value>
+  </data>
+  <data name="Random_RollCall_ListAndHistoryCleared" xml:space="preserve">
+    <value>Name list and history cleared</value>
+  </data>
+  <data name="Random_RollCall_ClearFailedFormat" xml:space="preserve">
+    <value>Clear list and history failed: {0}</value>
+  </data>
+  <data name="Random_RollCall_ModeSelectedRandom" xml:space="preserve">
+    <value>Mode selected: Random</value>
+  </data>
+  <data name="Random_RollCall_ModeSelectedSequential" xml:space="preserve">
+    <value>Mode selected: Sequential</value>
+  </data>
+  <data name="Random_RollCall_ModeSelectedGroup" xml:space="preserve">
+    <value>Mode selected: Group</value>
+  </data>
+  <data name="Random_RollCall_ModeSelectedExternalFormat" xml:space="preserve">
+    <value>Mode selected: External ({0})</value>
+  </data>
+  <data name="Random_RollCall_ExternalCallerSelectedFormat" xml:space="preserve">
+    <value>External caller selected: {0}</value>
+  </data>
+  <data name="Random_RollCall_ExternalCallerFirstUse" xml:space="preserve">
+    <value>First time using external roll call. Please make sure the corresponding software is installed.&#13;&#10;If not installed, please download and install it from the official website. If already installed, click this button again.</value>
+  </data>
+  <data name="Random_RollCall_ExternalCallerLaunchedFormat" xml:space="preserve">
+    <value>External roll call launched: {0}</value>
+  </data>
+  <data name="Random_RollCall_ExternalCallerFailedFormat" xml:space="preserve">
+    <value>Cannot launch external roll call: {0}</value>
+  </data>
+  <data name="Random_RollCall_ExceedNameList" xml:space="preserve">
+    <value>People count cannot exceed name list size!</value>
+  </data>
+  <data name="Random_RollCall_RollCalling" xml:space="preserve">
+    <value>Rolling...</value>
+  </data>
+  <data name="Random_RollCall_DonePeopleFormat" xml:space="preserve">
+    <value>Roll call complete, {0} people selected</value>
+  </data>
+  <data name="Random_RollCall_Drawing" xml:space="preserve">
+    <value>Drawing...</value>
+  </data>
+  <data name="Random_RollCall_DoneNumbersFormat" xml:space="preserve">
+    <value>Drawing complete, {0} numbers selected</value>
+  </data>
+  <data name="Random_RollCall_Stopped" xml:space="preserve">
+    <value>Roll call stopped</value>
+  </data>
+  <data name="Random_RollCall_DoneSingleFormat" xml:space="preserve">
+    <value>Drawing complete: {0}</value>
+  </data>
+  <data name="Random_History_WindowTitle" xml:space="preserve">
+    <value>Ink Canvas - Roll Call History</value>
+  </data>
+  <data name="Random_History_Title" xml:space="preserve">
+    <value>Roll Call History</value>
+  </data>
+  <data name="Random_History_NoHistory" xml:space="preserve">
+    <value>No history yet</value>
+  </data>
+  <data name="Random_History_RecentCountFormat" xml:space="preserve">
+    <value>{0} (recent total: {1})</value>
+  </data>
+  <data name="Random_History_StatsTitle" xml:space="preserve">
+    <value>Cumulative selection count:</value>
+  </data>
+  <data name="Random_History_CountFormat" xml:space="preserve">
+    <value>{0}: {1} times</value>
+  </data>
+  <data name="Random_History_SummaryFormat" xml:space="preserve">
+    <value>{0} records total, last updated: {1}</value>
+  </data>
+  <data name="Random_History_LoadFailedFormat" xml:space="preserve">
+    <value>Load history failed: {0}</value>
+  </data>
+  <data name="Random_NamesInput_WindowTitle" xml:space="preserve">
+    <value>Ink Canvas - Import Name List</value>
+  </data>
+  <data name="Random_NamesInput_Hint" xml:space="preserve">
+    <value>Enter names below, one per line (paste from spreadsheet recommended)</value>
+  </data>
+  <data name="Random_NamesInput_SaveConfirm" xml:space="preserve">
+    <value>Save changes?</value>
+  </data>
+  <data name="Random_NamesInput_Title" xml:space="preserve">
+    <value>Import Name List</value>
+  </data>
+  <data name="Random_ManageBg_WindowTitle" xml:space="preserve">
+    <value>Manage Roll Call Backgrounds</value>
+  </data>
+  <data name="Random_ManageBg_Title" xml:space="preserve">
+    <value>Manage Custom Roll Call Backgrounds</value>
+  </data>
+  <data name="Random_ManageBg_SetAsCurrent" xml:space="preserve">
+    <value>Set as current</value>
+  </data>
+  <data name="Random_ManageBg_SetSuccessFormat" xml:space="preserve">
+    <value>Set "{0}" as current background</value>
+  </data>
+  <data name="Random_ManageBg_SetSuccessTitle" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="Random_ManageBg_DeleteConfirmFormat" xml:space="preserve">
+    <value>Are you sure you want to delete background "{0}"?</value>
+  </data>
+  <data name="Random_ManageBg_DeleteConfirmTitle" xml:space="preserve">
+    <value>Confirm Delete</value>
+  </data>
+  <data name="Random_ManageBg_DeleteFailedFormat" xml:space="preserve">
+    <value>Error deleting background: {0}</value>
+  </data>
+  <data name="Random_AddBg_WindowTitle" xml:space="preserve">
+    <value>Add Custom Roll Call Background</value>
+  </data>
+  <data name="Random_AddBg_Title" xml:space="preserve">
+    <value>Add Custom Roll Call Background</value>
+  </data>
+  <data name="Random_AddBg_SelectImage" xml:space="preserve">
+    <value>Select background image:</value>
+  </data>
+  <data name="Random_AddBg_NameLabel" xml:space="preserve">
+    <value>Background name:</value>
+  </data>
+  <data name="Random_AddBg_PreviewLabel" xml:space="preserve">
+    <value>Preview:</value>
+  </data>
+  <data name="Random_AddBg_NoImage" xml:space="preserve">
+    <value>No image selected</value>
+  </data>
+  <data name="Random_AddBg_ImageFilter" xml:space="preserve">
+    <value>Image files|*.png;*.jpg;*.jpeg;*.bmp;*.gif</value>
+  </data>
+  <data name="Random_AddBg_SelectImageTitle" xml:space="preserve">
+    <value>Select a background image</value>
+  </data>
+  <data name="Random_AddBg_LoadImageFailedFormat" xml:space="preserve">
+    <value>Cannot load image: {0}</value>
+  </data>
+  <data name="Random_AddBg_SaveFailedFormat" xml:space="preserve">
+    <value>Error saving background: {0}</value>
+  </data>
+  <data name="Random_CustomIcon_Title" xml:space="preserve">
+    <value>Custom Floating Bar Icon Management</value>
+  </data>
+  <data name="Random_AddIcon_WindowTitle" xml:space="preserve">
+    <value>Add Custom Icon</value>
+  </data>
+  <data name="Random_AddIcon_Title" xml:space="preserve">
+    <value>Add Custom Floating Bar Icon</value>
+  </data>
+  <data name="Random_AddIcon_SelectFile" xml:space="preserve">
+    <value>Select icon file:</value>
+  </data>
+  <data name="Random_AddIcon_NameLabel" xml:space="preserve">
+    <value>Icon name:</value>
+  </data>
+  <data name="Random_AddIcon_PreviewLabel" xml:space="preserve">
+    <value>Preview:</value>
+  </data>
+  <data name="Random_AddIcon_ImageFilter" xml:space="preserve">
+    <value>Image files|*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.ico</value>
+  </data>
+  <data name="Random_AddIcon_SelectFileTitle" xml:space="preserve">
+    <value>Select an icon file</value>
+  </data>
+  <data name="Random_AddIcon_LoadImageFailedFormat" xml:space="preserve">
+    <value>Cannot load image: {0}</value>
+  </data>
+  <data name="Random_AddIcon_SaveFailedFormat" xml:space="preserve">
+    <value>Error saving icon: {0}</value>
+  </data>
+  <data name="Random_QuickDraw_WindowTitle" xml:space="preserve">
+    <value>Quick Draw</value>
+  </data>
+  <data name="Random_QuickDraw_Title" xml:space="preserve">
+    <value>Quick Draw</value>
+  </data>
+  <data name="Random_Rand_ClickToImport" xml:space="preserve">
+    <value>Click here to import name list</value>
+  </data>
+  <data name="Random_RollCall_NameListVerifyTitle" xml:space="preserve">
+    <value>Name List Modification Verification</value>
+  </data>
+  <data name="Random_RollCall_NameListVerifyMessage" xml:space="preserve">
+    <value>Please enter your security password or TOTP verification code to modify the name list.</value>
+  </data>
+  <data name="Random_RollCall_NameListClearVerifyTitle" xml:space="preserve">
+    <value>Name List Clear Verification</value>
+  </data>
+  <data name="Random_RollCall_NameListClearVerifyMessage" xml:space="preserve">
+    <value>Please enter your security password or TOTP verification code to clear the name list.</value>
+  </data>
 </root>

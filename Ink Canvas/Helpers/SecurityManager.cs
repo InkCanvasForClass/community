@@ -1,3 +1,4 @@
+using Ink_Canvas.Properties;
 using iNKORE.UI.WPF.Controls;
 using iNKORE.UI.WPF.Modern.Controls;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
@@ -116,8 +117,8 @@ namespace Ink_Canvas.Helpers
             var dialog = new ContentDialog
             {
                 Title = title,
-                PrimaryButtonText = "确定",
-                SecondaryButtonText = "取消"
+                PrimaryButtonText = CommonStrings.Common_OK,
+                SecondaryButtonText = CommonStrings.Common_Cancel
             };
 
             var panel = new SimpleStackPanel
@@ -162,8 +163,8 @@ namespace Ink_Canvas.Helpers
             var dialog = new ContentDialog
             {
                 Title = title,
-                PrimaryButtonText = "确定",
-                SecondaryButtonText = "取消"
+                PrimaryButtonText = CommonStrings.Common_OK,
+                SecondaryButtonText = CommonStrings.Common_Cancel
             };
 
             var panel = new SimpleStackPanel
@@ -181,19 +182,19 @@ namespace Ink_Canvas.Helpers
             string hintText;
             if (totpOnlyMode)
             {
-                hintText = "请输入 6 位 TOTP 验证码。";
+                hintText = MainWindowStrings.Main_Security_TotpOnlyHint;
             }
             else if (hasPassword && hasTotp)
             {
-                hintText = "请输入安全密码或 6 位 TOTP 验证码。";
+                hintText = MainWindowStrings.Main_Security_PasswordOrTotpHint;
             }
             else if (hasTotp)
             {
-                hintText = "请输入 6 位 TOTP 验证码。";
+                hintText = MainWindowStrings.Main_Security_TotpOnlyHint;
             }
             else
             {
-                hintText = "请输入安全密码。";
+                hintText = MainWindowStrings.Main_Security_PasswordOnlyHint;
             }
 
             panel.Children.Add(new TextBlock
@@ -250,9 +251,9 @@ namespace Ink_Canvas.Helpers
         {
             var dialog = new ContentDialog
             {
-                Title = "设置安全密码",
-                PrimaryButtonText = "确定",
-                SecondaryButtonText = "取消"
+                Title = MainWindowStrings.Main_Security_SetPasswordTitle,
+                PrimaryButtonText = CommonStrings.Common_OK,
+                SecondaryButtonText = CommonStrings.Common_Cancel
             };
 
             var panel = new SimpleStackPanel
@@ -263,7 +264,7 @@ namespace Ink_Canvas.Helpers
 
             var tipText = new TextBlock
             {
-                Text = "请输入新密码",
+                Text = MainWindowStrings.Main_Security_EnterNewPassword,
                 TextWrapping = TextWrapping.Wrap
             };
 
@@ -271,9 +272,9 @@ namespace Ink_Canvas.Helpers
             var confirmPwdBox = new PasswordBox { Height = 32, Margin = new Thickness(0, 4, 0, 0) };
 
             panel.Children.Add(tipText);
-            panel.Children.Add(new TextBlock { Text = "新密码", Margin = new Thickness(0, 4, 0, 0) });
+            panel.Children.Add(new TextBlock { Text = MainWindowStrings.Main_Security_NewPasswordLabel, Margin = new Thickness(0, 4, 0, 0) });
             panel.Children.Add(newPwdBox);
-            panel.Children.Add(new TextBlock { Text = "确认新密码", Margin = new Thickness(0, 8, 0, 0) });
+            panel.Children.Add(new TextBlock { Text = MainWindowStrings.Main_Security_ConfirmNewPasswordLabel, Margin = new Thickness(0, 8, 0, 0) });
             panel.Children.Add(confirmPwdBox);
             dialog.Content = panel;
 
@@ -285,12 +286,12 @@ namespace Ink_Canvas.Helpers
 
             if (string.IsNullOrWhiteSpace(pwd) || pwd.Length < 4)
             {
-                MessageBox.Show("密码长度过短。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(MainWindowStrings.Main_Security_PasswordTooShort, MainWindowStrings.Main_Security_Tip, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return null;
             }
             if (!string.Equals(pwd, confirm, StringComparison.Ordinal))
             {
-                MessageBox.Show("两次输入的密码不一致。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(MainWindowStrings.Main_Security_PasswordMismatch, MainWindowStrings.Main_Security_Tip, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return null;
             }
 
@@ -312,9 +313,9 @@ namespace Ink_Canvas.Helpers
 
             var dialog = new ContentDialog
             {
-                Title = "修改安全密码",
-                PrimaryButtonText = "确定",
-                SecondaryButtonText = "取消"
+                Title = MainWindowStrings.Main_Security_ChangePasswordTitle,
+                PrimaryButtonText = CommonStrings.Common_OK,
+                SecondaryButtonText = CommonStrings.Common_Cancel
             };
 
             var panel = new SimpleStackPanel
@@ -325,7 +326,7 @@ namespace Ink_Canvas.Helpers
 
             var tipText = new TextBlock
             {
-                Text = "请输入当前密码，并设置新密码。",
+                Text = MainWindowStrings.Main_Security_ChangePasswordHint,
                 TextWrapping = TextWrapping.Wrap
             };
 
@@ -334,11 +335,11 @@ namespace Ink_Canvas.Helpers
             var confirmPwdBox = new PasswordBox { Height = 32, Margin = new Thickness(0, 4, 0, 0) };
 
             panel.Children.Add(tipText);
-            panel.Children.Add(new TextBlock { Text = "当前密码", Margin = new Thickness(0, 4, 0, 0) });
+            panel.Children.Add(new TextBlock { Text = MainWindowStrings.Main_Security_CurrentPasswordLabel, Margin = new Thickness(0, 4, 0, 0) });
             panel.Children.Add(currentBox);
-            panel.Children.Add(new TextBlock { Text = "新密码", Margin = new Thickness(0, 8, 0, 0) });
+            panel.Children.Add(new TextBlock { Text = MainWindowStrings.Main_Security_NewPasswordLabel, Margin = new Thickness(0, 8, 0, 0) });
             panel.Children.Add(newPwdBox);
-            panel.Children.Add(new TextBlock { Text = "确认新密码", Margin = new Thickness(0, 8, 0, 0) });
+            panel.Children.Add(new TextBlock { Text = MainWindowStrings.Main_Security_ConfirmNewPasswordLabel, Margin = new Thickness(0, 8, 0, 0) });
             panel.Children.Add(confirmPwdBox);
             dialog.Content = panel;
 
@@ -351,18 +352,18 @@ namespace Ink_Canvas.Helpers
 
             if (!VerifyPassword(settings, current))
             {
-                MessageBox.Show("当前密码错误。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(MainWindowStrings.Main_Security_CurrentPasswordWrong, MainWindowStrings.Main_Security_Tip, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return null;
             }
 
             if (string.IsNullOrWhiteSpace(newPwd) || newPwd.Length < 4)
             {
-                MessageBox.Show("新密码长度过短。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(MainWindowStrings.Main_Security_NewPasswordTooShort, MainWindowStrings.Main_Security_Tip, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return null;
             }
             if (!string.Equals(newPwd, confirm, StringComparison.Ordinal))
             {
-                MessageBox.Show("两次输入的新密码不一致。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(MainWindowStrings.Main_Security_NewPasswordMismatch, MainWindowStrings.Main_Security_Tip, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return null;
             }
 

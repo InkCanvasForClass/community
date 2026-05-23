@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Oobe_WelcomeTitle" xml:space="preserve">
+    <value>Welcome to InkCanvasForClass CE</value>
+  </data>
+  <data name="Oobe_WelcomeDesc" xml:space="preserve">
+    <value>An annotation and whiteboard tool designed for classrooms. The wizard below will help you complete the initial setup. All options can be changed later in Settings.</value>
+  </data>
+  <data name="Oobe_StepCount" xml:space="preserve">
+    <value>8 steps · About 1 minute</value>
+  </data>
+  <data name="Oobe_StartStepByStep" xml:space="preserve">
+    <value>Start step-by-step setup</value>
+  </data>
+  <data name="Oobe_UsePreset" xml:space="preserve">
+    <value>Use a preset configuration</value>
+  </data>
+  <data name="Oobe_NavWelcome" xml:space="preserve">
+    <value>Welcome</value>
+  </data>
+  <data name="Oobe_NavTelemetry" xml:space="preserve">
+    <value>Startup &amp; Privacy</value>
+  </data>
+  <data name="Oobe_NavCanvas" xml:space="preserve">
+    <value>Canvas &amp; Ink</value>
+  </data>
+  <data name="Oobe_NavGestures" xml:space="preserve">
+    <value>Gestures</value>
+  </data>
+  <data name="Oobe_NavPPT" xml:space="preserve">
+    <value>PowerPoint Integration</value>
+  </data>
+  <data name="Oobe_NavAutomation" xml:space="preserve">
+    <value>Automation &amp; Screenshots</value>
+  </data>
+  <data name="Oobe_NavAdvanced" xml:space="preserve">
+    <value>Advanced</value>
+  </data>
+  <data name="Oobe_NavFinish" xml:space="preserve">
+    <value>Finish</value>
+  </data>
+  <data name="Oobe_Step1Title" xml:space="preserve">
+    <value>Startup &amp; Privacy</value>
+  </data>
+  <data name="Oobe_Step1Subtitle" xml:space="preserve">
+    <value>Telemetry, privacy policy, auto-update, and crash handling.</value>
+  </data>
+  <data name="Oobe_PrivacyTitle" xml:space="preserve">
+    <value>Anonymous Usage Data &amp; Privacy</value>
+  </data>
+  <data name="Oobe_PrivacyDesc" xml:space="preserve">
+    <value>Fully anonymous usage statistics, used only to improve software stability and performance.</value>
+  </data>
+  <data name="Oobe_AgreePrivacy" xml:space="preserve">
+    <value>I have read and agree to the</value>
+  </data>
+  <data name="Oobe_PrivacyPolicy" xml:space="preserve">
+    <value>Privacy Policy</value>
+  </data>
+  <data name="Oobe_TelemetryLevel" xml:space="preserve">
+    <value>Telemetry Level</value>
+  </data>
+  <data name="Oobe_TelemetryLevelDesc" xml:space="preserve">
+    <value>This software does not collect classroom content, student personal information, or identifiable raw ink strokes. See privacy.txt for details.</value>
+  </data>
+  <data name="Oobe_TelemetryNone" xml:space="preserve">
+    <value>Do not upload any anonymous usage data</value>
+  </data>
+  <data name="Oobe_TelemetryBasic" xml:space="preserve">
+    <value>Basic (crash info, version &amp; system info)</value>
+  </data>
+  <data name="Oobe_TelemetryOptional" xml:space="preserve">
+    <value>Optional (feature usage frequency, etc.)</value>
+  </data>
+  <data name="Oobe_StartupCrashTitle" xml:space="preserve">
+    <value>Startup &amp; Crash Handling</value>
+  </data>
+  <data name="Oobe_FoldAtStartup" xml:space="preserve">
+    <value>Dock to screen edge at startup</value>
+  </data>
+  <data name="Oobe_FoldAtStartupDesc" xml:space="preserve">
+    <value>Automatically hide the floating toolbar to the screen edge after startup.</value>
+  </data>
+  <data name="Oobe_AutoUpdate" xml:space="preserve">
+    <value>Allow background update checks and download new versions.</value>
+  </data>
+  <data name="Oobe_CrashAction" xml:space="preserve">
+    <value>When an unhandled exception occurs</value>
+  </data>
+  <data name="Oobe_CrashActionDesc" xml:space="preserve">
+    <value>Can be changed in Settings → Startup.</value>
+  </data>
+  <data name="Oobe_CrashSilentRestart" xml:space="preserve">
+    <value>Silently restart the app (recommended)</value>
+  </data>
+  <data name="Oobe_CrashNoAction" xml:space="preserve">
+    <value>No action (log only)</value>
+  </data>
+  <data name="Oobe_CrashShowDialog" xml:space="preserve">
+    <value>Show crash details dialog (no restart)</value>
+  </data>
+  <data name="Oobe_Step2Title" xml:space="preserve">
+    <value>Canvas &amp; Ink</value>
+  </data>
+  <data name="Oobe_ShowPenCursorDesc" xml:space="preserve">
+    <value>Show cursor position while drawing.</value>
+  </data>
+  <data name="Oobe_IgnorePressureDesc" xml:space="preserve">
+    <value>Uniform stroke width regardless of pressure.</value>
+  </data>
+  <data name="Oobe_HideInkOnExit" xml:space="preserve">
+    <value>Hide ink when exiting canvas mode</value>
+  </data>
+  <data name="Oobe_HideInkOnExitDesc" xml:space="preserve">
+    <value>Do not display ink when in PPT non-annotation mode.</value>
+  </data>
+  <data name="Oobe_InkRecogDesc" xml:space="preserve">
+    <value>Automatically convert hand-drawn shapes to standard shapes.</value>
+  </data>
+  <data name="Oobe_Step3Title" xml:space="preserve">
+    <value>Gestures</value>
+  </data>
+  <data name="Oobe_EnableTwoFingerZoom" xml:space="preserve">
+    <value>Enable two-finger zoom</value>
+  </data>
+  <data name="Oobe_EnableTwoFingerPan" xml:space="preserve">
+    <value>Enable two-finger pan</value>
+  </data>
+  <data name="Oobe_PalmEraserDesc" xml:space="preserve">
+    <value>Temporarily switch to eraser when multiple touch points with large contact area are detected.</value>
+  </data>
+  <data name="Oobe_AppTheme" xml:space="preserve">
+    <value>App Theme</value>
+  </data>
+  <data name="Oobe_AppThemeDesc" xml:space="preserve">
+    <value>Can be changed at any time in Settings → Personalization.</value>
+  </data>
+  <data name="Oobe_ThemeLight" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="Oobe_ShowSplashScreenDesc" xml:space="preserve">
+    <value>Show a full-screen welcome page on first launch.</value>
+  </data>
+  <data name="Oobe_TrayAndQuickPanel" xml:space="preserve">
+    <value>Tray &amp; Quick Panel</value>
+  </data>
+  <data name="Oobe_EnableTrayIcon" xml:space="preserve">
+    <value>Show icon in system tray</value>
+  </data>
+  <data name="Oobe_EnableTrayIconDesc" xml:space="preserve">
+    <value>Quickly bring InkCanvasForClass to the foreground from the background.</value>
+  </data>
+  <data name="Oobe_EnableQuickPanel" xml:space="preserve">
+    <value>Enable quick panel</value>
+  </data>
+  <data name="Oobe_EnableQuickPanelDesc" xml:space="preserve">
+    <value>Quick access to commonly used tools like timer and roll call.</value>
+  </data>
+  <data name="Oobe_HotkeysTitle" xml:space="preserve">
+    <value>Hotkeys</value>
+  </data>
+  <data name="Oobe_EnableGlobalHotkeys" xml:space="preserve">
+    <value>Enable global hotkeys in mouse mode</value>
+  </data>
+  <data name="Oobe_EnableGlobalHotkeysDesc" xml:space="preserve">
+    <value>Specific hotkeys can be adjusted in Settings → Personalization.</value>
+  </data>
+  <data name="Oobe_Step5Title" xml:space="preserve">
+    <value>PowerPoint Integration</value>
+  </data>
+  <data name="Oobe_EnablePPTLink" xml:space="preserve">
+    <value>Enable integration with PowerPoint / WPS</value>
+  </data>
+  <data name="Oobe_EnablePPTLinkDesc" xml:space="preserve">
+    <value>Bring up the canvas with one click during a slideshow.</value>
+  </data>
+  <data name="Oobe_AutoSaveStrokes" xml:space="preserve">
+    <value>Auto-save ink during slideshow</value>
+  </data>
+  <data name="Oobe_AutoSaveStrokesDesc" xml:space="preserve">
+    <value>Prevent accidental loss of whiteboard content.</value>
+  </data>
+  <data name="Oobe_AutoScreenshot" xml:space="preserve">
+    <value>Auto-save screenshots during slideshow</value>
+  </data>
+  <data name="Oobe_AutoScreenshotDesc" xml:space="preserve">
+    <value>For reviewing classroom content afterwards.</value>
+  </data>
+  <data name="Oobe_EnableTimeCapsule" xml:space="preserve">
+    <value>Enable PPT time capsule</value>
+  </data>
+  <data name="Oobe_EnableTimeCapsuleDesc" xml:space="preserve">
+    <value>Show time reminders during slideshow.</value>
+  </data>
+  <data name="Oobe_Step6Title" xml:space="preserve">
+    <value>Automation</value>
+  </data>
+  <data name="Oobe_AutoFoldInPPT" xml:space="preserve">
+    <value>Auto-dock when entering PPT slideshow</value>
+  </data>
+  <data name="Oobe_AutoSaveInk" xml:space="preserve">
+    <value>Enable auto-save ink</value>
+  </data>
+  <data name="Oobe_AutoSaveInkDesc" xml:space="preserve">
+    <value>Periodically save ink strokes locally.</value>
+  </data>
+  <data name="Oobe_FloatingInterceptorDesc" xml:space="preserve">
+    <value>Block floating windows from Seewo, Honghe and other classroom software to avoid covering the canvas.</value>
+  </data>
+  <data name="Oobe_ScreenshotTitle" xml:space="preserve">
+    <value>Screenshots &amp; Screen Capture</value>
+  </data>
+  <data name="Oobe_AutoSaveScreenshot" xml:space="preserve">
+    <value>Auto-save screenshot on clear</value>
+  </data>
+  <data name="Oobe_SaveByDate" xml:space="preserve">
+    <value>Save screenshots in date-based folders</value>
+  </data>
+  <data name="Oobe_ShowRollCallButtons" xml:space="preserve">
+    <value>Show random pick and single pick buttons</value>
+  </data>
+  <data name="Oobe_Step8Title" xml:space="preserve">
+    <value>Advanced</value>
+  </data>
+  <data name="Oobe_EnableLog" xml:space="preserve">
+    <value>Enable logging</value>
+  </data>
+  <data name="Oobe_EnableLogDesc" xml:space="preserve">
+    <value>Helpful for troubleshooting and feedback.</value>
+  </data>
+  <data name="Oobe_FinishTitle" xml:space="preserve">
+    <value>All Set</value>
+  </data>
+  <data name="Oobe_FinishDesc" xml:space="preserve">
+    <value>Review the key settings below, then start using the app. All settings can be changed later in Settings.</value>
+  </data>
+  <data name="Oobe_SummaryTelemetry" xml:space="preserve">
+    <value>Telemetry Level</value>
+  </data>
+  <data name="Oobe_SummaryTheme" xml:space="preserve">
+    <value>App Theme</value>
+  </data>
+  <data name="Oobe_SummaryPPTLink" xml:space="preserve">
+    <value>PowerPoint / WPS Integration</value>
+  </data>
+  <data name="Oobe_SummaryTwoFinger" xml:space="preserve">
+    <value>Two-finger Zoom / Pan</value>
+  </data>
+  <data name="Oobe_SummaryTrayIcon" xml:space="preserve">
+    <value>System Tray Icon</value>
+  </data>
+  <data name="Oobe_SummaryLog" xml:space="preserve">
+    <value>Enable Logging</value>
+  </data>
+  <data name="Oobe_BoolEnabled" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="Oobe_BoolDisabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="Oobe_Previous" xml:space="preserve">
+    <value>Previous</value>
+  </data>
+  <data name="Oobe_Next" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="Oobe_SaveAndStart" xml:space="preserve">
+    <value>Save and Start</value>
+  </data>
+  <data name="Oobe_StepFormat" xml:space="preserve">
+    <value>Step {0} / {1}</value>
+  </data>
+  <data name="Oobe_StepFinishFormat" xml:space="preserve">
+    <value>{0} / {1} · Done</value>
+  </data>
+  <data name="Oobe_PresetTitle" xml:space="preserve">
+    <value>Choose a Preset</value>
+  </data>
+  <data name="Oobe_PresetSubtitle" xml:space="preserve">
+    <value>Choose a developer-tuned recommended configuration to finish setup in one click. All options can be changed later in Settings.</value>
+  </data>
+  <data name="Oobe_PresetStandard" xml:space="preserve">
+    <value>Standard Classroom</value>
+  </data>
+  <data name="Oobe_PresetStandardDesc" xml:space="preserve">
+    <value>Enables PPT integration, auto-save ink, tray icon, and two-finger gestures. Suitable for most classroom scenarios.</value>
+  </data>
+  <data name="Oobe_PresetLite" xml:space="preserve">
+    <value>Lite</value>
+  </data>
+  <data name="Oobe_PresetLiteDesc" xml:space="preserve">
+    <value>Disables most automation and integration features for minimal background activity. Suitable for simple annotation scenarios.</value>
+  </data>
+  <data name="Oobe_PresetTagPPTLink" xml:space="preserve">
+    <value>PPT Integration</value>
+  </data>
+  <data name="Oobe_PresetTagTwoFinger" xml:space="preserve">
+    <value>Two-finger Gestures</value>
+  </data>
+  <data name="Oobe_PresetTagTrayIcon" xml:space="preserve">
+    <value>Tray Icon</value>
+  </data>
+  <data name="Oobe_PresetNote" xml:space="preserve">
+    <value>Selecting a preset will complete the initial setup immediately, no step-by-step configuration needed.</value>
+  </data>
+  <data name="Oobe_PresetBack" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Oobe_PresetApply" xml:space="preserve">
+    <value>Apply and Start</value>
+  </data>
+  <data name="Oobe_Step2Subtitle" xml:space="preserve">
+    <value>Cursor, pressure, ink display, and ink correction.</value>
+  </data>
+  <data name="Oobe_Step3Subtitle" xml:space="preserve">
+    <value>Two-finger zoom/pan, palm eraser, etc.</value>
+  </data>
+  <data name="Oobe_Step4Subtitle" xml:space="preserve">
+    <value>Theme, startup animation, tray, quick panel, and hotkeys.</value>
+  </data>
+  <data name="Oobe_Step5Subtitle" xml:space="preserve">
+    <value>Slideshow integration, auto-save ink &amp; screenshots, time capsule.</value>
+  </data>
+  <data name="Oobe_Step6Subtitle" xml:space="preserve">
+    <value>Auto-dock, auto-save ink, floating window interceptor, and screenshot saving.</value>
+  </data>
+  <data name="Oobe_Step7Subtitle" xml:space="preserve">
+    <value>Roll call window options.</value>
+  </data>
+  <data name="Oobe_Step8Subtitle" xml:space="preserve">
+    <value>Logging and other advanced settings.</value>
+  </data>
+  <data name="Oobe_SummaryTelemetryLevel" xml:space="preserve">
+    <value>Telemetry Level</value>
+  </data>
+  <data name="Oobe_SummaryAppTheme" xml:space="preserve">
+    <value>App Theme</value>
+  </data>
+  <data name="Oobe_SummaryPptLink" xml:space="preserve">
+    <value>PowerPoint / WPS Integration</value>
+  </data>
+  <data name="Oobe_SummaryTwoFingerZoom" xml:space="preserve">
+    <value>Two-finger Zoom / Pan</value>
+  </data>
+  <data name="Oobe_SummaryLogEnabled" xml:space="preserve">
+    <value>Enable Logging</value>
+  </data>
+</root>

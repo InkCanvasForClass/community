@@ -97,7 +97,7 @@ namespace Ink_Canvas
 
                     if (!hideNotification && !string.IsNullOrEmpty(path))
                     {
-                        Dispatcher.Invoke(() => ShowNotification($"截图成功保存至 {path}"));
+                        Dispatcher.Invoke(() => ShowNotification(string.Format(Properties.MainWindowStrings.Main_Screenshot_SaveSuccess, path)));
                     }
 
                     // 使用上传帮助类上传到所有启用的服务
@@ -186,7 +186,7 @@ namespace Ink_Canvas
 
                 if (!screenshotResult.HasValue)
                 {
-                    ShowNotification("截图已取消");
+                    ShowNotification(Properties.MainWindowStrings.Main_Screenshot_Cancelled);
                     return;
                 }
 
@@ -198,7 +198,7 @@ namespace Ink_Canvas
 
                 if (screenshotResult.Value.Area.Width <= 0 || screenshotResult.Value.Area.Height <= 0)
                 {
-                    ShowNotification("未选择有效截图区域");
+                    ShowNotification(Properties.MainWindowStrings.Main_Screenshot_NoValidArea);
                     return;
                 }
 
@@ -210,7 +210,7 @@ namespace Ink_Canvas
                 {
                     if (originalBitmap == null)
                     {
-                        ShowNotification("截图失败");
+                        ShowNotification(Properties.MainWindowStrings.Main_Screenshot_Failed);
                         return;
                     }
 
@@ -254,7 +254,7 @@ namespace Ink_Canvas
                         }
 
                         finalBitmap.Save(desktopPath, ImageFormat.Png);
-                        ShowNotification($"截图成功保存至 {desktopPath}");
+                        ShowNotification(string.Format(Properties.MainWindowStrings.Main_Screenshot_SaveSuccess, desktopPath));
                     }
                     finally
                     {
@@ -270,7 +270,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                ShowNotification($"截图失败: {ex.Message}");
+                ShowNotification(string.Format(Properties.MainWindowStrings.Main_Screenshot_FailedWithError, ex.Message));
             }
             finally
             {
@@ -297,7 +297,7 @@ namespace Ink_Canvas
             {
                 if (screenshotResult.Area.Width <= 0 || screenshotResult.Area.Height <= 0)
                 {
-                    ShowNotification("未选择有效截图区域");
+                    ShowNotification(Properties.MainWindowStrings.Main_Screenshot_NoValidArea);
                     return;
                 }
 
@@ -305,7 +305,7 @@ namespace Ink_Canvas
                 {
                     if (originalBitmap == null)
                     {
-                        ShowNotification("截图失败");
+                        ShowNotification(Properties.MainWindowStrings.Main_Screenshot_Failed);
                         return;
                     }
 
@@ -356,7 +356,7 @@ namespace Ink_Canvas
 
             if (bitmapSourceForClipboard == null)
             {
-                ShowNotification("截图转换失败");
+                ShowNotification(Properties.MainWindowStrings.Main_Screenshot_ConvertFailed);
                 return;
             }
 
@@ -421,7 +421,7 @@ namespace Ink_Canvas
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        ShowNotification($"截图成功保存至 {savePath}");
+                        ShowNotification(string.Format(Properties.MainWindowStrings.Main_Screenshot_SaveSuccess, savePath));
                     });
                 });
             }

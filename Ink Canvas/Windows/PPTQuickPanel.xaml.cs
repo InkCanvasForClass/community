@@ -130,7 +130,7 @@ namespace Ink_Canvas.Windows
         private void SyncMagnifierButtonState()
         {
             if (MagnifierToggleButton == null) return;
-            MagnifierToggleButton.Content = MagnifierWindow.HasInstance ? "关闭放大镜" : "开启放大镜";
+            MagnifierToggleButton.Content = MagnifierWindow.HasInstance ? Properties.PPTStrings.PPTQuickPanel_CloseMagnifier : Properties.PPTStrings.PPTQuickPanel_OpenMagnifier;
         }
 
         private void PPTQuickPanel_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -1880,14 +1880,14 @@ namespace Ink_Canvas.Windows
                 if (MagnifierWindow.HasInstance)
                 {
                     MagnifierWindow.HideInstance();
-                    MagnifierToggleButton.Content = "开启放大镜";
+                    MagnifierToggleButton.Content = Properties.PPTStrings.PPTQuickPanel_OpenMagnifier;
                 }
                 else
                 {
                     MagnifierWindow.Show((float)MagnifierZoomSlider.Value);
                     if (MagnifierWindow.HasInstance)
                     {
-                        MagnifierToggleButton.Content = "关闭放大镜";
+                        MagnifierToggleButton.Content = Properties.PPTStrings.PPTQuickPanel_CloseMagnifier;
                     }
                 }
             }
@@ -1923,7 +1923,7 @@ namespace Ink_Canvas.Windows
             {
                 MagnifierWindow.HideInstance();
                 if (MagnifierToggleButton != null)
-                    MagnifierToggleButton.Content = "开启放大镜";
+                    MagnifierToggleButton.Content = Properties.PPTStrings.PPTQuickPanel_OpenMagnifier;
             }
         }
 

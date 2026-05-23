@@ -42,40 +42,61 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="Timer_CustomSoundLabel" xml:space="preserve">
-    <value>自定义提醒铃声：</value>
+  <data name="Timer_Title" xml:space="preserve">
+    <value>计时</value>
   </data>
-  <data name="Timer_EnableCountUp" xml:space="preserve">
-    <value>启用正计时</value>
+  <data name="Timer_HourUp" xml:space="preserve">
+    <value>小时十位加一</value>
   </data>
-  <data name="Timer_NewUI" xml:space="preserve">
-    <value>新计时器 UI</value>
+  <data name="Timer_HourDown" xml:space="preserve">
+    <value>小时十位减一</value>
   </data>
-  <data name="Timer_OvertimeHighlight" xml:space="preserve">
-    <value>超时醒目数字</value>
+  <data name="Timer_HourDigitUp" xml:space="preserve">
+    <value>小时个位加一</value>
   </data>
-  <data name="Timer_Progressive" xml:space="preserve">
-    <value>渐进提醒</value>
+  <data name="Timer_HourDigitDown" xml:space="preserve">
+    <value>小时个位减一</value>
   </data>
-  <data name="Timer_ProgressiveCustomLabel" xml:space="preserve">
-    <value>自定义渐进提醒音频：</value>
+  <data name="Timer_MinuteUp" xml:space="preserve">
+    <value>分钟十位加一</value>
   </data>
-  <data name="Timer_ProgressiveSelectFile" xml:space="preserve">
-    <value>选择文件</value>
+  <data name="Timer_MinuteDown" xml:space="preserve">
+    <value>分钟十位减一</value>
   </data>
-  <data name="Timer_ProgressiveVolume" xml:space="preserve">
-    <value>渐进提醒音量</value>
+  <data name="Timer_MinuteDigitUp" xml:space="preserve">
+    <value>分钟个位加一</value>
+  </data>
+  <data name="Timer_MinuteDigitDown" xml:space="preserve">
+    <value>分钟个位减一</value>
+  </data>
+  <data name="Timer_SecondUp" xml:space="preserve">
+    <value>秒十位加一</value>
+  </data>
+  <data name="Timer_SecondDown" xml:space="preserve">
+    <value>秒十位减一</value>
+  </data>
+  <data name="Timer_SecondDigitUp" xml:space="preserve">
+    <value>秒个位加一</value>
+  </data>
+  <data name="Timer_SecondDigitDown" xml:space="preserve">
+    <value>秒个位减一</value>
+  </data>
+  <data name="Timer_CommonTab" xml:space="preserve">
+    <value>常用</value>
+  </data>
+  <data name="Timer_RecentTab" xml:space="preserve">
+    <value>最近</value>
+  </data>
+  <data name="Timer_45Minutes" xml:space="preserve">
+    <value>45 分钟</value>
+  </data>
+  <data name="Timer_FullScreen" xml:space="preserve">
+    <value>全屏显示</value>
+  </data>
+  <data name="Timer_StartPause" xml:space="preserve">
+    <value>开始或暂停</value>
   </data>
   <data name="Timer_Reset" xml:space="preserve">
-    <value>重置</value>
-  </data>
-  <data name="Timer_Title" xml:space="preserve">
-    <value>计时器设置</value>
-  </data>
-  <data name="Timer_UseLegacyButtons" xml:space="preserve">
-    <value>使用老版计时器按钮 UI</value>
-  </data>
-  <data name="Timer_Volume" xml:space="preserve">
-    <value>计时器提醒音量</value>
+    <value>重置计时</value>
   </data>
 </root>

@@ -1,3 +1,4 @@
+using Ink_Canvas.Properties;
 using Microsoft.Win32;
 using System;
 using System.Diagnostics;
@@ -494,7 +495,7 @@ namespace Ink_Canvas.Helpers
                                     if (Application.Current.MainWindow is MainWindow mainWindow)
                                     {
                                         mainWindow.OpenSingleStrokeFile(filePath);
-                                        mainWindow.ShowNotification($"已加载墨迹文件: {Path.GetFileName(filePath)}");
+                                        mainWindow.ShowNotification(string.Format(AutomationStrings.FileAssoc_LoadedStrokesFile, Path.GetFileName(filePath)));
                                     }
                                 }
                                 catch (Exception ex)
@@ -545,7 +546,7 @@ namespace Ink_Canvas.Helpers
                                     if (Application.Current.MainWindow is MainWindow mainWindow)
                                     {
                                         mainWindow.SwitchToBoardMode();
-                                        mainWindow.ShowNotification("已切换到白板模式");
+                                        mainWindow.ShowNotification(AutomationStrings.FileAssoc_SwitchedToBoardMode);
                                     }
                                 }
                                 catch (Exception ex)
@@ -600,7 +601,7 @@ namespace Ink_Canvas.Helpers
                                         {
                                             await mainWindow.UnFoldFloatingBar(new object());
                                         }
-                                        mainWindow.ShowNotification("已退出收纳模式并恢复浮动栏");
+                                        mainWindow.ShowNotification(AutomationStrings.FileAssoc_ExitedFoldMode);
                                     }
                                 }
                                 catch (Exception ex)

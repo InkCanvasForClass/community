@@ -16,17 +16,17 @@ mc:Ignorable="d">
                 <ikw:SimpleStackPanel x:Name="_CommonPropsPanel">
                     <!--笔锋-->
                     <ikw:SimpleStackPanel Orientation="Horizontal">
-                        <Label Content="笔锋"
+                        <Label Content="{x:Static props:FloatingBarStrings.FloatingBar_PenTipStyle}"
                                Foreground="{DynamicResource FloatBarForeground}"
                                FontSize="16" FontWeight="Bold"
                                VerticalAlignment="Center" />
                         <ComboBox VerticalAlignment="Center"
                                   x:Name="ComboBoxPenStyle"
                                   SelectedIndex="1">
-                            <ComboBoxItem Content="实时笔锋" />
-                            <ComboBoxItem Content="基于点集" />
-                            <ComboBoxItem Content="基于速率" />
-                            <ComboBoxItem Content="关闭笔锋" />
+                            <ComboBoxItem Content="{x:Static props:FloatingBarStrings.FloatingBar_PenStyle_RealTime}" />
+                            <ComboBoxItem Content="{x:Static props:FloatingBarStrings.FloatingBar_PenStyle_PointSet}" />
+                            <ComboBoxItem Content="{x:Static props:FloatingBarStrings.FloatingBar_PenStyle_Velocity}" />
+                            <ComboBoxItem Content="{x:Static props:FloatingBarStrings.FloatingBar_PenStyle_Off}" />
                         </ComboBox>
                     </ikw:SimpleStackPanel>
                     <!--笔尖 纠正 加深-->
@@ -44,7 +44,7 @@ mc:Ignorable="d">
                                             MinWidth="0" OnContent="" OffContent="" />
                         </ikw:SimpleStackPanel>
                         <ikw:SimpleStackPanel x:Name="_HighlighterOverlapPanel" Orientation="Horizontal" Spacing="4">
-                            <Label Content="重叠加深" FontSize="12"
+                            <Label Content="{x:Static props:FloatingBarStrings.FloatingBar_HighlighterOverlap}" FontSize="12"
                                 VerticalAlignment="Center" />
                             <ui:ToggleSwitch x:Name="ToggleSwitchHighlighterOverlap"
                                             MinWidth="0" OnContent="" OffContent="" />
@@ -65,7 +65,7 @@ mc:Ignorable="d">
                     </StackPanel>
                     <!--透明度-->
                     <StackPanel Orientation="Horizontal">
-                        <Label Margin="0,0,10,0" Content="透明" FontWeight="Bold"
+                        <Label Margin="0,0,10,0" Content="{x:Static props:FloatingBarStrings.FloatingBar_Opacity}" FontWeight="Bold"
                                FontSize="17" VerticalAlignment="Center" />
                         <Slider x:Name="_PenAlphaSlider" Margin="0,0,0,0"
                                 Minimum="1" Maximum="255" Width="200"
@@ -78,7 +78,7 @@ mc:Ignorable="d">
                     </StackPanel>
                     <!--渐隐延迟-->
                     <StackPanel x:Name="_LaserPenFadePanel" Orientation="Horizontal" Visibility="Collapsed" d:Visibility="Visible">
-                        <Label Margin="0,0,10,0" Content="延迟" FontWeight="Bold"
+                        <Label Margin="0,0,10,0" Content="{x:Static props:FloatingBarStrings.FloatingBar_FadeDelay}" FontWeight="Bold"
                                FontSize="17" VerticalAlignment="Center" />
                         <Slider x:Name="_LaserPenFadeTimeSlider" Minimum="1"
                                 Maximum="15" Width="200"
@@ -91,7 +91,7 @@ mc:Ignorable="d">
                     </StackPanel>
                     <!--渐隐速度倍率-->
                     <StackPanel x:Name="_LaserPenFadeSpeedPanel" Orientation="Horizontal" Visibility="Collapsed" d:Visibility="Visible">
-                        <Label Margin="0,0,10,0" Content="倍速" FontWeight="Bold"
+                        <Label Margin="0,0,10,0" Content="{x:Static props:FloatingBarStrings.FloatingBar_FadeSpeed}" FontWeight="Bold"
                                FontSize="17" VerticalAlignment="Center" />
                         <Slider x:Name="_LaserPenFadeSpeedSlider" Minimum="0.1"
                                 Maximum="5" Width="200"
@@ -118,7 +118,7 @@ mc:Ignorable="d">
                                         Width="23" Height="23" Margin="0,0,0,0" />
                                 <TextBlock Margin="0,0,0,2"
                                             x:Name="ColorThemeSwitchTextBlock"
-                                            Text="亮系"
+                                            Text="{x:Static props:FloatingBarStrings.FloatingBar_ColorThemeLight}"
                                             Foreground="{DynamicResource FloatBarForeground}"
                                             VerticalAlignment="Bottom"
                                             HorizontalAlignment="Center"
@@ -170,7 +170,7 @@ mc:Ignorable="d">
                                         Width="23" Height="23" Margin="0,0,0,0" />
                                 <TextBlock Margin="0,0,0,2"
                                             x:Name="_LaserPenColorThemeSwitchTextBlock"
-                                            Text="亮系"
+                                            Text="{x:Static props:FloatingBarStrings.FloatingBar_ColorThemeLight}"
                                             Foreground="{DynamicResource FloatBarForeground}"
                                             VerticalAlignment="Bottom"
                                             HorizontalAlignment="Center"

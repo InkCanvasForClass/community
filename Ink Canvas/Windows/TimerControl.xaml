@@ -123,7 +123,7 @@
                             <TextBlock x:Name="TitleText"
                                        Margin="12,0,0,0"
                                        VerticalAlignment="Center"
-                                       Text="计时"
+                                       Text="{x:Static props:TimerStrings.Timer_Title}"
                                        FontSize="24"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" />
@@ -150,21 +150,21 @@
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center">
                                     <StackPanel Width="46" Margin="0,0,10,0">
-                                        <Button x:Name="Digit1PlusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit1Plus_Click" ToolTipService.ToolTip="小时十位加一">
+                                        <Button x:Name="Digit1PlusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit1Plus_Click" ToolTipService.ToolTip="{x:Static props:TimerStrings.Timer_HourUp}">
                                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronUp}" FontSize="12" />
                                         </Button>
                                         <Path x:Name="Digit1Display" Data="{StaticResource Digit0}" Fill="{DynamicResource NewTimerWindowDigitForeground}" Width="38" Height="62" Stretch="Uniform" HorizontalAlignment="Center" Margin="0,12" />
-                                        <Button x:Name="Digit1MinusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit1Minus_Click" ToolTipService.ToolTip="小时十位减一">
+                                        <Button x:Name="Digit1MinusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit1Minus_Click" ToolTipService.ToolTip="{x:Static props:TimerStrings.Timer_HourDown}">
                                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronDown}" FontSize="12" />
                                         </Button>
                                     </StackPanel>
 
                                     <StackPanel Width="46" Margin="0,0,22,0">
-                                        <Button x:Name="Digit2PlusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit2Plus_Click" ToolTipService.ToolTip="小时个位加一">
+                                        <Button x:Name="Digit2PlusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit2Plus_Click" ToolTipService.ToolTip="{x:Static props:TimerStrings.Timer_HourDigitUp}">
                                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronUp}" FontSize="12" />
                                         </Button>
                                         <Path x:Name="Digit2Display" Data="{StaticResource Digit0}" Fill="{DynamicResource NewTimerWindowDigitForeground}" Width="38" Height="62" Stretch="Uniform" HorizontalAlignment="Center" Margin="0,12" />
-                                        <Button x:Name="Digit2MinusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit2Minus_Click" ToolTipService.ToolTip="小时个位减一">
+                                        <Button x:Name="Digit2MinusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit2Minus_Click" ToolTipService.ToolTip="{x:Static props:TimerStrings.Timer_HourDigitDown}">
                                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronDown}" FontSize="12" />
                                         </Button>
                                     </StackPanel>
@@ -178,21 +178,21 @@
                                                Foreground="{DynamicResource NewTimerWindowDigitForeground}" />
 
                                     <StackPanel Width="46" Margin="0,0,10,0">
-                                        <Button x:Name="Digit3PlusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit3Plus_Click" ToolTipService.ToolTip="分钟十位加一">
+                                        <Button x:Name="Digit3PlusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit3Plus_Click" ToolTipService.ToolTip="{x:Static props:TimerStrings.Timer_MinuteUp}">
                                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronUp}" FontSize="12" />
                                         </Button>
                                         <Path x:Name="Digit3Display" Data="{StaticResource Digit0}" Fill="{DynamicResource NewTimerWindowDigitForeground}" Width="38" Height="62" Stretch="Uniform" HorizontalAlignment="Center" Margin="0,12" />
-                                        <Button x:Name="Digit3MinusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit3Minus_Click" ToolTipService.ToolTip="分钟十位减一">
+                                        <Button x:Name="Digit3MinusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit3Minus_Click" ToolTipService.ToolTip="{x:Static props:TimerStrings.Timer_MinuteDown}">
                                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronDown}" FontSize="12" />
                                         </Button>
                                     </StackPanel>
 
                                     <StackPanel Width="46" Margin="0,0,22,0">
-                                        <Button x:Name="Digit4PlusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit4Plus_Click" ToolTipService.ToolTip="分钟个位加一">
+                                        <Button x:Name="Digit4PlusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit4Plus_Click" ToolTipService.ToolTip="{x:Static props:TimerStrings.Timer_MinuteDigitUp}">
                                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronUp}" FontSize="12" />
                                         </Button>
                                         <Path x:Name="Digit4Display" Data="{StaticResource Digit0}" Fill="{DynamicResource NewTimerWindowDigitForeground}" Width="38" Height="62" Stretch="Uniform" HorizontalAlignment="Center" Margin="0,12" />
-                                        <Button x:Name="Digit4MinusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit4Minus_Click" ToolTipService.ToolTip="分钟个位减一">
+                                        <Button x:Name="Digit4MinusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit4Minus_Click" ToolTipService.ToolTip="{x:Static props:TimerStrings.Timer_MinuteDigitDown}">
                                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronDown}" FontSize="12" />
                                         </Button>
                                     </StackPanel>
@@ -206,21 +206,21 @@
                                                Foreground="{DynamicResource NewTimerWindowDigitForeground}" />
 
                                     <StackPanel Width="46" Margin="0,0,10,0">
-                                        <Button x:Name="Digit5PlusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit5Plus_Click" ToolTipService.ToolTip="秒十位加一">
+                                        <Button x:Name="Digit5PlusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit5Plus_Click" ToolTipService.ToolTip="{x:Static props:TimerStrings.Timer_SecondUp}">
                                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronUp}" FontSize="12" />
                                         </Button>
                                         <Path x:Name="Digit5Display" Data="{StaticResource Digit0}" Fill="{DynamicResource NewTimerWindowDigitForeground}" Width="38" Height="62" Stretch="Uniform" HorizontalAlignment="Center" Margin="0,12" />
-                                        <Button x:Name="Digit5MinusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit5Minus_Click" ToolTipService.ToolTip="秒十位减一">
+                                        <Button x:Name="Digit5MinusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit5Minus_Click" ToolTipService.ToolTip="{x:Static props:TimerStrings.Timer_SecondDown}">
                                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronDown}" FontSize="12" />
                                         </Button>
                                     </StackPanel>
 
                                     <StackPanel Width="46">
-                                        <Button x:Name="Digit6PlusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit6Plus_Click" ToolTipService.ToolTip="秒个位加一">
+                                        <Button x:Name="Digit6PlusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit6Plus_Click" ToolTipService.ToolTip="{x:Static props:TimerStrings.Timer_SecondDigitUp}">
                                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronUp}" FontSize="12" />
                                         </Button>
                                         <Path x:Name="Digit6Display" Data="{StaticResource Digit0}" Fill="{DynamicResource NewTimerWindowDigitForeground}" Width="38" Height="62" Stretch="Uniform" HorizontalAlignment="Center" Margin="0,12" />
-                                        <Button x:Name="Digit6MinusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit6Minus_Click" ToolTipService.ToolTip="秒个位减一">
+                                        <Button x:Name="Digit6MinusBtn" Style="{StaticResource ModernTimerIconButtonStyle}" Click="Digit6Minus_Click" ToolTipService.ToolTip="{x:Static props:TimerStrings.Timer_SecondDigitDown}">
                                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronDown}" FontSize="12" />
                                         </Button>
                                     </StackPanel>
@@ -239,7 +239,7 @@
                                             FontSize="14"
                                             Style="{StaticResource {x:Static ui:ThemeKeys.TabControlPivotStyleKey}}"
                                             SelectionChanged="TimerQuickTabControl_SelectionChanged">
-                                    <TabItem Header="常用">
+                                    <TabItem Header="{x:Static props:TimerStrings.Timer_CommonTab}">
                                         <Grid x:Name="CommonTimersGrid" Margin="0,12,0,0">
                                             <UniformGrid Rows="2" Columns="3" Margin="2,0,2,0">
                                                 <Button x:Name="Common5MinBtn" Style="{StaticResource ModernTimerQuickButtonStyle}" Margin="0,0,10,8" Click="Common5Min_Click">
@@ -269,7 +269,7 @@
                                                 <Button x:Name="Common45MinBtn" Style="{StaticResource ModernTimerQuickButtonStyle}" Margin="0,0,10,0" Click="Common45Min_Click">
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                                         <Path Data="M13 15h2a1 1 0 0 0 1 -1v-1a1 1 0 0 0 -1 -1h-2v-3h3 M7 9v2a1 1 0 0 0 1 1h1 M10 9v6 M7.5 4.2v.01 M4.2 7.5v.01 M3 12a9 9 0 1 0 9 -9" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.9" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="19" Height="19" Stretch="Uniform" Margin="0,0,6,0" />
-                                                        <TextBlock Text="45 分钟" VerticalAlignment="Center" FontWeight="Medium" />
+                                                        <TextBlock Text="{x:Static props:TimerStrings.Timer_45Minutes}" VerticalAlignment="Center" FontWeight="Medium" />
                                                     </StackPanel>
                                                 </Button>
                                                 <Button x:Name="Common60MinBtn" Style="{StaticResource ModernTimerQuickButtonStyle}" Click="Common60Min_Click">
@@ -281,7 +281,7 @@
                                             </UniformGrid>
                                         </Grid>
                                     </TabItem>
-                                    <TabItem Header="最近">
+                                    <TabItem Header="{x:Static props:TimerStrings.Timer_RecentTab}">
                                         <Grid x:Name="RecentTimersGrid" Margin="0,12,0,0">
                                             <UniformGrid Rows="2" Columns="3" Margin="2,0,2,0">
                                                 <Button x:Name="RecentTimer1Btn" Style="{StaticResource ModernTimerQuickButtonStyle}" Margin="0,0,8,8" Click="RecentTimer1_Click"><TextBlock x:Name="RecentTimer1Text" Text="--:--" /></Button>
@@ -306,7 +306,7 @@
                                     Margin="0,0,18,0"
                                     IsEnabled="False"
                                     Click="Fullscreen_Click"
-                                    ToolTipService.ToolTip="全屏显示">
+                                    ToolTipService.ToolTip="{x:Static props:TimerStrings.Timer_FullScreen}">
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FullScreen}" FontSize="17" />
                             </Button>
 
@@ -315,7 +315,7 @@
                                     Width="92"
                                     Margin="0,0,18,0"
                                     Click="StartPause_Click"
-                                    ToolTipService.ToolTip="开始或暂停">
+                                    ToolTipService.ToolTip="{x:Static props:TimerStrings.Timer_StartPause}">
                                 <Path x:Name="StartPauseIcon"
                                       Width="18"
                                       Height="18"
@@ -327,7 +327,7 @@
                             <Button x:Name="ResetBtn"
                                     Style="{StaticResource ModernTimerBottomButtonStyle}"
                                     Click="Reset_Click"
-                                    ToolTipService.ToolTip="重置计时">
+                                    ToolTipService.ToolTip="{x:Static props:TimerStrings.Timer_Reset}">
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" FontSize="17" />
                             </Button>
                         </StackPanel>

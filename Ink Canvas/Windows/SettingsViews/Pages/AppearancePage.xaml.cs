@@ -215,6 +215,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                                 Top = mw.Top
                             };
                             newWindow.Show();
+                            Application.Current.MainWindow = newWindow;
                             mw.Close();
                         }
                         catch (Exception ex2)

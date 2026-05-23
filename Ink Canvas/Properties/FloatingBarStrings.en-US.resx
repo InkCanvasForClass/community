@@ -456,4 +456,34 @@
   <data name="ToolbarCondition_Collapsed" xml:space="preserve">
     <value>Toolbar collapsed</value>
   </data>
+  <data name="FloatingBar_PenTipStyle" xml:space="preserve">
+    <value>Pen Tip Style</value>
+  </data>
+  <data name="FloatingBar_PenStyle_RealTime" xml:space="preserve">
+    <value>Real-time</value>
+  </data>
+  <data name="FloatingBar_PenStyle_PointSet" xml:space="preserve">
+    <value>Point Set</value>
+  </data>
+  <data name="FloatingBar_PenStyle_Velocity" xml:space="preserve">
+    <value>Velocity</value>
+  </data>
+  <data name="FloatingBar_PenStyle_Off" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="FloatingBar_HighlighterOverlap" xml:space="preserve">
+    <value>Overlap Darken</value>
+  </data>
+  <data name="FloatingBar_Opacity" xml:space="preserve">
+    <value>Opacity</value>
+  </data>
+  <data name="FloatingBar_FadeDelay" xml:space="preserve">
+    <value>Delay</value>
+  </data>
+  <data name="FloatingBar_FadeSpeed" xml:space="preserve">
+    <value>Speed</value>
+  </data>
+  <data name="FloatingBar_ColorThemeLight" xml:space="preserve">
+    <value>Light</value>
+  </data>
 </root>

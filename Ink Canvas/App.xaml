@@ -12,7 +12,7 @@
                 <MenuItem IsCheckable="True" IsChecked="False" Checked="HideICCMainWindowTrayIconMenuItem_Checked" Unchecked="HideICCMainWindowTrayIconMenuItem_UnChecked" Name="HideICCMainWindowTrayIconMenuItem">
                     <MenuItem.Header>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
-                            <TextBlock Name="HideICCMainWindowTrayIconMenuItemHeaderText" FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="隐藏 ICC-CE 主窗口" />
+                            <TextBlock Name="HideICCMainWindowTrayIconMenuItemHeaderText" FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="{x:Static props:MainStrings.Main_Tray_HideWindow}" />
                         </ikw:SimpleStackPanel>
                     </MenuItem.Header>
                     <MenuItem.Icon>
@@ -32,7 +32,7 @@
                 <MenuItem Name="TempShowMainWindowTrayIconMenuItem" Click="TempShowMainWindowTrayIconMenuItem_Clicked">
                     <MenuItem.Header>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
-                            <TextBlock FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="显示主窗口（2 分钟）" />
+                            <TextBlock FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="{x:Static props:MainStrings.Main_Tray_ShowWindow}" />
                         </ikw:SimpleStackPanel>
                     </MenuItem.Header>
                     <MenuItem.Icon>
@@ -63,7 +63,7 @@
                 <MenuItem Name="DisableAllHotkeysMenuItem" Click="DisableAllHotkeysMenuItem_Clicked">
                     <MenuItem.Header>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
-                            <TextBlock FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="禁用所有快捷键" />
+                            <TextBlock FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="{x:Static props:MainStrings.Main_Tray_DisableHotkeys}" />
                         </ikw:SimpleStackPanel>
                     </MenuItem.Header>
                     <MenuItem.Icon>
@@ -116,7 +116,7 @@
                 <MenuItem Name="FoldFloatingBarTrayIconMenuItem" Click="FoldFloatingBarTrayIconMenuItem_Clicked">
                     <MenuItem.Header>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
-                            <TextBlock Name="FoldFloatingBarTrayIconMenuItemHeaderText" FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="切换为收纳模式" />
+                            <TextBlock Name="FoldFloatingBarTrayIconMenuItemHeaderText" FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="{x:Static props:MainStrings.Main_Tray_SwitchFoldMode}" />
                             <ikw:SimpleStackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="4" Margin="16,0,0,0">
                                 <Border Padding="4,2,4,1" Background="#e4e4e7" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="2.5">
                                     <TextBlock FontSize="8" Foreground="#3f3f46" FontWeight="Bold" Text="CTRL" />

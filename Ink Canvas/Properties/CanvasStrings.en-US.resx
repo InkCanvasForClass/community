@@ -312,4 +312,22 @@
   <data name="Canvas_SecondsFormat" xml:space="preserve">
     <value>{0:0} s</value>
   </data>
+  <data name="Canvas_BackgroundSettings" xml:space="preserve">
+    <value>Background Settings</value>
+  </data>
+  <data name="Canvas_WhiteboardMode" xml:space="preserve">
+    <value>Whiteboard Mode</value>
+  </data>
+  <data name="Canvas_Blackboard" xml:space="preserve">
+    <value>Blackboard</value>
+  </data>
+  <data name="Canvas_BackgroundColor" xml:space="preserve">
+    <value>Background Color</value>
+  </data>
+  <data name="Canvas_ApplyColor" xml:space="preserve">
+    <value>Apply Color</value>
+  </data>
+  <data name="Shape_RemoveAsymptote" xml:space="preserve">
+    <value>Remove asymptote lines?</value>
+  </data>
 </root>

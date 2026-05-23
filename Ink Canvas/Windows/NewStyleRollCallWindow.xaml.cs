@@ -199,11 +199,11 @@ namespace Ink_Canvas
 
         // 开始点名按钮的数据
         private string originalStartBtnIconData = "M5 7C5 8.06087 5.42143 9.07828 6.17157 9.82843C6.92172 10.5786 7.93913 11 9 11C10.0609 11 11.0783 10.5786 11.8284 9.82843C12.5786 9.07828 13 8.06087 13 7C13 5.93913 12.5786 4.92172 11.8284 4.17157C11.0783 3.42143 10.0609 3 9 3C7.93913 3 6.92172 3.42143 6.17157 4.17157C5.42143 4.92172 5 5.93913 5 7Z M3 21V19C3 17.9391 3.42143 16.9217 4.17157 16.1716C4.92172 15.4214 5.93913 15 7 15H11C12.0609 15 13.0783 15.4214 13.8284 16.1716C14.5786 16.9217 15 17.9391 15 19V21 M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89318 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88 M21 21V19C20.9949 18.1172 20.6979 17.2608 20.1553 16.5644C19.6126 15.868 18.8548 15.3707 18 15.15";
-        private string originalStartBtnText = "开始点名";
+        private string originalStartBtnText = Properties.RandomStrings.Random_RollCall_Start;
 
         // 外部点名按钮的数据
         private string externalCallerBtnIconData = "M9 15L15 9 M11 6L11.463 5.464C12.4008 4.52633 13.6727 3.9996 14.9989 3.99969C16.325 3.99979 17.5968 4.52669 18.5345 5.4645C19.4722 6.40231 19.9989 7.67419 19.9988 9.00035C19.9987 10.3265 19.4718 11.5983 18.534 12.536L18 13 M13.0001 18L12.6031 18.534C11.6544 19.4722 10.3739 19.9984 9.03964 19.9984C7.70535 19.9984 6.42489 19.4722 5.47614 18.534C5.0085 18.0716 4.63724 17.521 4.38385 16.9141C4.13047 16.3073 4 15.6561 4 14.9985C4 14.3408 4.13047 13.6897 4.38385 13.0829C4.63724 12.476 5.0085 11.9254 5.47614 11.463L6.00014 11";
-        private string externalCallerBtnText = "外部点名";
+        private string externalCallerBtnText = Properties.RandomStrings.Random_RollCall_ExternalCall;
 
         // JSON文件路径
         private static readonly string ConfigsFolder = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs");
@@ -228,8 +228,8 @@ namespace Ink_Canvas
             if (isSingleDrawMode)
             {
                 // 单次抽模式：使用60个数字
-                MainResultDisplay.Text = "准备抽选...";
-                StatusDisplay.Text = "单次抽模式 - 60个数字";
+                MainResultDisplay.Text = Properties.RandomStrings.Random_RollCall_ReadyToDraw;
+                StatusDisplay.Text = Properties.RandomStrings.Random_RollCall_SingleDrawMode;
                 CountDisplay.Text = "1";
                 CountMinusBtn.IsEnabled = true;
                 CountPlusBtn.IsEnabled = true;
@@ -237,8 +237,8 @@ namespace Ink_Canvas
             else
             {
                 // 普通点名模式
-                MainResultDisplay.Text = "点击开始点名";
-                StatusDisplay.Text = "准备就绪";
+                MainResultDisplay.Text = Properties.RandomStrings.Random_RollCall_ClickToStart;
+                StatusDisplay.Text = Properties.RandomStrings.Random_RollCall_Ready;
                 CountDisplay.Text = "1";
                 CountMinusBtn.IsEnabled = true;
                 CountPlusBtn.IsEnabled = true;
@@ -1054,7 +1054,7 @@ namespace Ink_Canvas
 
         private void UpdateListCountDisplay()
         {
-            ListCountDisplay.Text = $"名单人数: {nameList.Count}";
+            ListCountDisplay.Text = string.Format(Properties.RandomStrings.Random_RollCall_NameListCountFormat, nameList.Count);
         }
 
         private void UpdateStatusDisplay(string status)
@@ -1067,7 +1067,7 @@ namespace Ink_Canvas
             if (results == null || results.Count == 0)
             {
                 ShowSingleResult();
-                MainResultDisplay.Text = "无结果";
+                MainResultDisplay.Text = Properties.RandomStrings.Random_RollCall_NoResult;
                 return;
             }
 
@@ -1169,8 +1169,8 @@ namespace Ink_Canvas
                     bool ok = await SecurityManager.PromptAndVerifyPasswordOrTotpAsync(
                         MainWindow.Settings,
                         this,
-                        "名单修改验证",
-                        "请输入安全密码或 TOTP 验证码以修改点名名单。");
+                        Properties.RandomStrings.Random_RollCall_NameListVerifyTitle,
+                        Properties.RandomStrings.Random_RollCall_NameListVerifyMessage);
                     if (!ok) return;
                 }
                 // 打开名单导入窗口，与老点名UI保持一致
@@ -1180,11 +1180,11 @@ namespace Ink_Canvas
                 // 重新加载名单
                 LoadNamesFromFile();
                 UpdateListCountDisplay();
-                UpdateStatusDisplay($"已导入 {nameList.Count} 个名字");
+                UpdateStatusDisplay(string.Format(Properties.RandomStrings.Random_RollCall_ImportedNamesFormat, nameList.Count));
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"导入名单失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(Properties.RandomStrings.Random_RollCall_ImportFailedFormat, ex.Message), Properties.RandomStrings.Random_Error, MessageBoxButton.OK, MessageBoxImage.Error);
                 LogHelper.WriteLogToFile($"导入名单失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
@@ -1199,7 +1199,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"打开历史记录失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(Properties.RandomStrings.Random_RollCall_OpenHistoryFailedFormat, ex.Message), Properties.RandomStrings.Random_Error, MessageBoxButton.OK, MessageBoxImage.Error);
                 LogHelper.WriteLogToFile($"打开历史记录失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
@@ -1238,8 +1238,8 @@ namespace Ink_Canvas
                     bool ok = await SecurityManager.PromptAndVerifyPasswordOrTotpAsync(
                         MainWindow.Settings,
                         this,
-                        "名单清空验证",
-                        "请输入安全密码或 TOTP 验证码以清空点名名单。");
+                        Properties.RandomStrings.Random_RollCall_NameListClearVerifyTitle,
+                        Properties.RandomStrings.Random_RollCall_NameListClearVerifyMessage);
                     if (!ok) return;
                 }
                 // 清空名单
@@ -1256,11 +1256,11 @@ namespace Ink_Canvas
                     SaveRollCallHistory();
                 }
 
-                UpdateStatusDisplay("名单和历史记录已清空");
+                UpdateStatusDisplay(Properties.RandomStrings.Random_RollCall_ListAndHistoryCleared);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"清空名单和历史记录失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(Properties.RandomStrings.Random_RollCall_ClearFailedFormat, ex.Message), Properties.RandomStrings.Random_Error, MessageBoxButton.OK, MessageBoxImage.Error);
                 LogHelper.WriteLogToFile($"清空名单和历史记录失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
@@ -1276,19 +1276,19 @@ namespace Ink_Canvas
                 {
                     case "Random":
                         RestoreStartRollCallButton();
-                        UpdateStatusDisplay("已选择点名模式: 随机点名");
+                        UpdateStatusDisplay(Properties.RandomStrings.Random_RollCall_ModeSelectedRandom);
                         break;
                     case "Sequential":
                         RestoreStartRollCallButton();
-                        UpdateStatusDisplay("已选择点名模式: 顺序点名");
+                        UpdateStatusDisplay(Properties.RandomStrings.Random_RollCall_ModeSelectedSequential);
                         break;
                     case "Group":
                         RestoreStartRollCallButton();
-                        UpdateStatusDisplay("已选择点名模式: 分组点名");
+                        UpdateStatusDisplay(Properties.RandomStrings.Random_RollCall_ModeSelectedGroup);
                         break;
                     case "External":
                         UpdateStartRollCallButtonForExternal();
-                        UpdateStatusDisplay($"已选择点名模式: 外部点名 ({selectedExternalCaller})");
+                        UpdateStatusDisplay(string.Format(Properties.RandomStrings.Random_RollCall_ModeSelectedExternalFormat, selectedExternalCaller));
                         break;
                 }
             }
@@ -1404,7 +1404,7 @@ namespace Ink_Canvas
 
                     if (selectedRollCallMode == "External")
                     {
-                        UpdateStatusDisplay($"已选择外部点名: {selectedExternalCaller}");
+                        UpdateStatusDisplay(string.Format(Properties.RandomStrings.Random_RollCall_ExternalCallerSelectedFormat, selectedExternalCaller));
                     }
                 }
             }
@@ -1421,9 +1421,8 @@ namespace Ink_Canvas
             if (isExternalCallerFirstClick)
             {
                 MessageBox.Show(
-                    "首次使用外部点名功能，请确保已安装相应的点名软件。\n" +
-                    "如未安装，请前往官网下载并安装后再使用。如果已安装请再次点击此按钮。",
-                    "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                    Properties.RandomStrings.Random_RollCall_ExternalCallerFirstUse,
+                    Properties.RandomStrings.Random_Hint, MessageBoxButton.OK, MessageBoxImage.Information);
                 isExternalCallerFirstClick = false;
                 return;
             }
@@ -1452,11 +1451,11 @@ namespace Ink_Canvas
                     throw lastException ?? new InvalidOperationException("external caller protocols are unavailable");
                 }
 
-                UpdateStatusDisplay($"已启动外部点名: {selectedExternalCaller}");
+                UpdateStatusDisplay(string.Format(Properties.RandomStrings.Random_RollCall_ExternalCallerLaunchedFormat, selectedExternalCaller));
             }
             catch (Exception ex)
             {
-                MessageBox.Show("无法调用外部点名：" + ex.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(Properties.RandomStrings.Random_RollCall_ExternalCallerFailedFormat, ex.Message), Properties.RandomStrings.Random_Error, MessageBoxButton.OK, MessageBoxImage.Error);
                 LogHelper.WriteLogToFile($"外部点名调用失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
@@ -1489,7 +1488,7 @@ namespace Ink_Canvas
                     // 有名单时，使用名单
                     if (currentCount > nameList.Count)
                     {
-                        MessageBox.Show($"点名人数不能超过名单人数！", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        MessageBox.Show(Properties.RandomStrings.Random_RollCall_ExceedNameList, Properties.RandomStrings.Random_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
                         return;
                     }
                     StartRollCall();
@@ -1509,9 +1508,9 @@ namespace Ink_Canvas
                 StopRollCall();
             }
 
-            MainResultDisplay.Text = "点击开始点名";
+            MainResultDisplay.Text = Properties.RandomStrings.Random_RollCall_ClickToStart;
             ShowSingleResult();
-            UpdateStatusDisplay("准备就绪");
+            UpdateStatusDisplay(Properties.RandomStrings.Random_RollCall_Ready);
         }
 
         private void StartRollCall()
@@ -1519,7 +1518,7 @@ namespace Ink_Canvas
             isRollCalling = true;
             StartRollCallBtn.Visibility = Visibility.Collapsed;
             StopRollCallBtn.Visibility = Visibility.Visible;
-            UpdateStatusDisplay("正在点名...");
+            UpdateStatusDisplay(Properties.RandomStrings.Random_RollCall_RollCalling);
 
             // 启动点名动画
             StartRollCallAnimation();
@@ -1572,7 +1571,7 @@ namespace Ink_Canvas
 
                     // 显示结果
                     ShowResults(selectedNames);
-                    UpdateStatusDisplay($"点名完成，共选择 {selectedNames.Count} 人");
+                    UpdateStatusDisplay(string.Format(Properties.RandomStrings.Random_RollCall_DonePeopleFormat, selectedNames.Count));
 
                     // 停止点名状态
                     isRollCalling = false;
@@ -1587,7 +1586,7 @@ namespace Ink_Canvas
             isRollCalling = true;
             StartRollCallBtn.Visibility = Visibility.Collapsed;
             StopRollCallBtn.Visibility = Visibility.Visible;
-            UpdateStatusDisplay("正在抽选...");
+            UpdateStatusDisplay(Properties.RandomStrings.Random_RollCall_Drawing);
 
             // 启动数字抽选动画
             StartNumberRollCallAnimation();
@@ -1637,7 +1636,7 @@ namespace Ink_Canvas
 
                     // 显示结果（这里会根据结果数量决定显示主显示区域还是多结果区域）
                     ShowResults(selectedNumbers);
-                    UpdateStatusDisplay($"抽选完成，共选择 {selectedNumbers.Count} 个数字");
+                    UpdateStatusDisplay(string.Format(Properties.RandomStrings.Random_RollCall_DoneNumbersFormat, selectedNumbers.Count));
 
                     // 停止点名状态
                     isRollCalling = false;
@@ -1652,7 +1651,7 @@ namespace Ink_Canvas
             isRollCalling = false;
             StartRollCallBtn.Visibility = Visibility.Visible;
             StopRollCallBtn.Visibility = Visibility.Collapsed;
-            UpdateStatusDisplay("已停止点名");
+            UpdateStatusDisplay(Properties.RandomStrings.Random_RollCall_Stopped);
         }
 
         /// <summary>
@@ -1663,7 +1662,7 @@ namespace Ink_Canvas
             isRollCalling = true;
             StartRollCallBtn.Visibility = Visibility.Collapsed;
             StopRollCallBtn.Visibility = Visibility.Visible;
-            UpdateStatusDisplay("正在抽选...");
+            UpdateStatusDisplay(Properties.RandomStrings.Random_RollCall_Drawing);
 
             // 启动抽选动画
             StartSingleDrawAnimation();
@@ -1729,7 +1728,7 @@ namespace Ink_Canvas
 
                 // 显示结果
                 ShowResults(selectedNames);
-                UpdateStatusDisplay($"抽选完成，共选择 {selectedNames.Count} 人");
+                UpdateStatusDisplay(string.Format(Properties.RandomStrings.Random_RollCall_DonePeopleFormat, selectedNames.Count));
 
                 // 停止点名状态
                 isRollCalling = false;
@@ -1805,12 +1804,12 @@ namespace Ink_Canvas
                 {
                     ShowSingleResult();
                     MainResultDisplay.Text = selectedNumbers[0];
-                    UpdateStatusDisplay($"抽选完成：{selectedNumbers[0]}");
+                    UpdateStatusDisplay(string.Format(Properties.RandomStrings.Random_RollCall_DoneSingleFormat, selectedNumbers[0]));
                 }
                 else
                 {
                     ShowResults(selectedNumbers);
-                    UpdateStatusDisplay($"抽选完成，共选择 {selectedNumbers.Count} 个数字");
+                    UpdateStatusDisplay(string.Format(Properties.RandomStrings.Random_RollCall_DoneNumbersFormat, selectedNumbers.Count));
                 }
 
                 // 停止点名状态

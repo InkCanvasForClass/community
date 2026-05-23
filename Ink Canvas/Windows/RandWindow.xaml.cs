@@ -340,7 +340,7 @@ namespace Ink_Canvas
                 if (PeopleCount == 0)
                 {
                     PeopleCount = 60;
-                    TextBlockPeopleCount.Text = "点击此处以导入名单";
+                    TextBlockPeopleCount.Text = Properties.RandomStrings.Random_Rand_ClickToImport;
                 }
             }
         }
@@ -352,8 +352,8 @@ namespace Ink_Canvas
                 bool ok = await SecurityManager.PromptAndVerifyPasswordOrTotpAsync(
                     MainWindow.Settings,
                     this,
-                    "名单修改验证",
-                    "请输入安全密码或 TOTP 验证码以修改点名名单。");
+                    Properties.RandomStrings.Random_RollCall_NameListVerifyTitle,
+                    Properties.RandomStrings.Random_RollCall_NameListVerifyMessage);
                 if (!ok) return;
             }
 
@@ -376,9 +376,8 @@ namespace Ink_Canvas
             if (isIslandCallerFirstClick)
             {
                 MessageBox.Show(
-                    "首次使用外部点名功能，请确保已安装相应的点名软件。\n" +
-                    "如未安装，请前往官网下载并安装后再使用。如果已安装请再次点击此按钮。",
-                    "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                    Properties.RandomStrings.Random_RollCall_ExternalCallerFirstUse,
+                    Properties.RandomStrings.Random_Hint, MessageBoxButton.OK, MessageBoxImage.Information);
                 isIslandCallerFirstClick = false;
                 return;
             }
@@ -409,7 +408,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                MessageBox.Show("无法调用外部点名：" + ex.Message);
+                MessageBox.Show(string.Format(Properties.RandomStrings.Random_RollCall_ExternalCallerFailedFormat, ex.Message));
             }
         }
 

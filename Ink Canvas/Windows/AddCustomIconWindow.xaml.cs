@@ -29,8 +29,8 @@ namespace Ink_Canvas
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
-                Filter = "图像文件|*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.ico",
-                Title = "选择一个图标文件"
+                Filter = Properties.RandomStrings.Random_AddIcon_ImageFilter,
+                Title = Properties.RandomStrings.Random_AddIcon_SelectFileTitle
             };
 
             if (openFileDialog.ShowDialog() == true)
@@ -49,7 +49,7 @@ namespace Ink_Canvas
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"无法加载图像: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(string.Format(Properties.RandomStrings.Random_AddIcon_LoadImageFailedFormat, ex.Message), Properties.RandomStrings.Random_Error, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
 
                 // 自动填充名称建议（文件名，不包括扩展名）
@@ -113,7 +113,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"保存图标时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(Properties.RandomStrings.Random_AddIcon_SaveFailedFormat, ex.Message), Properties.RandomStrings.Random_Error, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }

@@ -35,7 +35,7 @@ namespace Ink_Canvas
 
                 if (!File.Exists(historyJsonPath))
                 {
-                    TextBoxHistory.Text = "暂无历史记录";
+                    TextBoxHistory.Text = Properties.RandomStrings.Random_History_NoHistory;
                     return;
                 }
 
@@ -44,7 +44,7 @@ namespace Ink_Canvas
 
                 if (historyData == null || historyData.History == null || historyData.History.Count == 0)
                 {
-                    TextBoxHistory.Text = "暂无历史记录";
+                    TextBoxHistory.Text = Properties.RandomStrings.Random_History_NoHistory;
                     return;
                 }
 
@@ -100,17 +100,17 @@ namespace Ink_Canvas
                 var statsLines = new System.Collections.Generic.List<string>();
                 statsLines.Add($"");
                 statsLines.Add($"");
-                statsLines.Add($"累计抽选次数统计：");
+                statsLines.Add(Properties.RandomStrings.Random_History_StatsTitle);
 
                 // 按累计次数降序排序显示
                 var sortedStats = nameCountDict.OrderByDescending(kvp => kvp.Value).ToList();
                 foreach (var kvp in sortedStats)
                 {
-                    statsLines.Add($"  {kvp.Key}: {kvp.Value}次");
+                    statsLines.Add(string.Format(Properties.RandomStrings.Random_History_CountFormat, kvp.Key, kvp.Value));
                 }
 
                 statsLines.Add($"");
-                statsLines.Add($"共 {totalCount} 条记录，最后更新：{lastUpdate}");
+                statsLines.Add(string.Format(Properties.RandomStrings.Random_History_SummaryFormat, totalCount, lastUpdate));
 
                 // 组合历史记录和统计信息
                 TextBoxHistory.Text = string.Join(Environment.NewLine, historyLines) +
@@ -119,7 +119,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                TextBoxHistory.Text = $"加载历史记录失败: {ex.Message}";
+                TextBoxHistory.Text = string.Format(Properties.RandomStrings.Random_History_LoadFailedFormat, ex.Message);
                 LogHelper.WriteLogToFile($"加载点名历史记录失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }

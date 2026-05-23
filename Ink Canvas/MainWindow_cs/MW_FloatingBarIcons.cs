@@ -845,7 +845,7 @@ namespace Ink_Canvas
                         }
                         else if (Settings.Appearance.EnableChickenSoupInWhiteboardMode && Settings.Appearance.ChickenSoupSource == 3)
                         {
-                            BlackBoardWaterMark.Text = "一言功能不可用";
+                            BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_Unavailable;
                         }
                     }
                 }, TaskScheduler.FromCurrentSynchronizationContext());
@@ -1389,7 +1389,7 @@ namespace Ink_Canvas
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("无法调用外部点名：" + ex.Message);
+                    MessageBox.Show(string.Format(Properties.MainWindowStrings.Main_RollCall_CannotCallExternal, ex.Message));
 
                     // 调用失败时回退到相应的点名窗口
                     if (Settings.RandSettings.UseNewRollCallUI)
@@ -1451,7 +1451,7 @@ namespace Ink_Canvas
             BlackboardUIGridForInkReplay.IsHitTestVisible = false;
 
             AnimationsHelper.ShowWithFadeIn(BorderInkReplayToolBox);
-            InkReplayPanelStatusText.Text = "正在重播墨迹...";
+            InkReplayPanelStatusText.Text = Properties.MainWindowStrings.Main_InkReplayPlaying;
             InkReplayPlayPauseBorder.Background = new SolidColorBrush(Colors.Transparent);
             InkReplayPlayButtonImage.Visibility = Visibility.Collapsed;
             InkReplayPauseButtonImage.Visibility = Visibility.Visible;
@@ -1647,7 +1647,7 @@ namespace Ink_Canvas
         {
             InkReplayPlayPauseBorder.Background = new SolidColorBrush(Colors.Transparent);
             isPauseInkReplay = !isPauseInkReplay;
-            InkReplayPanelStatusText.Text = isPauseInkReplay ? "已暂停！" : "正在重播墨迹...";
+            InkReplayPanelStatusText.Text = isPauseInkReplay ? Properties.MainWindowStrings.Main_InkReplay_Paused : Properties.MainWindowStrings.Main_InkReplayPlaying;
             InkReplayPlayButtonImage.Visibility = isPauseInkReplay ? Visibility.Visible : Visibility.Collapsed;
             InkReplayPauseButtonImage.Visibility = !isPauseInkReplay ? Visibility.Visible : Visibility.Collapsed;
         }
@@ -1701,7 +1701,7 @@ namespace Ink_Canvas
             InkReplayReplayButtonBorder.Background = new SolidColorBrush(Colors.Transparent);
             isRestartInkReplay = true;
             isPauseInkReplay = false;
-            InkReplayPanelStatusText.Text = "正在重播墨迹...";
+            InkReplayPanelStatusText.Text = Properties.MainWindowStrings.Main_InkReplayPlaying;
             InkReplayPlayButtonImage.Visibility = Visibility.Collapsed;
             InkReplayPauseButtonImage.Visibility = Visibility.Visible;
         }
@@ -3745,11 +3745,11 @@ namespace Ink_Canvas
         {
             if (Settings.Advanced.IsSecondConfirmWhenShutdownApp)
             {
-                if (MessageBox.Show("是否继续关闭 InkCanvasForClass，这将丢失当前未保存的墨迹。", "InkCanvasForClass",
+                if (MessageBox.Show(Properties.MainWindowStrings.Main_CloseConfirm_Level1, "InkCanvasForClass",
                         MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.Cancel) return;
-                if (MessageBox.Show("真的狠心关闭 InkCanvasForClass吗？", "InkCanvasForClass",
+                if (MessageBox.Show(Properties.MainWindowStrings.Main_CloseConfirm_Level2, "InkCanvasForClass",
                         MessageBoxButton.OKCancel, MessageBoxImage.Error) == MessageBoxResult.Cancel) return;
-                if (MessageBox.Show("最后确认：确定要关闭 InkCanvasForClass 吗？", "InkCanvasForClass",
+                if (MessageBox.Show(Properties.MainWindowStrings.Main_CloseConfirm_Level3, "InkCanvasForClass",
                         MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.Cancel) return;
             }
 
@@ -3780,7 +3780,7 @@ namespace Ink_Canvas
             {
                 if (Ink_Canvas.Helpers.SecurityManager.IsPasswordRequiredForEnterSettings(Settings))
                 {
-                    bool ok = await Ink_Canvas.Helpers.SecurityManager.PromptAndVerifyPasswordOrTotpAsync(Settings, this, "进入设置", "请输入安全密码或 TOTP 验证码以进入设置。");
+                    bool ok = await Ink_Canvas.Helpers.SecurityManager.PromptAndVerifyPasswordOrTotpAsync(Settings, this, Properties.MainWindowStrings.Main_EnterSettings, Properties.MainWindowStrings.Main_EnterSettings_Message);
                     if (!ok) return;
                 }
             }

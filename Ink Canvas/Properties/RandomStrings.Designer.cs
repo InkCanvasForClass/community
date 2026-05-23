@@ -91,5 +91,193 @@ namespace Ink_Canvas.Properties
         public static string Random_ResetSuccess => ResourceManager.GetString(nameof(Random_ResetSuccess), _resourceCulture);
 
         public static string Random_SelectProgressiveAlarm => ResourceManager.GetString(nameof(Random_SelectProgressiveAlarm), _resourceCulture);
+
+        public static string Random_Error => ResourceManager.GetString(nameof(Random_Error), _resourceCulture);
+
+        public static string Random_Hint => ResourceManager.GetString(nameof(Random_Hint), _resourceCulture);
+
+        public static string Random_Browse => ResourceManager.GetString(nameof(Random_Browse), _resourceCulture);
+
+        public static string Random_Cancel => ResourceManager.GetString(nameof(Random_Cancel), _resourceCulture);
+
+        public static string Random_Preview => ResourceManager.GetString(nameof(Random_Preview), _resourceCulture);
+
+        public static string Random_Name => ResourceManager.GetString(nameof(Random_Name), _resourceCulture);
+
+        public static string Random_Delete => ResourceManager.GetString(nameof(Random_Delete), _resourceCulture);
+
+        public static string Random_RollCall_WindowTitle => ResourceManager.GetString(nameof(Random_RollCall_WindowTitle), _resourceCulture);
+
+        public static string Random_RollCall_ClickToStart => ResourceManager.GetString(nameof(Random_RollCall_ClickToStart), _resourceCulture);
+
+        public static string Random_RollCall_Ready => ResourceManager.GetString(nameof(Random_RollCall_Ready), _resourceCulture);
+
+        public static string Random_RollCall_PeopleCount => ResourceManager.GetString(nameof(Random_RollCall_PeopleCount), _resourceCulture);
+
+        public static string Random_RollCall_DecreaseCount => ResourceManager.GetString(nameof(Random_RollCall_DecreaseCount), _resourceCulture);
+
+        public static string Random_RollCall_IncreaseCount => ResourceManager.GetString(nameof(Random_RollCall_IncreaseCount), _resourceCulture);
+
+        public static string Random_RollCall_Mode => ResourceManager.GetString(nameof(Random_RollCall_Mode), _resourceCulture);
+
+        public static string Random_RollCall_ModeSequential => ResourceManager.GetString(nameof(Random_RollCall_ModeSequential), _resourceCulture);
+
+        public static string Random_RollCall_ModeGroup => ResourceManager.GetString(nameof(Random_RollCall_ModeGroup), _resourceCulture);
+
+        public static string Random_RollCall_ModeExternal => ResourceManager.GetString(nameof(Random_RollCall_ModeExternal), _resourceCulture);
+
+        public static string Random_RollCall_ExternalCall => ResourceManager.GetString(nameof(Random_RollCall_ExternalCall), _resourceCulture);
+
+        public static string Random_RollCall_NameListManagement => ResourceManager.GetString(nameof(Random_RollCall_NameListManagement), _resourceCulture);
+
+        public static string Random_RollCall_Import => ResourceManager.GetString(nameof(Random_RollCall_Import), _resourceCulture);
+
+        public static string Random_RollCall_History => ResourceManager.GetString(nameof(Random_RollCall_History), _resourceCulture);
+
+        public static string Random_RollCall_Start => ResourceManager.GetString(nameof(Random_RollCall_Start), _resourceCulture);
+
+        public static string Random_RollCall_Stop => ResourceManager.GetString(nameof(Random_RollCall_Stop), _resourceCulture);
+
+        public static string Random_RollCall_ReadyToDraw => ResourceManager.GetString(nameof(Random_RollCall_ReadyToDraw), _resourceCulture);
+
+        public static string Random_RollCall_SingleDrawMode => ResourceManager.GetString(nameof(Random_RollCall_SingleDrawMode), _resourceCulture);
+
+        public static string Random_RollCall_NameListCountFormat => ResourceManager.GetString(nameof(Random_RollCall_NameListCountFormat), _resourceCulture);
+
+        public static string Random_RollCall_NoResult => ResourceManager.GetString(nameof(Random_RollCall_NoResult), _resourceCulture);
+
+        public static string Random_RollCall_ImportedNamesFormat => ResourceManager.GetString(nameof(Random_RollCall_ImportedNamesFormat), _resourceCulture);
+
+        public static string Random_RollCall_ImportFailedFormat => ResourceManager.GetString(nameof(Random_RollCall_ImportFailedFormat), _resourceCulture);
+
+        public static string Random_RollCall_OpenHistoryFailedFormat => ResourceManager.GetString(nameof(Random_RollCall_OpenHistoryFailedFormat), _resourceCulture);
+
+        public static string Random_RollCall_ListAndHistoryCleared => ResourceManager.GetString(nameof(Random_RollCall_ListAndHistoryCleared), _resourceCulture);
+
+        public static string Random_RollCall_ClearFailedFormat => ResourceManager.GetString(nameof(Random_RollCall_ClearFailedFormat), _resourceCulture);
+
+        public static string Random_RollCall_ModeSelectedRandom => ResourceManager.GetString(nameof(Random_RollCall_ModeSelectedRandom), _resourceCulture);
+
+        public static string Random_RollCall_ModeSelectedSequential => ResourceManager.GetString(nameof(Random_RollCall_ModeSelectedSequential), _resourceCulture);
+
+        public static string Random_RollCall_ModeSelectedGroup => ResourceManager.GetString(nameof(Random_RollCall_ModeSelectedGroup), _resourceCulture);
+
+        public static string Random_RollCall_ModeSelectedExternalFormat => ResourceManager.GetString(nameof(Random_RollCall_ModeSelectedExternalFormat), _resourceCulture);
+
+        public static string Random_RollCall_ExternalCallerSelectedFormat => ResourceManager.GetString(nameof(Random_RollCall_ExternalCallerSelectedFormat), _resourceCulture);
+
+        public static string Random_RollCall_ExternalCallerFirstUse => ResourceManager.GetString(nameof(Random_RollCall_ExternalCallerFirstUse), _resourceCulture);
+
+        public static string Random_RollCall_ExternalCallerLaunchedFormat => ResourceManager.GetString(nameof(Random_RollCall_ExternalCallerLaunchedFormat), _resourceCulture);
+
+        public static string Random_RollCall_ExternalCallerFailedFormat => ResourceManager.GetString(nameof(Random_RollCall_ExternalCallerFailedFormat), _resourceCulture);
+
+        public static string Random_RollCall_ExceedNameList => ResourceManager.GetString(nameof(Random_RollCall_ExceedNameList), _resourceCulture);
+
+        public static string Random_RollCall_RollCalling => ResourceManager.GetString(nameof(Random_RollCall_RollCalling), _resourceCulture);
+
+        public static string Random_RollCall_DonePeopleFormat => ResourceManager.GetString(nameof(Random_RollCall_DonePeopleFormat), _resourceCulture);
+
+        public static string Random_RollCall_Drawing => ResourceManager.GetString(nameof(Random_RollCall_Drawing), _resourceCulture);
+
+        public static string Random_RollCall_DoneNumbersFormat => ResourceManager.GetString(nameof(Random_RollCall_DoneNumbersFormat), _resourceCulture);
+
+        public static string Random_RollCall_Stopped => ResourceManager.GetString(nameof(Random_RollCall_Stopped), _resourceCulture);
+
+        public static string Random_RollCall_DoneSingleFormat => ResourceManager.GetString(nameof(Random_RollCall_DoneSingleFormat), _resourceCulture);
+
+        public static string Random_History_WindowTitle => ResourceManager.GetString(nameof(Random_History_WindowTitle), _resourceCulture);
+
+        public static string Random_History_Title => ResourceManager.GetString(nameof(Random_History_Title), _resourceCulture);
+
+        public static string Random_History_NoHistory => ResourceManager.GetString(nameof(Random_History_NoHistory), _resourceCulture);
+
+        public static string Random_History_RecentCountFormat => ResourceManager.GetString(nameof(Random_History_RecentCountFormat), _resourceCulture);
+
+        public static string Random_History_StatsTitle => ResourceManager.GetString(nameof(Random_History_StatsTitle), _resourceCulture);
+
+        public static string Random_History_CountFormat => ResourceManager.GetString(nameof(Random_History_CountFormat), _resourceCulture);
+
+        public static string Random_History_SummaryFormat => ResourceManager.GetString(nameof(Random_History_SummaryFormat), _resourceCulture);
+
+        public static string Random_History_LoadFailedFormat => ResourceManager.GetString(nameof(Random_History_LoadFailedFormat), _resourceCulture);
+
+        public static string Random_NamesInput_WindowTitle => ResourceManager.GetString(nameof(Random_NamesInput_WindowTitle), _resourceCulture);
+
+        public static string Random_NamesInput_Hint => ResourceManager.GetString(nameof(Random_NamesInput_Hint), _resourceCulture);
+
+        public static string Random_NamesInput_SaveConfirm => ResourceManager.GetString(nameof(Random_NamesInput_SaveConfirm), _resourceCulture);
+
+        public static string Random_NamesInput_Title => ResourceManager.GetString(nameof(Random_NamesInput_Title), _resourceCulture);
+
+        public static string Random_ManageBg_WindowTitle => ResourceManager.GetString(nameof(Random_ManageBg_WindowTitle), _resourceCulture);
+
+        public static string Random_ManageBg_Title => ResourceManager.GetString(nameof(Random_ManageBg_Title), _resourceCulture);
+
+        public static string Random_ManageBg_SetAsCurrent => ResourceManager.GetString(nameof(Random_ManageBg_SetAsCurrent), _resourceCulture);
+
+        public static string Random_ManageBg_SetSuccessFormat => ResourceManager.GetString(nameof(Random_ManageBg_SetSuccessFormat), _resourceCulture);
+
+        public static string Random_ManageBg_SetSuccessTitle => ResourceManager.GetString(nameof(Random_ManageBg_SetSuccessTitle), _resourceCulture);
+
+        public static string Random_ManageBg_DeleteConfirmFormat => ResourceManager.GetString(nameof(Random_ManageBg_DeleteConfirmFormat), _resourceCulture);
+
+        public static string Random_ManageBg_DeleteConfirmTitle => ResourceManager.GetString(nameof(Random_ManageBg_DeleteConfirmTitle), _resourceCulture);
+
+        public static string Random_ManageBg_DeleteFailedFormat => ResourceManager.GetString(nameof(Random_ManageBg_DeleteFailedFormat), _resourceCulture);
+
+        public static string Random_AddBg_WindowTitle => ResourceManager.GetString(nameof(Random_AddBg_WindowTitle), _resourceCulture);
+
+        public static string Random_AddBg_Title => ResourceManager.GetString(nameof(Random_AddBg_Title), _resourceCulture);
+
+        public static string Random_AddBg_SelectImage => ResourceManager.GetString(nameof(Random_AddBg_SelectImage), _resourceCulture);
+
+        public static string Random_AddBg_NameLabel => ResourceManager.GetString(nameof(Random_AddBg_NameLabel), _resourceCulture);
+
+        public static string Random_AddBg_PreviewLabel => ResourceManager.GetString(nameof(Random_AddBg_PreviewLabel), _resourceCulture);
+
+        public static string Random_AddBg_NoImage => ResourceManager.GetString(nameof(Random_AddBg_NoImage), _resourceCulture);
+
+        public static string Random_AddBg_ImageFilter => ResourceManager.GetString(nameof(Random_AddBg_ImageFilter), _resourceCulture);
+
+        public static string Random_AddBg_SelectImageTitle => ResourceManager.GetString(nameof(Random_AddBg_SelectImageTitle), _resourceCulture);
+
+        public static string Random_AddBg_LoadImageFailedFormat => ResourceManager.GetString(nameof(Random_AddBg_LoadImageFailedFormat), _resourceCulture);
+
+        public static string Random_AddBg_SaveFailedFormat => ResourceManager.GetString(nameof(Random_AddBg_SaveFailedFormat), _resourceCulture);
+
+        public static string Random_CustomIcon_Title => ResourceManager.GetString(nameof(Random_CustomIcon_Title), _resourceCulture);
+
+        public static string Random_AddIcon_WindowTitle => ResourceManager.GetString(nameof(Random_AddIcon_WindowTitle), _resourceCulture);
+
+        public static string Random_AddIcon_Title => ResourceManager.GetString(nameof(Random_AddIcon_Title), _resourceCulture);
+
+        public static string Random_AddIcon_SelectFile => ResourceManager.GetString(nameof(Random_AddIcon_SelectFile), _resourceCulture);
+
+        public static string Random_AddIcon_NameLabel => ResourceManager.GetString(nameof(Random_AddIcon_NameLabel), _resourceCulture);
+
+        public static string Random_AddIcon_PreviewLabel => ResourceManager.GetString(nameof(Random_AddIcon_PreviewLabel), _resourceCulture);
+
+        public static string Random_AddIcon_ImageFilter => ResourceManager.GetString(nameof(Random_AddIcon_ImageFilter), _resourceCulture);
+
+        public static string Random_AddIcon_SelectFileTitle => ResourceManager.GetString(nameof(Random_AddIcon_SelectFileTitle), _resourceCulture);
+
+        public static string Random_AddIcon_LoadImageFailedFormat => ResourceManager.GetString(nameof(Random_AddIcon_LoadImageFailedFormat), _resourceCulture);
+
+        public static string Random_AddIcon_SaveFailedFormat => ResourceManager.GetString(nameof(Random_AddIcon_SaveFailedFormat), _resourceCulture);
+
+        public static string Random_QuickDraw_WindowTitle => ResourceManager.GetString(nameof(Random_QuickDraw_WindowTitle), _resourceCulture);
+
+        public static string Random_QuickDraw_Title => ResourceManager.GetString(nameof(Random_QuickDraw_Title), _resourceCulture);
+
+        public static string Random_Rand_ClickToImport => ResourceManager.GetString(nameof(Random_Rand_ClickToImport), _resourceCulture);
+
+        public static string Random_RollCall_NameListVerifyTitle => ResourceManager.GetString(nameof(Random_RollCall_NameListVerifyTitle), _resourceCulture);
+
+        public static string Random_RollCall_NameListVerifyMessage => ResourceManager.GetString(nameof(Random_RollCall_NameListVerifyMessage), _resourceCulture);
+
+        public static string Random_RollCall_NameListClearVerifyTitle => ResourceManager.GetString(nameof(Random_RollCall_NameListClearVerifyTitle), _resourceCulture);
+
+        public static string Random_RollCall_NameListClearVerifyMessage => ResourceManager.GetString(nameof(Random_RollCall_NameListClearVerifyMessage), _resourceCulture);
     }
 }

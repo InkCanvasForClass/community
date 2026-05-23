@@ -3,18 +3,19 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Reflection;
 using System.Resources;
 using System.Threading;
+using System.Xml.Linq;
 
 namespace Ink_Canvas.Helpers
 {
     public static class LocalizationHelper
     {
-        private static readonly string[] CustomCultureNames = { "zh-ME" };
-        private static readonly Dictionary<string, Dictionary<string, string>> _zhMeCache = new();
+        private static readonly string[] EmbeddedOnlyCultures = { "en-US", "zh-ME" };
+        private static readonly Dictionary<(string className, string cultureName), Dictionary<string, string>> _embeddedCache = new();
         private static readonly Dictionary<string, ResourceManager> _originalResourceManagers = new();
-        private static bool _zhMeActive;
 
         public static CultureInfo CurrentCulture
         {
@@ -61,7 +62,7 @@ namespace Ink_Canvas.Helpers
 
         private static bool IsCustomCulture(string name)
         {
-            foreach (var cn in CustomCultureNames)
+            foreach (var cn in EmbeddedOnlyCultures)
                 if (string.Equals(cn, name, StringComparison.OrdinalIgnoreCase))
                     return true;
             return false;
@@ -77,7 +78,8 @@ namespace Ink_Canvas.Helpers
 
             try
             {
-                var clone = (CultureInfo)CultureInfo.GetCultureInfo("zh-CN").Clone();
+                var parent = name.StartsWith("zh-", StringComparison.OrdinalIgnoreCase) ? "zh-CN" : "en-US";
+                var clone = (CultureInfo)CultureInfo.GetCultureInfo(parent).Clone();
                 var dataField = typeof(CultureInfo).GetField("_cultureData",
                     BindingFlags.Instance | BindingFlags.NonPublic);
                 if (dataField != null)
@@ -99,7 +101,8 @@ namespace Ink_Canvas.Helpers
 
         private static void SetAllResourceCultures(CultureInfo culture)
         {
-            var isZhMe = culture.Name.StartsWith("zh-ME", StringComparison.OrdinalIgnoreCase);
+            var cultureName = culture.Name;
+            var isEmbeddedOnly = IsEmbeddedOnlyCulture(cultureName);
             var asm = Assembly.GetExecutingAssembly();
 
             foreach (var type in asm.GetTypes())
@@ -111,58 +114,81 @@ namespace Ink_Canvas.Helpers
                 if (prop != null && prop.CanWrite)
                     prop.SetValue(null, culture);
 
-                if (isZhMe)
-                    InstallZhMeResourceManager(type, asm);
+                if (isEmbeddedOnly)
+                    InstallEmbeddedResourceManager(type, asm, cultureName);
                 else
                     RestoreOriginalResourceManager(type);
             }
-
-            _zhMeActive = isZhMe;
         }
 
-        private static void InstallZhMeResourceManager(Type type, Assembly asm)
+        private static bool IsEmbeddedOnlyCulture(string name)
+        {
+            foreach (var cn in EmbeddedOnlyCultures)
+                if (string.Equals(cn, name, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            return false;
+        }
+
+        private static void InstallEmbeddedResourceManager(Type type, Assembly asm, string cultureName)
         {
             var resourceManField = type.GetField("_resourceMan",
                 BindingFlags.Static | BindingFlags.NonPublic);
             if (resourceManField == null) return;
 
+            var resourceManProp = type.GetProperty("ResourceManager",
+                BindingFlags.Public | BindingFlags.Static);
+            if (resourceManProp != null)
+                resourceManProp.GetValue(null);
+
             var current = (ResourceManager)resourceManField.GetValue(null);
 
-            if (_originalResourceManagers.ContainsKey(type.Name))
-                return;
+            if (!_originalResourceManagers.ContainsKey(type.Name))
+            {
+                if (current != null && !(current is EmbeddedResourceManager))
+                    _originalResourceManagers[type.Name] = current;
+            }
 
-            if (current != null)
-                _originalResourceManagers[type.Name] = current;
-
-            var zhMeStrings = LoadZhMeResource(asm, type.Name);
-            var customManager = new ZhMeResourceManager(current, zhMeStrings);
+            var embeddedStrings = LoadEmbeddedResource(asm, type.Name, cultureName);
+            var original = _originalResourceManagers.TryGetValue(type.Name, out var orig) ? orig : current;
+            var customManager = new EmbeddedResourceManager(original, cultureName, embeddedStrings);
             resourceManField.SetValue(null, customManager);
         }
 
         private static void RestoreOriginalResourceManager(Type type)
         {
-            if (!_originalResourceManagers.TryGetValue(type.Name, out var original))
-                return;
-
             var resourceManField = type.GetField("_resourceMan",
                 BindingFlags.Static | BindingFlags.NonPublic);
             if (resourceManField == null) return;
 
-            resourceManField.SetValue(null, original);
-            _originalResourceManagers.Remove(type.Name);
+            if (_originalResourceManagers.TryGetValue(type.Name, out var original))
+            {
+                resourceManField.SetValue(null, original);
+                _originalResourceManagers.Remove(type.Name);
+                return;
+            }
+
+            var current = resourceManField.GetValue(null) as ResourceManager;
+            if (current is EmbeddedResourceManager emb)
+            {
+                var fallbackField = typeof(EmbeddedResourceManager).GetField("_fallback",
+                    BindingFlags.Instance | BindingFlags.NonPublic);
+                if (fallbackField?.GetValue(emb) is ResourceManager fallback)
+                    resourceManField.SetValue(null, fallback);
+            }
         }
 
-        private static Dictionary<string, string> LoadZhMeResource(Assembly asm, string className)
+        private static Dictionary<string, string> LoadEmbeddedResource(Assembly asm, string className, string cultureName)
         {
-            if (_zhMeCache.TryGetValue(className, out var cached))
+            var cacheKey = (className, cultureName.ToLowerInvariant());
+            if (_embeddedCache.TryGetValue(cacheKey, out var cached))
                 return cached;
 
             var result = new Dictionary<string, string>();
-            var resourceName = $"Ink_Canvas.Properties.{className}.zh-ME.resources";
 
+            var resName = $"Ink_Canvas.Properties.{className}.{cultureName}.resources";
             try
             {
-                using var stream = asm.GetManifestResourceStream(resourceName);
+                using var stream = asm.GetManifestResourceStream(resName);
                 if (stream != null)
                 {
                     using var reader = new ResourceReader(stream);
@@ -175,26 +201,78 @@ namespace Ink_Canvas.Helpers
             }
             catch { }
 
-            _zhMeCache[className] = result;
+            if (result.Count > 0)
+            {
+                _embeddedCache[cacheKey] = result;
+                return result;
+            }
+
+            var resxName = $"Ink_Canvas.Properties.{className}.{cultureName}.resx";
+            try
+            {
+                using var stream = asm.GetManifestResourceStream(resxName);
+                if (stream != null)
+                {
+                    ParseResx(stream, result);
+                }
+            }
+            catch { }
+
+            if (result.Count > 0)
+            {
+                _embeddedCache[cacheKey] = result;
+                return result;
+            }
+
+            try
+            {
+                var exeDir = Path.GetDirectoryName(asm.Location);
+                var resxPath = Path.Combine(exeDir, "Properties", $"{className}.{cultureName}.resx");
+                if (!File.Exists(resxPath))
+                    resxPath = Path.Combine(exeDir, $"{className}.{cultureName}.resx");
+                if (File.Exists(resxPath))
+                {
+                    using var fs = File.OpenRead(resxPath);
+                    ParseResx(fs, result);
+                }
+            }
+            catch { }
+
+            _embeddedCache[cacheKey] = result;
             return result;
         }
 
-        private class ZhMeResourceManager : ResourceManager
+        private static void ParseResx(Stream stream, Dictionary<string, string> result)
+        {
+            var doc = XDocument.Load(stream);
+            var ns = doc.Root.Name.Namespace;
+            foreach (var data in doc.Root.Elements(ns + "data"))
+            {
+                var nameAttr = data.Attribute("name")?.Value;
+                var valueElem = data.Element(ns + "value")?.Value;
+                if (nameAttr != null && valueElem != null)
+                    result[nameAttr] = valueElem;
+            }
+        }
+
+        private class EmbeddedResourceManager : ResourceManager
         {
             private readonly ResourceManager _fallback;
-            private readonly Dictionary<string, string> _zhMeStrings;
+            private readonly string _cultureName;
+            private readonly Dictionary<string, string> _strings;
 
-            public ZhMeResourceManager(ResourceManager fallback, Dictionary<string, string> zhMeStrings)
+            public EmbeddedResourceManager(ResourceManager fallback, string cultureName, Dictionary<string, string> strings)
             {
                 _fallback = fallback;
-                _zhMeStrings = zhMeStrings;
+                _cultureName = cultureName;
+                _strings = strings;
             }
 
             public override string GetString(string name, CultureInfo culture)
             {
-                if (culture != null && culture.Name.StartsWith("zh-ME", StringComparison.OrdinalIgnoreCase))
+                if (culture != null && string.Equals(culture.Name, _cultureName, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (_zhMeStrings.TryGetValue(name, out var value))
+                    if (_strings.TryGetValue(name, out var value))
                         return value;
                 }
                 return _fallback.GetString(name, culture);
@@ -202,7 +280,7 @@ namespace Ink_Canvas.Helpers
 
             public override string GetString(string name)
             {
-                if (_zhMeStrings.TryGetValue(name, out var value))
+                if (_strings.TryGetValue(name, out var value))
                     return value;
                 return _fallback.GetString(name);
             }

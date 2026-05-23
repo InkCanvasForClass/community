@@ -315,5 +315,25 @@ namespace Ink_Canvas.Properties
         public static string ToolbarPage_VerticalAlignment => ResourceManager.GetString(nameof(ToolbarPage_VerticalAlignment), _resourceCulture);
 
         public static string FloatingBar_QuickPaletteMode => ResourceManager.GetString(nameof(FloatingBar_QuickPaletteMode), _resourceCulture);
+
+        public static string FloatingBar_PenTipStyle => ResourceManager.GetString(nameof(FloatingBar_PenTipStyle), _resourceCulture);
+
+        public static string FloatingBar_PenStyle_RealTime => ResourceManager.GetString(nameof(FloatingBar_PenStyle_RealTime), _resourceCulture);
+
+        public static string FloatingBar_PenStyle_PointSet => ResourceManager.GetString(nameof(FloatingBar_PenStyle_PointSet), _resourceCulture);
+
+        public static string FloatingBar_PenStyle_Velocity => ResourceManager.GetString(nameof(FloatingBar_PenStyle_Velocity), _resourceCulture);
+
+        public static string FloatingBar_PenStyle_Off => ResourceManager.GetString(nameof(FloatingBar_PenStyle_Off), _resourceCulture);
+
+        public static string FloatingBar_HighlighterOverlap => ResourceManager.GetString(nameof(FloatingBar_HighlighterOverlap), _resourceCulture);
+
+        public static string FloatingBar_Opacity => ResourceManager.GetString(nameof(FloatingBar_Opacity), _resourceCulture);
+
+        public static string FloatingBar_FadeDelay => ResourceManager.GetString(nameof(FloatingBar_FadeDelay), _resourceCulture);
+
+        public static string FloatingBar_FadeSpeed => ResourceManager.GetString(nameof(FloatingBar_FadeSpeed), _resourceCulture);
+
+        public static string FloatingBar_ColorThemeLight => ResourceManager.GetString(nameof(FloatingBar_ColorThemeLight), _resourceCulture);
     }
 }

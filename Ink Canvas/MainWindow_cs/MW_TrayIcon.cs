@@ -1,5 +1,6 @@
 using H.NotifyIcon;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using iNKORE.UI.WPF.Controls;
 using System;
 using System.Diagnostics;
@@ -168,7 +169,7 @@ namespace Ink_Canvas
                 {
                     FoldFloatingBarTrayIconMenuItemIconEyeOff.Visibility = Visibility.Hidden;
                     FoldFloatingBarTrayIconMenuItemIconEyeOn.Visibility = Visibility.Visible;
-                    FoldFloatingBarTrayIconMenuItemHeaderText.Text = "退出收纳模式";
+                    FoldFloatingBarTrayIconMenuItemHeaderText.Text = MainWindowStrings.Main_Tray_ExitFoldMode;
                     if (!HideICCMainWindowTrayIconMenuItem.IsChecked)
                     {
                         ResetFloatingBarPositionTrayIconMenuItem.IsEnabled = false;
@@ -179,7 +180,7 @@ namespace Ink_Canvas
                 {
                     FoldFloatingBarTrayIconMenuItemIconEyeOff.Visibility = Visibility.Visible;
                     FoldFloatingBarTrayIconMenuItemIconEyeOn.Visibility = Visibility.Hidden;
-                    FoldFloatingBarTrayIconMenuItemHeaderText.Text = "切换为收纳模式";
+                    FoldFloatingBarTrayIconMenuItemHeaderText.Text = MainWindowStrings.Main_Tray_EnterFoldMode;
                     if (!HideICCMainWindowTrayIconMenuItem.IsChecked)
                     {
                         ResetFloatingBarPositionTrayIconMenuItem.IsEnabled = true;
@@ -616,14 +617,14 @@ namespace Ink_Canvas
                                 var textBlock = headerPanel.Children[0] as TextBlock;
                                 if (textBlock != null)
                                 {
-                                    if (textBlock.Text == "禁用所有快捷键")
+                                    if (textBlock.Text == MainWindowStrings.Main_Tray_DisableHotkeys)
                                     {
-                                        textBlock.Text = "启用所有快捷键";
+                                        textBlock.Text = MainWindowStrings.Main_Tray_EnableHotkeys;
                                         LogHelper.WriteLogToFile("已禁用所有快捷键", LogHelper.LogType.Event);
                                     }
                                     else
                                     {
-                                        textBlock.Text = "禁用所有快捷键";
+                                        textBlock.Text = MainWindowStrings.Main_Tray_DisableHotkeys;
                                         // 重新启用快捷键
                                         hotkeyManager.EnableHotkeyRegistration();
                                         LogHelper.WriteLogToFile("已启用所有快捷键", LogHelper.LogType.Event);

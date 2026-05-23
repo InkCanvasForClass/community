@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -213,7 +213,43 @@
   <data name="TwoFingerGesture" xml:space="preserve">
     <value>允许幻灯片模式下的双指手势</value>
   </data>
+  <data name="PPTQuickPanel_CloseMagnifier" xml:space="preserve">
+    <value>关闭放大镜</value>
+  </data>
+  <data name="PPTQuickPanel_FocusMagnifier" xml:space="preserve">
+    <value>聚焦放大镜</value>
+  </data>
+  <data name="PPTQuickPanel_Insert" xml:space="preserve">
+    <value>插入</value>
+  </data>
+  <data name="PPTQuickPanel_MagnifierHint" xml:space="preserve">
+    <value>拖动选择框移动，拖动控制点缩放，按 ESC 关闭</value>
+  </data>
+  <data name="PPTQuickPanel_OpenMagnifier" xml:space="preserve">
+    <value>开启放大镜</value>
+  </data>
+  <data name="PPTQuickPanel_ScreenshotInsert" xml:space="preserve">
+    <value>截图插入</value>
+  </data>
+  <data name="PPTQuickPanel_Sound" xml:space="preserve">
+    <value>声音</value>
+  </data>
+  <data name="PPTQuickPanel_Zoom" xml:space="preserve">
+    <value>缩放</value>
+  </data>
   <data name="UseRot" xml:space="preserve">
     <value>使用 ROT 联动</value>
+  </data>
+  <data name="PPT_RememberLastPage_Prompt" xml:space="preserve">
+    <value>上次播放到了第 {0} 页, 是否立即跳转</value>
+  </data>
+  <data name="PPT_HiddenSlides_Detected" xml:space="preserve">
+    <value>检测到此演示文档中包含隐藏的幻灯片，是否取消隐藏？</value>
+  </data>
+  <data name="PPT_AutoPlay_Detected" xml:space="preserve">
+    <value>检测到此演示文档中自动播放或排练计时已经启用，可能导致幻灯片自动翻页，是否取消？</value>
+  </data>
+  <data name="PPT_SlidesNotFound" xml:space="preserve">
+    <value>未找到幻灯片</value>
   </data>
 </root>

@@ -373,10 +373,10 @@ namespace Ink_Canvas
                 LaserPenColorThemeSwitchIcon.Source = newImageSource;
                 BoardLaserPenColorThemeSwitchIcon.Source = newImageSource;
 
-                ColorThemeSwitchTextBlock.Text = "暗系";
-                BoardColorThemeSwitchTextBlock.Text = "暗系";
-                LaserPenColorThemeSwitchTextBlock.Text = "暗系";
-                BoardLaserPenColorThemeSwitchTextBlock.Text = "暗系";
+                ColorThemeSwitchTextBlock.Text = Properties.MainWindowStrings.Main_Colors_DarkTheme;
+                BoardColorThemeSwitchTextBlock.Text = Properties.MainWindowStrings.Main_Colors_DarkTheme;
+                LaserPenColorThemeSwitchTextBlock.Text = Properties.MainWindowStrings.Main_Colors_DarkTheme;
+                BoardLaserPenColorThemeSwitchTextBlock.Text = Properties.MainWindowStrings.Main_Colors_DarkTheme;
             }
             else
             {
@@ -429,10 +429,10 @@ namespace Ink_Canvas
                 LaserPenColorThemeSwitchIcon.Source = newImageSource;
                 BoardLaserPenColorThemeSwitchIcon.Source = newImageSource;
 
-                ColorThemeSwitchTextBlock.Text = "亮系";
-                BoardColorThemeSwitchTextBlock.Text = "亮系";
-                LaserPenColorThemeSwitchTextBlock.Text = "亮系";
-                BoardLaserPenColorThemeSwitchTextBlock.Text = "亮系";
+                ColorThemeSwitchTextBlock.Text = Properties.MainWindowStrings.Main_Colors_LightTheme;
+                BoardColorThemeSwitchTextBlock.Text = Properties.MainWindowStrings.Main_Colors_LightTheme;
+                LaserPenColorThemeSwitchTextBlock.Text = Properties.MainWindowStrings.Main_Colors_LightTheme;
+                BoardLaserPenColorThemeSwitchTextBlock.Text = Properties.MainWindowStrings.Main_Colors_LightTheme;
             }
 
             // 改变选中提示

@@ -14,23 +14,23 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         
-        <TextBlock Text="自定义浮动栏图标管理" FontSize="20" FontWeight="Bold" Margin="0,0,0,15"/>
+        <TextBlock Text="{x:Static props:RandomStrings.Random_CustomIcon_Title}" FontSize="20" FontWeight="Bold" Margin="0,0,0,15"/>
         
         <ListView Grid.Row="1" Name="CustomIconsListView" BorderBrush="#CCCCCC" BorderThickness="1">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="预览" Width="80">
+                    <GridViewColumn Header="{x:Static props:RandomStrings.Random_Preview}" Width="80">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <Image Source="{Binding FilePath}" Width="32" Height="32"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="名称" Width="200" DisplayMemberBinding="{Binding Name}"/>
+                    <GridViewColumn Header="{x:Static props:RandomStrings.Random_Name}" Width="200" DisplayMemberBinding="{Binding Name}"/>
                     <GridViewColumn Header="{x:Static props:NotificationStrings.ActionsTitle}" Width="100">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Content="删除" Click="DeleteCustomIcon_Click" Tag="{Binding}"/>
+                                <Button Content="{x:Static props:RandomStrings.Random_Delete}" Click="DeleteCustomIcon_Click" Tag="{Binding}"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

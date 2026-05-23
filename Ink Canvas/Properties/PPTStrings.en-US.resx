@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -213,7 +213,43 @@
   <data name="TwoFingerGesture" xml:space="preserve">
     <value>Allow two-finger gestures in slide show</value>
   </data>
+  <data name="PPTQuickPanel_CloseMagnifier" xml:space="preserve">
+    <value>Close Magnifier</value>
+  </data>
+  <data name="PPTQuickPanel_FocusMagnifier" xml:space="preserve">
+    <value>Focus Magnifier</value>
+  </data>
+  <data name="PPTQuickPanel_Insert" xml:space="preserve">
+    <value>Insert</value>
+  </data>
+  <data name="PPTQuickPanel_MagnifierHint" xml:space="preserve">
+    <value>Drag selection box to move, drag control points to zoom, press ESC to close</value>
+  </data>
+  <data name="PPTQuickPanel_OpenMagnifier" xml:space="preserve">
+    <value>Turn on Magnifier</value>
+  </data>
+  <data name="PPTQuickPanel_ScreenshotInsert" xml:space="preserve">
+    <value>Screenshot Insert</value>
+  </data>
+  <data name="PPTQuickPanel_Sound" xml:space="preserve">
+    <value>Sound</value>
+  </data>
+  <data name="PPTQuickPanel_Zoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
   <data name="UseRot" xml:space="preserve">
     <value>Use ROT integration</value>
+  </data>
+  <data name="PPT_RememberLastPage_Prompt" xml:space="preserve">
+    <value>Last played at page {0}, jump to it now?</value>
+  </data>
+  <data name="PPT_HiddenSlides_Detected" xml:space="preserve">
+    <value>Hidden slides detected in this presentation. Unhide them?</value>
+  </data>
+  <data name="PPT_AutoPlay_Detected" xml:space="preserve">
+    <value>Auto-play or rehearsal timings detected, which may cause automatic slide advancement. Disable?</value>
+  </data>
+  <data name="PPT_SlidesNotFound" xml:space="preserve">
+    <value>Slides not found</value>
   </data>
 </root>
