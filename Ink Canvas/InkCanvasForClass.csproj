@@ -106,6 +106,9 @@
     <None Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Costura.Fody" Version="6.0.0">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="gong-wpf-dragdrop" Version="4.0.0" />
     <PackageReference Include="H.NotifyIcon.Wpf" Version="2.0.131" />
     <PackageReference Include="iNKORE.UI.WPF.Modern" Version="0.10.2.1" />
@@ -548,21 +551,6 @@
       <IACoreHelperFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.IACoreHelper\bin\$(Configuration)\*.*" />
     </ItemGroup>
     <Copy SourceFiles="@(IACoreHelperFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" Condition="'@(IACoreHelperFiles)' != ''" />
-  </Target>
-
-  <Target Name="ExcludeIACoreHelperFromSingleFile" BeforeTargets="GenerateSingleFileBundle">
-    <ItemGroup>
-      <ResolvedFileToPublish Update="@(ResolvedFileToPublish)" Condition="$([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('InkCanvas.IACoreHelper'))">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      </ResolvedFileToPublish>
-    </ItemGroup>
-  </Target>
-
-  <Target Name="CopyIACoreHelperToPublishDirectory" AfterTargets="Publish">
-    <ItemGroup>
-      <IACoreHelperPublishFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.IACoreHelper\bin\$(Configuration)\*.*" />
-    </ItemGroup>
-    <Copy SourceFiles="@(IACoreHelperPublishFiles)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" Condition="'@(IACoreHelperPublishFiles)' != '' and '$(PublishDir)' != ''" />
   </Target>
 
   <ItemGroup>
