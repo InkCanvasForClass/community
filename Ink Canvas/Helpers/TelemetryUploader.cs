@@ -212,8 +212,7 @@ namespace Ink_Canvas.Helpers
                     LogHelper.WriteLogToFile($"从程序集资源读取遥测 Token 失败: {ex.Message}", LogHelper.LogType.Warning);
                 }
 
-                string assemblyLocation = Assembly.GetExecutingAssembly().Location;
-                string currentDir = Path.GetDirectoryName(assemblyLocation);
+                string currentDir = AppContext.BaseDirectory;
 
                 for (int i = 0; i < 5; i++)
                 {
