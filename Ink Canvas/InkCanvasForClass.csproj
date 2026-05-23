@@ -553,21 +553,6 @@
     <Copy SourceFiles="@(IACoreHelperFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" Condition="'@(IACoreHelperFiles)' != ''" />
   </Target>
 
-  <Target Name="ExcludeIACoreHelperFromSingleFile" BeforeTargets="GenerateSingleFileBundle">
-    <ItemGroup>
-      <ResolvedFileToPublish Update="@(ResolvedFileToPublish)" Condition="$([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('InkCanvas.IACoreHelper'))">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      </ResolvedFileToPublish>
-    </ItemGroup>
-  </Target>
-
-  <Target Name="CopyIACoreHelperToPublishDirectory" AfterTargets="Publish">
-    <ItemGroup>
-      <IACoreHelperPublishFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.IACoreHelper\bin\$(Configuration)\*.*" />
-    </ItemGroup>
-    <Copy SourceFiles="@(IACoreHelperPublishFiles)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" Condition="'@(IACoreHelperPublishFiles)' != '' and '$(PublishDir)' != ''" />
-  </Target>
-
   <ItemGroup>
     <EmbeddedResource Update="Properties\*.en-US.resx">
       <WithCulture>false</WithCulture>

@@ -26,11 +26,6 @@ on:
         required: true
         default: false
         type: boolean
-      include_runtime:
-        description: 'Include .NET runtime in release artifacts'
-        required: true
-        default: false
-        type: boolean
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}-${{ github.sha }}
@@ -229,26 +224,20 @@ jobs:
           cache: true
           cache-dependency-path: '**/packages.lock.json'
       
-      - name: Restore Package
-        run: dotnet restore "Ink Canvas.sln" --locked-mode -p:PublishReadyToRun=false
+      - name: Restore Package 
+        run: dotnet restore "Ink Canvas.sln" --locked-mode
       
-      - name: Publish the Application (Release)
+      - name: Build the Solution (Release)
         env:
           DLASS_TELEMETRY_TOKEN: ${{ secrets.DLASS_TELEMETRY_TOKEN }}
         run: |
-          $architecture = "${{ matrix.architecture }}"
-          $runtimeIdentifier = if ($architecture -eq "AnyCPU") { "win-x64" } else { "win-x86" }
-          $selfContained = "${{ github.event_name == 'workflow_dispatch' && github.event.inputs.include_runtime == 'true' }}" -eq "true"
-          $singleFileCompression = if ($selfContained) { "true" } else { "false" }
-          msbuild /t:Publish /p:platform="$architecture" /p:configuration="Release" /p:RuntimeIdentifier="$runtimeIdentifier" /p:SelfContained=$selfContained /p:PublishSingleFile=true /p:PublishReadyToRun=false /p:IncludeNativeLibrariesForSelfExtract=true /p:EnableCompressionInSingleFile=$singleFileCompression /p:PublishDir="bin/Release/publish/$runtimeIdentifier/" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
+          msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
 
       - name: Check if exe file is generated
         id: check-exe
         run: |
-          $architecture = "${{ matrix.architecture }}"
-          $runtimeIdentifier = if ($architecture -eq "AnyCPU") { "win-x64" } else { "win-x86" }
-          $exePath = "Ink Canvas\bin\Release\publish\$runtimeIdentifier\InkCanvasForClass.exe"
-
+          $exePath = "Ink Canvas\bin\Release\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\InkCanvasForClass.exe"
+          
           if (Test-Path $exePath) {
             echo "build_success=true" >> $env:GITHUB_OUTPUT
           } else {
@@ -294,9 +283,8 @@ jobs:
           # 创建发布目录
           New-Item -ItemType Directory -Path "release" -Force
           
-          # 复制自包含发布文件（使用运行时特定的路径）
-          $runtimeIdentifier = if ($architecture -eq "AnyCPU") { "win-x64" } else { "win-x86" }
-          Copy-Item "Ink Canvas\bin\Release\publish\$runtimeIdentifier\*" "release/" -Recurse -Force
+          # 复制发布文件（使用架构特定的路径）
+          Copy-Item "Ink Canvas\bin\Release\$architecture\net6.0-windows10.0.19041.0\*" "release/" -Recurse -Force
           
           # 创建压缩包
           Compress-Archive -Path "release/*" -DestinationPath $archiveName -Force
