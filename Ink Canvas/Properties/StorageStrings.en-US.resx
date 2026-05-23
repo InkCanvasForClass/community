@@ -250,7 +250,8 @@
     <value>Backup Successful</value>
   </data>
   <data name="Backup_SuccessMsg" xml:space="preserve">
-    <value>Settings backed up to:\n{0}</value>
+    <value>Settings backed up to:
+{0}</value>
   </data>
   <data name="Backup_FailedTitle" xml:space="preserve">
     <value>Backup Failed</value>

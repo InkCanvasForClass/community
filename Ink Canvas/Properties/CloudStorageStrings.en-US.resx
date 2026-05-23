@@ -208,7 +208,10 @@
     <value>Error saving WebDav settings: </value>
   </data>
   <data name="CloudStorage_DlassRegistrationPrompt" xml:space="preserve">
-    <value>Have you registered a Dlass account?\n\n• If registered: enter your user Token on this page\n• If not registered: the browser will open to the Dlass Dashboard</value>
+    <value>Have you registered a Dlass account?
+
+• If registered: enter your user Token on this page
+• If not registered: the browser will open to the Dlass Dashboard</value>
   </data>
   <data name="CloudStorage_DlassRegistrationTitle" xml:space="preserve">
     <value>Dlass Account Registration</value>

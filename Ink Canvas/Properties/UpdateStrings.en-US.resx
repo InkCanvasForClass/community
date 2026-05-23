@@ -208,7 +208,9 @@
     <value>{0} days</value>
   </data>
   <data name="FixVersion_ConfirmBody" xml:space="preserve">
-    <value>This will download and install the latest version from the current channel. The app will close and update automatically.\n\nAre you sure you want to repair the installation?</value>
+    <value>This will download and install the latest version from the current channel. The app will close and update automatically.
+
+Are you sure you want to repair the installation?</value>
   </data>
   <data name="FixVersion_ConfirmTitle" xml:space="preserve">
     <value>Confirm installation repair</value>
@@ -244,7 +246,9 @@
     <value>Privacy agreement required</value>
   </data>
   <data name="Channel_TelemetryRequired" xml:space="preserve">
-    <value>Joining the preview/beta channel requires enabling anonymous basic data upload.\n\nEnable anonymous usage data upload now?</value>
+    <value>Joining the preview/beta channel requires enabling anonymous basic data upload.
+
+Enable anonymous usage data upload now?</value>
   </data>
   <data name="Channel_TelemetryRequiredTitle" xml:space="preserve">
     <value>Anonymous data upload required</value>
