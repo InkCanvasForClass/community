@@ -64,10 +64,10 @@
     <value>Update channel</value>
   </data>
   <data name="Update_PackageArch_X64" xml:space="preserve">
-    <value></value>
+    <value>64-bit (x64)</value>
   </data>
   <data name="Update_PackageArch_X86" xml:space="preserve">
-    <value></value>
+    <value>32-bit (x86)</value>
   </data>
   <data name="Update_Preview" xml:space="preserve">
     <value>Preview</value>
@@ -208,25 +208,25 @@
     <value>{0} days</value>
   </data>
   <data name="FixVersion_ConfirmBody" xml:space="preserve">
-    <value>This will download and install the latest version from the current channel. The app will close and update automatically.\n\nAre you sure you want to fix the version?</value>
+    <value>This will download and install the latest version from the current channel. The app will close and update automatically.\n\nAre you sure you want to repair the installation?</value>
   </data>
   <data name="FixVersion_ConfirmTitle" xml:space="preserve">
-    <value>Confirm version fix</value>
+    <value>Confirm installation repair</value>
   </data>
   <data name="FixVersion_InProgress" xml:space="preserve">
-    <value>Fixing...</value>
+    <value>Repairing...</value>
   </data>
   <data name="FixVersion_FailedBody" xml:space="preserve">
-    <value>Version fix failed. It may be a network issue or you are already on the latest version.</value>
+    <value>Repair failed. This may be due to a network issue, or you may already have the latest version installed.</value>
   </data>
   <data name="FixVersion_FailedTitle" xml:space="preserve">
-    <value>Fix failed</value>
+    <value>Repair failed</value>
   </data>
   <data name="FixVersion_ErrorBody" xml:space="preserve">
-    <value>Error during version fix: {0}</value>
+    <value>Error during installation repair: {0}</value>
   </data>
   <data name="FixVersion_ErrorTitle" xml:space="preserve">
-    <value>Fix error</value>
+    <value>Repair error</value>
   </data>
   <data name="InstallUpdate_Msg" xml:space="preserve">
     <value>Update downloaded. Click OK to close the app and install the new version!</value>

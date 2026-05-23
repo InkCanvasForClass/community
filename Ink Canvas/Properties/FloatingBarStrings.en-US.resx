@@ -139,7 +139,7 @@
     <value>Freeze</value>
   </data>
   <data name="FloatingBar_Geometry" xml:space="preserve">
-    <value>Geometry</value>
+    <value>Shapes</value>
   </data>
   <data name="FloatingBar_Gesture_MultiTouchWriting" xml:space="preserve">
     <value>Multi-touch writing</value>

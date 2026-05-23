@@ -49,7 +49,7 @@
     <value>Automatically check for updates when the app starts.</value>
   </data>
   <data name="EnableNibMode" xml:space="preserve">
-    <value>Nib Mode</value>
+    <value>Pen-only Mode</value>
   </data>
   <data name="EnableNibModeHint" xml:space="preserve">
     <value>Only respond to pen tip touch, ignore palm and finger</value>
@@ -61,7 +61,7 @@
     <value>Control via icc:// protocol</value>
   </data>
   <data name="FixVersionHint" xml:space="preserve">
-    <value>Repair downloads the latest build for the selected channel and reinstalls; use to fix broken installs.</value>
+    <value>Downloads and reinstalls the latest build from the selected channel to fix broken installations.</value>
   </data>
   <data name="FoldAtStartup" xml:space="preserve">
     <value>Dock to sidebar after startup</value>
@@ -79,7 +79,7 @@
     <value>No-focus mode</value>
   </data>
   <data name="NoFocusModeHint" xml:space="preserve">
-    <value>Still receive input when window loses focus</value>
+    <value>Keep responding to input when the window loses focus</value>
   </data>
   <data name="RunAtStartup" xml:space="preserve">
     <value>Run at startup</value>
@@ -88,7 +88,7 @@
     <value>Automatically run the software when system starts</value>
   </data>
   <data name="SilentUpdateFullHint" xml:space="preserve">
-    <value>When silent update is off, you will be prompted after download. When on, every 10 minutes the app checks: 1) within silent-update time window 2) not in writing mode 3) not in canvas. If all pass, it will close and update.</value>
+    <value>Specify the time window for automatic background updates. To prevent interruptions, updates will only install every 10 minutes when the app is idle (not writing or actively using the canvas).</value>
   </data>
   <data name="SilentUpdateHint" xml:space="preserve">
     <value>Silent update installs when the app is idle; no manual action needed.</value>
@@ -103,7 +103,7 @@
     <value>Startup</value>
   </data>
   <data name="TimePeriodHint" xml:space="preserve">
-    <value>If end &lt; start, end is next day. If start = end, window is 24h.</value>
+    <value>If the end time is earlier than the start time, the window spans into the next day. Setting both times equal creates a 24-hour window.</value>
   </data>
   <data name="TopMost" xml:space="preserve">
     <value>Topmost</value>
@@ -139,9 +139,9 @@
     <value>Stable: reliable updates. Preview: new features with better stability than Beta. Beta: earliest new features.</value>
   </data>
   <data name="UpdatePackageArchitecture" xml:space="preserve">
-    <value></value>
+    <value>Software architecture</value>
   </data>
   <data name="UpdatePackageArchitectureHint" xml:space="preserve">
-    <value></value>
+    <value>Select the architecture for the update package. By default, it matches the current software architecture.</value>
   </data>
 </root>
