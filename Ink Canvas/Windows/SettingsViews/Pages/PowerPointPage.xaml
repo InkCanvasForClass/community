@@ -77,10 +77,9 @@
 
                     <!-- PPT Flip Buttons Preview (Actual PptNavBar Controls) -->
                     <Border x:Name="PreviewContainer"
-                            Width="480"
                             Height="270"
                             Margin="0,8,0,0"
-                            HorizontalAlignment="Center"
+                            HorizontalAlignment="Stretch"
                             Background="White"
                             BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1"
