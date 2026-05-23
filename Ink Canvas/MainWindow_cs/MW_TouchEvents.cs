@@ -114,6 +114,11 @@ namespace Ink_Canvas
             public float SmoothedSampleRateHz { get; set; } = 120f;
             public bool SawPressureVariation { get; set; }
             public bool HasSeed { get; set; }
+            public bool HasTouchPoint { get; set; }
+            public Point PreviousTouchPoint { get; set; }
+            public Point LastTouchPoint { get; set; }
+            public bool HasTouchDirection { get; set; }
+            public Vector LastTouchDirection { get; set; }
             public float LastSmoothX { get; set; }
             public float LastSmoothY { get; set; }
             public float LastSmoothPressure { get; set; } = 0.5f;
@@ -246,7 +251,9 @@ namespace Ink_Canvas
             {
                 LastRawX = (float)startPoint.X,
                 LastRawY = (float)startPoint.Y,
-                LastTimestampMs = RealtimeNowMs()
+                LastTimestampMs = RealtimeNowMs(),
+                HasTouchPoint = true,
+                LastTouchPoint = startPoint
             };
         }
 
@@ -262,6 +269,102 @@ namespace Ink_Canvas
                 : 0.15f;
             var scale = RealtimeClamp((float)Settings.Canvas.RealtimeBrushTipMinDistanceScale, 0f, 2f);
             return baseMinDist * scale;
+        }
+
+        private static IEnumerable<Point> InterpolateTouchPoints(Point from, Point to)
+        {
+            var dx = to.X - from.X;
+            var dy = to.Y - from.Y;
+            var distance = Math.Sqrt(dx * dx + dy * dy);
+            var steps = Math.Min(24, Math.Max(1, (int)Math.Ceiling(distance / 1.2)));
+            for (var i = 1; i <= steps; i++)
+            {
+                var t = (double)i / steps;
+                yield return new Point(from.X + dx * t, from.Y + dy * t);
+            }
+        }
+
+        private static IEnumerable<Point> InterpolateTouchPoints(RealtimeBrushTipState state, Point to)
+        {
+            if (!state.HasTouchDirection)
+            {
+                foreach (var p in InterpolateTouchPoints(state.LastTouchPoint, to))
+                    yield return p;
+                yield break;
+            }
+
+            var from = state.LastTouchPoint;
+            var chord = to - from;
+            var distance = chord.Length;
+            if (distance < 0.1)
+                yield break;
+
+            var incoming = state.LastTouchDirection;
+            if (incoming.LengthSquared > 0.0001)
+            {
+                incoming.Normalize();
+                var current = chord;
+                current.Normalize();
+                var dot = Math.Max(-1, Math.Min(1, incoming.X * current.X + incoming.Y * current.Y));
+                var angle = Math.Acos(dot);
+                if (angle < Math.PI * 0.72)
+                {
+                    var tangentLength = Math.Min(distance * 0.45, 18);
+                    var c1 = from + incoming * tangentLength;
+                    var c2 = to - current * tangentLength;
+                    var steps = Math.Min(24, Math.Max(1, (int)Math.Ceiling(distance / 1.2)));
+                    for (var i = 1; i <= steps; i++)
+                    {
+                        var t = (double)i / steps;
+                        var u = 1 - t;
+                        yield return new Point(
+                            u * u * u * from.X + 3 * u * u * t * c1.X + 3 * u * t * t * c2.X + t * t * t * to.X,
+                            u * u * u * from.Y + 3 * u * u * t * c1.Y + 3 * u * t * t * c2.Y + t * t * t * to.Y);
+                    }
+                    yield break;
+                }
+            }
+
+            foreach (var p in InterpolateTouchPoints(from, to))
+                yield return p;
+        }
+
+        private static void UpdateTouchInterpolationState(RealtimeBrushTipState state, Point point)
+        {
+            var delta = point - state.LastTouchPoint;
+            if (delta.LengthSquared > 0.0001)
+            {
+                state.PreviousTouchPoint = state.LastTouchPoint;
+                state.LastTouchDirection = delta;
+                state.HasTouchDirection = true;
+            }
+            state.LastTouchPoint = point;
+        }
+
+        private void AppendInterpolatedTouchPoints(StrokeVisual strokeVisual, int strokeId, Point point)
+        {
+            if (strokeVisual == null) return;
+            if (!_realtimeBrushTipStates.TryGetValue(strokeId, out var state))
+            {
+                state = new RealtimeBrushTipState { HasTouchPoint = true, LastTouchPoint = point };
+                _realtimeBrushTipStates[strokeId] = state;
+                strokeVisual.Add(new StylusPoint(point.X, point.Y, 0.5f));
+                return;
+            }
+
+            if (!state.HasTouchPoint)
+            {
+                state.HasTouchPoint = true;
+                state.LastTouchPoint = point;
+                strokeVisual.Add(new StylusPoint(point.X, point.Y, 0.5f));
+                return;
+            }
+
+            foreach (var p in InterpolateTouchPoints(state, point))
+            {
+                strokeVisual.Add(new StylusPoint(p.X, p.Y, 0.5f));
+            }
+            UpdateTouchInterpolationState(state, point);
         }
 
         private bool TryAppendRealtimeVelocityBrushTipPoints(StrokeVisual strokeVisual, StylusEventArgs e)
@@ -412,7 +515,7 @@ namespace Ink_Canvas
             pressure = state.FilterPressure.Filter(pressure, dt, speed);
 
             var minDist = GetRealtimeBrushTipMinDistance(state.SmoothedSampleRateHz);
-            if (dist < minDist && state.HasSeed)
+            if (dist < minDist && state.HasSeed && strokeId == MouseRealtimeStrokeId)
             {
                 state.LastRawX = rawX;
                 state.LastRawY = rawY;
@@ -443,6 +546,27 @@ namespace Ink_Canvas
             state.LastRawY = rawY;
             state.LastTimestampMs = nowMs;
             return true;
+        }
+
+        private bool TryAppendRealtimeVelocityBrushTipInterpolatedPoints(StrokeVisual strokeVisual, int strokeId, Point point, float rawPressure = 0.5f)
+        {
+            if (!_realtimeBrushTipStates.TryGetValue(strokeId, out var state))
+                return TryAppendRealtimeVelocityBrushTipPoint(strokeVisual, strokeId, point, rawPressure);
+
+            var appended = false;
+            if (!state.HasTouchPoint)
+            {
+                state.HasTouchPoint = true;
+                state.LastTouchPoint = point;
+                return TryAppendRealtimeVelocityBrushTipPoint(strokeVisual, strokeId, point, rawPressure);
+            }
+
+            foreach (var p in InterpolateTouchPoints(state, point))
+            {
+                appended |= TryAppendRealtimeVelocityBrushTipPoint(strokeVisual, strokeId, p, rawPressure);
+            }
+            UpdateTouchInterpolationState(state, point);
+            return appended;
         }
 
         /// <summary>
@@ -1382,7 +1506,7 @@ namespace Ink_Canvas
                     CancelPauseStraightenTimer(touchId);
                     InitializeRealtimeBrushTipStateFromPoint(touchId, p);
                     var sv = GetStrokeVisual(touchId);
-                    TryAppendRealtimeVelocityBrushTipPoint(sv, touchId, p);
+                    TryAppendRealtimeVelocityBrushTipInterpolatedPoints(sv, touchId, p);
                     sv.Redraw();
                 }
                 catch (Exception ex)
@@ -1406,7 +1530,7 @@ namespace Ink_Canvas
                     BeginTouchInkInput();
                     CancelPauseStraightenTimer(touchId);
                     var sv = GetStrokeVisual(touchId);
-                    sv.Add(new StylusPoint(p.X, p.Y, 0.5f));
+                    AppendInterpolatedTouchPoints(sv, touchId, p);
                     sv.Redraw();
                 }
                 catch (Exception ex)
@@ -1530,15 +1654,13 @@ namespace Ink_Canvas
             }
 
             var touchId = e.TouchDevice.Id;
-            if (ShouldUseRealtimeVelocityBrushTipForTouch())
+            if (_activeRealtimeTouchStrokeIds.Contains(touchId))
             {
-                if (!_activeRealtimeTouchStrokeIds.Contains(touchId))
-                    return;
                 try
                 {
                     var p = e.GetTouchPoint(inkCanvas).Position;
                     var sv = GetStrokeVisual(touchId);
-                    if (TryAppendRealtimeVelocityBrushTipPoint(sv, touchId, p))
+                    if (TryAppendRealtimeVelocityBrushTipInterpolatedPoints(sv, touchId, p))
                         sv.Redraw();
                 }
                 catch (Exception ex)
@@ -1554,7 +1676,7 @@ namespace Ink_Canvas
                 {
                     var p = e.GetTouchPoint(inkCanvas).Position;
                     var sv = GetStrokeVisual(touchId);
-                    sv.Add(new StylusPoint(p.X, p.Y, 0.5f));
+                    AppendInterpolatedTouchPoints(sv, touchId, p);
                     sv.Redraw();
                 }
                 catch (Exception ex)
