@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
     <OutputType>WinExe</OutputType>
@@ -554,15 +554,9 @@
     <Copy SourceFiles="@(IACoreHelperFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" Condition="'@(IACoreHelperFiles)' != ''" />
   </Target>
 
-  <Target Name="RemoveSatelliteDlls" AfterTargets="Build">
-    <RemoveDir Directories="$(OutDir)en-US" Condition="Exists('$(OutDir)en-US')" />
-  </Target>
-
   <ItemGroup>
-    <EnUsResxFiles Include="Properties\*.en-US.resx" />
+    <EmbeddedResource Update="Properties\*.en-US.resx">
+      <WithCulture>false</WithCulture>
+    </EmbeddedResource>
   </ItemGroup>
-
-  <Target Name="CopyEnUsResxToOutput" AfterTargets="Build">
-    <Copy SourceFiles="@(EnUsResxFiles)" DestinationFolder="$(OutDir)Properties" SkipUnchangedFiles="true" />
-  </Target>
 </Project>
