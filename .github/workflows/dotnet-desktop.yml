@@ -42,7 +42,7 @@ jobs:
           cache-dependency-path: '**/packages.lock.json'
       
       - name: Restore Package
-        run: dotnet restore "Ink Canvas.sln" --locked-mode -p:PublishReadyToRun=true
+        run: dotnet restore "Ink Canvas.sln" --locked-mode -p:PublishReadyToRun=false
       
       - name: Publish the Application
         env:
@@ -52,7 +52,7 @@ jobs:
           $runtimeIdentifier = if ($architecture -eq "AnyCPU") { "win-x64" } else { "win-x86" }
           $selfContained = "${{ github.event_name == 'workflow_dispatch' && github.event.inputs.include_runtime == 'true' }}" -eq "true"
           $singleFileCompression = if ($selfContained) { "true" } else { "false" }
-          msbuild /t:Publish /p:platform="$architecture" /p:configuration="Debug" /p:RuntimeIdentifier="$runtimeIdentifier" /p:SelfContained=$selfContained /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:IncludeNativeLibrariesForSelfExtract=true /p:EnableCompressionInSingleFile=$singleFileCompression /p:PublishDir="bin/Debug/publish/$runtimeIdentifier/" /p:GitFlow="$GITFLOW" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
+          msbuild /t:Publish /p:platform="$architecture" /p:configuration="Debug" /p:RuntimeIdentifier="$runtimeIdentifier" /p:SelfContained=$selfContained /p:PublishSingleFile=true /p:PublishReadyToRun=false /p:IncludeNativeLibrariesForSelfExtract=true /p:EnableCompressionInSingleFile=$singleFileCompression /p:PublishDir="bin/Debug/publish/$runtimeIdentifier/" /p:GitFlow="$GITFLOW" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
 
       - name: Check if exe file is generated
         id: check-exe
