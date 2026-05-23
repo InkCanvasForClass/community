@@ -111,6 +111,9 @@
   <data name="Board_Size" xml:space="preserve">
     <value>Size</value>
   </data>
+  <data name="Board_StrokeEraser" xml:space="preserve">
+    <value>Stroke eraser</value>
+  </data>
   <data name="Board_Tools" xml:space="preserve">
     <value>Tools</value>
   </data>
@@ -455,9 +458,6 @@
   </data>
   <data name="ToolbarCondition_Collapsed" xml:space="preserve">
     <value>Toolbar collapsed</value>
-  </data>
-  <data name="Board_StrokeEraser" xml:space="preserve">
-    <value>Storke eraser</value>
   </data>
   <data name="FloatingBar_PenTipStyle" xml:space="preserve">
     <value>Pen Tip Style</value>
