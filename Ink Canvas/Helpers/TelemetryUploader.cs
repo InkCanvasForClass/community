@@ -1,160 +1,254 @@
-﻿using Sentry;
+using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
-using System.Text.RegularExpressions;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Ink_Canvas.Helpers
 {
     internal static class TelemetryUploader
     {
-        private static readonly Regex EmailRegex = new Regex(
-            @"(?i)\b[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}\b",
-            RegexOptions.Compiled);
+        private const string UploadUrl = "https://dev-api.dy.ci/api/telemetry/client/upload/";
 
-        private static readonly Regex PhoneRegex = new Regex(
-            @"\b1[3-9]\d{9}\b",
-            RegexOptions.Compiled);
-
-        private static readonly Regex IPv4Regex = new Regex(
-            @"\b(?:\d{1,3}\.){3}\d{1,3}\b",
-            RegexOptions.Compiled);
-
-        private static readonly Regex WindowsPathRegex = new Regex(
-            @"\b[A-Za-z]:\\[^\s<>|]+\b",
-            RegexOptions.Compiled);
-
-        private static readonly Regex UncPathRegex = new Regex(
-            @"\\\\[^\s]+",
-            RegexOptions.Compiled);
-
-        private static readonly Regex KeyValueSecretRegex = new Regex(
-            @"(?i)(\b(?:access[_-]?token|refresh[_-]?token|token|password|passwd|pwd|secret|authorization)\b\s*[:=]\s*)([^\s,;]+)",
-            RegexOptions.Compiled);
-
-        private static readonly Regex JsonSecretRegex = new Regex(
-            "(?i)(\"(?:access_token|refresh_token|token|password|passwd|pwd|secret|authorization)\"\\s*:\\s*\")([^\"]*)(\")",
-            RegexOptions.Compiled);
-
-        private static readonly Regex UrlSecretRegex = new Regex(
-            @"(?i)([?&](?:access_token|token|password|pwd|secret)=)[^&\s]+",
-            RegexOptions.Compiled);
-
-        public static Task UploadTelemetryIfNeededAsync()
+        public static async Task UploadTelemetryIfNeededAsync()
         {
-            return Task.Run(() =>
+            try
             {
+                var settings = MainWindow.Settings;
+                if (settings == null || settings.Startup == null)
+                {
+                    return;
+                }
+
+                var level = settings.Startup.TelemetryUploadLevel;
+                if (level == TelemetryUploadLevel.None)
+                {
+                    return;
+                }
+
+                if (!settings.Startup.HasAcceptedTelemetryPrivacy)
+                {
+                    LogHelper.WriteLogToFile("TelemetryUploader | 未同意隐私说明，取消遥测上传", LogHelper.LogType.Warning);
+                    return;
+                }
+
+                string token = GetTelemetryToken();
+                if (string.IsNullOrWhiteSpace(token))
+                {
+                    LogHelper.WriteLogToFile("TelemetryUploader | 未配置遥测 Token，取消遥测上传", LogHelper.LogType.Warning);
+                    return;
+                }
+
+                string deviceId = DeviceIdentifier.GetDeviceId();
+                if (string.IsNullOrWhiteSpace(deviceId) || deviceId.Length < 5)
+                {
+                    LogHelper.WriteLogToFile("TelemetryUploader | 设备ID无效，取消遥测上传", LogHelper.LogType.Warning);
+                    return;
+                }
+
+                object crashFile = TryGetLatestFile(
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Crashes"),
+                    "Crash_*.txt",
+                    "崩溃日志");
+
+                object runtimeLogFile = null;
+                if (level == TelemetryUploadLevel.Extended)
+                {
+                    runtimeLogFile = TryGetLatestFile(
+                        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs"),
+                        "Log_*.txt",
+                        "运行日志",
+                        true);
+                }
+
+                string appVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                string systemVersion = NormalizeWindowsVersion(DeviceIdentifier.GetSystemVersion());
+                var usageStats = DeviceIdentifier.GetTelemetryStats();
+                var process = System.Diagnostics.Process.GetCurrentProcess();
+                var traceContent = new
+                {
+                    telemetry_level = level.ToString(),
+                    id = deviceId,
+                    update_channel = settings.Startup.UpdateChannel.ToString(),
+                    os = systemVersion,
+                    machine_name = Environment.MachineName,
+                    is_64_bit_operating_system = Environment.Is64BitOperatingSystem,
+                    is_64_bit_process = Environment.Is64BitProcess,
+                    processor_count = Environment.ProcessorCount,
+                    clr_version = Environment.Version.ToString(),
+                    process_uptime_seconds = (DateTime.Now - process.StartTime).TotalSeconds,
+                    working_set_mb = process.WorkingSet64 / 1024 / 1024,
+                    usage_stats = usageStats,
+                    usage_frequency = DeviceIdentifier.GetUsageFrequency().ToString(),
+                    update_priority = DeviceIdentifier.GetUpdatePriority().ToString()
+                };
+
+                await UploadAsync(token, "trace", appVersion, traceContent).ConfigureAwait(false);
+
+                if (crashFile != null || runtimeLogFile != null)
+                {
+                    var logContent = new
+                    {
+                        has_crash_log = crashFile != null,
+                        has_runtime_log = runtimeLogFile != null,
+                        crash_file = crashFile,
+                        runtime_log_file = runtimeLogFile
+                    };
+
+                    await UploadAsync(token, "log", appVersion, logContent).ConfigureAwait(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"TelemetryUploader | 遥测上传失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        private static async Task UploadAsync(string token, string dataType, string appVersion, object content)
+        {
+            var payload = new
+            {
+                token,
+                data_type = dataType,
+                service_name = "ICC-CE",
+#if DEBUG
+                environment = "dev",
+#else
+                environment = "prod",
+#endif
+                version = appVersion,
+                content
+            };
+
+            using (var client = new HttpClient())
+            using (var requestContent = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json"))
+            using (var response = await client.PostAsync(UploadUrl, requestContent).ConfigureAwait(false))
+            {
+                if (response.IsSuccessStatusCode)
+                {
+                    LogHelper.WriteLogToFile($"TelemetryUploader | {dataType} 数据已上报", LogHelper.LogType.Event);
+                }
+                else
+                {
+                    LogHelper.WriteLogToFile($"TelemetryUploader | {dataType} 上传失败: HTTP {(int)response.StatusCode}", LogHelper.LogType.Warning);
+                }
+            }
+        }
+
+        private static string NormalizeWindowsVersion(string systemVersion)
+        {
+            if (!string.IsNullOrWhiteSpace(systemVersion))
+            {
+                if (systemVersion.IndexOf("Windows11", StringComparison.OrdinalIgnoreCase) >= 0 || systemVersion.IndexOf("Windows 11", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return "Windows 11";
+                }
+
+                if (systemVersion.IndexOf("Windows10", StringComparison.OrdinalIgnoreCase) >= 0 || systemVersion.IndexOf("Windows 10", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return "Windows 10";
+                }
+
+                if (systemVersion.IndexOf("Windows8", StringComparison.OrdinalIgnoreCase) >= 0 || systemVersion.IndexOf("Windows 8", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return "Windows 8";
+                }
+
+                if (systemVersion.IndexOf("Windows7", StringComparison.OrdinalIgnoreCase) >= 0 || systemVersion.IndexOf("Windows 7", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return "Windows 7";
+                }
+            }
+
+            var version = Environment.OSVersion.Version;
+            if (version.Major >= 10 && version.Build >= 22000) return "Windows 11";
+            if (version.Major >= 10) return "Windows 10";
+            if (version.Major == 6 && version.Minor == 3) return "Windows 8.1";
+            if (version.Major == 6 && version.Minor == 2) return "Windows 8";
+            if (version.Major == 6 && version.Minor == 1) return "Windows 7";
+            return "Windows " + version.Major;
+        }
+
+        private static string GetTelemetryToken()
+        {
+            try
+            {
+                var envToken = Environment.GetEnvironmentVariable("DLASS_TELEMETRY_TOKEN");
+                if (!string.IsNullOrWhiteSpace(envToken))
+                {
+                    return envToken.Trim();
+                }
+
+                envToken = Environment.GetEnvironmentVariable("ICC_CE_TELEMETRY_TOKEN");
+                if (!string.IsNullOrWhiteSpace(envToken))
+                {
+                    return envToken.Trim();
+                }
+
+                var announcementToken = MainWindow.Settings?.Notification?.AnnouncementSoftwareToken;
+                if (!string.IsNullOrWhiteSpace(announcementToken))
+                {
+                    return announcementToken.Trim();
+                }
+
                 try
                 {
-                    var settings = MainWindow.Settings;
-                    if (settings == null || settings.Startup == null)
+                    var assembly = Assembly.GetExecutingAssembly();
+                    var resourceName = "Ink_Canvas.telemetry_token.txt";
+                    using (Stream stream = assembly.GetManifestResourceStream(resourceName))
                     {
-                        return;
-                    }
-
-                    var level = settings.Startup.TelemetryUploadLevel;
-                    if (level == TelemetryUploadLevel.None)
-                    {
-                        return;
-                    }
-
-                    if (!settings.Startup.HasAcceptedTelemetryPrivacy)
-                    {
-                        LogHelper.WriteLogToFile("TelemetryUploader | 未同意隐私说明，取消遥测上传", LogHelper.LogType.Warning);
-                        return;
-                    }
-
-                    string deviceId = DeviceIdentifier.GetDeviceId();
-                    if (string.IsNullOrWhiteSpace(deviceId) || deviceId.Length < 5)
-                    {
-                        LogHelper.WriteLogToFile("TelemetryUploader | 设备ID无效，取消遥测上传", LogHelper.LogType.Warning);
-                        return;
-                    }
-
-                    // Basic 和 Extended 均上传崩溃日志（脱敏）
-                    object crashFile = TryGetLatestSanitizedFile(
-                        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Crashes"),
-                        "Crash_*.txt",
-                        "崩溃日志");
-
-                    // Extended 额外上传运行日志（脱敏）
-                    object runtimeLogFile = null;
-                    if (level == TelemetryUploadLevel.Extended)
-                    {
-                        runtimeLogFile = TryGetLatestSanitizedFile(
-                            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs"),
-                            "Log_*.txt",
-                            "运行日志");
-                    }
-
-                    var telemetryData = new
-                    {
-                        telemetry_level = level.ToString(),
-                        device_id = deviceId,
-                        update_channel = settings.Startup.UpdateChannel.ToString(),
-                        app_version = Assembly.GetExecutingAssembly().GetName().Version.ToString(),
-                        os_version = Environment.OSVersion.VersionString,
-                        has_crash_log = crashFile != null,
-                        has_runtime_log = runtimeLogFile != null
-                    };
-
-                    // 通过 Sentry 上报一个包含遥测信息的事件
-                    string userName = Environment.UserName;
-                    SentrySdk.ConfigureScope(scope =>
-                    {
-                        scope.User = new SentryUser
+                        if (stream != null)
                         {
-                            Id = deviceId,
-                            Username = userName,
-                            Email = $"{userName}",
-                            IpAddress = "{{auto}}"
-                        };
-                    });
-
-                    var evt = new SentryEvent
-                    {
-                        Message = "ICC CE Telemetry",
-                        Level = SentryLevel.Info
-                    };
-
-                    evt.User = new SentryUser
-                    {
-                        Id = deviceId,
-                        Username = userName,
-                        Email = $"{userName}",
-                        IpAddress = "{{auto}}"
-                    };
-
-                    evt.SetTag("telemetry_level", level.ToString());
-                    evt.SetTag("device_id", deviceId);
-                    evt.SetTag("update_channel", settings.Startup.UpdateChannel.ToString());
-                    evt.SetTag("app_version", Assembly.GetExecutingAssembly().GetName().Version.ToString());
-                    evt.SetTag("os_version", Environment.OSVersion.VersionString);
-                    evt.SetExtra("telemetry_data", telemetryData);
-
-                    if (crashFile != null)
-                    {
-                        evt.SetExtra("crash_file", crashFile);
+                            using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
+                            {
+                                string token = reader.ReadToEnd().Trim();
+                                if (!string.IsNullOrWhiteSpace(token))
+                                {
+                                    return token;
+                                }
+                            }
+                        }
                     }
-
-                    if (runtimeLogFile != null)
-                    {
-                        evt.SetExtra("runtime_log_file", runtimeLogFile);
-                    }
-
-                    SentrySdk.CaptureEvent(evt);
-                    LogHelper.WriteLogToFile("TelemetryUploader | 遥测数据已通过 Sentry 上报", LogHelper.LogType.Event);
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.WriteLogToFile($"TelemetryUploader | 遥测上传失败: {ex.Message}", LogHelper.LogType.Warning);
+                    LogHelper.WriteLogToFile($"从程序集资源读取遥测 Token 失败: {ex.Message}", LogHelper.LogType.Warning);
                 }
-            });
+
+                string assemblyLocation = Assembly.GetExecutingAssembly().Location;
+                string currentDir = Path.GetDirectoryName(assemblyLocation);
+
+                for (int i = 0; i < 5; i++)
+                {
+                    string tokenFilePath = Path.Combine(currentDir, "telemetry_token.txt");
+                    if (File.Exists(tokenFilePath))
+                    {
+                        string token = File.ReadAllText(tokenFilePath, Encoding.UTF8).Trim();
+                        if (!string.IsNullOrWhiteSpace(token))
+                        {
+                            return token;
+                        }
+                    }
+
+                    DirectoryInfo parentDir = Directory.GetParent(currentDir);
+                    if (parentDir == null)
+                    {
+                        break;
+                    }
+                    currentDir = parentDir.FullName;
+                }
+            }
+            catch
+            {
+            }
+
+            return string.Empty;
         }
 
-        private static object TryGetLatestSanitizedFile(string directory, string pattern, string fileType)
+        private static object TryGetLatestFile(string directory, string pattern, string fileType, bool importantOnly = false)
         {
             try
             {
@@ -174,14 +268,22 @@ namespace Ink_Canvas.Helpers
                 }
 
                 string content = File.ReadAllText(latest.FullName);
-                string sanitizedContent = SanitizeLogContent(content);
+                if (importantOnly)
+                {
+                    content = PickImportantLogContent(content);
+                    if (string.IsNullOrWhiteSpace(content))
+                    {
+                        return null;
+                    }
+                }
 
                 return new
                 {
                     file_type = fileType,
                     file_name = latest.Name,
                     last_write_time = latest.LastWriteTime.ToString("o"),
-                    content = sanitizedContent
+                    important_only = importantOnly,
+                    content
                 };
             }
             catch (Exception ex)
@@ -193,23 +295,35 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        private static string SanitizeLogContent(string content)
+        private static string PickImportantLogContent(string content)
         {
-            if (string.IsNullOrEmpty(content))
+            if (string.IsNullOrWhiteSpace(content))
             {
-                return content;
+                return string.Empty;
             }
 
-            string sanitized = content;
-            sanitized = EmailRegex.Replace(sanitized, "[REDACTED_EMAIL]");
-            sanitized = PhoneRegex.Replace(sanitized, "[REDACTED_PHONE]");
-            sanitized = IPv4Regex.Replace(sanitized, "[REDACTED_IP]");
-            sanitized = WindowsPathRegex.Replace(sanitized, "[REDACTED_PATH]");
-            sanitized = UncPathRegex.Replace(sanitized, "[REDACTED_PATH]");
-            sanitized = UrlSecretRegex.Replace(sanitized, "$1[REDACTED]");
-            sanitized = KeyValueSecretRegex.Replace(sanitized, "$1[REDACTED]");
-            sanitized = JsonSecretRegex.Replace(sanitized, "$1[REDACTED]$3");
-            return sanitized;
+            var importantLines = content
+                .Split(new[] { "\r\n", "\n" }, StringSplitOptions.None)
+                .Where(IsImportantLogLine)
+                .TakeLast(200);
+
+            return string.Join(Environment.NewLine, importantLines);
+        }
+
+        private static bool IsImportantLogLine(string line)
+        {
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                return false;
+            }
+
+            return line.IndexOf("[Error]", StringComparison.OrdinalIgnoreCase) >= 0
+                   || line.IndexOf("[Warning]", StringComparison.OrdinalIgnoreCase) >= 0
+                   || line.IndexOf("Exception", StringComparison.OrdinalIgnoreCase) >= 0
+                   || line.IndexOf("异常", StringComparison.OrdinalIgnoreCase) >= 0
+                   || line.IndexOf("失败", StringComparison.OrdinalIgnoreCase) >= 0
+                   || line.IndexOf("崩溃", StringComparison.OrdinalIgnoreCase) >= 0
+                   || line.IndexOf("终止", StringComparison.OrdinalIgnoreCase) >= 0;
         }
     }
 }
