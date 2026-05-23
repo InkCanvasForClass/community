@@ -2323,6 +2323,14 @@ namespace Ink_Canvas
                 return;
             }
 
+            if (canvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
+            {
+                canvas.UseCustomCursor = true;
+                canvas.ForceCursor = true;
+                canvas.Cursor = Cursors.None;
+                return;
+            }
+
             // 其他模式按照用户设置处理
             if (Settings.Canvas.IsShowCursor)
             {

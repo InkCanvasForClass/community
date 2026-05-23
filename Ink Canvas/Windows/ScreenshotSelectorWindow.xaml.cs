@@ -40,6 +40,11 @@ namespace Ink_Canvas
         private WpfPoint _lastBlankClickPosition;
         private readonly BitmapSource _inkOverlayPreview;
 
+        private readonly System.Windows.Media.Brush _modeButtonDefaultBrush = System.Windows.Application.Current.TryFindResource(iNKORE.UI.WPF.Modern.ThemeKeys.ButtonBackgroundKey) as System.Windows.Media.Brush
+            ?? new SolidColorBrush(Color.FromRgb(45, 45, 45));
+        private readonly System.Windows.Media.Brush _modeButtonActiveBrush = System.Windows.Application.Current.TryFindResource(iNKORE.UI.WPF.Modern.ThemeKeys.AccentFillColorDefaultBrushKey) as System.Windows.Media.Brush
+            ?? new SolidColorBrush(Color.FromRgb(0, 120, 212));
+
         private const int DoubleClickTimeThresholdMs = 300; // 双击判定时间阈值（常见范围 200~500ms）
         private const double DoubleClickDistanceThresholdPx = 12; // 双击判定位置阈值（像素）
 
@@ -105,10 +110,15 @@ namespace Ink_Canvas
 
         private void InitializeButtonStates()
         {
-            RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-            FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-            FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-            CameraModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            SetActiveModeButton(null);
+        }
+
+        private void SetActiveModeButton(System.Windows.Controls.Button activeButton)
+        {
+            RectangleModeButton.Background = activeButton == RectangleModeButton ? _modeButtonActiveBrush : _modeButtonDefaultBrush;
+            FreehandModeButton.Background = activeButton == FreehandModeButton ? _modeButtonActiveBrush : _modeButtonDefaultBrush;
+            FullScreenButton.Background = activeButton == FullScreenButton ? _modeButtonActiveBrush : _modeButtonDefaultBrush;
+            CameraModeButton.Background = activeButton == CameraModeButton ? _modeButtonActiveBrush : _modeButtonDefaultBrush;
         }
 
         private void InitializeInkPreview()
@@ -410,9 +420,7 @@ namespace Ink_Canvas
             ResetSelectionState();
 
             _isFreehandMode = false;
-            RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235)); // 蓝色
-            FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-            FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            SetActiveModeButton(RectangleModeButton);
             IncludeInkCheckBox.IsEnabled = _inkOverlayPreview != null;
             HintText.Text = Properties.MainWindowStrings.Main_Screenshot_DragToSelect;
             HintTextBorder.Visibility = Visibility.Visible;
@@ -424,9 +432,7 @@ namespace Ink_Canvas
             ResetSelectionState();
 
             _isFreehandMode = true;
-            FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235)); // 蓝色
-            RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-            FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            SetActiveModeButton(FreehandModeButton);
             IncludeInkCheckBox.IsEnabled = _inkOverlayPreview != null;
             HintText.Text = Properties.MainWindowStrings.Main_Screenshot_FreeDrawHint;
             HintTextBorder.Visibility = Visibility.Visible;
@@ -440,10 +446,7 @@ namespace Ink_Canvas
             // 设置全屏截图模式
             _isFreehandMode = false;
             _isCameraMode = false;
-            FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235)); // 蓝色
-            RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-            FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-            CameraModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            SetActiveModeButton(FullScreenButton);
 
             // 隐藏摄像头预览
             CameraPreviewBorder.Visibility = Visibility.Collapsed;
@@ -463,10 +466,7 @@ namespace Ink_Canvas
                 // 设置摄像头模式
                 _isFreehandMode = false;
                 _isCameraMode = true;
-                CameraModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235)); // 蓝色
-                RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-                FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-                FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+                SetActiveModeButton(CameraModeButton);
 
                 // 显示摄像头预览
                 CameraPreviewBorder.Visibility = Visibility.Visible;
@@ -1208,9 +1208,7 @@ namespace Ink_Canvas
             _isAdjusting = false;
             _isSelecting = false;
             _isFreehandMode = false;
-            RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-            FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128));
-            FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128));
+            SetActiveModeButton(RectangleModeButton);
 
             UpdateSelectionDisplay();
             SelectedPath = null;
@@ -1461,10 +1459,7 @@ namespace Ink_Canvas
             SelectedPath = null;
             CameraImage = null;
 
-            RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-            FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-            FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-            CameraModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            SetActiveModeButton(null);
         }
 
         #region 摄像头旋转和分辨率控制

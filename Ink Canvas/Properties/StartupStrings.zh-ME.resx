@@ -130,10 +130,10 @@
     <value>切换到非管理员模式</value>
   </data>
   <data name="TopMostMode_UIA" xml:space="preserve">
-    <value>UIA 置顶（需要管理员权限，大佬专属）</value>
+    <value>UIA 置顶（需要一次 UAC 授权）</value>
   </data>
   <data name="TopMostMode_UIA_RestartRequired" xml:space="preserve">
-    <value>切换到 UIA 置顶模式需要重启软件才生效，现在重启吗？</value>
+    <value>切换到 UIA 置顶模式需要弹出 UAC 授权并重启成普通用户 UIA 进程，现在继续吗？</value>
   </data>
   <data name="UpdateChannel" xml:space="preserve">
     <value>更新通道</value>

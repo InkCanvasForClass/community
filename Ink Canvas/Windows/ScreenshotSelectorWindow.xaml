@@ -1,7 +1,10 @@
 <Window x:Class="Ink_Canvas.ScreenshotSelectorWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="选择截图区域" 
+        xmlns:props="clr-namespace:Ink_Canvas.Properties"
+        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+        Title="{x:Static props:MainWindowStrings.Main_Screenshot_WindowTitle}"
         WindowStyle="None" 
         AllowsTransparency="True" 
         Background="Transparent"
@@ -14,7 +17,50 @@
         MouseRightButtonDown="Window_MouseRightButtonDown"
         MouseMove="Window_MouseMove"
         MouseLeftButtonUp="Window_MouseLeftButtonUp">
-    
+    <Window.Resources>
+        <SolidColorBrush x:Key="ScreenshotBarBackgroundBrush" Color="#F21F1F1F" />
+        <SolidColorBrush x:Key="ScreenshotBarPrimaryBrush" Color="#0F9F7A" />
+        <SolidColorBrush x:Key="ScreenshotBarPrimaryHoverBrush" Color="#10B981" />
+        <SolidColorBrush x:Key="ScreenshotBarPrimaryPressedBrush" Color="#047857" />
+        <SolidColorBrush x:Key="ScreenshotBarAccentBrush" Color="#2563EB" />
+        <SolidColorBrush x:Key="ScreenshotBarAccentHoverBrush" Color="#3B82F6" />
+        <SolidColorBrush x:Key="ScreenshotBarAccentPressedBrush" Color="#1D4ED8" />
+        <SolidColorBrush x:Key="ScreenshotBarDangerBrush" Color="#DC2626" />
+        <SolidColorBrush x:Key="ScreenshotBarDangerHoverBrush" Color="#EF4444" />
+        <SolidColorBrush x:Key="ScreenshotBarDangerPressedBrush" Color="#B91C1C" />
+
+        <DropShadowEffect x:Key="ScreenshotBarShadow"
+                          BlurRadius="26"
+                          ShadowDepth="8"
+                          Direction="270"
+                          Opacity="0.35"
+                          Color="#000000" />
+
+        <Style x:Key="ScreenshotBarModeButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+
+        <Style x:Key="ScreenshotBarActionButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="Padding" Value="16,0" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Style.Resources>
+                <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonForegroundKey}" Color="White" />
+                <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonForegroundPointerOverKey}" Color="White" />
+                <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonForegroundPressedKey}" Color="White" />
+            </Style.Resources>
+        </Style>
+    </Window.Resources>
+
     <Grid Name="MainGrid">
         <!-- 半透明遮罩 -->
         <Rectangle Name="OverlayRectangle"
@@ -95,99 +141,92 @@
         </Canvas>
 
         <!-- 底部工具栏 -->
-        <Border Background="#1a1a1a" 
-                Opacity="0.95"
-                CornerRadius="8"
-                Padding="12,8"
+        <Border Background="{StaticResource ScreenshotBarBackgroundBrush}"
+                BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.CardStrokeColorDefaultBrushKey}}"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="10"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Bottom"
                 Margin="0,0,0,80"
-                Panel.ZIndex="1000">
-            <StackPanel Orientation="Horizontal">
+                Effect="{StaticResource ScreenshotBarShadow}"
+                Panel.ZIndex="1000"
+                ui:ThemeManager.RequestedTheme="Dark">
+            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
                 <!-- 模式切换按钮 -->
-                <Button Name="RectangleModeButton" 
-                        Content="矩形模式" 
-                        Margin="4,0"
-                        Padding="12,6"
-                        Background="#6b7280"
-                        Foreground="White"
-                        BorderThickness="0"
-                        FontWeight="Medium"
-                        Click="RectangleModeButton_Click" />
-                <Button Name="FreehandModeButton" 
-                        Content="自由绘制" 
-                        Margin="4,0"
-                        Padding="12,6"
-                        Background="#6b7280"
-                        Foreground="White"
-                        BorderThickness="0"
-                        FontWeight="Medium"
-                        Click="FreehandModeButton_Click" />
-                <Button Name="FullScreenButton" 
-                        Content="全屏截图" 
-                        Margin="4,0"
-                        Padding="12,6"
-                        Background="#6b7280"
-                        Foreground="White"
-                        BorderThickness="0"
-                        FontWeight="Medium"
-                        Click="FullScreenButton_Click" />
-                <Button Name="CameraModeButton" 
-                        Content="摄像头截图" 
-                        Margin="4,0"
-                        Padding="12,6"
-                        Background="#6b7280"
-                        Foreground="White"
-                        BorderThickness="0"
-                        FontWeight="Medium"
-                        Click="CameraModeButton_Click" />
-                
-                <!-- 分隔线 -->
-                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" 
-                          Margin="8,0" 
-                          Background="#404040" />
-                
+                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Name="RectangleModeButton"
+                            Style="{StaticResource ScreenshotBarModeButtonStyle}"
+                            Content="{x:Static props:MainWindowStrings.Main_Screenshot_RectangleMode}"
+                            Click="RectangleModeButton_Click" />
+                    <Button Name="FreehandModeButton"
+                            Style="{StaticResource ScreenshotBarModeButtonStyle}"
+                            Content="{x:Static props:MainWindowStrings.Main_Screenshot_FreehandMode}"
+                            Click="FreehandModeButton_Click" />
+                    <Button Name="FullScreenButton"
+                            Style="{StaticResource ScreenshotBarModeButtonStyle}"
+                            Content="{x:Static props:MainWindowStrings.Main_Screenshot_FullScreenMode}"
+                            Click="FullScreenButton_Click" />
+                    <Button Name="CameraModeButton"
+                            Style="{StaticResource ScreenshotBarModeButtonStyle}"
+                            Content="{x:Static props:MainWindowStrings.Main_Screenshot_CameraCaptureMode}"
+                            Click="CameraModeButton_Click" />
+                </ikw:SimpleStackPanel>
+
+                <Rectangle Width="1"
+                           Height="32"
+                           Fill="{DynamicResource {x:Static ui:ThemeKeys.DividerStrokeColorDefaultBrushKey}}"
+                           Margin="4,0" />
+
                 <!-- 操作按钮 -->
                 <CheckBox Name="IncludeInkCheckBox"
-                          Content="包含墨迹"
+                          Content="{x:Static props:MainWindowStrings.Main_Screenshot_IncludeInk}"
                           Margin="4,0"
                           VerticalAlignment="Center"
                           Foreground="White"
+                          FontSize="14"
+                          FontWeight="SemiBold"
                           Checked="IncludeInkCheckBox_Checked"
                           Unchecked="IncludeInkCheckBox_Unchecked" />
                 <Rectangle Name="ToolbarDividerRectangle"
                            Width="1"
-                           Height="20"
-                           Fill="#404040"
-                           Margin="8,0" />
+                           Height="32"
+                           Fill="{DynamicResource {x:Static ui:ThemeKeys.DividerStrokeColorDefaultBrushKey}}"
+                           Margin="4,0" />
                 <Button Name="ConfirmButton"
-                        Content="确认截图"
-                        Margin="4,0"
-                        Padding="12,6"
-                        Background="#059669"
-                        Foreground="White"
-                        BorderThickness="0"
-                        FontWeight="Medium"
-                        Click="ConfirmButton_Click" />
+                        Style="{StaticResource ScreenshotBarActionButtonStyle}"
+                        Content="{x:Static props:MainWindowStrings.Main_Screenshot_ConfirmCapture}"
+                        Background="{StaticResource ScreenshotBarPrimaryBrush}"
+                        BorderBrush="{StaticResource ScreenshotBarPrimaryBrush}"
+                        Click="ConfirmButton_Click">
+                    <Button.Resources>
+                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPointerOverKey}" Color="#10B981" />
+                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPressedKey}" Color="#047857" />
+                    </Button.Resources>
+                </Button>
                 <Button Name="AddToWhiteboardButton"
-                        Content="添加到白板"
-                        Margin="4,0"
-                        Padding="12,6"
-                        Background="#2563eb"
-                        Foreground="White"
-                        BorderThickness="0"
-                        FontWeight="Medium"
-                        Click="AddToWhiteboardButton_Click" />
+                        Style="{StaticResource ScreenshotBarActionButtonStyle}"
+                        Content="{x:Static props:MainWindowStrings.Main_Screenshot_AddToWhiteboard}"
+                        Background="{StaticResource ScreenshotBarAccentBrush}"
+                        BorderBrush="{StaticResource ScreenshotBarAccentBrush}"
+                        Click="AddToWhiteboardButton_Click">
+                    <Button.Resources>
+                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPointerOverKey}" Color="#3B82F6" />
+                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPressedKey}" Color="#1D4ED8" />
+                    </Button.Resources>
+                </Button>
                 <Button Name="CancelButton"
-                        Content="取消"
-                        Margin="4,0"
-                        Padding="12,6"
-                        Background="#dc2626"
-                        Foreground="White"
-                        BorderThickness="0"
-                        FontWeight="Medium"
-                        Click="CancelButton_Click" />
-            </StackPanel>
+                        Style="{StaticResource ScreenshotBarActionButtonStyle}"
+                        Content="{x:Static props:CommonStrings.Common_Cancel}"
+                        Background="{StaticResource ScreenshotBarDangerBrush}"
+                        BorderBrush="{StaticResource ScreenshotBarDangerBrush}"
+                        Click="CancelButton_Click">
+                    <Button.Resources>
+                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPointerOverKey}" Color="#EF4444" />
+                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPressedKey}" Color="#B91C1C" />
+                    </Button.Resources>
+                </Button>
+            </ikw:SimpleStackPanel>
         </Border>
 
         <!-- 摄像头预览区域 -->
@@ -227,7 +266,7 @@
                         
                         <!-- 切换摄像头按钮 -->
                         <Button Name="SwitchCameraButton"
-                               Content="切换摄像头"
+                               Content="{x:Static props:MainWindowStrings.Main_Screenshot_SwitchCamera}"
                                Margin="4,0"
                                Padding="8,4"
                                Background="#3b82f6"
@@ -241,7 +280,7 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
                         <!-- 旋转控制 -->
                         <StackPanel Orientation="Horizontal" Margin="4,0">
-                            <TextBlock Text="旋转:" Foreground="White" VerticalAlignment="Center" Margin="0,0,4,0" FontSize="12"/>
+                            <TextBlock Text="{x:Static props:MainWindowStrings.Main_Screenshot_Rotation}" Foreground="White" VerticalAlignment="Center" Margin="0,0,4,0" FontSize="12"/>
                             <Button Name="RotateLeftButton" Content="⟲" Width="30" Height="30" Margin="2,0" 
                                    Background="#4b5563" Foreground="White" BorderThickness="0" 
                                    Click="RotateLeftButton_Click" FontSize="10" FontWeight="10"/>
@@ -257,7 +296,7 @@
                         
                         <!-- 分辨率控制 -->
                         <StackPanel Orientation="Horizontal" Margin="4,0">
-                            <TextBlock Text="分辨率:" Foreground="White" VerticalAlignment="Center" Margin="0,0,4,0" FontSize="12"/>
+                            <TextBlock Text="{x:Static props:MainWindowStrings.Main_Screenshot_Resolution}" Foreground="White" VerticalAlignment="Center" Margin="0,0,4,0" FontSize="12"/>
                             <ComboBox Name="ResolutionComboBox" Margin="2,0"
                                      Background="#2d2d2d" Foreground="White" BorderBrush="#404040"
                                      SelectionChanged="ResolutionComboBox_SelectionChanged">
@@ -283,7 +322,7 @@
                               Foreground="White"
                               FontSize="12"
                               FontWeight="Medium"
-                              Text="摄像头未连接" />
+                              Text="{x:Static props:MainWindowStrings.Main_Screenshot_CameraNotConnected}" />
                 </Border>
             </Grid>
         </Border>
@@ -299,7 +338,7 @@
                 Margin="0,0,0,140"
                 Panel.ZIndex="1000">
             <TextBlock Name="HintText"
-                       Text="拖拽选择区域，右键或双击可全选屏幕；自由绘制松开后需点击确认"
+                       Text="{x:Static props:MainWindowStrings.Main_Screenshot_DefaultHint}"
                        Foreground="White"
                        FontSize="14"
                        FontWeight="Medium" />

@@ -127,10 +127,10 @@
     <value>Switch to Non-Admin Mode</value>
   </data>
   <data name="TopMostMode_UIA" xml:space="preserve">
-    <value>UIA Topmost (Requires Admin)</value>
+    <value>UIA Topmost (Requires one UAC approval)</value>
   </data>
   <data name="TopMostMode_UIA_RestartRequired" xml:space="preserve">
-    <value>Switching to UIA topmost mode requires a restart to take effect. Restart now?</value>
+    <value>Switching to UIA topmost mode requires UAC approval and will restart as a normal-user UIA process. Continue now?</value>
   </data>
   <data name="UpdateChannel" xml:space="preserve">
     <value>Update channel</value>

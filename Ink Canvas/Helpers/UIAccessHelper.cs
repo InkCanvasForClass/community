@@ -379,6 +379,12 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        public static bool LaunchNormalUserWithUIAccessFromElevatedHelper()
+        {
+            LogHelper.WriteLogToFile("UIAccess | 已进入 UIAccess 辅助启动模式");
+            return RestartAsNormalUserWithUIAccess();
+        }
+
         #endregion
 
         #region Token Manipulation
@@ -715,6 +721,9 @@ namespace Ink_Canvas.Helpers
             string[] args = Environment.GetCommandLineArgs();
             for (int i = 1; i < args.Length; i++)
             {
+                if (string.Equals(args[i], "--enable-uia-topmost-helper", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
                 cmdBuilder.Append(' ');
                 AppendQuoted(cmdBuilder, args[i]);
             }

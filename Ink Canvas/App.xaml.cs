@@ -137,6 +137,12 @@ namespace Ink_Canvas
                 return;
             }
 
+            if (args.Contains("--enable-uia-topmost-helper"))
+            {
+                Environment.Exit(UIAccessHelper.LaunchNormalUserWithUIAccessFromElevatedHelper() ? 0 : 1);
+                return;
+            }
+
             // 启动时优先同步设置，确保CrashAction为最新
             SyncCrashActionFromSettings();
 
