@@ -288,14 +288,12 @@ namespace Ink_Canvas
 
         internal void InitializeToolbarPlugins()
         {
-            LogHelper.WriteLogToFile("MW_Toolbar: InitializeToolbarPlugins 开始", LogHelper.LogType.Info);
             try
             {
                 ToolbarRegistry.EnsureDefaultConfigExists();
                 ToolbarHost = new ToolbarHost(this);
                 var layout = ToolbarRegistry.LoadActiveConfig();
                 ToolbarRegistry.Populate(ToolbarHost, StackPanelFloatingBarRoot, layout);
-                LogHelper.WriteLogToFile("MW_Toolbar: InitializeToolbarPlugins 完成", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {

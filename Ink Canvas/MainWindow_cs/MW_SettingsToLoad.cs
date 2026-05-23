@@ -224,7 +224,6 @@ namespace Ink_Canvas
                     if (isStartup)
                     {
                         _pendingStartupAutoUpdateCheck = true;
-                        LogHelper.WriteLogToFile("AutoUpdate | Startup check deferred until UI is stable");
                     }
                     else
                     {

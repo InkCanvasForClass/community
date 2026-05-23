@@ -1151,7 +1151,6 @@ namespace Ink_Canvas
             {
                 var inkCanvasService = new Plugins.InkCanvasService(mainWindow);
                 Plugins.PluginManager.Instance.RegisterService<Plugins.IInkCanvasService>(inkCanvasService);
-                LogHelper.WriteLogToFile("InkCanvasService registered for plugins");
             }
             catch (Exception ex)
             {
@@ -1162,7 +1161,6 @@ namespace Ink_Canvas
             {
                 var appRestartService = new Plugins.AppRestartService();
                 Plugins.PluginManager.Instance.RegisterService<Plugins.IAppRestartService>(appRestartService);
-                LogHelper.WriteLogToFile("AppRestartService registered for plugins");
             }
             catch (Exception ex)
             {

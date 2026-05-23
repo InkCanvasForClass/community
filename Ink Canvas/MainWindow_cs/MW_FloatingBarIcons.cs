@@ -3611,7 +3611,6 @@ namespace Ink_Canvas
             var qcp = QuickColorPalette;
             if (qcp == null)
             {
-                LogHelper.WriteLogToFile($"UpdateQuickColorPaletteIndicator: QuickColorPalette 为 null，ToolbarHost={ToolbarHost != null}, StackPanelFloatingBarRoot={StackPanelFloatingBarRoot != null}", LogHelper.LogType.Warning);
                 return;
             }
 
