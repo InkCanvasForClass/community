@@ -432,7 +432,7 @@ namespace Ink_Canvas
                     if (IsInPptPresentationMode)
                         ViewboxFloatingBarMarginAnimation(60);
                     else
-                        ViewboxFloatingBarMarginAnimation(100, true);
+                        PureViewboxFloatingBarMarginAnimationInDesktopMode();
                 }
                 SidePannelMarginAnimation(-50, !unfoldFloatingBarByUser);
             });
