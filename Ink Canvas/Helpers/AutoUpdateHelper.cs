@@ -39,7 +39,7 @@ namespace Ink_Canvas.Helpers
         };
         private static readonly HashSet<string> UpdateDirectoriesToOverwrite = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
-            "en-US",
+            "Properties",
             "runtimes"
         };
         // 全局下载取消令牌；UI 通过 RequestCancelDownload 取消当前下载

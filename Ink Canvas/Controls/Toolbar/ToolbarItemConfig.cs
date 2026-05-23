@@ -252,6 +252,16 @@ namespace Ink_Canvas.Controls.Toolbar
             return null;
         }
 
+        public bool GetSettingBool(string key)
+        {
+            if (Settings != null && Settings.TryGetValue(key, out var val))
+            {
+                if (val is bool b) return b;
+                if (val != null && bool.TryParse(val.ToString(), out var parsed)) return parsed;
+            }
+            return false;
+        }
+
         public void SetSetting(string key, object value)
         {
             if (Settings == null) Settings = new Dictionary<string, object>();
@@ -280,6 +290,7 @@ namespace Ink_Canvas.Controls.Toolbar
         public const string PaddingRight = "paddingRight";
         public const string PaddingBottom = "paddingBottom";
         public const string Opacity = "opacity";
+        public const string UseRedStyle = "useRedStyle";
         public const string DisplayMode = "displayMode";
     }
 

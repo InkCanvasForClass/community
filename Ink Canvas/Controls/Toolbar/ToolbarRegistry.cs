@@ -57,6 +57,16 @@ namespace Ink_Canvas.Controls.Toolbar
         public static bool GetIsContentCollapsedByUser(FrameworkElement element)
             => (bool)element.GetValue(IsContentCollapsedByUserProperty);
 
+        public static readonly DependencyProperty UseRedStyleProperty =
+            DependencyProperty.RegisterAttached("UseRedStyle", typeof(bool), typeof(ToolbarRegistry),
+                new PropertyMetadata(false));
+
+        public static void SetUseRedStyle(FrameworkElement element, bool value)
+            => element.SetValue(UseRedStyleProperty, value);
+
+        public static bool GetUseRedStyle(FrameworkElement element)
+            => (bool)element.GetValue(UseRedStyleProperty);
+
         public static List<KeyValuePair<string, string>> AvailableConditions => new List<KeyValuePair<string, string>>
         {
             new KeyValuePair<string, string>("isAnnotating", Strings.GetString("ToolbarCondition_Annotating") ?? "Annotation mode"),
@@ -494,6 +504,8 @@ namespace Ink_Canvas.Controls.Toolbar
                     ApplyComponentSettings(view, entry);
                     var ruleset = GetEffectiveRuleset(entry);
                     SetHidingRuleset(view, ruleset);
+                    if (entry.GetSettingBool(ComponentSettingKeys.UseRedStyle))
+                        SetUseRedStyle(view, true);
                     result.Add(new DisplayItem
                     {
                         View = view,
@@ -648,6 +660,8 @@ namespace Ink_Canvas.Controls.Toolbar
             {
                 ApplyInitialVisibility(item.View, item.Ruleset);
                 contentPanel.Children.Add(item.View);
+                if (GetUseRedStyle(item.View))
+                    SetUseRedStyle(contentPanel, true);
             }
 
             var border = new Border
@@ -925,6 +939,21 @@ namespace Ink_Canvas.Controls.Toolbar
                 var iconSize = entry.GetSettingDouble(ComponentSettingKeys.IconSize);
                 if (iconSize.HasValue && iconSize.Value > 0)
                     btn.IconHeight = iconSize.Value;
+
+                if (entry.GetSettingBool(ComponentSettingKeys.UseRedStyle))
+                {
+                    SetUseRedStyle(btn, true);
+                    if (btn.TryFindResource("RedBrush") is Brush redBrush)
+                    {
+                        btn.IconBrush = redBrush;
+                        btn.LabelBrush = redBrush;
+                    }
+                    else
+                    {
+                        btn.SetResourceReference(ToolbarImageButton.IconBrushProperty, "RedBrush");
+                        btn.SetResourceReference(ToolbarImageButton.LabelBrushProperty, "RedBrush");
+                    }
+                }
             }
 
             if (view is QuickColorPaletteControl qcp)

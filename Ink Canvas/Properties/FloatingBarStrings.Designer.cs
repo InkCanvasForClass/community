@@ -292,6 +292,10 @@ namespace Ink_Canvas.Properties
 
         public static string ToolbarPage_Opacity => ResourceManager.GetString(nameof(ToolbarPage_Opacity), _resourceCulture);
 
+        public static string ToolbarPage_RedStyle => ResourceManager.GetString(nameof(ToolbarPage_RedStyle), _resourceCulture);
+
+        public static string ToolbarPage_RedStyleDesc => ResourceManager.GetString(nameof(ToolbarPage_RedStyleDesc), _resourceCulture);
+
         public static string ToolbarPage_QuickPaletteDisplayModeDesc => ResourceManager.GetString(nameof(ToolbarPage_QuickPaletteDisplayModeDesc), _resourceCulture);
 
         public static string ToolbarPage_ResetComponentSettings => ResourceManager.GetString(nameof(ToolbarPage_ResetComponentSettings), _resourceCulture);

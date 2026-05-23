@@ -324,6 +324,12 @@
   <data name="ToolbarPage_Opacity" xml:space="preserve">
     <value>Opacity</value>
   </data>
+  <data name="ToolbarPage_RedStyle" xml:space="preserve">
+    <value>Red accent</value>
+  </data>
+  <data name="ToolbarPage_RedStyleDesc" xml:space="preserve">
+    <value>Display this component's icon and label in red</value>
+  </data>
   <data name="ToolbarPage_Margin" xml:space="preserve">
     <value>Margin</value>
   </data>

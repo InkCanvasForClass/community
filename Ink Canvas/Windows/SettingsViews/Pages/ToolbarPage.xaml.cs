@@ -95,6 +95,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             TextBoxMarginTop.Text = entry.GetSettingDouble(ComponentSettingKeys.MarginTop)?.ToString() ?? "";
             TextBoxMarginRight.Text = entry.GetSettingDouble(ComponentSettingKeys.MarginRight)?.ToString() ?? "";
             TextBoxMarginBottom.Text = entry.GetSettingDouble(ComponentSettingKeys.MarginBottom)?.ToString() ?? "";
+            CheckBoxUseRedStyle.IsChecked = entry.GetSettingBool(ComponentSettingKeys.UseRedStyle);
 
             var hAlign = entry.GetSettingString(ComponentSettingKeys.HorizontalAlignment) ?? "";
             ComboBoxHAlign.SelectedIndex = hAlign switch { "Left" => 1, "Center" => 2, "Right" => 3, "Stretch" => 4, _ => 0 };
@@ -453,6 +454,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded || ActiveEntry == null) return;
             ActiveEntry.ShowSeparateBorder = CheckBoxShowSeparateBorder.IsChecked == true;
+            SaveSettings();
+        }
+
+        private void CheckBoxUseRedStyle_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded || ActiveEntry == null || _suppressSave) return;
+            if (CheckBoxUseRedStyle.IsChecked == true)
+                ActiveEntry.SetSetting(ComponentSettingKeys.UseRedStyle, true);
+            else
+                ActiveEntry.Settings?.Remove(ComponentSettingKeys.UseRedStyle);
             SaveSettings();
         }
 

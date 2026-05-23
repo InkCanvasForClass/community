@@ -324,6 +324,12 @@
   <data name="ToolbarPage_Opacity" xml:space="preserve">
     <value>不透明度</value>
   </data>
+  <data name="ToolbarPage_RedStyle" xml:space="preserve">
+    <value>红色强调</value>
+  </data>
+  <data name="ToolbarPage_RedStyleDesc" xml:space="preserve">
+    <value>将该组件的图标和文字显示为红色</value>
+  </data>
   <data name="ToolbarPage_Margin" xml:space="preserve">
     <value>边距</value>
   </data>
