@@ -39,15 +39,6 @@
           "AForge.Video": "2.2.5"
         }
       },
-      "Costura.Fody": {
-        "type": "Direct",
-        "requested": "[6.0.0, )",
-        "resolved": "6.0.0",
-        "contentHash": "3Uriu9GJABMivG0wXMJs6NQ7FNE3pylir1gZEBAWDvpii3cnrmxXnOG44MMDuIVOIk/Xhef7WZFsaCNV+py9qA==",
-        "dependencies": {
-          "Fody": "6.8.2"
-        }
-      },
       "gong-wpf-dragdrop": {
         "type": "Direct",
         "requested": "[4.0.0, )",
@@ -210,11 +201,6 @@
         "type": "Transitive",
         "resolved": "6.3.0.90",
         "contentHash": "WVTb5MxwGqKdeasd3nG5udlV4t6OpvkFanziwI133K0/QJ5FvZmfzRQgpAjGTJhQfIA8GP7AzKQ3sTY9JOFk8Q=="
-      },
-      "Fody": {
-        "type": "Transitive",
-        "resolved": "6.8.2",
-        "contentHash": "sjGHrtGS1+kcrv99WXCvujOFBTQp4zCH3ZC9wo2LAtVaJkuLpHghQx3y4k1Q8ZKuDAbEw+HE6ZjPUJQK3ejepQ=="
       },
       "H.GeneratedIcons.System.Drawing": {
         "type": "Transitive",
