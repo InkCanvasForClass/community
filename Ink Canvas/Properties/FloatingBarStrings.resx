@@ -111,6 +111,9 @@
   <data name="Board_Size" xml:space="preserve">
     <value>大小</value>
   </data>
+  <data name="Board_StrokeEraser" xml:space="preserve">
+    <value>线擦</value>
+  </data>
   <data name="Board_Tools" xml:space="preserve">
     <value>工具</value>
   </data>

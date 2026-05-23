@@ -500,14 +500,18 @@ namespace Ink_Canvas
                         BoardPen.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
                         BoardSelect.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
                         BoardEraser.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
+                        BoardStrokeEraser.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
                         BoardSelect.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
                         BoardPen.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
                         BoardEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                        BoardStrokeEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
                         BoardPen.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
                         BoardSelect.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
                         BoardEraser.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                        BoardStrokeEraser.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
                         BoardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
                         BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
+                        BoardStrokeEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
                         BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
                     }
                     else
@@ -515,14 +519,18 @@ namespace Ink_Canvas
                         BoardPen.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
                         BoardSelect.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
                         BoardEraser.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
+                        BoardStrokeEraser.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
                         BoardSelect.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
                         BoardPen.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
                         BoardEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                        BoardStrokeEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
                         BoardPen.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
                         BoardSelect.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
                         BoardEraser.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                        BoardStrokeEraser.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
                         BoardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
                         BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
+                        BoardStrokeEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
                         BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
                     }
                 }
@@ -574,10 +582,10 @@ namespace Ink_Canvas
                             EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
                             EraserByStrokes_Icon.Icon.Geometry =
                                 Geometry.Parse(GetCorrectIcon("eraserStroke", true));
-                            BoardEraser.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                            BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                            BoardEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Colors.GhostWhite);
-                            BoardEraser.Foreground = new SolidColorBrush(Colors.GhostWhite);
+                            BoardStrokeEraser.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                            BoardStrokeEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                            BoardStrokeEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Colors.GhostWhite);
+                            BoardStrokeEraser.Foreground = new SolidColorBrush(Colors.GhostWhite);
 
                             SetFloatingBarHighlightPosition("eraserByStrokes");
                             break;
@@ -614,6 +622,11 @@ namespace Ink_Canvas
                                 BoardEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
                                 BoardEraser.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
 
+                                BoardStrokeEraser.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
+                                BoardStrokeEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
+                                BoardStrokeEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                                BoardStrokeEraser.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+
                                 BoardSelect.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
                                 BoardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
                                 BoardSelect.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
@@ -638,6 +651,11 @@ namespace Ink_Canvas
                                 BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
                                 BoardEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
                                 BoardEraser.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+
+                                BoardStrokeEraser.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
+                                BoardStrokeEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
+                                BoardStrokeEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                                BoardStrokeEraser.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
 
                                 BoardSelect.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
                                 BoardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
@@ -3327,6 +3345,39 @@ namespace Ink_Canvas
 
             HideSubPanels("eraserByStrokes");
 
+        }
+        
+        /// <summary>
+        /// 白板模式下的墨迹擦除图标点击事件处理，用于切换到按笔画擦除模式
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">路由事件参数</param>
+        internal void BoardEraserIconByStrokes_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (TryBlockFrozenPageMutation("切换到线擦")) return;
+
+            // 禁用高级橡皮擦系统
+            DisableEraserOverlay();
+
+            forceEraser = true;
+            forcePointEraser = false;
+
+            inkCanvas.EraserShape = new EllipseStylusShape(5, 5);
+            // 使用集中化的工具模式切换方法
+            SetCurrentToolMode(InkCanvasEditingMode.EraseByStroke);
+
+            // 更新模式缓存
+            UpdateCurrentToolMode("eraserByStrokes");
+
+            drawingShapeMode = 0;
+
+            // 这样从线擦切换回批注时，可以恢复之前的荧光笔状态
+            // penType 和 drawingAttributes 的状态将在 PenIcon_Click 中根据 wasHighlighter 来恢复
+
+            inkCanvas_EditingModeChanged(inkCanvas, null);
+            CancelSingleFingerDragMode();
+
+            HideSubPanels("eraserByStrokes");
         }
 
         /// <summary>
