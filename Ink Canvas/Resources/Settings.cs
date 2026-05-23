@@ -133,6 +133,11 @@ namespace Ink_Canvas
         public bool RequirePasswordOnModifyOrClearNameList { get; set; } = false;
         [JsonProperty("enableProcessProtection")]
         public bool EnableProcessProtection { get; set; } = true;
+
+        [JsonProperty("usbVerificationEnabled")]
+        public bool UsbVerificationEnabled { get; set; } = false;
+        [JsonProperty("usbAuthorizedSns")]
+        public string UsbAuthorizedSns { get; set; } = "";
     }
 
     public class Canvas
