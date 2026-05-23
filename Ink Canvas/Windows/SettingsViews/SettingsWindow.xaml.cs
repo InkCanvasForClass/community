@@ -371,10 +371,8 @@ namespace Ink_Canvas.Windows.SettingsViews
 
                 if (!_pages.TryGetValue(pageTag, out var cachedPage))
                 {
-                    Ink_Canvas.Helpers.LogHelper.WriteLogToFile($"SettingsWindow: 创建页面实例 {pageTag} ({pageType.Name})", Ink_Canvas.Helpers.LogHelper.LogType.Info);
                     cachedPage = Activator.CreateInstance(pageType);
                     _pages.Add(pageTag, cachedPage);
-                    Ink_Canvas.Helpers.LogHelper.WriteLogToFile($"SettingsWindow: 页面实例 {pageTag} 创建成功", Ink_Canvas.Helpers.LogHelper.LogType.Info);
                 }
 
                 if (cachedPage is PluginSettingsPage pluginSettingsPage && pluginInfo != null)
