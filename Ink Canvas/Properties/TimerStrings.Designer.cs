@@ -63,5 +63,39 @@ namespace Ink_Canvas.Properties
         public static string Timer_UseLegacyButtons => ResourceManager.GetString(nameof(Timer_UseLegacyButtons), _resourceCulture);
 
         public static string Timer_Volume => ResourceManager.GetString(nameof(Timer_Volume), _resourceCulture);
+
+        public static string Timer_HourUp => ResourceManager.GetString(nameof(Timer_HourUp), _resourceCulture);
+
+        public static string Timer_HourDown => ResourceManager.GetString(nameof(Timer_HourDown), _resourceCulture);
+
+        public static string Timer_HourDigitUp => ResourceManager.GetString(nameof(Timer_HourDigitUp), _resourceCulture);
+
+        public static string Timer_HourDigitDown => ResourceManager.GetString(nameof(Timer_HourDigitDown), _resourceCulture);
+
+        public static string Timer_MinuteUp => ResourceManager.GetString(nameof(Timer_MinuteUp), _resourceCulture);
+
+        public static string Timer_MinuteDown => ResourceManager.GetString(nameof(Timer_MinuteDown), _resourceCulture);
+
+        public static string Timer_MinuteDigitUp => ResourceManager.GetString(nameof(Timer_MinuteDigitUp), _resourceCulture);
+
+        public static string Timer_MinuteDigitDown => ResourceManager.GetString(nameof(Timer_MinuteDigitDown), _resourceCulture);
+
+        public static string Timer_SecondUp => ResourceManager.GetString(nameof(Timer_SecondUp), _resourceCulture);
+
+        public static string Timer_SecondDown => ResourceManager.GetString(nameof(Timer_SecondDown), _resourceCulture);
+
+        public static string Timer_SecondDigitUp => ResourceManager.GetString(nameof(Timer_SecondDigitUp), _resourceCulture);
+
+        public static string Timer_SecondDigitDown => ResourceManager.GetString(nameof(Timer_SecondDigitDown), _resourceCulture);
+
+        public static string Timer_CommonTab => ResourceManager.GetString(nameof(Timer_CommonTab), _resourceCulture);
+
+        public static string Timer_RecentTab => ResourceManager.GetString(nameof(Timer_RecentTab), _resourceCulture);
+
+        public static string Timer_45Minutes => ResourceManager.GetString(nameof(Timer_45Minutes), _resourceCulture);
+
+        public static string Timer_FullScreen => ResourceManager.GetString(nameof(Timer_FullScreen), _resourceCulture);
+
+        public static string Timer_StartPause => ResourceManager.GetString(nameof(Timer_StartPause), _resourceCulture);
     }
 }

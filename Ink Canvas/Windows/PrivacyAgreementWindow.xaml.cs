@@ -61,7 +61,7 @@ namespace Ink_Canvas
 
                 if (string.IsNullOrWhiteSpace(privacyText))
                 {
-                    privacyText = "未找到隐私说明文件（privacy.txt）。";
+                    privacyText = Properties.MainWindowStrings.Main_Privacy_FileNotFound;
                 }
 
                 TextBoxPrivacyContent.Text = privacyText;
@@ -69,7 +69,7 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"读取隐私说明失败: {ex.Message}", LogHelper.LogType.Warning);
-                TextBoxPrivacyContent.Text = "读取隐私说明文件时出错。";
+                TextBoxPrivacyContent.Text = Properties.MainWindowStrings.Main_Privacy_ReadError;
             }
         }
 

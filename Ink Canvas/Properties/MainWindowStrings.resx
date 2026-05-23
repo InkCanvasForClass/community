@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Main_WatermarkText" xml:space="preserve">
+    <value>多一份理解，少一份抱怨</value>
+  </data>
+  <data name="Main_ContextClone" xml:space="preserve">
+    <value>克隆</value>
+  </data>
+  <data name="Main_ContextCloneToNewPage" xml:space="preserve">
+    <value>克隆至新页</value>
+  </data>
+  <data name="Main_ContextFlip" xml:space="preserve">
+    <value>翻转</value>
+  </data>
+  <data name="Main_ContextBrushSize" xml:space="preserve">
+    <value>画笔粗细</value>
+  </data>
+  <data name="Main_ContextDelete" xml:space="preserve">
+    <value>删除</value>
+  </data>
+  <data name="Main_ContextZoom" xml:space="preserve">
+    <value>缩放</value>
+  </data>
+  <data name="Main_ContextPageTurn" xml:space="preserve">
+    <value>翻页</value>
+  </data>
+  <data name="Main_InkReplayPlaying" xml:space="preserve">
+    <value>正在重播墨迹...</value>
+  </data>
+  <data name="Main_InkReplayExitHint" xml:space="preserve">
+    <value>双击屏幕退出播放</value>
+  </data>
+  <data name="Main_TrayHideWindow" xml:space="preserve">
+    <value>隐藏 ICC-CE 主窗口</value>
+  </data>
+  <data name="Main_TrayShowWindow" xml:space="preserve">
+    <value>显示主窗口（2 分钟）</value>
+  </data>
+  <data name="Main_TrayDisableHotkeys" xml:space="preserve">
+    <value>禁用所有快捷键</value>
+  </data>
+  <data name="Main_TraySwitchFoldMode" xml:space="preserve">
+    <value>切换为收纳模式</value>
+  </data>
+  <data name="Main_Strokes_SaveSuccess" xml:space="preserve">
+    <value>墨迹成功保存至 {0}</value>
+  </data>
+  <data name="Main_Strokes_SaveFailed" xml:space="preserve">
+    <value>墨迹保存失败</value>
+  </data>
+  <data name="Main_Strokes_OpenFailed" xml:space="preserve">
+    <value>墨迹打开失败</value>
+  </data>
+  <data name="Main_Strokes_OpenIccSuccess" xml:space="preserve">
+    <value>成功打开ICC压缩包，共{0}页</value>
+  </data>
+  <data name="Main_Strokes_OpenFileDialogTitle" xml:space="preserve">
+    <value>打开墨迹文件</value>
+  </data>
+  <data name="Main_Strokes_OpenFileDialogFilter" xml:space="preserve">
+    <value>Ink Canvas Strokes File (*.icstk)|*.icstk|XML墨迹文件 (*.xml)|*.xml|ICC压缩包 (*.zip)|*.zip|所有支持的文件 (*.icstk;*.xml;*.zip)|*.icstk;*.xml;*.zip</value>
+  </data>
+  <data name="Main_Strokes_SaveMultiPageXmlSuccess" xml:space="preserve">
+    <value>多页面XML墨迹成功保存为 {0} 个XML文件</value>
+  </data>
+  <data name="Main_Strokes_SaveXmlSuccess" xml:space="preserve">
+    <value>墨迹成功保存为XML格式至 {0}</value>
+  </data>
+  <data name="Main_Strokes_SaveMultiPageIcstkSuccess" xml:space="preserve">
+    <value>多页面墨迹成功保存为 {0} 个icstk文件</value>
+  </data>
+  <data name="Main_Strokes_SaveMultiPageXmlZipSuccess" xml:space="preserve">
+    <value>多页面XML墨迹成功保存至压缩包 {0}</value>
+  </data>
+  <data name="Main_Strokes_SaveMultiPageZipSuccess" xml:space="preserve">
+    <value>多页面墨迹成功保存至压缩包 {0}</value>
+  </data>
+  <data name="Main_Strokes_SaveFullPageSuccess" xml:space="preserve">
+    <value>墨迹成功全页面保存至 {0}</value>
+  </data>
+  <data name="Main_Strokes_ModeMismatch" xml:space="preserve">
+    <value>墨迹保存模式({0})与当前模式({1})不匹配，无法恢复墨迹</value>
+  </data>
+  <data name="Main_Freeze_PageFrozen" xml:space="preserve">
+    <value>该页面已冻结</value>
+  </data>
+  <data name="Main_Freeze_AnnotationPageFrozen" xml:space="preserve">
+    <value>当前批注页已冻结</value>
+  </data>
+  <data name="Main_Freeze_WhiteboardPageFrozen" xml:space="preserve">
+    <value>白板第 {0} 页已冻结</value>
+  </data>
+  <data name="Main_Freeze_PageUnfrozen" xml:space="preserve">
+    <value>当前批注页已解冻</value>
+  </data>
+  <data name="Main_Freeze_WhiteboardPageUnfrozen" xml:space="preserve">
+    <value>白板第 {0} 页已解冻</value>
+  </data>
+  <data name="Main_Freeze_VerifyTitle" xml:space="preserve">
+    <value>解冻验证</value>
+  </data>
+  <data name="Main_Freeze_VerifyMessage" xml:space="preserve">
+    <value>请输入安全密码或 TOTP 动态验证码以解冻当前页面。</value>
+  </data>
+  <data name="Main_Freeze_VerifyFailed" xml:space="preserve">
+    <value>解冻验证未通过</value>
+  </data>
+  <data name="Main_Freeze_FrozenNoEdit" xml:space="preserve">
+    <value>当前页面已冻结，不能修改内容</value>
+  </data>
+  <data name="Main_Freeze_FrozenNoAction" xml:space="preserve">
+    <value>当前页面已冻结，不能{0}</value>
+  </data>
+  <data name="Main_Freeze_Recorded" xml:space="preserve">
+    <value>已记录当前批注页，等待课程结束后冻结</value>
+  </data>
+  <data name="Main_Freeze_RecordedWhiteboard" xml:space="preserve">
+    <value>已记录白板第 {0} 页，等待课程结束后冻结</value>
+  </data>
+  <data name="Main_Freeze_CancelCountdown" xml:space="preserve">
+    <value>已取消自动冻结倒计时</value>
+  </data>
+  <data name="Main_Freeze_CancelByOperation" xml:space="preserve">
+    <value>检测到页面操作，已取消自动冻结</value>
+  </data>
+  <data name="Main_Freeze_AutoFreezeIn3Min" xml:space="preserve">
+    <value>将在 3 分钟后检查并自动冻结页面</value>
+  </data>
+  <data name="Main_Screenshot_SaveSuccess" xml:space="preserve">
+    <value>截图成功保存至 {0}</value>
+  </data>
+  <data name="Main_Screenshot_Cancelled" xml:space="preserve">
+    <value>截图已取消</value>
+  </data>
+  <data name="Main_Screenshot_NoValidArea" xml:space="preserve">
+    <value>未选择有效截图区域</value>
+  </data>
+  <data name="Main_Screenshot_Failed" xml:space="preserve">
+    <value>截图失败</value>
+  </data>
+  <data name="Main_Screenshot_FailedWithError" xml:space="preserve">
+    <value>截图失败: {0}</value>
+  </data>
+  <data name="Main_Screenshot_ConvertFailed" xml:space="preserve">
+    <value>截图转换失败</value>
+  </data>
+  <data name="Main_ImageInsert_ScreenshotCancelled" xml:space="preserve">
+    <value>截图已取消</value>
+  </data>
+  <data name="Main_ImageInsert_ScreenshotFailed" xml:space="preserve">
+    <value>截图失败</value>
+  </data>
+  <data name="Main_ImageInsert_FullScreenFailed" xml:space="preserve">
+    <value>全屏截图失败</value>
+  </data>
+  <data name="Main_ImageInsert_InvalidScreenshot" xml:space="preserve">
+    <value>无效的截图</value>
+  </data>
+  <data name="Main_ImageInsert_ConvertFailed" xml:space="preserve">
+    <value>转换截图失败</value>
+  </data>
+  <data name="Main_ImageInsert_Inserted" xml:space="preserve">
+    <value>截图已插入到画布</value>
+  </data>
+  <data name="Main_ImageInsert_InsertFailed" xml:space="preserve">
+    <value>插入截图失败</value>
+  </data>
+  <data name="Main_Clipboard_ImageDetected" xml:space="preserve">
+    <value>检测到剪贴板中有图片，右键点击白板可粘贴</value>
+  </data>
+  <data name="Main_Clipboard_PasteImage" xml:space="preserve">
+    <value>粘贴图片</value>
+  </data>
+  <data name="Main_Clipboard_NoImage" xml:space="preserve">
+    <value>剪贴板中没有图片</value>
+  </data>
+  <data name="Main_Clipboard_CannotGetImage" xml:space="preserve">
+    <value>无法获取剪贴板图片</value>
+  </data>
+  <data name="Main_Clipboard_ImagePasted" xml:space="preserve">
+    <value>图片已从剪贴板粘贴</value>
+  </data>
+  <data name="Main_Clipboard_PasteFailed" xml:space="preserve">
+    <value>粘贴图片失败: {0}</value>
+  </data>
+  <data name="Main_Hitokoto_Loading" xml:space="preserve">
+    <value>正在获取一言...</value>
+  </data>
+  <data name="Main_Hitokoto_Unavailable" xml:space="preserve">
+    <value>一言功能不可用</value>
+  </data>
+  <data name="Main_Hitokoto_HttpUnavailable" xml:space="preserve">
+    <value>一言功能不可用（HTTP 库不可用）</value>
+  </data>
+  <data name="Main_Hitokoto_NoContent" xml:space="preserve">
+    <value>一言暂时没有返回内容</value>
+  </data>
+  <data name="Main_Settings_ResetVerify" xml:space="preserve">
+    <value>重置配置验证</value>
+  </data>
+  <data name="Main_Settings_ResetVerifyMessage" xml:space="preserve">
+    <value>请输入安全密码或 TOTP 验证码以确认重置配置。</value>
+  </data>
+  <data name="Main_Settings_ResetDone" xml:space="preserve">
+    <value>设置已重置为默认推荐设置~</value>
+  </data>
+  <data name="Main_Uri_EnterFoldMode" xml:space="preserve">
+    <value>已进入收纳模式</value>
+  </data>
+  <data name="Main_Uri_ExitFoldMode" xml:space="preserve">
+    <value>已退出收纳模式</value>
+  </data>
+  <data name="Main_Uri_HideOnFoldEnabled" xml:space="preserve">
+    <value>已开启：收起时彻底隐藏</value>
+  </data>
+  <data name="Main_Uri_HideOnFoldDisabled" xml:space="preserve">
+    <value>已关闭：收起时彻底隐藏</value>
+  </data>
+  <data name="Main_Uri_SchemeNotFound" xml:space="preserve">
+    <value>切换失败：方案「{0}」不存在</value>
+  </data>
+  <data name="Main_Uri_SwitchedScheme" xml:space="preserve">
+    <value>已通过 URI 切换至方案「{0}」</value>
+  </data>
+  <data name="Main_Tray_ExitFoldMode" xml:space="preserve">
+    <value>退出收纳模式</value>
+  </data>
+  <data name="Main_Tray_EnterFoldMode" xml:space="preserve">
+    <value>切换为收纳模式</value>
+  </data>
+  <data name="Main_Tray_DisableHotkeys" xml:space="preserve">
+    <value>禁用所有快捷键</value>
+  </data>
+  <data name="Main_Tray_EnableHotkeys" xml:space="preserve">
+    <value>启用所有快捷键</value>
+  </data>
+  <data name="Main_Colors_DarkTheme" xml:space="preserve">
+    <value>暗系</value>
+  </data>
+  <data name="Main_Colors_LightTheme" xml:space="preserve">
+    <value>亮系</value>
+  </data>
+  <data name="Main_RollCall_CannotCallExternal" xml:space="preserve">
+    <value>无法调用外部点名：{0}</value>
+  </data>
+  <data name="Main_InkReplay_Paused" xml:space="preserve">
+    <value>已暂停！</value>
+  </data>
+  <data name="Main_CloseConfirm_Level1" xml:space="preserve">
+    <value>是否继续关闭 InkCanvasForClass，这将丢失当前未保存的墨迹。</value>
+  </data>
+  <data name="Main_CloseConfirm_Level2" xml:space="preserve">
+    <value>真的狠心关闭 InkCanvasForClass吗？</value>
+  </data>
+  <data name="Main_CloseConfirm_Level3" xml:space="preserve">
+    <value>最后确认：确定要关闭 InkCanvasForClass 吗？</value>
+  </data>
+  <data name="Main_EnterSettings" xml:space="preserve">
+    <value>进入设置</value>
+  </data>
+  <data name="Main_EnterSettings_Message" xml:space="preserve">
+    <value>请输入安全密码或 TOTP 验证码以进入设置。</value>
+  </data>
+  <data name="Main_AutoFold_ClearingAndFolding" xml:space="preserve">
+    <value>正在清空墨迹并收纳至侧边栏，可进入批注模式后通过【撤销】功能来恢复原先墨迹。</value>
+  </data>
+  <data name="Main_PDF_OpenFailed" xml:space="preserve">
+    <value>无法打开 PDF（可能已加密、损坏或不支持）。</value>
+  </data>
+  <data name="Main_PDF_InsertFailed" xml:space="preserve">
+    <value>插入 PDF 失败: {0}</value>
+  </data>
+  <data name="Main_Board_FrozenCannotDelete" xml:space="preserve">
+    <value>该页面已冻结，不能删除</value>
+  </data>
+  <data name="Main_Board_NewPage" xml:space="preserve">
+    <value>新页面</value>
+  </data>
+  <data name="Main_Board_CustomBgApplied" xml:space="preserve">
+    <value>已应用自定义背景色: {0}</value>
+  </data>
+  <data name="Main_Timer_AutoClosedInkeys" xml:space="preserve">
+    <value>「智绘教 Inkeys」已自动关闭</value>
+  </data>
+  <data name="Main_Timer_AutoClosedYouJiao" xml:space="preserve">
+    <value>「优教授课端」已自动关闭</value>
+  </data>
+  <data name="Main_Timer_AutoClosedSeewoDesktop" xml:space="preserve">
+    <value>「希沃桌面 2.0 桌面批注」已自动关闭</value>
+  </data>
+  <data name="Main_Security_Tip" xml:space="preserve">
+    <value>提示</value>
+  </data>
+  <data name="Main_Security_PasswordTooShort" xml:space="preserve">
+    <value>密码长度过短。</value>
+  </data>
+  <data name="Main_Security_PasswordMismatch" xml:space="preserve">
+    <value>两次输入的密码不一致。</value>
+  </data>
+  <data name="Main_Security_CurrentPasswordWrong" xml:space="preserve">
+    <value>当前密码错误。</value>
+  </data>
+  <data name="Main_Security_NewPasswordTooShort" xml:space="preserve">
+    <value>新密码长度过短。</value>
+  </data>
+  <data name="Main_Security_NewPasswordMismatch" xml:space="preserve">
+    <value>两次输入的新密码不一致。</value>
+  </data>
+  <data name="Main_Security_SetPasswordTitle" xml:space="preserve">
+    <value>设置安全密码</value>
+  </data>
+  <data name="Main_Security_ChangePasswordTitle" xml:space="preserve">
+    <value>修改安全密码</value>
+  </data>
+  <data name="Main_Security_EnterNewPassword" xml:space="preserve">
+    <value>请输入新密码</value>
+  </data>
+  <data name="Main_Security_NewPasswordLabel" xml:space="preserve">
+    <value>新密码</value>
+  </data>
+  <data name="Main_Security_ConfirmNewPasswordLabel" xml:space="preserve">
+    <value>确认新密码</value>
+  </data>
+  <data name="Main_Security_CurrentPasswordLabel" xml:space="preserve">
+    <value>当前密码</value>
+  </data>
+  <data name="Main_Security_ChangePasswordHint" xml:space="preserve">
+    <value>请输入当前密码，并设置新密码。</value>
+  </data>
+  <data name="Main_Security_TotpOnlyHint" xml:space="preserve">
+    <value>请输入 6 位 TOTP 验证码。</value>
+  </data>
+  <data name="Main_Security_PasswordOrTotpHint" xml:space="preserve">
+    <value>请输入安全密码或 6 位 TOTP 验证码。</value>
+  </data>
+  <data name="Main_Security_PasswordOnlyHint" xml:space="preserve">
+    <value>请输入安全密码。</value>
+  </data>
+  <data name="Main_Update_FailedTitle" xml:space="preserve">
+    <value>更新失败</value>
+  </data>
+  <data name="Main_Update_FilesInUse" xml:space="preserve">
+    <value>更新失败：部分文件无法覆盖，可能是文件正在使用中。
+请关闭所有相关程序后重试。</value>
+  </data>
+  <data name="Main_Update_CopyError" xml:space="preserve">
+    <value>更新失败：文件复制时出错
+{0}</value>
+  </data>
+  <data name="Main_Update_LaunchFailedTitle" xml:space="preserve">
+    <value>启动失败</value>
+  </data>
+  <data name="Main_Update_LaunchFailed" xml:space="preserve">
+    <value>更新完成，但启动应用程序失败：{0}
+请手动启动应用程序。</value>
+  </data>
+  <data name="Main_Update_LaunchNotFoundTitle" xml:space="preserve">
+    <value>文件缺失</value>
+  </data>
+  <data name="Main_Update_LaunchNotFound" xml:space="preserve">
+    <value>更新完成，但未找到应用程序文件：{0}
+请检查更新是否成功。</value>
+  </data>
+  <data name="Main_Update_Failed" xml:space="preserve">
+    <value>更新失败：{0}</value>
+  </data>
+  <data name="Main_Screenshot_DragToSelect" xml:space="preserve">
+    <value>拖拽鼠标选择矩形区域</value>
+  </data>
+  <data name="Main_Screenshot_FreeDrawHint" xml:space="preserve">
+    <value>按住鼠标左键自由绘制，松开后可继续调整或重新绘制，确认后再截图</value>
+  </data>
+  <data name="Main_Screenshot_CameraMode" xml:space="preserve">
+    <value>摄像头预览模式，点击确认截图按钮进行截图</value>
+  </data>
+  <data name="Main_Screenshot_NoCamera" xml:space="preserve">
+    <value>未找到摄像头设备</value>
+  </data>
+  <data name="Main_Screenshot_CameraStartFailed" xml:space="preserve">
+    <value>启动摄像头失败: {0}</value>
+  </data>
+  <data name="Main_Screenshot_CameraFrameFailed" xml:space="preserve">
+    <value>无法获取摄像头画面</value>
+  </data>
+  <data name="Main_Screenshot_CameraNotStarted" xml:space="preserve">
+    <value>摄像头未启动</value>
+  </data>
+  <data name="Main_Screenshot_CameraCaptureFailed" xml:space="preserve">
+    <value>摄像头截图失败: {0}</value>
+  </data>
+  <data name="Main_Screenshot_FreeSelectDone" xml:space="preserve">
+    <value>自由选区已完成，可点击确认截图/添加到白板；重新拖动可重画</value>
+  </data>
+  <data name="Main_Screenshot_FreeSelectTooSmall" xml:space="preserve">
+    <value>自由选区过小，请重新绘制</value>
+  </data>
+  <data name="Main_Screenshot_DragToAdjust" xml:space="preserve">
+    <value>拖拽控制点调整选择区域，或拖拽边框移动位置</value>
+  </data>
+  <data name="Main_Screenshot_DragToSelectArea" xml:space="preserve">
+    <value>请拖拽选择区域，右键或双击可全选</value>
+  </data>
+  <data name="Main_Screenshot_SelectFirst" xml:space="preserve">
+    <value>请先选择截图区域</value>
+  </data>
+  <data name="Main_Screenshot_DrawFirst" xml:space="preserve">
+    <value>请先拖动鼠标绘制自由选区</value>
+  </data>
+  <data name="Main_Screenshot_FullScreenSelected" xml:space="preserve">
+    <value>已全选屏幕，点击确认截图或添加到白板</value>
+  </data>
+  <data name="Main_Screenshot_NoInkPreview" xml:space="preserve">
+    <value>当前无可预览墨迹</value>
+  </data>
+  <data name="Main_Screenshot_CameraConnected" xml:space="preserve">
+    <value>摄像头已连接</value>
+  </data>
+  <data name="Main_Screenshot_CameraError" xml:space="preserve">
+    <value>摄像头错误: {0}</value>
+  </data>
+  <data name="Main_Privacy_FileNotFound" xml:space="preserve">
+    <value>未找到隐私说明文件（privacy.txt）。</value>
+  </data>
+  <data name="Main_Privacy_ReadError" xml:space="preserve">
+    <value>读取隐私说明文件时出错。</value>
+  </data>
+  <data name="Main_App_RestartLoopDetected" xml:space="preserve">
+    <value>检测到程序已连续重启 5 次，已停止自动重启。请联系开发者或检查系统环境。</value>
+  </data>
+  <data name="Main_App_UnexpectedError" xml:space="preserve">
+    <value>抱歉，出现未预期的异常，可能导致 InkCanvasForClass 运行不稳定。\n建议保存墨迹后重启应用。</value>
+  </data>
+  <data name="Main_DisplayChanged" xml:space="preserve">
+    <value>检测到显示器信息变化，变为{0}x{1}）</value>
+  </data>
+  <data name="Main_DPIChanged" xml:space="preserve">
+    <value>系统DPI发生变化，从 {0}x{1} 变化为 {2}x{3}</value>
+  </data>
+  <data name="Main_StrokesFileLoaded" xml:space="preserve">
+    <value>已加载墨迹文件: {0}</value>
+  </data>
+  <data name="Main_StrokesFileOpenFailed" xml:space="preserve">
+    <value>打开墨迹文件失败</value>
+  </data>
+  <data name="Main_ExitVerify" xml:space="preserve">
+    <value>退出验证</value>
+  </data>
+  <data name="Main_ExitVerifyWithTotp" xml:space="preserve">
+    <value>请输入安全密码或 TOTP 验证码以退出软件。</value>
+  </data>
+  <data name="Main_ExitVerifyPasswordOnly" xml:space="preserve">
+    <value>请输入安全密码以退出软件。</value>
+  </data>
+</root>

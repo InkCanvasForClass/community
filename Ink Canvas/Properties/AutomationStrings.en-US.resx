@@ -288,4 +288,13 @@
   <data name="Storage_MinAutomationStrokes" xml:space="preserve">
     <value>Minimum Automation Strokes</value>
   </data>
+  <data name="FileAssoc_LoadedStrokesFile" xml:space="preserve">
+    <value>Loaded strokes file: {0}</value>
+  </data>
+  <data name="FileAssoc_SwitchedToBoardMode" xml:space="preserve">
+    <value>Switched to whiteboard mode</value>
+  </data>
+  <data name="FileAssoc_ExitedFoldMode" xml:space="preserve">
+    <value>Exited fold mode and restored floating bar</value>
+  </data>
 </root>

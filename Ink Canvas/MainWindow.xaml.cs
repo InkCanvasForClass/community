@@ -1762,7 +1762,7 @@ namespace Ink_Canvas
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e)
         {
             if (!Settings.Advanced.IsEnableResolutionChangeDetection) return;
-            ShowNotification($"检测到显示器信息变化，变为{Screen.PrimaryScreen.Bounds.Width}x{Screen.PrimaryScreen.Bounds.Height}）");
+            ShowNotification(string.Format(Properties.MainWindowStrings.Main_DisplayChanged, Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height));
             HandleFloatingBarRecovery();
         }
 
@@ -1770,7 +1770,7 @@ namespace Ink_Canvas
         {
             if (e.OldDpi.DpiScaleX != e.NewDpi.DpiScaleX && e.OldDpi.DpiScaleY != e.NewDpi.DpiScaleY && Settings.Advanced.IsEnableDPIChangeDetection)
             {
-                ShowNotification($"系统DPI发生变化，从 {e.OldDpi.DpiScaleX}x{e.OldDpi.DpiScaleY} 变化为 {e.NewDpi.DpiScaleX}x{e.NewDpi.DpiScaleY}");
+                ShowNotification(string.Format(Properties.MainWindowStrings.Main_DPIChanged, e.OldDpi.DpiScaleX, e.OldDpi.DpiScaleY, e.NewDpi.DpiScaleX, e.NewDpi.DpiScaleY));
 
                 Dispatcher.Invoke(() =>
                 {
@@ -1845,6 +1845,9 @@ namespace Ink_Canvas
         {
             try
             {
+                if (_isReloadingForLanguageChange)
+                    return;
+
                 LogHelper.WriteLogToFile("Ink Canvas closing", LogHelper.LogType.Event);
 
                 if (_allowCloseAfterExitVerification)
@@ -1857,7 +1860,7 @@ namespace Ink_Canvas
                     {
                         try
                         {
-                            bool ok = await SecurityManager.PromptAndVerifyPasswordOrTotpAsync(Settings, this, "退出验证", "请输入安全密码或 TOTP 验证码以退出软件。");
+                            bool ok = await SecurityManager.PromptAndVerifyPasswordOrTotpAsync(Settings, this, Properties.MainWindowStrings.Main_ExitVerify, Properties.MainWindowStrings.Main_ExitVerifyWithTotp);
                             if (!ok)
                             {
                                 _forceCloseFromExitOrRestartButton = false;
@@ -1915,7 +1918,7 @@ namespace Ink_Canvas
                         {
                             try
                             {
-                                bool ok = await SecurityManager.PromptAndVerifyAsync(Settings, this, "退出验证", "请输入安全密码以退出软件。");
+                                bool ok = await SecurityManager.PromptAndVerifyAsync(Settings, this, Properties.MainWindowStrings.Main_ExitVerify, Properties.MainWindowStrings.Main_ExitVerifyPasswordOnly);
                                 if (!ok)
                                 {
                                     _forceCloseFromExitOrRestartButton = false;
@@ -1943,7 +1946,7 @@ namespace Ink_Canvas
 
                 if (!CloseIsFromButton && Settings.Advanced.IsSecondConfirmWhenShutdownApp)
                 {
-                    var result1 = MessageBox.Show("是否继续关闭 InkCanvasForClass，这将丢失当前未保存的墨迹。", "InkCanvasForClass",
+                    var result1 = MessageBox.Show(Properties.MainWindowStrings.Main_CloseConfirm_Level1, "InkCanvasForClass",
                         MessageBoxButton.OKCancel, MessageBoxImage.Warning);
 
                     if (result1 == MessageBoxResult.Cancel)
@@ -1954,7 +1957,7 @@ namespace Ink_Canvas
                         return;
                     }
 
-                    var result2 = MessageBox.Show("真的狠心关闭 InkCanvasForClass吗？", "InkCanvasForClass",
+                    var result2 = MessageBox.Show(Properties.MainWindowStrings.Main_CloseConfirm_Level2, "InkCanvasForClass",
                         MessageBoxButton.OKCancel, MessageBoxImage.Error);
 
                     if (result2 == MessageBoxResult.Cancel)
@@ -1965,7 +1968,7 @@ namespace Ink_Canvas
                         return;
                     }
 
-                    var result3 = MessageBox.Show("最后确认：确定要关闭 InkCanvasForClass 吗？", "InkCanvasForClass",
+                    var result3 = MessageBox.Show(Properties.MainWindowStrings.Main_CloseConfirm_Level3, "InkCanvasForClass",
                         MessageBoxButton.OKCancel, MessageBoxImage.Question);
 
                     if (result3 == MessageBoxResult.Cancel)
@@ -3229,12 +3232,12 @@ namespace Ink_Canvas
                         {
                             // 打开文件
                             OpenSingleStrokeFile(icstkFile);
-                            ShowNotification($"已加载墨迹文件: {Path.GetFileName(icstkFile)}");
+                            ShowNotification(string.Format(Properties.MainWindowStrings.Main_StrokesFileLoaded, Path.GetFileName(icstkFile)));
                         }
                         catch (Exception ex)
                         {
                             LogHelper.WriteLogToFile($"打开命令行参数中的文件失败: {ex.Message}", LogHelper.LogType.Error);
-                            ShowNotification("打开墨迹文件失败");
+                            ShowNotification(Properties.MainWindowStrings.Main_StrokesFileOpenFailed);
                         }
                     }), DispatcherPriority.Loaded);
                 }

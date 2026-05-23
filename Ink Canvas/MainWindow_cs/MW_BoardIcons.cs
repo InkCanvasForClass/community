@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using System;
 using System.Diagnostics;
 using System.Windows;
@@ -218,7 +219,7 @@ namespace Ink_Canvas
             }
 
             // 显示提示信息
-            ShowNotification($"已应用自定义背景色: {colorHex}");
+            ShowNotification(string.Format(MainWindowStrings.Main_Board_CustomBgApplied, colorHex));
         }
 
         /// <summary>

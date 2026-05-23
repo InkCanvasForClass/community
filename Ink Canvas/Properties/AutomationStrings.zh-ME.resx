@@ -288,4 +288,13 @@
   <data name="Storage_MinAutomationStrokes" xml:space="preserve">
     <value>自动化最少笔画数</value>
   </data>
+  <data name="FileAssoc_LoadedStrokesFile" xml:space="preserve">
+    <value>墨迹文件加载好啦: {0}</value>
+  </data>
+  <data name="FileAssoc_SwitchedToBoardMode" xml:space="preserve">
+    <value>切到白板模式了</value>
+  </data>
+  <data name="FileAssoc_ExitedFoldMode" xml:space="preserve">
+    <value>收纳模式已退出，浮动栏回来啦</value>
+  </data>
 </root>

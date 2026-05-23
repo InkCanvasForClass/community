@@ -203,5 +203,11 @@ namespace Ink_Canvas.Properties
         public static string Storage_AutoDeleteDaysThreshold => ResourceManager.GetString(nameof(Storage_AutoDeleteDaysThreshold), _resourceCulture);
 
         public static string Storage_MinAutomationStrokes => ResourceManager.GetString(nameof(Storage_MinAutomationStrokes), _resourceCulture);
+
+        public static string FileAssoc_LoadedStrokesFile => ResourceManager.GetString(nameof(FileAssoc_LoadedStrokesFile), _resourceCulture);
+
+        public static string FileAssoc_SwitchedToBoardMode => ResourceManager.GetString(nameof(FileAssoc_SwitchedToBoardMode), _resourceCulture);
+
+        public static string FileAssoc_ExitedFoldMode => ResourceManager.GetString(nameof(FileAssoc_ExitedFoldMode), _resourceCulture);
     }
 }

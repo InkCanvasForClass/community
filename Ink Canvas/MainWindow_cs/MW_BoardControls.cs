@@ -600,7 +600,7 @@ namespace Ink_Canvas
 
             if (IsPageFrozen(pageIndex))
             {
-                ShowNotification("该页面已冻结，不能删除");
+                ShowNotification(MainWindowStrings.Main_Board_FrozenCannotDelete);
                 return;
             }
 

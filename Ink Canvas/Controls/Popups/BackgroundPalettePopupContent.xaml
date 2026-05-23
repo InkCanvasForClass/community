@@ -7,10 +7,10 @@
              xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
 mc:Ignorable="d">
     <Grid>
-        <controls:PopupShellContent x:Name="Shell" Title="背景设置" d:Visibility="Collapsed" />
+        <controls:PopupShellContent x:Name="Shell" Title="{x:Static props:CanvasStrings.Canvas_BackgroundSettings}" d:Visibility="Collapsed" />
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
             <ikw:SimpleStackPanel Margin="8" Spacing="4">
-                <TextBlock Text="白板模式"
+                <TextBlock Text="{x:Static props:CanvasStrings.Canvas_WhiteboardMode}"
                            Foreground="{DynamicResource TextForeground}"
                            FontSize="10" FontWeight="Bold"
                            HorizontalAlignment="Center"/>
@@ -28,7 +28,7 @@ mc:Ignorable="d">
                             Width="60" Height="30"
                             Background="LightGray"
                             CornerRadius="4">
-                        <TextBlock Text="黑板"
+                        <TextBlock Text="{x:Static props:CanvasStrings.Canvas_Blackboard}"
                                    Foreground="Black"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center" />
@@ -36,7 +36,7 @@ mc:Ignorable="d">
                 </ikw:SimpleStackPanel>
                 <Border Height="1" d:Background="Green"
                         Background="{DynamicResource SettingsPageBorderBrush}"/>
-                <TextBlock Text="背景颜色"
+                <TextBlock Text="{x:Static props:CanvasStrings.Canvas_BackgroundColor}"
                            Foreground="{DynamicResource TextForeground}"
                            FontSize="10" FontWeight="Bold"
                            HorizontalAlignment="Center"/>
@@ -90,7 +90,7 @@ mc:Ignorable="d">
                                Foreground="{DynamicResource TextForeground}" />
                 </StackPanel>
                 <Button x:Name="ApplyBackgroundColorBtn"
-                        Content="应用颜色"
+                        Content="{x:Static props:CanvasStrings.Canvas_ApplyColor}"
                         Background="#2563eb"
                         Foreground="Black"
                         HorizontalAlignment="Center" />

@@ -211,7 +211,7 @@ namespace Ink_Canvas
             {
                 try
                 {
-                    ShowNotification("检测到剪贴板中有图片，右键点击白板可粘贴");
+                    ShowNotification(Properties.MainWindowStrings.Main_Clipboard_ImageDetected);
                 }
                 catch (Exception ex)
                 {
@@ -235,7 +235,7 @@ namespace Ink_Canvas
 
                 var pasteMenuItem = new MenuItem
                 {
-                    Header = "粘贴图片"
+                    Header = Properties.MainWindowStrings.Main_Clipboard_PasteImage
                 };
 
                 pasteMenuItem.Click += async (s, e) => await PasteImageFromClipboard(position);
@@ -279,14 +279,14 @@ namespace Ink_Canvas
             {
                 if (!Clipboard.ContainsImage())
                 {
-                    ShowNotification("剪贴板中没有图片");
+                    ShowNotification(Properties.MainWindowStrings.Main_Clipboard_NoImage);
                     return Task.CompletedTask;
                 }
 
                 var clipboardImage = Clipboard.GetImage();
                 if (clipboardImage == null)
                 {
-                    ShowNotification("无法获取剪贴板图片");
+                    ShowNotification(Properties.MainWindowStrings.Main_Clipboard_CannotGetImage);
                     return Task.CompletedTask;
                 }
 
@@ -377,11 +377,11 @@ namespace Ink_Canvas
                 UpdateCurrentToolMode("select");
                 HideSubPanels("select");
 
-                ShowNotification("图片已从剪贴板粘贴");
+                ShowNotification(Properties.MainWindowStrings.Main_Clipboard_ImagePasted);
             }
             catch (Exception ex)
             {
-                ShowNotification($"粘贴图片失败: {ex.Message}");
+                ShowNotification(string.Format(Properties.MainWindowStrings.Main_Clipboard_PasteFailed, ex.Message));
                 LogHelper.WriteLogToFile($"粘贴图片失败: {ex.Message}", LogHelper.LogType.Error);
             }
             return Task.CompletedTask;

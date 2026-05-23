@@ -164,7 +164,7 @@ namespace Ink_Canvas
                 }
                 else if (Settings.Appearance.ChickenSoupSource == 3)
                 {
-                    BlackBoardWaterMark.Text = "正在获取一言...";
+                    BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_Loading;
 
                     try
                     {
@@ -176,13 +176,13 @@ namespace Ink_Canvas
                         catch (Exception initEx)
                         {
                             LogHelper.WriteLogToFile($"一言 HTTP 客户端初始化失败: {initEx.Message}", LogHelper.LogType.Warning);
-                            BlackBoardWaterMark.Text = "一言功能不可用（HTTP 库不可用）";
+                            BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_HttpUnavailable;
                             return;
                         }
 
                         if (clientObj == null || !(clientObj is HttpClient client))
                         {
-                            BlackBoardWaterMark.Text = "一言功能不可用（HTTP 库不可用）";
+                            BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_HttpUnavailable;
                             return;
                         }
 
@@ -206,13 +206,13 @@ namespace Ink_Canvas
                         }
                         else
                         {
-                            BlackBoardWaterMark.Text = "一言暂时没有返回内容";
+                            BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_NoContent;
                         }
                     }
                     catch (Exception ex)
                     {
                         LogHelper.WriteLogToFile($"一言 API 请求失败: {ex.Message}", LogHelper.LogType.Warning);
-                        BlackBoardWaterMark.Text = "一言功能不可用";
+                        BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_Unavailable;
                     }
                 }
                 else if (Settings.Appearance.ChickenSoupSource == 4)
@@ -226,7 +226,7 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"更新白板名言时出错: {ex.Message}", LogHelper.LogType.Warning);
                 if (Settings.Appearance.ChickenSoupSource == 3 && BlackBoardWaterMark != null)
                 {
-                    try { BlackBoardWaterMark.Text = "一言功能不可用"; } catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
+                    try { BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_Unavailable; } catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
                 }
             }
         }
@@ -1024,7 +1024,7 @@ namespace Ink_Canvas
             {
                 if (sender != null && Ink_Canvas.Helpers.SecurityManager.IsPasswordRequiredForResetConfig(Settings))
                 {
-                    bool ok = await Ink_Canvas.Helpers.SecurityManager.PromptAndVerifyPasswordOrTotpAsync(Settings, this, "重置配置验证", "请输入安全密码或 TOTP 验证码以确认重置配置。");
+                    bool ok = await Ink_Canvas.Helpers.SecurityManager.PromptAndVerifyPasswordOrTotpAsync(Settings, this, Properties.MainWindowStrings.Main_Settings_ResetVerify, Properties.MainWindowStrings.Main_Settings_ResetVerifyMessage);
                     if (!ok) return;
                 }
             }
@@ -1051,7 +1051,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
-            try { ShowNotification("设置已重置为默认推荐设置~"); } catch { }
+            try { ShowNotification(Properties.MainWindowStrings.Main_Settings_ResetDone); } catch { }
         }
 
         private async void SpecialVersionResetToSuggestion_Click()

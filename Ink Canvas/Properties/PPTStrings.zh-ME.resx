@@ -213,7 +213,43 @@
   <data name="TwoFingerGesture" xml:space="preserve">
     <value>允许幻灯片模式下的双指手势</value>
   </data>
+  <data name="PPTQuickPanel_CloseMagnifier" xml:space="preserve">
+    <value>收了神通吧</value>
+  </data>
+  <data name="PPTQuickPanel_FocusMagnifier" xml:space="preserve">
+    <value>火眼金睛放大镜</value>
+  </data>
+  <data name="PPTQuickPanel_Insert" xml:space="preserve">
+    <value>塞图进来</value>
+  </data>
+  <data name="PPTQuickPanel_MagnifierHint" xml:space="preserve">
+    <value>拖框框移动，拖角角缩放，按 ESC 收工~</value>
+  </data>
+  <data name="PPTQuickPanel_OpenMagnifier" xml:space="preserve">
+    <value>打开火眼金睛</value>
+  </data>
+  <data name="PPTQuickPanel_ScreenshotInsert" xml:space="preserve">
+    <value>咔嚓截图塞进来</value>
+  </data>
+  <data name="PPTQuickPanel_Sound" xml:space="preserve">
+    <value>音量调调</value>
+  </data>
+  <data name="PPTQuickPanel_Zoom" xml:space="preserve">
+    <value>放大缩小</value>
+  </data>
   <data name="UseRot" xml:space="preserve">
     <value>使用 ROT 联动</value>
+  </data>
+  <data name="PPT_RememberLastPage_Prompt" xml:space="preserve">
+    <value>上次看到第 {0} 页了，要不要一键飞过去？</value>
+  </data>
+  <data name="PPT_HiddenSlides_Detected" xml:space="preserve">
+    <value>发现藏起来的幻灯片了，要不要把它们拉出来示众？</value>
+  </data>
+  <data name="PPT_AutoPlay_Detected" xml:space="preserve">
+    <value>检测到自动播放或排练计时开着，幻灯片可能会自己跑，要不要封印它？</value>
+  </data>
+  <data name="PPT_SlidesNotFound" xml:space="preserve">
+    <value>幻灯片呢？找不到啊！</value>
   </data>
 </root>

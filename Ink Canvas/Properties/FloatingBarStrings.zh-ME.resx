@@ -459,4 +459,34 @@
   <data name="ToolbarCondition_Collapsed" xml:space="preserve">
     <value>装备栏已收纳</value>
   </data>
+  <data name="FloatingBar_PenTipStyle" xml:space="preserve">
+    <value>笔锋</value>
+  </data>
+  <data name="FloatingBar_PenStyle_RealTime" xml:space="preserve">
+    <value>实时笔锋</value>
+  </data>
+  <data name="FloatingBar_PenStyle_PointSet" xml:space="preserve">
+    <value>基于点集</value>
+  </data>
+  <data name="FloatingBar_PenStyle_Velocity" xml:space="preserve">
+    <value>基于速率</value>
+  </data>
+  <data name="FloatingBar_PenStyle_Off" xml:space="preserve">
+    <value>关闭笔锋</value>
+  </data>
+  <data name="FloatingBar_HighlighterOverlap" xml:space="preserve">
+    <value>重叠加深</value>
+  </data>
+  <data name="FloatingBar_Opacity" xml:space="preserve">
+    <value>透明</value>
+  </data>
+  <data name="FloatingBar_FadeDelay" xml:space="preserve">
+    <value>延迟</value>
+  </data>
+  <data name="FloatingBar_FadeSpeed" xml:space="preserve">
+    <value>倍速</value>
+  </data>
+  <data name="FloatingBar_ColorThemeLight" xml:space="preserve">
+    <value>亮系</value>
+  </data>
 </root>

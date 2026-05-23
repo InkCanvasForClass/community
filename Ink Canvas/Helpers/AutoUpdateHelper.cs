@@ -2130,7 +2130,7 @@ namespace Ink_Canvas.Helpers
 
                         if (!isSilence)
                         {
-                            MessageBox.Show("更新失败：部分文件无法覆盖，可能是文件正在使用中。\n请关闭所有相关程序后重试。", "更新失败", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show(MainWindowStrings.Main_Update_FilesInUse, MainWindowStrings.Main_Update_FailedTitle, MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                         return;
                     }
@@ -2141,7 +2141,7 @@ namespace Ink_Canvas.Helpers
 
                     if (!isSilence)
                     {
-                        MessageBox.Show($"更新失败：文件复制时出错\n{ex.Message}", "更新失败", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(string.Format(MainWindowStrings.Main_Update_CopyError, ex.Message), MainWindowStrings.Main_Update_FailedTitle, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                     return;
                 }
@@ -2250,7 +2250,7 @@ namespace Ink_Canvas.Helpers
 
                         if (!isSilence)
                         {
-                            MessageBox.Show($"更新完成，但启动应用程序失败：{ex.Message}\n请手动启动应用程序。", "启动失败", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            MessageBox.Show(string.Format(MainWindowStrings.Main_Update_LaunchFailed, ex.Message), MainWindowStrings.Main_Update_LaunchFailedTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
                         }
                     }
                 }
@@ -2260,7 +2260,7 @@ namespace Ink_Canvas.Helpers
 
                     if (!isSilence)
                     {
-                        MessageBox.Show($"更新完成，但未找到应用程序文件：{newAppPath}\n请检查更新是否成功。", "文件缺失", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(string.Format(MainWindowStrings.Main_Update_LaunchNotFound, newAppPath), MainWindowStrings.Main_Update_LaunchNotFoundTitle, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }
@@ -2270,7 +2270,7 @@ namespace Ink_Canvas.Helpers
 
                 if (!isSilence)
                 {
-                    MessageBox.Show($"更新失败：{ex.Message}", "更新失败", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(string.Format(MainWindowStrings.Main_Update_Failed, ex.Message), MainWindowStrings.Main_Update_FailedTitle, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }

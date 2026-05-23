@@ -219,5 +219,17 @@ namespace Ink_Canvas.Properties
         public static string InkRecog_ShapeCorrection => ResourceManager.GetString(nameof(InkRecog_ShapeCorrection), _resourceCulture);
 
         public static string Canvas_SecondsFormat => ResourceManager.GetString(nameof(Canvas_SecondsFormat), _resourceCulture);
+
+        public static string Canvas_BackgroundSettings => ResourceManager.GetString(nameof(Canvas_BackgroundSettings), _resourceCulture);
+
+        public static string Canvas_WhiteboardMode => ResourceManager.GetString(nameof(Canvas_WhiteboardMode), _resourceCulture);
+
+        public static string Canvas_Blackboard => ResourceManager.GetString(nameof(Canvas_Blackboard), _resourceCulture);
+
+        public static string Canvas_BackgroundColor => ResourceManager.GetString(nameof(Canvas_BackgroundColor), _resourceCulture);
+
+        public static string Canvas_ApplyColor => ResourceManager.GetString(nameof(Canvas_ApplyColor), _resourceCulture);
+
+        public static string Shape_RemoveAsymptote => ResourceManager.GetString(nameof(Shape_RemoveAsymptote), _resourceCulture);
     }
 }

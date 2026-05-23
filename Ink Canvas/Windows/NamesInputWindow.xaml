@@ -9,7 +9,7 @@
         mc:Ignorable="d" FontFamily="Microsoft YaHei UI"
         WindowStartupLocation="CenterScreen"
         Topmost="True"
-        Title="Ink Canvas 抽奖 - 名单导入" Height="500" Width="400"
+        Title="{x:Static props:RandomStrings.Random_NamesInput_WindowTitle}" Height="500" Width="400"
         Loaded="Window_Loaded" Closing="Window_Closing"
         ui:ThemeManager.IsThemeAware="True"
         ui:TitleBar.ExtendViewIntoTitleBar="True"
@@ -56,7 +56,7 @@
         
         <!-- 主内容区 -->
         <Grid Grid.Row="1" Background="{DynamicResource NamesInputWindowBackground}" Margin="10,10,10,10">
-            <Label Content="请在下方输入名单，每行一人（建议直接粘贴表格姓名列）" 
+            <Label Content="{x:Static props:RandomStrings.Random_NamesInput_Hint}" 
                    Margin="10" 
                    Foreground="{DynamicResource NamesInputWindowForeground}"
                   />

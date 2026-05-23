@@ -1763,7 +1763,7 @@ namespace Ink_Canvas
                 if (int.TryParse(File.ReadAllText(positionFile), out var page) && page > 0)
                 {
                     _lastPlaybackPage = page;
-                    var result = await ShowInlineYesNoDialog("Ink Canvas For Class CE", $"上次播放到了第 {page} 页, 是否立即跳转");
+                    var result = await ShowInlineYesNoDialog("Ink Canvas For Class CE", string.Format(Properties.PPTStrings.PPT_RememberLastPage_Prompt, page));
                     if (result)
                     {
                         try
@@ -1828,7 +1828,7 @@ namespace Ink_Canvas
                 if (hasHiddenSlides && !IsShowingRestoreHiddenSlidesWindow)
                 {
                     IsShowingRestoreHiddenSlidesWindow = true;
-                    var result = await ShowInlineYesNoDialog("Ink Canvas For Class CE", "检测到此演示文档中包含隐藏的幻灯片，是否取消隐藏？");
+                    var result = await ShowInlineYesNoDialog("Ink Canvas For Class CE", Properties.PPTStrings.PPT_HiddenSlides_Detected);
                     if (result)
                     {
                         try
@@ -1900,7 +1900,7 @@ namespace Ink_Canvas
                 if (hasSlideTimings && !IsShowingAutoplaySlidesWindow)
                 {
                     IsShowingAutoplaySlidesWindow = true;
-                    var result = await ShowInlineYesNoDialog("Ink Canvas For Class CE", "检测到此演示文档中自动播放或排练计时已经启用，可能导致幻灯片自动翻页，是否取消？");
+                    var result = await ShowInlineYesNoDialog("Ink Canvas For Class CE", Properties.PPTStrings.PPT_AutoPlay_Detected);
                     if (result)
                     {
                         try
@@ -2075,7 +2075,7 @@ namespace Ink_Canvas
                         }
                         else
                         {
-                            MessageBox.Show("未找到幻灯片");
+                            MessageBox.Show(Properties.PPTStrings.PPT_SlidesNotFound);
                             LogHelper.WriteLogToFile("手动PPT连接检查失败", LogHelper.LogType.Warning);
                         }
                     });
@@ -2085,7 +2085,7 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"手动检查PPT应用程序失败: {ex}", LogHelper.LogType.Error);
                 _pptUIManager?.UpdateConnectionStatus(false);
-                MessageBox.Show("未找到幻灯片");
+                MessageBox.Show(Properties.PPTStrings.PPT_SlidesNotFound);
             }
         }
 

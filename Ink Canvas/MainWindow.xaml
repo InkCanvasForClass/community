@@ -206,7 +206,7 @@
                 <TextBlock Text="{Binding nowDate}" Name="WaterMarkDate" Visibility="Collapsed"  d:Visibility="Visible" Margin="2,0,0,0"
                            FontSize="16" Foreground="White" Opacity="0.45" />
             </ikw:SimpleStackPanel>
-            <TextBlock Canvas.Right="25" Canvas.Top="15" Text="多一份理解，少一份抱怨" Name="BlackBoardWaterMark"
+            <TextBlock Canvas.Right="25" Canvas.Top="15" Text="{x:Static props:MainWindowStrings.Main_WatermarkText}" Name="BlackBoardWaterMark"
                        Visibility="Collapsed"  d:Visibility="Visible" FontSize="24" FontWeight="Bold" Foreground="White" Opacity="0.5" />
         </Canvas>
         <!--墨迹/图片选择器-->
@@ -280,7 +280,7 @@
                             <ikw:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                                 <Image Source="{DynamicResource StrokeSelectionCloneIcon}"
                                        RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
-                                <TextBlock Text="克隆" FontSize="10" Foreground="{DynamicResource FloatBarForeground}"
+                                <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextClone}" FontSize="10" Foreground="{DynamicResource FloatBarForeground}"
                                            HorizontalAlignment="Center" />
                             </ikw:SimpleStackPanel>
                         </Border>
@@ -292,7 +292,7 @@
                             <ikw:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                                 <Image Source="{DynamicResource StrokeSelectionCloneToNewBoardIcon}"
                                        RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
-                                <TextBlock Text="克隆至新页" FontSize="8" Foreground="{DynamicResource FloatBarForeground}"
+                                <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextCloneToNewPage}" FontSize="8" Foreground="{DynamicResource FloatBarForeground}"
                                            HorizontalAlignment="Center" />
                             </ikw:SimpleStackPanel>
                         </Border>
@@ -324,7 +324,7 @@
                                            Source="{DynamicResource StrokeSelectionFlipVerticalIcon}"
                                            RenderOptions.BitmapScalingMode="HighQuality" Height="30" Width="30" />
                                 </ikw:SimpleStackPanel>
-                                <TextBlock Text="翻转" FontSize="10" HorizontalAlignment="Center"
+                                <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextFlip}" FontSize="10" HorizontalAlignment="Center"
                                            Foreground="{DynamicResource FloatBarForeground}" />
                             </ikw:SimpleStackPanel>
                         </Border>
@@ -356,7 +356,7 @@
                                                Margin="0,0,-2,-2" Width="8" />
                                     </Grid>
                                 </ikw:SimpleStackPanel>
-                                <TextBlock Text="画笔粗细" FontSize="10" HorizontalAlignment="Center"
+                                <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextBrushSize}" FontSize="10" HorizontalAlignment="Center"
                                            Foreground="{DynamicResource FloatBarForeground}" />
                             </ikw:SimpleStackPanel>
                         </Border>
@@ -368,7 +368,7 @@
                             <ikw:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                                 <Image Source="{DynamicResource StrokeSelectionDeleteIcon}"
                                        RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
-                                <TextBlock Margin="0,5,0,0" Text="删除" FontSize="10"
+                                <TextBlock Margin="0,5,0,0" Text="{x:Static props:MainWindowStrings.Main_ContextDelete}" FontSize="10"
                                            Foreground="{DynamicResource FloatBarForeground}"
                                            HorizontalAlignment="Center" />
                             </ikw:SimpleStackPanel>
@@ -376,7 +376,6 @@
                     </ikw:SimpleStackPanel>
                 </Viewbox>
             </Border>
-
             <!-- 图片选择工具栏 -->
             <Border Name="BorderImageSelectionControl"
                     HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,0"
@@ -392,7 +391,7 @@
                             <ikw:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                                 <Image Source="{DynamicResource ImageSelectionCloneIcon}"
                                        RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
-                                <TextBlock Text="克隆" FontSize="10" Foreground="{DynamicResource FloatBarForeground}"
+                                <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextClone}" FontSize="10" Foreground="{DynamicResource FloatBarForeground}"
                                            HorizontalAlignment="Center" />
                             </ikw:SimpleStackPanel>
                         </Border>
@@ -410,7 +409,7 @@
                                        RenderOptions.BitmapScalingMode="HighQuality"
                                        Height="25"
                                        Width="25" />
-                                <TextBlock Text="克隆至新页"
+                                <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextCloneToNewPage}"
                                            FontSize="8"
                                            Foreground="{DynamicResource FloatBarForeground}"
                                            HorizontalAlignment="Center" />
@@ -463,7 +462,7 @@
                                                    Margin="0,0,-3,-4" FontSize="11" />
                                     </Grid>
                                 </ikw:SimpleStackPanel>
-                                <TextBlock Text="缩放" FontSize="10" HorizontalAlignment="Center"
+                                <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextZoom}" FontSize="10" HorizontalAlignment="Center"
                                            Foreground="{DynamicResource FloatBarForeground}" />
                             </ikw:SimpleStackPanel>
                         </Border>
@@ -475,7 +474,7 @@
                             <ikw:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                                 <Image Source="{DynamicResource ImageSelectionDeleteIcon}"
                                        RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
-                                <TextBlock Margin="0,5,0,0" Text="删除" FontSize="10"
+                                <TextBlock Margin="0,5,0,0" Text="{x:Static props:MainWindowStrings.Main_ContextDelete}" FontSize="10"
                                            Foreground="{DynamicResource FloatBarForeground}"
                                            HorizontalAlignment="Center" />
                             </ikw:SimpleStackPanel>
@@ -576,7 +575,7 @@
                                          VerticalAlignment="Center"
                                          Foreground="{DynamicResource FloatBarForeground}" />
                         </Border>
-                        <TextBlock Text="翻页"
+                        <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextPageTurn}"
                                    FontSize="9"
                                    HorizontalAlignment="Center"
                                    Foreground="{DynamicResource FloatBarForeground}"
@@ -1199,8 +1198,8 @@
                     </Border>
                     <StackPanel Width="128" Orientation="Vertical" VerticalAlignment="Center" Margin="8,0,0,0">
                         <TextBlock Name="InkReplayPanelStatusText" FontSize="17" FontWeight="Bold" Foreground="#b91c1c"
-                                   Text="正在重播墨迹..." VerticalAlignment="Center" />
-                        <TextBlock FontSize="12" Foreground="#b91c1c" Text="双击屏幕退出播放" VerticalAlignment="Center" />
+                                   Text="{x:Static props:MainWindowStrings.Main_InkReplayPlaying}" VerticalAlignment="Center" />
+                        <TextBlock FontSize="12" Foreground="#b91c1c" Text="{x:Static props:MainWindowStrings.Main_InkReplayExitHint}" VerticalAlignment="Center" />
                     </StackPanel>
                     <ikw:SimpleStackPanel Orientation="Horizontal" Margin="9,0,0,0" Spacing="6">
                         <Border Name="InkReplayPlayPauseBorder" MouseDown="InkReplayPlayPauseBorder_OnMouseDown"

@@ -1053,7 +1053,7 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"插入 PDF 失败: {ex.Message}", LogHelper.LogType.Error);
-                ShowNotification($"插入 PDF 失败: {ex.Message}");
+                ShowNotification(string.Format(Properties.MainWindowStrings.Main_PDF_InsertFailed, ex.Message));
                 return null;
             }
         }

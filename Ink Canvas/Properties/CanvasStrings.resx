@@ -312,4 +312,22 @@
   <data name="Canvas_SecondsFormat" xml:space="preserve">
     <value>{0:0}秒</value>
   </data>
+  <data name="Canvas_BackgroundSettings" xml:space="preserve">
+    <value>背景设置</value>
+  </data>
+  <data name="Canvas_WhiteboardMode" xml:space="preserve">
+    <value>白板模式</value>
+  </data>
+  <data name="Canvas_Blackboard" xml:space="preserve">
+    <value>黑板</value>
+  </data>
+  <data name="Canvas_BackgroundColor" xml:space="preserve">
+    <value>背景颜色</value>
+  </data>
+  <data name="Canvas_ApplyColor" xml:space="preserve">
+    <value>应用颜色</value>
+  </data>
+  <data name="Shape_RemoveAsymptote" xml:space="preserve">
+    <value>是否移除渐近线？</value>
+  </data>
 </root>

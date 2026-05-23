@@ -12,7 +12,7 @@
         WindowStartupLocation="CenterScreen"
         MouseMove="Window_MouseMove"
         MouseEnter="Window_MouseEnter"
-        Title="Ink Canvas 画板 - 点名"
+        Title="{x:Static props:RandomStrings.Random_RollCall_WindowTitle}"
         Height="520"
         Width="860"
         ui:ThemeManager.IsThemeAware="True"
@@ -132,7 +132,7 @@
                                                  MaxWidth="380"
                                                  MaxHeight="110">
                                             <TextBlock x:Name="MainResultDisplay"
-                                                       Text="点击开始点名"
+                                                       Text="{x:Static props:RandomStrings.Random_RollCall_ClickToStart}"
                                                        FontSize="48"
                                                        FontWeight="Medium"
                                                        Foreground="{DynamicResource NewRollCallWindowDigitForeground}"
@@ -186,7 +186,7 @@
 
                                     <TextBlock x:Name="StatusDisplay"
                                                Margin="0,18,0,0"
-                                               Text="准备就绪"
+                                               Text="{x:Static props:RandomStrings.Random_RollCall_Ready}"
                                                FontSize="14"
                                                Foreground="{DynamicResource NewRollCallWindowSecondaryTextForeground}"
                                                TextAlignment="Center" />
@@ -211,13 +211,13 @@
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
                                     <StackPanel>
-                                        <TextBlock Text="点名人数"
+                                        <TextBlock Text="{x:Static props:RandomStrings.Random_RollCall_PeopleCount}"
                                                    FontSize="14"
                                                    FontWeight="Medium"
                                                    Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" />
                                         <TextBlock x:Name="ListCountDisplay"
                                                    Margin="0,4,0,0"
-                                                   Text="名单人数: 0"
+                                                   Text=""
                                                    FontSize="12"
                                                    Foreground="{DynamicResource NewRollCallWindowSecondaryTextForeground}" />
                                     </StackPanel>
@@ -225,7 +225,7 @@
                                                 Orientation="Horizontal"
                                                 HorizontalAlignment="Right"
                                                 VerticalAlignment="Center">
-                                        <Button x:Name="CountMinusBtn" Style="{StaticResource ModernRollCallIconButtonStyle}" Click="CountMinus_Click" ToolTipService.ToolTip="减少人数">
+                                        <Button x:Name="CountMinusBtn" Style="{StaticResource ModernRollCallIconButtonStyle}" Click="CountMinus_Click" ToolTipService.ToolTip="{x:Static props:RandomStrings.Random_RollCall_DecreaseCount}">
                                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Remove}" FontSize="12" />
                                         </Button>
                                         <Border Width="64"
@@ -243,14 +243,14 @@
                                                        VerticalAlignment="Center"
                                                        Foreground="{DynamicResource NewRollCallWindowDigitForeground}" />
                                         </Border>
-                                        <Button x:Name="CountPlusBtn" Style="{StaticResource ModernRollCallIconButtonStyle}" Click="CountPlus_Click" ToolTipService.ToolTip="增加人数">
+                                        <Button x:Name="CountPlusBtn" Style="{StaticResource ModernRollCallIconButtonStyle}" Click="CountPlus_Click" ToolTipService.ToolTip="{x:Static props:RandomStrings.Random_RollCall_IncreaseCount}">
                                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" FontSize="12" />
                                         </Button>
                                     </StackPanel>
                                 </Grid>
 
                                 <StackPanel Grid.Row="0" Margin="0,0,0,16">
-                                    <TextBlock Text="点名模式"
+                                    <TextBlock Text="{x:Static props:RandomStrings.Random_RollCall_Mode}"
                                                Margin="0,0,0,8"
                                                FontSize="14"
                                                FontWeight="Medium"
@@ -264,9 +264,9 @@
                                                 Style="{StaticResource {x:Static ui:ThemeKeys.TabControlPivotStyleKey}}"
                                                 SelectionChanged="RollCallModeTabControl_SelectionChanged">
                                         <TabItem Header="{x:Static props:ThemeStrings.Theme_Splash_Random}" />
-                                        <TabItem Header="顺序" />
-                                        <TabItem Header="分组" />
-                                        <TabItem Header="外部" />
+                                        <TabItem Header="{x:Static props:RandomStrings.Random_RollCall_ModeSequential}" />
+                                        <TabItem Header="{x:Static props:RandomStrings.Random_RollCall_ModeGroup}" />
+                                        <TabItem Header="{x:Static props:RandomStrings.Random_RollCall_ModeExternal}" />
                                     </TabControl>
                                 </StackPanel>
 
@@ -275,7 +275,7 @@
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="外部点名"
+                                    <TextBlock Text="{x:Static props:RandomStrings.Random_RollCall_ExternalCall}"
                                                VerticalAlignment="Center"
                                                FontSize="14"
                                                FontWeight="Medium"
@@ -294,7 +294,7 @@
                                 </Grid>
 
                                 <StackPanel Grid.Row="3">
-                                    <TextBlock Text="名单管理"
+                                    <TextBlock Text="{x:Static props:RandomStrings.Random_RollCall_NameListManagement}"
                                                Margin="0,0,0,8"
                                                FontSize="14"
                                                FontWeight="Medium"
@@ -303,7 +303,7 @@
                                         <Button x:Name="ImportListBtn" Style="{StaticResource ModernRollCallSmallButtonStyle}" Margin="0,0,8,0" Click="ImportList_Click">
                                             <StackPanel Orientation="Horizontal">
                                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.OpenFile}" FontSize="13" Margin="0,0,6,0" />
-                                                <TextBlock Text="导入" />
+                                                <TextBlock Text="{x:Static props:RandomStrings.Random_RollCall_Import}" />
                                             </StackPanel>
                                         </Button>
                                         <Button x:Name="ClearListBtn" Style="{StaticResource ModernRollCallSmallButtonStyle}" Margin="0,0,8,0" Click="ClearList_Click">
@@ -315,7 +315,7 @@
                                         <Button x:Name="ViewHistoryBtn" Style="{StaticResource ModernRollCallSmallButtonStyle}" Click="ViewHistory_Click">
                                             <StackPanel Orientation="Horizontal">
                                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.History}" FontSize="13" Margin="0,0,6,0" />
-                                                <TextBlock Text="历史" />
+                                                <TextBlock Text="{x:Static props:RandomStrings.Random_RollCall_History}" />
                                             </StackPanel>
                                         </Button>
                                     </UniformGrid>
@@ -344,7 +344,7 @@
                                           Fill="Transparent"
                                           Stretch="Uniform" />
                                     <TextBlock x:Name="StartRollCallBtnText"
-                                               Text="开始点名"
+                                               Text="{x:Static props:RandomStrings.Random_RollCall_Start}"
                                                FontSize="16"
                                                FontWeight="Medium"
                                                Foreground="White" />
@@ -358,7 +358,7 @@
                                     Visibility="Collapsed">
                                 <StackPanel Orientation="Horizontal">
                                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cancel}" FontSize="14" Margin="0,0,8,0" />
-                                    <TextBlock Text="停止" FontSize="16" FontWeight="Medium" />
+                                    <TextBlock Text="{x:Static props:RandomStrings.Random_RollCall_Stop}" FontSize="16" FontWeight="Medium" />
                                 </StackPanel>
                             </Button>
 
