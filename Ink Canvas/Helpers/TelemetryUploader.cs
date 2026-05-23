@@ -188,12 +188,6 @@ namespace Ink_Canvas.Helpers
                     return envToken.Trim();
                 }
 
-                var announcementToken = NotificationSettings.DefaultAnnouncementSoftwareToken;
-                if (!string.IsNullOrWhiteSpace(announcementToken))
-                {
-                    return announcementToken.Trim();
-                }
-
                 try
                 {
                     var assembly = Assembly.GetExecutingAssembly();

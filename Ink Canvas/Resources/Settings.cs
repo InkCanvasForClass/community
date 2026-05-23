@@ -64,16 +64,16 @@ namespace Ink_Canvas
         [JsonProperty("isForcePopupEnabled")]
         public bool IsForcePopupEnabled { get; set; } = true;
 
-        [JsonProperty("announcementApiBaseUrl")]
-        public string AnnouncementApiBaseUrl { get; set; } = "https://dev-api.dy.ci/api/announcement/client/announcements/";
-
-        [JsonProperty("announcementWebSocketUrl")]
-        public string AnnouncementWebSocketUrl { get; set; } = string.Empty;
+        [JsonIgnore]
+        public string AnnouncementApiBaseUrl => "https://dev-api.dy.ci/api/announcement/client/announcements/";
 
         [JsonIgnore]
-        public string AnnouncementSoftwareToken => DefaultAnnouncementSoftwareToken;
+        public string AnnouncementWebSocketUrl => string.Empty;
 
-        public const string DefaultAnnouncementSoftwareToken = "092fb28012b3985e2b84341c0643eab0";
+        [JsonIgnore]
+        public string AnnouncementSoftwareToken => BuiltInSoftwareToken;
+
+        public const string BuiltInSoftwareToken = "492e41ea8eb61fc9a1d336b3852a4478";
 
         [JsonProperty("placement")]
         public string Placement { get; set; } = "TopCenter";

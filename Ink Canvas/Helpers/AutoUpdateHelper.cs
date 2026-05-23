@@ -974,7 +974,8 @@ namespace Ink_Canvas.Helpers
             string localVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             string arch = IsX64UpdatePackageSelected() ? "x64" : "x86";
             string checkUrl = "https://dev-api.dy.ci/api/distribute/check/ICC-CE/" +
-                              $"?version={Uri.EscapeDataString(localVersion)}" +
+                              $"?token={Uri.EscapeDataString(NotificationSettings.BuiltInSoftwareToken)}" +
+                              $"&version={Uri.EscapeDataString(localVersion)}" +
                               $"&os={Uri.EscapeDataString(GetSmartUpdateOs())}" +
                               $"&arch={Uri.EscapeDataString(arch)}" +
                               $"&channel={Uri.EscapeDataString(GetSmartUpdateChannel(channel))}" +

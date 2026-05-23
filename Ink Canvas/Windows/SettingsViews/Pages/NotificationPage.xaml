@@ -50,26 +50,6 @@
                             Click="ViewAnnouncementsButton_Click" />
                 </ui:SettingsCard>
 
-                <ui:SettingsExpander Header="{x:Static props:AnnouncementStrings.ConnectionTitle}"
-                                     Description="{x:Static props:AnnouncementStrings.ConnectionHint}">
-                    <ui:SettingsExpander.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}" />
-                    </ui:SettingsExpander.HeaderIcon>
-                    <ui:SettingsExpander.Items>
-                        <ui:SettingsCard Header="{x:Static props:AnnouncementStrings.ApiBaseUrl}"
-                                         Description="{x:Static props:AnnouncementStrings.ApiBaseUrlHint}">
-                            <TextBox x:Name="ApiBaseUrlTextBox"
-                                     MinWidth="360"
-                                     TextChanged="ApiBaseUrlTextBox_TextChanged" />
-                        </ui:SettingsCard>
-                        <ui:SettingsCard Header="{x:Static props:AnnouncementStrings.WebSocketUrl}"
-                                         Description="{x:Static props:AnnouncementStrings.WebSocketUrlHint}">
-                            <TextBox x:Name="WebSocketUrlTextBox"
-                                     MinWidth="360"
-                                     TextChanged="WebSocketUrlTextBox_TextChanged" />
-                        </ui:SettingsCard>                    </ui:SettingsExpander.Items>
-                </ui:SettingsExpander>
-
                 <controls:LabeledSettingsCard x:Name="CardEnableDynamic"
                         Header="{x:Static props:NotificationStrings.EnableDynamic}"
                         Description="{x:Static props:NotificationStrings.EnableDynamicHint}"

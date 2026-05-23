@@ -35,8 +35,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var notification = SettingsManager.Settings.Notification;
             CardEnableAnnouncements.IsOn = notification.IsAnnouncementEnabled;
             CardEnableForcePopup.IsOn = notification.IsForcePopupEnabled;
-            ApiBaseUrlTextBox.Text = notification.AnnouncementApiBaseUrl ?? string.Empty;
-            WebSocketUrlTextBox.Text = notification.AnnouncementWebSocketUrl ?? string.Empty;
         }
 
         private void SaveSettings()
@@ -82,20 +80,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 Owner = Window.GetWindow(this)
             };
             window.ShowDialog();
-        }
-
-        private void ApiBaseUrlTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Notification.AnnouncementApiBaseUrl = ApiBaseUrlTextBox.Text.Trim();
-            SaveSettings();
-        }
-
-        private void WebSocketUrlTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Notification.AnnouncementWebSocketUrl = WebSocketUrlTextBox.Text.Trim();
-            SaveSettings();
         }
     }
 }
