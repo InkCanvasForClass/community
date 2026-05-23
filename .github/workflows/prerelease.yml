@@ -229,8 +229,11 @@ jobs:
           cache: true
           cache-dependency-path: '**/packages.lock.json'
       
-      - name: Restore Package 
-        run: dotnet restore "Ink Canvas.sln" --locked-mode
+      - name: Restore Package
+        run: |
+          $architecture = "${{ matrix.architecture }}"
+          $runtimeIdentifier = if ($architecture -eq "AnyCPU") { "win-x64" } else { "win-x86" }
+          dotnet restore "Ink Canvas.sln" --locked-mode -r $runtimeIdentifier -p:PublishReadyToRun=true
       
       - name: Publish the Application (Release)
         env:
