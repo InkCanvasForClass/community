@@ -2155,7 +2155,10 @@ namespace Ink_Canvas
                 ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
                 ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
                 isViewboxFloatingBarMarginAnimationRunning = false;
-                if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
+                if (MarginFromEdge > 0)
+                    ViewboxFloatingBar.Visibility = Visibility.Visible;
+                else if (!Topmost)
+                    ViewboxFloatingBar.Visibility = Visibility.Hidden;
             });
         }
 
@@ -2358,7 +2361,9 @@ namespace Ink_Canvas
             }
 
             if (!animate) isViewboxFloatingBarMarginAnimationRunning = false;
-            if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
+            if (!isFloatingBarFolded)
+                ViewboxFloatingBar.Visibility = Visibility.Visible;
+            else if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
         }
 
         /// <summary>
@@ -3846,7 +3851,7 @@ namespace Ink_Canvas
             _settingsWindow.Owner = this;
             _settingsWindow.Topmost = this.Topmost;
             _settingsWindow.Closed += (s, args) => _settingsWindow = null;
-            _settingsWindow.ShowDialog();
+            _settingsWindow.Show();
         }
 private bool forceEraser;
 
