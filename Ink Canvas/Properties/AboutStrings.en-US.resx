@@ -64,7 +64,7 @@
     <value>The strong copyleft license requires that complete source code and modifications of the licensed work (including large works using it) be provided under the same license. Copyright and license notices must be retained. Contributors explicitly grant patent rights.</value>
   </data>
   <data name="LicenseTitle" xml:space="preserve">
-    <value>This software, ICA and Ink Canvas are all open sourced under a license</value>
+    <value>The following software, ICA, and Ink Canvas are open-source projects:</value>
   </data>
   <data name="OpenSourceSlogan" xml:space="preserve">
     <value>We love open-source forever!</value>
@@ -85,13 +85,13 @@
     <value>Upload basic data</value>
   </data>
   <data name="Telemetry_Off" xml:space="preserve">
-    <value>Off (no upload)</value>
+    <value>Off</value>
   </data>
   <data name="Telemetry_Optional" xml:space="preserve">
     <value>Upload basic + optional data</value>
   </data>
   <data name="TelemetryLabel" xml:space="preserve">
-    <value>Anonymous usage data upload:</value>
+    <value>Anonymous usage data upload</value>
   </data>
   <data name="ThanksContributors" xml:space="preserve">
     <value>Thanks to the following contributors:</value>

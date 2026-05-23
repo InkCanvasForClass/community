@@ -46,13 +46,13 @@
     <value>Auto-save slide ink</value>
   </data>
   <data name="AutoSaveStrokesHint" xml:space="preserve">
-    <value>When on, ink is saved when ending slide show and loaded next time (same file and page).</value>
+    <value>Saves ink when ending a slideshow and restores it the next time the same file and slide are opened.</value>
   </data>
   <data name="AutoScreenshot" xml:space="preserve">
     <value>Auto screenshot on slide change</value>
   </data>
   <data name="AutoScreenshotHint" xml:space="preserve">
-    <value>When on, auto-screenshot when turning page with ink on slide.</value>
+    <value>Automatically take a screenshot when switching slides containing ink.</value>
   </data>
   <data name="BlackBackground" xml:space="preserve">
     <value>Black background</value>
@@ -82,7 +82,7 @@
     <value>PPT page-turn buttons</value>
   </data>
   <data name="GoToFirstPageOnReenter" xml:space="preserve">
-    <value>Go to first slide when entering show</value>
+    <value>Go to first slide when starting a slideshow</value>
   </data>
   <data name="GroupTitle" xml:space="preserve">
     <value>PPT integration</value>
@@ -139,10 +139,10 @@
     <value>Bottom right</value>
   </data>
   <data name="RememberLastPage" xml:space="preserve">
-    <value>Remember and prompt last slide position</value>
+    <value>Remember last slide position</value>
   </data>
   <data name="RememberLastPageHint" xml:space="preserve">
-    <value>When on, last page is recorded; choose Yes to jump to it.</value>
+    <value>Prompts to resume from the last viewed slide when opening a presentation.</value>
   </data>
   <data name="RightBottomOffset" xml:space="preserve">
     <value>Bottom right offset</value>
@@ -172,7 +172,7 @@
     <value>Sides</value>
   </data>
   <data name="SkipAnimations" xml:space="preserve">
-    <value>Steal focus to skip animations (PPT)</value>
+    <value>Preempt focus to skip PowerPoint animations</value>
   </data>
   <data name="SupportPowerPoint" xml:space="preserve">
     <value>Microsoft PowerPoint support</value>

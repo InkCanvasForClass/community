@@ -79,10 +79,10 @@
     <value>Taskbar tray icon</value>
   </data>
   <data name="Tray_LeftClickAction" xml:space="preserve">
-    <value>Tray left-click</value>
+    <value>When left-clicked</value>
   </data>
   <data name="Tray_RightClickAction" xml:space="preserve">
-    <value>Tray right-click</value>
+    <value>When right-clicked</value>
   </data>
   <data name="Window_WindowChromeRendering" xml:space="preserve">
     <value>Render with WindowChrome</value>
