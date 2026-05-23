@@ -4,6 +4,12 @@ on:
   push:
     branches: [ net6 ]
   workflow_dispatch:
+    inputs:
+      include_runtime:
+        description: 'Include .NET runtime in published artifacts'
+        required: true
+        default: false
+        type: boolean
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}-${{ github.head_ref || github.sha }}
@@ -44,7 +50,9 @@ jobs:
         run: |
           $architecture = "${{ matrix.architecture }}"
           $runtimeIdentifier = if ($architecture -eq "AnyCPU") { "win-x64" } else { "win-x86" }
-          msbuild /t:Publish /p:platform="$architecture" /p:configuration="Debug" /p:RuntimeIdentifier="$runtimeIdentifier" /p:SelfContained=false /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:IncludeNativeLibrariesForSelfExtract=true /p:EnableCompressionInSingleFile=false /p:PublishDir="bin/Debug/publish/$runtimeIdentifier/" /p:GitFlow="$GITFLOW" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
+          $selfContained = "${{ github.event_name == 'workflow_dispatch' && inputs.include_runtime }}" -eq "true"
+          $singleFileCompression = if ($selfContained) { "true" } else { "false" }
+          msbuild /t:Publish /p:platform="$architecture" /p:configuration="Debug" /p:RuntimeIdentifier="$runtimeIdentifier" /p:SelfContained=$selfContained /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:IncludeNativeLibrariesForSelfExtract=true /p:EnableCompressionInSingleFile=$singleFileCompression /p:PublishDir="bin/Debug/publish/$runtimeIdentifier/" /p:GitFlow="$GITFLOW" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
 
       - name: Check if exe file is generated
         id: check-exe
@@ -71,14 +79,15 @@ jobs:
           GITHUB_RUN_NUMBER: ${{ github.run_number }}
         run: |
           $shortSha = $env:GITHUB_SHA.Substring(0, 7)
-          $version = "debug-$shortSha-$env:GITHUB_RUN_NUMBER"
+          $runtimeSuffix = if (("${{ github.event_name == 'workflow_dispatch' && inputs.include_runtime }}" -eq "true")) { "-with-runtime" } else { "" }
+          $version = "debug-$shortSha-$env:GITHUB_RUN_NUMBER$runtimeSuffix"
           echo "archive_name=$version" >> $env:GITHUB_OUTPUT
       
       - name: Upload Artifact (if build succeeded)
         if: steps.check-exe.outputs.build_success == 'true'
         uses: actions/upload-artifact@v7
         with:
-          name: InkCanvasForClass.CE.debug.${{ matrix.architecture }}
+          name: InkCanvasForClass.CE.debug.${{ matrix.architecture }}${{ github.event_name == 'workflow_dispatch' && inputs.include_runtime && '.with-runtime' || '' }}
           path: "Ink Canvas/bin/Debug/publish/${{ matrix.architecture == 'AnyCPU' && 'win-x64' || 'win-x86' }}/*"
 
       - name: Create Summary
