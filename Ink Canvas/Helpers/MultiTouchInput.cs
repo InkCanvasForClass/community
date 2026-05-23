@@ -54,6 +54,7 @@ namespace Ink_Canvas.Helpers
     {
         private int _lastDrawnPointCount = 0;
         private const int INCREMENTAL_DRAW_THRESHOLD = 2;
+        private const int MAX_SEGMENTS_PER_VISUAL = 24;
         private VisualCanvas _visualCanvas;
 
         /// <summary>
@@ -124,11 +125,22 @@ namespace Ink_Canvas.Helpers
             if (Stroke == null || Stroke.StylusPoints.Count == 0 || _visualCanvas == null) return;
             if (startIndex >= endIndex || startIndex < 0 || endIndex > Stroke.StylusPoints.Count) return;
 
+            for (int segmentStart = startIndex; segmentStart < endIndex;)
+            {
+                int segmentEnd = Math.Min(endIndex, segmentStart + MAX_SEGMENTS_PER_VISUAL + 1);
+                DrawVisualSegment(segmentStart, segmentEnd);
+                segmentStart = Math.Max(segmentStart + 1, segmentEnd - 1);
+            }
+        }
+
+        private void DrawVisualSegment(int startIndex, int endIndex)
+        {
+            if (startIndex >= endIndex) return;
+
             var points = Stroke.StylusPoints;
             var drawingAttributes = Stroke.DrawingAttributes;
             var ignorePressure = drawingAttributes.IgnorePressure;
 
-            // 创建新的DrawingVisual用于绘制这个点段
             var segmentVisual = new DrawingVisual();
 
             RenderOptions.SetBitmapScalingMode(segmentVisual, BitmapScalingMode.HighQuality);
@@ -137,10 +149,8 @@ namespace Ink_Canvas.Helpers
 
             using (var dc = segmentVisual.RenderOpen())
             {
-                // 绘制指定范围内的点段
                 if (endIndex - startIndex >= 2)
                 {
-                    // 多个点，绘制线段
                     for (int i = startIndex; i < endIndex - 1 && i < points.Count - 1; i++)
                     {
                         var startPoint = new Point(points[i].X, points[i].Y);
@@ -159,7 +169,6 @@ namespace Ink_Canvas.Helpers
                 }
                 else if (endIndex - startIndex == 1 && startIndex < points.Count)
                 {
-                    // 只有一个点，绘制圆点
                     var brush = new SolidColorBrush(drawingAttributes.Color);
                     var point = points[startIndex];
                     var s = PressureToVisualScale(point.PressureFactor, ignorePressure);
@@ -168,7 +177,6 @@ namespace Ink_Canvas.Helpers
                 }
             }
 
-            // 将新的DrawingVisual添加到VisualCanvas中
             _visualCanvas.AddVisual(segmentVisual);
         }
 
