@@ -17,14 +17,16 @@
         <TranslateTransform x:Name="RootTransform" Y="-24" />
     </UserControl.RenderTransform>
 
-    <Border x:Name="RootBorder"
-            Margin="0,24,0,0"
-            Padding="14,10"
-            Background="#E618181B"
-            BorderBrush="#33FFFFFF"
-            BorderThickness="1"
-            CornerRadius="24"
-            MouseLeftButtonUp="RootBorder_MouseLeftButtonUp">
+    <Grid x:Name="RootContainer"
+          Margin="0,24,0,0"
+          MouseLeftButtonUp="RootBorder_MouseLeftButtonUp"
+          SizeChanged="RootContainer_SizeChanged">
+        <Border x:Name="RootBorder"
+                Padding="14,10"
+                Background="#E618181B"
+                BorderBrush="#33FFFFFF"
+                BorderThickness="1"
+                CornerRadius="24">
         <Border.Effect>
             <DropShadowEffect BlurRadius="24" ShadowDepth="4" Opacity="0.28" Color="#000000" />
         </Border.Effect>
@@ -96,6 +98,14 @@
                             Click="ActionButton_Click" />
                 </StackPanel>
             </StackPanel>
-        </Grid>
-    </Border>
+            </Grid>
+        </Border>
+        <Path x:Name="CountdownProgressPath"
+              Stroke="#FF5AA9E6"
+              StrokeThickness="3"
+              StrokeStartLineCap="Round"
+              StrokeEndLineCap="Round"
+              Fill="Transparent"
+              IsHitTestVisible="False" />
+    </Grid>
 </UserControl>
