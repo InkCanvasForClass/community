@@ -82,7 +82,7 @@ namespace Ink_Canvas
         public string AnimationMode { get; set; } = "Standard";
 
         [JsonProperty("updateDurationSeconds")]
-        public int UpdateDurationSeconds { get; set; } = 5;
+        public int UpdateDurationSeconds { get; set; } = 3;
 
         [JsonProperty("urgentDurationSeconds")]
         public int UrgentDurationSeconds { get; set; } = 10;
