@@ -136,21 +136,6 @@ namespace Ink_Canvas
             return RealtimeClamp((scale - 0.42f) / 1.16f, 0.08f, 1f);
         }
 
-        private double GetRealtimeBrushTipMinDistance()
-        {
-            return Math.Max(0, Settings.Canvas.RealtimeBrushTipMinDistance);
-        }
-
-        private double GetRealtimeBrushTipMinDistance(RealtimeBrushTipState state)
-        {
-            var configuredMinDistance = GetRealtimeBrushTipMinDistance();
-            if (configuredMinDistance > 0)
-                return configuredMinDistance;
-            return state.SmoothedSampleRateHz > 160f ? 0.35f
-                : state.SmoothedSampleRateHz > 90f ? 0.25f
-                : 0.12f;
-        }
-
         private bool ShouldUseRealtimeVelocityBrushTip()
         {
             return Settings.Canvas.InkStyle == 3
@@ -301,7 +286,10 @@ namespace Ink_Canvas
                 pressure = RealtimeClamp(pressure, 0.08f, 1f);
                 pressure = state.FilterPressure.Filter(pressure, dt, speed);
 
-                var minDist = GetRealtimeBrushTipMinDistance(state);
+                // 高频采样时做最小距离门限，避免点爆炸导致实时重绘卡顿
+                var minDist = state.SmoothedSampleRateHz > 160f ? 0.55f
+                    : state.SmoothedSampleRateHz > 90f ? 0.4f
+                    : 0.25f;
                 if (dist < minDist && state.HasSeed)
                 {
                     state.LastRawX = rawX;
@@ -395,7 +383,9 @@ namespace Ink_Canvas
             pressure = RealtimeClamp(pressure, 0.08f, 1f);
             pressure = state.FilterPressure.Filter(pressure, dt, speed);
 
-            var minDist = GetRealtimeBrushTipMinDistance(state);
+            var minDist = state.SmoothedSampleRateHz > 160f ? 0.55f
+                : state.SmoothedSampleRateHz > 90f ? 0.4f
+                : 0.25f;
             if (dist < minDist && state.HasSeed)
             {
                 state.LastRawX = rawX;
@@ -1366,7 +1356,7 @@ namespace Ink_Canvas
                     InitializeRealtimeBrushTipStateFromPoint(touchId, p);
                     var sv = GetStrokeVisual(touchId);
                     TryAppendRealtimeVelocityBrushTipPoint(sv, touchId, p);
-                    sv.Redraw();
+                    sv.ForceRedraw();
                 }
                 catch (Exception ex)
                 {
@@ -1520,7 +1510,7 @@ namespace Ink_Canvas
                     var p = e.GetTouchPoint(inkCanvas).Position;
                     var sv = GetStrokeVisual(touchId);
                     if (TryAppendRealtimeVelocityBrushTipPoint(sv, touchId, p))
-                        sv.Redraw();
+                        sv.ForceRedraw();
                     ResetPauseStraightenTimer(touchId);
                 }
                 catch (Exception ex)
