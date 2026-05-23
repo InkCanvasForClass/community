@@ -41,7 +41,8 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Row="0"
+            <Border x:Name="IconBackgroundBorder"
+                    Grid.Row="0"
                     Grid.Column="0"
                     Width="28"
                     Height="28"
