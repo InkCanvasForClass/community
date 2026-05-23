@@ -8,15 +8,13 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace Ink_Canvas.Controls
 {
     public partial class DynamicNotificationControl : UserControl
     {
-        private DateTime autoCloseStartedAt;
-        private TimeSpan autoCloseDuration;
-        private bool isCountdownRendering;
-        private bool isClosing;
+        private readonly DispatcherTimer autoCloseTimer = new DispatcherTimer();
         private NotificationMessage currentMessage;
         private bool isExpanded;
 
@@ -25,12 +23,12 @@ namespace Ink_Canvas.Controls
         public DynamicNotificationControl()
         {
             InitializeComponent();
+            autoCloseTimer.Tick += AutoCloseTimer_Tick;
         }
 
         public void Show(NotificationMessage message)
         {
             currentMessage = message;
-            isClosing = false;
             isExpanded = message?.ForcePopup == true;
 
             TitleTextBlock.Text = string.IsNullOrWhiteSpace(message?.Title) ? NotificationStrings.DefaultTitle : message.Title;
@@ -46,13 +44,9 @@ namespace Ink_Canvas.Controls
             ApplyThemeColors(message);
             BeginShowAnimation();
 
-            StopCountdownRendering();
-            autoCloseDuration = TimeSpan.FromSeconds(Math.Max(1, message?.DisplaySeconds ?? 5));
-            autoCloseStartedAt = DateTime.Now;
-            CountdownProgressPath.StrokeDashArray = new DoubleCollection { 1, 0 };
-            CountdownProgressPath.StrokeDashOffset = 0;
-            UpdateCountdownProgress(1);
-            StartCountdownRendering();
+            autoCloseTimer.Stop();
+            autoCloseTimer.Interval = TimeSpan.FromSeconds(Math.Max(1, message?.DisplaySeconds ?? 5));
+            autoCloseTimer.Start();
         }
 
         private FontIconData GetIcon(NotificationMessage message)
@@ -79,7 +73,6 @@ namespace Ink_Canvas.Controls
             var (background, border, foreground, secondaryForeground, iconBackground) = GetThemeColors(message);
             RootBorder.Background = new SolidColorBrush(background);
             RootBorder.BorderBrush = new SolidColorBrush(border);
-            CountdownProgressPath.Stroke = new SolidColorBrush(border);
             TitleTextBlock.Foreground = new SolidColorBrush(foreground);
             SummaryTextBlock.Foreground = new SolidColorBrush(secondaryForeground);
             ContentTextBlock.Foreground = new SolidColorBrush(secondaryForeground);
@@ -107,11 +100,8 @@ namespace Ink_Canvas.Controls
         private void RootBorder_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (e.OriginalSource is Button) return;
-            StopCountdownRendering();
             isExpanded = !isExpanded;
             ExpandedPanel.Visibility = isExpanded ? Visibility.Visible : Visibility.Collapsed;
-            autoCloseStartedAt = DateTime.Now - TimeSpan.FromMilliseconds(autoCloseDuration.TotalMilliseconds * (1 - (CountdownProgressPath.Tag is double progress ? progress : 1)));
-            StartCountdownRendering();
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
@@ -141,137 +131,25 @@ namespace Ink_Canvas.Controls
 
         private void UserControl_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {
+            autoCloseTimer.Stop();
         }
 
         private void UserControl_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
         {
-        }
-
-        private void StartCountdownRendering()
-        {
-            if (isCountdownRendering) return;
-            CompositionTarget.Rendering += CompositionTarget_Rendering;
-            isCountdownRendering = true;
-        }
-
-        private void StopCountdownRendering()
-        {
-            if (!isCountdownRendering) return;
-            CompositionTarget.Rendering -= CompositionTarget_Rendering;
-            isCountdownRendering = false;
-        }
-
-        private void CompositionTarget_Rendering(object sender, EventArgs e)
-        {
-            RenderCountdownFrame();
-        }
-
-        private void RenderCountdownFrame()
-        {
-            if (currentMessage == null || autoCloseDuration <= TimeSpan.Zero)
+            if (currentMessage != null)
             {
-                Close();
-                return;
-            }
-
-            var remaining = 1 - (DateTime.Now - autoCloseStartedAt).TotalMilliseconds / autoCloseDuration.TotalMilliseconds;
-            UpdateCountdownProgress(Math.Max(0, remaining));
-            if (remaining <= 0)
-            {
-                Close();
+                autoCloseTimer.Start();
             }
         }
 
-        private void RootContainer_SizeChanged(object sender, SizeChangedEventArgs e)
+        private void AutoCloseTimer_Tick(object sender, EventArgs e)
         {
-            UpdateCountdownProgress(CountdownProgressPath?.Tag is double progress ? progress : 1);
-        }
-
-        private void UpdateCountdownProgress(double progress)
-        {
-            if (CountdownProgressPath == null || RootContainer.ActualWidth <= 0 || RootContainer.ActualHeight <= 0)
-            {
-                return;
-            }
-
-            progress = Math.Max(0, Math.Min(1, progress));
-            CountdownProgressPath.Tag = progress;
-            CountdownProgressPath.StrokeDashArray = null;
-
-            double width = RootContainer.ActualWidth;
-            double height = RootContainer.ActualHeight;
-            double radius = Math.Min(24, Math.Min(width, height) / 2);
-            double centerX = width / 2;
-            double topRightLine = width - radius;
-            double topLeftLine = radius;
-            double rightLine = height - radius;
-            double bottomLine = width - radius;
-            double leftLine = height - radius;
-
-            double arc = Math.PI * radius / 2;
-            double perimeter = (topRightLine - centerX) + arc + rightLine + arc + bottomLine + arc + leftLine + arc + (centerX - topLeftLine);
-            double length = perimeter * progress;
-            var figure = new PathFigure { StartPoint = new Point(centerX, 1.5), IsClosed = false, IsFilled = false };
-
-            AddLineSegment(figure, new Point(topRightLine, 1.5), ref length);
-            AddArcSegment(figure, new Point(width - 1.5, radius), new Size(radius - 1.5, radius - 1.5), SweepDirection.Clockwise, ref length, arc);
-            AddLineSegment(figure, new Point(width - 1.5, rightLine), ref length);
-            AddArcSegment(figure, new Point(bottomLine, height - 1.5), new Size(radius - 1.5, radius - 1.5), SweepDirection.Clockwise, ref length, arc);
-            AddLineSegment(figure, new Point(topLeftLine, height - 1.5), ref length);
-            AddArcSegment(figure, new Point(1.5, leftLine), new Size(radius - 1.5, radius - 1.5), SweepDirection.Clockwise, ref length, arc);
-            AddLineSegment(figure, new Point(1.5, radius), ref length);
-            AddArcSegment(figure, new Point(topLeftLine, 1.5), new Size(radius - 1.5, radius - 1.5), SweepDirection.Clockwise, ref length, arc);
-            AddLineSegment(figure, new Point(centerX, 1.5), ref length);
-
-            CountdownProgressPath.Data = new PathGeometry(new[] { figure });
-        }
-
-        private static void AddLineSegment(PathFigure figure, Point endPoint, ref double length)
-        {
-            if (length <= 0) return;
-
-            Point startPoint = figure.Segments.Count == 0 ? figure.StartPoint : GetLastPoint(figure);
-            double segmentLength = (endPoint - startPoint).Length;
-            if (length >= segmentLength)
-            {
-                figure.Segments.Add(new LineSegment(endPoint, true));
-                length -= segmentLength;
-                return;
-            }
-
-            double ratio = segmentLength <= 0 ? 0 : length / segmentLength;
-            figure.Segments.Add(new LineSegment(new Point(startPoint.X + (endPoint.X - startPoint.X) * ratio, startPoint.Y + (endPoint.Y - startPoint.Y) * ratio), true));
-            length = 0;
-        }
-
-        private static void AddArcSegment(PathFigure figure, Point endPoint, Size size, SweepDirection sweepDirection, ref double length, double segmentLength)
-        {
-            if (length <= 0) return;
-            if (length >= segmentLength)
-            {
-                figure.Segments.Add(new ArcSegment(endPoint, size, 0, false, sweepDirection, true));
-                length -= segmentLength;
-                return;
-            }
-
-            figure.Segments.Add(new ArcSegment(endPoint, size, 0, false, sweepDirection, true));
-            length = 0;
-        }
-
-        private static Point GetLastPoint(PathFigure figure)
-        {
-            if (figure.Segments.Count == 0) return figure.StartPoint;
-            var segment = figure.Segments[figure.Segments.Count - 1];
-            if (segment is LineSegment line) return line.Point;
-            if (segment is ArcSegment arc) return arc.Point;
-            return figure.StartPoint;
+            Close();
         }
 
         private void Close()
         {
-            if (isClosing) return;
-            isClosing = true;
-            StopCountdownRendering();
+            autoCloseTimer.Stop();
             BeginHideAnimation();
         }
 

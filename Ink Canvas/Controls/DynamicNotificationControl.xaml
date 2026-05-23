@@ -19,8 +19,7 @@
 
     <Grid x:Name="RootContainer"
           Margin="0,24,0,0"
-          MouseLeftButtonUp="RootBorder_MouseLeftButtonUp"
-          SizeChanged="RootContainer_SizeChanged">
+          MouseLeftButtonUp="RootBorder_MouseLeftButtonUp">
         <Border x:Name="RootBorder"
                 Padding="14,10"
                 Background="#E618181B"
@@ -122,13 +121,5 @@
                 </StackPanel>
             </StackPanel>
             </Grid>
-        </Border>
-        <Path x:Name="CountdownProgressPath"
-              Stroke="#FF5AA9E6"
-              StrokeThickness="3"
-              StrokeStartLineCap="Round"
-              StrokeEndLineCap="Round"
-              Fill="Transparent"
-              IsHitTestVisible="False" />
-    </Grid>
+        </Border>    </Grid>
 </UserControl>
