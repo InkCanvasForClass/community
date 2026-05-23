@@ -142,7 +142,8 @@
     <value>清理失败：{0}</value>
   </data>
   <data name="Storage_Confirm_Body" xml:space="preserve">
-    <value>将永久删除「{0}」分类下的所有文件，操作不可恢复。\n是否继续？</value>
+    <value>将永久删除「{0}」分类下的所有文件，操作不可恢复。
+是否继续？</value>
   </data>
   <data name="Storage_Confirm_Second_Body" xml:space="preserve">
     <value>再次确认：确定要删除「{0}」吗？</value>
@@ -250,7 +251,8 @@
     <value>备份成功</value>
   </data>
   <data name="Backup_SuccessMsg" xml:space="preserve">
-    <value>设置已成功备份到:\n{0}</value>
+    <value>设置已成功备份到:
+{0}</value>
   </data>
   <data name="Backup_FailedTitle" xml:space="preserve">
     <value>备份失败</value>

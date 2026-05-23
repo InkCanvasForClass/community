@@ -142,7 +142,8 @@
     <value>清理翻车了：{0}</value>
   </data>
   <data name="Storage_Confirm_Body" xml:space="preserve">
-    <value>将永久删除「{0}」分类下的所有文件，删了就没了！\n确定要继续吗？</value>
+    <value>将永久删除「{0}」分类下的所有文件，删了就没了！
+确定要继续吗？</value>
   </data>
   <data name="Storage_Confirm_Second_Body" xml:space="preserve">
     <value>再确认一次：真的要删「{0}」吗？删了可就没了！</value>
@@ -250,7 +251,8 @@
     <value>备份到手，稳如老狗</value>
   </data>
   <data name="Backup_SuccessMsg" xml:space="preserve">
-    <value>设置已成功备份到:\n{0}</value>
+    <value>设置已成功备份到:
+{0}</value>
   </data>
   <data name="Backup_FailedTitle" xml:space="preserve">
     <value>备份翻车了</value>
