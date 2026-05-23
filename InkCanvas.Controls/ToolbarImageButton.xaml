@@ -5,12 +5,18 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
              mc:Ignorable="d">
-    <Border x:Name="ButtonBorder" CornerRadius="4" Background="Transparent" Margin="0,2,0,7">
+    <Border x:Name="ButtonBorder"
+            CornerRadius="4"
+            Background="Transparent"
+            Width="44"
+            Height="52">
         <Grid Name="ButtonPanel" d:Background="Red"
               MouseDown="ButtonPanel_MouseDown"
               MouseLeave="ButtonPanel_MouseLeave"
               MouseUp="ButtonPanel_MouseUp"
               Background="Transparent"
+              VerticalAlignment="Center"
+              RenderTransformOrigin="0.5,0.5"
               Width="44" Height="43">
             <Image x:Name="ButtonImage" HorizontalAlignment="Center" VerticalAlignment="Top"
                    RenderOptions.BitmapScalingMode="HighQuality" Height="24" Width="24" Margin="0,1,0,0">

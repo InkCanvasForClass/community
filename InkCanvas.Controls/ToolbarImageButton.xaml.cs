@@ -1,7 +1,9 @@
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 
 namespace Ink_Canvas.Controls
 {
@@ -85,6 +87,24 @@ namespace Ink_Canvas.Controls
         {
             get => ButtonImage.Height;
             set => ButtonImage.Height = value;
+        }
+
+        public void SetSelectedVisualOffset(bool isSelected)
+        {
+            var transform = ButtonPanel.RenderTransform as TranslateTransform;
+            if (transform == null)
+            {
+                transform = new TranslateTransform();
+                ButtonPanel.RenderTransform = transform;
+            }
+
+            var animation = new DoubleAnimation
+            {
+                To = isSelected ? -3 : 0,
+                Duration = TimeSpan.FromMilliseconds(120),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+            transform.BeginAnimation(TranslateTransform.YProperty, animation);
         }
 
         public event MouseButtonEventHandler ButtonMouseDown;

@@ -4814,6 +4814,7 @@ private bool forceEraser;
                     System.Windows.Controls.Canvas.SetTop(indicatorBar, nextBarTop);
 
                     selectionBG.Visibility = Visibility.Visible;
+                    targetButton.SetSelectedVisualOffset(true);
                     _lastHighlightButton = targetButton;
                     return;
                 }
@@ -4839,6 +4840,9 @@ private bool forceEraser;
                     if (double.IsNaN(prevBarLeft)) prevBarLeft = nextBarLeft;
                 }
 
+                if (_lastHighlightButton != null && _lastHighlightButton != targetButton)
+                    _lastHighlightButton.SetSelectedVisualOffset(false);
+                targetButton.SetSelectedVisualOffset(true);
                 _lastHighlightButton = targetButton;
 
                 selectionBG.Width = nextWidth;
@@ -5094,6 +5098,10 @@ private bool forceEraser;
 
         private void HideAllSelectionHighlights()
         {
+            if (_lastHighlightButton != null)
+            {
+                _lastHighlightButton.SetSelectedVisualOffset(false);
+            }
             if (SelectionBGFloatingBar != null)
             {
                 SelectionBGFloatingBar.Visibility = Visibility.Hidden;
