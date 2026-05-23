@@ -55,6 +55,8 @@ namespace Ink_Canvas
         internal const int MouseRealtimeStrokeId = -100001;
         private readonly HashSet<int> _activeRealtimeTouchStrokeIds = new HashSet<int>();
         private readonly HashSet<int> _activeTouchStrokeIds = new HashSet<int>();
+        private bool _isInkCanvasManipulationEnabledBeforeTouchInk;
+        private bool _hasStoredInkCanvasManipulationStateForTouchInk;
 
         private readonly Dictionary<int, DispatcherTimer> _pauseStraightenTimers = new Dictionary<int, DispatcherTimer>();
         private const int PauseStraightenDelayMs = 300;
@@ -164,6 +166,26 @@ namespace Ink_Canvas
             return stylusDevice?.TabletDevice?.Type == TabletDeviceType.Touch;
         }
 
+        private void BeginTouchInkInput()
+        {
+            if (!_hasStoredInkCanvasManipulationStateForTouchInk)
+            {
+                _isInkCanvasManipulationEnabledBeforeTouchInk = inkCanvas.IsManipulationEnabled;
+                _hasStoredInkCanvasManipulationStateForTouchInk = true;
+            }
+            inkCanvas.IsManipulationEnabled = false;
+        }
+
+        private void EndTouchInkInputIfIdle()
+        {
+            if (_activeRealtimeTouchStrokeIds.Count != 0 || _activeTouchStrokeIds.Count != 0)
+                return;
+            if (!_hasStoredInkCanvasManipulationStateForTouchInk)
+                return;
+            inkCanvas.IsManipulationEnabled = _isInkCanvasManipulationEnabledBeforeTouchInk;
+            _hasStoredInkCanvasManipulationStateForTouchInk = false;
+        }
+
         internal void EnsureRealtimeStylusPipelineBinding()
         {
             if (inkCanvas == null) return;
@@ -233,6 +255,15 @@ namespace Ink_Canvas
             _realtimeBrushTipStates.Remove(stylusId);
         }
 
+        private float GetRealtimeBrushTipMinDistance(float smoothedSampleRateHz)
+        {
+            var baseMinDist = smoothedSampleRateHz > 160f ? 0.35f
+                : smoothedSampleRateHz > 90f ? 0.25f
+                : 0.15f;
+            var scale = RealtimeClamp((float)Settings.Canvas.RealtimeBrushTipMinDistanceScale, 0f, 2f);
+            return baseMinDist * scale;
+        }
+
         private bool TryAppendRealtimeVelocityBrushTipPoints(StrokeVisual strokeVisual, StylusEventArgs e)
         {
             if (!ShouldUseRealtimeVelocityBrushTip() || strokeVisual == null || e?.StylusDevice == null)
@@ -286,10 +317,7 @@ namespace Ink_Canvas
                 pressure = RealtimeClamp(pressure, 0.08f, 1f);
                 pressure = state.FilterPressure.Filter(pressure, dt, speed);
 
-                // 高频采样时做最小距离门限，避免点爆炸导致实时重绘卡顿
-                var minDist = state.SmoothedSampleRateHz > 160f ? 0.55f
-                    : state.SmoothedSampleRateHz > 90f ? 0.4f
-                    : 0.25f;
+                var minDist = GetRealtimeBrushTipMinDistance(state.SmoothedSampleRateHz);
                 if (dist < minDist && state.HasSeed)
                 {
                     state.LastRawX = rawX;
@@ -383,9 +411,7 @@ namespace Ink_Canvas
             pressure = RealtimeClamp(pressure, 0.08f, 1f);
             pressure = state.FilterPressure.Filter(pressure, dt, speed);
 
-            var minDist = state.SmoothedSampleRateHz > 160f ? 0.55f
-                : state.SmoothedSampleRateHz > 90f ? 0.4f
-                : 0.25f;
+            var minDist = GetRealtimeBrushTipMinDistance(state.SmoothedSampleRateHz);
             if (dist < minDist && state.HasSeed)
             {
                 state.LastRawX = rawX;
@@ -1352,11 +1378,12 @@ namespace Ink_Canvas
                     var touchId = e.TouchDevice.Id;
                     var p = e.GetTouchPoint(inkCanvas).Position;
                     _activeRealtimeTouchStrokeIds.Add(touchId);
+                    BeginTouchInkInput();
                     CancelPauseStraightenTimer(touchId);
                     InitializeRealtimeBrushTipStateFromPoint(touchId, p);
                     var sv = GetStrokeVisual(touchId);
                     TryAppendRealtimeVelocityBrushTipPoint(sv, touchId, p);
-                    sv.ForceRedraw();
+                    sv.Redraw();
                 }
                 catch (Exception ex)
                 {
@@ -1376,6 +1403,7 @@ namespace Ink_Canvas
                     var touchId = e.TouchDevice.Id;
                     var p = e.GetTouchPoint(inkCanvas).Position;
                     _activeTouchStrokeIds.Add(touchId);
+                    BeginTouchInkInput();
                     CancelPauseStraightenTimer(touchId);
                     var sv = GetStrokeVisual(touchId);
                     sv.Add(new StylusPoint(p.X, p.Y, 0.5f));
@@ -1498,6 +1526,7 @@ namespace Ink_Canvas
             {
                 var touchPoint = e.GetTouchPoint(inkCanvas);
                 EraserOverlay_PointerMove(sender, touchPoint.Position);
+                return;
             }
 
             var touchId = e.TouchDevice.Id;
@@ -1510,8 +1539,7 @@ namespace Ink_Canvas
                     var p = e.GetTouchPoint(inkCanvas).Position;
                     var sv = GetStrokeVisual(touchId);
                     if (TryAppendRealtimeVelocityBrushTipPoint(sv, touchId, p))
-                        sv.ForceRedraw();
-                    ResetPauseStraightenTimer(touchId);
+                        sv.Redraw();
                 }
                 catch (Exception ex)
                 {
@@ -1528,7 +1556,6 @@ namespace Ink_Canvas
                     var sv = GetStrokeVisual(touchId);
                     sv.Add(new StylusPoint(p.X, p.Y, 0.5f));
                     sv.Redraw();
-                    ResetPauseStraightenTimer(touchId);
                 }
                 catch (Exception ex)
                 {
@@ -1591,6 +1618,7 @@ namespace Ink_Canvas
                     CleanupRealtimeBrushTipState(touchId);
                     CancelPauseStraightenTimer(touchId);
                     _activeRealtimeTouchStrokeIds.Remove(touchId);
+                    EndTouchInkInputIfIdle();
                 }
             }
             else if (_activeTouchStrokeIds.Contains(touchId))
@@ -1620,6 +1648,7 @@ namespace Ink_Canvas
                     CleanupRealtimeBrushTipState(touchId);
                     CancelPauseStraightenTimer(touchId);
                     _activeTouchStrokeIds.Remove(touchId);
+                    EndTouchInkInputIfIdle();
                 }
             }
 

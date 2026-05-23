@@ -35,6 +35,14 @@ namespace Ink_Canvas.Helpers
             _visuals.Add(visual);
             AddVisualChild(visual);
         }
+
+        public void RemoveVisual(DrawingVisual visual)
+        {
+            if (visual == null) return;
+            if (!_visuals.Remove(visual)) return;
+            RemoveVisualChild(visual);
+        }
+
         public void Clear()
         {
             foreach (var visual in _visuals)
@@ -48,12 +56,13 @@ namespace Ink_Canvas.Helpers
     }
 
     /// <summary>
-    /// 用于显示笔迹的类 
+    /// 用于显示笔迹的类
     /// </summary>
     public class StrokeVisual
     {
-        private int _lastDrawnPointCount = 0;
-        private const int INCREMENTAL_DRAW_THRESHOLD = 2;
+        private int _lastCommittedPointCount = 0;
+        private const int COMMIT_POINT_THRESHOLD = 24;
+        private DrawingVisual _activeVisual;
         private VisualCanvas _visualCanvas;
 
         /// <summary>
@@ -119,28 +128,28 @@ namespace Ink_Canvas.Helpers
             return Math.Max(0.22, Math.Min(2.1, 0.42 + 1.16 * pressureFactor));
         }
 
-        private void DrawSegmentToNewVisual(int startIndex, int endIndex)
+        private DrawingVisual CreateDrawingVisual()
         {
-            if (Stroke == null || Stroke.StylusPoints.Count == 0 || _visualCanvas == null) return;
+            var visual = new DrawingVisual();
+            RenderOptions.SetBitmapScalingMode(visual, BitmapScalingMode.HighQuality);
+            RenderOptions.SetEdgeMode(visual, EdgeMode.Aliased);
+            RenderOptions.SetCachingHint(visual, CachingHint.Cache);
+            return visual;
+        }
+
+        private void DrawSegment(DrawingVisual visual, int startIndex, int endIndex)
+        {
+            if (Stroke == null || Stroke.StylusPoints.Count == 0 || visual == null) return;
             if (startIndex >= endIndex || startIndex < 0 || endIndex > Stroke.StylusPoints.Count) return;
 
             var points = Stroke.StylusPoints;
             var drawingAttributes = Stroke.DrawingAttributes;
             var ignorePressure = drawingAttributes.IgnorePressure;
 
-            // 创建新的DrawingVisual用于绘制这个点段
-            var segmentVisual = new DrawingVisual();
-
-            RenderOptions.SetBitmapScalingMode(segmentVisual, BitmapScalingMode.HighQuality);
-            RenderOptions.SetEdgeMode(segmentVisual, EdgeMode.Aliased);
-            RenderOptions.SetCachingHint(segmentVisual, CachingHint.Cache);
-
-            using (var dc = segmentVisual.RenderOpen())
+            using (var dc = visual.RenderOpen())
             {
-                // 绘制指定范围内的点段
                 if (endIndex - startIndex >= 2)
                 {
-                    // 多个点，绘制线段
                     for (int i = startIndex; i < endIndex - 1 && i < points.Count - 1; i++)
                     {
                         var startPoint = new Point(points[i].X, points[i].Y);
@@ -159,7 +168,6 @@ namespace Ink_Canvas.Helpers
                 }
                 else if (endIndex - startIndex == 1 && startIndex < points.Count)
                 {
-                    // 只有一个点，绘制圆点
                     var brush = new SolidColorBrush(drawingAttributes.Color);
                     var point = points[startIndex];
                     var s = PressureToVisualScale(point.PressureFactor, ignorePressure);
@@ -167,9 +175,17 @@ namespace Ink_Canvas.Helpers
                         drawingAttributes.Width * s / 2, drawingAttributes.Height * s / 2);
                 }
             }
+        }
 
-            // 将新的DrawingVisual添加到VisualCanvas中
-            _visualCanvas.AddVisual(segmentVisual);
+        private void CommitActiveVisual(int currentPointCount)
+        {
+            if (currentPointCount <= _lastCommittedPointCount + 1) return;
+
+            var committedVisual = CreateDrawingVisual();
+            var startIndex = _lastCommittedPointCount == 0 ? 0 : _lastCommittedPointCount - 1;
+            DrawSegment(committedVisual, startIndex, currentPointCount);
+            _visualCanvas.AddVisual(committedVisual);
+            _lastCommittedPointCount = currentPointCount;
         }
 
         /// <summary>
@@ -182,30 +198,25 @@ namespace Ink_Canvas.Helpers
             var currentPointCount = Stroke.StylusPoints.Count;
             if (currentPointCount == 0) return;
 
-            // 计算新增的点数
-            int newPointCount = currentPointCount - _lastDrawnPointCount;
-
-            // 如果新增点数达到阈值，才进行增量绘制
-            if (newPointCount >= INCREMENTAL_DRAW_THRESHOLD || _lastDrawnPointCount == 0)
+            try
             {
-                try
+                if (_activeVisual == null)
                 {
-                    if (_lastDrawnPointCount == 0)
-                    {
-                        // 首次绘制：绘制所有点
-                        DrawSegmentToNewVisual(0, currentPointCount);
-                        _lastDrawnPointCount = currentPointCount;
-                    }
-                    else
-                    {
-                        // 从上次绘制的最后一个点开始
-                        int startIndex = Math.Max(0, _lastDrawnPointCount - 1);
-                        DrawSegmentToNewVisual(startIndex, currentPointCount);
-                        _lastDrawnPointCount = currentPointCount;
-                    }
+                    _activeVisual = CreateDrawingVisual();
+                    _visualCanvas.AddVisual(_activeVisual);
                 }
-                catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+
+                var activeStartIndex = _lastCommittedPointCount == 0 ? 0 : _lastCommittedPointCount - 1;
+                DrawSegment(_activeVisual, activeStartIndex, currentPointCount);
+
+                if (currentPointCount - _lastCommittedPointCount >= COMMIT_POINT_THRESHOLD)
+                {
+                    _visualCanvas.RemoveVisual(_activeVisual);
+                    _activeVisual = null;
+                    CommitActiveVisual(currentPointCount);
+                }
             }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
         /// <summary>
@@ -217,7 +228,8 @@ namespace Ink_Canvas.Helpers
             {
                 _visualCanvas.Clear();
             }
-            _lastDrawnPointCount = 0;
+            _activeVisual = null;
+            _lastCommittedPointCount = 0;
             Redraw();
         }
 

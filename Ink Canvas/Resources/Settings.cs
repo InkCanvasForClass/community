@@ -236,6 +236,8 @@ namespace Ink_Canvas
         public int EraserAutoSwitchBackDelaySeconds { get; set; } = 10; // 默认10秒
         [JsonProperty("velocityBrushTipMix")]
         public double VelocityBrushTipMix { get; set; } = 0.45;
+        [JsonProperty("realtimeBrushTipMinDistanceScale")]
+        public double RealtimeBrushTipMinDistanceScale { get; set; } = 0.5;
         [JsonProperty("enableVelocityBrushTip")]
         public bool EnableVelocityBrushTip { get; set; }
 
