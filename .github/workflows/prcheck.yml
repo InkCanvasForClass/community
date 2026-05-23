@@ -37,14 +37,19 @@ jobs:
       - name: Restore Package 
         run: dotnet restore "Ink Canvas.sln" --locked-mode
       
-      - name: Build the Solution
-        run: msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Debug" /p:GitFlow="$GITFLOW" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
+      - name: Publish the Application
+        run: |
+          $architecture = "${{ matrix.architecture }}"
+          $runtimeIdentifier = if ($architecture -eq "AnyCPU") { "win-x64" } else { "win-x86" }
+          msbuild /t:Publish /p:platform="$architecture" /p:configuration="Debug" /p:RuntimeIdentifier="$runtimeIdentifier" /p:SelfContained=true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:IncludeNativeLibrariesForSelfExtract=true /p:EnableCompressionInSingleFile=true /p:PublishDir="bin/Debug/publish/$runtimeIdentifier/" /p:GitFlow="$GITFLOW" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
 
       - name: Check if exe file is generated
         id: check-exe
         run: |
-          $exePath = "Ink Canvas\bin\Debug\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\InkCanvasForClass.exe"
-          
+          $architecture = "${{ matrix.architecture }}"
+          $runtimeIdentifier = if ($architecture -eq "AnyCPU") { "win-x64" } else { "win-x86" }
+          $exePath = "Ink Canvas\bin\Debug\publish\$runtimeIdentifier\InkCanvasForClass.exe"
+
           if (Test-Path $exePath) {
             echo "build_success=true" >> $env:GITHUB_OUTPUT
           } else {
@@ -71,7 +76,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: InkCanvasForClass.CE.debug.${{ matrix.architecture }}
-          path: "Ink Canvas/bin/Debug/${{ matrix.architecture }}/net6.0-windows10.0.19041.0/*"
+          path: "Ink Canvas/bin/Debug/publish/${{ matrix.architecture == 'AnyCPU' && 'win-x64' || 'win-x86' }}/*"
         
 
       - name: Create Summary
