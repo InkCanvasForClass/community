@@ -49,11 +49,13 @@
                     CornerRadius="14"
                     Background="#22FFFFFF"
                     VerticalAlignment="Center">
-                <ui:FontIcon x:Name="IconGlyph"
-                             FontSize="17"
-                             Foreground="White"
-                             HorizontalAlignment="Center"
-                             VerticalAlignment="Center" />
+                <Grid Width="28" Height="28">
+                    <ui:FontIcon x:Name="IconGlyph"
+                                 FontSize="16"
+                                 Foreground="White"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center" />
+                </Grid>
             </Border>
 
             <StackPanel Grid.Row="0" Grid.Column="1" Margin="10,0,8,0" VerticalAlignment="Center">

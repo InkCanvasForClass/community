@@ -97,7 +97,7 @@ namespace Ink_Canvas.Controls
             if (message?.Type == NotificationMessageType.Reminder)
                 return (Color.FromArgb(238, 31, 82, 47), Color.FromRgb(102, 187, 106), Colors.White, Color.FromArgb(230, 255, 255, 255), Color.FromArgb(38, 255, 255, 255));
 
-            return (Color.FromArgb(242, 246, 248, 252), Color.FromRgb(180, 190, 205), Color.FromRgb(25, 31, 40), Color.FromRgb(70, 78, 92), Color.FromArgb(26, 25, 31, 40));
+            return (Color.FromArgb(238, 28, 32, 42), Color.FromRgb(66, 165, 245), Colors.White, Color.FromArgb(230, 255, 255, 255), Color.FromArgb(38, 255, 255, 255));
         }
 
         private void RootBorder_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
