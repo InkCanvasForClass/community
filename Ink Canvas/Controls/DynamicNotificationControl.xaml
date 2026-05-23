@@ -48,13 +48,33 @@
                     Height="28"
                     CornerRadius="14"
                     Background="#22FFFFFF"
+                    HorizontalAlignment="Center"
                     VerticalAlignment="Center">
                 <Grid Width="28" Height="28">
+                    <Ellipse Stroke="{Binding Foreground, ElementName=IconGlyph}"
+                             StrokeThickness="1.8"
+                             Width="16"
+                             Height="16"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center" />
+                    <Rectangle Fill="{Binding Foreground, ElementName=IconGlyph}"
+                               Width="1.8"
+                               Height="6.5"
+                               RadiusX="0.9"
+                               RadiusY="0.9"
+                               Margin="0,4.5,0,0"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
+                    <Ellipse Fill="{Binding Foreground, ElementName=IconGlyph}"
+                             Width="2"
+                             Height="2"
+                             Margin="0,-7.5,0,0"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center" />
                     <ui:FontIcon x:Name="IconGlyph"
-                                 FontSize="16"
+                                 FontSize="1"
                                  Foreground="White"
-                                 HorizontalAlignment="Center"
-                                 VerticalAlignment="Center" />
+                                 Visibility="Hidden" />
                 </Grid>
             </Border>
 

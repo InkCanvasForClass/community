@@ -16,6 +16,7 @@ namespace Ink_Canvas.Controls
         private DateTime autoCloseStartedAt;
         private TimeSpan autoCloseDuration;
         private bool isCountdownRendering;
+        private bool isClosing;
         private NotificationMessage currentMessage;
         private bool isExpanded;
 
@@ -29,6 +30,7 @@ namespace Ink_Canvas.Controls
         public void Show(NotificationMessage message)
         {
             currentMessage = message;
+            isClosing = false;
             isExpanded = message?.ForcePopup == true;
 
             TitleTextBlock.Text = string.IsNullOrWhiteSpace(message?.Title) ? NotificationStrings.DefaultTitle : message.Title;
@@ -47,6 +49,8 @@ namespace Ink_Canvas.Controls
             StopCountdownRendering();
             autoCloseDuration = TimeSpan.FromSeconds(Math.Max(1, message?.DisplaySeconds ?? 5));
             autoCloseStartedAt = DateTime.Now;
+            CountdownProgressPath.StrokeDashArray = new DoubleCollection { 1, 0 };
+            CountdownProgressPath.StrokeDashOffset = 0;
             UpdateCountdownProgress(1);
             StartCountdownRendering();
         }
@@ -103,8 +107,11 @@ namespace Ink_Canvas.Controls
         private void RootBorder_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (e.OriginalSource is Button) return;
+            StopCountdownRendering();
             isExpanded = !isExpanded;
             ExpandedPanel.Visibility = isExpanded ? Visibility.Visible : Visibility.Collapsed;
+            autoCloseStartedAt = DateTime.Now - TimeSpan.FromMilliseconds(autoCloseDuration.TotalMilliseconds * (1 - (CountdownProgressPath.Tag is double progress ? progress : 1)));
+            StartCountdownRendering();
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
@@ -189,6 +196,7 @@ namespace Ink_Canvas.Controls
 
             progress = Math.Max(0, Math.Min(1, progress));
             CountdownProgressPath.Tag = progress;
+            CountdownProgressPath.StrokeDashArray = null;
 
             double width = RootContainer.ActualWidth;
             double height = RootContainer.ActualHeight;
@@ -261,6 +269,8 @@ namespace Ink_Canvas.Controls
 
         private void Close()
         {
+            if (isClosing) return;
+            isClosing = true;
             StopCountdownRendering();
             BeginHideAnimation();
         }
