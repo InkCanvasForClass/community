@@ -282,9 +282,6 @@
   <data name="Oobe_SummaryTheme" xml:space="preserve">
     <value>App Theme</value>
   </data>
-  <data name="Oobe_SummaryPPTLink" xml:space="preserve">
-    <value>PowerPoint / WPS Integration</value>
-  </data>
   <data name="Oobe_SummaryTwoFinger" xml:space="preserve">
     <value>Two-finger Zoom / Pan</value>
   </data>
