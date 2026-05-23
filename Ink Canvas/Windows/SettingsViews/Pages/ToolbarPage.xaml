@@ -211,6 +211,12 @@
                                           Unchecked="CheckBoxShowSeparateBorder_Changed"/>
                             </ui:SettingsCard>
 
+                            <ui:SettingsCard Header="{x:Static props:FloatingBarStrings.ToolbarPage_RedStyle}" Description="{x:Static props:FloatingBarStrings.ToolbarPage_RedStyleDesc}">
+                                <CheckBox x:Name="CheckBoxUseRedStyle"
+                                          Checked="CheckBoxUseRedStyle_Changed"
+                                          Unchecked="CheckBoxUseRedStyle_Changed"/>
+                            </ui:SettingsCard>
+
                             <StackPanel x:Name="PanelQuickColorPaletteDisplayMode" Visibility="Collapsed">
                                 <ui:SettingsCard Header="{x:Static props:FloatingBarStrings.ToolbarPage_DisplayMode}" Description="{x:Static props:FloatingBarStrings.ToolbarPage_QuickPaletteDisplayModeDesc}">
                                     <ComboBox x:Name="ComboBoxDisplayMode"
