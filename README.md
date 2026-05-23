@@ -96,6 +96,9 @@
       <td align="center" valign="top" width="20%"><a href="https://github.com/Hao3288"><img src="https://avatars.githubusercontent.com/u/119276078?v=4?s=100" width="100px;" alt="NoobHao"/><br /><sub><b>NoobHao</b></sub></a><br /><a href="https://github.com/InkCanvasForClass/community/commits?author=Hao3288" title="Code">💻</a></td>
       <td align="center" valign="top" width="20%"><a href="https://github.com/AstrZero"><img src="https://avatars.githubusercontent.com/u/135413163?v=4?s=100" width="100px;" alt="AstrZero"/><br /><sub><b>AstrZero</b></sub></a><br /><a href="#ideas-AstrZero" title="Ideas, Planning, & Feedback">🤔</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="20%"><a href="http://lrsgzs.top"><img src="https://avatars.githubusercontent.com/u/99574908?v=4?s=100" width="100px;" alt="lrs2187"/><br /><sub><b>lrs2187</b></sub></a><br /><a href="https://github.com/InkCanvasForClass/community/commits?author=lrsgzs" title="Code">💻</a></td>
+    </tr>
   </tbody>
 </table>
 
