@@ -3845,7 +3845,7 @@ namespace Ink_Canvas
             _settingsWindow.Owner = this;
             _settingsWindow.Topmost = this.Topmost;
             _settingsWindow.Closed += (s, args) => _settingsWindow = null;
-            _settingsWindow.ShowDialog();
+            _settingsWindow.Show();
         }
 private bool forceEraser;
 

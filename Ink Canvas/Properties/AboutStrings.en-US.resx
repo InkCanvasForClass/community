@@ -136,7 +136,9 @@
     <value>Medium frequency user</value>
   </data>
   <data name="Privacy_ConfirmDisableTelemetry_Message" xml:space="preserve">
-    <value>After disabling anonymous usage data upload, you will not be able to continue using the preview/test channel. The system will automatically switch to the Release channel.\n\nAre you sure you want to disable it?</value>
+    <value>After disabling anonymous usage data upload, you will not be able to continue using the preview/test channel. The system will automatically switch to the Release channel.
+
+Are you sure you want to disable it?</value>
   </data>
   <data name="Privacy_ConfirmDisableTelemetry_Title" xml:space="preserve">
     <value>Confirm Disable Telemetry</value>
@@ -154,7 +156,9 @@
     <value>Privacy Notice Missing</value>
   </data>
   <data name="Privacy_ConfirmRevokePrivacy_Message" xml:space="preserve">
-    <value>After revoking privacy agreement, anonymous usage data upload will be disabled and the channel will switch to Release.\n\nAre you sure?</value>
+    <value>After revoking privacy agreement, anonymous usage data upload will be disabled and the channel will switch to Release.
+
+Are you sure?</value>
   </data>
   <data name="Privacy_ConfirmRevokePrivacy_Title" xml:space="preserve">
     <value>Confirm Revoke Privacy Agreement</value>

@@ -208,7 +208,10 @@
     <value>保存 WebDav 调教翻车了: </value>
   </data>
   <data name="CloudStorage_DlassRegistrationPrompt" xml:space="preserve">
-    <value>Dlass 账号搞了没？\n\n• 搞了：在本页填入通行证就行\n• 没搞：帮你打开浏览器去 Dlass 司令部注册</value>
+    <value>Dlass 账号搞了没？
+
+• 搞了：在本页填入通行证就行
+• 没搞：帮你打开浏览器去 Dlass 司令部注册</value>
   </data>
   <data name="CloudStorage_DlassRegistrationTitle" xml:space="preserve">
     <value>Dlass 注册入口</value>
