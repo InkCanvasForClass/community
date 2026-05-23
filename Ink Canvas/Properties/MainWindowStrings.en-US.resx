@@ -481,6 +481,45 @@ Please check if the update was successful.</value>
   <data name="Main_Screenshot_CameraError" xml:space="preserve">
     <value>Camera error: {0}</value>
   </data>
+  <data name="Main_Screenshot_WindowTitle" xml:space="preserve">
+    <value>Select screenshot area</value>
+  </data>
+  <data name="Main_Screenshot_RectangleMode" xml:space="preserve">
+    <value>Rectangle</value>
+  </data>
+  <data name="Main_Screenshot_FreehandMode" xml:space="preserve">
+    <value>Freehand</value>
+  </data>
+  <data name="Main_Screenshot_FullScreenMode" xml:space="preserve">
+    <value>Full screen</value>
+  </data>
+  <data name="Main_Screenshot_CameraCaptureMode" xml:space="preserve">
+    <value>Camera</value>
+  </data>
+  <data name="Main_Screenshot_IncludeInk" xml:space="preserve">
+    <value>Include ink</value>
+  </data>
+  <data name="Main_Screenshot_ConfirmCapture" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="Main_Screenshot_AddToWhiteboard" xml:space="preserve">
+    <value>Add to whiteboard</value>
+  </data>
+  <data name="Main_Screenshot_SwitchCamera" xml:space="preserve">
+    <value>Switch camera</value>
+  </data>
+  <data name="Main_Screenshot_Rotation" xml:space="preserve">
+    <value>Rotation:</value>
+  </data>
+  <data name="Main_Screenshot_Resolution" xml:space="preserve">
+    <value>Resolution:</value>
+  </data>
+  <data name="Main_Screenshot_CameraNotConnected" xml:space="preserve">
+    <value>Camera not connected</value>
+  </data>
+  <data name="Main_Screenshot_DefaultHint" xml:space="preserve">
+    <value>Drag to select an area; right-click or double-click to select the full screen; confirm after freehand drawing</value>
+  </data>
   <data name="Main_Privacy_FileNotFound" xml:space="preserve">
     <value>Privacy policy file not found (privacy.txt).</value>
   </data>

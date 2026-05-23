@@ -316,6 +316,32 @@ namespace Ink_Canvas.Properties
 
         public static string Main_Screenshot_CameraError => ResourceManager.GetString(nameof(Main_Screenshot_CameraError), _resourceCulture);
 
+        public static string Main_Screenshot_WindowTitle => ResourceManager.GetString(nameof(Main_Screenshot_WindowTitle), _resourceCulture);
+
+        public static string Main_Screenshot_RectangleMode => ResourceManager.GetString(nameof(Main_Screenshot_RectangleMode), _resourceCulture);
+
+        public static string Main_Screenshot_FreehandMode => ResourceManager.GetString(nameof(Main_Screenshot_FreehandMode), _resourceCulture);
+
+        public static string Main_Screenshot_FullScreenMode => ResourceManager.GetString(nameof(Main_Screenshot_FullScreenMode), _resourceCulture);
+
+        public static string Main_Screenshot_CameraCaptureMode => ResourceManager.GetString(nameof(Main_Screenshot_CameraCaptureMode), _resourceCulture);
+
+        public static string Main_Screenshot_IncludeInk => ResourceManager.GetString(nameof(Main_Screenshot_IncludeInk), _resourceCulture);
+
+        public static string Main_Screenshot_ConfirmCapture => ResourceManager.GetString(nameof(Main_Screenshot_ConfirmCapture), _resourceCulture);
+
+        public static string Main_Screenshot_AddToWhiteboard => ResourceManager.GetString(nameof(Main_Screenshot_AddToWhiteboard), _resourceCulture);
+
+        public static string Main_Screenshot_SwitchCamera => ResourceManager.GetString(nameof(Main_Screenshot_SwitchCamera), _resourceCulture);
+
+        public static string Main_Screenshot_Rotation => ResourceManager.GetString(nameof(Main_Screenshot_Rotation), _resourceCulture);
+
+        public static string Main_Screenshot_Resolution => ResourceManager.GetString(nameof(Main_Screenshot_Resolution), _resourceCulture);
+
+        public static string Main_Screenshot_CameraNotConnected => ResourceManager.GetString(nameof(Main_Screenshot_CameraNotConnected), _resourceCulture);
+
+        public static string Main_Screenshot_DefaultHint => ResourceManager.GetString(nameof(Main_Screenshot_DefaultHint), _resourceCulture);
+
         public static string Main_Privacy_FileNotFound => ResourceManager.GetString(nameof(Main_Privacy_FileNotFound), _resourceCulture);
 
         public static string Main_Privacy_ReadError => ResourceManager.GetString(nameof(Main_Privacy_ReadError), _resourceCulture);

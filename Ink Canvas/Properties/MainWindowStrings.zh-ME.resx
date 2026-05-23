@@ -481,6 +481,45 @@
   <data name="Main_Screenshot_CameraError" xml:space="preserve">
     <value>摄像头出毛病了: {0}</value>
   </data>
+  <data name="Main_Screenshot_WindowTitle" xml:space="preserve">
+    <value>选一下要截哪里</value>
+  </data>
+  <data name="Main_Screenshot_RectangleMode" xml:space="preserve">
+    <value>矩形模式</value>
+  </data>
+  <data name="Main_Screenshot_FreehandMode" xml:space="preserve">
+    <value>自由绘制</value>
+  </data>
+  <data name="Main_Screenshot_FullScreenMode" xml:space="preserve">
+    <value>全屏截图</value>
+  </data>
+  <data name="Main_Screenshot_CameraCaptureMode" xml:space="preserve">
+    <value>摄像头截图</value>
+  </data>
+  <data name="Main_Screenshot_IncludeInk" xml:space="preserve">
+    <value>包含墨迹</value>
+  </data>
+  <data name="Main_Screenshot_ConfirmCapture" xml:space="preserve">
+    <value>确认截图</value>
+  </data>
+  <data name="Main_Screenshot_AddToWhiteboard" xml:space="preserve">
+    <value>添加到白板</value>
+  </data>
+  <data name="Main_Screenshot_SwitchCamera" xml:space="preserve">
+    <value>切换摄像头</value>
+  </data>
+  <data name="Main_Screenshot_Rotation" xml:space="preserve">
+    <value>旋转:</value>
+  </data>
+  <data name="Main_Screenshot_Resolution" xml:space="preserve">
+    <value>分辨率:</value>
+  </data>
+  <data name="Main_Screenshot_CameraNotConnected" xml:space="preserve">
+    <value>摄像头没连上</value>
+  </data>
+  <data name="Main_Screenshot_DefaultHint" xml:space="preserve">
+    <value>拖一下选区域，右键或双击可全屏；自由绘制松开后点确认</value>
+  </data>
   <data name="Main_Privacy_FileNotFound" xml:space="preserve">
     <value>隐私说明文件找不到了（privacy.txt）</value>
   </data>
