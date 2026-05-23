@@ -104,6 +104,8 @@ namespace Ink_Canvas.Properties
 
         public static string PlacementHint => ResourceManager.GetString(nameof(PlacementHint), _resourceCulture);
 
+        public static string PlacementFloatingBarAbove => ResourceManager.GetString(nameof(PlacementFloatingBarAbove), _resourceCulture);
+
         public static string PlacementTopCenter => ResourceManager.GetString(nameof(PlacementTopCenter), _resourceCulture);
 
         public static string PlacementTopLeft => ResourceManager.GetString(nameof(PlacementTopLeft), _resourceCulture);
