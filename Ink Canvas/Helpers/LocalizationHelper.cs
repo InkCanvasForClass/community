@@ -226,7 +226,7 @@ namespace Ink_Canvas.Helpers
 
             try
             {
-                var exeDir = Path.GetDirectoryName(asm.Location);
+                var exeDir = AppContext.BaseDirectory;
                 var resxPath = Path.Combine(exeDir, "Properties", $"{className}.{cultureName}.resx");
                 if (!File.Exists(resxPath))
                     resxPath = Path.Combine(exeDir, $"{className}.{cultureName}.resx");
