@@ -71,16 +71,6 @@
                              TextChanged="WebSocketUrlTextBox_TextChanged" />
                 </ui:SettingsCard>
 
-                <ui:SettingsCard Header="{x:Static props:AnnouncementStrings.Token}"
-                                 Description="{x:Static props:AnnouncementStrings.TokenHint}">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Permissions}" />
-                    </ui:SettingsCard.HeaderIcon>
-                    <TextBox x:Name="TokenTextBox"
-                             MinWidth="360"
-                             TextChanged="TokenTextBox_TextChanged" />
-                </ui:SettingsCard>
-
                 <Rectangle Height="48" />
             </ikw:SimpleStackPanel>
         </Grid>

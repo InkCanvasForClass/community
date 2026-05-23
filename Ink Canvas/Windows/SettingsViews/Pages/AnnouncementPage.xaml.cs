@@ -37,7 +37,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardEnableForcePopup.IsOn = notification.IsForcePopupEnabled;
             ApiBaseUrlTextBox.Text = notification.AnnouncementApiBaseUrl ?? string.Empty;
             WebSocketUrlTextBox.Text = notification.AnnouncementWebSocketUrl ?? string.Empty;
-            TokenTextBox.Text = notification.AnnouncementSoftwareToken ?? string.Empty;
         }
 
         private void SaveSettings()
@@ -96,13 +95,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.Notification.AnnouncementWebSocketUrl = WebSocketUrlTextBox.Text.Trim();
-            SaveSettings();
-        }
-
-        private void TokenTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Notification.AnnouncementSoftwareToken = TokenTextBox.Text.Trim();
             SaveSettings();
         }
     }

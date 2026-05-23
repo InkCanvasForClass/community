@@ -188,7 +188,7 @@ namespace Ink_Canvas.Helpers
                     return envToken.Trim();
                 }
 
-                var announcementToken = MainWindow.Settings?.Notification?.AnnouncementSoftwareToken;
+                var announcementToken = NotificationSettings.DefaultAnnouncementSoftwareToken;
                 if (!string.IsNullOrWhiteSpace(announcementToken))
                 {
                     return announcementToken.Trim();

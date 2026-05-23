@@ -67,14 +67,7 @@
                             <TextBox x:Name="WebSocketUrlTextBox"
                                      MinWidth="360"
                                      TextChanged="WebSocketUrlTextBox_TextChanged" />
-                        </ui:SettingsCard>
-                        <ui:SettingsCard Header="{x:Static props:AnnouncementStrings.Token}"
-                                         Description="{x:Static props:AnnouncementStrings.TokenHint}">
-                            <TextBox x:Name="TokenTextBox"
-                                     MinWidth="360"
-                                     TextChanged="TokenTextBox_TextChanged" />
-                        </ui:SettingsCard>
-                    </ui:SettingsExpander.Items>
+                        </ui:SettingsCard>                    </ui:SettingsExpander.Items>
                 </ui:SettingsExpander>
 
                 <controls:LabeledSettingsCard x:Name="CardEnableDynamic"

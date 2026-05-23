@@ -70,8 +70,10 @@ namespace Ink_Canvas
         [JsonProperty("announcementWebSocketUrl")]
         public string AnnouncementWebSocketUrl { get; set; } = string.Empty;
 
-        [JsonProperty("announcementSoftwareToken")]
-        public string AnnouncementSoftwareToken { get; set; } = "d7dd5a04175844318da871a40b7bc59d";
+        [JsonIgnore]
+        public string AnnouncementSoftwareToken => DefaultAnnouncementSoftwareToken;
+
+        public const string DefaultAnnouncementSoftwareToken = "092fb28012b3985e2b84341c0643eab0";
 
         [JsonProperty("placement")]
         public string Placement { get; set; } = "TopCenter";
