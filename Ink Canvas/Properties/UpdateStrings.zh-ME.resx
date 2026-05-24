@@ -240,7 +240,7 @@
     <value>冲！</value>
   </data>
   <data name="Channel_PrivacyRequired" xml:space="preserve">
-    <value>加入预览 / 测试通道前，请先在关于页面勾选"我已阅读并同意 privacy 中的隐私说明"。</value>
+    <value>加入预览 / 测试通道前，请先在隐私设置中勾选"我已阅读并同意 privacy 中的隐私说明"。</value>
   </data>
   <data name="Channel_PrivacyRequiredTitle" xml:space="preserve">
     <value>需要同意隐私说明</value>
