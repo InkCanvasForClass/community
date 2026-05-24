@@ -174,8 +174,8 @@ namespace Ink_Canvas
                     var marginAnimation = new ThicknessAnimation
                     {
                         Duration = TimeSpan.FromSeconds(0.1),
-                        From = new Thickness(-50, 0, 0, Settings.Appearance.QuickPanelBottomOffset),
-                        To = new Thickness(-1, 0, 0, Settings.Appearance.QuickPanelBottomOffset)
+                        From = new Thickness(-60, 0, 0, Settings.Appearance.QuickPanelBottomOffset),
+                        To = new Thickness(8, 0, 0, Settings.Appearance.QuickPanelBottomOffset)
                     };
                     marginAnimation.EasingFunction = new CubicEase();
                     LeftUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, marginAnimation);
@@ -184,7 +184,7 @@ namespace Ink_Canvas
 
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    LeftUnFoldButtonQuickPanel.Margin = new Thickness(-1, 0, 0, Settings.Appearance.QuickPanelBottomOffset);
+                    LeftUnFoldButtonQuickPanel.Margin = new Thickness(8, 0, 0, Settings.Appearance.QuickPanelBottomOffset);
                 });
             }
             else
@@ -215,8 +215,8 @@ namespace Ink_Canvas
                     var marginAnimation = new ThicknessAnimation
                     {
                         Duration = TimeSpan.FromSeconds(0.1),
-                        From = new Thickness(0, 0, -50, Settings.Appearance.QuickPanelBottomOffset),
-                        To = new Thickness(0, 0, -1, Settings.Appearance.QuickPanelBottomOffset)
+                        From = new Thickness(0, 0, -60, Settings.Appearance.QuickPanelBottomOffset),
+                        To = new Thickness(0, 0, 8, Settings.Appearance.QuickPanelBottomOffset)
                     };
                     marginAnimation.EasingFunction = new CubicEase();
                     RightUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, marginAnimation);
@@ -225,7 +225,7 @@ namespace Ink_Canvas
 
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    RightUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, -1, Settings.Appearance.QuickPanelBottomOffset);
+                    RightUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, 8, Settings.Appearance.QuickPanelBottomOffset);
                 });
             }
             else
@@ -252,8 +252,8 @@ namespace Ink_Canvas
                     var marginAnimation = new ThicknessAnimation
                     {
                         Duration = TimeSpan.FromSeconds(0.1),
-                        From = new Thickness(-1, 0, 0, Settings.Appearance.QuickPanelBottomOffset),
-                        To = new Thickness(-50, 0, 0, Settings.Appearance.QuickPanelBottomOffset)
+                        From = new Thickness(8, 0, 0, Settings.Appearance.QuickPanelBottomOffset),
+                        To = new Thickness(-60, 0, 0, Settings.Appearance.QuickPanelBottomOffset)
                     };
                     marginAnimation.EasingFunction = new CubicEase();
                     LeftUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, marginAnimation);
@@ -262,7 +262,7 @@ namespace Ink_Canvas
 
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    LeftUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, -50, Settings.Appearance.QuickPanelBottomOffset);
+                    LeftUnFoldButtonQuickPanel.Margin = new Thickness(-60, 0, 0, Settings.Appearance.QuickPanelBottomOffset);
                     LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
                 });
             }
@@ -286,8 +286,8 @@ namespace Ink_Canvas
                     var marginAnimation = new ThicknessAnimation
                     {
                         Duration = TimeSpan.FromSeconds(0.1),
-                        From = new Thickness(0, 0, -1, Settings.Appearance.QuickPanelBottomOffset),
-                        To = new Thickness(0, 0, -50, Settings.Appearance.QuickPanelBottomOffset)
+                        From = new Thickness(0, 0, 8, Settings.Appearance.QuickPanelBottomOffset),
+                        To = new Thickness(0, 0, -60, Settings.Appearance.QuickPanelBottomOffset)
                     };
                     marginAnimation.EasingFunction = new CubicEase();
                     RightUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, marginAnimation);
@@ -296,7 +296,7 @@ namespace Ink_Canvas
 
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    RightUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, -50, Settings.Appearance.QuickPanelBottomOffset);
+                    RightUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, -60, Settings.Appearance.QuickPanelBottomOffset);
                     RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
                 });
             }
@@ -589,5 +589,6 @@ namespace Ink_Canvas
         {
             _ = VerifyStartupFoldAbsenceAfterDelayAsync();
         }
+
     }
 }

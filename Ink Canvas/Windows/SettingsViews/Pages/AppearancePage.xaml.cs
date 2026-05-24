@@ -18,6 +18,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
     public partial class AppearancePage : Page
     {
+        public static event Action<double> OnBottomOffsetChanged;
+
         private bool _isLoaded = false;
         private bool _suppressChickenSoupSourceSelectionChanged = false;
         private bool _isApplyingLanguageFromSettings = false;
@@ -29,11 +31,26 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             Unloaded += Page_Unloaded;
         }
 
+        public static void NotifyBottomOffsetChanged(double val)
+        {
+            OnBottomOffsetChanged?.Invoke(val);
+        }
+
+        private void HandleBottomOffsetChanged(double val)
+        {
+            if (QuickPanelBottomOffsetSlider != null)
+            {
+                QuickPanelBottomOffsetSlider.Value = val;
+                UpdateSliderText(QuickPanelBottomOffsetSlider, QuickPanelBottomOffsetText, "{0:F0}");
+            }
+        }
+
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             LoadSettings();
             _isLoaded = true;
             UpdateAllSliderTexts();
+            OnBottomOffsetChanged += HandleBottomOffsetChanged;
         }
 
         private void UpdateAllSliderTexts()
@@ -64,6 +81,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
             _isLoaded = false;
+            OnBottomOffsetChanged -= HandleBottomOffsetChanged;
         }
 
         private void LoadSettings()
