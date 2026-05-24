@@ -437,3 +437,6 @@ SKILL_FloatingToolbarRefactoring.md
 /Samples
 /SamplePlugin
 *.xlsx
+
+# qoder
+/.qoder
