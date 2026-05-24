@@ -2122,6 +2122,17 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 集中管理浮动工具栏的可见性状态，基于当前应用状态统一决策。
+        /// </summary>
+        private void UpdateFloatingBarVisibility(bool shouldBeVisible)
+        {
+            if (shouldBeVisible)
+                ViewboxFloatingBar.Visibility = Visibility.Visible;
+            else if (!Topmost)
+                ViewboxFloatingBar.Visibility = Visibility.Hidden;
+        }
+
+        /// <summary>
         /// 浮动工具栏边距动画处理
         /// </summary>
         /// <param name="MarginFromEdge">边缘边距</param>
@@ -2155,10 +2166,7 @@ namespace Ink_Canvas
                 ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
                 ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
                 isViewboxFloatingBarMarginAnimationRunning = false;
-                if (MarginFromEdge > 0)
-                    ViewboxFloatingBar.Visibility = Visibility.Visible;
-                else if (!Topmost)
-                    ViewboxFloatingBar.Visibility = Visibility.Hidden;
+                UpdateFloatingBarVisibility(MarginFromEdge > 0);
             });
         }
 
@@ -2361,9 +2369,7 @@ namespace Ink_Canvas
             }
 
             if (!animate) isViewboxFloatingBarMarginAnimationRunning = false;
-            if (!isFloatingBarFolded)
-                ViewboxFloatingBar.Visibility = Visibility.Visible;
-            else if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
+            UpdateFloatingBarVisibility(!isFloatingBarFolded);
         }
 
         /// <summary>
