@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -134,5 +134,61 @@
   </data>
   <data name="Security_ResetTotpMessage" xml:space="preserve">
     <value>Please enter the security password or current TOTP code to reset the key.</value>
+  </data>
+  <data name="Security_UsbSectionHeader" xml:space="preserve">
+    <value>USB Maintenance Verification</value>
+  </data>
+  <data name="Security_UsbInfoBarMessage" xml:space="preserve">
+    <value>After enabling USB verification, when security verification is required, inserting an authorized USB drive will automatically bypass it, allowing maintenance personnel to operate directly.</value>
+  </data>
+  <data name="Security_EnableUsbVerification" xml:space="preserve">
+    <value>Enable USB Verification</value>
+  </data>
+  <data name="Security_EnableUsbVerification_Hint" xml:space="preserve">
+    <value>Allows inserting an authorized USB drive as a password-free security verification method</value>
+  </data>
+  <data name="Security_UsbAuthorizedSns" xml:space="preserve">
+    <value>Authorized USB Serial Numbers</value>
+  </data>
+  <data name="Security_UsbAuthorizedSns_Hint" xml:space="preserve">
+    <value>List of authorized device serial numbers (comma-separated for multiple devices)</value>
+  </data>
+  <data name="Security_UsbDetectAndAuthorize" xml:space="preserve">
+    <value>Detect &amp; Authorize New USB</value>
+  </data>
+  <data name="Security_UsbDetectAndAuthorize_Hint" xml:space="preserve">
+    <value>Scan currently connected USB drives and quickly add their serial numbers to the authorized list</value>
+  </data>
+  <data name="Security_UsbRefreshDrives" xml:space="preserve">
+    <value>Refresh Devices</value>
+  </data>
+  <data name="Security_UsbAuthorizeDrive" xml:space="preserve">
+    <value>Authorize Selected USB</value>
+  </data>
+  <data name="Security_UsbPromptNoValidSn" xml:space="preserve">
+    <value>The selected USB drive has no valid serial number.</value>
+  </data>
+  <data name="Security_UsbPromptAlreadyAuthorized" xml:space="preserve">
+    <value>This USB serial number is already authorized.</value>
+  </data>
+  <data name="Security_UsbPromptAuthorizeSuccess" xml:space="preserve">
+    <value>USB serial number successfully authorized and added to the list.</value>
+  </data>
+  <data name="Security_UsbPromptSelectDrive" xml:space="preserve">
+    <value>Please select a detected USB drive first.</value>
+  </data>
+  <data name="Security_UsbPromptNoDriveDetected" xml:space="preserve">
+    <value>No USB drive detected</value>
+  </data>
+  <data name="Security_UsbPromptLocalDisk" xml:space="preserve">
+    <value>Local Disk</value>
+  </data>
+  <data name="Security_UsbBypassDialogHint" xml:space="preserve">
+    <value>
+(USB verification enabled. You can insert an authorized USB drive to automatically verify.)</value>
+  </data>
+  <data name="Security_UsbBypassDialogHintShort" xml:space="preserve">
+    <value>
+(USB verification enabled. Direct insert authorized USB.)</value>
   </data>
 </root>
