@@ -546,12 +546,11 @@
     <Delete Files="$(MSBuildProjectDirectory)\telemetry_token.generated.txt" />
   </Target>
 
-  <Target Name="CopyIACoreHelper" AfterTargets="Build;Publish">
+  <Target Name="CopyIACoreHelper" AfterTargets="Build">
     <ItemGroup>
       <IACoreHelperFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.IACoreHelper\bin\$(Configuration)\*.*" />
     </ItemGroup>
-    <Copy SourceFiles="@(IACoreHelperFiles)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" Condition="'@(IACoreHelperFiles)' != '' AND '$(PublishDir)' == ''" />
-    <Copy SourceFiles="@(IACoreHelperFiles)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" Condition="'@(IACoreHelperFiles)' != '' AND '$(PublishDir)' != ''" />
+    <Copy SourceFiles="@(IACoreHelperFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" Condition="'@(IACoreHelperFiles)' != ''" />
   </Target>
 
   <ItemGroup>
