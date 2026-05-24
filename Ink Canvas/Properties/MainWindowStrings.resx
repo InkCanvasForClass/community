@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -38,10 +38,18 @@
       </xsd:complexType>
     </xsd:element>
   </xsd:schema>
-  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
-  <resheader name="version"><value>2.0</value></resheader>
-  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
   <data name="Main_WatermarkText" xml:space="preserve">
     <value>多一份理解，少一份抱怨</value>
   </data>
@@ -71,18 +79,6 @@
   </data>
   <data name="Main_InkReplayExitHint" xml:space="preserve">
     <value>双击屏幕退出播放</value>
-  </data>
-  <data name="Main_TrayHideWindow" xml:space="preserve">
-    <value>隐藏 ICC-CE 主窗口</value>
-  </data>
-  <data name="Main_TrayShowWindow" xml:space="preserve">
-    <value>显示主窗口（2 分钟）</value>
-  </data>
-  <data name="Main_TrayDisableHotkeys" xml:space="preserve">
-    <value>禁用所有快捷键</value>
-  </data>
-  <data name="Main_TraySwitchFoldMode" xml:space="preserve">
-    <value>切换为收纳模式</value>
   </data>
   <data name="Main_Strokes_SaveSuccess" xml:space="preserve">
     <value>墨迹成功保存至 {0}</value>
@@ -306,17 +302,11 @@
   <data name="Main_AutoFold_ClearingAndFolding" xml:space="preserve">
     <value>正在清空墨迹并收纳至侧边栏，可进入批注模式后通过【撤销】功能来恢复原先墨迹。</value>
   </data>
-  <data name="Main_PDF_OpenFailed" xml:space="preserve">
-    <value>无法打开 PDF（可能已加密、损坏或不支持）。</value>
-  </data>
   <data name="Main_PDF_InsertFailed" xml:space="preserve">
     <value>插入 PDF 失败: {0}</value>
   </data>
   <data name="Main_Board_FrozenCannotDelete" xml:space="preserve">
     <value>该页面已冻结，不能删除</value>
-  </data>
-  <data name="Main_Board_NewPage" xml:space="preserve">
-    <value>新页面</value>
   </data>
   <data name="Main_Board_CustomBgApplied" xml:space="preserve">
     <value>已应用自定义背景色: {0}</value>

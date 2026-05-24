@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -64,7 +64,7 @@
     <value>Shortcuts</value>
   </data>
   <data name="Nav_Startup" xml:space="preserve">
-    <value>Startup</value>
+    <value>Basic</value>
   </data>
   <data name="Nav_Theme_Settings" xml:space="preserve">
     <value>Appearance</value>
@@ -110,6 +110,33 @@
   </data>
   <data name="Nav_Basic" xml:space="preserve">
     <value>Basic</value>
+  </data>
+  <data name="Nav_General" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="Nav_General_Tooltip" xml:space="preserve">
+    <value>General settings</value>
+  </data>
+  <data name="Nav_Startup_Tooltip" xml:space="preserve">
+    <value>Startup and basic behavior settings</value>
+  </data>
+  <data name="Nav_Clock" xml:space="preserve">
+    <value>Clock</value>
+  </data>
+  <data name="Nav_Clock_Tooltip" xml:space="preserve">
+    <value>Clock display settings</value>
+  </data>
+  <data name="Nav_ToolbarComponents" xml:space="preserve">
+    <value>Components</value>
+  </data>
+  <data name="Nav_ToolbarComponents_Tooltip" xml:space="preserve">
+    <value>Toolbar button order and visibility</value>
+  </data>
+  <data name="Nav_ToolbarAppearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="Nav_ToolbarAppearance_Tooltip" xml:space="preserve">
+    <value>Toolbar appearance settings</value>
   </data>
   <data name="Nav_Basic_Tooltip" xml:space="preserve">
     <value>Basic settings</value>

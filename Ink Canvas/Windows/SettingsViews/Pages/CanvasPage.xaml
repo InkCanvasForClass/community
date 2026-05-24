@@ -142,6 +142,7 @@
                     <ui:SettingsExpander x:Name="ExpanderBrushAutoRestore"
                             Header="{x:Static props:CanvasStrings.Canvas_BrushAutoRestore}"
                             Description="{x:Static props:CanvasStrings.Canvas_BrushAutoRestoreHint}"
+                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchBrushAutoRestore, Mode=OneWay}"
                             d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" />
@@ -193,6 +194,7 @@
                     <ui:SettingsExpander x:Name="ExpanderEnableEraserAutoSwitchBack"
                             Header="{x:Static props:CanvasStrings.Canvas_SwitchBackAfterEraser}"
                             Description="{x:Static props:CanvasStrings.Canvas_SwitchBackAfterEraserHint}"
+                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchEnableEraserAutoSwitchBack, Mode=OneWay}"
                             d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Switch}" />
@@ -228,6 +230,7 @@
                     <ui:SettingsExpander x:Name="ExpanderEnablePalmEraser"
                             Header="{x:Static props:GestureStrings.Gesture_EnablePalmEraser}"
                             Description="{x:Static props:GestureStrings.Gesture_PalmHint}"
+                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchEnablePalmEraser, Mode=OneWay}"
                             d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EraseTool}" />

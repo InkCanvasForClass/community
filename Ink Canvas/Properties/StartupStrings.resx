@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -101,6 +101,9 @@
   </data>
   <data name="Start" xml:space="preserve">
     <value>启动</value>
+  </data>
+  <data name="Startup_Behavior" xml:space="preserve">
+    <value>行为</value>
   </data>
   <data name="TimePeriodHint" xml:space="preserve">
     <value>若终止时间小于起始时间，即将终止时间视为第二天的时间。若起始时间与终止时间相同，即视为全天候时间。</value>

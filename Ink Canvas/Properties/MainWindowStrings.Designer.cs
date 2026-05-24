@@ -59,15 +59,6 @@ namespace Ink_Canvas.Properties
         public static string Main_InkReplayPlaying => ResourceManager.GetString(nameof(Main_InkReplayPlaying), _resourceCulture);
 
         public static string Main_InkReplayExitHint => ResourceManager.GetString(nameof(Main_InkReplayExitHint), _resourceCulture);
-
-        public static string Main_TrayHideWindow => ResourceManager.GetString(nameof(Main_TrayHideWindow), _resourceCulture);
-
-        public static string Main_TrayShowWindow => ResourceManager.GetString(nameof(Main_TrayShowWindow), _resourceCulture);
-
-        public static string Main_TrayDisableHotkeys => ResourceManager.GetString(nameof(Main_TrayDisableHotkeys), _resourceCulture);
-
-        public static string Main_TraySwitchFoldMode => ResourceManager.GetString(nameof(Main_TraySwitchFoldMode), _resourceCulture);
-
         public static string Main_Strokes_SaveSuccess => ResourceManager.GetString(nameof(Main_Strokes_SaveSuccess), _resourceCulture);
 
         public static string Main_Strokes_SaveFailed => ResourceManager.GetString(nameof(Main_Strokes_SaveFailed), _resourceCulture);
@@ -215,15 +206,9 @@ namespace Ink_Canvas.Properties
         public static string Main_EnterSettings_Message => ResourceManager.GetString(nameof(Main_EnterSettings_Message), _resourceCulture);
 
         public static string Main_AutoFold_ClearingAndFolding => ResourceManager.GetString(nameof(Main_AutoFold_ClearingAndFolding), _resourceCulture);
-
-        public static string Main_PDF_OpenFailed => ResourceManager.GetString(nameof(Main_PDF_OpenFailed), _resourceCulture);
-
         public static string Main_PDF_InsertFailed => ResourceManager.GetString(nameof(Main_PDF_InsertFailed), _resourceCulture);
 
         public static string Main_Board_FrozenCannotDelete => ResourceManager.GetString(nameof(Main_Board_FrozenCannotDelete), _resourceCulture);
-
-        public static string Main_Board_NewPage => ResourceManager.GetString(nameof(Main_Board_NewPage), _resourceCulture);
-
         public static string Main_Board_CustomBgApplied => ResourceManager.GetString(nameof(Main_Board_CustomBgApplied), _resourceCulture);
 
         public static string Main_Timer_AutoClosedInkeys => ResourceManager.GetString(nameof(Main_Timer_AutoClosedInkeys), _resourceCulture);

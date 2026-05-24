@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -102,6 +102,9 @@
   <data name="Start" xml:space="preserve">
     <value>Startup</value>
   </data>
+  <data name="Startup_Behavior" xml:space="preserve">
+    <value>Behavior</value>
+  </data>
   <data name="TimePeriodHint" xml:space="preserve">
     <value>If the end time is earlier than the start time, the window spans into the next day. Setting both times equal creates a 24-hour window.</value>
   </data>
@@ -125,6 +128,9 @@
   </data>
   <data name="TopMostMode_RestartAsNormal" xml:space="preserve">
     <value>Switch to Non-Admin Mode</value>
+  </data>
+  <data name="TopMostMode_CurrentUIAccessNormal" xml:space="preserve">
+    <value>Currently running as a demoted process with UIA privilege</value>
   </data>
   <data name="TopMostMode_UIA" xml:space="preserve">
     <value>UIA Topmost (Requires one UAC approval)</value>

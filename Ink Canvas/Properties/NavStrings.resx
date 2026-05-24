@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -64,7 +64,7 @@
     <value>快捷键</value>
   </data>
   <data name="Nav_Startup" xml:space="preserve">
-    <value>启动设置</value>
+    <value>基本</value>
   </data>
   <data name="Nav_Theme_Settings" xml:space="preserve">
     <value>个性化设置</value>
@@ -110,6 +110,33 @@
   </data>
   <data name="Nav_Basic" xml:space="preserve">
     <value>基本</value>
+  </data>
+  <data name="Nav_General" xml:space="preserve">
+    <value>通用</value>
+  </data>
+  <data name="Nav_General_Tooltip" xml:space="preserve">
+    <value>通用设置</value>
+  </data>
+  <data name="Nav_Startup_Tooltip" xml:space="preserve">
+    <value>启动与基本行为设置</value>
+  </data>
+  <data name="Nav_Clock" xml:space="preserve">
+    <value>时钟</value>
+  </data>
+  <data name="Nav_Clock_Tooltip" xml:space="preserve">
+    <value>时钟显示设置</value>
+  </data>
+  <data name="Nav_ToolbarComponents" xml:space="preserve">
+    <value>组件</value>
+  </data>
+  <data name="Nav_ToolbarComponents_Tooltip" xml:space="preserve">
+    <value>工具栏按钮排序与可见性</value>
+  </data>
+  <data name="Nav_ToolbarAppearance" xml:space="preserve">
+    <value>外观</value>
+  </data>
+  <data name="Nav_ToolbarAppearance_Tooltip" xml:space="preserve">
+    <value>工具栏外观设置</value>
   </data>
   <data name="Nav_Basic_Tooltip" xml:space="preserve">
     <value>基本设置</value>

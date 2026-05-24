@@ -122,6 +122,7 @@
 
                     <ui:SettingsExpander x:Name="ExpanderAutoStraightenLine"
                             Header="{x:Static props:CanvasStrings.InkRecog_AutoStraightLine}"
+                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchAutoStraightenLine, Mode=OneWay}"
                             d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.LineDisplay}" />
@@ -177,6 +178,7 @@
 
                     <ui:SettingsExpander x:Name="ExpanderLineEndpointSnapping"
                             Header="{x:Static props:CanvasStrings.InkRecog_LineEndpointSnapping}"
+                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchLineEndpointSnapping, Mode=OneWay}"
                             d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />
