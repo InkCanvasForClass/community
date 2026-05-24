@@ -340,7 +340,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                     }
                     else
                     {
-                        LogHelper.WriteLogToFile("UIA置顶功能需要通过设置页授权重启", LogHelper.LogType.Warning);
+                        LogHelper.WriteLogToFile("UIA置顶功能需要管理员权限，正在申请管理员权限重启");
+                        OnStopKillProcessTimer?.Invoke();
+
+                        if (App.watchdogProcess != null && !App.watchdogProcess.HasExited)
+                        {
+                            App.watchdogProcess.Kill();
+                            App.watchdogProcess = null;
+                        }
+
+                        AppRestartHelper.SwitchToUIATopMostAndRestart();
                     }
                 }
                 else
