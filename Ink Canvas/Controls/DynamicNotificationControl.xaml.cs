@@ -5,7 +5,9 @@ using System;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace Ink_Canvas.Controls
@@ -39,6 +41,7 @@ namespace Ink_Canvas.Controls
             ExpandedPanel.Visibility = isExpanded ? Visibility.Visible : Visibility.Collapsed;
 
             Visibility = Visibility.Visible;
+            ApplyThemeColors(message);
             BeginShowAnimation();
 
             autoCloseTimer.Stop();
@@ -63,6 +66,35 @@ namespace Ink_Canvas.Controls
                 default:
                     return SegoeFluentIcons.Info;
             }
+        }
+
+        private void ApplyThemeColors(NotificationMessage message)
+        {
+            var (background, border, foreground, secondaryForeground, iconBackground) = GetThemeColors(message);
+            RootBorder.Background = new SolidColorBrush(background);
+            RootBorder.BorderBrush = new SolidColorBrush(border);
+            TitleTextBlock.Foreground = new SolidColorBrush(foreground);
+            SummaryTextBlock.Foreground = new SolidColorBrush(secondaryForeground);
+            ContentTextBlock.Foreground = new SolidColorBrush(secondaryForeground);
+            IconGlyph.Foreground = new SolidColorBrush(foreground);
+            IconBackgroundBorder.Background = new SolidColorBrush(iconBackground);
+        }
+
+        private static (Color Background, Color Border, Color Foreground, Color SecondaryForeground, Color IconBackground) GetThemeColors(NotificationMessage message)
+        {
+            if (message?.Level >= NotificationMessageLevel.Critical || message?.Type == NotificationMessageType.Urgent)
+                return (Color.FromArgb(238, 91, 30, 33), Color.FromRgb(255, 107, 107), Colors.White, Color.FromArgb(230, 255, 255, 255), Color.FromArgb(38, 255, 255, 255));
+
+            if (message?.Level >= NotificationMessageLevel.High || message?.Type == NotificationMessageType.Important)
+                return (Color.FromArgb(238, 112, 72, 18), Color.FromRgb(255, 183, 77), Colors.White, Color.FromArgb(230, 255, 255, 255), Color.FromArgb(38, 255, 255, 255));
+
+            if (message?.Type == NotificationMessageType.Update)
+                return (Color.FromArgb(238, 20, 68, 116), Color.FromRgb(66, 165, 245), Colors.White, Color.FromArgb(230, 255, 255, 255), Color.FromArgb(38, 255, 255, 255));
+
+            if (message?.Type == NotificationMessageType.Reminder)
+                return (Color.FromArgb(238, 31, 82, 47), Color.FromRgb(102, 187, 106), Colors.White, Color.FromArgb(230, 255, 255, 255), Color.FromArgb(38, 255, 255, 255));
+
+            return (Color.FromArgb(238, 28, 32, 42), Color.FromRgb(66, 165, 245), Colors.White, Color.FromArgb(230, 255, 255, 255), Color.FromArgb(38, 255, 255, 255));
         }
 
         private void RootBorder_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)

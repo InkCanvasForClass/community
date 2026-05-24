@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Centralized i18n string lookup - delegates to split resx groups.
 //------------------------------------------------------------------------------
 using System;
@@ -820,6 +820,24 @@ namespace Ink_Canvas.Properties
             dict["Security_DisablePasswordMessage"] = ("SecurityStrings", "Security_DisablePasswordMessage");
             dict["Security_ResetTotpTitle"] = ("SecurityStrings", "Security_ResetTotpTitle");
             dict["Security_ResetTotpMessage"] = ("SecurityStrings", "Security_ResetTotpMessage");
+            dict["Security_UsbSectionHeader"] = ("SecurityStrings", "Security_UsbSectionHeader");
+            dict["Security_UsbInfoBarMessage"] = ("SecurityStrings", "Security_UsbInfoBarMessage");
+            dict["Security_EnableUsbVerification"] = ("SecurityStrings", "Security_EnableUsbVerification");
+            dict["Security_EnableUsbVerification_Hint"] = ("SecurityStrings", "Security_EnableUsbVerification_Hint");
+            dict["Security_UsbAuthorizedSns"] = ("SecurityStrings", "Security_UsbAuthorizedSns");
+            dict["Security_UsbAuthorizedSns_Hint"] = ("SecurityStrings", "Security_UsbAuthorizedSns_Hint");
+            dict["Security_UsbDetectAndAuthorize"] = ("SecurityStrings", "Security_UsbDetectAndAuthorize");
+            dict["Security_UsbDetectAndAuthorize_Hint"] = ("SecurityStrings", "Security_UsbDetectAndAuthorize_Hint");
+            dict["Security_UsbRefreshDrives"] = ("SecurityStrings", "Security_UsbRefreshDrives");
+            dict["Security_UsbAuthorizeDrive"] = ("SecurityStrings", "Security_UsbAuthorizeDrive");
+            dict["Security_UsbPromptNoValidSn"] = ("SecurityStrings", "Security_UsbPromptNoValidSn");
+            dict["Security_UsbPromptAlreadyAuthorized"] = ("SecurityStrings", "Security_UsbPromptAlreadyAuthorized");
+            dict["Security_UsbPromptAuthorizeSuccess"] = ("SecurityStrings", "Security_UsbPromptAuthorizeSuccess");
+            dict["Security_UsbPromptSelectDrive"] = ("SecurityStrings", "Security_UsbPromptSelectDrive");
+            dict["Security_UsbPromptNoDriveDetected"] = ("SecurityStrings", "Security_UsbPromptNoDriveDetected");
+            dict["Security_UsbPromptLocalDisk"] = ("SecurityStrings", "Security_UsbPromptLocalDisk");
+            dict["Security_UsbBypassDialogHint"] = ("SecurityStrings", "Security_UsbBypassDialogHint");
+            dict["Security_UsbBypassDialogHintShort"] = ("SecurityStrings", "Security_UsbBypassDialogHintShort");
             dict["Settings_ModeDesc"] = ("NavStrings", "Settings_ModeDesc");
             dict["Settings_ModeDesc_1"] = ("NavStrings", "Settings_ModeDesc_1");
             dict["Settings_Nav_Hotkey_Tooltip"] = ("NavStrings", "Settings_Nav_Hotkey_Tooltip");

@@ -530,6 +530,7 @@ Please check if the update was successful.</value>
     <value>The app has restarted 5 times in a row. Auto-restart stopped. Please contact the developer or check your system environment.</value>
   </data>
   <data name="Main_App_UnexpectedError" xml:space="preserve">
-    <value>Sorry, an unexpected error occurred that may cause InkCanvasForClass to run unstably.\nIt is recommended to save your ink and restart the application.</value>
+    <value>Sorry, an unexpected error occurred that may cause InkCanvasForClass to run unstably.
+    It is recommended to save your ink and restart the application.</value>
   </data>
 </root>

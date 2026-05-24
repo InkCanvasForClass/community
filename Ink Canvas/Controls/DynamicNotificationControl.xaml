@@ -17,14 +17,15 @@
         <TranslateTransform x:Name="RootTransform" Y="-24" />
     </UserControl.RenderTransform>
 
-    <Border x:Name="RootBorder"
-            Margin="0,24,0,0"
-            Padding="14,10"
-            Background="#E618181B"
-            BorderBrush="#33FFFFFF"
-            BorderThickness="1"
-            CornerRadius="24"
-            MouseLeftButtonUp="RootBorder_MouseLeftButtonUp">
+    <Grid x:Name="RootContainer"
+          Margin="0,24,0,0"
+          MouseLeftButtonUp="RootBorder_MouseLeftButtonUp">
+        <Border x:Name="RootBorder"
+                Padding="14,10"
+                Background="#E618181B"
+                BorderBrush="#33FFFFFF"
+                BorderThickness="1"
+                CornerRadius="24">
         <Border.Effect>
             <DropShadowEffect BlurRadius="24" ShadowDepth="4" Opacity="0.28" Color="#000000" />
         </Border.Effect>
@@ -39,18 +40,41 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Row="0"
+            <Border x:Name="IconBackgroundBorder"
+                    Grid.Row="0"
                     Grid.Column="0"
                     Width="28"
                     Height="28"
                     CornerRadius="14"
                     Background="#22FFFFFF"
+                    HorizontalAlignment="Center"
                     VerticalAlignment="Center">
-                <ui:FontIcon x:Name="IconGlyph"
-                             FontSize="17"
-                             Foreground="White"
+                <Grid Width="28" Height="28">
+                    <Ellipse Stroke="{Binding Foreground, ElementName=IconGlyph}"
+                             StrokeThickness="1.8"
+                             Width="16"
+                             Height="16"
                              HorizontalAlignment="Center"
                              VerticalAlignment="Center" />
+                    <Rectangle Fill="{Binding Foreground, ElementName=IconGlyph}"
+                               Width="1.8"
+                               Height="6.5"
+                               RadiusX="0.9"
+                               RadiusY="0.9"
+                               Margin="0,4.5,0,0"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
+                    <Ellipse Fill="{Binding Foreground, ElementName=IconGlyph}"
+                             Width="2"
+                             Height="2"
+                             Margin="0,-7.5,0,0"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center" />
+                    <ui:FontIcon x:Name="IconGlyph"
+                                 FontSize="1"
+                                 Foreground="White"
+                                 Visibility="Hidden" />
+                </Grid>
             </Border>
 
             <StackPanel Grid.Row="0" Grid.Column="1" Margin="10,0,8,0" VerticalAlignment="Center">
@@ -96,6 +120,6 @@
                             Click="ActionButton_Click" />
                 </StackPanel>
             </StackPanel>
-        </Grid>
-    </Border>
+            </Grid>
+        </Border>    </Grid>
 </UserControl>

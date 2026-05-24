@@ -74,6 +74,7 @@ namespace Ink_Canvas
 
                     if (Settings?.Notification?.IsDynamicNotificationEnabled == true && DynamicNotification != null)
                     {
+                        ApplyDynamicNotificationPlacement();
                         DynamicNotification.Show(message);
                     }
                     else
@@ -105,6 +106,58 @@ namespace Ink_Canvas
         private void DynamicNotification_Closed(object sender, EventArgs e)
         {
             NotificationCenterService.NotifyCurrentClosed();
+        }
+
+        private void ApplyDynamicNotificationPlacement()
+        {
+            if (DynamicNotification == null) return;
+
+            DynamicNotification.HorizontalAlignment = HorizontalAlignment.Center;
+            DynamicNotification.VerticalAlignment = VerticalAlignment.Top;
+            DynamicNotification.Margin = new Thickness(0);
+
+            switch (Settings?.Notification?.Placement)
+            {
+                case "TopLeft":
+                    DynamicNotification.HorizontalAlignment = HorizontalAlignment.Left;
+                    DynamicNotification.Margin = new Thickness(16, 0, 0, 0);
+                    break;
+                case "TopRight":
+                    DynamicNotification.HorizontalAlignment = HorizontalAlignment.Right;
+                    DynamicNotification.Margin = new Thickness(0, 0, 16, 0);
+                    break;
+                case "FloatingBarAbove":
+                    ApplyDynamicNotificationFloatingBarPlacement();
+                    break;
+            }
+        }
+
+        private void ApplyDynamicNotificationFloatingBarPlacement()
+        {
+            if (DynamicNotification == null || ViewboxFloatingBar == null || ViewboxFloatingBar.Visibility != Visibility.Visible)
+            {
+                return;
+            }
+
+            try
+            {
+                var position = ViewboxFloatingBar.TransformToAncestor(this).Transform(new Point(0, 0));
+                double notificationWidth = DynamicNotification.ActualWidth > 0 ? DynamicNotification.ActualWidth : DynamicNotification.Width;
+                double notificationHeight = DynamicNotification.ActualHeight > 0 ? DynamicNotification.ActualHeight : 72;
+                double floatingBarWidth = ViewboxFloatingBar.ActualWidth;
+                double left = position.X + floatingBarWidth / 2 - notificationWidth / 2;
+                double top = position.Y - notificationHeight - 12;
+
+                left = Math.Max(12, Math.Min(ActualWidth - notificationWidth - 12, left));
+                top = Math.Max(12, top);
+
+                DynamicNotification.HorizontalAlignment = HorizontalAlignment.Left;
+                DynamicNotification.VerticalAlignment = VerticalAlignment.Top;
+                DynamicNotification.Margin = new Thickness(left, top, 0, 0);
+            }
+            catch
+            {
+            }
         }
 
         private void ShowLegacyNotification(string notice, int displaySeconds)

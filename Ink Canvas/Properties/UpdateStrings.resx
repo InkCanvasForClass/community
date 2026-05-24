@@ -208,7 +208,9 @@
     <value>{0} 天</value>
   </data>
   <data name="FixVersion_ConfirmBody" xml:space="preserve">
-    <value>此操作将下载当前选择通道的最新版本并安装，软件将自动关闭并更新。\n\n确定要执行版本修复吗？</value>
+    <value>此操作将下载当前选择通道的最新版本并安装，软件将自动关闭并更新。
+
+确定要执行版本修复吗？</value>
   </data>
   <data name="FixVersion_ConfirmTitle" xml:space="preserve">
     <value>版本修复确认</value>
@@ -238,13 +240,15 @@
     <value>确定</value>
   </data>
   <data name="Channel_PrivacyRequired" xml:space="preserve">
-    <value>加入预览 / 测试通道前，请先在关于页面勾选"我已阅读并同意 privacy 中的隐私说明"。</value>
+    <value>加入预览 / 测试通道前，请先在隐私设置中勾选"我已阅读并同意 privacy 中的隐私说明"。</value>
   </data>
   <data name="Channel_PrivacyRequiredTitle" xml:space="preserve">
     <value>需要同意隐私说明</value>
   </data>
   <data name="Channel_TelemetryRequired" xml:space="preserve">
-    <value>加入预览 / 测试通道需要开启匿名基础数据上传。\n\n是否立即开启匿名基础数据上传？</value>
+    <value>加入预览 / 测试通道需要开启匿名基础数据上传。
+
+是否立即开启匿名基础数据上传？</value>
   </data>
   <data name="Channel_TelemetryRequiredTitle" xml:space="preserve">
     <value>需要开启匿名使用数据上传</value>

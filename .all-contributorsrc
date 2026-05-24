@@ -159,7 +159,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/135413163?v=4",
       "profile": "https://github.com/AstrZero",
       "contributions": [
-        "ideas"
+        "ideas",
+        "code"
       ]
     },
     {
@@ -167,6 +168,15 @@
       "name": "lrs2187",
       "avatar_url": "https://avatars.githubusercontent.com/u/99574908?v=4",
       "profile": "http://lrsgzs.top",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Braydenccc",
+      "name": "Jbyccc",
+      "avatar_url": "https://avatars.githubusercontent.com/u/177214309?v=4",
+      "profile": "http://jbyc.cc",
       "contributions": [
         "code"
       ]

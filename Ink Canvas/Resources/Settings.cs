@@ -64,14 +64,16 @@ namespace Ink_Canvas
         [JsonProperty("isForcePopupEnabled")]
         public bool IsForcePopupEnabled { get; set; } = true;
 
-        [JsonProperty("announcementApiBaseUrl")]
-        public string AnnouncementApiBaseUrl { get; set; } = "https://dev-api.dy.ci/api/announcement/client/announcements/";
+        [JsonIgnore]
+        public string AnnouncementApiBaseUrl => "https://dev-api.dy.ci/api/announcement/client/announcements/";
 
-        [JsonProperty("announcementWebSocketUrl")]
-        public string AnnouncementWebSocketUrl { get; set; } = string.Empty;
+        [JsonIgnore]
+        public string AnnouncementWebSocketUrl => string.Empty;
 
-        [JsonProperty("announcementSoftwareToken")]
-        public string AnnouncementSoftwareToken { get; set; } = "d7dd5a04175844318da871a40b7bc59d";
+        [JsonIgnore]
+        public string AnnouncementSoftwareToken => BuiltInSoftwareToken;
+
+        public const string BuiltInSoftwareToken = "492e41ea8eb61fc9a1d336b3852a4478";
 
         [JsonProperty("placement")]
         public string Placement { get; set; } = "TopCenter";
@@ -80,7 +82,7 @@ namespace Ink_Canvas
         public string AnimationMode { get; set; } = "Standard";
 
         [JsonProperty("updateDurationSeconds")]
-        public int UpdateDurationSeconds { get; set; } = 5;
+        public int UpdateDurationSeconds { get; set; } = 3;
 
         [JsonProperty("urgentDurationSeconds")]
         public int UrgentDurationSeconds { get; set; } = 10;
@@ -131,6 +133,11 @@ namespace Ink_Canvas
         public bool RequirePasswordOnModifyOrClearNameList { get; set; } = false;
         [JsonProperty("enableProcessProtection")]
         public bool EnableProcessProtection { get; set; } = true;
+
+        [JsonProperty("usbVerificationEnabled")]
+        public bool UsbVerificationEnabled { get; set; } = false;
+        [JsonProperty("usbAuthorizedSns")]
+        public string UsbAuthorizedSns { get; set; } = "";
     }
 
     public class Canvas

@@ -136,7 +136,9 @@
     <value>中频用户</value>
   </data>
   <data name="Privacy_ConfirmDisableTelemetry_Message" xml:space="preserve">
-    <value>关闭匿名使用数据上传后，将无法继续使用预览/测试通道，系统会自动切换回正式通道（Release）。\n\n是否确认关闭？</value>
+    <value>关闭匿名使用数据上传后，将无法继续使用预览/测试通道，系统会自动切换回正式通道（Release）。
+
+是否确认关闭？</value>
   </data>
   <data name="Privacy_ConfirmDisableTelemetry_Title" xml:space="preserve">
     <value>确认关闭遥测</value>
@@ -154,7 +156,9 @@
     <value>隐私说明缺失</value>
   </data>
   <data name="Privacy_ConfirmRevokePrivacy_Message" xml:space="preserve">
-    <value>取消同意隐私说明后，将关闭匿名使用数据上传，并切回正式通道（Release）。\n\n是否确认？</value>
+    <value>取消同意隐私说明后，将关闭匿名使用数据上传，并切回正式通道（Release）。
+
+是否确认？</value>
   </data>
   <data name="Privacy_ConfirmRevokePrivacy_Title" xml:space="preserve">
     <value>确认取消隐私同意</value>

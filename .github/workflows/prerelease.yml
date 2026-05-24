@@ -229,7 +229,7 @@ jobs:
       
       - name: Build the Solution (Release)
         env:
-          DLASS_SENTRY_DSN: ${{ secrets.DLASS_SENTRY_DSN }}
+          DLASS_TELEMETRY_TOKEN: ${{ secrets.DLASS_TELEMETRY_TOKEN }}
         run: |
           msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
 

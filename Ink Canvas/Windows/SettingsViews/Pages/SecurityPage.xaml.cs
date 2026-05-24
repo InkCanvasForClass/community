@@ -3,6 +3,7 @@ using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Windows;
+using System.Windows.Controls;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
@@ -48,7 +49,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 TextBoxTotpSecret.Text = sec.TotpSecret ?? "";
                 CardEnableProcessProtection.IsOn = sec.EnableProcessProtection;
 
+                // Load U-disk settings
+                CardUsbVerificationEnabled.IsOn = sec.UsbVerificationEnabled;
+                TextBoxUsbAuthorizedSns.Text = sec.UsbAuthorizedSns ?? "";
+
                 UpdatePasswordUiState();
+
+                if (sec.UsbVerificationEnabled)
+                {
+                    RefreshUsbDrives();
+                }
             }
             catch (Exception ex)
             {
@@ -62,6 +72,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var sec = SettingsManager.Settings?.Security;
             var passwordEnabled = sec != null && sec.PasswordEnabled;
             var totpEnabled = sec != null && sec.TotpEnabled;
+            var usbEnabled = sec != null && sec.UsbVerificationEnabled;
 
             if (BtnSetOrChangePassword != null) BtnSetOrChangePassword.IsEnabled = passwordEnabled;
             if (BtnGenerateTotpSecret != null) BtnGenerateTotpSecret.IsEnabled = CardTotpEnabled?.IsOn == true;
@@ -71,6 +82,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardRequirePasswordOnEnterSettings.IsEnabled = passwordEnabled || totpEnabled;
             CardRequirePasswordOnResetConfig.IsEnabled = passwordEnabled || totpEnabled;
             CardRequirePasswordOnModifyOrClearNameList.IsEnabled = passwordEnabled || totpEnabled;
+
+            // Update U-disk UI state
+            if (CardUsbSnManage != null) CardUsbSnManage.IsEnabled = usbEnabled;
+            if (CardUsbSnRegister != null) CardUsbSnRegister.IsEnabled = usbEnabled;
         }
 
         private void SetCardIsOnSilently(Ink_Canvas.Controls.LabeledSettingsCard card, bool value)
@@ -222,6 +237,113 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SetCardIsOnSilently(CardTotpEnabled, true);
             SettingsManager.SaveSettingsToFile();
             UpdatePasswordUiState();
+        }
+
+        private void RefreshUsbDrives()
+        {
+            try
+            {
+                if (ComboBoxUsbDrives == null) return;
+                ComboBoxUsbDrives.Items.Clear();
+
+                var drives = UsbSecurityManager.GetConnectedUsbDrives();
+                if (drives.Count == 0)
+                {
+                    ComboBoxUsbDrives.Items.Add(new ComboBoxItem
+                    {
+                        Content = SecurityStrings.Security_UsbPromptNoDriveDetected,
+                        IsEnabled = false
+                    });
+                    ComboBoxUsbDrives.SelectedIndex = 0;
+                    if (BtnAuthorizeSelectedDrive != null) BtnAuthorizeSelectedDrive.IsEnabled = false;
+                    return;
+                }
+
+                if (BtnAuthorizeSelectedDrive != null) BtnAuthorizeSelectedDrive.IsEnabled = true;
+                foreach (var d in drives)
+                {
+                    string label = string.IsNullOrEmpty(d.VolumeLabel) ? SecurityStrings.Security_UsbPromptLocalDisk : d.VolumeLabel;
+                    string dispSn = d.SerialNumber;
+                    if (dispSn.Length > 12)
+                    {
+                        dispSn = dispSn.Substring(0, 12) + "...";
+                    }
+                    string itemText = $"{label} ({d.DriveLetter}) [SN: {dispSn}]";
+                    ComboBoxUsbDrives.Items.Add(new ComboBoxItem
+                    {
+                        Content = itemText,
+                        Tag = d
+                    });
+                }
+                ComboBoxUsbDrives.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"RefreshUsbDrives error: {ex.Message}");
+                MessageBox.Show($"Refresh USB drives failed. Info:\n{ex.Message}\n\nStack:\n{ex.StackTrace}", SecurityStrings.Security_InfoBarTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void ToggleSwitchUsbVerificationEnabled_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            var settings = SettingsManager.Settings;
+            if (settings?.Security == null) return;
+
+            settings.Security.UsbVerificationEnabled = CardUsbVerificationEnabled.IsOn;
+            SettingsManager.SaveSettingsToFile();
+            UpdatePasswordUiState();
+
+            if (settings.Security.UsbVerificationEnabled)
+            {
+                RefreshUsbDrives();
+            }
+        }
+
+        private void TextBoxUsbAuthorizedSns_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            var settings = SettingsManager.Settings;
+            if (settings?.Security == null) return;
+
+            settings.Security.UsbAuthorizedSns = TextBoxUsbAuthorizedSns.Text;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void BtnRefreshUsbDrives_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshUsbDrives();
+        }
+
+        private void BtnAuthorizeSelectedDrive_Click(object sender, RoutedEventArgs e)
+        {
+            if (ComboBoxUsbDrives.SelectedItem is ComboBoxItem item && item.Tag is UsbDriveInfo drive)
+            {
+                if (string.IsNullOrEmpty(drive.SerialNumber))
+                {
+                    MessageBox.Show(SecurityStrings.Security_UsbPromptNoValidSn, SecurityStrings.Security_InfoBarTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                var current = TextBoxUsbAuthorizedSns.Text?.Trim() ?? "";
+                if (string.IsNullOrEmpty(current))
+                {
+                    TextBoxUsbAuthorizedSns.Text = drive.SerialNumber;
+                }
+                else if (current.Contains(drive.SerialNumber))
+                {
+                    MessageBox.Show(SecurityStrings.Security_UsbPromptAlreadyAuthorized, SecurityStrings.Security_InfoBarTitle, MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    TextBoxUsbAuthorizedSns.Text = current + "," + drive.SerialNumber;
+                }
+                MessageBox.Show(SecurityStrings.Security_UsbPromptAuthorizeSuccess, SecurityStrings.Security_InfoBarTitle, MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                MessageBox.Show(SecurityStrings.Security_UsbPromptSelectDrive, SecurityStrings.Security_InfoBarTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
     }
 }

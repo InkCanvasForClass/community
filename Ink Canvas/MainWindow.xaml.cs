@@ -2209,7 +2209,7 @@ namespace Ink_Canvas
                         Content = AvailableLatestReleaseNotes ?? string.Empty,
                         Icon = "Update",
                         ActionText = NotificationStrings.ViewDetails,
-                        DisplaySeconds = Settings?.Notification?.UpdateDurationSeconds > 0 ? Settings.Notification.UpdateDurationSeconds : 5,
+                        DisplaySeconds = Settings?.Notification?.UpdateDurationSeconds > 0 ? Settings.Notification.UpdateDurationSeconds : 3,
                         Source = "update",
                         Action = () =>
                         {

@@ -530,6 +530,7 @@
     <value>程序已经连续重启5次了，自动重启已停。快联系开发者或者检查下系统环境吧</value>
   </data>
   <data name="Main_App_UnexpectedError" xml:space="preserve">
-    <value>哎呀，出了点意外，InkCanvasForClass 可能要翻车了。\n建议赶紧存墨迹然后重启保平安。</value>
+    <value>哎呀，出了点意外，InkCanvasForClass 可能要翻车了。
+建议赶紧存墨迹然后重启保平安。</value>
   </data>
 </root>

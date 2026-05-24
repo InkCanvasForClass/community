@@ -118,7 +118,6 @@
     <PackageReference Include="MicrosoftOfficeCore" Version="15.0.0" />
     <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.3" />
     <PackageReference Include="Microsoft.International.Converters.PinYinConverter" Version="1.0.0" />
-    <PackageReference Include="Sentry" Version="6.3.0" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
@@ -253,11 +252,11 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="privacy.txt" />
-    <EmbeddedResource Include="telemetry_dsn.txt" Condition="Exists('telemetry_dsn.txt') AND '$(DLASS_SENTRY_DSN)' == ''">
-      <Link>telemetry_dsn.txt</Link>
+    <EmbeddedResource Include="telemetry_token.txt" Condition="Exists('telemetry_token.txt') AND '$(DLASS_TELEMETRY_TOKEN)' == ''">
+      <Link>telemetry_token.txt</Link>
     </EmbeddedResource>
-    <EmbeddedResource Include="$(MSBuildProjectDirectory)\telemetry_dsn.generated.txt" Condition="'$(DLASS_SENTRY_DSN)' != ''">
-      <Link>telemetry_dsn.txt</Link>
+    <EmbeddedResource Include="$(MSBuildProjectDirectory)\telemetry_token.generated.txt" Condition="'$(DLASS_TELEMETRY_TOKEN)' != ''">
+      <Link>telemetry_token.txt</Link>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </EmbeddedResource>
@@ -539,12 +538,12 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
-  <Target Name="GenerateTelemetryDsn" BeforeTargets="PrepareResources" Condition="'$(DLASS_SENTRY_DSN)' != ''">
-    <WriteLinesToFile File="$(MSBuildProjectDirectory)\telemetry_dsn.generated.txt" Lines="$(DLASS_SENTRY_DSN)" Overwrite="true" />
+  <Target Name="GenerateTelemetryToken" BeforeTargets="PrepareResources" Condition="'$(DLASS_TELEMETRY_TOKEN)' != ''">
+    <WriteLinesToFile File="$(MSBuildProjectDirectory)\telemetry_token.generated.txt" Lines="$(DLASS_TELEMETRY_TOKEN)" Overwrite="true" />
   </Target>
 
-  <Target Name="CleanTelemetryDsn" AfterTargets="Build;Clean" Condition="Exists('$(MSBuildProjectDirectory)\telemetry_dsn.generated.txt')">
-    <Delete Files="$(MSBuildProjectDirectory)\telemetry_dsn.generated.txt" />
+  <Target Name="CleanTelemetryToken" AfterTargets="Build;Clean" Condition="Exists('$(MSBuildProjectDirectory)\telemetry_token.generated.txt')">
+    <Delete Files="$(MSBuildProjectDirectory)\telemetry_token.generated.txt" />
   </Target>
 
   <Target Name="CopyIACoreHelper" AfterTargets="Build">

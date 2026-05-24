@@ -216,7 +216,6 @@ namespace Ink_Canvas.Controls.Toolbar
                 })
                 .Where(i => i != null)
                 .ToList();
-            LogHelper.WriteLogToFile($"ToolbarRegistry: Discover 完成, 发现 {_items.Count} 个条目", LogHelper.LogType.Info);
             return _items;
         }
 
@@ -298,7 +297,6 @@ namespace Ink_Canvas.Controls.Toolbar
                     LogHelper.WriteLogToFile($"ToolbarRegistry: 配置 [{name}] 内容为空或无效", LogHelper.LogType.Warning);
                     return null;
                 }
-                LogHelper.WriteLogToFile($"ToolbarRegistry: 加载配置 [{name}] 成功, {layout.Components.Count} 个条目", LogHelper.LogType.Info);
                 return layout;
             }
             catch (Exception ex)
@@ -405,7 +403,6 @@ namespace Ink_Canvas.Controls.Toolbar
                 .ToList();
             foreach (var element in toRemove)
                 container.Children.Remove(element);
-            LogHelper.WriteLogToFile($"ToolbarRegistry: ClearInjected 清除 {toRemove.Count} 个元素 [{container.Name}]", LogHelper.LogType.Info);
         }
 
         #region Display items and segments
@@ -599,7 +596,6 @@ namespace Ink_Canvas.Controls.Toolbar
 
         public static void Populate(IToolbarHost host, Panel rootPanel, ToolbarLayoutSettings layout)
         {
-            LogHelper.WriteLogToFile($"ToolbarRegistry: Populate 开始", LogHelper.LogType.Info);
             if (host == null || rootPanel == null)
             {
                 LogHelper.WriteLogToFile("ToolbarRegistry: Populate host/rootPanel 为空", LogHelper.LogType.Warning);
@@ -631,19 +627,15 @@ namespace Ink_Canvas.Controls.Toolbar
                     elementToAdd.Margin = (isFirst && !hasExistingChildren) ? new Thickness(0) : new Thickness(3, 0, 0, 0);
                     ApplyInitialVisibility(elementToAdd, item.Ruleset);
                     rootPanel.Children.Add(elementToAdd);
-                    LogHelper.WriteLogToFile($"ToolbarRegistry: 添加独立边框条目到根面板", LogHelper.LogType.Info);
                 }
                 else
                 {
                     var contentBorder = CreateContentBorder(segment.Items);
                     contentBorder.Margin = (isFirst && !hasExistingChildren) ? new Thickness(0) : new Thickness(3, 0, 0, 0);
                     rootPanel.Children.Add(contentBorder);
-                    LogHelper.WriteLogToFile($"ToolbarRegistry: 添加内容边框 ({segment.Items.Count} 项) 到根面板", LogHelper.LogType.Info);
                 }
                 isFirst = false;
             }
-
-            LogHelper.WriteLogToFile($"ToolbarRegistry: Populate 完成, 共 {segments.Count} 个段, {layout.Components.Count} 个条目", LogHelper.LogType.Info);
         }
 
         private static Border CreateContentBorder(List<DisplayItem> items)

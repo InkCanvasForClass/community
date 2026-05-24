@@ -40,9 +40,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             CardEnableAnnouncements.IsOn = notification.IsAnnouncementEnabled;
             CardEnableForcePopup.IsOn = notification.IsForcePopupEnabled;
-            ApiBaseUrlTextBox.Text = notification.AnnouncementApiBaseUrl ?? string.Empty;
-            WebSocketUrlTextBox.Text = notification.AnnouncementWebSocketUrl ?? string.Empty;
-            TokenTextBox.Text = notification.AnnouncementSoftwareToken ?? string.Empty;
             CardEnableDynamic.IsOn = notification.IsDynamicNotificationEnabled;
             CardEnableWindowsToast.IsOn = notification.IsWindowsToastEnabled;
             ToggleSwitchDictationDoNotDisturb.IsOn = notification.IsDictationDoNotDisturbEnabled;
@@ -157,27 +154,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             var settingsWindow = Window.GetWindow(this) as SettingsWindow;
             settingsWindow?.NavigateToPage("AnnouncementCenterPage");
-        }
-
-        private void ApiBaseUrlTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Notification.AnnouncementApiBaseUrl = ApiBaseUrlTextBox.Text.Trim();
-            SaveSettings();
-        }
-
-        private void WebSocketUrlTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Notification.AnnouncementWebSocketUrl = WebSocketUrlTextBox.Text.Trim();
-            SaveSettings();
-        }
-
-        private void TokenTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Notification.AnnouncementSoftwareToken = TokenTextBox.Text.Trim();
-            SaveSettings();
         }
 
         private void ToggleSwitchEnableDynamic_Toggled(object sender, RoutedEventArgs e)

@@ -114,6 +114,17 @@ namespace Ink_Canvas.Helpers
         {
             if (!HasPasswordConfigured(settings)) return true;
 
+            // 1. Check if USB verification is enabled and active
+            bool usbVerified = false;
+            DispatcherTimer usbCheckTimer = null;
+            if (settings?.Security?.UsbVerificationEnabled == true)
+            {
+                if (UsbSecurityManager.VerifyCurrentUsbDrives(settings))
+                {
+                    return true;
+                }
+            }
+
             var dialog = new ContentDialog
             {
                 Title = title,
@@ -127,9 +138,16 @@ namespace Ink_Canvas.Helpers
                 Margin = new Thickness(0, 10, 0, 0)
             };
 
+            // Enhance message if USB verification is enabled
+            string finalMessage = message;
+            if (settings?.Security?.UsbVerificationEnabled == true)
+            {
+                finalMessage += SecurityStrings.Security_UsbBypassDialogHint;
+            }
+
             var textBlock = new TextBlock
             {
-                Text = message,
+                Text = finalMessage,
                 TextWrapping = TextWrapping.Wrap
             };
 
@@ -142,10 +160,39 @@ namespace Ink_Canvas.Helpers
             panel.Children.Add(passwordBox);
             dialog.Content = panel;
 
-            var result = await dialog.ShowAsync();
-            if (result != ContentDialogResult.Primary) return false;
+            if (settings?.Security?.UsbVerificationEnabled == true)
+            {
+                usbCheckTimer = new DispatcherTimer
+                {
+                    Interval = TimeSpan.FromSeconds(1)
+                };
+                usbCheckTimer.Tick += (s, e) =>
+                {
+                    if (UsbSecurityManager.VerifyCurrentUsbDrives(settings))
+                    {
+                        usbVerified = true;
+                        usbCheckTimer.Stop();
+                        dialog.Hide();
+                    }
+                };
+                usbCheckTimer.Start();
+            }
 
-            return VerifyPassword(settings, passwordBox.Password);
+            try
+            {
+                var result = await dialog.ShowAsync();
+                if (usbVerified) return true;
+                if (result != ContentDialogResult.Primary) return false;
+
+                return VerifyPassword(settings, passwordBox.Password);
+            }
+            finally
+            {
+                if (usbCheckTimer != null)
+                {
+                    usbCheckTimer.Stop();
+                }
+            }
         }
 
         public static async Task<bool> PromptAndVerifyPasswordOrTotpAsync(Settings settings, Window owner, string title, string message)
@@ -158,6 +205,17 @@ namespace Ink_Canvas.Helpers
             if (totpOnlyMode)
             {
                 hasPassword = false;
+            }
+
+            // 1. Check if USB verification is enabled and active
+            bool usbVerified = false;
+            DispatcherTimer usbCheckTimer = null;
+            if (settings?.Security?.UsbVerificationEnabled == true)
+            {
+                if (UsbSecurityManager.VerifyCurrentUsbDrives(settings))
+                {
+                    return true;
+                }
             }
 
             var dialog = new ContentDialog
@@ -197,6 +255,11 @@ namespace Ink_Canvas.Helpers
                 hintText = MainWindowStrings.Main_Security_PasswordOnlyHint;
             }
 
+            if (settings?.Security?.UsbVerificationEnabled == true)
+            {
+                hintText += SecurityStrings.Security_UsbBypassDialogHintShort;
+            }
+
             panel.Children.Add(new TextBlock
             {
                 Text = hintText,
@@ -214,6 +277,24 @@ namespace Ink_Canvas.Helpers
                 noFocusModeWasTemporarilyDisabled = true;
             }
 
+            if (settings?.Security?.UsbVerificationEnabled == true)
+            {
+                usbCheckTimer = new DispatcherTimer
+                {
+                    Interval = TimeSpan.FromSeconds(1)
+                };
+                usbCheckTimer.Tick += (s, e) =>
+                {
+                    if (UsbSecurityManager.VerifyCurrentUsbDrives(settings))
+                    {
+                        usbVerified = true;
+                        usbCheckTimer.Stop();
+                        dialog.Hide();
+                    }
+                };
+                usbCheckTimer.Start();
+            }
+
             try
             {
                 dialog.Opened += (s, e) =>
@@ -226,6 +307,7 @@ namespace Ink_Canvas.Helpers
                 };
 
                 var result = await dialog.ShowAsync();
+                if (usbVerified) return true;
                 if (result != ContentDialogResult.Primary) return false;
 
                 string input = inputBox.Password ?? "";
@@ -234,6 +316,11 @@ namespace Ink_Canvas.Helpers
             }
             finally
             {
+                if (usbCheckTimer != null)
+                {
+                    usbCheckTimer.Stop();
+                }
+
                 if (noFocusModeWasTemporarilyDisabled)
                 {
                     WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode = false;
