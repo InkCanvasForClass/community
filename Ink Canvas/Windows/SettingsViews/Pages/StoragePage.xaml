@@ -142,7 +142,8 @@
                 <!-- 核心文件 -->
                 <ui:SettingsExpander x:Name="CoreExpander"
                                      Header="{x:Static props:StorageStrings.Storage_Legend_Core}"
-                                     Description="{x:Static props:StorageStrings.Storage_Core_Desc}">
+                                     Description="{x:Static props:StorageStrings.Storage_Core_Desc}"
+                                     IsExpanded="True">
                     <ui:SettingsExpander.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
                     </ui:SettingsExpander.HeaderIcon>
@@ -193,8 +194,9 @@
 
                 <!-- 自定义文件 -->
                 <ui:SettingsExpander x:Name="CustomExpander"
-                                     Header="{x:Static props:StorageStrings.Storage_Custom_Header}"
-                                     Description="{x:Static props:StorageStrings.Storage_Custom_Desc}">
+                                     Header="{x:Static props:StorageStrings.Storage_Legend_Custom}"
+                                     Description="{x:Static props:StorageStrings.Storage_Custom_Desc}"
+                                     IsExpanded="True">
                     <ui:SettingsExpander.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Photo}"/>
                     </ui:SettingsExpander.HeaderIcon>
@@ -206,8 +208,9 @@
 
                 <!-- 插件 -->
                 <ui:SettingsExpander x:Name="PluginsExpander"
-                                     Header="{x:Static props:StorageStrings.Storage_Plugins_Header}"
-                                     Description="{x:Static props:StorageStrings.Storage_Plugins_Desc}">
+                                     Header="{x:Static props:StorageStrings.Storage_Legend_Plugins}"
+                                     Description="{x:Static props:StorageStrings.Storage_Plugins_Desc}"
+                                     IsExpanded="True">
                     <ui:SettingsExpander.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Puzzle}"/>
                     </ui:SettingsExpander.HeaderIcon>

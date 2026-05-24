@@ -55,21 +55,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void UpdateAllSliderTexts()
         {
-            UpdateSliderText(ViewboxFloatingBarScaleTransformValueSlider, ViewboxFloatingBarScaleSliderText, "{0:F2}x");
-            UpdateSliderText(ViewboxFloatingBarOpacityValueSlider, ViewboxFloatingBarOpacityText, "{0:F2}");
-            UpdateSliderText(ViewboxFloatingBarOpacityInPPTValueSlider, ViewboxFloatingBarOpacityInPPTText, "{0:F2}");
             UpdateSliderText(ViewboxBlackBoardScaleTransformValueSlider, ViewboxBlackBoardScaleText, "{0:F2}");
             UpdateSliderText(QuickPanelBottomOffsetSlider, QuickPanelBottomOffsetText, "{0:F0}");
-            UpdateFloatingBarActualScaleText();
-        }
-
-        private void UpdateFloatingBarActualScaleText()
-        {
-            if (ViewboxFloatingBarScaleTransformValueSlider == null || ViewboxFloatingBarActualScaleText == null) return;
-            double val = ViewboxFloatingBarScaleTransformValueSlider.Value;
-            double clampedVal = (val > 0.5 && val < 1.25) ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1.0;
-            double actualScale = clampedVal;
-            ViewboxFloatingBarActualScaleText.Text = $"{actualScale:F2}x";
         }
 
         private void UpdateSliderText(Slider slider, TextBlock textBlock, string format)
@@ -107,35 +94,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 _isApplyingLanguageFromSettings = false;
             }
 
-            CardEnableSplashScreen.IsOn = settings.Appearance.EnableSplashScreen;
-            ComboBoxSplashScreenStyle.SelectedIndex = settings.Appearance.SplashScreenStyle;
-            UpdateCustomSplashImageVisibility();
-
-            if (!string.IsNullOrEmpty(settings.Appearance.CustomSplashImagePath) && 
-                System.IO.File.Exists(settings.Appearance.CustomSplashImagePath))
-            {
-                TextBlockCustomSplashPath.Text = System.IO.Path.GetFileName(settings.Appearance.CustomSplashImagePath);
-                TextBlockCustomSplashPath.ToolTip = settings.Appearance.CustomSplashImagePath;
-            }
-            else
-            {
-                TextBlockCustomSplashPath.Text = ThemeStrings.Theme_CustomSplash_NotSelected;
-                TextBlockCustomSplashPath.ToolTip = null;
-            }
-
-            UpdateTextAlignButtonAppearance(settings.Appearance.CustomSplashTextPosition);
-
             if (settings.Appearance.FloatingBarImg >= ComboBoxFloatingBarImg.Items.Count)
                 settings.Appearance.FloatingBarImg = 0;
             ComboBoxFloatingBarImg.SelectedIndex = settings.Appearance.FloatingBarImg;
 
-            if (settings.Appearance.ViewboxFloatingBarScaleTransformValue != 0)
-                ViewboxFloatingBarScaleTransformValueSlider.Value = settings.Appearance.ViewboxFloatingBarScaleTransformValue;
-
             ViewboxBlackBoardScaleTransformValueSlider.Value = settings.Appearance.ViewboxBlackBoardScaleTransformValue;
-
-            ViewboxFloatingBarOpacityValueSlider.Value = settings.Appearance.ViewboxFloatingBarOpacityValue;
-            ViewboxFloatingBarOpacityInPPTValueSlider.Value = settings.Appearance.ViewboxFloatingBarOpacityInPPTValue;
 
             CardEnableTimeDisplayInWhiteboardMode.IsOn = settings.Appearance.EnableTimeDisplayInWhiteboardMode;
             CardUse24HourTimeFormat.IsOn = settings.Appearance.Use24HourTimeFormat;
@@ -158,11 +121,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ComboBoxUnFoldBtnImg.SelectedIndex = settings.Appearance.UnFoldButtonImageType;
 
             CardUseLegacyFloatingBarUI.IsOn = settings.Appearance.UseLegacyFloatingBarUI;
-
-            CardEnableTrayIcon.IsOn = settings.Appearance.EnableTrayIcon;
-
-            ComboBoxTrayLeftClickAction.SelectedIndex = (int)settings.Appearance.TrayLeftClickAction;
-            ComboBoxTrayRightClickAction.SelectedIndex = (int)settings.Appearance.TrayRightClickAction;
 
             if (BtnHitokotoCustomize != null)
                 BtnHitokotoCustomize.Visibility = settings.Appearance.ChickenSoupSource == 3 ? Visibility.Visible : Visibility.Collapsed;
@@ -266,116 +224,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         #endregion
 
-        #region Splash Screen
-
-        private void ToggleSwitchEnableSplashScreen_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.EnableSplashScreen = CardEnableSplashScreen.IsOn;
-            SettingsManager.SaveSettingsToFile();
-        }
-
-        private void ComboBoxSplashScreenStyle_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.SplashScreenStyle = ComboBoxSplashScreenStyle.SelectedIndex;
-            SettingsManager.SaveSettingsToFile();
-            UpdateCustomSplashImageVisibility();
-        }
-
-        private void UpdateCustomSplashImageVisibility()
-        {
-            bool isCustomSelected = ComboBoxSplashScreenStyle.SelectedIndex == 7;
-            CardCustomSplashImage.Visibility = isCustomSelected ? Visibility.Visible : Visibility.Collapsed;
-            CardCustomSplashTextPosition.Visibility = isCustomSelected ? Visibility.Visible : Visibility.Collapsed;
-        }
-
-        private void BorderTextAlign_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            if (!_isLoaded) return;
-
-            if (sender is Border border && border.Tag != null)
-            {
-                int selectedIndex = int.Parse(border.Tag.ToString());
-                SettingsManager.Settings.Appearance.CustomSplashTextPosition = selectedIndex;
-                SettingsManager.SaveSettingsToFile();
-                UpdateTextAlignButtonAppearance(selectedIndex);
-            }
-        }
-
-        private void UpdateTextAlignButtonAppearance(int selectedIndex)
-        {
-            AnimateIndicatorToPosition(selectedIndex);
-        }
-
-        private void AnimateIndicatorToPosition(int position)
-        {
-            // 外容器 110px，内边距 1px，每个按钮 36px
-            // 左: X=0, 中: X=36, 右: X=72
-            double targetX = position * 36;
-
-            var animation = new DoubleAnimation
-            {
-                To = targetX,
-                Duration = TimeSpan.FromMilliseconds(200),
-                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
-            };
-
-            IndicatorTranslateTransform.BeginAnimation(TranslateTransform.XProperty, animation);
-
-            // 跟随系统主题颜色
-            var isDarkTheme = SettingsManager.Settings.Appearance.Theme == 1;
-
-            if (isDarkTheme)
-            {
-                SelectionIndicator.Background = new SolidColorBrush(Color.FromArgb(40, 0, 120, 215));
-                SelectionIndicator.BorderBrush = new SolidColorBrush(Color.FromArgb(150, 0, 120, 215));
-            }
-            else
-            {
-                SelectionIndicator.Background = new SolidColorBrush(Color.FromArgb(25, 0, 120, 215));
-                SelectionIndicator.BorderBrush = new SolidColorBrush(Color.FromArgb(120, 0, 120, 215));
-            }
-        }
-
-        private void ButtonBrowseCustomSplash_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var openFileDialog = new Microsoft.Win32.OpenFileDialog
-                {
-                    Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.webp|All Files|*.*",
-                    Title = ThemeStrings.Theme_SelectCustomSplashImage
-                };
-
-                if (openFileDialog.ShowDialog() == true)
-                {
-                    string selectedPath = openFileDialog.FileName;
-                    if (!string.IsNullOrEmpty(selectedPath))
-                    {
-                        SettingsManager.Settings.Appearance.CustomSplashImagePath = selectedPath;
-                        SettingsManager.SaveSettingsToFile();
-                        TextBlockCustomSplashPath.Text = System.IO.Path.GetFileName(selectedPath);
-                        TextBlockCustomSplashPath.ToolTip = selectedPath;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"选择自定义启动图片时出错: {ex.Message}");
-            }
-        }
-
-        private void ButtonClearCustomSplash_Click(object sender, RoutedEventArgs e)
-        {
-            SettingsManager.Settings.Appearance.CustomSplashImagePath = string.Empty;
-            SettingsManager.SaveSettingsToFile();
-            TextBlockCustomSplashPath.Text = ThemeStrings.Theme_CustomSplash_NotSelected;
-            TextBlockCustomSplashPath.ToolTip = null;
-        }
-
-        #endregion
-
         #region Floating Bar Appearance
 
         private void ComboBoxFloatingBarImg_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -407,74 +255,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CustomIconWindow dialog = new CustomIconWindow(mw);
             dialog.Owner = mw;
             dialog.ShowDialog();
-        }
-
-        private void ViewboxFloatingBarScaleTransformValueSlider_ValueChanged(object sender, RoutedEventArgs e)
-        {
-            UpdateSliderText(ViewboxFloatingBarScaleTransformValueSlider, ViewboxFloatingBarScaleSliderText, "{0:F2}x");
-            if (!_isLoaded) return;
-            var slider = ViewboxFloatingBarScaleTransformValueSlider;
-            var val = Math.Round(slider.Value, 2);
-            // 仅当四舍五入纠正了显示值时才回写；那次 set 会重入 ValueChanged 完成保存。
-            if (slider.Value != val)
-            {
-                slider.Value = val;
-                return;
-            }
-            SettingsManager.Settings.Appearance.ViewboxFloatingBarScaleTransformValue = val;
-            SettingsManager.SaveSettingsToFile();
-
-            double clampedVal = (val > 0.5 && val < 1.25) ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1.0;
-            double actualScale = clampedVal;
-            UpdateFloatingBarActualScaleText();
-
-            var mw = GetMainWindow();
-            if (mw != null)
-            {
-                mw.ViewboxFloatingBarScaleTransform.ScaleX = actualScale;
-                mw.ViewboxFloatingBarScaleTransform.ScaleY = actualScale;
-                if (mw.IsInPptPresentationMode)
-                    mw.ViewboxFloatingBarMarginAnimation(60);
-                else
-                    mw.ViewboxFloatingBarMarginAnimation(100, true);
-            }
-        }
-
-        private void ViewboxFloatingBarOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
-        {
-            UpdateSliderText(ViewboxFloatingBarOpacityValueSlider, ViewboxFloatingBarOpacityText, "{0:F2}");
-            if (!_isLoaded) return;
-            var slider = ViewboxFloatingBarOpacityValueSlider;
-            var val = Math.Round(slider.Value, 2);
-            if (slider.Value != val)
-            {
-                slider.Value = val;
-                return;
-            }
-            SettingsManager.Settings.Appearance.ViewboxFloatingBarOpacityValue = val;
-            SettingsManager.SaveSettingsToFile();
-            var mw = GetMainWindow();
-            if (mw != null) mw.ViewboxFloatingBar.Opacity = val;
-        }
-
-        private void ViewboxFloatingBarOpacityInPPTValueSlider_ValueChanged(object sender, RoutedEventArgs e)
-        {
-            UpdateSliderText(ViewboxFloatingBarOpacityInPPTValueSlider, ViewboxFloatingBarOpacityInPPTText, "{0:F2}");
-            if (!_isLoaded) return;
-            var slider = ViewboxFloatingBarOpacityInPPTValueSlider;
-            var val = Math.Round(slider.Value, 2);
-            if (slider.Value != val)
-            {
-                slider.Value = val;
-                return;
-            }
-            SettingsManager.Settings.Appearance.ViewboxFloatingBarOpacityInPPTValue = val;
-            SettingsManager.SaveSettingsToFile();
-            var mw = GetMainWindow();
-            if (mw != null && mw.currentMode == 2)
-            {
-                mw.ViewboxFloatingBar.Opacity = val;
-            }
         }
 
         #endregion
@@ -688,41 +468,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var settingsWindow = Application.Current.Windows.OfType<SettingsViews.SettingsWindow>().FirstOrDefault();
             if (settingsWindow != null)
                 settingsWindow.NavigateToPage("ToolbarPage");
-        }
-
-        #endregion
-
-        #region Tray Icon
-
-        private void ToggleSwitchEnableTrayIcon_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.EnableTrayIcon = CardEnableTrayIcon.IsOn;
-            SettingsManager.SaveSettingsToFile();
-            try
-            {
-                var _taskbar = Application.Current.Resources["TaskbarTrayIcon"];
-                if (_taskbar is FrameworkElement fe)
-                    fe.Visibility = CardEnableTrayIcon.IsOn ? Visibility.Visible : Visibility.Collapsed;
-            }
-            catch (Exception ex)
-            {
-                ExceptionHandler.HandleException(ex, "更新托盘图标可见性失败", LogHelper.LogType.Warning);
-            }
-        }
-
-        private void ComboBoxTrayLeftClickAction_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.TrayLeftClickAction = (TrayClickAction)ComboBoxTrayLeftClickAction.SelectedIndex;
-            SettingsManager.SaveSettingsToFile();
-        }
-
-        private void ComboBoxTrayRightClickAction_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.TrayRightClickAction = (TrayClickAction)ComboBoxTrayRightClickAction.SelectedIndex;
-            SettingsManager.SaveSettingsToFile();
         }
 
         #endregion

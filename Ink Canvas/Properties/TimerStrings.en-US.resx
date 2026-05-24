@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -98,5 +98,35 @@
   </data>
   <data name="Timer_Reset" xml:space="preserve">
     <value>Reset Timer</value>
+  </data>
+  <data name="Timer_EnableCountUp" xml:space="preserve">
+    <value>Count Up After Timeout</value>
+  </data>
+  <data name="Timer_OvertimeHighlight" xml:space="preserve">
+    <value>Overtime Highlight</value>
+  </data>
+  <data name="Timer_Volume" xml:space="preserve">
+    <value>Volume</value>
+  </data>
+  <data name="Timer_CustomSoundLabel" xml:space="preserve">
+    <value>Custom Alert Sound</value>
+  </data>
+  <data name="Timer_Progressive" xml:space="preserve">
+    <value>Progressive Reminder</value>
+  </data>
+  <data name="Timer_ProgressiveVolume" xml:space="preserve">
+    <value>Progressive Reminder Volume</value>
+  </data>
+  <data name="Timer_ProgressiveCustomLabel" xml:space="preserve">
+    <value>Custom Progressive Reminder Sound</value>
+  </data>
+  <data name="Timer_ProgressiveSelectFile" xml:space="preserve">
+    <value>Select File</value>
+  </data>
+  <data name="Timer_NewUI" xml:space="preserve">
+    <value>New Style</value>
+  </data>
+  <data name="Timer_UseLegacyButtons" xml:space="preserve">
+    <value>Legacy Buttons</value>
   </data>
 </root>

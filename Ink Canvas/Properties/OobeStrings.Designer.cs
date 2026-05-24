@@ -92,7 +92,6 @@ namespace Ink_Canvas.Properties
         public static string Oobe_EnableTrayIconDesc => ResourceManager.GetString(nameof(Oobe_EnableTrayIconDesc), _resourceCulture);
         public static string Oobe_EnableQuickPanel => ResourceManager.GetString(nameof(Oobe_EnableQuickPanel), _resourceCulture);
         public static string Oobe_EnableQuickPanelDesc => ResourceManager.GetString(nameof(Oobe_EnableQuickPanelDesc), _resourceCulture);
-        public static string Oobe_HotkeysTitle => ResourceManager.GetString(nameof(Oobe_HotkeysTitle), _resourceCulture);
         public static string Oobe_EnableGlobalHotkeys => ResourceManager.GetString(nameof(Oobe_EnableGlobalHotkeys), _resourceCulture);
         public static string Oobe_EnableGlobalHotkeysDesc => ResourceManager.GetString(nameof(Oobe_EnableGlobalHotkeysDesc), _resourceCulture);
         public static string Oobe_Step5Title => ResourceManager.GetString(nameof(Oobe_Step5Title), _resourceCulture);
@@ -118,12 +117,8 @@ namespace Ink_Canvas.Properties
         public static string Oobe_EnableLogDesc => ResourceManager.GetString(nameof(Oobe_EnableLogDesc), _resourceCulture);
         public static string Oobe_FinishTitle => ResourceManager.GetString(nameof(Oobe_FinishTitle), _resourceCulture);
         public static string Oobe_FinishDesc => ResourceManager.GetString(nameof(Oobe_FinishDesc), _resourceCulture);
-        public static string Oobe_SummaryTelemetry => ResourceManager.GetString(nameof(Oobe_SummaryTelemetry), _resourceCulture);
-        public static string Oobe_SummaryTheme => ResourceManager.GetString(nameof(Oobe_SummaryTheme), _resourceCulture);
         public static string Oobe_SummaryPPTLink => ResourceManager.GetString(nameof(Oobe_SummaryPPTLink), _resourceCulture);
-        public static string Oobe_SummaryTwoFinger => ResourceManager.GetString(nameof(Oobe_SummaryTwoFinger), _resourceCulture);
         public static string Oobe_SummaryTrayIcon => ResourceManager.GetString(nameof(Oobe_SummaryTrayIcon), _resourceCulture);
-        public static string Oobe_SummaryLog => ResourceManager.GetString(nameof(Oobe_SummaryLog), _resourceCulture);
         public static string Oobe_BoolEnabled => ResourceManager.GetString(nameof(Oobe_BoolEnabled), _resourceCulture);
         public static string Oobe_BoolDisabled => ResourceManager.GetString(nameof(Oobe_BoolDisabled), _resourceCulture);
         public static string Oobe_Previous => ResourceManager.GetString(nameof(Oobe_Previous), _resourceCulture);

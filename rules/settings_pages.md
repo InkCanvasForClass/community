@@ -1,5 +1,121 @@
 # 设置页面开发规范
 
+## 导航结构
+
+设置窗口使用 `NavigationView` 实现三级导航，结构如下：
+
+```
+应用设置
+├── 首页
+├── ── ICC CE 设置 ──（分隔符）
+├── 通用
+│   ├── 基本 (StartupPage)
+│   ├── 时钟 (ClockPage)
+│   ├── 隐私 (PrivacyPage)
+│   ├── 安全 (SecurityPage)
+│   └── 高级 (AdvancedPage)
+├── 主界面
+│   ├── 窗口 (WindowPage)
+│   ├── 个性化 (AppearancePage)
+│   └── 快捷键 (HotkeyPage)
+├── 画板设置
+│   ├── 画布 (CanvasPage)
+│   └── 墨迹识别 (InkRecognitionPage)
+├── PPT联动 (PowerPointPage)
+├── 更新 (UpdatePage)
+├── 通知
+│   ├── 通知设置 (NotificationPage)
+│   └── 公告中心 (AnnouncementCenterPage)
+├── 实验性 (ExperimentalPage)
+├── 存储
+│   ├── 存储管理 (StoragePage)
+│   └── 备份与还原 (BackupPage)
+├── 云存储 (CloudStoragePage)
+├── 工具栏
+│   ├── 组件 (ToolbarPage)
+│   └── 外观 (ToolbarAppearancePage)
+├── 自动化 (AutomationPage)
+├── 随机点名 (RandomDrawPage)
+├── Debug (DebugPage)
+├── ── 插件设置 ──（分隔符）
+├── 插件 (PluginPage)
+├── ── 底部 ──（分隔符）
+├── 友情链接 (FriendlyLinksPage)
+└── 关于 Ink Canvas (AboutPage)
+```
+
+## 导航栏文字
+
+导航栏文字**必须**使用 `NavStrings` 资源文件中的字符串，不得自行编写。
+
+| 资源键 | 中文值 |
+|--------|--------|
+| Nav_General | 通用 |
+| Nav_Startup | 基本 |
+| Nav_Clock | 时钟 |
+| Nav_Privacy | 隐私 |
+| Nav_Security | 安全 |
+| Nav_Advanced | 高级 |
+| Nav_MainInterface | 主界面 |
+| Nav_Window | 窗口 |
+| Nav_Appearance | 个性化 |
+| Nav_Hotkey | 快捷键 |
+| Nav_CanvasSettings | 画板设置 |
+| Nav_Canvas | 画布 |
+| Nav_InkRecognition | 墨迹识别 |
+| Nav_PPT | PPT联动 |
+| Nav_Update | 更新 |
+| Nav_Notification | 通知 |
+| Nav_NotificationSettings | 通知设置 |
+| Nav_AnnouncementCenter | 公告中心 |
+| Nav_Experimental | 实验性 |
+| Nav_Storage | 存储 |
+| Nav_StorageManagement | 存储管理 |
+| Nav_Backup | 备份与还原 |
+| Nav_CloudStorage | 云存储 |
+| Nav_Toolbar | 工具栏 |
+| Nav_ToolbarComponents | 组件 |
+| Nav_ToolbarAppearance | 外观 |
+| Nav_Automation | 自动化 |
+| Nav_RandomDraw | 随机点名 |
+| Nav_Debug | Debug |
+
+## 页面类型映射
+
+在 `SettingsWindow.xaml.cs` 中，导航 Tag 到页面类型的映射：
+
+```csharp
+private static readonly Dictionary<string, Type> _pageDict = new()
+{
+    { "Startup", typeof(StartupPage) },
+    { "Clock", typeof(ClockPage) },
+    { "Privacy", typeof(PrivacyPage) },
+    { "Security", typeof(SecurityPage) },
+    { "Advanced", typeof(AdvancedPage) },
+    { "Window", typeof(WindowPage) },
+    { "Appearance", typeof(AppearancePage) },
+    { "Hotkey", typeof(HotkeyPage) },
+    { "Canvas", typeof(CanvasPage) },
+    { "InkRecognition", typeof(InkRecognitionPage) },
+    { "PowerPoint", typeof(PowerPointPage) },
+    { "Update", typeof(UpdatePage) },
+    { "Notification", typeof(NotificationPage) },
+    { "AnnouncementCenter", typeof(AnnouncementCenterPage) },
+    { "Experimental", typeof(ExperimentalPage) },
+    { "Storage", typeof(StoragePage) },
+    { "Backup", typeof(BackupPage) },
+    { "CloudStorage", typeof(CloudStoragePage) },
+    { "Toolbar", typeof(ToolbarPage) },
+    { "ToolbarAppearance", typeof(ToolbarAppearancePage) },
+    { "Automation", typeof(AutomationPage) },
+    { "RandomDraw", typeof(RandomDrawPage) },
+    { "Debug", typeof(DebugPage) },
+    { "Plugin", typeof(PluginPage) },
+    { "FriendlyLinks", typeof(FriendlyLinksPage) },
+    { "About", typeof(AboutPage) },
+};
+```
+
 ## 设置添加与删除
 
 ### 添加新设置完整流程
@@ -107,9 +223,10 @@ Settings.Appearance.IsEnableDisPlayNibModeToggler = false;
 ### 添加新设置页面
 
 1. 在 `Windows/SettingsViews/Pages/` 下创建新的 `.xaml` 和 `.xaml.cs` 文件
-2. 参考现有页面（如 `AppearancePage.xaml`）的结构
-3. 在 `SettingsWindow.xaml` 中添加导航入口
-4. 在主窗口代码中添加必要的访问器属性
+2. 参考现有页面的结构
+3. 在 `SettingsWindow.xaml` 中添加导航入口（使用 `NavStrings` 资源）
+4. 在 `SettingsWindow.xaml.cs` 的 `_pageDict` 中添加 Tag→Type 映射
+5. 更新 `rules/Ink Canvas 设置完整目录.md`
 
 ### 添加笔工具栏滑块
 
@@ -183,3 +300,25 @@ private void PenWidthSlider_ValueChanged(object sender, RoutedPropertyChangedEve
 - 使用 `_isUpdatingSliders` 标志防止交叉同步时的死循环
 - `UpdateSliderText` 必须在 `_isLoaded` 检查之前调用，确保初始值显示
 - 使用 `Math.Round` 处理浮点数精度
+
+## 资源文件规范
+
+### 资源文件体系
+
+每个功能模块有独立的 resx 文件，支持三语：
+- `XxxStrings.resx` — 默认（中文）
+- `XxxStrings.en-US.resx` — 英文
+- `XxxStrings.zh-ME.resx` — 简繁混合
+
+### 资源键命名
+
+- 导航栏文字：`Nav_XXX`，放在 `NavStrings.resx`
+- 页面内容文字：按模块分文件（如 `StartupStrings.resx`、`CanvasStrings.resx`）
+- 通用文字：`CommonStrings.resx`
+
+### 资源完整性检查
+
+修改 resx 后必须确保：
+1. `Designer.cs` 中有对应的属性声明
+2. 默认 resx、en-US、zh-ME 三个文件的键完全一致
+3. 不存在未使用的资源键
