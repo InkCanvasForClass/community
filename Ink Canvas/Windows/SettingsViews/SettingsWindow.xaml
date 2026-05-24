@@ -125,23 +125,32 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
                 <ui:NavigationViewItemHeader Content="{x:Static props:NavStrings.Nav_ICCSettings}"/>
-                <!-- 基本设置 -->
+                <!-- 通用 -->
                 <ui:NavigationViewItem
-                    x:Name="BasicItem"
-                    Content="{x:Static props:NavStrings.Nav_Basic}"
+                    x:Name="GeneralItem"
+                    Content="{x:Static props:NavStrings.Nav_General}"
                     SelectsOnInvoked="False"
-                    ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Basic_Tooltip}">
+                    ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_General_Tooltip}">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Home}"/>
                     </ui:NavigationViewItem.Icon>
                     <ui:NavigationViewItem.MenuItems>
                         <ui:NavigationViewItem
                             x:Name="StartupPageItem"
-                            Content="{x:Static props:StartupStrings.Start}"
+                            Content="{x:Static props:NavStrings.Nav_Startup}"
                             Tag="StartupPage"
-                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Startup}">
+                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Startup_Tooltip}">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Play}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="ClockPageItem"
+                            Content="{x:Static props:NavStrings.Nav_Clock}"
+                            Tag="ClockPage"
+                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Clock_Tooltip}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Stopwatch}"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
@@ -160,6 +169,15 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             ToolTipService.ToolTip="{x:Static props:NavStrings.Settings_Nav_Security_Tooltip}">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Permissions}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="AdvancedPageItem"
+                            Content="{x:Static props:NavStrings.Nav_Advanced}"
+                            Tag="AdvancedPage"
+                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Advanced_Settings}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
@@ -200,15 +218,6 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             ToolTipService.ToolTip="{x:Static props:NavStrings.Settings_Nav_Hotkey_Tooltip}">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.KeyboardStandard}"/>
-                            </ui:NavigationViewItem.Icon>
-                        </ui:NavigationViewItem>
-                        <ui:NavigationViewItem
-                            x:Name="ToolbarPageItem"
-                            Content="{x:Static props:NavStrings.Nav_Toolbar}"
-                            Tag="ToolbarPage"
-                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Toolbar_Tooltip}">
-                            <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Rename}"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
@@ -319,26 +328,35 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
-                <!-- 高级设置 -->
+                <!-- 存储 -->
                 <ui:NavigationViewItem
-                    x:Name="AdvancedPageItem"
-                    Content="{x:Static props:NavStrings.Nav_Advanced}"
-                    Tag="AdvancedPage"
-                    ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Advanced_Settings}">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
-                    </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
-
-                <!-- 存储管理 -->
-                <ui:NavigationViewItem
-                    x:Name="StoragePageItem"
-                    Content="{x:Static props:StorageStrings.Storage_Title}"
-                    Tag="StoragePage"
+                    x:Name="StorageItem"
+                    Content="{x:Static props:StorageStrings.Storage_NavTitle}"
+                    SelectsOnInvoked="False"
                     ToolTipService.ToolTip="{x:Static props:StorageStrings.Storage_NavTooltip}">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.HardDrive}"/>
                     </ui:NavigationViewItem.Icon>
+                    <ui:NavigationViewItem.MenuItems>
+                        <ui:NavigationViewItem
+                            x:Name="StoragePageItem"
+                            Content="{x:Static props:StorageStrings.Storage_Title}"
+                            Tag="StoragePage"
+                            ToolTipService.ToolTip="{x:Static props:StorageStrings.Storage_NavTooltip}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.HardDrive}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="BackupPageItem"
+                            Content="{x:Static props:StorageStrings.Backup_Title}"
+                            Tag="BackupPage"
+                            ToolTipService.ToolTip="{x:Static props:StorageStrings.Backup_Title}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                    </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
 
                 <ui:NavigationViewItem
@@ -349,6 +367,37 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}"/>
                     </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
+                <!-- 工具栏 -->
+                <ui:NavigationViewItem
+                    x:Name="ToolbarItem"
+                    Content="{x:Static props:NavStrings.Nav_Toolbar}"
+                    SelectsOnInvoked="False"
+                    ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Toolbar_Tooltip}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Rename}"/>
+                    </ui:NavigationViewItem.Icon>
+                    <ui:NavigationViewItem.MenuItems>
+                        <ui:NavigationViewItem
+                            x:Name="ToolbarPageItem"
+                            Content="{x:Static props:NavStrings.Nav_ToolbarComponents}"
+                            Tag="ToolbarPage"
+                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_ToolbarComponents_Tooltip}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Rename}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="ToolbarAppearancePageItem"
+                            Content="{x:Static props:NavStrings.Nav_ToolbarAppearance}"
+                            Tag="ToolbarAppearancePage"
+                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_ToolbarAppearance_Tooltip}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Personalize}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                    </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
 
                 <!-- 自动化 -->

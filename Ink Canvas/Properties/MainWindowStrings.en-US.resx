@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -38,10 +38,18 @@
       </xsd:complexType>
     </xsd:element>
   </xsd:schema>
-  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
-  <resheader name="version"><value>2.0</value></resheader>
-  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
   <data name="Main_WatermarkText" xml:space="preserve">
     <value>More understanding, less complaining</value>
   </data>
@@ -71,18 +79,6 @@
   </data>
   <data name="Main_InkReplayExitHint" xml:space="preserve">
     <value>Double-tap to exit replay</value>
-  </data>
-  <data name="Main_TrayHideWindow" xml:space="preserve">
-    <value>Hide ICC-CE Main Window</value>
-  </data>
-  <data name="Main_TrayShowWindow" xml:space="preserve">
-    <value>Show Main Window (2 min)</value>
-  </data>
-  <data name="Main_TrayDisableHotkeys" xml:space="preserve">
-    <value>Disable All Hotkeys</value>
-  </data>
-  <data name="Main_TraySwitchFoldMode" xml:space="preserve">
-    <value>Switch to Fold Mode</value>
   </data>
   <data name="Main_Strokes_SaveSuccess" xml:space="preserve">
     <value>Strokes saved to {0}</value>
@@ -270,9 +266,6 @@
   <data name="Main_Board_FrozenCannotDelete" xml:space="preserve">
     <value>This page is frozen and cannot be deleted</value>
   </data>
-  <data name="Main_Board_NewPage" xml:space="preserve">
-    <value>New Page</value>
-  </data>
   <data name="Main_Board_CustomBgApplied" xml:space="preserve">
     <value>Custom background color applied: {0}</value>
   </data>
@@ -344,9 +337,6 @@
   </data>
   <data name="Main_AutoFold_ClearingAndFolding" xml:space="preserve">
     <value>Clearing ink and folding to sidebar. You can restore the original ink via Undo after entering annotation mode.</value>
-  </data>
-  <data name="Main_PDF_OpenFailed" xml:space="preserve">
-    <value>Cannot open PDF (may be encrypted, corrupted, or unsupported).</value>
   </data>
   <data name="Main_PDF_InsertFailed" xml:space="preserve">
     <value>Failed to insert PDF: {0}</value>

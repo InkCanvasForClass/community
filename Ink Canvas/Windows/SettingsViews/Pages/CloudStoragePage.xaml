@@ -47,7 +47,7 @@
 
                 <ui:SettingsExpander Header="{x:Static props:CloudStorageStrings.CloudStorage_UploadProviders}"
                                      Description="{x:Static props:CloudStorageStrings.CloudStorage_UploadProvidersDesc}"
-                                     d:IsExpanded="True">
+                                     IsExpanded="True">
                     <ui:SettingsExpander.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}" />
                     </ui:SettingsExpander.HeaderIcon>
@@ -84,7 +84,7 @@
 
                 <ui:SettingsExpander Header="{x:Static props:CloudStorageStrings.CloudStorage_UserToken}"
                                      Description="{x:Static props:CloudStorageStrings.CloudStorage_UserTokenDesc}"
-                                     d:IsExpanded="True">
+                                     IsExpanded="True">
                     <ui:SettingsExpander.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.People}" />
                     </ui:SettingsExpander.HeaderIcon>
@@ -161,7 +161,7 @@
 
                 <ui:SettingsExpander Header="{x:Static props:CloudStorageStrings.CloudStorage_WebDavSettings}"
                                      Description="{x:Static props:CloudStorageStrings.CloudStorage_WebDavSettingsDesc}"
-                                     d:IsExpanded="True">
+                                     IsExpanded="True">
                     <ui:SettingsExpander.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Folder}" />
                     </ui:SettingsExpander.HeaderIcon>

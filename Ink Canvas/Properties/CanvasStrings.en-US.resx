@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -202,7 +202,7 @@
     <value>Yes</value>
   </data>
   <data name="CanvasAndInkPanel_1920×1080Hint" xml:space="preserve">
-    <value></value>
+    <value>Automatically compress images larger than 1920×1080 to save memory</value>
   </data>
   <data name="CanvasAndInkPanel_Hint_9" xml:space="preserve">
     <value>Automatically saves ink at set intervals, only when the canvas is visible and contains ink</value>
@@ -256,13 +256,13 @@
     <value>When on, line endpoints near other endpoints will snap and connect.</value>
   </data>
   <data name="InkRecog_PauseStraightenDelay" xml:space="preserve">
-    <value></value>
+    <value>Pause Trigger Delay</value>
   </data>
   <data name="InkRecog_PauseStraightenHint" xml:space="preserve">
-    <value></value>
+    <value>Automatically straighten the current stroke to a line when pausing during writing (requires Auto Straighten Line to be enabled).</value>
   </data>
   <data name="InkRecog_PauseStraightenLine" xml:space="preserve">
-    <value></value>
+    <value>Pause Straighten</value>
   </data>
   <data name="InkRecog_Sensitivity" xml:space="preserve">
     <value>Sensitivity</value>

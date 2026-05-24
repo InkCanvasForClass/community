@@ -63,7 +63,8 @@
                         Toggled="ToggleSwitchEnableWindowsToast_Toggled" />
 
                 <ui:SettingsExpander Header="{x:Static props:NotificationStrings.DictationDoNotDisturb}"
-                                     Description="{x:Static props:NotificationStrings.DictationDoNotDisturbHint}">
+                                     Description="{x:Static props:NotificationStrings.DictationDoNotDisturbHint}"
+                                     IsExpanded="{Binding IsOn, ElementName=ToggleSwitchDictationDoNotDisturb, Mode=OneWay}">
                     <ui:SettingsExpander.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BlockContact}" />
                     </ui:SettingsExpander.HeaderIcon>

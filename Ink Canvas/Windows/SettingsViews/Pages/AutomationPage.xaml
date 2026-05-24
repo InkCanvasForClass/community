@@ -34,7 +34,7 @@
                     <TextBlock Text="{x:Static props:AutomationStrings.Automation_AutoFoldTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
                     <ui:SettingsExpander Header="{x:Static props:AutomationStrings.AutoFold_Group_Seewo}"
-                            d:IsExpanded="True">
+                            IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
                         </ui:SettingsExpander.HeaderIcon>
@@ -97,7 +97,7 @@
                     </ui:SettingsExpander>
 
                     <ui:SettingsExpander Header="{x:Static props:AutomationStrings.AutoFold_Group_Hite}"
-                            d:IsExpanded="True">
+                            IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
                         </ui:SettingsExpander.HeaderIcon>
@@ -133,7 +133,7 @@
                     </ui:SettingsExpander>
 
                     <ui:SettingsExpander Header="{x:Static props:AutomationStrings.AutoFold_Group_Other}"
-                            d:IsExpanded="True">
+                            IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
                         </ui:SettingsExpander.HeaderIcon>
@@ -375,7 +375,8 @@
                             Icon="{x:Static ui:SegoeFluentIcons.Edit}"
                             Toggled="ToggleSwitchUseCustomSaveFileName_Toggled"/>
 
-                    <ui:SettingsExpander x:Name="CardSaveFileNamePreset" Header="{x:Static props:AutomationStrings.Automation_SaveFileNameFormat}">
+                    <ui:SettingsExpander x:Name="CardSaveFileNamePreset" Header="{x:Static props:AutomationStrings.Automation_SaveFileNameFormat}"
+                        IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
                         </ui:SettingsExpander.HeaderIcon>
@@ -404,7 +405,7 @@
                     <TextBlock Text="{x:Static props:AutomationStrings.FloatingInterceptor_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
                     <ui:SettingsExpander Header="{x:Static props:AutomationStrings.FloatingInterceptor_Group_Seewo}"
-                            d:IsExpanded="True">
+                            IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
                         </ui:SettingsExpander.HeaderIcon>
@@ -485,7 +486,7 @@
                     </ui:SettingsExpander>
 
                     <ui:SettingsExpander Header="{x:Static props:NotificationStrings.Type_Other}"
-                            d:IsExpanded="True">
+                            IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
                         </ui:SettingsExpander.HeaderIcon>
@@ -541,7 +542,8 @@
                     <TextBlock Text="{x:Static props:SecurityStrings.FileAssoc_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
                     <ui:SettingsExpander Header="{x:Static props:SecurityStrings.FileAssoc_Check}"
-                                         Description="{x:Static props:AutomationStrings.FileAssoc_CheckDesc}">
+                                         Description="{x:Static props:AutomationStrings.FileAssoc_CheckDesc}"
+                                         IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}"/>
                         </ui:SettingsExpander.HeaderIcon>
