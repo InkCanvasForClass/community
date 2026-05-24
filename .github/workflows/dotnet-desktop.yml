@@ -4,6 +4,12 @@ on:
   push:
     branches: [ net6 ]
   workflow_dispatch:
+    inputs:
+      include_dotnet_runtime:
+        description: 'Include .NET runtime in single-file output'
+        required: true
+        default: false
+        type: boolean
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}-${{ github.head_ref || github.sha }}
@@ -32,21 +38,41 @@ jobs:
       - name: Setup dotnet
         uses: actions/setup-dotnet@v5
         with:
+          dotnet-version: '6.0.x'
           cache: true
           cache-dependency-path: '**/packages.lock.json'
-      
-      - name: Restore Package 
-        run: dotnet restore "Ink Canvas.sln" --locked-mode
-      
-      - name: Build the Solution
+
+      - name: Restore Package
+        run: |
+          $rid = if ("${{ matrix.architecture }}" -eq "x86") { "win-x86" } else { "win-x64" }
+          $includeRuntime = '${{ github.event_name == 'workflow_dispatch' && github.event.inputs.include_dotnet_runtime == 'true' }}' -eq 'true'
+          dotnet restore "Ink Canvas/InkCanvasForClass.csproj" --locked-mode -r $rid -p:SelfContained=$includeRuntime
+
+      - name: Publish the Application
         env:
           DLASS_TELEMETRY_TOKEN: ${{ secrets.DLASS_TELEMETRY_TOKEN }}
-        run: msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Debug" /p:GitFlow="$GITFLOW" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
+        run: |
+          $rid = if ("${{ matrix.architecture }}" -eq "x86") { "win-x86" } else { "win-x64" }
+          $includeRuntime = '${{ github.event_name == 'workflow_dispatch' && github.event.inputs.include_dotnet_runtime == 'true' }}' -eq 'true'
+          $compression = $includeRuntime.ToString().ToLowerInvariant()
+          $publishDir = "artifacts\publish\Debug\${{ matrix.architecture }}"
+          dotnet publish "Ink Canvas/InkCanvasForClass.csproj" `
+            -c Debug `
+            -r $rid `
+            --self-contained $includeRuntime `
+            --no-restore `
+            -p:Platform="${{ matrix.architecture }}" `
+            -p:PublishSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:EnableCompressionInSingleFile=$compression `
+            -p:GitFlow="Github Action" `
+            -p:RunAnalyzers=false `
+            -o $publishDir
 
       - name: Check if exe file is generated
         id: check-exe
         run: |
-          $exePath = "Ink Canvas\bin\Debug\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\InkCanvasForClass.exe"
+          $exePath = "artifacts\publish\Debug\${{ matrix.architecture }}\InkCanvasForClass.exe"
           
           if (Test-Path $exePath) {
             echo "build_success=true" >> $env:GITHUB_OUTPUT
@@ -74,7 +100,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: InkCanvasForClass.CE.debug.${{ matrix.architecture }}
-          path: "Ink Canvas/bin/Debug/${{ matrix.architecture }}/net6.0-windows10.0.19041.0/*"
+          path: "artifacts/publish/Debug/${{ matrix.architecture }}/*"
 
       - name: Create Summary
         if: always()
