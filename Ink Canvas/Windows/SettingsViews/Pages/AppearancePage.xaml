@@ -190,8 +190,9 @@
                         <ComboBox x:Name="ComboBoxUnFoldBtnImg"
                                   SelectedIndex="0"
                                   SelectionChanged="ComboBoxUnFoldBtnImg_SelectionChanged">
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_UnfoldIcon_Arrow}" />
-                            <ComboBoxItem Content="{x:Static props:FloatingBarStrings.Board_Pen}" />
+                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_UnfoldIcon_ClassicArrow}" />
+                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_UnfoldIcon_ClassicPen}" />
+                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_UnfoldIcon_Stripe}" />
                         </ComboBox>
                     </ui:SettingsCard>
 

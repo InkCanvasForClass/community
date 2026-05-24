@@ -3,10 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
              mc:Ignorable="d"
              d:DesignHeight="150" d:DesignWidth="80">
     <Grid Background="#02000000" Cursor="Hand" Width="80" Height="150" VerticalAlignment="Center">
-        <!-- PanelBorder is the outer translucent track (width 24, height 110) positioned by C# code-behind -->
+        <!-- New Minimalist Grab Handle -->
         <Border x:Name="PanelBorder"
                 Width="24" Height="110"
                 Background="Transparent"
@@ -49,7 +50,6 @@
                     </Border.Style>
                     
                     <Image x:Name="ChevronImage"
-                           Visibility="Collapsed"
                            Source="{DynamicResource QuickPanelUnfoldChevronIcon}"
                            RenderOptions.BitmapScalingMode="HighQuality"
                            Height="8" Width="8"
@@ -61,5 +61,17 @@
                 </Border>
             </Border>
         </Border>
+
+        <!-- Classic Capsule Handle -->
+        <Viewbox x:Name="ClassicViewbox" Height="50" Width="32" VerticalAlignment="Center" Visibility="Collapsed">
+            <ikw:SimpleStackPanel>
+                <Border x:Name="ClassicPanelBorder" Background="#9918181b" Opacity="1"
+                        CornerRadius="0,25,25,0" Height="50" Width="32">
+                    <Image x:Name="ClassicChevronImage" Margin="10,0,0,0"
+                           Source="{DynamicResource QuickPanelUnfoldChevronIcon}"
+                           RenderOptions.BitmapScalingMode="HighQuality" Height="14" Width="14" />
+                </Border>
+            </ikw:SimpleStackPanel>
+        </Viewbox>
     </Grid>
 </UserControl>

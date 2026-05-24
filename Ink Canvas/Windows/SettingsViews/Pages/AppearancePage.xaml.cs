@@ -429,23 +429,37 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var mw = GetMainWindow();
             if (mw != null)
             {
+                mw.ApplySidePanelSettings();
+
                 if (ComboBoxUnFoldBtnImg.SelectedIndex == 0)
                 {
-                    mw.RightUnFoldBtnImgChevron.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
-                    mw.RightUnFoldBtnImgChevron.Width = 14; mw.RightUnFoldBtnImgChevron.Height = 14;
-                    mw.RightUnFoldBtnImgChevron.RenderTransform = new RotateTransform(180);
-                    mw.LeftUnFoldBtnImgChevron.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
-                    mw.LeftUnFoldBtnImgChevron.Width = 14; mw.LeftUnFoldBtnImgChevron.Height = 14;
-                    mw.LeftUnFoldBtnImgChevron.RenderTransform = null;
+                    if (mw.RightUnFoldBtnImgChevron != null)
+                    {
+                        mw.RightUnFoldBtnImgChevron.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
+                        mw.RightUnFoldBtnImgChevron.Width = 14; mw.RightUnFoldBtnImgChevron.Height = 14;
+                        mw.RightUnFoldBtnImgChevron.RenderTransform = new RotateTransform(180);
+                    }
+                    if (mw.LeftUnFoldBtnImgChevron != null)
+                    {
+                        mw.LeftUnFoldBtnImgChevron.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
+                        mw.LeftUnFoldBtnImgChevron.Width = 14; mw.LeftUnFoldBtnImgChevron.Height = 14;
+                        mw.LeftUnFoldBtnImgChevron.RenderTransform = null;
+                    }
                 }
                 else if (ComboBoxUnFoldBtnImg.SelectedIndex == 1)
                 {
-                    mw.RightUnFoldBtnImgChevron.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
-                    mw.RightUnFoldBtnImgChevron.Width = 18; mw.RightUnFoldBtnImgChevron.Height = 18;
-                    mw.RightUnFoldBtnImgChevron.RenderTransform = null;
-                    mw.LeftUnFoldBtnImgChevron.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
-                    mw.LeftUnFoldBtnImgChevron.Width = 18; mw.LeftUnFoldBtnImgChevron.Height = 18;
-                    mw.LeftUnFoldBtnImgChevron.RenderTransform = null;
+                    if (mw.RightUnFoldBtnImgChevron != null)
+                    {
+                        mw.RightUnFoldBtnImgChevron.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
+                        mw.RightUnFoldBtnImgChevron.Width = 18; mw.RightUnFoldBtnImgChevron.Height = 18;
+                        mw.RightUnFoldBtnImgChevron.RenderTransform = null;
+                    }
+                    if (mw.LeftUnFoldBtnImgChevron != null)
+                    {
+                        mw.LeftUnFoldBtnImgChevron.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
+                        mw.LeftUnFoldBtnImgChevron.Width = 18; mw.LeftUnFoldBtnImgChevron.Height = 18;
+                        mw.LeftUnFoldBtnImgChevron.RenderTransform = null;
+                    }
                 }
             }
         }

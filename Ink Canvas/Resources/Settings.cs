@@ -474,6 +474,15 @@ namespace Ink_Canvas
         [JsonProperty("quickPanelBottomOffset")]
         public double QuickPanelBottomOffset { get; set; } = -150;
 
+        [JsonProperty("useMinimalistGrabHandle")]
+        public bool UseMinimalistGrabHandle { get; set; } = true;
+
+        [JsonProperty("showGrabHandleChevron")]
+        public bool ShowGrabHandleChevron { get; set; } = false;
+
+        [JsonProperty("useFloatingQuickPanel")]
+        public bool UseFloatingQuickPanel { get; set; } = true;
+
     }
 
     public class PowerPointSettings

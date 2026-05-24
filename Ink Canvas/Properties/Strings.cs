@@ -1042,6 +1042,9 @@ namespace Ink_Canvas.Properties
             dict["Theme_System"] = ("ThemeStrings", "Theme_System");
             dict["Theme_UnfoldButtonIcon"] = ("ThemeStrings", "Theme_UnfoldButtonIcon");
             dict["Theme_UnfoldIcon_Arrow"] = ("ThemeStrings", "Theme_UnfoldIcon_Arrow");
+            dict["Theme_UnfoldIcon_ClassicArrow"] = ("ThemeStrings", "Theme_UnfoldIcon_ClassicArrow");
+            dict["Theme_UnfoldIcon_ClassicPen"] = ("ThemeStrings", "Theme_UnfoldIcon_ClassicPen");
+            dict["Theme_UnfoldIcon_Stripe"] = ("ThemeStrings", "Theme_UnfoldIcon_Stripe");
             dict["Theme_Upload"] = ("ThemeStrings", "Theme_Upload");
             dict["Theme_UseLegacyFloatingBarUI"] = ("ThemeStrings", "Theme_UseLegacyFloatingBarUI");
             dict["Theme_WindowBackdrop"] = ("ThemeStrings", "Theme_WindowBackdrop");

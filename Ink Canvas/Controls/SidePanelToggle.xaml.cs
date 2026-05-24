@@ -29,14 +29,22 @@ namespace Ink_Canvas.Controls
             set => SetValue(IsRightSideProperty, value);
         }
 
-        public Image ChevronIcon => ChevronImage;
+        public Image ChevronIcon
+        {
+            get
+            {
+                var settings = MainWindow.Settings?.Appearance;
+                bool useMinimalist = settings?.UnFoldButtonImageType == 2;
+                return useMinimalist ? ChevronImage : ClassicChevronImage;
+            }
+        }
 
         public SidePanelToggle()
         {
             InitializeComponent();
             
             Loaded += (s, e) => {
-                UpdateLayoutState(IsRightSide);
+                ApplySettings();
             };
         }
 
@@ -178,36 +186,81 @@ namespace Ink_Canvas.Controls
             }
         }
 
+        public void ApplySettings()
+        {
+            var settings = MainWindow.Settings?.Appearance;
+            if (settings == null) return;
+
+            bool useMinimalist = settings.UnFoldButtonImageType == 2;
+
+            if (PanelBorder != null)
+                PanelBorder.Visibility = useMinimalist ? Visibility.Visible : Visibility.Collapsed;
+
+            if (ClassicViewbox != null)
+                ClassicViewbox.Visibility = useMinimalist ? Visibility.Collapsed : Visibility.Visible;
+
+            if (ChevronImage != null)
+                ChevronImage.Visibility = Visibility.Collapsed;
+
+            UpdateLayoutState(IsRightSide);
+        }
+
         private void UpdateLayoutState(bool isRightSide)
         {
-            if (PanelBorder == null || ChevronImage == null || InnerStripe == null) return;
+            var settings = MainWindow.Settings?.Appearance;
+            bool useMinimalist = settings?.UnFoldButtonImageType == 2;
 
-            if (isRightSide)
+            if (useMinimalist)
             {
-                // Align Right inside the container so it is near the right edge of the screen
-                PanelBorder.HorizontalAlignment = HorizontalAlignment.Right;
-                // Since container right is offscreen by 10px, 15px margin makes it exactly 5px away from the right edge
-                PanelBorder.Margin = new Thickness(0, 0, 15, 0);
+                if (PanelBorder == null || InnerStripe == null || ChevronImage == null) return;
 
-                // Align inner stripe to the right edge of the outer track (tucked towards screen boundary)
-                InnerStripe.HorizontalAlignment = HorizontalAlignment.Right;
-                InnerStripe.Margin = new Thickness(0, 0, 3, 0);
+                if (isRightSide)
+                {
+                    // Align Right inside the container so it is near the right edge of the screen
+                    PanelBorder.HorizontalAlignment = HorizontalAlignment.Right;
+                    // Since container right is offscreen by 10px, 15px margin makes it exactly 5px away from the right edge
+                    PanelBorder.Margin = new Thickness(0, 0, 15, 0);
 
-                ChevronImage.RenderTransformOrigin = new Point(0.5, 0.5);
-                ChevronImage.RenderTransform = new RotateTransform(180);
+                    // Align inner stripe to the right edge of the outer track (tucked towards screen boundary)
+                    InnerStripe.HorizontalAlignment = HorizontalAlignment.Right;
+                    InnerStripe.Margin = new Thickness(0, 0, 3, 0);
+
+                    ChevronImage.RenderTransformOrigin = new Point(0.5, 0.5);
+                    ChevronImage.RenderTransform = new RotateTransform(180);
+                }
+                else
+                {
+                    // Align Left inside the container so it is near the left edge of the screen
+                    PanelBorder.HorizontalAlignment = HorizontalAlignment.Left;
+                    // Since container left is offscreen by 10px, 15px margin makes it exactly 5px away from the left edge
+                    PanelBorder.Margin = new Thickness(15, 0, 0, 0);
+
+                    // Align inner stripe to the left edge of the outer track (tucked towards screen boundary)
+                    InnerStripe.HorizontalAlignment = HorizontalAlignment.Left;
+                    InnerStripe.Margin = new Thickness(3, 0, 0, 0);
+
+                    ChevronImage.RenderTransform = null;
+                }
             }
             else
             {
-                // Align Left inside the container so it is near the left edge of the screen
-                PanelBorder.HorizontalAlignment = HorizontalAlignment.Left;
-                // Since container left is offscreen by 10px, 15px margin makes it exactly 5px away from the left edge
-                PanelBorder.Margin = new Thickness(15, 0, 0, 0);
+                if (ClassicViewbox == null || ClassicPanelBorder == null || ClassicChevronImage == null) return;
 
-                // Align inner stripe to the left edge of the outer track (tucked towards screen boundary)
-                InnerStripe.HorizontalAlignment = HorizontalAlignment.Left;
-                InnerStripe.Margin = new Thickness(3, 0, 0, 0);
-
-                ChevronImage.RenderTransform = null;
+                if (isRightSide)
+                {
+                    ClassicViewbox.HorizontalAlignment = HorizontalAlignment.Right;
+                    ClassicPanelBorder.CornerRadius = new CornerRadius(25, 0, 0, 25);
+                    ClassicChevronImage.Margin = new Thickness(0, 0, 10, 0);
+                    ClassicChevronImage.RenderTransformOrigin = new Point(0.5, 0.5);
+                    ClassicChevronImage.RenderTransform = new RotateTransform(180);
+                }
+                else
+                {
+                    ClassicViewbox.HorizontalAlignment = HorizontalAlignment.Left;
+                    ClassicPanelBorder.CornerRadius = new CornerRadius(0, 25, 25, 0);
+                    ClassicChevronImage.Margin = new Thickness(10, 0, 0, 0);
+                    ClassicChevronImage.RenderTransform = null;
+                }
             }
         }
     }
