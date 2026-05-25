@@ -64,16 +64,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ComboBoxExternalCallerType.SelectedIndex = settings.RandSettings.ExternalCallerType;
 
             ToggleSwitchUseNewRollCallUI.IsOn = settings.RandSettings.UseNewRollCallUI;
+            ToggleSwitchDisplayRandWindowNamesInputBtn.Visibility = settings.RandSettings.UseNewRollCallUI ? Visibility.Collapsed : Visibility.Visible;
             ToggleSwitchEnableMLAvoidance.IsOn = settings.RandSettings.EnableMLAvoidance;
             MLAvoidanceHistorySlider.Value = settings.RandSettings.MLAvoidanceHistoryCount;
             MLAvoidanceWeightSlider.Value = settings.RandSettings.MLAvoidanceWeight;
 
-            if (settings.RandSettings.UseNewStyleUI)
-                ComboBoxTimerUIStyle.SelectedIndex = 2;
-            else if (settings.RandSettings.UseLegacyTimerUI)
-                ComboBoxTimerUIStyle.SelectedIndex = 1;
-            else
+            if (settings.RandSettings.UseLegacyTimerUI)
                 ComboBoxTimerUIStyle.SelectedIndex = 0;
+            else
+                ComboBoxTimerUIStyle.SelectedIndex = 1;
             ToggleSwitchEnableOvertimeCountUp.IsOn = settings.RandSettings.EnableOvertimeCountUp;
 
             bool canEnableRedText = settings.RandSettings.EnableOvertimeCountUp && settings.RandSettings.EnableOvertimeRedText;
@@ -220,6 +219,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.RandSettings.UseNewRollCallUI = ToggleSwitchUseNewRollCallUI.IsOn;
+            ToggleSwitchDisplayRandWindowNamesInputBtn.Visibility = ToggleSwitchUseNewRollCallUI.IsOn ? Visibility.Collapsed : Visibility.Visible;
             SettingsManager.SaveSettingsToFile();
         }
 

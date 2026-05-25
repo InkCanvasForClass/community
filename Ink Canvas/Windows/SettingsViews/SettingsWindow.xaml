@@ -411,7 +411,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
-                <!-- 随机点名 -->
+                <!-- 点名与计时器 -->
                 <ui:NavigationViewItem
                     x:Name="RandomDrawPageItem"
                     Content="{x:Static props:RandomStrings.Random_Title}"
