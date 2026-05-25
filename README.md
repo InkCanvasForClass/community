@@ -8,9 +8,7 @@
 
 ![GitHub License](https://img.shields.io/github/license/InkCanvasForClass/community)
 ![GitHub top language](https://img.shields.io/github/languages/top/InkCanvasForClass/community)
-<a href="https://github.com/iNKORE-NET/UI.WPF.Modern">
-  <img src="https://github.com/iNKORE-NET/UI.WPF.Modern/blob/main/assets/images/badges/UI.WPF.Modern_Main_Shield.svg?raw=true" alt="iNKORE.UI.WPF.Modern">
-</a>
+[![Using iNKORE.UI.WPF.Modern](https://github.com/iNKORE-NET/UI.WPF.Modern/blob/main/assets/images/badges/UI.WPF.Modern_Main_Shield.svg?raw=true)](https://github.com/iNKORE-NET/UI.WPF.Modern)
 ![GitHub Repo stars](https://img.shields.io/github/stars/InkCanvasForClass/community)
 ![GitHub forks](https://img.shields.io/github/forks/InkCanvasForClass/community)
 [![All Contributors](https://img.shields.io/github/all-contributors/InkCanvasForClass/community?color=ee8449)](#贡献者)
