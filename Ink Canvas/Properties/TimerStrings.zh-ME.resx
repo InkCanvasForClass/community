@@ -124,9 +124,9 @@
     <value>选个文件</value>
   </data>
   <data name="Timer_NewUI" xml:space="preserve">
-    <value>新样式</value>
+    <value>ICC CE 版 UI</value>
   </data>
   <data name="Timer_UseLegacyButtons" xml:space="preserve">
-    <value>老式按钮</value>
+    <value>ICC 版 UI</value>
   </data>
 </root>
