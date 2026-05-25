@@ -34,8 +34,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _isLoaded = false;
         }
 
-        private MainWindow GetMainWindow() => Application.Current.MainWindow as MainWindow;
-
         private void LoadSettings()
         {
             var settings = SettingsManager.Settings;
@@ -147,8 +145,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                             SettingsManager.Settings = backupSettings;
                             SettingsManager.SaveSettingsToFile();
 
-                            var mw = GetMainWindow();
-                            if (mw != null) mw.ReloadSettingsFromFile();
+                            SettingsActionHub.OnReloadSettingsFromFile();
 
                             LogHelper.WriteLogToFile($"成功从备份还原设置: {dlg.FileName}");
                             MessageBox.Show(StorageStrings.Restore_SuccessMsg, StorageStrings.Restore_SuccessTitle, MessageBoxButton.OK, MessageBoxImage.Information);

@@ -49,8 +49,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _isLoaded = false;
         }
 
-        private MainWindow GetMainWindow() => Application.Current.MainWindow as MainWindow;
-
         private void LoadSettings()
         {
             _isLoaded = false;
@@ -118,82 +116,48 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchSupportPowerPoint_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
             var ppt = SettingsManager.Settings.PowerPointSettings;
             ppt.PowerPointSupport = CardSupportPowerPoint.IsOn;
             if (!ppt.PowerPointSupport && ppt.IsSupportWPS)
             {
                 ppt.IsSupportWPS = false;
                 CardSupportWPS.IsOn = false;
-                if (mw?.PPTManager != null) mw.PPTManager.IsSupportWPS = false;
             }
             SettingsManager.SaveSettingsToFile();
-            if (mw != null)
-            {
-                if (ppt.PowerPointSupport)
-                {
-                    if (mw.PPTManager == null) mw.InitializePPTManagers();
-                    mw.StartPPTMonitoring();
-                }
-                else mw.StopPPTMonitoring();
-            }
+            SettingsActionHub.OnPPTSupportChanged(CardSupportPowerPoint.IsOn);
         }
 
         private void ToggleSwitchPowerPointEnhancement_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
             var ppt = SettingsManager.Settings.PowerPointSettings;
             ppt.EnablePowerPointEnhancement = CardPowerPointEnhancement.IsOn;
             if (ppt.EnablePowerPointEnhancement)
             {
                 ppt.IsSupportWPS = false;
                 CardSupportWPS.IsOn = false;
-                if (mw?.PPTManager != null) mw.PPTManager.IsSupportWPS = false;
             }
             SettingsManager.SaveSettingsToFile();
-            if (mw != null)
-            {
-                if (ppt.EnablePowerPointEnhancement)
-                    mw.StartPowerPointProcessMonitoring();
-                else
-                    mw.StopPowerPointProcessMonitoring();
-            }
+            SettingsActionHub.OnPPTEnhancementChanged(CardPowerPointEnhancement.IsOn);
         }
 
         private void ToggleSwitchSkipAnimationsWhenGoNext_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
             SettingsManager.Settings.PowerPointSettings.SkipAnimationsWhenGoNext = CardSkipAnimationsWhenGoNext.IsOn;
-            if (mw?.PPTManager != null)
-                mw.PPTManager.SkipAnimationsWhenNavigating = CardSkipAnimationsWhenGoNext.IsOn;
             SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnSkipAnimationsWhenGoNextChanged(CardSkipAnimationsWhenGoNext.IsOn);
         }
 
         private void ToggleSwitchUseRotPptLink_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
             var ppt = SettingsManager.Settings.PowerPointSettings;
             ppt.UseRotPptLink = CardUseRotPptLink.IsOn;
             SettingsManager.SaveSettingsToFile();
             try
             {
-                if (mw != null)
-                {
-                    mw.StopPPTMonitoring();
-                    if (ppt.UseRotPptLink && ppt.EnablePowerPointEnhancement)
-                    {
-                        ppt.EnablePowerPointEnhancement = false;
-                        CardPowerPointEnhancement.IsOn = false;
-                        mw.StopPowerPointProcessMonitoring();
-                        SettingsManager.SaveSettingsToFile();
-                    }
-                    mw.InitializePPTManagers();
-                    if (ppt.PowerPointSupport) mw.StartPPTMonitoring();
-                    LogHelper.WriteLogToFile($"已切换 PPT 联动架构为 {(ppt.UseRotPptLink ? "ROT" : "COM")}", LogHelper.LogType.Event);
-                }
+                SettingsActionHub.OnUseRotPptLinkChanged();
             }
             catch (Exception ex) { LogHelper.WriteLogToFile($"切换 PPT 联动架构失败: {ex}", LogHelper.LogType.Error); }
         }
@@ -201,7 +165,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchSupportWPS_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
             var ppt = SettingsManager.Settings.PowerPointSettings;
             ppt.IsSupportWPS = CardSupportWPS.IsOn;
             if (ppt.IsSupportWPS)
@@ -210,25 +173,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 {
                     ppt.PowerPointSupport = true;
                     CardSupportPowerPoint.IsOn = true;
-                    if (mw != null)
-                    {
-                        if (mw.PPTManager == null) mw.InitializePPTManagers();
-                        mw.StartPPTMonitoring();
-                    }
                 }
                 if (ppt.EnablePowerPointEnhancement)
                 {
                     ppt.EnablePowerPointEnhancement = false;
                     CardPowerPointEnhancement.IsOn = false;
-                    mw?.StopPowerPointProcessMonitoring();
                 }
             }
-            if (mw?.PPTManager != null)
-            {
-                mw.PPTManager.IsSupportWPS = ppt.IsSupportWPS;
-                mw.PPTManager.SkipAnimationsWhenNavigating = ppt.SkipAnimationsWhenGoNext;
-            }
             SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnSupportWPSChanged();
         }
 
         private void ToggleSwitchEnableWppProcessKill_Toggled(object sender, RoutedEventArgs e)
@@ -245,25 +198,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchShowPPTButton_OnToggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
             SettingsManager.Settings.PowerPointSettings.ShowPPTButton = CardShowPPTButton.IsOn;
             SettingsManager.SaveSettingsToFile();
-            if (mw?.PPTUIManager != null)
-            {
-                mw.PPTUIManager.ShowPPTButton = CardShowPPTButton.IsOn;
-                mw.PPTUIManager.UpdateNavigationPanelsVisibility();
-            }
-            mw?.UpdatePPTBtnPreview();
+            SettingsActionHub.OnShowPPTButtonChanged(CardShowPPTButton.IsOn);
         }
 
         private void ToggleSwitchShowPPTSidebarByDefault_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
             SettingsManager.Settings.PowerPointSettings.ShowPPTSidebarByDefault = CardShowPPTSidebarByDefault.IsOn;
             SettingsManager.SaveSettingsToFile();
-            if (mw != null && mw.IsInPptPresentationMode)
-                mw.UpdatePPTQuickPanelVisibility();
+            SettingsActionHub.OnShowPPTSidebarByDefaultChanged();
         }
 
         private void ToggleSwitchEnablePPTButtonPageClickable_OnToggled(object sender, RoutedEventArgs e)
@@ -295,48 +240,36 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             UpdateSliderText(PPTButtonLeftPositionValueSlider, PPTButtonLeftPositionText, "{0:F0}");
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
             SettingsManager.Settings.PowerPointSettings.PPTLSButtonPosition = (int)PPTButtonLeftPositionValueSlider.Value;
-            mw?.UpdatePPTBtnSlidersStatus();
-            mw?.UpdatePPTUIManagerSettings();
+            SettingsActionHub.OnPPTButtonPositionChanged();
             _sliderDelayAction.DebounceAction(2000, null, () => SettingsManager.SaveSettingsToFile());
-            mw?.UpdatePPTBtnPreview();
         }
 
         private void PPTButtonRightPositionValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             UpdateSliderText(PPTButtonRightPositionValueSlider, PPTButtonRightPositionText, "{0:F0}");
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
             SettingsManager.Settings.PowerPointSettings.PPTRSButtonPosition = (int)PPTButtonRightPositionValueSlider.Value;
-            mw?.UpdatePPTBtnSlidersStatus();
-            mw?.UpdatePPTUIManagerSettings();
+            SettingsActionHub.OnPPTButtonPositionChanged();
             _sliderDelayAction.DebounceAction(2000, null, () => SettingsManager.SaveSettingsToFile());
-            mw?.UpdatePPTBtnPreview();
         }
 
         private void PPTButtonLBPositionValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             UpdateSliderText(PPTButtonLBPositionValueSlider, PPTButtonLBPositionText, "{0:F0}");
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
             SettingsManager.Settings.PowerPointSettings.PPTLBButtonPosition = (int)PPTButtonLBPositionValueSlider.Value;
-            mw?.UpdatePPTBtnSlidersStatus();
-            mw?.UpdatePPTUIManagerSettings();
+            SettingsActionHub.OnPPTButtonPositionChanged();
             _sliderDelayAction.DebounceAction(2000, null, () => SettingsManager.SaveSettingsToFile());
-            mw?.UpdatePPTBtnPreview();
         }
 
         private void PPTButtonRBPositionValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             UpdateSliderText(PPTButtonRBPositionValueSlider, PPTButtonRBPositionText, "{0:F0}");
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
             SettingsManager.Settings.PowerPointSettings.PPTRBButtonPosition = (int)PPTButtonRBPositionValueSlider.Value;
-            mw?.UpdatePPTBtnSlidersStatus();
-            mw?.UpdatePPTUIManagerSettings();
+            SettingsActionHub.OnPPTButtonPositionChanged();
             _sliderDelayAction.DebounceAction(2000, null, () => SettingsManager.SaveSettingsToFile());
-            mw?.UpdatePPTBtnPreview();
         }
 
         private void PPTLSButtonOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
@@ -349,13 +282,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             PPTLSButtonOpacityValueSlider.ValueChanged += PPTLSButtonOpacityValueSlider_ValueChanged;
             SettingsManager.Settings.PowerPointSettings.PPTLSButtonOpacity = roundedValue;
             SettingsManager.SaveSettingsToFile();
-            var mw = GetMainWindow();
-            if (mw?.PPTUIManager != null)
-            {
-                mw.PPTUIManager.PPTLSButtonOpacity = roundedValue;
-                mw.PPTUIManager.UpdateNavigationButtonStyles();
-            }
-            mw?.UpdatePPTBtnPreview();
+            SettingsActionHub.OnPPTButtonOpacityChanged("LS", roundedValue);
         }
 
         private void PPTRSButtonOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
@@ -368,13 +295,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             PPTRSButtonOpacityValueSlider.ValueChanged += PPTRSButtonOpacityValueSlider_ValueChanged;
             SettingsManager.Settings.PowerPointSettings.PPTRSButtonOpacity = roundedValue;
             SettingsManager.SaveSettingsToFile();
-            var mw = GetMainWindow();
-            if (mw?.PPTUIManager != null)
-            {
-                mw.PPTUIManager.PPTRSButtonOpacity = roundedValue;
-                mw.PPTUIManager.UpdateNavigationButtonStyles();
-            }
-            mw?.UpdatePPTBtnPreview();
+            SettingsActionHub.OnPPTButtonOpacityChanged("RS", roundedValue);
         }
 
         private void PPTLBButtonOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
@@ -387,13 +308,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             PPTLBButtonOpacityValueSlider.ValueChanged += PPTLBButtonOpacityValueSlider_ValueChanged;
             SettingsManager.Settings.PowerPointSettings.PPTLBButtonOpacity = roundedValue;
             SettingsManager.SaveSettingsToFile();
-            var mw = GetMainWindow();
-            if (mw?.PPTUIManager != null)
-            {
-                mw.PPTUIManager.PPTLBButtonOpacity = roundedValue;
-                mw.PPTUIManager.UpdateNavigationButtonStyles();
-            }
-            mw?.UpdatePPTBtnPreview();
+            SettingsActionHub.OnPPTButtonOpacityChanged("LB", roundedValue);
         }
 
         private void PPTRBButtonOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
@@ -406,13 +321,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             PPTRBButtonOpacityValueSlider.ValueChanged += PPTRBButtonOpacityValueSlider_ValueChanged;
             SettingsManager.Settings.PowerPointSettings.PPTRBButtonOpacity = roundedValue;
             SettingsManager.SaveSettingsToFile();
-            var mw = GetMainWindow();
-            if (mw?.PPTUIManager != null)
-            {
-                mw.PPTUIManager.PPTRBButtonOpacity = roundedValue;
-                mw.PPTUIManager.UpdateNavigationButtonStyles();
-            }
-            mw?.UpdatePPTBtnPreview();
+            SettingsActionHub.OnPPTButtonOpacityChanged("RB", roundedValue);
         }
 
         #endregion
@@ -422,92 +331,61 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void CheckboxEnableLBPPTButton_IsCheckChanged(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
             var str = SettingsManager.Settings.PowerPointSettings.PPTButtonsDisplayOption.ToString();
             char[] c = str.ToCharArray();
             c[0] = CheckboxEnableLBPPTButton.IsChecked == true ? '2' : '1';
             SettingsManager.Settings.PowerPointSettings.PPTButtonsDisplayOption = int.Parse(new string(c));
             SettingsManager.SaveSettingsToFile();
-            if (mw?.PPTUIManager != null && mw.IsInPptPresentationMode)
-            {
-                mw.PPTUIManager.PPTButtonsDisplayOption = SettingsManager.Settings.PowerPointSettings.PPTButtonsDisplayOption;
-                mw.PPTUIManager.UpdateNavigationPanelsVisibility();
-            }
-            mw?.UpdatePPTBtnPreview();
+            SettingsActionHub.OnPPTButtonsDisplayOptionChanged();
         }
 
         private void CheckboxEnableRBPPTButton_IsCheckChanged(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
             var str = SettingsManager.Settings.PowerPointSettings.PPTButtonsDisplayOption.ToString();
             char[] c = str.ToCharArray();
             c[1] = CheckboxEnableRBPPTButton.IsChecked == true ? '2' : '1';
             SettingsManager.Settings.PowerPointSettings.PPTButtonsDisplayOption = int.Parse(new string(c));
             SettingsManager.SaveSettingsToFile();
-            if (mw?.PPTUIManager != null && mw.IsInPptPresentationMode)
-            {
-                mw.PPTUIManager.PPTButtonsDisplayOption = SettingsManager.Settings.PowerPointSettings.PPTButtonsDisplayOption;
-                mw.PPTUIManager.UpdateNavigationPanelsVisibility();
-            }
-            mw?.UpdatePPTBtnPreview();
+            SettingsActionHub.OnPPTButtonsDisplayOptionChanged();
         }
 
         private void CheckboxEnableLSPPTButton_IsCheckChanged(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
             var str = SettingsManager.Settings.PowerPointSettings.PPTButtonsDisplayOption.ToString();
             char[] c = str.ToCharArray();
             c[2] = CheckboxEnableLSPPTButton.IsChecked == true ? '2' : '1';
             SettingsManager.Settings.PowerPointSettings.PPTButtonsDisplayOption = int.Parse(new string(c));
             SettingsManager.SaveSettingsToFile();
-            if (mw?.PPTUIManager != null && mw.IsInPptPresentationMode)
-            {
-                mw.PPTUIManager.PPTButtonsDisplayOption = SettingsManager.Settings.PowerPointSettings.PPTButtonsDisplayOption;
-                mw.PPTUIManager.UpdateNavigationPanelsVisibility();
-            }
-            mw?.UpdatePPTBtnPreview();
+            SettingsActionHub.OnPPTButtonsDisplayOptionChanged();
         }
 
         private void CheckboxEnableRSPPTButton_IsCheckChanged(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
             var str = SettingsManager.Settings.PowerPointSettings.PPTButtonsDisplayOption.ToString();
             char[] c = str.ToCharArray();
             c[3] = CheckboxEnableRSPPTButton.IsChecked == true ? '2' : '1';
             SettingsManager.Settings.PowerPointSettings.PPTButtonsDisplayOption = int.Parse(new string(c));
             SettingsManager.SaveSettingsToFile();
-            if (mw?.PPTUIManager != null && mw.IsInPptPresentationMode)
-            {
-                mw.PPTUIManager.PPTButtonsDisplayOption = SettingsManager.Settings.PowerPointSettings.PPTButtonsDisplayOption;
-                mw.PPTUIManager.UpdateNavigationPanelsVisibility();
-            }
-            mw?.UpdatePPTBtnPreview();
+            SettingsActionHub.OnPPTButtonsDisplayOptionChanged();
         }
 
         private void CheckboxSPPTDisplayPage_IsCheckChange(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
             var str = SettingsManager.Settings.PowerPointSettings.PPTSButtonsOption.ToString();
             char[] c = str.ToCharArray();
             c[0] = CheckboxSPPTDisplayPage.IsChecked == true ? '2' : '1';
             SettingsManager.Settings.PowerPointSettings.PPTSButtonsOption = int.Parse(new string(c));
             SettingsManager.SaveSettingsToFile();
-            if (mw?.PPTUIManager != null && mw.IsInPptPresentationMode)
-            {
-                mw.PPTUIManager.PPTSButtonsOption = SettingsManager.Settings.PowerPointSettings.PPTSButtonsOption;
-                mw.PPTUIManager.UpdateNavigationButtonStyles();
-            }
-            mw?.UpdatePPTBtnPreview();
+            SettingsActionHub.OnPPTSButtonsOptionChanged();
         }
 
         private void CheckboxSPPTHalfOpacity_IsCheckChange(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
             var ppt = SettingsManager.Settings.PowerPointSettings;
             var str = ppt.PPTSButtonsOption.ToString();
             char[] c = str.ToCharArray();
@@ -529,54 +407,34 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 PPTRSButtonOpacityValueSlider.Value = ppt.PPTRSButtonOpacity;
             }
             SettingsManager.SaveSettingsToFile();
-            if (mw?.PPTUIManager != null && mw.IsInPptPresentationMode)
-            {
-                mw.PPTUIManager.PPTSButtonsOption = ppt.PPTSButtonsOption;
-                mw.PPTUIManager.PPTLSButtonOpacity = ppt.PPTLSButtonOpacity;
-                mw.PPTUIManager.PPTRSButtonOpacity = ppt.PPTRSButtonOpacity;
-                mw.PPTUIManager.UpdateNavigationButtonStyles();
-            }
-            mw?.UpdatePPTBtnPreview();
+            SettingsActionHub.OnPPTSButtonsOptionWithOpacityChanged();
         }
 
         private void CheckboxSPPTBlackBackground_IsCheckChange(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
             var str = SettingsManager.Settings.PowerPointSettings.PPTSButtonsOption.ToString();
             char[] c = str.ToCharArray();
             c[2] = CheckboxSPPTBlackBackground.IsChecked == true ? '2' : '1';
             SettingsManager.Settings.PowerPointSettings.PPTSButtonsOption = int.Parse(new string(c));
             SettingsManager.SaveSettingsToFile();
-            if (mw?.PPTUIManager != null && mw.IsInPptPresentationMode)
-            {
-                mw.PPTUIManager.PPTSButtonsOption = SettingsManager.Settings.PowerPointSettings.PPTSButtonsOption;
-                mw.PPTUIManager.UpdateNavigationButtonStyles();
-            }
-            mw?.UpdatePPTBtnPreview();
+            SettingsActionHub.OnPPTSButtonsOptionChanged();
         }
 
         private void CheckboxBPPTDisplayPage_IsCheckChange(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
             var str = SettingsManager.Settings.PowerPointSettings.PPTBButtonsOption.ToString();
             char[] c = str.ToCharArray();
             c[0] = CheckboxBPPTDisplayPage.IsChecked == true ? '2' : '1';
             SettingsManager.Settings.PowerPointSettings.PPTBButtonsOption = int.Parse(new string(c));
             SettingsManager.SaveSettingsToFile();
-            if (mw?.PPTUIManager != null && mw.IsInPptPresentationMode)
-            {
-                mw.PPTUIManager.PPTBButtonsOption = SettingsManager.Settings.PowerPointSettings.PPTBButtonsOption;
-                mw.PPTUIManager.UpdateNavigationButtonStyles();
-            }
-            mw?.UpdatePPTBtnPreview();
+            SettingsActionHub.OnPPTBButtonsOptionChanged();
         }
 
         private void CheckboxBPPTHalfOpacity_IsCheckChange(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
             var ppt = SettingsManager.Settings.PowerPointSettings;
             var str = ppt.PPTBButtonsOption.ToString();
             char[] c = str.ToCharArray();
@@ -598,31 +456,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 PPTRBButtonOpacityValueSlider.Value = ppt.PPTRBButtonOpacity;
             }
             SettingsManager.SaveSettingsToFile();
-            if (mw?.PPTUIManager != null && mw.IsInPptPresentationMode)
-            {
-                mw.PPTUIManager.PPTBButtonsOption = ppt.PPTBButtonsOption;
-                mw.PPTUIManager.PPTLBButtonOpacity = ppt.PPTLBButtonOpacity;
-                mw.PPTUIManager.PPTRBButtonOpacity = ppt.PPTRBButtonOpacity;
-                mw.PPTUIManager.UpdateNavigationButtonStyles();
-            }
-            mw?.UpdatePPTBtnPreview();
+            SettingsActionHub.OnPPTBButtonsOptionWithOpacityChanged();
         }
 
         private void CheckboxBPPTBlackBackground_IsCheckChange(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
             var str = SettingsManager.Settings.PowerPointSettings.PPTBButtonsOption.ToString();
             char[] c = str.ToCharArray();
             c[2] = CheckboxBPPTBlackBackground.IsChecked == true ? '2' : '1';
             SettingsManager.Settings.PowerPointSettings.PPTBButtonsOption = int.Parse(new string(c));
             SettingsManager.SaveSettingsToFile();
-            if (mw?.PPTUIManager != null && mw.IsInPptPresentationMode)
-            {
-                mw.PPTUIManager.PPTBButtonsOption = SettingsManager.Settings.PowerPointSettings.PPTBButtonsOption;
-                mw.PPTUIManager.UpdateNavigationButtonStyles();
-            }
-            mw?.UpdatePPTBtnPreview();
+            SettingsActionHub.OnPPTBButtonsOptionChanged();
         }
 
         #endregion
@@ -653,24 +498,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnablePPTTimeCapsule_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
             SettingsManager.Settings.PowerPointSettings.EnablePPTTimeCapsule = CardEnablePPTTimeCapsule.IsOn;
             SettingsManager.SaveSettingsToFile();
-            if (mw != null && mw.IsInPptPresentationMode)
-            {
-                mw.UpdatePPTTimeCapsuleVisibility();
-                mw.UpdatePPTQuickPanelVisibility();
-            }
+            SettingsActionHub.OnPPTTimeCapsuleChanged();
         }
 
         private void ComboBoxPPTTimeCapsulePosition_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!_isLoaded || ComboBoxPPTTimeCapsulePosition == null) return;
-            var mw = GetMainWindow();
             SettingsManager.Settings.PowerPointSettings.PPTTimeCapsulePosition = ComboBoxPPTTimeCapsulePosition.SelectedIndex;
             SettingsManager.SaveSettingsToFile();
-            if (mw != null && mw.IsInPptPresentationMode)
-                mw.UpdatePPTTimeCapsulePosition();
+            SettingsActionHub.OnPPTTimeCapsulePositionChanged();
         }
 
         private void SliderPPTTimeCapsuleOpacity_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -684,9 +522,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
             SettingsManager.Settings.PowerPointSettings.PPTTimeCapsuleOpacity = val;
             SettingsManager.SaveSettingsToFile();
-            var mw = GetMainWindow();
-            if (mw != null && mw.IsInPptPresentationMode)
-                mw.UpdatePPTTimeCapsuleOpacity();
+            SettingsActionHub.OnPPTTimeCapsuleOpacityChanged();
         }
 
         private void SliderPPTTimeCapsuleScale_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -700,16 +536,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
             SettingsManager.Settings.PowerPointSettings.PPTTimeCapsuleScale = val;
             SettingsManager.SaveSettingsToFile();
-            var mw = GetMainWindow();
-            if (mw != null && mw.IsInPptPresentationMode)
-                mw.UpdatePPTTimeCapsuleScale();
+            SettingsActionHub.OnPPTTimeCapsuleScaleChanged();
         }
 
         private void ButtonResetPPTTimeCapsulePosition_Click(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var mw = GetMainWindow();
-            mw?.ResetPPTTimeCapsuleOffset();
+            SettingsActionHub.OnResetPPTTimeCapsulePosition();
         }
 
         #endregion

@@ -209,12 +209,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 if (SettingsManager.Settings.Startup.IsAutoUpdate)
                 {
-                    var mainWindow = Application.Current.MainWindow as MainWindow;
-                    if (mainWindow != null)
-                    {
-                        mainWindow.ResetUpdateCheckRetry();
-                        await Dispatcher.InvokeAsync(() => mainWindow.AutoUpdate());
-                    }
+                    SettingsActionHub.OnSmartUpdateChanged();
                 }
             }
             catch (Exception ex)
@@ -349,25 +344,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 LogHelper.WriteLogToFile($"AutoUpdate | Channel changed to {newChannel}, performing immediate update check");
 
-                var mainWindow = Application.Current.MainWindow as MainWindow;
-                if (mainWindow != null)
-                {
-                    mainWindow.ResetUpdateCheckRetry();
-                    await System.Threading.Tasks.Task.Run(() =>
-                    {
-                        try
-                        {
-                            Dispatcher.Invoke(() =>
-                            {
-                                mainWindow.AutoUpdate();
-                            });
-                        }
-                        catch (Exception ex)
-                        {
-                            LogHelper.WriteLogToFile($"AutoUpdate | Error during channel switch update check: {ex.Message}", LogHelper.LogType.Error);
-                        }
-                    });
-                }
+                SettingsActionHub.OnUpdateChannelChanged();
             }
         }
 
@@ -699,9 +676,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (string.IsNullOrEmpty(_remoteVersion)) return;
 
-            var mainWindow = Application.Current.MainWindow as MainWindow;
-            if (mainWindow == null) return;
-
             ApplyState(UpdateUiState.Downloading);
             CancelDownloadButton.Visibility = Visibility.Visible;
             ProgressBar.Value = 0;
@@ -723,7 +697,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 CardAutoUpdate.IsOn = true;
                 CardSilentUpdate.IsOn = true;
 
-                mainWindow.StartSilentUpdateTimer();
+                SettingsActionHub.OnStartSilentUpdateTimer();
                 ApplyState(UpdateUiState.Downloaded);
             }
             catch (Exception ex)

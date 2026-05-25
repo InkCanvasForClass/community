@@ -87,8 +87,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.Canvas.UseHardwareAcceleration = !ToggleSwitchDisableHardwareAcceleration.IsOn;
-            var mw = GetMainWindow();
-            if (mw != null) mw.UpdateInkSmoothingConfig();
+            SettingsActionHub.OnHardwareAccelerationChanged();
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -128,14 +127,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdateSliderText(NibModeBoundsWidthSlider, NibModeBoundsWidthText, "{0:0}");
             if (!_isLoaded) return;
             SettingsManager.Settings.Advanced.NibModeBoundsWidth = (int)e.NewValue;
-            var mw = GetMainWindow();
-            if (mw != null)
-            {
-                if (SettingsManager.Settings.Startup.IsEnableNibMode)
-                    mw.BoundsWidth = SettingsManager.Settings.Advanced.NibModeBoundsWidth;
-                else
-                    mw.BoundsWidth = SettingsManager.Settings.Advanced.FingerModeBoundsWidth;
-            }
+            SettingsActionHub.OnNibModeBoundsWidthChanged();
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -144,14 +136,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdateSliderText(FingerModeBoundsWidthSlider, FingerModeBoundsWidthText, "{0:0}");
             if (!_isLoaded) return;
             SettingsManager.Settings.Advanced.FingerModeBoundsWidth = (int)e.NewValue;
-            var mw = GetMainWindow();
-            if (mw != null)
-            {
-                if (SettingsManager.Settings.Startup.IsEnableNibMode)
-                    mw.BoundsWidth = SettingsManager.Settings.Advanced.NibModeBoundsWidth;
-                else
-                    mw.BoundsWidth = SettingsManager.Settings.Advanced.FingerModeBoundsWidth;
-            }
+            SettingsActionHub.OnFingerModeBoundsWidthChanged();
             SettingsManager.SaveSettingsToFile();
         }
 

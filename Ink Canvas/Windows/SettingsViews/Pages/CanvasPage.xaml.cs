@@ -120,20 +120,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             SettingsManager.Settings.Canvas.IsShowCursor = CardShowCursor.IsOn;
             SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnIsShowCursorChanged(CardShowCursor.IsOn);
         }
 
         private void ToggleSwitchEnablePressureTouchMode_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.Canvas.EnablePressureTouchMode = CardEnablePressureTouchMode.IsOn;
-            if (SettingsManager.Settings.Canvas.EnablePressureTouchMode && SettingsManager.Settings.Canvas.DisablePressure)
-            {
-                SettingsManager.Settings.Canvas.DisablePressure = false;
-                CardDisablePressure.IsOn = false;
-                var mw = Application.Current.MainWindow as MainWindow;
-                if (mw != null && mw.inkCanvas != null)
-                    mw.inkCanvas.DefaultDrawingAttributes.IgnorePressure = false;
-            }
+            SettingsActionHub.OnEnablePressureTouchModeChanged(CardEnablePressureTouchMode.IsOn);
+            if (!CardEnablePressureTouchMode.IsOn || !SettingsManager.Settings.Canvas.DisablePressure)
+                CardDisablePressure.IsOn = SettingsManager.Settings.Canvas.DisablePressure;
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -141,15 +137,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.Canvas.DisablePressure = CardDisablePressure.IsOn;
-            if (SettingsManager.Settings.Canvas.DisablePressure && SettingsManager.Settings.Canvas.EnablePressureTouchMode)
-            {
-                SettingsManager.Settings.Canvas.EnablePressureTouchMode = false;
-                CardEnablePressureTouchMode.IsOn = false;
-            }
+            SettingsActionHub.OnDisablePressureChanged(CardDisablePressure.IsOn);
+            if (!CardDisablePressure.IsOn || !SettingsManager.Settings.Canvas.EnablePressureTouchMode)
+                CardEnablePressureTouchMode.IsOn = SettingsManager.Settings.Canvas.EnablePressureTouchMode;
             SettingsManager.SaveSettingsToFile();
-            var mw = Application.Current.MainWindow as MainWindow;
-            if (mw != null && mw.inkCanvas != null)
-                mw.inkCanvas.DefaultDrawingAttributes.IgnorePressure = CardDisablePressure.IsOn;
         }
 
         private void ComboBoxEraserSize_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -157,14 +148,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             SettingsManager.Settings.Canvas.EraserSize = ComboBoxEraserSize.SelectedIndex;
             SettingsManager.SaveSettingsToFile();
-            var mw = Application.Current.MainWindow as MainWindow;
-            if (mw != null)
-            {
-                if (mw.ComboBoxEraserSizeFloatingBar != null)
-                    mw.ComboBoxEraserSizeFloatingBar.SelectedIndex = ComboBoxEraserSize.SelectedIndex;
-                if (mw.BoardComboBoxEraserSize != null)
-                    mw.BoardComboBoxEraserSize.SelectedIndex = ComboBoxEraserSize.SelectedIndex;
-            }
+            SettingsActionHub.OnEraserSizeChanged(ComboBoxEraserSize.SelectedIndex);
         }
 
         private void ToggleSwitchHideStrokeWhenSelecting_Toggled(object sender, RoutedEventArgs e)
@@ -245,14 +229,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     break;
             }
             SettingsManager.SaveSettingsToFile();
-            var mw = Application.Current.MainWindow as MainWindow;
-            if (mw != null && mw.inkCanvas != null)
-            {
-                if (SettingsManager.Settings.Canvas.UseAdvancedBezierSmoothing)
-                    mw.inkCanvas.DefaultDrawingAttributes.FitToCurve = false;
-                else
-                    mw.inkCanvas.DefaultDrawingAttributes.FitToCurve = SettingsManager.Settings.Canvas.FitToCurve;
-            }
+            SettingsActionHub.OnCurveSmoothingModeChanged(
+                SettingsManager.Settings.Canvas.FitToCurve,
+                SettingsManager.Settings.Canvas.UseAdvancedBezierSmoothing);
         }
 
         private void ToggleSwitchBrushAutoRestore_Toggled(object sender, RoutedEventArgs e)

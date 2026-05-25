@@ -48,8 +48,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _isLoaded = false;
         }
 
-        private MainWindow GetMainWindow() => Application.Current.MainWindow as MainWindow;
-
         private void LoadSettings()
         {
             var settings = SettingsManager.Settings;
@@ -123,12 +121,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             bool isToggled = ToggleSwitchShowRandomAndSingleDraw.IsOn;
             SettingsManager.Settings.RandSettings.ShowRandomAndSingleDraw = isToggled;
 
-            var mw = GetMainWindow();
-            if (mw != null)
-            {
-                mw.BoardRandomDrawToolBtn.Visibility = isToggled ? Visibility.Visible : Visibility.Collapsed;
-                mw.BoardSingleDrawToolBtn.Visibility = isToggled ? Visibility.Visible : Visibility.Collapsed;
-            }
+            SettingsActionHub.OnShowRandomAndSingleDrawChanged(isToggled);
 
             SettingsManager.SaveSettingsToFile();
         }
@@ -139,8 +132,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.Settings.RandSettings.EnableQuickDraw = ToggleSwitchEnableQuickDraw.IsOn;
             SettingsManager.SaveSettingsToFile();
 
-            var mw = GetMainWindow();
-            if (mw != null) mw.ShowQuickDrawFloatingButton();
+            SettingsActionHub.OnEnableQuickDrawChanged();
         }
 
         private void ToggleSwitchExternalCaller_Toggled(object sender, RoutedEventArgs e)
@@ -188,7 +180,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void ButtonAddCustomBackground_Click(object sender, RoutedEventArgs e)
         {
-            var mw = GetMainWindow();
+            var mw = Application.Current.MainWindow as MainWindow;
             if (mw == null) return;
 
             AddPickNameBackgroundWindow dialog = new AddPickNameBackgroundWindow(mw);
@@ -203,7 +195,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void ButtonManageBackgrounds_Click(object sender, RoutedEventArgs e)
         {
-            var mw = GetMainWindow();
+            var mw = Application.Current.MainWindow as MainWindow;
             if (mw == null) return;
 
             ManagePickNameBackgroundsWindow dialog = new ManagePickNameBackgroundsWindow(mw);

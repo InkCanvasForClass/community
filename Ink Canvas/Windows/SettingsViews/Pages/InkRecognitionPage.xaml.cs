@@ -88,14 +88,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             SettingsManager.Settings.InkToShape.IsInkToShapeEnabled = CardEnableInkToShape.IsOn;
             SettingsManager.SaveSettingsToFile();
-            var mw = Application.Current.MainWindow as MainWindow;
-            if (mw != null)
-            {
-                if (mw.FloatingBarToggleSwitchEnableInkToShape != null)
-                    mw.FloatingBarToggleSwitchEnableInkToShape.IsOn = CardEnableInkToShape.IsOn;
-                if (mw.BoardToggleSwitchEnableInkToShape != null)
-                    mw.BoardToggleSwitchEnableInkToShape.IsOn = CardEnableInkToShape.IsOn;
-            }
+            SettingsActionHub.OnInkToShapeEnabledChanged(CardEnableInkToShape.IsOn);
         }
 
         private void ComboBoxShapeRecognitionEngine_SelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -67,8 +67,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             textBlock.Text = string.Format(format, slider.Value);
         }
 
-        private MainWindow GetMainWindow() => Application.Current.MainWindow as MainWindow;
-
         private void ViewboxFloatingBarScaleTransformValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             UpdateSliderText(ViewboxFloatingBarScaleTransformValueSlider, ViewboxFloatingBarScaleSliderText, "{0:F2}x");
@@ -87,16 +85,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             double actualScale = clampedVal;
             UpdateFloatingBarActualScaleText();
 
-            var mw = GetMainWindow();
-            if (mw != null)
-            {
-                mw.ViewboxFloatingBarScaleTransform.ScaleX = actualScale;
-                mw.ViewboxFloatingBarScaleTransform.ScaleY = actualScale;
-                if (mw.IsInPptPresentationMode)
-                    mw.ViewboxFloatingBarMarginAnimation(60);
-                else
-                    mw.ViewboxFloatingBarMarginAnimation(100, true);
-            }
+            SettingsActionHub.OnFloatingBarScaleChanged(actualScale);
         }
 
         private void ViewboxFloatingBarOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
@@ -112,8 +101,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
             SettingsManager.Settings.Appearance.ViewboxFloatingBarOpacityValue = val;
             SettingsManager.SaveSettingsToFile();
-            var mw = GetMainWindow();
-            if (mw != null) mw.ViewboxFloatingBar.Opacity = val;
+            SettingsActionHub.OnFloatingBarOpacityChanged(val);
         }
 
         private void ViewboxFloatingBarOpacityInPPTValueSlider_ValueChanged(object sender, RoutedEventArgs e)
@@ -129,11 +117,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
             SettingsManager.Settings.Appearance.ViewboxFloatingBarOpacityInPPTValue = val;
             SettingsManager.SaveSettingsToFile();
-            var mw = GetMainWindow();
-            if (mw != null && mw.currentMode == 2)
-            {
-                mw.ViewboxFloatingBar.Opacity = val;
-            }
+            SettingsActionHub.OnFloatingBarOpacityInPPTChanged(val);
         }
     }
 }

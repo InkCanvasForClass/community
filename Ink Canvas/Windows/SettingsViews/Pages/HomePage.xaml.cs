@@ -1,3 +1,4 @@
+using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System.Windows;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
@@ -20,20 +21,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void BtnRestart_Click(object sender, RoutedEventArgs e)
         {
-            var mainWindow = Application.Current.MainWindow as MainWindow;
-            mainWindow?.BtnRestart_Click(sender, e);
+            SettingsActionHub.OnRestartApplication(sender, e);
         }
 
         private void BtnResetToSuggestion_Click(object sender, RoutedEventArgs e)
         {
-            var mainWindow = Application.Current.MainWindow as MainWindow;
-            mainWindow?.BtnResetToSuggestion_Click(sender, e);
+            SettingsActionHub.OnResetToSuggestion(sender, e);
         }
 
         private void BtnExit_Click(object sender, RoutedEventArgs e)
         {
-            var mainWindow = Application.Current.MainWindow as MainWindow;
-            mainWindow?.ExitApplication(sender, e);
+            SettingsActionHub.OnExitApplication(sender, e);
         }
     }
 }
