@@ -44,7 +44,7 @@
                             </ui:SettingsCard.HeaderIcon>
                         </ui:SettingsCard>
 
-                        <ui:SettingsCard Header="{x:Static props:TimerStrings.Timer_Reset}" Description="{x:Static props:HomeStrings.Home_ResetSettings}"
+                        <ui:SettingsCard Header="{x:Static props:HomeStrings.Home_Reset}" Description="{x:Static props:HomeStrings.Home_ResetSettings}"
                         IsClickEnabled="True" Click="BtnResetToSuggestion_Click" Grid.Column="1" Margin="0,0,4,0">
                             <ui:SettingsCard.HeaderIcon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Clear}" />
