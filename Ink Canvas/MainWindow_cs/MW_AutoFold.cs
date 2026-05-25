@@ -167,6 +167,7 @@ namespace Ink_Canvas
         {
             if (Settings.Appearance.IsShowQuickPanel)
             {
+                SidePannelMarginAnimation(-50);
                 HideRightQuickPanel();
                 LeftUnFoldButtonQuickPanel.Visibility = Visibility.Visible;
                 await Dispatcher.InvokeAsync(() =>
@@ -174,8 +175,8 @@ namespace Ink_Canvas
                     var marginAnimation = new ThicknessAnimation
                     {
                         Duration = TimeSpan.FromSeconds(0.1),
-                        From = new Thickness(-50, 0, 0, Settings.Appearance.QuickPanelBottomOffset),
-                        To = new Thickness(-1, 0, 0, Settings.Appearance.QuickPanelBottomOffset)
+                        From = new Thickness(QuickPanelFoldedMargin, 0, 0, Settings.Appearance.QuickPanelBottomOffset),
+                        To = new Thickness(QuickPanelUnfoldedMargin, 0, 0, Settings.Appearance.QuickPanelBottomOffset)
                     };
                     marginAnimation.EasingFunction = new CubicEase();
                     LeftUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, marginAnimation);
@@ -184,7 +185,7 @@ namespace Ink_Canvas
 
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    LeftUnFoldButtonQuickPanel.Margin = new Thickness(-1, 0, 0, Settings.Appearance.QuickPanelBottomOffset);
+                    LeftUnFoldButtonQuickPanel.Margin = new Thickness(QuickPanelUnfoldedMargin, 0, 0, Settings.Appearance.QuickPanelBottomOffset);
                 });
             }
             else
@@ -208,6 +209,7 @@ namespace Ink_Canvas
         {
             if (Settings.Appearance.IsShowQuickPanel)
             {
+                SidePannelMarginAnimation(-50);
                 HideLeftQuickPanel();
                 RightUnFoldButtonQuickPanel.Visibility = Visibility.Visible;
                 await Dispatcher.InvokeAsync(() =>
@@ -215,8 +217,8 @@ namespace Ink_Canvas
                     var marginAnimation = new ThicknessAnimation
                     {
                         Duration = TimeSpan.FromSeconds(0.1),
-                        From = new Thickness(0, 0, -50, Settings.Appearance.QuickPanelBottomOffset),
-                        To = new Thickness(0, 0, -1, Settings.Appearance.QuickPanelBottomOffset)
+                        From = new Thickness(0, 0, QuickPanelFoldedMargin, Settings.Appearance.QuickPanelBottomOffset),
+                        To = new Thickness(0, 0, QuickPanelUnfoldedMargin, Settings.Appearance.QuickPanelBottomOffset)
                     };
                     marginAnimation.EasingFunction = new CubicEase();
                     RightUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, marginAnimation);
@@ -225,7 +227,7 @@ namespace Ink_Canvas
 
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    RightUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, -1, Settings.Appearance.QuickPanelBottomOffset);
+                    RightUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, QuickPanelUnfoldedMargin, Settings.Appearance.QuickPanelBottomOffset);
                 });
             }
             else
@@ -252,8 +254,8 @@ namespace Ink_Canvas
                     var marginAnimation = new ThicknessAnimation
                     {
                         Duration = TimeSpan.FromSeconds(0.1),
-                        From = new Thickness(-1, 0, 0, Settings.Appearance.QuickPanelBottomOffset),
-                        To = new Thickness(-50, 0, 0, Settings.Appearance.QuickPanelBottomOffset)
+                        From = new Thickness(QuickPanelUnfoldedMargin, 0, 0, Settings.Appearance.QuickPanelBottomOffset),
+                        To = new Thickness(QuickPanelFoldedMargin, 0, 0, Settings.Appearance.QuickPanelBottomOffset)
                     };
                     marginAnimation.EasingFunction = new CubicEase();
                     LeftUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, marginAnimation);
@@ -262,7 +264,7 @@ namespace Ink_Canvas
 
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    LeftUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, -50, Settings.Appearance.QuickPanelBottomOffset);
+                    LeftUnFoldButtonQuickPanel.Margin = new Thickness(QuickPanelFoldedMargin, 0, 0, Settings.Appearance.QuickPanelBottomOffset);
                     LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
                 });
             }
@@ -286,8 +288,8 @@ namespace Ink_Canvas
                     var marginAnimation = new ThicknessAnimation
                     {
                         Duration = TimeSpan.FromSeconds(0.1),
-                        From = new Thickness(0, 0, -1, Settings.Appearance.QuickPanelBottomOffset),
-                        To = new Thickness(0, 0, -50, Settings.Appearance.QuickPanelBottomOffset)
+                        From = new Thickness(0, 0, QuickPanelUnfoldedMargin, Settings.Appearance.QuickPanelBottomOffset),
+                        To = new Thickness(0, 0, QuickPanelFoldedMargin, Settings.Appearance.QuickPanelBottomOffset)
                     };
                     marginAnimation.EasingFunction = new CubicEase();
                     RightUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, marginAnimation);
@@ -296,7 +298,7 @@ namespace Ink_Canvas
 
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    RightUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, -50, Settings.Appearance.QuickPanelBottomOffset);
+                    RightUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, QuickPanelFoldedMargin, Settings.Appearance.QuickPanelBottomOffset);
                     RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
                 });
             }
@@ -316,6 +318,7 @@ namespace Ink_Canvas
         {
             HideLeftQuickPanel();
             HideRightQuickPanel();
+            SidePannelMarginAnimation(-10);
         }
 
         /// <summary>
@@ -589,5 +592,6 @@ namespace Ink_Canvas
         {
             _ = VerifyStartupFoldAbsenceAfterDelayAsync();
         }
+
     }
 }
