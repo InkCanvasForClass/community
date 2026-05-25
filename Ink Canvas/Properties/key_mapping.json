@@ -4334,5 +4334,9 @@
     "Theme_UnfoldIcon_Stripe":  {
                                     "NewKey":  "Theme_UnfoldIcon_Stripe",
                                     "Group":  "ThemeStrings"
-                                }
+                                },
+    "Theme_AllowDragSidePanel":  {
+                                     "NewKey":  "Theme_AllowDragSidePanel",
+                                     "Group":  "ThemeStrings"
+                                 }
 }

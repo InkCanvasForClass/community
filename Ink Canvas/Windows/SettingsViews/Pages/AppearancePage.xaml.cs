@@ -119,6 +119,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardEnableQuickPanel.IsOn = settings.Appearance.IsShowQuickPanel;
             QuickPanelBottomOffsetSlider.Value = settings.Appearance.QuickPanelBottomOffset;
             ComboBoxUnFoldBtnImg.SelectedIndex = settings.Appearance.UnFoldButtonImageType;
+            CardAllowDragSidePanel.IsOn = settings.Appearance.AllowDragSidePanel;
 
             CardUseLegacyFloatingBarUI.IsOn = settings.Appearance.UseLegacyFloatingBarUI;
 
@@ -402,6 +403,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.Appearance.IsShowQuickPanel = CardEnableQuickPanel.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchAllowDragSidePanel_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.AllowDragSidePanel = CardAllowDragSidePanel.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 

@@ -196,6 +196,12 @@
                         </ComboBox>
                     </ui:SettingsCard>
 
+                    <controls:LabeledSettingsCard x:Name="CardAllowDragSidePanel"
+                            Header="{x:Static props:ThemeStrings.Theme_AllowDragSidePanel}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Touch}"
+                            SwitchName="ToggleSwitchAllowDragSidePanel"
+                            Toggled="ToggleSwitchAllowDragSidePanel_Toggled" />
+
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:ThemeStrings.Theme_FloatingBarButtonsTitle}" />
 

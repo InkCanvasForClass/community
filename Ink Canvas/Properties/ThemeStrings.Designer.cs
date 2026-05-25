@@ -170,6 +170,8 @@ namespace Ink_Canvas.Properties
 
         public static string Theme_UnfoldIcon_Stripe => ResourceManager.GetString(nameof(Theme_UnfoldIcon_Stripe), _resourceCulture);
 
+        public static string Theme_AllowDragSidePanel => ResourceManager.GetString(nameof(Theme_AllowDragSidePanel), _resourceCulture);
+
         public static string Theme_Upload => ResourceManager.GetString(nameof(Theme_Upload), _resourceCulture);
 
         public static string Theme_UseLegacyFloatingBarUI => ResourceManager.GetString(nameof(Theme_UseLegacyFloatingBarUI), _resourceCulture);

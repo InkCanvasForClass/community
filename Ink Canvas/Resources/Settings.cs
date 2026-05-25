@@ -483,6 +483,9 @@ namespace Ink_Canvas
         [JsonProperty("useFloatingQuickPanel")]
         public bool UseFloatingQuickPanel { get; set; } = true;
 
+        [JsonProperty("allowDragSidePanel")]
+        public bool AllowDragSidePanel { get; set; } = true;
+
     }
 
     public class PowerPointSettings

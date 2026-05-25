@@ -237,6 +237,9 @@
   <data name="Theme_UnfoldIcon_Stripe" xml:space="preserve">
     <value>条形</value>
   </data>
+  <data name="Theme_AllowDragSidePanel" xml:space="preserve">
+    <value>允许通过拖动调整侧边栏位置</value>
+  </data>
   <data name="Theme_Upload" xml:space="preserve">
     <value>上传</value>
   </data>

@@ -53,6 +53,10 @@ namespace Ink_Canvas.Controls
             base.OnPreviewMouseDown(e);
             if (e.ChangedButton == MouseButton.Left)
             {
+                var settings = MainWindow.Settings?.Appearance;
+                bool allowDrag = settings == null || settings.AllowDragSidePanel;
+                if (!allowDrag) return;
+
                 var mw = Application.Current.MainWindow as MainWindow;
                 if (mw != null)
                 {
@@ -122,6 +126,10 @@ namespace Ink_Canvas.Controls
         protected override void OnPreviewTouchDown(TouchEventArgs e)
         {
             base.OnPreviewTouchDown(e);
+            var settings = MainWindow.Settings?.Appearance;
+            bool allowDrag = settings == null || settings.AllowDragSidePanel;
+            if (!allowDrag) return;
+
             var mw = Application.Current.MainWindow as MainWindow;
             if (mw != null)
             {
