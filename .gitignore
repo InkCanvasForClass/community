@@ -436,6 +436,8 @@ telemetry_dsn.txt
 SKILL_FloatingToolbarRefactoring.md
 /Samples
 /SamplePlugin
+*.xlsx
+*.csv
 
 # qoder
 /.qoder
