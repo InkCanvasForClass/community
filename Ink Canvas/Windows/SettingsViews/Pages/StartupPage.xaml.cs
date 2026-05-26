@@ -44,6 +44,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     int crashAction = settings.Startup.CrashAction;
                     if (crashAction < 0 || crashAction > 2) crashAction = 0;
                     ComboBoxCrashAction.SelectedIndex = crashAction;
+
+                    ToggleSwitchFoldAtStartup.IsOn = settings.Startup.IsFoldAtStartup;
                 }
 
                 ToggleSwitchEnableTrayIcon.IsOn = settings.Appearance.EnableTrayIcon;
@@ -100,6 +102,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 Debug.WriteLine($"设置开机启动时出错: {ex.Message}");
+            }
+        }
+
+        private void ToggleSwitchFoldAtStartup_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+
+            try
+            {
+                SettingsManager.Settings.Startup.IsFoldAtStartup = ToggleSwitchFoldAtStartup.IsOn;
+                SettingsManager.SaveSettingsToFile();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"设置启动时收纳出错: {ex.Message}");
             }
         }
 

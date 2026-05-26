@@ -29,16 +29,25 @@
                     Spacing="{StaticResource SettingsCardSpacing}">
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{x:Static props:StartupStrings.Startup_Behavior}" />
+                   Text="{x:Static props:StartupStrings.Startup_Behavior}" />
 
-                    <ui:SettingsCard Header="{x:Static props:StartupStrings.RunAtStartup}"
-                            Description="{x:Static props:StartupStrings.RunAtStartupHint}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ui:ToggleSwitch x:Name="ToggleSwitchRunAtStartup"
-                                        Toggled="ToggleSwitchRunAtStartup_Toggled" />
-                    </ui:SettingsCard>
+        <ui:SettingsCard Header="{x:Static props:StartupStrings.RunAtStartup}"
+                         Description="{x:Static props:StartupStrings.RunAtStartupHint}">
+            <ui:SettingsCard.HeaderIcon>
+                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
+            </ui:SettingsCard.HeaderIcon>
+            <ui:ToggleSwitch x:Name="ToggleSwitchRunAtStartup"
+                             Toggled="ToggleSwitchRunAtStartup_Toggled" />
+        </ui:SettingsCard>
+
+        <ui:SettingsCard Header="{x:Static props:StartupStrings.FoldAtStartup}"
+                         Description="{x:Static props:StartupStrings.FoldAtStartupHint}">
+            <ui:SettingsCard.HeaderIcon>
+                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronLeft}" />
+            </ui:SettingsCard.HeaderIcon>
+            <ui:ToggleSwitch x:Name="ToggleSwitchFoldAtStartup"
+                             Toggled="ToggleSwitchFoldAtStartup_Toggled" />
+        </ui:SettingsCard>
 
                     <ui:SettingsCard Header="{x:Static props:StartupStrings.ExternalProtocol}"
                             Description="{x:Static props:StartupStrings.ExternalProtocolHint}">

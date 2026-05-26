@@ -361,7 +361,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             SettingsManager.Settings.Appearance.IsShowQuickPanel = CardEnableQuickPanel.IsOn;
             SettingsManager.SaveSettingsToFile();
-            SettingsActionHub.OnIsShowQuickPanelChanged(CardEnableQuickPanel.IsOn);
         }
 
         private void ToggleSwitchAllowDragSidePanel_Toggled(object sender, RoutedEventArgs e)

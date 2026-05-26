@@ -307,12 +307,6 @@ namespace Ink_Canvas
                 ViewboxBlackboardCenterSideScaleTransform.ScaleY = Settings.Appearance.ViewboxBlackBoardScaleTransformValue;
 
                 ApplyQuickPanelBottomOffset(Settings.Appearance.QuickPanelBottomOffset);
-                // 应用 IsShowQuickPanel 设置
-                Visibility vis = Settings.Appearance.IsShowQuickPanel ? Visibility.Visible : Visibility.Collapsed;
-                if (LeftSidePanel != null) LeftSidePanel.Visibility = vis;
-                if (RightSidePanel != null) RightSidePanel.Visibility = vis;
-                if (LeftUnFoldButtonQuickPanel != null) LeftUnFoldButtonQuickPanel.Visibility = vis;
-                if (RightUnFoldButtonQuickPanel != null) RightUnFoldButtonQuickPanel.Visibility = vis;
                 ApplySidePanelSettings();
 
                 if (Settings.Appearance.IsTransparentButtonBackground)
