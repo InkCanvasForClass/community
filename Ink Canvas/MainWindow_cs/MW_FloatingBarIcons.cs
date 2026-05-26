@@ -3841,6 +3841,9 @@ namespace Ink_Canvas
             }
 
             HideSubPanels();
+            // 打开设置前退出白板模式并切换到鼠标模式
+            if (currentMode != 0) CloseWhiteboardImmediately();
+            CursorIcon_Click(null, null);
             _settingsWindow = new Windows.SettingsViews.SettingsWindow();
             _settingsWindow.Owner = this;
             _settingsWindow.Topmost = this.Topmost;
