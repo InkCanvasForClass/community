@@ -2040,17 +2040,43 @@ namespace Ink_Canvas
             {
                 // 折叠时的处理：先尝试使用整个工具栏宽度（包含无法折叠的组件）
                 var fullCollapsedWidth = GetFloatingBarScaledWidth();
-                var headWidth = GetFloatingBarHeadScaledWidth();
+                var collapsedHeadWidth = GetFloatingBarHeadScaledWidth();
                 
                 // 如果整个宽度远大于头部宽度，说明有其他可见组件，使用整个宽度
                 // 否则只使用头部宽度
-                var useFullWidth = fullCollapsedWidth > headWidth * 1.5;
-                var collapsedWidth = useFullWidth ? fullCollapsedWidth : headWidth;
+                var useFullWidth = fullCollapsedWidth > collapsedHeadWidth * 1.5;
+                var collapsedWidth = useFullWidth ? fullCollapsedWidth : collapsedHeadWidth;
                 
                 var shouldFlipOnCollapse = headLeft + collapsedWidth > screenWidth;
+                var wasCollapsedHeadOnRight = isFloatingBarHeadOnRight;
                 SetFloatingBarHeadPlacement(shouldFlipOnCollapse);
-                pos.X = ClampFloatingBarLeft(headLeft, collapsedWidth, screenWidth);
+
+                // 再次更新布局，以防翻转后宽度有变化
+                ViewboxFloatingBar.UpdateLayout();
+                
+                fullCollapsedWidth = GetFloatingBarScaledWidth();
+                collapsedHeadWidth = GetFloatingBarHeadScaledWidth();
+                useFullWidth = fullCollapsedWidth > collapsedHeadWidth * 1.5;
+                collapsedWidth = useFullWidth ? fullCollapsedWidth : collapsedHeadWidth;
+
+                var nextCollapsedLeft = shouldFlipOnCollapse
+                    ? headLeft - Math.Max(0, collapsedWidth - collapsedHeadWidth)
+                    : headLeft;
+
+                pos.X = ClampFloatingBarLeft(nextCollapsedLeft, collapsedWidth, screenWidth);
                 ViewboxFloatingBar.Margin = new Thickness(pos.X, ViewboxFloatingBar.Margin.Top, -2000, -200);
+
+                if (shouldFlipOnCollapse != wasCollapsedHeadOnRight)
+                {
+                    var actualHeadLeft = ViewboxFloatingBar.Margin.Left + (isFloatingBarHeadOnRight ? Math.Max(0, collapsedWidth - collapsedHeadWidth) : 0);
+                    var correction = headLeft - actualHeadLeft;
+                    if (Math.Abs(correction) > 0.5)
+                    {
+                        pos.X += correction;
+                        pos.X = ClampFloatingBarLeft(pos.X, collapsedWidth, screenWidth);
+                        ViewboxFloatingBar.Margin = new Thickness(pos.X, ViewboxFloatingBar.Margin.Top, -2000, -200);
+                    }
+                }
                 SaveFloatingBarPositionPoint();
                 return;
             }
@@ -2059,7 +2085,7 @@ namespace Ink_Canvas
             ViewboxFloatingBar.UpdateLayout();
             
             var floatingBarWidth = GetFloatingBarScaledWidth();
-            var headWidth = GetFloatingBarHeadScaledWidth();
+            var expandedHeadWidth = GetFloatingBarHeadScaledWidth();
             var shouldPlaceToolsOnLeft = headLeft + floatingBarWidth > screenWidth;
             var wasHeadOnRight = isFloatingBarHeadOnRight;
 
@@ -2069,10 +2095,10 @@ namespace Ink_Canvas
             ViewboxFloatingBar.UpdateLayout();
             
             floatingBarWidth = GetFloatingBarScaledWidth();
-            headWidth = GetFloatingBarHeadScaledWidth();
+            expandedHeadWidth = GetFloatingBarHeadScaledWidth();
 
             var nextLeft = shouldPlaceToolsOnLeft
-                ? headLeft - Math.Max(0, floatingBarWidth - headWidth)
+                ? headLeft - Math.Max(0, floatingBarWidth - expandedHeadWidth)
                 : headLeft;
 
             pos.X = ClampFloatingBarLeft(nextLeft, floatingBarWidth, screenWidth);
@@ -2080,7 +2106,7 @@ namespace Ink_Canvas
 
             if (shouldPlaceToolsOnLeft != wasHeadOnRight)
             {
-                var actualHeadLeft = ViewboxFloatingBar.Margin.Left + (isFloatingBarHeadOnRight ? Math.Max(0, floatingBarWidth - headWidth) : 0);
+                var actualHeadLeft = ViewboxFloatingBar.Margin.Left + (isFloatingBarHeadOnRight ? Math.Max(0, floatingBarWidth - expandedHeadWidth) : 0);
                 var correction = headLeft - actualHeadLeft;
                 if (Math.Abs(correction) > 0.5)
                 {
