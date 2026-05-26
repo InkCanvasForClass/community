@@ -153,6 +153,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         {
             var mw = GetMainWindow();
             if (mw == null) return;
+            mw.ApplySidePanelSettings();
             if (selectedIndex == 0)
             {
                 mw.RightUnFoldBtnImgChevron.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
