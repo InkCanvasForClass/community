@@ -149,6 +149,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             if (mw != null) mw.ApplyQuickPanelBottomOffset(value);
         }
 
+        public static void OnIsShowQuickPanelChanged(bool isVisible)
+        {
+            var mw = GetMainWindow();
+            if (mw == null) return;
+
+            Visibility vis = isVisible ? Visibility.Visible : Visibility.Collapsed;
+
+            if (mw.LeftSidePanel != null) mw.LeftSidePanel.Visibility = vis;
+            if (mw.RightSidePanel != null) mw.RightSidePanel.Visibility = vis;
+            if (mw.LeftUnFoldButtonQuickPanel != null) mw.LeftUnFoldButtonQuickPanel.Visibility = vis;
+            if (mw.RightUnFoldButtonQuickPanel != null) mw.RightUnFoldButtonQuickPanel.Visibility = vis;
+
+            mw.ApplySidePanelSettings();
+        }
+
         public static void OnUnFoldButtonImageTypeChanged(int selectedIndex)
         {
             var mw = GetMainWindow();
