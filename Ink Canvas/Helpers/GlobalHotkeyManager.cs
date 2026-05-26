@@ -283,7 +283,7 @@ namespace Ink_Canvas.Helpers
                 RegisterHotkey("Pen5", Key.D5, ModifierKeys.Alt, () => SwitchToPenType(4));
 
                 // 功能快捷键
-                RegisterHotkey("DrawLine", Key.L, ModifierKeys.Alt, () => _mainWindow.BtnDrawLine_Click(null, null));
+                RegisterHotkey("DrawLine", Key.L, ModifierKeys.Alt, () => _mainWindow.DrawLineFromHotkey());
                 RegisterHotkey("Screenshot", Key.C, ModifierKeys.Alt, () => _mainWindow.SaveScreenShotToDesktop());
                 RegisterHotkey("QuickDraw", Key.K, ModifierKeys.Alt, () => _mainWindow.OpenQuickDrawFromHotkey());
                 RegisterHotkey("Hide", Key.V, ModifierKeys.Alt, () => _mainWindow.SymbolIconEmoji_MouseUp(null, null));
@@ -1261,7 +1261,7 @@ namespace Ink_Canvas.Helpers
                     case "Pen5":
                         return () => SwitchToPenType(4);
                     case "DrawLine":
-                        return () => _mainWindow.BtnDrawLine_Click(null, null);
+                        return () => _mainWindow.DrawLineFromHotkey();
                     case "Screenshot":
                         return () => _mainWindow.SaveScreenShotToDesktop();
                     case "QuickDraw":

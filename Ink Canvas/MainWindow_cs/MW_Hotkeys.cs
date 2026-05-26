@@ -195,7 +195,22 @@ namespace Ink_Canvas
         /// <remarks>仅当画布控件面板可见时生效</remarks>
         private void KeyDrawLine(object sender, ExecutedRoutedEventArgs e)
         {
-            if (IsAnnotating) BtnDrawLine_Click(lastMouseDownSender, null);
+            DrawLineFromHotkey();
+        }
+
+        internal async void DrawLineFromHotkey()
+        {
+            if (isFloatingBarFolded)
+            {
+                await UnFoldFloatingBar(new object());
+            }
+
+            if (!IsAnnotating)
+            {
+                PenIcon_Click(lastBorderMouseDownObject, null);
+            }
+
+            BtnDrawLine_Click(lastMouseDownSender, null);
         }
 
         /// <summary>
