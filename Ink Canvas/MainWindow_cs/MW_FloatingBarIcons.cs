@@ -1957,18 +1957,22 @@ namespace Ink_Canvas
             return false;
         }
 
-        private IEnumerable<StackPanel> GetAllContentPanels()
+        private IEnumerable<StackPanel> GetAllPanelsWithContent(DependencyObject root)
         {
-            if (FloatingBarRootPanel == null) yield break;
-            foreach (var child in FloatingBarRootPanel.Children.OfType<Border>())
+            if (root == null) yield break;
+            
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
             {
-                if (child.Tag as string == ToolbarRegistry.ContentBorderTag && child.Child is Grid grid)
+                var child = VisualTreeHelper.GetChild(root, i);
+                
+                if (child is StackPanel panel && panel.Orientation == System.Windows.Controls.Orientation.Horizontal)
                 {
-                    foreach (var gridChild in grid.Children.OfType<StackPanel>())
-                    {
-                        if (gridChild.Tag as string == ToolbarRegistry.ContentPanelTag)
-                            yield return gridChild;
-                    }
+                    yield return panel;
+                }
+                
+                foreach (var nestedPanel in GetAllPanelsWithContent(child))
+                {
+                    yield return nestedPanel;
                 }
             }
         }
@@ -1978,7 +1982,7 @@ namespace Ink_Canvas
         private void ReverseAllContentPanels()
         {
             _normalContentOrders = new Dictionary<StackPanel, List<FrameworkElement>>();
-            foreach (var panel in GetAllContentPanels())
+            foreach (var panel in GetAllPanelsWithContent(FloatingBarRootPanel))
             {
                 _normalContentOrders[panel] = panel.Children.OfType<FrameworkElement>().ToList();
                 var reversed = panel.Children.OfType<FrameworkElement>().Reverse().ToList();
