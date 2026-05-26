@@ -906,14 +906,6 @@ namespace Ink_Canvas
             Settings.Appearance.EnableTrayIcon = true;
 
             // 浮动栏按钮显示控制默认值
-            Settings.Appearance.IsShowShapeButton = true;
-            Settings.Appearance.IsShowUndoButton = true;
-            Settings.Appearance.IsShowRedoButton = true;
-            Settings.Appearance.IsShowClearButton = true;
-            Settings.Appearance.IsShowWhiteboardButton = true;
-            Settings.Appearance.IsShowHideButton = true;
-            Settings.Appearance.IsShowLassoSelectButton = true;
-            Settings.Appearance.IsShowClearAndMouseButton = true;
             Settings.Appearance.IsShowQuickColorPalette = false;
             Settings.Appearance.QuickColorPaletteDisplayMode = 1;
             Settings.Appearance.EraserDisplayOption = 0;
@@ -989,7 +981,6 @@ namespace Ink_Canvas
             Settings.Canvas.UsingWhiteboard = false;
             Settings.Canvas.HyperbolaAsymptoteOption = 0;
 
-            Settings.Gesture.AutoSwitchTwoFingerGesture = true;
             Settings.Gesture.IsEnableTwoFingerTranslate = true;
             Settings.Gesture.IsEnableTwoFingerZoom = false;
             Settings.Gesture.IsEnableTwoFingerRotation = false;
