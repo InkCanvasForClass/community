@@ -73,7 +73,7 @@
     <value>Highlighter</value>
   </data>
   <data name="Board_InsertImage" xml:space="preserve">
-    <value>Insert image</value>
+    <value>Insert file</value>
   </data>
   <data name="Board_LaserPen" xml:space="preserve">
     <value>Laser Pen</value>
@@ -103,7 +103,7 @@
     <value>Select</value>
   </data>
   <data name="Board_SelectImage" xml:space="preserve">
-    <value>Select image</value>
+    <value>Insert file</value>
   </data>
   <data name="Board_Shape" xml:space="preserve">
     <value>Shapes</value>

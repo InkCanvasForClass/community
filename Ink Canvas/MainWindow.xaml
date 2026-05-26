@@ -1334,10 +1334,13 @@
                                        Visibility="Visible" Margin="-60,0,0,-150"
                                        HorizontalAlignment="Left" VerticalAlignment="Center" />
         <!--收纳下的快捷面板//左-->
-        <Viewbox Width="50" Visibility="Collapsed"  d:Visibility="Visible" Name="LeftUnFoldButtonQuickPanel" Margin="-1,0,0,-150" d:Margin="-1,0,0,500"
+        <Viewbox Width="50" Visibility="Collapsed"  d:Visibility="Visible" Name="LeftUnFoldButtonQuickPanel" Margin="-60,0,0,-150" d:Margin="-60,0,0,500"
                  HorizontalAlignment="Left" VerticalAlignment="Center">
-            <Border ClipToBounds="True" Visibility="Visible" CornerRadius="0,6,6,0" Background="{DynamicResource FloatBarBackground}" Opacity="1"
+            <Border x:Name="LeftQuickPanelBorder" ClipToBounds="False" Visibility="Visible" CornerRadius="6" Background="{DynamicResource FloatBarBackground}" Opacity="1"
                     BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}" d:BorderBrush="Red" d:Background="Green" Width="32">
+                <Border.Effect>
+                    <DropShadowEffect x:Name="LeftQuickPanelShadow" BlurRadius="16" ShadowDepth="2" Direction="270" Opacity="0.3" Color="#000000" />
+                </Border.Effect>
                 <ikw:SimpleStackPanel Orientation="Vertical" Margin="0,5">
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelPersonMoneyIcon}" Label="{x:Static props:FloatingBarStrings.QuickPanel_SingleDraw}" ButtonMouseUp="SymbolIconRandOne_MouseUp" />
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelPeopleMoneyIcon}" Label="{x:Static props:FloatingBarStrings.Tools_RandomDraw}" ButtonMouseUp="SymbolIconRand_MouseUp" />
@@ -1355,10 +1358,13 @@
                                        Margin="0,0,-60,-150" IsRightSide="True"
                                        HorizontalAlignment="Right" VerticalAlignment="Center" />
         <!--收纳下的快捷面板//右-->
-        <Viewbox Width="50" Visibility="Collapsed"  d:Visibility="Visible" Name="RightUnFoldButtonQuickPanel" Margin="0,0,-1,-150" d:Margin="0,0,-1,500"
+        <Viewbox Width="50" Visibility="Collapsed"  d:Visibility="Visible" Name="RightUnFoldButtonQuickPanel" Margin="0,0,-60,-150" d:Margin="0,0,-60,500"
                  HorizontalAlignment="Right" VerticalAlignment="Center">
-            <Border ClipToBounds="True" Visibility="Visible" CornerRadius="6,0,0,6" Background="{DynamicResource FloatBarBackground}" Opacity="1"
+            <Border x:Name="RightQuickPanelBorder" ClipToBounds="False" Visibility="Visible" CornerRadius="6" Background="{DynamicResource FloatBarBackground}" Opacity="1"
                     BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}" d:BorderBrush="Red" d:Background="Green" Width="32">
+                <Border.Effect>
+                    <DropShadowEffect x:Name="RightQuickPanelShadow" BlurRadius="16" ShadowDepth="2" Direction="270" Opacity="0.3" Color="#000000" />
+                </Border.Effect>
                 <ikw:SimpleStackPanel Orientation="Vertical" Margin="0,5">
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelPersonMoneyIcon}" Label="{x:Static props:FloatingBarStrings.QuickPanel_SingleDraw}" ButtonMouseUp="SymbolIconRandOne_MouseUp" />
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelPeopleMoneyIcon}" Label="{x:Static props:FloatingBarStrings.Tools_RandomDraw}" ButtonMouseUp="SymbolIconRand_MouseUp" />

@@ -31,13 +31,14 @@ namespace Ink_Canvas
     // 1. 定义元素信息结构
     public class CanvasElementInfo
     {
-        public string Type { get; set; } // "Image" | "Pdf"
+        public string Type { get; set; } // "Image" | "Pdf" | "Media"
         public string SourcePath { get; set; }
         public double Left { get; set; }
         public double Top { get; set; }
         public double Width { get; set; }
         public double Height { get; set; }
         public string Stretch { get; set; } = "Fill"; // 默认为Fill
+        public string MediaKind { get; set; }
         /// <summary>PDF 当前页（从 0 开始），仅 Type == Pdf 时有效。</summary>
         public int? PdfCurrentPage { get; set; }
         /// <summary>保存时的 PDF 总页数，用于校验；仅 Type == Pdf 时有效。</summary>
@@ -80,6 +81,58 @@ namespace Ink_Canvas
                         PdfPageCount = (int)pdf.PageCount
                     });
                 }
+                else if (child is MediaElement media && media.Source != null)
+                {
+                    string sourcePath = media.Source.IsFile ? media.Source.LocalPath : media.Source.OriginalString;
+                    if (!string.IsNullOrEmpty(sourcePath))
+                    {
+                        string extension = Path.GetExtension(sourcePath);
+                        elementInfos.Add(new CanvasElementInfo
+                        {
+                            Type = "Media",
+                            SourcePath = sourcePath,
+                            Left = InkCanvas.GetLeft(media),
+                            Top = InkCanvas.GetTop(media),
+                            Width = media.Width,
+                            Height = media.Height,
+                            Stretch = media.Stretch.ToString(),
+                            MediaKind = string.Equals(extension, ".mp3", StringComparison.OrdinalIgnoreCase) ? "Audio" : "Video"
+                        });
+                    }
+                }
+            }
+        }
+
+        private void RestoreMediaFromElementInfo(CanvasElementInfo info)
+        {
+            if (info == null || inkCanvas == null) return;
+            if (!string.Equals(info.Type, "Media", StringComparison.OrdinalIgnoreCase)) return;
+            if (string.IsNullOrEmpty(info.SourcePath) || !File.Exists(info.SourcePath)) return;
+
+            try
+            {
+                var mediaElement = new MediaElement
+                {
+                    Name = "media_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff"),
+                    Source = new Uri(info.SourcePath),
+                    LoadedBehavior = MediaState.Manual,
+                    UnloadedBehavior = MediaState.Manual,
+                    Stretch = Enum.TryParse<Stretch>(info.Stretch, out var stretch) ? stretch : Stretch.Fill,
+                    Width = info.Width > 0 && !double.IsNaN(info.Width) ? info.Width : 256,
+                    Height = info.Height > 0 && !double.IsNaN(info.Height) ? info.Height : 256,
+                    ToolTip = Path.GetFileName(info.SourcePath)
+                };
+
+                AttachMediaFailureNotification(mediaElement);
+                InkCanvas.SetLeft(mediaElement, info.Left);
+                InkCanvas.SetTop(mediaElement, info.Top);
+                InitializeElementTransform(mediaElement);
+                BindElementEvents(mediaElement);
+                inkCanvas.Children.Add(mediaElement);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"从 .elements.json 恢复媒体失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -1302,6 +1355,10 @@ namespace Ink_Canvas
                         {
                             Dispatcher.BeginInvoke(new Action(() => { _ = RestorePdfFromElementInfoAsync(info); }), DispatcherPriority.Loaded);
                         }
+                        else if (string.Equals(info.Type, "Media", StringComparison.OrdinalIgnoreCase) && File.Exists(info.SourcePath))
+                        {
+                            RestoreMediaFromElementInfo(info);
+                        }
                     }
                 }
             }
@@ -1456,6 +1513,10 @@ namespace Ink_Canvas
                     else if (string.Equals(info.Type, "Pdf", StringComparison.OrdinalIgnoreCase) && File.Exists(info.SourcePath))
                     {
                         Dispatcher.BeginInvoke(new Action(() => { _ = RestorePdfFromElementInfoAsync(info); }), DispatcherPriority.Loaded);
+                    }
+                    else if (string.Equals(info.Type, "Media", StringComparison.OrdinalIgnoreCase) && File.Exists(info.SourcePath))
+                    {
+                        RestoreMediaFromElementInfo(info);
                     }
                 }
             }

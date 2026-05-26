@@ -4322,5 +4322,21 @@
     "Startup_NoFocusModeHint":  {
                                     "NewKey":  "NoFocusModeHint",
                                     "Group":  "StartupStrings"
-                                }
+                                },
+    "Theme_UnfoldIcon_ClassicArrow":  {
+                                          "NewKey":  "Theme_UnfoldIcon_ClassicArrow",
+                                          "Group":  "ThemeStrings"
+                                      },
+    "Theme_UnfoldIcon_ClassicPen":  {
+                                        "NewKey":  "Theme_UnfoldIcon_ClassicPen",
+                                        "Group":  "ThemeStrings"
+                                    },
+    "Theme_UnfoldIcon_Stripe":  {
+                                    "NewKey":  "Theme_UnfoldIcon_Stripe",
+                                    "Group":  "ThemeStrings"
+                                },
+    "Theme_AllowDragSidePanel":  {
+                                     "NewKey":  "Theme_AllowDragSidePanel",
+                                     "Group":  "ThemeStrings"
+                                 }
 }

@@ -64,18 +64,23 @@ namespace Ink_Canvas
         private async void BtnImageInsert_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "图片与 PDF|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf|图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf";
+            openFileDialog.Filter = "图片、PDF 与媒体|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf;*.mp4;*.mkv;*.mp3|图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf|媒体文件|*.mp4;*.mkv;*.mp3";
 
             if (openFileDialog.ShowDialog() == true)
             {
                 string filePath = openFileDialog.FileName;
+                string extension = Path.GetExtension(filePath);
 
-                FrameworkElement element = await CreateAndCompressImageAsync(filePath);
+                FrameworkElement element = IsSupportedMediaExtension(extension)
+                    ? await CreateMediaElementAsync(filePath)
+                    : await CreateAndCompressImageAsync(filePath);
 
                 if (element != null)
                 {
-                    string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
-                    element.Name = timestamp;
+                    string timestamp = element is MediaElement
+                        ? "media_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff")
+                        : "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
+                    if (string.IsNullOrEmpty(element.Name)) element.Name = timestamp;
 
                     // 设置图片属性，避免被InkCanvas选择系统处理
                     element.IsHitTestVisible = true;
@@ -964,7 +969,24 @@ namespace Ink_Canvas
         /// <summary>与图片选择工具栏、缩放控制点联动的画布位图类元素（普通图片或多页 PDF 嵌入）。</summary>
         private static bool IsBitmapLikeCanvasElement(FrameworkElement fe)
         {
-            return fe is Image || fe is PdfEmbeddedView;
+            return fe is Image || fe is PdfEmbeddedView || fe is MediaElement;
+        }
+
+        private static bool IsSupportedMediaExtension(string extension)
+        {
+            return string.Equals(extension, ".mp4", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(extension, ".mkv", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(extension, ".mp3", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void AttachMediaFailureNotification(MediaElement mediaElement)
+        {
+            mediaElement.MediaFailed += (_, args) =>
+            {
+                string message = args.ErrorException?.Message ?? "未知错误";
+                LogHelper.WriteLogToFile($"媒体加载失败: {message}", LogHelper.LogType.Error);
+                ShowNotification("媒体加载失败，可能是不支持的格式或缺少系统解码器。");
+            };
         }
 
         private async Task<FrameworkElement> CreateAndCompressImageAsync(string filePath)
@@ -1120,26 +1142,25 @@ namespace Ink_Canvas
         private async void BtnMediaInsert_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Media files (*.mp4; *.avi; *.wmv)|*.mp4;*.avi;*.wmv";
+            openFileDialog.Filter = "Media files (*.mp4; *.mkv; *.mp3; *.avi; *.wmv)|*.mp4;*.mkv;*.mp3;*.avi;*.wmv";
 
             if (openFileDialog.ShowDialog() == true)
             {
                 string filePath = openFileDialog.FileName;
 
-                byte[] mediaBytes = await Task.Run(() => File.ReadAllBytes(filePath));
-
                 MediaElement mediaElement = await CreateMediaElementAsync(filePath);
 
                 if (mediaElement != null)
                 {
+                    InitializeInkCanvasSelectionSettings();
+                    InitializeElementTransform(mediaElement);
                     CenterAndScaleElement(mediaElement);
+                    BindElementEvents(mediaElement);
 
                     InkCanvas.SetLeft(mediaElement, 0);
                     InkCanvas.SetTop(mediaElement, 0);
                     inkCanvas.Children.Add(mediaElement);
 
-                    mediaElement.LoadedBehavior = MediaState.Manual;
-                    mediaElement.UnloadedBehavior = MediaState.Manual;
                     mediaElement.Loaded += async (_, args) =>
                     {
                         mediaElement.Play();
@@ -1148,6 +1169,10 @@ namespace Ink_Canvas
                     };
 
                     timeMachine.CommitElementInsertHistory(mediaElement);
+
+                    SetCurrentToolMode(InkCanvasEditingMode.Select);
+                    UpdateCurrentToolMode("select");
+                    HideSubPanels("select");
                 }
             }
         }
@@ -1168,32 +1193,50 @@ namespace Ink_Canvas
         /// </remarks>
         private async Task<MediaElement> CreateMediaElementAsync(string filePath)
         {
-            string savePath = Path.Combine(Settings.Automation.AutoSavedStrokesLocation, "File Dependency");
-            if (!Directory.Exists(savePath))
+            string fileExtension = Path.GetExtension(filePath);
+            if (!IsSupportedMediaExtension(fileExtension)
+                && !string.Equals(fileExtension, ".avi", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(fileExtension, ".wmv", StringComparison.OrdinalIgnoreCase))
             {
-                Directory.CreateDirectory(savePath);
+                ShowNotification("不支持的媒体格式。");
+                return null;
             }
-            return await Dispatcher.InvokeAsync(() =>
+
+            try
             {
-                MediaElement mediaElement = new MediaElement();
-                mediaElement.Source = new Uri(filePath);
+                string savePath = Path.Combine(Settings.Automation.AutoSavedStrokesLocation, "File Dependency");
+                if (!Directory.Exists(savePath))
+                {
+                    Directory.CreateDirectory(savePath);
+                }
+
                 string timestamp = "media_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
-                mediaElement.Name = timestamp;
-                mediaElement.LoadedBehavior = MediaState.Manual;
-                mediaElement.UnloadedBehavior = MediaState.Manual;
+                string newFilePath = Path.Combine(savePath, timestamp + fileExtension);
+                await Task.Run(() => File.Copy(filePath, newFilePath, true));
 
-                mediaElement.Width = 256;
-                mediaElement.Height = 256;
-
-                string fileExtension = Path.GetExtension(filePath);
-                string newFilePath = Path.Combine(savePath, mediaElement.Name + fileExtension);
-
-                File.Copy(filePath, newFilePath, true);
-
-                mediaElement.Source = new Uri(newFilePath);
-
-                return mediaElement;
-            });
+                return await Dispatcher.InvokeAsync(() =>
+                {
+                    MediaElement mediaElement = new MediaElement
+                    {
+                        Source = new Uri(newFilePath),
+                        Name = timestamp,
+                        LoadedBehavior = MediaState.Manual,
+                        UnloadedBehavior = MediaState.Manual,
+                        Stretch = Stretch.Fill,
+                        Width = 256,
+                        Height = 256,
+                        ToolTip = Path.GetFileName(filePath)
+                    };
+                    AttachMediaFailureNotification(mediaElement);
+                    return mediaElement;
+                });
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"插入媒体失败: {ex.Message}", LogHelper.LogType.Error);
+                ShowNotification($"插入媒体失败：{ex.Message}");
+                return null;
+            }
         }
         #endregion
 

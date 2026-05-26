@@ -73,7 +73,7 @@
     <value>荧光笔</value>
   </data>
   <data name="Board_InsertImage" xml:space="preserve">
-    <value>插入图片</value>
+    <value>插入文件</value>
   </data>
   <data name="Board_LaserPen" xml:space="preserve">
     <value>激光笔</value>
@@ -103,7 +103,7 @@
     <value>选择</value>
   </data>
   <data name="Board_SelectImage" xml:space="preserve">
-    <value>选择图片</value>
+    <value>插入文件</value>
   </data>
   <data name="Board_Shape" xml:space="preserve">
     <value>图形</value>
