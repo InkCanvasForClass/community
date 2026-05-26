@@ -230,36 +230,34 @@ namespace Ink_Canvas
 
                 pos = currentPos;
 
-                if (IsFloatingBarContentVisible())
+                // 无论是展开还是折叠状态都需要检查是否需要翻转
+                RefreshFloatingBarSizeCache();
+
+                var headLeft = ViewboxFloatingBar.Margin.Left + (isFloatingBarHeadOnRight ? Math.Max(0, _cachedFloatingBarWidth - _cachedFloatingBarHeadWidth) : 0);
+
+                bool shouldFlip;
+                if (!isFloatingBarHeadOnRight && headLeft + _cachedFloatingBarWidth > _cachedScreenWidth)
+                    shouldFlip = true;
+                else if (isFloatingBarHeadOnRight && headLeft + _cachedFloatingBarWidth <= _cachedScreenWidth)
+                    shouldFlip = false;
+                else
+                    shouldFlip = isFloatingBarHeadOnRight;
+
+                if (shouldFlip != isFloatingBarHeadOnRight)
                 {
-                    RefreshFloatingBarSizeCache();
+                    var savedHeadLeft = headLeft;
+                    SetFloatingBarHeadPlacement(shouldFlip);
 
-                    var headLeft = ViewboxFloatingBar.Margin.Left + (isFloatingBarHeadOnRight ? Math.Max(0, _cachedFloatingBarWidth - _cachedFloatingBarHeadWidth) : 0);
+                    RefreshFloatingBarSizeCache(true);
 
-                    bool shouldFlip;
-                    if (!isFloatingBarHeadOnRight && headLeft + _cachedFloatingBarWidth > _cachedScreenWidth)
-                        shouldFlip = true;
-                    else if (isFloatingBarHeadOnRight && headLeft + _cachedFloatingBarWidth <= _cachedScreenWidth)
-                        shouldFlip = false;
+                    double newLeft;
+                    if (shouldFlip)
+                        newLeft = savedHeadLeft - Math.Max(0, _cachedFloatingBarWidth - _cachedFloatingBarHeadWidth);
                     else
-                        shouldFlip = isFloatingBarHeadOnRight;
+                        newLeft = savedHeadLeft;
 
-                    if (shouldFlip != isFloatingBarHeadOnRight)
-                    {
-                        var savedHeadLeft = headLeft;
-                        SetFloatingBarHeadPlacement(shouldFlip);
-
-                        RefreshFloatingBarSizeCache(true);
-
-                        double newLeft;
-                        if (shouldFlip)
-                            newLeft = savedHeadLeft - Math.Max(0, _cachedFloatingBarWidth - _cachedFloatingBarHeadWidth);
-                        else
-                            newLeft = savedHeadLeft;
-
-                        newLeft = ClampFloatingBarLeft(newLeft, _cachedFloatingBarWidth, _cachedScreenWidth);
-                        ViewboxFloatingBar.Margin = new Thickness(newLeft, ViewboxFloatingBar.Margin.Top, -2000, -200);
-                    }
+                    newLeft = ClampFloatingBarLeft(newLeft, _cachedFloatingBarWidth, _cachedScreenWidth);
+                    ViewboxFloatingBar.Margin = new Thickness(newLeft, ViewboxFloatingBar.Margin.Top, -2000, -200);
                 }
 
                 var currentMargin = ViewboxFloatingBar.Margin;
@@ -2036,17 +2034,30 @@ namespace Ink_Canvas
         private void PlaceFloatingBarAfterHeadToggle(double headLeft, bool isExpanding)
         {
             var screenWidth = GetFloatingBarScreenWidth(Settings.Advanced.IsEnableAvoidFullScreenHelper);
+            ViewboxFloatingBar.UpdateLayout(); // 先更新布局，确保获取正确的宽度
 
             if (!isExpanding)
             {
-                SetFloatingBarHeadPlacement(false);
-                var collapsedWidth = GetFloatingBarHeadScaledWidth();
+                // 折叠时的处理：先尝试使用整个工具栏宽度（包含无法折叠的组件）
+                var fullCollapsedWidth = GetFloatingBarScaledWidth();
+                var headWidth = GetFloatingBarHeadScaledWidth();
+                
+                // 如果整个宽度远大于头部宽度，说明有其他可见组件，使用整个宽度
+                // 否则只使用头部宽度
+                var useFullWidth = fullCollapsedWidth > headWidth * 1.5;
+                var collapsedWidth = useFullWidth ? fullCollapsedWidth : headWidth;
+                
+                var shouldFlipOnCollapse = headLeft + collapsedWidth > screenWidth;
+                SetFloatingBarHeadPlacement(shouldFlipOnCollapse);
                 pos.X = ClampFloatingBarLeft(headLeft, collapsedWidth, screenWidth);
                 ViewboxFloatingBar.Margin = new Thickness(pos.X, ViewboxFloatingBar.Margin.Top, -2000, -200);
                 SaveFloatingBarPositionPoint();
                 return;
             }
 
+            // 展开时强制更新布局，确保获取正确的宽度
+            ViewboxFloatingBar.UpdateLayout();
+            
             var floatingBarWidth = GetFloatingBarScaledWidth();
             var headWidth = GetFloatingBarHeadScaledWidth();
             var shouldPlaceToolsOnLeft = headLeft + floatingBarWidth > screenWidth;
@@ -2054,6 +2065,9 @@ namespace Ink_Canvas
 
             SetFloatingBarHeadPlacement(shouldPlaceToolsOnLeft);
 
+            // 再次更新布局，以防翻转后宽度有变化
+            ViewboxFloatingBar.UpdateLayout();
+            
             floatingBarWidth = GetFloatingBarScaledWidth();
             headWidth = GetFloatingBarHeadScaledWidth();
 
