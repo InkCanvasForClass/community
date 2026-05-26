@@ -16,6 +16,7 @@ namespace Ink_Canvas.Controls
         private bool _isDragging = false;
         private double _startY = 0;
         private double _startOffset = 0;
+        private bool _justFinishedTouchDragging = false;
 
         private static void OnIsRightSideChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -106,6 +107,19 @@ namespace Ink_Canvas.Controls
         protected override void OnPreviewMouseUp(MouseButtonEventArgs e)
         {
             base.OnPreviewMouseUp(e);
+            if (_justFinishedTouchDragging)
+            {
+                _justFinishedTouchDragging = false;
+                e.Handled = true;
+                _isPressed = false;
+                _isDragging = false;
+                if (IsMouseCaptured)
+                {
+                    ReleaseMouseCapture();
+                }
+                return;
+            }
+
             if (_isPressed)
             {
                 ReleaseMouseCapture();
@@ -184,6 +198,7 @@ namespace Ink_Canvas.Controls
                 if (_isDragging)
                 {
                     _isDragging = false;
+                    _justFinishedTouchDragging = true;
                     
                     // Save settings permanently
                     Ink_Canvas.Windows.SettingsViews.Helpers.SettingsManager.SaveSettingsToFile();
