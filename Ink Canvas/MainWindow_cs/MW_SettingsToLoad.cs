@@ -307,6 +307,7 @@ namespace Ink_Canvas
                 ViewboxBlackboardCenterSideScaleTransform.ScaleY = Settings.Appearance.ViewboxBlackBoardScaleTransformValue;
 
                 ApplyQuickPanelBottomOffset(Settings.Appearance.QuickPanelBottomOffset);
+                ApplySidePanelSettings();
 
                 if (Settings.Appearance.IsTransparentButtonBackground)
                 {

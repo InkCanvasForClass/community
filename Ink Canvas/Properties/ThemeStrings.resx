@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -227,6 +227,18 @@
   </data>
   <data name="Theme_UnfoldIcon_Arrow" xml:space="preserve">
     <value>箭头</value>
+  </data>
+  <data name="Theme_UnfoldIcon_ClassicArrow" xml:space="preserve">
+    <value>半圆形（箭头）</value>
+  </data>
+  <data name="Theme_UnfoldIcon_ClassicPen" xml:space="preserve">
+    <value>半圆形（画笔）</value>
+  </data>
+  <data name="Theme_UnfoldIcon_Stripe" xml:space="preserve">
+    <value>条形</value>
+  </data>
+  <data name="Theme_AllowDragSidePanel" xml:space="preserve">
+    <value>允许通过拖动调整侧边栏位置</value>
   </data>
   <data name="Theme_Upload" xml:space="preserve">
     <value>上传</value>

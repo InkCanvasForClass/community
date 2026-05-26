@@ -18,6 +18,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
     public partial class AppearancePage : Page
     {
+        public static event Action<double> OnBottomOffsetChanged;
+
         private bool _isLoaded = false;
         private bool _suppressChickenSoupSourceSelectionChanged = false;
         private bool _isApplyingLanguageFromSettings = false;
@@ -29,11 +31,26 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             Unloaded += Page_Unloaded;
         }
 
+        public static void NotifyBottomOffsetChanged(double val)
+        {
+            OnBottomOffsetChanged?.Invoke(val);
+        }
+
+        private void HandleBottomOffsetChanged(double val)
+        {
+            if (QuickPanelBottomOffsetSlider != null)
+            {
+                QuickPanelBottomOffsetSlider.Value = val;
+                UpdateSliderText(QuickPanelBottomOffsetSlider, QuickPanelBottomOffsetText, "{0:F0}");
+            }
+        }
+
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             LoadSettings();
             _isLoaded = true;
             UpdateAllSliderTexts();
+            OnBottomOffsetChanged += HandleBottomOffsetChanged;
         }
 
         private void UpdateAllSliderTexts()
@@ -51,6 +68,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
             _isLoaded = false;
+            OnBottomOffsetChanged -= HandleBottomOffsetChanged;
         }
 
         private void LoadSettings()
@@ -101,6 +119,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardEnableQuickPanel.IsOn = settings.Appearance.IsShowQuickPanel;
             QuickPanelBottomOffsetSlider.Value = settings.Appearance.QuickPanelBottomOffset;
             ComboBoxUnFoldBtnImg.SelectedIndex = settings.Appearance.UnFoldButtonImageType;
+            CardAllowDragSidePanel.IsOn = settings.Appearance.AllowDragSidePanel;
 
             CardUseLegacyFloatingBarUI.IsOn = settings.Appearance.UseLegacyFloatingBarUI;
 
@@ -387,6 +406,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.SaveSettingsToFile();
         }
 
+        private void ToggleSwitchAllowDragSidePanel_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.AllowDragSidePanel = CardAllowDragSidePanel.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
         private void QuickPanelBottomOffsetSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             UpdateSliderText(QuickPanelBottomOffsetSlider, QuickPanelBottomOffsetText, "{0:F0}");
@@ -411,23 +437,37 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var mw = GetMainWindow();
             if (mw != null)
             {
+                mw.ApplySidePanelSettings();
+
                 if (ComboBoxUnFoldBtnImg.SelectedIndex == 0)
                 {
-                    mw.RightUnFoldBtnImgChevron.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
-                    mw.RightUnFoldBtnImgChevron.Width = 14; mw.RightUnFoldBtnImgChevron.Height = 14;
-                    mw.RightUnFoldBtnImgChevron.RenderTransform = new RotateTransform(180);
-                    mw.LeftUnFoldBtnImgChevron.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
-                    mw.LeftUnFoldBtnImgChevron.Width = 14; mw.LeftUnFoldBtnImgChevron.Height = 14;
-                    mw.LeftUnFoldBtnImgChevron.RenderTransform = null;
+                    if (mw.RightUnFoldBtnImgChevron != null)
+                    {
+                        mw.RightUnFoldBtnImgChevron.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
+                        mw.RightUnFoldBtnImgChevron.Width = 14; mw.RightUnFoldBtnImgChevron.Height = 14;
+                        mw.RightUnFoldBtnImgChevron.RenderTransform = new RotateTransform(180);
+                    }
+                    if (mw.LeftUnFoldBtnImgChevron != null)
+                    {
+                        mw.LeftUnFoldBtnImgChevron.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
+                        mw.LeftUnFoldBtnImgChevron.Width = 14; mw.LeftUnFoldBtnImgChevron.Height = 14;
+                        mw.LeftUnFoldBtnImgChevron.RenderTransform = null;
+                    }
                 }
                 else if (ComboBoxUnFoldBtnImg.SelectedIndex == 1)
                 {
-                    mw.RightUnFoldBtnImgChevron.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
-                    mw.RightUnFoldBtnImgChevron.Width = 18; mw.RightUnFoldBtnImgChevron.Height = 18;
-                    mw.RightUnFoldBtnImgChevron.RenderTransform = null;
-                    mw.LeftUnFoldBtnImgChevron.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
-                    mw.LeftUnFoldBtnImgChevron.Width = 18; mw.LeftUnFoldBtnImgChevron.Height = 18;
-                    mw.LeftUnFoldBtnImgChevron.RenderTransform = null;
+                    if (mw.RightUnFoldBtnImgChevron != null)
+                    {
+                        mw.RightUnFoldBtnImgChevron.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
+                        mw.RightUnFoldBtnImgChevron.Width = 18; mw.RightUnFoldBtnImgChevron.Height = 18;
+                        mw.RightUnFoldBtnImgChevron.RenderTransform = null;
+                    }
+                    if (mw.LeftUnFoldBtnImgChevron != null)
+                    {
+                        mw.LeftUnFoldBtnImgChevron.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
+                        mw.LeftUnFoldBtnImgChevron.Width = 18; mw.LeftUnFoldBtnImgChevron.Height = 18;
+                        mw.LeftUnFoldBtnImgChevron.RenderTransform = null;
+                    }
                 }
             }
         }
