@@ -1615,6 +1615,10 @@ namespace Ink_Canvas
                 FoldFloatingBar_MouseUp(new object(), null);
                 ScheduleStartupFoldAbsenceVerification();
             }
+            else
+            {
+                UnFoldFloatingBar_MouseUp(new object(), null);
+            }
 
             // 显示快抽悬浮按钮
             ShowQuickDrawFloatingButton();
