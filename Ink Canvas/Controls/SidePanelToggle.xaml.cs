@@ -52,9 +52,21 @@ namespace Ink_Canvas.Controls
         protected override void OnPreviewMouseDown(MouseButtonEventArgs e)
         {
             base.OnPreviewMouseDown(e);
+            
+            // 只在实际按钮区域内响应（PanelBorder 或 ClassicViewbox）
+            var settings = MainWindow.Settings?.Appearance;
+            bool useMinimalist = settings?.UnFoldButtonImageType == 2;
+            var targetElement = useMinimalist ? (FrameworkElement)PanelBorder : ClassicViewbox;
+            var pos = e.GetPosition(targetElement);
+            
+            if (pos.X < 0 || pos.X > targetElement.ActualWidth || pos.Y < 0 || pos.Y > targetElement.ActualHeight)
+            {
+                // 不在按钮区域内，不响应
+                return;
+            }
+            
             if (e.ChangedButton == MouseButton.Left)
             {
-                var settings = MainWindow.Settings?.Appearance;
                 bool allowDrag = settings == null || settings.AllowDragSidePanel;
                 if (!allowDrag) return;
 
@@ -107,6 +119,22 @@ namespace Ink_Canvas.Controls
         protected override void OnPreviewMouseUp(MouseButtonEventArgs e)
         {
             base.OnPreviewMouseUp(e);
+            
+            // 检查是否在实际按钮区域内
+            var settings = MainWindow.Settings?.Appearance;
+            bool useMinimalist = settings?.UnFoldButtonImageType == 2;
+            var targetElement = useMinimalist ? (FrameworkElement)PanelBorder : ClassicViewbox;
+            var pos = e.GetPosition(targetElement);
+            
+            bool isInButtonArea = pos.X >= 0 && pos.X <= targetElement.ActualWidth && pos.Y >= 0 && pos.Y <= targetElement.ActualHeight;
+            
+            if (!isInButtonArea)
+            {
+                // 不在按钮区域内，阻止事件继续传播到 MainWindow
+                e.Handled = true;
+                return;
+            }
+            
             if (_justFinishedTouchDragging)
             {
                 _justFinishedTouchDragging = false;
@@ -140,7 +168,20 @@ namespace Ink_Canvas.Controls
         protected override void OnPreviewTouchDown(TouchEventArgs e)
         {
             base.OnPreviewTouchDown(e);
+            
+            // 只在实际按钮区域内响应（PanelBorder 或 ClassicViewbox）
             var settings = MainWindow.Settings?.Appearance;
+            bool useMinimalist = settings?.UnFoldButtonImageType == 2;
+            var targetElement = useMinimalist ? (FrameworkElement)PanelBorder : ClassicViewbox;
+            var touchPoint = e.GetTouchPoint(targetElement);
+            var pos = touchPoint.Position;
+            
+            if (pos.X < 0 || pos.X > targetElement.ActualWidth || pos.Y < 0 || pos.Y > targetElement.ActualHeight)
+            {
+                // 不在按钮区域内，不响应
+                return;
+            }
+            
             bool allowDrag = settings == null || settings.AllowDragSidePanel;
             if (!allowDrag) return;
 
@@ -149,7 +190,7 @@ namespace Ink_Canvas.Controls
             {
                 _isPressed = true;
                 _isDragging = false;
-                _startY = e.GetTouchPoint(mw).Position.Y;
+                _startY = touchPoint.Position.Y;
                 _startOffset = MainWindow.Settings.Appearance.QuickPanelBottomOffset;
                 CaptureTouch(e.TouchDevice);
             }
@@ -191,6 +232,23 @@ namespace Ink_Canvas.Controls
         protected override void OnPreviewTouchUp(TouchEventArgs e)
         {
             base.OnPreviewTouchUp(e);
+            
+            // 检查是否在实际按钮区域内
+            var settings = MainWindow.Settings?.Appearance;
+            bool useMinimalist = settings?.UnFoldButtonImageType == 2;
+            var targetElement = useMinimalist ? (FrameworkElement)PanelBorder : ClassicViewbox;
+            var touchPoint = e.GetTouchPoint(targetElement);
+            var pos = touchPoint.Position;
+            
+            bool isInButtonArea = pos.X >= 0 && pos.X <= targetElement.ActualWidth && pos.Y >= 0 && pos.Y <= targetElement.ActualHeight;
+            
+            if (!isInButtonArea)
+            {
+                // 不在按钮区域内，阻止事件继续传播到 MainWindow
+                e.Handled = true;
+                return;
+            }
+            
             if (_isPressed)
             {
                 ReleaseTouchCapture(e.TouchDevice);

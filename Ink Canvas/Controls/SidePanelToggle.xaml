@@ -6,11 +6,12 @@
              xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
              mc:Ignorable="d"
              d:DesignHeight="150" d:DesignWidth="80">
-    <Grid Background="#02000000" Cursor="Hand" Width="80" Height="150" VerticalAlignment="Center">
-        <!-- New Minimalist Grab Handle -->
+    <Grid Width="80" Height="150" VerticalAlignment="Center">
+        <!-- New Minimalist Grab Handle - 这里才是实际的点击和拖动区域 -->
         <Border x:Name="PanelBorder"
                 Width="24" Height="110"
                 Background="Transparent"
+                Cursor="Hand"
                 CornerRadius="12"
                 VerticalAlignment="Center">
             <!-- Solid 100% Pure Black 1px Border Outline, positioned dynamically by C# -->
@@ -29,7 +30,7 @@
                         <Style TargetType="Border">
                             <Setter Property="Opacity" Value="0.4"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                <DataTrigger Binding="{Binding IsMouseOver, ElementName=PanelBorder}" Value="True">
                                     <DataTrigger.EnterActions>
                                         <BeginStoryboard>
                                             <Storyboard>
