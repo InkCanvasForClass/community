@@ -21,6 +21,7 @@ namespace Ink_Canvas.Controls
         private double _startX = 0;
         private double _totalDragDistance = 0;
         private bool _allowDrag = true;
+        private bool _dragStarted = false;
 
         private static void OnIsRightSideChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -62,7 +63,6 @@ namespace Ink_Canvas.Controls
             var settings = MainWindow.Settings?.Appearance;
             _allowDrag = settings == null || settings.AllowDragSidePanel;
             
-            // 检查是否在正确的按钮区域内
             var targetElement = (settings?.UnFoldButtonImageType == 2) ? (FrameworkElement)PanelBorder : ClassicViewbox;
             var pos = e.GetPosition(targetElement);
             if (pos.X < 0 || pos.X > targetElement.ActualWidth || pos.Y < 0 || pos.Y > targetElement.ActualHeight)
@@ -71,9 +71,11 @@ namespace Ink_Canvas.Controls
             }
             
             _isDragging = true;
+            _dragStarted = false;
             _totalDragDistance = 0;
             _startOffset = MainWindow.Settings.Appearance.QuickPanelBottomOffset;
-            var startPos = e.GetPosition(this);
+            var reference = Application.Current.MainWindow;
+            var startPos = e.GetPosition(reference);
             _startY = startPos.Y;
             _startX = startPos.X;
             CaptureMouse();
@@ -85,13 +87,17 @@ namespace Ink_Canvas.Controls
             
             if (!_isDragging) return;
             
-            var currentPos = e.GetPosition(this);
+            var reference = Application.Current.MainWindow;
+            var currentPos = e.GetPosition(reference);
             var deltaY = _startY - currentPos.Y;
-            var deltaX = _startX - currentPos.X;
-            _totalDragDistance += Math.Abs(deltaX) + Math.Abs(deltaY);
+            var deltaX = currentPos.X - _startX;
             
-            // 只有当拖动距离足够大时，才开始真正的拖动
-            if (_totalDragDistance < 5) return;
+            if (!_dragStarted)
+            {
+                _totalDragDistance = Math.Abs(deltaY) + Math.Abs(deltaX);
+                if (_totalDragDistance < 5) return;
+                _dragStarted = true;
+            }
             
             double newOffset = _startOffset + deltaY * 2;
             newOffset = Math.Max(-600, Math.Min(600, newOffset));
@@ -108,13 +114,11 @@ namespace Ink_Canvas.Controls
 
             if (e.ChangedButton != MouseButton.Left) return;
 
-            // 如果拖动距离很小，认为是点击，触发 Click 事件
-            if (_totalDragDistance < 5)
+            if (!_dragStarted)
             {
                 _isDragging = false;
                 ReleaseMouseCapture();
                 e.Handled = true;
-                // 触发 Click 事件
                 Click?.Invoke(this, new RoutedEventArgs());
                 return;
             }
@@ -126,6 +130,7 @@ namespace Ink_Canvas.Controls
             }
 
             _isDragging = false;
+            _dragStarted = false;
             ReleaseMouseCapture();
         }
 
@@ -139,6 +144,7 @@ namespace Ink_Canvas.Controls
             }
             
             _isDragging = false;
+            _dragStarted = false;
         }
 
         public void ApplySettings()
