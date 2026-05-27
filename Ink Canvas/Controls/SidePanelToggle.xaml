@@ -54,9 +54,10 @@
                            Source="{DynamicResource QuickPanelUnfoldChevronIcon}"
                            RenderOptions.BitmapScalingMode="HighQuality"
                            Height="8" Width="8"
-                           HorizontalAlignment="Center" VerticalAlignment="Center">
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           IsHitTestVisible="False">
                         <Image.Effect>
-                            <DropShadowEffect Color="Black" BlurRadius="2" ShadowDepth="0" Opacity="0.5"/>
+                            <DropShadowEffect Color="Black" BlurRadius="2" ShadowDepth="0" Opacity="0"/>
                         </Image.Effect>
                     </Image>
                 </Border>
@@ -70,7 +71,8 @@
                         CornerRadius="0,25,25,0" Height="50" Width="32">
                     <Image x:Name="ClassicChevronImage" Margin="10,0,0,0"
                            Source="{DynamicResource QuickPanelUnfoldChevronIcon}"
-                           RenderOptions.BitmapScalingMode="HighQuality" Height="14" Width="14" />
+                           RenderOptions.BitmapScalingMode="HighQuality" Height="14" Width="14"
+                           IsHitTestVisible="False"/>
                 </Border>
             </ikw:SimpleStackPanel>
         </Viewbox>

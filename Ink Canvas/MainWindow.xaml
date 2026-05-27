@@ -1330,7 +1330,7 @@
             </Border>
         </Grid>
         <!--侧边栏//左-->
-        <localControls:SidePanelToggle x:Name="LeftSidePanel" MouseUp="LeftUnFoldButtonDisplayQuickPanel_MouseUp"
+        <localControls:SidePanelToggle x:Name="LeftSidePanel" Click="LeftUnFoldButtonDisplayQuickPanel_MouseUp"
                                        Visibility="Visible" Margin="-60,0,0,-150"
                                        HorizontalAlignment="Left" VerticalAlignment="Center" />
         <!--收纳下的快捷面板//左-->
@@ -1353,7 +1353,7 @@
             </Border>
         </Viewbox>
         <!--侧边栏//右-->
-        <localControls:SidePanelToggle x:Name="RightSidePanel" MouseUp="RightUnFoldButtonDisplayQuickPanel_MouseUp"
+        <localControls:SidePanelToggle x:Name="RightSidePanel" Click="RightUnFoldButtonDisplayQuickPanel_MouseUp"
                                        Visibility="{Binding ElementName=LeftSidePanel, Path=Visibility}"
                                        Margin="0,0,-60,-150" IsRightSide="True"
                                        HorizontalAlignment="Right" VerticalAlignment="Center" />

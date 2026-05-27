@@ -1217,6 +1217,7 @@ namespace Ink_Canvas
         {
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
+            SidePannelMarginAnimation(-10);
             AnimationsHelper.HidePopupWithSlideAndFade(BorderTools);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
@@ -1288,7 +1289,7 @@ namespace Ink_Canvas
 
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
-
+            SidePannelMarginAnimation(-10);
             AnimationsHelper.HidePopupWithSlideAndFade(BorderTools);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
@@ -1371,7 +1372,7 @@ namespace Ink_Canvas
 
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
-
+            SidePannelMarginAnimation(-10);
             AnimationsHelper.HidePopupWithSlideAndFade(BorderTools);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);

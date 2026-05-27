@@ -163,7 +163,7 @@ namespace Ink_Canvas
         /// 2. 如果显示快捷面板，则隐藏右侧快捷面板，显示左侧快捷面板并执行动画
         /// 3. 否则，调用展开浮动栏的方法
         /// </remarks>
-        private async void LeftUnFoldButtonDisplayQuickPanel_MouseUp(object sender, MouseButtonEventArgs e)
+        private async void LeftUnFoldButtonDisplayQuickPanel_MouseUp(object sender, RoutedEventArgs e)
         {
             if (Settings.Appearance.IsShowQuickPanel)
             {
@@ -190,7 +190,8 @@ namespace Ink_Canvas
             }
             else
             {
-                UnFoldFloatingBar_MouseUp(sender, e);
+                var mouseEventArgs = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left);
+                UnFoldFloatingBar_MouseUp(sender, mouseEventArgs);
             }
         }
 
@@ -198,14 +199,14 @@ namespace Ink_Canvas
         /// 处理右侧展开按钮显示快捷面板的鼠标点击事件。
         /// </summary>
         /// <param name="sender">事件发送者。</param>
-        /// <param name="e">鼠标按钮事件参数。</param>
+        /// <param name="e">路由事件参数。</param>
         /// <remarks>
         /// 操作包括：
         /// 1. 检查是否显示快捷面板
         /// 2. 如果显示快捷面板，则隐藏左侧快捷面板，显示右侧快捷面板并执行动画
         /// 3. 否则，调用展开浮动栏的方法
         /// </remarks>
-        private async void RightUnFoldButtonDisplayQuickPanel_MouseUp(object sender, MouseButtonEventArgs e)
+        private async void RightUnFoldButtonDisplayQuickPanel_MouseUp(object sender, RoutedEventArgs e)
         {
             if (Settings.Appearance.IsShowQuickPanel)
             {
@@ -232,7 +233,8 @@ namespace Ink_Canvas
             }
             else
             {
-                UnFoldFloatingBar_MouseUp(sender, e);
+                var mouseEventArgs = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left);
+                UnFoldFloatingBar_MouseUp(sender, mouseEventArgs);
             }
         }
 
@@ -481,7 +483,13 @@ namespace Ink_Canvas
         {
             await Dispatcher.InvokeAsync(() =>
             {
-                if (MarginFromEdge == -10) LeftSidePanel.Visibility = Visibility.Visible;
+                if (MarginFromEdge == -10)
+                {
+                    if (isFloatingBarFolded)
+                        LeftSidePanel.Visibility = Visibility.Visible;
+                    else
+                        LeftSidePanel.Visibility = Visibility.Collapsed;
+                }
 
                 var LeftSidePanelmarginAnimation = new ThicknessAnimation
                 {
