@@ -197,7 +197,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
         }
 
-        private async void ToggleSwitchIsSmartUpdate_Toggled(object sender, RoutedEventArgs e)
+        private void ToggleSwitchIsSmartUpdate_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
 

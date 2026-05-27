@@ -274,7 +274,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.SaveSettingsToFile();
         }
 
-        private async void ComboBoxChickenSoupSource_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ComboBoxChickenSoupSource_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_suppressChickenSoupSourceSelectionChanged || !_isLoaded) return;
             int idx = ComboBoxChickenSoupSource.SelectedIndex;
