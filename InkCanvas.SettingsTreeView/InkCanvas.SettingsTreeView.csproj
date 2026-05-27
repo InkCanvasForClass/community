@@ -10,7 +10,7 @@
     <UseWPF>true</UseWPF>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <LangVersion>10</LangVersion>
-    <NoWarn>CA1416</NoWarn>
+    <NoWarn>CA1416;NETSDK1138</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

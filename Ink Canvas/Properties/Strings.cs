@@ -445,8 +445,12 @@ namespace Ink_Canvas.Properties
             dict["FileAssoc_CheckError"] = ("AutomationStrings", "FileAssoc_CheckError");
             dict["Storage_AutoDeleteDaysThreshold"] = ("AutomationStrings", "Storage_AutoDeleteDaysThreshold");
             dict["Storage_MinAutomationStrokes"] = ("AutomationStrings", "Storage_MinAutomationStrokes");
+            dict["FriendlyLinks_CjikSponsorDescription"] = ("FriendlyLinksStrings", "FriendlyLinks_CjikSponsorDescription");
+            dict["FriendlyLinks_FriendsSectionTitle"] = ("FriendlyLinksStrings", "FriendlyLinks_FriendsSectionTitle");
             dict["FriendlyLinks_InkeysDescription"] = ("FriendlyLinksStrings", "FriendlyLinks_InkeysDescription");
             dict["FriendlyLinks_NamePickerDescription"] = ("FriendlyLinksStrings", "FriendlyLinks_NamePickerDescription");
+            dict["FriendlyLinks_Sponsor"] = ("FriendlyLinksStrings", "FriendlyLinks_Sponsor");
+            dict["FriendlyLinks_SponsorSectionTitle"] = ("FriendlyLinksStrings", "FriendlyLinks_SponsorSectionTitle");
             dict["FriendlyLinks_Title"] = ("FriendlyLinksStrings", "FriendlyLinks_Title");
             dict["FriendlyLinks_Visit"] = ("FriendlyLinksStrings", "FriendlyLinks_Visit");
             dict["Geometry_DrawArrow"] = ("GeometryStrings", "DrawArrow");
