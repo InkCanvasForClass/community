@@ -345,14 +345,17 @@ namespace Ink_Canvas
                     {
                         rootChildren.Add(elem);
                     }
-                    if (reverseContent) ReverseAllContentPanels();
-                    else RestoreAllContentPanels();
+                    // 根据用户设置决定是否翻转内容面板
+                    if (reverseContent)
+                        ReverseAllContentPanels();
+                    else
+                        RestoreAllContentPanels();
                     isFloatingBarHeadOnRight = false;
                     isFloatingBarHeadOnBottom = false;
                     break;
                     
                 case ToolbarPosition.Left:
-                    foreach (var elem in otherElements)
+                    foreach (var elem in otherElements.AsEnumerable().Reverse())
                     {
                         rootChildren.Add(elem);
                     }
@@ -361,14 +364,17 @@ namespace Ink_Canvas
                         dragElement.Margin = new Thickness(3, 0, 0, 0);
                         rootChildren.Add(dragElement);
                     }
-                    if (!reverseContent) ReverseAllContentPanels();
-                    else RestoreAllContentPanels();
+                    // 根据用户设置决定是否翻转内容面板（注意：这里默认是翻转的，所以用户设置要反过来）
+                    if (reverseContent)
+                        RestoreAllContentPanels();
+                    else
+                        ReverseAllContentPanels();
                     isFloatingBarHeadOnRight = true;
                     isFloatingBarHeadOnBottom = false;
                     break;
                     
                 case ToolbarPosition.Top:
-                    foreach (var elem in otherElements)
+                    foreach (var elem in otherElements.AsEnumerable().Reverse())
                     {
                         rootChildren.Add(elem);
                     }
@@ -377,8 +383,11 @@ namespace Ink_Canvas
                         dragElement.Margin = new Thickness(0, 3, 0, 0);
                         rootChildren.Add(dragElement);
                     }
-                    if (!reverseContent) ReverseAllContentPanels();
-                    else RestoreAllContentPanels();
+                    // 根据用户设置决定是否翻转内容面板（注意：这里默认是翻转的，所以用户设置要反过来）
+                    if (reverseContent)
+                        RestoreAllContentPanels();
+                    else
+                        ReverseAllContentPanels();
                     isFloatingBarHeadOnRight = false;
                     isFloatingBarHeadOnBottom = true;
                     break;
@@ -393,8 +402,11 @@ namespace Ink_Canvas
                     {
                         rootChildren.Add(elem);
                     }
-                    if (reverseContent) ReverseAllContentPanels();
-                    else RestoreAllContentPanels();
+                    // 根据用户设置决定是否翻转内容面板
+                    if (reverseContent)
+                        ReverseAllContentPanels();
+                    else
+                        RestoreAllContentPanels();
                     isFloatingBarHeadOnRight = false;
                     isFloatingBarHeadOnBottom = false;
                     break;
