@@ -853,6 +853,8 @@ namespace Ink_Canvas
                     {
                         LogHelper.WriteLogToFile("PPT连接已断开", LogHelper.LogType.Event);
                         _singlePPTInkManager?.ClearAllStrokes();
+                        CollapseAllPptNavBarPreviews();
+                        ResetPptEnhancedPreviewCache();
                         _exitPPTModeAfterDisconnectTimer?.Stop();
                         _exitPPTModeAfterDisconnectTimer = null;
                         _pptUIManager?.UpdateSlideShowStatus(false);
@@ -992,7 +994,7 @@ namespace Ink_Canvas
 
                     if (!isInSlideShow)
                     {
-                        ResetPptEnhancedPreviewCache();
+                        CollapseAllPptNavBarPreviews();
                     }
 
                     // 检查主窗口可见性（用于仅PPT模式）
@@ -1386,7 +1388,6 @@ namespace Ink_Canvas
             try
             {
                 await Application.Current.Dispatcher.InvokeAsync(() => CollapseAllPptNavBarPreviews());
-                ResetPptEnhancedPreviewCache();
 
                 if (Settings.Automation.IsAutoFoldAfterPPTSlideShow && !isFloatingBarFolded)
                 {
@@ -3020,7 +3021,6 @@ namespace Ink_Canvas
             try
             {
                 await Application.Current.Dispatcher.InvokeAsync(() => CollapseAllPptNavBarPreviews());
-                ResetPptEnhancedPreviewCache();
 
                 if (Settings.Automation.IsAutoFoldAfterPPTSlideShow && !isFloatingBarFolded)
                 {
