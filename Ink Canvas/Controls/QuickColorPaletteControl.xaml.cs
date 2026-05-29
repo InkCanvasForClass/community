@@ -1,6 +1,7 @@
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -191,6 +192,44 @@ namespace Ink_Canvas.Controls
 
         private void QuickColorPurple_Click(object sender, RoutedEventArgs e)
             => RaiseEvent(new RoutedEventArgs(ColorClickedEvent, "Purple"));
+
+        public void ApplyOrientation(bool isVertical)
+        {
+            if (QuickColorPaletteContainer == null) return;
+
+            if (isVertical)
+            {
+                QuickColorPaletteContainer.Orientation = Orientation.Horizontal;
+                QuickColorPalettePanel.Orientation = Orientation.Horizontal;
+                if (Row1 != null)
+                {
+                    Row1.Orientation = Orientation.Vertical;
+                    Row1.Margin = new Thickness(0, 0, 1, 0);
+                }
+                if (Row2 != null)
+                {
+                    Row2.Orientation = Orientation.Vertical;
+                    Row2.Margin = new Thickness(1, 0, 0, 0);
+                }
+                QuickColorPaletteSingleRowPanel.Orientation = Orientation.Vertical;
+            }
+            else
+            {
+                QuickColorPaletteContainer.Orientation = Orientation.Vertical;
+                QuickColorPalettePanel.Orientation = Orientation.Vertical;
+                if (Row1 != null)
+                {
+                    Row1.Orientation = Orientation.Horizontal;
+                    Row1.Margin = new Thickness(0, 0, 0, 1);
+                }
+                if (Row2 != null)
+                {
+                    Row2.Orientation = Orientation.Horizontal;
+                    Row2.Margin = new Thickness(0, 1, 0, 0);
+                }
+                QuickColorPaletteSingleRowPanel.Orientation = Orientation.Horizontal;
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)

@@ -48,6 +48,12 @@
                             SwitchName="ToggleSwitchReverseToolbarContent"
                             Toggled="ReverseToolbarContentToggleSwitch_Toggled" />
 
+                    <controls:LabeledSettingsCard x:Name="CardAutoFlipWhenSpaceInsufficient"
+                            Header="空间不足时自动翻转"
+                            Description="拖动工具栏到屏幕边缘空间不足时自动翻转方向"
+                            SwitchName="ToggleSwitchAutoFlipWhenSpaceInsufficient"
+                            Toggled="AutoFlipWhenSpaceInsufficientToggleSwitch_Toggled" />
+
                     <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_FloatingBarScale}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}" />

@@ -21,5 +21,11 @@ namespace Ink_Canvas.Controls.Toolbar.Items
             };
             return panel;
         }
+
+        public void ApplyOrientation(FrameworkElement view, Orientation orientation)
+        {
+            if (view is StackPanel panel)
+                panel.Orientation = orientation;
+        }
     }
 }

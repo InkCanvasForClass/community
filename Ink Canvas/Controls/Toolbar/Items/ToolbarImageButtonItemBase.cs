@@ -1,5 +1,6 @@
 using Ink_Canvas.Properties;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -46,6 +47,14 @@ namespace Ink_Canvas.Controls.Toolbar.Items
             btn.ButtonMouseUp += (s, e) => OnClick(host, s, e);
             AfterBuild(host, btn);
             return btn;
+        }
+
+        public void ApplyOrientation(FrameworkElement view, Orientation orientation)
+        {
+            if (view is ToolbarImageButton btn)
+            {
+                btn.ApplyOrientation(orientation == Orientation.Vertical);
+            }
         }
     }
 }

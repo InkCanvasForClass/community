@@ -237,90 +237,96 @@ namespace Ink_Canvas
 
                 if (IsVerticalToolbar)
                 {
-                    var headTop = ViewboxFloatingBar.Margin.Top + (isFloatingBarHeadOnBottom ? Math.Max(0, _cachedFloatingBarHeight - _cachedFloatingBarHeadHeight) : 0);
-
-                    const double flipHysteresis = 20.0;
-                    bool shouldFlip;
-                    var vPosition = Settings.Appearance.ToolbarPosition;
-                    if (vPosition == ToolbarPosition.Bottom)
+                    if (Settings.Appearance.AutoFlipWhenSpaceInsufficient)
                     {
-                        if (!isFloatingBarHeadOnBottom && headTop + _cachedFloatingBarHeight > _cachedScreenHeight)
-                            shouldFlip = true;
-                        else if (isFloatingBarHeadOnBottom && headTop + _cachedFloatingBarHeight <= _cachedScreenHeight - flipHysteresis)
-                            shouldFlip = false;
+                        var headTop = ViewboxFloatingBar.Margin.Top + (isFloatingBarHeadOnBottom ? Math.Max(0, _cachedFloatingBarHeight - _cachedFloatingBarHeadHeight) : 0);
+
+                        const double flipHysteresis = 20.0;
+                        bool shouldFlip;
+                        var vPosition = Settings.Appearance.ToolbarPosition;
+                        if (vPosition == ToolbarPosition.Bottom)
+                        {
+                            if (!isFloatingBarHeadOnBottom && headTop + _cachedFloatingBarHeight > _cachedScreenHeight)
+                                shouldFlip = true;
+                            else if (isFloatingBarHeadOnBottom && headTop + _cachedFloatingBarHeight <= _cachedScreenHeight - flipHysteresis)
+                                shouldFlip = false;
+                            else
+                                shouldFlip = isFloatingBarHeadOnBottom;
+                        }
                         else
-                            shouldFlip = isFloatingBarHeadOnBottom;
-                    }
-                    else
-                    {
-                        var toolsTopWhenUnflipped = headTop - Math.Max(0, _cachedFloatingBarHeight - _cachedFloatingBarHeadHeight);
-                        if (isFloatingBarHeadOnBottom && toolsTopWhenUnflipped < 0)
-                            shouldFlip = false;
-                        else if (!isFloatingBarHeadOnBottom && toolsTopWhenUnflipped >= flipHysteresis)
-                            shouldFlip = true;
-                        else
-                            shouldFlip = isFloatingBarHeadOnBottom;
-                    }
+                        {
+                            var toolsTopWhenUnflipped = headTop - Math.Max(0, _cachedFloatingBarHeight - _cachedFloatingBarHeadHeight);
+                            if (isFloatingBarHeadOnBottom && toolsTopWhenUnflipped < 0)
+                                shouldFlip = false;
+                            else if (!isFloatingBarHeadOnBottom && toolsTopWhenUnflipped >= flipHysteresis)
+                                shouldFlip = true;
+                            else
+                                shouldFlip = isFloatingBarHeadOnBottom;
+                        }
 
-                    if (shouldFlip != isFloatingBarHeadOnBottom)
-                    {
-                        var savedHeadTop = headTop;
-                        SetFloatingBarHeadPlacementVertical(shouldFlip);
+                        if (shouldFlip != isFloatingBarHeadOnBottom)
+                        {
+                            var savedHeadTop = headTop;
+                            SetFloatingBarHeadPlacementVertical(shouldFlip);
 
-                        RefreshFloatingBarSizeCache(true);
+                            RefreshFloatingBarSizeCache(true);
 
-                        double newTop;
-                        if (shouldFlip)
-                            newTop = savedHeadTop - Math.Max(0, _cachedFloatingBarHeight - _cachedFloatingBarHeadHeight);
-                        else
-                            newTop = savedHeadTop;
+                            double newTop;
+                            if (shouldFlip)
+                                newTop = savedHeadTop - Math.Max(0, _cachedFloatingBarHeight - _cachedFloatingBarHeadHeight);
+                            else
+                                newTop = savedHeadTop;
 
-                        newTop = ClampFloatingBarTop(newTop, _cachedFloatingBarHeight, _cachedScreenHeight);
-                        ViewboxFloatingBar.Margin = new Thickness(ViewboxFloatingBar.Margin.Left, newTop, -2000, -200);
+                            newTop = ClampFloatingBarTop(newTop, _cachedFloatingBarHeight, _cachedScreenHeight);
+                            ViewboxFloatingBar.Margin = new Thickness(ViewboxFloatingBar.Margin.Left, newTop, -2000, -200);
+                        }
                     }
                 }
                 else
                 {
-                    var headLeft = ViewboxFloatingBar.Margin.Left + (isFloatingBarHeadOnRight ? Math.Max(0, _cachedFloatingBarWidth - _cachedFloatingBarHeadWidth) : 0);
-
-                    const double flipHysteresis = 20.0;
-                    bool shouldFlip;
-                    var hPosition = Settings.Appearance.ToolbarPosition;
-                    if (hPosition == ToolbarPosition.Right)
+                    if (Settings.Appearance.AutoFlipWhenSpaceInsufficient)
                     {
-                        if (!isFloatingBarHeadOnRight && headLeft + _cachedFloatingBarWidth > _cachedScreenWidth)
-                            shouldFlip = true;
-                        else if (isFloatingBarHeadOnRight && headLeft + _cachedFloatingBarWidth <= _cachedScreenWidth - flipHysteresis)
-                            shouldFlip = false;
+                        var headLeft = ViewboxFloatingBar.Margin.Left + (isFloatingBarHeadOnRight ? Math.Max(0, _cachedFloatingBarWidth - _cachedFloatingBarHeadWidth) : 0);
+
+                        const double flipHysteresis = 20.0;
+                        bool shouldFlip;
+                        var hPosition = Settings.Appearance.ToolbarPosition;
+                        if (hPosition == ToolbarPosition.Right)
+                        {
+                            if (!isFloatingBarHeadOnRight && headLeft + _cachedFloatingBarWidth > _cachedScreenWidth)
+                                shouldFlip = true;
+                            else if (isFloatingBarHeadOnRight && headLeft + _cachedFloatingBarWidth <= _cachedScreenWidth - flipHysteresis)
+                                shouldFlip = false;
+                            else
+                                shouldFlip = isFloatingBarHeadOnRight;
+                        }
                         else
-                            shouldFlip = isFloatingBarHeadOnRight;
-                    }
-                    else
-                    {
-                        var toolsLeftWhenUnflipped = headLeft - Math.Max(0, _cachedFloatingBarWidth - _cachedFloatingBarHeadWidth);
-                        if (isFloatingBarHeadOnRight && toolsLeftWhenUnflipped < 0)
-                            shouldFlip = false;
-                        else if (!isFloatingBarHeadOnRight && toolsLeftWhenUnflipped >= flipHysteresis)
-                            shouldFlip = true;
-                        else
-                            shouldFlip = isFloatingBarHeadOnRight;
-                    }
+                        {
+                            var toolsLeftWhenUnflipped = headLeft - Math.Max(0, _cachedFloatingBarWidth - _cachedFloatingBarHeadWidth);
+                            if (isFloatingBarHeadOnRight && toolsLeftWhenUnflipped < 0)
+                                shouldFlip = false;
+                            else if (!isFloatingBarHeadOnRight && toolsLeftWhenUnflipped >= flipHysteresis)
+                                shouldFlip = true;
+                            else
+                                shouldFlip = isFloatingBarHeadOnRight;
+                        }
 
-                    if (shouldFlip != isFloatingBarHeadOnRight)
-                    {
-                        var savedHeadLeft = headLeft;
-                        SetFloatingBarHeadPlacement(shouldFlip);
+                        if (shouldFlip != isFloatingBarHeadOnRight)
+                        {
+                            var savedHeadLeft = headLeft;
+                            SetFloatingBarHeadPlacement(shouldFlip);
 
-                        RefreshFloatingBarSizeCache(true);
+                            RefreshFloatingBarSizeCache(true);
 
-                        double newLeft;
-                        if (shouldFlip)
-                            newLeft = savedHeadLeft - Math.Max(0, _cachedFloatingBarWidth - _cachedFloatingBarHeadWidth);
-                        else
-                            newLeft = savedHeadLeft;
+                            double newLeft;
+                            if (shouldFlip)
+                                newLeft = savedHeadLeft - Math.Max(0, _cachedFloatingBarWidth - _cachedFloatingBarHeadWidth);
+                            else
+                                newLeft = savedHeadLeft;
 
-                        newLeft = ClampFloatingBarLeft(newLeft, _cachedFloatingBarWidth, _cachedScreenWidth);
-                        ViewboxFloatingBar.Margin = new Thickness(newLeft, ViewboxFloatingBar.Margin.Top, -2000, -200);
+                            newLeft = ClampFloatingBarLeft(newLeft, _cachedFloatingBarWidth, _cachedScreenWidth);
+                            ViewboxFloatingBar.Margin = new Thickness(newLeft, ViewboxFloatingBar.Margin.Top, -2000, -200);
+                        }
                     }
                 }
 
@@ -2215,9 +2221,10 @@ namespace Ink_Canvas
                 var useFullWidth = fullCollapsedWidth > collapsedHeadWidth * 1.5;
                 var collapsedWidth = useFullWidth ? fullCollapsedWidth : collapsedHeadWidth;
                 
-                var shouldFlipOnCollapse = Settings.Appearance.ToolbarPosition == ToolbarPosition.Left
+                var shouldFlipOnCollapse = !Settings.Appearance.AutoFlipWhenSpaceInsufficient ? isFloatingBarHeadOnRight :
+                    (Settings.Appearance.ToolbarPosition == ToolbarPosition.Left
                     ? headLeft - Math.Max(0, collapsedWidth - collapsedHeadWidth) < 0
-                    : headLeft + collapsedWidth > screenWidth;
+                    : headLeft + collapsedWidth > screenWidth);
                 var wasCollapsedHeadOnRight = isFloatingBarHeadOnRight;
                 SetFloatingBarHeadPlacement(shouldFlipOnCollapse);
 
@@ -2254,9 +2261,10 @@ namespace Ink_Canvas
             
             var floatingBarWidth = GetFloatingBarScaledWidth();
             var expandedHeadWidth = GetFloatingBarHeadScaledWidth();
-            var shouldPlaceToolsOnLeft = Settings.Appearance.ToolbarPosition == ToolbarPosition.Left
+            var shouldPlaceToolsOnLeft = !Settings.Appearance.AutoFlipWhenSpaceInsufficient ? isFloatingBarHeadOnRight :
+                (Settings.Appearance.ToolbarPosition == ToolbarPosition.Left
                 ? headLeft - Math.Max(0, floatingBarWidth - expandedHeadWidth) >= 0
-                : headLeft + floatingBarWidth > screenWidth;
+                : headLeft + floatingBarWidth > screenWidth);
             var wasHeadOnRight = isFloatingBarHeadOnRight;
 
             SetFloatingBarHeadPlacement(shouldPlaceToolsOnLeft);
@@ -2300,9 +2308,10 @@ namespace Ink_Canvas
                 var useFullHeight = fullCollapsedHeight > collapsedHeadHeight * 1.5;
                 var collapsedHeight = useFullHeight ? fullCollapsedHeight : collapsedHeadHeight;
 
-                var shouldFlipOnCollapse = Settings.Appearance.ToolbarPosition == ToolbarPosition.Top
+                var shouldFlipOnCollapse = !Settings.Appearance.AutoFlipWhenSpaceInsufficient ? isFloatingBarHeadOnBottom :
+                    (Settings.Appearance.ToolbarPosition == ToolbarPosition.Top
                     ? headTop - Math.Max(0, collapsedHeight - collapsedHeadHeight) < 0
-                    : headTop + collapsedHeight > screenHeight;
+                    : headTop + collapsedHeight > screenHeight);
                 var wasCollapsedHeadOnBottom = isFloatingBarHeadOnBottom;
                 SetFloatingBarHeadPlacementVertical(shouldFlipOnCollapse);
 
@@ -2339,9 +2348,10 @@ namespace Ink_Canvas
 
             var floatingBarHeight = GetFloatingBarScaledHeight();
             var expandedHeadHeight = GetFloatingBarHeadScaledHeight();
-            var shouldPlaceToolsOnTop = Settings.Appearance.ToolbarPosition == ToolbarPosition.Top
+            var shouldPlaceToolsOnTop = !Settings.Appearance.AutoFlipWhenSpaceInsufficient ? isFloatingBarHeadOnBottom :
+                (Settings.Appearance.ToolbarPosition == ToolbarPosition.Top
                 ? headTop - Math.Max(0, floatingBarHeight - expandedHeadHeight) >= 0
-                : headTop + floatingBarHeight > screenHeight;
+                : headTop + floatingBarHeight > screenHeight);
             var wasHeadOnBottom = isFloatingBarHeadOnBottom;
 
             SetFloatingBarHeadPlacementVertical(shouldPlaceToolsOnTop);
@@ -2385,32 +2395,35 @@ namespace Ink_Canvas
             var shouldPlaceToolsOnLeft = isFloatingBarHeadOnRight;
             var wasHeadOnRight = isFloatingBarHeadOnRight;
 
-            var requestedHeadLeft = isFloatingBarHeadOnRight
-                ? requestedLeft + Math.Max(0, floatingBarWidth - headWidth)
-                : requestedLeft;
+            if (Settings.Appearance.AutoFlipWhenSpaceInsufficient)
+            {
+                var requestedHeadLeft = isFloatingBarHeadOnRight
+                    ? requestedLeft + Math.Max(0, floatingBarWidth - headWidth)
+                    : requestedLeft;
 
-            if (Settings.Appearance.ToolbarPosition == ToolbarPosition.Right)
-            {
-                if (!isFloatingBarHeadOnRight && requestedHeadLeft + floatingBarWidth > screenWidth)
+                if (Settings.Appearance.ToolbarPosition == ToolbarPosition.Right)
                 {
-                    shouldPlaceToolsOnLeft = true;
-                    nextLeft = requestedHeadLeft - Math.Max(0, floatingBarWidth - headWidth);
+                    if (!isFloatingBarHeadOnRight && requestedHeadLeft + floatingBarWidth > screenWidth)
+                    {
+                        shouldPlaceToolsOnLeft = true;
+                        nextLeft = requestedHeadLeft - Math.Max(0, floatingBarWidth - headWidth);
+                    }
+                    else if (isFloatingBarHeadOnRight && requestedHeadLeft + floatingBarWidth <= screenWidth)
+                    {
+                        shouldPlaceToolsOnLeft = false;
+                    }
                 }
-                else if (isFloatingBarHeadOnRight && requestedHeadLeft + floatingBarWidth <= screenWidth)
+                else
                 {
-                    shouldPlaceToolsOnLeft = false;
-                }
-            }
-            else
-            {
-                var toolsLeftWhenUnflipped = requestedHeadLeft - Math.Max(0, floatingBarWidth - headWidth);
-                if (isFloatingBarHeadOnRight && toolsLeftWhenUnflipped < 0)
-                {
-                    shouldPlaceToolsOnLeft = false;
-                }
-                else if (!isFloatingBarHeadOnRight && toolsLeftWhenUnflipped >= 0)
-                {
-                    shouldPlaceToolsOnLeft = true;
+                    var toolsLeftWhenUnflipped = requestedHeadLeft - Math.Max(0, floatingBarWidth - headWidth);
+                    if (isFloatingBarHeadOnRight && toolsLeftWhenUnflipped < 0)
+                    {
+                        shouldPlaceToolsOnLeft = false;
+                    }
+                    else if (!isFloatingBarHeadOnRight && toolsLeftWhenUnflipped >= 0)
+                    {
+                        shouldPlaceToolsOnLeft = true;
+                    }
                 }
             }
 
@@ -2432,32 +2445,35 @@ namespace Ink_Canvas
             var shouldPlaceToolsOnTop = isFloatingBarHeadOnBottom;
             var wasHeadOnBottom = isFloatingBarHeadOnBottom;
 
-            var requestedHeadTop = isFloatingBarHeadOnBottom
-                ? requestedTop + Math.Max(0, floatingBarHeight - headHeight)
-                : requestedTop;
+            if (Settings.Appearance.AutoFlipWhenSpaceInsufficient)
+            {
+                var requestedHeadTop = isFloatingBarHeadOnBottom
+                    ? requestedTop + Math.Max(0, floatingBarHeight - headHeight)
+                    : requestedTop;
 
-            if (Settings.Appearance.ToolbarPosition == ToolbarPosition.Bottom)
-            {
-                if (!isFloatingBarHeadOnBottom && requestedHeadTop + floatingBarHeight > screenHeight)
+                if (Settings.Appearance.ToolbarPosition == ToolbarPosition.Bottom)
                 {
-                    shouldPlaceToolsOnTop = true;
-                    nextTop = requestedHeadTop - Math.Max(0, floatingBarHeight - headHeight);
+                    if (!isFloatingBarHeadOnBottom && requestedHeadTop + floatingBarHeight > screenHeight)
+                    {
+                        shouldPlaceToolsOnTop = true;
+                        nextTop = requestedHeadTop - Math.Max(0, floatingBarHeight - headHeight);
+                    }
+                    else if (isFloatingBarHeadOnBottom && requestedHeadTop + floatingBarHeight <= screenHeight)
+                    {
+                        shouldPlaceToolsOnTop = false;
+                    }
                 }
-                else if (isFloatingBarHeadOnBottom && requestedHeadTop + floatingBarHeight <= screenHeight)
+                else
                 {
-                    shouldPlaceToolsOnTop = false;
-                }
-            }
-            else
-            {
-                var toolsTopWhenUnflipped = requestedHeadTop - Math.Max(0, floatingBarHeight - headHeight);
-                if (isFloatingBarHeadOnBottom && toolsTopWhenUnflipped < 0)
-                {
-                    shouldPlaceToolsOnTop = false;
-                }
-                else if (!isFloatingBarHeadOnBottom && toolsTopWhenUnflipped >= 0)
-                {
-                    shouldPlaceToolsOnTop = true;
+                    var toolsTopWhenUnflipped = requestedHeadTop - Math.Max(0, floatingBarHeight - headHeight);
+                    if (isFloatingBarHeadOnBottom && toolsTopWhenUnflipped < 0)
+                    {
+                        shouldPlaceToolsOnTop = false;
+                    }
+                    else if (!isFloatingBarHeadOnBottom && toolsTopWhenUnflipped >= 0)
+                    {
+                        shouldPlaceToolsOnTop = true;
+                    }
                 }
             }
 

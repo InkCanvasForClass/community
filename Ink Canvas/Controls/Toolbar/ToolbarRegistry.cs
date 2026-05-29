@@ -421,7 +421,7 @@ namespace Ink_Canvas.Controls.Toolbar
             public List<DisplayItem> Items { get; set; } = new();
         }
 
-        private static List<DisplayItem> FlattenEntries(IToolbarHost host, List<ToolbarComponentEntry> entries, Dictionary<string, IToolbarItem> itemMap)
+        private static List<DisplayItem> FlattenEntries(IToolbarHost host, List<ToolbarComponentEntry> entries, Dictionary<string, IToolbarItem> itemMap, Orientation orientation = Orientation.Horizontal)
         {
             var result = new List<DisplayItem>();
             foreach (var entry in entries)
@@ -437,10 +437,10 @@ namespace Ink_Canvas.Controls.Toolbar
                         {
                             if (groupContentItems.Count > 0)
                             {
-                                FlushGroupContentItems(result, groupContentItems, groupRuleset, entry.ShowSeparateBorder);
+                                FlushGroupContentItems(result, groupContentItems, groupRuleset, entry.ShowSeparateBorder, orientation);
                                 groupContentItems.Clear();
                             }
-                            var nestedItems = FlattenEntries(host, new List<ToolbarComponentEntry> { childEntry }, itemMap);
+                            var nestedItems = FlattenEntries(host, new List<ToolbarComponentEntry> { childEntry }, itemMap, orientation);
                             foreach (var nestedItem in nestedItems)
                             {
                                 result.Add(nestedItem);
@@ -449,7 +449,7 @@ namespace Ink_Canvas.Controls.Toolbar
                         }
 
                         if (!itemMap.TryGetValue(childEntry.Id, out var item)) continue;
-                        var view = BuildAndRegister(host, item);
+                        var view = BuildAndRegister(host, item, orientation);
                         if (view == null) continue;
                         view.Tag = InjectedTag;
                         ApplyComponentSettings(view, childEntry);
@@ -460,7 +460,7 @@ namespace Ink_Canvas.Controls.Toolbar
                         {
                             if (groupContentItems.Count > 0)
                             {
-                                FlushGroupContentItems(result, groupContentItems, groupRuleset, entry.ShowSeparateBorder);
+                                FlushGroupContentItems(result, groupContentItems, groupRuleset, entry.ShowSeparateBorder, orientation);
                                 groupContentItems.Clear();
                             }
                             result.Add(new DisplayItem
@@ -485,7 +485,7 @@ namespace Ink_Canvas.Controls.Toolbar
 
                     if (groupContentItems.Count > 0)
                     {
-                        FlushGroupContentItems(result, groupContentItems, groupRuleset, entry.ShowSeparateBorder);
+                        FlushGroupContentItems(result, groupContentItems, groupRuleset, entry.ShowSeparateBorder, orientation);
                     }
                 }
                 else
@@ -495,7 +495,7 @@ namespace Ink_Canvas.Controls.Toolbar
                         LogHelper.WriteLogToFile($"ToolbarRegistry: 未找到条目 [{entry.Id}]", LogHelper.LogType.Warning);
                         continue;
                     }
-                    var view = BuildAndRegister(host, item);
+                    var view = BuildAndRegister(host, item, orientation);
                     if (view == null) continue;
                     view.Tag = InjectedTag;
                     ApplyComponentSettings(view, entry);
@@ -613,7 +613,7 @@ namespace Ink_Canvas.Controls.Toolbar
 
             ClearInjected(rootPanel);
 
-            var displayItems = FlattenEntries(host, layout.Components, itemMap);
+            var displayItems = FlattenEntries(host, layout.Components, itemMap, orientation);
             var segments = GroupIntoSegments(displayItems);
 
             bool hasExistingChildren = rootPanel.Children.Count > 0;
@@ -842,13 +842,14 @@ namespace Ink_Canvas.Controls.Toolbar
             return true;
         }
 
-        private static FrameworkElement BuildAndRegister(IToolbarHost host, IToolbarItem item)
+        private static FrameworkElement BuildAndRegister(IToolbarHost host, IToolbarItem item, Orientation orientation = Orientation.Horizontal)
         {
             try
             {
                 var view = item.BuildView(host);
                 if (view == null) return null;
                 host.RegisterView(item.Id, view);
+                item.ApplyOrientation(view, orientation);
                 return view;
             }
             catch (Exception ex)

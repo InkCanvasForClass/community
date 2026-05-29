@@ -482,6 +482,9 @@ namespace Ink_Canvas
         [JsonProperty("reverseToolbarContent")]
         public bool ReverseToolbarContent { get; set; } = false;
 
+        [JsonProperty("autoFlipWhenSpaceInsufficient")]
+        public bool AutoFlipWhenSpaceInsufficient { get; set; } = true;
+
     }
 
     public class PowerPointSettings

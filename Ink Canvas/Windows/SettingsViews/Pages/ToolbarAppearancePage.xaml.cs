@@ -60,6 +60,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 CardReverseToolbarContent.IsOn = settings.Appearance.ReverseToolbarContent;
             }
+
+            // 加载自动翻转设置
+            if (CardAutoFlipWhenSpaceInsufficient != null)
+            {
+                CardAutoFlipWhenSpaceInsufficient.IsOn = settings.Appearance.AutoFlipWhenSpaceInsufficient;
+            }
         }
 
         private void UpdateAllSliderTexts()
@@ -159,6 +165,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.Settings.Appearance.ReverseToolbarContent = CardReverseToolbarContent.IsOn;
             SettingsManager.SaveSettingsToFile();
             SettingsActionHub.OnReverseToolbarContentChanged(CardReverseToolbarContent.IsOn);
+        }
+
+        private void AutoFlipWhenSpaceInsufficientToggleSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            if (CardAutoFlipWhenSpaceInsufficient == null) return;
+
+            SettingsManager.Settings.Appearance.AutoFlipWhenSpaceInsufficient = CardAutoFlipWhenSpaceInsufficient.IsOn;
+            SettingsManager.SaveSettingsToFile();
         }
     }
 }

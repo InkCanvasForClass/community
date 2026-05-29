@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Controls;
 using Ink_Canvas.Properties;
 
 namespace Ink_Canvas.Controls.Toolbar.Items
@@ -28,6 +29,14 @@ namespace Ink_Canvas.Controls.Toolbar.Items
             };
 
             return control;
+        }
+
+        public void ApplyOrientation(FrameworkElement view, Orientation orientation)
+        {
+            if (view is QuickColorPaletteControl control)
+            {
+                control.ApplyOrientation(orientation == Orientation.Vertical);
+            }
         }
     }
 }
