@@ -51,13 +51,13 @@ namespace Ink_Canvas
                 _interceptor.WindowIntercepted += OnWindowIntercepted;
                 _interceptor.WindowRestored += OnWindowRestored;
 
+                _isInitialized = true;
+
                 // 应用配置
                 ApplySettings();
 
-                _isInitialized = true;
-
-                // 如果设置了自动启动，则启动拦截器
-                if (_settings.AutoStart && _settings.IsEnabled)
+                // 如果设置了自动启动或已有拦截选项开启，则启动拦截器
+                if (!IsRunning && (_settings.AutoStart || HasEnabledRules()) && _settings.IsEnabled)
                 {
                     Start();
                 }
@@ -354,6 +354,11 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"显示通知失败: {ex.Message}", LogHelper.LogType.Error);
             }
+        }
+
+        private bool HasEnabledRules()
+        {
+            return _settings?.InterceptRules?.Any(rule => rule.Value) == true;
         }
 
         #endregion

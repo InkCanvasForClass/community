@@ -677,6 +677,32 @@ namespace Ink_Canvas
             }
         }
 
+        internal void UnloadPPTModuleForShutdown()
+        {
+            try
+            {
+                if (Dispatcher.CheckAccess())
+                {
+                    DisposePPTManagers();
+                    return;
+                }
+
+                if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
+
+                Dispatcher.Invoke(DisposePPTManagers, DispatcherPriority.Send);
+            }
+            catch (TaskCanceledException)
+            {
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"关机时卸载PPT模块失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
         /// <summary>
         /// 初始化长按定时器
         /// </summary>
@@ -853,6 +879,8 @@ namespace Ink_Canvas
                     {
                         LogHelper.WriteLogToFile("PPT连接已断开", LogHelper.LogType.Event);
                         _singlePPTInkManager?.ClearAllStrokes();
+                        CollapseAllPptNavBarPreviews();
+                        ResetPptEnhancedPreviewCache();
                         _exitPPTModeAfterDisconnectTimer?.Stop();
                         _exitPPTModeAfterDisconnectTimer = null;
                         _pptUIManager?.UpdateSlideShowStatus(false);
@@ -992,7 +1020,7 @@ namespace Ink_Canvas
 
                     if (!isInSlideShow)
                     {
-                        ResetPptEnhancedPreviewCache();
+                        CollapseAllPptNavBarPreviews();
                     }
 
                     // 检查主窗口可见性（用于仅PPT模式）
@@ -1386,7 +1414,6 @@ namespace Ink_Canvas
             try
             {
                 await Application.Current.Dispatcher.InvokeAsync(() => CollapseAllPptNavBarPreviews());
-                ResetPptEnhancedPreviewCache();
 
                 if (Settings.Automation.IsAutoFoldAfterPPTSlideShow && !isFloatingBarFolded)
                 {
@@ -3020,7 +3047,6 @@ namespace Ink_Canvas
             try
             {
                 await Application.Current.Dispatcher.InvokeAsync(() => CollapseAllPptNavBarPreviews());
-                ResetPptEnhancedPreviewCache();
 
                 if (Settings.Automation.IsAutoFoldAfterPPTSlideShow && !isFloatingBarFolded)
                 {
