@@ -331,6 +331,8 @@ namespace Ink_Canvas
             
             rootChildren.Clear();
 
+            var reverseContent = Settings.Appearance.ReverseToolbarContent;
+
             switch (position)
             {
                 case ToolbarPosition.Right:
@@ -343,7 +345,8 @@ namespace Ink_Canvas
                     {
                         rootChildren.Add(elem);
                     }
-                    RestoreAllContentPanels();
+                    if (reverseContent) ReverseAllContentPanels();
+                    else RestoreAllContentPanels();
                     isFloatingBarHeadOnRight = false;
                     isFloatingBarHeadOnBottom = false;
                     break;
@@ -358,27 +361,13 @@ namespace Ink_Canvas
                         dragElement.Margin = new Thickness(3, 0, 0, 0);
                         rootChildren.Add(dragElement);
                     }
-                    RestoreAllContentPanels();
+                    if (!reverseContent) ReverseAllContentPanels();
+                    else RestoreAllContentPanels();
                     isFloatingBarHeadOnRight = true;
                     isFloatingBarHeadOnBottom = false;
                     break;
                     
                 case ToolbarPosition.Top:
-                    if (dragElement != null)
-                    {
-                        dragElement.Margin = new Thickness(0);
-                        rootChildren.Add(dragElement);
-                    }
-                    foreach (var elem in otherElements)
-                    {
-                        rootChildren.Add(elem);
-                    }
-                    RestoreAllContentPanels();
-                    isFloatingBarHeadOnRight = false;
-                    isFloatingBarHeadOnBottom = false;
-                    break;
-                    
-                case ToolbarPosition.Bottom:
                     foreach (var elem in otherElements)
                     {
                         rootChildren.Add(elem);
@@ -388,9 +377,26 @@ namespace Ink_Canvas
                         dragElement.Margin = new Thickness(0, 3, 0, 0);
                         rootChildren.Add(dragElement);
                     }
-                    RestoreAllContentPanels();
+                    if (!reverseContent) ReverseAllContentPanels();
+                    else RestoreAllContentPanels();
                     isFloatingBarHeadOnRight = false;
                     isFloatingBarHeadOnBottom = true;
+                    break;
+                    
+                case ToolbarPosition.Bottom:
+                    if (dragElement != null)
+                    {
+                        dragElement.Margin = new Thickness(0);
+                        rootChildren.Add(dragElement);
+                    }
+                    foreach (var elem in otherElements)
+                    {
+                        rootChildren.Add(elem);
+                    }
+                    if (reverseContent) ReverseAllContentPanels();
+                    else RestoreAllContentPanels();
+                    isFloatingBarHeadOnRight = false;
+                    isFloatingBarHeadOnBottom = false;
                     break;
             }
             
