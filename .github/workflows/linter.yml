@@ -2,8 +2,10 @@
 name: Lint
 
 on: 
-  push: [ net6 ]
-  pull_request: [ net6 ]
+  push:
+    branches: [ net6 ]
+  pull_request:
+    branches: [ net6 ]
 
 permissions: {}
 
