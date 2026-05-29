@@ -677,6 +677,32 @@ namespace Ink_Canvas
             }
         }
 
+        internal void UnloadPPTModuleForShutdown()
+        {
+            try
+            {
+                if (Dispatcher.CheckAccess())
+                {
+                    DisposePPTManagers();
+                    return;
+                }
+
+                if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
+
+                Dispatcher.Invoke(DisposePPTManagers, DispatcherPriority.Send);
+            }
+            catch (TaskCanceledException)
+            {
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"关机时卸载PPT模块失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
         /// <summary>
         /// 初始化长按定时器
         /// </summary>

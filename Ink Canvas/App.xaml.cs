@@ -410,18 +410,15 @@ namespace Ink_Canvas
             string reason = e.Reason == SessionEndReasons.Logoff ? "用户注销" : "系统关机";
             WriteCrashLog($"系统会话即将结束: {reason}");
 
-            // 清理PowerPoint进程守护和悬浮窗拦截器
+            // 卸载PPT模块并清理悬浮窗拦截器
             try
             {
                 // 获取主窗口实例
                 var mainWindow = Current.MainWindow as MainWindow;
                 if (mainWindow != null)
                 {
-                    // 清理PowerPoint进程守护
-                    var method = mainWindow.GetType().GetMethod("StopPowerPointProcessMonitoring",
-                        BindingFlags.NonPublic | BindingFlags.Instance);
-                    method?.Invoke(mainWindow, null);
-                    WriteCrashLog("PowerPoint进程守护已在系统关机时清理");
+                    mainWindow.UnloadPPTModuleForShutdown();
+                    WriteCrashLog("PPT模块已在系统关机时卸载");
 
                     // 清理悬浮窗拦截器
                     var interceptorField = mainWindow.GetType().GetField("_floatingWindowInterceptorManager",
