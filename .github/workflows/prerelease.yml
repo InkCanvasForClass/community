@@ -429,40 +429,42 @@ jobs:
         if: always()
         shell: bash
         run: |
-          echo "# Release Build Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "# Release Build Summary"
+            echo ""
 
-          if [ "${{ steps.check-exe.outputs.build_success }}" = "true" ]; then
-            echo "## ✅ Release Build Successful" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Version:** ${{ needs.prepare.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-            echo "**Tag:** \`${{ needs.prepare.outputs.tag_name }}\`" >> $GITHUB_STEP_SUMMARY
-            echo "**Release Type:** ${{ needs.prepare.outputs.is_prerelease == 'true' && 'Pre-release' || 'Release' }}" >> $GITHUB_STEP_SUMMARY
-            echo "**Architecture:** ${{ matrix.architecture }}" >> $GITHUB_STEP_SUMMARY
-            echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-            echo "**Run:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            
-            if [ -n "${{ steps.calculate_size.outputs.zip_size }}" ]; then
-              echo "**Archive Size:** ${{ steps.calculate_size.outputs.zip_size }} bytes" >> $GITHUB_STEP_SUMMARY
+            if [ "${{ steps.check-exe.outputs.build_success }}" = "true" ]; then
+              echo "## ✅ Release Build Successful"
+              echo ""
+              echo "**Version:** ${{ needs.prepare.outputs.version }}"
+              echo "**Tag:** \`${{ needs.prepare.outputs.tag_name }}\`"
+              echo "**Release Type:** ${{ needs.prepare.outputs.is_prerelease == 'true' && 'Pre-release' || 'Release' }}"
+              echo "**Architecture:** ${{ matrix.architecture }}"
+              echo "**Commit:** \`${{ github.sha }}\`"
+              echo "**Run:** #${{ github.run_number }}"
+              echo ""
+              
+              if [ -n "${{ steps.calculate_size.outputs.zip_size }}" ]; then
+                echo "**Archive Size:** ${{ steps.calculate_size.outputs.zip_size }} bytes"
+              fi
+              
+              if [ -n "${{ steps.calculate_installer_size.outputs.installer_size }}" ]; then
+                echo "**Installer Size:** ${{ steps.calculate_installer_size.outputs.installer_size }} bytes"
+              fi
+              
+            else
+              echo "## ❌ Release Build Failed"
+              echo ""
+              echo "**Version:** ${{ needs.prepare.outputs.version }}"
+              echo "**Tag:** \`${{ needs.prepare.outputs.tag_name }}\`"
+              echo "**Architecture:** ${{ matrix.architecture }}"
+              echo "**Event:** ${{ github.event_name }} (${{ github.event.action || 'N/A' }})"
+              echo "**Commit:** \`${{ github.sha }}\`"
+              echo "**Run:** #${{ github.run_number }}"
+              echo ""
+              echo "Check build logs for details."
             fi
-            
-            if [ -n "${{ steps.calculate_installer_size.outputs.installer_size }}" ]; then
-              echo "**Installer Size:** ${{ steps.calculate_installer_size.outputs.installer_size }} bytes" >> $GITHUB_STEP_SUMMARY
-            fi
-            
-          else
-            echo "## ❌ Release Build Failed" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Version:** ${{ needs.prepare.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-            echo "**Tag:** \`${{ needs.prepare.outputs.tag_name }}\`" >> $GITHUB_STEP_SUMMARY
-            echo "**Architecture:** ${{ matrix.architecture }}" >> $GITHUB_STEP_SUMMARY
-            echo "**Event:** ${{ github.event_name }} (${{ github.event.action || 'N/A' }})" >> $GITHUB_STEP_SUMMARY
-            echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-            echo "**Run:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Check build logs for details." >> $GITHUB_STEP_SUMMARY
-          fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
   sign:
     needs: [prepare, build]
@@ -596,9 +598,11 @@ jobs:
           enhancedChangelog="${originalChangelog}${fileTable}"
 
           # 输出增强版changelog内容
-          echo "enhanced_changelog<<EOF" >> $GITHUB_OUTPUT
-          echo "$enhancedChangelog" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          {
+            echo "enhanced_changelog<<EOF"
+            echo "$enhancedChangelog"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
           echo "Enhanced changelog created with file information table"
 
