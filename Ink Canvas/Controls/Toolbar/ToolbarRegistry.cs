@@ -515,13 +515,13 @@ namespace Ink_Canvas.Controls.Toolbar
             return result;
         }
 
-        private static void FlushGroupContentItems(List<DisplayItem> result, List<DisplayItem> groupContentItems, ToolbarRuleset groupRuleset, bool groupShowSeparateBorder)
+        private static void FlushGroupContentItems(List<DisplayItem> result, List<DisplayItem> groupContentItems, ToolbarRuleset groupRuleset, bool groupShowSeparateBorder, Orientation orientation = Orientation.Horizontal)
         {
             if (groupContentItems.Count == 0) return;
 
             if (groupShowSeparateBorder)
             {
-                var innerPanel = new StackPanel { Orientation = Orientation.Horizontal };
+                var innerPanel = new StackPanel { Orientation = orientation };
                 foreach (var item in groupContentItems)
                 {
                     item.View.Margin = new Thickness(0);
@@ -539,13 +539,13 @@ namespace Ink_Canvas.Controls.Toolbar
             }
             else
             {
-                result.Add(CreateGroupContentDisplayItem(groupContentItems, groupRuleset));
+                result.Add(CreateGroupContentDisplayItem(groupContentItems, groupRuleset, orientation));
             }
         }
 
-        private static DisplayItem CreateGroupContentDisplayItem(List<DisplayItem> groupContentItems, ToolbarRuleset groupRuleset)
+        private static DisplayItem CreateGroupContentDisplayItem(List<DisplayItem> groupContentItems, ToolbarRuleset groupRuleset, Orientation orientation = Orientation.Horizontal)
         {
-            var innerPanel = new StackPanel { Orientation = Orientation.Horizontal };
+            var innerPanel = new StackPanel { Orientation = orientation };
             foreach (var item in groupContentItems)
             {
                 item.View.Margin = new Thickness(0);
@@ -594,7 +594,7 @@ namespace Ink_Canvas.Controls.Toolbar
 
         #endregion
 
-        public static void Populate(IToolbarHost host, Panel rootPanel, ToolbarLayoutSettings layout)
+        public static void Populate(IToolbarHost host, Panel rootPanel, ToolbarLayoutSettings layout, Orientation orientation = Orientation.Horizontal)
         {
             if (host == null || rootPanel == null)
             {
@@ -623,27 +623,29 @@ namespace Ink_Canvas.Controls.Toolbar
                 if (segment.IsSeparateBorder)
                 {
                     var item = segment.Items[0];
-                    var elementToAdd = WrapInSeparateBorder(item.View, item.Ruleset, item.IsToolbarButton);
-                    elementToAdd.Margin = (isFirst && !hasExistingChildren) ? new Thickness(0) : new Thickness(3, 0, 0, 0);
+                    var elementToAdd = WrapInSeparateBorder(item.View, item.Ruleset, item.IsToolbarButton, orientation);
+                    elementToAdd.Margin = (isFirst && !hasExistingChildren) ? new Thickness(0) : 
+                        orientation == Orientation.Horizontal ? new Thickness(3, 0, 0, 0) : new Thickness(0, 3, 0, 0);
                     ApplyInitialVisibility(elementToAdd, item.Ruleset);
                     rootPanel.Children.Add(elementToAdd);
                 }
                 else
                 {
-                    var contentBorder = CreateContentBorder(segment.Items);
-                    contentBorder.Margin = (isFirst && !hasExistingChildren) ? new Thickness(0) : new Thickness(3, 0, 0, 0);
+                    var contentBorder = CreateContentBorder(segment.Items, orientation);
+                    contentBorder.Margin = (isFirst && !hasExistingChildren) ? new Thickness(0) : 
+                        orientation == Orientation.Horizontal ? new Thickness(3, 0, 0, 0) : new Thickness(0, 3, 0, 0);
                     rootPanel.Children.Add(contentBorder);
                 }
                 isFirst = false;
             }
         }
 
-        private static Border CreateContentBorder(List<DisplayItem> items)
+        private static Border CreateContentBorder(List<DisplayItem> items, Orientation orientation = Orientation.Horizontal)
         {
             var contentPanel = new StackPanel
             {
-                Orientation = Orientation.Horizontal,
-                Margin = new Thickness(2, 2, 2, 0),
+                Orientation = orientation,
+                Margin = orientation == Orientation.Horizontal ? new Thickness(2, 2, 2, 0) : new Thickness(2, 2, 0, 2),
                 Cursor = Cursors.Arrow,
                 Tag = ContentPanelTag
             };
@@ -658,9 +660,10 @@ namespace Ink_Canvas.Controls.Toolbar
 
             var border = new Border
             {
-                Padding = new Thickness(2, 0, 2, 0),
+                Padding = orientation == Orientation.Horizontal ? new Thickness(2, 0, 2, 0) : new Thickness(0, 2, 0, 2),
                 Visibility = Visibility.Visible,
-                Height = 58,
+                Height = orientation == Orientation.Horizontal ? 58 : double.NaN,
+                Width = orientation == Orientation.Vertical ? 58 : double.NaN,
                 CornerRadius = new CornerRadius(8),
                 BorderThickness = new Thickness(2),
                 HorizontalAlignment = HorizontalAlignment.Left,
@@ -673,7 +676,7 @@ namespace Ink_Canvas.Controls.Toolbar
             return border;
         }
 
-        private static Border WrapInSeparateBorder(FrameworkElement view, ToolbarRuleset ruleset, bool isToolbarButton)
+        private static Border WrapInSeparateBorder(FrameworkElement view, ToolbarRuleset ruleset, bool isToolbarButton, Orientation orientation = Orientation.Horizontal)
         {
             Border wrapper;
 
@@ -681,10 +684,11 @@ namespace Ink_Canvas.Controls.Toolbar
             {
                 var contentPanel = new StackPanel
                 {
-                    Orientation = Orientation.Horizontal,
-                    Margin = new Thickness(2, 2, 2, 0),
+                    Orientation = orientation,
+                    Margin = orientation == Orientation.Horizontal ? new Thickness(2, 2, 2, 0) : new Thickness(2, 2, 0, 2),
                     Cursor = Cursors.Arrow,
                     HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
                     Tag = ContentPanelTag
                 };
                 ApplyInitialVisibility(view, ruleset);
@@ -694,9 +698,10 @@ namespace Ink_Canvas.Controls.Toolbar
                 {
                     Margin = new Thickness(0),
                     Padding = new Thickness(0),
-                    Width = double.NaN,
-                    MinWidth = 58,
-                    Height = 58,
+                    MinWidth = orientation == Orientation.Horizontal ? 58 : 0,
+                    MinHeight = orientation == Orientation.Vertical ? 58 : 0,
+                    Height = orientation == Orientation.Horizontal ? 58 : double.NaN,
+                    Width = orientation == Orientation.Vertical ? 58 : double.NaN,
                     CornerRadius = new CornerRadius(8),
                     BorderThickness = new Thickness(2),
                     Child = contentPanel,
@@ -706,15 +711,17 @@ namespace Ink_Canvas.Controls.Toolbar
                 wrapper.SetResourceReference(Border.BorderBrushProperty, "FloatBarBorderBrush");
 
                 view.HorizontalAlignment = HorizontalAlignment.Center;
+                view.VerticalAlignment = VerticalAlignment.Center;
             }
             else
             {
                 var contentPanel = new StackPanel
                 {
-                    Orientation = Orientation.Horizontal,
-                    Margin = new Thickness(2, 2, 2, 0),
+                    Orientation = orientation,
+                    Margin = orientation == Orientation.Horizontal ? new Thickness(2, 2, 2, 0) : new Thickness(2, 2, 0, 2),
                     Cursor = Cursors.Arrow,
                     HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
                     Tag = ContentPanelTag
                 };
                 ApplyInitialVisibility(view, ruleset);
@@ -723,10 +730,10 @@ namespace Ink_Canvas.Controls.Toolbar
                 wrapper = new Border
                 {
                     Margin = new Thickness(0),
-                    Padding = new Thickness(2, 0, 2, 0),
-                    Width = double.NaN,
+                    Padding = orientation == Orientation.Horizontal ? new Thickness(2, 0, 2, 0) : new Thickness(0, 2, 0, 2),
                     MinWidth = 0,
-                    Height = 58,
+                    Height = orientation == Orientation.Horizontal ? 58 : double.NaN,
+                    Width = orientation == Orientation.Vertical ? 58 : double.NaN,
                     CornerRadius = new CornerRadius(8),
                     BorderThickness = new Thickness(2),
                     Child = contentPanel,
@@ -736,6 +743,7 @@ namespace Ink_Canvas.Controls.Toolbar
                 wrapper.SetResourceReference(Border.BorderBrushProperty, "FloatBarBorderBrush");
 
                 view.HorizontalAlignment = HorizontalAlignment.Center;
+                view.VerticalAlignment = VerticalAlignment.Center;
             }
 
             SetHidingRuleset(wrapper, ruleset);

@@ -31,6 +31,23 @@
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="基本" />
 
+                    <ui:SettingsCard Header="工具栏位置" Description="设置工具栏相对于拖动图标的显示位置">
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <ComboBox x:Name="ToolbarPositionComboBox" Width="200" SelectionChanged="ToolbarPositionComboBox_SelectionChanged">
+                                <ComboBoxItem Tag="Right" Content="右侧" />
+                                <ComboBoxItem Tag="Left" Content="左侧" />
+                                <ComboBoxItem Tag="Top" Content="上方" />
+                                <ComboBoxItem Tag="Bottom" Content="下方" />
+                            </ComboBox>
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <controls:LabeledSettingsCard x:Name="CardReverseToolbarContent"
+                            Header="翻转组件内容"
+                            Description="当空间不足时是否翻转组件内容的方向"
+                            SwitchName="ToggleSwitchReverseToolbarContent"
+                            Toggled="ReverseToolbarContentToggleSwitch_Toggled" />
+
                     <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_FloatingBarScale}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}" />

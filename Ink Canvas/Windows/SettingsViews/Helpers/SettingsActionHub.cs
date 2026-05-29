@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Resources;
 using System;
 using System.Windows;
 
@@ -208,6 +209,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             var mw = GetMainWindow();
             if (mw != null && mw.currentMode == 2)
                 mw.ViewboxFloatingBar.Opacity = value;
+        }
+
+        public static void OnToolbarPositionChanged(ToolbarPosition position)
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.UpdateToolbarPosition();
+        }
+
+        public static void OnReverseToolbarContentChanged(bool isOn)
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.UpdateToolbarPosition();
         }
 
         #endregion
