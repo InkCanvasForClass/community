@@ -1,11 +1,11 @@
 ---
 name: Lint
 
-on: 
+on:
   push:
-    branches: [ net6 ]
+    branches: [net6]
   pull_request:
-    branches: [ net6 ]
+    branches: [net6]
 
 permissions: {}
 

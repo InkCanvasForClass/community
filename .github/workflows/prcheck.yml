@@ -3,9 +3,9 @@ name: PR Check
 on:
   pull_request:
     types: [opened, synchronize]
-    branches: [ main, net6 ]
+    branches: [main, net6]
     paths-ignore:
-      - '**/*.md'
+      - "**/*.md"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}-${{ github.head_ref || github.sha }}
@@ -27,16 +27,16 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
-      
+
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v3
-      
+
       - name: Setup dotnet
         uses: actions/setup-dotnet@v5
-      
-      - name: Restore Package 
+
+      - name: Restore Package
         run: dotnet restore "Ink Canvas.sln" --locked-mode
-      
+
       - name: Build the Solution
         run: msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Debug" /p:GitFlow="$GITFLOW" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
 
@@ -44,7 +44,7 @@ jobs:
         id: check-exe
         run: |
           $exePath = "Ink Canvas\bin\Debug\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\InkCanvasForClass.exe"
-          
+
           if (Test-Path $exePath) {
             echo "build_success=true" >> $env:GITHUB_OUTPUT
           } else {
@@ -65,14 +65,13 @@ jobs:
           $shortSha = $env:GITHUB_SHA.Substring(0, 7)
           $version = "debug-$shortSha-$env:GITHUB_RUN_NUMBER"
           echo "archive_name=$version" >> $env:GITHUB_OUTPUT
-      
+
       - name: Upload Artifact (if build succeeded)
         if: steps.check-exe.outputs.build_success == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: InkCanvasForClass.CE.debug.${{ matrix.architecture }}
           path: "Ink Canvas/bin/Debug/${{ matrix.architecture }}/net6.0-windows10.0.19041.0/*"
-        
 
       - name: Create Summary
         if: always()
@@ -80,7 +79,7 @@ jobs:
         run: |
           echo "# Build Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "${{ steps.check-exe.outputs.build_success }}" = "true" ]; then
             echo "## ✅ Build Successful" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
