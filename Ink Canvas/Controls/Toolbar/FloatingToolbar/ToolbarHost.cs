@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Windows;
 
-namespace Ink_Canvas.Controls.Toolbar
+namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 {
     /// <summary>
     /// MainWindow 版的 IToolbarHost 实现。Phase 1 直接把 MainWindow 引用暴露给插件，

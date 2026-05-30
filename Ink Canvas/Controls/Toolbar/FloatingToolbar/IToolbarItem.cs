@@ -1,7 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 
-namespace Ink_Canvas.Controls.Toolbar
+namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 {
     public interface IToolbarItem
     {

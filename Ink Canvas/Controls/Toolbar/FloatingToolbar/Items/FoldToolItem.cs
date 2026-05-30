@@ -1,7 +1,7 @@
 using System.Windows.Input;
 using Ink_Canvas.Properties;
 
-namespace Ink_Canvas.Controls.Toolbar.Items
+namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
 {
     internal sealed class FoldToolItem : ToolbarImageButtonItemBase
     {

@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace Ink_Canvas.Controls.Toolbar
+namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 {
     /// <summary>
     /// 工具栏按钮插件与宿主之间的桥梁。Phase 1 粗粒度暴露 MainWindow，后续收窄。

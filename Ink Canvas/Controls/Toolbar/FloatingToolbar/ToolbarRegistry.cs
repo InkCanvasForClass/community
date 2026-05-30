@@ -13,7 +13,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace Ink_Canvas.Controls.Toolbar
+namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 {
     public static class ToolbarRegistry
     {

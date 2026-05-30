@@ -4,7 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace Ink_Canvas.Controls.Toolbar.Items
+namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
 {
     internal abstract class ToolbarImageButtonItemBase : IToolbarItem
     {

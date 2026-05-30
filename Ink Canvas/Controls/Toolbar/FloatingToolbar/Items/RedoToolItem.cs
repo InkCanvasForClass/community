@@ -1,7 +1,7 @@
 using Ink_Canvas.Properties;
 using System.Windows.Input;
 
-namespace Ink_Canvas.Controls.Toolbar.Items
+namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
 {
     internal sealed class RedoToolItem : ToolbarImageButtonItemBase
     {

@@ -7,7 +7,7 @@
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:dd="urn:gong-wpf-dragdrop"
-      xmlns:toolbar="clr-namespace:Ink_Canvas.Controls.Toolbar"
+      xmlns:toolbar="clr-namespace:Ink_Canvas.Controls.Toolbar.FloatingToolbar"
       mc:Ignorable="d"
       Title="工具栏">
 

@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace Ink_Canvas.Controls.Toolbar
+namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 {
     public enum ToolbarLogicalMode
     {
