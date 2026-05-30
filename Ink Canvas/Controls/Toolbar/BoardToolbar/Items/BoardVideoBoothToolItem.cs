@@ -5,7 +5,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar.Items
     internal sealed class BoardVideoBoothToolItem : BoardToolbarImageButtonItemBase
     {
         public override string Id => "board.videoBooth";
-        public override string LocalizationKey => "Main_Board_VideoBooth";
+        public override string LocalizationKey => "Board_VideoBooth";
         public override string Description => "视频展台";
         public override ButtonPosition DefaultPosition => ButtonPosition.Last;
 

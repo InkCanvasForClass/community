@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -122,6 +122,9 @@
   </data>
   <data name="Board_Undo" xml:space="preserve">
     <value>Undo</value>
+  </data>
+  <data name="Board_VideoBooth" xml:space="preserve">
+    <value>Video Booth</value>
   </data>
   <data name="FloatingBar_Annotate" xml:space="preserve">
     <value>Annotate</value>

@@ -10,11 +10,11 @@
             Width="60" Height="50"
             MouseDown="ButtonBorder_MouseDown"
             MouseUp="ButtonBorder_MouseUp"
-            Background="{DynamicResource BoardFloatBarBackground}"
+            Background="{DynamicResource BoardFloatBarBackground}" d:Background="Green"
             Opacity="1"
             BorderThickness="1"
-            BorderBrush="{DynamicResource BoardFloatBarBorderBrush}">
-        <Grid Margin="6,6,6,4">
+            BorderBrush="{DynamicResource BoardFloatBarBorderBrush}" d:BorderBrush="Red">
+        <Grid Margin="0,6,0,4">
             <Image x:Name="ButtonImage"
                    VerticalAlignment="Top"
                    RenderOptions.BitmapScalingMode="HighQuality"
@@ -32,7 +32,7 @@
                     </DrawingImage>
                 </Image.Source>
             </Image>
-            <TextBlock x:Name="LabelTextBlock"
+            <TextBlock x:Name="LabelTextBlock" d:Text="田田田田"
                        Foreground="{DynamicResource FloatBarForeground}"
                        VerticalAlignment="Bottom"
                        HorizontalAlignment="Center"

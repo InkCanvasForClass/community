@@ -391,12 +391,19 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
 
             container.Children.Clear();
 
+            bool isFirst = true;
             foreach (var group in area.Groups)
             {
                 var views = BuildGroup(host, group.Components, area.Id);
                 if (views.Count > 0)
                 {
-                    container.Children.Add(CreateGroupBorder(views));
+                    var groupBorder = CreateGroupBorder(views);
+                    if (!isFirst)
+                    {
+                        groupBorder.Margin = new Thickness(3, 0, 0, 0);
+                    }
+                    container.Children.Add(groupBorder);
+                    isFirst = false;
                 }
             }
 
@@ -405,7 +412,12 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                 var view = BuildView(component.Id, host);
                 if (view != null)
                 {
+                    if (!isFirst)
+                    {
+                        view.Margin = new Thickness(3, 0, 0, 0);
+                    }
                     container.Children.Add(view);
+                    isFirst = false;
                 }
             }
         }

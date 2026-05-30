@@ -218,6 +218,7 @@ namespace Ink_Canvas.Properties
             dict["Board_Tools"] = ("FloatingBarStrings", "Board_Tools");
             dict["Board_TwoFingerMove"] = ("FloatingBarStrings", "Board_TwoFingerMove");
             dict["Board_Undo"] = ("FloatingBarStrings", "Board_Undo");
+            dict["Board_VideoBooth"] = ("FloatingBarStrings", "Board_VideoBooth");
             dict["Booth_CameraDevices"] = ("BoothStrings", "CameraDevices");
             dict["Booth_Capture"] = ("BoothStrings", "Capture");
             dict["Booth_CapturedPhotos"] = ("BoothStrings", "CapturedPhotos");
