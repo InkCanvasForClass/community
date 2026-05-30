@@ -2380,7 +2380,7 @@ namespace Ink_Canvas
                 GridTransparencyFakeBackground.Opacity = 1;
                 GridTransparencyFakeBackground.Background = new SolidColorBrush(StringToColor("#01FFFFFF"));
                 SetTransparentNotHitThrough();
-                CursorIcon_Click(null, null);
+                CursorIcon_Click(null, null, true);
 
                 if (Settings.PowerPointSettings.EnablePPTButtonEnhancedPreview && bar != null)
                 {
@@ -2436,11 +2436,6 @@ namespace Ink_Canvas
                     }
                 }
 
-                if (!isFloatingBarFolded)
-                {
-                    await Task.Delay(100);
-                    ViewboxFloatingBarMarginAnimation(60);
-                }
             }
             catch (OperationCanceledException)
             {
@@ -2451,11 +2446,22 @@ namespace Ink_Canvas
             }
         }
 
-        private void OnPptNavBarSlideSelected(Controls.PptNavBar bar, int slideNumber)
+        private async void OnPptNavBarSlideSelected(Controls.PptNavBar bar, int slideNumber)
         {
-            try { _pptManager?.TryNavigateToSlide(slideNumber); }
+            try
+            {
+                if (bar != null)
+                {
+                    bar.IsPreviewExpanded = false;
+                    bar.UpdateLayout();
+
+                    // Give WPF one render pass to hide the preview before PowerPoint starts its transition.
+                    await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.Render);
+                }
+
+                _pptManager?.TryNavigateToSlide(slideNumber);
+            }
             catch (Exception ex) { LogHelper.WriteLogToFile($"PPT增强预览跳转异常: {ex}", LogHelper.LogType.Error); }
-            finally { if (bar != null) bar.IsPreviewExpanded = false; }
         }
 
         /// <summary>
