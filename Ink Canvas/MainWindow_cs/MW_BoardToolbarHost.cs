@@ -7,6 +7,9 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Ink;
+using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Ink_Canvas
 {
@@ -221,7 +224,11 @@ namespace Ink_Canvas
 
         public void UpdatePageInfo()
         {
-            _pageManager?.UpdatePageInfoDisplay(TextBlockWhiteBoardIndexInfo);
+            var pageInfoTextBlock = FindView("board.pageInfo") as TextBlock;
+            if (pageInfoTextBlock != null)
+            {
+                _pageManager?.UpdatePageInfoDisplay(pageInfoTextBlock);
+            }
         }
 
         private void InitializeBoardToolbar()
@@ -238,6 +245,8 @@ namespace Ink_Canvas
                 BoardToolbarRegistry.RebuildToolbar(host, BlackboardLeftSidePanel, BlackboardCenterSidePanel, BlackboardRightSidePanel);
 
                 BindPopupPlacementTargets();
+                BindPageInfoClickHandler();
+                CreatePagePreviewUI();
 
                 UpdateBoardToolbarState();
             }
@@ -311,6 +320,103 @@ namespace Ink_Canvas
                     redoBtn.IsEnabled = CanRedo;
                 }
             }), System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+
+        private void BindPageInfoClickHandler()
+        {
+            var pageInfoBtn = FindView("board.pageList.rightBtn") as Border;
+            if (pageInfoBtn != null)
+            {
+                pageInfoBtn.MouseDown += (s, e) => BtnWhiteBoardPageIndex_Click(s, e);
+            }
+        }
+
+        private void CreatePagePreviewUI()
+        {
+            var template = new DataTemplate();
+
+            var borderFactory = new FrameworkElementFactory(typeof(Border));
+            borderFactory.SetValue(Border.BackgroundProperty, new SolidColorBrush(Color.FromArgb(20, 255, 255, 255)));
+            borderFactory.SetValue(Border.MarginProperty, new Thickness(2));
+            borderFactory.SetValue(Border.PaddingProperty, new Thickness(4));
+            borderFactory.SetValue(Border.CornerRadiusProperty, new CornerRadius(4));
+
+            var gridFactory = new FrameworkElementFactory(typeof(Grid));
+            var row1 = new FrameworkElementFactory(typeof(RowDefinition));
+            row1.SetValue(RowDefinition.HeightProperty, new GridLength(60));
+            var row2 = new FrameworkElementFactory(typeof(RowDefinition));
+            row2.SetValue(RowDefinition.HeightProperty, GridLength.Auto);
+            gridFactory.AppendChild(row1);
+            gridFactory.AppendChild(row2);
+
+            var inkCanvasFactory = new FrameworkElementFactory(typeof(System.Windows.Controls.InkCanvas));
+            inkCanvasFactory.SetValue(Grid.RowProperty, 0);
+            inkCanvasFactory.SetValue(System.Windows.Controls.InkCanvas.BackgroundProperty, Brushes.White);
+            inkCanvasFactory.AddHandler(FrameworkElement.LoadedEvent, new RoutedEventHandler((s, e) =>
+            {
+                if (s is System.Windows.Controls.InkCanvas ic && ic.DataContext is PageListViewItem item)
+                {
+                    ic.Strokes.Clear();
+                    if (item.Strokes != null)
+                    {
+                        ic.Strokes.Add(item.Strokes);
+                    }
+                }
+            }));
+
+            var textBlockFactory = new FrameworkElementFactory(typeof(TextBlock));
+            textBlockFactory.SetValue(Grid.RowProperty, 1);
+            textBlockFactory.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("Index"));
+            textBlockFactory.SetValue(TextBlock.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+            textBlockFactory.SetValue(TextBlock.ForegroundProperty, Application.Current.TryFindResource("FloatBarForeground") as Brush ?? Brushes.White);
+            textBlockFactory.SetValue(TextBlock.FontSizeProperty, 12.0);
+            textBlockFactory.SetValue(TextBlock.MarginProperty, new Thickness(0, 2, 0, 0));
+
+            gridFactory.AppendChild(inkCanvasFactory);
+            gridFactory.AppendChild(textBlockFactory);
+            borderFactory.AppendChild(gridFactory);
+            template.VisualTree = borderFactory;
+
+            var rightListView = new System.Windows.Controls.ListView
+            {
+                Background = Brushes.Transparent,
+                BorderThickness = new Thickness(0),
+                SelectionMode = SelectionMode.Single,
+                ItemTemplate = template
+            };
+            rightListView.MouseUp += BlackBoardRightSidePageListView_OnMouseUp;
+
+            var rightScrollViewer = new ScrollViewer
+            {
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                Content = rightListView
+            };
+
+            var rightBorder = new Border
+            {
+                Width = 120,
+                MaxHeight = 400,
+                CornerRadius = new CornerRadius(8),
+                Background = Application.Current.TryFindResource("FloatBarBackground") as Brush ?? new SolidColorBrush(Color.FromRgb(30, 30, 30)),
+                BorderBrush = new SolidColorBrush(Color.FromArgb(51, 255, 255, 255)),
+                BorderThickness = new Thickness(1),
+                Child = rightScrollViewer,
+                Visibility = Visibility.Collapsed,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Bottom,
+                Margin = new Thickness(0, 0, 10, 70)
+            };
+
+            RegisterView("board.pageList.right", rightListView);
+            RegisterView("board.pageList.rightScrollViewer", rightScrollViewer);
+            RegisterView("board.pageList.rightBorder", rightBorder);
+
+            var parentGrid = BlackboardRightSidePanel?.Parent as Grid;
+            var mainGrid = parentGrid?.Parent as Grid;
+            if (mainGrid != null)
+            {
+                mainGrid.Children.Add(rightBorder);
+            }
         }
     }
 }

@@ -79,6 +79,17 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             for (int i = 0; i < components.Count; i++)
             {
                 var entry = components[i];
+
+                if (entry.Id == "board.pageInfo")
+                {
+                    var pageInfoView = BuildPageInfoView(host);
+                    if (pageInfoView != null)
+                    {
+                        views.Add(pageInfoView);
+                    }
+                    continue;
+                }
+
                 if (!itemMap.TryGetValue(entry.Id, out var item))
                 {
                     LogHelper.WriteLogToFile($"BoardToolbarRegistry: 未找到组件 [{entry.Id}]", LogHelper.LogType.Warning);
@@ -104,6 +115,32 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             }
 
             return views;
+        }
+
+        private static FrameworkElement BuildPageInfoView(IBoardToolbarHost host)
+        {
+            var pageInfoTextBlock = new TextBlock
+            {
+                Text = "1/1",
+                Foreground = (Brush)Application.Current.TryFindResource("FloatBarForeground"),
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                FontSize = 14
+            };
+            host.RegisterView("board.pageInfo", pageInfoTextBlock);
+
+            var pageInfoBorder = new Border
+            {
+                CornerRadius = new CornerRadius(2),
+                Margin = new Thickness(2, 0, 2, 0),
+                Padding = new Thickness(6, 0, 6, 0),
+                Child = pageInfoTextBlock,
+                Cursor = System.Windows.Input.Cursors.Hand,
+                Background = Brushes.Transparent,
+                VerticalAlignment = VerticalAlignment.Stretch
+            };
+            host.RegisterView("board.pageList.rightBtn", pageInfoBorder);
+            return pageInfoBorder;
         }
 
         public static List<FrameworkElement> BuildGroup(IBoardToolbarHost host, params string[] ids)
@@ -237,11 +274,55 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                 Directory.CreateDirectory(dir);
 
             var defaultPath = GetConfigFilePath("default");
+            var layout = BoardToolbarLayoutSettings.CreateDefault();
+
             if (!File.Exists(defaultPath))
             {
-                var layout = BoardToolbarLayoutSettings.CreateDefault();
                 SaveConfigFile("default", layout);
                 LogHelper.WriteLogToFile("BoardToolbarRegistry: 首次启动，创建 default.json", LogHelper.LogType.Info);
+                return;
+            }
+
+            try
+            {
+                var existing = LoadConfigFile("default");
+                if (existing == null || existing.Areas == null)
+                {
+                    SaveConfigFile("default", layout);
+                    LogHelper.WriteLogToFile("BoardToolbarRegistry: 配置无效，重建 default.json", LogHelper.LogType.Info);
+                    return;
+                }
+
+                var defaultIds = new HashSet<string>();
+                foreach (var area in layout.Areas)
+                {
+                    foreach (var group in area.Groups)
+                    {
+                        foreach (var comp in group.Components)
+                            defaultIds.Add($"{area.Id}:{comp.Id}");
+                    }
+                }
+
+                var existingIds = new HashSet<string>();
+                foreach (var area in existing.Areas)
+                {
+                    foreach (var group in area.Groups)
+                    {
+                        foreach (var comp in group.Components)
+                            existingIds.Add($"{area.Id}:{comp.Id}");
+                    }
+                }
+
+                if (!defaultIds.SetEquals(existingIds))
+                {
+                    SaveConfigFile("default", layout);
+                    LogHelper.WriteLogToFile("BoardToolbarRegistry: 检测到组件变更，更新 default.json", LogHelper.LogType.Info);
+                }
+            }
+            catch (Exception ex)
+            {
+                SaveConfigFile("default", layout);
+                LogHelper.WriteLogToFile($"BoardToolbarRegistry: 配置校验失败，重建 default.json: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
 
@@ -311,84 +392,11 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             }
         }
 
-        public static void RebuildLeftToolbar(IBoardToolbarHost host, Panel container)
-        {
-            if (container == null) return;
+        public static void RebuildLeftToolbar(IBoardToolbarHost host, Panel container) { }
 
-            container.Children.Clear();
+        public static void RebuildCenterToolbar(IBoardToolbarHost host, Panel container) { }
 
-            var navigationViews = BuildGroup(host,
-                "board.previousPage",
-                "board.nextPage"
-            );
-            if (navigationViews.Count > 0)
-            {
-                container.Children.Add(CreateGroupBorder(navigationViews));
-            }
-        }
-
-        public static void RebuildCenterToolbar(IBoardToolbarHost host, Panel container)
-        {
-            if (container == null) return;
-
-            container.Children.Clear();
-
-            var gestureViews = BuildGroup(host,
-                "board.gesture",
-                "board.backgroundColor"
-            );
-            if (gestureViews.Count > 0)
-            {
-                container.Children.Add(CreateGroupBorder(gestureViews));
-            }
-
-            var toolViews = BuildGroup(host,
-                "board.select",
-                "board.pen",
-                "board.inkFreeze",
-                "board.eraser",
-                "board.strokeEraser",
-                "board.shape",
-                "board.insertImage",
-                "board.undo",
-                "board.redo"
-            );
-            if (toolViews.Count > 0)
-            {
-                container.Children.Add(CreateGroupBorder(toolViews));
-            }
-
-            var systemViews = BuildGroup(host,
-                "board.tools",
-                "board.exit"
-            );
-            if (systemViews.Count > 0)
-            {
-                container.Children.Add(CreateGroupBorder(systemViews));
-            }
-        }
-
-        public static void RebuildRightToolbar(IBoardToolbarHost host, Panel container)
-        {
-            if (container == null) return;
-
-            container.Children.Clear();
-
-            var addPageView = BuildView("board.addNewPage", host);
-            if (addPageView != null)
-            {
-                container.Children.Add(addPageView);
-            }
-
-            var navigationViews = BuildGroup(host,
-                "board.previousPage",
-                "board.nextPage"
-            );
-            if (navigationViews.Count > 0)
-            {
-                container.Children.Add(CreateGroupBorder(navigationViews));
-            }
-        }
+        public static void RebuildRightToolbar(IBoardToolbarHost host, Panel container) { }
 
         #endregion
     }

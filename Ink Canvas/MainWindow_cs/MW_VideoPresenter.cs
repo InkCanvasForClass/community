@@ -62,6 +62,11 @@ namespace Ink_Canvas
             ToggleVideoPresenterSidebar();
         }
 
+        public void ToggleVideoPresenterSidebarPublic()
+        {
+            ToggleVideoPresenterSidebar();
+        }
+
         /// <summary>
         /// 切换视频演示侧栏的显示状态并在显示时初始化相关控件与状态。
         /// </summary>

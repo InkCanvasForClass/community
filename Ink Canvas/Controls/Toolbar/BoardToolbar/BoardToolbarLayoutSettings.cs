@@ -96,7 +96,16 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                                 Components = new List<BoardToolbarComponentEntry>
                                 {
                                     new BoardToolbarComponentEntry { Id = "board.previousPage", Position = "First" },
+                                    new BoardToolbarComponentEntry { Id = "board.pageInfo" },
                                     new BoardToolbarComponentEntry { Id = "board.nextPage", Position = "Last" }
+                                }
+                            },
+                            new BoardToolbarGroupEntry
+                            {
+                                Id = "videoBooth",
+                                Components = new List<BoardToolbarComponentEntry>
+                                {
+                                    new BoardToolbarComponentEntry { Id = "board.videoBooth", Position = "Single" }
                                 }
                             }
                         }
@@ -149,11 +158,19 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                         {
                             new BoardToolbarGroupEntry
                             {
-                                Id = "pageManagement",
+                                Id = "addPage",
                                 Components = new List<BoardToolbarComponentEntry>
                                 {
-                                    new BoardToolbarComponentEntry { Id = "board.addNewPage", Position = "Single" },
+                                    new BoardToolbarComponentEntry { Id = "board.addNewPage", Position = "Single" }
+                                }
+                            },
+                            new BoardToolbarGroupEntry
+                            {
+                                Id = "navigation",
+                                Components = new List<BoardToolbarComponentEntry>
+                                {
                                     new BoardToolbarComponentEntry { Id = "board.previousPage", Position = "First" },
+                                    new BoardToolbarComponentEntry { Id = "board.pageInfo" },
                                     new BoardToolbarComponentEntry { Id = "board.nextPage", Position = "Last" }
                                 }
                             }
