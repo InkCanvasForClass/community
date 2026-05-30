@@ -2,6 +2,7 @@ using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar.BoardToolbar;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
+using iNKORE.UI.WPF.Controls;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -10,12 +11,13 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
+using iNKORE.UI.WPF.Modern.Controls;
+using SegoeFluentIcons = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons;
 
 namespace Ink_Canvas
 {
     public partial class MainWindow : IBoardToolbarHost
     {
-        private WhiteboardPageManager _pageManager;
         private Dictionary<string, FrameworkElement> _boardToolbarViews = new Dictionary<string, FrameworkElement>();
 
         MainWindow IBoardToolbarHost.Window => this;
@@ -32,120 +34,22 @@ namespace Ink_Canvas
 
         public void SwitchToPreviousPage()
         {
-            if (!_pageManager.CanGoToPrevious) return;
-
-            if (currentSelectedElement != null)
-            {
-                var previousEditingMode = inkCanvas.EditingMode;
-                UnselectElement(currentSelectedElement);
-                inkCanvas.EditingMode = previousEditingMode;
-                currentSelectedElement = null;
-            }
-
-            VideoPresenter_BeforePageLeave();
-            SaveStrokes();
-
-            ClearStrokes(true);
-            _pageManager.GoToPreviousPage();
-
-            RestoreStrokes();
-            VideoPresenter_OnPageChanged();
-            UpdateBoardToolbarState();
+            BtnWhiteBoardSwitchPrevious_Click(this, null);
         }
 
         public void SwitchToNextPage()
         {
-            if (!_pageManager.CanGoToNext)
-            {
-                AddWhiteboardPage();
-                return;
-            }
-
-            if (Settings.Automation.IsAutoSaveScreenshotAtClear &&
-                inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
-                CaptureAndEnqueueScreenshotSave(isHideNotification: true);
-
-            if (currentSelectedElement != null)
-            {
-                var previousEditingMode = inkCanvas.EditingMode;
-                UnselectElement(currentSelectedElement);
-                inkCanvas.EditingMode = previousEditingMode;
-                currentSelectedElement = null;
-            }
-
-            VideoPresenter_BeforePageLeave();
-            SaveStrokes();
-
-            ClearStrokes(true);
-            _pageManager.GoToNextPage();
-
-            RestoreStrokes();
-            VideoPresenter_OnPageChanged();
-            UpdateBoardToolbarState();
+            BtnWhiteBoardSwitchNext_Click(this, null);
         }
 
         public void AddWhiteboardPage()
         {
-            MarkCurrentPageInkChanged();
-            if (!_pageManager.CanAddNewPage) return;
-
-            if (Settings.Automation.IsAutoSaveScreenshotAtClear &&
-                inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
-                CaptureAndEnqueueScreenshotSave(isHideNotification: true);
-
-            if (currentSelectedElement != null)
-            {
-                var previousEditingMode = inkCanvas.EditingMode;
-                UnselectElement(currentSelectedElement);
-                inkCanvas.EditingMode = previousEditingMode;
-                currentSelectedElement = null;
-            }
-
-            VideoPresenter_BeforePageLeave();
-            SaveStrokes();
-            ClearStrokes(true);
-
-            _pageManager.AddNewPage();
-
-            RestoreStrokes();
-            VideoPresenter_OnPageChanged();
-            UpdateBoardToolbarState();
-
-            var leftPageListView = FindView("board.pageList.left") as System.Windows.Controls.ListView;
-            if (leftPageListView?.Visibility == Visibility.Visible)
-            {
-                RefreshBlackBoardSidePageListView();
-            }
+            BtnWhiteBoardAdd_Click(this, null);
         }
 
         public void DeleteWhiteboardPage()
         {
-            if (!_pageManager.CanDeletePage) return;
-
-            if (IsPageFrozen(_pageManager.CurrentIndex))
-            {
-                ShowNotification(MainWindowStrings.Main_Board_FrozenCannotDelete);
-                return;
-            }
-
-            if (currentSelectedElement != null)
-            {
-                var previousEditingMode = inkCanvas.EditingMode;
-                UnselectElement(currentSelectedElement);
-                inkCanvas.EditingMode = previousEditingMode;
-                currentSelectedElement = null;
-            }
-
-            ClearStrokes(true);
-            _pageManager.DeletePage(_pageManager.CurrentIndex);
-            RestoreStrokes();
-            UpdateBoardToolbarState();
-
-            var leftBorder = FindView("board.pageList.leftBorder") as Border;
-            var rightBorder = FindView("board.pageList.rightBorder") as Border;
-            if (leftBorder?.Visibility == Visibility.Visible ||
-                rightBorder?.Visibility == Visibility.Visible)
-                RefreshBlackBoardSidePageListView();
+            BtnWhiteBoardDelete_Click(this, null);
         }
 
         public void ToggleGesture()
@@ -215,19 +119,25 @@ namespace Ink_Canvas
 
         public bool CanUndo => IsUndoEnabled;
         public bool CanRedo => IsRedoEnabled;
-        public bool CanSwitchToPreviousPage => _pageManager?.CanGoToPrevious ?? false;
-        public bool CanSwitchToNextPage => _pageManager?.CanGoToNext ?? false;
-        public bool CanAddNewPage => _pageManager?.CanAddNewPage ?? false;
-        public bool CanDeletePage => _pageManager?.CanDeletePage ?? false;
+        public bool CanSwitchToPreviousPage => CurrentWhiteboardIndex > 1;
+        public bool CanSwitchToNextPage => CurrentWhiteboardIndex < WhiteboardTotalCount;
+        public bool CanAddNewPage => WhiteboardTotalCount < 99;
+        public bool CanDeletePage => WhiteboardTotalCount > 1;
 
-        public string CurrentPageInfo => _pageManager?.PageInfo ?? "1/1";
+        public string CurrentPageInfo => $"{CurrentWhiteboardIndex}/{WhiteboardTotalCount}";
 
         public void UpdatePageInfo()
         {
-            var pageInfoTextBlock = FindView("board.pageInfo") as TextBlock;
-            if (pageInfoTextBlock != null)
+            var leftPageInfo = FindView("board.pageInfo.left") as TextBlock;
+            if (leftPageInfo != null)
             {
-                _pageManager?.UpdatePageInfoDisplay(pageInfoTextBlock);
+                leftPageInfo.Text = CurrentPageInfo;
+            }
+
+            var rightPageInfo = FindView("board.pageInfo.right") as TextBlock;
+            if (rightPageInfo != null)
+            {
+                rightPageInfo.Text = CurrentPageInfo;
             }
         }
 
@@ -235,9 +145,6 @@ namespace Ink_Canvas
         {
             try
             {
-                _pageManager = new WhiteboardPageManager();
-                _pageManager.PageChanged += OnWhiteboardPageChanged;
-
                 BoardToolbarRegistry.EnsureDefaultConfigExists();
 
                 var host = (IBoardToolbarHost)this;
@@ -247,6 +154,7 @@ namespace Ink_Canvas
                 BindPopupPlacementTargets();
                 BindPageInfoClickHandler();
                 CreatePagePreviewUI();
+                RefreshBlackBoardSidePageListView();
 
                 UpdateBoardToolbarState();
             }
@@ -277,35 +185,35 @@ namespace Ink_Canvas
             }
         }
 
-        private void OnWhiteboardPageChanged()
-        {
-            UpdateBoardToolbarState();
-        }
-
         private void UpdateBoardToolbarState()
         {
-            if (_pageManager == null) return;
-
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 UpdatePageInfo();
 
-                var previousPageBtn = FindView("board.previousPage") as BoardToolbarButton;
-                if (previousPageBtn != null)
-                {
-                    previousPageBtn.IsEnabled = CanSwitchToPreviousPage;
-                }
+                var leftPreviousPageBtn = FindView("board.previousPage.left") as BoardToolbarButton;
+                var rightPreviousPageBtn = FindView("board.previousPage.right") as BoardToolbarButton;
+                if (leftPreviousPageBtn != null)
+                    leftPreviousPageBtn.IsEnabled = CanSwitchToPreviousPage;
+                if (rightPreviousPageBtn != null)
+                    rightPreviousPageBtn.IsEnabled = CanSwitchToPreviousPage;
 
-                var nextPageBtn = FindView("board.nextPage") as BoardToolbarButton;
-                if (nextPageBtn != null)
+                var leftNextPageBtn = FindView("board.nextPage.left") as BoardToolbarButton;
+                var rightNextPageBtn = FindView("board.nextPage.right") as BoardToolbarButton;
+                var nextPageLabel = CanSwitchToNextPage
+                    ? FloatingBarStrings.Board_NextPage
+                    : FloatingBarStrings.Board_NewPage;
+                if (leftNextPageBtn != null)
                 {
-                    nextPageBtn.IsEnabled = CanSwitchToNextPage;
-                    if (nextPageBtn.LabelTextBlockControl != null)
-                    {
-                        nextPageBtn.LabelTextBlockControl.Text = _pageManager.CanGoToNext
-                            ? FloatingBarStrings.Board_NextPage
-                            : FloatingBarStrings.Board_NewPage;
-                    }
+                    leftNextPageBtn.IsEnabled = CanSwitchToNextPage || CanAddNewPage;
+                    if (leftNextPageBtn.LabelTextBlockControl != null)
+                        leftNextPageBtn.LabelTextBlockControl.Text = nextPageLabel;
+                }
+                if (rightNextPageBtn != null)
+                {
+                    rightNextPageBtn.IsEnabled = CanSwitchToNextPage || CanAddNewPage;
+                    if (rightNextPageBtn.LabelTextBlockControl != null)
+                        rightNextPageBtn.LabelTextBlockControl.Text = nextPageLabel;
                 }
 
                 var undoBtn = FindView("board.undo") as BoardToolbarButton;
@@ -324,99 +232,185 @@ namespace Ink_Canvas
 
         private void BindPageInfoClickHandler()
         {
-            var pageInfoBtn = FindView("board.pageList.rightBtn") as Border;
-            if (pageInfoBtn != null)
+            var leftBtn = FindView("board.pageList.leftBtn") as Border;
+            if (leftBtn != null)
             {
-                pageInfoBtn.MouseDown += (s, e) => BtnWhiteBoardPageIndex_Click(s, e);
+                leftBtn.MouseUp += BtnWhiteBoardPageIndex_Click;
+            }
+
+            var rightBtn = FindView("board.pageList.rightBtn") as Border;
+            if (rightBtn != null)
+            {
+                rightBtn.MouseUp += BtnWhiteBoardPageIndex_Click;
             }
         }
 
         private void CreatePagePreviewUI()
         {
-            var template = new DataTemplate();
+            CreatePageListView(
+                "board.pageList.leftBorder",
+                "board.pageList.left",
+                "board.pageList.leftScrollViewer",
+                BlackBoardLeftSidePageListView_OnMouseUp,
+                -134, -465, -60, 50,
+                "board.pageList.leftBtn"
+            );
 
-            var borderFactory = new FrameworkElementFactory(typeof(Border));
-            borderFactory.SetValue(Border.BackgroundProperty, new SolidColorBrush(Color.FromArgb(20, 255, 255, 255)));
-            borderFactory.SetValue(Border.MarginProperty, new Thickness(2));
-            borderFactory.SetValue(Border.PaddingProperty, new Thickness(4));
-            borderFactory.SetValue(Border.CornerRadiusProperty, new CornerRadius(4));
+            CreatePageListView(
+                "board.pageList.rightBorder",
+                "board.pageList.right",
+                "board.pageList.rightScrollViewer",
+                BlackBoardRightSidePageListView_OnMouseUp,
+                -138, -465, -56, 50,
+                "board.pageList.rightBtn"
+            );
+        }
 
-            var gridFactory = new FrameworkElementFactory(typeof(Grid));
-            var row1 = new FrameworkElementFactory(typeof(RowDefinition));
-            row1.SetValue(RowDefinition.HeightProperty, new GridLength(60));
-            var row2 = new FrameworkElementFactory(typeof(RowDefinition));
-            row2.SetValue(RowDefinition.HeightProperty, GridLength.Auto);
-            gridFactory.AppendChild(row1);
-            gridFactory.AppendChild(row2);
+        private void CreatePageListView(
+            string borderId,
+            string listViewId,
+            string scrollViewerId,
+            MouseButtonEventHandler mouseUpHandler,
+            double marginLeft, double marginTop, double marginRight, double marginBottom,
+            string btnId)
+        {
+            var itemTemplate = CreatePageListItemTemplate(mouseUpHandler);
 
-            var inkCanvasFactory = new FrameworkElementFactory(typeof(System.Windows.Controls.InkCanvas));
-            inkCanvasFactory.SetValue(Grid.RowProperty, 0);
-            inkCanvasFactory.SetValue(System.Windows.Controls.InkCanvas.BackgroundProperty, Brushes.White);
-            inkCanvasFactory.AddHandler(FrameworkElement.LoadedEvent, new RoutedEventHandler((s, e) =>
+            var listView = new System.Windows.Controls.ListView
             {
-                if (s is System.Windows.Controls.InkCanvas ic && ic.DataContext is PageListViewItem item)
-                {
-                    ic.Strokes.Clear();
-                    if (item.Strokes != null)
-                    {
-                        ic.Strokes.Add(item.Strokes);
-                    }
-                }
-            }));
-
-            var textBlockFactory = new FrameworkElementFactory(typeof(TextBlock));
-            textBlockFactory.SetValue(Grid.RowProperty, 1);
-            textBlockFactory.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("Index"));
-            textBlockFactory.SetValue(TextBlock.HorizontalAlignmentProperty, HorizontalAlignment.Center);
-            textBlockFactory.SetValue(TextBlock.ForegroundProperty, Application.Current.TryFindResource("FloatBarForeground") as Brush ?? Brushes.White);
-            textBlockFactory.SetValue(TextBlock.FontSizeProperty, 12.0);
-            textBlockFactory.SetValue(TextBlock.MarginProperty, new Thickness(0, 2, 0, 0));
-
-            gridFactory.AppendChild(inkCanvasFactory);
-            gridFactory.AppendChild(textBlockFactory);
-            borderFactory.AppendChild(gridFactory);
-            template.VisualTree = borderFactory;
-
-            var rightListView = new System.Windows.Controls.ListView
-            {
+                Name = listViewId.Replace(".", "_"),
                 Background = Brushes.Transparent,
                 BorderThickness = new Thickness(0),
                 SelectionMode = SelectionMode.Single,
-                ItemTemplate = template
+                ItemTemplate = itemTemplate,
+                ItemsSource = blackBoardSidePageListViewObservableCollection
             };
-            rightListView.MouseUp += BlackBoardRightSidePageListView_OnMouseUp;
+            ScrollViewer.SetCanContentScroll(listView, false);
+            ScrollViewer.SetHorizontalScrollBarVisibility(listView, ScrollBarVisibility.Disabled);
+            ScrollViewer.SetVerticalScrollBarVisibility(listView, ScrollBarVisibility.Disabled);
 
-            var rightScrollViewer = new ScrollViewer
+            var scrollViewer = new ScrollViewer
             {
-                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-                Content = rightListView
+                Name = scrollViewerId.Replace(".", "_"),
+                Height = 460,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Hidden,
+                CanContentScroll = false,
+                Content = listView,
+                PanningMode = PanningMode.VerticalOnly,
+                IsManipulationEnabled = true
             };
 
-            var rightBorder = new Border
+            var border = new Border
             {
-                Width = 120,
-                MaxHeight = 400,
+                Name = borderId.Replace(".", "_"),
+                ClipToBounds = true,
+                Margin = new Thickness(marginLeft, marginTop, marginRight, marginBottom),
                 CornerRadius = new CornerRadius(8),
-                Background = Application.Current.TryFindResource("FloatBarBackground") as Brush ?? new SolidColorBrush(Color.FromRgb(30, 30, 30)),
-                BorderBrush = new SolidColorBrush(Color.FromArgb(51, 255, 255, 255)),
+                Background = (Brush)Application.Current.TryFindResource("FloatBarBackground"),
+                Opacity = 1,
+                BorderBrush = (Brush)Application.Current.TryFindResource("BoardFloatBarBorderBrush"),
                 BorderThickness = new Thickness(1),
-                Child = rightScrollViewer,
-                Visibility = Visibility.Collapsed,
-                HorizontalAlignment = HorizontalAlignment.Right,
-                VerticalAlignment = VerticalAlignment.Bottom,
-                Margin = new Thickness(0, 0, 10, 70)
+                Child = scrollViewer,
+                Visibility = Visibility.Collapsed
             };
 
-            RegisterView("board.pageList.right", rightListView);
-            RegisterView("board.pageList.rightScrollViewer", rightScrollViewer);
-            RegisterView("board.pageList.rightBorder", rightBorder);
+            RegisterView(borderId, border);
+            RegisterView(listViewId, listView);
+            RegisterView(scrollViewerId, scrollViewer);
 
-            var parentGrid = BlackboardRightSidePanel?.Parent as Grid;
-            var mainGrid = parentGrid?.Parent as Grid;
-            if (mainGrid != null)
+            var btn = FindView(btnId) as Border;
+            if (btn != null)
             {
-                mainGrid.Children.Add(rightBorder);
+                var parentPanel = btn.Parent as Panel;
+                if (parentPanel != null)
+                {
+                    var hiddenGrid = new Grid { Width = 0, Margin = new Thickness(0, 0, 0, 5) };
+                    hiddenGrid.Children.Add(border);
+                    int btnIndex = parentPanel.Children.IndexOf(btn);
+                    parentPanel.Children.Insert(btnIndex + 1, hiddenGrid);
+                }
             }
+        }
+
+        private DataTemplate CreatePageListItemTemplate(MouseButtonEventHandler mouseUpHandler)
+        {
+            var template = new DataTemplate();
+
+            var outerStackFactory = new FrameworkElementFactory(typeof(SimpleStackPanel));
+            outerStackFactory.SetValue(SimpleStackPanel.OrientationProperty, Orientation.Vertical);
+            outerStackFactory.AddHandler(Mouse.MouseUpEvent, mouseUpHandler);
+
+            var itemBorderFactory = new FrameworkElementFactory(typeof(Border));
+            itemBorderFactory.SetValue(Border.MarginProperty, new Thickness(0, 4, 0, 0));
+            itemBorderFactory.SetValue(Border.WidthProperty, 160.0);
+            itemBorderFactory.SetBinding(Border.BorderBrushProperty, new System.Windows.Data.Binding { Source = this, Path = new PropertyPath("BoardFloatBarBorderBrush") });
+            itemBorderFactory.SetValue(Border.BorderThicknessProperty, new Thickness(1));
+
+            var gridFactory = new FrameworkElementFactory(typeof(Grid));
+
+            var viewboxFactory = new FrameworkElementFactory(typeof(Viewbox));
+            viewboxFactory.SetValue(Viewbox.WidthProperty, 160.0);
+            viewboxFactory.SetValue(Viewbox.HeightProperty, 120.0);
+            viewboxFactory.SetValue(Viewbox.StretchProperty, Stretch.Uniform);
+
+            var inkCanvasFactory = new FrameworkElementFactory(typeof(System.Windows.Controls.InkCanvas));
+            inkCanvasFactory.SetValue(System.Windows.Controls.InkCanvas.EditingModeProperty, InkCanvasEditingMode.None);
+            inkCanvasFactory.SetBinding(System.Windows.Controls.InkCanvas.BackgroundProperty,
+                new System.Windows.Data.Binding("Background") { Source = GridBackgroundCover, Mode = System.Windows.Data.BindingMode.OneWay });
+            inkCanvasFactory.SetBinding(System.Windows.Controls.InkCanvas.StrokesProperty,
+                new System.Windows.Data.Binding("Strokes"));
+            inkCanvasFactory.SetBinding(FrameworkElement.WidthProperty,
+                new System.Windows.Data.Binding("ActualWidth") { Source = inkCanvas, Mode = System.Windows.Data.BindingMode.OneWay });
+            inkCanvasFactory.SetBinding(FrameworkElement.HeightProperty,
+                new System.Windows.Data.Binding("ActualHeight") { Source = inkCanvas, Mode = System.Windows.Data.BindingMode.OneWay });
+            viewboxFactory.AppendChild(inkCanvasFactory);
+
+            var indexBorderFactory = new FrameworkElementFactory(typeof(Border));
+            indexBorderFactory.SetValue(Border.MarginProperty, new Thickness(4));
+            indexBorderFactory.SetValue(Border.WidthProperty, 36.0);
+            indexBorderFactory.SetValue(Border.HeightProperty, 20.0);
+            indexBorderFactory.SetValue(Border.CornerRadiusProperty, new CornerRadius(3));
+            indexBorderFactory.SetValue(Border.HorizontalAlignmentProperty, HorizontalAlignment.Left);
+            indexBorderFactory.SetValue(Border.VerticalAlignmentProperty, VerticalAlignment.Top);
+            indexBorderFactory.SetValue(Border.BackgroundProperty, new SolidColorBrush(Color.FromArgb(204, 9, 9, 11)));
+
+            var indexTextFactory = new FrameworkElementFactory(typeof(TextBlock));
+            indexTextFactory.SetValue(TextBlock.FontSizeProperty, 14.0);
+            indexTextFactory.SetValue(TextBlock.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+            indexTextFactory.SetValue(TextBlock.VerticalAlignmentProperty, VerticalAlignment.Center);
+            indexTextFactory.SetValue(TextBlock.FontFamilyProperty, new FontFamily("Consolas"));
+            indexTextFactory.SetValue(TextBlock.ForegroundProperty, Brushes.White);
+            indexTextFactory.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("Index"));
+            indexBorderFactory.AppendChild(indexTextFactory);
+
+            var deleteBtnFactory = new FrameworkElementFactory(typeof(Button));
+            deleteBtnFactory.SetValue(Button.WidthProperty, 24.0);
+            deleteBtnFactory.SetValue(Button.HeightProperty, 24.0);
+            deleteBtnFactory.SetValue(Button.HorizontalAlignmentProperty, HorizontalAlignment.Right);
+            deleteBtnFactory.SetValue(Button.VerticalAlignmentProperty, VerticalAlignment.Top);
+            deleteBtnFactory.SetValue(Button.MarginProperty, new Thickness(4));
+            deleteBtnFactory.SetValue(Button.ToolTipProperty, FloatingBarStrings.Board_DeleteThisPage);
+            deleteBtnFactory.AddHandler(Button.ClickEvent, new RoutedEventHandler(WhiteBoardPageListItem_DeleteClick));
+            deleteBtnFactory.SetValue(Button.BackgroundProperty, new SolidColorBrush(Color.FromArgb(204, 0, 0, 0)));
+            deleteBtnFactory.SetValue(Button.ForegroundProperty, Brushes.White);
+            deleteBtnFactory.SetValue(Button.BorderThicknessProperty, new Thickness(0));
+            deleteBtnFactory.SetValue(Button.PaddingProperty, new Thickness(0));
+            deleteBtnFactory.SetValue(Button.CursorProperty, System.Windows.Input.Cursors.Hand);
+
+            var fontIconFactory = new FrameworkElementFactory(typeof(iNKORE.UI.WPF.Modern.Controls.FontIcon));
+            fontIconFactory.SetValue(iNKORE.UI.WPF.Modern.Controls.FontIcon.IconProperty,
+                SegoeFluentIcons.Delete);
+            deleteBtnFactory.AppendChild(fontIconFactory);
+
+            gridFactory.AppendChild(viewboxFactory);
+            gridFactory.AppendChild(indexBorderFactory);
+            gridFactory.AppendChild(deleteBtnFactory);
+
+            itemBorderFactory.AppendChild(gridFactory);
+            outerStackFactory.AppendChild(itemBorderFactory);
+            template.VisualTree = outerStackFactory;
+
+            return template;
         }
     }
 }

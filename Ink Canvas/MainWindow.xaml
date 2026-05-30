@@ -633,7 +633,7 @@
                          Stretch="None">
                     <Grid Name="BlackboardLeftSide" Visibility="Collapsed" d:Visibility="Visible" Margin="0,0,0,3" Height="50"
                           HorizontalAlignment="Center" VerticalAlignment="Bottom">
-                        <ikw:SimpleStackPanel x:Name="BlackboardLeftSidePanel" Orientation="Horizontal" Spacing="5">
+                        <ikw:SimpleStackPanel x:Name="BlackboardLeftSidePanel" Orientation="Horizontal">
                             <!-- 白板左下角导航将由 BoardToolbarRegistry 动态构建 -->
                         </ikw:SimpleStackPanel>
                     </Grid>
@@ -689,7 +689,7 @@
                          Stretch="None">
                     <Grid Name="BlackboardRightSide" Visibility="Collapsed"  d:Visibility="Visible" Margin="0,0,0,3" Height="50"
                           HorizontalAlignment="Center" VerticalAlignment="Bottom">
-                        <ikw:SimpleStackPanel x:Name="BlackboardRightSidePanel" Orientation="Horizontal" Spacing="5">
+                        <ikw:SimpleStackPanel x:Name="BlackboardRightSidePanel" Orientation="Horizontal">
                             <!-- 白板右下角导航将由 BoardToolbarRegistry 动态构建 -->
                         </ikw:SimpleStackPanel>
                     </Grid>

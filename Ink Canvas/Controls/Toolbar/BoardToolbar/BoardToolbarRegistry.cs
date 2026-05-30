@@ -1,5 +1,6 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -70,7 +71,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             }
         }
 
-        public static List<FrameworkElement> BuildGroup(IBoardToolbarHost host, List<BoardToolbarComponentEntry> components)
+        public static List<FrameworkElement> BuildGroup(IBoardToolbarHost host, List<BoardToolbarComponentEntry> components, string areaId = null)
         {
             var views = new List<FrameworkElement>();
             var items = Discover();
@@ -82,7 +83,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
 
                 if (entry.Id == "board.pageInfo")
                 {
-                    var pageInfoView = BuildPageInfoView(host);
+                    var pageInfoView = BuildPageInfoView(host, areaId);
                     if (pageInfoView != null)
                     {
                         views.Add(pageInfoView);
@@ -105,6 +106,8 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                         item.ApplyPosition(view, position);
                         ApplyComponentSettings(view, entry);
                         host.RegisterView(entry.Id, view);
+                        if (areaId != null)
+                            host.RegisterView($"{entry.Id}.{areaId}", view);
                         views.Add(view);
                     }
                 }
@@ -117,29 +120,44 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             return views;
         }
 
-        private static FrameworkElement BuildPageInfoView(IBoardToolbarHost host)
+        private static FrameworkElement BuildPageInfoView(IBoardToolbarHost host, string areaId)
         {
             var pageInfoTextBlock = new TextBlock
             {
                 Text = "1/1",
-                Foreground = (Brush)Application.Current.TryFindResource("FloatBarForeground"),
-                VerticalAlignment = VerticalAlignment.Center,
                 HorizontalAlignment = HorizontalAlignment.Center,
-                FontSize = 14
+                Margin = new Thickness(0, -1, 0, 0),
+                FontSize = 17,
+                FontWeight = FontWeights.Bold,
+                TextAlignment = TextAlignment.Center
             };
-            host.RegisterView("board.pageInfo", pageInfoTextBlock);
+            host.RegisterView($"board.pageInfo.{areaId}", pageInfoTextBlock);
+
+            var pageLabel = new TextBlock
+            {
+                Text = FloatingBarStrings.Board_Page,
+                Foreground = (Brush)Application.Current.TryFindResource("FloatBarForeground"),
+                VerticalAlignment = VerticalAlignment.Bottom,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                FontSize = 12
+            };
+
+            var grid = new Grid { Margin = new Thickness(6, 6, 6, 4) };
+            grid.Children.Add(pageInfoTextBlock);
+            grid.Children.Add(pageLabel);
 
             var pageInfoBorder = new Border
             {
-                CornerRadius = new CornerRadius(2),
-                Margin = new Thickness(2, 0, 2, 0),
-                Padding = new Thickness(6, 0, 6, 0),
-                Child = pageInfoTextBlock,
-                Cursor = System.Windows.Input.Cursors.Hand,
-                Background = Brushes.Transparent,
-                VerticalAlignment = VerticalAlignment.Stretch
+                Width = 75,
+                Height = 50,
+                BorderThickness = new Thickness(1),
+                BorderBrush = (Brush)Application.Current.TryFindResource("BoardFloatBarBorderBrush"),
+                Background = (Brush)Application.Current.TryFindResource("BoardFloatBarBackground"),
+                Opacity = 1,
+                Child = grid,
+                Cursor = System.Windows.Input.Cursors.Hand
             };
-            host.RegisterView("board.pageList.rightBtn", pageInfoBorder);
+            host.RegisterView($"board.pageList.{areaId}Btn", pageInfoBorder);
             return pageInfoBorder;
         }
 
@@ -202,7 +220,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             {
                 CornerRadius = new CornerRadius(5, 5, 5, 5),
                 Background = (Brush)Application.Current.TryFindResource("BoardFloatBarBackground"),
-                Margin = new Thickness(0, 0, 5, 0),
+                Margin = new Thickness(0),
                 Child = panel
             };
 
@@ -375,7 +393,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
 
             foreach (var group in area.Groups)
             {
-                var views = BuildGroup(host, group.Components);
+                var views = BuildGroup(host, group.Components, area.Id);
                 if (views.Count > 0)
                 {
                     container.Children.Add(CreateGroupBorder(views));

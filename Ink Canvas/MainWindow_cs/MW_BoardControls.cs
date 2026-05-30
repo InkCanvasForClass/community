@@ -714,26 +714,29 @@ namespace Ink_Canvas
             TextBlockWhiteBoardIndexInfo.Text =
                 $"{CurrentWhiteboardIndex}/{WhiteboardTotalCount}";
 
+            UpdatePageInfo();
+
             bool isLastPage = CurrentWhiteboardIndex == WhiteboardTotalCount;
             bool isMaxPage = WhiteboardTotalCount >= 99;
 
-            // 设置按钮文本
-            if (BtnLeftWhiteBoardSwitchNext != null) BtnLeftWhiteBoardSwitchNext.LabelTextBlockControl.Text = isLastPage ? "新页面" : FloatingBarStrings.Board_NextPage;
+            if (BtnLeftWhiteBoardSwitchNext != null) BtnLeftWhiteBoardSwitchNext.LabelTextBlockControl.Text = isLastPage ? FloatingBarStrings.Board_NewPage : FloatingBarStrings.Board_NextPage;
             if (BtnRightWhiteBoardSwitchNext != null) BtnRightWhiteBoardSwitchNext.LabelTextBlockControl.Text = isLastPage ? FloatingBarStrings.Board_NewPage : FloatingBarStrings.Board_NextPage;
 
             if (isLastPage)
             {
                 BtnWhiteBoardSwitchNext.IsEnabled = !isMaxPage;
+                if (BtnLeftWhiteBoardSwitchNext != null) BtnLeftWhiteBoardSwitchNext.IsEnabled = !isMaxPage;
+                if (BtnRightWhiteBoardSwitchNext != null) BtnRightWhiteBoardSwitchNext.IsEnabled = !isMaxPage;
             }
             else
             {
                 BtnWhiteBoardSwitchNext.IsEnabled = true;
+                if (BtnLeftWhiteBoardSwitchNext != null) BtnLeftWhiteBoardSwitchNext.IsEnabled = true;
+                if (BtnRightWhiteBoardSwitchNext != null) BtnRightWhiteBoardSwitchNext.IsEnabled = true;
             }
 
-            // 获取主题颜色资源
             var iconForegroundBrush = Application.Current.FindResource("IconForeground") as SolidColorBrush;
 
-            // 设置下一页按钮颜色
             if (iconForegroundBrush != null)
             {
                 if (BtnLeftWhiteBoardSwitchNext != null) BtnLeftWhiteBoardSwitchNext.IconGeometryDrawing.Brush = iconForegroundBrush;
@@ -743,10 +746,14 @@ namespace Ink_Canvas
             if (BtnRightWhiteBoardSwitchNext != null) BtnRightWhiteBoardSwitchNext.LabelTextBlockControl.Opacity = 1;
 
             BtnWhiteBoardSwitchPrevious.IsEnabled = true;
+            if (BtnLeftWhiteBoardSwitchPrevious != null) BtnLeftWhiteBoardSwitchPrevious.IsEnabled = true;
+            if (BtnRightWhiteBoardSwitchPrevious != null) BtnRightWhiteBoardSwitchPrevious.IsEnabled = true;
 
             if (CurrentWhiteboardIndex == 1)
             {
                 BtnWhiteBoardSwitchPrevious.IsEnabled = false;
+                if (BtnLeftWhiteBoardSwitchPrevious != null) BtnLeftWhiteBoardSwitchPrevious.IsEnabled = false;
+                if (BtnRightWhiteBoardSwitchPrevious != null) BtnRightWhiteBoardSwitchPrevious.IsEnabled = false;
                 if (iconForegroundBrush != null)
                 {
                     var disabledBrush = new SolidColorBrush(Color.FromArgb(127, iconForegroundBrush.Color.R, iconForegroundBrush.Color.G, iconForegroundBrush.Color.B));
