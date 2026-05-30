@@ -99,7 +99,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             try
             {
-                AppVersionTextBlock.Text = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                var version = Assembly.GetExecutingAssembly().GetName().Version;
+                AppVersionTextBlock.Text = version.Major + "." + version.Minor + "." + version.Build + "." + version.Revision;
+                var informationalVersion = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+                if (informationalVersion != null)
+                {
+                    string infoVersion = informationalVersion.InformationalVersion;
+                    int lastDotIndex = infoVersion.LastIndexOf('.');
+                    if (lastDotIndex >= 0 && lastDotIndex < infoVersion.Length - 7)
+                    {
+                        AppVersionTextBlock.Text += " (" + infoVersion.Substring(lastDotIndex + 1) + ")";
+                    }
+                }
                 RefreshDeviceInfo();
             }
             catch (Exception ex)
