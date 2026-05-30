@@ -76,12 +76,12 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public void UpdateSlideShowStatus(bool isInSlideShow, int currentSlide = 0, int totalSlides = 0)
         {
-            _mainWindow.IsInPptPresentationMode = isInSlideShow;
-
             void UpdateSlideShowStatusOnUi()
             {
                 try
                 {
+                    _mainWindow.IsInPptPresentationMode = isInSlideShow;
+
                     if (isInSlideShow)
                     {
                         // Old UI removed:                         _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Collapsed;
@@ -150,7 +150,7 @@ namespace Ink_Canvas.Helpers
             }
             else
             {
-                _dispatcher.InvokeAsync(UpdateSlideShowStatusOnUi);
+                _dispatcher.Invoke(UpdateSlideShowStatusOnUi);
             }
         }
 
