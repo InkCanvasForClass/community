@@ -810,7 +810,6 @@
                                          HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
             </Grid>
         </Grid>
-        <!--// PPT 侧边翻页按钮 //-->
         <!-- 隐藏的全局页码源:旧代码与 PPTUIManager 通过 PPTBtnPageNow/Total 设置文字 -->
         <ikw:SimpleStackPanel Visibility="Collapsed"  d:Visibility="Visible">
             <TextBlock Name="PPTBtnPageNow" Text="?"/>
