@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Controls;
 
 namespace Ink_Canvas.Controls.Toolbar
 {
@@ -17,5 +18,7 @@ namespace Ink_Canvas.Controls.Toolbar
         bool DefaultPreventHideOnDragClick { get; }
 
         FrameworkElement BuildView(IToolbarHost host);
+
+        void ApplyOrientation(FrameworkElement view, Orientation orientation) { }
     }
 }

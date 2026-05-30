@@ -1529,6 +1529,8 @@ namespace Ink_Canvas
             InitializePopupManager();
             //加载设置
             LoadSettings(true);
+            // 根据ToolbarPosition设置更新工具栏结构和位置
+            UpdateToolbarPosition();
             // 启动时直接设置浮动栏位置，跳过动画
             if (currentMode == 0)
             {
