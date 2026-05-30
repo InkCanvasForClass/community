@@ -76,14 +76,15 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public void UpdateSlideShowStatus(bool isInSlideShow, int currentSlide = 0, int totalSlides = 0)
         {
-            _dispatcher.InvokeAsync(() =>
+            _mainWindow.IsInPptPresentationMode = isInSlideShow;
+
+            void UpdateSlideShowStatusOnUi()
             {
                 try
                 {
                     if (isInSlideShow)
                     {
                         // Old UI removed:                         _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Collapsed;
-                        _mainWindow.IsInPptPresentationMode = true;
                         _mainWindow.UpdateToolbarComponentVisibility();
 
                         // 同步页码到所有翻页条 + 兼容旧绑定的隐藏 placeholder
@@ -115,7 +116,6 @@ namespace Ink_Canvas.Helpers
                     else
                     {
                         // Old UI removed:                         _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Visible;
-                        _mainWindow.IsInPptPresentationMode = false;
                         _mainWindow.UpdateToolbarComponentVisibility();
                         HideAllNavigationPanels();
                         _mainWindow.UpdatePPTTimeCapsuleVisibility();
@@ -142,7 +142,16 @@ namespace Ink_Canvas.Helpers
                 {
                     LogHelper.WriteLogToFile($"更新幻灯片放映状态UI失败: {ex}", LogHelper.LogType.Error);
                 }
-            });
+            }
+
+            if (_dispatcher.CheckAccess())
+            {
+                UpdateSlideShowStatusOnUi();
+            }
+            else
+            {
+                _dispatcher.InvokeAsync(UpdateSlideShowStatusOnUi);
+            }
         }
 
         /// <summary>
