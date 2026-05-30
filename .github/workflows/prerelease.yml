@@ -672,9 +672,9 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
           REPO_DIR=$(mktemp -d)
-          git clone --depth 1 --filter=blob:none --branch main https://x-access-token:${{ steps.octo-sts-downloads.outputs.token }}@github.com/InkCanvasForClass/downloads.git $REPO_DIR
+          git clone --depth 1 --filter=blob:none --branch main https://x-access-token:${{ steps.octo-sts-downloads.outputs.token }}@github.com/InkCanvasForClass/downloads.git "$REPO_DIR"
 
-          cd $REPO_DIR
+          cd "$REPO_DIR"
           IS_PRERELEASE="${{ needs.prepare.outputs.is_prerelease }}"
           VERSION="${{ needs.prepare.outputs.version }}"
           X64_ZIP_FILE="$GITHUB_WORKSPACE/InkCanvasForClass.CE.$VERSION-x64.zip"
