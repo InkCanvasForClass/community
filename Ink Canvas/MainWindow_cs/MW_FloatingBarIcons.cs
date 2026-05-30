@@ -1,6 +1,7 @@
 using Ink_Canvas.Properties;
 using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar;
+using Ink_Canvas.Controls.Toolbar.BoardToolbar;
 using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern;
 using System;
@@ -131,25 +132,29 @@ namespace Ink_Canvas
                 }
             }
 
-            if (boardAnyOn)
+            var boardGestureBtn = FindView("board.gesture") as BoardToolbarButton;
+            if (boardGestureBtn != null)
             {
-                BoardGesture.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                BoardGesture.IconGeometryDrawing.Brush = new SolidColorBrush(Colors.GhostWhite);
-                BoardGesture.IconGeometryDrawing2.Brush = new SolidColorBrush(Colors.GhostWhite);
-                BoardGesture.Foreground = new SolidColorBrush(Colors.GhostWhite);
-                BoardGesture.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                BoardGesture.IconGeometryDrawing.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.EnabledGestureIcon);
-                BoardGesture.IconGeometryDrawing2.Geometry = Geometry.Parse("F0 M24,24z M0,0z " + XamlGraphicsIconGeometries.EnabledGestureIconBadgeCheck);
-            }
-            else
-            {
-                BoardGesture.Background = new SolidColorBrush(boardBgColor);
-                BoardGesture.IconGeometryDrawing.Brush = new SolidColorBrush(boardIconColor);
-                BoardGesture.IconGeometryDrawing2.Brush = new SolidColorBrush(boardIconColor);
-                BoardGesture.Foreground = new SolidColorBrush(boardTextColor);
-                BoardGesture.BorderBrush = new SolidColorBrush(boardBorderColor);
-                BoardGesture.IconGeometryDrawing.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.DisabledGestureIcon);
-                BoardGesture.IconGeometryDrawing2.Geometry = Geometry.Parse("F0 M24,24z M0,0z");
+                if (boardAnyOn)
+                {
+                    boardGestureBtn.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                    boardGestureBtn.IconGeometryDrawing.Brush = new SolidColorBrush(Colors.GhostWhite);
+                    boardGestureBtn.IconGeometryDrawing2.Brush = new SolidColorBrush(Colors.GhostWhite);
+                    boardGestureBtn.Foreground = new SolidColorBrush(Colors.GhostWhite);
+                    boardGestureBtn.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                    boardGestureBtn.IconGeometryDrawing.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.EnabledGestureIcon);
+                    boardGestureBtn.IconGeometryDrawing2.Geometry = Geometry.Parse("F0 M24,24z M0,0z " + XamlGraphicsIconGeometries.EnabledGestureIconBadgeCheck);
+                }
+                else
+                {
+                    boardGestureBtn.Background = new SolidColorBrush(boardBgColor);
+                    boardGestureBtn.IconGeometryDrawing.Brush = new SolidColorBrush(boardIconColor);
+                    boardGestureBtn.IconGeometryDrawing2.Brush = new SolidColorBrush(boardIconColor);
+                    boardGestureBtn.Foreground = new SolidColorBrush(boardTextColor);
+                    boardGestureBtn.BorderBrush = new SolidColorBrush(boardBorderColor);
+                    boardGestureBtn.IconGeometryDrawing.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.DisabledGestureIcon);
+                    boardGestureBtn.IconGeometryDrawing2.Geometry = Geometry.Parse("F0 M24,24z M0,0z");
+                }
             }
         }
 
@@ -461,8 +466,10 @@ namespace Ink_Canvas
             BoardPenPalette.IsOpen = false;
             BoardEraserSizePanel.IsOpen = false;
             EraserSizePanel.IsOpen = false;
-            BoardBorderLeftPageListView.Visibility = Visibility.Collapsed;
-            BoardBorderRightPageListView.Visibility = Visibility.Collapsed;
+            var leftBorder = FindView("board.pageList.leftBorder") as Border;
+            var rightBorder = FindView("board.pageList.rightBorder") as Border;
+            if (leftBorder != null) leftBorder.Visibility = Visibility.Collapsed;
+            if (rightBorder != null) rightBorder.Visibility = Visibility.Collapsed;
             BoardImageOptionsPanel.IsOpen = false;
             TwoFingerGestureBorder.IsOpen = false;
             BoardTwoFingerGestureBorder.IsOpen = false;
@@ -536,6 +543,11 @@ namespace Ink_Canvas
         {
             mode = NormalizeToolModeForFreeze(mode);
 
+            var boardPen = FindView("board.pen") as BoardToolbarButton;
+            var boardEraser = FindView("board.eraser") as BoardToolbarButton;
+            var boardStrokeEraser = FindView("board.strokeEraser") as BoardToolbarButton;
+            var boardSelect = FindView("board.select") as BoardToolbarButton;
+
             AnimationsHelper.HidePopupWithSlideAndFade(BorderTools);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
             AnimationsHelper.HidePopupWithSlideAndFade(PenPalette);
@@ -544,8 +556,10 @@ namespace Ink_Canvas
             AnimationsHelper.HidePopupWithSlideAndFade(EraserSizePanel);
             AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderDrawShape);
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
+            var leftBorderAnim = FindView("board.pageList.leftBorder") as Border;
+            var rightBorderAnim = FindView("board.pageList.rightBorder") as Border;
+            if (leftBorderAnim != null) AnimationsHelper.HideWithSlideAndFade(leftBorderAnim);
+            if (rightBorderAnim != null) AnimationsHelper.HideWithSlideAndFade(rightBorderAnim);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardImageOptionsPanel);
             AnimationsHelper.HidePopupWithSlideAndFade(TwoFingerGestureBorder);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardTwoFingerGestureBorder);
@@ -566,41 +580,17 @@ namespace Ink_Canvas
                                                  (Settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
                     if (isDarkThemeForButtons)
                     {
-                        BoardPen.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
-                        BoardSelect.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
-                        BoardEraser.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
-                        BoardStrokeEraser.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
-                        BoardSelect.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-                        BoardPen.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-                        BoardEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-                        BoardStrokeEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-                        BoardPen.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-                        BoardSelect.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-                        BoardEraser.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-                        BoardStrokeEraser.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-                        BoardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
-                        BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
-                        BoardStrokeEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
-                        BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
+                        if (boardPen != null) { boardPen.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42)); boardPen.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255)); boardPen.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)); boardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85)); }
+                        if (boardSelect != null) { boardSelect.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42)); boardSelect.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255)); boardSelect.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)); boardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85)); }
+                        if (boardEraser != null) { boardEraser.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42)); boardEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255)); boardEraser.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)); boardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85)); }
+                        if (boardStrokeEraser != null) { boardStrokeEraser.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42)); boardStrokeEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255)); boardStrokeEraser.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)); boardStrokeEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85)); }
                     }
                     else
                     {
-                        BoardPen.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
-                        BoardSelect.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
-                        BoardEraser.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
-                        BoardStrokeEraser.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
-                        BoardSelect.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                        BoardPen.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                        BoardEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                        BoardStrokeEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                        BoardPen.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                        BoardSelect.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                        BoardEraser.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                        BoardStrokeEraser.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                        BoardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
-                        BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
-                        BoardStrokeEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
-                        BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
+                        if (boardPen != null) { boardPen.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245)); boardPen.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27)); boardPen.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27)); boardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170)); }
+                        if (boardSelect != null) { boardSelect.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245)); boardSelect.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27)); boardSelect.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27)); boardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170)); }
+                        if (boardEraser != null) { boardEraser.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245)); boardEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27)); boardEraser.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27)); boardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170)); }
+                        if (boardStrokeEraser != null) { boardStrokeEraser.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245)); boardStrokeEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27)); boardStrokeEraser.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27)); boardStrokeEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170)); }
                     }
                 }
 
@@ -625,10 +615,13 @@ namespace Ink_Canvas
                         {
                             Pen_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
                             Pen_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("pen", true));
-                            BoardPen.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                            BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                            BoardPen.IconGeometryDrawing.Brush = new SolidColorBrush(Colors.GhostWhite);
-                            BoardPen.Foreground = new SolidColorBrush(Colors.GhostWhite);
+                            if (boardPen != null)
+                            {
+                                boardPen.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                                boardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                                boardPen.IconGeometryDrawing.Brush = new SolidColorBrush(Colors.GhostWhite);
+                                boardPen.Foreground = new SolidColorBrush(Colors.GhostWhite);
+                            }
 
                             SetFloatingBarHighlightPosition("pen");
                             break;
@@ -638,10 +631,13 @@ namespace Ink_Canvas
                             Eraser_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
                             Eraser_Icon.Icon.Geometry =
                                 Geometry.Parse(GetCorrectIcon("eraserCircle", true));
-                            BoardEraser.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                            BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                            BoardEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Colors.GhostWhite);
-                            BoardEraser.Foreground = new SolidColorBrush(Colors.GhostWhite);
+                            if (boardEraser != null)
+                            {
+                                boardEraser.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                                boardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                                boardEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Colors.GhostWhite);
+                                boardEraser.Foreground = new SolidColorBrush(Colors.GhostWhite);
+                            }
 
                             SetFloatingBarHighlightPosition("eraser");
                             break;
@@ -651,10 +647,13 @@ namespace Ink_Canvas
                             EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
                             EraserByStrokes_Icon.Icon.Geometry =
                                 Geometry.Parse(GetCorrectIcon("eraserStroke", true));
-                            BoardStrokeEraser.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                            BoardStrokeEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                            BoardStrokeEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Colors.GhostWhite);
-                            BoardStrokeEraser.Foreground = new SolidColorBrush(Colors.GhostWhite);
+                            if (boardStrokeEraser != null)
+                            {
+                                boardStrokeEraser.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                                boardStrokeEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                                boardStrokeEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Colors.GhostWhite);
+                                boardStrokeEraser.Foreground = new SolidColorBrush(Colors.GhostWhite);
+                            }
 
                             SetFloatingBarHighlightPosition("eraserByStrokes");
                             break;
@@ -664,10 +663,13 @@ namespace Ink_Canvas
                             SymbolIconSelect.Icon.Brush = new SolidColorBrush(highlightColor);
                             SymbolIconSelect.Icon.Geometry =
                                 Geometry.Parse(GetCorrectIcon("lassoSelect", true));
-                            BoardSelect.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                            BoardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                            BoardSelect.IconGeometryDrawing.Brush = new SolidColorBrush(Colors.GhostWhite);
-                            BoardSelect.Foreground = new SolidColorBrush(Colors.GhostWhite);
+                            if (boardSelect != null)
+                            {
+                                boardSelect.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                                boardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                                boardSelect.IconGeometryDrawing.Brush = new SolidColorBrush(Colors.GhostWhite);
+                                boardSelect.Foreground = new SolidColorBrush(Colors.GhostWhite);
+                            }
 
                             SetFloatingBarHighlightPosition("select");
                             break;
@@ -681,25 +683,10 @@ namespace Ink_Canvas
                                                         (Settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
                             if (isDarkThemeForCursor)
                             {
-                                BoardPen.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
-                                BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
-                                BoardPen.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-                                BoardPen.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-
-                                BoardEraser.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
-                                BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
-                                BoardEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-                                BoardEraser.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-
-                                BoardStrokeEraser.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
-                                BoardStrokeEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
-                                BoardStrokeEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-                                BoardStrokeEraser.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-
-                                BoardSelect.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
-                                BoardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
-                                BoardSelect.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-                                BoardSelect.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                                if (boardPen != null) { boardPen.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42)); boardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85)); boardPen.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255)); boardPen.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)); }
+                                if (boardEraser != null) { boardEraser.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42)); boardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85)); boardEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255)); boardEraser.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)); }
+                                if (boardStrokeEraser != null) { boardStrokeEraser.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42)); boardStrokeEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85)); boardStrokeEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255)); boardStrokeEraser.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)); }
+                                if (boardSelect != null) { boardSelect.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42)); boardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85)); boardSelect.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255)); boardSelect.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)); }
 
                                 if (BoardInkFreezeBtn != null)
                                 {
@@ -711,25 +698,10 @@ namespace Ink_Canvas
                             }
                             else
                             {
-                                BoardPen.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
-                                BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
-                                BoardPen.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                                BoardPen.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-
-                                BoardEraser.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
-                                BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
-                                BoardEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                                BoardEraser.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-
-                                BoardStrokeEraser.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
-                                BoardStrokeEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
-                                BoardStrokeEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                                BoardStrokeEraser.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-
-                                BoardSelect.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
-                                BoardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
-                                BoardSelect.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                                BoardSelect.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                                if (boardPen != null) { boardPen.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245)); boardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170)); boardPen.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27)); boardPen.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27)); }
+                                if (boardEraser != null) { boardEraser.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245)); boardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170)); boardEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27)); boardEraser.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27)); }
+                                if (boardStrokeEraser != null) { boardStrokeEraser.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245)); boardStrokeEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170)); boardStrokeEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27)); boardStrokeEraser.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27)); }
+                                if (boardSelect != null) { boardSelect.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245)); boardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170)); boardSelect.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27)); boardSelect.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27)); }
 
                                 if (BoardInkFreezeBtn != null)
                                 {
