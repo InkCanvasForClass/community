@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 
 namespace Ink_Canvas
 {
@@ -236,11 +237,34 @@ namespace Ink_Canvas
 
                 BoardToolbarRegistry.RebuildToolbar(host, BlackboardLeftSidePanel, BlackboardCenterSidePanel, BlackboardRightSidePanel);
 
+                BindPopupPlacementTargets();
+
                 UpdateBoardToolbarState();
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"MW_BoardToolbarHost: InitializeBoardToolbar 异常: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void BindPopupPlacementTargets()
+        {
+            SetPopupPlacementTarget(BoardTwoFingerGestureBorder, "board.gesture");
+            SetPopupPlacementTarget(BackgroundPalette, "board.backgroundColor");
+            SetPopupPlacementTarget(BoardPenPalette, "board.pen");
+            SetPopupPlacementTarget(BoardEraserSizePanel, "board.eraser");
+            SetPopupPlacementTarget(BoardBorderDrawShape, "board.shape");
+            SetPopupPlacementTarget(BoardImageOptionsPanel, "board.insertImage");
+            SetPopupPlacementTarget(BoardBorderToolsPopup, "board.tools");
+        }
+
+        private void SetPopupPlacementTarget(Popup popup, string buttonId)
+        {
+            if (popup == null) return;
+            var btn = FindView(buttonId);
+            if (btn != null)
+            {
+                popup.PlacementTarget = btn;
             }
         }
 

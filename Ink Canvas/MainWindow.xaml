@@ -655,31 +655,31 @@
                 <!--菜单-->
                 <Grid>
                     <!--手势菜单-->
-                    <Popup x:Name="BoardTwoFingerGestureBorder" Placement="Custom" AllowsTransparency="True" StaysOpen="True" PlacementTarget="{Binding ElementName=BoardGesture}" IsOpen="False">
+                    <Popup x:Name="BoardTwoFingerGestureBorder" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
                         <localControls:GesturePopupContent x:Name="BoardGesturePopupContent" />
                     </Popup>
                     <!--背景菜单-->
-                    <Popup x:Name="BackgroundPalette" Placement="Custom" AllowsTransparency="True" StaysOpen="True" PlacementTarget="{Binding ElementName=BoardChangeBackgroundColorBtn}" IsOpen="False">
+                    <Popup x:Name="BackgroundPalette" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
                         <localControls:BackgroundPalettePopupContent x:Name="BackgroundPalettePopupContent" />
                     </Popup>
                     <!--批注菜单-->
-                    <Popup x:Name="BoardPenPalette" Placement="Custom" AllowsTransparency="True" StaysOpen="True" PlacementTarget="{Binding ElementName=BoardPen}" IsOpen="False">
+                    <Popup x:Name="BoardPenPalette" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
                         <localControls:PenPalettePopupContent x:Name="BoardPenPalettePopupContent" />
                     </Popup>
                     <!--橡皮菜单-->
-                    <Popup x:Name="BoardEraserSizePanel" Placement="Custom" AllowsTransparency="True" StaysOpen="True" PlacementTarget="{Binding ElementName=BoardEraser}" IsOpen="False">
+                    <Popup x:Name="BoardEraserSizePanel" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
                         <localControls:EraserPopupContent x:Name="BoardEraserPopupContent" IsBoardMode="True" />
                     </Popup>
                     <!--图形菜单-->
-                    <Popup x:Name="BoardBorderDrawShape" Placement="Custom" AllowsTransparency="True" StaysOpen="True" PlacementTarget="{Binding ElementName=BoardGeometry}" IsOpen="False">
+                    <Popup x:Name="BoardBorderDrawShape" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
                         <localControls:ShapeDrawPopupContent x:Name="BoardShapeDrawPopupContent" />
                     </Popup>
                     <!--插入图片菜单-->
-                    <Popup x:Name="BoardImageOptionsPanel" Placement="Custom" AllowsTransparency="True" StaysOpen="True" PlacementTarget="{Binding ElementName=BoardInsertImage}" IsOpen="False">
+                    <Popup x:Name="BoardImageOptionsPanel" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
                         <localControls:ImageOptionsPopupContent x:Name="BoardImageOptionsPopupContent" />
                     </Popup>
                     <!--工具菜单-->
-                    <Popup x:Name="BoardBorderToolsPopup" Placement="Custom" AllowsTransparency="True" StaysOpen="True" PlacementTarget="{Binding ElementName=BoardTools}" IsOpen="False">
+                    <Popup x:Name="BoardBorderToolsPopup" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
                         <localControls:ToolsPopupContent x:Name="BoardToolsPopupContent" IsBoardMode="True" />
                     </Popup>
                 </Grid>
@@ -795,7 +795,7 @@
             <TextBlock x:Name="TextBlockNotice" Visibility="Collapsed"  d:Visibility="Visible"
                        Text="{x:Static props:NotificationStrings.TestText}" />
         </Grid>
-        <!--// PPT 工具栏 //-->
+        <!--// PPT 底部翻页按钮 //-->
         <Grid>
             <Grid Visibility="Visible">
                 <localControls:PptNavBar x:Name="LeftBottomPanelForPPTNavigation"
@@ -1340,9 +1340,10 @@
                 Panel.ZIndex="1100"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Top" />
+        <!-- 内联对话框根容器 -->
         <Grid x:Name="InlineDialogRoot"
                 Panel.ZIndex="9999"
-                Visibility="Collapsed"
+                Visibility="Collapsed" d:Visibility="Visible"
                 Background="{DynamicResource ContentDialogSmokeFill}">
             <Border x:Name="InlineDialogCard"
                     MinWidth="{DynamicResource ContentDialogMinWidth}"
