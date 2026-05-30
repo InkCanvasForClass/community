@@ -1597,12 +1597,7 @@ namespace Ink_Canvas
                         // 注意：快捷调色盘的可见性现在完全由工具栏规则集管理
                         // 不需要手动设置，UpdateToolbarComponentVisibility 会处理好
 
-                        if (GridTransparencyFakeBackground.Background != Brushes.Transparent)
-                            BtnHideInkCanvas_Click(null, null);
-                        SetCurrentToolMode(InkCanvasEditingMode.None);
-
-                        UpdateCurrentToolMode("cursor");
-                        SetFloatingBarHighlightPosition("cursor");
+                        EnsureCursorModeAfterPptExit();
 
                         CheckMainWindowVisibility();
                     }
@@ -3002,8 +2997,7 @@ namespace Ink_Canvas
                     await HandleManualSlideShowEnd();
                 }
 
-                HideSubPanels("cursor");
-                SetCurrentToolMode(InkCanvasEditingMode.None);
+                await Application.Current.Dispatcher.InvokeAsync(EnsureCursorModeAfterPptExit);
 
                 await Task.Delay(150);
                 if (!isFloatingBarFolded)
@@ -3029,6 +3023,7 @@ namespace Ink_Canvas
                     _pptUIManager?.UpdateSlideShowStatus(false);
                     _pptUIManager?.UpdateSidebarExitButtons(false);
                     HideFloatingBarExitPPTBtn();
+                    EnsureCursorModeAfterPptExit();
                     CheckMainWindowVisibility();
                 });
 
@@ -3068,6 +3063,33 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"手动处理PPT放映结束自动收纳失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void EnsureCursorModeAfterPptExit()
+        {
+            try
+            {
+                GridTransparencyFakeBackground.Opacity = 0;
+                GridTransparencyFakeBackground.Background = Brushes.Transparent;
+                SetTransparentHitThrough();
+
+                GridBackgroundCoverHolder.Visibility = Visibility.Collapsed;
+                inkCanvas.IsHitTestVisible = false;
+                inkCanvas.Visibility = Visibility.Visible;
+                inkCanvas.Select(new StrokeCollection());
+                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+
+                RestoreFullScreenOnExitAnnotationMode();
+                SetCurrentToolMode(InkCanvasEditingMode.None);
+                UpdateCurrentToolMode("cursor");
+                UpdateToolbarComponentVisibility();
+                HideSubPanels("cursor");
+                SetFloatingBarHighlightPosition("cursor");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"同步PPT退出后的鼠标模式失败: {ex}", LogHelper.LogType.Error);
             }
         }
 
