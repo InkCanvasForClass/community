@@ -150,8 +150,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             {
                 Width = 75,
                 Height = 50,
-                BorderThickness = new Thickness(1),
-                BorderBrush = (Brush)Application.Current.TryFindResource("BoardFloatBarBorderBrush"),
+                BorderThickness = new Thickness(0),
                 Background = (Brush)Application.Current.TryFindResource("BoardFloatBarBackground"),
                 Opacity = 1,
                 Child = grid,

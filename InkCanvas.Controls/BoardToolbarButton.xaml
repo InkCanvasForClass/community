@@ -12,8 +12,8 @@
             MouseUp="ButtonBorder_MouseUp"
             Background="{DynamicResource BoardFloatBarBackground}" d:Background="Green"
             Opacity="1"
-            BorderThickness="1"
-            BorderBrush="{DynamicResource BoardFloatBarBorderBrush}" d:BorderBrush="Red">
+            BorderThickness="0"
+            BorderBrush="Transparent">
         <Grid Margin="0,6,0,4">
             <Image x:Name="ButtonImage"
                    VerticalAlignment="Top"

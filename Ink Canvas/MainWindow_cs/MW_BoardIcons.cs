@@ -309,6 +309,7 @@ namespace Ink_Canvas
             forcePointEraser = false;
             drawingShapeMode = 0;
             SetCurrentToolMode(InkCanvasEditingMode.Select);
+            UpdateCurrentToolMode("select");
             SetCursorBasedOnEditingMode(inkCanvas);
             HideSubPanels("select");
         }
