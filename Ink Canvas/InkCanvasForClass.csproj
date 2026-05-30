@@ -557,8 +557,11 @@
   
   <Target Name="SetAssemblyInformationalVersion" DependsOnTargets="GetBuildVersion" AfterTargets="GetBuildVersion">
     <PropertyGroup>
-      <_ShortSha>$(GitCommitIdShort)</_ShortSha>
-      <_ShortSha7>$(_ShortSha.Substring(0, 7))</_ShortSha7>
+      <!-- 如果没有GitCommitIdShort，就置为UNKNOWN -->
+      <_ShortSha7 Condition="'$(GitCommitIdShort)' == ''">UNKNOWN</_ShortSha7>
+      <!-- 如果有GitCommitIdShort，就取前7位 -->
+      <_ShortSha Condition="'$(GitCommitIdShort)' != ''">$(GitCommitIdShort)</_ShortSha>
+      <_ShortSha7 Condition="'$(GitCommitIdShort)' != ''">$(_ShortSha.Substring(0, 7))</_ShortSha7>
       <AssemblyInformationalVersion>$(AssemblyVersion).$(_ShortSha7)</AssemblyInformationalVersion>
     </PropertyGroup>
   </Target>
