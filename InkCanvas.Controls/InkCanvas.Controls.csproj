@@ -10,6 +10,7 @@
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <LangVersion>10</LangVersion>
     <NoWarn>CA1416</NoWarn>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <ItemGroup>

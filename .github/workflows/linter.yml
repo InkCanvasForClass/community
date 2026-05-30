@@ -38,5 +38,9 @@ jobs:
         env:
           # Flag to have the linter complete with exit code 0 even if errors were detected, in order not to make cjk unhappy.
           DISABLE_ERRORS: true
+          # Disable the SPELL_CODESPELL rule
+          VALIDATE_SPELL_CODESPELL: false
+          # Save the super-linter output
+          SAVE_SUPER_LINTER_OUTPUT: true
           # To report GitHub Actions status checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

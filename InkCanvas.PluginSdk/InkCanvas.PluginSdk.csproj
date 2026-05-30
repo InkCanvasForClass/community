@@ -7,6 +7,7 @@
     <Nullable>disable</Nullable>
     <RootNamespace>Ink_Canvas.Plugins</RootNamespace>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
 </Project>
