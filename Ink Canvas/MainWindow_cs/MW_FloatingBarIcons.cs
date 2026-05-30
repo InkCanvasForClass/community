@@ -2019,33 +2019,65 @@ namespace Ink_Canvas
 
             rootChildren.Clear();
 
+            var flipContentOnAutoFlip = Settings.Appearance.FlipContentOnAutoFlip;
+
             if (headOnRight)
             {
-                foreach (var elem in otherElements.AsEnumerable().Reverse())
+                if (flipContentOnAutoFlip)
                 {
-                    rootChildren.Add(elem);
+                    foreach (var elem in otherElements)
+                    {
+                        rootChildren.Add(elem);
+                    }
+                    if (dragElement != null)
+                    {
+                        dragElement.Margin = new Thickness(3, 0, 0, 0);
+                        rootChildren.Add(dragElement);
+                    }
                 }
-                if (dragElement != null)
+                else
                 {
-                    dragElement.Margin = new Thickness(3, 0, 0, 0);
-                    rootChildren.Add(dragElement);
-                }
+                    foreach (var elem in otherElements.AsEnumerable().Reverse())
+                    {
+                        rootChildren.Add(elem);
+                    }
+                    if (dragElement != null)
+                    {
+                        dragElement.Margin = new Thickness(3, 0, 0, 0);
+                        rootChildren.Add(dragElement);
+                    }
 
-                ReverseAllContentPanels();
+                    ReverseAllContentPanels();
+                }
             }
             else
             {
-                if (dragElement != null)
+                if (flipContentOnAutoFlip)
                 {
-                    dragElement.Margin = new Thickness(0);
-                    rootChildren.Add(dragElement);
+                    if (dragElement != null)
+                    {
+                        dragElement.Margin = new Thickness(0);
+                        rootChildren.Add(dragElement);
+                    }
+                    foreach (var elem in otherElements)
+                    {
+                        rootChildren.Add(elem);
+                    }
                 }
-                foreach (var elem in otherElements.AsEnumerable().Reverse())
+                else
                 {
-                    rootChildren.Add(elem);
-                }
+                    if (dragElement != null)
+                    {
+                        dragElement.Margin = new Thickness(0);
+                        rootChildren.Add(dragElement);
+                    }
+                    foreach (var elem in otherElements.AsEnumerable().Reverse())
+                    {
+                        rootChildren.Add(elem);
+                    }
 
-                RestoreAllContentPanels();
+                    RestoreAllContentPanels();
+                }
             }
 
             isFloatingBarHeadOnRight = headOnRight;
@@ -2066,33 +2098,65 @@ namespace Ink_Canvas
 
             rootChildren.Clear();
 
+            var flipContentOnAutoFlip = Settings.Appearance.FlipContentOnAutoFlip;
+
             if (headOnBottom)
             {
-                foreach (var elem in otherElements.AsEnumerable().Reverse())
+                if (flipContentOnAutoFlip)
                 {
-                    rootChildren.Add(elem);
+                    foreach (var elem in otherElements)
+                    {
+                        rootChildren.Add(elem);
+                    }
+                    if (dragElement != null)
+                    {
+                        dragElement.Margin = new Thickness(0, 3, 0, 0);
+                        rootChildren.Add(dragElement);
+                    }
                 }
-                if (dragElement != null)
+                else
                 {
-                    dragElement.Margin = new Thickness(0, 3, 0, 0);
-                    rootChildren.Add(dragElement);
-                }
+                    foreach (var elem in otherElements.AsEnumerable().Reverse())
+                    {
+                        rootChildren.Add(elem);
+                    }
+                    if (dragElement != null)
+                    {
+                        dragElement.Margin = new Thickness(0, 3, 0, 0);
+                        rootChildren.Add(dragElement);
+                    }
 
-                ReverseAllContentPanels();
+                    ReverseAllContentPanels();
+                }
             }
             else
             {
-                if (dragElement != null)
+                if (flipContentOnAutoFlip)
                 {
-                    dragElement.Margin = new Thickness(0);
-                    rootChildren.Add(dragElement);
+                    if (dragElement != null)
+                    {
+                        dragElement.Margin = new Thickness(0);
+                        rootChildren.Add(dragElement);
+                    }
+                    foreach (var elem in otherElements)
+                    {
+                        rootChildren.Add(elem);
+                    }
                 }
-                foreach (var elem in otherElements.AsEnumerable().Reverse())
+                else
                 {
-                    rootChildren.Add(elem);
-                }
+                    if (dragElement != null)
+                    {
+                        dragElement.Margin = new Thickness(0);
+                        rootChildren.Add(dragElement);
+                    }
+                    foreach (var elem in otherElements.AsEnumerable().Reverse())
+                    {
+                        rootChildren.Add(elem);
+                    }
 
-                RestoreAllContentPanels();
+                    RestoreAllContentPanels();
+                }
             }
 
             isFloatingBarHeadOnBottom = headOnBottom;

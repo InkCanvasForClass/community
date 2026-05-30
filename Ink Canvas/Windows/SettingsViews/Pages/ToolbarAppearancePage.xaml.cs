@@ -62,9 +62,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
 
             // 加载自动翻转设置
-            if (CardAutoFlipWhenSpaceInsufficient != null)
+            if (ToggleSwitchAutoFlipWhenSpaceInsufficient != null)
             {
-                CardAutoFlipWhenSpaceInsufficient.IsOn = settings.Appearance.AutoFlipWhenSpaceInsufficient;
+                ToggleSwitchAutoFlipWhenSpaceInsufficient.IsOn = settings.Appearance.AutoFlipWhenSpaceInsufficient;
+            }
+
+            // 加载自动翻转后翻转组件内容设置
+            if (ToggleSwitchFlipContentOnAutoFlip != null)
+            {
+                ToggleSwitchFlipContentOnAutoFlip.IsOn = settings.Appearance.FlipContentOnAutoFlip;
             }
         }
 
@@ -170,9 +176,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void AutoFlipWhenSpaceInsufficientToggleSwitch_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            if (CardAutoFlipWhenSpaceInsufficient == null) return;
+            if (ToggleSwitchAutoFlipWhenSpaceInsufficient == null) return;
 
-            SettingsManager.Settings.Appearance.AutoFlipWhenSpaceInsufficient = CardAutoFlipWhenSpaceInsufficient.IsOn;
+            SettingsManager.Settings.Appearance.AutoFlipWhenSpaceInsufficient = ToggleSwitchAutoFlipWhenSpaceInsufficient.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void FlipContentOnAutoFlipToggleSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            if (ToggleSwitchFlipContentOnAutoFlip == null) return;
+
+            SettingsManager.Settings.Appearance.FlipContentOnAutoFlip = ToggleSwitchFlipContentOnAutoFlip.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
     }

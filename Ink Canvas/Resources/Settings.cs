@@ -485,6 +485,9 @@ namespace Ink_Canvas
         [JsonProperty("autoFlipWhenSpaceInsufficient")]
         public bool AutoFlipWhenSpaceInsufficient { get; set; } = true;
 
+        [JsonProperty("flipContentOnAutoFlip")]
+        public bool FlipContentOnAutoFlip { get; set; } = false;
+
     }
 
     public class PowerPointSettings
