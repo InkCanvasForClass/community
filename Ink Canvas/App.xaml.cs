@@ -410,7 +410,7 @@ namespace Ink_Canvas
             string reason = e.Reason == SessionEndReasons.Logoff ? "用户注销" : "系统关机";
             WriteCrashLog($"系统会话即将结束: {reason}");
 
-            // 卸载PPT模块并清理悬浮窗拦截器
+            // 卸载PPT模块
             try
             {
                 // 获取主窗口实例
@@ -419,16 +419,6 @@ namespace Ink_Canvas
                 {
                     mainWindow.UnloadPPTModuleForShutdown();
                     WriteCrashLog("PPT模块已在系统关机时卸载");
-
-                    // 清理悬浮窗拦截器
-                    var interceptorField = mainWindow.GetType().GetField("_floatingWindowInterceptorManager",
-                        BindingFlags.NonPublic | BindingFlags.Instance);
-                    var interceptorManager = interceptorField?.GetValue(mainWindow);
-                    if (interceptorManager != null)
-                    {
-                        var disposeMethod = interceptorManager.GetType().GetMethod("Dispose");
-                        disposeMethod?.Invoke(interceptorManager, null);
-                    }
                 }
             }
             catch (Exception ex)
