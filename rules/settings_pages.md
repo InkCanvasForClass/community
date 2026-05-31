@@ -33,7 +33,8 @@
 ├── 云存储 (CloudStoragePage)
 ├── 工具栏
 │   ├── 组件 (ToolbarPage)
-│   └── 外观 (ToolbarAppearancePage)
+│   ├── 外观 (ToolbarAppearancePage)
+│   └── 白板工具栏 (BoardToolbarPage)
 ├── 自动化 (AutomationPage)
 ├── 随机点名 (RandomDrawPage)
 ├── Debug (DebugPage)
@@ -76,6 +77,7 @@
 | Nav_Toolbar | 工具栏 |
 | Nav_ToolbarComponents | 组件 |
 | Nav_ToolbarAppearance | 外观 |
+| Nav_BoardToolbar | 白板工具栏 |
 | Nav_Automation | 自动化 |
 | Nav_RandomDraw | 随机点名 |
 | Nav_Debug | Debug |
@@ -83,6 +85,35 @@
 ## 页面类型映射
 
 在 `SettingsWindow.xaml.cs` 中，导航 Tag 到页面类型的映射：
+
+### ⚠️ 双字典注册（重要）
+
+`SettingsWindow.xaml.cs` 中存在**两个**页面类型字典，添加新页面时**必须同时注册到两个字典**：
+
+1. `_staticPageTypes` — 静态字典
+2. `_pageTypes` — 实例字典（构造函数中初始化）
+
+导航逻辑使用的是**实例字典 `_pageTypes`**，如果只在 `_staticPageTypes` 中注册而忘记在 `_pageTypes` 中注册，页面将无法打开（点击导航项无反应，无报错）。
+
+```csharp
+// 静态字典
+private static readonly Dictionary<string, Type> _staticPageTypes = new Dictionary<string, Type>
+{
+    // ...
+    { "BoardToolbarPage", typeof(BoardToolbarPage) },  // ✅ 必须添加
+    // ...
+};
+
+// 构造函数中的实例字典
+_pageTypes = new Dictionary<string, Type>
+{
+    // ...
+    { "BoardToolbarPage", typeof(BoardToolbarPage) },  // ✅ 必须添加
+    // ...
+};
+```
+
+### 完整映射
 
 ```csharp
 private static readonly Dictionary<string, Type> _pageDict = new()
