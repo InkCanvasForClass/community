@@ -7,7 +7,7 @@
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:dd="urn:gong-wpf-dragdrop"
-      xmlns:toolbar="clr-namespace:Ink_Canvas.Controls.Toolbar"
+      xmlns:toolbar="clr-namespace:Ink_Canvas.Controls.Toolbar.FloatingToolbar"
       mc:Ignorable="d"
       Title="工具栏">
 
@@ -99,7 +99,7 @@
     </Page.Resources>
 
     <ScrollViewer PanningMode="VerticalFirst">
-        <ikw:SimpleStackPanel Margin="59,0,59,0" MaxWidth="1000" Spacing="4">
+        <ikw:SimpleStackPanel Spacing="4">
 
             <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_ConfigProfiles}" FontSize="14" FontWeight="SemiBold" Margin="0,20,0,6"/>
             <DockPanel Margin="0,0,0,4">

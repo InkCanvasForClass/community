@@ -397,6 +397,15 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Personalize}"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="BoardToolbarPageItem"
+                            Content="{x:Static props:NavStrings.Nav_BoardToolbar}"
+                            Tag="BoardToolbarPage"
+                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_BoardToolbar_Tooltip}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
 

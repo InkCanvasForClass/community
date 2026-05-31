@@ -1,0 +1,20 @@
+<Window x:Class="Ink_Canvas.Windows.SettingsViews.Pages.BoardToolbarAreaPickerDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="选择目标区域" Width="320" Height="240"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        WindowStyle="ToolWindow">
+    <StackPanel Margin="16">
+        <TextBlock Text="请选择将组件添加到哪个区域：" FontSize="13" Margin="0,0,0,12"/>
+        <RadioButton x:Name="RadioLeft" Content="左侧区域" GroupName="Area" IsChecked="True" Margin="0,4,0,4" FontSize="13"/>
+        <RadioButton x:Name="RadioCenter" Content="中间区域" GroupName="Area" Margin="0,4,0,4" FontSize="13"/>
+        <RadioButton x:Name="RadioRight" Content="右侧区域" GroupName="Area" Margin="0,4,0,16" FontSize="13"/>
+        <TextBlock Text="目标分组（可选，留空则添加到区域顶层）：" FontSize="12" Margin="0,0,0,4" Opacity="0.7"/>
+        <TextBox x:Name="TextBoxGroup" FontSize="12" Height="28"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="确定" Click="ButtonOK_Click" Padding="16,6" FontSize="12" Margin="0,0,8,0"/>
+            <Button Content="取消" Click="ButtonCancel_Click" Padding="16,6" FontSize="12"/>
+        </StackPanel>
+    </StackPanel>
+</Window>

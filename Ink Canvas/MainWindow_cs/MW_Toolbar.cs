@@ -1,7 +1,8 @@
 using Ink_Canvas.Controls;
-using Ink_Canvas.Controls.Toolbar;
+using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
 using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -293,12 +294,125 @@ namespace Ink_Canvas
                 ToolbarRegistry.EnsureDefaultConfigExists();
                 ToolbarHost = new ToolbarHost(this);
                 var layout = ToolbarRegistry.LoadActiveConfig();
-                ToolbarRegistry.Populate(ToolbarHost, StackPanelFloatingBarRoot, layout);
+                
+                // 根据设置确定工具栏方向
+                var position = Settings.Appearance.ToolbarPosition;
+                var orientation = (position == ToolbarPosition.Top || position == ToolbarPosition.Bottom) 
+                    ? Orientation.Vertical 
+                    : Orientation.Horizontal;
+                
+                // 设置根面板的方向和尺寸
+                if (StackPanelFloatingBarRoot != null)
+                {
+                    StackPanelFloatingBarRoot.Orientation = orientation;
+                    UpdateToolbarDimensions(orientation);
+                }
+                
+                // 填充工具栏组件
+                ToolbarRegistry.Populate(ToolbarHost, StackPanelFloatingBarRoot, layout, orientation);
+                
+                // 根据位置设置拖动图标的位置
+                SetToolbarHeadPosition(position);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"MW_Toolbar: InitializeToolbarPlugins 异常: {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}", LogHelper.LogType.Error);
             }
+        }
+
+        private void SetToolbarHeadPosition(ToolbarPosition position)
+        {
+            if (FloatingBarRootPanel == null) return;
+            
+            var rootChildren = FloatingBarRootPanel.Children;
+            var rootList = rootChildren.OfType<FrameworkElement>().ToList();
+            var dragElement = FindDragHandleInRoot();
+            var otherElements = rootList.Where(c => c != dragElement).ToList();
+            
+            rootChildren.Clear();
+
+            var reverseContent = Settings.Appearance.ReverseToolbarContent;
+
+            switch (position)
+            {
+                case ToolbarPosition.Right:
+                    if (dragElement != null)
+                    {
+                        dragElement.Margin = new Thickness(0);
+                        rootChildren.Add(dragElement);
+                    }
+                    foreach (var elem in otherElements)
+                    {
+                        rootChildren.Add(elem);
+                    }
+                    // 根据用户设置决定是否翻转内容面板
+                    if (reverseContent)
+                        ReverseAllContentPanels();
+                    else
+                        RestoreAllContentPanels();
+                    isFloatingBarHeadOnRight = false;
+                    isFloatingBarHeadOnBottom = false;
+                    break;
+                    
+                case ToolbarPosition.Left:
+                    foreach (var elem in otherElements.AsEnumerable().Reverse())
+                    {
+                        rootChildren.Add(elem);
+                    }
+                    if (dragElement != null)
+                    {
+                        dragElement.Margin = new Thickness(3, 0, 0, 0);
+                        rootChildren.Add(dragElement);
+                    }
+                    // 根据用户设置决定是否翻转内容面板（注意：这里默认是翻转的，所以用户设置要反过来）
+                    if (reverseContent)
+                        RestoreAllContentPanels();
+                    else
+                        ReverseAllContentPanels();
+                    isFloatingBarHeadOnRight = true;
+                    isFloatingBarHeadOnBottom = false;
+                    break;
+                    
+                case ToolbarPosition.Top:
+                    foreach (var elem in otherElements.AsEnumerable().Reverse())
+                    {
+                        rootChildren.Add(elem);
+                    }
+                    if (dragElement != null)
+                    {
+                        dragElement.Margin = new Thickness(0, 3, 0, 0);
+                        rootChildren.Add(dragElement);
+                    }
+                    // 根据用户设置决定是否翻转内容面板（注意：这里默认是翻转的，所以用户设置要反过来）
+                    if (reverseContent)
+                        RestoreAllContentPanels();
+                    else
+                        ReverseAllContentPanels();
+                    isFloatingBarHeadOnRight = false;
+                    isFloatingBarHeadOnBottom = true;
+                    break;
+                    
+                case ToolbarPosition.Bottom:
+                    if (dragElement != null)
+                    {
+                        dragElement.Margin = new Thickness(0);
+                        rootChildren.Add(dragElement);
+                    }
+                    foreach (var elem in otherElements)
+                    {
+                        rootChildren.Add(elem);
+                    }
+                    // 根据用户设置决定是否翻转内容面板
+                    if (reverseContent)
+                        ReverseAllContentPanels();
+                    else
+                        RestoreAllContentPanels();
+                    isFloatingBarHeadOnRight = false;
+                    isFloatingBarHeadOnBottom = false;
+                    break;
+            }
+            
+            SetFloatingBarHighlightPosition(_currentToolMode);
         }
 
         internal void RebuildToolbar()
@@ -333,6 +447,24 @@ namespace Ink_Canvas
         {
             var isPpt = IsInPptPresentationMode;
             ToolbarRegistry.UpdateVisibilityByMode(StackPanelFloatingBarRoot, IsAnnotating, isPpt);
+        }
+
+        private void UpdateToolbarDimensions(Orientation orientation)
+        {
+            if (StackPanelFloatingBarRoot == null) return;
+            
+            if (orientation == Orientation.Horizontal)
+            {
+                // 左右位置：高度固定，宽度自动
+                StackPanelFloatingBarRoot.MaxHeight = 58;
+                StackPanelFloatingBarRoot.ClearValue(System.Windows.FrameworkElement.MaxWidthProperty);
+            }
+            else
+            {
+                // 上下位置：宽度固定，高度自动
+                StackPanelFloatingBarRoot.MaxWidth = 58;
+                StackPanelFloatingBarRoot.ClearValue(System.Windows.FrameworkElement.MaxHeightProperty);
+            }
         }
     }
 }

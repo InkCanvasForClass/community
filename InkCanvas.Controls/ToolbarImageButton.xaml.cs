@@ -87,6 +87,22 @@ namespace Ink_Canvas.Controls
             set => ButtonImage.Height = value;
         }
 
+        public void ApplyOrientation(bool isVertical)
+        {
+            if (isVertical)
+            {
+                ButtonPanel.Width = 43;
+                ButtonPanel.Height = 44;
+                ButtonBorder.Margin = new Thickness(2, 0, 7, 0);
+            }
+            else
+            {
+                ButtonPanel.Width = 44;
+                ButtonPanel.Height = 43;
+                ButtonBorder.Margin = new Thickness(0, 2, 0, 7);
+            }
+        }
+
         public event MouseButtonEventHandler ButtonMouseDown;
         public event MouseEventHandler ButtonMouseLeave;
         public event MouseButtonEventHandler ButtonMouseUp;

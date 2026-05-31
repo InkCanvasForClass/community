@@ -165,6 +165,12 @@
   <data name="Nav_Toolbar_Tooltip" xml:space="preserve">
     <value>装备栏按钮排序与显隐</value>
   </data>
+  <data name="Nav_BoardToolbar" xml:space="preserve">
+    <value>白板工具栏</value>
+  </data>
+  <data name="Nav_BoardToolbar_Tooltip" xml:space="preserve">
+    <value>白板工具栏组件配置</value>
+  </data>
   <data name="Nav_CanvasAndInk_Tooltip" xml:space="preserve">
     <value>画板与墨迹调教</value>
   </data>

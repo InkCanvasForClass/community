@@ -72,6 +72,8 @@
                                             BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="2"
                                             TouchDown="BorderCalculateMultiplier_TouchDown" />
                                     <TextBlock x:Name="TextBlockShowCalculatedMultiplier" FontSize="14" />
+                                    <TextBlock x:Name="TextBlockShowRawValue" FontSize="14"
+                                               Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>
@@ -113,6 +115,46 @@
                         Icon="{x:Static ui:SegoeFluentIcons.FullScreen}"
                         IsOn="True"
                         Toggled="ToggleSwitchIsQuadIR_Toggled"/>
+
+                    <ui:SettingsExpander x:Name="CardAutoCalibrate"
+                                         Header="自动校准触摸参数"
+                                         Description="通过三次触摸自动计算合适的笔尖/手指阈值和触摸倍率"
+                                         IsExpanded="False">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EaseOfAccess}" />
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="校准步骤" ContentAlignment="Left">
+                                <ikw:SimpleStackPanel Spacing="8" Margin="0,4,0,4">
+                                    <TextBlock Text="点击&quot;开始校准&quot;按钮，然后依次在下方区域用："
+                                               Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                                               TextWrapping="Wrap" MaxWidth="420" />
+                                    <ikw:SimpleStackPanel Orientation="Vertical" Spacing="4" Margin="8,0,0,0">
+                                        <TextBlock Text="1. 笔尖（触控笔）" />
+                                        <TextBlock Text="2. 手指" />
+                                        <TextBlock Text="3. 手掌（模拟误触）" />
+                                    </ikw:SimpleStackPanel>
+                                    <Button x:Name="BtnStartCalibrate" Content="开始校准" Click="BtnStartCalibrate_Click" MinWidth="120" />
+                                    <Border x:Name="BorderCalibrate" Margin="0,0,20,0" CornerRadius="4" Height="64" 
+                                            Background="Transparent"
+                                            BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="2"
+                                            TouchDown="BorderCalibrate_TouchDown" IsEnabled="False">
+                                        <TextBlock x:Name="TextCalibrateHint" 
+                                                   Text="点击上面的按钮开始" 
+                                                   HorizontalAlignment="Center" 
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                    </Border>
+                                    <ikw:SimpleStackPanel Orientation="Vertical" Spacing="4" Margin="8,0,0,0">
+                                        <TextBlock x:Name="TextNibCalibrated" Text="笔尖值: 未校准" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                        <TextBlock x:Name="TextFingerCalibrated" Text="手指值: 未校准" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                        <TextBlock x:Name="TextPalmCalibrated" Text="手掌值: 未校准" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                        <TextBlock x:Name="TextCalibrateResult" Text="" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" FontWeight="SemiBold" />
+                                    </ikw:SimpleStackPanel>
+                                </ikw:SimpleStackPanel>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:AdvancedStrings.Logging}" />

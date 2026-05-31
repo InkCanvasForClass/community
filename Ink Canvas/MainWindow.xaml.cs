@@ -1,6 +1,7 @@
 using Ink_Canvas.Properties;
 using Ink_Canvas.Controls;
-using Ink_Canvas.Controls.Toolbar;
+using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
+using Ink_Canvas.Controls.Toolbar.BoardToolbar;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Models;
 using Ink_Canvas.Windows;
@@ -639,95 +640,106 @@ namespace Ink_Canvas
             ShowPage(currentPageIndex);
 
             // 手动实现触摸滑动
+            var leftScrollViewer = FindView("board.pageList.leftScrollViewer") as ScrollViewer;
+            var rightScrollViewer = FindView("board.pageList.rightScrollViewer") as ScrollViewer;
+            var leftPageListView = FindView("board.pageList.left") as System.Windows.Controls.ListView;
+            var rightPageListView = FindView("board.pageList.right") as System.Windows.Controls.ListView;
+
             const double TouchTapMovementThreshold = 15.0;
             double leftTouchStartY = 0;
             double leftTouchStartX = 0;
             double leftScrollStartOffset = 0;
             bool leftIsTouching = false;
             bool leftTouchDidScroll = false;
-            BlackBoardLeftSidePageListScrollViewer.TouchDown += (s, e) =>
+            if (leftScrollViewer != null)
             {
-                leftIsTouching = true;
-                leftTouchDidScroll = false;
-                var pt = e.GetTouchPoint(BlackBoardLeftSidePageListScrollViewer).Position;
-                leftTouchStartX = pt.X;
-                leftTouchStartY = pt.Y;
-                leftScrollStartOffset = BlackBoardLeftSidePageListScrollViewer.VerticalOffset;
-                BlackBoardLeftSidePageListScrollViewer.CaptureTouch(e.TouchDevice);
-                e.Handled = true;
-            };
-            BlackBoardLeftSidePageListScrollViewer.TouchMove += (s, e) =>
-            {
-                if (leftIsTouching)
+                leftScrollViewer.TouchDown += (s, e) =>
                 {
-                    var pt = e.GetTouchPoint(BlackBoardLeftSidePageListScrollViewer).Position;
-                    double deltaY = leftTouchStartY - pt.Y;
-                    double deltaX = pt.X - leftTouchStartX;
-                    if (!leftTouchDidScroll && (Math.Abs(deltaY) > TouchTapMovementThreshold || Math.Abs(deltaX) > TouchTapMovementThreshold))
-                        leftTouchDidScroll = true;
-                    if (leftTouchDidScroll)
-                        BlackBoardLeftSidePageListScrollViewer.ScrollToVerticalOffset(leftScrollStartOffset + deltaY);
+                    leftIsTouching = true;
+                    leftTouchDidScroll = false;
+                    var pt = e.GetTouchPoint(leftScrollViewer).Position;
+                    leftTouchStartX = pt.X;
+                    leftTouchStartY = pt.Y;
+                    leftScrollStartOffset = leftScrollViewer.VerticalOffset;
+                    leftScrollViewer.CaptureTouch(e.TouchDevice);
                     e.Handled = true;
-                }
-            };
-            BlackBoardLeftSidePageListScrollViewer.TouchUp += (s, e) =>
-            {
-                if (leftIsTouching && !leftTouchDidScroll)
+                };
+                leftScrollViewer.TouchMove += (s, e) =>
                 {
-                    var pt = e.GetTouchPoint(BlackBoardLeftSidePageListScrollViewer).Position;
-                    double dx = pt.X - leftTouchStartX, dy = pt.Y - leftTouchStartY;
-                    if (dx * dx + dy * dy <= TouchTapMovementThreshold * TouchTapMovementThreshold)
-                        TrySwitchWhiteboardPageByTouchPoint(BlackBoardLeftSidePageListView, BlackBoardLeftSidePageListScrollViewer, pt);
-                }
-                leftIsTouching = false;
-                leftTouchDidScroll = false;
-                BlackBoardLeftSidePageListScrollViewer.ReleaseTouchCapture(e.TouchDevice);
-                e.Handled = true;
-            };
+                    if (leftIsTouching)
+                    {
+                        var pt = e.GetTouchPoint(leftScrollViewer).Position;
+                        double deltaY = leftTouchStartY - pt.Y;
+                        double deltaX = pt.X - leftTouchStartX;
+                        if (!leftTouchDidScroll && (Math.Abs(deltaY) > TouchTapMovementThreshold || Math.Abs(deltaX) > TouchTapMovementThreshold))
+                            leftTouchDidScroll = true;
+                        if (leftTouchDidScroll)
+                            leftScrollViewer.ScrollToVerticalOffset(leftScrollStartOffset + deltaY);
+                        e.Handled = true;
+                    }
+                };
+                leftScrollViewer.TouchUp += (s, e) =>
+                {
+                    if (leftIsTouching && !leftTouchDidScroll)
+                    {
+                        var pt = e.GetTouchPoint(leftScrollViewer).Position;
+                        double dx = pt.X - leftTouchStartX, dy = pt.Y - leftTouchStartY;
+                        if (dx * dx + dy * dy <= TouchTapMovementThreshold * TouchTapMovementThreshold)
+                            TrySwitchWhiteboardPageByTouchPoint(leftPageListView, leftScrollViewer, pt);
+                    }
+                    leftIsTouching = false;
+                    leftTouchDidScroll = false;
+                    leftScrollViewer.ReleaseTouchCapture(e.TouchDevice);
+                    e.Handled = true;
+                };
+            }
             double rightTouchStartY = 0;
             double rightTouchStartX = 0;
             double rightScrollStartOffset = 0;
             bool rightIsTouching = false;
             bool rightTouchDidScroll = false;
-            BlackBoardRightSidePageListScrollViewer.TouchDown += (s, e) =>
+            if (rightScrollViewer != null)
             {
-                rightIsTouching = true;
-                rightTouchDidScroll = false;
-                var pt = e.GetTouchPoint(BlackBoardRightSidePageListScrollViewer).Position;
-                rightTouchStartX = pt.X;
-                rightTouchStartY = pt.Y;
-                rightScrollStartOffset = BlackBoardRightSidePageListScrollViewer.VerticalOffset;
-                BlackBoardRightSidePageListScrollViewer.CaptureTouch(e.TouchDevice);
-                e.Handled = true;
-            };
-            BlackBoardRightSidePageListScrollViewer.TouchMove += (s, e) =>
-            {
-                if (rightIsTouching)
+                rightScrollViewer.TouchDown += (s, e) =>
                 {
-                    var pt = e.GetTouchPoint(BlackBoardRightSidePageListScrollViewer).Position;
-                    double deltaY = rightTouchStartY - pt.Y;
-                    double deltaX = pt.X - rightTouchStartX;
-                    if (!rightTouchDidScroll && (Math.Abs(deltaY) > TouchTapMovementThreshold || Math.Abs(deltaX) > TouchTapMovementThreshold))
-                        rightTouchDidScroll = true;
-                    if (rightTouchDidScroll)
-                        BlackBoardRightSidePageListScrollViewer.ScrollToVerticalOffset(rightScrollStartOffset + deltaY);
+                    rightIsTouching = true;
+                    rightTouchDidScroll = false;
+                    var pt = e.GetTouchPoint(rightScrollViewer).Position;
+                    rightTouchStartX = pt.X;
+                    rightTouchStartY = pt.Y;
+                    rightScrollStartOffset = rightScrollViewer.VerticalOffset;
+                    rightScrollViewer.CaptureTouch(e.TouchDevice);
                     e.Handled = true;
-                }
-            };
-            BlackBoardRightSidePageListScrollViewer.TouchUp += (s, e) =>
-            {
-                if (rightIsTouching && !rightTouchDidScroll)
+                };
+                rightScrollViewer.TouchMove += (s, e) =>
                 {
-                    var pt = e.GetTouchPoint(BlackBoardRightSidePageListScrollViewer).Position;
-                    double dx = pt.X - rightTouchStartX, dy = pt.Y - rightTouchStartY;
-                    if (dx * dx + dy * dy <= TouchTapMovementThreshold * TouchTapMovementThreshold)
-                        TrySwitchWhiteboardPageByTouchPoint(BlackBoardRightSidePageListView, BlackBoardRightSidePageListScrollViewer, pt);
-                }
-                rightIsTouching = false;
-                rightTouchDidScroll = false;
-                BlackBoardRightSidePageListScrollViewer.ReleaseTouchCapture(e.TouchDevice);
-                e.Handled = true;
-            };
+                    if (rightIsTouching)
+                    {
+                        var pt = e.GetTouchPoint(rightScrollViewer).Position;
+                        double deltaY = rightTouchStartY - pt.Y;
+                        double deltaX = pt.X - rightTouchStartX;
+                        if (!rightTouchDidScroll && (Math.Abs(deltaY) > TouchTapMovementThreshold || Math.Abs(deltaX) > TouchTapMovementThreshold))
+                            rightTouchDidScroll = true;
+                        if (rightTouchDidScroll)
+                            rightScrollViewer.ScrollToVerticalOffset(rightScrollStartOffset + deltaY);
+                        e.Handled = true;
+                    }
+                };
+                rightScrollViewer.TouchUp += (s, e) =>
+                {
+                    if (rightIsTouching && !rightTouchDidScroll)
+                    {
+                        var pt = e.GetTouchPoint(rightScrollViewer).Position;
+                        double dx = pt.X - rightTouchStartX, dy = pt.Y - rightTouchStartY;
+                        if (dx * dx + dy * dy <= TouchTapMovementThreshold * TouchTapMovementThreshold)
+                            TrySwitchWhiteboardPageByTouchPoint(rightPageListView, rightScrollViewer, pt);
+                    }
+                    rightIsTouching = false;
+                    rightTouchDidScroll = false;
+                    rightScrollViewer.ReleaseTouchCapture(e.TouchDevice);
+                    e.Handled = true;
+                };
+            }
             // 应用无焦点模式设置
             ApplyNoFocusMode();
             // 应用窗口置顶设置
@@ -1524,11 +1536,12 @@ namespace Ink_Canvas
             // 工具栏插件化按钮先注入到容器，确保 LoadSettings 内部对 Cursor_Icon / Pen_Icon 等的访问非空。
             // Settings.Toolbar 此时尚为默认值（全部可见），与旧 XAML 行为一致。
             InitializeToolbarPlugins();
-            AttachBoardInkFreezeBtn(BoardInkFreeze);
             // 初始化 Popup 管理器（置顶 + 拖动跟随）
             InitializePopupManager();
             //加载设置
             LoadSettings(true);
+            // 根据ToolbarPosition设置更新工具栏结构和位置
+            UpdateToolbarPosition();
             // 启动时直接设置浮动栏位置，跳过动画
             if (currentMode == 0)
             {
@@ -1577,15 +1590,30 @@ namespace Ink_Canvas
 
             isLoaded = true;
             EnsureRealtimeStylusPipelineBinding();
-            BlackBoardLeftSidePageListView.ItemsSource = blackBoardSidePageListViewObservableCollection;
-            BlackBoardRightSidePageListView.ItemsSource = blackBoardSidePageListViewObservableCollection;
+            var leftPageListView = FindView("board.pageList.left") as System.Windows.Controls.ListView;
+            var rightPageListView = FindView("board.pageList.right") as System.Windows.Controls.ListView;
+            if (leftPageListView != null) leftPageListView.ItemsSource = blackBoardSidePageListViewObservableCollection;
+            if (rightPageListView != null) rightPageListView.ItemsSource = blackBoardSidePageListViewObservableCollection;
 
-            BtnLeftWhiteBoardSwitchPrevious.IconGeometryDrawing.Brush =
-                new SolidColorBrush(Color.FromArgb(127, 24, 24, 27));
-            BtnLeftWhiteBoardSwitchPrevious.LabelTextBlockControl.Opacity = 0.5;
-            BtnRightWhiteBoardSwitchPrevious.IconGeometryDrawing.Brush =
-                new SolidColorBrush(Color.FromArgb(127, 24, 24, 27));
-            BtnRightWhiteBoardSwitchPrevious.LabelTextBlockControl.Opacity = 0.5;
+            InitializeBoardToolbar();
+
+            var boardInkFreezeBtn = FindView("board.inkFreeze") as BoardToolbarButton;
+            if (boardInkFreezeBtn != null) AttachBoardInkFreezeBtn(boardInkFreezeBtn);
+
+            var leftPreviousBtn = FindView("board.previousPage.left") as BoardToolbarButton;
+            var rightPreviousBtn = FindView("board.previousPage.right") as BoardToolbarButton;
+            if (leftPreviousBtn != null)
+            {
+                leftPreviousBtn.IconGeometryDrawing.Brush =
+                    new SolidColorBrush(Color.FromArgb(127, 24, 24, 27));
+                leftPreviousBtn.LabelTextBlockControl.Opacity = 0.5;
+            }
+            if (rightPreviousBtn != null)
+            {
+                rightPreviousBtn.IconGeometryDrawing.Brush =
+                    new SolidColorBrush(Color.FromArgb(127, 24, 24, 27));
+                rightPreviousBtn.LabelTextBlockControl.Opacity = 0.5;
+            }
 
             // 应用颜色主题，这将考虑自定义背景色
             CheckColorTheme(true);

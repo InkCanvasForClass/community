@@ -14,7 +14,6 @@
 [![All Contributors](https://img.shields.io/github/all-contributors/InkCanvasForClass/community?color=ee8449)](#贡献者)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/InkCanvasForClass/community)
 
-
 [![Discord](https://img.shields.io/discord/1383039050184917053?label=Discord&logo=discord)](https://discord.gg/ahj7eJWhEG)
 [![QQ](https://img.shields.io/badge/-1054377349-white?logo=qq&label=QQ)](https://qm.qq.com/q/qo32AclNh6)
 [![STCN](https://img.shields.io/badge/icc--ce-8a2be2?label=%E6%99%BA%E6%95%99%E8%AE%BA%E5%9D%9B&link=https%3A%2F%2Fforum.smart-teach.cn%2Ft%2Ficc-ce)](https://forum.smart-teach.cn/t/icc-ce)
@@ -36,19 +35,24 @@
 在使用和分发本软件前，请务必了解相关开源协议。本软件基于 <https://github.com/InkCanvasForClass/icc-20240610-stable> 修改而来，而 icc-20240610-stable 基于 <https://github.com/ChangSakura/Ink-Canvas> 修改，ICA 则基于 <https://github.com/WXRIW/Ink-Canvas> 修改，增加了包括但不限于隐藏到侧边栏等功能，更改了相关UI和软件操作逻辑。对于墨迹书写功能以及 ICA 独有功能的相关问题反馈，建议优先查阅 <https://github.com/WXRIW/Ink-Canvas/issues> 。**使用前建议戴上大脑使用。**
 
 # 💬 提示
+
 - 对于新功能的有效意见和合理建议，开发者会适时回复并进行开发。本软件并非商业性质软件或由营利性机构驱动，请不要催促开发者，耐心等待能让功能少些 Bug，更加稳定。
 - 此软件仅用于个人使用，请勿商用。更新速度不会很快，如果有能力请通过 PR 贡献代码，而不是在 Issue 里无能狂怒。
 - 欢迎尝试 InkCanvas 家族的其他成员，包括 [Ink Canvas Plus](https://khyan.top/ic+) 和 [Ink Canvas Artistry](https://github.com/InkCanvas/Ink-Canvas-Artistry) 。您的大力宣传能让更多用户发现我们的软件。
 - **强烈建议使用 Microsoft Office 365 的 PowerPoint 搭配 InkCanvasForClass 使用，效果更好！！！**
 
 ## 📗 FAQ
+
 ### 在 Windows 10 以下版本系统中，部分图标显示为 「□」 怎么办？
+
 [点击下载](https://aka.ms/SegoeFonts "SegoeFonts") SegoeFonts 文件，安装压缩包中 `SegMDL2.ttf` 字体后重启即可解决。
 
 ### 点击放映后一翻页就闪退
+
 请[激活 Microsoft Office](https://www.coolhub.top/archives/14)。
 
 ### 放映后画板程序不会切换到 PPT 模式
+
 1. PowerPoint 处在保护模式下（只读），请退出保护模式，方法如下：
    1. 打开 PowerPoint，点击左上角的「文件」选项；
    2. 在「信息」标签内，点击右侧的「启用编辑」按钮。
@@ -57,6 +61,7 @@
 4. 如果上述方法不能解决你的问题，请参考这个链接[【点击此处以跳转】](https://www.inkeys.top/tutorial/ppt-com.html)
 
 ### 程序无法正常启动
+
 请检查你的电脑上是否安装了 `.Net Runtime 6.0` 或更高版本。若没有，请[前往官网](https://dotnet.microsoft.com/zh-cn/download/dotnet/6.0)下载安装。
 
 如果仍无法运行，请[安装 `Microsoft Office`](https://www.coolhub.top/archives/11)。
@@ -65,13 +70,16 @@
 
 **请注意，在贡献代码时，_务必_ 将所有代码提交到 _net6_ 分支，以保证net6版本总是新于main版本。**
 
-## TODO LIST
+## Todo LIST
+
 1. 预备 2.0 版本开发
 2. Ci 联动插件
 
 ## 贡献者
+
 > [!NOTE]
 > 此列表通过[All Contributers](https://allcontributors.org/)实现。
+
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
@@ -111,16 +119,19 @@
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 ## 🤝 感谢
- 
+
 感谢 [yuwenhui2020](https://github.com/yuwenhui2020) 为 `Ink Canvas 使用说明` 做出的贡献！  
-感谢 [CN-Ironegg](https://github.com/CN-Ironegg)、[jiajiaxd](https://github.com/jiajiaxd)、[Kengwang](https://github.com/kengwang)、[Raspberry Kan](https://github.com/Raspberry-Monster)、[clover-yan](https://github.com/clover-yan)、[STBBRD](https://github.com/STBBRD)、[ChangSakura](https://github.com/WuChanging) 为本项目贡献代码！  
+感谢 [CN-Ironegg](https://github.com/CN-Ironegg)、[jiajiaxd](https://github.com/jiajiaxd)、[Kengwang](https://github.com/kengwang)、[Raspberry Kan](https://github.com/Raspberry-Monster)、[clover-yan](https://github.com/clover-yan)、[STBBRD](https://github.com/STBBRD)、[ChangSakura](https://github.com/WuChanging) 为本项目贡献代码！
 
 ## License
+
 GPLv3
 
 ## 项目引用
+
 [Alan-CRL/DesktopDrawpadBlocker](https://github.com/Alan-CRL/DesktopDrawpadBlocker)  
-[Alan-CRL/Inkeys](https://github.com/Alan-CRL/Inkeys)  
+[Alan-CRL/Inkeys](https://github.com/Alan-CRL/Inkeys)
+
 ## Star History
 
 <a href="https://www.star-history.com/?repos=InkCanvasForClass%2Fcommunity&type=timeline&logscale=&legend=top-left">

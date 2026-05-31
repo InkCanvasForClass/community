@@ -8,12 +8,14 @@
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+      xmlns:c="clr-namespace:Ink_Canvas.Converter"
       mc:Ignorable="d"
       Title="ToolbarAppearancePage">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
             <FrameworkElement.Resources>
+                <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
                 <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
                 <Style x:Key="SettingsSectionHeaderTextBlockStyle"
                     BasedOn="{StaticResource BodyStrongTextBlockStyle}"
@@ -28,9 +30,42 @@
                     HorizontalAlignment="Stretch"
                     Spacing="{StaticResource SettingsCardSpacing}">
 
-                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="基本" />
+                    <ui:SettingsCard Header="工具栏位置" Description="设置工具栏相对于拖动图标的显示位置">
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <ComboBox x:Name="ToolbarPositionComboBox" Width="200" SelectionChanged="ToolbarPositionComboBox_SelectionChanged">
+                                <ComboBoxItem Tag="Right" Content="右侧" />
+                                <ComboBoxItem Tag="Left" Content="左侧" />
+                                <ComboBoxItem Tag="Top" Content="上方" />
+                                <ComboBoxItem Tag="Bottom" Content="下方" />
+                            </ComboBox>
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+                    <Rectangle Height="16" />
+                    <controls:LabeledSettingsCard x:Name="CardReverseToolbarContent"
+                            Header="翻转组件内容"
+                            Description="翻转组件内容的方向，更改后建议重启应用"
+                            SwitchName="ToggleSwitchReverseToolbarContent"
+                            Toggled="ReverseToolbarContentToggleSwitch_Toggled" />
 
+                    <ui:SettingsExpander x:Name="ExpanderAutoFlipWhenSpaceInsufficient"
+                            Header="空间不足时自动翻转" d:IsExpanded="True"
+                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchAutoFlipWhenSpaceInsufficient, Mode=OneWay}"
+                            Description="拖动工具栏到屏幕边缘空间不足时自动翻转方向，更改后建议重启应用">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Switch}" />
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchAutoFlipWhenSpaceInsufficient"
+                                Toggled="AutoFlipWhenSpaceInsufficientToggleSwitch_Toggled" />
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard x:Name="CardFlipContentOnAutoFlip"
+                                    Header="自动翻转后翻转组件内容"
+                                    Description="开启后自动翻转时仅移动拖动图标位置，组件内容保持原顺序，更改后建议重启应用">
+                                <ui:ToggleSwitch x:Name="ToggleSwitchFlipContentOnAutoFlip"
+                                        Toggled="FlipContentOnAutoFlipToggleSwitch_Toggled" />
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
+                    <Rectangle Height="16" />
                     <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_FloatingBarScale}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}" />
@@ -50,7 +85,7 @@
                                     ValueChanged="ViewboxFloatingBarScaleTransformValueSlider_ValueChanged" />
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
-
+                    <Rectangle Height="16" />
                     <ui:SettingsExpander Header="{x:Static props:ThemeStrings.Theme_FloatingBarOpacity}"
                                          IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>

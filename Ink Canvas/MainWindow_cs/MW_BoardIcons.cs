@@ -308,9 +308,10 @@ namespace Ink_Canvas
             forceEraser = false;
             forcePointEraser = false;
             drawingShapeMode = 0;
-            // 使用集中化的工具模式切换方法
             SetCurrentToolMode(InkCanvasEditingMode.Select);
+            UpdateCurrentToolMode("select");
             SetCursorBasedOnEditingMode(inkCanvas);
+            HideSubPanels("select");
         }
 
         /// <summary>

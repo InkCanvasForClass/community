@@ -1,4 +1,4 @@
-using Ink_Canvas.Controls.Toolbar;
+using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Newtonsoft.Json;
 using OSVersionExtension;
 using System;
@@ -48,6 +48,9 @@ namespace Ink_Canvas
 
         [JsonProperty("toolbarConfigName")]
         public string ToolbarConfigName { get; set; } = "default";
+
+        [JsonProperty("boardToolbarConfigName")]
+        public string BoardToolbarConfigName { get; set; } = "default";
     }
 
     public class NotificationSettings
@@ -376,6 +379,14 @@ namespace Ink_Canvas
         CloseApp = 9
     }
 
+    public enum ToolbarPosition
+    {
+        Right = 0,
+        Left = 1,
+        Top = 2,
+        Bottom = 3
+    }
+
     public class Appearance
     {
         [JsonProperty("isColorfulViewboxFloatingBar")]
@@ -467,6 +478,18 @@ namespace Ink_Canvas
 
         [JsonProperty("allowDragSidePanel")]
         public bool AllowDragSidePanel { get; set; } = true;
+
+        [JsonProperty("toolbarPosition")]
+        public ToolbarPosition ToolbarPosition { get; set; } = ToolbarPosition.Right;
+
+        [JsonProperty("reverseToolbarContent")]
+        public bool ReverseToolbarContent { get; set; } = false;
+
+        [JsonProperty("autoFlipWhenSpaceInsufficient")]
+        public bool AutoFlipWhenSpaceInsufficient { get; set; } = true;
+
+        [JsonProperty("flipContentOnAutoFlip")]
+        public bool FlipContentOnAutoFlip { get; set; } = false;
 
     }
 

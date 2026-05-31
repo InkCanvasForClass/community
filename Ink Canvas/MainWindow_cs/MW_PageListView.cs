@@ -27,6 +27,9 @@ namespace Ink_Canvas
         /// </remarks>
         private void RefreshBlackBoardSidePageListView()
         {
+            var leftPageListView = FindView("board.pageList.left") as ListView;
+            var rightPageListView = FindView("board.pageList.right") as ListView;
+
             if (blackBoardSidePageListViewObservableCollection.Count == WhiteboardTotalCount)
             {
                 foreach (int index in Enumerable.Range(1, WhiteboardTotalCount))
@@ -66,8 +69,8 @@ namespace Ink_Canvas
             };
             blackBoardSidePageListViewObservableCollection[CurrentWhiteboardIndex - 1] = _pitem;
 
-            BlackBoardLeftSidePageListView.SelectedIndex = CurrentWhiteboardIndex - 1;
-            BlackBoardRightSidePageListView.SelectedIndex = CurrentWhiteboardIndex - 1;
+            if (leftPageListView != null) leftPageListView.SelectedIndex = CurrentWhiteboardIndex - 1;
+            if (rightPageListView != null) rightPageListView.SelectedIndex = CurrentWhiteboardIndex - 1;
         }
 
         /// <summary>
@@ -83,6 +86,10 @@ namespace Ink_Canvas
         private void TrySwitchWhiteboardPageByTouchPoint(ListView listView, ScrollViewer scrollViewer, Point pointInScrollViewer)
         {
             if (listView == null || scrollViewer == null) return;
+            var leftBorder = FindView("board.pageList.leftBorder") as Border;
+            var rightBorder = FindView("board.pageList.rightBorder") as Border;
+            var leftPageListView = FindView("board.pageList.left") as ListView;
+            var rightPageListView = FindView("board.pageList.right") as ListView;
             try
             {
                 var transform = scrollViewer.TransformToVisual(listView);
@@ -96,8 +103,8 @@ namespace Ink_Canvas
                 if (index < 0 || index >= blackBoardSidePageListViewObservableCollection.Count) return;
                 var item = blackBoardSidePageListViewObservableCollection[index];
                 if (item == null) return;
-                AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
-                AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
+                if (leftBorder != null) AnimationsHelper.HideWithSlideAndFade(leftBorder);
+                if (rightBorder != null) AnimationsHelper.HideWithSlideAndFade(rightBorder);
                 if (index + 1 != CurrentWhiteboardIndex)
                 {
                     if (currentSelectedElement != null)
@@ -113,8 +120,8 @@ namespace Ink_Canvas
                     RestoreStrokes();
                     UpdateIndexInfoDisplay();
                 }
-                BlackBoardLeftSidePageListView.SelectedIndex = index;
-                BlackBoardRightSidePageListView.SelectedIndex = index;
+                if (leftPageListView != null) leftPageListView.SelectedIndex = index;
+                if (rightPageListView != null) rightPageListView.SelectedIndex = index;
             }
             catch
             {
@@ -183,22 +190,23 @@ namespace Ink_Canvas
         /// </remarks>
         private void BlackBoardLeftSidePageListView_OnMouseUp(object sender, MouseButtonEventArgs e)
         {
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
-            var item = BlackBoardLeftSidePageListView.SelectedItem;
-            var index = BlackBoardLeftSidePageListView.SelectedIndex;
+            var leftBorder = FindView("board.pageList.leftBorder") as Border;
+            var rightBorder = FindView("board.pageList.rightBorder") as Border;
+            var leftPageListView = FindView("board.pageList.left") as ListView;
+            if (leftPageListView == null) return;
+
+            if (leftBorder != null) AnimationsHelper.HideWithSlideAndFade(leftBorder);
+            if (rightBorder != null) AnimationsHelper.HideWithSlideAndFade(rightBorder);
+            var item = leftPageListView.SelectedItem;
+            var index = leftPageListView.SelectedIndex;
             if (item != null)
             {
-                // 只有当选择的页面与当前页面不同时才进行切换
                 if (index + 1 != CurrentWhiteboardIndex)
                 {
-                    // 隐藏图片选择工具栏
                     if (currentSelectedElement != null)
                     {
-                        // 保存当前编辑模式
                         var previousEditingMode = inkCanvas.EditingMode;
                         UnselectElement(currentSelectedElement);
-                        // 恢复编辑模式
                         inkCanvas.EditingMode = previousEditingMode;
                         currentSelectedElement = null;
                     }
@@ -209,8 +217,7 @@ namespace Ink_Canvas
                     RestoreStrokes();
                     UpdateIndexInfoDisplay();
                 }
-                // 无论是否切换页面，都更新选择索引
-                BlackBoardLeftSidePageListView.SelectedIndex = index;
+                leftPageListView.SelectedIndex = index;
             }
         }
 
@@ -234,22 +241,23 @@ namespace Ink_Canvas
         /// </remarks>
         private void BlackBoardRightSidePageListView_OnMouseUp(object sender, MouseButtonEventArgs e)
         {
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
-            var item = BlackBoardRightSidePageListView.SelectedItem;
-            var index = BlackBoardRightSidePageListView.SelectedIndex;
+            var leftBorder = FindView("board.pageList.leftBorder") as Border;
+            var rightBorder = FindView("board.pageList.rightBorder") as Border;
+            var rightPageListView = FindView("board.pageList.right") as ListView;
+            if (rightPageListView == null) return;
+
+            if (leftBorder != null) AnimationsHelper.HideWithSlideAndFade(leftBorder);
+            if (rightBorder != null) AnimationsHelper.HideWithSlideAndFade(rightBorder);
+            var item = rightPageListView.SelectedItem;
+            var index = rightPageListView.SelectedIndex;
             if (item != null)
             {
-                // 只有当选择的页面与当前页面不同时才进行切换
                 if (index + 1 != CurrentWhiteboardIndex)
                 {
-                    // 隐藏图片选择工具栏
                     if (currentSelectedElement != null)
                     {
-                        // 保存当前编辑模式
                         var previousEditingMode = inkCanvas.EditingMode;
                         UnselectElement(currentSelectedElement);
-                        // 恢复编辑模式
                         inkCanvas.EditingMode = previousEditingMode;
                         currentSelectedElement = null;
                     }
@@ -260,8 +268,7 @@ namespace Ink_Canvas
                     RestoreStrokes();
                     UpdateIndexInfoDisplay();
                 }
-                // 无论是否切换页面，都更新选择索引
-                BlackBoardRightSidePageListView.SelectedIndex = index;
+                rightPageListView.SelectedIndex = index;
             }
         }
 
