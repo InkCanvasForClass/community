@@ -113,7 +113,6 @@
                             <TreeViewItem Header="Button: 上传自定义 + Button: 管理自定义" />
                             <TreeViewItem Header="SettingsCard: 黑板缩放比例 → Slider" />
                             <TreeViewItem Header="LabeledSettingsCard: 画板模式显示时间 → ToggleSwitch" />
-                            <TreeViewItem Header="LabeledSettingsCard: 使用24小时制 → ToggleSwitch" />
                             <TreeViewItem Header="LabeledSettingsCard: 画板模式显示鸡汤 → ToggleSwitch" />
                             <TreeViewItem Header="SettingsCard: 鸡汤来源 → ComboBox + Button" />
                             <TreeViewItem Header="LabeledSettingsCard: 启用快捷面板 → ToggleSwitch" />
