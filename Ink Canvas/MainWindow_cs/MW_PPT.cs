@@ -2441,22 +2441,11 @@ namespace Ink_Canvas
             }
         }
 
-        private async void OnPptNavBarSlideSelected(Controls.PptNavBar bar, int slideNumber)
+        private void OnPptNavBarSlideSelected(Controls.PptNavBar bar, int slideNumber)
         {
-            try
-            {
-                if (bar != null)
-                {
-                    bar.IsPreviewExpanded = false;
-                    bar.UpdateLayout();
-
-                    // Give WPF one render pass to hide the preview before PowerPoint starts its transition.
-                    await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.Render);
-                }
-
-                _pptManager?.TryNavigateToSlide(slideNumber);
-            }
+            try { _pptManager?.TryNavigateToSlide(slideNumber); }
             catch (Exception ex) { LogHelper.WriteLogToFile($"PPT增强预览跳转异常: {ex}", LogHelper.LogType.Error); }
+            finally { if (bar != null) bar.IsPreviewExpanded = false; }
         }
 
         /// <summary>
