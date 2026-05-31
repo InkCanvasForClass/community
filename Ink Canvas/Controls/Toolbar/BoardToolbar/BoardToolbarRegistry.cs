@@ -284,6 +284,54 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             }
         }
 
+        public static List<string> ListConfigFiles()
+        {
+            try
+            {
+                var dir = GetConfigDirectory();
+                if (!Directory.Exists(dir))
+                    return new List<string> { "default" };
+
+                var files = Directory.GetFiles(dir, "*.json");
+                var names = new List<string>();
+                foreach (var file in files)
+                {
+                    var name = Path.GetFileNameWithoutExtension(file);
+                    if (!string.IsNullOrEmpty(name))
+                        names.Add(name);
+                }
+                if (names.Count == 0)
+                    names.Add("default");
+                names.Sort();
+                return names;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"BoardToolbarRegistry: 列出配置失败: {ex.Message}", LogHelper.LogType.Error);
+                return new List<string> { "default" };
+            }
+        }
+
+        public static void DeleteConfigFile(string name)
+        {
+            try
+            {
+                var path = GetConfigFilePath(name);
+                if (File.Exists(path))
+                    File.Delete(path);
+
+                var bakPath = path + ".bak";
+                if (File.Exists(bakPath))
+                    File.Delete(bakPath);
+
+                LogHelper.WriteLogToFile($"BoardToolbarRegistry: 删除配置 [{name}]", LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"BoardToolbarRegistry: 删除配置 [{name}] 失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
         public static void EnsureDefaultConfigExists()
         {
             var dir = GetConfigDirectory();

@@ -48,6 +48,9 @@ namespace Ink_Canvas
 
         [JsonProperty("toolbarConfigName")]
         public string ToolbarConfigName { get; set; } = "default";
+
+        [JsonProperty("boardToolbarConfigName")]
+        public string BoardToolbarConfigName { get; set; } = "default";
     }
 
     public class NotificationSettings

@@ -165,6 +165,12 @@
   <data name="Nav_Toolbar_Tooltip" xml:space="preserve">
     <value>Toolbar button order &amp; visibility</value>
   </data>
+  <data name="Nav_BoardToolbar" xml:space="preserve">
+    <value>Board Toolbar</value>
+  </data>
+  <data name="Nav_BoardToolbar_Tooltip" xml:space="preserve">
+    <value>Board toolbar component configuration</value>
+  </data>
   <data name="Nav_CanvasAndInk_Tooltip" xml:space="preserve">
     <value>Canvas &amp; ink settings</value>
   </data>

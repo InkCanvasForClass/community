@@ -122,6 +122,10 @@ namespace Ink_Canvas.Properties
 
         public static string Nav_Toolbar_Tooltip => ResourceManager.GetString(nameof(Nav_Toolbar_Tooltip), _resourceCulture);
 
+        public static string Nav_BoardToolbar => ResourceManager.GetString(nameof(Nav_BoardToolbar), _resourceCulture);
+
+        public static string Nav_BoardToolbar_Tooltip => ResourceManager.GetString(nameof(Nav_BoardToolbar_Tooltip), _resourceCulture);
+
         public static string Nav_CanvasAndInk_Tooltip => ResourceManager.GetString(nameof(Nav_CanvasAndInk_Tooltip), _resourceCulture);
 
         public static string Nav_Canvas_Tooltip => ResourceManager.GetString(nameof(Nav_Canvas_Tooltip), _resourceCulture);

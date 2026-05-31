@@ -164,6 +164,25 @@ namespace Ink_Canvas
             }
         }
 
+        internal void RebuildBoardToolbar()
+        {
+            try
+            {
+                var host = (IBoardToolbarHost)this;
+                BlackboardLeftSidePanel.Children.Clear();
+                BlackboardCenterSidePanel.Children.Clear();
+                BlackboardRightSidePanel.Children.Clear();
+                BoardToolbarRegistry.RebuildToolbar(host, BlackboardLeftSidePanel, BlackboardCenterSidePanel, BlackboardRightSidePanel);
+                BindPopupPlacementTargets();
+                BindPageInfoClickHandler();
+                UpdateBoardToolbarState();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"MW_BoardToolbarHost: RebuildBoardToolbar 异常: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
         private void BindPopupPlacementTargets()
         {
             SetPopupPlacementTarget(BoardTwoFingerGestureBorder, "board.gesture");

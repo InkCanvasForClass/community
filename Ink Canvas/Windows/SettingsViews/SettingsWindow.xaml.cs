@@ -30,6 +30,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             { "HotkeyPage", typeof(HotkeyPage) },
             { "ToolbarPage", typeof(ToolbarPage) },
             { "ToolbarAppearancePage", typeof(ToolbarAppearancePage) },
+            { "BoardToolbarPage", typeof(BoardToolbarPage) },
             { "UpdatePage", typeof(UpdatePage) },
             { "NotificationPage", typeof(NotificationPage) },
             { "AnnouncementCenterPage", typeof(AnnouncementCenterPage) },
@@ -86,6 +87,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 { "HotkeyPage", typeof(HotkeyPage) },
                 { "ToolbarPage", typeof(ToolbarPage) },
                 { "ToolbarAppearancePage", typeof(ToolbarAppearancePage) },
+                { "BoardToolbarPage", typeof(BoardToolbarPage) },
                 { "UpdatePage", typeof(UpdatePage) },
                 { "NotificationPage", typeof(NotificationPage) },
                 { "AnnouncementCenterPage", typeof(AnnouncementCenterPage) },
@@ -370,7 +372,11 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         public void NavigateToPage(string pageTag, Ink_Canvas.Plugins.PluginInfo pluginInfo = null)
         {
-            if (!_pageTypes.TryGetValue(pageTag, out Type pageType)) return;
+            if (!_pageTypes.TryGetValue(pageTag, out Type pageType))
+            {
+                LogHelper.WriteLogToFile($"SettingsWindow: NavigateToPage 找不到页面类型 [{pageTag}]，已注册: [{string.Join(", ", _pageTypes.Keys)}]", LogHelper.LogType.Warning);
+                return;
+            }
 
             try
             {
