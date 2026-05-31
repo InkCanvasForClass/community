@@ -776,6 +776,7 @@ namespace Ink_Canvas
 
             BtnWhiteBoardDelete.IsEnabled = WhiteboardTotalCount != 1;
             UpdateInkFreezeButtonState();
+            UpdateBoardToolbarState();
         }
     }
 }

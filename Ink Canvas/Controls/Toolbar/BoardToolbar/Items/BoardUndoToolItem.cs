@@ -1,3 +1,4 @@
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace Ink_Canvas.Controls.Toolbar.BoardToolbar.Items
@@ -14,6 +15,10 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar.Items
             => host.Undo();
 
         protected override void AfterBuild(IBoardToolbarHost host, BoardToolbarButton view)
-            => host.RegisterView(Id, view);
+        {
+            view.SetBinding(BoardToolbarButton.IsEnabledBindingProperty,
+                new Binding("IsUndoEnabled") { Source = host.Window });
+            host.RegisterView(Id, view);
+        }
     }
 }
