@@ -106,7 +106,7 @@
     <value>启用 ResolutionChangeDetection</value>
   </data>
   <data name="ResolutionChangeDetectionHint" xml:space="preserve">
-    <value>当检测到系统分辨率变化时，会尝试检测 FloatingBar 是否在屏幕内显示，如果不在屏幕内显示将会尝试移动到屏幕内可见区域（分辨率调小可能会触发，如果在屏幕内不会自动调整位置，请手动挡）。</value>
+    <value>检测到系统分辨率变化时，会检查 FloatingBar 是否仍在屏幕可见范围内；如果已经移出屏幕，会尝试将其移回可见区域。该功能通常会在降低分辨率后触发；如果 FloatingBar 本就在屏幕内，则不会自动调整位置。</value>
   </data>
   <data name="SpecialScreenMode" xml:space="preserve">
     <value>特殊屏幕模式</value>

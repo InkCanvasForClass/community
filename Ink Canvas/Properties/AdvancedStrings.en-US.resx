@@ -106,7 +106,7 @@
     <value>Enable ResolutionChangeDetection</value>
   </data>
   <data name="ResolutionChangeDetectionHint" xml:space="preserve">
-    <value>When a screen resolution change is detected, it tries to keep FloatingBar visible. If it goes off-screen, it will attempt to move it into the visible area. (Reducing resolution may trigger this; if it&apos;s still on-screen it won&apos;t auto-adjust—adjust manually.)</value>
+    <value>When a screen resolution change is detected, the app checks whether the FloatingBar is still within the visible screen area. If it has moved off-screen, it will try to move it back into view. This is most commonly triggered after lowering the resolution; if the FloatingBar is already visible, its position will not be adjusted automatically.</value>
   </data>
   <data name="SpecialScreenMode" xml:space="preserve">
     <value>Special screen mode</value>

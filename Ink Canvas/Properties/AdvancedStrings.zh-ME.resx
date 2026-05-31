@@ -106,7 +106,7 @@
     <value>开启分辨率变化雷达</value>
   </data>
   <data name="ResolutionChangeDetectionHint" xml:space="preserve">
-    <value>系统分辨率一变，立刻检测浮动工具栏是不是跑到屏幕外面浪了，如果跑出去了就拽回来（分辨率调小可能触发，在屏幕内的话它懒得动，你自己拖吧）</value>
+    <value>系统分辨率一变，它就会看看 FloatingBar 还在不在屏幕可见范围里；要是已经跑出去了，就尽量把它拽回可见区域。一般在分辨率调低后更容易触发；要是本来就在屏幕里，它就不会自己乱挪位置。</value>
   </data>
   <data name="SpecialScreenMode" xml:space="preserve">
     <value>特殊屏幕模式</value>
