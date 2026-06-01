@@ -3290,7 +3290,10 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
-        internal async void CursorIcon_Click(object sender, MouseButtonEventArgs e)
+        internal void CursorIcon_Click(object sender, MouseButtonEventArgs e)
+            => CursorIcon_Click(sender, e, false);
+
+        private async void CursorIcon_Click(object sender, MouseButtonEventArgs e, bool suppressFloatingBarMove)
         {
             if (lastBorderMouseDownObject is Panel panel)
                 panel.Background = new SolidColorBrush(Colors.Transparent);
@@ -3383,13 +3386,16 @@ namespace Ink_Canvas
 
             if (!isFloatingBarFolded)
             {
-                HideSubPanels("cursor", true);
+                HideSubPanels("cursor", !suppressFloatingBarMove);
                 await Task.Delay(50);
 
-                if (IsInPptPresentationMode)
-                    ViewboxFloatingBarMarginAnimation(60);
-                else
-                    ViewboxFloatingBarMarginAnimation(100, true);
+                if (!suppressFloatingBarMove)
+                {
+                    if (IsInPptPresentationMode)
+                        ViewboxFloatingBarMarginAnimation(60);
+                    else
+                        ViewboxFloatingBarMarginAnimation(100, true);
+                }
             }
         }
 
