@@ -429,17 +429,25 @@ namespace Ink_Canvas
             BorderTools.CustomPopupPlacementCallback =
                 (popupSize, targetSize, offset) => new[]
                 {
-                    new CustomPopupPlacement(
-                        new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height - 8),
-                        PopupPrimaryAxis.Vertical)
+                    IsVerticalToolbar
+                        ? new CustomPopupPlacement(
+                            new Point(-popupSize.Width - 8, (targetSize.Height - popupSize.Height) / 2),
+                            PopupPrimaryAxis.Horizontal)
+                        : new CustomPopupPlacement(
+                            new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height - 8),
+                            PopupPrimaryAxis.Vertical)
                 };
 
             BorderDrawShape.CustomPopupPlacementCallback =
                 (popupSize, targetSize, offset) => new[]
                 {
-                    new CustomPopupPlacement(
-                        new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height - 8),
-                        PopupPrimaryAxis.Vertical)
+                    IsVerticalToolbar
+                        ? new CustomPopupPlacement(
+                            new Point(-popupSize.Width - 8, (targetSize.Height - popupSize.Height) / 2),
+                            PopupPrimaryAxis.Horizontal)
+                        : new CustomPopupPlacement(
+                            new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height - 8),
+                            PopupPrimaryAxis.Vertical)
                 };
 
             BoardBorderDrawShape.CustomPopupPlacementCallback =
@@ -453,9 +461,13 @@ namespace Ink_Canvas
             PenPalette.CustomPopupPlacementCallback =
                 (popupSize, targetSize, offset) => new[]
                 {
-                    new CustomPopupPlacement(
-                        new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height - 8),
-                        PopupPrimaryAxis.Vertical)
+                    IsVerticalToolbar
+                        ? new CustomPopupPlacement(
+                            new Point(-popupSize.Width - 8, (targetSize.Height - popupSize.Height) / 2),
+                            PopupPrimaryAxis.Horizontal)
+                        : new CustomPopupPlacement(
+                            new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height - 8),
+                            PopupPrimaryAxis.Vertical)
                 };
 
             BoardPenPalette.CustomPopupPlacementCallback =
@@ -469,9 +481,13 @@ namespace Ink_Canvas
             EraserSizePanel.CustomPopupPlacementCallback =
                 (popupSize, targetSize, offset) => new[]
                 {
-                    new CustomPopupPlacement(
-                        new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height - 8),
-                        PopupPrimaryAxis.Vertical)
+                    IsVerticalToolbar
+                        ? new CustomPopupPlacement(
+                            new Point(-popupSize.Width - 8, (targetSize.Height - popupSize.Height) / 2),
+                            PopupPrimaryAxis.Horizontal)
+                        : new CustomPopupPlacement(
+                            new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height - 8),
+                            PopupPrimaryAxis.Vertical)
                 };
 
             BoardEraserSizePanel.CustomPopupPlacementCallback =
@@ -493,9 +509,13 @@ namespace Ink_Canvas
             TwoFingerGestureBorder.CustomPopupPlacementCallback =
                 (popupSize, targetSize, offset) => new[]
                 {
-                    new CustomPopupPlacement(
-                        new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height - 8),
-                        PopupPrimaryAxis.Vertical)
+                    IsVerticalToolbar
+                        ? new CustomPopupPlacement(
+                            new Point(-popupSize.Width - 8, (targetSize.Height - popupSize.Height) / 2),
+                            PopupPrimaryAxis.Horizontal)
+                        : new CustomPopupPlacement(
+                            new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height - 8),
+                            PopupPrimaryAxis.Vertical)
                 };
 
             BoardTwoFingerGestureBorder.CustomPopupPlacementCallback =

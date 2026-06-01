@@ -2603,6 +2603,11 @@ namespace Ink_Canvas
                 ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
                 isViewboxFloatingBarMarginAnimationRunning = false;
                 if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
+
+                if (!string.IsNullOrEmpty(_currentToolMode))
+                {
+                    SetFloatingBarHighlightPosition(_currentToolMode);
+                }
             });
         }
 
@@ -2788,19 +2793,13 @@ namespace Ink_Canvas
                             break;
 
                         case ToolbarPosition.Top:
-                            pos.X = (screenWidth - floatingBarWidth) / 2;
-                            pos.Y = 3 * ViewboxFloatingBarScaleTransform.ScaleY;
-                            break;
-
                         case ToolbarPosition.Bottom:
-                            pos.X = (screenWidth - floatingBarWidth) / 2;
-                            pos.Y = screenHeight - floatingBarHeight +
-                                   2 * ViewboxFloatingBarScaleTransform.ScaleY;
+                            pos.X = screenWidth - floatingBarWidth -
+                                   3 * ViewboxFloatingBarScaleTransform.ScaleX;
+                            pos.Y = (screenHeight - floatingBarHeight) / 2;
                             break;
                     }
                 }
-
-                // 移除旧的位置恢复逻辑，总是使用根据工具栏位置计算的新位置
 
                 if (IsVerticalToolbar)
                 {
@@ -2962,6 +2961,11 @@ namespace Ink_Canvas
             await Dispatcher.InvokeAsync(() =>
             {
                 ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
+
+                if (!string.IsNullOrEmpty(_currentToolMode))
+                {
+                    SetFloatingBarHighlightPosition(_currentToolMode);
+                }
             });
         }
 
@@ -3035,14 +3039,10 @@ namespace Ink_Canvas
                         break;
 
                     case ToolbarPosition.Top:
-                        pos.X = (screenWidth - floatingBarWidth) / 2;
-                        pos.Y = 3 * ViewboxFloatingBarScaleTransform.ScaleY;
-                        break;
-
                     case ToolbarPosition.Bottom:
-                        pos.X = (screenWidth - floatingBarWidth) / 2;
-                        pos.Y = screenHeight - floatingBarHeight +
-                               2 * ViewboxFloatingBarScaleTransform.ScaleY;
+                        pos.X = screenWidth - floatingBarWidth -
+                               3 * ViewboxFloatingBarScaleTransform.ScaleX;
+                        pos.Y = (screenHeight - floatingBarHeight) / 2;
                         break;
                 }
 
@@ -3076,6 +3076,11 @@ namespace Ink_Canvas
             await Dispatcher.InvokeAsync(() =>
             {
                 ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
+
+                if (!string.IsNullOrEmpty(_currentToolMode))
+                {
+                    SetFloatingBarHighlightPosition(_currentToolMode);
+                }
             });
 
             if (Settings.ModeSettings.IsPPTOnlyMode && !isRetry)
