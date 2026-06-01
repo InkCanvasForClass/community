@@ -1706,7 +1706,6 @@ namespace Ink_Canvas.Helpers
             object slide = null;
             object activeWindow = null;
             object presentation = null;
-            object returnedPresentation = null;
             try
             {
                 if (!IsConnected || PPTApplication == null) return null;
@@ -1746,8 +1745,7 @@ namespace Ink_Canvas.Helpers
                                     {
                                         dynamic slideObj = slide;
                                         presentation = slideObj.Parent;
-                                        returnedPresentation = presentation;
-                                        return returnedPresentation;
+                                        return presentation;
                                     }
                                 }
                             }
@@ -1762,13 +1760,11 @@ namespace Ink_Canvas.Helpers
                     presentation = aw.Presentation;
                     if (presentation != null)
                     {
-                        returnedPresentation = presentation;
-                        return returnedPresentation;
+                        return presentation;
                     }
                 }
 
-                returnedPresentation = CurrentPresentation;
-                return returnedPresentation;
+                return CurrentPresentation;
             }
             catch (COMException comEx)
             {
@@ -1782,20 +1778,16 @@ namespace Ink_Canvas.Helpers
                     return null;
                 }
                 LogHelper.WriteLogToFile($"获取当前活跃演示文稿失败: {comEx.Message}", LogHelper.LogType.Warning);
-                returnedPresentation = CurrentPresentation;
-                return returnedPresentation;
+                return CurrentPresentation;
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"获取当前活跃演示文稿失败: {ex}", LogHelper.LogType.Error);
-                returnedPresentation = CurrentPresentation;
-                return returnedPresentation;
+                return CurrentPresentation;
             }
             finally
             {
-                if (presentation != null &&
-                    !ReferenceEquals(presentation, CurrentPresentation) &&
-                    !ReferenceEquals(presentation, returnedPresentation))
+                if (presentation != null && !ReferenceEquals(presentation, CurrentPresentation))
                 {
                     SafeReleaseComObject(presentation);
                 }
