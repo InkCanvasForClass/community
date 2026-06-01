@@ -2685,7 +2685,7 @@ namespace Ink_Canvas
             double floatingBarHeight = baseHeight * ViewboxFloatingBarScaleTransform.ScaleY;
 
 
-            if (QuickColorPalette != null &&
+            if (!IsVerticalToolbar && QuickColorPalette != null &&
                 (QuickColorPalette.QuickColorPalettePanel.Visibility == Visibility.Visible ||
                  QuickColorPalette.QuickColorPaletteSingleRowPanel.Visibility == Visibility.Visible))
             {
@@ -2736,7 +2736,7 @@ namespace Ink_Canvas
 
             if (MarginFromEdge != -60)
             {
-                if (QuickColorPalette?.Visibility == Visibility.Visible)
+                if (!IsVerticalToolbar && QuickColorPalette?.Visibility == Visibility.Visible)
                 {
                     if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
                     {
@@ -2895,8 +2895,7 @@ namespace Ink_Canvas
                 double floatingBarHeight = baseHeight * ViewboxFloatingBarScaleTransform.ScaleY;
 
 
-                // 如果快捷调色盘显示，确保有足够空间
-                if (QuickColorPalette?.Visibility == Visibility.Visible)
+                if (!IsVerticalToolbar && QuickColorPalette?.Visibility == Visibility.Visible)
                 {
                     if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
                     {
@@ -3016,8 +3015,7 @@ namespace Ink_Canvas
                 double floatingBarHeight = baseHeight * ViewboxFloatingBarScaleTransform.ScaleY;
 
 
-                // 如果快捷调色盘显示，确保有足够空间
-                if (QuickColorPalette?.Visibility == Visibility.Visible)
+                if (!IsVerticalToolbar && QuickColorPalette?.Visibility == Visibility.Visible)
                 {
                     if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
                     {
