@@ -2634,6 +2634,8 @@ namespace Ink_Canvas
             var screen = GetFloatingBarTargetScreen();
             double screenWidth, screenHeight;
             double toolbarHeight;
+            double screenBoundsWidth = screen.Bounds.Width / dpiScaleX;
+            double screenBoundsHeight = screen.Bounds.Height / dpiScaleY;
             if (Settings.Advanced.IsEnableAvoidFullScreenHelper && PosXCaculatedWithTaskbarHeight)
             {
                 screenWidth = screen.WorkingArea.Width / dpiScaleX;
@@ -2767,8 +2769,7 @@ namespace Ink_Canvas
 
                     case ToolbarPosition.Top:
                     case ToolbarPosition.Bottom:
-                        // 上/下位置：X 靠右，Y 居中
-                        pos.X = screenWidth - floatingBarWidth -
+                        pos.X = screenBoundsWidth - floatingBarWidth -
                                3 * ViewboxFloatingBarScaleTransform.ScaleX;
                         pos.Y = (screenHeight - floatingBarHeight) / 2;
                         break;
@@ -2794,7 +2795,7 @@ namespace Ink_Canvas
 
                         case ToolbarPosition.Top:
                         case ToolbarPosition.Bottom:
-                            pos.X = screenWidth - floatingBarWidth -
+                            pos.X = screenBoundsWidth - floatingBarWidth -
                                    3 * ViewboxFloatingBarScaleTransform.ScaleX;
                             pos.Y = (screenHeight - floatingBarHeight) / 2;
                             break;
@@ -2864,6 +2865,7 @@ namespace Ink_Canvas
                 var screen = GetFloatingBarTargetScreen();
                 double screenWidth, screenHeight;
                 double toolbarHeight;
+                double screenBoundsWidth = screen.Bounds.Width / dpiScaleX;
                 if (Settings.Advanced.IsEnableAvoidFullScreenHelper)
                 {
                     screenWidth = screen.WorkingArea.Width / dpiScaleX;
@@ -2927,8 +2929,7 @@ namespace Ink_Canvas
 
                     case ToolbarPosition.Top:
                     case ToolbarPosition.Bottom:
-                        // 上/下位置：X 靠右，Y 居中
-                        pos.X = screenWidth - floatingBarWidth -
+                        pos.X = screenBoundsWidth - floatingBarWidth -
                                3 * ViewboxFloatingBarScaleTransform.ScaleX;
                         pos.Y = (screenHeight - floatingBarHeight) / 2;
                         break;
