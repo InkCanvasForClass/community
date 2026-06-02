@@ -10,7 +10,7 @@
           xmlns:dd="urn:gong-wpf-dragdrop"
           xmlns:board="clr-namespace:Ink_Canvas.Controls.Toolbar.BoardToolbar"
           mc:Ignorable="d"
-          Title="白板工具栏">
+          Title="{x:Static props:FloatingBarStrings.BoardToolbarPage_Title}">
 
     <Page.Resources>
         <local:BoardIdToDisplayNameConverter x:Key="IdToNameConverter"/>
@@ -96,6 +96,16 @@
                                    FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"
                                    DockPanel.Dock="Left"/>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
+                            <Button Content="&#xE70E;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                                    Click="MoveGroupUp_Click" Padding="4,2" Margin="0,0,2,0"
+                                    Background="Transparent" BorderThickness="0"
+                                    ToolTip="{x:Static props:FloatingBarStrings.BoardToolbarPage_MoveUp}"
+                                    Cursor="Hand"/>
+                            <Button Content="&#xE70D;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                                    Click="MoveGroupDown_Click" Padding="4,2" Margin="0,0,4,0"
+                                    Background="Transparent" BorderThickness="0"
+                                    ToolTip="{x:Static props:FloatingBarStrings.BoardToolbarPage_MoveDown}"
+                                    Cursor="Hand"/>
                             <Button Content="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="10"
                                     Click="AddComponentToGroup_Click" Padding="4,2" Margin="0,0,4,0"
                                     Background="Transparent" BorderThickness="0"
@@ -233,12 +243,6 @@
                         <ikw:SimpleStackPanel Spacing="4" Margin="0,8,0,0">
 
                             <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentProperties}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
-
-                            <ui:SettingsCard Header="{x:Static props:FloatingBarStrings.ToolbarPage_SeparateBorder}" Description="{x:Static props:FloatingBarStrings.ToolbarPage_SeparateBorderDesc}">
-                                <CheckBox x:Name="CheckBoxShowSeparateBorder"
-                                          Checked="CheckBoxShowSeparateBorder_Changed"
-                                          Unchecked="CheckBoxShowSeparateBorder_Changed"/>
-                            </ui:SettingsCard>
 
                             <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_Size}" FontSize="14" FontWeight="SemiBold" Margin="0,12,0,4"/>
                             <Grid Margin="0,0,0,4">

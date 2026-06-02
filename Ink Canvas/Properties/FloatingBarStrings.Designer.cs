@@ -395,5 +395,23 @@ namespace Ink_Canvas.Properties
         public static string BoardToolbarPage_PositionLast => ResourceManager.GetString(nameof(BoardToolbarPage_PositionLast), _resourceCulture);
 
         public static string BoardToolbarPage_PositionSingle => ResourceManager.GetString(nameof(BoardToolbarPage_PositionSingle), _resourceCulture);
+
+        public static string BoardToolbarPage_MoveUp => ResourceManager.GetString(nameof(BoardToolbarPage_MoveUp), _resourceCulture);
+
+        public static string BoardToolbarPage_MoveDown => ResourceManager.GetString(nameof(BoardToolbarPage_MoveDown), _resourceCulture);
+
+        public static string BoardToolbarPage_GroupNavigation => ResourceManager.GetString(nameof(BoardToolbarPage_GroupNavigation), _resourceCulture);
+
+        public static string BoardToolbarPage_GroupVideoBooth => ResourceManager.GetString(nameof(BoardToolbarPage_GroupVideoBooth), _resourceCulture);
+
+        public static string BoardToolbarPage_GroupGesture => ResourceManager.GetString(nameof(BoardToolbarPage_GroupGesture), _resourceCulture);
+
+        public static string BoardToolbarPage_GroupTools => ResourceManager.GetString(nameof(BoardToolbarPage_GroupTools), _resourceCulture);
+
+        public static string BoardToolbarPage_GroupSystem => ResourceManager.GetString(nameof(BoardToolbarPage_GroupSystem), _resourceCulture);
+
+        public static string BoardToolbarPage_GroupAddPage => ResourceManager.GetString(nameof(BoardToolbarPage_GroupAddPage), _resourceCulture);
+
+        public static string BoardToolbarPage_Title => ResourceManager.GetString(nameof(BoardToolbarPage_Title), _resourceCulture);
     }
 }

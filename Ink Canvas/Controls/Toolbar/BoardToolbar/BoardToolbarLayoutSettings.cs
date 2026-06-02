@@ -11,9 +11,6 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
         [JsonProperty("position")]
         public string Position { get; set; } = "Middle";
 
-        [JsonProperty("showSeparateBorder")]
-        public bool ShowSeparateBorder { get; set; } = false;
-
         [JsonProperty("settings")]
         public Dictionary<string, object> Settings { get; set; } = new Dictionary<string, object>();
 

@@ -254,8 +254,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             var clone = new BoardToolbarComponentEntry
             {
-                Id = source.Id,
-                ShowSeparateBorder = source.ShowSeparateBorder
+                Id = source.Id
             };
             if (source.Settings != null && source.Settings.Count > 0)
                 clone.Settings = new Dictionary<string, object>(source.Settings);
@@ -482,6 +481,26 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SaveSettings();
         }
 
+        private void MoveGroupUp_Click(object sender, RoutedEventArgs e)
+        {
+            var group = (sender as FrameworkElement)?.DataContext as BoardToolbarGroupEntry;
+            if (group == null) return;
+            var index = AreaGroups.IndexOf(group);
+            if (index <= 0) return;
+            AreaGroups.Move(index, index - 1);
+            SaveSettings();
+        }
+
+        private void MoveGroupDown_Click(object sender, RoutedEventArgs e)
+        {
+            var group = (sender as FrameworkElement)?.DataContext as BoardToolbarGroupEntry;
+            if (group == null) return;
+            var index = AreaGroups.IndexOf(group);
+            if (index < 0 || index >= AreaGroups.Count - 1) return;
+            AreaGroups.Move(index, index + 1);
+            SaveSettings();
+        }
+
         #endregion
 
         #region Properties panel
@@ -491,8 +510,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var entry = SelectedEntry;
             if (entry == null) return;
             _suppressSave = true;
-
-            CheckBoxShowSeparateBorder.IsChecked = entry.ShowSeparateBorder;
 
             TextBoxFixedWidth.Text = entry.GetSettingDouble("fixedWidth")?.ToString() ?? "";
             TextBoxFixedHeight.Text = entry.GetSettingDouble("fixedHeight")?.ToString() ?? "";
@@ -512,13 +529,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded || SelectedEntry == null || _suppressSave) return;
             WriteComponentSettingsFromUI(SelectedEntry);
-            SaveSettings();
-        }
-
-        private void CheckBoxShowSeparateBorder_Changed(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded || SelectedEntry == null || _suppressSave) return;
-            SelectedEntry.ShowSeparateBorder = CheckBoxShowSeparateBorder.IsChecked == true;
             SaveSettings();
         }
 
@@ -678,12 +688,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             return value?.ToString()?.ToLower() switch
             {
-                "navigation" => "页面导航",
-                "videobooth" => "视频展台",
-                "gesture" => "手势与背景",
-                "tools" => "批注工具",
-                "system" => "系统",
-                "addpage" => "新增页面",
+                "navigation" => FloatingBarStrings.BoardToolbarPage_GroupNavigation,
+                "videobooth" => FloatingBarStrings.BoardToolbarPage_GroupVideoBooth,
+                "gesture" => FloatingBarStrings.BoardToolbarPage_GroupGesture,
+                "tools" => FloatingBarStrings.BoardToolbarPage_GroupTools,
+                "system" => FloatingBarStrings.BoardToolbarPage_GroupSystem,
+                "addpage" => FloatingBarStrings.BoardToolbarPage_GroupAddPage,
                 _ => value?.ToString()
             };
         }

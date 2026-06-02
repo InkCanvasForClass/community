@@ -579,4 +579,31 @@
   <data name="BoardToolbarPage_PositionSingle" xml:space="preserve">
     <value>Single</value>
   </data>
+  <data name="BoardToolbarPage_MoveUp" xml:space="preserve">
+    <value>Move Up</value>
+  </data>
+  <data name="BoardToolbarPage_MoveDown" xml:space="preserve">
+    <value>Move Down</value>
+  </data>
+  <data name="BoardToolbarPage_GroupNavigation" xml:space="preserve">
+    <value>Navigation</value>
+  </data>
+  <data name="BoardToolbarPage_GroupVideoBooth" xml:space="preserve">
+    <value>Video Booth</value>
+  </data>
+  <data name="BoardToolbarPage_GroupGesture" xml:space="preserve">
+    <value>Gesture &amp; Background</value>
+  </data>
+  <data name="BoardToolbarPage_GroupTools" xml:space="preserve">
+    <value>Annotation Tools</value>
+  </data>
+  <data name="BoardToolbarPage_GroupSystem" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="BoardToolbarPage_GroupAddPage" xml:space="preserve">
+    <value>Add Page</value>
+  </data>
+  <data name="BoardToolbarPage_Title" xml:space="preserve">
+    <value>Board Toolbar</value>
+  </data>
 </root>

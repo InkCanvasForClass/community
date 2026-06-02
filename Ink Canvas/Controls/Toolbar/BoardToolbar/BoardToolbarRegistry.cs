@@ -81,16 +81,6 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             {
                 var entry = components[i];
 
-                if (entry.Id == "board.pageInfo")
-                {
-                    var pageInfoView = BuildPageInfoView(host, areaId);
-                    if (pageInfoView != null)
-                    {
-                        views.Add(pageInfoView);
-                    }
-                    continue;
-                }
-
                 if (!itemMap.TryGetValue(entry.Id, out var item))
                 {
                     LogHelper.WriteLogToFile($"BoardToolbarRegistry: 未找到组件 [{entry.Id}]", LogHelper.LogType.Warning);
@@ -99,7 +89,16 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
 
                 try
                 {
-                    var view = item.BuildView(host);
+                    FrameworkElement view;
+                    if (item is Items.BoardPageInfoToolItem pageInfoItem)
+                    {
+                        view = Items.BoardPageInfoToolItem.BuildPageInfoView(host, areaId);
+                    }
+                    else
+                    {
+                        view = item.BuildView(host);
+                    }
+
                     if (view != null)
                     {
                         var position = ComputeButtonPosition(i, components.Count);
@@ -126,46 +125,6 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             if (index == 0) return ButtonPosition.First;
             if (index == totalCount - 1) return ButtonPosition.Last;
             return ButtonPosition.Middle;
-        }
-
-        private static FrameworkElement BuildPageInfoView(IBoardToolbarHost host, string areaId)
-        {
-            var pageInfoTextBlock = new TextBlock
-            {
-                Text = "1/1",
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(0, -1, 0, 0),
-                FontSize = 17,
-                FontWeight = FontWeights.Bold,
-                TextAlignment = TextAlignment.Center
-            };
-            host.RegisterView($"board.pageInfo.{areaId}", pageInfoTextBlock);
-
-            var pageLabel = new TextBlock
-            {
-                Text = FloatingBarStrings.Board_Page,
-                Foreground = (Brush)Application.Current.TryFindResource("FloatBarForeground"),
-                VerticalAlignment = VerticalAlignment.Bottom,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                FontSize = 12
-            };
-
-            var grid = new Grid { Margin = new Thickness(6, 6, 6, 4) };
-            grid.Children.Add(pageInfoTextBlock);
-            grid.Children.Add(pageLabel);
-
-            var pageInfoBorder = new Border
-            {
-                Width = 75,
-                Height = 50,
-                BorderThickness = new Thickness(0),
-                Background = (Brush)Application.Current.TryFindResource("BoardFloatBarBackground"),
-                Opacity = 1,
-                Child = grid,
-                Cursor = System.Windows.Input.Cursors.Hand
-            };
-            host.RegisterView($"board.pageList.{areaId}Btn", pageInfoBorder);
-            return pageInfoBorder;
         }
 
         public static List<FrameworkElement> BuildGroup(IBoardToolbarHost host, params string[] ids)
@@ -458,36 +417,14 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                 {
                     ApplyComponentSettings(view, component);
 
-                    FrameworkElement elementToAdd;
-                    if (component.ShowSeparateBorder)
-                    {
-                        elementToAdd = WrapInSeparateBorder(view);
-                    }
-                    else
-                    {
-                        elementToAdd = view;
-                    }
-
                     if (!isFirst)
                     {
-                        elementToAdd.Margin = new Thickness(3, 0, 0, 0);
+                        view.Margin = new Thickness(3, 0, 0, 0);
                     }
-                    container.Children.Add(elementToAdd);
+                    container.Children.Add(view);
                     isFirst = false;
                 }
             }
-        }
-
-        private static Border WrapInSeparateBorder(FrameworkElement view)
-        {
-            var border = new Border
-            {
-                CornerRadius = new CornerRadius(5),
-                Background = (Brush)Application.Current.TryFindResource("BoardFloatBarBackground"),
-                Margin = new Thickness(0),
-                Child = view
-            };
-            return border;
         }
 
         public static void RebuildLeftToolbar(IBoardToolbarHost host, Panel container) { }

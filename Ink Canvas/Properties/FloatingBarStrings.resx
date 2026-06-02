@@ -579,4 +579,31 @@
   <data name="BoardToolbarPage_PositionSingle" xml:space="preserve">
     <value>独立</value>
   </data>
+  <data name="BoardToolbarPage_MoveUp" xml:space="preserve">
+    <value>上移</value>
+  </data>
+  <data name="BoardToolbarPage_MoveDown" xml:space="preserve">
+    <value>下移</value>
+  </data>
+  <data name="BoardToolbarPage_GroupNavigation" xml:space="preserve">
+    <value>页面导航</value>
+  </data>
+  <data name="BoardToolbarPage_GroupVideoBooth" xml:space="preserve">
+    <value>视频展台</value>
+  </data>
+  <data name="BoardToolbarPage_GroupGesture" xml:space="preserve">
+    <value>手势与背景</value>
+  </data>
+  <data name="BoardToolbarPage_GroupTools" xml:space="preserve">
+    <value>批注工具</value>
+  </data>
+  <data name="BoardToolbarPage_GroupSystem" xml:space="preserve">
+    <value>系统</value>
+  </data>
+  <data name="BoardToolbarPage_GroupAddPage" xml:space="preserve">
+    <value>新增页面</value>
+  </data>
+  <data name="BoardToolbarPage_Title" xml:space="preserve">
+    <value>白板工具栏</value>
+  </data>
 </root>
