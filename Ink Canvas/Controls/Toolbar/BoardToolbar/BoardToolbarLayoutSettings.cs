@@ -11,6 +11,9 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
         [JsonProperty("position")]
         public string Position { get; set; } = "Middle";
 
+        [JsonProperty("showSeparateBorder")]
+        public bool ShowSeparateBorder { get; set; } = false;
+
         [JsonProperty("settings")]
         public Dictionary<string, object> Settings { get; set; } = new Dictionary<string, object>();
 
@@ -95,9 +98,9 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                                 Id = "navigation",
                                 Components = new List<BoardToolbarComponentEntry>
                                 {
-                                    new BoardToolbarComponentEntry { Id = "board.previousPage", Position = "First" },
+                                    new BoardToolbarComponentEntry { Id = "board.previousPage" },
                                     new BoardToolbarComponentEntry { Id = "board.pageInfo" },
-                                    new BoardToolbarComponentEntry { Id = "board.nextPage", Position = "Last" }
+                                    new BoardToolbarComponentEntry { Id = "board.nextPage" }
                                 }
                             },
                             new BoardToolbarGroupEntry
@@ -105,7 +108,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                                 Id = "videoBooth",
                                 Components = new List<BoardToolbarComponentEntry>
                                 {
-                                    new BoardToolbarComponentEntry { Id = "board.videoBooth", Position = "Single" }
+                                    new BoardToolbarComponentEntry { Id = "board.videoBooth" }
                                 }
                             }
                         }
@@ -120,8 +123,8 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                                 Id = "gesture",
                                 Components = new List<BoardToolbarComponentEntry>
                                 {
-                                    new BoardToolbarComponentEntry { Id = "board.gesture", Position = "First" },
-                                    new BoardToolbarComponentEntry { Id = "board.backgroundColor", Position = "Last" }
+                                    new BoardToolbarComponentEntry { Id = "board.gesture" },
+                                    new BoardToolbarComponentEntry { Id = "board.backgroundColor" }
                                 }
                             },
                             new BoardToolbarGroupEntry
@@ -129,15 +132,14 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                                 Id = "tools",
                                 Components = new List<BoardToolbarComponentEntry>
                                 {
-                                    new BoardToolbarComponentEntry { Id = "board.select", Position = "First" },
+                                    new BoardToolbarComponentEntry { Id = "board.select" },
                                     new BoardToolbarComponentEntry { Id = "board.pen" },
                                     new BoardToolbarComponentEntry { Id = "board.inkFreeze" },
                                     new BoardToolbarComponentEntry { Id = "board.eraser" },
                                     new BoardToolbarComponentEntry { Id = "board.strokeEraser" },
                                     new BoardToolbarComponentEntry { Id = "board.shape" },
-                                    new BoardToolbarComponentEntry { Id = "board.insertImage" },
                                     new BoardToolbarComponentEntry { Id = "board.undo" },
-                                    new BoardToolbarComponentEntry { Id = "board.redo", Position = "Last" }
+                                    new BoardToolbarComponentEntry { Id = "board.redo" }
                                 }
                             },
                             new BoardToolbarGroupEntry
@@ -145,8 +147,8 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                                 Id = "system",
                                 Components = new List<BoardToolbarComponentEntry>
                                 {
-                                    new BoardToolbarComponentEntry { Id = "board.tools", Position = "First" },
-                                    new BoardToolbarComponentEntry { Id = "board.exit", Position = "Last" }
+                                    new BoardToolbarComponentEntry { Id = "board.tools" },
+                                    new BoardToolbarComponentEntry { Id = "board.exit" }
                                 }
                             }
                         }
@@ -161,7 +163,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                                 Id = "addPage",
                                 Components = new List<BoardToolbarComponentEntry>
                                 {
-                                    new BoardToolbarComponentEntry { Id = "board.addNewPage", Position = "Single" }
+                                    new BoardToolbarComponentEntry { Id = "board.addNewPage" }
                                 }
                             },
                             new BoardToolbarGroupEntry
@@ -169,9 +171,9 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                                 Id = "navigation",
                                 Components = new List<BoardToolbarComponentEntry>
                                 {
-                                    new BoardToolbarComponentEntry { Id = "board.previousPage", Position = "First" },
+                                    new BoardToolbarComponentEntry { Id = "board.previousPage" },
                                     new BoardToolbarComponentEntry { Id = "board.pageInfo" },
-                                    new BoardToolbarComponentEntry { Id = "board.nextPage", Position = "Last" }
+                                    new BoardToolbarComponentEntry { Id = "board.nextPage" }
                                 }
                             }
                         }

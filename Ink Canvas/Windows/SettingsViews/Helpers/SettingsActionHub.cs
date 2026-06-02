@@ -189,6 +189,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             var mw = GetMainWindow();
             if (mw != null)
             {
+                mw._userHasDraggedFloatingBar = false;
+                mw.pointDesktop = new Point(-1, -1);
+                mw.pointPPT = new Point(-1, -1);
                 mw.ViewboxFloatingBarScaleTransform.ScaleX = actualScale;
                 mw.ViewboxFloatingBarScaleTransform.ScaleY = actualScale;
                 if (mw.IsInPptPresentationMode)

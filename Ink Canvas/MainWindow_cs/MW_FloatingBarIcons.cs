@@ -185,11 +185,12 @@ namespace Ink_Canvas
         /// <summary>
         /// 用于记录上次在桌面时的坐标
         /// </summary>
-        private Point pointDesktop = new Point(-1, -1);
+        internal Point pointDesktop = new Point(-1, -1);
         /// <summary>
         /// 用于记录上次在PPT中的坐标
         /// </summary>
-        private Point pointPPT = new Point(-1, -1);
+        internal Point pointPPT = new Point(-1, -1);
+        internal bool _userHasDraggedFloatingBar;
         private DispatcherTimer _floatingBarScreenFollowTimer;
         private string _lastFloatingBarScreenDeviceName;
         private string _lastCanvasScreenDeviceName;
@@ -340,6 +341,7 @@ namespace Ink_Canvas
                     pointPPT = new Point(currentMargin.Left, currentMargin.Top);
                 else
                     pointDesktop = new Point(currentMargin.Left, currentMargin.Top);
+                _userHasDraggedFloatingBar = true;
 
                 _popupManager?.MarkNeedsUpdate();
 
@@ -2138,7 +2140,10 @@ namespace Ink_Canvas
 
         internal void UpdateToolbarPosition()
         {
-            // 重建工具栏以应用新的位置设置
+            _userHasDraggedFloatingBar = false;
+            pointDesktop = new Point(-1, -1);
+            pointPPT = new Point(-1, -1);
+
             RebuildToolbar();
 
             // 更新工具栏位置
@@ -2748,49 +2753,35 @@ namespace Ink_Canvas
                     }
                 }
 
-                var toolbarPosition = Settings.Appearance.ToolbarPosition;
-                switch (toolbarPosition)
+                bool usedSavedPosition = false;
+                if (_userHasDraggedFloatingBar)
                 {
-                    case ToolbarPosition.Right:
-                    case ToolbarPosition.Left:
-                        // 左/右位置：X 居中，Y 靠下（任务栏上方）
-                        pos.X = (screenWidth - floatingBarWidth) / 2;
-                        if (toolbarHeight == 0)
-                        {
-                            pos.Y = screenHeight - floatingBarHeight -
-                                   3 * ViewboxFloatingBarScaleTransform.ScaleY;
-                        }
-                        else
-                        {
-                            pos.Y = screenHeight - floatingBarHeight -
-                                   toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
-                        }
-                        break;
-
-                    case ToolbarPosition.Top:
-                    case ToolbarPosition.Bottom:
-                        pos.X = screenBoundsWidth - floatingBarWidth -
-                               3 * ViewboxFloatingBarScaleTransform.ScaleX;
-                        pos.Y = (screenHeight - floatingBarHeight) / 2;
-                        break;
+                    var savedPoint = IsInPptPresentationMode ? pointPPT : pointDesktop;
+                    if (savedPoint.X != -1 || savedPoint.Y != -1)
+                    {
+                        pos = savedPoint;
+                        usedSavedPosition = true;
+                    }
                 }
 
-                if (MarginFromEdge < 0)
+                if (!usedSavedPosition)
                 {
-                    if (IsVerticalToolbar)
-                        pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY;
-                    else
-                        pos.X = screenWidth - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleX;
-                }
-                else if (IsInPptPresentationMode)
-                {
+                    var toolbarPosition = Settings.Appearance.ToolbarPosition;
                     switch (toolbarPosition)
                     {
                         case ToolbarPosition.Right:
                         case ToolbarPosition.Left:
                             pos.X = (screenWidth - floatingBarWidth) / 2;
-                            pos.Y = screenHeight - floatingBarHeight +
-                                   2 * ViewboxFloatingBarScaleTransform.ScaleY;
+                            if (toolbarHeight == 0)
+                            {
+                                pos.Y = screenHeight - floatingBarHeight -
+                                       3 * ViewboxFloatingBarScaleTransform.ScaleY;
+                            }
+                            else
+                            {
+                                pos.Y = screenHeight - floatingBarHeight -
+                                       toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
+                            }
                             break;
 
                         case ToolbarPosition.Top:
@@ -2799,6 +2790,33 @@ namespace Ink_Canvas
                                    3 * ViewboxFloatingBarScaleTransform.ScaleX;
                             pos.Y = (screenHeight - floatingBarHeight) / 2;
                             break;
+                    }
+
+                    if (MarginFromEdge < 0)
+                    {
+                        if (IsVerticalToolbar)
+                            pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY;
+                        else
+                            pos.X = screenWidth - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleX;
+                    }
+                    else if (IsInPptPresentationMode)
+                    {
+                        switch (toolbarPosition)
+                        {
+                            case ToolbarPosition.Right:
+                            case ToolbarPosition.Left:
+                                pos.X = (screenWidth - floatingBarWidth) / 2;
+                                pos.Y = screenHeight - floatingBarHeight +
+                                       2 * ViewboxFloatingBarScaleTransform.ScaleY;
+                                break;
+
+                            case ToolbarPosition.Top:
+                            case ToolbarPosition.Bottom:
+                                pos.X = screenBoundsWidth - floatingBarWidth -
+                                       3 * ViewboxFloatingBarScaleTransform.ScaleX;
+                                pos.Y = (screenHeight - floatingBarHeight) / 2;
+                                break;
+                        }
                     }
                 }
 
@@ -2811,10 +2829,13 @@ namespace Ink_Canvas
                     pos.X = NormalizeFloatingBarLeftForScreen(pos.X, floatingBarWidth, screenWidth);
                 }
 
-                if (IsInPptPresentationMode)
-                    pointPPT = pos;
-                else
-                    pointDesktop = pos;
+                if (!usedSavedPosition)
+                {
+                    if (IsInPptPresentationMode)
+                        pointPPT = pos;
+                    else
+                        pointDesktop = pos;
+                }
             }
 
             if (animate)
@@ -2907,34 +2928,41 @@ namespace Ink_Canvas
                     }
                 }
 
-                var toolbarPosition = Settings.Appearance.ToolbarPosition;
-                switch (toolbarPosition)
+                bool usedSavedPosition = false;
+                if (_userHasDraggedFloatingBar && pointDesktop.X != -1 && pointDesktop.Y != -1)
                 {
-                    case ToolbarPosition.Right:
-                    case ToolbarPosition.Left:
-                        // 左/右位置：X 居中，Y 靠下（任务栏上方）
-                        pos.X = (screenWidth - floatingBarWidth) / 2;
-                        if (toolbarHeight == 0)
-                        {
-                            pos.Y = screenHeight - floatingBarHeight -
-                                   3 * ViewboxFloatingBarScaleTransform.ScaleY;
-                        }
-                        else
-                        {
-                            pos.Y = screenHeight - floatingBarHeight -
-                                   toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
-                        }
-                        break;
-
-                    case ToolbarPosition.Top:
-                    case ToolbarPosition.Bottom:
-                        pos.X = screenBoundsWidth - floatingBarWidth -
-                               3 * ViewboxFloatingBarScaleTransform.ScaleX;
-                        pos.Y = (screenHeight - floatingBarHeight) / 2;
-                        break;
+                    pos = pointDesktop;
+                    usedSavedPosition = true;
                 }
 
-                if (pointDesktop.X != -1 || pointDesktop.Y != -1) pointDesktop = pos;
+                if (!usedSavedPosition)
+                {
+                    var toolbarPosition = Settings.Appearance.ToolbarPosition;
+                    switch (toolbarPosition)
+                    {
+                        case ToolbarPosition.Right:
+                        case ToolbarPosition.Left:
+                            pos.X = (screenWidth - floatingBarWidth) / 2;
+                            if (toolbarHeight == 0)
+                            {
+                                pos.Y = screenHeight - floatingBarHeight -
+                                       3 * ViewboxFloatingBarScaleTransform.ScaleY;
+                            }
+                            else
+                            {
+                                pos.Y = screenHeight - floatingBarHeight -
+                                       toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
+                            }
+                            break;
+
+                        case ToolbarPosition.Top:
+                        case ToolbarPosition.Bottom:
+                            pos.X = screenBoundsWidth - floatingBarWidth -
+                                   3 * ViewboxFloatingBarScaleTransform.ScaleX;
+                            pos.Y = (screenHeight - floatingBarHeight) / 2;
+                            break;
+                    }
+                }
 
                 if (IsVerticalToolbar)
                 {
@@ -2944,7 +2972,11 @@ namespace Ink_Canvas
                 {
                     pos.X = NormalizeFloatingBarLeftForScreen(pos.X, floatingBarWidth, screenWidth);
                 }
-                pointDesktop = pos;
+
+                if (!usedSavedPosition)
+                {
+                    pointDesktop = pos;
+                }
 
                 var marginAnimation = new ThicknessAnimation
                 {
@@ -3027,27 +3059,32 @@ namespace Ink_Canvas
                     }
                 }
 
-                var toolbarPosition = Settings.Appearance.ToolbarPosition;
-                switch (toolbarPosition)
+                bool usedSavedPosition = false;
+                if (_userHasDraggedFloatingBar && pointPPT.X != -1 && pointPPT.Y != -1)
                 {
-                    case ToolbarPosition.Right:
-                    case ToolbarPosition.Left:
-                        pos.X = (screenWidth - floatingBarWidth) / 2;
-                        pos.Y = screenHeight - floatingBarHeight +
-                               2 * ViewboxFloatingBarScaleTransform.ScaleY;
-                        break;
-
-                    case ToolbarPosition.Top:
-                    case ToolbarPosition.Bottom:
-                        pos.X = screenWidth - floatingBarWidth -
-                               3 * ViewboxFloatingBarScaleTransform.ScaleX;
-                        pos.Y = (screenHeight - floatingBarHeight) / 2;
-                        break;
+                    pos = pointPPT;
+                    usedSavedPosition = true;
                 }
 
-                if (pointPPT.X != -1 || pointPPT.Y != -1)
+                if (!usedSavedPosition)
                 {
-                    pointPPT = pos;
+                    var toolbarPosition = Settings.Appearance.ToolbarPosition;
+                    switch (toolbarPosition)
+                    {
+                        case ToolbarPosition.Right:
+                        case ToolbarPosition.Left:
+                            pos.X = (screenWidth - floatingBarWidth) / 2;
+                            pos.Y = screenHeight - floatingBarHeight +
+                                   2 * ViewboxFloatingBarScaleTransform.ScaleY;
+                            break;
+
+                        case ToolbarPosition.Top:
+                        case ToolbarPosition.Bottom:
+                            pos.X = screenWidth - floatingBarWidth -
+                                   3 * ViewboxFloatingBarScaleTransform.ScaleX;
+                            pos.Y = (screenHeight - floatingBarHeight) / 2;
+                            break;
+                    }
                 }
 
                 if (IsVerticalToolbar)
@@ -3058,7 +3095,11 @@ namespace Ink_Canvas
                 {
                     pos.X = NormalizeFloatingBarLeftForScreen(pos.X, floatingBarWidth, screenWidth);
                 }
-                pointPPT = pos;
+
+                if (!usedSavedPosition)
+                {
+                    pointPPT = pos;
+                }
 
                 var marginAnimation = new ThicknessAnimation
                 {

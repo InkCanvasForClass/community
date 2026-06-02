@@ -255,7 +255,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var clone = new BoardToolbarComponentEntry
             {
                 Id = source.Id,
-                Position = source.Position
+                ShowSeparateBorder = source.ShowSeparateBorder
             };
             if (source.Settings != null && source.Settings.Count > 0)
                 clone.Settings = new Dictionary<string, object>(source.Settings);
@@ -318,6 +318,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             AreaGroupsControl.ItemsSource = AreaGroups;
         }
 
+        internal void RefreshGroupsDisplay()
+        {
+            AreaGroupsControl.ItemsSource = null;
+            AreaGroupsControl.ItemsSource = AreaGroups;
+        }
+
         private BoardToolbarAreaEntry FindOrCreateArea(string areaId)
         {
             var area = _currentLayout?.Areas?.FirstOrDefault(a =>
@@ -354,8 +360,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 var entry = new BoardToolbarComponentEntry
                 {
-                    Id = item.Id,
-                    Position = item.DefaultPosition.ToString()
+                    Id = item.Id
                 };
                 var insertIndex = dropInfo.UnfilteredInsertIndex;
                 if (insertIndex < 0 || insertIndex > AreaComponents.Count)
@@ -404,6 +409,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     if (group.Components.Remove(entry))
                     {
                         if (SelectedEntry == entry) SelectedEntry = null;
+                        RefreshGroupsDisplay();
                         SaveSettings();
                         return;
                     }
@@ -417,8 +423,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 var entry = new BoardToolbarComponentEntry
                 {
-                    Id = item.Id,
-                    Position = item.DefaultPosition.ToString()
+                    Id = item.Id
                 };
                 AreaComponents.Add(entry);
                 SelectedEntry = entry;
@@ -461,11 +466,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var item = AvailableItems.FirstOrDefault(i => i.Id == selectedId);
             var entry = new BoardToolbarComponentEntry
             {
-                Id = selectedId,
-                Position = item?.DefaultPosition.ToString() ?? "Middle"
+                Id = selectedId
             };
             group.Components.Add(entry);
             SelectedEntry = entry;
+            RefreshGroupsDisplay();
             SaveSettings();
         }
 
@@ -487,13 +492,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (entry == null) return;
             _suppressSave = true;
 
-            ComboBoxPosition.SelectedIndex = entry.Position?.ToLower() switch
-            {
-                "first" => 0,
-                "last" => 2,
-                "single" => 3,
-                _ => 1
-            };
+            CheckBoxShowSeparateBorder.IsChecked = entry.ShowSeparateBorder;
 
             TextBoxFixedWidth.Text = entry.GetSettingDouble("fixedWidth")?.ToString() ?? "";
             TextBoxFixedHeight.Text = entry.GetSettingDouble("fixedHeight")?.ToString() ?? "";
@@ -509,21 +508,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _suppressSave = false;
         }
 
-        private void ComboBoxPosition_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!_isLoaded || SelectedEntry == null || _suppressSave) return;
-            var tag = (ComboBoxPosition.SelectedItem as ComboBoxItem)?.Tag?.ToString();
-            if (!string.IsNullOrEmpty(tag))
-            {
-                SelectedEntry.Position = tag;
-                SaveSettings();
-            }
-        }
-
         private void ComponentSetting_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (!_isLoaded || SelectedEntry == null || _suppressSave) return;
             WriteComponentSettingsFromUI(SelectedEntry);
+            SaveSettings();
+        }
+
+        private void CheckBoxShowSeparateBorder_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded || SelectedEntry == null || _suppressSave) return;
+            SelectedEntry.ShowSeparateBorder = CheckBoxShowSeparateBorder.IsChecked == true;
             SaveSettings();
         }
 
@@ -611,14 +606,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 var entry = new BoardToolbarComponentEntry
                 {
-                    Id = item.Id,
-                    Position = item.DefaultPosition.ToString()
+                    Id = item.Id
                 };
                 var insertIndex = dropInfo.UnfilteredInsertIndex;
                 if (insertIndex < 0 || insertIndex > group.Components.Count)
                     insertIndex = group.Components.Count;
                 group.Components.Insert(insertIndex, entry);
                 _page.SelectedEntry = entry;
+                _page.RefreshGroupsDisplay();
                 _page.SaveSettings();
             }
             else if (dropInfo.Data is BoardToolbarComponentEntry vm)
@@ -635,6 +630,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     group.Components.RemoveAt(oldIndex);
                     group.Components.Insert(newIndex, vm);
                 }
+                _page.RefreshGroupsDisplay();
                 _page.SaveSettings();
             }
         }

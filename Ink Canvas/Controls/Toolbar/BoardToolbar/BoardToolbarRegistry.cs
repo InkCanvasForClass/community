@@ -102,7 +102,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                     var view = item.BuildView(host);
                     if (view != null)
                     {
-                        var position = ParseButtonPosition(entry.Position);
+                        var position = ComputeButtonPosition(i, components.Count);
                         item.ApplyPosition(view, position);
                         ApplyComponentSettings(view, entry);
                         host.RegisterView(entry.Id, view);
@@ -118,6 +118,14 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             }
 
             return views;
+        }
+
+        internal static ButtonPosition ComputeButtonPosition(int index, int totalCount)
+        {
+            if (totalCount == 1) return ButtonPosition.Single;
+            if (index == 0) return ButtonPosition.First;
+            if (index == totalCount - 1) return ButtonPosition.Last;
+            return ButtonPosition.Middle;
         }
 
         private static FrameworkElement BuildPageInfoView(IBoardToolbarHost host, string areaId)
@@ -164,17 +172,6 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
         {
             var components = ids.Select(id => new BoardToolbarComponentEntry { Id = id }).ToList();
             return BuildGroup(host, components);
-        }
-
-        private static ButtonPosition ParseButtonPosition(string position)
-        {
-            return position?.ToLower() switch
-            {
-                "first" => ButtonPosition.First,
-                "last" => ButtonPosition.Last,
-                "single" => ButtonPosition.Single,
-                _ => ButtonPosition.Middle
-            };
         }
 
         private static void ApplyComponentSettings(FrameworkElement view, BoardToolbarComponentEntry entry)
@@ -459,14 +456,38 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                 var view = BuildView(component.Id, host);
                 if (view != null)
                 {
+                    ApplyComponentSettings(view, component);
+
+                    FrameworkElement elementToAdd;
+                    if (component.ShowSeparateBorder)
+                    {
+                        elementToAdd = WrapInSeparateBorder(view);
+                    }
+                    else
+                    {
+                        elementToAdd = view;
+                    }
+
                     if (!isFirst)
                     {
-                        view.Margin = new Thickness(3, 0, 0, 0);
+                        elementToAdd.Margin = new Thickness(3, 0, 0, 0);
                     }
-                    container.Children.Add(view);
+                    container.Children.Add(elementToAdd);
                     isFirst = false;
                 }
             }
+        }
+
+        private static Border WrapInSeparateBorder(FrameworkElement view)
+        {
+            var border = new Border
+            {
+                CornerRadius = new CornerRadius(5),
+                Background = (Brush)Application.Current.TryFindResource("BoardFloatBarBackground"),
+                Margin = new Thickness(0),
+                Child = view
+            };
+            return border;
         }
 
         public static void RebuildLeftToolbar(IBoardToolbarHost host, Panel container) { }

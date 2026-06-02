@@ -30,8 +30,6 @@
                                VerticalAlignment="Center" Margin="0,0,6,0" Opacity="0.45"/>
                     <TextBlock Text="{Binding Id, Converter={StaticResource IdToNameConverter}}"
                                VerticalAlignment="Center" FontSize="13"/>
-                    <TextBlock Text="{Binding Position, Converter={StaticResource PositionNameConverter}}"
-                               VerticalAlignment="Center" FontSize="10" Opacity="0.5" Margin="4,0,0,0"/>
                     <Button Content="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="10"
                             Click="RemoveItem_Click" Margin="8,0,0,0"
                             Background="Transparent" BorderThickness="0"
@@ -52,8 +50,6 @@
                                VerticalAlignment="Center" Margin="0,0,4,0" Opacity="0.45"/>
                     <TextBlock Text="{Binding Id, Converter={StaticResource IdToNameConverter}}"
                                VerticalAlignment="Center" FontSize="12"/>
-                    <TextBlock Text="{Binding Position, Converter={StaticResource PositionNameConverter}}"
-                               VerticalAlignment="Center" FontSize="10" Opacity="0.5" Margin="4,0,0,0"/>
                     <Button Content="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="9"
                             Click="RemoveGroupChildItem_Click" Margin="6,0,0,0"
                             Background="Transparent" BorderThickness="0"
@@ -238,14 +234,10 @@
 
                             <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentProperties}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
 
-                            <ui:SettingsCard Header="{x:Static props:FloatingBarStrings.BoardToolbarPage_Position}" Description="{x:Static props:FloatingBarStrings.BoardToolbarPage_PositionDesc}">
-                                <ComboBox x:Name="ComboBoxPosition"
-                                          SelectionChanged="ComboBoxPosition_SelectionChanged">
-                                    <ComboBoxItem Content="{x:Static props:FloatingBarStrings.BoardToolbarPage_PositionFirst}" Tag="First"/>
-                                    <ComboBoxItem Content="{x:Static props:FloatingBarStrings.BoardToolbarPage_PositionMiddle}" Tag="Middle"/>
-                                    <ComboBoxItem Content="{x:Static props:FloatingBarStrings.BoardToolbarPage_PositionLast}" Tag="Last"/>
-                                    <ComboBoxItem Content="{x:Static props:FloatingBarStrings.BoardToolbarPage_PositionSingle}" Tag="Single"/>
-                                </ComboBox>
+                            <ui:SettingsCard Header="{x:Static props:FloatingBarStrings.ToolbarPage_SeparateBorder}" Description="{x:Static props:FloatingBarStrings.ToolbarPage_SeparateBorderDesc}">
+                                <CheckBox x:Name="CheckBoxShowSeparateBorder"
+                                          Checked="CheckBoxShowSeparateBorder_Changed"
+                                          Unchecked="CheckBoxShowSeparateBorder_Changed"/>
                             </ui:SettingsCard>
 
                             <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_Size}" FontSize="14" FontWeight="SemiBold" Margin="0,12,0,4"/>
