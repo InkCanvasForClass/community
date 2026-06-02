@@ -123,3 +123,31 @@
 - `toolbar.md` — 添加白板工具栏完整规范
 - `settings_pages.md` — 添加 BoardToolbarPage 导航项、双字典注册规则
 - `general.md` — 添加 WPF 常见陷阱（Geometry 冻结、AfterBuild 未初始化、Page 命名空间冲突、Thickness 构造函数、SegoeFluentIcons 不存在、导航失败无报错）
+
+---
+
+## 会话 7：白板手势按钮图标问题
+
+### 用户：为什么白板手势按钮的图标在最初始状态在图标的手掌两边右边有一个黑色小条
+
+**问题描述**：启动时打开白板，手势按钮右侧出现黑色小条；打开菜单把里面的开关全关再开就正常了。
+
+**根因分析**：
+- `BoardGestureToolItem.IconGeometry` 使用了硬编码的图标字符串（3008字符）
+- `DisabledGestureIcon` 资源字符串是完整的（3390字符）
+- 两个字符串**不完全相同**，第一个差异位置在索引 1941
+
+**修复方案**：
+1. 将 `BoardGestureToolItem.IconGeometry` 从硬编码改为引用 `XamlGraphicsIconGeometries.DisabledGestureIcon`
+2. 在 `BoardToolbarButton_Loaded` 事件中显式设置 `IconGeometryInternal2.Geometry = Geometry.Parse("M0,0")` 防止 Brush 漏出
+3. 在 `CheckEnableTwoFingerGestureBtnColorPrompt` 中禁用手势时也使用 `Geometry.Parse("M0,0")`
+
+**文件修改**：
+- `BoardGestureToolItem.cs` — 改为引用 `XamlGraphicsIconGeometries.DisabledGestureIcon`
+- `BoardToolbarButton.xaml.cs` — Loaded 事件中处理空 Geometry
+- `MW_FloatingBarIcons.cs` — 禁用手势时使用 `Geometry.Parse("M0,0")`
+
+**经验教训**：
+- 对于看起来相似但表现不同的代码，必须进行**精确的对比验证**，不能凭外观假设它们相同
+- 图标资源应尽量集中管理，避免硬编码字符串
+- 启动时和运行时使用的图标资源必须完全一致
