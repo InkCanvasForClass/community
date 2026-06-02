@@ -157,6 +157,7 @@ namespace Ink_Canvas
                 RefreshBlackBoardSidePageListView();
 
                 UpdateBoardToolbarState();
+                CheckEnableTwoFingerGestureBtnColorPrompt();
             }
             catch (Exception ex)
             {
@@ -176,6 +177,7 @@ namespace Ink_Canvas
                 BindPopupPlacementTargets();
                 BindPageInfoClickHandler();
                 UpdateBoardToolbarState();
+                CheckEnableTwoFingerGestureBtnColorPrompt();
             }
             catch (Exception ex)
             {

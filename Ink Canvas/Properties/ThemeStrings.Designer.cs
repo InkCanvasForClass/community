@@ -44,6 +44,20 @@ namespace Ink_Canvas.Properties
 
         public static string Theme_BlackboardScale80 => ResourceManager.GetString(nameof(Theme_BlackboardScale80), _resourceCulture);
 
+        public static string Theme_BoardToolbarOpacity => ResourceManager.GetString(nameof(Theme_BoardToolbarOpacity), _resourceCulture);
+
+        public static string Theme_BoardToolbarOpacityLeft => ResourceManager.GetString(nameof(Theme_BoardToolbarOpacityLeft), _resourceCulture);
+
+        public static string Theme_BoardToolbarOpacityCenter => ResourceManager.GetString(nameof(Theme_BoardToolbarOpacityCenter), _resourceCulture);
+
+        public static string Theme_BoardToolbarOpacityRight => ResourceManager.GetString(nameof(Theme_BoardToolbarOpacityRight), _resourceCulture);
+
+        public static string Theme_BoardScaleLeft => ResourceManager.GetString(nameof(Theme_BoardScaleLeft), _resourceCulture);
+
+        public static string Theme_BoardScaleCenter => ResourceManager.GetString(nameof(Theme_BoardScaleCenter), _resourceCulture);
+
+        public static string Theme_BoardScaleRight => ResourceManager.GetString(nameof(Theme_BoardScaleRight), _resourceCulture);
+
         public static string Theme_Clear => ResourceManager.GetString(nameof(Theme_Clear), _resourceCulture);
 
         public static string Theme_CustomFloatingIconLabel => ResourceManager.GetString(nameof(Theme_CustomFloatingIconLabel), _resourceCulture);

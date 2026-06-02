@@ -126,6 +126,18 @@ namespace Ink_Canvas.Properties
 
         public static string Nav_BoardToolbar_Tooltip => ResourceManager.GetString(nameof(Nav_BoardToolbar_Tooltip), _resourceCulture);
 
+        public static string Nav_Board => ResourceManager.GetString(nameof(Nav_Board), _resourceCulture);
+
+        public static string Nav_Board_Tooltip => ResourceManager.GetString(nameof(Nav_Board_Tooltip), _resourceCulture);
+
+        public static string Nav_BoardComponents => ResourceManager.GetString(nameof(Nav_BoardComponents), _resourceCulture);
+
+        public static string Nav_BoardComponents_Tooltip => ResourceManager.GetString(nameof(Nav_BoardComponents_Tooltip), _resourceCulture);
+
+        public static string Nav_BoardAppearance => ResourceManager.GetString(nameof(Nav_BoardAppearance), _resourceCulture);
+
+        public static string Nav_BoardAppearance_Tooltip => ResourceManager.GetString(nameof(Nav_BoardAppearance_Tooltip), _resourceCulture);
+
         public static string Nav_CanvasAndInk_Tooltip => ResourceManager.GetString(nameof(Nav_CanvasAndInk_Tooltip), _resourceCulture);
 
         public static string Nav_Canvas_Tooltip => ResourceManager.GetString(nameof(Nav_Canvas_Tooltip), _resourceCulture);

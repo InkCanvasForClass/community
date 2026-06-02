@@ -118,6 +118,44 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             }
         }
 
+        public static void OnBlackBoardLeftScaleChanged(double value)
+        {
+            var mw = GetMainWindow();
+            if (mw != null)
+            {
+                mw.ViewboxBlackboardLeftSideScaleTransform.ScaleX = value;
+                mw.ViewboxBlackboardLeftSideScaleTransform.ScaleY = value;
+            }
+        }
+
+        public static void OnBlackBoardRightScaleChanged(double value)
+        {
+            var mw = GetMainWindow();
+            if (mw != null)
+            {
+                mw.ViewboxBlackboardRightSideScaleTransform.ScaleX = value;
+                mw.ViewboxBlackboardRightSideScaleTransform.ScaleY = value;
+            }
+        }
+
+        public static void OnBoardToolbarLeftOpacityChanged(double value)
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.ViewboxBlackboardLeftSide.Opacity = value;
+        }
+
+        public static void OnBoardToolbarCenterOpacityChanged(double value)
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.ViewboxBlackboardCenterSide.Opacity = value;
+        }
+
+        public static void OnBoardToolbarRightOpacityChanged(double value)
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.ViewboxBlackboardRightSide.Opacity = value;
+        }
+
         public static void OnTimeDisplayInWhiteboardChanged(bool isOn)
         {
             var mw = GetMainWindow();

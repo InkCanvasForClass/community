@@ -2837,6 +2837,10 @@ namespace Ink_Canvas
                         pointDesktop = pos;
                 }
             }
+            else if (IsVerticalToolbar)
+            {
+                pos.X = screenWidth - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleX;
+            }
 
             if (animate)
             {

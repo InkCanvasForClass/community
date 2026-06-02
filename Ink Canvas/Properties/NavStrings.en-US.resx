@@ -171,6 +171,24 @@
   <data name="Nav_BoardToolbar_Tooltip" xml:space="preserve">
     <value>Board toolbar component configuration</value>
   </data>
+  <data name="Nav_Board" xml:space="preserve">
+    <value>Board</value>
+  </data>
+  <data name="Nav_Board_Tooltip" xml:space="preserve">
+    <value>Board toolbar &amp; appearance settings</value>
+  </data>
+  <data name="Nav_BoardComponents" xml:space="preserve">
+    <value>Components</value>
+  </data>
+  <data name="Nav_BoardComponents_Tooltip" xml:space="preserve">
+    <value>Board toolbar component configuration</value>
+  </data>
+  <data name="Nav_BoardAppearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="Nav_BoardAppearance_Tooltip" xml:space="preserve">
+    <value>Board toolbar appearance settings</value>
+  </data>
   <data name="Nav_CanvasAndInk_Tooltip" xml:space="preserve">
     <value>Canvas &amp; ink settings</value>
   </data>

@@ -48,6 +48,27 @@
   <data name="Theme_BlackboardScale80" xml:space="preserve">
     <value>白板 UI 缩放倍数</value>
   </data>
+  <data name="Theme_BoardToolbarOpacity" xml:space="preserve">
+    <value>白板工具栏透明度</value>
+  </data>
+  <data name="Theme_BoardToolbarOpacityLeft" xml:space="preserve">
+    <value>左下角透明度</value>
+  </data>
+  <data name="Theme_BoardToolbarOpacityCenter" xml:space="preserve">
+    <value>中间透明度</value>
+  </data>
+  <data name="Theme_BoardToolbarOpacityRight" xml:space="preserve">
+    <value>右下角透明度</value>
+  </data>
+  <data name="Theme_BoardScaleLeft" xml:space="preserve">
+    <value>左下角缩放倍数</value>
+  </data>
+  <data name="Theme_BoardScaleCenter" xml:space="preserve">
+    <value>中间缩放倍数</value>
+  </data>
+  <data name="Theme_BoardScaleRight" xml:space="preserve">
+    <value>右下角缩放倍数</value>
+  </data>
   <data name="Theme_Clear" xml:space="preserve">
     <value>一键清空</value>
   </data>

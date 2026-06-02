@@ -69,9 +69,6 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
 
         [JsonProperty("groups")]
         public List<BoardToolbarGroupEntry> Groups { get; set; } = new List<BoardToolbarGroupEntry>();
-
-        [JsonProperty("components")]
-        public List<BoardToolbarComponentEntry> Components { get; set; } = new List<BoardToolbarComponentEntry>();
     }
 
     public class BoardToolbarLayoutSettings

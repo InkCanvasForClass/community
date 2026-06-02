@@ -19,26 +19,6 @@
         <local:BoardGroupNameConverter x:Key="GroupNameConverter"/>
         <local:BoardPositionNameConverter x:Key="PositionNameConverter"/>
 
-        <DataTemplate x:Key="AddedItemTemplate" DataType="{x:Type board:BoardToolbarComponentEntry}">
-            <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                    BorderThickness="1"
-                    CornerRadius="6" Padding="10,6" Margin="2"
-                    Cursor="Hand">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="&#xE76F;" FontFamily="Segoe MDL2 Assets" FontSize="11"
-                               VerticalAlignment="Center" Margin="0,0,6,0" Opacity="0.45"/>
-                    <TextBlock Text="{Binding Id, Converter={StaticResource IdToNameConverter}}"
-                               VerticalAlignment="Center" FontSize="13"/>
-                    <Button Content="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="10"
-                            Click="RemoveItem_Click" Margin="8,0,0,0"
-                            Background="Transparent" BorderThickness="0"
-                            Padding="4,2" VerticalAlignment="Center"
-                            Cursor="Hand"/>
-                </StackPanel>
-            </Border>
-        </DataTemplate>
-
         <DataTemplate x:Key="GroupChildItemTemplate" DataType="{x:Type board:BoardToolbarComponentEntry}">
             <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
@@ -175,28 +155,6 @@
                 <RadioButton x:Name="RadioAreaRight" Content="{x:Static props:FloatingBarStrings.BoardToolbarPage_RightArea}"
                              Checked="AreaRadioButton_Changed" FontSize="13" FontWeight="Medium"/>
             </WrapPanel>
-
-            <!-- 当前区域的独立组件 -->
-            <TextBlock Text="{x:Static props:FloatingBarStrings.BoardToolbarPage_AreaComponents}"
-                       FontSize="14" FontWeight="SemiBold" Margin="0,4,0,6"/>
-            <TextBlock Text="{x:Static props:FloatingBarStrings.BoardToolbarPage_AreaComponentsHint}"
-                       Opacity="0.65" FontSize="12" Margin="0,0,0,6"/>
-            <Border BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="8" Padding="6"
-                    Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}"
-                    MinHeight="48">
-                <ListBox x:Name="AreaComponentsList"
-                         ItemTemplate="{StaticResource AddedItemTemplate}"
-                         Style="{StaticResource DragDropListBoxStyle}"
-                         dd:DragDrop.DropHandler="{Binding}"
-                         MinHeight="36">
-                    <ListBox.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel Orientation="Horizontal"/>
-                        </ItemsPanelTemplate>
-                    </ListBox.ItemsPanel>
-                </ListBox>
-            </Border>
 
             <!-- 当前区域的分组 -->
             <TextBlock Text="{x:Static props:FloatingBarStrings.BoardToolbarPage_AreaGroups}"

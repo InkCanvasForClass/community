@@ -397,13 +397,35 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Personalize}"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
+                    </ui:NavigationViewItem.MenuItems>
+                </ui:NavigationViewItem>
+
+                <!-- 白板 -->
+                <ui:NavigationViewItem
+                    x:Name="BoardItem"
+                    Content="{x:Static props:NavStrings.Nav_Board}"
+                    SelectsOnInvoked="False"
+                    ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Board_Tooltip}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
+                    </ui:NavigationViewItem.Icon>
+                    <ui:NavigationViewItem.MenuItems>
                         <ui:NavigationViewItem
                             x:Name="BoardToolbarPageItem"
-                            Content="{x:Static props:NavStrings.Nav_BoardToolbar}"
+                            Content="{x:Static props:NavStrings.Nav_BoardComponents}"
                             Tag="BoardToolbarPage"
-                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_BoardToolbar_Tooltip}">
+                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_BoardComponents_Tooltip}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Rename}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="BoardAppearancePageItem"
+                            Content="{x:Static props:NavStrings.Nav_BoardAppearance}"
+                            Tag="BoardAppearancePage"
+                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_BoardAppearance_Tooltip}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Personalize}"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>

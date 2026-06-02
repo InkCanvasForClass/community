@@ -55,7 +55,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void UpdateAllSliderTexts()
         {
-            UpdateSliderText(ViewboxBlackBoardScaleTransformValueSlider, ViewboxBlackBoardScaleText, "{0:F2}");
             UpdateSliderText(QuickPanelBottomOffsetSlider, QuickPanelBottomOffsetText, "{0:F0}");
         }
 
@@ -97,8 +96,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (settings.Appearance.FloatingBarImg >= ComboBoxFloatingBarImg.Items.Count)
                 settings.Appearance.FloatingBarImg = 0;
             ComboBoxFloatingBarImg.SelectedIndex = settings.Appearance.FloatingBarImg;
-
-            ViewboxBlackBoardScaleTransformValueSlider.Value = settings.Appearance.ViewboxBlackBoardScaleTransformValue;
 
             CardEnableTimeDisplayInWhiteboardMode.IsOn = settings.Appearance.EnableTimeDisplayInWhiteboardMode;
             CardEnableChickenSoupInWhiteboardMode.IsOn = settings.Appearance.EnableChickenSoupInWhiteboardMode;
@@ -231,22 +228,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         #endregion
 
         #region Display Options
-
-        private void ViewboxBlackBoardScaleTransformValueSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            UpdateSliderText(ViewboxBlackBoardScaleTransformValueSlider, ViewboxBlackBoardScaleText, "{0:F2}");
-            if (!_isLoaded) return;
-            var slider = ViewboxBlackBoardScaleTransformValueSlider;
-            var val = Math.Round(slider.Value, 2);
-            if (slider.Value != val)
-            {
-                slider.Value = val;
-                return;
-            }
-            SettingsManager.Settings.Appearance.ViewboxBlackBoardScaleTransformValue = val;
-            SettingsManager.SaveSettingsToFile();
-            SettingsActionHub.OnBlackBoardScaleChanged(val);
-        }
 
         private void ToggleSwitchEnableTimeDisplayInWhiteboardMode_Toggled(object sender, RoutedEventArgs e)
         {

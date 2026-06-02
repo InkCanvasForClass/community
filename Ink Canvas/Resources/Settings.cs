@@ -411,6 +411,16 @@ namespace Ink_Canvas
         public double ViewboxFloatingBarOpacityInPPTValue { get; set; } = 0.5;
         [JsonProperty("viewboxBlackBoardScaleTransformValue")]
         public double ViewboxBlackBoardScaleTransformValue { get; set; } = 1;
+        [JsonProperty("viewboxBlackBoardLeftScaleTransformValue")]
+        public double ViewboxBlackBoardLeftScaleTransformValue { get; set; } = 1;
+        [JsonProperty("viewboxBlackBoardRightScaleTransformValue")]
+        public double ViewboxBlackBoardRightScaleTransformValue { get; set; } = 1;
+        [JsonProperty("boardToolbarLeftOpacity")]
+        public double BoardToolbarLeftOpacity { get; set; } = 0.77;
+        [JsonProperty("boardToolbarCenterOpacity")]
+        public double BoardToolbarCenterOpacity { get; set; } = 0.77;
+        [JsonProperty("boardToolbarRightOpacity")]
+        public double BoardToolbarRightOpacity { get; set; } = 0.77;
         [JsonProperty("isTransparentButtonBackground")]
         public bool IsTransparentButtonBackground { get; set; } = true;
         [JsonProperty("isShowExitButton")]

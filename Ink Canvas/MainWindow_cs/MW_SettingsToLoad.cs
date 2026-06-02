@@ -306,6 +306,15 @@ namespace Ink_Canvas
                 ViewboxBlackboardCenterSideScaleTransform.ScaleX = Settings.Appearance.ViewboxBlackBoardScaleTransformValue;
                 ViewboxBlackboardCenterSideScaleTransform.ScaleY = Settings.Appearance.ViewboxBlackBoardScaleTransformValue;
 
+                ViewboxBlackboardLeftSideScaleTransform.ScaleX = Settings.Appearance.ViewboxBlackBoardLeftScaleTransformValue;
+                ViewboxBlackboardLeftSideScaleTransform.ScaleY = Settings.Appearance.ViewboxBlackBoardLeftScaleTransformValue;
+                ViewboxBlackboardRightSideScaleTransform.ScaleX = Settings.Appearance.ViewboxBlackBoardRightScaleTransformValue;
+                ViewboxBlackboardRightSideScaleTransform.ScaleY = Settings.Appearance.ViewboxBlackBoardRightScaleTransformValue;
+
+                ViewboxBlackboardLeftSide.Opacity = Settings.Appearance.BoardToolbarLeftOpacity;
+                ViewboxBlackboardCenterSide.Opacity = Settings.Appearance.BoardToolbarCenterOpacity;
+                ViewboxBlackboardRightSide.Opacity = Settings.Appearance.BoardToolbarRightOpacity;
+
                 ApplyQuickPanelBottomOffset(Settings.Appearance.QuickPanelBottomOffset);
                 ApplySidePanelSettings();
 

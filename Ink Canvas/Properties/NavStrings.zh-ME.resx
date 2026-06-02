@@ -171,6 +171,24 @@
   <data name="Nav_BoardToolbar_Tooltip" xml:space="preserve">
     <value>白板工具栏组件配置</value>
   </data>
+  <data name="Nav_Board" xml:space="preserve">
+    <value>白板</value>
+  </data>
+  <data name="Nav_Board_Tooltip" xml:space="preserve">
+    <value>白板工具栏与外观调教</value>
+  </data>
+  <data name="Nav_BoardComponents" xml:space="preserve">
+    <value>组件</value>
+  </data>
+  <data name="Nav_BoardComponents_Tooltip" xml:space="preserve">
+    <value>白板工具栏组件配置</value>
+  </data>
+  <data name="Nav_BoardAppearance" xml:space="preserve">
+    <value>外观</value>
+  </data>
+  <data name="Nav_BoardAppearance_Tooltip" xml:space="preserve">
+    <value>白板工具栏外观调教</value>
+  </data>
   <data name="Nav_CanvasAndInk_Tooltip" xml:space="preserve">
     <value>画板与墨迹调教</value>
   </data>

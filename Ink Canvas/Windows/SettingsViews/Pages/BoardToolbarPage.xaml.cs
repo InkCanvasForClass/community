@@ -16,7 +16,7 @@ using Page = iNKORE.UI.WPF.Modern.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
-    public partial class BoardToolbarPage : Page, IDropTarget
+    public partial class BoardToolbarPage : Page
     {
         private static readonly string LogTag = "BoardToolbarPage";
         private bool _isLoaded;
@@ -26,7 +26,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private BoardToolbarLayoutSettings _currentLayout;
         private string _currentAreaId = "center";
 
-        public ObservableCollection<BoardToolbarComponentEntry> AreaComponents { get; } = new();
         public ObservableCollection<BoardToolbarGroupEntry> AreaGroups { get; } = new();
         public BoardGroupChildrenDropHandler GroupDropHandler { get; }
 
@@ -206,7 +205,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             LogHelper.WriteLogToFile($"{LogTag}: LoadSettings 开始", LogHelper.LogType.Info);
             SelectedEntry = null;
-            AreaComponents.Clear();
             AreaGroups.Clear();
 
             RefreshConfigFileList();
@@ -241,7 +239,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 string.Equals(a.Id, _currentAreaId, StringComparison.OrdinalIgnoreCase));
             if (area == null) return;
 
-            area.Components = new List<BoardToolbarComponentEntry>(AreaComponents.Select(CloneEntry));
             area.Groups = new List<BoardToolbarGroupEntry>(AreaGroups.Select(g =>
             {
                 var ng = new BoardToolbarGroupEntry { Id = g.Id };
@@ -295,16 +292,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void RefreshAreaPanel()
         {
-            AreaComponents.Clear();
             AreaGroups.Clear();
             SelectedEntry = null;
 
             var area = _currentLayout?.Areas?.FirstOrDefault(a =>
                 string.Equals(a.Id, _currentAreaId, StringComparison.OrdinalIgnoreCase));
             if (area == null) return;
-
-            foreach (var comp in area.Components)
-                AreaComponents.Add(CloneEntry(comp));
 
             foreach (var group in area.Groups)
             {
@@ -313,7 +306,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 AreaGroups.Add(ng);
             }
 
-            AreaComponentsList.ItemsSource = AreaComponents;
             AreaGroupsControl.ItemsSource = AreaGroups;
         }
 
@@ -337,67 +329,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         #endregion
 
-        #region Drag-drop (AreaComponentsList)
-
-        public new void DragOver(IDropInfo dropInfo)
-        {
-            if (dropInfo.Data is IBoardToolbarItem)
-            {
-                dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
-                dropInfo.Effects = DragDropEffects.Copy;
-            }
-            else if (dropInfo.Data is BoardToolbarComponentEntry)
-            {
-                dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
-                dropInfo.Effects = DragDropEffects.Move;
-            }
-        }
-
-        public new void Drop(IDropInfo dropInfo)
-        {
-            if (dropInfo.Data is IBoardToolbarItem item)
-            {
-                var entry = new BoardToolbarComponentEntry
-                {
-                    Id = item.Id
-                };
-                var insertIndex = dropInfo.UnfilteredInsertIndex;
-                if (insertIndex < 0 || insertIndex > AreaComponents.Count)
-                    insertIndex = AreaComponents.Count;
-                AreaComponents.Insert(insertIndex, entry);
-                SelectedEntry = entry;
-                SaveSettings();
-            }
-            else if (dropInfo.Data is BoardToolbarComponentEntry vm)
-            {
-                var oldIndex = AreaComponents.IndexOf(vm);
-                if (oldIndex == -1) return;
-
-                var newIndex = dropInfo.UnfilteredInsertIndex;
-                if (oldIndex < newIndex) newIndex--;
-                newIndex = Math.Max(0, Math.Min(newIndex, AreaComponents.Count - 1));
-
-                if (oldIndex != newIndex)
-                {
-                    AreaComponents.Move(oldIndex, newIndex);
-                }
-                SaveSettings();
-            }
-        }
-
-        #endregion
-
         #region Item management
-
-        private void RemoveItem_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is FrameworkElement fe && fe.DataContext is BoardToolbarComponentEntry entry)
-            {
-                AreaComponents.Remove(entry);
-                if (SelectedEntry == entry) SelectedEntry = null;
-                SaveSettings();
-            }
-        }
 
         private void RemoveGroupChildItem_Click(object sender, RoutedEventArgs e)
         {
@@ -420,12 +352,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (sender is FrameworkElement fe && fe.DataContext is IBoardToolbarItem item)
             {
+                if (AreaGroups.Count == 0)
+                {
+                    var group = new BoardToolbarGroupEntry { Id = "default" };
+                    AreaGroups.Add(group);
+                }
                 var entry = new BoardToolbarComponentEntry
                 {
                     Id = item.Id
                 };
-                AreaComponents.Add(entry);
+                AreaGroups.Last().Components.Add(entry);
                 SelectedEntry = entry;
+                RefreshGroupsDisplay();
                 SaveSettings();
             }
         }

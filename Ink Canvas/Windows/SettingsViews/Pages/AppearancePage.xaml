@@ -107,21 +107,6 @@
                                 Click="ButtonManageCustomIcons_Click" Padding="10,3"/>
                     </ikw:SimpleStackPanel>
 
-                    <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_BlackboardScale80}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BackToWindow}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock x:Name="ViewboxBlackBoardScaleText"
-                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                            <Slider x:Name="ViewboxBlackBoardScaleTransformValueSlider" Minimum="0.5"
-                                    Maximum="1.5" Width="200"
-                                    IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
-                                    TickPlacement="None" AutoToolTipPlacement="None"
-                                    ValueChanged="ViewboxBlackBoardScaleTransformValueSlider_ValueChanged" />
-                        </ikw:SimpleStackPanel>
-                    </ui:SettingsCard>
-
                     <controls:LabeledSettingsCard x:Name="CardEnableTimeDisplayInWhiteboardMode"
                             Header="{x:Static props:ThemeStrings.Theme_ShowTimeInWhiteboard}"
                             Icon="{x:Static ui:SegoeFluentIcons.Pinned}"

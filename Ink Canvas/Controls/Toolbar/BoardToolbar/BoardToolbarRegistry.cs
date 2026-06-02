@@ -409,22 +409,6 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                     isFirst = false;
                 }
             }
-
-            foreach (var component in area.Components)
-            {
-                var view = BuildView(component.Id, host);
-                if (view != null)
-                {
-                    ApplyComponentSettings(view, component);
-
-                    if (!isFirst)
-                    {
-                        view.Margin = new Thickness(3, 0, 0, 0);
-                    }
-                    container.Children.Add(view);
-                    isFirst = false;
-                }
-            }
         }
 
         public static void RebuildLeftToolbar(IBoardToolbarHost host, Panel container) { }

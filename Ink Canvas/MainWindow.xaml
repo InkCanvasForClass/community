@@ -1,4 +1,4 @@
-﻿<helpers:PerformanceTransparentWin xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Name="window" x:Class="Ink_Canvas.MainWindow"
+<helpers:PerformanceTransparentWin xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Name="window" x:Class="Ink_Canvas.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -631,6 +631,9 @@
                 <Viewbox x:Name="ViewboxBlackboardLeftSide" Margin="3,0,0,0" Height="55" HorizontalAlignment="Left"
                          VerticalAlignment="Bottom"
                          Stretch="None">
+                    <Viewbox.LayoutTransform>
+                        <ScaleTransform x:Name="ViewboxBlackboardLeftSideScaleTransform" ScaleX="1" ScaleY="1" />
+                    </Viewbox.LayoutTransform>
                     <Grid Name="BlackboardLeftSide" Visibility="Collapsed" d:Visibility="Visible" Margin="0,0,0,3" Height="50"
                           HorizontalAlignment="Center" VerticalAlignment="Bottom">
                         <ikw:SimpleStackPanel x:Name="BlackboardLeftSidePanel" Orientation="Horizontal">
@@ -639,7 +642,7 @@
                     </Grid>
                 </Viewbox>
                 <!-- 中间 -->
-                <Viewbox Margin="3,0,0,0" Height="56" HorizontalAlignment="Center"
+                <Viewbox x:Name="ViewboxBlackboardCenterSide" Margin="3,0,0,0" Height="56" HorizontalAlignment="Center"
                          VerticalAlignment="Bottom"
                          Stretch="None">
                     <Viewbox.LayoutTransform>
@@ -687,6 +690,9 @@
                 <Viewbox x:Name="ViewboxBlackboardRightSide" Margin="3,0,0,0" Height="55"
                          HorizontalAlignment="Right" VerticalAlignment="Bottom"
                          Stretch="None">
+                    <Viewbox.LayoutTransform>
+                        <ScaleTransform x:Name="ViewboxBlackboardRightSideScaleTransform" ScaleX="1" ScaleY="1" />
+                    </Viewbox.LayoutTransform>
                     <Grid Name="BlackboardRightSide" Visibility="Collapsed"  d:Visibility="Visible" Margin="0,0,0,3" Height="50"
                           HorizontalAlignment="Center" VerticalAlignment="Bottom">
                         <ikw:SimpleStackPanel x:Name="BlackboardRightSidePanel" Orientation="Horizontal">
