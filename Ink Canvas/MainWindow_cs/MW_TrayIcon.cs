@@ -472,15 +472,11 @@ namespace Ink_Canvas
                 {
                     isInPPTPresentationMode = mainWin.IsInPptPresentationMode;
                 });
-
-                // 如果工具栏被折叠，先展开它
-                if (mainWin.isFloatingBarFolded)
+                if (!mainWin.isFloatingBarFolded)
                 {
-                    mainWin.UnFoldFloatingBar(new object());
+                    if (!isInPPTPresentationMode) mainWin.PureViewboxFloatingBarMarginAnimationInDesktopMode();
+                    else mainWin.PureViewboxFloatingBarMarginAnimationInPPTMode();
                 }
-
-                if (!isInPPTPresentationMode) mainWin.PureViewboxFloatingBarMarginAnimationInDesktopMode();
-                else mainWin.PureViewboxFloatingBarMarginAnimationInPPTMode();
             }
         }
 
