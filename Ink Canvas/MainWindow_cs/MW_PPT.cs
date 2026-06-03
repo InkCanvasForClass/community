@@ -1278,7 +1278,8 @@ namespace Ink_Canvas
                         Thread.Sleep(100);
                         Application.Current.Dispatcher.Invoke(() =>
                         {
-                            ViewboxFloatingBarMarginAnimation(60);
+                            // 进入PPT后窗口已移动到全屏(Bounds)，使用Bounds计算浮动栏位置
+                            ViewboxFloatingBarMarginAnimation(60, false);
                         });
                     }).Start();
                 }
