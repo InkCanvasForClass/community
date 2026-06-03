@@ -717,5 +717,19 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         }
 
         #endregion
+
+        #region Custom Automation
+
+        private void CardCustomAutomation_Click(object sender, RoutedEventArgs e)
+        {
+            // 导航到自定义自动化页面
+            var settingsWindow = Window.GetWindow(this) as Windows.SettingsViews.SettingsWindow;
+            if (settingsWindow != null)
+            {
+                settingsWindow.NavigateToPage("AutomationWorkflowPage");
+            }
+        }
+
+        #endregion
     }
 }

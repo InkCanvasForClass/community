@@ -582,6 +582,19 @@
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
+                    <!-- 自定义自动化入口 -->
+                    <TextBlock Text="自定义自动化" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
+
+                    <ui:SettingsCard Header="自定义自动化规则"
+                            Description="创建自定义的触发器→条件→行动规则，实现灵活的自动化操作。"
+                            IsClickEnabled="True"
+                            Click="CardCustomAutomation_Click">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Page}"/>
+                        </ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronRight}" FontSize="12" Opacity="0.5" />
+                    </ui:SettingsCard>
+
                     <Rectangle Height="48" />
                 </ikw:SimpleStackPanel>
             </Grid>

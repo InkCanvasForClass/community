@@ -1,0 +1,295 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.IO;
+using System.Linq;
+using CommunityToolkit.Mvvm.ComponentModel;
+using Ink_Canvas.WorkflowAutomation.Abstractions;
+using Ink_Canvas.WorkflowAutomation.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+namespace Ink_Canvas.WorkflowAutomation.Services
+{
+    /// <summary>
+    /// 自动化服务，负责管理工作流的生命周期、触发和恢复。
+    /// </summary>
+    public class AutomationService : ObservableObject
+    {
+        private readonly string _configsFolderPath;
+
+        public AutomationService(string configsFolderPath)
+        {
+            _configsFolderPath = configsFolderPath;
+            if (!Directory.Exists(_configsFolderPath))
+            {
+                Directory.CreateDirectory(_configsFolderPath);
+            }
+        }
+
+        private string _currentConfig = "default";
+        public string CurrentConfig
+        {
+            get => _currentConfig;
+            set
+            {
+                if (value == _currentConfig) return;
+                _currentConfig = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string CurrentConfigPath => Path.GetFullPath(Path.Combine(_configsFolderPath, CurrentConfig + ".json"));
+
+        private ObservableCollection<Workflow> _workflows = new();
+        public ObservableCollection<Workflow> Workflows
+        {
+            get => _workflows;
+            set
+            {
+                if (Equals(value, _workflows)) return;
+                _workflows = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private List<string> _configs = new();
+        public List<string> Configs
+        {
+            get => _configs;
+            set
+            {
+                if (Equals(value, _configs)) return;
+                _configs = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _isAutomationEnabled = true;
+        public bool IsAutomationEnabled
+        {
+            get => _isAutomationEnabled;
+            set
+            {
+                if (value == _isAutomationEnabled) return;
+                _isAutomationEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// 刷新配置文件列表
+        /// </summary>
+        public void RefreshConfigs()
+        {
+            Configs = Directory.GetFiles(_configsFolderPath, "*.json")
+                               .Select(Path.GetFileNameWithoutExtension)
+                               .Where(x => x != null)
+                               .Select(x => x!)
+                               .ToList();
+        }
+
+        /// <summary>
+        /// 加载当前配置
+        /// </summary>
+        public void LoadConfig()
+        {
+            // 卸载当前工作流
+            foreach (var workflow in Workflows)
+            {
+                UnloadWorkflow(workflow);
+            }
+            Workflows.CollectionChanged -= WorkflowsOnCollectionChanged;
+
+            if (File.Exists(CurrentConfigPath))
+            {
+                try
+                {
+                    var json = File.ReadAllText(CurrentConfigPath);
+                    Workflows = JsonConvert.DeserializeObject<ObservableCollection<Workflow>>(json) ?? new ObservableCollection<Workflow>();
+                }
+                catch
+                {
+                    Workflows = new ObservableCollection<Workflow>();
+                }
+            }
+            else
+            {
+                Workflows = new ObservableCollection<Workflow>();
+                SaveConfig();
+            }
+
+            foreach (var workflow in Workflows)
+            {
+                LoadWorkflow(workflow);
+            }
+            Workflows.CollectionChanged += WorkflowsOnCollectionChanged;
+        }
+
+        /// <summary>
+        /// 保存当前配置
+        /// </summary>
+        public void SaveConfig(string note = "")
+        {
+            try
+            {
+                var json = JsonConvert.SerializeObject(Workflows, Formatting.Indented);
+                File.WriteAllText(CurrentConfigPath, json);
+            }
+            catch
+            {
+                // 忽略保存失败
+            }
+        }
+
+        private void WorkflowsOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    foreach (Workflow workflow in e.NewItems!)
+                        LoadWorkflow(workflow);
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    foreach (Workflow workflow in e.OldItems!)
+                        UnloadWorkflow(workflow);
+                    break;
+            }
+            SaveConfig("CollectionChanged");
+        }
+
+        private void LoadWorkflow(Workflow workflow)
+        {
+            workflow.Triggers.CollectionChanged += (s, e) =>
+            {
+                switch (e.Action)
+                {
+                    case NotifyCollectionChangedAction.Add:
+                        foreach (TriggerSettings trigger in e.NewItems!)
+                            LoadTrigger(workflow, trigger);
+                        break;
+                    case NotifyCollectionChangedAction.Remove:
+                        foreach (TriggerSettings trigger in e.OldItems!)
+                            UnloadTrigger(workflow, trigger);
+                        break;
+                }
+            };
+
+            foreach (var trigger in workflow.Triggers)
+            {
+                LoadTrigger(workflow, trigger);
+            }
+        }
+
+        public void UnloadWorkflow(Workflow workflow)
+        {
+            workflow.Unload();
+            foreach (var trigger in workflow.Triggers)
+            {
+                UnloadTrigger(workflow, trigger);
+            }
+        }
+
+        private void LoadTrigger(Workflow workflow, TriggerSettings trigger)
+        {
+            if (trigger.TriggerInstance != null) return;
+
+            var triggerInstance = AutomationRegistry.ResolveTrigger(trigger.Id);
+            if (triggerInstance == null) return;
+
+            // 处理设置反序列化
+            var settings = trigger.Settings;
+            var triggerInfo = trigger.AssociatedTriggerInfo;
+            if (triggerInfo?.SettingsType != null && settings != null)
+            {
+                try
+                {
+                    if (settings is JToken jToken)
+                    {
+                        settings = jToken.ToObject(triggerInfo.SettingsType);
+                    }
+                    else if (settings.GetType() != triggerInfo.SettingsType)
+                    {
+                        settings = Activator.CreateInstance(triggerInfo.SettingsType);
+                    }
+                }
+                catch
+                {
+                    settings = Activator.CreateInstance(triggerInfo.SettingsType);
+                }
+                trigger.Settings = settings;
+            }
+
+            triggerInstance.SettingsInternal = settings;
+            triggerInstance.AssociatedWorkflow = workflow;
+            triggerInstance.Triggered += TriggerTriggered;
+            triggerInstance.TriggeredRecover += TriggerTriggeredRecover;
+            trigger.TriggerInstance = triggerInstance;
+
+            try
+            {
+                triggerInstance.Loaded();
+            }
+            catch
+            {
+                // 触发器加载失败不影响其他
+            }
+        }
+
+        private void UnloadTrigger(Workflow workflow, TriggerSettings trigger)
+        {
+            if (trigger.TriggerInstance == null) return;
+
+            try
+            {
+                trigger.TriggerInstance.UnLoaded();
+            }
+            catch { }
+
+            trigger.TriggerInstance.Triggered -= TriggerTriggered;
+            trigger.TriggerInstance.TriggeredRecover -= TriggerTriggeredRecover;
+            trigger.TriggerInstance = null;
+            trigger.Unload();
+        }
+
+        private void TriggerTriggered(object? sender, EventArgs e)
+        {
+            if (!IsAutomationEnabled) return;
+            if (sender is not TriggerBase trigger) return;
+
+            var workflow = trigger.AssociatedWorkflow;
+            if (workflow == null) return;
+            if (!workflow.ActionSet.IsEnabled) return;
+
+            // 如果已触发且启用了恢复，则跳过（等待恢复触发器）
+            if (workflow.ActionSet.IsRevertEnabled && workflow.ActionSet.IsOn) return;
+
+            // 检查条件
+            if (workflow.IsConditionEnabled)
+            {
+                var rulesetService = new RulesetService();
+                if (!rulesetService.IsRulesetSatisfied(workflow.Ruleset)) return;
+            }
+
+            // 执行行动
+            var actionService = new ActionService();
+            actionService.Invoke(workflow.ActionSet);
+            SaveConfig("TriggerTriggered");
+        }
+
+        private void TriggerTriggeredRecover(object? sender, EventArgs e)
+        {
+            if (!IsAutomationEnabled) return;
+            if (sender is not TriggerBase trigger) return;
+
+            var workflow = trigger.AssociatedWorkflow;
+            if (workflow == null) return;
+            if (!workflow.ActionSet.IsOn) return;
+
+            var actionService = new ActionService();
+            actionService.Revert(workflow.ActionSet);
+            SaveConfig("TriggerTriggeredRecover");
+        }
+    }
+}
