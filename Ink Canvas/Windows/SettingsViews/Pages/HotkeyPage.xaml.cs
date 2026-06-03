@@ -285,9 +285,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 case "Redo": return () => _mainWindow.SymbolIconRedo_MouseUp(null, null);
                 case "Clear": return () => _mainWindow.SymbolIconDelete_MouseUp(null, null);
                 case "Paste": return () => _mainWindow.HandleGlobalPaste(null, null);
-                case "SelectTool": return () => _mainWindow.SymbolIconSelect_MouseUp(null, null);
+                case "SelectTool": return () => _mainWindow.SwitchToSelectFromHotkey();
                 case "DrawTool": return () => _mainWindow.PenIcon_Click(null, null);
-                case "EraserTool": return () => _mainWindow.EraserIcon_Click(null, null);
+                case "EraserTool": return () => _mainWindow.SwitchToEraserFromHotkey();
                 case "BlackboardTool": return () => _mainWindow.ImageBlackboard_MouseUp(null, null);
                 case "QuitDrawTool": return () => _mainWindow.CursorIcon_Click(null, null);
                 case "Pen1": return () => SwitchToPenType(0);

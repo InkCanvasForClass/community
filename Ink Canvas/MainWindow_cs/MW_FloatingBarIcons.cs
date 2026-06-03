@@ -1114,6 +1114,12 @@ namespace Ink_Canvas
             if (lastBorderMouseDownObject is Panel panel)
                 panel.Background = new SolidColorBrush(Colors.Transparent);
 
+            // 如果当前不在批注模式，先切换到批注模式
+            if (!IsAnnotating)
+            {
+                PenIcon_Click(sender, e);
+            }
+
             BtnSelect_Click(null, null);
 
             // 更新模式缓存
@@ -2933,7 +2939,8 @@ namespace Ink_Canvas
                 }
 
                 bool usedSavedPosition = false;
-                if (_userHasDraggedFloatingBar && pointDesktop.X != -1 && pointDesktop.Y != -1)
+                // 只有在桌面模式下保存过的位置才使用，避免使用PPT模式下拖动的位置
+                if (pointDesktop.X != -1 && pointDesktop.Y != -1)
                 {
                     pos = pointDesktop;
                     usedSavedPosition = true;
@@ -3770,6 +3777,12 @@ namespace Ink_Canvas
             forcePointEraser = true;
             drawingShapeMode = 0;
 
+            // 如果当前不在批注模式，先切换到批注模式
+            if (!IsAnnotating)
+            {
+                PenIcon_Click(sender, e);
+            }
+
             // 切换到橡皮擦模式时，确保保存当前图片信息
             if (!isAlreadyEraser && currentMode != 0)
             {
@@ -3892,6 +3905,12 @@ namespace Ink_Canvas
         internal void EraserIconByStrokes_Click(object sender, MouseButtonEventArgs e)
         {
             if (TryBlockFrozenPageMutation("切换到线擦")) return;
+
+            // 如果当前不在批注模式，先切换到批注模式
+            if (!IsAnnotating)
+            {
+                PenIcon_Click(sender, e);
+            }
 
             // 禁用高级橡皮擦系统
             DisableEraserOverlay();

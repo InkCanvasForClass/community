@@ -269,9 +269,9 @@ namespace Ink_Canvas.Helpers
                 RegisterHotkey("Paste", Key.V, ModifierKeys.Control, () => _mainWindow.HandleGlobalPaste(null, null));
 
                 // 工具切换快捷键
-                RegisterHotkey("SelectTool", Key.S, ModifierKeys.Alt, () => _mainWindow.SymbolIconSelect_MouseUp(null, null));
+                RegisterHotkey("SelectTool", Key.S, ModifierKeys.Alt, () => _mainWindow.SwitchToSelectFromHotkey());
                 RegisterHotkey("DrawTool", Key.D, ModifierKeys.Alt, () => _mainWindow.PenIcon_Click(null, null));
-                RegisterHotkey("EraserTool", Key.E, ModifierKeys.Alt, () => _mainWindow.EraserIcon_Click(null, null));
+                RegisterHotkey("EraserTool", Key.E, ModifierKeys.Alt, () => _mainWindow.SwitchToEraserFromHotkey());
                 RegisterHotkey("BlackboardTool", Key.B, ModifierKeys.Alt, () => _mainWindow.ImageBlackboard_MouseUp(null, null));
                 RegisterHotkey("QuitDrawTool", Key.Q, ModifierKeys.Alt, () => _mainWindow.KeyChangeToQuitDrawTool(null, null));
 
@@ -1241,11 +1241,11 @@ namespace Ink_Canvas.Helpers
                     case "Paste":
                         return () => _mainWindow.HandleGlobalPaste(null, null);
                     case "SelectTool":
-                        return () => _mainWindow.SymbolIconSelect_MouseUp(null, null);
+                        return () => _mainWindow.SwitchToSelectFromHotkey();
                     case "DrawTool":
                         return () => _mainWindow.PenIcon_Click(null, null);
                     case "EraserTool":
-                        return () => _mainWindow.EraserIcon_Click(null, null);
+                        return () => _mainWindow.SwitchToEraserFromHotkey();
                     case "BlackboardTool":
                         return () => _mainWindow.ImageBlackboard_MouseUp(null, null);
                     case "QuitDrawTool":
