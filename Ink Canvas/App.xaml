@@ -5,6 +5,7 @@
              xmlns:tb="clr-namespace:H.NotifyIcon;assembly=H.NotifyIcon.Wpf"
              xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
              xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+             xmlns:helpers="clr-namespace:Ink_Canvas.Helpers"
 >
     <Application.Resources>
         <ResourceDictionary>
@@ -268,6 +269,12 @@
                 <ResourceDictionary Source="Resources/SeewoImageDictionary.xaml"/>
                 <ResourceDictionary Source="Resources/DrawShapeImageDictionary.xaml"/>
                 <ResourceDictionary Source="Resources/IconImageDictionary.xaml"/>
+                <!-- 为所有 Slider 添加触屏支持 -->
+                <ResourceDictionary>
+                    <Style TargetType="Slider" BasedOn="{StaticResource {x:Type Slider}}">
+                        <Setter Property="helpers:SliderTouchHelper.IsEnabled" Value="True" />
+                    </Style>
+                </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
