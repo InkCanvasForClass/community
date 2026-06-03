@@ -128,17 +128,42 @@ namespace Ink_Canvas
 
         public void UpdatePageInfo()
         {
-            var leftPageInfo = FindView("board.pageInfo.left") as TextBlock;
-            if (leftPageInfo != null)
+            var newText = CurrentPageInfo;
+            foreach (var key in new[] { "board.pageInfo.left", "board.pageInfo.right", "board.pageInfo.center" })
             {
-                leftPageInfo.Text = CurrentPageInfo;
-            }
+                var view = FindView(key);
+                if (view == null) continue;
 
-            var rightPageInfo = FindView("board.pageInfo.right") as TextBlock;
-            if (rightPageInfo != null)
-            {
-                rightPageInfo.Text = CurrentPageInfo;
+                TextBlock tb = view as TextBlock;
+                if (tb == null)
+                {
+                    // 如果不是 TextBlock（比如被覆盖成了 Border），查找内部的 TextBlock
+                    tb = FindTextBlockInVisualTree(view);
+                }
+
+                if (tb != null)
+                {
+                    tb.Text = newText;
+                }
             }
+        }
+
+        private static TextBlock FindTextBlockInVisualTree(DependencyObject parent)
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is TextBlock tb)
+                {
+                    return tb;
+                }
+                var found = FindTextBlockInVisualTree(child);
+                if (found != null)
+                {
+                    return found;
+                }
+            }
+            return null;
         }
 
         private void InitializeBoardToolbar()
@@ -285,6 +310,116 @@ namespace Ink_Canvas
                 -138, -465, -56, 50,
                 "board.pageList.rightBtn"
             );
+
+            AttachPagePreviewTouchHandlers();
+        }
+
+        private void AttachPagePreviewTouchHandlers()
+        {
+            const double TouchTapMovementThreshold = 15.0;
+
+            var leftScrollViewer = FindView("board.pageList.leftScrollViewer") as ScrollViewer;
+            var rightScrollViewer = FindView("board.pageList.rightScrollViewer") as ScrollViewer;
+            var leftPageListView = FindView("board.pageList.left") as System.Windows.Controls.ListView;
+            var rightPageListView = FindView("board.pageList.right") as System.Windows.Controls.ListView;
+
+            if (leftScrollViewer != null && leftPageListView != null)
+            {
+                double leftTouchStartY = 0;
+                double leftTouchStartX = 0;
+                double leftScrollStartOffset = 0;
+                bool leftIsTouching = false;
+                bool leftTouchDidScroll = false;
+
+                leftScrollViewer.TouchDown += (s, e) =>
+                {
+                    leftIsTouching = true;
+                    leftTouchDidScroll = false;
+                    var pt = e.GetTouchPoint(leftScrollViewer).Position;
+                    leftTouchStartX = pt.X;
+                    leftTouchStartY = pt.Y;
+                    leftScrollStartOffset = leftScrollViewer.VerticalOffset;
+                    leftScrollViewer.CaptureTouch(e.TouchDevice);
+                    e.Handled = true;
+                };
+                leftScrollViewer.TouchMove += (s, e) =>
+                {
+                    if (leftIsTouching)
+                    {
+                        var pt = e.GetTouchPoint(leftScrollViewer).Position;
+                        double deltaY = leftTouchStartY - pt.Y;
+                        double deltaX = pt.X - leftTouchStartX;
+                        if (!leftTouchDidScroll && (Math.Abs(deltaY) > TouchTapMovementThreshold || Math.Abs(deltaX) > TouchTapMovementThreshold))
+                            leftTouchDidScroll = true;
+                        if (leftTouchDidScroll)
+                            leftScrollViewer.ScrollToVerticalOffset(leftScrollStartOffset + deltaY);
+                        e.Handled = true;
+                    }
+                };
+                leftScrollViewer.TouchUp += (s, e) =>
+                {
+                    if (leftIsTouching && !leftTouchDidScroll)
+                    {
+                        var pt = e.GetTouchPoint(leftScrollViewer).Position;
+                        double dx = pt.X - leftTouchStartX, dy = pt.Y - leftTouchStartY;
+                        if (dx * dx + dy * dy <= TouchTapMovementThreshold * TouchTapMovementThreshold)
+                            TrySwitchWhiteboardPageByTouchPoint(leftPageListView, leftScrollViewer, pt);
+                    }
+                    leftIsTouching = false;
+                    leftTouchDidScroll = false;
+                    leftScrollViewer.ReleaseTouchCapture(e.TouchDevice);
+                    e.Handled = true;
+                };
+            }
+
+            if (rightScrollViewer != null && rightPageListView != null)
+            {
+                double rightTouchStartY = 0;
+                double rightTouchStartX = 0;
+                double rightScrollStartOffset = 0;
+                bool rightIsTouching = false;
+                bool rightTouchDidScroll = false;
+
+                rightScrollViewer.TouchDown += (s, e) =>
+                {
+                    rightIsTouching = true;
+                    rightTouchDidScroll = false;
+                    var pt = e.GetTouchPoint(rightScrollViewer).Position;
+                    rightTouchStartX = pt.X;
+                    rightTouchStartY = pt.Y;
+                    rightScrollStartOffset = rightScrollViewer.VerticalOffset;
+                    rightScrollViewer.CaptureTouch(e.TouchDevice);
+                    e.Handled = true;
+                };
+                rightScrollViewer.TouchMove += (s, e) =>
+                {
+                    if (rightIsTouching)
+                    {
+                        var pt = e.GetTouchPoint(rightScrollViewer).Position;
+                        double deltaY = rightTouchStartY - pt.Y;
+                        double deltaX = pt.X - rightTouchStartX;
+                        if (!rightTouchDidScroll && (Math.Abs(deltaY) > TouchTapMovementThreshold || Math.Abs(deltaX) > TouchTapMovementThreshold))
+                            rightTouchDidScroll = true;
+                        if (rightTouchDidScroll)
+                            rightScrollViewer.ScrollToVerticalOffset(rightScrollStartOffset + deltaY);
+                        e.Handled = true;
+                    }
+                };
+                rightScrollViewer.TouchUp += (s, e) =>
+                {
+                    if (rightIsTouching && !rightTouchDidScroll)
+                    {
+                        var pt = e.GetTouchPoint(rightScrollViewer).Position;
+                        double dx = pt.X - rightTouchStartX, dy = pt.Y - rightTouchStartY;
+                        if (dx * dx + dy * dy <= TouchTapMovementThreshold * TouchTapMovementThreshold)
+                            TrySwitchWhiteboardPageByTouchPoint(rightPageListView, rightScrollViewer, pt);
+                    }
+                    rightIsTouching = false;
+                    rightTouchDidScroll = false;
+                    rightScrollViewer.ReleaseTouchCapture(e.TouchDevice);
+                    e.Handled = true;
+                };
+            }
         }
 
         private void CreatePageListView(
