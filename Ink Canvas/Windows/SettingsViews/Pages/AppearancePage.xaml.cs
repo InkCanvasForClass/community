@@ -51,6 +51,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _isLoaded = true;
             UpdateAllSliderTexts();
             OnBottomOffsetChanged += HandleBottomOffsetChanged;
+            SliderTouchHelper.AddTouchSupportToAllSliders(this);
         }
 
         private void UpdateAllSliderTexts()

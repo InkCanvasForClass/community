@@ -38,6 +38,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _isLoaded = true;
             RefreshConfigProfileList();
             UpdateAllSliderTexts();
+            SliderTouchHelper.AddTouchSupportToAllSliders(this);
         }
 
         private void UpdateAllSliderTexts()

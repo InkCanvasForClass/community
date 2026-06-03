@@ -23,6 +23,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             LoadSettings();
             _isLoaded = true;
             UpdateAllSliderTexts();
+            SliderTouchHelper.AddTouchSupportToAllSliders(this);
         }
 
         private void Page_Unloaded(object sender, RoutedEventArgs e)

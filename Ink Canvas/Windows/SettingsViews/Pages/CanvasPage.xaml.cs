@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
@@ -45,6 +46,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
 
             _isLoaded = true;
+            SliderTouchHelper.AddTouchSupportToAllSliders(this);
         }
 
         private void LoadBrushAutoRestoreColor(string hex)

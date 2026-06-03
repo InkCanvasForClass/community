@@ -24,6 +24,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             LoadSettings();
             _isLoaded = true;
             UpdateAllSliderTexts();
+            SliderTouchHelper.AddTouchSupportToAllSliders(this);
         }
 
         private void UpdateAllSliderTexts()
