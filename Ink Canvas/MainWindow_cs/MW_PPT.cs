@@ -3000,17 +3000,30 @@ namespace Ink_Canvas
                 SetCurrentToolMode(InkCanvasEditingMode.None);
 
                 await Task.Delay(150);
-                if (!isFloatingBarFolded)
+
+                // 如果工具栏被折叠，先展开它（确保位置能被正确重置）
+                bool shouldReFold = false;
+                if (isFloatingBarFolded)
                 {
-                    PureViewboxFloatingBarMarginAnimationInDesktopMode();
-                    if (Settings.Automation.IsAutoEnterAnnotationModeWhenExitFoldMode)
-                    {
-                        await Task.Delay(350);
-                        if (!isFloatingBarFolded)
-                        {
-                            ViewboxFloatingBarMarginAnimation(-60);
-                        }
-                    }
+                    shouldReFold = true;
+                    UnFoldFloatingBar(new object());
+                    await Task.Delay(100);
+                }
+
+                PureViewboxFloatingBarMarginAnimationInDesktopMode();
+
+                // 如果启用了退出时自动进入批注模式，执行收起动画
+                if (Settings.Automation.IsAutoEnterAnnotationModeWhenExitFoldMode)
+                {
+                    await Task.Delay(350);
+                    ViewboxFloatingBarMarginAnimation(-60);
+                }
+
+                // 如果之前是折叠状态，现在重新折叠回去
+                if (shouldReFold && Settings.Automation.IsAutoFoldAfterPPTSlideShow)
+                {
+                    await Task.Delay(100);
+                    FoldFloatingBar_MouseUp(new object(), null);
                 }
             }
             catch (Exception ex)
@@ -3026,21 +3039,31 @@ namespace Ink_Canvas
                     CheckMainWindowVisibility();
                 });
 
-                // 异常情况下也手动处理自动收纳
-                await HandleManualSlideShowEnd();
-
                 await Task.Delay(150);
-                if (!isFloatingBarFolded)
+
+                // 如果工具栏被折叠，先展开它（确保位置能被正确重置）
+                bool shouldReFold = false;
+                if (isFloatingBarFolded)
                 {
-                    PureViewboxFloatingBarMarginAnimationInDesktopMode();
-                    if (Settings.Automation.IsAutoEnterAnnotationModeWhenExitFoldMode)
-                    {
-                        await Task.Delay(350);
-                        if (!isFloatingBarFolded)
-                        {
-                            ViewboxFloatingBarMarginAnimation(-60);
-                        }
-                    }
+                    shouldReFold = true;
+                    UnFoldFloatingBar(new object());
+                    await Task.Delay(100);
+                }
+
+                PureViewboxFloatingBarMarginAnimationInDesktopMode();
+
+                // 如果启用了退出时自动进入批注模式，执行收起动画
+                if (Settings.Automation.IsAutoEnterAnnotationModeWhenExitFoldMode)
+                {
+                    await Task.Delay(350);
+                    ViewboxFloatingBarMarginAnimation(-60);
+                }
+
+                // 如果之前是折叠状态，现在重新折叠回去
+                if (shouldReFold && Settings.Automation.IsAutoFoldAfterPPTSlideShow)
+                {
+                    await Task.Delay(100);
+                    FoldFloatingBar_MouseUp(new object(), null);
                 }
             }
         }
