@@ -1,40 +1,103 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
+using Ink_Canvas.WorkflowAutomation;
+using Ink_Canvas.WorkflowAutomation.Models;
+using Ink_Canvas.WorkflowAutomation.Services;
 using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
-    public partial class AutomationPage : Page
+    public partial class AutomationWorkflowPage : Page
     {
         private bool _isLoaded = false;
+        private AutomationService Service => AutomationBootstrap.Service;
 
-        public AutomationPage()
+        public AutomationWorkflowPage()
         {
             InitializeComponent();
-            Loaded += AutomationPage_Loaded;
-            Unloaded += AutomationPage_Unloaded;
+            Loaded += AutomationWorkflowPage_Loaded;
+            Unloaded += AutomationWorkflowPage_Unloaded;
         }
 
-        private void AutomationPage_Loaded(object sender, RoutedEventArgs e)
+        private void AutomationWorkflowPage_Loaded(object sender, RoutedEventArgs e)
         {
-            LoadSettings();
+            LoadPresetSettings();
             _isLoaded = true;
             UpdateFileAssociationStatus();
             SliderTouchHelper.AddTouchSupportToAllSliders(this);
+
+            // Initialize workflow system
+            PopulateComboBoxes();
+            RefreshWorkflowList();
+
+            ToggleIsConditionEnabled.Toggled += ToggleIsConditionEnabled_Toggled;
+            ToggleIsRevertEnabled.Toggled += ToggleIsRevertEnabled_Toggled;
+
+            // Default to preset panel
+            NavigationListBox.SelectedIndex = 0;
         }
 
-        private void AutomationPage_Unloaded(object sender, RoutedEventArgs e)
+        private void AutomationWorkflowPage_Unloaded(object sender, RoutedEventArgs e)
         {
             _isLoaded = false;
         }
 
         private MainWindow GetMainWindow() => Application.Current.MainWindow as MainWindow;
 
-        private void LoadSettings()
+        #region Navigation
+
+        private void NavigationListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+
+            if (NavigationListBox.SelectedItem == NavPresetItem)
+            {
+                PresetPanel.Visibility = Visibility.Visible;
+                WorkflowEditorPanel.Visibility = Visibility.Collapsed;
+                BtnDeleteWorkflow.IsEnabled = false;
+                BtnDuplicateWorkflow.IsEnabled = false;
+            }
+            else if (NavigationListBox.SelectedItem is ListBoxItem item && item.Tag is Workflow)
+            {
+                PresetPanel.Visibility = Visibility.Collapsed;
+                WorkflowEditorPanel.Visibility = Visibility.Visible;
+                BtnDeleteWorkflow.IsEnabled = true;
+                BtnDuplicateWorkflow.IsEnabled = true;
+                UpdateEditorBindings((Workflow)item.Tag);
+            }
+        }
+
+        private void RefreshWorkflowList()
+        {
+            // Remove old workflow items (keep NavPresetItem)
+            for (int i = NavigationListBox.Items.Count - 1; i >= 1; i--)
+            {
+                NavigationListBox.Items.RemoveAt(i);
+            }
+
+            // Add workflow items
+            foreach (var workflow in Service.Workflows)
+            {
+                var item = new ListBoxItem
+                {
+                    Content = workflow.ActionSet.Name,
+                    Tag = workflow
+                };
+                NavigationListBox.Items.Add(item);
+            }
+        }
+
+        #endregion
+
+        #region Preset Settings
+
+        private void LoadPresetSettings()
         {
             _isLoaded = false;
             var auto = SettingsManager.Settings.Automation;
@@ -700,33 +763,195 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (isRegistered)
                 {
                     TextBlockFileAssociationStatus.Text = AutomationStrings.FileAssoc_Registered;
-                    TextBlockFileAssociationStatus.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.LightGreen);
+                    TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightGreen);
                 }
                 else
                 {
                     TextBlockFileAssociationStatus.Text = AutomationStrings.FileAssoc_NotRegistered;
-                    TextBlockFileAssociationStatus.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.LightCoral);
+                    TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightCoral);
                 }
             }
             catch (Exception ex)
             {
                 TextBlockFileAssociationStatus.Text = AutomationStrings.FileAssoc_CheckError;
-                TextBlockFileAssociationStatus.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.LightCoral);
+                TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightCoral);
                 LogHelper.WriteLogToFile($"检查文件关联状态失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
         #endregion
 
-        #region Custom Automation
+        #endregion
 
-        private void CardCustomAutomation_Click(object sender, RoutedEventArgs e)
+        #region Workflow Editor
+
+        private void PopulateComboBoxes()
         {
-            // 导航到自定义自动化页面
-            var settingsWindow = Window.GetWindow(this) as Windows.SettingsViews.SettingsWindow;
-            if (settingsWindow != null)
+            ComboBoxTriggerType.ItemsSource = AutomationRegistry.RegisteredTriggers;
+            ComboBoxTriggerType.DisplayMemberPath = "Name";
+            ComboBoxTriggerType.SelectedValuePath = "Id";
+
+            ComboBoxActionType.ItemsSource = AutomationRegistry.RegisteredActions.Values.ToList();
+            ComboBoxActionType.DisplayMemberPath = "Name";
+            ComboBoxActionType.SelectedValuePath = "Id";
+
+            ComboBoxRuleType.ItemsSource = AutomationRegistry.RegisteredRules.Values.ToList();
+            ComboBoxRuleType.DisplayMemberPath = "Name";
+            ComboBoxRuleType.SelectedValuePath = "Id";
+        }
+
+        private void BtnAddWorkflow_Click(object sender, RoutedEventArgs e)
+        {
+            var workflow = new Workflow();
+            workflow.ActionSet.Name = $"自定义自动化 {Service.Workflows.Count + 1}";
+            Service.Workflows.Add(workflow);
+            Service.SaveConfig("AddWorkflow");
+            RefreshWorkflowList();
+            // Select the new workflow
+            NavigationListBox.SelectedIndex = NavigationListBox.Items.Count - 1;
+        }
+
+        private void BtnDeleteWorkflow_Click(object sender, RoutedEventArgs e)
+        {
+            if (NavigationListBox.SelectedItem is not ListBoxItem item || item.Tag is not Workflow workflow) return;
+            Service.Workflows.Remove(workflow);
+            Service.SaveConfig("DeleteWorkflow");
+            RefreshWorkflowList();
+            NavigationListBox.SelectedIndex = 0; // Go back to preset
+        }
+
+        private void BtnDuplicateWorkflow_Click(object sender, RoutedEventArgs e)
+        {
+            if (NavigationListBox.SelectedItem is not ListBoxItem item || item.Tag is not Workflow source) return;
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(source);
+            var copy = Newtonsoft.Json.JsonConvert.DeserializeObject<Workflow>(json);
+            if (copy != null)
             {
-                settingsWindow.NavigateToPage("AutomationWorkflowPage");
+                copy.ActionSet.Name += " (副本)";
+                Service.Workflows.Add(copy);
+                Service.SaveConfig("DuplicateWorkflow");
+                RefreshWorkflowList();
+                NavigationListBox.SelectedIndex = NavigationListBox.Items.Count - 1;
+            }
+        }
+
+        private void UpdateEditorBindings(Workflow workflow)
+        {
+            TextBoxWorkflowName.Text = workflow.ActionSet.Name;
+            TextBoxWorkflowName.TextChanged -= TextBoxWorkflowName_TextChanged;
+            TextBoxWorkflowName.TextChanged += TextBoxWorkflowName_TextChanged;
+
+            ToggleIsEnabled.IsOn = workflow.ActionSet.IsEnabled;
+            ToggleIsRevertEnabled.IsOn = workflow.ActionSet.IsRevertEnabled;
+            ToggleIsConditionEnabled.IsOn = workflow.IsConditionEnabled;
+
+            TriggersItemsControl.ItemsSource = workflow.Triggers;
+            ActionsItemsControl.ItemsSource = workflow.ActionSet.Actions;
+
+            if (workflow.Ruleset.Groups.Count > 0)
+                RulesItemsControl.ItemsSource = workflow.Ruleset.Groups[0].Rules;
+
+            UpdateConditionVisibility(workflow.IsConditionEnabled);
+            UpdateRevertHintVisibility(workflow.ActionSet.IsRevertEnabled);
+        }
+
+        private void TextBoxWorkflowName_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (NavigationListBox.SelectedItem is ListBoxItem item && item.Tag is Workflow workflow)
+            {
+                workflow.ActionSet.Name = TextBoxWorkflowName.Text;
+                Service.SaveConfig("NameChanged");
+                item.Content = workflow.ActionSet.Name;
+            }
+        }
+
+        private void ToggleIsConditionEnabled_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (NavigationListBox.SelectedItem is ListBoxItem item && item.Tag is Workflow workflow)
+            {
+                workflow.IsConditionEnabled = ToggleIsConditionEnabled.IsOn;
+                UpdateConditionVisibility(workflow.IsConditionEnabled);
+                Service.SaveConfig("ConditionEnabledChanged");
+            }
+        }
+
+        private void ToggleIsRevertEnabled_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (NavigationListBox.SelectedItem is ListBoxItem item && item.Tag is Workflow workflow)
+            {
+                workflow.ActionSet.IsRevertEnabled = ToggleIsRevertEnabled.IsOn;
+                UpdateRevertHintVisibility(workflow.ActionSet.IsRevertEnabled);
+                Service.SaveConfig("RevertEnabledChanged");
+            }
+        }
+
+        private void UpdateConditionVisibility(bool enabled)
+        {
+            ConditionDisabledHint.Visibility = enabled ? Visibility.Collapsed : Visibility.Visible;
+            ConditionEditorPanel.Visibility = enabled ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void UpdateRevertHintVisibility(bool enabled)
+        {
+            RevertHintPanel.Visibility = enabled ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void BtnAddTrigger_Click(object sender, RoutedEventArgs e)
+        {
+            if (NavigationListBox.SelectedItem is not ListBoxItem item || item.Tag is not Workflow workflow) return;
+            var triggerId = ComboBoxTriggerType.SelectedValue as string;
+            if (string.IsNullOrEmpty(triggerId)) return;
+            var triggerSettings = new TriggerSettings { Id = triggerId };
+            workflow.Triggers.Add(triggerSettings);
+            Service.SaveConfig("AddTrigger");
+        }
+
+        private void BtnRemoveTrigger_Click(object sender, RoutedEventArgs e)
+        {
+            if (NavigationListBox.SelectedItem is not ListBoxItem item || item.Tag is not Workflow workflow) return;
+            if (sender is not Button btn || btn.Tag is not TriggerSettings trigger) return;
+            workflow.Triggers.Remove(trigger);
+            Service.SaveConfig("RemoveTrigger");
+        }
+
+        private void BtnAddAction_Click(object sender, RoutedEventArgs e)
+        {
+            if (NavigationListBox.SelectedItem is not ListBoxItem item || item.Tag is not Workflow workflow) return;
+            var actionId = ComboBoxActionType.SelectedValue as string;
+            if (string.IsNullOrEmpty(actionId)) return;
+            var action = new Ink_Canvas.WorkflowAutomation.Models.Action { Id = actionId };
+            workflow.ActionSet.Actions.Add(action);
+            Service.SaveConfig("AddAction");
+        }
+
+        private void BtnRemoveAction_Click(object sender, RoutedEventArgs e)
+        {
+            if (NavigationListBox.SelectedItem is not ListBoxItem item || item.Tag is not Workflow workflow) return;
+            if (sender is not Button btn || btn.Tag is not Ink_Canvas.WorkflowAutomation.Models.Action action) return;
+            workflow.ActionSet.Actions.Remove(action);
+            Service.SaveConfig("RemoveAction");
+        }
+
+        private void BtnAddRule_Click(object sender, RoutedEventArgs e)
+        {
+            if (NavigationListBox.SelectedItem is not ListBoxItem item || item.Tag is not Workflow workflow) return;
+            var ruleId = ComboBoxRuleType.SelectedValue as string;
+            if (string.IsNullOrEmpty(ruleId)) return;
+            if (workflow.Ruleset.Groups.Count == 0)
+                workflow.Ruleset.Groups.Add(new RuleGroup());
+            var rule = new Rule { Id = ruleId };
+            workflow.Ruleset.Groups[0].Rules.Add(rule);
+            Service.SaveConfig("AddRule");
+        }
+
+        private void BtnRemoveRule_Click(object sender, RoutedEventArgs e)
+        {
+            if (NavigationListBox.SelectedItem is not ListBoxItem item || item.Tag is not Workflow workflow) return;
+            if (sender is not Button btn || btn.Tag is not Rule rule) return;
+            if (workflow.Ruleset.Groups.Count > 0)
+            {
+                workflow.Ruleset.Groups[0].Rules.Remove(rule);
+                Service.SaveConfig("RemoveRule");
             }
         }
 

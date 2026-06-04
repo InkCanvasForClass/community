@@ -131,6 +131,7 @@
     <PackageReference Include="System.Private.Uri" Version="4.3.2" />
     <PackageReference Include="WebDav.Client" Version="2.9.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\InkCanvas.PluginSdk\InkCanvas.PluginSdk.csproj" />
