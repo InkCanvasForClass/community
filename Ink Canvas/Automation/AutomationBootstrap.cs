@@ -52,6 +52,55 @@ namespace Ink_Canvas.WorkflowAutomation
                 },
                 () => new TimerTrigger());
 
+            // 新增触发器
+            AutomationRegistry.RegisterTrigger(
+                new TriggerInfo("inkcanvas.windowfocuschanged", "前台窗口变化", "Window")
+                {
+                    TriggerType = typeof(WindowFocusChangedTrigger),
+                    SettingsType = typeof(WindowFocusChangedSettings)
+                },
+                () => new WindowFocusChangedTrigger());
+
+            AutomationRegistry.RegisterTrigger(
+                new TriggerInfo("inkcanvas.pptslideshowenter", "进入PPT放映", "Presentation")
+                {
+                    TriggerType = typeof(PptSlideShowEnterTrigger),
+                    SettingsType = typeof(PptSlideShowEnterSettings)
+                },
+                () => new PptSlideShowEnterTrigger());
+
+            AutomationRegistry.RegisterTrigger(
+                new TriggerInfo("inkcanvas.pptslideshowexit", "退出PPT放映", "Presentation")
+                {
+                    TriggerType = typeof(PptSlideShowExitTrigger),
+                    SettingsType = typeof(PptSlideShowExitSettings)
+                },
+                () => new PptSlideShowExitTrigger());
+
+            AutomationRegistry.RegisterTrigger(
+                new TriggerInfo("inkcanvas.annotationenter", "进入批注模式", "PenTool")
+                {
+                    TriggerType = typeof(AnnotationModeEnterTrigger),
+                    SettingsType = typeof(AnnotationModeEnterSettings)
+                },
+                () => new AnnotationModeEnterTrigger());
+
+            AutomationRegistry.RegisterTrigger(
+                new TriggerInfo("inkcanvas.annotationexit", "退出批注模式", "PenTool")
+                {
+                    TriggerType = typeof(AnnotationModeExitTrigger),
+                    SettingsType = typeof(AnnotationModeExitSettings)
+                },
+                () => new AnnotationModeExitTrigger());
+
+            AutomationRegistry.RegisterTrigger(
+                new TriggerInfo("inkcanvas.rulesetchanged", "规则集更新", "Refresh")
+                {
+                    TriggerType = typeof(RulesetChangedTrigger),
+                    SettingsType = typeof(RulesetChangedSettings)
+                },
+                () => new RulesetChangedTrigger());
+
             // 注册行动
             AutomationRegistry.RegisterAction(FoldAction.Register());
             AutomationRegistry.RegisterAction(KillProcessAction.Register());
@@ -59,6 +108,8 @@ namespace Ink_Canvas.WorkflowAutomation
 
             // 注册规则
             AutomationRegistry.RegisterRule(ProcessRunningRule.Register());
+            AutomationRegistry.RegisterRule(WindowTitleContainsRule.Register());
+            AutomationRegistry.RegisterRule(IsAnnotationModeRule.Register());
 
             // 加载配置
             Service.RefreshConfigs();

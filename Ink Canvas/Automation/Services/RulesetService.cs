@@ -12,6 +12,11 @@ namespace Ink_Canvas.WorkflowAutomation.Services
     public class RulesetService
     {
         /// <summary>
+        /// 规则状态更新事件，当规则条件可能发生变化时触发。
+        /// </summary>
+        public event EventHandler? StatusUpdated;
+
+        /// <summary>
         /// 判断指定的规则集是否成立。
         /// </summary>
         public bool IsRulesetSatisfied(Ruleset ruleset)
@@ -69,6 +74,14 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             {
                 return false;
             }
+        }
+
+        /// <summary>
+        /// 手动通知规则状态已更新，触发所有订阅者重新评估规则。
+        /// </summary>
+        public void NotifyStatusChanged()
+        {
+            StatusUpdated?.Invoke(this, EventArgs.Empty);
         }
     }
 }

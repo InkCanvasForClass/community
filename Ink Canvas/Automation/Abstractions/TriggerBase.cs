@@ -54,6 +54,6 @@ namespace Ink_Canvas.WorkflowAutomation.Abstractions
         /// <summary>
         /// 当前触发器的设置
         /// </summary>
-        protected T Settings => (SettingsInternal as T)!;
+        protected T Settings => (SettingsInternal as T) ?? Activator.CreateInstance<T>();
     }
 }

@@ -191,6 +191,13 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             }
         }
 
+        private RulesetService? _rulesetService;
+        
+        public RulesetService GetRulesetService()
+        {
+            return _rulesetService ??= new RulesetService();
+        }
+
         private void LoadTrigger(Workflow workflow, TriggerSettings trigger)
         {
             if (trigger.TriggerInstance != null) return;
@@ -198,26 +205,31 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             var triggerInstance = AutomationRegistry.ResolveTrigger(trigger.Id);
             if (triggerInstance == null) return;
 
-            // 处理设置反序列化
+            // 处理设置反序列化（对齐 ClassIsland ActivateTrigger 逻辑）
             var settings = trigger.Settings;
             var triggerInfo = trigger.AssociatedTriggerInfo;
-            if (triggerInfo?.SettingsType != null && settings != null)
+            if (triggerInfo?.SettingsType != null)
             {
+                // settings 为 null 时创建默认实例
+                var settingsReal = settings ?? Activator.CreateInstance(triggerInfo.SettingsType);
                 try
                 {
-                    if (settings is JToken jToken)
+                    if (settingsReal is JToken jToken)
                     {
-                        settings = jToken.ToObject(triggerInfo.SettingsType);
-                    }
-                    else if (settings.GetType() != triggerInfo.SettingsType)
-                    {
-                        settings = Activator.CreateInstance(triggerInfo.SettingsType);
+                        settingsReal = jToken.ToObject(triggerInfo.SettingsType);
                     }
                 }
                 catch
                 {
-                    settings = Activator.CreateInstance(triggerInfo.SettingsType);
+                    settingsReal = Activator.CreateInstance(triggerInfo.SettingsType);
                 }
+
+                if (settingsReal?.GetType() != triggerInfo.SettingsType)
+                {
+                    settingsReal = Activator.CreateInstance(triggerInfo.SettingsType);
+                }
+
+                settings = settingsReal;
                 trigger.Settings = settings;
             }
 
