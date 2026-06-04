@@ -687,7 +687,7 @@ namespace Ink_Canvas
         {
             try
             {
-                if (Dispatcher.CheckAccess())
+                if (Dispatcher == null || Dispatcher.CheckAccess())
                 {
                     DisposePPTManagers(isShutdown: true);
                     return;
@@ -697,11 +697,13 @@ namespace Ink_Canvas
 
                 Dispatcher.Invoke(() => DisposePPTManagers(isShutdown: true), DispatcherPriority.Send);
             }
-            catch (TaskCanceledException)
+            catch (TaskCanceledException ex)
             {
+                LogHelper.WriteLogToFile($"关机时卸载PPT模块被取消: {ex.Message}", LogHelper.LogType.Warning);
             }
-            catch (ObjectDisposedException)
+            catch (ObjectDisposedException ex)
             {
+                LogHelper.WriteLogToFile($"关机时卸载PPT模块对象已释放: {ex.Message}", LogHelper.LogType.Warning);
             }
             catch (Exception ex)
             {
