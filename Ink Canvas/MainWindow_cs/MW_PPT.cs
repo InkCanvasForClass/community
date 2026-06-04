@@ -382,11 +382,8 @@ namespace Ink_Canvas
                 // 停止应用程序监控定时器
                 _powerPointProcessMonitorTimer?.Stop();
 
-                // 关闭PowerPoint应用程序（仅在非关机时）
-                if (!isShutdown)
-                {
-                    ClosePowerPointApplication();
-                }
+                // 关闭PowerPoint应用程序（包括关机时）
+                ClosePowerPointApplication(isShutdown);
 
                 LogHelper.WriteLogToFile("PowerPoint应用程序守护已停止", LogHelper.LogType.Event);
             }
@@ -545,9 +542,9 @@ namespace Ink_Canvas
             {
                 if (pptApplication != null)
                 {
-                    if (!isShutdown)
+                    // 关闭所有打开的演示文稿
+                    try
                     {
-                        // 关闭所有打开的演示文稿
                         if (pptApplication.Presentations.Count > 0)
                         {
                             for (int i = pptApplication.Presentations.Count; i >= 1; i--)
@@ -559,13 +556,39 @@ namespace Ink_Canvas
                                 catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                             }
                         }
-
-                        // 退出PowerPoint应用程序
-                        pptApplication.Quit();
-
-                        // 释放COM对象
-                        Marshal.ReleaseComObject(pptApplication);
                     }
+                    catch (COMException comEx)
+                    {
+                        // 关机时 COM 对象可能已失效，记录但继续清理
+                        LogHelper.WriteLogToFile($"关闭演示文稿时 COM 异常 (HResult: 0x{comEx.HResult:X}): {comEx.Message}",
+                            isShutdown ? LogHelper.LogType.Warning : LogHelper.LogType.Error);
+                    }
+
+                    // 退出PowerPoint应用程序
+                    try
+                    {
+                        pptApplication.Quit();
+                    }
+                    catch (COMException comEx)
+                    {
+                        // 关机时 COM 对象可能已失效，记录但继续清理
+                        LogHelper.WriteLogToFile($"退出 PowerPoint 时 COM 异常 (HResult: 0x{comEx.HResult:X}): {comEx.Message}",
+                            isShutdown ? LogHelper.LogType.Warning : LogHelper.LogType.Error);
+                    }
+
+                    // 释放COM对象
+                    try
+                    {
+                        if (Marshal.IsComObject(pptApplication))
+                        {
+                            Marshal.ReleaseComObject(pptApplication);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"释放 PowerPoint COM 对象异常: {ex.Message}", LogHelper.LogType.Warning);
+                    }
+
                     pptApplication = null;
                 }
 
@@ -687,13 +710,30 @@ namespace Ink_Canvas
         {
             try
             {
+                try
+                {
+                    _longPressTimer?.Stop();
+                    _powerPointProcessMonitorTimer?.Stop();
+                    StopPptOnlyVisibilityProbeTimer();
+                    LogHelper.WriteLogToFile("关机时已停止所有 PPT 相关定时器", LogHelper.LogType.Event);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"关机时停止定时器失败: {ex}", LogHelper.LogType.Warning);
+                }
+
+                // 再处理需要 dispatcher 或 COM 的清理操作
                 if (Dispatcher == null || Dispatcher.CheckAccess())
                 {
                     DisposePPTManagers(isShutdown: true);
                     return;
                 }
 
-                if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
+                if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
+                {
+                    LogHelper.WriteLogToFile("关机时 Dispatcher 已关闭，跳过需要 UI 线程的清理操作", LogHelper.LogType.Warning);
+                    return;
+                }
 
                 Dispatcher.Invoke(() => DisposePPTManagers(isShutdown: true), DispatcherPriority.Send);
             }
