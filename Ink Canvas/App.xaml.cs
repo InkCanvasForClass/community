@@ -78,7 +78,7 @@ namespace Ink_Canvas
         internal static DateTime appStartTime { get; private set; }
         // 新增：最后一次错误信息
         private static string lastErrorMessage = string.Empty;
-        private bool powerPointShutdownCleanupCompleted;
+        private volatile bool powerPointShutdownCleanupCompleted;
         // 新增：是否已初始化崩溃监听器
         private static bool crashListenersInitialized;
         private static readonly object cpuUsageLock = new object();
@@ -136,6 +136,7 @@ namespace Ink_Canvas
             SyncCrashActionFromSettings();
 
             Startup += App_Startup;
+            SessionEnding += App_SessionEnding;
             DispatcherUnhandledException += App_DispatcherUnhandledException;
             StartHeartbeatMonitor();
 
@@ -411,10 +412,17 @@ namespace Ink_Canvas
             string reason = e.Reason == SessionEndReasons.Logoff ? "用户注销" : "系统关机";
             WriteCrashLog($"系统会话即将结束: {reason}");
 
-            // 清理PowerPoint进程守护
-            CleanupPowerPointModuleForShutdown();
+            if (!powerPointShutdownCleanupCompleted)
+            {
+                WriteCrashLog("PowerPoint模块等待WPF会话结束事件清理");
+            }
 
             DeviceIdentifier.SaveUsageStatsOnShutdown();
+        }
+
+        private void App_SessionEnding(object sender, System.Windows.SessionEndingCancelEventArgs e)
+        {
+            CleanupPowerPointModuleForShutdown();
         }
 
         private void CleanupPowerPointModuleForShutdown()
@@ -423,37 +431,12 @@ namespace Ink_Canvas
 
             try
             {
-                if (Current?.MainWindow is not MainWindow mainWindow)
-                {
-                    return;
-                }
-
-                var dispatcher = mainWindow.Dispatcher;
-                if (dispatcher == null || dispatcher.HasShutdownStarted || dispatcher.HasShutdownFinished)
-                {
-                    WriteCrashLog("PowerPoint模块关机清理已跳过：UI线程已关闭");
-                    return;
-                }
-
-                if (dispatcher.CheckAccess())
+                if (Current?.MainWindow is MainWindow mainWindow)
                 {
                     mainWindow.UnloadPPTModuleForShutdown();
+                    powerPointShutdownCleanupCompleted = true;
+                    WriteCrashLog("PowerPoint模块已在系统关机时清理");
                 }
-                else
-                {
-                    dispatcher.Invoke((Action)mainWindow.UnloadPPTModuleForShutdown, DispatcherPriority.Send);
-                }
-
-                powerPointShutdownCleanupCompleted = true;
-                WriteCrashLog("PowerPoint模块已在系统关机时清理");
-            }
-            catch (TaskCanceledException ex)
-            {
-                WriteCrashLog($"PowerPoint模块关机清理被取消: {ex.Message}");
-            }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("Dispatcher processing has been suspended") || ex.Message.Contains("Cannot perform this operation while dispatcher processing is suspended"))
-            {
-                WriteCrashLog($"PowerPoint模块关机清理失败: {ex.Message}");
             }
             catch (Exception ex)
             {
