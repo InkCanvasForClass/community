@@ -413,15 +413,17 @@ namespace Ink_Canvas
             // 清理PowerPoint进程守护
             try
             {
-                // 获取主窗口实例
-                var mainWindow = Current.MainWindow as MainWindow;
-                if (mainWindow != null)
+                var dispatcher = Current?.Dispatcher;
+                if (dispatcher != null && !dispatcher.HasShutdownStarted && !dispatcher.HasShutdownFinished)
                 {
-                    // 清理PowerPoint进程守护
-                    var method = mainWindow.GetType().GetMethod("StopPowerPointProcessMonitoring",
-                        BindingFlags.NonPublic | BindingFlags.Instance);
-                    method?.Invoke(mainWindow, null);
-                    WriteCrashLog("PowerPoint进程守护已在系统关机时清理");
+                    dispatcher.Invoke(() =>
+                    {
+                        if (Current.MainWindow is MainWindow mainWindow)
+                        {
+                            mainWindow.StopPowerPointProcessMonitoring(isShutdown: true);
+                            WriteCrashLog("PowerPoint进程守护已在系统关机时清理");
+                        }
+                    }, DispatcherPriority.Send);
                 }
             }
             catch (Exception ex)
