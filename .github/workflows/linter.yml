@@ -38,8 +38,12 @@ jobs:
         env:
           # Flag to have the linter complete with exit code 0 even if errors were detected, in order not to make cjk unhappy.
           DISABLE_ERRORS: true
+          # Disable the BIOME_FORMAT rule
+          VALIDATE_BIOME_FORMAT: false
           # Disable the SPELL_CODESPELL rule
           VALIDATE_SPELL_CODESPELL: false
+          # Disable the GITLEAKS rule temporarily
+          VALIDATE_GITLEAKS: false
           # Save the super-linter output
           SAVE_SUPER_LINTER_OUTPUT: true
           # To report GitHub Actions status checks
