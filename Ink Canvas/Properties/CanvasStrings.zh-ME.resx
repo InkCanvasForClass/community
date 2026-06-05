@@ -159,6 +159,12 @@
   <data name="Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint" xml:space="preserve">
     <value>开启后，点白板工具栏「展台」会打开希沃视频展台（需已安装）；关掉则用内置展台。</value>
   </data>
+  <data name="Canvas_MergeInkSmoothingWithUndo" xml:space="preserve">
+    <value>把墨迹平滑和撤销合并（少点一下）</value>
+  </data>
+  <data name="Canvas_MergeInkSmoothingWithUndoHint" xml:space="preserve">
+    <value>开启后，一笔字的原始墨迹和后续平滑替换会算作一次撤销，不用点两次；墨迹纠正不参与这波合并。</value>
+  </data>
   <data name="Canvas_No" xml:space="preserve">
     <value>不</value>
   </data>

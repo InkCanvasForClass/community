@@ -159,6 +159,12 @@
   <data name="Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint" xml:space="preserve">
     <value>When enabled, the whiteboard toolbar Booth button launches Seewo Video Showcase (must be installed). When disabled, the built-in booth is used.</value>
   </data>
+  <data name="Canvas_MergeInkSmoothingWithUndo" xml:space="preserve">
+    <value>Merge ink smoothing into undo</value>
+  </data>
+  <data name="Canvas_MergeInkSmoothingWithUndoHint" xml:space="preserve">
+    <value>When enabled, the smoothing replacement for a stroke is merged into the same undo step as the original stroke. Ink correction is not merged.</value>
+  </data>
   <data name="Canvas_No" xml:space="preserve">
     <value>No</value>
   </data>

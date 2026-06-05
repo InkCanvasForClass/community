@@ -172,6 +172,8 @@ namespace Ink_Canvas
         public bool FitToCurve { get; set; } // 默认关闭原来的贝塞尔平滑
         [JsonProperty("useAdvancedBezierSmoothing")]
         public bool UseAdvancedBezierSmoothing { get; set; } = true; // 默认启用高级贝塞尔曲线平滑
+        [JsonProperty("mergeInkSmoothingWithUndo")]
+        public bool MergeInkSmoothingWithUndo { get; set; } = false;
         [JsonProperty("useAsyncInkSmoothing")]
         public bool UseAsyncInkSmoothing { get; set; } = true; // 默认启用异步墨迹平滑
         [JsonProperty("useHardwareAcceleration")]

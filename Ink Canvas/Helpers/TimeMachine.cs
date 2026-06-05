@@ -33,6 +33,24 @@ namespace Ink_Canvas.Helpers
             NotifyUndoRedoState();
         }
 
+        public bool TryReplaceLastUserInputHistory(StrokeCollection stroke)
+        {
+            if (stroke == null || _currentIndex < 0 || _currentIndex >= _currentStrokeHistory.Count)
+            {
+                return false;
+            }
+
+            var item = _currentStrokeHistory[_currentIndex];
+            if (item.CommitType != TimeMachineHistoryType.UserInput || item.StrokeHasBeenCleared)
+            {
+                return false;
+            }
+
+            item.CurrentStroke = stroke;
+            NotifyUndoRedoState();
+            return true;
+        }
+
         public void CommitStrokeShapeHistory(StrokeCollection strokeToBeReplaced, StrokeCollection generatedStroke)
         {
             if (_currentIndex + 1 < _currentStrokeHistory.Count)

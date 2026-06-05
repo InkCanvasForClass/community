@@ -121,6 +121,13 @@
                     </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard
+                            Header="{x:Static props:CanvasStrings.Canvas_MergeInkSmoothingWithUndo}"
+                            Description="{x:Static props:CanvasStrings.Canvas_MergeInkSmoothingWithUndoHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Undo}"
+                            SwitchName="ToggleSwitchMergeInkSmoothingWithUndo"
+                            helpers:SettingsBinder.PropertyPath="Canvas.MergeInkSmoothingWithUndo" />
+
+                    <controls:LabeledSettingsCard
                             Header="{x:Static props:CanvasStrings.Canvas_ShowCircleCenter}"
                             Icon="{x:Static ui:SegoeFluentIcons.CircleRing}"
                             SwitchName="ToggleSwitchShowCircleCenter"
