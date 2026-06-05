@@ -1,3 +1,4 @@
+using iNKORE.UI.WPF.Controls;
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -6,8 +7,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using iNKORE.UI.WPF.Modern.Controls;
-using iNKORE.UI.WPF.Controls;
 
 namespace Ink_Canvas.Controls
 {

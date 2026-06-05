@@ -1,5 +1,4 @@
 using System.Windows.Input;
-using Ink_Canvas.Properties;
 
 namespace Ink_Canvas.Controls.Toolbar.BoardToolbar.Items
 {

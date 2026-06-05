@@ -1,4 +1,3 @@
-using System;
 using Ink_Canvas.WorkflowAutomation.Models;
 
 namespace Ink_Canvas.WorkflowAutomation.Rules

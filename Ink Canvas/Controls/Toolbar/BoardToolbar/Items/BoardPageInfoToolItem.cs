@@ -1,4 +1,3 @@
-using Ink_Canvas.Controls;
 using Ink_Canvas.Properties;
 using System.Windows;
 using System.Windows.Controls;

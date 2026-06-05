@@ -1,8 +1,8 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using FontIcon = iNKORE.UI.WPF.Modern.Controls.FontIcon;
 using FluentSystemIcons = iNKORE.UI.WPF.Modern.Common.IconKeys.FluentSystemIcons;
+using FontIcon = iNKORE.UI.WPF.Modern.Controls.FontIcon;
 
 namespace Ink_Canvas.Controls.Toolbar.BoardToolbar.Items
 {

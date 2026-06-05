@@ -1,6 +1,4 @@
-using Ink_Canvas.Controls;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
 {

@@ -1,5 +1,3 @@
-using System;
-using System.Windows;
 using Ink_Canvas.WorkflowAutomation.Models;
 
 namespace Ink_Canvas.WorkflowAutomation.Actions

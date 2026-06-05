@@ -1,9 +1,6 @@
-using Ink_Canvas.Properties;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
-using Ink_Canvas.Resources;
 using System;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;

@@ -1,7 +1,5 @@
-using System;
-using System.Diagnostics;
-using System.Timers;
 using Ink_Canvas.WorkflowAutomation.Abstractions;
+using System.Timers;
 
 namespace Ink_Canvas.WorkflowAutomation.Triggers
 {

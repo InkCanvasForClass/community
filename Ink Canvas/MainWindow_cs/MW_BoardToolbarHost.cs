@@ -8,10 +8,8 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
-using iNKORE.UI.WPF.Modern.Controls;
 using SegoeFluentIcons = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons;
 
 namespace Ink_Canvas

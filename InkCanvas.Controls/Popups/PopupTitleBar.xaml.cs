@@ -1,4 +1,3 @@
-using iNKORE.UI.WPF.Modern.Controls;
 using System.Windows;
 using System.Windows.Controls;
 

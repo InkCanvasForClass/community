@@ -1,5 +1,5 @@
-using System;
 using Ink_Canvas.WorkflowAutomation.Models;
+using System;
 
 namespace Ink_Canvas.WorkflowAutomation.Abstractions
 {

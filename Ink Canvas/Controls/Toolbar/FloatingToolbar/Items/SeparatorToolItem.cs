@@ -1,7 +1,7 @@
+using Ink_Canvas.Properties;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Ink_Canvas.Properties;
 
 namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
 {

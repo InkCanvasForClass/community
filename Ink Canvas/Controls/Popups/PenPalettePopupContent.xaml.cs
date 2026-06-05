@@ -1,9 +1,8 @@
+using Ink_Canvas.Properties;
+using iNKORE.UI.WPF.Modern.Controls;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using iNKORE.UI.WPF.Modern.Controls;
-using Ink_Canvas.Properties;
 
 namespace Ink_Canvas.Controls
 {

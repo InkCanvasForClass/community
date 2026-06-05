@@ -1,7 +1,7 @@
 using Ink_Canvas.Properties;
+using Ink_Canvas.Windows.SettingsViews.Helpers;
 using iNKORE.UI.WPF.Controls;
 using iNKORE.UI.WPF.Modern.Controls;
-using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Linq;
 using System.Security.Cryptography;

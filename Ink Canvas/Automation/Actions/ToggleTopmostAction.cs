@@ -1,6 +1,5 @@
-using System;
-using System.Windows;
 using Ink_Canvas.WorkflowAutomation.Models;
+using System.Windows;
 
 namespace Ink_Canvas.WorkflowAutomation.Actions
 {

@@ -1,10 +1,10 @@
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 
 namespace Ink_Canvas.Controls
 {
