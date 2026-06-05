@@ -13,7 +13,7 @@ namespace Ink_Canvas.WorkflowAutomation.Models
     {
         private RulesetLogicalMode _mode = RulesetLogicalMode.Or;
         private bool _isReversed = false;
-        private ObservableCollection<RuleGroup> _groups = new() { new RuleGroup { Rules = new() { new Rule() } } };
+        private ObservableCollection<RuleGroup> _groups = new();
         private int _state = 0;
 
         /// <summary>

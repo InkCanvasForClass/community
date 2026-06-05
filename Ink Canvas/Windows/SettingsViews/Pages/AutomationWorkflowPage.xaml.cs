@@ -490,6 +490,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             var workflow = new Workflow();
             workflow.ActionSet.Name = $"自定义自动化 {Service.Workflows.Count + 1}";
+            // 初始化一个默认规则组
+            workflow.Ruleset.Groups.Add(new RuleGroup
+            {
+                Rules = new ObservableCollection<Rule> { new Rule() }
+            });
             Service.Workflows.Add(workflow);
             Service.SaveConfig("AddWorkflow");
             RefreshWorkflowList();
@@ -671,7 +676,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void BtnAddRuleGroup_Click(object sender, RoutedEventArgs e)
         {
             if (SelectedWorkflow is not Workflow workflow) return;
-            workflow.Ruleset.Groups.Add(new RuleGroup());
+            workflow.Ruleset.Groups.Add(new RuleGroup
+            {
+                Rules = new ObservableCollection<Rule> { new Rule() }
+            });
             Service.SaveConfig("AddRuleGroup");
         }
 

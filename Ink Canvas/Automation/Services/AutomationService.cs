@@ -161,6 +161,15 @@ namespace Ink_Canvas.WorkflowAutomation.Services
 
         private void LoadWorkflow(Workflow workflow)
         {
+            // 如果规则组为空，初始化一个默认的
+            if (workflow.Ruleset.Groups.Count == 0)
+            {
+                workflow.Ruleset.Groups.Add(new RuleGroup
+                {
+                    Rules = new ObservableCollection<Rule> { new Rule() }
+                });
+            }
+            
             workflow.Triggers.CollectionChanged += (s, e) =>
             {
                 switch (e.Action)
