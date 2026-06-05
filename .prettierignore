@@ -1,0 +1,11 @@
+# Lock File
+
+Ink Canvas/packages.lock.json
+
+# Key mapping
+
+Ink Canvas/Properties/key_mapping.json
+
+# For Code Uses
+
+rules/**
