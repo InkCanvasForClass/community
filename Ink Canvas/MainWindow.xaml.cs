@@ -2027,8 +2027,8 @@ namespace Ink_Canvas
 
             UninstallKeyboardHook();
 
-            // 从Z-Order管理器中移除主窗口
-            WindowZOrderManager.UnregisterWindow(this);
+            // 清理统一窗口置顶管理器
+            WindowTopmostManager.Shutdown();
 
             LogHelper.WriteLogToFile("Ink Canvas closed", LogHelper.LogType.Event);
 

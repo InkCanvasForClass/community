@@ -115,10 +115,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
 
         #region Topmost Maintenance Timer
 
-        private static DispatcherTimer _topmostMaintenanceTimer;
-        private static bool _isTopmostMaintenanceEnabled;
-        private static Window _maintainedWindow;
-
         #endregion
 
         #region PPT Only Mode
@@ -244,34 +240,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         {
             try
             {
-                var hwnd = new WindowInteropHelper(window).Handle;
-                if (SettingsManager.Settings.Advanced.IsAlwaysOnTop)
+                WindowTopmostManager.ApplyMainWindowTopmost(window, SettingsManager.Settings.Advanced.IsAlwaysOnTop);
+
+                if (SettingsManager.Settings.Advanced.IsAlwaysOnTop &&
+                    SettingsManager.Settings.Advanced.IsNoFocusMode &&
+                    !SettingsManager.Settings.Advanced.EnableUIAccessTopMost)
                 {
-                    window.Topmost = true;
-
-                    int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-                    SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
-
-                    SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
-
-                    if (SettingsManager.Settings.Advanced.IsNoFocusMode && !SettingsManager.Settings.Advanced.EnableUIAccessTopMost)
-                    {
-                        StartTopmostMaintenance(window);
-                    }
-                    else
-                    {
-                        StopTopmostMaintenance();
-                    }
+                    StartTopmostMaintenance(window);
                 }
                 else
                 {
-                    SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0,
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
-
-                    int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-                    SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_TOPMOST);
-
                     StopTopmostMaintenance();
                 }
             }
@@ -367,12 +345,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         {
             if (SettingsManager.Settings.Advanced.IsAlwaysOnTop)
             {
-                window.Topmost = true;
+                WindowTopmostManager.ApplyMainWindowTopmost(window, true);
                 ApplyAlwaysOnTop(window);
             }
             else
             {
-                window.Topmost = shouldBeTopmost;
+                WindowTopmostManager.ApplyMainWindowTopmost(window, shouldBeTopmost);
                 if (!shouldBeTopmost)
                 {
                     ApplyAlwaysOnTop(window);
@@ -382,10 +360,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
 
         public static void PauseTopmostMaintenance()
         {
-            if (_topmostMaintenanceTimer != null && _isTopmostMaintenanceEnabled)
-            {
-                _topmostMaintenanceTimer.Stop();
-            }
+            WindowTopmostManager.PauseTopmostMaintenance();
         }
 
         public static void ResumeTopmostMaintenance(Window window)
@@ -394,91 +369,26 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 SettingsManager.Settings.Advanced.IsNoFocusMode &&
                 !SettingsManager.Settings.Advanced.EnableUIAccessTopMost)
             {
-                if (_topmostMaintenanceTimer != null && !_isTopmostMaintenanceEnabled)
-                {
-                    _topmostMaintenanceTimer.Start();
-                    _isTopmostMaintenanceEnabled = true;
-                }
+                WindowTopmostManager.ResumeTopmostMaintenance(window);
             }
         }
 
         private static void StartTopmostMaintenance(Window window)
         {
             if (SettingsManager.Settings.Advanced.EnableUIAccessTopMost) return;
-            if (_isTopmostMaintenanceEnabled) return;
 
-            _maintainedWindow = window;
-
-            if (_topmostMaintenanceTimer == null)
-            {
-                _topmostMaintenanceTimer = new DispatcherTimer();
-                _topmostMaintenanceTimer.Interval = TimeSpan.FromMilliseconds(500);
-                _topmostMaintenanceTimer.Tick += TopmostMaintenanceTimer_Tick;
-            }
-
-            _topmostMaintenanceTimer.Start();
-            _isTopmostMaintenanceEnabled = true;
+            WindowTopmostManager.StartTopmostMaintenance(window);
             LogHelper.WriteLogToFile("启动置顶维护定时器", LogHelper.LogType.Trace);
         }
 
         private static void StopTopmostMaintenance()
         {
-            if (_topmostMaintenanceTimer != null && _isTopmostMaintenanceEnabled)
-            {
-                _topmostMaintenanceTimer.Stop();
-                _isTopmostMaintenanceEnabled = false;
-                LogHelper.WriteLogToFile("停止置顶维护定时器", LogHelper.LogType.Trace);
-            }
+            WindowTopmostManager.StopTopmostMaintenance();
+            LogHelper.WriteLogToFile("停止置顶维护定时器", LogHelper.LogType.Trace);
         }
 
         private static void TopmostMaintenanceTimer_Tick(object sender, EventArgs e)
         {
-            try
-            {
-                if (SettingsManager.Settings.Advanced.EnableUIAccessTopMost)
-                {
-                    StopTopmostMaintenance();
-                    return;
-                }
-
-                if (!SettingsManager.Settings.Advanced.IsAlwaysOnTop || !SettingsManager.Settings.Advanced.IsNoFocusMode)
-                {
-                    StopTopmostMaintenance();
-                    return;
-                }
-
-                var window = _maintainedWindow;
-                if (window == null) return;
-
-                var hwnd = new WindowInteropHelper(window).Handle;
-                if (hwnd == IntPtr.Zero) return;
-
-                if (!IsWindow(hwnd) || !IsWindowVisible(hwnd) || IsIconic(hwnd)) return;
-
-                var foregroundWindow = GetForegroundWindow();
-                if (foregroundWindow != hwnd)
-                {
-                    GetWindowThreadProcessId(foregroundWindow, out uint processId);
-                    var currentProcessId = GetCurrentProcessId();
-
-                    if (processId == currentProcessId) return;
-
-                    SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
-
-                    int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-                    if ((exStyle & WS_EX_TOPMOST) == 0)
-                    {
-                        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
-                    }
-
-                    PopupManagerHelper.NotifyTopmostMaintained();
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"置顶维护定时器出错: {ex.Message}", LogHelper.LogType.Error);
-            }
         }
 
         #endregion
