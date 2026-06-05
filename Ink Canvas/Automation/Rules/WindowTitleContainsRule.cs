@@ -1,5 +1,8 @@
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Text;
 using Ink_Canvas.WorkflowAutomation.Models;
 
 namespace Ink_Canvas.WorkflowAutomation.Rules
@@ -27,11 +30,11 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
     {
         public const string RuleId = "inkcanvas.windowtitlecontains";
 
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        [DllImport("user32.dll", SetLastError = true)]
         private static extern IntPtr GetForegroundWindow();
 
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern int GetWindowText(IntPtr hWnd, System.Text.StringBuilder text, int count);
+        [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern int GetWindowTextW(IntPtr hWnd, StringBuilder text, int count);
 
         public static RuleRegistryInfo Register()
         {
@@ -48,9 +51,13 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
                 try
                 {
                     var handle = GetForegroundWindow();
-                    var sb = new System.Text.StringBuilder(256);
-                    GetWindowText(handle, sb, sb.Capacity);
-                    string windowTitle = sb.ToString();
+                    if (handle == IntPtr.Zero) return false;
+
+                    var sb = new StringBuilder(512);
+                    int length = GetWindowTextW(handle, sb, sb.Capacity);
+                    if (length <= 0) return false;
+
+                    string windowTitle = sb.ToString(0, length);
 
                     if (s.IgnoreCase)
                     {
@@ -60,6 +67,10 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
                     {
                         return windowTitle.Contains(s.TitleContains);
                     }
+                }
+                catch (Win32Exception)
+                {
+                    return false;
                 }
                 catch
                 {

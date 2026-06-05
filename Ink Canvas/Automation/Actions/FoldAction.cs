@@ -34,14 +34,18 @@ namespace Ink_Canvas.WorkflowAutomation.Actions
                 var s = settings as FoldActionSettings;
                 if (s == null) return;
 
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    var mw = System.Windows.Application.Current.MainWindow as MainWindow;
+                    var mw = Application.Current.MainWindow as MainWindow;
                     if (mw == null) return;
 
                     if (s.Fold && !mw.isFloatingBarFolded)
                     {
                         mw.FoldFloatingBar(null, true);
+                    }
+                    else if (!s.Fold && mw.isFloatingBarFolded)
+                    {
+                        mw.UnFoldFloatingBar(null);
                     }
                 });
             };
@@ -51,15 +55,19 @@ namespace Ink_Canvas.WorkflowAutomation.Actions
                 var s = settings as FoldActionSettings;
                 if (s == null) return;
 
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    var mw = System.Windows.Application.Current.MainWindow as MainWindow;
+                    var mw = Application.Current.MainWindow as MainWindow;
                     if (mw == null) return;
 
-                    if (!s.Fold && mw.isFloatingBarFolded)
+                    // 恢复：折叠→展开，展开→折叠
+                    if (s.Fold && mw.isFloatingBarFolded)
                     {
-                        // 展开浮动栏
-                        mw.FoldFloatingBar(null, false);
+                        mw.UnFoldFloatingBar(null);
+                    }
+                    else if (!s.Fold && !mw.isFloatingBarFolded)
+                    {
+                        mw.FoldFloatingBar(null, true);
                     }
                 });
             };

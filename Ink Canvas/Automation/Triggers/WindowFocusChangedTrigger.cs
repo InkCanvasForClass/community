@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Timers;
 using Ink_Canvas.WorkflowAutomation.Abstractions;
 
@@ -24,11 +23,8 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
         private Timer? _timer;
         private IntPtr _lastForegroundWindow = IntPtr.Zero;
 
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true)]
         private static extern IntPtr GetForegroundWindow();
-
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern int GetWindowText(IntPtr hWnd, System.Text.StringBuilder text, int count);
 
         public override void Loaded()
         {
@@ -51,11 +47,18 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
 
         private void OnTimerElapsed(object? sender, ElapsedEventArgs e)
         {
-            var currentForeground = GetForegroundWindow();
-            if (currentForeground != _lastForegroundWindow)
+            try
             {
-                _lastForegroundWindow = currentForeground;
-                Trigger();
+                var currentForeground = GetForegroundWindow();
+                if (currentForeground != _lastForegroundWindow)
+                {
+                    _lastForegroundWindow = currentForeground;
+                    Trigger();
+                }
+            }
+            catch
+            {
+                // 忽略 Win32 异常
             }
         }
     }

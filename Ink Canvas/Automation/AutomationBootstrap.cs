@@ -105,11 +105,18 @@ namespace Ink_Canvas.WorkflowAutomation
             AutomationRegistry.RegisterAction(FoldAction.Register());
             AutomationRegistry.RegisterAction(KillProcessAction.Register());
             AutomationRegistry.RegisterAction(SaveStrokesAction.Register());
+            AutomationRegistry.RegisterAction(ToggleAnnotationModeAction.Register());
+            AutomationRegistry.RegisterAction(ClearStrokesAction.Register());
+            AutomationRegistry.RegisterAction(ShowNotificationAction.Register());
+            AutomationRegistry.RegisterAction(ToggleTopmostAction.Register());
 
             // 注册规则
             AutomationRegistry.RegisterRule(ProcessRunningRule.Register());
             AutomationRegistry.RegisterRule(WindowTitleContainsRule.Register());
             AutomationRegistry.RegisterRule(IsAnnotationModeRule.Register());
+            AutomationRegistry.RegisterRule(IsPptSlideshowRule.Register());
+            AutomationRegistry.RegisterRule(ForegroundWindowProcessRule.Register());
+            AutomationRegistry.RegisterRule(IsFloatingBarFoldedRule.Register());
 
             // 加载配置
             Service.RefreshConfigs();
