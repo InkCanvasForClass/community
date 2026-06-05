@@ -3,6 +3,7 @@ using Ink_Canvas.WorkflowAutomation.Models;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;
+using System.Timers;
 
 namespace Ink_Canvas.WorkflowAutomation.Services
 {
@@ -10,12 +11,14 @@ namespace Ink_Canvas.WorkflowAutomation.Services
     /// 规则集服务，负责评估规则集是否满足。
     /// 对齐 ClassIsland 的 RulesetService 实现，在评估时更新所有层级的 State。
     /// </summary>
-    public class RulesetService
+    public class RulesetService : IDisposable
     {
         /// <summary>
         /// 规则状态更新事件，当规则条件可能发生变化时触发。
         /// </summary>
         public event EventHandler? StatusUpdated;
+
+        private Timer? _pollingTimer;
 
         private int BoolToRuleObjectState(bool? v) => v switch
         {
@@ -23,6 +26,15 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             false => 1,
             null => 0
         };
+
+        public RulesetService()
+        {
+            // 启动定期轮询以检测状态变化
+            _pollingTimer = new Timer(500);
+            _pollingTimer.Elapsed += OnPollingTimerElapsed;
+            _pollingTimer.AutoReset = true;
+            _pollingTimer.Start();
+        }
 
         /// <summary>
         /// 判断指定的规则集是否成立，同时更新所有层级的 State。
@@ -162,6 +174,20 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         public void NotifyStatusChanged()
         {
             StatusUpdated?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void OnPollingTimerElapsed(object? sender, ElapsedEventArgs e)
+        {
+            // 定期通知状态已更改，让所有订阅者重新评估规则
+            // 这样即使没有显式调用 NotifyStatusChanged 也能检测到变化
+            NotifyStatusChanged();
+        }
+
+        public void Dispose()
+        {
+            _pollingTimer?.Stop();
+            _pollingTimer?.Dispose();
+            _pollingTimer = null;
         }
     }
 }

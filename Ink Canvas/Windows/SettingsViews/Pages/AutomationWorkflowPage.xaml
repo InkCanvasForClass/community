@@ -494,7 +494,7 @@
 
             <!-- ========== 工作流编辑器面板 ========== -->
             <ScrollViewer x:Name="WorkflowEditorPanel" Visibility="Collapsed" Padding="16,8">
-                <StackPanel DataContext="{Binding SelectedWorkflow}">
+                <StackPanel DataContext="{Binding SelectedWorkflow, Mode=OneWay}">
                     <!-- 禁用时整体半透明 -->
                     <StackPanel.Style>
                         <Style TargetType="StackPanel">
@@ -524,7 +524,9 @@
                             </StackPanel>
 
                             <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Right">
-                                <CheckBox x:Name="CheckBoxIsRevertEnabled" Content="启用恢复" Margin="0,0,0,8"/>
+                                <CheckBox x:Name="CheckBoxIsRevertEnabled" Content="启用恢复" Margin="0,0,0,8"
+                                          Checked="CheckBoxIsRevertEnabled_Changed"
+                                          Unchecked="CheckBoxIsRevertEnabled_Changed"/>
                                 <StackPanel Orientation="Horizontal">
                                     <Button x:Name="BtnInvokeAction" Content="触发" Padding="12,4" Margin="0,0,8,0" Click="BtnInvokeAction_Click"/>
                                     <Button x:Name="BtnRevertAction" Content="恢复" Padding="12,4" Click="BtnRevertAction_Click"/>
@@ -666,7 +668,8 @@
                                                                         <ColumnDefinition Width="Auto"/>
                                                                         <ColumnDefinition Width="Auto"/>
                                                                         <ColumnDefinition Width="Auto"/>
-                                                                        <ColumnDefinition Width="*"/>
+                                                                            <ColumnDefinition Width="220"/>
+                                                                            <ColumnDefinition Width="*"/>
                                                                     </Grid.ColumnDefinitions>
                                                                     <Button Grid.Column="0" Content="✕" FontSize="10"
                                                                             Click="BtnRemoveRule_Click" Padding="4,1"
@@ -685,6 +688,11 @@
                                                                               SelectedValue="{Binding Id, Mode=TwoWay}"
                                                                               SelectionChanged="ComboBoxRuleType_SelectionChanged"
                                                                               Tag="{Binding}" Padding="8,6"/>
+                                                                        <local:AutomationSettingsPresenter Grid.Column="4"
+                                                                                                           Margin="8,0,0,0"
+                                                                                                           VerticalAlignment="Center"
+                                                                                                           Item="{Binding}"
+                                                                                                           SettingsChanged="RuleSettingsPresenter_SettingsChanged"/>
                                                                 </Grid>
                                                             </DataTemplate>
                                                         </ItemsControl.ItemTemplate>
@@ -718,6 +726,7 @@
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="220"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
 
@@ -734,6 +743,11 @@
                                                           SelectionChanged="ComboBoxActionType_SelectionChanged"
                                                           Tag="{Binding}" Padding="8,6" MinWidth="150"
                                                           VerticalAlignment="Center"/>
+                                                <local:AutomationSettingsPresenter Grid.Column="2"
+                                                                                   Margin="8,0,0,0"
+                                                                                   VerticalAlignment="Center"
+                                                                                   Item="{Binding}"
+                                                                                   SettingsChanged="ActionSettingsPresenter_SettingsChanged"/>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
