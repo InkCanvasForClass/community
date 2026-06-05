@@ -48,8 +48,9 @@ namespace Ink_Canvas.Controls
         public SidePanelToggle()
         {
             InitializeComponent();
-            
-            Loaded += (s, e) => {
+
+            Loaded += (s, e) =>
+            {
                 ApplySettings();
             };
         }
@@ -57,19 +58,19 @@ namespace Ink_Canvas.Controls
         protected override void OnPreviewMouseDown(MouseButtonEventArgs e)
         {
             base.OnPreviewMouseDown(e);
-            
+
             if (e.ChangedButton != MouseButton.Left) return;
-            
+
             var settings = MainWindow.Settings?.Appearance;
             _allowDrag = settings == null || settings.AllowDragSidePanel;
-            
+
             var targetElement = (settings?.UnFoldButtonImageType == 2) ? (FrameworkElement)PanelBorder : ClassicViewbox;
             var pos = e.GetPosition(targetElement);
             if (pos.X < 0 || pos.X > targetElement.ActualWidth || pos.Y < 0 || pos.Y > targetElement.ActualHeight)
             {
                 return;
             }
-            
+
             _isDragging = true;
             _dragStarted = false;
             _totalDragDistance = 0;
@@ -84,24 +85,24 @@ namespace Ink_Canvas.Controls
         protected override void OnPreviewMouseMove(MouseEventArgs e)
         {
             base.OnPreviewMouseMove(e);
-            
+
             if (!_isDragging) return;
-            
+
             var reference = Application.Current.MainWindow;
             var currentPos = e.GetPosition(reference);
             var deltaY = _startY - currentPos.Y;
             var deltaX = currentPos.X - _startX;
-            
+
             if (!_dragStarted)
             {
                 _totalDragDistance = Math.Abs(deltaY) + Math.Abs(deltaX);
                 if (_totalDragDistance < 5) return;
                 _dragStarted = true;
             }
-            
+
             double newOffset = _startOffset + deltaY * 2;
             newOffset = Math.Max(-600, Math.Min(600, newOffset));
-            
+
             MainWindow.Settings.Appearance.QuickPanelBottomOffset = newOffset;
             var mw = Application.Current.MainWindow as MainWindow;
             mw?.ApplyQuickPanelBottomOffset(newOffset);
@@ -137,12 +138,12 @@ namespace Ink_Canvas.Controls
         protected override void OnLostMouseCapture(MouseEventArgs e)
         {
             base.OnLostMouseCapture(e);
-            
+
             if (_isDragging)
             {
                 Ink_Canvas.Windows.SettingsViews.Helpers.SettingsManager.SaveSettingsToFile();
             }
-            
+
             _isDragging = false;
             _dragStarted = false;
         }

@@ -294,23 +294,23 @@ namespace Ink_Canvas
                 ToolbarRegistry.EnsureDefaultConfigExists();
                 ToolbarHost = new ToolbarHost(this);
                 var layout = ToolbarRegistry.LoadActiveConfig();
-                
+
                 // 根据设置确定工具栏方向
                 var position = Settings.Appearance.ToolbarPosition;
-                var orientation = (position == ToolbarPosition.Top || position == ToolbarPosition.Bottom) 
-                    ? Orientation.Vertical 
+                var orientation = (position == ToolbarPosition.Top || position == ToolbarPosition.Bottom)
+                    ? Orientation.Vertical
                     : Orientation.Horizontal;
-                
+
                 // 设置根面板的方向和尺寸
                 if (StackPanelFloatingBarRoot != null)
                 {
                     StackPanelFloatingBarRoot.Orientation = orientation;
                     UpdateToolbarDimensions(orientation);
                 }
-                
+
                 // 填充工具栏组件
                 ToolbarRegistry.Populate(ToolbarHost, StackPanelFloatingBarRoot, layout, orientation);
-                
+
                 // 根据位置设置拖动图标的位置
                 SetToolbarHeadPosition(position);
             }
@@ -323,12 +323,12 @@ namespace Ink_Canvas
         private void SetToolbarHeadPosition(ToolbarPosition position)
         {
             if (FloatingBarRootPanel == null) return;
-            
+
             var rootChildren = FloatingBarRootPanel.Children;
             var rootList = rootChildren.OfType<FrameworkElement>().ToList();
             var dragElement = FindDragHandleInRoot();
             var otherElements = rootList.Where(c => c != dragElement).ToList();
-            
+
             rootChildren.Clear();
 
             var reverseContent = Settings.Appearance.ReverseToolbarContent;
@@ -353,7 +353,7 @@ namespace Ink_Canvas
                     isFloatingBarHeadOnRight = false;
                     isFloatingBarHeadOnBottom = false;
                     break;
-                    
+
                 case ToolbarPosition.Left:
                     foreach (var elem in otherElements.AsEnumerable().Reverse())
                     {
@@ -372,7 +372,7 @@ namespace Ink_Canvas
                     isFloatingBarHeadOnRight = true;
                     isFloatingBarHeadOnBottom = false;
                     break;
-                    
+
                 case ToolbarPosition.Top:
                     foreach (var elem in otherElements.AsEnumerable().Reverse())
                     {
@@ -391,7 +391,7 @@ namespace Ink_Canvas
                     isFloatingBarHeadOnRight = false;
                     isFloatingBarHeadOnBottom = true;
                     break;
-                    
+
                 case ToolbarPosition.Bottom:
                     if (dragElement != null)
                     {
@@ -411,7 +411,7 @@ namespace Ink_Canvas
                     isFloatingBarHeadOnBottom = false;
                     break;
             }
-            
+
             SetFloatingBarHighlightPosition(_currentToolMode);
         }
 
@@ -452,7 +452,7 @@ namespace Ink_Canvas
         private void UpdateToolbarDimensions(Orientation orientation)
         {
             if (StackPanelFloatingBarRoot == null) return;
-            
+
             if (orientation == Orientation.Horizontal)
             {
                 // 左右位置：高度固定，宽度自动

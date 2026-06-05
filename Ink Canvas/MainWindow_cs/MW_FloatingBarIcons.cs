@@ -2175,17 +2175,17 @@ namespace Ink_Canvas
         private IEnumerable<StackPanel> GetAllPanelsWithContent(DependencyObject root)
         {
             if (root == null) yield break;
-            
+
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
             {
                 var child = VisualTreeHelper.GetChild(root, i);
-                
-                if (child is StackPanel panel && (panel.Orientation == System.Windows.Controls.Orientation.Horizontal || 
+
+                if (child is StackPanel panel && (panel.Orientation == System.Windows.Controls.Orientation.Horizontal ||
                                                   panel.Orientation == System.Windows.Controls.Orientation.Vertical))
                 {
                     yield return panel;
                 }
-                
+
                 foreach (var nestedPanel in GetAllPanelsWithContent(child))
                 {
                     yield return nestedPanel;
@@ -2270,10 +2270,10 @@ namespace Ink_Canvas
             {
                 var fullCollapsedWidth = GetFloatingBarScaledWidth();
                 var collapsedHeadWidth = GetFloatingBarHeadScaledWidth();
-                
+
                 var useFullWidth = fullCollapsedWidth > collapsedHeadWidth * 1.5;
                 var collapsedWidth = useFullWidth ? fullCollapsedWidth : collapsedHeadWidth;
-                
+
                 var shouldFlipOnCollapse = !Settings.Appearance.AutoFlipWhenSpaceInsufficient ? isFloatingBarHeadOnRight :
                     (Settings.Appearance.ToolbarPosition == ToolbarPosition.Left
                     ? headLeft - Math.Max(0, collapsedWidth - collapsedHeadWidth) < 0
@@ -2282,7 +2282,7 @@ namespace Ink_Canvas
                 SetFloatingBarHeadPlacement(shouldFlipOnCollapse);
 
                 ViewboxFloatingBar.UpdateLayout();
-                
+
                 fullCollapsedWidth = GetFloatingBarScaledWidth();
                 collapsedHeadWidth = GetFloatingBarHeadScaledWidth();
                 useFullWidth = fullCollapsedWidth > collapsedHeadWidth * 1.5;
@@ -2311,7 +2311,7 @@ namespace Ink_Canvas
             }
 
             ViewboxFloatingBar.UpdateLayout();
-            
+
             var floatingBarWidth = GetFloatingBarScaledWidth();
             var expandedHeadWidth = GetFloatingBarHeadScaledWidth();
             var shouldPlaceToolsOnLeft = !Settings.Appearance.AutoFlipWhenSpaceInsufficient ? isFloatingBarHeadOnRight :
@@ -2323,7 +2323,7 @@ namespace Ink_Canvas
             SetFloatingBarHeadPlacement(shouldPlaceToolsOnLeft);
 
             ViewboxFloatingBar.UpdateLayout();
-            
+
             floatingBarWidth = GetFloatingBarScaledWidth();
             expandedHeadWidth = GetFloatingBarHeadScaledWidth();
 
@@ -3529,18 +3529,18 @@ namespace Ink_Canvas
                 if (GridBackgroundCover.Visibility == Visibility.Collapsed)
                 {
                     if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
-            { /* Old UI removed */ }
+                    { /* Old UI removed */ }
                     else
-            { /* Old UI removed */ }
-            { /* Old UI removed */ }
+                    { /* Old UI removed */ }
+                    { /* Old UI removed */ }
                 }
                 else
                 {
-            { /* Old UI removed */ }
-            { /* Old UI removed */ }
+                    { /* Old UI removed */ }
+                    { /* Old UI removed */ }
                 }
 
-            { /* Old UI removed */ }
+                { /* Old UI removed */ }
 
                 // 进入批注模式时的全屏处理（仅当未应用过全屏处理时）
                 if (Settings.Advanced.IsEnableAvoidFullScreenHelper && !isFullScreenApplied)
@@ -3561,12 +3561,12 @@ namespace Ink_Canvas
                 // 使用集中化的工具模式切换方法
                 SetCurrentToolMode(InkCanvasEditingMode.Ink);
 
-            UpdateCurrentToolMode("pen");
+                UpdateCurrentToolMode("pen");
 
-            // 注意：快捷调色盘的可见性和显示模式现在完全由工具栏系统管理
-            // 不需要手动设置，UpdateToolbarComponentVisibility 会处理好
+                // 注意：快捷调色盘的可见性和显示模式现在完全由工具栏系统管理
+                // 不需要手动设置，UpdateToolbarComponentVisibility 会处理好
 
-            SetFloatingBarHighlightPosition("pen");
+                SetFloatingBarHighlightPosition("pen");
 
                 forceEraser = false;
                 forcePointEraser = false;
@@ -3936,7 +3936,7 @@ namespace Ink_Canvas
             HideSubPanels("eraserByStrokes");
 
         }
-        
+
         /// <summary>
         /// 白板模式下的墨迹擦除图标点击事件处理，用于切换到按笔画擦除模式
         /// </summary>
@@ -4297,12 +4297,12 @@ namespace Ink_Canvas
             if (isSingleFingerDragMode)
             {
                 isSingleFingerDragMode = false;
-            { /* Old UI removed */ }
+                { /* Old UI removed */ }
             }
             else
             {
                 isSingleFingerDragMode = true;
-            { /* Old UI removed */ }
+                { /* Old UI removed */ }
             }
         }
 
@@ -4440,7 +4440,7 @@ namespace Ink_Canvas
             _settingsWindow.Closed += (s, args) => _settingsWindow = null;
             _settingsWindow.Show();
         }
-private bool forceEraser;
+        private bool forceEraser;
 
 
         private void BtnClear_Click(object sender, RoutedEventArgs e)
@@ -4581,25 +4581,25 @@ private bool forceEraser;
 
                     if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
                     {
-            { /* Old UI removed */ }
-            { /* Old UI removed */ }
+                        { /* Old UI removed */ }
+                        { /* Old UI removed */ }
                     }
                     else
                     {
-            { /* Old UI removed */ }
+                        { /* Old UI removed */ }
                         if (isPresentationHaveBlackSpace)
                         {
-            { /* Old UI removed */ }
+                            { /* Old UI removed */ }
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
                         }
                         else
                         {
-            { /* Old UI removed */ }
+                            { /* Old UI removed */ }
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
                         }
                     }
 
-            { /* Old UI removed */ }
+                    { /* Old UI removed */ }
 
                     CheckClipboardImageAndShowPasteNotificationWhenEnteringBoard();
                 }
@@ -4668,26 +4668,26 @@ private bool forceEraser;
 
                         if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
                         {
-            { /* Old UI removed */ }
-            { /* Old UI removed */ }
+                            { /* Old UI removed */ }
+                            { /* Old UI removed */ }
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
                         }
                         else
                         {
-            { /* Old UI removed */ }
+                            { /* Old UI removed */ }
                             if (isPresentationHaveBlackSpace)
                             {
-            { /* Old UI removed */ }
+                                { /* Old UI removed */ }
                                 ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
                             }
                             else
                             {
-            { /* Old UI removed */ }
+                                { /* Old UI removed */ }
                                 ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
                             }
                         }
 
-            { /* Old UI removed */ }
+                        { /* Old UI removed */ }
                         Topmost = true;
                         break;
                     case 1: //黑板或白板模式
@@ -4720,15 +4720,15 @@ private bool forceEraser;
 
                         ViewboxFloatingBar.Visibility = Visibility.Collapsed;
 
-            { /* Old UI removed */ }
+                        { /* Old UI removed */ }
                         if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
                         {
-            { /* Old UI removed */ }
+                            { /* Old UI removed */ }
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
                         }
                         else
                         {
-            { /* Old UI removed */ }
+                            { /* Old UI removed */ }
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
                         }
 
@@ -4752,7 +4752,7 @@ private bool forceEraser;
                             ColorSwitchCheck();
                         }
 
-            { /* Old UI removed */ }
+                        { /* Old UI removed */ }
 
                         if (Settings.Advanced.EnableUIAccessTopMost)
                         {
@@ -4792,18 +4792,18 @@ private bool forceEraser;
                 if (GridBackgroundCover.Visibility == Visibility.Collapsed)
                 {
                     if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
-            { /* Old UI removed */ }
+                    { /* Old UI removed */ }
                     else
-            { /* Old UI removed */ }
-            { /* Old UI removed */ }
+                    { /* Old UI removed */ }
+                    { /* Old UI removed */ }
                 }
                 else
                 {
-            { /* Old UI removed */ }
-            { /* Old UI removed */ }
+                    { /* Old UI removed */ }
+                    { /* Old UI removed */ }
                 }
 
-            { /* Old UI removed */ }
+                { /* Old UI removed */ }
 
                 // 进入批注模式时的全屏处理（仅当未应用过全屏处理时）
                 if (Settings.Advanced.IsEnableAvoidFullScreenHelper && !isFullScreenApplied)
@@ -4880,12 +4880,12 @@ private bool forceEraser;
                 }
 
                 if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
-            { /* Old UI removed */ }
+                { /* Old UI removed */ }
                 else
-            { /* Old UI removed */ }
+                { /* Old UI removed */ }
 
-            { /* Old UI removed */ }
-            { /* Old UI removed */ }
+                { /* Old UI removed */ }
+                { /* Old UI removed */ }
             }
 
             if (GridTransparencyFakeBackground.Background == Brushes.Transparent)
@@ -4913,13 +4913,13 @@ private bool forceEraser;
         {
             if (_isToolbarOnRightSide)
             {
-            { /* Old UI removed */ }
-            { /* Old UI removed */ }
+                { /* Old UI removed */ }
+                { /* Old UI removed */ }
             }
             else
             {
-            { /* Old UI removed */ }
-            { /* Old UI removed */ }
+                { /* Old UI removed */ }
+                { /* Old UI removed */ }
             }
         }
 

@@ -315,7 +315,7 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                    var message = JsonConvert.DeserializeObject<AnnouncementWebSocketMessage>(json);
+                var message = JsonConvert.DeserializeObject<AnnouncementWebSocketMessage>(json);
                 if ((message?.Type == "announcement_message" || message?.Type == "announcement") && message.Data != null)
                 {
                     if (ShouldShow(message.Data)) EnqueueAnnouncement(message.Data, true);

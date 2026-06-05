@@ -165,7 +165,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardAutoDelSavedFiles.IsOn = auto.AutoDelSavedFiles;
             ComboBoxAutoDelSavedFilesDaysThreshold.SelectedIndex = auto.AutoDelSavedFilesDaysThreshold switch
             {
-                7 => 0, 14 => 1, 30 => 2, 60 => 3, 90 => 4, _ => 2
+                7 => 0,
+                14 => 1,
+                30 => 2,
+                60 => 3,
+                90 => 4,
+                _ => 2
             };
 
             SideControlMinimumAutomationSlider.Value = auto.MinimumAutomationStrokeNumber;
@@ -564,10 +569,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 EllipseRulesetState.Fill = Brushes.DarkGray;
                 return;
             }
-            
+
             // 评估规则集（会自动更新所有层级的 State）
             Service.RulesetService.IsRulesetSatisfied(ruleset);
-            
+
             EllipseRulesetState.Fill = ruleset.State switch
             {
                 2 => Brushes.Green,

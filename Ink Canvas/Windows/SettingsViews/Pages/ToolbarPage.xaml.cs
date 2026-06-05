@@ -113,10 +113,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var ruleset = ToolbarRegistry.GetEffectiveRuleset(entry);
             ComboBoxRulesetMode.SelectedIndex = (int)ruleset.Mode;
             CheckBoxRulesetReversed.IsChecked = ruleset.IsReversed;
-            
+
             // 评估规则集并更新所有层级的状态
             UpdateRulesetStateIndicator(ruleset);
-            
+
             // 设置 ItemsSource（评估后设置，确保 Ellipse 绑定到最新的 State）
             ItemsControlGroups.ItemsSource = null;
             ItemsControlGroups.ItemsSource = ruleset.Groups;
@@ -131,22 +131,22 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 EllipseRulesetState.Fill = Brushes.DarkGray;
                 return;
             }
-            
+
             // 获取当前上下文状态
             var mainWindow = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
             bool isAnnotating = mainWindow?.IsAnnotating ?? false;
             bool isPptMode = mainWindow?.IsInPptPresentationMode ?? false;
-            
+
             var context = new Dictionary<string, bool>
             {
                 ["isAnnotating"] = isAnnotating,
                 ["isPptMode"] = isPptMode,
                 ["isContentCollapsedByUser"] = ToolbarRegistry.IsContentCollapsedByUser
             };
-            
+
             // 评估规则集并更新所有层级的状态
             ToolbarRegistry.EvaluateRuleset(ruleset, context);
-            
+
             EllipseRulesetState.Fill = ruleset.State switch
             {
                 2 => Brushes.Green,

@@ -168,7 +168,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             if (CardReverseToolbarContent == null) return;
-            
+
             SettingsManager.Settings.Appearance.ReverseToolbarContent = CardReverseToolbarContent.IsOn;
             SettingsManager.SaveSettingsToFile();
             SettingsActionHub.OnReverseToolbarContentChanged(CardReverseToolbarContent.IsOn);

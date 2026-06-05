@@ -624,7 +624,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 {
                     var item = segment.Items[0];
                     var elementToAdd = WrapInSeparateBorder(item.View, item.Ruleset, item.IsToolbarButton, orientation);
-                    elementToAdd.Margin = (isFirst && !hasExistingChildren) ? new Thickness(0) : 
+                    elementToAdd.Margin = (isFirst && !hasExistingChildren) ? new Thickness(0) :
                         orientation == Orientation.Horizontal ? new Thickness(3, 0, 0, 0) : new Thickness(0, 3, 0, 0);
                     ApplyInitialVisibility(elementToAdd, item.Ruleset);
                     rootPanel.Children.Add(elementToAdd);
@@ -632,7 +632,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 else
                 {
                     var contentBorder = CreateContentBorder(segment.Items, orientation);
-                    contentBorder.Margin = (isFirst && !hasExistingChildren) ? new Thickness(0) : 
+                    contentBorder.Margin = (isFirst && !hasExistingChildren) ? new Thickness(0) :
                         orientation == Orientation.Horizontal ? new Thickness(3, 0, 0, 0) : new Thickness(0, 3, 0, 0);
                     rootPanel.Children.Add(contentBorder);
                 }
@@ -965,7 +965,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 else
                     // 如果组件设置中没有找到，回退到全局设置
                     qcp.SyncFromSettings();
-                
+
                 // 强制应用显示模式，确保独立边框模式下也能正确显示
                 qcp.ForceApplyDisplayMode();
             }

@@ -60,7 +60,7 @@ namespace Ink_Canvas.Controls
                 QuickColorPalettePanel.Visibility = Visibility.Visible;
                 QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
             }
-            
+
             QuickColorPaletteContainer.Visibility = Visibility.Visible;
         }
 

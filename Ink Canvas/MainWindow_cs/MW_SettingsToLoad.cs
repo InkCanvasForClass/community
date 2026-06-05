@@ -258,89 +258,89 @@ namespace Ink_Canvas
             {
                 if (Settings.Appearance != null)
                 {
-                if (Settings.Appearance.ViewboxFloatingBarScaleTransformValue != 0)
-                {
-                    double userVal = Settings.Appearance.ViewboxFloatingBarScaleTransformValue;
-                    // 限制用户设置值在有效范围内
-                    double clampedUserVal = (userVal > 0.5 && userVal < 1.25) ? userVal :
-                                               userVal <= 0.5 ? 0.5 :
-                                               userVal >= 1.25 ? 1.25 : 1.0;
+                    if (Settings.Appearance.ViewboxFloatingBarScaleTransformValue != 0)
+                    {
+                        double userVal = Settings.Appearance.ViewboxFloatingBarScaleTransformValue;
+                        // 限制用户设置值在有效范围内
+                        double clampedUserVal = (userVal > 0.5 && userVal < 1.25) ? userVal :
+                                                   userVal <= 0.5 ? 0.5 :
+                                                   userVal >= 1.25 ? 1.25 : 1.0;
 
-                    double actualScale = clampedUserVal;
+                        double actualScale = clampedUserVal;
 
-                    // 最终范围限制：0.5x ~ 1.25x
-                    ViewboxFloatingBarScaleTransform.ScaleX = actualScale;
-                    ViewboxFloatingBarScaleTransform.ScaleY = actualScale;
-                }
+                        // 最终范围限制：0.5x ~ 1.25x
+                        ViewboxFloatingBarScaleTransform.ScaleX = actualScale;
+                        ViewboxFloatingBarScaleTransform.ScaleY = actualScale;
+                    }
 
-                switch (Settings.Appearance.UnFoldButtonImageType)
-                {
-                    case 0:
-                        RightUnFoldBtnImgChevron.Source =
-                            new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
-                        RightUnFoldBtnImgChevron.Width = 14;
-                        RightUnFoldBtnImgChevron.Height = 14;
-                        RightUnFoldBtnImgChevron.RenderTransform = new RotateTransform(180);
-                        LeftUnFoldBtnImgChevron.Source =
-                            new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
-                        LeftUnFoldBtnImgChevron.Width = 14;
-                        LeftUnFoldBtnImgChevron.Height = 14;
-                        LeftUnFoldBtnImgChevron.RenderTransform = null;
-                        break;
-                    case 1:
-                        RightUnFoldBtnImgChevron.Source =
-                            new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
-                        RightUnFoldBtnImgChevron.Width = 18;
-                        RightUnFoldBtnImgChevron.Height = 18;
-                        RightUnFoldBtnImgChevron.RenderTransform = null;
-                        LeftUnFoldBtnImgChevron.Source =
-                            new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
-                        LeftUnFoldBtnImgChevron.Width = 18;
-                        LeftUnFoldBtnImgChevron.Height = 18;
-                        LeftUnFoldBtnImgChevron.RenderTransform = null;
-                        break;
-                }
+                    switch (Settings.Appearance.UnFoldButtonImageType)
+                    {
+                        case 0:
+                            RightUnFoldBtnImgChevron.Source =
+                                new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
+                            RightUnFoldBtnImgChevron.Width = 14;
+                            RightUnFoldBtnImgChevron.Height = 14;
+                            RightUnFoldBtnImgChevron.RenderTransform = new RotateTransform(180);
+                            LeftUnFoldBtnImgChevron.Source =
+                                new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
+                            LeftUnFoldBtnImgChevron.Width = 14;
+                            LeftUnFoldBtnImgChevron.Height = 14;
+                            LeftUnFoldBtnImgChevron.RenderTransform = null;
+                            break;
+                        case 1:
+                            RightUnFoldBtnImgChevron.Source =
+                                new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
+                            RightUnFoldBtnImgChevron.Width = 18;
+                            RightUnFoldBtnImgChevron.Height = 18;
+                            RightUnFoldBtnImgChevron.RenderTransform = null;
+                            LeftUnFoldBtnImgChevron.Source =
+                                new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
+                            LeftUnFoldBtnImgChevron.Width = 18;
+                            LeftUnFoldBtnImgChevron.Height = 18;
+                            LeftUnFoldBtnImgChevron.RenderTransform = null;
+                            break;
+                    }
 
-                ViewboxFloatingBar.Opacity = Settings.Appearance.ViewboxFloatingBarOpacityValue;
+                    ViewboxFloatingBar.Opacity = Settings.Appearance.ViewboxFloatingBarOpacityValue;
 
-                ViewboxBlackboardCenterSideScaleTransform.ScaleX = Settings.Appearance.ViewboxBlackBoardScaleTransformValue;
-                ViewboxBlackboardCenterSideScaleTransform.ScaleY = Settings.Appearance.ViewboxBlackBoardScaleTransformValue;
+                    ViewboxBlackboardCenterSideScaleTransform.ScaleX = Settings.Appearance.ViewboxBlackBoardScaleTransformValue;
+                    ViewboxBlackboardCenterSideScaleTransform.ScaleY = Settings.Appearance.ViewboxBlackBoardScaleTransformValue;
 
-                ViewboxBlackboardLeftSideScaleTransform.ScaleX = Settings.Appearance.ViewboxBlackBoardLeftScaleTransformValue;
-                ViewboxBlackboardLeftSideScaleTransform.ScaleY = Settings.Appearance.ViewboxBlackBoardLeftScaleTransformValue;
-                ViewboxBlackboardRightSideScaleTransform.ScaleX = Settings.Appearance.ViewboxBlackBoardRightScaleTransformValue;
-                ViewboxBlackboardRightSideScaleTransform.ScaleY = Settings.Appearance.ViewboxBlackBoardRightScaleTransformValue;
+                    ViewboxBlackboardLeftSideScaleTransform.ScaleX = Settings.Appearance.ViewboxBlackBoardLeftScaleTransformValue;
+                    ViewboxBlackboardLeftSideScaleTransform.ScaleY = Settings.Appearance.ViewboxBlackBoardLeftScaleTransformValue;
+                    ViewboxBlackboardRightSideScaleTransform.ScaleX = Settings.Appearance.ViewboxBlackBoardRightScaleTransformValue;
+                    ViewboxBlackboardRightSideScaleTransform.ScaleY = Settings.Appearance.ViewboxBlackBoardRightScaleTransformValue;
 
-                ViewboxBlackboardLeftSide.Opacity = Settings.Appearance.BoardToolbarLeftOpacity;
-                ViewboxBlackboardCenterSide.Opacity = Settings.Appearance.BoardToolbarCenterOpacity;
-                ViewboxBlackboardRightSide.Opacity = Settings.Appearance.BoardToolbarRightOpacity;
+                    ViewboxBlackboardLeftSide.Opacity = Settings.Appearance.BoardToolbarLeftOpacity;
+                    ViewboxBlackboardCenterSide.Opacity = Settings.Appearance.BoardToolbarCenterOpacity;
+                    ViewboxBlackboardRightSide.Opacity = Settings.Appearance.BoardToolbarRightOpacity;
 
-                ApplyQuickPanelBottomOffset(Settings.Appearance.QuickPanelBottomOffset);
-                ApplySidePanelSettings();
+                    ApplyQuickPanelBottomOffset(Settings.Appearance.QuickPanelBottomOffset);
+                    ApplySidePanelSettings();
 
-                if (Settings.Appearance.IsTransparentButtonBackground)
-                {
-                    { /* Old UI removed */ }
-                }
-                else
-                {
-                    { /* Old UI removed */ }
-                }
+                    if (Settings.Appearance.IsTransparentButtonBackground)
+                    {
+                        { /* Old UI removed */ }
+                    }
+                    else
+                    {
+                        { /* Old UI removed */ }
+                    }
 
-                if (Settings.Appearance.FloatingBarImg >= 12 + Settings.Appearance.CustomFloatingBarImgs.Count)
-                {
-                    Settings.Appearance.FloatingBarImg = 0;
-                }
+                    if (Settings.Appearance.FloatingBarImg >= 12 + Settings.Appearance.CustomFloatingBarImgs.Count)
+                    {
+                        Settings.Appearance.FloatingBarImg = 0;
+                    }
 
-                UpdateFloatingBarIcon();
-                UpdateFloatingBarButtonsVisibility();
-                UpdateFloatingBarIcons();
+                    UpdateFloatingBarIcon();
+                    UpdateFloatingBarButtonsVisibility();
+                    UpdateFloatingBarIcons();
 
-                var _taskbar = Application.Current.Resources["TaskbarTrayIcon"];
-                if (_taskbar is FrameworkElement fe)
-                    fe.Visibility = Settings.Appearance.EnableTrayIcon ? Visibility.Visible : Visibility.Collapsed;
+                    var _taskbar = Application.Current.Resources["TaskbarTrayIcon"];
+                    if (_taskbar is FrameworkElement fe)
+                        fe.Visibility = Settings.Appearance.EnableTrayIcon ? Visibility.Visible : Visibility.Collapsed;
 
-                SystemEvents_UserPreferenceChanged(null, null);
+                    SystemEvents_UserPreferenceChanged(null, null);
                 }
                 else
                 {

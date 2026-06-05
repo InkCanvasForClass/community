@@ -544,7 +544,7 @@ namespace Ink_Canvas
             if (sender == BoardPenWidthSlider) PenWidthSlider.Value = value;
             else if (sender == PenWidthSlider) BoardPenWidthSlider.Value = value;
             _isUpdatingSliders = false;
-            
+
             if (penType == 0)
             {
                 drawingAttributes.Height = value / 2;
@@ -590,7 +590,7 @@ namespace Ink_Canvas
             var NowG = drawingAttributes.Color.G;
             var NowB = drawingAttributes.Color.B;
             drawingAttributes.Color = Color.FromArgb((byte)value, NowR, NowG, NowB);
-            
+
             if (penType == 0)
             {
                 Settings.Canvas.InkAlpha = value;
@@ -1028,16 +1028,16 @@ namespace Ink_Canvas
                 isLoaded = false;
                 SetSettingsToRecommendation();
                 SaveSettingsToFile();
-                
+
                 // 确保工具栏配置也被重置为默认值
                 var configName = SettingsManager.Settings?.ToolbarConfigName ?? "default";
                 ToolbarRegistry.SaveConfigFile(configName, ToolbarRegistry.CreateDefaultLayout());
-                
+
                 LoadSettings(isStartup: false, skipAutoUpdateCheck: true);
-                
+
                 // 重置后重建工具栏
                 RebuildToolbar();
-                
+
                 isLoaded = true;
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -1056,16 +1056,16 @@ namespace Ink_Canvas
                 Settings.Automation.AutoDelSavedFilesDaysThreshold = 15;
                 Settings.Automation.AutoSavedStrokesLocation = @"D:\Ink Canvas\AutoSavedStrokes";
                 SaveSettingsToFile();
-                
+
                 // 确保工具栏配置也被重置为默认值
                 var configName = SettingsManager.Settings?.ToolbarConfigName ?? "default";
                 ToolbarRegistry.SaveConfigFile(configName, ToolbarRegistry.CreateDefaultLayout());
-                
+
                 LoadSettings(isStartup: false, skipAutoUpdateCheck: true);
-                
+
                 // 重置后重建工具栏
                 RebuildToolbar();
-                
+
                 isLoaded = true;
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
