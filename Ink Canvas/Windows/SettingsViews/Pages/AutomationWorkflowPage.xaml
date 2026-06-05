@@ -613,7 +613,8 @@
                                     <Button Content="添加组" Padding="8,4" VerticalAlignment="Center"
                                             Click="BtnAddRuleGroup_Click"/>
                                     <Ellipse x:Name="EllipseRulesetState" Width="10" Height="10"
-                                             Margin="8,0,0,0" VerticalAlignment="Center" Fill="DarkGray"/>
+                                             Margin="8,0,0,0" VerticalAlignment="Center"
+                                             Fill="DarkGray"/>
                                 </WrapPanel>
 
                                 <!-- 条件组列表 -->

@@ -7,6 +7,7 @@ using Ink_Canvas.WorkflowAutomation.Models;
 using Ink_Canvas.WorkflowAutomation.Services;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
@@ -546,13 +547,33 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // 行动
             ActionsItemsControl.ItemsSource = workflow.ActionSet.Actions;
 
-            // 规则集
+            // 规则集 - 先评估更新 State，再设置 ItemsSource
             ComboBoxRulesetMode.SelectedIndex = workflow.Ruleset.Mode == RulesetLogicalMode.Or ? 0 : 1;
             CheckBoxRulesetReversed.IsChecked = workflow.Ruleset.IsReversed;
+            UpdateRulesetStateIndicator(workflow.Ruleset);
             RuleGroupsItemsControl.ItemsSource = workflow.Ruleset.Groups;
 
             UpdateConditionVisibility(workflow.IsConditionEnabled);
             UpdateRevertHintVisibility(workflow.ActionSet.IsRevertEnabled);
+        }
+
+        private void UpdateRulesetStateIndicator(Ruleset ruleset)
+        {
+            if (ruleset == null)
+            {
+                EllipseRulesetState.Fill = Brushes.DarkGray;
+                return;
+            }
+            
+            // 评估规则集（会自动更新所有层级的 State）
+            Service.RulesetService.IsRulesetSatisfied(ruleset);
+            
+            EllipseRulesetState.Fill = ruleset.State switch
+            {
+                2 => Brushes.Green,
+                1 => Brushes.IndianRed,
+                _ => Brushes.DarkGray
+            };
         }
 
         private void TextBoxWorkflowName_TextChanged(object sender, TextChangedEventArgs e)

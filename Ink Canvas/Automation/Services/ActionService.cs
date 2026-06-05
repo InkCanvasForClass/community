@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Ink_Canvas.WorkflowAutomation.Models;
+using Newtonsoft.Json.Linq;
 using ActionModel = Ink_Canvas.WorkflowAutomation.Models.Action;
 
 namespace Ink_Canvas.WorkflowAutomation.Services
@@ -17,11 +19,28 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         {
             if (!actionSet.IsEnabled) return;
 
+            // 先清除所有行动的错误状态
             foreach (var action in actionSet.Actions)
+                action.Exception = null;
+
+            if (actionSet.IsRevertEnabled)
             {
-                InvokeAction(action);
+                actionSet.IsOn = true;
             }
-            actionSet.IsOn = true;
+
+            // 对齐 ClassIsland：异步执行行动，避免阻塞 UI 线程
+            Task.Run(() =>
+            {
+                foreach (var action in actionSet.Actions)
+                {
+                    InvokeAction(action);
+                }
+            });
+
+            if (!actionSet.IsRevertEnabled)
+            {
+                actionSet.IsOn = true;
+            }
         }
 
         /// <summary>
@@ -31,11 +50,20 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         {
             if (!actionSet.IsOn) return;
 
+            // 先清除所有行动的错误状态
             foreach (var action in actionSet.Actions)
-            {
-                RevertAction(action);
-            }
+                action.Exception = null;
+
             actionSet.IsOn = false;
+
+            // 对齐 ClassIsland：异步执行恢复，避免阻塞 UI 线程
+            Task.Run(() =>
+            {
+                foreach (var action in actionSet.Actions)
+                {
+                    RevertAction(action);
+                }
+            });
         }
 
         /// <summary>
@@ -45,11 +73,30 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         {
             if (!AutomationRegistry.RegisteredActions.TryGetValue(action.Id, out var info)) return;
 
+            // 对齐 ClassIsland：反序列化 settings
+            object? settings = null;
+            var settingsType = info.SettingsType;
+            if (settingsType != null)
+            {
+                settings = action.Settings ?? Activator.CreateInstance(settingsType);
+                if (settings is JToken jToken)
+                {
+                    try
+                    {
+                        settings = jToken.ToObject(settingsType);
+                    }
+                    catch
+                    {
+                        settings = Activator.CreateInstance(settingsType);
+                    }
+                }
+            }
+
             action.IsWorking = true;
             action.Exception = null;
             try
             {
-                info.Handle?.Invoke(action.Settings, action.Id);
+                info.Handle?.Invoke(settings, action.Id);
             }
             catch (Exception ex)
             {
@@ -66,14 +113,34 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         /// </summary>
         private void RevertAction(ActionModel action)
         {
+            if (action.Id == string.Empty) return;
             if (!AutomationRegistry.RegisteredActions.TryGetValue(action.Id, out var info)) return;
             if (info.RevertHandle == null) return;
+
+            // 对齐 ClassIsland：反序列化 settings
+            object? settings = null;
+            var settingsType = info.SettingsType;
+            if (settingsType != null)
+            {
+                settings = action.Settings ?? Activator.CreateInstance(settingsType);
+                if (settings is JToken jToken)
+                {
+                    try
+                    {
+                        settings = jToken.ToObject(settingsType);
+                    }
+                    catch
+                    {
+                        settings = Activator.CreateInstance(settingsType);
+                    }
+                }
+            }
 
             action.IsWorking = true;
             action.Exception = null;
             try
             {
-                info.RevertHandle.Invoke(action.Settings, action.Id);
+                info.RevertHandle.Invoke(settings, action.Id);
             }
             catch (Exception ex)
             {

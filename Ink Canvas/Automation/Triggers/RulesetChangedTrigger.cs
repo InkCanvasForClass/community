@@ -19,12 +19,12 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
     {
         public override void Loaded()
         {
-            AutomationBootstrap.Service.GetRulesetService().StatusUpdated += StatusUpdatedHandler;
+            AutomationBootstrap.Service.RulesetService.StatusUpdated += StatusUpdatedHandler;
         }
 
         public override void UnLoaded()
         {
-            AutomationBootstrap.Service.GetRulesetService().StatusUpdated -= StatusUpdatedHandler;
+            AutomationBootstrap.Service.RulesetService.StatusUpdated -= StatusUpdatedHandler;
         }
 
         private void StatusUpdatedHandler(object? sender, EventArgs e)

@@ -26,6 +26,21 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             {
                 Directory.CreateDirectory(_configsFolderPath);
             }
+
+            // 监听规则状态变化，自动恢复不再满足条件的工作流
+            RulesetService.StatusUpdated += RulesetServiceOnStatusUpdated;
+        }
+
+        private void RulesetServiceOnStatusUpdated(object? sender, EventArgs e)
+        {
+            if (!IsAutomationEnabled) return;
+
+            foreach (var workflow in Workflows.Where(x => x is { ActionSet: { IsOn: true, IsRevertEnabled: true }, IsConditionEnabled: true }))
+            {
+                if (RulesetService.IsRulesetSatisfied(workflow.Ruleset))
+                    continue;
+                ActionService.Revert(workflow.ActionSet);
+            }
         }
 
         private string _currentConfig = "default";
@@ -169,8 +184,8 @@ namespace Ink_Canvas.WorkflowAutomation.Services
                     Rules = new ObservableCollection<Rule> { new Rule() }
                 });
             }
-            
-            workflow.Triggers.CollectionChanged += (s, e) =>
+
+            void TriggersOnCollectionChanged(object? s, NotifyCollectionChangedEventArgs e)
             {
                 switch (e.Action)
                 {
@@ -183,11 +198,24 @@ namespace Ink_Canvas.WorkflowAutomation.Services
                             UnloadTrigger(workflow, trigger);
                         break;
                 }
-            };
+            }
+
+            workflow.Triggers.CollectionChanged += TriggersOnCollectionChanged;
+
+            // 通过 Unloading 事件取消订阅，避免内存泄漏
+            workflow.Unloading += OnWorkflowUnloading;
 
             foreach (var trigger in workflow.Triggers)
             {
                 LoadTrigger(workflow, trigger);
+            }
+
+            return;
+
+            void OnWorkflowUnloading(object? sender, EventArgs e)
+            {
+                workflow.Unloading -= OnWorkflowUnloading;
+                workflow.Triggers.CollectionChanged -= TriggersOnCollectionChanged;
             }
         }
 
@@ -201,11 +229,10 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         }
 
         private RulesetService? _rulesetService;
-        
-        public RulesetService GetRulesetService()
-        {
-            return _rulesetService ??= new RulesetService();
-        }
+        public RulesetService RulesetService => _rulesetService ??= new RulesetService();
+
+        private ActionService? _actionService;
+        public ActionService ActionService => _actionService ??= new ActionService();
 
         private void LoadTrigger(Workflow workflow, TriggerSettings trigger)
         {
@@ -248,6 +275,10 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             triggerInstance.TriggeredRecover += TriggerTriggeredRecover;
             trigger.TriggerInstance = triggerInstance;
 
+            // 对齐 ClassIsland：监听 trigger.Id 变化，自动重新加载触发器
+            trigger.PropertyChanged += TriggerOnPropertyChanged;
+            trigger.Unloading += TriggerOnUnloading;
+
             try
             {
                 triggerInstance.Loaded();
@@ -256,11 +287,29 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             {
                 // 触发器加载失败不影响其他
             }
+
+            return;
+
+            void TriggerOnPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+            {
+                if (e.PropertyName != nameof(trigger.Id)) return;
+                UnloadTrigger(workflow, trigger);
+                LoadTrigger(workflow, trigger);
+            }
+
+            void TriggerOnUnloading(object? sender, EventArgs e)
+            {
+                trigger.Unloading -= TriggerOnUnloading;
+                trigger.PropertyChanged -= TriggerOnPropertyChanged;
+            }
         }
 
         private void UnloadTrigger(Workflow workflow, TriggerSettings trigger)
         {
             if (trigger.TriggerInstance == null) return;
+
+            // 对齐 ClassIsland：先触发 Unloading 事件取消订阅，再卸载触发器实例
+            trigger.Unload();
 
             try
             {
@@ -271,7 +320,6 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             trigger.TriggerInstance.Triggered -= TriggerTriggered;
             trigger.TriggerInstance.TriggeredRecover -= TriggerTriggeredRecover;
             trigger.TriggerInstance = null;
-            trigger.Unload();
         }
 
         private void TriggerTriggered(object? sender, EventArgs e)
@@ -289,13 +337,11 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             // 检查条件
             if (workflow.IsConditionEnabled)
             {
-                var rulesetService = new RulesetService();
-                if (!rulesetService.IsRulesetSatisfied(workflow.Ruleset)) return;
+                if (!RulesetService.IsRulesetSatisfied(workflow.Ruleset)) return;
             }
 
             // 执行行动
-            var actionService = new ActionService();
-            actionService.Invoke(workflow.ActionSet);
+            ActionService.Invoke(workflow.ActionSet);
             SaveConfig("TriggerTriggered");
         }
 
@@ -308,8 +354,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             if (workflow == null) return;
             if (!workflow.ActionSet.IsOn) return;
 
-            var actionService = new ActionService();
-            actionService.Revert(workflow.ActionSet);
+            ActionService.Revert(workflow.ActionSet);
             SaveConfig("TriggerTriggeredRecover");
         }
     }

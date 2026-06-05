@@ -22,11 +22,15 @@ namespace Ink_Canvas.WorkflowAutomation
         public static AutomationService Service => _service ??= new AutomationService(
             Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Automations"));
 
+        private static bool _isInitialized = false;
+
         /// <summary>
         /// 初始化自动化系统，注册所有内置组件。
         /// </summary>
         public static void Initialize()
         {
+            if (_isInitialized) return;
+            _isInitialized = true;
             // 注册触发器
             AutomationRegistry.RegisterTrigger(
                 new TriggerInfo("inkcanvas.processdetected", "进程检测", "ApplicationOutline")

@@ -380,7 +380,7 @@
                                                 Padding="8,4" Margin="8,0,0,0" VerticalAlignment="Center"/>
                                         <Ellipse x:Name="EllipseRulesetState" Width="10" Height="10"
                                                  Margin="8,0,0,0" VerticalAlignment="Center"
-                                                 Fill="DarkGray"/>
+                                                 Fill="{Binding State, Converter={StaticResource StateToBrushConverter}}"/>
                                     </WrapPanel>
 
                                     <ItemsControl x:Name="ItemsControlGroups">

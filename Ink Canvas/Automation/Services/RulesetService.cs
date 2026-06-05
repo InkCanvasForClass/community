@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Ink_Canvas.WorkflowAutomation.Enums;
 using Ink_Canvas.WorkflowAutomation.Models;
+using Newtonsoft.Json.Linq;
 
 namespace Ink_Canvas.WorkflowAutomation.Services
 {
     /// <summary>
     /// 规则集服务，负责评估规则集是否满足。
+    /// 对齐 ClassIsland 的 RulesetService 实现，在评估时更新所有层级的 State。
     /// </summary>
     public class RulesetService
     {
@@ -16,59 +18,138 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         /// </summary>
         public event EventHandler? StatusUpdated;
 
+        private int BoolToRuleObjectState(bool? v) => v switch
+        {
+            true => 2,
+            false => 1,
+            null => 0
+        };
+
         /// <summary>
-        /// 判断指定的规则集是否成立。
+        /// 判断指定的规则集是否成立，同时更新所有层级的 State。
         /// </summary>
         public bool IsRulesetSatisfied(Ruleset ruleset)
         {
-            if (ruleset.Groups.Count == 0) return true;
-
-            bool result;
-            if (ruleset.Mode == RulesetLogicalMode.And)
+            if (ruleset.Groups.Count <= 0)
             {
-                result = ruleset.Groups.All(g => IsRuleGroupSatisfied(g));
-            }
-            else
-            {
-                result = ruleset.Groups.Any(g => IsRuleGroupSatisfied(g));
+                ruleset.State = BoolToRuleObjectState(false);
+                return false;
             }
 
-            return ruleset.IsReversed ? !result : result;
+            // 先重置所有状态
+            foreach (var group in ruleset.Groups)
+            {
+                group.State = 0;
+                foreach (var rule in group.Rules)
+                {
+                    rule.State = 0;
+                }
+            }
+
+            var isSatisfied = ruleset.Mode == RulesetLogicalMode.And;
+
+            foreach (var group in ruleset.Groups.Where(x => x.IsEnabled))
+            {
+                bool? res = IsRuleGroupSatisfied(group);
+                group.State = BoolToRuleObjectState(res);
+                if (res == null)
+                    continue;
+
+                bool result = res.Value;
+                if (!result && ruleset.Mode == RulesetLogicalMode.And)
+                {
+                    isSatisfied = false;
+                    break;
+                }
+                if (result && ruleset.Mode == RulesetLogicalMode.Or)
+                {
+                    isSatisfied = true;
+                    break;
+                }
+            }
+
+            isSatisfied ^= ruleset.IsReversed;
+            ruleset.State = BoolToRuleObjectState(isSatisfied);
+            return isSatisfied;
         }
 
         /// <summary>
-        /// 判断规则组是否成立。
+        /// 判断规则组是否成立，同时更新规则组内所有规则的 State。
         /// </summary>
-        private bool IsRuleGroupSatisfied(RuleGroup group)
+        private bool? IsRuleGroupSatisfied(RuleGroup group)
         {
-            if (!group.IsEnabled) return true;
-            if (group.Rules.Count == 0) return true;
-
-            bool result;
-            if (group.Mode == RulesetLogicalMode.And)
+            // 没有有效规则时返回 null（未知状态）
+            if (group.Rules.Where(r => r.Id != "").ToList().Count <= 0)
             {
-                result = group.Rules.All(r => IsRuleSatisfied(r));
-            }
-            else
-            {
-                result = group.Rules.Any(r => IsRuleSatisfied(r));
+                return null;
             }
 
-            return group.IsReversed ? !result : result;
+            var groupSatisfied = group.Mode == RulesetLogicalMode.And;
+
+            foreach (var rule in group.Rules)
+            {
+                bool? res = IsRuleSatisfied(rule);
+                if (res == null)
+                {
+                    rule.State = BoolToRuleObjectState(res);
+                    continue;
+                }
+
+                bool result = res.Value;
+                result ^= rule.IsReversed;
+                rule.State = BoolToRuleObjectState(result);
+                if (!result && group.Mode == RulesetLogicalMode.And)
+                {
+                    groupSatisfied = false;
+                    break;
+                }
+                if (result && group.Mode == RulesetLogicalMode.Or)
+                {
+                    groupSatisfied = true;
+                    break;
+                }
+            }
+
+            groupSatisfied ^= group.IsReversed;
+            return groupSatisfied;
         }
 
         /// <summary>
         /// 判断单条规则是否成立。
         /// </summary>
-        private bool IsRuleSatisfied(Rule rule)
+        private bool? IsRuleSatisfied(Rule rule)
         {
-            if (!AutomationRegistry.RegisteredRules.TryGetValue(rule.Id, out var info)) return false;
-            if (info.Handle == null) return false;
+            if (rule.Id == string.Empty)
+                return null;
+
+            if (!AutomationRegistry.RegisteredRules.TryGetValue(rule.Id, out var info))
+                return false;
+
+            if (info.Handle == null)
+                return false;
+
+            // 对齐 ClassIsland：反序列化 settings
+            object? settings = null;
+            var settingsType = info.SettingsType;
+            if (settingsType != null)
+            {
+                settings = rule.Settings ?? Activator.CreateInstance(settingsType);
+                if (settings is JToken jToken)
+                {
+                    try
+                    {
+                        settings = jToken.ToObject(settingsType);
+                    }
+                    catch
+                    {
+                        settings = Activator.CreateInstance(settingsType);
+                    }
+                }
+            }
 
             try
             {
-                bool result = info.Handle(rule.Settings);
-                return rule.IsReversed ? !result : result;
+                return info.Handle(settings);
             }
             catch
             {
