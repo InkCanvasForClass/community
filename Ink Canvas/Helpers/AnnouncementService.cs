@@ -159,7 +159,7 @@ namespace Ink_Canvas.Helpers
                 NotificationProviderRegistry.SetRunning(ProviderId, false, NotificationStrings.Provider_Disabled);
                 return;
             }
-            if (string.IsNullOrWhiteSpace(NotificationSettings.BuiltInSoftwareToken))
+            if (string.IsNullOrWhiteSpace(settings.Notification.AnnouncementSoftwareToken))
             {
                 NotificationProviderRegistry.SetRunning(ProviderId, false, NotificationStrings.Provider_NoToken);
                 return;
@@ -187,7 +187,7 @@ namespace Ink_Canvas.Helpers
         public async Task FetchAnnouncementsAsync(CancellationToken cancellationToken)
         {
             var baseUrl = settings?.Notification?.AnnouncementApiBaseUrl;
-            var token = NotificationSettings.BuiltInSoftwareToken;
+            var token = settings.Notification.AnnouncementSoftwareToken;
             if (string.IsNullOrWhiteSpace(baseUrl) || string.IsNullOrWhiteSpace(token)) return;
 
             try
@@ -578,7 +578,7 @@ namespace Ink_Canvas.Helpers
 
         private string BuildWebSocketUrl()
         {
-            var token = NotificationSettings.BuiltInSoftwareToken;
+            var token = settings.Notification.AnnouncementSoftwareToken;
             if (string.IsNullOrWhiteSpace(token)) return string.Empty;
 
             var wsUrl = settings.Notification.AnnouncementWebSocketUrl;
