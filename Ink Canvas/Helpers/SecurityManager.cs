@@ -160,6 +160,14 @@ namespace Ink_Canvas.Helpers
             panel.Children.Add(passwordBox);
             dialog.Content = panel;
 
+            bool noFocusModeWasTemporarilyDisabled = false;
+            if (owner != null && owner.IsVisible && settings?.Advanced?.IsNoFocusMode == true)
+            {
+                WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode = true;
+                WindowSettingsHelper.ApplyNoFocusMode(owner);
+                noFocusModeWasTemporarilyDisabled = true;
+            }
+
             if (settings?.Security?.UsbVerificationEnabled == true)
             {
                 usbCheckTimer = new DispatcherTimer
@@ -180,6 +188,15 @@ namespace Ink_Canvas.Helpers
 
             try
             {
+                dialog.Opened += (s, e) =>
+                {
+                    passwordBox.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        passwordBox.Focus();
+                        Keyboard.Focus(passwordBox);
+                    }), DispatcherPriority.Input);
+                };
+
                 var result = await dialog.ShowAsync();
                 if (usbVerified) return true;
                 if (result != ContentDialogResult.Primary) return false;
@@ -191,6 +208,12 @@ namespace Ink_Canvas.Helpers
                 if (usbCheckTimer != null)
                 {
                     usbCheckTimer.Stop();
+                }
+
+                if (noFocusModeWasTemporarilyDisabled)
+                {
+                    WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode = false;
+                    WindowSettingsHelper.ApplyNoFocusMode(owner);
                 }
             }
         }
@@ -365,24 +388,56 @@ namespace Ink_Canvas.Helpers
             panel.Children.Add(confirmPwdBox);
             dialog.Content = panel;
 
-            var result = await dialog.ShowAsync();
-            if (result != ContentDialogResult.Primary) return null;
-
-            var pwd = newPwdBox.Password ?? "";
-            var confirm = confirmPwdBox.Password ?? "";
-
-            if (string.IsNullOrWhiteSpace(pwd) || pwd.Length < 4)
+            bool noFocusModeWasTemporarilyDisabled = false;
+            if (owner != null && owner.IsVisible)
             {
-                MessageBox.Show(MainWindowStrings.Main_Security_PasswordTooShort, MainWindowStrings.Main_Security_Tip, MessageBoxButton.OK, MessageBoxImage.Warning);
-                return null;
-            }
-            if (!string.Equals(pwd, confirm, StringComparison.Ordinal))
-            {
-                MessageBox.Show(MainWindowStrings.Main_Security_PasswordMismatch, MainWindowStrings.Main_Security_Tip, MessageBoxButton.OK, MessageBoxImage.Warning);
-                return null;
+                var settings = MainWindow.Settings;
+                if (settings?.Advanced?.IsNoFocusMode == true)
+                {
+                    WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode = true;
+                    WindowSettingsHelper.ApplyNoFocusMode(owner);
+                    noFocusModeWasTemporarilyDisabled = true;
+                }
             }
 
-            return pwd;
+            try
+            {
+                dialog.Opened += (s, e) =>
+                {
+                    newPwdBox.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        newPwdBox.Focus();
+                        Keyboard.Focus(newPwdBox);
+                    }), DispatcherPriority.Input);
+                };
+
+                var result = await dialog.ShowAsync();
+                if (result != ContentDialogResult.Primary) return null;
+
+                var pwd = newPwdBox.Password ?? "";
+                var confirm = confirmPwdBox.Password ?? "";
+
+                if (string.IsNullOrWhiteSpace(pwd) || pwd.Length < 4)
+                {
+                    MessageBox.Show(MainWindowStrings.Main_Security_PasswordTooShort, MainWindowStrings.Main_Security_Tip, MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return null;
+                }
+                if (!string.Equals(pwd, confirm, StringComparison.Ordinal))
+                {
+                    MessageBox.Show(MainWindowStrings.Main_Security_PasswordMismatch, MainWindowStrings.Main_Security_Tip, MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return null;
+                }
+
+                return pwd;
+            }
+            finally
+            {
+                if (noFocusModeWasTemporarilyDisabled)
+                {
+                    WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode = false;
+                    WindowSettingsHelper.ApplyNoFocusMode(owner);
+                }
+            }
         }
 
         /// <summary>
@@ -430,31 +485,59 @@ namespace Ink_Canvas.Helpers
             panel.Children.Add(confirmPwdBox);
             dialog.Content = panel;
 
-            var result = await dialog.ShowAsync();
-            if (result != ContentDialogResult.Primary) return null;
-
-            var current = currentBox.Password ?? "";
-            var newPwd = newPwdBox.Password ?? "";
-            var confirm = confirmPwdBox.Password ?? "";
-
-            if (!VerifyPassword(settings, current))
+            bool noFocusModeWasTemporarilyDisabled = false;
+            if (owner != null && owner.IsVisible && settings?.Advanced?.IsNoFocusMode == true)
             {
-                MessageBox.Show(MainWindowStrings.Main_Security_CurrentPasswordWrong, MainWindowStrings.Main_Security_Tip, MessageBoxButton.OK, MessageBoxImage.Warning);
-                return null;
+                WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode = true;
+                WindowSettingsHelper.ApplyNoFocusMode(owner);
+                noFocusModeWasTemporarilyDisabled = true;
             }
 
-            if (string.IsNullOrWhiteSpace(newPwd) || newPwd.Length < 4)
+            try
             {
-                MessageBox.Show(MainWindowStrings.Main_Security_NewPasswordTooShort, MainWindowStrings.Main_Security_Tip, MessageBoxButton.OK, MessageBoxImage.Warning);
-                return null;
-            }
-            if (!string.Equals(newPwd, confirm, StringComparison.Ordinal))
-            {
-                MessageBox.Show(MainWindowStrings.Main_Security_NewPasswordMismatch, MainWindowStrings.Main_Security_Tip, MessageBoxButton.OK, MessageBoxImage.Warning);
-                return null;
-            }
+                dialog.Opened += (s, e) =>
+                {
+                    currentBox.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        currentBox.Focus();
+                        Keyboard.Focus(currentBox);
+                    }), DispatcherPriority.Input);
+                };
 
-            return newPwd;
+                var result = await dialog.ShowAsync();
+                if (result != ContentDialogResult.Primary) return null;
+
+                var current = currentBox.Password ?? "";
+                var newPwd = newPwdBox.Password ?? "";
+                var confirm = confirmPwdBox.Password ?? "";
+
+                if (!VerifyPassword(settings, current))
+                {
+                    MessageBox.Show(MainWindowStrings.Main_Security_CurrentPasswordWrong, MainWindowStrings.Main_Security_Tip, MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return null;
+                }
+
+                if (string.IsNullOrWhiteSpace(newPwd) || newPwd.Length < 4)
+                {
+                    MessageBox.Show(MainWindowStrings.Main_Security_NewPasswordTooShort, MainWindowStrings.Main_Security_Tip, MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return null;
+                }
+                if (!string.Equals(newPwd, confirm, StringComparison.Ordinal))
+                {
+                    MessageBox.Show(MainWindowStrings.Main_Security_NewPasswordMismatch, MainWindowStrings.Main_Security_Tip, MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return null;
+                }
+
+                return newPwd;
+            }
+            finally
+            {
+                if (noFocusModeWasTemporarilyDisabled)
+                {
+                    WindowSettingsHelper.IsTemporarilyDisablingNoFocusMode = false;
+                    WindowSettingsHelper.ApplyNoFocusMode(owner);
+                }
+            }
         }
 
         /// <summary>
