@@ -19,7 +19,9 @@
         Closing="Window_Closing"
         ui:ThemeManager.IsThemeAware="True"
         ui:WindowHelper.UseModernWindowStyle="True"
-        ui:WindowHelper.CornerStyle="Round">
+        ui:WindowHelper.CornerStyle="Round"
+        ui:TitleBar.ExtendViewIntoTitleBar="True"
+        ui:TitleBar.Height="0">
 
     <Window.Resources>
         <Style x:Key="MiniToolBtn" TargetType="Border">
@@ -92,14 +94,6 @@
                         MouseLeftButtonUp="UndoBtn_Click"
                         ToolTip="{x:Static fb:FloatingBarStrings.Board_Undo}">
                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Undo}" FontSize="14"
-                                 Foreground="{DynamicResource IconForeground}"/>
-                </Border>
-
-                <!-- 重做 -->
-                <Border x:Name="RedoBtn" Style="{StaticResource MiniToolBtn}"
-                        MouseLeftButtonUp="RedoBtn_Click"
-                        ToolTip="{x:Static fb:FloatingBarStrings.Board_Redo}">
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Redo}" FontSize="14"
                                  Foreground="{DynamicResource IconForeground}"/>
                 </Border>
 

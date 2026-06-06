@@ -113,12 +113,6 @@ namespace Ink_Canvas
             }
         }
 
-        private void RedoBtn_Click(object sender, MouseButtonEventArgs e)
-        {
-            // Redo would need proper TimeMachineHistory integration
-            // For now, this is a placeholder
-        }
-
         private void ClearBtn_Click(object sender, MouseButtonEventArgs e)
         {
             if (MiniInkCanvas.Strokes.Count == 0) return;

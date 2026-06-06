@@ -15,6 +15,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public override string Description => FloatingBarStrings.FloatingBar_MiniWhiteboard;
 
+        // 使用与浮动栏白板按钮相同的图标几何
+        protected override string IconGeometry => XamlGraphicsIconGeometries.WhiteboardFloatingBarBtnIcon;
+
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.ToggleMiniWhiteboard();
 

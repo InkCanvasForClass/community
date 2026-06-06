@@ -28,11 +28,10 @@
                     </Style>
                 </Border.Style>
                 <StackPanel Orientation="Horizontal">
-                    <Path Data="M3 3h18v18H3V3zm2 2v14h14V5H5z"
-                          Stroke="{DynamicResource TextFillColorPrimaryBrush}"
-                          StrokeThickness="1.2" Fill="Transparent"
-                          Width="14" Height="14" Stretch="Uniform"
-                          VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <Image Source="{DynamicResource QuickPanelBlackboardIcon}"
+                           Width="14" Height="14"
+                           RenderOptions.BitmapScalingMode="HighQuality"
+                           Margin="0,0,8,0" VerticalAlignment="Center"/>
                     <TextBlock Text="{x:Static fb:FloatingBarStrings.FloatingBar_Whiteboard}"
                                FontSize="12"
                                Foreground="{DynamicResource TextFillColorPrimaryBrush}"
@@ -53,11 +52,10 @@
                     </Style>
                 </Border.Style>
                 <StackPanel Orientation="Horizontal">
-                    <Path Data="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z M20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
-                          Stroke="{DynamicResource TextFillColorPrimaryBrush}"
-                          StrokeThickness="1.2" Fill="Transparent"
-                          Width="14" Height="14" Stretch="Uniform"
-                          VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <Image Source="{DynamicResource QuickPanelBlackboardIcon}"
+                           Width="14" Height="14"
+                           RenderOptions.BitmapScalingMode="HighQuality"
+                           Margin="0,0,8,0" VerticalAlignment="Center"/>
                     <TextBlock Text="{x:Static fb:FloatingBarStrings.FloatingBar_MiniWhiteboard}"
                                FontSize="12"
                                Foreground="{DynamicResource TextFillColorPrimaryBrush}"
