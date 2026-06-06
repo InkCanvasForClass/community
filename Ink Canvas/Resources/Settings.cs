@@ -105,6 +105,27 @@ namespace Ink_Canvas
 
         [JsonProperty("sampleCount")]
         public int SampleCount { get; set; }
+
+        [JsonProperty("smoothingSampleCount")]
+        public int SmoothingSampleCount { get; set; }
+
+        [JsonProperty("smoothingAvgTotalMs")]
+        public double SmoothingAvgTotalMs { get; set; }
+
+        [JsonProperty("smoothingMaxTotalMs")]
+        public double SmoothingMaxTotalMs { get; set; }
+
+        [JsonProperty("smoothingAvgBezierMs")]
+        public double SmoothingAvgBezierMs { get; set; }
+
+        [JsonProperty("smoothingAvgResampleMs")]
+        public double SmoothingAvgResampleMs { get; set; }
+
+        [JsonProperty("smoothingAvgInputPoints")]
+        public double SmoothingAvgInputPoints { get; set; }
+
+        [JsonProperty("smoothingAvgOutputPoints")]
+        public double SmoothingAvgOutputPoints { get; set; }
     }
 
     public class NotificationSettings

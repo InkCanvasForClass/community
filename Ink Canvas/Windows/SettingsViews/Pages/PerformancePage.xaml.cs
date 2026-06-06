@@ -111,6 +111,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 TextHistorySummary.Text = PerformanceStrings.NoHistory;
                 PanelHistoryStats.Visibility = Visibility.Collapsed;
+                TextSmoothingHistorySummary.Text = PerformanceStrings.NoHistory;
+                PanelSmoothingHistoryStats.Visibility = Visibility.Collapsed;
+                PanelSmoothingHistoryPointStats.Visibility = Visibility.Collapsed;
                 CardClearHistory.IsEnabled = false;
                 return;
             }
@@ -123,6 +126,29 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             TextHistoryPeakCpu.Text = $"{history.Max(r => r.PeakCpuPercent):F1} %";
             TextHistoryAvgMem.Text = $"{history.Average(r => r.AvgMemoryMb):F0} MB";
             TextHistoryPeakMem.Text = $"{history.Max(r => r.PeakMemoryMb):F0} MB";
+
+            // 墨迹平滑历史
+            var smoothingHistory = history.Where(r => r.SmoothingSampleCount > 0).ToList();
+            if (smoothingHistory.Count == 0)
+            {
+                TextSmoothingHistorySummary.Text = PerformanceStrings.InkSmoothingInactive;
+                PanelSmoothingHistoryStats.Visibility = Visibility.Collapsed;
+                PanelSmoothingHistoryPointStats.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                TextSmoothingHistorySummary.Text = string.Format(PerformanceStrings.HistoryRunCount, smoothingHistory.Count);
+                PanelSmoothingHistoryStats.Visibility = Visibility.Visible;
+                PanelSmoothingHistoryPointStats.Visibility = Visibility.Visible;
+
+                TextSmoothingHistoryAvgTotal.Text = $"{smoothingHistory.Average(r => r.SmoothingAvgTotalMs):F2} ms";
+                TextSmoothingHistoryMaxTotal.Text = $"{smoothingHistory.Max(r => r.SmoothingMaxTotalMs):F2} ms";
+                TextSmoothingHistoryAvgBezier.Text = $"{smoothingHistory.Average(r => r.SmoothingAvgBezierMs):F2} ms";
+                TextSmoothingHistoryAvgResample.Text = $"{smoothingHistory.Average(r => r.SmoothingAvgResampleMs):F2} ms";
+                TextSmoothingHistoryAvgInput.Text = $"{smoothingHistory.Average(r => r.SmoothingAvgInputPoints):F0}";
+                TextSmoothingHistoryAvgOutput.Text = $"{smoothingHistory.Average(r => r.SmoothingAvgOutputPoints):F0}";
+                TextSmoothingHistorySampleCount.Text = smoothingHistory.Sum(r => r.SmoothingSampleCount).ToString();
+            }
         }
 
         private void RefreshDeviceScoreDisplay()

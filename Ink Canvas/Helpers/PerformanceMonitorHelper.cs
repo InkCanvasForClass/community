@@ -63,6 +63,9 @@ namespace Ink_Canvas.Helpers
         /// <summary>Current system-wide CPU usage percent.</summary>
         public static double CurrentSystemCpuPercent { get; private set; }
 
+        /// <summary>Cached ink smoothing stats (updated by InkSmoothingManager after each smoothing).</summary>
+        private static InkSmoothingDetailedStats _cachedSmoothingStats;
+
         /// <summary>Whether monitoring is active.</summary>
         public static bool IsMonitoring => _isMonitoring;
 
@@ -120,6 +123,14 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
+        /// Called by InkSmoothingManager after each smoothing operation to cache the latest stats.
+        /// </summary>
+        public static void UpdateSmoothingStats(InkSmoothingDetailedStats stats)
+        {
+            _cachedSmoothingStats = stats;
+        }
+
+        /// <summary>
         /// Stops monitoring and saves the run record. Call at app shutdown.
         /// </summary>
         public static void StopAndSave()
@@ -148,6 +159,18 @@ namespace Ink_Canvas.Helpers
                         PeakMemoryMb = Math.Round(_memorySamples.Count > 0 ? _memorySamples.Max() : 0, 1),
                         SampleCount = SampleCount
                     };
+
+                    // 记录墨迹平滑统计
+                    if (_cachedSmoothingStats != null && _cachedSmoothingStats.SampleCount > 0)
+                    {
+                        record.SmoothingSampleCount = _cachedSmoothingStats.SampleCount;
+                        record.SmoothingAvgTotalMs = Math.Round(_cachedSmoothingStats.AvgTotalMs, 2);
+                        record.SmoothingMaxTotalMs = Math.Round(_cachedSmoothingStats.MaxTotalMs, 2);
+                        record.SmoothingAvgBezierMs = Math.Round(_cachedSmoothingStats.AvgBezierMs, 2);
+                        record.SmoothingAvgResampleMs = Math.Round(_cachedSmoothingStats.AvgResampleMs, 2);
+                        record.SmoothingAvgInputPoints = Math.Round(_cachedSmoothingStats.AvgInputPoints, 0);
+                        record.SmoothingAvgOutputPoints = Math.Round(_cachedSmoothingStats.AvgOutputPoints, 0);
+                    }
 
                     AppendRecord(record);
                 }
