@@ -1,5 +1,5 @@
 using Ink_Canvas.WorkflowAutomation.Abstractions;
-using System.Timers;
+using Ink_Canvas.WorkflowAutomation.Services;
 
 namespace Ink_Canvas.WorkflowAutomation.Triggers
 {
@@ -8,69 +8,108 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
     /// </summary>
     public class AnnotationModeExitSettings
     {
-        /// <summary>
-        /// 检测间隔（毫秒）
-        /// </summary>
-        public int CheckIntervalMs { get; set; } = 200;
     }
 
     /// <summary>
     /// 浮动工具栏退出批注模式时触发的触发器。
+    /// 通过订阅 inkCanvas.EditingModeChanged 事件驱动，无需轮询。
     /// </summary>
     public class AnnotationModeExitTrigger : TriggerBase<AnnotationModeExitSettings>
     {
-        private Timer _timer;
         private bool _wasInAnnotationMode = false;
 
         public override void Loaded()
         {
-            _timer = new Timer(Settings.CheckIntervalMs);
-            _timer.Elapsed += OnTimerElapsed;
-            _timer.Start();
             _wasInAnnotationMode = IsInAnnotationMode();
+
+            // 订阅 inkCanvas 事件
+            TrySubscribeInkCanvas();
+
+            // 同时订阅 Monitor 的内部状态变化事件作为兜底
+            var monitor = AutomationBootstrap.Monitor;
+            if (monitor != null)
+            {
+                monitor.InternalStateChanged += OnInternalStateChanged;
+            }
         }
 
         public override void UnLoaded()
         {
-            if (_timer != null)
+            TryUnsubscribeInkCanvas();
+
+            var monitor = AutomationBootstrap.Monitor;
+            if (monitor != null)
             {
-                _timer.Elapsed -= OnTimerElapsed;
-                _timer.Stop();
-                _timer.Dispose();
-                _timer = null;
+                monitor.InternalStateChanged -= OnInternalStateChanged;
             }
         }
 
-        private void OnTimerElapsed(object sender, ElapsedEventArgs e)
+        private void TrySubscribeInkCanvas()
         {
             try
             {
-                bool isInAnnotationMode = IsInAnnotationMode();
-
-                if (!isInAnnotationMode && _wasInAnnotationMode)
+                var mw = System.Windows.Application.Current?.MainWindow as MainWindow;
+                if (mw?.inkCanvas != null)
                 {
-                    _wasInAnnotationMode = false;
-                    Trigger();
-                }
-                else if (isInAnnotationMode)
-                {
-                    _wasInAnnotationMode = true;
+                    mw.inkCanvas.EditingModeChanged += OnEditingModeChanged;
                 }
             }
-            catch
+            catch { }
+        }
+
+        private void TryUnsubscribeInkCanvas()
+        {
+            try
             {
-                // 忽略检测错误
+                var mw = System.Windows.Application.Current?.MainWindow as MainWindow;
+                if (mw?.inkCanvas != null)
+                {
+                    mw.inkCanvas.EditingModeChanged -= OnEditingModeChanged;
+                }
+            }
+            catch { }
+        }
+
+        private void OnEditingModeChanged(object sender, System.EventArgs e)
+        {
+            CheckAnnotationMode();
+        }
+
+        private void OnInternalStateChanged(object sender, System.EventArgs e)
+        {
+            CheckAnnotationMode();
+        }
+
+        private void CheckAnnotationMode()
+        {
+            bool isInAnnotationMode = IsInAnnotationMode();
+
+            if (!isInAnnotationMode && _wasInAnnotationMode)
+            {
+                _wasInAnnotationMode = false;
+                Trigger();
+            }
+            else if (isInAnnotationMode)
+            {
+                _wasInAnnotationMode = true;
             }
         }
 
         private static bool IsInAnnotationMode()
         {
-            return System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            try
             {
-                var mw = System.Windows.Application.Current.MainWindow as MainWindow;
-                if (mw == null) return false;
-                return mw.inkCanvas?.EditingMode == System.Windows.Controls.InkCanvasEditingMode.Ink;
-            });
+                return System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    var mw = System.Windows.Application.Current.MainWindow as MainWindow;
+                    if (mw == null) return false;
+                    return mw.inkCanvas?.EditingMode == System.Windows.Controls.InkCanvasEditingMode.Ink;
+                });
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

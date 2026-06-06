@@ -1,4 +1,5 @@
 using Ink_Canvas.WorkflowAutomation.Models;
+using Ink_Canvas.WorkflowAutomation.Services;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -48,6 +49,8 @@ namespace Ink_Canvas.WorkflowAutomation.Actions
                         mw.inkCanvas.EditingMode = InkCanvasEditingMode.None;
                     }
                 });
+
+                AutomationBootstrap.Monitor?.NotifyInternalStateChanged();
             };
 
             info.RevertHandle = (settings, guid) =>
@@ -70,6 +73,8 @@ namespace Ink_Canvas.WorkflowAutomation.Actions
                         mw.inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                     }
                 });
+
+                AutomationBootstrap.Monitor?.NotifyInternalStateChanged();
             };
 
             return info;

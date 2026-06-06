@@ -9,7 +9,8 @@ namespace Ink_Canvas.WorkflowAutomation.Services
 {
     /// <summary>
     /// 规则集服务，负责评估规则集是否满足。
-    /// 对齐 ClassIsland 的 RulesetService 实现，在评估时更新所有层级的 State。
+    /// 事件驱动模式：订阅 SystemEventMonitor 的系统事件，仅在状态可能变化时重新评估。
+    /// 保留 5s 兜底轮询防止遗漏。
     /// </summary>
     public class RulesetService : IDisposable
     {
@@ -18,7 +19,8 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         /// </summary>
         public event EventHandler StatusUpdated;
 
-        private Timer _pollingTimer;
+        private Timer _fallbackTimer;
+        private SystemEventMonitor _monitor;
 
         private int BoolToRuleObjectState(bool? v) => v switch
         {
@@ -29,11 +31,31 @@ namespace Ink_Canvas.WorkflowAutomation.Services
 
         public RulesetService()
         {
-            // 启动定期轮询以检测状态变化
-            _pollingTimer = new Timer(500);
-            _pollingTimer.Elapsed += OnPollingTimerElapsed;
-            _pollingTimer.AutoReset = true;
-            _pollingTimer.Start();
+            _monitor = AutomationBootstrap.Monitor;
+
+            // 订阅系统事件监控器
+            if (_monitor != null)
+            {
+                _monitor.ForegroundWindowChanged += OnStatusMayHaveChanged;
+                _monitor.ProcessChanged += OnStatusMayHaveChanged;
+                _monitor.InternalStateChanged += OnStatusMayHaveChanged;
+            }
+
+            // 兜底轮询（5s），防止事件遗漏
+            _fallbackTimer = new Timer(5000);
+            _fallbackTimer.Elapsed += OnFallbackTimerElapsed;
+            _fallbackTimer.AutoReset = true;
+            _fallbackTimer.Start();
+        }
+
+        private void OnStatusMayHaveChanged(object sender, EventArgs e)
+        {
+            NotifyStatusChanged();
+        }
+
+        private void OnFallbackTimerElapsed(object sender, ElapsedEventArgs e)
+        {
+            NotifyStatusChanged();
         }
 
         /// <summary>
@@ -176,18 +198,18 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             StatusUpdated?.Invoke(this, EventArgs.Empty);
         }
 
-        private void OnPollingTimerElapsed(object sender, ElapsedEventArgs e)
-        {
-            // 定期通知状态已更改，让所有订阅者重新评估规则
-            // 这样即使没有显式调用 NotifyStatusChanged 也能检测到变化
-            NotifyStatusChanged();
-        }
-
         public void Dispose()
         {
-            _pollingTimer?.Stop();
-            _pollingTimer?.Dispose();
-            _pollingTimer = null;
+            if (_monitor != null)
+            {
+                _monitor.ForegroundWindowChanged -= OnStatusMayHaveChanged;
+                _monitor.ProcessChanged -= OnStatusMayHaveChanged;
+                _monitor.InternalStateChanged -= OnStatusMayHaveChanged;
+            }
+
+            _fallbackTimer?.Stop();
+            _fallbackTimer?.Dispose();
+            _fallbackTimer = null;
         }
     }
 }

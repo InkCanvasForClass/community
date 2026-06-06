@@ -1,6 +1,6 @@
 using Ink_Canvas.WorkflowAutomation.Abstractions;
+using Ink_Canvas.WorkflowAutomation.Services;
 using System.Diagnostics;
-using System.Timers;
 
 namespace Ink_Canvas.WorkflowAutomation.Triggers
 {
@@ -9,77 +9,77 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
     /// </summary>
     public class PptSlideShowEnterSettings
     {
-        /// <summary>
-        /// 检测间隔（毫秒）
-        /// </summary>
-        public int CheckIntervalMs { get; set; } = 2000;
     }
 
     /// <summary>
     /// 进入PPT放映模式时触发的触发器。
+    /// 通过 SystemEventMonitor 的进程和窗口事件驱动，无需独立轮询。
     /// </summary>
     public class PptSlideShowEnterTrigger : TriggerBase<PptSlideShowEnterSettings>
     {
-        private Timer _timer;
         private bool _wasInSlideShow = false;
 
         public override void Loaded()
         {
-            _timer = new Timer(Settings.CheckIntervalMs);
-            _timer.Elapsed += OnTimerElapsed;
-            _timer.Start();
+            var monitor = AutomationBootstrap.Monitor;
+            if (monitor == null) return;
+
+            monitor.RegisterProcess("POWERPNT");
+            _wasInSlideShow = IsPowerPointInSlideShow();
+
+            monitor.ProcessChanged += OnStateChanged;
+            monitor.ForegroundWindowChanged += OnStateChanged;
         }
 
         public override void UnLoaded()
         {
-            if (_timer != null)
-            {
-                _timer.Elapsed -= OnTimerElapsed;
-                _timer.Stop();
-                _timer.Dispose();
-                _timer = null;
-            }
+            var monitor = AutomationBootstrap.Monitor;
+            if (monitor == null) return;
+
+            monitor.ProcessChanged -= OnStateChanged;
+            monitor.ForegroundWindowChanged -= OnStateChanged;
+            monitor.UnregisterProcess("POWERPNT");
         }
 
-        private void OnTimerElapsed(object sender, ElapsedEventArgs e)
+        private void OnStateChanged(object sender, System.EventArgs e)
         {
-            try
-            {
-                bool isInSlideShow = IsPowerPointInSlideShow();
+            var isInSlideShow = IsPowerPointInSlideShow();
 
-                if (isInSlideShow && !_wasInSlideShow)
-                {
-                    _wasInSlideShow = true;
-                    Trigger();
-                }
-                else if (!isInSlideShow)
-                {
-                    _wasInSlideShow = false;
-                }
-            }
-            catch
+            if (isInSlideShow && !_wasInSlideShow)
             {
-                // 忽略检测错误
+                _wasInSlideShow = true;
+                Trigger();
+            }
+            else if (!isInSlideShow)
+            {
+                _wasInSlideShow = false;
             }
         }
 
         private static bool IsPowerPointInSlideShow()
         {
-            var pptProcesses = Process.GetProcessesByName("POWERPNT");
-            if (pptProcesses.Length == 0) return false;
-
-            foreach (var proc in pptProcesses)
+            try
             {
-                try
+                var pptProcesses = Process.GetProcessesByName("POWERPNT");
+                if (pptProcesses.Length == 0) return false;
+
+                foreach (var proc in pptProcesses)
                 {
-                    if (proc.MainWindowTitle.Contains("幻灯片放映") || proc.MainWindowTitle.Contains("Slide Show"))
+                    try
                     {
-                        return true;
+                        if (proc.MainWindowTitle.Contains("幻灯片放映") || proc.MainWindowTitle.Contains("Slide Show"))
+                        {
+                            return true;
+                        }
                     }
+                    catch { }
                 }
-                catch { }
+                return false;
             }
-            return false;
+            catch
+            {
+                return false;
+            }
         }
     }
 }

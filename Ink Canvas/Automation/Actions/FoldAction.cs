@@ -1,4 +1,5 @@
 using Ink_Canvas.WorkflowAutomation.Models;
+using Ink_Canvas.WorkflowAutomation.Services;
 using System.Windows;
 
 namespace Ink_Canvas.WorkflowAutomation.Actions
@@ -47,6 +48,8 @@ namespace Ink_Canvas.WorkflowAutomation.Actions
                         _ = mw.UnFoldFloatingBar(null);
                     }
                 });
+
+                AutomationBootstrap.Monitor?.NotifyInternalStateChanged();
             };
 
             info.RevertHandle = (settings, guid) =>
@@ -69,6 +72,8 @@ namespace Ink_Canvas.WorkflowAutomation.Actions
                         _ = mw.FoldFloatingBar(null, true);
                     }
                 });
+
+                AutomationBootstrap.Monitor?.NotifyInternalStateChanged();
             };
 
             return info;

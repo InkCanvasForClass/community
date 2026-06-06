@@ -1,6 +1,5 @@
 using Ink_Canvas.WorkflowAutomation.Abstractions;
-using System.Diagnostics;
-using System.Timers;
+using Ink_Canvas.WorkflowAutomation.Services;
 
 namespace Ink_Canvas.WorkflowAutomation.Triggers
 {
@@ -13,42 +12,51 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
         /// 要检测的进程名称（不含.exe）
         /// </summary>
         public string ProcessName { get; set; } = "";
-
-        /// <summary>
-        /// 检测间隔（毫秒）
-        /// </summary>
-        public int CheckIntervalMs { get; set; } = 1000;
     }
 
     /// <summary>
     /// 当指定进程启动时触发的触发器。
+    /// 通过 SystemEventMonitor 的进程监控驱动，无需独立轮询。
     /// </summary>
     public class ProcessDetectedTrigger : TriggerBase<ProcessDetectedSettings>
     {
-        private Timer _timer;
         private bool _wasRunning = false;
 
         public override void Loaded()
         {
-            _timer = new Timer(Settings.CheckIntervalMs);
-            _timer.Elapsed += OnTimerElapsed;
-            _timer.Start();
+            var monitor = AutomationBootstrap.Monitor;
+            if (monitor == null) return;
+
+            // 注册进程监控
+            if (!string.IsNullOrEmpty(Settings.ProcessName))
+            {
+                monitor.RegisterProcess(Settings.ProcessName);
+            }
+
+            _wasRunning = monitor.IsProcessRunning(Settings.ProcessName);
+            monitor.ProcessChanged += OnProcessChanged;
         }
 
         public override void UnLoaded()
         {
-            if (_timer != null)
+            var monitor = AutomationBootstrap.Monitor;
+            if (monitor == null) return;
+
+            monitor.ProcessChanged -= OnProcessChanged;
+
+            // 取消注册进程监控
+            if (!string.IsNullOrEmpty(Settings.ProcessName))
             {
-                _timer.Elapsed -= OnTimerElapsed;
-                _timer.Stop();
-                _timer.Dispose();
-                _timer = null;
+                monitor.UnregisterProcess(Settings.ProcessName);
             }
         }
 
-        private void OnTimerElapsed(object sender, ElapsedEventArgs e)
+        private void OnProcessChanged(object sender, System.EventArgs e)
         {
-            var isRunning = IsProcessRunning(Settings.ProcessName);
+            var monitor = AutomationBootstrap.Monitor;
+            if (monitor == null) return;
+
+            var isRunning = monitor.IsProcessRunning(Settings.ProcessName);
 
             if (isRunning && !_wasRunning)
             {
@@ -62,19 +70,6 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
             }
 
             _wasRunning = isRunning;
-        }
-
-        private static bool IsProcessRunning(string processName)
-        {
-            if (string.IsNullOrEmpty(processName)) return false;
-            try
-            {
-                return Process.GetProcessesByName(processName).Length > 0;
-            }
-            catch
-            {
-                return false;
-            }
         }
     }
 }

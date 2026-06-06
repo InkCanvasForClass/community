@@ -1,5 +1,6 @@
 using Ink_Canvas.WorkflowAutomation.Abstractions;
-using System.Timers;
+using Ink_Canvas.WorkflowAutomation.Services;
+using System.Diagnostics;
 
 namespace Ink_Canvas.WorkflowAutomation.Triggers
 {
@@ -8,76 +9,77 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
     /// </summary>
     public class PptSlideShowSettings
     {
-        /// <summary>
-        /// 检测间隔（毫秒）
-        /// </summary>
-        public int CheckIntervalMs { get; set; } = 2000;
     }
 
     /// <summary>
     /// 当 PPT 进入放映模式时触发的触发器。
+    /// 通过 SystemEventMonitor 的进程和窗口事件驱动，无需独立轮询。
     /// </summary>
     public class PptSlideShowTrigger : TriggerBase<PptSlideShowSettings>
     {
-        private Timer _timer;
         private bool _wasInSlideShow = false;
 
         public override void Loaded()
         {
-            _timer = new Timer(Settings.CheckIntervalMs);
-            _timer.Elapsed += OnTimerElapsed;
-            _timer.Start();
+            var monitor = AutomationBootstrap.Monitor;
+            if (monitor == null) return;
+
+            monitor.RegisterProcess("POWERPNT");
+            _wasInSlideShow = IsPowerPointInSlideShow();
+
+            monitor.ProcessChanged += OnStateChanged;
+            monitor.ForegroundWindowChanged += OnStateChanged;
         }
 
         public override void UnLoaded()
         {
-            if (_timer != null)
-            {
-                _timer.Elapsed -= OnTimerElapsed;
-                _timer.Stop();
-                _timer.Dispose();
-                _timer = null;
-            }
+            var monitor = AutomationBootstrap.Monitor;
+            if (monitor == null) return;
+
+            monitor.ProcessChanged -= OnStateChanged;
+            monitor.ForegroundWindowChanged -= OnStateChanged;
+            monitor.UnregisterProcess("POWERPNT");
         }
 
-        private void OnTimerElapsed(object sender, ElapsedEventArgs e)
+        private void OnStateChanged(object sender, System.EventArgs e)
+        {
+            var isInSlideShow = IsPowerPointInSlideShow();
+
+            if (isInSlideShow && !_wasInSlideShow)
+            {
+                Trigger();
+            }
+            else if (!isInSlideShow && _wasInSlideShow)
+            {
+                TriggerRevert();
+            }
+
+            _wasInSlideShow = isInSlideShow;
+        }
+
+        private static bool IsPowerPointInSlideShow()
         {
             try
             {
-                var pptProcesses = System.Diagnostics.Process.GetProcessesByName("POWERPNT");
-                bool isInSlideShow = false;
+                var pptProcesses = Process.GetProcessesByName("POWERPNT");
+                if (pptProcesses.Length == 0) return false;
 
-                if (pptProcesses.Length > 0)
+                foreach (var proc in pptProcesses)
                 {
-                    // 检查是否有放映窗口（窗口标题通常包含 "PowerPoint 幻灯片放映" 或 "PowerPoint Slide Show"）
-                    foreach (var proc in pptProcesses)
+                    try
                     {
-                        try
+                        if (proc.MainWindowTitle.Contains("幻灯片放映") || proc.MainWindowTitle.Contains("Slide Show"))
                         {
-                            if (proc.MainWindowTitle.Contains("幻灯片放映") || proc.MainWindowTitle.Contains("Slide Show"))
-                            {
-                                isInSlideShow = true;
-                                break;
-                            }
+                            return true;
                         }
-                        catch { }
                     }
+                    catch { }
                 }
-
-                if (isInSlideShow && !_wasInSlideShow)
-                {
-                    Trigger();
-                }
-                else if (!isInSlideShow && _wasInSlideShow)
-                {
-                    TriggerRevert();
-                }
-
-                _wasInSlideShow = isInSlideShow;
+                return false;
             }
             catch
             {
-                // 忽略检测错误
+                return false;
             }
         }
     }

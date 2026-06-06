@@ -15,12 +15,18 @@ namespace Ink_Canvas.WorkflowAutomation
     public static class AutomationBootstrap
     {
         private static AutomationService _service;
+        private static SystemEventMonitor _monitor;
 
         /// <summary>
         /// 获取自动化服务实例
         /// </summary>
         public static AutomationService Service => _service ??= new AutomationService(
             Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Automations"));
+
+        /// <summary>
+        /// 获取系统事件监控器实例
+        /// </summary>
+        public static SystemEventMonitor Monitor => _monitor;
 
         private static bool _isInitialized = false;
 
@@ -31,7 +37,12 @@ namespace Ink_Canvas.WorkflowAutomation
         {
             if (_isInitialized) return;
             _isInitialized = true;
-            // 注册触发器
+
+            // 1. 创建并启动系统事件监控器（必须在其他组件之前）
+            _monitor = new SystemEventMonitor();
+            _monitor.Start();
+
+            // 2. 注册触发器
             AutomationRegistry.RegisterTrigger(
                 new TriggerInfo("inkcanvas.processdetected", "进程检测", "ApplicationOutline")
                 {
@@ -105,7 +116,7 @@ namespace Ink_Canvas.WorkflowAutomation
                 },
                 () => new RulesetChangedTrigger());
 
-            // 注册行动
+            // 3. 注册行动
             AutomationRegistry.RegisterAction(FoldAction.Register());
             AutomationRegistry.RegisterAction(KillProcessAction.Register());
             AutomationRegistry.RegisterAction(SaveStrokesAction.Register());
@@ -114,7 +125,7 @@ namespace Ink_Canvas.WorkflowAutomation
             AutomationRegistry.RegisterAction(ShowNotificationAction.Register());
             AutomationRegistry.RegisterAction(ToggleTopmostAction.Register());
 
-            // 注册规则
+            // 4. 注册规则
             AutomationRegistry.RegisterRule(ProcessRunningRule.Register());
             AutomationRegistry.RegisterRule(WindowTitleContainsRule.Register());
             AutomationRegistry.RegisterRule(IsAnnotationModeRule.Register());
@@ -122,7 +133,7 @@ namespace Ink_Canvas.WorkflowAutomation
             AutomationRegistry.RegisterRule(ForegroundWindowProcessRule.Register());
             AutomationRegistry.RegisterRule(IsFloatingBarFoldedRule.Register());
 
-            // 加载配置
+            // 5. 加载配置
             Service.RefreshConfigs();
             Service.LoadConfig();
         }
@@ -137,6 +148,10 @@ namespace Ink_Canvas.WorkflowAutomation
             {
                 Service.UnloadWorkflow(workflow);
             }
+
+            // 释放系统事件监控器
+            _monitor?.Dispose();
+            _monitor = null;
         }
     }
 }
