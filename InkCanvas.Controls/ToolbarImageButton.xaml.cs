@@ -131,16 +131,21 @@ namespace Ink_Canvas.Controls
             if (!IsEnabled) return;
             if (_lastPressedButton != null && _lastPressedButton != this)
             {
-                _lastPressedButton.ButtonBorder.Background = Brushes.Transparent;
+                _lastPressedButton.PressedBackground.Background = Brushes.Transparent;
             }
             _lastPressedButton = this;
-            ButtonBorder.Background = new SolidColorBrush(Color.FromArgb(28, 24, 24, 27));
+            PressedBackground.Background = new SolidColorBrush(Color.FromArgb(28, 24, 24, 27));
             ButtonMouseDown?.Invoke(this, e);
         }
 
         private void ButtonPanel_MouseLeave(object sender, MouseEventArgs e)
         {
             if (!IsEnabled) return;
+            if (_lastPressedButton == this)
+            {
+                PressedBackground.Background = Brushes.Transparent;
+                _lastPressedButton = null;
+            }
             ButtonMouseLeave?.Invoke(this, e);
         }
 
@@ -149,7 +154,7 @@ namespace Ink_Canvas.Controls
             if (!IsEnabled) return;
             if (_lastPressedButton == this)
             {
-                ButtonBorder.Background = Brushes.Transparent;
+                PressedBackground.Background = Brushes.Transparent;
                 _lastPressedButton = null;
             }
             ButtonMouseUp?.Invoke(this, e);
