@@ -19,7 +19,7 @@ namespace Ink_Canvas.Windows
         private System.Timers.Timer timeUpdateTimer;
         private System.Timers.Timer countdownUpdateTimer;
         private DateTime lastTime = DateTime.MinValue;
-        private TimerControl parentControl;
+        private NewStyleTimerWindow parentControl;
         private bool wasTimerRunning = false;
         private bool isOvertime = false;
         private Storyboard capsuleExpandStoryboard;
@@ -208,7 +208,7 @@ namespace Ink_Canvas.Windows
         /// <summary>
         /// 设置父计时器控件
         /// </summary>
-        public void SetParentControl(TimerControl parent)
+        public void SetParentControl(NewStyleTimerWindow parent)
         {
             parentControl = parent;
             if (parentControl != null)
@@ -790,53 +790,10 @@ namespace Ink_Canvas.Windows
 
         private void RestoreTimerWindow()
         {
-            var mainWindow = Application.Current.MainWindow as MainWindow;
-            if (mainWindow != null)
-            {
-                mainWindow.AdjustTimerContainerSize();
-
-                // 显示主计时器窗口
-                var timerContainer = mainWindow.FindName("TimerContainer") as FrameworkElement;
-                if (timerContainer != null)
-                {
-                    timerContainer.Visibility = Visibility.Visible;
-                }
-
-                // 隐藏最小化计时器容器
-                var minimizedContainer = mainWindow.FindName("MinimizedTimerContainer") as FrameworkElement;
-                if (minimizedContainer != null)
-                {
-                    minimizedContainer.Visibility = Visibility.Collapsed;
-                }
-
-                if (mainWindow.TimerControl != null)
-                {
-                    mainWindow.TimerControl.UpdateActivityTime();
-
-                    mainWindow.TimerControl.CloseRequested -= TimerControl_CloseRequested;
-                    mainWindow.TimerControl.CloseRequested += TimerControl_CloseRequested;
-                }
-            }
         }
 
-        private void TimerControl_CloseRequested(object sender, EventArgs e)
+        private void TimerWindow_Closed(object sender, EventArgs e)
         {
-            // 当计时器窗口关闭时，隐藏TimerContainer
-            var mainWindow = Application.Current.MainWindow as MainWindow;
-            if (mainWindow != null)
-            {
-                var timerContainer = mainWindow.FindName("TimerContainer") as FrameworkElement;
-                if (timerContainer != null)
-                {
-                    timerContainer.Visibility = Visibility.Collapsed;
-                }
-
-                var minimizedContainer = mainWindow.FindName("MinimizedTimerContainer") as FrameworkElement;
-                if (minimizedContainer != null)
-                {
-                    minimizedContainer.Visibility = Visibility.Collapsed;
-                }
-            }
         }
 
         private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)

@@ -27,9 +27,9 @@ namespace Ink_Canvas.Windows
     /// <summary>
     /// 新计时器UI风格的倒计时器窗口
     /// </summary>
-    public partial class TimerControl : UserControl
+    public partial class NewStyleTimerWindow : Window
     {
-        public TimerControl()
+        public NewStyleTimerWindow()
         {
             InitializeComponent();
 
@@ -48,14 +48,14 @@ namespace Ink_Canvas.Windows
             // 监听主题变化事件
             SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
 
-            // 监听卸载事件，清理资源
-            Unloaded += TimerControl_Unloaded;
+            // 监听关闭事件，清理资源
+            Closed += NewStyleTimerWindow_Closed;
 
             // 监听加载事件，调整DPI相关的尺寸
-            Loaded += TimerControl_Loaded;
+            Loaded += NewStyleTimerWindow_Loaded;
         }
 
-        private void TimerControl_Loaded(object sender, RoutedEventArgs e)
+        private void NewStyleTimerWindow_Loaded(object sender, RoutedEventArgs e)
         {
             // 根据DPI缩放因子调整Viewbox的最大尺寸，确保在高DPI屏幕上不会过大
             try
@@ -100,10 +100,14 @@ namespace Ink_Canvas.Windows
             }
         }
 
-        private void TimerControl_Unloaded(object sender, RoutedEventArgs e)
+        private void NewStyleTimerWindow_Closed(object sender, EventArgs e)
         {
-            // 取消订阅主题变化事件
             SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
+            timer?.Stop();
+            timer?.Dispose();
+            hideTimer?.Stop();
+            hideTimer?.Dispose();
+            mediaPlayer?.Close();
         }
 
         private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
@@ -140,20 +144,6 @@ namespace Ink_Canvas.Windows
         /// </summary>
         public event EventHandler TimerCompleted;
 
-        /// <summary>
-        /// 关闭事件 - 通知主窗口隐藏容器
-        /// </summary>
-        public event EventHandler CloseRequested;
-
-        /// <summary>
-        /// 显示最小化视图事件
-        /// </summary>
-        public event EventHandler ShowMinimizedRequested;
-
-        /// <summary>
-        /// 隐藏最小化视图事件
-        /// </summary>
-        public event EventHandler HideMinimizedRequested;
         #endregion
 
 
@@ -328,6 +318,7 @@ namespace Ink_Canvas.Windows
             ThemeHelper.ApplyTheme(this, settings, theme =>
             {
                 RefreshModernBorder();
+                WindowBackdropHelper.Apply(this, settings);
                 // 复用当前状态下的显示逻辑，避免把暂停/超时/运行中的读数重置为初始设定时间。
                 RefreshDigitDisplayForCurrentState();
             });
@@ -966,13 +957,12 @@ namespace Ink_Canvas.Windows
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             StopTimer();
-            CloseRequested?.Invoke(this, EventArgs.Empty);
+            Close();
         }
 
         private void TimerQuickTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (e.OriginalSource != TimerQuickTabControl) return;
-
             UpdateActivityTime();
             _isRecentTimersTabSelected = TimerQuickTabControl.SelectedIndex == 1;
         }
@@ -1223,158 +1213,37 @@ namespace Ink_Canvas.Windows
                 fullscreenWindow = new FullscreenTimerWindow(this);
                 fullscreenWindow.Closed += (s, args) => { fullscreenWindow = null; };
                 fullscreenWindow.Show();
-                HideMinimizedRequested?.Invoke(this, EventArgs.Empty);
             }
         }
 
         private void MainBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             UpdateActivityTime();
-            if (e.ClickCount == 1)
-            {
-                var mainWindow = Application.Current.MainWindow as MainWindow;
-                if (mainWindow != null)
-                {
-                    var timerContainer = mainWindow.FindName("TimerContainer") as FrameworkElement;
-                    if (timerContainer != null)
-                    {
-                        var point = e.GetPosition(timerContainer);
-                        var mainWindowPoint = timerContainer.TransformToAncestor(mainWindow).Transform(point);
-                        DragTimerContainer(mainWindow, mainWindowPoint, e);
-                    }
-                }
-            }
+            DragTimerWindow(e);
         }
 
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             UpdateActivityTime();
-            if (e.ClickCount == 1)
-            {
-                var mainWindow = Application.Current.MainWindow as MainWindow;
-                if (mainWindow != null)
-                {
-                    var timerContainer = mainWindow.FindName("TimerContainer") as FrameworkElement;
-                    if (timerContainer != null)
-                    {
-                        var point = e.GetPosition(timerContainer);
-                        var mainWindowPoint = timerContainer.TransformToAncestor(mainWindow).Transform(point);
-                        DragTimerContainer(mainWindow, mainWindowPoint, e);
-                    }
-                }
-            }
+            DragTimerWindow(e);
         }
 
-        private bool isDragging = false;
-        private Point dragStartPoint;
-        private Point containerStartPosition;
-
-        private void DragTimerContainer(MainWindow mainWindow, Point startPoint, MouseButtonEventArgs e)
+        private void DragTimerWindow(MouseButtonEventArgs e)
         {
-            var timerContainer = mainWindow.FindName("TimerContainer") as FrameworkElement;
-            if (timerContainer == null) return;
+            if (e.ClickCount != 1 || e.LeftButton != MouseButtonState.Pressed) return;
 
-            isDragging = true;
-            dragStartPoint = startPoint;
-
-            if (timerContainer.HorizontalAlignment == HorizontalAlignment.Center ||
-                timerContainer.VerticalAlignment == VerticalAlignment.Center)
+            try
             {
-                var timerPoint = timerContainer.TransformToAncestor(mainWindow).Transform(new Point(0, 0));
-                containerStartPosition = new Point(timerPoint.X, timerPoint.Y);
-
-                timerContainer.Margin = new Thickness(containerStartPosition.X, containerStartPosition.Y, 0, 0);
-                timerContainer.HorizontalAlignment = HorizontalAlignment.Left;
-                timerContainer.VerticalAlignment = VerticalAlignment.Top;
+                DragMove();
+                e.Handled = true;
             }
-            else
+            catch
             {
-                var margin = timerContainer.Margin;
-                containerStartPosition = new Point(margin.Left, margin.Top);
-
-                if (double.IsNaN(containerStartPosition.X) || containerStartPosition.X < 0) containerStartPosition.X = 0;
-                if (double.IsNaN(containerStartPosition.Y) || containerStartPosition.Y < 0) containerStartPosition.Y = 0;
-            }
-
-            timerContainer.CaptureMouse();
-            timerContainer.MouseMove += TimerContainer_MouseMove;
-            timerContainer.MouseLeftButtonUp += TimerContainer_MouseLeftButtonUp;
-            e.Handled = true;
-        }
-
-        private void TimerContainer_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (!isDragging) return;
-
-            UpdateActivityTime();
-
-            var mainWindow = Application.Current.MainWindow as MainWindow;
-            if (mainWindow == null) return;
-
-            var timerContainer = mainWindow.FindName("TimerContainer") as FrameworkElement;
-            var minimizedContainer = mainWindow.FindName("MinimizedTimerContainer") as FrameworkElement;
-            if (timerContainer == null) return;
-
-            var currentPoint = e.GetPosition(mainWindow);
-            var deltaX = currentPoint.X - dragStartPoint.X;
-            var deltaY = currentPoint.Y - dragStartPoint.Y;
-
-            var newX = containerStartPosition.X + deltaX;
-            var newY = containerStartPosition.Y + deltaY;
-
-            if (newX < 0) newX = 0;
-            if (newY < 0) newY = 0;
-
-            timerContainer.Margin = new Thickness(newX, newY, 0, 0);
-            timerContainer.HorizontalAlignment = HorizontalAlignment.Left;
-            timerContainer.VerticalAlignment = VerticalAlignment.Top;
-
-            if (minimizedContainer != null && minimizedContainer.Visibility == Visibility.Visible)
-            {
-                minimizedContainer.Margin = new Thickness(newX, newY, 0, 0);
-                minimizedContainer.HorizontalAlignment = HorizontalAlignment.Left;
-                minimizedContainer.VerticalAlignment = VerticalAlignment.Top;
-            }
-        }
-
-        private void TimerContainer_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            if (!isDragging) return;
-
-            isDragging = false;
-
-            var mainWindow = Application.Current.MainWindow as MainWindow;
-            if (mainWindow == null) return;
-
-            var timerContainer = mainWindow.FindName("TimerContainer") as FrameworkElement;
-            if (timerContainer != null)
-            {
-                timerContainer.ReleaseMouseCapture();
-                timerContainer.MouseMove -= TimerContainer_MouseMove;
-                timerContainer.MouseLeftButtonUp -= TimerContainer_MouseLeftButtonUp;
             }
         }
 
         private void HandleTimerCompletion()
         {
-            // 计时器结束时，如果显示的是最小化视图，恢复到主窗口视图
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                var mainWindow = Application.Current.MainWindow as MainWindow;
-                if (mainWindow != null)
-                {
-                    var timerContainer = mainWindow.FindName("TimerContainer") as FrameworkElement;
-                    var minimizedContainer = mainWindow.FindName("MinimizedTimerContainer") as FrameworkElement;
-
-                    // 如果最小化视图可见，恢复到主窗口视图
-                    if (minimizedContainer != null && minimizedContainer.Visibility == Visibility.Visible)
-                    {
-                        HideMinimizedRequested?.Invoke(this, EventArgs.Empty);
-                    }
-                }
-            });
-
-            // 重置计时器状态
             ResetTimerState();
         }
 
@@ -1427,45 +1296,11 @@ namespace Ink_Canvas.Windows
 
         private void HideTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (!isTimerRunning || isPaused) return;
-
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                var timeSinceLastActivity = DateTime.Now - lastActivityTime;
-
-                if (timeSinceLastActivity.TotalSeconds >= 5)
-                {
-                    var mainWindow = Application.Current.MainWindow as MainWindow;
-                    if (mainWindow != null)
-                    {
-                        var timerContainer = mainWindow.FindName("TimerContainer") as FrameworkElement;
-                        if (timerContainer != null && timerContainer.Visibility == Visibility.Visible)
-                        {
-                            ShowMinimizedRequested?.Invoke(this, EventArgs.Empty);
-                        }
-                    }
-                }
-            });
         }
 
         public void UpdateActivityTime()
         {
             lastActivityTime = DateTime.Now;
-
-            var mainWindow = Application.Current.MainWindow as MainWindow;
-            if (mainWindow != null)
-            {
-                var timerContainer = mainWindow.FindName("TimerContainer") as FrameworkElement;
-                var minimizedContainer = mainWindow.FindName("MinimizedTimerContainer") as FrameworkElement;
-
-                if (timerContainer != null && minimizedContainer != null)
-                {
-                    if (timerContainer.Visibility == Visibility.Collapsed && minimizedContainer.Visibility == Visibility.Visible)
-                    {
-                        HideMinimizedRequested?.Invoke(this, EventArgs.Empty);
-                    }
-                }
-            }
         }
 
     }

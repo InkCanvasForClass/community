@@ -1298,27 +1298,6 @@
                 </Grid>
             </Grid>
         </Border>
-        <!-- 包装层：为 TimerControl 提供 Visibility/Margin 控制与鼠标拖拽手柄，代码中 7 文件 40+ 处引用，非死代码 -->
-        <Border x:Name="TimerContainer" 
-                Visibility="Collapsed"  d:Visibility="Visible"
-                Panel.ZIndex="998"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Width="900"
-                Height="500">
-            <Windows:TimerControl x:Name="TimerControl"/>
-        </Border>
-        <!-- 包装层：计时器最小化浮窗，同步主容器位置后显示/拖拽，非死代码 -->
-        <Border x:Name="MinimizedTimerContainer" 
-                Visibility="Collapsed"  d:Visibility="Visible"
-                Panel.ZIndex="997"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                Margin="20,20,0,0"
-                Width="600"
-                Height="200">
-            <Windows:MinimizedTimerControl x:Name="MinimizedTimerControl"/>
-        </Border>
         <!-- 包装层：PPT 时间胶囊容器，承载 ScaleTransform 与屏幕四角定位，非死代码 -->
         <Border x:Name="PPTTimeCapsuleContainer"
                 Visibility="Collapsed"  d:Visibility="Visible"

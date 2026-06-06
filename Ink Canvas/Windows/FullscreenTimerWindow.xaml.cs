@@ -15,11 +15,10 @@ namespace Ink_Canvas.Windows
     /// </summary>
     public partial class FullscreenTimerWindow : Window
     {
-        private TimerControl parentControl;
+        private NewStyleTimerWindow parentControl;
         private System.Timers.Timer updateTimer;
-        private Visibility previousTimerContainerVisibility = Visibility.Visible;
 
-        public FullscreenTimerWindow(TimerControl parent)
+        public FullscreenTimerWindow(NewStyleTimerWindow parent)
         {
             InitializeComponent();
             parentControl = parent;
@@ -36,16 +35,11 @@ namespace Ink_Canvas.Windows
             parentControl.TimerCompleted += ParentWindow_TimerCompleted;
 
             var mainWindow = Application.Current.MainWindow as MainWindow;
-            if (mainWindow != null)
-            {
-                mainWindow.PauseTopmostMaintenance();
+            mainWindow?.PauseTopmostMaintenance();
 
-                var timerContainer = mainWindow.FindName("TimerContainer") as FrameworkElement;
-                if (timerContainer != null)
-                {
-                    previousTimerContainerVisibility = timerContainer.Visibility;
-                    timerContainer.Visibility = Visibility.Collapsed;
-                }
+            if (parentControl != null)
+            {
+                parentControl.Hide();
             }
 
             // 确保窗口置顶
@@ -298,26 +292,14 @@ namespace Ink_Canvas.Windows
         protected override void OnClosed(EventArgs e)
         {
             var mainWindow = Application.Current.MainWindow as MainWindow;
-            if (mainWindow != null)
-            {
-                mainWindow.ResumeTopmostMaintenance();
-
-                var timerContainer = mainWindow.FindName("TimerContainer") as FrameworkElement;
-                if (timerContainer != null && previousTimerContainerVisibility == Visibility.Visible)
-                {
-                    timerContainer.Visibility = Visibility.Visible;
-
-                    // 重置5秒最小化计时
-                    if (parentControl != null)
-                    {
-                        parentControl.UpdateActivityTime();
-                    }
-                }
-            }
+            mainWindow?.ResumeTopmostMaintenance();
 
             if (parentControl != null)
             {
                 parentControl.TimerCompleted -= ParentWindow_TimerCompleted;
+                parentControl.Show();
+                parentControl.Activate();
+                parentControl.UpdateActivityTime();
             }
 
             // 清理资源

@@ -1275,28 +1275,11 @@ namespace Ink_Canvas
 
             if (Settings.RandSettings?.UseNewStyleUI == true)
             {
-                if (TimerContainer != null && TimerControl != null)
+                var timerWindow = new Windows.NewStyleTimerWindow
                 {
-                    // 每次打开计时器窗口时重置计时器
-                    TimerControl.ResetTimerState();
-
-                    // 根据DPI缩放因子调整TimerContainer的尺寸
-                    AdjustTimerContainerSize();
-
-                    TimerContainer.Visibility = Visibility.Visible;
-                    if (MinimizedTimerContainer != null)
-                    {
-                        MinimizedTimerContainer.Visibility = Visibility.Collapsed;
-                    }
-                    TimerControl.CloseRequested += (s, args) =>
-                    {
-                        TimerContainer.Visibility = Visibility.Collapsed;
-                        if (MinimizedTimerContainer != null)
-                        {
-                            MinimizedTimerContainer.Visibility = Visibility.Collapsed;
-                        }
-                    };
-                }
+                    Owner = this
+                };
+                timerWindow.ShowDialog();
             }
             else
             {

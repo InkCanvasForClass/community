@@ -25,8 +25,6 @@ namespace Ink_Canvas
                    || ContainsPoint(ImageSelectionOverlay, windowPoint)
                    || ContainsPoint(QuickDrawFloatingButton, windowPoint)
                    || ContainsPoint(BorderInkReplayToolBox, windowPoint)
-                   || ContainsPoint(TimerContainer, windowPoint)
-                   || ContainsPoint(MinimizedTimerContainer, windowPoint)
                    || ContainsPoint(PPTTimeCapsuleContainer, windowPoint)
                    || ContainsPoint(PPTQuickPanelContainer, windowPoint)
                    || ContainsPoint(VideoPresenterSidebar, windowPoint);

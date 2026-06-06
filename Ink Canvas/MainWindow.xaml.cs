@@ -681,21 +681,7 @@ namespace Ink_Canvas
             Activated += Window_Activated;
             Deactivated += Window_Deactivated;
 
-            // 初始化计时器控件事件
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                if (TimerControl != null)
-                {
-                    TimerControl.ShowMinimizedRequested += TimerControl_ShowMinimizedRequested;
-                    TimerControl.HideMinimizedRequested += TimerControl_HideMinimizedRequested;
-                }
-
-                if (MinimizedTimerControl != null && TimerControl != null)
-                {
-                    MinimizedTimerControl.SetParentControl(TimerControl);
-                }
-                CheckAndShowOobe();
-            }), DispatcherPriority.Loaded);
+            Dispatcher.BeginInvoke(new Action(CheckAndShowOobe), DispatcherPriority.Loaded);
         }
 
         /// <summary>
@@ -789,127 +775,6 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"完成 OOBE 时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
-
-        /// <summary>
-        /// 将计时器切换为最小化视图并把最小化容器定位到当前计时器的位置。
-        /// </summary>
-        /// <remarks>
-        /// 计算原计时器容器在窗口中的位置（若容器居中则使用 TransformToAncestor 获取实际坐标，否则使用 Margin 的 Left/Top），
-        /// 将该位置应用到最小化容器并把两者的对齐方式设为左上，然后隐藏原计时器并显示最小化容器。
-        /// </remarks>
-        private void TimerControl_ShowMinimizedRequested(object sender, EventArgs e)
-        {
-            var timerContainer = FindName("TimerContainer") as FrameworkElement;
-            var minimizedContainer = FindName("MinimizedTimerContainer") as FrameworkElement;
-
-            if (timerContainer != null && minimizedContainer != null)
-            {
-                double x = 0, y = 0;
-
-                if (timerContainer.HorizontalAlignment == HorizontalAlignment.Center &&
-                    timerContainer.VerticalAlignment == VerticalAlignment.Center)
-                {
-                    var timerPoint = timerContainer.TransformToAncestor(this).Transform(new Point(0, 0));
-                    x = timerPoint.X;
-                    y = timerPoint.Y;
-                }
-                else
-                {
-                    var timerMargin = timerContainer.Margin;
-                    x = double.IsNaN(timerMargin.Left) ? 0 : timerMargin.Left;
-                    y = double.IsNaN(timerMargin.Top) ? 0 : timerMargin.Top;
-                }
-
-                minimizedContainer.Margin = new Thickness(x, y, 0, 0);
-                minimizedContainer.HorizontalAlignment = HorizontalAlignment.Left;
-                minimizedContainer.VerticalAlignment = VerticalAlignment.Top;
-
-                timerContainer.Margin = new Thickness(x, y, 0, 0);
-                timerContainer.HorizontalAlignment = HorizontalAlignment.Left;
-                timerContainer.VerticalAlignment = VerticalAlignment.Top;
-
-                timerContainer.Visibility = Visibility.Collapsed;
-                minimizedContainer.Visibility = Visibility.Visible;
-            }
-        }
-
-        private void TimerControl_HideMinimizedRequested(object sender, EventArgs e)
-        {
-            var timerContainer = FindName("TimerContainer") as FrameworkElement;
-            var minimizedContainer = FindName("MinimizedTimerContainer") as FrameworkElement;
-
-            if (timerContainer != null && minimizedContainer != null)
-            {
-                minimizedContainer.Visibility = Visibility.Collapsed;
-                timerContainer.Visibility = Visibility.Visible;
-
-                if (TimerControl != null)
-                {
-                    TimerControl.UpdateActivityTime();
-                }
-            }
-        }
-
-        /// <summary>
-        /// 根据DPI缩放因子调整TimerContainer的尺寸
-        /// </summary>
-        public void AdjustTimerContainerSize()
-        {
-            try
-            {
-                var timerContainer = FindName("TimerContainer") as FrameworkElement;
-                if (timerContainer == null) return;
-
-                var source = System.Windows.PresentationSource.FromVisual(this);
-                if (source != null)
-                {
-                    var dpiScaleX = source.CompositionTarget.TransformToDevice.M11;
-                    var dpiScaleY = source.CompositionTarget.TransformToDevice.M22;
-
-                    // 如果DPI缩放因子大于1.25，则适当缩小容器尺寸
-                    // 这样可以确保在高DPI屏幕上，计时器窗口的物理像素大小不会过大
-                    if (dpiScaleX > 1.25 || dpiScaleY > 1.25)
-                    {
-                        // 使用较小的缩放因子来限制最大尺寸
-                        double scaleFactor = Math.Min(dpiScaleX, dpiScaleY);
-
-                        // 计算目标物理像素大小（约1350x750物理像素）
-                        // 然后转换为逻辑像素
-                        double targetPhysicalWidth = 1350;
-                        double targetPhysicalHeight = 750;
-
-                        // 转换为逻辑像素
-                        double maxWidth = targetPhysicalWidth / scaleFactor;
-                        double maxHeight = targetPhysicalHeight / scaleFactor;
-
-                        // 确保不会小于原始尺寸的70%
-                        maxWidth = Math.Max(maxWidth, 900 * 0.7);
-                        maxHeight = Math.Max(maxHeight, 500 * 0.7);
-
-                        // 应用调整后的尺寸
-                        timerContainer.Width = maxWidth;
-                        timerContainer.Height = maxHeight;
-                    }
-                    else
-                    {
-                        // 标准DPI，使用原始尺寸
-                        timerContainer.Width = 900;
-                        timerContainer.Height = 500;
-                    }
-                }
-                else
-                {
-                    // 无法获取DPI信息，使用原始尺寸
-                    timerContainer.Width = 900;
-                    timerContainer.Height = 500;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"调整TimerContainer尺寸失败: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
         private void ApplyLanguageFromSettings()
         {
             try
@@ -1654,68 +1519,6 @@ namespace Ink_Canvas
                     }
                 }), DispatcherPriority.Loaded);
             }
-
-            // 初始化计时器控件关联
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                if (TimerControl != null && MinimizedTimerControl != null)
-                {
-                    MinimizedTimerControl.SetParentControl(TimerControl);
-
-                    // 设置PPT时间胶囊的父控件
-                    if (PPTTimeCapsule != null)
-                    {
-                        PPTTimeCapsule.SetParentControl(TimerControl);
-                    }
-
-                    TimerControl.ShowMinimizedRequested += (s, args) =>
-                    {
-                        if (TimerContainer != null && MinimizedTimerContainer != null && MinimizedTimerControl != null)
-                        {
-                            TimerContainer.Visibility = Visibility.Collapsed;
-
-                            if (Settings.PowerPointSettings.EnablePPTTimeCapsule &&
-                                IsInPptPresentationMode &&
-                                PPTTimeCapsule != null)
-                            {
-                                MinimizedTimerContainer.Visibility = Visibility.Collapsed;
-                            }
-                            else
-                            {
-                                MinimizedTimerContainer.Visibility = Visibility.Visible;
-                                MinimizedTimerControl.Visibility = Visibility.Visible;
-                            }
-                        }
-                    };
-
-                    TimerControl.HideMinimizedRequested += (s, args) =>
-                    {
-                        if (MinimizedTimerContainer != null && MinimizedTimerControl != null)
-                        {
-                            MinimizedTimerContainer.Visibility = Visibility.Collapsed;
-                            MinimizedTimerControl.Visibility = Visibility.Collapsed;
-                        }
-
-                        // 如果启用了PPT时间胶囊，停止倒计时显示
-                        if (Settings.PowerPointSettings.EnablePPTTimeCapsule && PPTTimeCapsule != null)
-                        {
-                            PPTTimeCapsule.StopCountdown();
-                        }
-                    };
-
-                    // 监听计时器完成事件
-                    TimerControl.TimerCompleted += (s, args) =>
-                    {
-                        // 如果启用了PPT时间胶囊且在PPT模式下，触发完成动画
-                        if (Settings.PowerPointSettings.EnablePPTTimeCapsule &&
-                            IsInPptPresentationMode &&
-                            PPTTimeCapsule != null)
-                        {
-                            PPTTimeCapsule.OnTimerCompleted();
-                        }
-                    };
-                }
-            }), DispatcherPriority.Loaded);
         }
 
 
@@ -1739,15 +1542,6 @@ namespace Ink_Canvas
             if (e.OldDpi.DpiScaleX != e.NewDpi.DpiScaleX && e.OldDpi.DpiScaleY != e.NewDpi.DpiScaleY && Settings.Advanced.IsEnableDPIChangeDetection)
             {
                 ShowNotification(string.Format(Properties.MainWindowStrings.Main_DPIChanged, e.OldDpi.DpiScaleX, e.OldDpi.DpiScaleY, e.NewDpi.DpiScaleX, e.NewDpi.DpiScaleY));
-
-                Dispatcher.Invoke(() =>
-                {
-                    var timerContainer = FindName("TimerContainer") as FrameworkElement;
-                    if (timerContainer != null && timerContainer.Visibility == Visibility.Visible)
-                    {
-                        AdjustTimerContainerSize();
-                    }
-                });
 
                 HandleFloatingBarRecovery();
             }

@@ -413,8 +413,6 @@ namespace Ink_Canvas
                     }
                 }
 
-                TimerControl?.RefreshTheme();
-                MinimizedTimerControl?.RefreshTheme();
                 DynamicNotification?.RefreshTheme(IsCurrentThemeDark());
             }
             catch (Exception)
