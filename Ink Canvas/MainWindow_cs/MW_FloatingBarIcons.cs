@@ -723,6 +723,8 @@ namespace Ink_Canvas
 
                 if (autoAlignCenter) // 控制居中
                 {
+                    _userHasDraggedFloatingBar = false;
+
                     if (IsInPptPresentationMode)
                     {
                         await Task.Delay(50);
