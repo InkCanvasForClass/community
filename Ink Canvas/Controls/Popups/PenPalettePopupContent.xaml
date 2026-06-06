@@ -56,23 +56,23 @@ mc:Ignorable="d">
                                FontSize="17" VerticalAlignment="Center" Visibility="Hidden" />
                         <UniformGrid Rows="1" Columns="5" Width="245">
                             <Button Tag="2" Click="PenWidthPresetButton_Click" Padding="8,2" Margin="0,0,6,0" MinWidth="40" ToolTip="1"
-                                    Foreground="{DynamicResource FloatBarForeground}" BorderBrush="{DynamicResource FloatBarBorderBrush}">
+                                    Foreground="{DynamicResource FloatBarForeground}" BorderThickness="0" Background="Transparent">
                                 <Ellipse Width="4" Height="4" Fill="{DynamicResource FloatBarForeground}" />
                             </Button>
                             <Button Tag="5" Click="PenWidthPresetButton_Click" Padding="8,2" Margin="0,0,6,0" MinWidth="40" ToolTip="2.5"
-                                    Foreground="{DynamicResource FloatBarForeground}" BorderBrush="{DynamicResource FloatBarBorderBrush}">
+                                    Foreground="{DynamicResource FloatBarForeground}" BorderThickness="0" Background="Transparent">
                                 <Ellipse Width="7" Height="7" Fill="{DynamicResource FloatBarForeground}" />
                             </Button>
                             <Button Tag="10" Click="PenWidthPresetButton_Click" Padding="8,2" Margin="0,0,6,0" MinWidth="40" ToolTip="5"
-                                    Foreground="{DynamicResource FloatBarForeground}" BorderBrush="{DynamicResource FloatBarBorderBrush}">
+                                    Foreground="{DynamicResource FloatBarForeground}" BorderThickness="0" Background="Transparent">
                                 <Ellipse Width="10" Height="10" Fill="{DynamicResource FloatBarForeground}" />
                             </Button>
                             <Button Tag="20" Click="PenWidthPresetButton_Click" Padding="8,2" Margin="0,0,6,0" MinWidth="40" ToolTip="10"
-                                    Foreground="{DynamicResource FloatBarForeground}" BorderBrush="{DynamicResource FloatBarBorderBrush}">
+                                    Foreground="{DynamicResource FloatBarForeground}" BorderThickness="0" Background="Transparent">
                                 <Ellipse Width="14" Height="14" Fill="{DynamicResource FloatBarForeground}" />
                             </Button>
                             <Button Tag="35" Click="PenWidthPresetButton_Click" Padding="8,2" MinWidth="44" ToolTip="17.5"
-                                    Foreground="{DynamicResource FloatBarForeground}" BorderBrush="{DynamicResource FloatBarBorderBrush}">
+                                    Foreground="{DynamicResource FloatBarForeground}" BorderThickness="0" Background="Transparent">
                                 <Ellipse Width="18" Height="18" Fill="{DynamicResource FloatBarForeground}" />
                             </Button>
                         </UniformGrid>
