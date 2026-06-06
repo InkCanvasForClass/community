@@ -1,3 +1,4 @@
+using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
@@ -277,6 +278,15 @@ namespace Ink_Canvas
                                     CenterAndScaleElement(media);
                                 }
                             }
+                            else if (item.InsertedElement is CanvasMediaControl mediaControl)
+                            {
+                                double left = InkCanvas.GetLeft(mediaControl);
+                                double top = InkCanvas.GetTop(mediaControl);
+                                if (double.IsNaN(left) || double.IsNaN(top))
+                                {
+                                    CenterAndScaleElement(mediaControl);
+                                }
+                            }
                         }
                     }
                 }
@@ -348,7 +358,7 @@ namespace Ink_Canvas
                 childrenSnapshot.Add(c);
             foreach (UIElement child in childrenSnapshot)
             {
-                if (child is Image || child is MediaElement)
+                if (child is Image || child is MediaElement || child is CanvasMediaControl)
                 {
                     list.Add(new TimeMachineHistory(child, TimeMachineHistoryType.ElementInsert));
                     fakeInkCanv.Children.Remove(child);
