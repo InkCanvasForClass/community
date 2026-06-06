@@ -5,11 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -42,8 +40,8 @@ namespace Ink_Canvas
             // 添加窗口关闭事件处理
             Closed += RandWindow_Closed;
 
-            // 添加窗口显示事件处理，确保置顶
-            Loaded += RandWindow_Loaded;
+            // 注册到中央置顶管理器，确保立即生效
+            SourceInitialized += (s, e) => WindowTopmostManager.RegisterWindow(this);
         }
 
         private void LoadBackground(Settings settings)
@@ -113,8 +111,8 @@ namespace Ink_Canvas
             // 添加窗口关闭事件处理
             Closed += RandWindow_Closed;
 
-            // 添加窗口显示事件处理，确保置顶
-            Loaded += RandWindow_Loaded;
+            // 注册到中央置顶管理器，确保立即生效
+            SourceInitialized += (s, e) => WindowTopmostManager.RegisterWindow(this);
 
             new Thread(() =>
             {
@@ -413,51 +411,6 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 窗口加载事件处理
-        /// </summary>
-        private void RandWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            // 使用延迟确保窗口完全加载后再应用置顶
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                try
-                {
-                    // 强制激活窗口
-                    Activate();
-                    Focus();
-
-                    // 设置置顶
-                    Topmost = true;
-
-                    // 使用Win32 API强制置顶
-                    var hwnd = new WindowInteropHelper(this).Handle;
-                    if (hwnd != IntPtr.Zero)
-                    {
-                        const int WS_EX_TOPMOST = 0x00000008;
-                        const int GWL_EXSTYLE = -20;
-                        const int SWP_NOMOVE = 0x0002;
-                        const int SWP_NOSIZE = 0x0001;
-                        const int SWP_SHOWWINDOW = 0x0040;
-                        const int SWP_NOOWNERZORDER = 0x0200;
-                        var HWND_TOPMOST = new IntPtr(-1);
-
-                        // 设置窗口样式为置顶
-                        int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-                        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
-
-                        // 强制置顶
-                        SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
-                            SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"RandWindow置顶失败: {ex.Message}", LogHelper.LogType.Error);
-                }
-            }), DispatcherPriority.Loaded);
-        }
-
-        /// <summary>
         /// 窗口关闭事件处理
         /// </summary>
         private void RandWindow_Closed(object sender, EventArgs e)
@@ -485,15 +438,5 @@ namespace Ink_Canvas
             }
         }
 
-        #region Win32 API 声明
-        [DllImport("user32.dll")]
-        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-
-        [DllImport("user32.dll")]
-        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-
-        [DllImport("user32.dll")]
-        private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-        #endregion
     }
 }

@@ -2377,63 +2377,6 @@ namespace Ink_Canvas
             settingsWindow.NavigateToPage("UpdatePage");
         }
 
-        [DllImport("user32.dll")]
-        private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-        [DllImport("user32.dll")]
-        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-        [DllImport("user32.dll")]
-        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-        [DllImport("user32.dll")]
-        private static extern bool BringWindowToTop(IntPtr hWnd);
-        [DllImport("user32.dll")]
-        private static extern bool SetForegroundWindow(IntPtr hWnd);
-        [DllImport("user32.dll")]
-        private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
-        [DllImport("kernel32.dll")]
-        private static extern uint GetCurrentProcessId();
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool UnhookWindowsHookEx(IntPtr hhk);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr GetModuleHandle(string lpModuleName);
-
-        private const int WH_KEYBOARD_LL = 13;
-        private const int WM_KEYDOWN = 0x0100;
-        private const int WM_KEYUP = 0x0101;
-        private const int WM_SYSKEYDOWN = 0x0104;
-        private const int WM_SYSKEYUP = 0x0105;
-
-        private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct KBDLLHOOKSTRUCT
-        {
-            public uint vkCode;
-            public uint scanCode;
-            public uint flags;
-            public uint time;
-            public IntPtr dwExtraInfo;
-        }
-
-        private const int GWL_EXSTYLE = -20;
-        private const int WS_EX_NOACTIVATE = 0x08000000;
-        private const int WS_EX_TOPMOST = 0x00000008;
-        private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
-        private static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
-        private const uint SWP_NOMOVE = 0x0002;
-        private const uint SWP_NOSIZE = 0x0001;
-        private const uint SWP_NOACTIVATE = 0x0010;
-        private const uint SWP_SHOWWINDOW = 0x0040;
-        private const uint SWP_NOOWNERZORDER = 0x0200;
-
         private DispatcherTimer autoSaveStrokesTimer;
 
         private void InstallKeyboardHook()
@@ -2490,14 +2433,7 @@ namespace Ink_Canvas
 
         private void Window_Activated(object sender, EventArgs e)
         {
-            if (Settings.Advanced.IsAlwaysOnTop)
-            {
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    ApplyAlwaysOnTop();
-                }), DispatcherPriority.Loaded);
-            }
-
+            // WindowTopmostManager.Window_Activated 已负责重新强制 Z 序，无需重复调用 ApplyAlwaysOnTop()
             _popupManager?.OnOwnerActivated();
         }
 
@@ -2623,15 +2559,7 @@ namespace Ink_Canvas
         /// </summary>
         private void Window_Deactivated(object sender, EventArgs e)
         {
-            // 窗口失去焦点时，如果启用了置顶功能且处于无焦点模式，重新应用置顶设置
-            if (Settings.Advanced.IsAlwaysOnTop && Settings.Advanced.IsNoFocusMode)
-            {
-                // 使用Dispatcher.BeginInvoke确保在UI线程上执行
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    ApplyAlwaysOnTop();
-                }), DispatcherPriority.Loaded);
-            }
+            // 500ms 维护计时器会在下一个 tick 重新强制置顶，无需在此重复调用
         }
 
 

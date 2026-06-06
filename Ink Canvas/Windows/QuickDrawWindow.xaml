@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Ink_Canvas"
         Topmost="True" Background="Transparent"
         mc:Ignorable="d" WindowStyle="None" AllowsTransparency="True"
-        Loaded="QuickDrawWindow_Loaded" Closing="Window_Closing" WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="CenterScreen"
         Title="{x:Static props:RandomStrings.Random_QuickDraw_WindowTitle}" Height="200" Width="400" Focusable="False" ShowInTaskbar="False">
 
 

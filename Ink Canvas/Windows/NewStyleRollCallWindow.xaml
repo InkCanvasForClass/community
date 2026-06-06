@@ -7,7 +7,6 @@
         Topmost="True"
         Background="{DynamicResource ApplicationPageBackgroundThemeBrush}"
         mc:Ignorable="d"
-        Loaded="RollCallWindow_Loaded"
         Closing="Window_Closing"
         WindowStartupLocation="CenterScreen"
         MouseMove="Window_MouseMove"

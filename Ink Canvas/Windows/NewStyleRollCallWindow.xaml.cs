@@ -1905,90 +1905,14 @@ namespace Ink_Canvas
 
         #endregion
 
-        #region Win32 API 声明和置顶管理
-        [DllImport("user32.dll")]
-        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-
-        [DllImport("user32.dll")]
-        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-
-        [DllImport("user32.dll")]
-        private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-
-        [DllImport("user32.dll")]
-        private static extern bool IsWindow(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        private static extern bool IsWindowVisible(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        private static extern bool IsIconic(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetForegroundWindow();
-
-        [DllImport("user32.dll")]
-        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
-
-        [DllImport("kernel32.dll")]
-        private static extern uint GetCurrentProcessId();
-
-        private const int GWL_EXSTYLE = -20;
-        private const int WS_EX_TOPMOST = 0x00000008;
-        private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
-        private static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
-        private const uint SWP_NOMOVE = 0x0002;
-        private const uint SWP_NOSIZE = 0x0001;
-        private const uint SWP_NOACTIVATE = 0x0010;
-        private const uint SWP_SHOWWINDOW = 0x0040;
-        private const uint SWP_NOOWNERZORDER = 0x0200;
-
         /// <summary>
-        /// 应用点名窗口置顶
+        /// 注册到中央置顶管理器，确保窗口立即获得置顶状态
         /// </summary>
-        private void ApplyRollCallWindowTopmost()
+        protected override void OnSourceInitialized(EventArgs e)
         {
-            try
-            {
-                var hwnd = new WindowInteropHelper(this).Handle;
-                if (hwnd == IntPtr.Zero) return;
-
-                // 强制激活窗口
-                Activate();
-                Focus();
-
-                // 设置WPF的Topmost属性
-                Topmost = true;
-
-                // 使用Win32 API强制置顶
-                // 1. 设置窗口样式为置顶
-                int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-                SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
-
-                // 2. 使用SetWindowPos确保窗口在最顶层
-                SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
-                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
-
-                LogHelper.WriteLogToFile("点名窗口已应用置顶", LogHelper.LogType.Trace);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"应用点名窗口置顶失败: {ex.Message}", LogHelper.LogType.Error);
-            }
+            base.OnSourceInitialized(e);
+            Helpers.WindowTopmostManager.RegisterWindow(this);
         }
-
-        /// <summary>
-        /// 窗口加载事件处理，确保置顶
-        /// </summary>
-        private void RollCallWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            // 使用延迟确保窗口完全加载后再应用置顶
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                ApplyRollCallWindowTopmost();
-            }), DispatcherPriority.Loaded);
-        }
-        #endregion
     }
 }
 

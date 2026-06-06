@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Interop;
@@ -11,31 +10,6 @@ namespace Ink_Canvas.Helpers
 {
     public class PopupManagerHelper : IDisposable
     {
-        #region Win32 API
-
-        [DllImport("user32.dll")]
-        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-
-        [DllImport("user32.dll")]
-        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-
-        [DllImport("user32.dll")]
-        private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-
-        [DllImport("user32.dll")]
-        private static extern bool IsWindow(IntPtr hWnd);
-
-        private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
-        private static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
-        private const uint SWP_NOMOVE = 0x0002;
-        private const uint SWP_NOSIZE = 0x0001;
-        private const uint SWP_NOACTIVATE = 0x0010;
-        private const uint SWP_NOOWNERZORDER = 0x0200;
-        private const int GWL_EXSTYLE = -20;
-        private const int WS_EX_TOPMOST = 0x00000008;
-
-        #endregion
-
         #region 状态管理
 
         private static readonly List<PopupManagerHelper> _activeInstances = new List<PopupManagerHelper>();
@@ -49,7 +23,7 @@ namespace Ink_Canvas.Helpers
         private bool _needsUpdate = false;
         private bool _lastTopmostState = false;
         private int _topmostCheckCounter = 0;
-        private const int TopmostCheckInterval = 15;
+        private const int TopmostCheckInterval = 25;
 
         #endregion
 
@@ -278,13 +252,13 @@ namespace Ink_Canvas.Helpers
 
         private IntPtr GetPopupHwnd(Popup popup)
         {
-            if (_hwndCache.TryGetValue(popup, out IntPtr cached) && IsWindow(cached))
+            if (_hwndCache.TryGetValue(popup, out IntPtr cached) && NativeWindowHelper.IsWindow(cached))
             {
                 return cached;
             }
 
             var source = PresentationSource.FromVisual(popup.Child) as HwndSource;
-            if (source?.Handle == IntPtr.Zero || !IsWindow(source.Handle))
+            if (source?.Handle == IntPtr.Zero || !NativeWindowHelper.IsWindow(source.Handle))
             {
                 _hwndCache.Remove(popup);
                 return IntPtr.Zero;
@@ -308,25 +282,25 @@ namespace Ink_Canvas.Helpers
 
                 if (shouldBeTopmost)
                 {
-                    SetWindowPos(popupHwnd, HWND_TOPMOST, 0, 0, 0, 0,
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
+                    NativeWindowHelper.SetWindowPos(popupHwnd, NativeWindowHelper.HWND_TOPMOST, 0, 0, 0, 0,
+                        NativeWindowHelper.SWP_NOMOVE | NativeWindowHelper.SWP_NOSIZE | NativeWindowHelper.SWP_NOACTIVATE | NativeWindowHelper.SWP_NOOWNERZORDER);
 
                     if (_ownerHwnd != IntPtr.Zero)
                     {
-                        SetWindowPos(_ownerHwnd, popupHwnd, 0, 0, 0, 0,
-                            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+                        NativeWindowHelper.SetWindowPos(_ownerHwnd, popupHwnd, 0, 0, 0, 0,
+                            NativeWindowHelper.SWP_NOMOVE | NativeWindowHelper.SWP_NOSIZE | NativeWindowHelper.SWP_NOACTIVATE);
                     }
                 }
                 else
                 {
-                    int exStyle = GetWindowLong(popupHwnd, GWL_EXSTYLE);
-                    if ((exStyle & WS_EX_TOPMOST) != 0)
+                    int exStyle = NativeWindowHelper.GetWindowLong(popupHwnd, NativeWindowHelper.GWL_EXSTYLE);
+                    if ((exStyle & NativeWindowHelper.WS_EX_TOPMOST) != 0)
                     {
-                        SetWindowLong(popupHwnd, GWL_EXSTYLE, exStyle & ~WS_EX_TOPMOST);
+                        NativeWindowHelper.SetWindowLong(popupHwnd, NativeWindowHelper.GWL_EXSTYLE, exStyle & ~NativeWindowHelper.WS_EX_TOPMOST);
                     }
 
-                    SetWindowPos(popupHwnd, HWND_NOTOPMOST, 0, 0, 0, 0,
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+                    NativeWindowHelper.SetWindowPos(popupHwnd, NativeWindowHelper.HWND_NOTOPMOST, 0, 0, 0, 0,
+                        NativeWindowHelper.SWP_NOMOVE | NativeWindowHelper.SWP_NOSIZE | NativeWindowHelper.SWP_NOACTIVATE);
                 }
             }
             catch (Exception ex)
@@ -348,8 +322,8 @@ namespace Ink_Canvas.Helpers
                         var source = PresentationSource.FromVisual(childPopup.Child) as HwndSource;
                         if (source?.Handle != IntPtr.Zero)
                         {
-                            SetWindowPos(source.Handle, HWND_TOPMOST, 0, 0, 0, 0,
-                                SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
+                            NativeWindowHelper.SetWindowPos(source.Handle, NativeWindowHelper.HWND_TOPMOST, 0, 0, 0, 0,
+                                NativeWindowHelper.SWP_NOMOVE | NativeWindowHelper.SWP_NOSIZE | NativeWindowHelper.SWP_NOACTIVATE | NativeWindowHelper.SWP_NOOWNERZORDER);
                         }
                     }
                 }

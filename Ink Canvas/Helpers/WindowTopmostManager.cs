@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
@@ -9,44 +8,13 @@ using Ink_Canvas.Windows.SettingsViews.Helpers;
 
 namespace Ink_Canvas.Helpers
 {
+    /// <summary>
+    /// 窗口置顶中央管理器。
+    /// 所有窗口的置顶状态由此类统一管理，子窗口不再自行调用 Win32 API 置顶。
+    /// </summary>
     public static class WindowTopmostManager
     {
-        private const int GWL_EXSTYLE = -20;
-        private const int WS_EX_TOPMOST = 0x00000008;
-        private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
-        private static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
-        private const uint SWP_NOMOVE = 0x0002;
-        private const uint SWP_NOSIZE = 0x0001;
-        private const uint SWP_NOACTIVATE = 0x0010;
-        private const uint SWP_SHOWWINDOW = 0x0040;
-        private const uint SWP_NOOWNERZORDER = 0x0200;
         private static readonly TimeSpan MaintenanceInterval = TimeSpan.FromMilliseconds(500);
-
-        [DllImport("user32.dll")]
-        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-
-        [DllImport("user32.dll")]
-        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-
-        [DllImport("user32.dll")]
-        private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-
-        [DllImport("user32.dll")]
-        private static extern bool IsWindow(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        private static extern bool IsWindowVisible(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        private static extern bool IsIconic(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        private static extern bool EnumThreadWindows(uint dwThreadId, EnumThreadWindowsProc lpfn, IntPtr lParam);
-
-        [DllImport("kernel32.dll")]
-        private static extern uint GetCurrentThreadId();
-
-        private delegate bool EnumThreadWindowsProc(IntPtr hWnd, IntPtr lParam);
 
         private static readonly List<ManagedWindow> ManagedWindows = new List<ManagedWindow>();
         private static readonly object SyncRoot = new object();
@@ -360,22 +328,22 @@ namespace Ink_Canvas.Helpers
 
             var mainWindow = ManagedWindows.FirstOrDefault(w => w.IsMainWindow);
             var childWindows = ManagedWindows
-                .Where(w => !w.IsMainWindow && IsWindowReady(w.Handle))
+                .Where(w => !w.IsMainWindow && NativeWindowHelper.IsWindowReady(w.Handle))
                 .OrderBy(w => w.ZOrder)
                 .ToList();
 
-            if (mainWindow != null && IsWindowReady(mainWindow.Handle))
+            if (mainWindow != null && NativeWindowHelper.IsWindowReady(mainWindow.Handle))
             {
                 if (_mainWindowTopmostEnabled)
                 {
                     mainWindow.Window.Topmost = true;
-                    SetTopmost(mainWindow.Handle);
+                    NativeWindowHelper.SetTopmost(mainWindow.Handle);
                     mainWindow.AppliedTopmost = true;
                 }
                 else
                 {
                     mainWindow.Window.Topmost = false;
-                    SetNotTopmost(mainWindow.Handle);
+                    NativeWindowHelper.SetNotTopmost(mainWindow.Handle);
                     mainWindow.AppliedTopmost = false;
                 }
             }
@@ -385,11 +353,10 @@ namespace Ink_Canvas.Helpers
                 foreach (var childWindow in childWindows)
                 {
                     childWindow.Window.Topmost = true;
-                    SetTopmost(childWindow.Handle);
+                    NativeWindowHelper.SetTopmost(childWindow.Handle);
                     childWindow.AppliedTopmost = true;
                 }
 
-                // 最后提升 Popup 窗口（如 ComboBox 下拉），确保它们在所有子窗口之上
                 BoostPopupWindowsAboveChildren();
             }
             else
@@ -399,21 +366,19 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 提升同线程中所有非 managed Window 的 HWND（即 WPF Popup/ComboBox 下拉等）到 TOPMOST 最顶层。
-        /// 在所有子窗口设为 TOPMOST 之后调用，确保 Popup 窗口始终在最上面。
+        /// 提升同线程中所有非 managed Window 的 HWND（如 WPF Popup/ComboBox 下拉）到 TOPMOST 最顶层。
         /// </summary>
         private static void BoostPopupWindowsAboveChildren()
         {
             try
             {
-                var currentThreadId = GetCurrentThreadId();
+                var currentThreadId = NativeWindowHelper.GetCurrentThreadId();
                 var popupHandles = new List<IntPtr>();
 
-                EnumThreadWindows(currentThreadId, (hWnd, _) =>
+                NativeWindowHelper.EnumThreadWindows(currentThreadId, (hWnd, _) =>
                 {
-                    if (!IsWindowReady(hWnd)) return true;
+                    if (!NativeWindowHelper.IsWindowReady(hWnd)) return true;
 
-                    // 跳过已由 ManagedWindows 管理的窗口（即正式的 Window 对象）
                     var isManaged = ManagedWindows.Any(w => w.Handle == hWnd);
                     if (!isManaged)
                     {
@@ -423,11 +388,10 @@ namespace Ink_Canvas.Helpers
                     return true;
                 }, IntPtr.Zero);
 
-                // 对 Popup 窗口再设一次 HWND_TOPMOST，使其排在 TOPMOST 队列最顶部
                 foreach (var hwnd in popupHandles)
                 {
-                    SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
+                    NativeWindowHelper.SetWindowPos(hwnd, NativeWindowHelper.HWND_TOPMOST, 0, 0, 0, 0,
+                        NativeWindowHelper.SWP_NOMOVE | NativeWindowHelper.SWP_NOSIZE | NativeWindowHelper.SWP_NOACTIVATE | NativeWindowHelper.SWP_SHOWWINDOW | NativeWindowHelper.SWP_NOOWNERZORDER);
                 }
             }
             catch (Exception ex)
@@ -440,10 +404,10 @@ namespace Ink_Canvas.Helpers
         {
             foreach (var childWindow in ManagedWindows.Where(w => !w.IsMainWindow && w.AppliedTopmost && !w.InitialTopmost).ToList())
             {
-                if (IsWindowReady(childWindow.Handle))
+                if (NativeWindowHelper.IsWindowReady(childWindow.Handle))
                 {
                     childWindow.Window.Topmost = false;
-                    SetNotTopmost(childWindow.Handle);
+                    NativeWindowHelper.SetNotTopmost(childWindow.Handle);
                 }
 
                 childWindow.AppliedTopmost = false;
@@ -452,7 +416,7 @@ namespace Ink_Canvas.Helpers
 
         private static void CleanupInvalidWindowsCore()
         {
-            foreach (var managedWindow in ManagedWindows.Where(w => w.Handle != IntPtr.Zero && !IsWindow(w.Handle)).ToList())
+            foreach (var managedWindow in ManagedWindows.Where(w => w.Handle != IntPtr.Zero && !NativeWindowHelper.IsWindow(w.Handle)).ToList())
             {
                 DetachWindowEvents(managedWindow.Window);
                 ManagedWindows.Remove(managedWindow);
@@ -499,35 +463,6 @@ namespace Ink_Canvas.Helpers
             if (!_maintenanceTimer.IsEnabled)
             {
                 _maintenanceTimer.Start();
-            }
-        }
-
-        private static bool IsWindowReady(IntPtr handle)
-        {
-            return handle != IntPtr.Zero && IsWindow(handle) && IsWindowVisible(handle) && !IsIconic(handle);
-        }
-
-        private static void SetTopmost(IntPtr handle)
-        {
-            SetWindowPos(handle, HWND_TOPMOST, 0, 0, 0, 0,
-                SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
-
-            int exStyle = GetWindowLong(handle, GWL_EXSTYLE);
-            if ((exStyle & WS_EX_TOPMOST) == 0)
-            {
-                SetWindowLong(handle, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
-            }
-        }
-
-        private static void SetNotTopmost(IntPtr handle)
-        {
-            SetWindowPos(handle, HWND_NOTOPMOST, 0, 0, 0, 0,
-                SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
-
-            int exStyle = GetWindowLong(handle, GWL_EXSTYLE);
-            if ((exStyle & WS_EX_TOPMOST) != 0)
-            {
-                SetWindowLong(handle, GWL_EXSTYLE, exStyle & ~WS_EX_TOPMOST);
             }
         }
 

@@ -3,38 +3,13 @@ using System;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Windows;
-using System.Windows.Interop;
 using System.Windows.Threading;
 
 namespace Ink_Canvas.Windows.SettingsViews.Helpers
 {
     public static class WindowSettingsHelper
     {
-        #region Win32 API
-
-        [DllImport("user32.dll")]
-        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-
-        [DllImport("user32.dll")]
-        private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-
-        [DllImport("user32.dll")]
-        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetForegroundWindow();
-
-        [DllImport("user32.dll")]
-        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
-
-        [DllImport("user32.dll")]
-        private static extern bool IsWindow(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        private static extern bool IsWindowVisible(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        private static extern bool IsIconic(IntPtr hWnd);
+        #region Keyboard Hook
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
@@ -49,28 +24,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr GetModuleHandle(string lpModuleName);
 
-        [DllImport("kernel32.dll")]
-        private static extern uint GetCurrentProcessId();
-
-        private const int GWL_EXSTYLE = -20;
-        private const int WS_EX_NOACTIVATE = 0x08000000;
-        private const int WS_EX_TOPMOST = 0x00000008;
         private const int WH_KEYBOARD_LL = 13;
 
-        private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
-        private static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
-
-        private const uint SWP_NOMOVE = 0x0002;
-        private const uint SWP_NOSIZE = 0x0001;
-        private const uint SWP_NOACTIVATE = 0x0010;
-        private const uint SWP_SHOWWINDOW = 0x0040;
-        private const uint SWP_NOOWNERZORDER = 0x0200;
-
         private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
-
-        #endregion
-
-        #region Keyboard Hook
 
         private static LowLevelKeyboardProc _keyboardProc;
         private static IntPtr _keyboardHookId = IntPtr.Zero;
@@ -110,10 +66,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
 
         public static Action OnStopKillProcessTimer { get; set; }
         public static Action OnStartKillProcessTimer { get; set; }
-
-        #endregion
-
-        #region Topmost Maintenance Timer
 
         #endregion
 
@@ -203,19 +155,19 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
 
         public static void ApplyNoFocusMode(Window window)
         {
-            var hwnd = new WindowInteropHelper(window).Handle;
-            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+            var hwnd = new System.Windows.Interop.WindowInteropHelper(window).Handle;
+            int exStyle = NativeWindowHelper.GetWindowLong(hwnd, NativeWindowHelper.GWL_EXSTYLE);
 
             bool shouldBeNoFocus = !IsTemporarilyDisablingNoFocusMode && SettingsManager.Settings.Advanced.IsNoFocusMode;
 
             if (shouldBeNoFocus)
             {
-                SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_NOACTIVATE);
+                NativeWindowHelper.SetWindowLong(hwnd, NativeWindowHelper.GWL_EXSTYLE, exStyle | NativeWindowHelper.WS_EX_NOACTIVATE);
                 InstallKeyboardHook();
             }
             else
             {
-                SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_NOACTIVATE);
+                NativeWindowHelper.SetWindowLong(hwnd, NativeWindowHelper.GWL_EXSTYLE, exStyle & ~NativeWindowHelper.WS_EX_NOACTIVATE);
                 UninstallKeyboardHook();
             }
         }
@@ -385,10 +337,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         {
             WindowTopmostManager.StopTopmostMaintenance();
             LogHelper.WriteLogToFile("停止置顶维护定时器", LogHelper.LogType.Trace);
-        }
-
-        private static void TopmostMaintenanceTimer_Tick(object sender, EventArgs e)
-        {
         }
 
         #endregion
