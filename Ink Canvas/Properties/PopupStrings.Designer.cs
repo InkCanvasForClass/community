@@ -39,35 +39,5 @@ namespace Ink_Canvas.Properties
         {
             return ResourceManager.GetString(key, _resourceCulture);
         }
-
-        public static string Popup_PenTipStyle => ResourceManager.GetString(nameof(Popup_PenTipStyle), _resourceCulture);
-
-        public static string Popup_PenTipRealtime => ResourceManager.GetString(nameof(Popup_PenTipRealtime), _resourceCulture);
-
-        public static string Popup_PenTipByPointSet => ResourceManager.GetString(nameof(Popup_PenTipByPointSet), _resourceCulture);
-
-        public static string Popup_PenTipByVelocity => ResourceManager.GetString(nameof(Popup_PenTipByVelocity), _resourceCulture);
-
-        public static string Popup_PenTipOff => ResourceManager.GetString(nameof(Popup_PenTipOff), _resourceCulture);
-
-        public static string Popup_OverlapDarken => ResourceManager.GetString(nameof(Popup_OverlapDarken), _resourceCulture);
-
-        public static string Popup_Transparent => ResourceManager.GetString(nameof(Popup_Transparent), _resourceCulture);
-
-        public static string Popup_Delay => ResourceManager.GetString(nameof(Popup_Delay), _resourceCulture);
-
-        public static string Popup_SpeedMultiplier => ResourceManager.GetString(nameof(Popup_SpeedMultiplier), _resourceCulture);
-
-        public static string Popup_LightSeries => ResourceManager.GetString(nameof(Popup_LightSeries), _resourceCulture);
-
-        public static string Popup_BgSettings => ResourceManager.GetString(nameof(Popup_BgSettings), _resourceCulture);
-
-        public static string Popup_WhiteboardMode => ResourceManager.GetString(nameof(Popup_WhiteboardMode), _resourceCulture);
-
-        public static string Popup_Blackboard => ResourceManager.GetString(nameof(Popup_Blackboard), _resourceCulture);
-
-        public static string Popup_BgColor => ResourceManager.GetString(nameof(Popup_BgColor), _resourceCulture);
-
-        public static string Popup_ApplyColor => ResourceManager.GetString(nameof(Popup_ApplyColor), _resourceCulture);
     }
 }

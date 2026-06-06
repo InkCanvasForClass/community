@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -159,6 +159,12 @@
   <data name="Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint" xml:space="preserve">
     <value>When enabled, the whiteboard toolbar Booth button launches Seewo Video Showcase (must be installed). When disabled, the built-in booth is used.</value>
   </data>
+  <data name="Canvas_MergeInkSmoothingWithUndo" xml:space="preserve">
+    <value>Merge ink smoothing into undo</value>
+  </data>
+  <data name="Canvas_MergeInkSmoothingWithUndoHint" xml:space="preserve">
+    <value>When enabled, the smoothing replacement for a stroke is merged into the same undo step as the original stroke. Ink correction is not merged.</value>
+  </data>
   <data name="Canvas_No" xml:space="preserve">
     <value>No</value>
   </data>
@@ -183,6 +189,33 @@
   <data name="Canvas_ShowPenCursor" xml:space="preserve">
     <value>Show pen cursor</value>
   </data>
+  <data name="Canvas_PenCursorType" xml:space="preserve">
+    <value>Pen cursor type</value>
+  </data>
+  <data name="Canvas_PenCursorTypeHint" xml:space="preserve">
+    <value>Choose which cursor to show when pen cursor is enabled</value>
+  </data>
+  <data name="Canvas_PenCursorType_System" xml:space="preserve">
+    <value>System cursor</value>
+  </data>
+  <data name="Canvas_PenCursorType_BuiltIn" xml:space="preserve">
+    <value>Built-in cursor</value>
+  </data>
+  <data name="Canvas_PenCursorType_Custom" xml:space="preserve">
+    <value>Custom cursor</value>
+  </data>
+  <data name="Canvas_CustomPenCursorPath" xml:space="preserve">
+    <value>Custom cursor file</value>
+  </data>
+  <data name="Canvas_CustomPenCursorPathHint" xml:space="preserve">
+    <value>Falls back to built-in cursor if no file is selected</value>
+  </data>
+  <data name="Canvas_SelectCustomPenCursor" xml:space="preserve">
+    <value>Select cursor file…</value>
+  </data>
+  <data name="Canvas_CustomPenCursorFilter" xml:space="preserve">
+    <value>Cursor files|*.cur;*.ani</value>
+  </data>
   <data name="Canvas_SwitchBackAfterEraser" xml:space="preserve">
     <value>Switch back to annotation after eraser</value>
   </data>
@@ -202,19 +235,19 @@
     <value>Yes</value>
   </data>
   <data name="CanvasAndInkPanel_1920×1080Hint" xml:space="preserve">
-    <value></value>
+    <value>Automatically compress images larger than 1920×1080 to save memory</value>
   </data>
   <data name="CanvasAndInkPanel_Hint_9" xml:space="preserve">
-    <value>When enabled, will auto save ink at set intervals, only when canvas is visible and has ink</value>
+    <value>Automatically saves ink at set intervals, only when the canvas is visible and contains ink</value>
   </data>
   <data name="InkRecog_AutoStraightLine" xml:space="preserve">
     <value>Auto-straighten lines</value>
   </data>
   <data name="InkRecog_BlockRectFakePressure" xml:space="preserve">
-    <value>Block fake pressure on corrected rectangles</value>
+    <value>Disable simulated pressure for corrected rectangles</value>
   </data>
   <data name="InkRecog_BlockTriFakePressure" xml:space="preserve">
-    <value>Block fake pressure on corrected triangles</value>
+    <value>Disable simulated pressure for corrected triangles</value>
   </data>
   <data name="InkRecog_EnableInkRecognition" xml:space="preserve">
     <value>Enable ink recognition</value>
@@ -232,7 +265,7 @@
     <value>WinRT recognition to handwriting glyphs</value>
   </data>
   <data name="InkRecog_HandwritingBeautifyHint" xml:space="preserve">
-    <value>When enabled, ink correction API: first recognizes handwritten words via WinRT, then replaces original strokes with glyph outlines rendered in a handwriting-style font. Requires 64-bit and WinRT.</value>
+    <value>When enabled, the ink correction API uses WinRT to recognize handwritten words and replaces original strokes with handwriting-style glyph outlines. (Requires 64-bit Windows and WinRT)</value>
   </data>
   <data name="InkRecog_HandwritingFont" xml:space="preserve">
     <value>Handwriting glyph font</value>
@@ -256,25 +289,25 @@
     <value>When on, line endpoints near other endpoints will snap and connect.</value>
   </data>
   <data name="InkRecog_PauseStraightenDelay" xml:space="preserve">
-    <value></value>
+    <value>Pause Trigger Delay</value>
   </data>
   <data name="InkRecog_PauseStraightenHint" xml:space="preserve">
-    <value></value>
+    <value>Automatically straighten the current stroke to a line when pausing during writing (requires Auto Straighten Line to be enabled).</value>
   </data>
   <data name="InkRecog_PauseStraightenLine" xml:space="preserve">
-    <value></value>
+    <value>Pause Straighten</value>
   </data>
   <data name="InkRecog_Sensitivity" xml:space="preserve">
     <value>Sensitivity</value>
   </data>
   <data name="InkRecog_ShapeEngine" xml:space="preserve">
-    <value></value>
+    <value>Recognition Engine</value>
   </data>
   <data name="InkRecog_ShapeEngineAuto" xml:space="preserve">
-    <value></value>
+    <value>Auto</value>
   </data>
   <data name="InkRecog_ShapeEngineHint" xml:space="preserve">
-    <value></value>
+    <value>Auto: Uses WinRT on Windows 10 or later, otherwise uses IACore. Supports forcing IACore or WinRT. IACore runs via an IPC helper process and is compatible with both 32-bit and 64-bit main processes.</value>
   </data>
   <data name="InkRecog_SnappingDistance" xml:space="preserve">
     <value>Snapping distance</value>

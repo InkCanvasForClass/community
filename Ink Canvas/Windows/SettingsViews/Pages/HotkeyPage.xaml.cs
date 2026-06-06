@@ -285,9 +285,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 case "Redo": return () => _mainWindow.SymbolIconRedo_MouseUp(null, null);
                 case "Clear": return () => _mainWindow.SymbolIconDelete_MouseUp(null, null);
                 case "Paste": return () => _mainWindow.HandleGlobalPaste(null, null);
-                case "SelectTool": return () => _mainWindow.SymbolIconSelect_MouseUp(null, null);
+                case "SelectTool": return () => _mainWindow.SwitchToSelectFromHotkey();
                 case "DrawTool": return () => _mainWindow.PenIcon_Click(null, null);
-                case "EraserTool": return () => _mainWindow.EraserIcon_Click(null, null);
+                case "EraserTool": return () => _mainWindow.SwitchToEraserFromHotkey();
                 case "BlackboardTool": return () => _mainWindow.ImageBlackboard_MouseUp(null, null);
                 case "QuitDrawTool": return () => _mainWindow.CursorIcon_Click(null, null);
                 case "Pen1": return () => SwitchToPenType(0);
@@ -295,7 +295,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 case "Pen3": return () => SwitchToPenType(2);
                 case "Pen4": return () => SwitchToPenType(3);
                 case "Pen5": return () => SwitchToPenType(4);
-                case "DrawLine": return () => _mainWindow.BtnDrawLine_Click(null, null);
+                case "DrawLine": return () => _mainWindow.DrawLineFromHotkey();
                 case "Screenshot": return () => _mainWindow.SaveScreenShotToDesktop();
                 case "QuickDraw": return () => _mainWindow.OpenQuickDrawFromHotkey();
                 case "Hide": return () => _mainWindow.SymbolIconEmoji_MouseUp(null, null);

@@ -3,10 +3,7 @@
   "postCreateCommand": "dotnet restore",
   "customizations": {
     "vscode": {
-      "extensions": [
-        "ms-dotnettools.csdevkit",
-        "ms-dotnettools.csharp"
-      ]
+      "extensions": ["ms-dotnettools.csdevkit", "ms-dotnettools.csharp"]
     }
   }
 }

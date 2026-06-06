@@ -457,7 +457,7 @@ namespace Ink_Canvas
         /// 处理重置浮动栏位置托盘菜单项的点击事件，包括以下步骤：
         /// 1. 获取主窗口实例
         /// 2. 如果主窗口已加载：
-        ///    - 检查是否处于PPT演示模式
+        ///    - 清空用户拖动标志和已保存的位置坐标，让动画走默认位置分支
         ///    - 如果浮动栏当前未处于收纳模式：
         ///       - 如果不处于PPT演示模式，调用PureViewboxFloatingBarMarginAnimationInDesktopMode方法重置浮动栏位置
         ///       - 否则，调用PureViewboxFloatingBarMarginAnimationInPPTMode方法重置浮动栏位置
@@ -474,6 +474,11 @@ namespace Ink_Canvas
                 });
                 if (!mainWin.isFloatingBarFolded)
                 {
+                    // 清空保存的状态，强制动画走默认位置分支
+                    mainWin._userHasDraggedFloatingBar = false;
+                    mainWin.pointDesktop = new Point(-1, -1);
+                    mainWin.pointPPT = new Point(-1, -1);
+
                     if (!isInPPTPresentationMode) mainWin.PureViewboxFloatingBarMarginAnimationInDesktopMode();
                     else mainWin.PureViewboxFloatingBarMarginAnimationInPPTMode();
                 }

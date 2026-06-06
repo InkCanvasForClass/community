@@ -1,0 +1,289 @@
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties"
+          x:Class="Ink_Canvas.Windows.SettingsViews.Pages.BoardToolbarPage"
+          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+          xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
+          xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+          xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+          xmlns:dd="urn:gong-wpf-dragdrop"
+          xmlns:board="clr-namespace:Ink_Canvas.Controls.Toolbar.BoardToolbar"
+          mc:Ignorable="d"
+          Title="{x:Static props:FloatingBarStrings.BoardToolbarPage_Title}">
+
+    <Page.Resources>
+        <local:BoardIdToDisplayNameConverter x:Key="IdToNameConverter"/>
+        <local:BoardNullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+        <local:BoardAreaNameConverter x:Key="AreaNameConverter"/>
+        <local:BoardGroupNameConverter x:Key="GroupNameConverter"/>
+        <local:BoardPositionNameConverter x:Key="PositionNameConverter"/>
+
+        <DataTemplate x:Key="GroupChildItemTemplate" DataType="{x:Type board:BoardToolbarComponentEntry}">
+            <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="6" Padding="8,4" Margin="2"
+                    Cursor="Hand">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="&#xE76F;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                               VerticalAlignment="Center" Margin="0,0,4,0" Opacity="0.45"/>
+                    <TextBlock Text="{Binding Id, Converter={StaticResource IdToNameConverter}}"
+                               VerticalAlignment="Center" FontSize="12"/>
+                    <Button Content="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="9"
+                            Click="RemoveGroupChildItem_Click" Margin="6,0,0,0"
+                            Background="Transparent" BorderThickness="0"
+                            Padding="3,1" VerticalAlignment="Center"
+                            Cursor="Hand"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="LibraryItemTemplate">
+            <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="6" Padding="10,8" Margin="3" Width="200"
+                    Cursor="Hand">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="{Binding DisplayName}" FontWeight="Medium" FontSize="13"/>
+                        <TextBlock Text="{Binding Description}" Opacity="0.65" FontSize="12"
+                                   TextWrapping="Wrap" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                            Click="AddLibraryItem_Click"
+                            Background="Transparent" BorderThickness="0"
+                            Padding="6,4" VerticalAlignment="Center"
+                            ToolTip="{x:Static props:FloatingBarStrings.ToolbarPage_AddToAdded}"
+                            Cursor="Hand"/>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="GroupEntryTemplate" DataType="{x:Type board:BoardToolbarGroupEntry}">
+            <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8" Padding="8" Margin="0,4">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,4">
+                        <TextBlock Text="{Binding Id, Converter={StaticResource GroupNameConverter}}"
+                                   FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"
+                                   DockPanel.Dock="Left"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
+                            <Button Content="&#xE70E;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                                    Click="MoveGroupUp_Click" Padding="4,2" Margin="0,0,2,0"
+                                    Background="Transparent" BorderThickness="0"
+                                    ToolTip="{x:Static props:FloatingBarStrings.BoardToolbarPage_MoveUp}"
+                                    Cursor="Hand"/>
+                            <Button Content="&#xE70D;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                                    Click="MoveGroupDown_Click" Padding="4,2" Margin="0,0,4,0"
+                                    Background="Transparent" BorderThickness="0"
+                                    ToolTip="{x:Static props:FloatingBarStrings.BoardToolbarPage_MoveDown}"
+                                    Cursor="Hand"/>
+                            <Button Content="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                                    Click="AddComponentToGroup_Click" Padding="4,2" Margin="0,0,4,0"
+                                    Background="Transparent" BorderThickness="0"
+                                    ToolTip="{x:Static props:FloatingBarStrings.BoardToolbarPage_AddComponent2}"
+                                    Cursor="Hand"/>
+                            <Button Content="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                                    Click="RemoveGroup_Click" Padding="4,2"
+                                    Background="Transparent" BorderThickness="0"
+                                    ToolTip="{x:Static props:FloatingBarStrings.BoardToolbarPage_DeleteProfile}"
+                                    Cursor="Hand"/>
+                        </StackPanel>
+                    </DockPanel>
+                    <ListBox ItemsSource="{Binding Components}"
+                             ItemTemplate="{StaticResource GroupChildItemTemplate}"
+                             dd:DragDrop.IsDragSource="True"
+                             dd:DragDrop.IsDropTarget="True"
+                             dd:DragDrop.DropHandler="{Binding DataContext.GroupDropHandler, RelativeSource={RelativeSource AncestorType=ui:Page}}"
+                             Background="Transparent" BorderThickness="0"
+                             MinHeight="32">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                    </ListBox>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <Style x:Key="DragDropListBoxStyle" TargetType="ListBox">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="dd:DragDrop.IsDragSource" Value="True"/>
+            <Setter Property="dd:DragDrop.IsDropTarget" Value="True"/>
+            <Setter Property="dd:DragDrop.UseDefaultEffectDataTemplate" Value="False"/>
+            <Setter Property="dd:DragDrop.DropTargetAdornerBrush" Value="#2563eb"/>
+            <Setter Property="ScrollViewer.PanningMode" Value="HorizontalOnly"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+    </Page.Resources>
+
+    <ScrollViewer PanningMode="VerticalFirst">
+        <ikw:SimpleStackPanel Spacing="4">
+
+            <TextBlock Text="{x:Static props:FloatingBarStrings.BoardToolbarPage_ConfigProfiles}"
+                       FontSize="14" FontWeight="SemiBold" Margin="0,20,0,6"/>
+            <DockPanel Margin="0,0,0,4">
+                <ComboBox x:Name="ComboBoxConfigFile" SelectionChanged="ComboBoxConfigFile_SelectionChanged"
+                          DockPanel.Dock="Left" VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
+                    <Button Content="{x:Static props:FloatingBarStrings.ToolbarPage_NewProfile}" Click="ButtonNewConfig_Click" Padding="12,6" Margin="0,0,8,0"/>
+                    <Button Content="{x:Static props:FloatingBarStrings.ToolbarPage_DuplicateProfile}" Click="ButtonDuplicateConfig_Click" Padding="12,6" Margin="0,0,8,0"/>
+                    <Button Content="{x:Static props:FloatingBarStrings.ToolbarPage_DeleteProfile}" Click="ButtonDeleteConfig_Click" Padding="12,6"/>
+                </StackPanel>
+            </DockPanel>
+
+            <!-- 区域选择 -->
+            <TextBlock Text="{x:Static props:FloatingBarStrings.BoardToolbarPage_Areas}"
+                       FontSize="14" FontWeight="SemiBold" Margin="0,12,0,6"/>
+            <WrapPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <RadioButton x:Name="RadioAreaLeft" Content="{x:Static props:FloatingBarStrings.BoardToolbarPage_LeftArea}"
+                             Checked="AreaRadioButton_Changed" Margin="0,0,16,0" FontSize="13" FontWeight="Medium"/>
+                <RadioButton x:Name="RadioAreaCenter" Content="{x:Static props:FloatingBarStrings.BoardToolbarPage_CenterArea}"
+                             Checked="AreaRadioButton_Changed" Margin="0,0,16,0" FontSize="13" FontWeight="Medium"/>
+                <RadioButton x:Name="RadioAreaRight" Content="{x:Static props:FloatingBarStrings.BoardToolbarPage_RightArea}"
+                             Checked="AreaRadioButton_Changed" FontSize="13" FontWeight="Medium"/>
+            </WrapPanel>
+
+            <!-- 当前区域的分组 -->
+            <TextBlock Text="{x:Static props:FloatingBarStrings.BoardToolbarPage_AreaGroups}"
+                       FontSize="14" FontWeight="SemiBold" Margin="0,8,0,4"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <Button Content="{x:Static props:FloatingBarStrings.BoardToolbarPage_AddGroup2}"
+                        Click="ButtonAddGroup_Click" Padding="10,5" FontSize="12"/>
+            </StackPanel>
+            <ItemsControl x:Name="AreaGroupsControl"
+                          ItemTemplate="{StaticResource GroupEntryTemplate}"/>
+
+            <!-- TabControl: 组件库 / 组件设置 -->
+            <TabControl x:Name="SettingsTabControl" Margin="0,12,0,0"
+                        Style="{StaticResource {x:Static ui:ThemeKeys.TabControlPivotStyleKey}}"
+                        SelectedIndex="{Binding SettingsTabIndex}">
+
+                <!-- Tab 1: 组件库 -->
+                <TabItem Header="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentLibrary}">
+                    <ScrollViewer PanningMode="VerticalFirst" VerticalScrollBarVisibility="Auto">
+                        <ikw:SimpleStackPanel Spacing="4" Margin="0,8,0,0">
+                            <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentLibraryHint}"
+                                       Opacity="0.65" FontSize="12" Margin="0,0,0,8"/>
+                            <ListBox ItemsSource="{Binding AvailableItems}"
+                                     ItemTemplate="{StaticResource LibraryItemTemplate}"
+                                     dd:DragDrop.IsDragSource="True"
+                                     Background="Transparent" BorderThickness="0"
+                                     SelectionMode="Single">
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                            </ListBox>
+                        </ikw:SimpleStackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- Tab 2: 组件设置 -->
+                <TabItem Header="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentSettings}">
+                    <TabItem.Visibility>
+                        <Binding Path="SelectedEntry" Converter="{StaticResource NullToVisibilityConverter}"/>
+                    </TabItem.Visibility>
+                    <ScrollViewer PanningMode="VerticalFirst" VerticalScrollBarVisibility="Auto">
+                        <ikw:SimpleStackPanel Spacing="4" Margin="0,8,0,0">
+
+                            <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentProperties}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+
+                            <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_Size}" FontSize="14" FontWeight="SemiBold" Margin="0,12,0,4"/>
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,4,4">
+                                    <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_FixedWidth}" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxFixedWidth" Width="80" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="0" Grid.Column="1" Margin="4,0,0,4">
+                                    <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_FixedHeight}" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxFixedHeight" Width="80" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,4,0">
+                                    <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_MinWidth}" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxMinWidth" Width="80" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="1" Margin="4,0,0,0">
+                                    <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_MinHeight}" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxMinHeight" Width="80" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_Appearance}" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,4,0">
+                                    <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_FontSize}" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxFontSize" Width="60" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="4,0,0,0">
+                                    <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_Opacity}" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                    <TextBox x:Name="TextBoxOpacity" Width="60" HorizontalAlignment="Left"
+                                             TextChanged="ComponentSetting_TextChanged"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_Margin}" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                            <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_MarginHint}" FontSize="12" Opacity="0.65" Margin="0,0,0,4"/>
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="TextBoxMarginLeft" Grid.Column="0" Margin="0,0,2,0"
+                                         TextChanged="ComponentSetting_TextChanged"/>
+                                <TextBox x:Name="TextBoxMarginTop" Grid.Column="1" Margin="2,0,2,0"
+                                         TextChanged="ComponentSetting_TextChanged"/>
+                                <TextBox x:Name="TextBoxMarginRight" Grid.Column="2" Margin="2,0,2,0"
+                                         TextChanged="ComponentSetting_TextChanged"/>
+                                <TextBox x:Name="TextBoxMarginBottom" Grid.Column="3" Margin="2,0,0,0"
+                                         TextChanged="ComponentSetting_TextChanged"/>
+                            </Grid>
+
+                            <Button Content="{x:Static props:FloatingBarStrings.ToolbarPage_ResetComponentSettings}" Click="ButtonResetComponentSettings_Click"
+                                    Padding="12,6" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+
+                        </ikw:SimpleStackPanel>
+                    </ScrollViewer>
+                </TabItem>
+            </TabControl>
+
+            <Button Content="{x:Static props:FloatingBarStrings.BoardToolbarPage_ResetDefault}" Click="ButtonReset_Click"
+                    Padding="20,10" HorizontalAlignment="Left" Margin="0,16,0,20"/>
+
+            <Rectangle Height="48"/>
+
+        </ikw:SimpleStackPanel>
+    </ScrollViewer>
+</ui:Page>

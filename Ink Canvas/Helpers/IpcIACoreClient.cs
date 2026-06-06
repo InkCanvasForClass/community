@@ -98,10 +98,10 @@ namespace Ink_Canvas.Helpers
 
                 var psi = new ProcessStartInfo
                 {
-                    FileName         = HelperExePath,
-                    Arguments        = CurrentProcessId.ToString(),
-                    UseShellExecute  = false,
-                    CreateNoWindow   = true,
+                    FileName = HelperExePath,
+                    Arguments = CurrentProcessId.ToString(),
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
                     WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory
                 };
                 _helperProcess = Process.Start(psi);
@@ -374,7 +374,7 @@ namespace Ink_Canvas.Helpers
             {
                 _helperProcess?.Dispose();
                 _helperProcess = null;
-                _available     = false;
+                _available = false;
                 ReleaseSharedMemory();
             }
         }

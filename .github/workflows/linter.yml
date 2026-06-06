@@ -1,0 +1,50 @@
+---
+name: Lint
+
+on:
+  push:
+    branches: [net6]
+  pull_request:
+    branches: [net6]
+
+permissions: {}
+
+jobs:
+  build:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    permissions:
+      # contents permission to clone the repository
+      contents: read
+      packages: read
+      # Don't need issues and pull-requests permissions to write results as pull request comments in order not to make cjk unhappy.
+
+      # To report GitHub Actions status checks. Omit if you don't need
+      # to update commit status
+      statuses: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          # super-linter needs the full git history to get the
+          # list of files that changed across commits
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Super-linter
+        uses: super-linter/super-linter@v8.6.0 # x-release-please-version
+        env:
+          # Flag to have the linter complete with exit code 0 even if errors were detected, in order not to make cjk unhappy.
+          DISABLE_ERRORS: true
+          # Disable the BIOME_FORMAT rule
+          VALIDATE_BIOME_FORMAT: false
+          # Disable the SPELL_CODESPELL rule
+          VALIDATE_SPELL_CODESPELL: false
+          # Disable the GITLEAKS rule temporarily
+          VALIDATE_GITLEAKS: false
+          # Save the super-linter output
+          SAVE_SUPER_LINTER_OUTPUT: true
+          # To report GitHub Actions status checks
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

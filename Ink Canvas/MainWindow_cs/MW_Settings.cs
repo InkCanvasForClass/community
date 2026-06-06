@@ -1,5 +1,5 @@
 using Ink_Canvas.Controls;
-using Ink_Canvas.Controls.Toolbar;
+using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using OSVersionExtension;
@@ -544,7 +544,7 @@ namespace Ink_Canvas
             if (sender == BoardPenWidthSlider) PenWidthSlider.Value = value;
             else if (sender == PenWidthSlider) BoardPenWidthSlider.Value = value;
             _isUpdatingSliders = false;
-            
+
             if (penType == 0)
             {
                 drawingAttributes.Height = value / 2;
@@ -590,7 +590,7 @@ namespace Ink_Canvas
             var NowG = drawingAttributes.Color.G;
             var NowB = drawingAttributes.Color.B;
             drawingAttributes.Color = Color.FromArgb((byte)value, NowR, NowG, NowB);
-            
+
             if (penType == 0)
             {
                 Settings.Canvas.InkAlpha = value;
@@ -906,14 +906,6 @@ namespace Ink_Canvas
             Settings.Appearance.EnableTrayIcon = true;
 
             // 浮动栏按钮显示控制默认值
-            Settings.Appearance.IsShowShapeButton = true;
-            Settings.Appearance.IsShowUndoButton = true;
-            Settings.Appearance.IsShowRedoButton = true;
-            Settings.Appearance.IsShowClearButton = true;
-            Settings.Appearance.IsShowWhiteboardButton = true;
-            Settings.Appearance.IsShowHideButton = true;
-            Settings.Appearance.IsShowLassoSelectButton = true;
-            Settings.Appearance.IsShowClearAndMouseButton = true;
             Settings.Appearance.IsShowQuickColorPalette = false;
             Settings.Appearance.QuickColorPaletteDisplayMode = 1;
             Settings.Appearance.EraserDisplayOption = 0;
@@ -978,6 +970,7 @@ namespace Ink_Canvas
             Settings.Canvas.ClearCanvasAndClearTimeMachine = false;
             Settings.Canvas.FitToCurve = false;
             Settings.Canvas.UseAdvancedBezierSmoothing = true;
+            Settings.Canvas.MergeInkSmoothingWithUndo = false;
             Settings.Canvas.EnablePressureTouchMode = false;
             Settings.Canvas.DisablePressure = false;
             Settings.Canvas.AutoStraightenLine = true;
@@ -989,7 +982,6 @@ namespace Ink_Canvas
             Settings.Canvas.UsingWhiteboard = false;
             Settings.Canvas.HyperbolaAsymptoteOption = 0;
 
-            Settings.Gesture.AutoSwitchTwoFingerGesture = true;
             Settings.Gesture.IsEnableTwoFingerTranslate = true;
             Settings.Gesture.IsEnableTwoFingerZoom = false;
             Settings.Gesture.IsEnableTwoFingerRotation = false;
@@ -1037,16 +1029,16 @@ namespace Ink_Canvas
                 isLoaded = false;
                 SetSettingsToRecommendation();
                 SaveSettingsToFile();
-                
+
                 // 确保工具栏配置也被重置为默认值
                 var configName = SettingsManager.Settings?.ToolbarConfigName ?? "default";
                 ToolbarRegistry.SaveConfigFile(configName, ToolbarRegistry.CreateDefaultLayout());
-                
+
                 LoadSettings(isStartup: false, skipAutoUpdateCheck: true);
-                
+
                 // 重置后重建工具栏
                 RebuildToolbar();
-                
+
                 isLoaded = true;
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -1065,16 +1057,16 @@ namespace Ink_Canvas
                 Settings.Automation.AutoDelSavedFilesDaysThreshold = 15;
                 Settings.Automation.AutoSavedStrokesLocation = @"D:\Ink Canvas\AutoSavedStrokes";
                 SaveSettingsToFile();
-                
+
                 // 确保工具栏配置也被重置为默认值
                 var configName = SettingsManager.Settings?.ToolbarConfigName ?? "default";
                 ToolbarRegistry.SaveConfigFile(configName, ToolbarRegistry.CreateDefaultLayout());
-                
+
                 LoadSettings(isStartup: false, skipAutoUpdateCheck: true);
-                
+
                 // 重置后重建工具栏
                 RebuildToolbar();
-                
+
                 isLoaded = true;
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -1256,6 +1248,66 @@ namespace Ink_Canvas
 
 
         #endregion
+
+        public double QuickPanelUnfoldedMargin => 8.0;
+        public double QuickPanelFoldedMargin => -60.0;
+
+        public void ApplySidePanelSettings()
+        {
+            LeftSidePanel?.ApplySettings();
+            RightSidePanel?.ApplySettings();
+            ApplyQuickPanelLayoutSettings();
+        }
+
+        public void ApplyQuickPanelLayoutSettings()
+        {
+            if (LeftQuickPanelBorder != null)
+            {
+                LeftQuickPanelBorder.CornerRadius = new CornerRadius(6);
+                LeftQuickPanelBorder.ClipToBounds = false;
+            }
+            if (LeftQuickPanelShadow != null)
+            {
+                LeftQuickPanelShadow.Opacity = 0.3;
+            }
+
+            if (RightQuickPanelBorder != null)
+            {
+                RightQuickPanelBorder.CornerRadius = new CornerRadius(6);
+                RightQuickPanelBorder.ClipToBounds = false;
+            }
+            if (RightQuickPanelShadow != null)
+            {
+                RightQuickPanelShadow.Opacity = 0.3;
+            }
+
+            // Update unfolded/folded margins in real-time
+            if (LeftUnFoldButtonQuickPanel != null)
+            {
+                var leftMargin = LeftUnFoldButtonQuickPanel.Margin;
+                double newLeft = LeftUnFoldButtonQuickPanel.Visibility == Visibility.Visible ? QuickPanelUnfoldedMargin : QuickPanelFoldedMargin;
+                LeftUnFoldButtonQuickPanel.Margin = new Thickness(newLeft, leftMargin.Top, leftMargin.Right, leftMargin.Bottom);
+            }
+            if (RightUnFoldButtonQuickPanel != null)
+            {
+                var rightMargin = RightUnFoldButtonQuickPanel.Margin;
+                double newRight = RightUnFoldButtonQuickPanel.Visibility == Visibility.Visible ? QuickPanelUnfoldedMargin : QuickPanelFoldedMargin;
+                RightUnFoldButtonQuickPanel.Margin = new Thickness(rightMargin.Left, rightMargin.Top, newRight, rightMargin.Bottom);
+            }
+
+            if (LeftSidePanel != null)
+            {
+                var leftMargin = LeftSidePanel.Margin;
+                double newLeft = LeftSidePanel.Visibility == Visibility.Visible ? -10.0 : QuickPanelFoldedMargin;
+                LeftSidePanel.Margin = new Thickness(newLeft, leftMargin.Top, leftMargin.Right, leftMargin.Bottom);
+            }
+            if (RightSidePanel != null)
+            {
+                var rightMargin = RightSidePanel.Margin;
+                double newRight = RightSidePanel.Visibility == Visibility.Visible ? -10.0 : QuickPanelFoldedMargin;
+                RightSidePanel.Margin = new Thickness(rightMargin.Left, rightMargin.Top, newRight, rightMargin.Bottom);
+            }
+        }
 
     }
 }

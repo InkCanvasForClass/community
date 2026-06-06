@@ -34,7 +34,7 @@
                     <TextBlock Text="{x:Static props:AutomationStrings.Automation_AutoFoldTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
                     <ui:SettingsExpander Header="{x:Static props:AutomationStrings.AutoFold_Group_Seewo}"
-                            d:IsExpanded="True">
+                            IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
                         </ui:SettingsExpander.HeaderIcon>
@@ -97,7 +97,7 @@
                     </ui:SettingsExpander>
 
                     <ui:SettingsExpander Header="{x:Static props:AutomationStrings.AutoFold_Group_Hite}"
-                            d:IsExpanded="True">
+                            IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
                         </ui:SettingsExpander.HeaderIcon>
@@ -133,7 +133,7 @@
                     </ui:SettingsExpander>
 
                     <ui:SettingsExpander Header="{x:Static props:AutomationStrings.AutoFold_Group_Other}"
-                            d:IsExpanded="True">
+                            IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
                         </ui:SettingsExpander.HeaderIcon>
@@ -375,7 +375,8 @@
                             Icon="{x:Static ui:SegoeFluentIcons.Edit}"
                             Toggled="ToggleSwitchUseCustomSaveFileName_Toggled"/>
 
-                    <ui:SettingsExpander x:Name="CardSaveFileNamePreset" Header="{x:Static props:AutomationStrings.Automation_SaveFileNameFormat}">
+                    <ui:SettingsExpander x:Name="CardSaveFileNamePreset" Header="{x:Static props:AutomationStrings.Automation_SaveFileNameFormat}"
+                        IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
                         </ui:SettingsExpander.HeaderIcon>
@@ -404,7 +405,7 @@
                     <TextBlock Text="{x:Static props:AutomationStrings.FloatingInterceptor_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
                     <ui:SettingsExpander Header="{x:Static props:AutomationStrings.FloatingInterceptor_Group_Seewo}"
-                            d:IsExpanded="True">
+                            IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
                         </ui:SettingsExpander.HeaderIcon>
@@ -485,7 +486,7 @@
                     </ui:SettingsExpander>
 
                     <ui:SettingsExpander Header="{x:Static props:NotificationStrings.Type_Other}"
-                            d:IsExpanded="True">
+                            IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
                         </ui:SettingsExpander.HeaderIcon>
@@ -541,7 +542,8 @@
                     <TextBlock Text="{x:Static props:SecurityStrings.FileAssoc_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
                     <ui:SettingsExpander Header="{x:Static props:SecurityStrings.FileAssoc_Check}"
-                                         Description="{x:Static props:AutomationStrings.FileAssoc_CheckDesc}">
+                                         Description="{x:Static props:AutomationStrings.FileAssoc_CheckDesc}"
+                                         IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}"/>
                         </ui:SettingsExpander.HeaderIcon>
@@ -579,6 +581,19 @@
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
+
+                    <!-- 自定义自动化入口 -->
+                    <TextBlock Text="自定义自动化" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
+
+                    <ui:SettingsCard Header="自定义自动化规则"
+                            Description="创建自定义的触发器→条件→行动规则，实现灵活的自动化操作。"
+                            IsClickEnabled="True"
+                            Click="CardCustomAutomation_Click">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Page}"/>
+                        </ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronRight}" FontSize="12" Opacity="0.5" />
+                    </ui:SettingsCard>
 
                     <Rectangle Height="48" />
                 </ikw:SimpleStackPanel>

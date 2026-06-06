@@ -429,10 +429,16 @@ FodyWeavers.xsd
 
 # Telemetry DSN configuration file (contains sensitive information)
 telemetry_dsn.txt
-**/telemetry_dsn.txt
+**/telemetry_token.txt
 /Ink Canvas/.trae
 /ClassIsland-1.7.0.1
 /.idea
 SKILL_FloatingToolbarRefactoring.md
 /Samples
 /SamplePlugin
+*.xlsx
+*.csv
+
+# qoder
+/.qoder
+/.claude

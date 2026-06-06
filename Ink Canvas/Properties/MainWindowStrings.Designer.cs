@@ -59,15 +59,6 @@ namespace Ink_Canvas.Properties
         public static string Main_InkReplayPlaying => ResourceManager.GetString(nameof(Main_InkReplayPlaying), _resourceCulture);
 
         public static string Main_InkReplayExitHint => ResourceManager.GetString(nameof(Main_InkReplayExitHint), _resourceCulture);
-
-        public static string Main_TrayHideWindow => ResourceManager.GetString(nameof(Main_TrayHideWindow), _resourceCulture);
-
-        public static string Main_TrayShowWindow => ResourceManager.GetString(nameof(Main_TrayShowWindow), _resourceCulture);
-
-        public static string Main_TrayDisableHotkeys => ResourceManager.GetString(nameof(Main_TrayDisableHotkeys), _resourceCulture);
-
-        public static string Main_TraySwitchFoldMode => ResourceManager.GetString(nameof(Main_TraySwitchFoldMode), _resourceCulture);
-
         public static string Main_Strokes_SaveSuccess => ResourceManager.GetString(nameof(Main_Strokes_SaveSuccess), _resourceCulture);
 
         public static string Main_Strokes_SaveFailed => ResourceManager.GetString(nameof(Main_Strokes_SaveFailed), _resourceCulture);
@@ -215,15 +206,9 @@ namespace Ink_Canvas.Properties
         public static string Main_EnterSettings_Message => ResourceManager.GetString(nameof(Main_EnterSettings_Message), _resourceCulture);
 
         public static string Main_AutoFold_ClearingAndFolding => ResourceManager.GetString(nameof(Main_AutoFold_ClearingAndFolding), _resourceCulture);
-
-        public static string Main_PDF_OpenFailed => ResourceManager.GetString(nameof(Main_PDF_OpenFailed), _resourceCulture);
-
         public static string Main_PDF_InsertFailed => ResourceManager.GetString(nameof(Main_PDF_InsertFailed), _resourceCulture);
 
         public static string Main_Board_FrozenCannotDelete => ResourceManager.GetString(nameof(Main_Board_FrozenCannotDelete), _resourceCulture);
-
-        public static string Main_Board_NewPage => ResourceManager.GetString(nameof(Main_Board_NewPage), _resourceCulture);
-
         public static string Main_Board_CustomBgApplied => ResourceManager.GetString(nameof(Main_Board_CustomBgApplied), _resourceCulture);
 
         public static string Main_Timer_AutoClosedInkeys => ResourceManager.GetString(nameof(Main_Timer_AutoClosedInkeys), _resourceCulture);
@@ -315,6 +300,32 @@ namespace Ink_Canvas.Properties
         public static string Main_Screenshot_CameraConnected => ResourceManager.GetString(nameof(Main_Screenshot_CameraConnected), _resourceCulture);
 
         public static string Main_Screenshot_CameraError => ResourceManager.GetString(nameof(Main_Screenshot_CameraError), _resourceCulture);
+
+        public static string Main_Screenshot_WindowTitle => ResourceManager.GetString(nameof(Main_Screenshot_WindowTitle), _resourceCulture);
+
+        public static string Main_Screenshot_RectangleMode => ResourceManager.GetString(nameof(Main_Screenshot_RectangleMode), _resourceCulture);
+
+        public static string Main_Screenshot_FreehandMode => ResourceManager.GetString(nameof(Main_Screenshot_FreehandMode), _resourceCulture);
+
+        public static string Main_Screenshot_FullScreenMode => ResourceManager.GetString(nameof(Main_Screenshot_FullScreenMode), _resourceCulture);
+
+        public static string Main_Screenshot_CameraCaptureMode => ResourceManager.GetString(nameof(Main_Screenshot_CameraCaptureMode), _resourceCulture);
+
+        public static string Main_Screenshot_IncludeInk => ResourceManager.GetString(nameof(Main_Screenshot_IncludeInk), _resourceCulture);
+
+        public static string Main_Screenshot_ConfirmCapture => ResourceManager.GetString(nameof(Main_Screenshot_ConfirmCapture), _resourceCulture);
+
+        public static string Main_Screenshot_AddToWhiteboard => ResourceManager.GetString(nameof(Main_Screenshot_AddToWhiteboard), _resourceCulture);
+
+        public static string Main_Screenshot_SwitchCamera => ResourceManager.GetString(nameof(Main_Screenshot_SwitchCamera), _resourceCulture);
+
+        public static string Main_Screenshot_Rotation => ResourceManager.GetString(nameof(Main_Screenshot_Rotation), _resourceCulture);
+
+        public static string Main_Screenshot_Resolution => ResourceManager.GetString(nameof(Main_Screenshot_Resolution), _resourceCulture);
+
+        public static string Main_Screenshot_CameraNotConnected => ResourceManager.GetString(nameof(Main_Screenshot_CameraNotConnected), _resourceCulture);
+
+        public static string Main_Screenshot_DefaultHint => ResourceManager.GetString(nameof(Main_Screenshot_DefaultHint), _resourceCulture);
 
         public static string Main_Privacy_FileNotFound => ResourceManager.GetString(nameof(Main_Privacy_FileNotFound), _resourceCulture);
 

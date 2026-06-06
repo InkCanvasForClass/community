@@ -9,6 +9,7 @@
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       xmlns:c="clr-namespace:Ink_Canvas.Converter"
+      xmlns:helpers="clr-namespace:Ink_Canvas.Windows.SettingsViews.Helpers"
       mc:Ignorable="d"
       Title="{x:Static props:CanvasStrings.Canvas_GroupTitle}">
     <ScrollViewer PanningMode="VerticalFirst">
@@ -31,12 +32,47 @@
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:CanvasStrings.Canvas_GroupTitle}" />
 
-                    <controls:LabeledSettingsCard x:Name="CardShowCursor"
+                    <!-- 画笔光标：开关 + 展开后选择系统/内置/自定义光标 -->
+                    <ui:SettingsExpander x:Name="ExpanderShowPenCursor"
                             Header="{x:Static props:CanvasStrings.Canvas_ShowPenCursor}"
-                            Icon="{x:Static ui:SegoeFluentIcons.PointerHand}"
-                            SwitchName="ToggleSwitchShowCursor"
-                            Toggled="ToggleSwitchShowCursor_Toggled" />
+                            Description="{x:Static props:CanvasStrings.Canvas_PenCursorTypeHint}"
+                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchShowCursor, Mode=OneWay}"
+                            d:Visibility="Visible" d:IsExpanded="True">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.PointerHand}" />
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchShowCursor"
+                                OnContent="{DynamicResource Common_On}"
+                                OffContent="{DynamicResource Common_Off}"
+                                helpers:SettingsBinder.PropertyPath="Canvas.IsShowCursor"
+                                helpers:SettingsBinder.SettingsChanged="OnIsShowCursorChanged" />
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_PenCursorType}">
+                                <ComboBox x:Name="ComboBoxPenCursorType" SelectedIndex="1"
+                                          helpers:SettingsBinder.PropertyPath="Canvas.PenCursorType"
+                                          helpers:SettingsBinder.SettingsChanged="OnPenCursorTypeChanged"
+                                          SelectionChanged="ComboBoxPenCursorType_SelectionChanged">
+                                    <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_PenCursorType_System}" />
+                                    <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_PenCursorType_BuiltIn}" />
+                                    <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_PenCursorType_Custom}" />
+                                </ComboBox>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard x:Name="CardCustomPenCursorPath"
+                                    Header="{x:Static props:CanvasStrings.Canvas_CustomPenCursorPath}"
+                                    Description="{x:Static props:CanvasStrings.Canvas_CustomPenCursorPathHint}"
+                                    Visibility="Collapsed">
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock x:Name="CustomPenCursorPathText"
+                                               VerticalAlignment="Center" MaxWidth="300"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <Button Content="{x:Static props:CanvasStrings.Canvas_SelectCustomPenCursor}"
+                                            Click="SelectCustomPenCursor_Click" />
+                                </ikw:SimpleStackPanel>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
 
+                    <!-- 互斥开关：需要 code-behind 处理联动逻辑 -->
                     <controls:LabeledSettingsCard x:Name="CardEnablePressureTouchMode"
                             Header="{x:Static props:CanvasStrings.Canvas_EnablePressureTouch}"
                             Description="{x:Static props:CanvasStrings.Canvas_EnablePressureTouchHint}"
@@ -51,6 +87,7 @@
                             SwitchName="ToggleSwitchDisablePressure"
                             Toggled="ToggleSwitchDisablePressure_Toggled" />
 
+                    <!-- 简单下拉：声明式绑定 -->
                     <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_EraserSize}"
                             Description="{x:Static props:CanvasStrings.Canvas_EraserSizeHint}">
                         <ui:SettingsCard.HeaderIcon>
@@ -58,7 +95,8 @@
                         </ui:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxEraserSize"
                                   SelectedIndex="1"
-                                  SelectionChanged="ComboBoxEraserSize_SelectionChanged">
+                                  helpers:SettingsBinder.PropertyPath="Canvas.EraserSize"
+                                  helpers:SettingsBinder.SettingsChanged="OnEraserSizeChanged">
                             <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_EraserSize_VerySmall}" />
                             <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_EraserSize_Small}" />
                             <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_EraserSize_Medium}" />
@@ -67,65 +105,74 @@
                         </ComboBox>
                     </ui:SettingsCard>
 
-                    <controls:LabeledSettingsCard x:Name="CardHideStrokeWhenSelecting"
+                    <!-- 简单开关：声明式绑定 -->
+                    <controls:LabeledSettingsCard
                             Header="{x:Static props:CanvasStrings.Canvas_HideInkOnExit}"
                             Description="{x:Static props:CanvasStrings.Canvas_HideStrokeWhenSelectingHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.Hide}"
                             SwitchName="ToggleSwitchHideStrokeWhenSelecting"
-                            Toggled="ToggleSwitchHideStrokeWhenSelecting_Toggled" />
+                            helpers:SettingsBinder.PropertyPath="Canvas.HideStrokeWhenSelecting" />
 
-                    <controls:LabeledSettingsCard x:Name="CardClearCanvasAndClearTimeMachine"
+                    <controls:LabeledSettingsCard
                             Header="{x:Static props:CanvasStrings.Canvas_ClearInkAlsoClearHistory}"
                             Icon="{x:Static ui:SegoeFluentIcons.Delete}"
                             SwitchName="ToggleSwitchClearCanvasAndClearTimeMachine"
-                            Toggled="ToggleSwitchClearCanvasAndClearTimeMachine_Toggled" />
+                            helpers:SettingsBinder.PropertyPath="Canvas.ClearCanvasAndClearTimeMachine" />
 
-                    <controls:LabeledSettingsCard x:Name="CardClearCanvasAlsoClearImages"
+                    <controls:LabeledSettingsCard
                             Header="{x:Static props:CanvasStrings.Canvas_ClearCanvasAlsoClearImages}"
                             Icon="{x:Static ui:SegoeFluentIcons.Photo}"
                             SwitchName="ToggleSwitchClearCanvasAlsoClearImages"
-                            Toggled="ToggleSwitchClearCanvasAlsoClearImages_Toggled" />
+                            helpers:SettingsBinder.PropertyPath="Canvas.ClearCanvasAlsoClearImages" />
 
-                    <controls:LabeledSettingsCard x:Name="CardCompressPicturesUploaded"
+                    <controls:LabeledSettingsCard
                             Header="{x:Static props:CanvasStrings.Canvas_CompressPicturesUploaded}"
                             Icon="{x:Static ui:SegoeFluentIcons.Clear}"
                             SwitchName="ToggleSwitchCompressPicturesUploaded"
-                            Toggled="ToggleSwitchCompressPicturesUploaded_Toggled" />
+                            helpers:SettingsBinder.PropertyPath="Canvas.IsCompressPicturesUploaded" />
 
-                    <controls:LabeledSettingsCard x:Name="CardLaunchSeewoVideoShowcaseForWhiteboardBooth"
+                    <controls:LabeledSettingsCard
                             Header="{x:Static props:CanvasStrings.Canvas_LaunchSeewoVideoShowcaseForWhiteboardBooth}"
                             Description="{x:Static props:CanvasStrings.Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.Video}"
                             SwitchName="ToggleSwitchLaunchSeewoVideoShowcaseForWhiteboardBooth"
-                            Toggled="ToggleSwitchLaunchSeewoVideoShowcaseForWhiteboardBooth_Toggled" />
+                            helpers:SettingsBinder.PropertyPath="Canvas.LaunchSeewoVideoShowcaseForWhiteboardBooth" />
 
+                    <!-- 简单下拉：声明式绑定 -->
                     <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_KeepAsymptote}"
                             Description="{x:Static props:CanvasStrings.Canvas_HyperbolaAsymptoteHint}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AreaChart}" />
                         </ui:SettingsCard.HeaderIcon>
-                        <ComboBox x:Name="ComboBoxHyperbolaAsymptoteOption"
-                                  SelectedIndex="0"
-                                  SelectionChanged="ComboBoxHyperbolaAsymptoteOption_SelectionChanged">
+                        <ComboBox helpers:SettingsBinder.PropertyPath="Canvas.HyperbolaAsymptoteOption"
+                                  SelectedIndex="0">
                             <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_Yes}" />
                             <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_No}" />
                             <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_AskEachTime}" />
                         </ComboBox>
                     </ui:SettingsCard>
 
-                    <controls:LabeledSettingsCard x:Name="CardShowCircleCenter"
+                    <controls:LabeledSettingsCard
+                            Header="{x:Static props:CanvasStrings.Canvas_MergeInkSmoothingWithUndo}"
+                            Description="{x:Static props:CanvasStrings.Canvas_MergeInkSmoothingWithUndoHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Undo}"
+                            SwitchName="ToggleSwitchMergeInkSmoothingWithUndo"
+                            helpers:SettingsBinder.PropertyPath="Canvas.MergeInkSmoothingWithUndo" />
+
+                    <controls:LabeledSettingsCard
                             Header="{x:Static props:CanvasStrings.Canvas_ShowCircleCenter}"
                             Icon="{x:Static ui:SegoeFluentIcons.CircleRing}"
                             SwitchName="ToggleSwitchShowCircleCenter"
-                            Toggled="ToggleSwitchShowCircleCenter_Toggled" />
+                            helpers:SettingsBinder.PropertyPath="Canvas.ShowCircleCenter" />
 
-                    <controls:LabeledSettingsCard x:Name="CardShowCoordinateUnitMarks"
+                    <controls:LabeledSettingsCard
                             Header="{x:Static props:CanvasStrings.Canvas_ShowCoordinateUnitMarks}"
                             Description="{x:Static props:CanvasStrings.Canvas_ShowCoordinateUnitMarksHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.Calculator}"
                             SwitchName="ToggleSwitchShowCoordinateUnitMarks"
-                            Toggled="ToggleSwitchShowCoordinateUnitMarks_Toggled" />
+                            helpers:SettingsBinder.PropertyPath="Canvas.ShowCoordinateUnitMarks" />
 
+                    <!-- 复杂下拉：映射到两个设置属性，需要 code-behind -->
                     <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_CurveSmoothingMode}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.InkingTool}" />
@@ -139,9 +186,11 @@
                         </ComboBox>
                     </ui:SettingsCard>
 
+                    <!-- Expander + ToggleSwitch：ToggleSwitch 用声明式，Expander.IsExpanded 由 XAML Binding 驱动 -->
                     <ui:SettingsExpander x:Name="ExpanderBrushAutoRestore"
                             Header="{x:Static props:CanvasStrings.Canvas_BrushAutoRestore}"
                             Description="{x:Static props:CanvasStrings.Canvas_BrushAutoRestoreHint}"
+                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchBrushAutoRestore, Mode=OneWay}"
                             d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" />
@@ -149,12 +198,14 @@
                         <ui:ToggleSwitch x:Name="ToggleSwitchBrushAutoRestore"
                                 OnContent="{DynamicResource Common_On}"
                                 OffContent="{DynamicResource Common_Off}"
-                                Toggled="ToggleSwitchBrushAutoRestore_Toggled" />
+                                helpers:SettingsBinder.PropertyPath="Canvas.EnableBrushAutoRestore" />
                         <ui:SettingsExpander.Items>
+                            <!-- TextBox：暂不支持声明式，保留 code-behind -->
                             <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_AutoRestoreTimePoints}">
                                 <TextBox x:Name="BrushAutoRestoreTimesTextBox" Width="260"
                                          TextChanged="BrushAutoRestoreTimesTextBox_TextChanged" />
                             </ui:SettingsCard>
+                            <!-- ComboBox by Tag：暂不支持声明式，保留 code-behind -->
                             <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_RestoreColor}">
                                 <ComboBox x:Name="ComboBoxBrushAutoRestoreColor"
                                           SelectionChanged="ComboBoxBrushAutoRestoreColor_SelectionChanged">
@@ -169,13 +220,17 @@
                                     <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_Color_Purple}" Tag="#FF9333EA" />
                                 </ComboBox>
                             </ui:SettingsCard>
+                            <!-- Slider：声明式绑定 -->
                             <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_RestoreWidth}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="BrushAutoRestoreWidthText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                                     <Slider x:Name="BrushAutoRestoreWidthSlider" Width="200" Minimum="1" Maximum="20"
                                             TickFrequency="1" IsSnapToTickEnabled="True" Value="5"
-                                            ValueChanged="BrushAutoRestoreWidthSlider_ValueChanged" />
+                                            helpers:SettingsBinder.PropertyPath="Canvas.BrushAutoRestoreWidth"
+                                            helpers:SettingsBinder.ValueRounding="2"
+                                            helpers:SettingsBinder.FormatString="{}{0:F2}"
+                                            helpers:SettingsBinder.TargetTextBlock="{Binding ElementName=BrushAutoRestoreWidthText}" />
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_RestoreOpacity}">
@@ -184,7 +239,10 @@
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                                     <Slider x:Name="BrushAutoRestoreAlphaSlider" Width="200" Minimum="0" Maximum="255"
                                             TickFrequency="5" IsSnapToTickEnabled="True"
-                                            ValueChanged="BrushAutoRestoreAlphaSlider_ValueChanged" />
+                                            helpers:SettingsBinder.PropertyPath="Canvas.BrushAutoRestoreAlpha"
+                                            helpers:SettingsBinder.ValueRounding="0"
+                                            helpers:SettingsBinder.FormatString="{}{0:0}"
+                                            helpers:SettingsBinder.TargetTextBlock="{Binding ElementName=BrushAutoRestoreAlphaText}" />
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>
@@ -193,6 +251,7 @@
                     <ui:SettingsExpander x:Name="ExpanderEnableEraserAutoSwitchBack"
                             Header="{x:Static props:CanvasStrings.Canvas_SwitchBackAfterEraser}"
                             Description="{x:Static props:CanvasStrings.Canvas_SwitchBackAfterEraserHint}"
+                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchEnableEraserAutoSwitchBack, Mode=OneWay}"
                             d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Switch}" />
@@ -200,7 +259,7 @@
                         <ui:ToggleSwitch x:Name="ToggleSwitchEnableEraserAutoSwitchBack"
                                 OnContent="{DynamicResource Common_On}"
                                 OffContent="{DynamicResource Common_Off}"
-                                Toggled="ToggleSwitchEnableEraserAutoSwitchBack_Toggled" />
+                                helpers:SettingsBinder.PropertyPath="Canvas.EnableEraserAutoSwitchBack" />
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_SwitchBackDelay}"
                                     Description="{x:Static props:CanvasStrings.Canvas_SwitchBackDelayHint}">
@@ -209,7 +268,10 @@
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                                     <Slider x:Name="EraserAutoSwitchBackDelaySlider" Width="200" Minimum="1" Maximum="60"
                                             Value="10" TickFrequency="1" IsSnapToTickEnabled="True"
-                                            ValueChanged="EraserAutoSwitchBackDelaySlider_ValueChanged" />
+                                            helpers:SettingsBinder.PropertyPath="Canvas.EraserAutoSwitchBackDelaySeconds"
+                                            helpers:SettingsBinder.ValueRounding="0"
+                                            helpers:SettingsBinder.FormatString="{x:Static props:CanvasStrings.Canvas_SecondsFormat}"
+                                            helpers:SettingsBinder.TargetTextBlock="{Binding ElementName=EraserAutoSwitchBackDelayText}" />
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>
@@ -218,16 +280,17 @@
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:GestureStrings.Gesture_Title}" />
 
-                    <controls:LabeledSettingsCard x:Name="CardEnableTwoFingerRotationOnSelection"
+                    <controls:LabeledSettingsCard
                             Header="{x:Static props:GestureStrings.Gesture_AllowRotateScale}"
                             Description="{x:Static props:GestureStrings.Gesture_AllowRotateScaleHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.Rotate}"
                             SwitchName="ToggleSwitchEnableTwoFingerRotationOnSelection"
-                            Toggled="ToggleSwitchEnableTwoFingerRotationOnSelection_Toggled" />
+                            helpers:SettingsBinder.PropertyPath="Gesture.IsEnableTwoFingerRotationOnSelection" />
 
                     <ui:SettingsExpander x:Name="ExpanderEnablePalmEraser"
                             Header="{x:Static props:GestureStrings.Gesture_EnablePalmEraser}"
                             Description="{x:Static props:GestureStrings.Gesture_PalmHint}"
+                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchEnablePalmEraser, Mode=OneWay}"
                             d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EraseTool}" />
@@ -235,11 +298,10 @@
                         <ui:ToggleSwitch x:Name="ToggleSwitchEnablePalmEraser"
                                 OnContent="{DynamicResource Common_On}"
                                 OffContent="{DynamicResource Common_Off}"
-                                Toggled="ToggleSwitchEnablePalmEraser_Toggled" />
+                                helpers:SettingsBinder.PropertyPath="Canvas.EnablePalmEraser" />
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{x:Static props:GestureStrings.Gesture_PalmSensitivity}">
-                                <ComboBox x:Name="ComboBoxPalmEraserSensitivity"
-                                          SelectionChanged="ComboBoxPalmEraserSensitivity_SelectionChanged">
+                                <ComboBox helpers:SettingsBinder.PropertyPath="Canvas.PalmEraserSensitivity">
                                     <ComboBoxItem Content="{x:Static props:GestureStrings.Gesture_PalmSensitivityLow}" />
                                     <ComboBoxItem Content="{x:Static props:GestureStrings.Gesture_PalmSensitivityMedium}" />
                                     <ComboBoxItem Content="{x:Static props:GestureStrings.Gesture_PalmSensitivityHigh}" />

@@ -340,7 +340,7 @@ namespace Ink_Canvas.Helpers
             {
                 // 先尝试清理过期项
                 int cleanedCount = CleanupExpiredItems();
-                
+
                 // 清理后仍然满，则记录警告并跳过
                 if (_uploadQueue.Count >= MAX_QUEUE_SIZE)
                 {

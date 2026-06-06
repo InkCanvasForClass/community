@@ -46,16 +46,16 @@
     <value>Delete profile</value>
   </data>
   <data name="Desc" xml:space="preserve">
-    <value>Selecting a profile switches and hot-reloads it; \&quot;Save as\&quot; saves current settings as a new profile.</value>
+    <value>Select a profile to switch and hot-reload. Use "Save As" to store current settings as a new profile.</value>
   </data>
   <data name="Label" xml:space="preserve">
-    <value>Profile:</value>
+    <value>Profile</value>
   </data>
   <data name="SaveAs" xml:space="preserve">
-    <value>Save as profile</value>
+    <value>Save as New Profile</value>
   </data>
   <data name="Title" xml:space="preserve">
-    <value>Config profiles &amp; hot reload</value>
+    <value>Profile Selection &amp; Hot Reload</value>
   </data>
   <data name="ProfileNameLabel" xml:space="preserve">
     <value>Profile Name</value>

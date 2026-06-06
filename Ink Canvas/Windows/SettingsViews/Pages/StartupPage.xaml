@@ -7,10 +7,9 @@
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
-      xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       mc:Ignorable="d"
 
-      Title="{x:Static props:StartupStrings.Start}">
+      Title="{x:Static props:NavStrings.Nav_Startup}">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -28,60 +27,80 @@
                 <ikw:SimpleStackPanel MaxWidth="1000"
                     HorizontalAlignment="Stretch"
                     Spacing="{StaticResource SettingsCardSpacing}">
-                
-                    <!-- 启动设置 -->
+
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{x:Static props:NavStrings.Nav_Startup}" />
-                
-                    <!-- 开机时运行 -->
-                    <controls:LabeledSettingsCard x:Name="CardRunAtStartup"
-                            Header="{x:Static props:StartupStrings.RunAtStartup}"
-                            Description="{x:Static props:StartupStrings.RunAtStartupHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Settings}"
-                            SwitchName="ToggleSwitchRunAtStartup"
-                            Toggled="ToggleSwitchRunAtStartup_Toggled" />
-                
-                    <!-- 开机运行后收纳到侧边栏 -->
-                    <controls:LabeledSettingsCard x:Name="CardFoldAtStartup"
-                            Header="{x:Static props:StartupStrings.FoldAtStartup}"
-                            Description="{x:Static props:StartupStrings.FoldAtStartupHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.ChevronLeft}"
-                            SwitchName="ToggleSwitchFoldAtStartup"
-                            Toggled="ToggleSwitchFoldAtStartup_Toggled" />
+                   Text="{x:Static props:StartupStrings.Startup_Behavior}" />
 
-                    <!-- 外部协议调用 -->
-                    <controls:LabeledSettingsCard x:Name="CardExternalProtocol"
-                            Header="{x:Static props:StartupStrings.ExternalProtocol}"
-                            Description="{x:Static props:StartupStrings.ExternalProtocolHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Link}"
-                            SwitchName="ToggleSwitchExternalProtocol"
-                            Toggled="ToggleSwitchExternalProtocol_Toggled" />
+        <ui:SettingsCard Header="{x:Static props:StartupStrings.RunAtStartup}"
+                         Description="{x:Static props:StartupStrings.RunAtStartupHint}">
+            <ui:SettingsCard.HeaderIcon>
+                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
+            </ui:SettingsCard.HeaderIcon>
+            <ui:ToggleSwitch x:Name="ToggleSwitchRunAtStartup"
+                             Toggled="ToggleSwitchRunAtStartup_Toggled" />
+        </ui:SettingsCard>
 
-                    <!-- 运行模式 -->
-                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{x:Static props:NavStrings.Settings_ModeDesc_1}" />
+        <ui:SettingsCard Header="{x:Static props:StartupStrings.FoldAtStartup}"
+                         Description="{x:Static props:StartupStrings.FoldAtStartupHint}">
+            <ui:SettingsCard.HeaderIcon>
+                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronLeft}" />
+            </ui:SettingsCard.HeaderIcon>
+            <ui:ToggleSwitch x:Name="ToggleSwitchFoldAtStartup"
+                             Toggled="ToggleSwitchFoldAtStartup_Toggled" />
+        </ui:SettingsCard>
 
-                    <controls:LabeledSettingsCard x:Name="CardPPTOnlyMode"
-                            Header="{x:Static props:CommonStrings.Mode_PPTOnly}"
-                            Description="{x:Static props:NavStrings.Settings_ModeDesc}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Settings}"
-                            SwitchName="ToggleSwitchPPTOnlyMode"
-                            Toggled="ToggleSwitchPPTOnlyMode_Toggled" />
+                    <ui:SettingsCard Header="{x:Static props:StartupStrings.ExternalProtocol}"
+                            Description="{x:Static props:StartupStrings.ExternalProtocolHint}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchExternalProtocol"
+                                        Toggled="ToggleSwitchExternalProtocol_Toggled" />
+                    </ui:SettingsCard>
 
-                    <!-- 笔尖模式 -->
-                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{x:Static props:StartupStrings.EnableNibMode}" />
-
-                    <controls:LabeledSettingsCard x:Name="CardEnableNibMode"
-                            Header="{x:Static props:StartupStrings.EnableNibMode}"
-                            Description="{x:Static props:StartupStrings.EnableNibModeHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
-                            SwitchName="ToggleSwitchEnableNibMode"
-                            Toggled="ToggleSwitchEnableNibMode_Toggled" />
-
-                    <!-- 崩溃后操作 -->
-                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{x:Static props:CrashStrings.Crash_Title}" />
+                    <ui:SettingsExpander Header="{x:Static props:WindowStrings.Tray_GroupTitle}"
+                            Description="{x:Static props:WindowStrings.Tray_EnableTrayIcon}"
+                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchEnableTrayIcon, Mode=OneWay}">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pin}" />
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchEnableTrayIcon"
+                                        Toggled="ToggleSwitchEnableTrayIcon_Toggled" />
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="{x:Static props:WindowStrings.Tray_LeftClickAction}">
+                                <ComboBox x:Name="ComboBoxTrayLeftClickAction"
+                                          SelectedIndex="0"
+                                          SelectionChanged="ComboBoxTrayLeftClickAction_SelectionChanged">
+                                    <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_ShowMenu}" />
+                                    <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_HideShowMainWindow}" />
+                                    <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_TempShowMainWindow}" />
+                                    <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_OpenSettings}" />
+                                    <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_DisableAllHotkeys}" />
+                                    <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_ForceFullScreen}" />
+                                    <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_ToggleFoldFloatingBar}" />
+                                    <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_ResetFloatingBarPosition}" />
+                                    <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_RestartApp}" />
+                                    <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_CloseApp}" />
+                                </ComboBox>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{x:Static props:WindowStrings.Tray_RightClickAction}">
+                                <ComboBox x:Name="ComboBoxTrayRightClickAction"
+                                          SelectedIndex="0"
+                                          SelectionChanged="ComboBoxTrayRightClickAction_SelectionChanged">
+                                    <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_ShowMenu}" />
+                                    <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_HideShowMainWindow}" />
+                                    <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_TempShowMainWindow}" />
+                                    <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_OpenSettings}" />
+                                    <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_DisableAllHotkeys}" />
+                                    <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_ForceFullScreen}" />
+                                    <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_ToggleFoldFloatingBar}" />
+                                    <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_ResetFloatingBarPosition}" />
+                                    <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_RestartApp}" />
+                                    <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_CloseApp}" />
+                                </ComboBox>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
 
                     <ui:SettingsCard Header="{x:Static props:CrashStrings.Crash_Title}"
                             Description="{x:Static props:CrashStrings.Crash_Desc}">
@@ -96,9 +115,122 @@
                         </ComboBox>
                     </ui:SettingsCard>
 
-                    <!-- 底部空白 -->
+                    <ui:SettingsExpander Header="{x:Static props:ThemeStrings.Theme_EnableSplash}"
+                            Description="{x:Static props:ThemeStrings.Theme_EnableSplash}"
+                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchEnableSplashScreen, Mode=OneWay}">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Photo}" />
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchEnableSplashScreen"
+                                        Toggled="ToggleSwitchEnableSplashScreen_Toggled" />
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_SplashStyle}">
+                                <ComboBox x:Name="ComboBoxSplashScreenStyle"
+                                          SelectedIndex="1"
+                                          SelectionChanged="ComboBoxSplashScreenStyle_SelectionChanged">
+                                    <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Splash_Random}" />
+                                    <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Splash_Seasonal}" />
+                                    <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Splash_Spring}" />
+                                    <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Splash_Summer}" />
+                                    <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Splash_Autumn}" />
+                                    <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Splash_Winter}" />
+                                    <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Splash_Horse}" />
+                                    <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Splash_Custom}" />
+                                </ComboBox>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard x:Name="CardCustomSplashImage"
+                                             Header="{x:Static props:ThemeStrings.Theme_CustomSplashImage}"
+                                             Description="{x:Static props:ThemeStrings.Theme_CustomSplashImage_Desc}"
+                                             Visibility="Collapsed">
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock x:Name="TextBlockCustomSplashPath"
+                                               Text="{x:Static props:ThemeStrings.Theme_CustomSplash_NotSelected}"
+                                               VerticalAlignment="Center"
+                                               MaxWidth="200"
+                                               TextTrimming="CharacterEllipsis"
+                                               Foreground="Gray"/>
+                                    <Button x:Name="ButtonBrowseCustomSplash"
+                                            Content="{x:Static props:StorageStrings.Storage_PathBrowse}"
+                                            Padding="10,3"
+                                            Click="ButtonBrowseCustomSplash_Click"/>
+                                    <Button x:Name="ButtonClearCustomSplash"
+                                            Content="{x:Static props:ThemeStrings.Theme_Clear}"
+                                            Padding="10,3"
+                                            Click="ButtonClearCustomSplash_Click"/>
+                                </ikw:SimpleStackPanel>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard x:Name="CardCustomSplashTextPosition"
+                                             Header="{x:Static props:ThemeStrings.Theme_CustomSplashTextPosition}"
+                                             Description="{x:Static props:ThemeStrings.Theme_CustomSplashTextPosition_Desc}"
+                                             Visibility="Collapsed">
+                                <Border CornerRadius="4"
+                                        BorderThickness="1"
+                                        BorderBrush="#30808080"
+                                        Background="Transparent"
+                                        Width="110"
+                                        Height="32">
+                                    <Grid ClipToBounds="True">
+                                        <Border x:Name="SelectionIndicator"
+                                                CornerRadius="3"
+                                                Background="#200078D7"
+                                                BorderBrush="#800078D7"
+                                                BorderThickness="1"
+                                                Width="34"
+                                                Height="28"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center"
+                                                Margin="1,1,0,1"
+                                                Panel.ZIndex="1">
+                                            <Border.RenderTransform>
+                                                <TranslateTransform x:Name="IndicatorTranslateTransform" X="0"/>
+                                            </Border.RenderTransform>
+                                        </Border>
+                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Border x:Name="BorderTextAlignLeft"
+                                                    Width="36" Height="30"
+                                                    PreviewMouseLeftButtonDown="BorderTextAlign_Click"
+                                                    Tag="0"
+                                                    Cursor="Hand"
+                                                    Panel.ZIndex="2">
+                                                <Canvas>
+                                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AlignLeft}" FontSize="14"
+                                                                 Canvas.Left="11" Canvas.Top="8"
+                                                                 Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                                                </Canvas>
+                                            </Border>
+                                            <Border x:Name="BorderTextAlignCenter"
+                                                    Width="36" Height="30"
+                                                    PreviewMouseLeftButtonDown="BorderTextAlign_Click"
+                                                    Tag="1"
+                                                    Cursor="Hand"
+                                                    Panel.ZIndex="2">
+                                                <Canvas>
+                                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AlignCenter}" FontSize="14"
+                                                                 Canvas.Left="11" Canvas.Top="8"
+                                                                 Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                                                </Canvas>
+                                            </Border>
+                                            <Border x:Name="BorderTextAlignRight"
+                                                    Width="36" Height="30"
+                                                    PreviewMouseLeftButtonDown="BorderTextAlign_Click"
+                                                    Tag="2"
+                                                    Cursor="Hand"
+                                                    Panel.ZIndex="2">
+                                                <Canvas>
+                                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AlignRight}" FontSize="14"
+                                                                 Canvas.Left="11" Canvas.Top="8"
+                                                                 Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                                                </Canvas>
+                                            </Border>
+                                        </ikw:SimpleStackPanel>
+                                    </Grid>
+                                </Border>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
+
                     <Rectangle Height="48" />
-                
+
                 </ikw:SimpleStackPanel>
             </Grid>
         </Grid>

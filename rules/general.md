@@ -87,3 +87,78 @@ public void AddFadingStroke(Stroke stroke, Point startPoint, Point endPoint, lon
 - 私有字段使用 _ 前缀，如 `_stylusDownTimestamp`
 - XAML 控件名使用 PascalCase，如 `CardEnableInkFade`
 - XAML 资源键使用 PascalCase，如 `PivotHeaderItemFontSize`
+
+## WPF 常见陷阱
+
+### Geometry 冻结（只读）问题
+
+`Geometry.Parse()` 返回的对象被 WPF 冻结为只读，不能直接设置 `Transform` 等属性：
+
+```csharp
+// ❌ 错误：InvalidOperationException - 无法在对象上设置属性，因为它处于只读状态
+drawing.Geometry.Transform = new ScaleTransform(1.5, 1.5);
+
+// ✅ 正确：先 Clone() 再修改
+var geo = drawing.Geometry.Clone();
+geo.Transform = new ScaleTransform(1.5, 1.5);
+drawing.Geometry = geo;
+```
+
+### AfterBuild 阶段控件未初始化
+
+在 `AfterBuild` 回调中，WPF 控件（如 `GeometryDrawing`）可能尚未完全初始化。如果需要操作视觉树，必须在 `Loaded` 事件中延迟处理：
+
+```csharp
+// ❌ 错误：AfterBuild 中直接操作视觉树，异常被 try-catch 吞掉
+protected override void AfterBuild(IBoardToolbarHost host, BoardToolbarButton view)
+{
+    var drawing = view.FindVisualChild<GeometryDrawing>(); // 可能为 null
+    drawing.Geometry.Transform = ...; // 可能抛异常
+}
+
+// ✅ 正确：在 Loaded 事件中延迟处理
+protected override void AfterBuild(IBoardToolbarHost host, BoardToolbarButton view)
+{
+    view.Loaded += (s, e) =>
+    {
+        // 此时控件已完全初始化
+    };
+}
+```
+
+### Page 命名空间冲突
+
+`iNKORE.UI.WPF.Modern.Controls.Page` 和 `System.Windows.Controls.Page` 之间存在歧义，需要显式 using：
+
+```csharp
+using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using SimpleStackPanel = iNKORE.UI.WPF.Controls.SimpleStackPanel;
+```
+
+### Thickness 构造函数
+
+.NET 6 SDK 中 `Thickness` 不支持双参数构造函数 `Thickness(double, double)`，必须使用四参数：
+
+```csharp
+// ❌ 错误：编译报错
+new Thickness(4, 2)
+
+// ✅ 正确
+new Thickness(4, 2, 4, 2)
+```
+
+### SegoeFluentIcons 图标键不存在
+
+并非所有 SegoeFluentIcons 枚举值都可用，使用前需确认图标键存在。例如 `SegoeFluentIcons.Whiteboard` 不存在，应改用 `SegoeFluentIcons.Edit`。
+
+### 设置页面导航失败无报错
+
+`NavigateToPage()` 中如果页面类型未注册，方法直接 `return`，不会抛异常也不会有任何提示。建议添加日志：
+
+```csharp
+if (!_pageTypes.TryGetValue(pageTag, out Type pageType))
+{
+    LogHelper.WriteLogToFile($"NavigateToPage 找不到页面类型 [{pageTag}]", LogHelper.LogType.Warning);
+    return;
+}
+```

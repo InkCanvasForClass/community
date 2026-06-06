@@ -1,5 +1,5 @@
-using Ink_Canvas.Properties;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Collections.ObjectModel;
@@ -15,7 +15,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private bool _isLoaded = false;
         private bool _isAdmin = false;
         private bool _hasUIAccess = false;
-        private bool CanConfigureUIAccessTopMost => _isAdmin || _hasUIAccess;
+        private bool CanConfigureUIAccessTopMost => true;
         private RadioButton _radioNormal;
         private RadioButton _radioUIA;
         private readonly ObservableCollection<object> _topMostModeItems = new();
@@ -54,21 +54,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     _topMostModeItems.Clear();
                     _topMostModeItems.Add(new TopMostModeSelectionItem());
 
-                    var btnItem = CanConfigureUIAccessTopMost
-                        ? new TopMostModeButtonItem
-                        {
-                            ButtonHeader = _hasUIAccess && !_isAdmin
-                                ? StartupStrings.TopMostMode_CurrentUIAccessNormal
-                                : StartupStrings.TopMostMode_RestartAsNormal,
-                            ButtonContent = StartupStrings.TopMostMode_RestartAsNormal,
-                            RestartAsAdmin = false
-                        }
-                        : new TopMostModeButtonItem
-                        {
-                            ButtonHeader = StartupStrings.TopMostMode_RestartAsAdmin,
-                            ButtonContent = StartupStrings.TopMostMode_RestartAsAdmin,
-                            RestartAsAdmin = true
-                        };
+                    var btnItem = new TopMostModeButtonItem
+                    {
+                        ButtonHeader = _hasUIAccess && !_isAdmin
+                            ? StartupStrings.TopMostMode_CurrentUIAccessNormal
+                            : StartupStrings.TopMostMode_RestartAsNormal,
+                        ButtonContent = StartupStrings.TopMostMode_RestartAsNormal,
+                        RestartAsAdmin = false
+                    };
                     _topMostModeItems.Add(btnItem);
 
                     ExpanderAlwaysOnTop.ItemsSource = _topMostModeItems;
@@ -340,7 +333,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (result == MessageBoxResult.Yes)
                 {
                     App.IsUIAccessTopMostEnabled = true;
-                    AppRestartHelper.RestartAsAdmin();
+                    AppRestartHelper.SwitchToUIATopMostAndRestart();
                 }
             }
             catch (Exception ex)

@@ -82,12 +82,12 @@
     <value>Announcement access token</value>
   </data>
   <data name="TokenHint" xml:space="preserve">
-    <value>Access token used by the announcement system to identify this software.</value>
+    <value>Access token used by the announcement system to identify this application.</value>
   </data>
   <data name="WebSocketUrl" xml:space="preserve">
     <value>Realtime push URL</value>
   </data>
   <data name="WebSocketUrlHint" xml:space="preserve">
-    <value>Leave empty to derive the WebSocket URL from the API URL automatically.</value>
+    <value>Leave empty to automatically derive the WebSocket URL from the API URL.</value>
   </data>
 </root>

@@ -1,5 +1,5 @@
 using Ink_Canvas.Controls;
-using Ink_Canvas.Controls.Toolbar;
+using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern;
 using Microsoft.Win32;
@@ -257,7 +257,7 @@ namespace Ink_Canvas
             if (ShapeDrawFloatingBarBtn != null) ShapeDrawFloatingBarBtn.Icon.Brush = brush;
             if (SymbolIconUndo != null) SymbolIconUndo.Icon.Brush = brush;
             if (SymbolIconRedo != null) SymbolIconRedo.Icon.Brush = brush;
-            if (CursorWithDelFloatingBarBtn != null) CursorWithDelFloatingBarBtn.Icon.Brush = brush;
+            if (CursorWithDelFloatingBarBtn != null && !ToolbarRegistry.GetUseRedStyle(CursorWithDelFloatingBarBtn)) CursorWithDelFloatingBarBtn.Icon.Brush = brush;
             if (WhiteboardFloatingBarBtn != null) WhiteboardFloatingBarBtn.Icon.Brush = brush;
             if (ToolsFloatingBarBtn != null) ToolsFloatingBarBtn.Icon.Brush = brush;
             if (Fold_Icon != null) Fold_Icon.Icon.Brush = brush;
@@ -415,6 +415,7 @@ namespace Ink_Canvas
 
                 TimerControl?.RefreshTheme();
                 MinimizedTimerControl?.RefreshTheme();
+                DynamicNotification?.RefreshTheme(IsCurrentThemeDark());
             }
             catch (Exception)
             {

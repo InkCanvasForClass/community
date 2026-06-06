@@ -1,6 +1,4 @@
 using System.Windows.Controls;
-using System.Windows.Media;
-using iNKORE.UI.WPF.Modern.Controls;
 
 namespace Ink_Canvas.Controls
 {

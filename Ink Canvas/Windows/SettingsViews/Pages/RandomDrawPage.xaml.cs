@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
@@ -25,6 +26,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             LoadSettings();
             _isLoaded = true;
             UpdateAllSliderTexts();
+            SliderTouchHelper.AddTouchSupportToAllSliders(this);
         }
 
         private void UpdateAllSliderTexts()
@@ -48,8 +50,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _isLoaded = false;
         }
 
-        private MainWindow GetMainWindow() => Application.Current.MainWindow as MainWindow;
-
         private void LoadSettings()
         {
             var settings = SettingsManager.Settings;
@@ -64,16 +64,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ComboBoxExternalCallerType.SelectedIndex = settings.RandSettings.ExternalCallerType;
 
             ToggleSwitchUseNewRollCallUI.IsOn = settings.RandSettings.UseNewRollCallUI;
+            ToggleSwitchDisplayRandWindowNamesInputBtn.Visibility = settings.RandSettings.UseNewRollCallUI ? Visibility.Collapsed : Visibility.Visible;
             ToggleSwitchEnableMLAvoidance.IsOn = settings.RandSettings.EnableMLAvoidance;
             MLAvoidanceHistorySlider.Value = settings.RandSettings.MLAvoidanceHistoryCount;
             MLAvoidanceWeightSlider.Value = settings.RandSettings.MLAvoidanceWeight;
 
-            if (settings.RandSettings.UseNewStyleUI)
-                ComboBoxTimerUIStyle.SelectedIndex = 2;
-            else if (settings.RandSettings.UseLegacyTimerUI)
-                ComboBoxTimerUIStyle.SelectedIndex = 1;
-            else
+            if (settings.RandSettings.UseLegacyTimerUI)
                 ComboBoxTimerUIStyle.SelectedIndex = 0;
+            else
+                ComboBoxTimerUIStyle.SelectedIndex = 1;
             ToggleSwitchEnableOvertimeCountUp.IsOn = settings.RandSettings.EnableOvertimeCountUp;
 
             bool canEnableRedText = settings.RandSettings.EnableOvertimeCountUp && settings.RandSettings.EnableOvertimeRedText;
@@ -124,12 +123,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             bool isToggled = ToggleSwitchShowRandomAndSingleDraw.IsOn;
             SettingsManager.Settings.RandSettings.ShowRandomAndSingleDraw = isToggled;
 
-            var mw = GetMainWindow();
-            if (mw != null)
-            {
-                mw.BoardRandomDrawToolBtn.Visibility = isToggled ? Visibility.Visible : Visibility.Collapsed;
-                mw.BoardSingleDrawToolBtn.Visibility = isToggled ? Visibility.Visible : Visibility.Collapsed;
-            }
+            SettingsActionHub.OnShowRandomAndSingleDrawChanged(isToggled);
 
             SettingsManager.SaveSettingsToFile();
         }
@@ -140,8 +134,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.Settings.RandSettings.EnableQuickDraw = ToggleSwitchEnableQuickDraw.IsOn;
             SettingsManager.SaveSettingsToFile();
 
-            var mw = GetMainWindow();
-            if (mw != null) mw.ShowQuickDrawFloatingButton();
+            SettingsActionHub.OnEnableQuickDrawChanged();
         }
 
         private void ToggleSwitchExternalCaller_Toggled(object sender, RoutedEventArgs e)
@@ -189,7 +182,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void ButtonAddCustomBackground_Click(object sender, RoutedEventArgs e)
         {
-            var mw = GetMainWindow();
+            var mw = Application.Current.MainWindow as MainWindow;
             if (mw == null) return;
 
             AddPickNameBackgroundWindow dialog = new AddPickNameBackgroundWindow(mw);
@@ -204,7 +197,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void ButtonManageBackgrounds_Click(object sender, RoutedEventArgs e)
         {
-            var mw = GetMainWindow();
+            var mw = Application.Current.MainWindow as MainWindow;
             if (mw == null) return;
 
             ManagePickNameBackgroundsWindow dialog = new ManagePickNameBackgroundsWindow(mw);
@@ -220,6 +213,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.RandSettings.UseNewRollCallUI = ToggleSwitchUseNewRollCallUI.IsOn;
+            ToggleSwitchDisplayRandWindowNamesInputBtn.Visibility = ToggleSwitchUseNewRollCallUI.IsOn ? Visibility.Collapsed : Visibility.Visible;
             SettingsManager.SaveSettingsToFile();
         }
 

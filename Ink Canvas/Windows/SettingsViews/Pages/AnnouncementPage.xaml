@@ -49,38 +49,6 @@
                             Click="ViewAnnouncementsButton_Click" />
                 </ui:SettingsCard>
 
-                <TextBlock Text="{x:Static props:AnnouncementStrings.ConnectionTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
-
-                <ui:SettingsCard Header="{x:Static props:AnnouncementStrings.ApiBaseUrl}"
-                                 Description="{x:Static props:AnnouncementStrings.ApiBaseUrlHint}">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}" />
-                    </ui:SettingsCard.HeaderIcon>
-                    <TextBox x:Name="ApiBaseUrlTextBox"
-                             MinWidth="360"
-                             TextChanged="ApiBaseUrlTextBox_TextChanged" />
-                </ui:SettingsCard>
-
-                <ui:SettingsCard Header="{x:Static props:AnnouncementStrings.WebSocketUrl}"
-                                 Description="{x:Static props:AnnouncementStrings.WebSocketUrlHint}">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Globe}" />
-                    </ui:SettingsCard.HeaderIcon>
-                    <TextBox x:Name="WebSocketUrlTextBox"
-                             MinWidth="360"
-                             TextChanged="WebSocketUrlTextBox_TextChanged" />
-                </ui:SettingsCard>
-
-                <ui:SettingsCard Header="{x:Static props:AnnouncementStrings.Token}"
-                                 Description="{x:Static props:AnnouncementStrings.TokenHint}">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Permissions}" />
-                    </ui:SettingsCard.HeaderIcon>
-                    <TextBox x:Name="TokenTextBox"
-                             MinWidth="360"
-                             TextChanged="TokenTextBox_TextChanged" />
-                </ui:SettingsCard>
-
                 <Rectangle Height="48" />
             </ikw:SimpleStackPanel>
         </Grid>

@@ -49,7 +49,7 @@
     <value>Avoid canvas fullscreen; may fix taskbar not on top and Win11 taskbar unclickable. Can cause floating bar offset with AppBar on left/top. Restart ICC to apply.</value>
   </data>
   <data name="ConfirmExit" xml:space="preserve">
-    <value>Confirm exit with dialog</value>
+    <value>Confirm before exiting</value>
   </data>
   <data name="DPIChangeDetection" xml:space="preserve">
     <value>Enable DPIChangeDetection</value>
@@ -94,10 +94,10 @@
     <value>Enable logging</value>
   </data>
   <data name="LogRotateHint" xml:space="preserve">
-    <value>Log files over 512 KB are auto-deleted. With date save, logs go to Logs folder; folder is cleared when over 5 MB.</value>
+    <value>When enabled, logs are saved to the Logs folder and the folder is automatically cleared when it exceeds 5 MB. Otherwise, log files exceeding 512 KB are automatically deleted.</value>
   </data>
   <data name="NibModeBoundsWidthHeader" xml:space="preserve">
-    <value>Nib mode BoundsWidth</value>
+    <value>Pen-only Mode BoundsWidth</value>
   </data>
   <data name="QuadIRMode" xml:space="preserve">
     <value>Quad IR mode</value>
@@ -106,7 +106,7 @@
     <value>Enable ResolutionChangeDetection</value>
   </data>
   <data name="ResolutionChangeDetectionHint" xml:space="preserve">
-    <value>When a screen resolution change is detected, it tries to keep FloatingBar visible. If it goes off-screen, it will attempt to move it into the visible area. (Reducing resolution may trigger this; if it&apos;s still on-screen it won&apos;t auto-adjust—adjust manually.)</value>
+    <value>When a screen resolution change is detected, the app checks whether the FloatingBar is still within the visible screen area. If it has moved off-screen, it will try to move it back into view. This is most commonly triggered after lowering the resolution; if the FloatingBar is already visible, its position will not be adjusted automatically.</value>
   </data>
   <data name="SpecialScreenMode" xml:space="preserve">
     <value>Special screen mode</value>

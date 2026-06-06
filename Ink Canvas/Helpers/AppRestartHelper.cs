@@ -86,10 +86,41 @@ namespace Ink_Canvas.Helpers
                 SettingsManager.SaveSettingsToFile();
 
                 App.IsUIAccessTopMostEnabled = true;
-                RestartApp(true);
+                App.IsAppExitByUser = true;
+                (Application.Current as App)?.ReleaseMutexForRestart();
+
+                bool started;
+                if (IsRunningAsAdmin())
+                {
+                    started = UIAccessHelper.RestartAsNormalUserWithUIAccess();
+                }
+                else
+                {
+                    string exePath = Process.GetCurrentProcess().MainModule.FileName;
+                    var psi = new ProcessStartInfo(exePath)
+                    {
+                        Arguments = "--enable-uia-topmost-helper",
+                        UseShellExecute = true,
+                        Verb = "runas"
+                    };
+                    Process.Start(psi);
+                    started = true;
+                }
+
+                if (started)
+                {
+                    Application.Current.Shutdown();
+                }
+                else
+                {
+                    App.IsAppExitByUser = false;
+                    App.IsUIAccessTopMostEnabled = false;
+                }
             }
             catch (Exception ex)
             {
+                App.IsAppExitByUser = false;
+                App.IsUIAccessTopMostEnabled = false;
                 Debug.WriteLine($"切换到UIA置顶模式时出错: {ex.Message}");
             }
         }

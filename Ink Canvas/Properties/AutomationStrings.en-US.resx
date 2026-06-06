@@ -139,7 +139,7 @@
     <value>Keep folded after app exit</value>
   </data>
   <data name="Automation_KeepFoldAfterExitHint" xml:space="preserve">
-    <value>When on, apps that trigger auto fold will stay folded even after they exit.</value>
+    <value>Remember the folded state even after the app restarts.</value>
   </data>
   <data name="Automation_SaveFileName_Custom" xml:space="preserve">
     <value>Custom...</value>
@@ -175,7 +175,7 @@
     <value>Automation</value>
   </data>
   <data name="Automation_UseCustomSaveFileName_Desc" xml:space="preserve">
-    <value>When enabled, choose how saved files are named</value>
+    <value>Customize how your saved files are named</value>
   </data>
   <data name="Automation_UseCustomSaveFileName_Header" xml:space="preserve">
     <value>Use custom save file name</value>
@@ -220,13 +220,13 @@
     <value>Auto fold floating bar after PPT show</value>
   </data>
   <data name="FoldMode_AutoFoldAfterPPTHint" xml:space="preserve">
-    <value>When on, floating bar is auto-folded after exiting PPT slide show.</value>
+    <value>Automatically hide or fold the toolbar after exiting a presentation.</value>
   </data>
   <data name="FoldMode_AutoFoldAfterWhiteboard" xml:space="preserve">
     <value>Auto fold when exiting whiteboard</value>
   </data>
   <data name="FoldMode_AutoFoldAfterWhiteboardHint" xml:space="preserve">
-    <value>When on, exiting whiteboard folds back to sidebar.</value>
+    <value>Automatically fold the sidebar when exiting the whiteboard.</value>
   </data>
   <data name="FoldMode_ExitToAnnotation" xml:space="preserve">
     <value>Switch to annotation when exiting fold mode</value>

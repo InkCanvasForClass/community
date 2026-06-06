@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -43,10 +43,31 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="AppearancePanel_24HourTimeFormat" xml:space="preserve">
-    <value></value>
+    <value>Use 24-hour format</value>
   </data>
   <data name="Theme_BlackboardScale80" xml:space="preserve">
     <value>Whiteboard UI 80% scale</value>
+  </data>
+  <data name="Theme_BoardToolbarOpacity" xml:space="preserve">
+    <value>Board Toolbar Opacity</value>
+  </data>
+  <data name="Theme_BoardToolbarOpacityLeft" xml:space="preserve">
+    <value>Bottom-left Opacity</value>
+  </data>
+  <data name="Theme_BoardToolbarOpacityCenter" xml:space="preserve">
+    <value>Center Opacity</value>
+  </data>
+  <data name="Theme_BoardToolbarOpacityRight" xml:space="preserve">
+    <value>Bottom-right Opacity</value>
+  </data>
+  <data name="Theme_BoardScaleLeft" xml:space="preserve">
+    <value>Bottom-left Scale</value>
+  </data>
+  <data name="Theme_BoardScaleCenter" xml:space="preserve">
+    <value>Center Scale</value>
+  </data>
+  <data name="Theme_BoardScaleRight" xml:space="preserve">
+    <value>Bottom-right Scale</value>
   </data>
   <data name="Theme_Clear" xml:space="preserve">
     <value>Clear</value>
@@ -70,7 +91,7 @@
     <value>Set the position of loading text and progress bar</value>
   </data>
   <data name="Theme_Dark" xml:space="preserve">
-    <value>Dark theme</value>
+    <value>Dark</value>
   </data>
   <data name="Theme_EnableQuickPanel" xml:space="preserve">
     <value>Enable quick panel in docked mode</value>
@@ -139,7 +160,7 @@
     <value>Theme</value>
   </data>
   <data name="Theme_Language_ChineseSimplified" xml:space="preserve">
-    <value>Chinese (Simplified)</value>
+    <value>Simplified Chinese (简体中文)</value>
   </data>
   <data name="Theme_Language_English" xml:space="preserve">
     <value>English</value>
@@ -154,7 +175,7 @@
     <value>UI language</value>
   </data>
   <data name="Theme_Light" xml:space="preserve">
-    <value>Light theme</value>
+    <value>Light</value>
   </data>
   <data name="Theme_Manage" xml:space="preserve">
     <value>Manage</value>
@@ -227,6 +248,18 @@
   </data>
   <data name="Theme_UnfoldIcon_Arrow" xml:space="preserve">
     <value>Arrow</value>
+  </data>
+  <data name="Theme_UnfoldIcon_ClassicArrow" xml:space="preserve">
+    <value>Semi-circle (Arrow)</value>
+  </data>
+  <data name="Theme_UnfoldIcon_ClassicPen" xml:space="preserve">
+    <value>Semi-circle (Pen)</value>
+  </data>
+  <data name="Theme_UnfoldIcon_Stripe" xml:space="preserve">
+    <value>Stripe</value>
+  </data>
+  <data name="Theme_AllowDragSidePanel" xml:space="preserve">
+    <value>Allow adjusting side panel position by dragging</value>
   </data>
   <data name="Theme_Upload" xml:space="preserve">
     <value>Upload</value>

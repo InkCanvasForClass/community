@@ -36,6 +36,12 @@ namespace Ink_Canvas
         {
             if (TryBlockFrozenPageMutation("打开几何工具")) return;
 
+            // 如果当前不在批注模式，先切换到批注模式
+            if (!IsAnnotating)
+            {
+                PenIcon_Click(sender, e);
+            }
+
             if (BorderDrawShape.IsOpen || BoardBorderDrawShape.IsOpen)
             {
                 AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);

@@ -40,9 +40,17 @@ namespace Ink_Canvas.Properties
             return ResourceManager.GetString(key, _resourceCulture);
         }
 
+        public static string FriendlyLinks_CjikSponsorDescription => ResourceManager.GetString(nameof(FriendlyLinks_CjikSponsorDescription), _resourceCulture);
+
+        public static string FriendlyLinks_FriendsSectionTitle => ResourceManager.GetString(nameof(FriendlyLinks_FriendsSectionTitle), _resourceCulture);
+
         public static string FriendlyLinks_InkeysDescription => ResourceManager.GetString(nameof(FriendlyLinks_InkeysDescription), _resourceCulture);
 
         public static string FriendlyLinks_NamePickerDescription => ResourceManager.GetString(nameof(FriendlyLinks_NamePickerDescription), _resourceCulture);
+
+        public static string FriendlyLinks_Sponsor => ResourceManager.GetString(nameof(FriendlyLinks_Sponsor), _resourceCulture);
+
+        public static string FriendlyLinks_SponsorSectionTitle => ResourceManager.GetString(nameof(FriendlyLinks_SponsorSectionTitle), _resourceCulture);
 
         public static string FriendlyLinks_Title => ResourceManager.GetString(nameof(FriendlyLinks_Title), _resourceCulture);
 

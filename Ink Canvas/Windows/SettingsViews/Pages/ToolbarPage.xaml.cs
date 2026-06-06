@@ -1,5 +1,5 @@
 using GongSolutions.Wpf.DragDrop;
-using Ink_Canvas.Controls.Toolbar;
+using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
@@ -95,6 +95,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             TextBoxMarginTop.Text = entry.GetSettingDouble(ComponentSettingKeys.MarginTop)?.ToString() ?? "";
             TextBoxMarginRight.Text = entry.GetSettingDouble(ComponentSettingKeys.MarginRight)?.ToString() ?? "";
             TextBoxMarginBottom.Text = entry.GetSettingDouble(ComponentSettingKeys.MarginBottom)?.ToString() ?? "";
+            CheckBoxUseRedStyle.IsChecked = entry.GetSettingBool(ComponentSettingKeys.UseRedStyle);
 
             var hAlign = entry.GetSettingString(ComponentSettingKeys.HorizontalAlignment) ?? "";
             ComboBoxHAlign.SelectedIndex = hAlign switch { "Left" => 1, "Center" => 2, "Right" => 3, "Stretch" => 4, _ => 0 };
@@ -112,11 +113,46 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var ruleset = ToolbarRegistry.GetEffectiveRuleset(entry);
             ComboBoxRulesetMode.SelectedIndex = (int)ruleset.Mode;
             CheckBoxRulesetReversed.IsChecked = ruleset.IsReversed;
-            // 先清空再重新赋值，确保完全更新
+
+            // 评估规则集并更新所有层级的状态
+            UpdateRulesetStateIndicator(ruleset);
+
+            // 设置 ItemsSource（评估后设置，确保 Ellipse 绑定到最新的 State）
             ItemsControlGroups.ItemsSource = null;
             ItemsControlGroups.ItemsSource = ruleset.Groups;
 
             _suppressSave = false;
+        }
+
+        private void UpdateRulesetStateIndicator(ToolbarRuleset ruleset)
+        {
+            if (ruleset == null)
+            {
+                EllipseRulesetState.Fill = Brushes.DarkGray;
+                return;
+            }
+
+            // 获取当前上下文状态
+            var mainWindow = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
+            bool isAnnotating = mainWindow?.IsAnnotating ?? false;
+            bool isPptMode = mainWindow?.IsInPptPresentationMode ?? false;
+
+            var context = new Dictionary<string, bool>
+            {
+                ["isAnnotating"] = isAnnotating,
+                ["isPptMode"] = isPptMode,
+                ["isContentCollapsedByUser"] = ToolbarRegistry.IsContentCollapsedByUser
+            };
+
+            // 评估规则集并更新所有层级的状态
+            ToolbarRegistry.EvaluateRuleset(ruleset, context);
+
+            EllipseRulesetState.Fill = ruleset.State switch
+            {
+                2 => Brushes.Green,
+                1 => Brushes.IndianRed,
+                _ => Brushes.DarkGray
+            };
         }
 
         public ToolbarPage()
@@ -453,6 +489,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded || ActiveEntry == null) return;
             ActiveEntry.ShowSeparateBorder = CheckBoxShowSeparateBorder.IsChecked == true;
+            SaveSettings();
+        }
+
+        private void CheckBoxUseRedStyle_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded || ActiveEntry == null || _suppressSave) return;
+            if (CheckBoxUseRedStyle.IsChecked == true)
+                ActiveEntry.SetSetting(ComponentSettingKeys.UseRedStyle, true);
+            else
+                ActiveEntry.Settings?.Remove(ComponentSettingKeys.UseRedStyle);
             SaveSettings();
         }
 

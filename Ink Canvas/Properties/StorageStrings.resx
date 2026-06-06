@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -82,7 +82,7 @@
     <value>还原备份</value>
   </data>
   <data name="Backup_Title" xml:space="preserve">
-    <value>设置备份与还原</value>
+    <value>备份与还原</value>
   </data>
   <data name="Storage_AutoDeleteTitle" xml:space="preserve">
     <value>定期自动删除超过保存时间的墨迹、截图文件</value>
@@ -142,7 +142,8 @@
     <value>清理失败：{0}</value>
   </data>
   <data name="Storage_Confirm_Body" xml:space="preserve">
-    <value>将永久删除「{0}」分类下的所有文件，操作不可恢复。\n是否继续？</value>
+    <value>将永久删除「{0}」分类下的所有文件，操作不可恢复。
+是否继续？</value>
   </data>
   <data name="Storage_Confirm_Second_Body" xml:space="preserve">
     <value>再次确认：确定要删除「{0}」吗？</value>
@@ -195,11 +196,17 @@
   <data name="Storage_Legend_Update" xml:space="preserve">
     <value>自动更新</value>
   </data>
+  <data name="Storage_Legend_Plugins" xml:space="preserve">
+    <value>插件</value>
+  </data>
   <data name="Storage_Logs_Desc" xml:space="preserve">
     <value>位于 Logs / Crashs 目录下的 .txt 日志与崩溃报告，可清理</value>
   </data>
   <data name="Storage_Logs_Header" xml:space="preserve">
     <value>日志</value>
+  </data>
+  <data name="Storage_NavTitle" xml:space="preserve">
+    <value>存储</value>
   </data>
   <data name="Storage_NavTooltip" xml:space="preserve">
     <value>查看与清理 ICC CE 占用的存储空间</value>
@@ -250,7 +257,8 @@
     <value>备份成功</value>
   </data>
   <data name="Backup_SuccessMsg" xml:space="preserve">
-    <value>设置已成功备份到:\n{0}</value>
+    <value>设置已成功备份到:
+{0}</value>
   </data>
   <data name="Backup_FailedTitle" xml:space="preserve">
     <value>备份失败</value>

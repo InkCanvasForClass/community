@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -82,7 +82,7 @@
     <value>Restore backup</value>
   </data>
   <data name="Backup_Title" xml:space="preserve">
-    <value>Settings backup &amp; restore</value>
+    <value>Backup &amp; Restore</value>
   </data>
   <data name="Storage_AutoDeleteTitle" xml:space="preserve">
     <value>Auto delete old strokes and screenshots</value>
@@ -195,11 +195,17 @@
   <data name="Storage_Legend_Update" xml:space="preserve">
     <value>Update</value>
   </data>
+  <data name="Storage_Legend_Plugins" xml:space="preserve">
+    <value>Plugins</value>
+  </data>
   <data name="Storage_Logs_Desc" xml:space="preserve">
     <value>.txt logs and crash reports under Logs / Crashes. Cleanable.</value>
   </data>
   <data name="Storage_Logs_Header" xml:space="preserve">
     <value>Logs</value>
+  </data>
+  <data name="Storage_NavTitle" xml:space="preserve">
+    <value>Storage</value>
   </data>
   <data name="Storage_NavTooltip" xml:space="preserve">
     <value>View and clean storage used by ICC CE</value>
@@ -250,7 +256,8 @@
     <value>Backup Successful</value>
   </data>
   <data name="Backup_SuccessMsg" xml:space="preserve">
-    <value>Settings backed up to:\n{0}</value>
+    <value>Settings backed up to:
+{0}</value>
   </data>
   <data name="Backup_FailedTitle" xml:space="preserve">
     <value>Backup Failed</value>

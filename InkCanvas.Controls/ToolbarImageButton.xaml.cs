@@ -10,6 +10,7 @@ namespace Ink_Canvas.Controls
     public partial class ToolbarImageButton : UserControl
     {
         private static ToolbarImageButton _lastPressedButton;
+        private bool _isVerticalOrientation;
 
         public static readonly DependencyProperty LabelProperty = DependencyProperty.Register(
             nameof(Label), typeof(string), typeof(ToolbarImageButton),
@@ -91,11 +92,11 @@ namespace Ink_Canvas.Controls
 
         public void SetSelectedVisualOffset(bool isSelected)
         {
-            var transform = ButtonPanel.RenderTransform as TranslateTransform;
+            var transform = ButtonContent.RenderTransform as TranslateTransform;
             if (transform == null)
             {
                 transform = new TranslateTransform();
-                ButtonPanel.RenderTransform = transform;
+                ButtonContent.RenderTransform = transform;
             }
 
             var animation = new DoubleAnimation
@@ -104,7 +105,29 @@ namespace Ink_Canvas.Controls
                 Duration = TimeSpan.FromMilliseconds(120),
                 EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
             };
-            transform.BeginAnimation(TranslateTransform.YProperty, animation);
+            transform.BeginAnimation(
+                _isVerticalOrientation ? TranslateTransform.XProperty : TranslateTransform.YProperty,
+                animation);
+            transform.BeginAnimation(
+                _isVerticalOrientation ? TranslateTransform.YProperty : TranslateTransform.XProperty,
+                null);
+        }
+
+        public void ApplyOrientation(bool isVertical)
+        {
+            _isVerticalOrientation = isVertical;
+            if (isVertical)
+            {
+                ButtonPanel.Width = 43;
+                ButtonPanel.Height = 44;
+                ButtonBorder.Margin = new Thickness(2, 0, 7, 0);
+            }
+            else
+            {
+                ButtonPanel.Width = 44;
+                ButtonPanel.Height = 43;
+                ButtonBorder.Margin = new Thickness(0, 2, 0, 7);
+            }
         }
 
         public event MouseButtonEventHandler ButtonMouseDown;

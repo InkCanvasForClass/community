@@ -11,13 +11,17 @@ type: Feature
 <!---Thank you for your suggestion! Please describe your needs in detail.-->
 
 ### 功能描述 | Description (必填 | Required)
+
 <!---请描述你希望添加的功能 | Describe the feature you want-->
 
 ### 需求动机 | Motivation (必填 | Required)
+
 <!---为什么需要这个功能？| Why do you need this feature?-->
 
 ### 期望设计 | Expected Design (可选 | Optional)
+
 <!---描述或画出你期望的界面或交互 | Describe or sketch the expected UI/UX-->
 
 ### 其他补充信息 | Additional Info (可选 | Optional)
+
 <!---其他补充说明或建议 | Any other context or suggestions-->

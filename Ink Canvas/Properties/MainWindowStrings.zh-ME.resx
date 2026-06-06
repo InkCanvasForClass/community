@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -38,10 +38,18 @@
       </xsd:complexType>
     </xsd:element>
   </xsd:schema>
-  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
-  <resheader name="version"><value>2.0</value></resheader>
-  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
   <data name="Main_WatermarkText" xml:space="preserve">
     <value>少点抱怨多点爱，摸鱼也要讲武德</value>
   </data>
@@ -71,18 +79,6 @@
   </data>
   <data name="Main_InkReplayExitHint" xml:space="preserve">
     <value>双击屏幕跑路</value>
-  </data>
-  <data name="Main_TrayHideWindow" xml:space="preserve">
-    <value>把 ICC-CE 主窗口藏起来</value>
-  </data>
-  <data name="Main_TrayShowWindow" xml:space="preserve">
-    <value>放出来透透气（2 分钟）</value>
-  </data>
-  <data name="Main_TrayDisableHotkeys" xml:space="preserve">
-    <value>把快捷键全封印了</value>
-  </data>
-  <data name="Main_TraySwitchFoldMode" xml:space="preserve">
-    <value>变身收纳模式</value>
   </data>
   <data name="Main_Strokes_SaveSuccess" xml:space="preserve">
     <value>墨迹已安家到 {0}，请放心</value>
@@ -270,9 +266,6 @@
   <data name="Main_Board_FrozenCannotDelete" xml:space="preserve">
     <value>页面冻住了，删不动，放弃吧</value>
   </data>
-  <data name="Main_Board_NewPage" xml:space="preserve">
-    <value>开新坑</value>
-  </data>
   <data name="Main_Board_CustomBgApplied" xml:space="preserve">
     <value>自定义背景色已安排上: {0}</value>
   </data>
@@ -344,9 +337,6 @@
   </data>
   <data name="Main_AutoFold_ClearingAndFolding" xml:space="preserve">
     <value>正在把墨迹清空塞进侧边栏，别慌，进批注模式点【撤销】还能救回来~</value>
-  </data>
-  <data name="Main_PDF_OpenFailed" xml:space="preserve">
-    <value>PDF 打不开啊（可能加密了、坏了或者不认识这格式）</value>
   </data>
   <data name="Main_PDF_InsertFailed" xml:space="preserve">
     <value>PDF 塞不进去，寄了: {0}</value>
@@ -481,6 +471,45 @@
   <data name="Main_Screenshot_CameraError" xml:space="preserve">
     <value>摄像头出毛病了: {0}</value>
   </data>
+  <data name="Main_Screenshot_WindowTitle" xml:space="preserve">
+    <value>选一下要截哪里</value>
+  </data>
+  <data name="Main_Screenshot_RectangleMode" xml:space="preserve">
+    <value>矩形模式</value>
+  </data>
+  <data name="Main_Screenshot_FreehandMode" xml:space="preserve">
+    <value>自由绘制</value>
+  </data>
+  <data name="Main_Screenshot_FullScreenMode" xml:space="preserve">
+    <value>全屏截图</value>
+  </data>
+  <data name="Main_Screenshot_CameraCaptureMode" xml:space="preserve">
+    <value>摄像头截图</value>
+  </data>
+  <data name="Main_Screenshot_IncludeInk" xml:space="preserve">
+    <value>包含墨迹</value>
+  </data>
+  <data name="Main_Screenshot_ConfirmCapture" xml:space="preserve">
+    <value>确认截图</value>
+  </data>
+  <data name="Main_Screenshot_AddToWhiteboard" xml:space="preserve">
+    <value>添加到白板</value>
+  </data>
+  <data name="Main_Screenshot_SwitchCamera" xml:space="preserve">
+    <value>切换摄像头</value>
+  </data>
+  <data name="Main_Screenshot_Rotation" xml:space="preserve">
+    <value>旋转:</value>
+  </data>
+  <data name="Main_Screenshot_Resolution" xml:space="preserve">
+    <value>分辨率:</value>
+  </data>
+  <data name="Main_Screenshot_CameraNotConnected" xml:space="preserve">
+    <value>摄像头没连上</value>
+  </data>
+  <data name="Main_Screenshot_DefaultHint" xml:space="preserve">
+    <value>拖一下选区域，右键或双击可全屏；自由绘制松开后点确认</value>
+  </data>
   <data name="Main_Privacy_FileNotFound" xml:space="preserve">
     <value>隐私说明文件找不到了（privacy.txt）</value>
   </data>
@@ -491,6 +520,7 @@
     <value>程序已经连续重启5次了，自动重启已停。快联系开发者或者检查下系统环境吧</value>
   </data>
   <data name="Main_App_UnexpectedError" xml:space="preserve">
-    <value>哎呀，出了点意外，InkCanvasForClass 可能要翻车了。\n建议赶紧存墨迹然后重启保平安。</value>
+    <value>哎呀，出了点意外，InkCanvasForClass 可能要翻车了。
+建议赶紧存墨迹然后重启保平安。</value>
   </data>
 </root>

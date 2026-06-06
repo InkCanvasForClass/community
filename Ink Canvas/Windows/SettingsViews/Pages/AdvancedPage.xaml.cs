@@ -1,9 +1,8 @@
-using Ink_Canvas.Properties;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
-using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,6 +19,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private bool _isRefreshingConfigProfileList = false;
         private string _lastAppliedProfileName;
 
+        // 自动校准相关
+        private int _calibrateStep = 0;
+        private double _nibTouchWidth = 0;
+        private double _fingerTouchWidth = 0;
+        private double _palmTouchWidth = 0;
+
         public AdvancedPage()
         {
             InitializeComponent();
@@ -33,6 +38,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _isLoaded = true;
             RefreshConfigProfileList();
             UpdateAllSliderTexts();
+            SliderTouchHelper.AddTouchSupportToAllSliders(this);
         }
 
         private void UpdateAllSliderTexts()
@@ -70,17 +76,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ToggleSwitchIsLogEnabled.IsOn = settings.Advanced.IsLogEnabled;
             ToggleSwitchIsSaveLogByDate.IsOn = settings.Advanced.IsSaveLogByDate;
             ToggleSwitchIsSecondConfimeWhenShutdownApp.IsOn = settings.Advanced.IsSecondConfirmWhenShutdownApp;
-            ToggleSwitchIsAutoBackupBeforeUpdate.IsOn = settings.Advanced.IsAutoBackupBeforeUpdate;
-            ToggleSwitchIsAutoBackupEnabled.IsOn = settings.Advanced.IsAutoBackupEnabled;
-
-            foreach (ComboBoxItem item in ComboBoxAutoBackupInterval.Items)
-            {
-                if (item.Tag != null && int.TryParse(item.Tag.ToString(), out int interval) && interval == settings.Advanced.AutoBackupIntervalDays)
-                {
-                    ComboBoxAutoBackupInterval.SelectedItem = item;
-                    break;
-                }
-            }
 
             CardTouchMultiplier.IsExpanded = settings.Advanced.IsSpecialScreen;
         }
@@ -99,8 +94,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.Canvas.UseHardwareAcceleration = !ToggleSwitchDisableHardwareAcceleration.IsOn;
-            var mw = GetMainWindow();
-            if (mw != null) mw.UpdateInkSmoothingConfig();
+            SettingsActionHub.OnHardwareAccelerationChanged();
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -121,6 +115,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!SettingsManager.Settings.Advanced.IsQuadIR) value = args.Width;
             else value = Math.Sqrt(args.Width * args.Height);
 
+            TextBlockShowRawValue.Text = value.ToString();
             TextBlockShowCalculatedMultiplier.Text = (5 / (value * 1.1)).ToString();
         }
 
@@ -140,14 +135,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdateSliderText(NibModeBoundsWidthSlider, NibModeBoundsWidthText, "{0:0}");
             if (!_isLoaded) return;
             SettingsManager.Settings.Advanced.NibModeBoundsWidth = (int)e.NewValue;
-            var mw = GetMainWindow();
-            if (mw != null)
-            {
-                if (SettingsManager.Settings.Startup.IsEnableNibMode)
-                    mw.BoundsWidth = SettingsManager.Settings.Advanced.NibModeBoundsWidth;
-                else
-                    mw.BoundsWidth = SettingsManager.Settings.Advanced.FingerModeBoundsWidth;
-            }
+            SettingsActionHub.OnNibModeBoundsWidthChanged();
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -156,14 +144,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdateSliderText(FingerModeBoundsWidthSlider, FingerModeBoundsWidthText, "{0:0}");
             if (!_isLoaded) return;
             SettingsManager.Settings.Advanced.FingerModeBoundsWidth = (int)e.NewValue;
-            var mw = GetMainWindow();
-            if (mw != null)
-            {
-                if (SettingsManager.Settings.Startup.IsEnableNibMode)
-                    mw.BoundsWidth = SettingsManager.Settings.Advanced.NibModeBoundsWidth;
-                else
-                    mw.BoundsWidth = SettingsManager.Settings.Advanced.FingerModeBoundsWidth;
-            }
+            SettingsActionHub.OnFingerModeBoundsWidthChanged();
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -172,6 +153,95 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             SettingsManager.Settings.Advanced.IsQuadIR = ToggleSwitchIsQuadIR.IsOn;
             SettingsManager.SaveSettingsToFile();
+        }
+
+        #endregion
+
+        #region Auto Calibrate
+
+        private void BtnStartCalibrate_Click(object sender, RoutedEventArgs e)
+        {
+            _calibrateStep = 1;
+            _nibTouchWidth = 0;
+            _fingerTouchWidth = 0;
+            _palmTouchWidth = 0;
+
+            BtnStartCalibrate.IsEnabled = false;
+            BorderCalibrate.IsEnabled = true;
+            TextCalibrateHint.Text = "请用 笔尖 点击此处";
+            TextNibCalibrated.Text = "笔尖值: 等待校准...";
+            TextFingerCalibrated.Text = "手指值: 未校准";
+            TextPalmCalibrated.Text = "手掌值: 未校准";
+            TextCalibrateResult.Text = "";
+        }
+
+        private void BorderCalibrate_TouchDown(object sender, TouchEventArgs e)
+        {
+            var args = e.GetTouchPoint(null).Bounds;
+            double touchWidth;
+            if (!SettingsManager.Settings.Advanced.IsQuadIR)
+                touchWidth = args.Width;
+            else
+                touchWidth = Math.Sqrt(args.Width * args.Height);
+
+            switch (_calibrateStep)
+            {
+                case 1:
+                    _nibTouchWidth = touchWidth;
+                    TextNibCalibrated.Text = $"笔尖值: {touchWidth:F2}";
+                    TextCalibrateHint.Text = "请用 手指 点击此处";
+                    _calibrateStep = 2;
+                    break;
+
+                case 2:
+                    _fingerTouchWidth = touchWidth;
+                    TextFingerCalibrated.Text = $"手指值: {touchWidth:F2}";
+                    TextCalibrateHint.Text = "请用 手掌 点击此处（模拟误触）";
+                    _calibrateStep = 3;
+                    break;
+
+                case 3:
+                    _palmTouchWidth = touchWidth;
+                    TextPalmCalibrated.Text = $"手掌值: {touchWidth:F2}";
+                    ApplyCalibratedSettings();
+                    _calibrateStep = 0;
+                    BtnStartCalibrate.IsEnabled = true;
+                    BorderCalibrate.IsEnabled = false;
+                    TextCalibrateHint.Text = "校准完成！点击按钮重新校准";
+                    break;
+            }
+
+            e.Handled = true;
+        }
+
+        private void ApplyCalibratedSettings()
+        {
+            if (!_isLoaded) return;
+
+            // 计算笔尖模式阈值：笔尖值 × 1.5，在 1-50 之间
+            double nibThreshold = _nibTouchWidth * 1.5;
+            nibThreshold = Math.Max(1, Math.Min(50, nibThreshold));
+            SettingsManager.Settings.Advanced.NibModeBoundsWidth = (int)Math.Round(nibThreshold);
+            NibModeBoundsWidthSlider.Value = SettingsManager.Settings.Advanced.NibModeBoundsWidth;
+
+            // 计算手指模式阈值：手指值 × 1.5，在 1-50 之间
+            double fingerThreshold = _fingerTouchWidth * 1.5;
+            fingerThreshold = Math.Max(1, Math.Min(50, fingerThreshold));
+            SettingsManager.Settings.Advanced.FingerModeBoundsWidth = (int)Math.Round(fingerThreshold);
+            FingerModeBoundsWidthSlider.Value = SettingsManager.Settings.Advanced.FingerModeBoundsWidth;
+
+            // 计算触摸倍率：使用手指值，和原来的公式一致
+            double touchMultiplier = 5 / (_fingerTouchWidth * 1.1);
+            touchMultiplier = Math.Max(0, Math.Min(2, touchMultiplier));
+            SettingsManager.Settings.Advanced.TouchMultiplier = Math.Round(touchMultiplier, 2);
+            TouchMultiplierSlider.Value = SettingsManager.Settings.Advanced.TouchMultiplier;
+
+            UpdateAllSliderTexts();
+            SettingsActionHub.OnNibModeBoundsWidthChanged();
+            SettingsActionHub.OnFingerModeBoundsWidthChanged();
+            SettingsManager.SaveSettingsToFile();
+
+            TextCalibrateResult.Text = $"校准成功！笔尖阈值={(int)nibThreshold}，手指阈值={(int)fingerThreshold}，触摸倍率={touchMultiplier:F2}";
         }
 
         #endregion
@@ -197,123 +267,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             SettingsManager.Settings.Advanced.IsSecondConfirmWhenShutdownApp = ToggleSwitchIsSecondConfimeWhenShutdownApp.IsOn;
             SettingsManager.SaveSettingsToFile();
-        }
-
-        #endregion
-
-        #region Backup
-
-        private void ToggleSwitchIsAutoBackupBeforeUpdate_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Advanced.IsAutoBackupBeforeUpdate = ToggleSwitchIsAutoBackupBeforeUpdate.IsOn;
-            SettingsManager.SaveSettingsToFile();
-        }
-
-        private void ToggleSwitchIsAutoBackupEnabled_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Advanced.IsAutoBackupEnabled = ToggleSwitchIsAutoBackupEnabled.IsOn;
-            SettingsManager.SaveSettingsToFile();
-        }
-
-        private void ComboBoxAutoBackupInterval_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            if (ComboBoxAutoBackupInterval.SelectedItem is ComboBoxItem selectedItem && selectedItem.Tag != null)
-            {
-                if (int.TryParse(selectedItem.Tag.ToString(), out int interval))
-                {
-                    SettingsManager.Settings.Advanced.AutoBackupIntervalDays = interval;
-                    SettingsManager.SaveSettingsToFile();
-                }
-            }
-        }
-
-        private void BtnManualBackup_Click(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-
-            try
-            {
-                string backupDir = Path.Combine(App.RootPath, "Backups");
-                if (!Directory.Exists(backupDir))
-                {
-                    Directory.CreateDirectory(backupDir);
-                    LogHelper.WriteLogToFile($"创建备份目录: {backupDir}");
-                }
-
-                string backupFileName = $"Settings_Backup_{DateTime.Now:yyyyMMdd_HHmmss}.json";
-                string backupPath = Path.Combine(backupDir, backupFileName);
-
-                string settingsJson = Newtonsoft.Json.JsonConvert.SerializeObject(SettingsManager.Settings, Newtonsoft.Json.Formatting.Indented);
-                File.WriteAllText(backupPath, settingsJson);
-
-                LogHelper.WriteLogToFile($"成功创建设置备份: {backupPath}");
-                MessageBox.Show(string.Format(StorageStrings.Backup_SuccessMsg, backupPath), StorageStrings.Backup_SuccessTitle, MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"创建设置备份时出错: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show(string.Format(StorageStrings.Backup_CreateFailedMsg, ex.Message), StorageStrings.Backup_FailedTitle, MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void BtnRestoreBackup_Click(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-
-            try
-            {
-                string backupDir = Path.Combine(App.RootPath, "Backups");
-                if (!Directory.Exists(backupDir))
-                {
-                    Directory.CreateDirectory(backupDir);
-                    LogHelper.WriteLogToFile($"创建备份目录: {backupDir}");
-                    MessageBox.Show(StorageStrings.Restore_NoBackupFound, StorageStrings.Restore_FailedTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                var dlg = new Microsoft.Win32.OpenFileDialog();
-                dlg.InitialDirectory = backupDir;
-                dlg.Filter = $"{StorageStrings.Restore_FilterLabel}|Settings_Backup_*.json|{StorageStrings.Restore_AllJsonFilter}|*.json";
-                dlg.Title = StorageStrings.Restore_SelectFileTitle;
-
-                if (dlg.ShowDialog() == true)
-                {
-                    string backupJson = File.ReadAllText(dlg.FileName);
-                    Settings backupSettings = Newtonsoft.Json.JsonConvert.DeserializeObject<Settings>(backupJson);
-
-                    if (backupSettings != null)
-                    {
-                        if (MessageBox.Show(StorageStrings.Restore_ConfirmMsg, StorageStrings.Restore_ConfirmTitle,
-                                MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-                        {
-                            string currentSettingsJson = Newtonsoft.Json.JsonConvert.SerializeObject(SettingsManager.Settings, Newtonsoft.Json.Formatting.Indented);
-                            string tempBackupPath = Path.Combine(backupDir, $"Settings_Before_Restore_{DateTime.Now:yyyyMMdd_HHmmss}.json");
-                            File.WriteAllText(tempBackupPath, currentSettingsJson);
-
-                            SettingsManager.Settings = backupSettings;
-                            SettingsManager.SaveSettingsToFile();
-
-                            var mw = GetMainWindow();
-                            if (mw != null) mw.ReloadSettingsFromFile();
-
-                            LogHelper.WriteLogToFile($"成功从备份还原设置: {dlg.FileName}");
-                            MessageBox.Show(StorageStrings.Restore_SuccessMsg, StorageStrings.Restore_SuccessTitle, MessageBoxButton.OK, MessageBoxImage.Information);
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show(StorageStrings.Restore_ParseFailed, StorageStrings.Restore_FailedTitle, MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"还原设置备份时出错: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show(string.Format(StorageStrings.Restore_FailedMsg, ex.Message), StorageStrings.Restore_FailedTitle, MessageBoxButton.OK, MessageBoxImage.Error);
-            }
         }
 
         #endregion

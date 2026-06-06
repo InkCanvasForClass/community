@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -102,6 +102,9 @@
   <data name="Start" xml:space="preserve">
     <value>启动</value>
   </data>
+  <data name="Startup_Behavior" xml:space="preserve">
+    <value>行为</value>
+  </data>
   <data name="TimePeriodHint" xml:space="preserve">
     <value>如果终止时间比起始时间早，就把终止时间当成第二天的时间。如果起始和终止时间一样，就是全天候模式。</value>
   </data>
@@ -130,10 +133,10 @@
     <value>切换到非管理员模式</value>
   </data>
   <data name="TopMostMode_UIA" xml:space="preserve">
-    <value>UIA 置顶（需要管理员权限，大佬专属）</value>
+    <value>UIA 置顶（需要一次 UAC 授权）</value>
   </data>
   <data name="TopMostMode_UIA_RestartRequired" xml:space="preserve">
-    <value>切换到 UIA 置顶模式需要重启软件才生效，现在重启吗？</value>
+    <value>切换到 UIA 置顶模式需要弹出 UAC 授权并重启成普通用户 UIA 进程，现在继续吗？</value>
   </data>
   <data name="UpdateChannel" xml:space="preserve">
     <value>更新通道</value>

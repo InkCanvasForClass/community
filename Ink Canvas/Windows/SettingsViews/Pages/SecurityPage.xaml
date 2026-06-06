@@ -110,6 +110,55 @@
                             SwitchName="ToggleSwitchRequirePasswordOnModifyOrClearNameList"
                             Toggled="ToggleSwitchRequirePasswordOnModifyOrClearNameList_Toggled" />
 
+                    <!-- U盘验证 -->
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="{x:Static props:SecurityStrings.Security_UsbSectionHeader}" />
+
+                    <ui:InfoBar IsClosable="False"
+                                IsOpen="True"
+                                Severity="Informational"
+                                Title="{x:Static props:SecurityStrings.Security_InfoBarTitle}"
+                                Message="{x:Static props:SecurityStrings.Security_UsbInfoBarMessage}" />
+
+                    <controls:LabeledSettingsCard x:Name="CardUsbVerificationEnabled"
+                            Header="{x:Static props:SecurityStrings.Security_EnableUsbVerification}"
+                            Description="{x:Static props:SecurityStrings.Security_EnableUsbVerification_Hint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Permissions}"
+                            SwitchName="ToggleSwitchUsbVerificationEnabled"
+                            Toggled="ToggleSwitchUsbVerificationEnabled_Toggled" />
+
+                    <ui:SettingsCard x:Name="CardUsbSnManage"
+                                     Header="{x:Static props:SecurityStrings.Security_UsbAuthorizedSns}"
+                                     Description="{x:Static props:SecurityStrings.Security_UsbAuthorizedSns_Hint}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Lock}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <TextBox x:Name="TextBoxUsbAuthorizedSns"
+                                 Width="320"
+                                 TextChanged="TextBoxUsbAuthorizedSns_TextChanged" />
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard x:Name="CardUsbSnRegister"
+                                     Header="{x:Static props:SecurityStrings.Security_UsbDetectAndAuthorize}"
+                                     Description="{x:Static props:SecurityStrings.Security_UsbDetectAndAuthorize_Hint}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Permissions}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <ComboBox x:Name="ComboBoxUsbDrives"
+                                      Width="240" />
+                            <Button x:Name="BtnRefreshUsbDrives"
+                                    Content="{x:Static props:SecurityStrings.Security_UsbRefreshDrives}"
+                                    MinWidth="80"
+                                    Click="BtnRefreshUsbDrives_Click" />
+                            <Button x:Name="BtnAuthorizeSelectedDrive"
+                                    Content="{x:Static props:SecurityStrings.Security_UsbAuthorizeDrive}"
+                                    MinWidth="100"
+                                    Style="{StaticResource AccentButtonStyle}"
+                                    Click="BtnAuthorizeSelectedDrive_Click" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
                     <!-- 进程保护 -->
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:SecurityStrings.Security_ProcessProtection}" />

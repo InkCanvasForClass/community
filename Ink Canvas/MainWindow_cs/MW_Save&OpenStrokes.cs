@@ -1,6 +1,6 @@
-using Ink_Canvas.Properties;
 using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -31,13 +31,18 @@ namespace Ink_Canvas
     // 1. 定义元素信息结构
     public class CanvasElementInfo
     {
-        public string Type { get; set; } // "Image" | "Pdf"
+        public string Type { get; set; } // "Image" | "Pdf" | "Media"
         public string SourcePath { get; set; }
         public double Left { get; set; }
         public double Top { get; set; }
         public double Width { get; set; }
         public double Height { get; set; }
         public string Stretch { get; set; } = "Fill"; // 默认为Fill
+        public string MediaKind { get; set; }
+        public string MediaDisplayName { get; set; }
+        public double? MediaPositionSeconds { get; set; }
+        public double? MediaSpeedRatio { get; set; }
+        public double? MediaVolume { get; set; }
         /// <summary>PDF 当前页（从 0 开始），仅 Type == Pdf 时有效。</summary>
         public int? PdfCurrentPage { get; set; }
         /// <summary>保存时的 PDF 总页数，用于校验；仅 Type == Pdf 时有效。</summary>
@@ -80,6 +85,87 @@ namespace Ink_Canvas
                         PdfPageCount = (int)pdf.PageCount
                     });
                 }
+                else if (child is CanvasMediaControl mediaControl && TryGetMediaSourcePath(mediaControl, out var mediaSourcePath))
+                {
+                    string extension = Path.GetExtension(mediaSourcePath);
+                    var mediaPosition = mediaControl.GetPlaybackPositionOrNull();
+                    elementInfos.Add(new CanvasElementInfo
+                    {
+                        Type = "Media",
+                        SourcePath = mediaSourcePath,
+                        Left = InkCanvas.GetLeft(mediaControl),
+                        Top = InkCanvas.GetTop(mediaControl),
+                        Width = mediaControl.Width,
+                        Height = mediaControl.Height,
+                        Stretch = "Uniform",
+                        MediaKind = string.Equals(extension, ".mp3", StringComparison.OrdinalIgnoreCase) ? "Audio" : "Video",
+                        MediaDisplayName = mediaControl.DisplayName,
+                        MediaPositionSeconds = mediaPosition?.TotalSeconds,
+                        MediaSpeedRatio = mediaControl.PlaybackRate,
+                        MediaVolume = mediaControl.VolumeLevel
+                    });
+                }
+                else if (child is MediaElement media && media.Source != null)
+                {
+                    string sourcePath = media.Source.IsFile ? media.Source.LocalPath : media.Source.OriginalString;
+                    if (!string.IsNullOrEmpty(sourcePath))
+                    {
+                        string extension = Path.GetExtension(sourcePath);
+                        elementInfos.Add(new CanvasElementInfo
+                        {
+                            Type = "Media",
+                            SourcePath = sourcePath,
+                            Left = InkCanvas.GetLeft(media),
+                            Top = InkCanvas.GetTop(media),
+                            Width = media.Width,
+                            Height = media.Height,
+                            Stretch = media.Stretch.ToString(),
+                            MediaKind = string.Equals(extension, ".mp3", StringComparison.OrdinalIgnoreCase) ? "Audio" : "Video"
+                        });
+                    }
+                }
+            }
+        }
+
+        private void RestoreMediaFromElementInfo(CanvasElementInfo info)
+        {
+            if (info == null || inkCanvas == null) return;
+            if (!string.Equals(info.Type, "Media", StringComparison.OrdinalIgnoreCase)) return;
+            if (string.IsNullOrEmpty(info.SourcePath) || !File.Exists(info.SourcePath)) return;
+
+            try
+            {
+                var mediaControl = new CanvasMediaControl
+                {
+                    Name = "media_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff"),
+                    Width = info.Width > 0 && !double.IsNaN(info.Width) ? info.Width : 800,
+                    Height = info.Height > 0 && !double.IsNaN(info.Height) ? info.Height : (string.Equals(info.MediaKind, "Audio", StringComparison.OrdinalIgnoreCase) ? 168 : 520),
+                    ToolTip = string.IsNullOrWhiteSpace(info.MediaDisplayName) ? Path.GetFileName(info.SourcePath) : info.MediaDisplayName
+                };
+                mediaControl.Initialize(info.SourcePath, info.MediaDisplayName);
+                if (info.MediaSpeedRatio.HasValue)
+                {
+                    mediaControl.SetPlaybackRate(info.MediaSpeedRatio.Value);
+                }
+                if (info.MediaVolume.HasValue)
+                {
+                    mediaControl.SetVolumeLevel(info.MediaVolume.Value);
+                }
+                if (info.MediaPositionSeconds.HasValue)
+                {
+                    mediaControl.SetPlaybackPosition(TimeSpan.FromSeconds(Math.Max(0, info.MediaPositionSeconds.Value)));
+                }
+
+                AttachMediaFailureNotification(mediaControl);
+                InkCanvas.SetLeft(mediaControl, info.Left);
+                InkCanvas.SetTop(mediaControl, info.Top);
+                InitializeElementTransform(mediaControl);
+                BindElementEvents(mediaControl);
+                inkCanvas.Children.Add(mediaControl);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"从 .elements.json 恢复媒体失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -1302,6 +1388,10 @@ namespace Ink_Canvas
                         {
                             Dispatcher.BeginInvoke(new Action(() => { _ = RestorePdfFromElementInfoAsync(info); }), DispatcherPriority.Loaded);
                         }
+                        else if (string.Equals(info.Type, "Media", StringComparison.OrdinalIgnoreCase) && File.Exists(info.SourcePath))
+                        {
+                            RestoreMediaFromElementInfo(info);
+                        }
                     }
                 }
             }
@@ -1456,6 +1546,10 @@ namespace Ink_Canvas
                     else if (string.Equals(info.Type, "Pdf", StringComparison.OrdinalIgnoreCase) && File.Exists(info.SourcePath))
                     {
                         Dispatcher.BeginInvoke(new Action(() => { _ = RestorePdfFromElementInfoAsync(info); }), DispatcherPriority.Loaded);
+                    }
+                    else if (string.Equals(info.Type, "Media", StringComparison.OrdinalIgnoreCase) && File.Exists(info.SourcePath))
+                    {
+                        RestoreMediaFromElementInfo(info);
                     }
                 }
             }

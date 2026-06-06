@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -98,5 +98,35 @@
   </data>
   <data name="Timer_Reset" xml:space="preserve">
     <value>一键重来</value>
+  </data>
+  <data name="Timer_EnableCountUp" xml:space="preserve">
+    <value>超时继续计时</value>
+  </data>
+  <data name="Timer_OvertimeHighlight" xml:space="preserve">
+    <value>超时变红</value>
+  </data>
+  <data name="Timer_Volume" xml:space="preserve">
+    <value>音量</value>
+  </data>
+  <data name="Timer_CustomSoundLabel" xml:space="preserve">
+    <value>自定义提示音</value>
+  </data>
+  <data name="Timer_Progressive" xml:space="preserve">
+    <value>渐进式提醒</value>
+  </data>
+  <data name="Timer_ProgressiveVolume" xml:space="preserve">
+    <value>渐进式提醒音量</value>
+  </data>
+  <data name="Timer_ProgressiveCustomLabel" xml:space="preserve">
+    <value>自定义渐进式提醒音</value>
+  </data>
+  <data name="Timer_ProgressiveSelectFile" xml:space="preserve">
+    <value>选个文件</value>
+  </data>
+  <data name="Timer_NewUI" xml:space="preserve">
+    <value>ICC CE 版 UI</value>
+  </data>
+  <data name="Timer_UseLegacyButtons" xml:space="preserve">
+    <value>ICC 版 UI</value>
   </data>
 </root>

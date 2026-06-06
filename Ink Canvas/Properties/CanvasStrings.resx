@@ -159,6 +159,12 @@
   <data name="Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint" xml:space="preserve">
     <value>开启后，点击白板工具栏「展台」将打开希沃视频展台（需已安装）；关闭则使用内置展台。</value>
   </data>
+  <data name="Canvas_MergeInkSmoothingWithUndo" xml:space="preserve">
+    <value>将墨迹平滑和撤销合并</value>
+  </data>
+  <data name="Canvas_MergeInkSmoothingWithUndoHint" xml:space="preserve">
+    <value>开启后，墨迹平滑产生的替换笔画会和原始书写合并为一次撤销；墨迹纠正不参与合并。</value>
+  </data>
   <data name="Canvas_No" xml:space="preserve">
     <value>否</value>
   </data>
@@ -182,6 +188,33 @@
   </data>
   <data name="Canvas_ShowPenCursor" xml:space="preserve">
     <value>显示画笔光标</value>
+  </data>
+  <data name="Canvas_PenCursorType" xml:space="preserve">
+    <value>画笔光标类型</value>
+  </data>
+  <data name="Canvas_PenCursorTypeHint" xml:space="preserve">
+    <value>选择显示画笔光标时使用的光标样式</value>
+  </data>
+  <data name="Canvas_PenCursorType_System" xml:space="preserve">
+    <value>系统光标</value>
+  </data>
+  <data name="Canvas_PenCursorType_BuiltIn" xml:space="preserve">
+    <value>软件内置光标</value>
+  </data>
+  <data name="Canvas_PenCursorType_Custom" xml:space="preserve">
+    <value>用户自定义光标</value>
+  </data>
+  <data name="Canvas_CustomPenCursorPath" xml:space="preserve">
+    <value>自定义光标文件</value>
+  </data>
+  <data name="Canvas_CustomPenCursorPathHint" xml:space="preserve">
+    <value>未选择文件时将回退到软件内置光标</value>
+  </data>
+  <data name="Canvas_SelectCustomPenCursor" xml:space="preserve">
+    <value>选择光标文件…</value>
+  </data>
+  <data name="Canvas_CustomPenCursorFilter" xml:space="preserve">
+    <value>光标文件|*.cur;*.ani</value>
   </data>
   <data name="Canvas_SwitchBackAfterEraser" xml:space="preserve">
     <value>使用橡皮擦后自动切换回批注模式</value>

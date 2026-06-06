@@ -136,7 +136,9 @@
     <value>普通玩家</value>
   </data>
   <data name="Privacy_ConfirmDisableTelemetry_Message" xml:space="preserve">
-    <value>关掉匿名数据上传后，就不能用预览/测试通道了，会被踢回正式通道（Release）。\n\n确定要关吗？</value>
+    <value>关掉匿名数据上传后，就不能用预览/测试通道了，会被踢回正式通道（Release）。
+
+确定要关吗？</value>
   </data>
   <data name="Privacy_ConfirmDisableTelemetry_Title" xml:space="preserve">
     <value>确认关闭遥测</value>
@@ -154,7 +156,9 @@
     <value>小秘密说明丢了</value>
   </data>
   <data name="Privacy_ConfirmRevokePrivacy_Message" xml:space="preserve">
-    <value>取消同意小秘密说明后，会关掉匿名数据上传，还会被踢回正式通道（Release）。\n\n确定要反悔吗？</value>
+    <value>取消同意小秘密说明后，会关掉匿名数据上传，还会被踢回正式通道（Release）。
+
+确定要反悔吗？</value>
   </data>
   <data name="Privacy_ConfirmRevokePrivacy_Title" xml:space="preserve">
     <value>确认取消小秘密同意</value>

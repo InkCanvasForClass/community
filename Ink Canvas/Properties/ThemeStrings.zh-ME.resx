@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -47,6 +47,27 @@
   </data>
   <data name="Theme_BlackboardScale80" xml:space="preserve">
     <value>白板 UI 缩放倍数</value>
+  </data>
+  <data name="Theme_BoardToolbarOpacity" xml:space="preserve">
+    <value>白板工具栏透明度</value>
+  </data>
+  <data name="Theme_BoardToolbarOpacityLeft" xml:space="preserve">
+    <value>左下角透明度</value>
+  </data>
+  <data name="Theme_BoardToolbarOpacityCenter" xml:space="preserve">
+    <value>中间透明度</value>
+  </data>
+  <data name="Theme_BoardToolbarOpacityRight" xml:space="preserve">
+    <value>右下角透明度</value>
+  </data>
+  <data name="Theme_BoardScaleLeft" xml:space="preserve">
+    <value>左下角缩放倍数</value>
+  </data>
+  <data name="Theme_BoardScaleCenter" xml:space="preserve">
+    <value>中间缩放倍数</value>
+  </data>
+  <data name="Theme_BoardScaleRight" xml:space="preserve">
+    <value>右下角缩放倍数</value>
   </data>
   <data name="Theme_Clear" xml:space="preserve">
     <value>一键清空</value>
@@ -227,6 +248,18 @@
   </data>
   <data name="Theme_UnfoldIcon_Arrow" xml:space="preserve">
     <value>箭头</value>
+  </data>
+  <data name="Theme_UnfoldIcon_ClassicArrow" xml:space="preserve">
+    <value>半圆形（箭头）</value>
+  </data>
+  <data name="Theme_UnfoldIcon_ClassicPen" xml:space="preserve">
+    <value>半圆形（画笔）</value>
+  </data>
+  <data name="Theme_UnfoldIcon_Stripe" xml:space="preserve">
+    <value>条形</value>
+  </data>
+  <data name="Theme_AllowDragSidePanel" xml:space="preserve">
+    <value>允许拽住手柄拖动侧边栏位置</value>
   </data>
   <data name="Theme_Upload" xml:space="preserve">
     <value>上传</value>

@@ -7,7 +7,7 @@
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:dd="urn:gong-wpf-dragdrop"
-      xmlns:toolbar="clr-namespace:Ink_Canvas.Controls.Toolbar"
+      xmlns:toolbar="clr-namespace:Ink_Canvas.Controls.Toolbar.FloatingToolbar"
       mc:Ignorable="d"
       Title="工具栏">
 
@@ -99,7 +99,7 @@
     </Page.Resources>
 
     <ScrollViewer PanningMode="VerticalFirst">
-        <ikw:SimpleStackPanel Margin="59,0,59,0" MaxWidth="1000" Spacing="4">
+        <ikw:SimpleStackPanel Spacing="4">
 
             <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_ConfigProfiles}" FontSize="14" FontWeight="SemiBold" Margin="0,20,0,6"/>
             <DockPanel Margin="0,0,0,4">
@@ -209,6 +209,12 @@
                                 <CheckBox x:Name="CheckBoxShowSeparateBorder"
                                           Checked="CheckBoxShowSeparateBorder_Changed"
                                           Unchecked="CheckBoxShowSeparateBorder_Changed"/>
+                            </ui:SettingsCard>
+
+                            <ui:SettingsCard Header="{x:Static props:FloatingBarStrings.ToolbarPage_RedStyle}" Description="{x:Static props:FloatingBarStrings.ToolbarPage_RedStyleDesc}">
+                                <CheckBox x:Name="CheckBoxUseRedStyle"
+                                          Checked="CheckBoxUseRedStyle_Changed"
+                                          Unchecked="CheckBoxUseRedStyle_Changed"/>
                             </ui:SettingsCard>
 
                             <StackPanel x:Name="PanelQuickColorPaletteDisplayMode" Visibility="Collapsed">
@@ -374,7 +380,7 @@
                                                 Padding="8,4" Margin="8,0,0,0" VerticalAlignment="Center"/>
                                         <Ellipse x:Name="EllipseRulesetState" Width="10" Height="10"
                                                  Margin="8,0,0,0" VerticalAlignment="Center"
-                                                 Fill="DarkGray"/>
+                                                 Fill="{Binding State, Converter={StaticResource StateToBrushConverter}}"/>
                                     </WrapPanel>
 
                                     <ItemsControl x:Name="ItemsControlGroups">

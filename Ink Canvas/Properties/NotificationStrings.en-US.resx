@@ -147,6 +147,9 @@
   <data name="PlacementTopRight" xml:space="preserve">
     <value>Top right</value>
   </data>
+  <data name="PlacementFloatingBarAbove" xml:space="preserve">
+    <value>Above floating toolbar</value>
+  </data>
   <data name="Provider_Announcement" xml:space="preserve">
     <value>Announcement provider</value>
   </data>

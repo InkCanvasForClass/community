@@ -220,8 +220,26 @@ namespace Ink_Canvas
                         ? XamlGraphicsIconGeometries.UnfreezeIconGeometry
                         : XamlGraphicsIconGeometries.FreezeIconGeometry;
 
-                    var frozenColor = IsCurrentThemeDark() ? Color.FromRgb(102, 204, 255) : Color.FromRgb(30, 58, 138);
-                    BoardInkFreezeBtn.IconBrush = new SolidColorBrush(isFrozen ? frozenColor : FloatBarForegroundColor);
+                    if (isFrozen)
+                    {
+                        BoardInkFreezeBtn.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                        BoardInkFreezeBtn.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                        BoardInkFreezeBtn.IconBrush = new SolidColorBrush(Colors.GhostWhite);
+                        BoardInkFreezeBtn.Foreground = new SolidColorBrush(Colors.GhostWhite);
+                    }
+                    else
+                    {
+                        bool isDark = Settings.Appearance.Theme == 1 ||
+                            (Settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
+                        BoardInkFreezeBtn.Background = new SolidColorBrush(isDark
+                            ? Color.FromRgb(42, 42, 42)
+                            : Color.FromRgb(244, 244, 245));
+                        BoardInkFreezeBtn.BorderBrush = new SolidColorBrush(isDark
+                            ? Color.FromRgb(85, 85, 85)
+                            : Color.FromRgb(161, 161, 170));
+                        BoardInkFreezeBtn.IconBrush = new SolidColorBrush(FloatBarForegroundColor);
+                        BoardInkFreezeBtn.Foreground = new SolidColorBrush(FloatBarForegroundColor);
+                    }
                 }
             }
             catch (Exception ex)
@@ -238,6 +256,7 @@ namespace Ink_Canvas
                 if (IsPageFrozen(pageIndex))
                 {
                     await UnfreezePageAsync(pageIndex);
+                    PenIcon_Click(null, null);
                 }
                 else
                 {

@@ -141,12 +141,11 @@
                                TextWrapping="Wrap" Margin="1,0,0,4" />
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{x:Static props:TimerStrings.Timer_Title}" />
+                        Text="{x:Static props:RandomStrings.Random_Title}" />
 
-                    <ui:SettingsCard Header="{x:Static props:TimerStrings.Timer_Title}">
+                    <ui:SettingsCard Header="{x:Static props:RandomStrings.Random_Title}">
                         <ComboBox x:Name="ComboBoxTimerUIStyle"
                                   SelectionChanged="ComboBoxTimerUIStyle_SelectionChanged">
-                            <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_Color_Default}" Tag="Default" />
                             <ComboBoxItem Content="{x:Static props:TimerStrings.Timer_UseLegacyButtons}" Tag="Legacy" />
                             <ComboBoxItem Content="{x:Static props:TimerStrings.Timer_NewUI}" Tag="NewStyle" />
                         </ComboBox>

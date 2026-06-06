@@ -187,7 +187,7 @@ namespace Ink_Canvas.Helpers
         public async Task FetchAnnouncementsAsync(CancellationToken cancellationToken)
         {
             var baseUrl = settings?.Notification?.AnnouncementApiBaseUrl;
-            var token = settings?.Notification?.AnnouncementSoftwareToken;
+            var token = settings.Notification.AnnouncementSoftwareToken;
             if (string.IsNullOrWhiteSpace(baseUrl) || string.IsNullOrWhiteSpace(token)) return;
 
             try
@@ -315,7 +315,7 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                    var message = JsonConvert.DeserializeObject<AnnouncementWebSocketMessage>(json);
+                var message = JsonConvert.DeserializeObject<AnnouncementWebSocketMessage>(json);
                 if ((message?.Type == "announcement_message" || message?.Type == "announcement") && message.Data != null)
                 {
                     if (ShouldShow(message.Data)) EnqueueAnnouncement(message.Data, true);
@@ -578,7 +578,7 @@ namespace Ink_Canvas.Helpers
 
         private string BuildWebSocketUrl()
         {
-            var token = settings?.Notification?.AnnouncementSoftwareToken;
+            var token = settings.Notification.AnnouncementSoftwareToken;
             if (string.IsNullOrWhiteSpace(token)) return string.Empty;
 
             var wsUrl = settings.Notification.AnnouncementWebSocketUrl;

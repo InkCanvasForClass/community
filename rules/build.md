@@ -1,37 +1,57 @@
 # 编译规范
 
-## 编译流程
+## dotnet 路径
 
-每次编译前必须按以下顺序执行：
+dotnet 不在系统 PATH 中，完整路径为：
 
-1. **杀掉所有 inkcanvasforclass 进程**
-2. **删除项目的 4 个 bin 和 4 个 obj 目录**
-3. **再执行编译**
-
-## 使用 PowerShell 完整脚本
-
-```powershell
-# 1. 杀掉所有 inkcanvasforclass 进程
-Get-Process -Name "*inkcanvas*" -ErrorAction SilentlyContinue | Stop-Process -Force
-
-# 2. 删除所有 bin 和 obj 目录
-$projectRoot = "c:\Users\PrefacedCorg\Documents\GitHub\community"
-Get-ChildItem -Path $projectRoot -Recurse -Directory -Filter "bin" -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force
-Get-ChildItem -Path $projectRoot -Recurse -Directory -Filter "obj" -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force
-
-# 3. 执行编译（使用 dotnet build）
-& "c:\Program Files\dotnet\dotnet.exe" build "$projectRoot\Ink Canvas.sln"
+```
+C:\Program Files\dotnet\dotnet.exe
 ```
 
-## 手动操作步骤
+## 编译命令
 
-如果不使用脚本，可以手动执行：
+### 编译主项目
 
-1. 打开任务管理器（Ctrl+Shift+Esc）
-2. 找到所有名称包含 "inkcanvas" 的进程，右键 → 结束任务
-3. 在项目根目录下删除所有 `bin` 和 `obj` 文件夹
-4. 在命令行中运行：
-   ```powershell
-   & "c:\Program Files\dotnet\dotnet.exe" build "c:\Users\PrefacedCorg\Documents\GitHub\community\Ink Canvas.sln"
-   ```
-5. 或者在 Visual Studio 中点击生成 → 重新生成解决方案
+```powershell
+& "C:\Program Files\dotnet\dotnet.exe" build "c:\Users\PrefacedCorg\Documents\GitHub\community\Ink Canvas\InkCanvasForClass.csproj"
+```
+
+### 编译单个子项目
+
+```powershell
+& "C:\Program Files\dotnet\dotnet.exe" build "c:\Users\PrefacedCorg\Documents\GitHub\community\InkCanvas.Controls\InkCanvas.Controls.csproj"
+& "C:\Program Files\dotnet\dotnet.exe" build "c:\Users\PrefacedCorg\Documents\GitHub\community\InkCanvas.SettingsTreeView\InkCanvas.SettingsTreeView.csproj"
+```
+
+### 编译整个解决方案
+
+```powershell
+& "C:\Program Files\dotnet\dotnet.exe" build "c:\Users\PrefacedCorg\Documents\GitHub\community\Ink Canvas.sln"
+```
+
+## 项目列表
+
+| 项目 | csproj 路径 | 目标框架 |
+|------|-------------|----------|
+| Ink Canvas (主应用) | `Ink Canvas/InkCanvasForClass.csproj` | net6.0-windows10.0.19041.0 |
+| InkCanvas.Controls | `InkCanvas.Controls/InkCanvas.Controls.csproj` | net6.0-windows10.0.19041.0 |
+| InkCanvas.PluginSdk | `InkCanvas.PluginSdk/InkCanvas.PluginSdk.csproj` | net6.0-windows10.0.19041.0 |
+| InkCanvas.IACoreHelper | `InkCanvas.IACoreHelper/InkCanvas.IACoreHelper.csproj` | net6.0-windows10.0.19041.0 |
+| InkCanvas.SettingsTreeView | `InkCanvas.SettingsTreeView/InkCanvas.SettingsTreeView.csproj` | net6.0-windows10.0.19041.0 |
+
+## 编译前检查
+
+1. 确保没有 CS0246（缺少 using）错误
+2. 确保没有 CS0103（找不到名称）错误
+3. 确保没有 CS0102（重复定义）错误
+4. 确保所有 resx 资源键在默认 resx、en-US、zh-ME 三个文件中完全一致
+5. 确保没有未使用的 resx 资源键
+
+## 常见编译错误修复
+
+| 错误 | 原因 | 修复方法 |
+|------|------|----------|
+| CS0246 找不到类型 | 缺少 using 指令 | 添加 `using Ink_Canvas.Properties;` 等 |
+| CS0103 找不到名称 | 未引用正确命名空间 | 检查是否需要 `using iNKORE.UI.WPF.Modern.Controls;` |
+| CS0102 重复定义 | resx Designer.cs 中重复添加属性 | 删除重复的属性声明 |
+| XAML 解析错误 | XML 格式错误 | 检查标签闭合、属性引号等 |

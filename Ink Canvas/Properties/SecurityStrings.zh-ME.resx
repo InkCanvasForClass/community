@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -134,5 +134,61 @@
   </data>
   <data name="Security_ResetTotpMessage" xml:space="preserve">
     <value>请输入安全密码或当前 TOTP 动态验证码来重置密钥。</value>
+  </data>
+  <data name="Security_UsbSectionHeader" xml:space="preserve">
+    <value>U盘防伪验证（维护特权）</value>
+  </data>
+  <data name="Security_UsbInfoBarMessage" xml:space="preserve">
+    <value>开启U盘验证后，掏出已授权的维护神器（U盘）插上，就能瞬间免密遁入，省时省力！</value>
+  </data>
+  <data name="Security_EnableUsbVerification" xml:space="preserve">
+    <value>开启U盘通关秘籍</value>
+  </data>
+  <data name="Security_EnableUsbVerification_Hint" xml:space="preserve">
+    <value>允许通过插拔已绑定身份的维护U盘来光速通过安全验证</value>
+  </data>
+  <data name="Security_UsbAuthorizedSns" xml:space="preserve">
+    <value>已绑定神格的U盘ID</value>
+  </data>
+  <data name="Security_UsbAuthorizedSns_Hint" xml:space="preserve">
+    <value>已获准出入的U盘硬件ID列表（多个用英文逗号隔开）</value>
+  </data>
+  <data name="Security_UsbDetectAndAuthorize" xml:space="preserve">
+    <value>现场降服并册封新U盘</value>
+  </data>
+  <data name="Security_UsbDetectAndAuthorize_Hint" xml:space="preserve">
+    <value>探查当前插在身上的U盘，一键将其刻印到神圣授权录中</value>
+  </data>
+  <data name="Security_UsbRefreshDrives" xml:space="preserve">
+    <value>雷达扫描</value>
+  </data>
+  <data name="Security_UsbAuthorizeDrive" xml:space="preserve">
+    <value>赐予神格</value>
+  </data>
+  <data name="Security_UsbPromptNoValidSn" xml:space="preserve">
+    <value>选中的这个盘居然没有神圣ID（无效序列号）！</value>
+  </data>
+  <data name="Security_UsbPromptAlreadyAuthorized" xml:space="preserve">
+    <value>莫慌，这根U盘ID早已录入在案！</value>
+  </data>
+  <data name="Security_UsbPromptAuthorizeSuccess" xml:space="preserve">
+    <value>刻印成功！已将其序列号打入神圣授权列表！</value>
+  </data>
+  <data name="Security_UsbPromptSelectDrive" xml:space="preserve">
+    <value>你倒是先在下拉框里选个U盘啊！</value>
+  </data>
+  <data name="Security_UsbPromptNoDriveDetected" xml:space="preserve">
+    <value>空空如也，没发现任何U盘</value>
+  </data>
+  <data name="Security_UsbPromptLocalDisk" xml:space="preserve">
+    <value>凡人的本地磁盘</value>
+  </data>
+  <data name="Security_UsbBypassDialogHint" xml:space="preserve">
+    <value>
+(已开后门，插上带有法力的维护U盘可直接通关)</value>
+  </data>
+  <data name="Security_UsbBypassDialogHintShort" xml:space="preserve">
+    <value>
+(秘籍已启用，直接插盘即过)</value>
   </data>
 </root>

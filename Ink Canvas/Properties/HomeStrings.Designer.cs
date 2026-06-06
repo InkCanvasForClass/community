@@ -42,6 +42,8 @@ namespace Ink_Canvas.Properties
 
         public static string Home_ExitApp => ResourceManager.GetString(nameof(Home_ExitApp), _resourceCulture);
 
+        public static string Home_Reset => ResourceManager.GetString(nameof(Home_Reset), _resourceCulture);
+
         public static string Home_ResetSettings => ResourceManager.GetString(nameof(Home_ResetSettings), _resourceCulture);
 
         public static string Home_RestartApp => ResourceManager.GetString(nameof(Home_RestartApp), _resourceCulture);

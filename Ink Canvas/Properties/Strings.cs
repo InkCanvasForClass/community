@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Centralized i18n string lookup - delegates to split resx groups.
 //------------------------------------------------------------------------------
 using System;
@@ -214,9 +214,11 @@ namespace Ink_Canvas.Properties
             dict["Board_SelectImage"] = ("FloatingBarStrings", "Board_SelectImage");
             dict["Board_Shape"] = ("FloatingBarStrings", "Board_Shape");
             dict["Board_Size"] = ("FloatingBarStrings", "Board_Size");
+            dict["Board_StrokeEraser"] = ("FloatingBarStrings", "Board_StrokeEraser");
             dict["Board_Tools"] = ("FloatingBarStrings", "Board_Tools");
             dict["Board_TwoFingerMove"] = ("FloatingBarStrings", "Board_TwoFingerMove");
             dict["Board_Undo"] = ("FloatingBarStrings", "Board_Undo");
+            dict["Board_VideoBooth"] = ("FloatingBarStrings", "Board_VideoBooth");
             dict["Booth_CameraDevices"] = ("BoothStrings", "CameraDevices");
             dict["Booth_Capture"] = ("BoothStrings", "Capture");
             dict["Booth_CapturedPhotos"] = ("BoothStrings", "CapturedPhotos");
@@ -445,8 +447,12 @@ namespace Ink_Canvas.Properties
             dict["FileAssoc_CheckError"] = ("AutomationStrings", "FileAssoc_CheckError");
             dict["Storage_AutoDeleteDaysThreshold"] = ("AutomationStrings", "Storage_AutoDeleteDaysThreshold");
             dict["Storage_MinAutomationStrokes"] = ("AutomationStrings", "Storage_MinAutomationStrokes");
+            dict["FriendlyLinks_CjikSponsorDescription"] = ("FriendlyLinksStrings", "FriendlyLinks_CjikSponsorDescription");
+            dict["FriendlyLinks_FriendsSectionTitle"] = ("FriendlyLinksStrings", "FriendlyLinks_FriendsSectionTitle");
             dict["FriendlyLinks_InkeysDescription"] = ("FriendlyLinksStrings", "FriendlyLinks_InkeysDescription");
             dict["FriendlyLinks_NamePickerDescription"] = ("FriendlyLinksStrings", "FriendlyLinks_NamePickerDescription");
+            dict["FriendlyLinks_Sponsor"] = ("FriendlyLinksStrings", "FriendlyLinks_Sponsor");
+            dict["FriendlyLinks_SponsorSectionTitle"] = ("FriendlyLinksStrings", "FriendlyLinks_SponsorSectionTitle");
             dict["FriendlyLinks_Title"] = ("FriendlyLinksStrings", "FriendlyLinks_Title");
             dict["FriendlyLinks_Visit"] = ("FriendlyLinksStrings", "FriendlyLinks_Visit");
             dict["Geometry_DrawArrow"] = ("GeometryStrings", "DrawArrow");
@@ -820,6 +826,24 @@ namespace Ink_Canvas.Properties
             dict["Security_DisablePasswordMessage"] = ("SecurityStrings", "Security_DisablePasswordMessage");
             dict["Security_ResetTotpTitle"] = ("SecurityStrings", "Security_ResetTotpTitle");
             dict["Security_ResetTotpMessage"] = ("SecurityStrings", "Security_ResetTotpMessage");
+            dict["Security_UsbSectionHeader"] = ("SecurityStrings", "Security_UsbSectionHeader");
+            dict["Security_UsbInfoBarMessage"] = ("SecurityStrings", "Security_UsbInfoBarMessage");
+            dict["Security_EnableUsbVerification"] = ("SecurityStrings", "Security_EnableUsbVerification");
+            dict["Security_EnableUsbVerification_Hint"] = ("SecurityStrings", "Security_EnableUsbVerification_Hint");
+            dict["Security_UsbAuthorizedSns"] = ("SecurityStrings", "Security_UsbAuthorizedSns");
+            dict["Security_UsbAuthorizedSns_Hint"] = ("SecurityStrings", "Security_UsbAuthorizedSns_Hint");
+            dict["Security_UsbDetectAndAuthorize"] = ("SecurityStrings", "Security_UsbDetectAndAuthorize");
+            dict["Security_UsbDetectAndAuthorize_Hint"] = ("SecurityStrings", "Security_UsbDetectAndAuthorize_Hint");
+            dict["Security_UsbRefreshDrives"] = ("SecurityStrings", "Security_UsbRefreshDrives");
+            dict["Security_UsbAuthorizeDrive"] = ("SecurityStrings", "Security_UsbAuthorizeDrive");
+            dict["Security_UsbPromptNoValidSn"] = ("SecurityStrings", "Security_UsbPromptNoValidSn");
+            dict["Security_UsbPromptAlreadyAuthorized"] = ("SecurityStrings", "Security_UsbPromptAlreadyAuthorized");
+            dict["Security_UsbPromptAuthorizeSuccess"] = ("SecurityStrings", "Security_UsbPromptAuthorizeSuccess");
+            dict["Security_UsbPromptSelectDrive"] = ("SecurityStrings", "Security_UsbPromptSelectDrive");
+            dict["Security_UsbPromptNoDriveDetected"] = ("SecurityStrings", "Security_UsbPromptNoDriveDetected");
+            dict["Security_UsbPromptLocalDisk"] = ("SecurityStrings", "Security_UsbPromptLocalDisk");
+            dict["Security_UsbBypassDialogHint"] = ("SecurityStrings", "Security_UsbBypassDialogHint");
+            dict["Security_UsbBypassDialogHintShort"] = ("SecurityStrings", "Security_UsbBypassDialogHintShort");
             dict["Settings_ModeDesc"] = ("NavStrings", "Settings_ModeDesc");
             dict["Settings_ModeDesc_1"] = ("NavStrings", "Settings_ModeDesc_1");
             dict["Settings_Nav_Hotkey_Tooltip"] = ("NavStrings", "Settings_Nav_Hotkey_Tooltip");
@@ -1024,6 +1048,10 @@ namespace Ink_Canvas.Properties
             dict["Theme_System"] = ("ThemeStrings", "Theme_System");
             dict["Theme_UnfoldButtonIcon"] = ("ThemeStrings", "Theme_UnfoldButtonIcon");
             dict["Theme_UnfoldIcon_Arrow"] = ("ThemeStrings", "Theme_UnfoldIcon_Arrow");
+            dict["Theme_UnfoldIcon_ClassicArrow"] = ("ThemeStrings", "Theme_UnfoldIcon_ClassicArrow");
+            dict["Theme_UnfoldIcon_ClassicPen"] = ("ThemeStrings", "Theme_UnfoldIcon_ClassicPen");
+            dict["Theme_UnfoldIcon_Stripe"] = ("ThemeStrings", "Theme_UnfoldIcon_Stripe");
+            dict["Theme_AllowDragSidePanel"] = ("ThemeStrings", "Theme_AllowDragSidePanel");
             dict["Theme_Upload"] = ("ThemeStrings", "Theme_Upload");
             dict["Theme_UseLegacyFloatingBarUI"] = ("ThemeStrings", "Theme_UseLegacyFloatingBarUI");
             dict["Theme_WindowBackdrop"] = ("ThemeStrings", "Theme_WindowBackdrop");

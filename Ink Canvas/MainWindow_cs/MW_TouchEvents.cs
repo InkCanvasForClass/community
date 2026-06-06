@@ -1,3 +1,4 @@
+using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
@@ -55,6 +56,8 @@ namespace Ink_Canvas
         internal const int MouseRealtimeStrokeId = -100001;
         private readonly HashSet<int> _activeRealtimeTouchStrokeIds = new HashSet<int>();
         private readonly HashSet<int> _activeTouchStrokeIds = new HashSet<int>();
+        private bool _isInkCanvasManipulationEnabledBeforeTouchInk;
+        private bool _hasStoredInkCanvasManipulationStateForTouchInk;
 
         private readonly Dictionary<int, DispatcherTimer> _pauseStraightenTimers = new Dictionary<int, DispatcherTimer>();
         private const int PauseStraightenDelayMs = 300;
@@ -112,6 +115,11 @@ namespace Ink_Canvas
             public float SmoothedSampleRateHz { get; set; } = 120f;
             public bool SawPressureVariation { get; set; }
             public bool HasSeed { get; set; }
+            public bool HasTouchPoint { get; set; }
+            public Point PreviousTouchPoint { get; set; }
+            public Point LastTouchPoint { get; set; }
+            public bool HasTouchDirection { get; set; }
+            public Vector LastTouchDirection { get; set; }
             public float LastSmoothX { get; set; }
             public float LastSmoothY { get; set; }
             public float LastSmoothPressure { get; set; } = 0.5f;
@@ -162,6 +170,26 @@ namespace Ink_Canvas
         private static bool IsTouchStylusDevice(StylusDevice stylusDevice)
         {
             return stylusDevice?.TabletDevice?.Type == TabletDeviceType.Touch;
+        }
+
+        private void BeginTouchInkInput()
+        {
+            if (!_hasStoredInkCanvasManipulationStateForTouchInk)
+            {
+                _isInkCanvasManipulationEnabledBeforeTouchInk = inkCanvas.IsManipulationEnabled;
+                _hasStoredInkCanvasManipulationStateForTouchInk = true;
+            }
+            inkCanvas.IsManipulationEnabled = false;
+        }
+
+        private void EndTouchInkInputIfIdle()
+        {
+            if (_activeRealtimeTouchStrokeIds.Count != 0 || _activeTouchStrokeIds.Count != 0)
+                return;
+            if (!_hasStoredInkCanvasManipulationStateForTouchInk)
+                return;
+            inkCanvas.IsManipulationEnabled = _isInkCanvasManipulationEnabledBeforeTouchInk;
+            _hasStoredInkCanvasManipulationStateForTouchInk = false;
         }
 
         internal void EnsureRealtimeStylusPipelineBinding()
@@ -224,13 +252,120 @@ namespace Ink_Canvas
             {
                 LastRawX = (float)startPoint.X,
                 LastRawY = (float)startPoint.Y,
-                LastTimestampMs = RealtimeNowMs()
+                LastTimestampMs = RealtimeNowMs(),
+                HasTouchPoint = true,
+                LastTouchPoint = startPoint
             };
         }
 
         private void CleanupRealtimeBrushTipState(int stylusId)
         {
             _realtimeBrushTipStates.Remove(stylusId);
+        }
+
+        private float GetRealtimeBrushTipMinDistance(float smoothedSampleRateHz)
+        {
+            var baseMinDist = smoothedSampleRateHz > 160f ? 0.35f
+                : smoothedSampleRateHz > 90f ? 0.25f
+                : 0.15f;
+            var scale = RealtimeClamp((float)Settings.Canvas.RealtimeBrushTipMinDistanceScale, 0f, 2f);
+            return baseMinDist * scale;
+        }
+
+        private static IEnumerable<Point> InterpolateTouchPoints(Point from, Point to)
+        {
+            var dx = to.X - from.X;
+            var dy = to.Y - from.Y;
+            var distance = Math.Sqrt(dx * dx + dy * dy);
+            var steps = Math.Min(24, Math.Max(1, (int)Math.Ceiling(distance / 1.2)));
+            for (var i = 1; i <= steps; i++)
+            {
+                var t = (double)i / steps;
+                yield return new Point(from.X + dx * t, from.Y + dy * t);
+            }
+        }
+
+        private static IEnumerable<Point> InterpolateTouchPoints(RealtimeBrushTipState state, Point to)
+        {
+            if (!state.HasTouchDirection)
+            {
+                foreach (var p in InterpolateTouchPoints(state.LastTouchPoint, to))
+                    yield return p;
+                yield break;
+            }
+
+            var from = state.LastTouchPoint;
+            var chord = to - from;
+            var distance = chord.Length;
+            if (distance < 0.1)
+                yield break;
+
+            var incoming = state.LastTouchDirection;
+            if (incoming.LengthSquared > 0.0001)
+            {
+                incoming.Normalize();
+                var current = chord;
+                current.Normalize();
+                var dot = Math.Max(-1, Math.Min(1, incoming.X * current.X + incoming.Y * current.Y));
+                var angle = Math.Acos(dot);
+                if (angle < Math.PI * 0.72)
+                {
+                    var tangentLength = Math.Min(distance * 0.45, 18);
+                    var c1 = from + incoming * tangentLength;
+                    var c2 = to - current * tangentLength;
+                    var steps = Math.Min(24, Math.Max(1, (int)Math.Ceiling(distance / 1.2)));
+                    for (var i = 1; i <= steps; i++)
+                    {
+                        var t = (double)i / steps;
+                        var u = 1 - t;
+                        yield return new Point(
+                            u * u * u * from.X + 3 * u * u * t * c1.X + 3 * u * t * t * c2.X + t * t * t * to.X,
+                            u * u * u * from.Y + 3 * u * u * t * c1.Y + 3 * u * t * t * c2.Y + t * t * t * to.Y);
+                    }
+                    yield break;
+                }
+            }
+
+            foreach (var p in InterpolateTouchPoints(from, to))
+                yield return p;
+        }
+
+        private static void UpdateTouchInterpolationState(RealtimeBrushTipState state, Point point)
+        {
+            var delta = point - state.LastTouchPoint;
+            if (delta.LengthSquared > 0.0001)
+            {
+                state.PreviousTouchPoint = state.LastTouchPoint;
+                state.LastTouchDirection = delta;
+                state.HasTouchDirection = true;
+            }
+            state.LastTouchPoint = point;
+        }
+
+        private void AppendInterpolatedTouchPoints(StrokeVisual strokeVisual, int strokeId, Point point)
+        {
+            if (strokeVisual == null) return;
+            if (!_realtimeBrushTipStates.TryGetValue(strokeId, out var state))
+            {
+                state = new RealtimeBrushTipState { HasTouchPoint = true, LastTouchPoint = point };
+                _realtimeBrushTipStates[strokeId] = state;
+                strokeVisual.Add(new StylusPoint(point.X, point.Y, 0.5f));
+                return;
+            }
+
+            if (!state.HasTouchPoint)
+            {
+                state.HasTouchPoint = true;
+                state.LastTouchPoint = point;
+                strokeVisual.Add(new StylusPoint(point.X, point.Y, 0.5f));
+                return;
+            }
+
+            foreach (var p in InterpolateTouchPoints(state, point))
+            {
+                strokeVisual.Add(new StylusPoint(p.X, p.Y, 0.5f));
+            }
+            UpdateTouchInterpolationState(state, point);
         }
 
         private bool TryAppendRealtimeVelocityBrushTipPoints(StrokeVisual strokeVisual, StylusEventArgs e)
@@ -286,10 +421,7 @@ namespace Ink_Canvas
                 pressure = RealtimeClamp(pressure, 0.08f, 1f);
                 pressure = state.FilterPressure.Filter(pressure, dt, speed);
 
-                // 高频采样时做最小距离门限，避免点爆炸导致实时重绘卡顿
-                var minDist = state.SmoothedSampleRateHz > 160f ? 0.55f
-                    : state.SmoothedSampleRateHz > 90f ? 0.4f
-                    : 0.25f;
+                var minDist = GetRealtimeBrushTipMinDistance(state.SmoothedSampleRateHz);
                 if (dist < minDist && state.HasSeed)
                 {
                     state.LastRawX = rawX;
@@ -383,10 +515,8 @@ namespace Ink_Canvas
             pressure = RealtimeClamp(pressure, 0.08f, 1f);
             pressure = state.FilterPressure.Filter(pressure, dt, speed);
 
-            var minDist = state.SmoothedSampleRateHz > 160f ? 0.55f
-                : state.SmoothedSampleRateHz > 90f ? 0.4f
-                : 0.25f;
-            if (dist < minDist && state.HasSeed)
+            var minDist = GetRealtimeBrushTipMinDistance(state.SmoothedSampleRateHz);
+            if (dist < minDist && state.HasSeed && strokeId == MouseRealtimeStrokeId)
             {
                 state.LastRawX = rawX;
                 state.LastRawY = rawY;
@@ -419,6 +549,27 @@ namespace Ink_Canvas
             return true;
         }
 
+        private bool TryAppendRealtimeVelocityBrushTipInterpolatedPoints(StrokeVisual strokeVisual, int strokeId, Point point, float rawPressure = 0.5f)
+        {
+            if (!_realtimeBrushTipStates.TryGetValue(strokeId, out var state))
+                return TryAppendRealtimeVelocityBrushTipPoint(strokeVisual, strokeId, point, rawPressure);
+
+            var appended = false;
+            if (!state.HasTouchPoint)
+            {
+                state.HasTouchPoint = true;
+                state.LastTouchPoint = point;
+                return TryAppendRealtimeVelocityBrushTipPoint(strokeVisual, strokeId, point, rawPressure);
+            }
+
+            foreach (var p in InterpolateTouchPoints(state, point))
+            {
+                appended |= TryAppendRealtimeVelocityBrushTipPoint(strokeVisual, strokeId, p, rawPressure);
+            }
+            UpdateTouchInterpolationState(state, point);
+            return appended;
+        }
+
         /// <summary>
         /// 保存画布上的非笔画元素（如图片、媒体元素等）
         /// </summary>
@@ -433,7 +584,7 @@ namespace Ink_Canvas
                 var child = inkCanvas.Children[i];
 
                 // 保存图片、媒体元素等非笔画相关的UI元素
-                if (child is Image || child is MediaElement ||
+                if (child is Image || child is MediaElement || child is CanvasMediaControl ||
                     (child is Border border && border.Name != "EraserOverlayCanvas"))
                 {
                     // 创建元素的深拷贝，避免直接引用导致的问题
@@ -487,6 +638,35 @@ namespace Ink_Canvas
                     }
 
                     return clonedImage;
+                }
+                else if (originalElement is CanvasMediaControl originalMediaControl)
+                {
+                    var clonedMediaControl = new CanvasMediaControl
+                    {
+                        Width = originalMediaControl.Width,
+                        Height = originalMediaControl.Height,
+                        Name = originalMediaControl.Name,
+                        IsHitTestVisible = originalMediaControl.IsHitTestVisible,
+                        Focusable = originalMediaControl.Focusable,
+                        RenderTransform = originalMediaControl.RenderTransform?.Clone()
+                    };
+
+                    if (!string.IsNullOrWhiteSpace(originalMediaControl.SourcePath))
+                    {
+                        clonedMediaControl.Initialize(originalMediaControl.SourcePath, originalMediaControl.DisplayName);
+                    }
+                    clonedMediaControl.SetPlaybackRate(originalMediaControl.PlaybackRate);
+                    clonedMediaControl.SetVolumeLevel(originalMediaControl.VolumeLevel);
+                    var playbackPosition = originalMediaControl.GetPlaybackPositionOrNull();
+                    if (playbackPosition.HasValue)
+                    {
+                        clonedMediaControl.SetPlaybackPosition(playbackPosition.Value);
+                    }
+
+                    InkCanvas.SetLeft(clonedMediaControl, InkCanvas.GetLeft(originalMediaControl));
+                    InkCanvas.SetTop(clonedMediaControl, InkCanvas.GetTop(originalMediaControl));
+
+                    return clonedMediaControl;
                 }
                 else if (originalElement is MediaElement originalMedia)
                 {
@@ -1352,11 +1532,12 @@ namespace Ink_Canvas
                     var touchId = e.TouchDevice.Id;
                     var p = e.GetTouchPoint(inkCanvas).Position;
                     _activeRealtimeTouchStrokeIds.Add(touchId);
+                    BeginTouchInkInput();
                     CancelPauseStraightenTimer(touchId);
                     InitializeRealtimeBrushTipStateFromPoint(touchId, p);
                     var sv = GetStrokeVisual(touchId);
-                    TryAppendRealtimeVelocityBrushTipPoint(sv, touchId, p);
-                    sv.ForceRedraw();
+                    TryAppendRealtimeVelocityBrushTipInterpolatedPoints(sv, touchId, p);
+                    sv.Redraw();
                 }
                 catch (Exception ex)
                 {
@@ -1376,9 +1557,10 @@ namespace Ink_Canvas
                     var touchId = e.TouchDevice.Id;
                     var p = e.GetTouchPoint(inkCanvas).Position;
                     _activeTouchStrokeIds.Add(touchId);
+                    BeginTouchInkInput();
                     CancelPauseStraightenTimer(touchId);
                     var sv = GetStrokeVisual(touchId);
-                    sv.Add(new StylusPoint(p.X, p.Y, 0.5f));
+                    AppendInterpolatedTouchPoints(sv, touchId, p);
                     sv.Redraw();
                 }
                 catch (Exception ex)
@@ -1498,20 +1680,18 @@ namespace Ink_Canvas
             {
                 var touchPoint = e.GetTouchPoint(inkCanvas);
                 EraserOverlay_PointerMove(sender, touchPoint.Position);
+                return;
             }
 
             var touchId = e.TouchDevice.Id;
-            if (ShouldUseRealtimeVelocityBrushTipForTouch())
+            if (_activeRealtimeTouchStrokeIds.Contains(touchId))
             {
-                if (!_activeRealtimeTouchStrokeIds.Contains(touchId))
-                    return;
                 try
                 {
                     var p = e.GetTouchPoint(inkCanvas).Position;
                     var sv = GetStrokeVisual(touchId);
-                    if (TryAppendRealtimeVelocityBrushTipPoint(sv, touchId, p))
-                        sv.ForceRedraw();
-                    ResetPauseStraightenTimer(touchId);
+                    if (TryAppendRealtimeVelocityBrushTipInterpolatedPoints(sv, touchId, p))
+                        sv.Redraw();
                 }
                 catch (Exception ex)
                 {
@@ -1526,9 +1706,8 @@ namespace Ink_Canvas
                 {
                     var p = e.GetTouchPoint(inkCanvas).Position;
                     var sv = GetStrokeVisual(touchId);
-                    sv.Add(new StylusPoint(p.X, p.Y, 0.5f));
+                    AppendInterpolatedTouchPoints(sv, touchId, p);
                     sv.Redraw();
-                    ResetPauseStraightenTimer(touchId);
                 }
                 catch (Exception ex)
                 {
@@ -1591,6 +1770,7 @@ namespace Ink_Canvas
                     CleanupRealtimeBrushTipState(touchId);
                     CancelPauseStraightenTimer(touchId);
                     _activeRealtimeTouchStrokeIds.Remove(touchId);
+                    EndTouchInkInputIfIdle();
                 }
             }
             else if (_activeTouchStrokeIds.Contains(touchId))
@@ -1620,6 +1800,7 @@ namespace Ink_Canvas
                     CleanupRealtimeBrushTipState(touchId);
                     CancelPauseStraightenTimer(touchId);
                     _activeTouchStrokeIds.Remove(touchId);
+                    EndTouchInkInputIfIdle();
                 }
             }
 
@@ -1948,6 +2129,10 @@ namespace Ink_Canvas
                         // 对媒体元素也应用变换
                         ApplyMatrixTransformToMediaElement(mediaElement, matrix);
                     }
+                    else if (child is CanvasMediaControl mediaControl)
+                    {
+                        ApplyMatrixTransformToCanvasMediaControl(mediaControl, matrix);
+                    }
                 }
             }
             catch (Exception ex)
@@ -2001,6 +2186,25 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"应用媒体元素变换失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void ApplyMatrixTransformToCanvasMediaControl(CanvasMediaControl mediaControl, Matrix matrix)
+        {
+            try
+            {
+                if (!(mediaControl.RenderTransform is TransformGroup transformGroup))
+                {
+                    transformGroup = new TransformGroup();
+                    mediaControl.RenderTransform = transformGroup;
+                }
+
+                var matrixTransform = new MatrixTransform(matrix);
+                transformGroup.Children.Add(matrixTransform);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"应用媒体控件变换失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
     }

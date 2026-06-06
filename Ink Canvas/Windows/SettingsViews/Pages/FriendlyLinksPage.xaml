@@ -27,7 +27,19 @@
                 Spacing="{StaticResource SettingsCardSpacing}">
 
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                    Text="{x:Static props:FriendlyLinksStrings.FriendlyLinks_Title}" />
+                    Text="{x:Static props:FriendlyLinksStrings.FriendlyLinks_SponsorSectionTitle}" />
+
+                <ui:SettingsCard Header="CJK_mkp"
+                    Description="{x:Static props:FriendlyLinksStrings.FriendlyLinks_CjikSponsorDescription}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Heart}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <ui:HyperlinkButton Content="{x:Static props:FriendlyLinksStrings.FriendlyLinks_Sponsor}"
+                        NavigateUri="https://www.ifdian.net/a/CJIK_mkp" />
+                </ui:SettingsCard>
+
+                <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                    Text="{x:Static props:FriendlyLinksStrings.FriendlyLinks_FriendsSectionTitle}" />
 
                 <ui:SettingsCard Header="NamePicker"
                     Description="{x:Static props:FriendlyLinksStrings.FriendlyLinks_NamePickerDescription}">

@@ -64,18 +64,23 @@ namespace Ink_Canvas
         private async void BtnImageInsert_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "图片与 PDF|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf|图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf";
+            openFileDialog.Filter = "图片、PDF 与媒体|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf;*.mp4;*.mkv;*.mkw;*.mp3|图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf|媒体文件|*.mp4;*.mkv;*.mkw;*.mp3";
 
             if (openFileDialog.ShowDialog() == true)
             {
                 string filePath = openFileDialog.FileName;
+                string extension = Path.GetExtension(filePath);
 
-                FrameworkElement element = await CreateAndCompressImageAsync(filePath);
+                FrameworkElement element = IsSupportedMediaExtension(extension)
+                    ? await CreateMediaElementAsync(filePath)
+                    : await CreateAndCompressImageAsync(filePath);
 
                 if (element != null)
                 {
-                    string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
-                    element.Name = timestamp;
+                    string timestamp = IsCanvasMediaElement(element)
+                        ? "media_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff")
+                        : "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
+                    if (string.IsNullOrEmpty(element.Name)) element.Name = timestamp;
 
                     // 设置图片属性，避免被InkCanvas选择系统处理
                     element.IsHitTestVisible = true;
@@ -150,11 +155,21 @@ namespace Ink_Canvas
         /// </remarks>
         private void BindElementEvents(FrameworkElement element)
         {
-            // 鼠标事件
-            element.MouseLeftButtonDown += Element_MouseLeftButtonDown;
+            if (element is CanvasMediaControl mediaControl)
+            {
+                mediaControl.RegisterSelectHandler(Element_MouseLeftButtonDown);
+                mediaControl.RegisterTouchSelectHandler(Element_TouchDown);
+            }
+            else
+            {
+                element.MouseLeftButtonDown += Element_MouseLeftButtonDown;
+                element.TouchDown += Element_TouchDown;
+            }
+
             element.MouseLeftButtonUp += Element_MouseLeftButtonUp;
             element.MouseMove += Element_MouseMove;
             element.MouseWheel += Element_MouseWheel;
+            element.TouchUp += Element_TouchUp;
 
             // 触摸事件
             element.IsManipulationEnabled = true;
@@ -191,6 +206,11 @@ namespace Ink_Canvas
             }
             if (sender is FrameworkElement element)
             {
+                if (element is CanvasMediaControl && CanvasMediaControl.IsInteractiveChildTarget(e.OriginalSource as DependencyObject))
+                {
+                    e.Handled = false;
+                    return;
+                }
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.Select)
                 {
                     e.Handled = false;
@@ -365,6 +385,11 @@ namespace Ink_Canvas
             }
             if (sender is FrameworkElement element)
             {
+                if (element is CanvasMediaControl && CanvasMediaControl.IsInteractiveChildTarget(e.OriginalSource as DependencyObject))
+                {
+                    e.Handled = false;
+                    return;
+                }
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.Select)
                 {
                     e.Handled = false;
@@ -495,6 +520,12 @@ namespace Ink_Canvas
         /// </remarks>
         private void ApplyScaleTransform(FrameworkElement element, double scaleFactor, Point center)
         {
+            if (element is CanvasMediaControl mediaControl)
+            {
+                ResizeCanvasMediaControlByScale(mediaControl, scaleFactor);
+                return;
+            }
+
             if (element.RenderTransform is TransformGroup transformGroup)
             {
                 var scaleTransform = transformGroup.Children.OfType<ScaleTransform>().FirstOrDefault();
@@ -515,9 +546,157 @@ namespace Ink_Canvas
             }
         }
 
-        /// <summary>
-        /// 应用旋转变换到元素
-        /// </summary>
+        private void ResizeCanvasMediaControlByScale(CanvasMediaControl mediaControl, double scaleFactor)
+        {
+            if (mediaControl == null || scaleFactor <= 0) return;
+            if (!(mediaControl.RenderTransform is TransformGroup transformGroup)) return;
+
+            var scaleTransform = transformGroup.Children.OfType<ScaleTransform>().FirstOrDefault();
+            var translateTransform = transformGroup.Children.OfType<TranslateTransform>().FirstOrDefault();
+            var rotateTransform = transformGroup.Children.OfType<RotateTransform>().FirstOrDefault();
+            if (translateTransform == null) return;
+
+            if (scaleTransform != null && (Math.Abs(scaleTransform.ScaleX - 1) > 0.001 || Math.Abs(scaleTransform.ScaleY - 1) > 0.001))
+            {
+                double baseWidth = mediaControl.Width > 0 ? mediaControl.Width : mediaControl.ActualWidth;
+                double baseHeight = mediaControl.Height > 0 ? mediaControl.Height : mediaControl.ActualHeight;
+                if (baseWidth > 0) mediaControl.Width = baseWidth * scaleTransform.ScaleX;
+                if (baseHeight > 0) mediaControl.Height = baseHeight * scaleTransform.ScaleY;
+                scaleTransform.ScaleX = 1;
+                scaleTransform.ScaleY = 1;
+            }
+
+            double currentWidth = mediaControl.Width > 0 ? mediaControl.Width : mediaControl.ActualWidth;
+            double currentHeight = mediaControl.Height > 0 ? mediaControl.Height : mediaControl.ActualHeight;
+            if (currentWidth <= 0 || currentHeight <= 0) return;
+
+            double angle = rotateTransform?.Angle ?? 0;
+            double left = InkCanvas.GetLeft(mediaControl); if (double.IsNaN(left)) left = 0;
+            double top = InkCanvas.GetTop(mediaControl); if (double.IsNaN(top)) top = 0;
+            double tx = translateTransform.X;
+            double ty = translateTransform.Y;
+
+            double newWidth = Math.Max(240, Math.Min(currentWidth * scaleFactor, 2400));
+            double newHeight = Math.Max(120, Math.Min(currentHeight * scaleFactor, 1600));
+
+            Point centerBefore = ApplyCanvasTransform(currentWidth / 2, currentHeight / 2,
+                                                      currentWidth / 2, currentHeight / 2,
+                                                      1, 1, tx, ty, angle, left, top);
+            Point centerAfter = ApplyCanvasTransform(newWidth / 2, newHeight / 2,
+                                                     newWidth / 2, newHeight / 2,
+                                                     1, 1, tx, ty, angle, left, top);
+
+            Vector canvasDrift = centerBefore - centerAfter;
+            translateTransform.X += canvasDrift.X;
+            translateTransform.Y += canvasDrift.Y;
+
+            mediaControl.Width = newWidth;
+            mediaControl.Height = newHeight;
+
+            if (rotateTransform != null)
+            {
+                rotateTransform.CenterX = translateTransform.X + newWidth / 2;
+                rotateTransform.CenterY = translateTransform.Y + newHeight / 2;
+            }
+
+            UpdateImageResizeHandlesPosition(default);
+            if (BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                UpdateImageSelectionToolbarPosition(mediaControl);
+        }
+
+        private void ResizeCanvasMediaControlByCorner(CanvasMediaControl mediaControl, Vector canvasDelta,
+                                                      ImageResizeCorner corner, bool lockAspect)
+        {
+            if (mediaControl == null) return;
+            if (!(mediaControl.RenderTransform is TransformGroup transformGroup)) return;
+
+            var scaleTransform = transformGroup.Children.OfType<ScaleTransform>().FirstOrDefault();
+            var translateTransform = transformGroup.Children.OfType<TranslateTransform>().FirstOrDefault();
+            var rotateTransform = transformGroup.Children.OfType<RotateTransform>().FirstOrDefault();
+            if (translateTransform == null) return;
+
+            if (scaleTransform != null && (Math.Abs(scaleTransform.ScaleX - 1) > 0.001 || Math.Abs(scaleTransform.ScaleY - 1) > 0.001))
+            {
+                double baseWidth = mediaControl.Width > 0 ? mediaControl.Width : mediaControl.ActualWidth;
+                double baseHeight = mediaControl.Height > 0 ? mediaControl.Height : mediaControl.ActualHeight;
+                if (baseWidth > 0) mediaControl.Width = baseWidth * scaleTransform.ScaleX;
+                if (baseHeight > 0) mediaControl.Height = baseHeight * scaleTransform.ScaleY;
+                scaleTransform.ScaleX = 1;
+                scaleTransform.ScaleY = 1;
+            }
+
+            double currentWidth = mediaControl.Width > 0 ? mediaControl.Width : mediaControl.ActualWidth;
+            double currentHeight = mediaControl.Height > 0 ? mediaControl.Height : mediaControl.ActualHeight;
+            if (currentWidth <= 0 || currentHeight <= 0) return;
+
+            double angle = rotateTransform?.Angle ?? 0;
+            Vector local = CanvasVectorToLocal(canvasDelta, angle);
+
+            double newWidth = currentWidth;
+            double newHeight = currentHeight;
+            double pivotFracX = 0;
+            double pivotFracY = 0;
+
+            switch (corner)
+            {
+                case ImageResizeCorner.TopLeft:
+                    newWidth = currentWidth - local.X; newHeight = currentHeight - local.Y;
+                    pivotFracX = 1; pivotFracY = 1;
+                    break;
+                case ImageResizeCorner.TopRight:
+                    newWidth = currentWidth + local.X; newHeight = currentHeight - local.Y;
+                    pivotFracX = 0; pivotFracY = 1;
+                    break;
+                case ImageResizeCorner.BottomLeft:
+                    newWidth = currentWidth - local.X; newHeight = currentHeight + local.Y;
+                    pivotFracX = 1; pivotFracY = 0;
+                    break;
+                case ImageResizeCorner.BottomRight:
+                    newWidth = currentWidth + local.X; newHeight = currentHeight + local.Y;
+                    pivotFracX = 0; pivotFracY = 0;
+                    break;
+            }
+
+            if (lockAspect && currentWidth > 0 && currentHeight > 0)
+            {
+                double uniform = Math.Min(newWidth / currentWidth, newHeight / currentHeight);
+                newWidth = currentWidth * uniform;
+                newHeight = currentHeight * uniform;
+            }
+
+            newWidth = Math.Max(240, Math.Min(newWidth, 2400));
+            newHeight = Math.Max(120, Math.Min(newHeight, 1600));
+
+            double left = InkCanvas.GetLeft(mediaControl); if (double.IsNaN(left)) left = 0;
+            double top = InkCanvas.GetTop(mediaControl); if (double.IsNaN(top)) top = 0;
+            double tx = translateTransform.X;
+            double ty = translateTransform.Y;
+
+            Point pivotBefore = ApplyCanvasTransform(pivotFracX * currentWidth, pivotFracY * currentHeight,
+                                                     currentWidth / 2, currentHeight / 2,
+                                                     1, 1, tx, ty, angle, left, top);
+            Point pivotAfter = ApplyCanvasTransform(pivotFracX * newWidth, pivotFracY * newHeight,
+                                                    newWidth / 2, newHeight / 2,
+                                                    1, 1, tx, ty, angle, left, top);
+
+            Vector canvasDrift = pivotBefore - pivotAfter;
+            translateTransform.X += canvasDrift.X;
+            translateTransform.Y += canvasDrift.Y;
+
+            mediaControl.Width = newWidth;
+            mediaControl.Height = newHeight;
+
+            if (rotateTransform != null)
+            {
+                rotateTransform.CenterX = translateTransform.X + newWidth / 2;
+                rotateTransform.CenterY = translateTransform.Y + newHeight / 2;
+            }
+
+            UpdateImageResizeHandlesPosition(default);
+            if (BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                UpdateImageSelectionToolbarPosition(mediaControl);
+        }
+
         /// <param name="element">要变换的元素</param>
         /// <param name="angle">旋转角度</param>
         /// <remarks>
@@ -698,6 +877,12 @@ namespace Ink_Canvas
                 // 根据滚轮方向确定缩放比例（向上1.1倍，向下0.9倍）
                 double scaleFactor = e.Delta > 0 ? 1.1 : 0.9;
 
+                if (element is CanvasMediaControl mediaControl)
+                {
+                    ResizeCanvasMediaControlByScale(mediaControl, scaleFactor);
+                    return;
+                }
+
                 // 计算选中元素的中心点作为缩放中心
                 var elementCenter = new Point(element.ActualWidth / 2, element.ActualHeight / 2);
 
@@ -714,8 +899,6 @@ namespace Ink_Canvas
                 {
                     stroke.Transform(matrix, false);
                 }
-
-
             }
             catch (Exception ex)
             {
@@ -961,10 +1144,67 @@ namespace Ink_Canvas
         /// - 否则使用原始尺寸
         /// - 返回创建的Image对象
         /// </remarks>
-        /// <summary>与图片选择工具栏、缩放控制点联动的画布位图类元素（普通图片或多页 PDF 嵌入）。</summary>
+        /// <summary>与图片选择工具栏、缩放控制点联动的画布位图类元素（普通图片、多页 PDF 嵌入或媒体控件）。</summary>
         private static bool IsBitmapLikeCanvasElement(FrameworkElement fe)
         {
-            return fe is Image || fe is PdfEmbeddedView;
+            return fe is Image || fe is PdfEmbeddedView || fe is CanvasMediaControl;
+        }
+
+        private static bool IsCanvasMediaElement(FrameworkElement fe)
+        {
+            return fe is CanvasMediaControl || fe is MediaElement;
+        }
+
+        private static bool IsSupportedMediaExtension(string extension)
+        {
+            return string.Equals(extension, ".mp4", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(extension, ".mkv", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(extension, ".mkw", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(extension, ".mp3", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool TryGetMediaSourcePath(FrameworkElement element, out string sourcePath)
+        {
+            sourcePath = null;
+            if (element is CanvasMediaControl mediaControl && !string.IsNullOrWhiteSpace(mediaControl.SourcePath))
+            {
+                sourcePath = mediaControl.SourcePath;
+                return true;
+            }
+
+            if (element is MediaElement mediaElement && mediaElement.Source != null)
+            {
+                sourcePath = mediaElement.Source.IsFile ? mediaElement.Source.LocalPath : mediaElement.Source.OriginalString;
+                return !string.IsNullOrWhiteSpace(sourcePath);
+            }
+
+            return false;
+        }
+
+        private void AttachMediaFailureNotification(MediaElement mediaElement)
+        {
+            mediaElement.MediaFailed += (_, args) =>
+            {
+                string message = args.ErrorException?.Message ?? "未知错误";
+                LogHelper.WriteLogToFile($"媒体加载失败: {message}", LogHelper.LogType.Error);
+                ShowNotification("媒体加载失败，可能是不支持的格式或缺少系统解码器。");
+            };
+        }
+
+        private void AttachMediaFailureNotification(CanvasMediaControl mediaControl)
+        {
+            if (mediaControl?.MediaPlayer == null) return;
+            AttachMediaFailureNotification(mediaControl.MediaPlayer);
+        }
+
+        private void PauseAllCanvasMediaPlayback()
+        {
+            if (inkCanvas == null) return;
+
+            foreach (var mediaControl in inkCanvas.Children.OfType<CanvasMediaControl>())
+            {
+                mediaControl.PausePlayback();
+            }
         }
 
         private async Task<FrameworkElement> CreateAndCompressImageAsync(string filePath)
@@ -1107,93 +1347,83 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">事件发送者</param>
         /// <param name="e">事件参数</param>
-        /// <remarks>
-        /// - 打开文件选择对话框，选择媒体文件
-        /// - 读取媒体文件字节
-        /// - 创建MediaElement
-        /// - 居中缩放MediaElement
-        /// - 设置位置并添加到画布
-        /// - 设置LoadedBehavior和UnloadedBehavior为Manual
-        /// - 媒体加载完成后播放并立即暂停
-        /// - 提交到时间机器历史记录
-        /// </remarks>
         private async void BtnMediaInsert_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Media files (*.mp4; *.avi; *.wmv)|*.mp4;*.avi;*.wmv";
+            openFileDialog.Filter = "Media files (*.mp4; *.mkv; *.mkw; *.mp3; *.avi; *.wmv)|*.mp4;*.mkv;*.mkw;*.mp3;*.avi;*.wmv";
 
             if (openFileDialog.ShowDialog() == true)
             {
                 string filePath = openFileDialog.FileName;
 
-                byte[] mediaBytes = await Task.Run(() => File.ReadAllBytes(filePath));
-
-                MediaElement mediaElement = await CreateMediaElementAsync(filePath);
+                FrameworkElement mediaElement = await CreateMediaElementAsync(filePath);
 
                 if (mediaElement != null)
                 {
+                    InitializeInkCanvasSelectionSettings();
+                    InitializeElementTransform(mediaElement);
                     CenterAndScaleElement(mediaElement);
+                    BindElementEvents(mediaElement);
 
                     InkCanvas.SetLeft(mediaElement, 0);
                     InkCanvas.SetTop(mediaElement, 0);
                     inkCanvas.Children.Add(mediaElement);
 
-                    mediaElement.LoadedBehavior = MediaState.Manual;
-                    mediaElement.UnloadedBehavior = MediaState.Manual;
-                    mediaElement.Loaded += async (_, args) =>
-                    {
-                        mediaElement.Play();
-                        await Task.Delay(100);
-                        mediaElement.Pause();
-                    };
-
                     timeMachine.CommitElementInsertHistory(mediaElement);
+
+                    SetCurrentToolMode(InkCanvasEditingMode.Select);
+                    UpdateCurrentToolMode("select");
+                    HideSubPanels("select");
                 }
             }
         }
 
         /// <summary>
-        /// 创建MediaElement
+        /// 创建画布媒体控件
         /// </summary>
         /// <param name="filePath">媒体文件路径</param>
-        /// <returns>创建的MediaElement对象</returns>
-        /// <remarks>
-        /// - 创建文件依赖目录
-        /// - 创建MediaElement
-        /// - 设置Source、名称、LoadedBehavior和UnloadedBehavior
-        /// - 设置宽度和高度
-        /// - 复制文件到依赖目录
-        /// - 更新Source为新文件路径
-        /// - 返回创建的MediaElement对象
-        /// </remarks>
-        private async Task<MediaElement> CreateMediaElementAsync(string filePath)
+        /// <returns>创建的媒体控件对象</returns>
+        private async Task<FrameworkElement> CreateMediaElementAsync(string filePath)
         {
-            string savePath = Path.Combine(Settings.Automation.AutoSavedStrokesLocation, "File Dependency");
-            if (!Directory.Exists(savePath))
+            string fileExtension = Path.GetExtension(filePath);
+            if (!IsSupportedMediaExtension(fileExtension)
+                && !string.Equals(fileExtension, ".avi", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(fileExtension, ".wmv", StringComparison.OrdinalIgnoreCase))
             {
-                Directory.CreateDirectory(savePath);
+                ShowNotification("不支持的媒体格式。");
+                return null;
             }
-            return await Dispatcher.InvokeAsync(() =>
+
+            try
             {
-                MediaElement mediaElement = new MediaElement();
-                mediaElement.Source = new Uri(filePath);
+                string savePath = Path.Combine(Settings.Automation.AutoSavedStrokesLocation, "File Dependency");
+                if (!Directory.Exists(savePath))
+                {
+                    Directory.CreateDirectory(savePath);
+                }
+
                 string timestamp = "media_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
-                mediaElement.Name = timestamp;
-                mediaElement.LoadedBehavior = MediaState.Manual;
-                mediaElement.UnloadedBehavior = MediaState.Manual;
+                string newFilePath = Path.Combine(savePath, timestamp + fileExtension);
+                await Task.Run(() => File.Copy(filePath, newFilePath, true));
 
-                mediaElement.Width = 256;
-                mediaElement.Height = 256;
-
-                string fileExtension = Path.GetExtension(filePath);
-                string newFilePath = Path.Combine(savePath, mediaElement.Name + fileExtension);
-
-                File.Copy(filePath, newFilePath, true);
-
-                mediaElement.Source = new Uri(newFilePath);
-
-                return mediaElement;
-            });
+                return await Dispatcher.InvokeAsync(() =>
+                {
+                    var mediaControl = new CanvasMediaControl
+                    {
+                        Name = timestamp,
+                        ToolTip = Path.GetFileName(filePath)
+                    };
+                    mediaControl.Initialize(newFilePath, Path.GetFileName(filePath));
+                    AttachMediaFailureNotification(mediaControl);
+                    return (FrameworkElement)mediaControl;
+                });
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"插入媒体失败: {ex.Message}", LogHelper.LogType.Error);
+                ShowNotification($"插入媒体失败：{ex.Message}");
+                return null;
+            }
         }
         #endregion
 
@@ -2264,6 +2494,10 @@ namespace Ink_Canvas
                     var previousEditingMode = inkCanvas.EditingMode;
 
                     // 记录删除历史
+                    if (currentSelectedElement is CanvasMediaControl mediaControl)
+                    {
+                        mediaControl.PausePlayback();
+                    }
                     timeMachine.CommitElementRemoveHistory(currentSelectedElement);
 
                     var toRemove = currentSelectedElement;
@@ -2658,6 +2892,12 @@ namespace Ink_Canvas
         private void ResizeImageByCorner(FrameworkElement element, Vector canvasDelta,
                                          ImageResizeCorner corner, bool lockAspect)
         {
+            if (element is CanvasMediaControl mediaControl)
+            {
+                ResizeCanvasMediaControlByCorner(mediaControl, canvasDelta, corner, lockAspect);
+                return;
+            }
+
             if (!(element.RenderTransform is TransformGroup transformGroup)) return;
             var scaleTransform = transformGroup.Children.OfType<ScaleTransform>().FirstOrDefault();
             var translateTransform = transformGroup.Children.OfType<TranslateTransform>().FirstOrDefault();

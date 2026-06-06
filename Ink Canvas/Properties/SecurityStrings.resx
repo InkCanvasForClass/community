@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -134,5 +134,61 @@
   </data>
   <data name="Security_ResetTotpMessage" xml:space="preserve">
     <value>请输入安全密码或当前 TOTP 动态验证码以重置密钥。</value>
+  </data>
+  <data name="Security_UsbSectionHeader" xml:space="preserve">
+    <value>U盘维护验证</value>
+  </data>
+  <data name="Security_UsbInfoBarMessage" xml:space="preserve">
+    <value>启用U盘验证后，当需要安全验证时，若插入了已授权的U盘，将自动跳过验证，方便维护人员直接操作。</value>
+  </data>
+  <data name="Security_EnableUsbVerification" xml:space="preserve">
+    <value>启用U盘验证</value>
+  </data>
+  <data name="Security_EnableUsbVerification_Hint" xml:space="preserve">
+    <value>允许插入已授权的U盘作为一种免密的安全验证方式</value>
+  </data>
+  <data name="Security_UsbAuthorizedSns" xml:space="preserve">
+    <value>已授权的U盘序列号</value>
+  </data>
+  <data name="Security_UsbAuthorizedSns_Hint" xml:space="preserve">
+    <value>已授权的设备序列号列表（多台设备使用英文逗号分隔）</value>
+  </data>
+  <data name="Security_UsbDetectAndAuthorize" xml:space="preserve">
+    <value>检测并授权新U盘</value>
+  </data>
+  <data name="Security_UsbDetectAndAuthorize_Hint" xml:space="preserve">
+    <value>扫描当前连接的U盘，并快速将其序列号加入授权列表中</value>
+  </data>
+  <data name="Security_UsbRefreshDrives" xml:space="preserve">
+    <value>刷新设备</value>
+  </data>
+  <data name="Security_UsbAuthorizeDrive" xml:space="preserve">
+    <value>授权所选U盘</value>
+  </data>
+  <data name="Security_UsbPromptNoValidSn" xml:space="preserve">
+    <value>所选U盘无有效序列号</value>
+  </data>
+  <data name="Security_UsbPromptAlreadyAuthorized" xml:space="preserve">
+    <value>该U盘序列号已被授权</value>
+  </data>
+  <data name="Security_UsbPromptAuthorizeSuccess" xml:space="preserve">
+    <value>成功授权该U盘序列号！已加入授权列表。</value>
+  </data>
+  <data name="Security_UsbPromptSelectDrive" xml:space="preserve">
+    <value>请先选择一个检测到的U盘</value>
+  </data>
+  <data name="Security_UsbPromptNoDriveDetected" xml:space="preserve">
+    <value>未检测到U盘</value>
+  </data>
+  <data name="Security_UsbPromptLocalDisk" xml:space="preserve">
+    <value>本地磁盘</value>
+  </data>
+  <data name="Security_UsbBypassDialogHint" xml:space="preserve">
+    <value>
+(已启用U盘安全验证，您可以插入已授权的维护U盘以自动验证通过)</value>
+  </data>
+  <data name="Security_UsbBypassDialogHintShort" xml:space="preserve">
+    <value>
+(已启用U盘安全验证，可直接插入已授权的维护U盘)</value>
   </data>
 </root>

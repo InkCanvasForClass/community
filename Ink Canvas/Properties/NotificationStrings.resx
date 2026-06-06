@@ -147,6 +147,9 @@
   <data name="PlacementTopRight" xml:space="preserve">
     <value>右上角</value>
   </data>
+  <data name="PlacementFloatingBarAbove" xml:space="preserve">
+    <value>浮动栏上方</value>
+  </data>
   <data name="Provider_Announcement" xml:space="preserve">
     <value>公告提供商</value>
   </data>

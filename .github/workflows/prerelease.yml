@@ -3,26 +3,26 @@ name: Pre-release and Changelog
 on:
   push:
     tags:
-      - '*'
+      - "*"
   workflow_dispatch:
     inputs:
       version_type:
-        description: 'Version bump type'
+        description: "Version bump type"
         required: true
-        default: 'patch'
+        default: "patch"
         type: choice
         options:
-        - patch
-        - minor
-        - major
-        - build
+          - patch
+          - minor
+          - major
+          - build
       prerelease:
-        description: 'Create as pre-release'
+        description: "Create as pre-release"
         required: true
         default: true
         type: boolean
       draft:
-        description: 'Create as draft release'
+        description: "Create as draft release"
         required: true
         default: false
         type: boolean
@@ -39,7 +39,7 @@ jobs:
       version: ${{ steps.get_tag.outputs.version }}
       is_prerelease: ${{ steps.release_type.outputs.is_prerelease }}
       changelog: ${{ steps.read_changelog.outputs.changelog }}
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -173,7 +173,7 @@ jobs:
         id: git_cliff_tag
         uses: orhun/git-cliff-action@v4
         with:
-          config: build/cliff.toml  # 使用项目build目录的 cliff.toml 配置
+          config: build/cliff.toml # 使用项目build目录的 cliff.toml 配置
           args: --latest --tag ${{ steps.get_tag.outputs.tag_name }} --output CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -208,28 +208,28 @@ jobs:
       archive_name: ${{ steps.create_archive.outputs.archive_name }}
       zip_size: ${{ steps.calculate_size.outputs.zip_size }}
       installer_size: ${{ steps.calculate_installer_size.outputs.installer_size }}
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
-      
+
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v3
-      
+
       - name: Setup dotnet
         uses: actions/setup-dotnet@v5
         with:
           cache: true
-          cache-dependency-path: '**/packages.lock.json'
-      
-      - name: Restore Package 
+          cache-dependency-path: "**/packages.lock.json"
+
+      - name: Restore Package
         run: dotnet restore "Ink Canvas.sln" --locked-mode
-      
+
       - name: Build the Solution (Release)
         env:
-          DLASS_SENTRY_DSN: ${{ secrets.DLASS_SENTRY_DSN }}
+          DLASS_TELEMETRY_TOKEN: ${{ secrets.DLASS_TELEMETRY_TOKEN }}
         run: |
           msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
 
@@ -237,7 +237,7 @@ jobs:
         id: check-exe
         run: |
           $exePath = "Ink Canvas\bin\Release\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\InkCanvasForClass.exe"
-          
+
           if (Test-Path $exePath) {
             echo "build_success=true" >> $env:GITHUB_OUTPUT
           } else {
@@ -250,17 +250,17 @@ jobs:
         run: |
           # 创建临时目录用于下载文件
           New-Item -ItemType Directory -Path "temp_lang" -Force
-          
+
           # 下载英语英国版语言文件
           Invoke-WebRequest -Uri "https://github.com/jrsoftware/issrc/raw/refs/heads/main/Files/Languages/Unofficial/EnglishBritish.isl" -OutFile "temp_lang/EnglishBritish.isl"
-          
+
           # 下载简体中文版语言文件
           Invoke-WebRequest -Uri "https://github.com/jrsoftware/issrc/raw/refs/heads/main/Files/Languages/Unofficial/ChineseSimplified.isl" -OutFile "temp_lang/ChineseSimplified.isl"
-          
+
           # 将文件移动到 Inno Setup 的语言目录
           Move-Item -Path "temp_lang/EnglishBritish.isl" -Destination "C:/Program Files (x86)/Inno Setup 6/Languages/EnglishBritish.isl" -Force
           Move-Item -Path "temp_lang/ChineseSimplified.isl" -Destination "C:/Program Files (x86)/Inno Setup 6/Languages/ChineseSimplified.isl" -Force
-          
+
           # 清理临时目录
           Remove-Item -Path "temp_lang" -Recurse -Force
 
@@ -270,123 +270,123 @@ jobs:
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
           $architecture = "${{ matrix.architecture }}"
-          
+
           # 根据架构生成文件名后缀
           if ($architecture -eq "AnyCPU") {
             $suffix = "-x64"
           } else {
             $suffix = ""
           }
-          
+
           $archiveName = "InkCanvasForClass.CE.$version$suffix.zip"
-          
+
           # 创建发布目录
           New-Item -ItemType Directory -Path "release" -Force
-          
+
           # 复制发布文件（使用架构特定的路径）
           Copy-Item "Ink Canvas\bin\Release\$architecture\net6.0-windows10.0.19041.0\*" "release/" -Recurse -Force
-          
+
           # 创建压缩包
           Compress-Archive -Path "release/*" -DestinationPath $archiveName -Force
-          
+
           echo "archive_name=$archiveName" >> $env:GITHUB_OUTPUT
-          
+
       - name: Prepare Inno Setup script
         if: steps.check-exe.outputs.build_success == 'true'
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
           $architecture = "${{ matrix.architecture }}"
-          
+
           # 更新 ISS 文件中的版本信息
           $issPath = "build/InkCanvasForClass CE.iss"
           $issContent = Get-Content -Path $issPath -Raw
-          
+
           # 替换版本信息
           $issContent = $issContent -replace '#define MyAppVersion ".*"', "#define MyAppVersion `"$version`""
-          
+
           # 替换源文件路径为相对路径（考虑到ISS文件在build目录下，需要返回上级目录）
           $issContent = $issContent -replace 'Source: "release\\\*";', 'Source: "../release/*";'
           $issContent = $issContent -replace 'Source: ".*\\{#MyAppExeName}";', 'Source: "../release/{#MyAppExeName}";'
           $issContent = $issContent -replace 'Source: ".*\\InkCanvasForClass.exe.config";', 'Source: "../release/InkCanvasForClass.exe.config";'
-          
+
           # 更新输出目录为当前目录
           $issContent = $issContent -replace 'OutputDir=.*', 'OutputDir=.'
-          
+
           # 更新默认安装目录
           $issContent = $issContent -replace 'DefaultDirName=.*', 'DefaultDirName={autopf}/{#MyAppName}'
-          
+
           # 更新许可证文件路径为相对路径（考虑到ISS文件在build目录下，需要返回上级目录）
           $issContent = $issContent -replace 'LicenseFile=.*', 'LicenseFile=../LICENSE'
-          
+
           # 保存修改后的 ISS 文件
           $issContent | Set-Content -Path $issPath -Encoding UTF8
-          
+
       - name: Build MSI installer with Inno Setup
         if: steps.check-exe.outputs.build_success == 'true'
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.7
         with:
           path: build/InkCanvasForClass CE.iss
           options: /O.
-          
+
       - name: Rename installer file
         if: steps.check-exe.outputs.build_success == 'true'
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
           $architecture = "${{ matrix.architecture }}"
-          
+
           # 根据架构生成文件名后缀
           if ($architecture -eq "AnyCPU") {
             $suffix = "-x64"
           } else {
             $suffix = ""
           }
-          
+
           $setupFile = "InkCanvasForClass CE Setup.exe"
           $newSetupName = "InkCanvasForClass.CE.$version$suffix.Setup.exe"
-          
+
           if (Test-Path $setupFile) {
             Rename-Item -Path $setupFile -NewName $newSetupName
           } else {
             Write-Error "Setup file not found: $setupFile"
           }
-          
+
       - name: Calculate archive size
         id: calculate_size
         if: steps.check-exe.outputs.build_success == 'true'
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
           $architecture = "${{ matrix.architecture }}"
-          
+
           # 根据架构生成文件名后缀
           if ($architecture -eq "AnyCPU") {
             $suffix = "-x64"
           } else {
             $suffix = ""
           }
-          
+
           $archiveName = "InkCanvasForClass.CE.$version$suffix.zip"
-          
+
           # 获取文件大小（字节）
           $fileSize = (Get-Item $archiveName).Length
-          
+
           echo "zip_size=$fileSize" >> $env:GITHUB_OUTPUT
-          
+
       - name: Calculate installer size
         id: calculate_installer_size
         if: steps.check-exe.outputs.build_success == 'true'
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
           $architecture = "${{ matrix.architecture }}"
-          
+
           # 根据架构生成文件名后缀
           if ($architecture -eq "AnyCPU") {
             $suffix = "-x64"
           } else {
             $suffix = ""
           }
-          
+
           $installerName = "InkCanvasForClass.CE.$version$suffix.Setup.exe"
-          
+
           if (Test-Path $installerName) {
             # 获取文件大小（字节）
             $fileSize = (Get-Item $installerName).Length
@@ -395,23 +395,23 @@ jobs:
           } else {
             Write-Error "Installer file not found: $installerName"
           }
-          
+
       - name: Upload Build Artifacts
         if: steps.check-exe.outputs.build_success == 'true'
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
           $architecture = "${{ matrix.architecture }}"
-          
+
           # 根据架构生成文件名后缀
           if ($architecture -eq "AnyCPU") {
             $suffix = "-x64"
           } else {
             $suffix = ""
           }
-          
+
           $zipFile = "InkCanvasForClass.CE.$version$suffix.zip"
           $setupFile = "InkCanvasForClass.CE.$version$suffix.Setup.exe"
-          
+
           echo "zip_file=$zipFile" >> $env:GITHUB_OUTPUT
           echo "setup_file=$setupFile" >> $env:GITHUB_OUTPUT
         id: get_file_names
@@ -429,40 +429,42 @@ jobs:
         if: always()
         shell: bash
         run: |
-          echo "# Release Build Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          if [ "${{ steps.check-exe.outputs.build_success }}" = "true" ]; then
-            echo "## ✅ Release Build Successful" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Version:** ${{ needs.prepare.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-            echo "**Tag:** \`${{ needs.prepare.outputs.tag_name }}\`" >> $GITHUB_STEP_SUMMARY
-            echo "**Release Type:** ${{ needs.prepare.outputs.is_prerelease == 'true' && 'Pre-release' || 'Release' }}" >> $GITHUB_STEP_SUMMARY
-            echo "**Architecture:** ${{ matrix.architecture }}" >> $GITHUB_STEP_SUMMARY
-            echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-            echo "**Run:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            
-            if [ -n "${{ steps.calculate_size.outputs.zip_size }}" ]; then
-              echo "**Archive Size:** ${{ steps.calculate_size.outputs.zip_size }} bytes" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "# Release Build Summary"
+            echo ""
+
+            if [ "${{ steps.check-exe.outputs.build_success }}" = "true" ]; then
+              echo "## ✅ Release Build Successful"
+              echo ""
+              echo "**Version:** ${{ needs.prepare.outputs.version }}"
+              echo "**Tag:** \`${{ needs.prepare.outputs.tag_name }}\`"
+              echo "**Release Type:** ${{ needs.prepare.outputs.is_prerelease == 'true' && 'Pre-release' || 'Release' }}"
+              echo "**Architecture:** ${{ matrix.architecture }}"
+              echo "**Commit:** \`${{ github.sha }}\`"
+              echo "**Run:** #${{ github.run_number }}"
+              echo ""
+              
+              if [ -n "${{ steps.calculate_size.outputs.zip_size }}" ]; then
+                echo "**Archive Size:** ${{ steps.calculate_size.outputs.zip_size }} bytes"
+              fi
+              
+              if [ -n "${{ steps.calculate_installer_size.outputs.installer_size }}" ]; then
+                echo "**Installer Size:** ${{ steps.calculate_installer_size.outputs.installer_size }} bytes"
+              fi
+              
+            else
+              echo "## ❌ Release Build Failed"
+              echo ""
+              echo "**Version:** ${{ needs.prepare.outputs.version }}"
+              echo "**Tag:** \`${{ needs.prepare.outputs.tag_name }}\`"
+              echo "**Architecture:** ${{ matrix.architecture }}"
+              echo "**Event:** ${{ github.event_name }} (${{ github.event.action || 'N/A' }})"
+              echo "**Commit:** \`${{ github.sha }}\`"
+              echo "**Run:** #${{ github.run_number }}"
+              echo ""
+              echo "Check build logs for details."
             fi
-            
-            if [ -n "${{ steps.calculate_installer_size.outputs.installer_size }}" ]; then
-              echo "**Installer Size:** ${{ steps.calculate_installer_size.outputs.installer_size }} bytes" >> $GITHUB_STEP_SUMMARY
-            fi
-            
-          else
-            echo "## ❌ Release Build Failed" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Version:** ${{ needs.prepare.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-            echo "**Tag:** \`${{ needs.prepare.outputs.tag_name }}\`" >> $GITHUB_STEP_SUMMARY
-            echo "**Architecture:** ${{ matrix.architecture }}" >> $GITHUB_STEP_SUMMARY
-            echo "**Event:** ${{ github.event_name }} (${{ github.event.action || 'N/A' }})" >> $GITHUB_STEP_SUMMARY
-            echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-            echo "**Run:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Check build logs for details." >> $GITHUB_STEP_SUMMARY
-          fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
   sign:
     needs: [prepare, build]
@@ -477,12 +479,12 @@ jobs:
         with:
           pattern: build-files-${{ needs.prepare.outputs.version }}-*
           merge-multiple: false
-          
+
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.14'
-          
+          python-version: "3.14"
+
       - name: Sign release artifacts with sigstore-python
         uses: sigstore/gh-action-sigstore-python@v3.3.0
         with:
@@ -495,7 +497,7 @@ jobs:
           upload-signing-artifacts: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Upload Signed Artifacts
         uses: actions/upload-artifact@v7
         with:
@@ -519,21 +521,21 @@ jobs:
         with:
           pattern: build-files-${{ needs.prepare.outputs.version }}-*
           merge-multiple: true
-          
+
       - name: Download Signed Artifacts (if exists)
         uses: actions/download-artifact@v8
         with:
           name: signed-files-${{ needs.prepare.outputs.version }}
         continue-on-error: true
-          
+
       - name: Create enhanced changelog with file table
         id: enhanced_changelog
         run: |
           version='${{ needs.prepare.outputs.version }}'
-          
+
           # 读取git-cliff生成的changelog内容
           originalChangelog='${{ needs.prepare.outputs.changelog }}'
-          
+
           # 检查是否为预发布版本，如果是则添加警告提示
           if [ '${{ needs.prepare.outputs.is_prerelease }}' = "true" ]; then
             warningText=$'\n> [!CAUTION]\n'
@@ -542,73 +544,75 @@ jobs:
             warningText+=$'> 请注意，这是一个预览/测试版本，使用时可能出现BUG，常规用户建议使用预览版或正式版\n\n'
             originalChangelog="${warningText}${originalChangelog}"
           fi
-          
+
           # 构建文件信息表格
           fileTable=$'\n## 文件信息 (File Information)\n'
           fileTable+=$'| 文件名 | 大小 |\n'
           fileTable+=$'|--------|------|\n'
-          
+
           # AnyCPU (x64) 架构文件
           if [ -f "InkCanvasForClass.CE.$version-x64.zip" ]; then
             zipSize=$(wc -c < "InkCanvasForClass.CE.$version-x64.zip")
             fileTable+=$'| InkCanvasForClass.CE.'"$version"'-x64.zip | '"$zipSize"' bytes |\n'
           fi
-          
+
           if [ -f "InkCanvasForClass.CE.$version-x64.Setup.exe" ]; then
             installerSize=$(wc -c < "InkCanvasForClass.CE.$version-x64.Setup.exe")
             fileTable+=$'| InkCanvasForClass.CE.'"$version"'-x64.Setup.exe | '"$installerSize"' bytes |\n'
           fi
-          
+
           if [ -f "InkCanvasForClass.CE.$version-x64.zip.sigstore.json" ]; then
             sigstoreSize=$(wc -c < "InkCanvasForClass.CE.$version-x64.zip.sigstore.json")
             fileTable+=$'| InkCanvasForClass.CE.'"$version"'-x64.zip.sigstore.json | '"$sigstoreSize"' bytes |\n'
           fi
-          
+
           if [ -f "InkCanvasForClass.CE.$version-x64.Setup.exe.sigstore.json" ]; then
             sigstoreSize=$(wc -c < "InkCanvasForClass.CE.$version-x64.Setup.exe.sigstore.json")
             fileTable+=$'| InkCanvasForClass.CE.'"$version"'-x64.Setup.exe.sigstore.json | '"$sigstoreSize"' bytes |\n'
           fi
-          
+
           # x86 架构文件
           if [ -f "InkCanvasForClass.CE.$version.zip" ]; then
             zipSize=$(wc -c < "InkCanvasForClass.CE.$version.zip")
             fileTable+=$'| InkCanvasForClass.CE.'"$version"'.zip | '"$zipSize"' bytes |\n'
           fi
-          
+
           if [ -f "InkCanvasForClass.CE.$version.Setup.exe" ]; then
             installerSize=$(wc -c < "InkCanvasForClass.CE.$version.Setup.exe")
             fileTable+=$'| InkCanvasForClass.CE.'"$version"'.Setup.exe | '"$installerSize"' bytes |\n'
           fi
-          
+
           if [ -f "InkCanvasForClass.CE.$version.zip.sigstore.json" ]; then
             sigstoreSize=$(wc -c < "InkCanvasForClass.CE.$version.zip.sigstore.json")
             fileTable+=$'| InkCanvasForClass.CE.'"$version"'.zip.sigstore.json | '"$sigstoreSize"' bytes |\n'
           fi
-          
+
           if [ -f "InkCanvasForClass.CE.$version.Setup.exe.sigstore.json" ]; then
             sigstoreSize=$(wc -c < "InkCanvasForClass.CE.$version.Setup.exe.sigstore.json")
             fileTable+=$'| InkCanvasForClass.CE.'"$version"'.Setup.exe.sigstore.json | '"$sigstoreSize"' bytes |\n'
           fi
-          
+
           fileTable+=$'\n*文件大小信息由GitHub Actions自动生成*\n'
-          
+
           # 将表格附加到原始changelog
           enhancedChangelog="${originalChangelog}${fileTable}"
-          
+
           # 输出增强版changelog内容
-          echo "enhanced_changelog<<EOF" >> $GITHUB_OUTPUT
-          echo "$enhancedChangelog" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          
+          {
+            echo "enhanced_changelog<<EOF"
+            echo "$enhancedChangelog"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
           echo "Enhanced changelog created with file information table"
-          
+
       - name: Display Release Info
         run: |
           echo "=== Creating Release ==="
           echo "Version: ${{ needs.prepare.outputs.version }}"
           echo "Tag: ${{ needs.prepare.outputs.tag_name }}"
           echo "Pre-release: ${{ needs.prepare.outputs.is_prerelease }}"
-          
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
         with:
@@ -630,7 +634,7 @@ jobs:
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  
+
   post_release:
     needs: [prepare, release]
     if: success() && github.event.inputs.draft != 'true'
@@ -658,7 +662,7 @@ jobs:
         with:
           scope: InkCanvasForClass/downloads
           identity: repo-sync
-      
+
       - name: Sync downloads repos(Universal)
         env:
           GITHUB_TOKEN: ${{ steps.octo-sts-downloads.outputs.token }}
@@ -666,16 +670,16 @@ jobs:
           set -e
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
+
           REPO_DIR=$(mktemp -d)
-          git clone --depth 1 --filter=blob:none --branch main https://x-access-token:${{ steps.octo-sts-downloads.outputs.token }}@github.com/InkCanvasForClass/downloads.git $REPO_DIR
-          
-          cd $REPO_DIR
+          git clone --depth 1 --filter=blob:none --branch main https://x-access-token:${{ steps.octo-sts-downloads.outputs.token }}@github.com/InkCanvasForClass/downloads.git "$REPO_DIR"
+
+          cd "$REPO_DIR"
           IS_PRERELEASE="${{ needs.prepare.outputs.is_prerelease }}"
           VERSION="${{ needs.prepare.outputs.version }}"
           X64_ZIP_FILE="$GITHUB_WORKSPACE/InkCanvasForClass.CE.$VERSION-x64.zip"
           X86_ZIP_FILE="$GITHUB_WORKSPACE/InkCanvasForClass.CE.$VERSION.zip"
-          
+
           if [ "$IS_PRERELEASE" == "true" ]; then
             mkdir -p Beta
             if [ -f "$X64_ZIP_FILE" ]; then
@@ -702,7 +706,7 @@ jobs:
             git commit -m "Add $VERSION Release"
           fi
           git push origin main
-            
+
       - name: Update AutomaticUpdateVersionControl in beta repo
         env:
           GITHUB_TOKEN: ${{ steps.octo-sts-beta.outputs.token }}
@@ -718,7 +722,7 @@ jobs:
             -f content="$CONTENT" \
             -f branch="main" \
             ${SHA:+-f sha="$SHA"}
-      
+
       - name: Create GitHub Release on beta repo
         uses: softprops/action-gh-release@v3
         with:

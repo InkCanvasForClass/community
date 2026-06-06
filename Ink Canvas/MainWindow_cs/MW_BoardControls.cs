@@ -1,6 +1,6 @@
-using Ink_Canvas.Properties;
 using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -86,7 +86,7 @@ namespace Ink_Canvas
             var missingElements = 0;
             foreach (UIElement child in inkCanvas.Children)
             {
-                if (child is Image || child is MediaElement || child is PdfEmbeddedView)
+                if (child is Image || child is MediaElement || child is CanvasMediaControl || child is PdfEmbeddedView)
                 {
                     if (child is Image img && img.Tag is string tag && tag == VideoPresenterLiveFrameTag)
                     {
@@ -327,6 +327,16 @@ namespace Ink_Canvas
                         }
                         BindElementEvents(media);
                     }
+                    else if (element is CanvasMediaControl mediaControl)
+                    {
+                        double left = InkCanvas.GetLeft(mediaControl);
+                        double top = InkCanvas.GetTop(mediaControl);
+                        if (double.IsNaN(left) || double.IsNaN(top))
+                        {
+                            CenterAndScaleElement(mediaControl);
+                        }
+                        BindElementEvents(mediaControl);
+                    }
                     else if (element is PdfEmbeddedView pdf)
                     {
                         double left = InkCanvas.GetLeft(pdf);
@@ -388,9 +398,18 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnWhiteBoardPageIndex_Click(object sender, EventArgs e)
         {
+            var BtnLeftPageListWB = FindView("board.pageList.leftBtn") as Border;
+            var BtnRightPageListWB = FindView("board.pageList.rightBtn") as Border;
+            var BoardBorderLeftPageListView = FindView("board.pageList.leftBorder") as Border;
+            var BoardBorderRightPageListView = FindView("board.pageList.rightBorder") as Border;
+            var BlackBoardLeftSidePageListView = FindView("board.pageList.left") as System.Windows.Controls.ListView;
+            var BlackBoardRightSidePageListView = FindView("board.pageList.right") as System.Windows.Controls.ListView;
+            var BlackBoardLeftSidePageListScrollViewer = FindView("board.pageList.leftScrollViewer") as ScrollViewer;
+            var BlackBoardRightSidePageListScrollViewer = FindView("board.pageList.rightScrollViewer") as ScrollViewer;
+
             if (sender == BtnLeftPageListWB)
             {
-                if (BoardBorderLeftPageListView.Visibility == Visibility.Visible)
+                if (BoardBorderLeftPageListView?.Visibility == Visibility.Visible)
                 {
                     AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
                 }
@@ -400,17 +419,20 @@ namespace Ink_Canvas
                     RefreshBlackBoardSidePageListView();
                     AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderLeftPageListView);
                     await Task.Delay(1);
-                    var leftContainer = BlackBoardLeftSidePageListView.ItemContainerGenerator.ContainerFromIndex(
-                        CurrentWhiteboardIndex - 1) as ListViewItem;
-                    if (leftContainer != null)
+                    if (BlackBoardLeftSidePageListView != null)
                     {
-                        ScrollViewToVerticalTop(leftContainer, BlackBoardLeftSidePageListScrollViewer);
+                        var leftContainer = BlackBoardLeftSidePageListView.ItemContainerGenerator.ContainerFromIndex(
+                            CurrentWhiteboardIndex - 1) as ListViewItem;
+                        if (leftContainer != null)
+                        {
+                            ScrollViewToVerticalTop(leftContainer, BlackBoardLeftSidePageListScrollViewer);
+                        }
                     }
                 }
             }
             else if (sender == BtnRightPageListWB)
             {
-                if (BoardBorderRightPageListView.Visibility == Visibility.Visible)
+                if (BoardBorderRightPageListView?.Visibility == Visibility.Visible)
                 {
                     AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
                 }
@@ -420,11 +442,14 @@ namespace Ink_Canvas
                     RefreshBlackBoardSidePageListView();
                     AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderRightPageListView);
                     await Task.Delay(1);
-                    var rightContainer = BlackBoardRightSidePageListView.ItemContainerGenerator.ContainerFromIndex(
-                        CurrentWhiteboardIndex - 1) as ListViewItem;
-                    if (rightContainer != null)
+                    if (BlackBoardRightSidePageListView != null)
                     {
-                        ScrollViewToVerticalTop(rightContainer, BlackBoardRightSidePageListScrollViewer);
+                        var rightContainer = BlackBoardRightSidePageListView.ItemContainerGenerator.ContainerFromIndex(
+                            CurrentWhiteboardIndex - 1) as ListViewItem;
+                        if (rightContainer != null)
+                        {
+                            ScrollViewToVerticalTop(rightContainer, BlackBoardRightSidePageListScrollViewer);
+                        }
                     }
                 }
             }
@@ -456,6 +481,7 @@ namespace Ink_Canvas
             }
 
             VideoPresenter_BeforePageLeave();
+            PauseAllCanvasMediaPlayback();
             SaveStrokes();
 
             ClearStrokes(true);
@@ -501,6 +527,7 @@ namespace Ink_Canvas
             }
 
             VideoPresenter_BeforePageLeave();
+            PauseAllCanvasMediaPlayback();
             SaveStrokes();
 
             ClearStrokes(true);
@@ -527,6 +554,8 @@ namespace Ink_Canvas
 
         private void BtnWhiteBoardAdd_Click(object sender, RoutedEventArgs e)
         {
+            var BlackBoardLeftSidePageListView = FindView("board.pageList.left") as System.Windows.Controls.ListView;
+
             MarkCurrentPageInkChanged();
             if (WhiteboardTotalCount >= 99) return;
             if (Settings.Automation.IsAutoSaveScreenshotAtClear &&
@@ -545,6 +574,7 @@ namespace Ink_Canvas
             }
 
             VideoPresenter_BeforePageLeave();
+            PauseAllCanvasMediaPlayback();
             SaveStrokes();
             ClearStrokes(true);
 
@@ -575,7 +605,7 @@ namespace Ink_Canvas
 
             if (WhiteboardTotalCount >= 99) BtnWhiteBoardAdd.IsEnabled = false;
 
-            if (BlackBoardLeftSidePageListView.Visibility == Visibility.Visible)
+            if (BlackBoardLeftSidePageListView?.Visibility == Visibility.Visible)
             {
                 RefreshBlackBoardSidePageListView();
             }
@@ -595,6 +625,9 @@ namespace Ink_Canvas
         /// <param name="pageIndex">要删除的页码（1 到 WhiteboardTotalCount）</param>
         private void DeleteWhiteBoardPageByIndex(int pageIndex)
         {
+            var BoardBorderLeftPageListView = FindView("board.pageList.leftBorder") as Border;
+            var BoardBorderRightPageListView = FindView("board.pageList.rightBorder") as Border;
+
             if (WhiteboardTotalCount <= 1 || pageIndex < 1 || pageIndex > WhiteboardTotalCount)
                 return;
 
@@ -614,6 +647,7 @@ namespace Ink_Canvas
 
             if (pageIndex == CurrentWhiteboardIndex)
             {
+                PauseAllCanvasMediaPlayback();
                 ClearStrokes(true);
 
                 var oldTotal = WhiteboardTotalCount;
@@ -685,64 +719,77 @@ namespace Ink_Canvas
         /// </remarks>
         private void UpdateIndexInfoDisplay()
         {
+            var BtnLeftWhiteBoardSwitchNext = FindView("board.nextPage.left") as BoardToolbarButton;
+            var BtnRightWhiteBoardSwitchNext = FindView("board.nextPage.right") as BoardToolbarButton;
+            var BtnLeftWhiteBoardSwitchPrevious = FindView("board.previousPage.left") as BoardToolbarButton;
+            var BtnRightWhiteBoardSwitchPrevious = FindView("board.previousPage.right") as BoardToolbarButton;
+
             TextBlockWhiteBoardIndexInfo.Text =
                 $"{CurrentWhiteboardIndex}/{WhiteboardTotalCount}";
+
+            UpdatePageInfo();
 
             bool isLastPage = CurrentWhiteboardIndex == WhiteboardTotalCount;
             bool isMaxPage = WhiteboardTotalCount >= 99;
 
-            // 设置按钮文本
-            BtnLeftWhiteBoardSwitchNext.LabelTextBlockControl.Text = isLastPage ? "新页面" : FloatingBarStrings.Board_NextPage;
-            BtnRightWhiteBoardSwitchNext.LabelTextBlockControl.Text = isLastPage ? FloatingBarStrings.Board_NewPage : FloatingBarStrings.Board_NextPage;
+            if (BtnLeftWhiteBoardSwitchNext != null) BtnLeftWhiteBoardSwitchNext.LabelTextBlockControl.Text = isLastPage ? FloatingBarStrings.Board_NewPage : FloatingBarStrings.Board_NextPage;
+            if (BtnRightWhiteBoardSwitchNext != null) BtnRightWhiteBoardSwitchNext.LabelTextBlockControl.Text = isLastPage ? FloatingBarStrings.Board_NewPage : FloatingBarStrings.Board_NextPage;
 
             if (isLastPage)
             {
                 BtnWhiteBoardSwitchNext.IsEnabled = !isMaxPage;
+                if (BtnLeftWhiteBoardSwitchNext != null) BtnLeftWhiteBoardSwitchNext.IsEnabled = !isMaxPage;
+                if (BtnRightWhiteBoardSwitchNext != null) BtnRightWhiteBoardSwitchNext.IsEnabled = !isMaxPage;
             }
             else
             {
                 BtnWhiteBoardSwitchNext.IsEnabled = true;
+                if (BtnLeftWhiteBoardSwitchNext != null) BtnLeftWhiteBoardSwitchNext.IsEnabled = true;
+                if (BtnRightWhiteBoardSwitchNext != null) BtnRightWhiteBoardSwitchNext.IsEnabled = true;
             }
 
-            // 获取主题颜色资源
             var iconForegroundBrush = Application.Current.FindResource("IconForeground") as SolidColorBrush;
 
-            // 设置下一页按钮颜色
             if (iconForegroundBrush != null)
             {
-                BtnLeftWhiteBoardSwitchNext.IconGeometryDrawing.Brush = iconForegroundBrush;
-                BtnRightWhiteBoardSwitchNext.IconGeometryDrawing.Brush = iconForegroundBrush;
+                if (BtnLeftWhiteBoardSwitchNext != null) BtnLeftWhiteBoardSwitchNext.IconGeometryDrawing.Brush = iconForegroundBrush;
+                if (BtnRightWhiteBoardSwitchNext != null) BtnRightWhiteBoardSwitchNext.IconGeometryDrawing.Brush = iconForegroundBrush;
             }
-            BtnLeftWhiteBoardSwitchNext.LabelTextBlockControl.Opacity = 1;
-            BtnRightWhiteBoardSwitchNext.LabelTextBlockControl.Opacity = 1;
+            if (BtnLeftWhiteBoardSwitchNext != null) BtnLeftWhiteBoardSwitchNext.LabelTextBlockControl.Opacity = 1;
+            if (BtnRightWhiteBoardSwitchNext != null) BtnRightWhiteBoardSwitchNext.LabelTextBlockControl.Opacity = 1;
 
             BtnWhiteBoardSwitchPrevious.IsEnabled = true;
+            if (BtnLeftWhiteBoardSwitchPrevious != null) BtnLeftWhiteBoardSwitchPrevious.IsEnabled = true;
+            if (BtnRightWhiteBoardSwitchPrevious != null) BtnRightWhiteBoardSwitchPrevious.IsEnabled = true;
 
             if (CurrentWhiteboardIndex == 1)
             {
                 BtnWhiteBoardSwitchPrevious.IsEnabled = false;
+                if (BtnLeftWhiteBoardSwitchPrevious != null) BtnLeftWhiteBoardSwitchPrevious.IsEnabled = false;
+                if (BtnRightWhiteBoardSwitchPrevious != null) BtnRightWhiteBoardSwitchPrevious.IsEnabled = false;
                 if (iconForegroundBrush != null)
                 {
                     var disabledBrush = new SolidColorBrush(Color.FromArgb(127, iconForegroundBrush.Color.R, iconForegroundBrush.Color.G, iconForegroundBrush.Color.B));
-                    BtnLeftWhiteBoardSwitchPrevious.IconGeometryDrawing.Brush = disabledBrush;
-                    BtnRightWhiteBoardSwitchPrevious.IconGeometryDrawing.Brush = disabledBrush;
+                    if (BtnLeftWhiteBoardSwitchPrevious != null) BtnLeftWhiteBoardSwitchPrevious.IconGeometryDrawing.Brush = disabledBrush;
+                    if (BtnRightWhiteBoardSwitchPrevious != null) BtnRightWhiteBoardSwitchPrevious.IconGeometryDrawing.Brush = disabledBrush;
                 }
-                BtnLeftWhiteBoardSwitchPrevious.LabelTextBlockControl.Opacity = 0.5;
-                BtnRightWhiteBoardSwitchPrevious.LabelTextBlockControl.Opacity = 0.5;
+                if (BtnLeftWhiteBoardSwitchPrevious != null) BtnLeftWhiteBoardSwitchPrevious.LabelTextBlockControl.Opacity = 0.5;
+                if (BtnRightWhiteBoardSwitchPrevious != null) BtnRightWhiteBoardSwitchPrevious.LabelTextBlockControl.Opacity = 0.5;
             }
             else
             {
                 if (iconForegroundBrush != null)
                 {
-                    BtnLeftWhiteBoardSwitchPrevious.IconGeometryDrawing.Brush = iconForegroundBrush;
-                    BtnRightWhiteBoardSwitchPrevious.IconGeometryDrawing.Brush = iconForegroundBrush;
+                    if (BtnLeftWhiteBoardSwitchPrevious != null) BtnLeftWhiteBoardSwitchPrevious.IconGeometryDrawing.Brush = iconForegroundBrush;
+                    if (BtnRightWhiteBoardSwitchPrevious != null) BtnRightWhiteBoardSwitchPrevious.IconGeometryDrawing.Brush = iconForegroundBrush;
                 }
-                BtnLeftWhiteBoardSwitchPrevious.LabelTextBlockControl.Opacity = 1;
-                BtnRightWhiteBoardSwitchPrevious.LabelTextBlockControl.Opacity = 1;
+                if (BtnLeftWhiteBoardSwitchPrevious != null) BtnLeftWhiteBoardSwitchPrevious.LabelTextBlockControl.Opacity = 1;
+                if (BtnRightWhiteBoardSwitchPrevious != null) BtnRightWhiteBoardSwitchPrevious.LabelTextBlockControl.Opacity = 1;
             }
 
             BtnWhiteBoardDelete.IsEnabled = WhiteboardTotalCount != 1;
             UpdateInkFreezeButtonState();
+            UpdateBoardToolbarState();
         }
     }
 }

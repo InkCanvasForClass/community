@@ -1,4 +1,3 @@
-using Ink_Canvas.Properties;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;

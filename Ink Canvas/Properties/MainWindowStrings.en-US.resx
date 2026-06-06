@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -38,10 +38,18 @@
       </xsd:complexType>
     </xsd:element>
   </xsd:schema>
-  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
-  <resheader name="version"><value>2.0</value></resheader>
-  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
   <data name="Main_WatermarkText" xml:space="preserve">
     <value>More understanding, less complaining</value>
   </data>
@@ -71,18 +79,6 @@
   </data>
   <data name="Main_InkReplayExitHint" xml:space="preserve">
     <value>Double-tap to exit replay</value>
-  </data>
-  <data name="Main_TrayHideWindow" xml:space="preserve">
-    <value>Hide ICC-CE Main Window</value>
-  </data>
-  <data name="Main_TrayShowWindow" xml:space="preserve">
-    <value>Show Main Window (2 min)</value>
-  </data>
-  <data name="Main_TrayDisableHotkeys" xml:space="preserve">
-    <value>Disable All Hotkeys</value>
-  </data>
-  <data name="Main_TraySwitchFoldMode" xml:space="preserve">
-    <value>Switch to Fold Mode</value>
   </data>
   <data name="Main_Strokes_SaveSuccess" xml:space="preserve">
     <value>Strokes saved to {0}</value>
@@ -270,9 +266,6 @@
   <data name="Main_Board_FrozenCannotDelete" xml:space="preserve">
     <value>This page is frozen and cannot be deleted</value>
   </data>
-  <data name="Main_Board_NewPage" xml:space="preserve">
-    <value>New Page</value>
-  </data>
   <data name="Main_Board_CustomBgApplied" xml:space="preserve">
     <value>Custom background color applied: {0}</value>
   </data>
@@ -344,9 +337,6 @@
   </data>
   <data name="Main_AutoFold_ClearingAndFolding" xml:space="preserve">
     <value>Clearing ink and folding to sidebar. You can restore the original ink via Undo after entering annotation mode.</value>
-  </data>
-  <data name="Main_PDF_OpenFailed" xml:space="preserve">
-    <value>Cannot open PDF (may be encrypted, corrupted, or unsupported).</value>
   </data>
   <data name="Main_PDF_InsertFailed" xml:space="preserve">
     <value>Failed to insert PDF: {0}</value>
@@ -481,6 +471,45 @@ Please check if the update was successful.</value>
   <data name="Main_Screenshot_CameraError" xml:space="preserve">
     <value>Camera error: {0}</value>
   </data>
+  <data name="Main_Screenshot_WindowTitle" xml:space="preserve">
+    <value>Select screenshot area</value>
+  </data>
+  <data name="Main_Screenshot_RectangleMode" xml:space="preserve">
+    <value>Rectangle</value>
+  </data>
+  <data name="Main_Screenshot_FreehandMode" xml:space="preserve">
+    <value>Freehand</value>
+  </data>
+  <data name="Main_Screenshot_FullScreenMode" xml:space="preserve">
+    <value>Full screen</value>
+  </data>
+  <data name="Main_Screenshot_CameraCaptureMode" xml:space="preserve">
+    <value>Camera</value>
+  </data>
+  <data name="Main_Screenshot_IncludeInk" xml:space="preserve">
+    <value>Include ink</value>
+  </data>
+  <data name="Main_Screenshot_ConfirmCapture" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="Main_Screenshot_AddToWhiteboard" xml:space="preserve">
+    <value>Add to whiteboard</value>
+  </data>
+  <data name="Main_Screenshot_SwitchCamera" xml:space="preserve">
+    <value>Switch camera</value>
+  </data>
+  <data name="Main_Screenshot_Rotation" xml:space="preserve">
+    <value>Rotation:</value>
+  </data>
+  <data name="Main_Screenshot_Resolution" xml:space="preserve">
+    <value>Resolution:</value>
+  </data>
+  <data name="Main_Screenshot_CameraNotConnected" xml:space="preserve">
+    <value>Camera not connected</value>
+  </data>
+  <data name="Main_Screenshot_DefaultHint" xml:space="preserve">
+    <value>Drag to select an area; right-click or double-click to select the full screen; confirm after freehand drawing</value>
+  </data>
   <data name="Main_Privacy_FileNotFound" xml:space="preserve">
     <value>Privacy policy file not found (privacy.txt).</value>
   </data>
@@ -491,6 +520,7 @@ Please check if the update was successful.</value>
     <value>The app has restarted 5 times in a row. Auto-restart stopped. Please contact the developer or check your system environment.</value>
   </data>
   <data name="Main_App_UnexpectedError" xml:space="preserve">
-    <value>Sorry, an unexpected error occurred that may cause InkCanvasForClass to run unstably.\nIt is recommended to save your ink and restart the application.</value>
+    <value>Sorry, an unexpected error occurred that may cause InkCanvasForClass to run unstably.
+    It is recommended to save your ink and restart the application.</value>
   </data>
 </root>

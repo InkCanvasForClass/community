@@ -38,10 +38,18 @@
       </xsd:complexType>
     </xsd:element>
   </xsd:schema>
-  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
-  <resheader name="version"><value>2.0</value></resheader>
-  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
   <data name="Random_BackgroundSelectLabel" xml:space="preserve">
     <value>背景选择：</value>
   </data>
@@ -94,7 +102,7 @@
     <value>显示修改随机点名名单的按钮</value>
   </data>
   <data name="Random_Title" xml:space="preserve">
-    <value>随机点名</value>
+    <value>点名与计时器</value>
   </data>
   <data name="Random_UseExternal" xml:space="preserve">
     <value>直接调用外部点名</value>
@@ -232,7 +240,8 @@
     <value>已选择外部点名: {0}</value>
   </data>
   <data name="Random_RollCall_ExternalCallerFirstUse" xml:space="preserve">
-    <value>首次使用外部点名功能，请确保已安装相应的点名软件。&#13;&#10;如未安装，请前往官网下载并安装后再使用。如果已安装请再次点击此按钮。</value>
+    <value>首次使用外部点名功能，请确保已安装相应的点名软件。
+如未安装，请前往官网下载并安装后再使用。如果已安装请再次点击此按钮。</value>
   </data>
   <data name="Random_RollCall_ExternalCallerLaunchedFormat" xml:space="preserve">
     <value>已启动外部点名: {0}</value>
@@ -269,9 +278,6 @@
   </data>
   <data name="Random_History_NoHistory" xml:space="preserve">
     <value>暂无历史记录</value>
-  </data>
-  <data name="Random_History_RecentCountFormat" xml:space="preserve">
-    <value>{0} (最近累计{1}次)</value>
   </data>
   <data name="Random_History_StatsTitle" xml:space="preserve">
     <value>累计抽选次数统计：</value>
