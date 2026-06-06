@@ -25,6 +25,8 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             foreach (var action in actionSet.Actions)
                 action.Exception = null;
 
+            // 对齐 ClassIsland：仅在启用恢复时设置 IsOn 标志
+            // 未启用恢复时，IsOn 不应阻止重复触发
             if (actionSet.IsRevertEnabled)
             {
                 actionSet.IsOn = true;
@@ -38,11 +40,6 @@ namespace Ink_Canvas.WorkflowAutomation.Services
                     InvokeAction(action);
                 }
             });
-
-            if (!actionSet.IsRevertEnabled)
-            {
-                actionSet.IsOn = true;
-            }
         }
 
         /// <summary>

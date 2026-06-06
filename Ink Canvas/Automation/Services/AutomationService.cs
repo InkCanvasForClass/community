@@ -355,6 +355,9 @@ namespace Ink_Canvas.WorkflowAutomation.Services
 
             var workflow = trigger.AssociatedWorkflow;
             if (workflow == null) return;
+
+            // 对齐 ClassIsland：未启用恢复时，忽略触发器的恢复事件
+            if (!workflow.ActionSet.IsRevertEnabled) return;
             if (!workflow.ActionSet.IsOn) return;
 
             ActionService.Revert(workflow.ActionSet);
