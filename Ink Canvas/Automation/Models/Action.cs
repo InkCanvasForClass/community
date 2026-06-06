@@ -9,8 +9,8 @@ namespace Ink_Canvas.WorkflowAutomation.Models
     public class Action : ObservableObject
     {
         private string _id = "";
-        private object? _settings;
-        private Exception? _exception;
+        private object _settings;
+        private Exception _exception;
         private bool _isWorking = false;
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace Ink_Canvas.WorkflowAutomation.Models
         /// <summary>
         /// 行动设置。
         /// </summary>
-        public object? Settings
+        public object Settings
         {
             get => _settings;
             set
@@ -46,7 +46,7 @@ namespace Ink_Canvas.WorkflowAutomation.Models
         /// 行动错误。
         /// </summary>
         [Newtonsoft.Json.JsonIgnore]
-        public Exception? Exception
+        public Exception Exception
         {
             get => _exception;
             set

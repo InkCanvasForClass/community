@@ -8,7 +8,7 @@ namespace Ink_Canvas.WorkflowAutomation.Abstractions
     /// </summary>
     public abstract class TriggerBase
     {
-        internal object? SettingsInternal { get; set; }
+        internal object SettingsInternal { get; set; }
 
         /// <summary>
         /// 触发这个触发器。
@@ -36,14 +36,14 @@ namespace Ink_Canvas.WorkflowAutomation.Abstractions
         /// </summary>
         public abstract void UnLoaded();
 
-        internal event EventHandler? Triggered;
+        internal event EventHandler Triggered;
 
-        internal event EventHandler? TriggeredRecover;
+        internal event EventHandler TriggeredRecover;
 
         /// <summary>
         /// 此触发器关联的工作流。
         /// </summary>
-        public Workflow? AssociatedWorkflow { get; internal set; }
+        public Workflow AssociatedWorkflow { get; internal set; }
     }
 
     /// <summary>

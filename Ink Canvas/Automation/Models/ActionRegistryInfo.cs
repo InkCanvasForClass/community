@@ -25,24 +25,24 @@ namespace Ink_Canvas.WorkflowAutomation.Models
         /// <summary>
         /// 设置控件类型。
         /// </summary>
-        public Type? SettingsControlType { get; internal set; }
+        public Type SettingsControlType { get; internal set; }
 
         /// <summary>
         /// 设置类型。
         /// </summary>
-        public Type? SettingsType { get; internal set; }
+        public Type SettingsType { get; internal set; }
 
-        public delegate void HandleDelegate(object? settings, string guid);
+        public delegate void HandleDelegate(object settings, string guid);
 
         /// <summary>
         /// 行动执行处理程序
         /// </summary>
-        public HandleDelegate? Handle;
+        public HandleDelegate Handle;
 
         /// <summary>
         /// 行动恢复处理程序
         /// </summary>
-        public HandleDelegate? RevertHandle;
+        public HandleDelegate RevertHandle;
 
         public ActionRegistryInfo(string id, string name = "", string iconKind = "PlayCircleOutline")
         {

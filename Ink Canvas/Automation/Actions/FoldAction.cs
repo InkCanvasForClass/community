@@ -40,11 +40,11 @@ namespace Ink_Canvas.WorkflowAutomation.Actions
 
                     if (s.Fold && !mw.isFloatingBarFolded)
                     {
-                        mw.FoldFloatingBar(null, true);
+                        _ = mw.FoldFloatingBar(null, true);
                     }
                     else if (!s.Fold && mw.isFloatingBarFolded)
                     {
-                        mw.UnFoldFloatingBar(null);
+                        _ = mw.UnFoldFloatingBar(null);
                     }
                 });
             };
@@ -62,11 +62,11 @@ namespace Ink_Canvas.WorkflowAutomation.Actions
                     // 恢复：折叠→展开，展开→折叠
                     if (s.Fold && mw.isFloatingBarFolded)
                     {
-                        mw.UnFoldFloatingBar(null);
+                        _ = mw.UnFoldFloatingBar(null);
                     }
                     else if (!s.Fold && !mw.isFloatingBarFolded)
                     {
-                        mw.FoldFloatingBar(null, true);
+                        _ = mw.FoldFloatingBar(null, true);
                     }
                 });
             };

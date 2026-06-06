@@ -25,17 +25,17 @@ namespace Ink_Canvas.WorkflowAutomation.Models
         /// <summary>
         /// 触发器类型
         /// </summary>
-        public Type? TriggerType { get; internal set; }
+        public Type TriggerType { get; internal set; }
 
         /// <summary>
         /// 设置界面类型
         /// </summary>
-        public Type? SettingsControlType { get; internal set; }
+        public Type SettingsControlType { get; internal set; }
 
         /// <summary>
         /// 设置数据类型
         /// </summary>
-        public Type? SettingsType { get; internal set; }
+        public Type SettingsType { get; internal set; }
 
         public TriggerInfo(string id, string name, string iconKind = "ClockOutline")
         {

@@ -10,7 +10,7 @@ namespace Ink_Canvas.WorkflowAutomation.Abstractions
         /// <summary>
         /// 触发器设置数据
         /// </summary>
-        public abstract object? Settings { get; set; }
+        public abstract object Settings { get; set; }
     }
 
     /// <summary>
@@ -18,9 +18,9 @@ namespace Ink_Canvas.WorkflowAutomation.Abstractions
     /// </summary>
     public abstract class TriggerSettingsControlBase<T> : TriggerSettingsControlBase where T : class, new()
     {
-        private T? _settings;
+        private T _settings;
 
-        public override object? Settings
+        public override object Settings
         {
             get => _settings;
             set

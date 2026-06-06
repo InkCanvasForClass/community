@@ -16,9 +16,9 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         /// <summary>
         /// 规则状态更新事件，当规则条件可能发生变化时触发。
         /// </summary>
-        public event EventHandler? StatusUpdated;
+        public event EventHandler StatusUpdated;
 
-        private Timer? _pollingTimer;
+        private Timer _pollingTimer;
 
         private int BoolToRuleObjectState(bool? v) => v switch
         {
@@ -140,7 +140,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
                 return false;
 
             // 对齐 ClassIsland：反序列化 settings
-            object? settings = null;
+            object settings = null;
             var settingsType = info.SettingsType;
             if (settingsType != null)
             {
@@ -176,7 +176,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             StatusUpdated?.Invoke(this, EventArgs.Empty);
         }
 
-        private void OnPollingTimerElapsed(object? sender, ElapsedEventArgs e)
+        private void OnPollingTimerElapsed(object sender, ElapsedEventArgs e)
         {
             // 定期通知状态已更改，让所有订阅者重新评估规则
             // 这样即使没有显式调用 NotifyStatusChanged 也能检测到变化

@@ -75,6 +75,6 @@ namespace Ink_Canvas.WorkflowAutomation.Models
             Unloading?.Invoke(this, EventArgs.Empty);
         }
 
-        internal event EventHandler? Unloading;
+        internal event EventHandler Unloading;
     }
 }

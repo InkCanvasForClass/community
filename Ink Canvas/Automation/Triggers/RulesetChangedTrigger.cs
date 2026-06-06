@@ -26,7 +26,7 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
             AutomationBootstrap.Service.RulesetService.StatusUpdated -= StatusUpdatedHandler;
         }
 
-        private void StatusUpdatedHandler(object? sender, EventArgs e)
+        private void StatusUpdatedHandler(object sender, EventArgs e)
         {
             Trigger();
         }

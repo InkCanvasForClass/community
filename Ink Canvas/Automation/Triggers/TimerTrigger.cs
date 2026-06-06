@@ -24,7 +24,7 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
     /// </summary>
     public class TimerTrigger : TriggerBase<TimerTriggerSettings>
     {
-        private Timer? _timer;
+        private Timer _timer;
         private bool _hasTriggered = false;
 
         public override void Loaded()
@@ -47,7 +47,7 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
             _hasTriggered = false;
         }
 
-        private void OnTimerElapsed(object? sender, ElapsedEventArgs e)
+        private void OnTimerElapsed(object sender, ElapsedEventArgs e)
         {
             if (Settings.TriggerOnce && _hasTriggered) return;
             _hasTriggered = true;

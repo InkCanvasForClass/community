@@ -11,7 +11,7 @@ namespace Ink_Canvas.WorkflowAutomation.Models
     public class TriggerSettings : ObservableObject
     {
         private string _id = "";
-        private object? _settings;
+        private object _settings;
 
         /// <summary>
         /// 触发器 ID
@@ -31,7 +31,7 @@ namespace Ink_Canvas.WorkflowAutomation.Models
         /// <summary>
         /// 触发器设置
         /// </summary>
-        public object? Settings
+        public object Settings
         {
             get => _settings;
             set
@@ -46,16 +46,16 @@ namespace Ink_Canvas.WorkflowAutomation.Models
         /// 关联的触发器信息
         /// </summary>
         [Newtonsoft.Json.JsonIgnore]
-        public TriggerInfo? AssociatedTriggerInfo => AutomationRegistry.RegisteredTriggers.FirstOrDefault(x => x.Id == Id);
+        public TriggerInfo AssociatedTriggerInfo => AutomationRegistry.RegisteredTriggers.FirstOrDefault(x => x.Id == Id);
 
         [Newtonsoft.Json.JsonIgnore]
-        internal Abstractions.TriggerBase? TriggerInstance { get; set; }
+        internal Abstractions.TriggerBase TriggerInstance { get; set; }
 
         internal void Unload()
         {
             Unloading?.Invoke(this, EventArgs.Empty);
         }
 
-        internal event EventHandler? Unloading;
+        internal event EventHandler Unloading;
     }
 }

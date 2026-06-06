@@ -25,7 +25,7 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
     /// </summary>
     public class ProcessDetectedTrigger : TriggerBase<ProcessDetectedSettings>
     {
-        private Timer? _timer;
+        private Timer _timer;
         private bool _wasRunning = false;
 
         public override void Loaded()
@@ -46,7 +46,7 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
             }
         }
 
-        private void OnTimerElapsed(object? sender, ElapsedEventArgs e)
+        private void OnTimerElapsed(object sender, ElapsedEventArgs e)
         {
             var isRunning = IsProcessRunning(Settings.ProcessName);
 

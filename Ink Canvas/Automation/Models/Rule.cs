@@ -9,7 +9,7 @@ namespace Ink_Canvas.WorkflowAutomation.Models
     {
         private bool _isReversed = false;
         private string _id = "";
-        private object? _settings;
+        private object _settings;
         private int _state = 0;
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace Ink_Canvas.WorkflowAutomation.Models
         /// <summary>
         /// 规则设置。
         /// </summary>
-        public object? Settings
+        public object Settings
         {
             get => _settings;
             set

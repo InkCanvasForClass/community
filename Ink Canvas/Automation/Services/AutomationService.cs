@@ -31,7 +31,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             RulesetService.StatusUpdated += RulesetServiceOnStatusUpdated;
         }
 
-        private void RulesetServiceOnStatusUpdated(object? sender, EventArgs e)
+        private void RulesetServiceOnStatusUpdated(object sender, EventArgs e)
         {
             if (!IsAutomationEnabled) return;
 
@@ -158,7 +158,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             }
         }
 
-        private void WorkflowsOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        private void WorkflowsOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
             {
@@ -185,7 +185,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
                 });
             }
 
-            void TriggersOnCollectionChanged(object? s, NotifyCollectionChangedEventArgs e)
+            void TriggersOnCollectionChanged(object s, NotifyCollectionChangedEventArgs e)
             {
                 switch (e.Action)
                 {
@@ -212,7 +212,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
 
             return;
 
-            void OnWorkflowUnloading(object? sender, EventArgs e)
+            void OnWorkflowUnloading(object sender, EventArgs e)
             {
                 workflow.Unloading -= OnWorkflowUnloading;
                 workflow.Triggers.CollectionChanged -= TriggersOnCollectionChanged;
@@ -228,10 +228,10 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             }
         }
 
-        private RulesetService? _rulesetService;
+        private RulesetService _rulesetService;
         public RulesetService RulesetService => _rulesetService ??= new RulesetService();
 
-        private ActionService? _actionService;
+        private ActionService _actionService;
         public ActionService ActionService => _actionService ??= new ActionService();
 
         private void LoadTrigger(Workflow workflow, TriggerSettings trigger)
@@ -290,14 +290,14 @@ namespace Ink_Canvas.WorkflowAutomation.Services
 
             return;
 
-            void TriggerOnPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+            void TriggerOnPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
             {
                 if (e.PropertyName != nameof(trigger.Id)) return;
                 UnloadTrigger(workflow, trigger);
                 LoadTrigger(workflow, trigger);
             }
 
-            void TriggerOnUnloading(object? sender, EventArgs e)
+            void TriggerOnUnloading(object sender, EventArgs e)
             {
                 trigger.Unloading -= TriggerOnUnloading;
                 trigger.PropertyChanged -= TriggerOnPropertyChanged;
@@ -322,7 +322,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             trigger.TriggerInstance = null;
         }
 
-        private void TriggerTriggered(object? sender, EventArgs e)
+        private void TriggerTriggered(object sender, EventArgs e)
         {
             if (!IsAutomationEnabled) return;
             if (sender is not TriggerBase trigger) return;
@@ -345,7 +345,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             SaveConfig("TriggerTriggered");
         }
 
-        private void TriggerTriggeredRecover(object? sender, EventArgs e)
+        private void TriggerTriggeredRecover(object sender, EventArgs e)
         {
             if (!IsAutomationEnabled) return;
             if (sender is not TriggerBase trigger) return;

@@ -20,7 +20,7 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
     /// </summary>
     public class WindowFocusChangedTrigger : TriggerBase<WindowFocusChangedSettings>
     {
-        private Timer? _timer;
+        private Timer _timer;
         private IntPtr _lastForegroundWindow = IntPtr.Zero;
 
         [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true)]
@@ -45,7 +45,7 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
             }
         }
 
-        private void OnTimerElapsed(object? sender, ElapsedEventArgs e)
+        private void OnTimerElapsed(object sender, ElapsedEventArgs e)
         {
             try
             {

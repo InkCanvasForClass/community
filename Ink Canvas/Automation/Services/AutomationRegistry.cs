@@ -57,7 +57,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         /// <summary>
         /// 解析触发器实例
         /// </summary>
-        public static Abstractions.TriggerBase? ResolveTrigger(string id)
+        public static Abstractions.TriggerBase ResolveTrigger(string id)
         {
             return _triggerFactories.TryGetValue(id, out var factory) ? factory() : null;
         }

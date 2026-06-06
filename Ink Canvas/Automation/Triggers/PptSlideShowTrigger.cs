@@ -19,7 +19,7 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
     /// </summary>
     public class PptSlideShowTrigger : TriggerBase<PptSlideShowSettings>
     {
-        private Timer? _timer;
+        private Timer _timer;
         private bool _wasInSlideShow = false;
 
         public override void Loaded()
@@ -40,7 +40,7 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
             }
         }
 
-        private void OnTimerElapsed(object? sender, ElapsedEventArgs e)
+        private void OnTimerElapsed(object sender, ElapsedEventArgs e)
         {
             try
             {

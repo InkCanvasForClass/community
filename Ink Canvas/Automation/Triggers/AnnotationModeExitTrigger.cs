@@ -19,7 +19,7 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
     /// </summary>
     public class AnnotationModeExitTrigger : TriggerBase<AnnotationModeExitSettings>
     {
-        private Timer? _timer;
+        private Timer _timer;
         private bool _wasInAnnotationMode = false;
 
         public override void Loaded()
@@ -41,7 +41,7 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
             }
         }
 
-        private void OnTimerElapsed(object? sender, ElapsedEventArgs e)
+        private void OnTimerElapsed(object sender, ElapsedEventArgs e)
         {
             try
             {

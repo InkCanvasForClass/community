@@ -14,7 +14,7 @@ namespace Ink_Canvas.WorkflowAutomation
     /// </summary>
     public static class AutomationBootstrap
     {
-        private static AutomationService? _service;
+        private static AutomationService _service;
 
         /// <summary>
         /// 获取自动化服务实例

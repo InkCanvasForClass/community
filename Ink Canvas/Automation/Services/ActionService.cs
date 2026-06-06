@@ -73,7 +73,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             if (!AutomationRegistry.RegisteredActions.TryGetValue(action.Id, out var info)) return;
 
             // 对齐 ClassIsland：反序列化 settings
-            object? settings = null;
+            object settings = null;
             var settingsType = info.SettingsType;
             if (settingsType != null)
             {
@@ -117,7 +117,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             if (info.RevertHandle == null) return;
 
             // 对齐 ClassIsland：反序列化 settings
-            object? settings = null;
+            object settings = null;
             var settingsType = info.SettingsType;
             if (settingsType != null)
             {
