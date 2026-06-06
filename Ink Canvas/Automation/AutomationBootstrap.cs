@@ -1,4 +1,5 @@
 using Ink_Canvas.WorkflowAutomation.Abstractions;
+using Ink_Canvas.WorkflowAutomation.Actions;
 using Ink_Canvas.WorkflowAutomation.ActionHandlers;
 using Ink_Canvas.WorkflowAutomation.Extensions;
 using Ink_Canvas.WorkflowAutomation.Models;
@@ -90,6 +91,8 @@ namespace Ink_Canvas.WorkflowAutomation
             services.AddAction<ClearStrokesActionSettings>("inkcanvas.clearstrokes", "清空笔画", "Eraser");
             services.AddAction<ShowNotificationActionSettings>("inkcanvas.shownotification", "显示通知", "BellOutline");
             services.AddAction<ToggleTopmostActionSettings>("inkcanvas.toggletopmost", "切换窗口置顶", "PinOutline");
+            services.AddAction<ResetDesktopPositionActionSettings>("inkcanvas.resetdesktopposition", "重置桌面模式位置", "DockBottom");
+            services.AddAction<ResetPptPositionActionSettings>("inkcanvas.resetpptposition", "重置PPT模式位置", "Presentation");
 
             // 5. 注册规则（对齐 ClassIsland 的 AddRule<TSettings>()）
             services.AddRule<ProcessRunningRuleSettings>("inkcanvas.processrunning", "进程正在运行", "ApplicationCogOutline");
@@ -107,6 +110,8 @@ namespace Ink_Canvas.WorkflowAutomation
             services.AddTransient<ClearStrokesActionHandler>();
             services.AddTransient<ShowNotificationActionHandler>();
             services.AddTransient<ToggleTopmostActionHandler>();
+            services.AddTransient<ResetDesktopPositionActionHandler>();
+            services.AddTransient<ResetPptPositionActionHandler>();
 
             // 7. 构建容器
             _serviceProvider = services.BuildServiceProvider();
@@ -127,6 +132,8 @@ namespace Ink_Canvas.WorkflowAutomation
             _serviceProvider.GetRequiredService<ClearStrokesActionHandler>();
             _serviceProvider.GetRequiredService<ShowNotificationActionHandler>();
             _serviceProvider.GetRequiredService<ToggleTopmostActionHandler>();
+            _serviceProvider.GetRequiredService<ResetDesktopPositionActionHandler>();
+            _serviceProvider.GetRequiredService<ResetPptPositionActionHandler>();
 
             // 10. 注册规则处理程序（对齐 ClassIsland 的 RegisterRuleHandler）
             RegisterRuleHandlers();

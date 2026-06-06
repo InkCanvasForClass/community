@@ -15,6 +15,16 @@ namespace Ink_Canvas.WorkflowAutomation.Services
     public static class AutomationRegistry
     {
         /// <summary>
+        /// 已注册的行动字典（兼容 UI 引用）
+        /// </summary>
+        public static Dictionary<string, ActionRegistryInfo> RegisteredActions => IActionService.Actions;
+
+        /// <summary>
+        /// 已注册的规则字典（兼容 UI 引用）
+        /// </summary>
+        public static Dictionary<string, RuleRegistryInfo> RegisteredRules => IRulesetService.Rules;
+
+        /// <summary>
         /// 已注册的触发器列表
         /// </summary>
         public static List<TriggerInfo> RegisteredTriggers { get; } = new();

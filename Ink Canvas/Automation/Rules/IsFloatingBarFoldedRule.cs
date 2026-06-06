@@ -44,7 +44,7 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
             return info;
         }
 
-        public static bool? Evaluate(object settings)
+        public static bool Evaluate(object settings)
         {
             try
             {

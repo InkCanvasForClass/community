@@ -71,7 +71,7 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
             return info;
         }
 
-        public static bool? Evaluate(object settings)
+        public static bool Evaluate(object settings)
         {
             var s = settings as ForegroundWindowProcessRuleSettings;
             if (s == null || string.IsNullOrEmpty(s.ProcessName)) return false;
