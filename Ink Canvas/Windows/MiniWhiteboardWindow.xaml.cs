@@ -16,7 +16,6 @@ namespace Ink_Canvas
     /// </summary>
     public partial class MiniWhiteboardWindow : Window
     {
-        private readonly MainWindow _mainWindow;
 
         // Page management
         private const int MaxPages = 99;
@@ -25,13 +24,17 @@ namespace Ink_Canvas
         private int _currentPageIndex = 0; // 0-based internal index
         private int _totalCount = 1;
 
+        // Multi-touch window drag
+        private readonly Dictionary<int, Point> _touchPoints = new Dictionary<int, Point>();
+        private bool _isMultiTouchDragging;
+        private Point _multiTouchLastCenter;
+
         // Undo/redo per page
         private readonly List<bool> _pageLastModeIsRedo = new List<bool>();
 
-        public MiniWhiteboardWindow(MainWindow mainWindow)
+        public MiniWhiteboardWindow()
         {
             InitializeComponent();
-            _mainWindow = mainWindow;
 
             // Initialize first page
             _pageStrokes.Add(new StrokeCollection());
@@ -58,12 +61,6 @@ namespace Ink_Canvas
             // Apply pen settings
             ApplyPenSettings();
 
-            // Subscribe to PPT slide change events if sync is enabled
-            if (settings.SyncWithPptPages)
-            {
-                SubscribeToPPTEvents();
-            }
-
             LogHelper.WriteLogToFile("小白板窗口已打开", LogHelper.LogType.Event);
         }
 
@@ -72,10 +69,67 @@ namespace Ink_Canvas
             // Save current page strokes before closing
             SaveCurrentPage();
 
-            // Unsubscribe from PPT events
-            UnsubscribeFromPPTEvents();
-
             LogHelper.WriteLogToFile("小白板窗口已关闭", LogHelper.LogType.Event);
+        }
+
+        #endregion
+
+        #region Multi-Touch Window Drag
+
+        private void RootGrid_PreviewTouchDown(object sender, TouchEventArgs e)
+        {
+            var touchPoint = e.GetTouchPoint(RootGrid);
+            _touchPoints[e.TouchDevice.Id] = touchPoint.Position;
+
+            if (_touchPoints.Count >= 2 && !_isMultiTouchDragging)
+            {
+                _isMultiTouchDragging = true;
+                _multiTouchLastCenter = GetTouchCenter();
+                // 阻止 InkCanvas 接收多指事件
+                e.Handled = true;
+            }
+        }
+
+        private void RootGrid_PreviewTouchMove(object sender, TouchEventArgs e)
+        {
+            if (!_isMultiTouchDragging) return;
+
+            var touchPoint = e.GetTouchPoint(RootGrid);
+            _touchPoints[e.TouchDevice.Id] = touchPoint.Position;
+
+            if (_touchPoints.Count >= 2)
+            {
+                var center = GetTouchCenter();
+                var deltaX = center.X - _multiTouchLastCenter.X;
+                var deltaY = center.Y - _multiTouchLastCenter.Y;
+
+                Left += deltaX;
+                Top += deltaY;
+
+                _multiTouchLastCenter = center;
+                e.Handled = true;
+            }
+        }
+
+        private void RootGrid_PreviewTouchUp(object sender, TouchEventArgs e)
+        {
+            _touchPoints.Remove(e.TouchDevice.Id);
+
+            if (_touchPoints.Count < 2 && _isMultiTouchDragging)
+            {
+                _isMultiTouchDragging = false;
+            }
+        }
+
+        private Point GetTouchCenter()
+        {
+            double x = 0, y = 0;
+            foreach (var pt in _touchPoints.Values)
+            {
+                x += pt.X;
+                y += pt.Y;
+            }
+            return new Point(x / _touchPoints.Count, y / _touchPoints.Count);
         }
 
         #endregion
@@ -234,85 +288,8 @@ namespace Ink_Canvas
 
         #region PPT Integration
 
-        private void SubscribeToPPTEvents()
-        {
-            try
-            {
-                if (_mainWindow?.PPTManager != null)
-                {
-                    _mainWindow.PPTManager.SlideShowNextSlide += OnPPTSlideChanged;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"小白板订阅PPT事件失败: {ex.Message}", LogHelper.LogType.Warning);
-            }
-        }
-
-        private void UnsubscribeFromPPTEvents()
-        {
-            try
-            {
-                if (_mainWindow?.PPTManager != null)
-                {
-                    _mainWindow.PPTManager.SlideShowNextSlide -= OnPPTSlideChanged;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"小白板取消订阅PPT事件失败: {ex.Message}", LogHelper.LogType.Warning);
-            }
-        }
-
-        private void OnPPTSlideChanged(object slideShowWindow)
-        {
-            try
-            {
-                if (!MainWindow.Settings.MiniWhiteboard.SyncWithPptPages) return;
-
-                // Get current slide index from PPT manager
-                var pptManager = _mainWindow?.PPTManager;
-                if (pptManager == null) return;
-
-                // The slide index is 1-based in PPT, convert to 0-based for our pages
-                int slideIndex = GetCurrentSlideIndex(pptManager);
-                if (slideIndex < 0) return;
-
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    // Ensure we have enough pages
-                    while (_totalCount <= slideIndex)
-                    {
-                        _pageStrokes.Add(new StrokeCollection());
-                        _pageHistories.Add(new TimeMachineHistory[] { });
-                        _pageLastModeIsRedo.Add(false);
-                        _totalCount++;
-                    }
-
-                    // Switch to the corresponding page (0-based)
-                    SwitchToPage(slideIndex);
-                }));
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"小白板处理PPT翻页失败: {ex.Message}", LogHelper.LogType.Warning);
-            }
-        }
-
-        private int GetCurrentSlideIndex(IPPTLinkManager pptManager)
-        {
-            try
-            {
-                // Use reflection or public API to get current slide index
-                // The PPTManager exposes slide info through various means
-                // For now, we use the main window's tracked position
-                return _mainWindow.CurrentPPTSlideIndex;
-            }
-            catch
-            {
-                return -1;
-            }
-        }
+        // PPT 翻页事件由 MainWindow (MW_PPT.cs) 统一转发到 OnPPTSlideChangedExternal
+        // 不再直接订阅 PPTManager.SlideShowNextSlide，避免双重触发
 
         #endregion
 
@@ -355,7 +332,7 @@ namespace Ink_Canvas
         #region Public Methods
 
         /// <summary>
-        /// 外部调用：PPT页面切换时通知小白板
+        /// 外部调用：PPT页面切换时通知小白板（由 MainWindow 转发）
         /// </summary>
         public void OnPPTSlideChangedExternal(int slideIndex)
         {

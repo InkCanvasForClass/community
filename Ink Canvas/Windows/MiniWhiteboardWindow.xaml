@@ -43,7 +43,10 @@
     <!-- 无标题栏窗口：画布内嵌悬浮白板工具栏，工具栏不贴边 -->
     <Grid x:Name="RootGrid"
           Background="#01000000"
-          ClipToBounds="True">
+          ClipToBounds="True"
+          PreviewTouchDown="RootGrid_PreviewTouchDown"
+          PreviewTouchMove="RootGrid_PreviewTouchMove"
+          PreviewTouchUp="RootGrid_PreviewTouchUp">
         <InkCanvas x:Name="MiniInkCanvas"
                    Background="#10FFFFFF"
                    EditingMode="Ink"

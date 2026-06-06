@@ -88,7 +88,7 @@ namespace Ink_Canvas
                 return;
             }
 
-            _miniWhiteboardWindow = new MiniWhiteboardWindow(this);
+            _miniWhiteboardWindow = new MiniWhiteboardWindow();
             _miniWhiteboardWindow.Owner = this;
             _miniWhiteboardWindow.Show();
         }
