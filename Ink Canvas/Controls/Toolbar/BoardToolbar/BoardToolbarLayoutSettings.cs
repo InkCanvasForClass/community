@@ -132,6 +132,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                                     new BoardToolbarComponentEntry { Id = "board.eraser" },
                                     new BoardToolbarComponentEntry { Id = "board.strokeEraser" },
                                     new BoardToolbarComponentEntry { Id = "board.shape" },
+                                    new BoardToolbarComponentEntry { Id = "board.insertImage" },
                                     new BoardToolbarComponentEntry { Id = "board.undo" },
                                     new BoardToolbarComponentEntry { Id = "board.redo" }
                                 }
