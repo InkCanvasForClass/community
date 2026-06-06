@@ -45,5 +45,19 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
 
             return info;
         }
+
+        public static bool? Evaluate(object settings)
+        {
+            var s = settings as ProcessRunningRuleSettings;
+            if (s == null || string.IsNullOrEmpty(s.ProcessName)) return false;
+            try
+            {
+                return Process.GetProcessesByName(s.ProcessName).Length > 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

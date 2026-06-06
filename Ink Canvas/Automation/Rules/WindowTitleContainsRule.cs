@@ -79,5 +79,32 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
 
             return info;
         }
+
+        public static bool? Evaluate(object settings)
+        {
+            var s = settings as WindowTitleContainsRuleSettings;
+            if (s == null || string.IsNullOrEmpty(s.TitleContains)) return false;
+            try
+            {
+                var handle = GetForegroundWindow();
+                if (handle == IntPtr.Zero) return false;
+                var sb = new StringBuilder(512);
+                int length = GetWindowTextW(handle, sb, sb.Capacity);
+                if (length <= 0) return false;
+                string windowTitle = sb.ToString(0, length);
+                if (s.IgnoreCase)
+                    return windowTitle.IndexOf(s.TitleContains, StringComparison.OrdinalIgnoreCase) >= 0;
+                else
+                    return windowTitle.Contains(s.TitleContains);
+            }
+            catch (Win32Exception)
+            {
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

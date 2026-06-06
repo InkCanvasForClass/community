@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Ink_Canvas.WorkflowAutomation.Abstractions;
 using Ink_Canvas.WorkflowAutomation.Models;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -14,14 +15,18 @@ namespace Ink_Canvas.WorkflowAutomation.Services
 {
     /// <summary>
     /// 自动化服务，负责管理工作流的生命周期、触发和恢复。
+    /// 对齐 ClassIsland 的 AutomationService，通过 DI 容器解析触发器实例。
     /// </summary>
     public class AutomationService : ObservableObject
     {
         private readonly string _configsFolderPath;
+        private readonly IServiceProvider _serviceProvider;
 
-        public AutomationService(string configsFolderPath)
+        public AutomationService(string configsFolderPath, IServiceProvider serviceProvider = null)
         {
             _configsFolderPath = configsFolderPath;
+            _serviceProvider = serviceProvider;
+
             if (!Directory.Exists(_configsFolderPath))
             {
                 Directory.CreateDirectory(_configsFolderPath);
@@ -201,8 +206,6 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             }
 
             workflow.Triggers.CollectionChanged += TriggersOnCollectionChanged;
-
-            // 通过 Unloading 事件取消订阅，避免内存泄漏
             workflow.Unloading += OnWorkflowUnloading;
 
             foreach (var trigger in workflow.Triggers)
@@ -238,15 +241,20 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         {
             if (trigger.TriggerInstance != null) return;
 
-            var triggerInstance = AutomationRegistry.ResolveTrigger(trigger.Id);
+            // 对齐 ClassIsland：通过 DI 容器解析触发器实例
+            TriggerBase triggerInstance = null;
+            if (_serviceProvider != null)
+            {
+                triggerInstance = AutomationRegistry.ResolveTrigger(_serviceProvider, trigger.Id);
+            }
+
             if (triggerInstance == null) return;
 
-            // 处理设置反序列化（对齐 ClassIsland ActivateTrigger 逻辑）
+            // 处理设置反序列化
             var settings = trigger.Settings;
             var triggerInfo = trigger.AssociatedTriggerInfo;
             if (triggerInfo?.SettingsType != null)
             {
-                // settings 为 null 时创建默认实例
                 var settingsReal = settings ?? Activator.CreateInstance(triggerInfo.SettingsType);
                 try
                 {
@@ -275,7 +283,6 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             triggerInstance.TriggeredRecover += TriggerTriggeredRecover;
             trigger.TriggerInstance = triggerInstance;
 
-            // 对齐 ClassIsland：监听 trigger.Id 变化，自动重新加载触发器
             trigger.PropertyChanged += TriggerOnPropertyChanged;
             trigger.Unloading += TriggerOnUnloading;
 
@@ -308,7 +315,6 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         {
             if (trigger.TriggerInstance == null) return;
 
-            // 对齐 ClassIsland：先触发 Unloading 事件取消订阅，再卸载触发器实例
             trigger.Unload();
 
             try
@@ -331,16 +337,13 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             if (workflow == null) return;
             if (!workflow.ActionSet.IsEnabled) return;
 
-            // 如果已触发且启用了恢复，则跳过（等待恢复触发器）
             if (workflow.ActionSet.IsRevertEnabled && workflow.ActionSet.IsOn) return;
 
-            // 检查条件
             if (workflow.IsConditionEnabled)
             {
                 if (!RulesetService.IsRulesetSatisfied(workflow.Ruleset)) return;
             }
 
-            // 执行行动
             ActionService.Invoke(workflow.ActionSet);
             SaveConfig("TriggerTriggered");
         }

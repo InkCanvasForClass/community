@@ -43,5 +43,22 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
 
             return info;
         }
+
+        public static bool? Evaluate(object settings)
+        {
+            try
+            {
+                return Application.Current.Dispatcher.Invoke(() =>
+                {
+                    var mw = Application.Current.MainWindow as MainWindow;
+                    if (mw == null) return false;
+                    return mw.isFloatingBarFolded;
+                });
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

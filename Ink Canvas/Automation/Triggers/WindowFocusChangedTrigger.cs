@@ -14,6 +14,7 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
     /// 前台窗口焦点变化时触发的触发器。
     /// 通过 SystemEventMonitor 的 WinEvent 钩子驱动，无需轮询。
     /// </summary>
+    [TriggerInfo("inkcanvas.windowfocuschanged", "前台窗口变化", "Window")]
     public class WindowFocusChangedTrigger : TriggerBase<WindowFocusChangedSettings>
     {
         public override void Loaded()

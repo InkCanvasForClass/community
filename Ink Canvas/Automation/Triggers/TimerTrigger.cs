@@ -22,6 +22,7 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
     /// <summary>
     /// 定时触发器。
     /// </summary>
+    [TriggerInfo("inkcanvas.timer", "定时触发", "ClockOutline")]
     public class TimerTrigger : TriggerBase<TimerTriggerSettings>
     {
         private Timer _timer;

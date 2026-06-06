@@ -70,5 +70,33 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
 
             return info;
         }
+
+        public static bool? Evaluate(object settings)
+        {
+            var s = settings as ForegroundWindowProcessRuleSettings;
+            if (s == null || string.IsNullOrEmpty(s.ProcessName)) return false;
+            try
+            {
+                var handle = GetForegroundWindow();
+                if (handle == IntPtr.Zero) return false;
+                uint pid;
+                GetWindowThreadProcessId(handle, out pid);
+                if (pid == 0) return false;
+                var process = Process.GetProcessById((int)pid);
+                return string.Equals(process.ProcessName, s.ProcessName, StringComparison.OrdinalIgnoreCase);
+            }
+            catch (Win32Exception)
+            {
+                return false;
+            }
+            catch (ArgumentException)
+            {
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

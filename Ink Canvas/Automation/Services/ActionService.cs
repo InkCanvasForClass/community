@@ -1,3 +1,4 @@
+using Ink_Canvas.WorkflowAutomation.Abstractions;
 using Ink_Canvas.WorkflowAutomation.Models;
 using Newtonsoft.Json.Linq;
 using System;
@@ -8,8 +9,9 @@ namespace Ink_Canvas.WorkflowAutomation.Services
 {
     /// <summary>
     /// 行动服务，负责执行和恢复行动。
+    /// 对齐 ClassIsland 的 ActionService，实现 IActionService 接口。
     /// </summary>
-    public class ActionService
+    public class ActionService : IActionService
     {
         /// <summary>
         /// 触发行动组
@@ -66,11 +68,35 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         }
 
         /// <summary>
+        /// 注册行动处理程序。
+        /// 对齐 ClassIsland 的 RegisterActionHandler。
+        /// </summary>
+        public void RegisterActionHandler(string id, ActionRegistryInfo.HandleDelegate handler)
+        {
+            if (!IActionService.Actions.TryGetValue(id, out var actionRegistryInfo))
+                throw new KeyNotFoundException($"找不到行动 {id}。");
+
+            actionRegistryInfo.Handle += handler;
+        }
+
+        /// <summary>
+        /// 注册行动恢复处理程序。
+        /// 对齐 ClassIsland 的 RegisterRevertHandler。
+        /// </summary>
+        public void RegisterRevertHandler(string id, ActionRegistryInfo.HandleDelegate handler)
+        {
+            if (!IActionService.Actions.TryGetValue(id, out var actionRegistryInfo))
+                throw new KeyNotFoundException($"找不到行动 {id}。");
+
+            actionRegistryInfo.RevertHandle += handler;
+        }
+
+        /// <summary>
         /// 执行单个行动
         /// </summary>
         private void InvokeAction(ActionModel action)
         {
-            if (!AutomationRegistry.RegisteredActions.TryGetValue(action.Id, out var info)) return;
+            if (!IActionService.Actions.TryGetValue(action.Id, out var info)) return;
 
             // 对齐 ClassIsland：反序列化 settings
             object settings = null;
@@ -113,7 +139,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         private void RevertAction(ActionModel action)
         {
             if (action.Id == string.Empty) return;
-            if (!AutomationRegistry.RegisteredActions.TryGetValue(action.Id, out var info)) return;
+            if (!IActionService.Actions.TryGetValue(action.Id, out var info)) return;
             if (info.RevertHandle == null) return;
 
             // 对齐 ClassIsland：反序列化 settings
@@ -156,7 +182,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         /// </summary>
         public bool ExistRevertHandler(ActionModel action)
         {
-            if (!AutomationRegistry.RegisteredActions.TryGetValue(action.Id, out var info)) return false;
+            if (!IActionService.Actions.TryGetValue(action.Id, out var info)) return false;
             return info.RevertHandle != null;
         }
     }

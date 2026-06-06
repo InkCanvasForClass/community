@@ -1,3 +1,4 @@
+using Ink_Canvas.WorkflowAutomation.Abstractions;
 using Ink_Canvas.WorkflowAutomation.Enums;
 using Ink_Canvas.WorkflowAutomation.Models;
 using Newtonsoft.Json.Linq;
@@ -9,10 +10,11 @@ namespace Ink_Canvas.WorkflowAutomation.Services
 {
     /// <summary>
     /// 规则集服务，负责评估规则集是否满足。
+    /// 对齐 ClassIsland 的 RulesetService，实现 IRulesetService 接口。
     /// 事件驱动模式：订阅 SystemEventMonitor 的系统事件，仅在状态可能变化时重新评估。
     /// 保留 5s 兜底轮询防止遗漏。
     /// </summary>
-    public class RulesetService : IDisposable
+    public class RulesetService : IRulesetService, IDisposable
     {
         /// <summary>
         /// 规则状态更新事件，当规则条件可能发生变化时触发。
@@ -155,7 +157,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             if (rule.Id == string.Empty)
                 return null;
 
-            if (!AutomationRegistry.RegisteredRules.TryGetValue(rule.Id, out var info))
+            if (!IRulesetService.Rules.TryGetValue(rule.Id, out var info))
                 return false;
 
             if (info.Handle == null)
@@ -188,6 +190,18 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             {
                 return false;
             }
+        }
+
+        /// <summary>
+        /// 注册规则处理程序。
+        /// 对齐 ClassIsland 的 RegisterRuleHandler。
+        /// </summary>
+        public void RegisterRuleHandler(string id, RuleRegistryInfo.HandleDelegate handler)
+        {
+            if (!IRulesetService.Rules.TryGetValue(id, out var ruleRegistryInfo))
+                throw new KeyNotFoundException($"找不到规则 {id}。");
+
+            ruleRegistryInfo.Handle += handler;
         }
 
         /// <summary>

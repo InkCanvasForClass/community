@@ -42,5 +42,22 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
 
             return info;
         }
+
+        public static bool? Evaluate(object settings)
+        {
+            try
+            {
+                return System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    var mw = System.Windows.Application.Current.MainWindow as MainWindow;
+                    if (mw == null) return false;
+                    return mw.inkCanvas?.EditingMode == System.Windows.Controls.InkCanvasEditingMode.Ink;
+                });
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

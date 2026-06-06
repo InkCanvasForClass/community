@@ -14,6 +14,7 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
     /// 浮动工具栏退出批注模式时触发的触发器。
     /// 通过订阅 inkCanvas.EditingModeChanged 事件驱动，无需轮询。
     /// </summary>
+    [TriggerInfo("inkcanvas.annotationexit", "退出批注模式", "PenTool")]
     public class AnnotationModeExitTrigger : TriggerBase<AnnotationModeExitSettings>
     {
         private bool _wasInAnnotationMode = false;
