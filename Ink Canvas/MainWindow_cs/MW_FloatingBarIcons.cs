@@ -1279,7 +1279,7 @@ namespace Ink_Canvas
                 {
                     Owner = this
                 };
-                timerWindow.ShowDialog();
+                timerWindow.Show();
             }
             else
             {
