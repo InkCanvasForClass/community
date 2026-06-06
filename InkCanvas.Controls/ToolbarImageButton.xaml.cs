@@ -101,7 +101,7 @@ namespace Ink_Canvas.Controls
 
             var animation = new DoubleAnimation
             {
-                To = isSelected ? -3 : 0,
+                To = 0,
                 Duration = TimeSpan.FromMilliseconds(120),
                 EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
             };
