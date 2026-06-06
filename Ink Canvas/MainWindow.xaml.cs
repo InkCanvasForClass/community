@@ -428,6 +428,7 @@ namespace Ink_Canvas
             WireUpEraserPopupContentEvents();
             WireUpGesturePopupContentEvents();
             WireUpImageOptionsPopupContentEvents();
+            WireUpWhiteboardModeSelectionEvents();
             BoardBorderToolsPopup.CustomPopupPlacementCallback =
                 (popupSize, targetSize, offset) => new[]
                 {

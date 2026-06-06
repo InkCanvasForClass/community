@@ -606,4 +606,43 @@
   <data name="BoardToolbarPage_Title" xml:space="preserve">
     <value>Board Toolbar</value>
   </data>
+  <data name="FloatingBar_MiniWhiteboard" xml:space="preserve">
+    <value>Mini Whiteboard</value>
+  </data>
+  <data name="MiniWhiteboard_Undo" xml:space="preserve">
+    <value>Undo</value>
+  </data>
+  <data name="MiniWhiteboard_Redo" xml:space="preserve">
+    <value>Redo</value>
+  </data>
+  <data name="MiniWhiteboard_Clear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="MiniWhiteboard_NewPage" xml:space="preserve">
+    <value>New Page</value>
+  </data>
+  <data name="MiniWhiteboard_DeletePage" xml:space="preserve">
+    <value>Delete Page</value>
+  </data>
+  <data name="MiniWhiteboard_PageInfo" xml:space="preserve">
+    <value>Page</value>
+  </data>
+  <data name="MiniWhiteboard_Pen" xml:space="preserve">
+    <value>Pen</value>
+  </data>
+  <data name="MiniWhiteboard_Eraser" xml:space="preserve">
+    <value>Eraser</value>
+  </data>
+  <data name="MiniWhiteboard_Settings_Enable" xml:space="preserve">
+    <value>Enable Mini Whiteboard</value>
+  </data>
+  <data name="MiniWhiteboard_Settings_SyncPpt" xml:space="preserve">
+    <value>Sync pages with PPT</value>
+  </data>
+  <data name="MiniWhiteboard_Settings_DefaultSize" xml:space="preserve">
+    <value>Default Size</value>
+  </data>
+  <data name="MiniWhiteboard_Settings_Opacity" xml:space="preserve">
+    <value>Opacity</value>
+  </data>
 </root>

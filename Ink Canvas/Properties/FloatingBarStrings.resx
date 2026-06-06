@@ -606,4 +606,43 @@
   <data name="BoardToolbarPage_Title" xml:space="preserve">
     <value>白板工具栏</value>
   </data>
+  <data name="FloatingBar_MiniWhiteboard" xml:space="preserve">
+    <value>小白板</value>
+  </data>
+  <data name="MiniWhiteboard_Undo" xml:space="preserve">
+    <value>撤销</value>
+  </data>
+  <data name="MiniWhiteboard_Redo" xml:space="preserve">
+    <value>重做</value>
+  </data>
+  <data name="MiniWhiteboard_Clear" xml:space="preserve">
+    <value>清除</value>
+  </data>
+  <data name="MiniWhiteboard_NewPage" xml:space="preserve">
+    <value>新建页面</value>
+  </data>
+  <data name="MiniWhiteboard_DeletePage" xml:space="preserve">
+    <value>删除页面</value>
+  </data>
+  <data name="MiniWhiteboard_PageInfo" xml:space="preserve">
+    <value>页码</value>
+  </data>
+  <data name="MiniWhiteboard_Pen" xml:space="preserve">
+    <value>画笔</value>
+  </data>
+  <data name="MiniWhiteboard_Eraser" xml:space="preserve">
+    <value>橡皮擦</value>
+  </data>
+  <data name="MiniWhiteboard_Settings_Enable" xml:space="preserve">
+    <value>启用小白板</value>
+  </data>
+  <data name="MiniWhiteboard_Settings_SyncPpt" xml:space="preserve">
+    <value>页面与PPT联动</value>
+  </data>
+  <data name="MiniWhiteboard_Settings_DefaultSize" xml:space="preserve">
+    <value>默认大小</value>
+  </data>
+  <data name="MiniWhiteboard_Settings_Opacity" xml:space="preserve">
+    <value>不透明度</value>
+  </data>
 </root>

@@ -157,6 +157,12 @@ namespace Ink_Canvas
         /// </summary>
         private int _currentSlideShowPosition = 0;
 
+        /// <summary>
+        /// 当前幻灯片放映位置的公开访问器（0-based）。
+        /// 用于小白板等组件获取当前PPT页码。
+        /// </summary>
+        internal int CurrentPPTSlideIndex => _currentSlideShowPosition > 0 ? _currentSlideShowPosition - 1 : 0;
+
         private Dictionary<int, MemoryStream> _memoryStreams = new Dictionary<int, MemoryStream>();
         private readonly object _pptEnhancedPreviewCacheLock = new object();
         private List<PptEnhancedPreviewItem> _pptEnhancedPreviewCache;
@@ -1445,6 +1451,9 @@ namespace Ink_Canvas
                     }
                 });
                 _previousSlideID = currentSlide;
+
+                // 转发PPT翻页事件到小白板（如果已打开且启用了联动）
+                _miniWhiteboardWindow?.OnPPTSlideChangedExternal(currentSlide - 1);
             }
             catch (Exception ex)
             {

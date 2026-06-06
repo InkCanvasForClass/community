@@ -2639,6 +2639,58 @@
                                    "NewKey":  "FloatingBar_Whiteboard",
                                    "Group":  "FloatingBarStrings"
                                },
+    "FloatingBar_MiniWhiteboard":  {
+                                       "NewKey":  "FloatingBar_MiniWhiteboard",
+                                       "Group":  "FloatingBarStrings"
+                                   },
+    "MiniWhiteboard_Undo":  {
+                                "NewKey":  "MiniWhiteboard_Undo",
+                                "Group":  "FloatingBarStrings"
+                            },
+    "MiniWhiteboard_Redo":  {
+                                "NewKey":  "MiniWhiteboard_Redo",
+                                "Group":  "FloatingBarStrings"
+                            },
+    "MiniWhiteboard_Clear":  {
+                                 "NewKey":  "MiniWhiteboard_Clear",
+                                 "Group":  "FloatingBarStrings"
+                             },
+    "MiniWhiteboard_NewPage":  {
+                                   "NewKey":  "MiniWhiteboard_NewPage",
+                                   "Group":  "FloatingBarStrings"
+                               },
+    "MiniWhiteboard_DeletePage":  {
+                                      "NewKey":  "MiniWhiteboard_DeletePage",
+                                      "Group":  "FloatingBarStrings"
+                                  },
+    "MiniWhiteboard_PageInfo":  {
+                                    "NewKey":  "MiniWhiteboard_PageInfo",
+                                    "Group":  "FloatingBarStrings"
+                                },
+    "MiniWhiteboard_Pen":  {
+                               "NewKey":  "MiniWhiteboard_Pen",
+                               "Group":  "FloatingBarStrings"
+                           },
+    "MiniWhiteboard_Eraser":  {
+                                  "NewKey":  "MiniWhiteboard_Eraser",
+                                  "Group":  "FloatingBarStrings"
+                              },
+    "MiniWhiteboard_Settings_Enable":  {
+                                           "NewKey":  "MiniWhiteboard_Settings_Enable",
+                                           "Group":  "FloatingBarStrings"
+                                       },
+    "MiniWhiteboard_Settings_SyncPpt":  {
+                                            "NewKey":  "MiniWhiteboard_Settings_SyncPpt",
+                                            "Group":  "FloatingBarStrings"
+                                        },
+    "MiniWhiteboard_Settings_DefaultSize":  {
+                                                "NewKey":  "MiniWhiteboard_Settings_DefaultSize",
+                                                "Group":  "FloatingBarStrings"
+                                            },
+    "MiniWhiteboard_Settings_Opacity":  {
+                                            "NewKey":  "MiniWhiteboard_Settings_Opacity",
+                                            "Group":  "FloatingBarStrings"
+                                        },
     "Timer_Title":  {
                         "NewKey":  "Timer_Title",
                         "Group":  "TimerStrings"

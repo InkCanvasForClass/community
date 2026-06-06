@@ -157,6 +157,57 @@
                     </ui:SettingsExpander>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="{x:Static props:FloatingBarStrings.FloatingBar_MiniWhiteboard}" />
+
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchMiniWhiteboardEnabled"
+                        Header="{x:Static props:FloatingBarStrings.MiniWhiteboard_Settings_Enable}"
+                        Icon="{x:Static ui:SegoeFluentIcons.Edit}"
+                        IsOn="True"
+                        Toggled="ToggleSwitchMiniWhiteboardEnabled_Toggled" />
+
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchMiniWhiteboardSyncPpt"
+                        Header="{x:Static props:FloatingBarStrings.MiniWhiteboard_Settings_SyncPpt}"
+                        Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
+                        IsOn="True"
+                        Toggled="ToggleSwitchMiniWhiteboardSyncPpt_Toggled" />
+
+                    <ui:SettingsCard Header="{x:Static props:FloatingBarStrings.MiniWhiteboard_Settings_DefaultSize}">
+                        <ikw:SimpleStackPanel Orientation="Vertical" Spacing="8">
+                            <TextBlock x:Name="MiniWhiteboardSizeText"
+                                       VerticalAlignment="Center" FontFamily="Consolas" />
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="W" Width="16" VerticalAlignment="Center" />
+                                <Slider x:Name="MiniWhiteboardWidthSlider"
+                                        Minimum="200" Maximum="1200" Width="200"
+                                        IsSnapToTickEnabled="True" TickFrequency="10"
+                                        TickPlacement="None"
+                                        ValueChanged="MiniWhiteboardWidthSlider_ValueChanged" />
+                            </ikw:SimpleStackPanel>
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="H" Width="16" VerticalAlignment="Center" />
+                                <Slider x:Name="MiniWhiteboardHeightSlider"
+                                        Minimum="150" Maximum="900" Width="200"
+                                        IsSnapToTickEnabled="True" TickFrequency="10"
+                                        TickPlacement="None"
+                                        ValueChanged="MiniWhiteboardHeightSlider_ValueChanged" />
+                            </ikw:SimpleStackPanel>
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard Header="{x:Static props:FloatingBarStrings.MiniWhiteboard_Settings_Opacity}">
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock x:Name="MiniWhiteboardOpacityText"
+                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" />
+                            <Slider x:Name="MiniWhiteboardOpacitySlider"
+                                    Minimum="0.3" Maximum="1"
+                                    Width="200"
+                                    IsSnapToTickEnabled="True"
+                                    TickFrequency="0.05" TickPlacement="None"
+                                    ValueChanged="MiniWhiteboardOpacitySlider_ValueChanged" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:AdvancedStrings.Logging}" />
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchIsLogEnabled"

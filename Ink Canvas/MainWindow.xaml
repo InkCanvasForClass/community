@@ -894,6 +894,10 @@
             <Popup x:Name="TwoFingerGestureBorder" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
                 <localControls:GesturePopupContent x:Name="FloatingBarGesturePopupContent" />
             </Popup>
+            <!--白板按钮右键二级菜单-->
+            <Popup x:Name="WhiteboardModeSelectionPopup" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
+                <localControls:WhiteboardModeSelectionPopupContent x:Name="WhiteboardModeSelectionContent" />
+            </Popup>
         </Grid>
         <Grid Name="GridForFloatingBarDraging" Background="#01000000" Visibility="Collapsed"  d:Visibility="Visible"
               MouseMove="SymbolIconEmoji_MouseMove" MouseUp="SymbolIconEmoji_MouseUp" />

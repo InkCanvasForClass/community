@@ -46,12 +46,26 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdateSliderText(TouchMultiplierSlider, TouchMultiplierText, "{0:F2}");
             UpdateSliderText(NibModeBoundsWidthSlider, NibModeBoundsWidthText, "{0:0}");
             UpdateSliderText(FingerModeBoundsWidthSlider, FingerModeBoundsWidthText, "{0:0}");
+            UpdateMiniWhiteboardSizeText();
+            UpdateMiniWhiteboardOpacityText();
         }
 
         private void UpdateSliderText(Slider slider, TextBlock textBlock, string format)
         {
             if (slider == null || textBlock == null) return;
             textBlock.Text = string.Format(format, slider.Value);
+        }
+
+        private void UpdateMiniWhiteboardSizeText()
+        {
+            if (MiniWhiteboardSizeText == null || MiniWhiteboardWidthSlider == null || MiniWhiteboardHeightSlider == null) return;
+            MiniWhiteboardSizeText.Text = $"{(int)MiniWhiteboardWidthSlider.Value} × {(int)MiniWhiteboardHeightSlider.Value}";
+        }
+
+        private void UpdateMiniWhiteboardOpacityText()
+        {
+            if (MiniWhiteboardOpacityText == null || MiniWhiteboardOpacitySlider == null) return;
+            MiniWhiteboardOpacityText.Text = $"{Math.Round(MiniWhiteboardOpacitySlider.Value * 100):0}%";
         }
 
         private void Page_Unloaded(object sender, RoutedEventArgs e)
@@ -76,6 +90,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ToggleSwitchIsLogEnabled.IsOn = settings.Advanced.IsLogEnabled;
             ToggleSwitchIsSaveLogByDate.IsOn = settings.Advanced.IsSaveLogByDate;
             ToggleSwitchIsSecondConfimeWhenShutdownApp.IsOn = settings.Advanced.IsSecondConfirmWhenShutdownApp;
+
+            settings.MiniWhiteboard ??= new MiniWhiteboardSettings();
+            ToggleSwitchMiniWhiteboardEnabled.IsOn = settings.MiniWhiteboard.IsEnabled;
+            ToggleSwitchMiniWhiteboardSyncPpt.IsOn = settings.MiniWhiteboard.SyncWithPptPages;
+            MiniWhiteboardWidthSlider.Value = settings.MiniWhiteboard.DefaultWidth;
+            MiniWhiteboardHeightSlider.Value = settings.MiniWhiteboard.DefaultHeight;
+            MiniWhiteboardOpacitySlider.Value = settings.MiniWhiteboard.DefaultOpacity;
 
             CardTouchMultiplier.IsExpanded = settings.Advanced.IsSpecialScreen;
         }
@@ -242,6 +263,53 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.SaveSettingsToFile();
 
             TextCalibrateResult.Text = $"校准成功！笔尖阈值={(int)nibThreshold}，手指阈值={(int)fingerThreshold}，触摸倍率={touchMultiplier:F2}";
+        }
+
+        #endregion
+
+        #region Mini Whiteboard
+
+        private void ToggleSwitchMiniWhiteboardEnabled_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.MiniWhiteboard ??= new MiniWhiteboardSettings();
+            SettingsManager.Settings.MiniWhiteboard.IsEnabled = ToggleSwitchMiniWhiteboardEnabled.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchMiniWhiteboardSyncPpt_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.MiniWhiteboard ??= new MiniWhiteboardSettings();
+            SettingsManager.Settings.MiniWhiteboard.SyncWithPptPages = ToggleSwitchMiniWhiteboardSyncPpt.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void MiniWhiteboardWidthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            UpdateMiniWhiteboardSizeText();
+            if (!_isLoaded) return;
+            SettingsManager.Settings.MiniWhiteboard ??= new MiniWhiteboardSettings();
+            SettingsManager.Settings.MiniWhiteboard.DefaultWidth = MiniWhiteboardWidthSlider.Value;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void MiniWhiteboardHeightSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            UpdateMiniWhiteboardSizeText();
+            if (!_isLoaded) return;
+            SettingsManager.Settings.MiniWhiteboard ??= new MiniWhiteboardSettings();
+            SettingsManager.Settings.MiniWhiteboard.DefaultHeight = MiniWhiteboardHeightSlider.Value;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void MiniWhiteboardOpacitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            UpdateMiniWhiteboardOpacityText();
+            if (!_isLoaded) return;
+            SettingsManager.Settings.MiniWhiteboard ??= new MiniWhiteboardSettings();
+            SettingsManager.Settings.MiniWhiteboard.DefaultOpacity = MiniWhiteboardOpacitySlider.Value;
+            SettingsManager.SaveSettingsToFile();
         }
 
         #endregion

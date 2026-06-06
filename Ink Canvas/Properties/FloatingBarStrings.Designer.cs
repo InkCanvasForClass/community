@@ -413,5 +413,31 @@ namespace Ink_Canvas.Properties
         public static string BoardToolbarPage_GroupAddPage => ResourceManager.GetString(nameof(BoardToolbarPage_GroupAddPage), _resourceCulture);
 
         public static string BoardToolbarPage_Title => ResourceManager.GetString(nameof(BoardToolbarPage_Title), _resourceCulture);
+
+        public static string FloatingBar_MiniWhiteboard => ResourceManager.GetString(nameof(FloatingBar_MiniWhiteboard), _resourceCulture);
+
+        public static string MiniWhiteboard_Undo => ResourceManager.GetString(nameof(MiniWhiteboard_Undo), _resourceCulture);
+
+        public static string MiniWhiteboard_Redo => ResourceManager.GetString(nameof(MiniWhiteboard_Redo), _resourceCulture);
+
+        public static string MiniWhiteboard_Clear => ResourceManager.GetString(nameof(MiniWhiteboard_Clear), _resourceCulture);
+
+        public static string MiniWhiteboard_NewPage => ResourceManager.GetString(nameof(MiniWhiteboard_NewPage), _resourceCulture);
+
+        public static string MiniWhiteboard_DeletePage => ResourceManager.GetString(nameof(MiniWhiteboard_DeletePage), _resourceCulture);
+
+        public static string MiniWhiteboard_PageInfo => ResourceManager.GetString(nameof(MiniWhiteboard_PageInfo), _resourceCulture);
+
+        public static string MiniWhiteboard_Pen => ResourceManager.GetString(nameof(MiniWhiteboard_Pen), _resourceCulture);
+
+        public static string MiniWhiteboard_Eraser => ResourceManager.GetString(nameof(MiniWhiteboard_Eraser), _resourceCulture);
+
+        public static string MiniWhiteboard_Settings_Enable => ResourceManager.GetString(nameof(MiniWhiteboard_Settings_Enable), _resourceCulture);
+
+        public static string MiniWhiteboard_Settings_SyncPpt => ResourceManager.GetString(nameof(MiniWhiteboard_Settings_SyncPpt), _resourceCulture);
+
+        public static string MiniWhiteboard_Settings_DefaultSize => ResourceManager.GetString(nameof(MiniWhiteboard_Settings_DefaultSize), _resourceCulture);
+
+        public static string MiniWhiteboard_Settings_Opacity => ResourceManager.GetString(nameof(MiniWhiteboard_Settings_Opacity), _resourceCulture);
     }
 }

@@ -1,0 +1,69 @@
+<UserControl xmlns:props="clr-namespace:Ink_Canvas.Properties"
+             xmlns:fb="clr-namespace:Ink_Canvas.Properties"
+             x:Class="Ink_Canvas.Controls.WhiteboardModeSelectionPopupContent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d">
+
+    <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1" CornerRadius="6" Padding="4"
+            MinWidth="120">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="8" ShadowDepth="2" Opacity="0.2" Color="Black"/>
+        </Border.Effect>
+        <StackPanel>
+            <!-- 全屏白板 -->
+            <Border x:Name="FullWhiteboardMenuItem"
+                    CornerRadius="4" Padding="10,6" Cursor="Hand">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource ControlFillColorDefaultBrush}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <StackPanel Orientation="Horizontal">
+                    <Path Data="M3 3h18v18H3V3zm2 2v14h14V5H5z"
+                          Stroke="{DynamicResource TextFillColorPrimaryBrush}"
+                          StrokeThickness="1.2" Fill="Transparent"
+                          Width="14" Height="14" Stretch="Uniform"
+                          VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock Text="{x:Static fb:FloatingBarStrings.FloatingBar_Whiteboard}"
+                               FontSize="12"
+                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+            <!-- 小白板 -->
+            <Border x:Name="MiniWhiteboardMenuItem"
+                    CornerRadius="4" Padding="10,6" Cursor="Hand"
+                    Margin="0,2,0,0">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource ControlFillColorDefaultBrush}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <StackPanel Orientation="Horizontal">
+                    <Path Data="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z M20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+                          Stroke="{DynamicResource TextFillColorPrimaryBrush}"
+                          StrokeThickness="1.2" Fill="Transparent"
+                          Width="14" Height="14" Stretch="Uniform"
+                          VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock Text="{x:Static fb:FloatingBarStrings.FloatingBar_MiniWhiteboard}"
+                               FontSize="12"
+                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </Border>
+</UserControl>

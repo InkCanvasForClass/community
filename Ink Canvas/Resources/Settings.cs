@@ -54,6 +54,9 @@ namespace Ink_Canvas
 
         [JsonProperty("performance")]
         public PerformanceSettings Performance { get; set; } = new PerformanceSettings();
+
+        [JsonProperty("miniWhiteboard")]
+        public MiniWhiteboardSettings MiniWhiteboard { get; set; } = new MiniWhiteboardSettings();
     }
 
     public class PerformanceSettings
@@ -1194,5 +1197,30 @@ namespace Ink_Canvas
         private List<string> _enabledProviders = new List<string>();
     }
 
+    public class MiniWhiteboardSettings
+    {
+        [JsonProperty("isEnabled")]
+        public bool IsEnabled { get; set; } = true;
 
+        [JsonProperty("defaultWidth")]
+        public double DefaultWidth { get; set; } = 400;
+
+        [JsonProperty("defaultHeight")]
+        public double DefaultHeight { get; set; } = 300;
+
+        [JsonProperty("defaultOpacity")]
+        public double DefaultOpacity { get; set; } = 0.95;
+
+        [JsonProperty("backgroundColor")]
+        public string BackgroundColor { get; set; } = "#FF2A2A2A";
+
+        [JsonProperty("syncWithPptPages")]
+        public bool SyncWithPptPages { get; set; } = true;
+
+        [JsonProperty("penWidth")]
+        public double PenWidth { get; set; } = 3;
+
+        [JsonProperty("penColor")]
+        public string PenColor { get; set; } = "#FFFFFFFF";
+    }
 }
