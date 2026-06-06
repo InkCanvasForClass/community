@@ -40,10 +40,10 @@
 
     <!-- 无标题栏窗口：画布内嵌悬浮白板工具栏，工具栏不贴边 -->
     <Grid x:Name="RootGrid"
-          Background="{DynamicResource BoardFloatBarBackground}"
+          Background="#01000000"
           ClipToBounds="True">
         <InkCanvas x:Name="MiniInkCanvas"
-                   Background="Transparent"
+                   Background="#10FFFFFF"
                    EditingMode="Ink"
                    ClipToBounds="True"
                    ForceCursor="True"

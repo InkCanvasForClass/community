@@ -339,19 +339,7 @@ namespace Ink_Canvas
                 catch { }
             }
 
-            // Parse background color (default: BoardFloatBarBackground dark)
-            Color bgColor = Color.FromRgb(0x2a, 0x2a, 0x2a);
-            if (!string.IsNullOrEmpty(settings.BackgroundColor) && settings.BackgroundColor.StartsWith("#"))
-            {
-                try
-                {
-                    bgColor = (Color)ColorConverter.ConvertFromString(settings.BackgroundColor);
-                }
-                catch { }
-            }
-
             // Apply to canvas
-            MiniInkCanvas.Background = new SolidColorBrush(bgColor);
             MiniInkCanvas.DefaultDrawingAttributes.Color = penColor;
             MiniInkCanvas.DefaultDrawingAttributes.Width = settings.PenWidth;
             MiniInkCanvas.DefaultDrawingAttributes.Height = settings.PenWidth;
