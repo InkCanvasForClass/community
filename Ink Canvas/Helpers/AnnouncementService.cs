@@ -519,11 +519,10 @@ namespace Ink_Canvas.Helpers
                 case "urgent":
                     return NotificationMessageType.Urgent;
                 case "important":
+                case "operation":
                     return NotificationMessageType.Important;
                 case "update":
                     return NotificationMessageType.Update;
-                case "operation":
-                case "custom":
                 case "reminder":
                     return NotificationMessageType.Reminder;
                 default:
@@ -534,6 +533,7 @@ namespace Ink_Canvas.Helpers
         private NotificationMessageLevel MapLevel(string level, string announcementType)
         {
             if (string.Equals(announcementType, "urgent", StringComparison.OrdinalIgnoreCase)) return NotificationMessageLevel.Critical;
+            if (string.Equals(announcementType, "operation", StringComparison.OrdinalIgnoreCase)) return NotificationMessageLevel.High;
 
             switch (level?.ToLowerInvariant())
             {
