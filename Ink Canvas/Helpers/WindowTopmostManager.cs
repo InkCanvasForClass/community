@@ -40,6 +40,14 @@ namespace Ink_Canvas.Helpers
         [DllImport("user32.dll")]
         private static extern bool IsIconic(IntPtr hWnd);
 
+        [DllImport("user32.dll")]
+        private static extern bool EnumThreadWindows(uint dwThreadId, EnumThreadWindowsProc lpfn, IntPtr lParam);
+
+        [DllImport("kernel32.dll")]
+        private static extern uint GetCurrentThreadId();
+
+        private delegate bool EnumThreadWindowsProc(IntPtr hWnd, IntPtr lParam);
+
         private static readonly List<ManagedWindow> ManagedWindows = new List<ManagedWindow>();
         private static readonly object SyncRoot = new object();
         private static DispatcherTimer _maintenanceTimer;
@@ -380,10 +388,51 @@ namespace Ink_Canvas.Helpers
                     SetTopmost(childWindow.Handle);
                     childWindow.AppliedTopmost = true;
                 }
+
+                // 最后提升 Popup 窗口（如 ComboBox 下拉），确保它们在所有子窗口之上
+                BoostPopupWindowsAboveChildren();
             }
             else
             {
                 ReleaseManagedChildTopmostCore();
+            }
+        }
+
+        /// <summary>
+        /// 提升同线程中所有非 managed Window 的 HWND（即 WPF Popup/ComboBox 下拉等）到 TOPMOST 最顶层。
+        /// 在所有子窗口设为 TOPMOST 之后调用，确保 Popup 窗口始终在最上面。
+        /// </summary>
+        private static void BoostPopupWindowsAboveChildren()
+        {
+            try
+            {
+                var currentThreadId = GetCurrentThreadId();
+                var popupHandles = new List<IntPtr>();
+
+                EnumThreadWindows(currentThreadId, (hWnd, _) =>
+                {
+                    if (!IsWindowReady(hWnd)) return true;
+
+                    // 跳过已由 ManagedWindows 管理的窗口（即正式的 Window 对象）
+                    var isManaged = ManagedWindows.Any(w => w.Handle == hWnd);
+                    if (!isManaged)
+                    {
+                        popupHandles.Add(hWnd);
+                    }
+
+                    return true;
+                }, IntPtr.Zero);
+
+                // 对 Popup 窗口再设一次 HWND_TOPMOST，使其排在 TOPMOST 队列最顶部
+                foreach (var hwnd in popupHandles)
+                {
+                    SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"提升 Popup Z 序失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
