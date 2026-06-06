@@ -102,6 +102,7 @@ namespace Ink_Canvas.Windows
 
         private void NewStyleTimerWindow_Closed(object sender, EventArgs e)
         {
+            _minimizedWindow?.Close();
             SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
             timer?.Stop();
             timer?.Dispose();
@@ -881,6 +882,7 @@ namespace Ink_Canvas.Windows
                 {
                     hideTimer.Stop();
                 }
+                _minimizedWindow?.Close();
             }
 
             isOvertimeMode = false;
@@ -1294,8 +1296,37 @@ namespace Ink_Canvas.Windows
             });
         }
 
+        private NewStyleMinimizedTimerWindow _minimizedWindow;
+
         private void HideTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
+            if (!isTimerRunning || isPaused) return;
+
+            var timeSinceLastActivity = DateTime.Now - lastActivityTime;
+            if (timeSinceLastActivity.TotalSeconds >= 5)
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    if (_minimizedWindow != null && _minimizedWindow.IsVisible) return;
+
+                    Hide();
+                    _minimizedWindow = new NewStyleMinimizedTimerWindow(
+                        () => GetRemainingTime(),
+                        () => !isTimerRunning || isPaused,
+                        () =>
+                        {
+                            Show();
+                            Activate();
+                            UpdateActivityTime();
+                        },
+                        () =>
+                        {
+                            StopTimer();
+                        });
+                    _minimizedWindow.Closed += (s, args) => { _minimizedWindow = null; };
+                    _minimizedWindow.Show();
+                });
+            }
         }
 
         public void UpdateActivityTime()
