@@ -189,6 +189,33 @@
   <data name="Canvas_ShowPenCursor" xml:space="preserve">
     <value>Show pen cursor</value>
   </data>
+  <data name="Canvas_PenCursorType" xml:space="preserve">
+    <value>Pen cursor type</value>
+  </data>
+  <data name="Canvas_PenCursorTypeHint" xml:space="preserve">
+    <value>Choose which cursor to show when pen cursor is enabled</value>
+  </data>
+  <data name="Canvas_PenCursorType_System" xml:space="preserve">
+    <value>System cursor</value>
+  </data>
+  <data name="Canvas_PenCursorType_BuiltIn" xml:space="preserve">
+    <value>Built-in cursor</value>
+  </data>
+  <data name="Canvas_PenCursorType_Custom" xml:space="preserve">
+    <value>Custom cursor</value>
+  </data>
+  <data name="Canvas_CustomPenCursorPath" xml:space="preserve">
+    <value>Custom cursor file</value>
+  </data>
+  <data name="Canvas_CustomPenCursorPathHint" xml:space="preserve">
+    <value>Falls back to built-in cursor if no file is selected</value>
+  </data>
+  <data name="Canvas_SelectCustomPenCursor" xml:space="preserve">
+    <value>Select cursor file…</value>
+  </data>
+  <data name="Canvas_CustomPenCursorFilter" xml:space="preserve">
+    <value>Cursor files|*.cur;*.ani</value>
+  </data>
   <data name="Canvas_SwitchBackAfterEraser" xml:space="preserve">
     <value>Switch back to annotation after eraser</value>
   </data>

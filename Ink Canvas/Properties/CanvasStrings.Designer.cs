@@ -138,6 +138,24 @@ namespace Ink_Canvas.Properties
 
         public static string Canvas_ShowPenCursor => ResourceManager.GetString(nameof(Canvas_ShowPenCursor), _resourceCulture);
 
+        public static string Canvas_PenCursorType => ResourceManager.GetString(nameof(Canvas_PenCursorType), _resourceCulture);
+
+        public static string Canvas_PenCursorTypeHint => ResourceManager.GetString(nameof(Canvas_PenCursorTypeHint), _resourceCulture);
+
+        public static string Canvas_PenCursorType_System => ResourceManager.GetString(nameof(Canvas_PenCursorType_System), _resourceCulture);
+
+        public static string Canvas_PenCursorType_BuiltIn => ResourceManager.GetString(nameof(Canvas_PenCursorType_BuiltIn), _resourceCulture);
+
+        public static string Canvas_PenCursorType_Custom => ResourceManager.GetString(nameof(Canvas_PenCursorType_Custom), _resourceCulture);
+
+        public static string Canvas_CustomPenCursorPath => ResourceManager.GetString(nameof(Canvas_CustomPenCursorPath), _resourceCulture);
+
+        public static string Canvas_CustomPenCursorPathHint => ResourceManager.GetString(nameof(Canvas_CustomPenCursorPathHint), _resourceCulture);
+
+        public static string Canvas_SelectCustomPenCursor => ResourceManager.GetString(nameof(Canvas_SelectCustomPenCursor), _resourceCulture);
+
+        public static string Canvas_CustomPenCursorFilter => ResourceManager.GetString(nameof(Canvas_CustomPenCursorFilter), _resourceCulture);
+
         public static string Canvas_SwitchBackAfterEraser => ResourceManager.GetString(nameof(Canvas_SwitchBackAfterEraser), _resourceCulture);
 
         public static string Canvas_SwitchBackAfterEraserHint => ResourceManager.GetString(nameof(Canvas_SwitchBackAfterEraserHint), _resourceCulture);

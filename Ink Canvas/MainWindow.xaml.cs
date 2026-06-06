@@ -77,6 +77,17 @@ namespace Ink_Canvas
 
         private static Cursor _cachedPenCursor = null;
         private static readonly object _cursorLock = new object();
+        private static Cursor _cachedCustomCursor = null;
+        private static string _cachedCustomCursorPath = null;
+
+        public static void ClearCustomCursorCache()
+        {
+            lock (_cursorLock)
+            {
+                _cachedCustomCursor = null;
+                _cachedCustomCursorPath = null;
+            }
+        }
 
         internal static DateTime? TrayTemporaryShowUntilUtc;
 
@@ -2287,38 +2298,28 @@ namespace Ink_Canvas
                 canvas.UseCustomCursor = true;
                 canvas.ForceCursor = true;
 
-                // 根据编辑模式设置不同的光标
-                if (canvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
+                // 根据编辑模式和光标类型设置不同的光标
+                if (canvas.EditingMode == InkCanvasEditingMode.Ink)
                 {
-                    canvas.Cursor = Cursors.Cross;
-                }
-                else if (canvas.EditingMode == InkCanvasEditingMode.Ink)
-                {
-                    if (_cachedPenCursor == null)
+                    int cursorType = Settings.Canvas.PenCursorType;
+                    Cursor targetCursor = null;
+
+                    switch (cursorType)
                     {
-                        lock (_cursorLock)
-                        {
-                            if (_cachedPenCursor == null)
-                            {
-                                try
-                                {
-                                    var sri = Application.GetResourceStream(new Uri("Resources/Cursors/Pen.cur", UriKind.Relative));
-                                    if (sri != null)
-                                    {
-                                        _cachedPenCursor = new Cursor(sri.Stream);
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    LogHelper.WriteLogToFile($"加载 Pen 光标资源失败: {ex.Message}", LogHelper.LogType.Error);
-                                }
-                            }
-                        }
+                        case 0: // 系统光标
+                            targetCursor = Cursors.Arrow;
+                            break;
+
+                        case 2: // 用户自定义光标
+                            targetCursor = LoadCustomCursor(Settings.Canvas.CustomPenCursorPath);
+                            break;
+
+                        default: // 1 - 软件内置光标（默认）
+                            targetCursor = LoadBuiltInPenCursor();
+                            break;
                     }
-                    if (_cachedPenCursor != null)
-                    {
-                        canvas.Cursor = _cachedPenCursor;
-                    }
+
+                    canvas.Cursor = targetCursor ?? LoadBuiltInPenCursor();
                 }
 
                 // 确保光标可见，无论是鼠标、触控还是手写笔
@@ -2331,7 +2332,6 @@ namespace Ink_Canvas
                     {
                         if (device.Type == TabletDeviceType.Stylus)
                         {
-                            // 手写笔设备存在，强制显示光标
                             System.Windows.Forms.Cursor.Show();
                             break;
                         }
@@ -2343,6 +2343,58 @@ namespace Ink_Canvas
                 canvas.UseCustomCursor = false;
                 canvas.ForceCursor = false;
                 System.Windows.Forms.Cursor.Show();
+            }
+        }
+
+        private static Cursor LoadBuiltInPenCursor()
+        {
+            if (_cachedPenCursor == null)
+            {
+                lock (_cursorLock)
+                {
+                    if (_cachedPenCursor == null)
+                    {
+                        try
+                        {
+                            var sri = Application.GetResourceStream(new Uri("Resources/Cursors/Pen.cur", UriKind.Relative));
+                            if (sri != null)
+                            {
+                                _cachedPenCursor = new Cursor(sri.Stream);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"加载 Pen 光标资源失败: {ex.Message}", LogHelper.LogType.Error);
+                        }
+                    }
+                }
+            }
+            return _cachedPenCursor;
+        }
+
+        private static Cursor LoadCustomCursor(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+                return null;
+
+            lock (_cursorLock)
+            {
+                if (string.Equals(_cachedCustomCursorPath, path, StringComparison.OrdinalIgnoreCase) && _cachedCustomCursor != null)
+                    return _cachedCustomCursor;
+
+                try
+                {
+                    _cachedCustomCursor = new Cursor(path);
+                    _cachedCustomCursorPath = path;
+                    return _cachedCustomCursor;
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"加载自定义光标失败 ({path}): {ex.Message}", LogHelper.LogType.Error);
+                    _cachedCustomCursor = null;
+                    _cachedCustomCursorPath = null;
+                    return null;
+                }
             }
         }
 

@@ -14,7 +14,27 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         {
             var mw = GetMainWindow();
             if (mw != null && mw.inkCanvas != null)
+            {
                 mw.inkCanvas.ForceCursor = value;
+                mw.SetCursorBasedOnEditingMode(mw.inkCanvas);
+            }
+        }
+
+        public static void OnPenCursorTypeChanged(int selectedIndex)
+        {
+            var mw = GetMainWindow();
+            if (mw != null && mw.inkCanvas != null)
+                mw.SetCursorBasedOnEditingMode(mw.inkCanvas);
+        }
+
+        public static void OnCustomPenCursorPathChanged()
+        {
+            var mw = GetMainWindow();
+            if (mw != null && mw.inkCanvas != null)
+            {
+                MainWindow.ClearCustomCursorCache();
+                mw.SetCursorBasedOnEditingMode(mw.inkCanvas);
+            }
         }
 
         public static void OnEnablePressureTouchModeChanged(bool value)
