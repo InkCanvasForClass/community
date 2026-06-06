@@ -165,4 +165,16 @@
     <!-- 浮动栏手势按钮图标资源 - 浅色主题 -->
     <BitmapImage x:Key="GestureIcon" UriSource="/Resources/new-icons/gesture.png"/>
     <BitmapImage x:Key="GestureIconEnabled" UriSource="/Resources/new-icons/gesture-enabled.png"/>
+
+    <!-- 灵动通知主题颜色 -->
+    <Color x:Key="NotificationBackgroundColor">#F0FFFFFF</Color>
+    <Color x:Key="NotificationBorderColor">#22000000</Color>
+    <Color x:Key="NotificationForegroundColor">#FF18181B</Color>
+    <Color x:Key="NotificationSecondaryForegroundColor">#9918181B</Color>
+    <Color x:Key="NotificationIconBackgroundColor">#14000000</Color>
+    <Color x:Key="NotificationCloseButtonForegroundColor">#9918181B</Color>
+    <Color x:Key="NotificationActionBackgroundColor">#14000000</Color>
+    <Color x:Key="NotificationActionForegroundColor">#FF18181B</Color>
+    <Color x:Key="NotificationActionBorderColor">#22000000</Color>
+    <Color x:Key="NotificationShadowColor">#22000000</Color>
 </ResourceDictionary>

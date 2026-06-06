@@ -22,10 +22,8 @@
           MouseLeftButtonUp="RootBorder_MouseLeftButtonUp">
         <Border x:Name="RootBorder"
                 Padding="14,10"
-                Background="#E618181B"
-                BorderBrush="#33FFFFFF"
-                BorderThickness="1"
-                CornerRadius="24">
+                CornerRadius="24"
+                BorderThickness="1">
         <Border.Effect>
             <DropShadowEffect BlurRadius="24" ShadowDepth="4" Opacity="0.28" Color="#000000" />
         </Border.Effect>
@@ -46,7 +44,6 @@
                     Width="28"
                     Height="28"
                     CornerRadius="14"
-                    Background="#22FFFFFF"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center">
                 <Grid Width="28" Height="28">
@@ -72,20 +69,17 @@
                              VerticalAlignment="Center" />
                     <ui:FontIcon x:Name="IconGlyph"
                                  FontSize="1"
-                                 Foreground="White"
                                  Visibility="Hidden" />
                 </Grid>
             </Border>
 
             <StackPanel Grid.Row="0" Grid.Column="1" Margin="10,0,8,0" VerticalAlignment="Center">
                 <TextBlock x:Name="TitleTextBlock"
-                           Foreground="White"
                            FontSize="14"
                            FontWeight="SemiBold"
                            TextTrimming="CharacterEllipsis" />
                 <TextBlock x:Name="SummaryTextBlock"
                            Margin="0,2,0,0"
-                           Foreground="#D6FFFFFF"
                            FontSize="12"
                            TextTrimming="CharacterEllipsis" />
             </StackPanel>
@@ -98,7 +92,7 @@
                     Background="Transparent"
                     BorderThickness="0"
                     Click="CloseButton_Click">
-                <TextBlock Text="×" FontSize="18" Foreground="#E8FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <TextBlock x:Name="CloseButtonText" Text="×" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Button>
 
             <StackPanel x:Name="ExpandedPanel"
@@ -108,7 +102,6 @@
                         Margin="0,12,0,0"
                         Visibility="Collapsed">
                 <TextBlock x:Name="ContentTextBlock"
-                           Foreground="#E8FFFFFF"
                            FontSize="13"
                            TextWrapping="Wrap"
                            TextTrimming="CharacterEllipsis"
@@ -117,6 +110,7 @@
                     <Button x:Name="ActionButton"
                             MinWidth="92"
                             Padding="14,6"
+                            BorderThickness="1"
                             Click="ActionButton_Click" />
                 </StackPanel>
             </StackPanel>

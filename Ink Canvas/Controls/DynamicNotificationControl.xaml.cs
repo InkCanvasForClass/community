@@ -16,6 +16,7 @@ namespace Ink_Canvas.Controls
         private readonly DispatcherTimer autoCloseTimer = new DispatcherTimer();
         private NotificationMessage currentMessage;
         private bool isExpanded;
+        private bool isDarkTheme = true;
 
         public event EventHandler Closed;
 
@@ -48,6 +49,18 @@ namespace Ink_Canvas.Controls
             autoCloseTimer.Start();
         }
 
+        /// <summary>
+        /// 刷新通知主题颜色，在全局主题切换时调用
+        /// </summary>
+        public void RefreshTheme(bool isDark)
+        {
+            isDarkTheme = isDark;
+            if (Visibility == Visibility.Visible && currentMessage != null)
+            {
+                ApplyThemeColors(currentMessage);
+            }
+        }
+
         private FontIconData GetIcon(NotificationMessage message)
         {
             if (message?.Level >= NotificationMessageLevel.High) return SegoeFluentIcons.Warning;
@@ -77,9 +90,31 @@ namespace Ink_Canvas.Controls
             ContentTextBlock.Foreground = new SolidColorBrush(secondaryForeground);
             IconGlyph.Foreground = new SolidColorBrush(foreground);
             IconBackgroundBorder.Background = new SolidColorBrush(iconBackground);
+            CloseButtonText.Foreground = new SolidColorBrush(secondaryForeground);
+
+            // 操作按钮使用半透明主题色
+            if (isDarkTheme)
+            {
+                ActionButton.Background = new SolidColorBrush(Color.FromArgb(34, 255, 255, 255));
+                ActionButton.Foreground = new SolidColorBrush(Colors.White);
+                ActionButton.BorderBrush = new SolidColorBrush(Color.FromArgb(51, 255, 255, 255));
+            }
+            else
+            {
+                ActionButton.Background = new SolidColorBrush(Color.FromArgb(20, 0, 0, 0));
+                ActionButton.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                ActionButton.BorderBrush = new SolidColorBrush(Color.FromArgb(34, 0, 0, 0));
+            }
         }
 
-        private static (Color Background, Color Border, Color Foreground, Color SecondaryForeground, Color IconBackground) GetThemeColors(NotificationMessage message)
+        private (Color Background, Color Border, Color Foreground, Color SecondaryForeground, Color IconBackground) GetThemeColors(NotificationMessage message)
+        {
+            if (isDarkTheme)
+                return GetDarkThemeColors(message);
+            return GetLightThemeColors(message);
+        }
+
+        private static (Color Background, Color Border, Color Foreground, Color SecondaryForeground, Color IconBackground) GetDarkThemeColors(NotificationMessage message)
         {
             if (message?.Level >= NotificationMessageLevel.Critical || message?.Type == NotificationMessageType.Urgent)
                 return (Color.FromArgb(238, 91, 30, 33), Color.FromRgb(255, 107, 107), Colors.White, Color.FromArgb(230, 255, 255, 255), Color.FromArgb(38, 255, 255, 255));
@@ -94,6 +129,23 @@ namespace Ink_Canvas.Controls
                 return (Color.FromArgb(238, 31, 82, 47), Color.FromRgb(102, 187, 106), Colors.White, Color.FromArgb(230, 255, 255, 255), Color.FromArgb(38, 255, 255, 255));
 
             return (Color.FromArgb(238, 28, 32, 42), Color.FromRgb(66, 165, 245), Colors.White, Color.FromArgb(230, 255, 255, 255), Color.FromArgb(38, 255, 255, 255));
+        }
+
+        private static (Color Background, Color Border, Color Foreground, Color SecondaryForeground, Color IconBackground) GetLightThemeColors(NotificationMessage message)
+        {
+            if (message?.Level >= NotificationMessageLevel.Critical || message?.Type == NotificationMessageType.Urgent)
+                return (Color.FromArgb(245, 255, 241, 242), Color.FromRgb(220, 80, 80), Color.FromRgb(153, 27, 27), Color.FromArgb(200, 153, 27, 27), Color.FromArgb(30, 220, 80, 80));
+
+            if (message?.Level >= NotificationMessageLevel.High || message?.Type == NotificationMessageType.Important)
+                return (Color.FromArgb(245, 255, 251, 235), Color.FromRgb(217, 153, 43), Color.FromRgb(146, 96, 14), Color.FromArgb(200, 146, 96, 14), Color.FromArgb(30, 217, 153, 43));
+
+            if (message?.Type == NotificationMessageType.Update)
+                return (Color.FromArgb(245, 235, 245, 255), Color.FromRgb(59, 130, 246), Color.FromRgb(30, 64, 175), Color.FromArgb(200, 30, 64, 175), Color.FromArgb(30, 59, 130, 246));
+
+            if (message?.Type == NotificationMessageType.Reminder)
+                return (Color.FromArgb(245, 240, 253, 244), Color.FromRgb(72, 160, 82), Color.FromRgb(22, 101, 52), Color.FromArgb(200, 22, 101, 52), Color.FromArgb(30, 72, 160, 82));
+
+            return (Color.FromArgb(245, 240, 245, 255), Color.FromRgb(59, 130, 246), Color.FromRgb(30, 64, 175), Color.FromArgb(200, 30, 64, 175), Color.FromArgb(30, 59, 130, 246));
         }
 
         private void RootBorder_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
