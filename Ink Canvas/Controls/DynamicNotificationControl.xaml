@@ -117,13 +117,14 @@
             </Grid>
         </Border>
 
-        <Path x:Name="CountdownProgressPath"
-              Panel.ZIndex="1"
-              IsHitTestVisible="False"
-              StrokeThickness="2.5"
-              StrokeStartLineCap="Round"
-              StrokeEndLineCap="Round"
-              StrokeLineJoin="Round"
-              Visibility="Collapsed" />
+        <Canvas Panel.ZIndex="1"
+                IsHitTestVisible="False">
+            <Path x:Name="CountdownProgressPath"
+                  StrokeThickness="2.5"
+                  StrokeStartLineCap="Round"
+                  StrokeEndLineCap="Round"
+                  StrokeLineJoin="Round"
+                  Visibility="Collapsed" />
+        </Canvas>
     </Grid>
 </UserControl>

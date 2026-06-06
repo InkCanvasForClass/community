@@ -20,6 +20,7 @@ namespace Ink_Canvas.Controls
         private bool isDarkTheme = true;
         private bool isClosing;
         private bool isCountdownRendering;
+        private double countdownProgressLength;
 
         public event EventHandler Closed;
 
@@ -156,6 +157,7 @@ namespace Ink_Canvas.Controls
             if (e.OriginalSource is Button) return;
             isExpanded = !isExpanded;
             ExpandedPanel.Visibility = isExpanded ? Visibility.Visible : Visibility.Collapsed;
+            Dispatcher.BeginInvoke(new Action(UpdateCountdownProgress), System.Windows.Threading.DispatcherPriority.Loaded);
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
@@ -198,6 +200,7 @@ namespace Ink_Canvas.Controls
 
         private void RootContainer_SizeChanged(object sender, SizeChangedEventArgs e)
         {
+            UpdateCountdownProgressPathGeometry();
             UpdateCountdownProgress();
         }
 
@@ -207,6 +210,7 @@ namespace Ink_Canvas.Controls
             countdownRemaining = duration;
             countdownStopwatch.Restart();
             CountdownProgressPath.Visibility = Visibility.Visible;
+            UpdateCountdownProgressPathGeometry();
             BeginCountdownRendering();
             UpdateCountdownProgress();
         }
@@ -270,10 +274,10 @@ namespace Ink_Canvas.Controls
             }
 
             var progress = countdownDuration.TotalMilliseconds <= 0 ? 0 : remaining.TotalMilliseconds / countdownDuration.TotalMilliseconds;
-            UpdateCountdownProgressPath(progress);
+            UpdateCountdownProgressDash(progress);
         }
 
-        private void UpdateCountdownProgressPath(double progress)
+        private void UpdateCountdownProgressPathGeometry()
         {
             var width = RootContainer.ActualWidth;
             var height = RootContainer.ActualHeight;
@@ -282,7 +286,6 @@ namespace Ink_Canvas.Controls
                 return;
             }
 
-            progress = Math.Max(0, Math.Min(1, progress));
             var thickness = CountdownProgressPath.StrokeThickness;
             var radius = Math.Max(0, RootBorder.CornerRadius.TopLeft - thickness / 2);
             var left = thickness / 2;
@@ -292,8 +295,8 @@ namespace Ink_Canvas.Controls
             var horizontalLength = Math.Max(0, right - left - radius * 2);
             var verticalLength = Math.Max(0, bottom - top - radius * 2);
             var arcLength = Math.PI * radius / 2;
-            var totalLength = horizontalLength * 2 + verticalLength * 2 + arcLength * 4;
-            if (totalLength <= 0)
+            countdownProgressLength = horizontalLength * 2 + verticalLength * 2 + arcLength * 4;
+            if (countdownProgressLength <= 0)
             {
                 return;
             }
@@ -311,11 +314,27 @@ namespace Ink_Canvas.Controls
             figure.Segments.Add(new LineSegment(start, true));
 
             CountdownProgressPath.Data = new PathGeometry(new[] { figure });
+        }
+
+        private void UpdateCountdownProgressDash(double progress)
+        {
+            if (countdownProgressLength <= 0)
+            {
+                UpdateCountdownProgressPathGeometry();
+            }
+
+            if (countdownProgressLength <= 0)
+            {
+                return;
+            }
+
+            progress = Math.Max(0, Math.Min(1, progress));
+            var thickness = CountdownProgressPath.StrokeThickness;
             CountdownProgressPath.StrokeDashOffset = 0;
             CountdownProgressPath.StrokeDashArray = new DoubleCollection
             {
-                totalLength * progress / thickness,
-                totalLength / thickness
+                countdownProgressLength * progress / thickness,
+                countdownProgressLength / thickness
             };
         }
 
