@@ -554,6 +554,9 @@
     <EmbeddedResource Update="Properties\*.en-US.resx">
       <WithCulture>false</WithCulture>
     </EmbeddedResource>
+    <EmbeddedResource Update="Properties\*.zh-ME.resx">
+      <WithCulture>false</WithCulture>
+    </EmbeddedResource>
   </ItemGroup>
   
   <Target Name="SetAssemblyInformationalVersion" DependsOnTargets="GetBuildVersion" AfterTargets="GetBuildVersion">

@@ -20,6 +20,11 @@ namespace Ink_Canvas.Helpers
         private readonly ConcurrentDictionary<Stroke, CancellationTokenSource> _processingTasks;
         private readonly Dispatcher _uiDispatcher;
 
+        /// <summary>
+        /// 可选的性能监控器，由 InkSmoothingManager 注入
+        /// </summary>
+        public InkSmoothingPerformanceMonitor PerformanceMonitor { get; set; }
+
         public AsyncAdvancedBezierSmoothing(Dispatcher uiDispatcher)
         {
             _uiDispatcher = uiDispatcher;
@@ -92,8 +97,11 @@ namespace Ink_Canvas.Helpers
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            // 使用改进的贝塞尔曲线拟合
+            // 使用改进的贝塞尔曲线拟合（计时）
+            var bezierWatch = System.Diagnostics.Stopwatch.StartNew();
             var smoothedPoints = ApplyImprovedBezierSmoothing(originalPoints);
+            bezierWatch.Stop();
+            PerformanceMonitor?.RecordBezierTime(bezierWatch.Elapsed);
 
             System.Diagnostics.Debug.WriteLine($"AsyncAdvancedBezierSmoothing: 原始点数={originalPoints.Length}, 平滑后点数={smoothedPoints.Length}");
 
@@ -104,8 +112,14 @@ namespace Ink_Canvas.Helpers
             {
                 System.Diagnostics.Debug.WriteLine($"AsyncAdvancedBezierSmoothing: 点数过多，进行重采样");
                 // 如果点数增加太多，进行重采样
+                var resampleWatch = System.Diagnostics.Stopwatch.StartNew();
                 smoothedPoints = ResampleEquidistantOptimized(smoothedPoints, ResampleInterval);
+                resampleWatch.Stop();
+                PerformanceMonitor?.RecordResampleTime(resampleWatch.Elapsed);
             }
+
+            // 记录输入/输出点数
+            PerformanceMonitor?.RecordPointCounts(originalPoints.Length, smoothedPoints.Length);
 
             // 进一步放宽最终检查
             if (smoothedPoints.Length > originalPoints.Length * 2.5)
@@ -1034,11 +1048,15 @@ namespace Ink_Canvas.Helpers
     }
 
     /// <summary>
-    /// 性能监控器
+    /// 性能监控器（含分阶段计时）
     /// </summary>
     public class InkSmoothingPerformanceMonitor
     {
         private readonly Queue<TimeSpan> _processingTimes = new Queue<TimeSpan>();
+        private readonly Queue<TimeSpan> _bezierTimes = new Queue<TimeSpan>();
+        private readonly Queue<TimeSpan> _resampleTimes = new Queue<TimeSpan>();
+        private readonly Queue<int> _inputPointCounts = new Queue<int>();
+        private readonly Queue<int> _outputPointCounts = new Queue<int>();
         private readonly object _lock = new object();
         private const int MaxSamples = 100;
 
@@ -1049,6 +1067,39 @@ namespace Ink_Canvas.Helpers
                 _processingTimes.Enqueue(time);
                 if (_processingTimes.Count > MaxSamples)
                     _processingTimes.Dequeue();
+            }
+        }
+
+        public void RecordBezierTime(TimeSpan time)
+        {
+            lock (_lock)
+            {
+                _bezierTimes.Enqueue(time);
+                if (_bezierTimes.Count > MaxSamples)
+                    _bezierTimes.Dequeue();
+            }
+        }
+
+        public void RecordResampleTime(TimeSpan time)
+        {
+            lock (_lock)
+            {
+                _resampleTimes.Enqueue(time);
+                if (_resampleTimes.Count > MaxSamples)
+                    _resampleTimes.Dequeue();
+            }
+        }
+
+        public void RecordPointCounts(int inputCount, int outputCount)
+        {
+            lock (_lock)
+            {
+                _inputPointCounts.Enqueue(inputCount);
+                _outputPointCounts.Enqueue(outputCount);
+                if (_inputPointCounts.Count > MaxSamples)
+                    _inputPointCounts.Dequeue();
+                if (_outputPointCounts.Count > MaxSamples)
+                    _outputPointCounts.Dequeue();
             }
         }
 
@@ -1067,6 +1118,42 @@ namespace Ink_Canvas.Helpers
             {
                 return _processingTimes.Count > 0 ?
                     _processingTimes.Max(t => t.TotalMilliseconds) : 0;
+            }
+        }
+
+        public double GetAverageBezierTimeMs()
+        {
+            lock (_lock)
+            {
+                return _bezierTimes.Count > 0 ?
+                    _bezierTimes.Average(t => t.TotalMilliseconds) : 0;
+            }
+        }
+
+        public double GetAverageResampleTimeMs()
+        {
+            lock (_lock)
+            {
+                return _resampleTimes.Count > 0 ?
+                    _resampleTimes.Average(t => t.TotalMilliseconds) : 0;
+            }
+        }
+
+        public double GetAverageInputPointCount()
+        {
+            lock (_lock)
+            {
+                return _inputPointCounts.Count > 0 ?
+                    _inputPointCounts.Average() : 0;
+            }
+        }
+
+        public double GetAverageOutputPointCount()
+        {
+            lock (_lock)
+            {
+                return _outputPointCounts.Count > 0 ?
+                    _outputPointCounts.Average() : 0;
             }
         }
 

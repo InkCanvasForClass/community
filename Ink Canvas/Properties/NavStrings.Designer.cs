@@ -169,5 +169,9 @@ namespace Ink_Canvas.Properties
         public static string Nav_PreloadPagesFailed => ResourceManager.GetString(nameof(Nav_PreloadPagesFailed), _resourceCulture);
 
         public static string Settings_Description => ResourceManager.GetString(nameof(Settings_Description), _resourceCulture);
+
+        public static string Nav_Performance => ResourceManager.GetString(nameof(Nav_Performance), _resourceCulture);
+
+        public static string Nav_Performance_Tooltip => ResourceManager.GetString(nameof(Nav_Performance_Tooltip), _resourceCulture);
     }
 }

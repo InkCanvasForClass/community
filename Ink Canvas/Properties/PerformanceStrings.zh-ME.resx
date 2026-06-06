@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Title" xml:space="preserve">
+    <value>摸鱼性能</value>
+  </data>
+  <data name="EnableMonitoring" xml:space="preserve">
+    <value>开启性能监控（看看电脑累不累）</value>
+  </data>
+  <data name="EnableMonitoringHint" xml:space="preserve">
+    <value>每隔一段时间看看 CPU 和内存在干嘛，记下最近 30 次的摸鱼数据。关了就全清空咯。</value>
+  </data>
+  <data name="CurrentSession" xml:space="preserve">
+    <value>本次摸鱼状态</value>
+  </data>
+  <data name="CpuUsage" xml:space="preserve">
+    <value>CPU 在摸鱼吗</value>
+  </data>
+  <data name="SystemCpuUsage" xml:space="preserve">
+    <value>整机 CPU</value>
+  </data>
+  <data name="MemoryUsage" xml:space="preserve">
+    <value>内存吃撑了吗</value>
+  </data>
+  <data name="MonitoringInactive" xml:space="preserve">
+    <value>监控没开，CPU 在偷偷摸鱼</value>
+  </data>
+  <data name="MonitoringActive" xml:space="preserve">
+    <value>正在偷看中...</value>
+  </data>
+  <data name="HistorySection" xml:space="preserve">
+    <value>摸鱼历史档案</value>
+  </data>
+  <data name="HistoryHint" xml:space="preserve">
+    <value>最近 30 次运行的 CPU 和内存平均摸鱼指数</value>
+  </data>
+  <data name="NoHistory" xml:space="preserve">
+    <value>还没有摸鱼记录，先开监控吧</value>
+  </data>
+  <data name="HistoryRunCount" xml:space="preserve">
+    <value>共摸了 {0} 次鱼</value>
+  </data>
+  <data name="AvgCpuLabel" xml:space="preserve">
+    <value>平均 CPU</value>
+  </data>
+  <data name="AvgMemoryLabel" xml:space="preserve">
+    <value>平均内存</value>
+  </data>
+  <data name="PeakCpuLabel" xml:space="preserve">
+    <value>最高 CPU</value>
+  </data>
+  <data name="PeakMemoryLabel" xml:space="preserve">
+    <value>最高内存</value>
+  </data>
+  <data name="ClearHistory" xml:space="preserve">
+    <value>清空摸鱼记录</value>
+  </data>
+  <data name="ClearHistoryConfirm" xml:space="preserve">
+    <value>确定要销毁所有摸鱼证据吗？删了就真没了！</value>
+  </data>
+  <data name="DeviceScoreSection" xml:space="preserve">
+    <value>体检中心</value>
+  </data>
+  <data name="DeviceScoreHint" xml:space="preserve">
+    <value>给你的电脑做个全身体检，看看它还能不能打</value>
+  </data>
+  <data name="RunDeviceTest" xml:space="preserve">
+    <value>开始体检</value>
+  </data>
+  <data name="DeviceScoreResult" xml:space="preserve">
+    <value>综合得分</value>
+  </data>
+  <data name="DeviceScoreExcellent" xml:space="preserve">
+    <value>优秀 — 这电脑太能打了！</value>
+  </data>
+  <data name="DeviceScoreGood" xml:space="preserve">
+    <value>良好 — 还行还行，够用了</value>
+  </data>
+  <data name="DeviceScoreFair" xml:space="preserve">
+    <value>一般 — 勉强能跑，偶尔会喘气</value>
+  </data>
+  <data name="DeviceScorePoor" xml:space="preserve">
+    <value>较差 — 这电脑该退休了，建议换一台</value>
+  </data>
+  <data name="DeviceScoreUnknown" xml:space="preserve">
+    <value>还没体检过</value>
+  </data>
+  <data name="CpuScore" xml:space="preserve">
+    <value>CPU 体检分</value>
+  </data>
+  <data name="MemoryScore" xml:space="preserve">
+    <value>内存体检分</value>
+  </data>
+  <data name="DiskScore" xml:space="preserve">
+    <value>磁盘体检分</value>
+  </data>
+  <data name="LastTestTime" xml:space="preserve">
+    <value>上次体检时间</value>
+  </data>
+  <data name="TestInProgress" xml:space="preserve">
+    <value>体检中，请稍候...</value>
+  </data>
+  <data name="InkSmoothingSection" xml:space="preserve">
+    <value>笔迹整形耗时</value>
+  </data>
+  <data name="InkSmoothingHint" xml:space="preserve">
+    <value>最近 100 次笔画整容手术的耗时记录</value>
+  </data>
+  <data name="InkSmoothingInactive" xml:space="preserve">
+    <value>整形手术没开，或者还没人做过</value>
+  </data>
+  <data name="InkSmoothingAvgTotal" xml:space="preserve">
+    <value>平均手术时长</value>
+  </data>
+  <data name="InkSmoothingMaxTotal" xml:space="preserve">
+    <value>最长手术时长</value>
+  </data>
+  <data name="InkSmoothingAvgBezier" xml:space="preserve">
+    <value>贝塞尔切割</value>
+  </data>
+  <data name="InkSmoothingAvgResample" xml:space="preserve">
+    <value>重采样打磨</value>
+  </data>
+  <data name="InkSmoothingAvgInputPoints" xml:space="preserve">
+    <value>平均送入点数</value>
+  </data>
+  <data name="InkSmoothingAvgOutputPoints" xml:space="preserve">
+    <value>平均产出点数</value>
+  </data>
+  <data name="InkSmoothingSampleCount" xml:space="preserve">
+    <value>已整形笔画数</value>
+  </data>
+</root>

@@ -939,6 +939,11 @@ namespace Ink_Canvas
         private DrawingAttributes drawingAttributes;
         private InkSmoothingManager _inkSmoothingManager;
 
+        /// <summary>
+        /// 墨迹平滑管理器实例（供性能页面读取统计）
+        /// </summary>
+        public InkSmoothingManager InkSmoothingManagerInstance => _inkSmoothingManager;
+
         private DispatcherTimer _brushAutoRestoreTimer;
 
         /// <summary>
@@ -1469,6 +1474,8 @@ namespace Ink_Canvas
             InitializePopupManager();
             //加载设置
             LoadSettings(true);
+            // 启动性能监测（如果已启用）
+            PerformanceMonitorHelper.StartIfEnabled();
             // 根据ToolbarPosition设置更新工具栏结构和位置
             UpdateToolbarPosition();
             // 启动时直接设置浮动栏位置，跳过动画

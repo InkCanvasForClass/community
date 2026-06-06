@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Performance</value>
+  </data>
+  <data name="EnableMonitoring" xml:space="preserve">
+    <value>Enable Performance Monitoring</value>
+  </data>
+  <data name="EnableMonitoringHint" xml:space="preserve">
+    <value>Periodically collect CPU and memory usage during runtime, keeping data for the last 30 runs. Disabling will stop collection and clear history.</value>
+  </data>
+  <data name="CurrentSession" xml:space="preserve">
+    <value>Current Session</value>
+  </data>
+  <data name="CpuUsage" xml:space="preserve">
+    <value>CPU Usage</value>
+  </data>
+  <data name="SystemCpuUsage" xml:space="preserve">
+    <value>System CPU</value>
+  </data>
+  <data name="MemoryUsage" xml:space="preserve">
+    <value>Memory Usage</value>
+  </data>
+  <data name="MonitoringInactive" xml:space="preserve">
+    <value>Performance monitoring is disabled</value>
+  </data>
+  <data name="MonitoringActive" xml:space="preserve">
+    <value>Collecting data...</value>
+  </data>
+  <data name="HistorySection" xml:space="preserve">
+    <value>Run History</value>
+  </data>
+  <data name="HistoryHint" xml:space="preserve">
+    <value>Average CPU and memory usage recorded over the last 30 runs</value>
+  </data>
+  <data name="NoHistory" xml:space="preserve">
+    <value>No history data available</value>
+  </data>
+  <data name="HistoryRunCount" xml:space="preserve">
+    <value>{0} run(s) recorded</value>
+  </data>
+  <data name="AvgCpuLabel" xml:space="preserve">
+    <value>Avg CPU</value>
+  </data>
+  <data name="AvgMemoryLabel" xml:space="preserve">
+    <value>Avg Memory</value>
+  </data>
+  <data name="PeakCpuLabel" xml:space="preserve">
+    <value>Peak CPU</value>
+  </data>
+  <data name="PeakMemoryLabel" xml:space="preserve">
+    <value>Peak Memory</value>
+  </data>
+  <data name="ClearHistory" xml:space="preserve">
+    <value>Clear History</value>
+  </data>
+  <data name="ClearHistoryConfirm" xml:space="preserve">
+    <value>Are you sure you want to clear all performance history? This action cannot be undone.</value>
+  </data>
+  <data name="DeviceScoreSection" xml:space="preserve">
+    <value>Device Performance Evaluation</value>
+  </data>
+  <data name="DeviceScoreHint" xml:space="preserve">
+    <value>Evaluate your device's hardware performance and check if it can run this software smoothly</value>
+  </data>
+  <data name="RunDeviceTest" xml:space="preserve">
+    <value>Start Evaluation</value>
+  </data>
+  <data name="DeviceScoreResult" xml:space="preserve">
+    <value>Overall Score</value>
+  </data>
+  <data name="DeviceScoreExcellent" xml:space="preserve">
+    <value>Excellent — Great device performance, runs smoothly</value>
+  </data>
+  <data name="DeviceScoreGood" xml:space="preserve">
+    <value>Good — Adequate performance, no issues expected</value>
+  </data>
+  <data name="DeviceScoreFair" xml:space="preserve">
+    <value>Fair — Meets minimum requirements, minor stutters possible</value>
+  </data>
+  <data name="DeviceScorePoor" xml:space="preserve">
+    <value>Poor — Insufficient performance, consider upgrading hardware</value>
+  </data>
+  <data name="DeviceScoreUnknown" xml:space="preserve">
+    <value>Not evaluated</value>
+  </data>
+  <data name="CpuScore" xml:space="preserve">
+    <value>CPU Score</value>
+  </data>
+  <data name="MemoryScore" xml:space="preserve">
+    <value>Memory Score</value>
+  </data>
+  <data name="DiskScore" xml:space="preserve">
+    <value>Disk Score</value>
+  </data>
+  <data name="LastTestTime" xml:space="preserve">
+    <value>Last Evaluation Time</value>
+  </data>
+  <data name="TestInProgress" xml:space="preserve">
+    <value>Evaluating...</value>
+  </data>
+  <data name="InkSmoothingSection" xml:space="preserve">
+    <value>Ink Correction Timing</value>
+  </data>
+  <data name="InkSmoothingHint" xml:space="preserve">
+    <value>Timing statistics for the last 100 stroke smoothing operations</value>
+  </data>
+  <data name="InkSmoothingInactive" xml:space="preserve">
+    <value>Curve smoothing is disabled or no data available</value>
+  </data>
+  <data name="InkSmoothingAvgTotal" xml:space="preserve">
+    <value>Avg Total Time</value>
+  </data>
+  <data name="InkSmoothingMaxTotal" xml:space="preserve">
+    <value>Max Total Time</value>
+  </data>
+  <data name="InkSmoothingAvgBezier" xml:space="preserve">
+    <value>Bezier Computation</value>
+  </data>
+  <data name="InkSmoothingAvgResample" xml:space="preserve">
+    <value>Resampling</value>
+  </data>
+  <data name="InkSmoothingAvgInputPoints" xml:space="preserve">
+    <value>Avg Input Points</value>
+  </data>
+  <data name="InkSmoothingAvgOutputPoints" xml:space="preserve">
+    <value>Avg Output Points</value>
+  </data>
+  <data name="InkSmoothingSampleCount" xml:space="preserve">
+    <value>Strokes Sampled</value>
+  </data>
+</root>

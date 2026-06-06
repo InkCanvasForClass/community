@@ -237,4 +237,10 @@
   <data name="Settings_Description" xml:space="preserve">
     <value>这里是调教中心</value>
   </data>
+  <data name="Nav_Performance" xml:space="preserve">
+    <value>体检</value>
+  </data>
+  <data name="Nav_Performance_Tooltip" xml:space="preserve">
+    <value>给电脑做体检，看看它行不行</value>
+  </data>
 </root>

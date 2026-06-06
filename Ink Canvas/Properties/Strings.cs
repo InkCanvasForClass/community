@@ -1267,6 +1267,51 @@ namespace Ink_Canvas.Properties
             dict["ToolbarCondition_Annotating"] = ("FloatingBarStrings", "ToolbarCondition_Annotating");
             dict["ToolbarCondition_PptMode"] = ("FloatingBarStrings", "ToolbarCondition_PptMode");
             dict["ToolbarCondition_Collapsed"] = ("FloatingBarStrings", "ToolbarCondition_Collapsed");
+            dict["Performance_Title"] = ("PerformanceStrings", "Title");
+            dict["Performance_EnableMonitoring"] = ("PerformanceStrings", "EnableMonitoring");
+            dict["Performance_EnableMonitoringHint"] = ("PerformanceStrings", "EnableMonitoringHint");
+            dict["Performance_CurrentSession"] = ("PerformanceStrings", "CurrentSession");
+            dict["Performance_CpuUsage"] = ("PerformanceStrings", "CpuUsage");
+            dict["Performance_SystemCpuUsage"] = ("PerformanceStrings", "SystemCpuUsage");
+            dict["Performance_MemoryUsage"] = ("PerformanceStrings", "MemoryUsage");
+            dict["Performance_MonitoringInactive"] = ("PerformanceStrings", "MonitoringInactive");
+            dict["Performance_MonitoringActive"] = ("PerformanceStrings", "MonitoringActive");
+            dict["Performance_HistorySection"] = ("PerformanceStrings", "HistorySection");
+            dict["Performance_HistoryHint"] = ("PerformanceStrings", "HistoryHint");
+            dict["Performance_NoHistory"] = ("PerformanceStrings", "NoHistory");
+            dict["Performance_HistoryRunCount"] = ("PerformanceStrings", "HistoryRunCount");
+            dict["Performance_AvgCpuLabel"] = ("PerformanceStrings", "AvgCpuLabel");
+            dict["Performance_AvgMemoryLabel"] = ("PerformanceStrings", "AvgMemoryLabel");
+            dict["Performance_PeakCpuLabel"] = ("PerformanceStrings", "PeakCpuLabel");
+            dict["Performance_PeakMemoryLabel"] = ("PerformanceStrings", "PeakMemoryLabel");
+            dict["Performance_ClearHistory"] = ("PerformanceStrings", "ClearHistory");
+            dict["Performance_ClearHistoryConfirm"] = ("PerformanceStrings", "ClearHistoryConfirm");
+            dict["Performance_DeviceScoreSection"] = ("PerformanceStrings", "DeviceScoreSection");
+            dict["Performance_DeviceScoreHint"] = ("PerformanceStrings", "DeviceScoreHint");
+            dict["Performance_RunDeviceTest"] = ("PerformanceStrings", "RunDeviceTest");
+            dict["Performance_DeviceScoreResult"] = ("PerformanceStrings", "DeviceScoreResult");
+            dict["Performance_DeviceScoreExcellent"] = ("PerformanceStrings", "DeviceScoreExcellent");
+            dict["Performance_DeviceScoreGood"] = ("PerformanceStrings", "DeviceScoreGood");
+            dict["Performance_DeviceScoreFair"] = ("PerformanceStrings", "DeviceScoreFair");
+            dict["Performance_DeviceScorePoor"] = ("PerformanceStrings", "DeviceScorePoor");
+            dict["Performance_DeviceScoreUnknown"] = ("PerformanceStrings", "DeviceScoreUnknown");
+            dict["Performance_CpuScore"] = ("PerformanceStrings", "CpuScore");
+            dict["Performance_MemoryScore"] = ("PerformanceStrings", "MemoryScore");
+            dict["Performance_DiskScore"] = ("PerformanceStrings", "DiskScore");
+            dict["Performance_LastTestTime"] = ("PerformanceStrings", "LastTestTime");
+            dict["Performance_TestInProgress"] = ("PerformanceStrings", "TestInProgress");
+            dict["Performance_InkSmoothingSection"] = ("PerformanceStrings", "InkSmoothingSection");
+            dict["Performance_InkSmoothingHint"] = ("PerformanceStrings", "InkSmoothingHint");
+            dict["Performance_InkSmoothingInactive"] = ("PerformanceStrings", "InkSmoothingInactive");
+            dict["Performance_InkSmoothingAvgTotal"] = ("PerformanceStrings", "InkSmoothingAvgTotal");
+            dict["Performance_InkSmoothingMaxTotal"] = ("PerformanceStrings", "InkSmoothingMaxTotal");
+            dict["Performance_InkSmoothingAvgBezier"] = ("PerformanceStrings", "InkSmoothingAvgBezier");
+            dict["Performance_InkSmoothingAvgResample"] = ("PerformanceStrings", "InkSmoothingAvgResample");
+            dict["Performance_InkSmoothingAvgInputPoints"] = ("PerformanceStrings", "InkSmoothingAvgInputPoints");
+            dict["Performance_InkSmoothingAvgOutputPoints"] = ("PerformanceStrings", "InkSmoothingAvgOutputPoints");
+            dict["Performance_InkSmoothingSampleCount"] = ("PerformanceStrings", "InkSmoothingSampleCount");
+            dict["Nav_Performance"] = ("NavStrings", "Nav_Performance");
+            dict["Nav_Performance_Tooltip"] = ("NavStrings", "Nav_Performance_Tooltip");
             return dict;
         }
 
@@ -1295,6 +1340,7 @@ namespace Ink_Canvas.Properties
                 HomeStrings.Culture = value;
                 NavStrings.Culture = value;
                 NotificationStrings.Culture = value;
+                PerformanceStrings.Culture = value;
                 PPTStrings.Culture = value;
                 PluginStrings.Culture = value;
                 RandomStrings.Culture = value;
@@ -1353,6 +1399,7 @@ namespace Ink_Canvas.Properties
                 "TimerStrings" => TimerStrings.GetString(key),
                 "UpdateCenterPanelStrings" => UpdateCenterPanelStrings.GetString(key),
                 "UpdateStrings" => UpdateStrings.GetString(key),
+                "PerformanceStrings" => PerformanceStrings.GetString(key),
                 "WindowStrings" => WindowStrings.GetString(key),
                 _ => "#" + group + "." + key
             };

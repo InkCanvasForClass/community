@@ -237,4 +237,10 @@
   <data name="Settings_Description" xml:space="preserve">
     <value>This is the settings page</value>
   </data>
+  <data name="Nav_Performance" xml:space="preserve">
+    <value>Performance</value>
+  </data>
+  <data name="Nav_Performance_Tooltip" xml:space="preserve">
+    <value>Performance monitoring and device evaluation</value>
+  </data>
 </root>

@@ -51,6 +51,60 @@ namespace Ink_Canvas
 
         [JsonProperty("boardToolbarConfigName")]
         public string BoardToolbarConfigName { get; set; } = "default";
+
+        [JsonProperty("performance")]
+        public PerformanceSettings Performance { get; set; } = new PerformanceSettings();
+    }
+
+    public class PerformanceSettings
+    {
+        [JsonProperty("isMonitoringEnabled")]
+        public bool IsMonitoringEnabled { get; set; } = false;
+
+        [JsonProperty("history")]
+        public List<PerformanceRunRecord> History { get; set; } = new List<PerformanceRunRecord>();
+
+        [JsonProperty("deviceScore")]
+        public int DeviceScore { get; set; } = -1;
+
+        [JsonProperty("cpuScore")]
+        public int CpuScore { get; set; } = -1;
+
+        [JsonProperty("memoryScore")]
+        public int MemoryScore { get; set; } = -1;
+
+        [JsonProperty("diskScore")]
+        public int DiskScore { get; set; } = -1;
+
+        [JsonProperty("lastTestTime")]
+        public string LastTestTime { get; set; } = string.Empty;
+    }
+
+    public class PerformanceRunRecord
+    {
+        [JsonProperty("startTime")]
+        public string StartTime { get; set; } = string.Empty;
+
+        [JsonProperty("endTime")]
+        public string EndTime { get; set; } = string.Empty;
+
+        [JsonProperty("durationSeconds")]
+        public double DurationSeconds { get; set; }
+
+        [JsonProperty("avgCpuPercent")]
+        public double AvgCpuPercent { get; set; }
+
+        [JsonProperty("peakCpuPercent")]
+        public double PeakCpuPercent { get; set; }
+
+        [JsonProperty("avgMemoryMb")]
+        public double AvgMemoryMb { get; set; }
+
+        [JsonProperty("peakMemoryMb")]
+        public double PeakMemoryMb { get; set; }
+
+        [JsonProperty("sampleCount")]
+        public int SampleCount { get; set; }
     }
 
     public class NotificationSettings

@@ -180,6 +180,15 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="PerformancePageItem"
+                            Content="{x:Static props:NavStrings.Nav_Performance}"
+                            Tag="PerformancePage"
+                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Performance_Tooltip}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.SpeedHigh}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
 
