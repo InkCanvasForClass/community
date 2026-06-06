@@ -189,6 +189,33 @@
   <data name="Canvas_ShowPenCursor" xml:space="preserve">
     <value>显示画笔光标</value>
   </data>
+  <data name="Canvas_PenCursorType" xml:space="preserve">
+    <value>画笔光标类型</value>
+  </data>
+  <data name="Canvas_PenCursorTypeHint" xml:space="preserve">
+    <value>选一个你喜欢的光标样式吧</value>
+  </data>
+  <data name="Canvas_PenCursorType_System" xml:space="preserve">
+    <value>系统光标</value>
+  </data>
+  <data name="Canvas_PenCursorType_BuiltIn" xml:space="preserve">
+    <value>软件自带光标</value>
+  </data>
+  <data name="Canvas_PenCursorType_Custom" xml:space="preserve">
+    <value>自己选光标</value>
+  </data>
+  <data name="Canvas_CustomPenCursorPath" xml:space="preserve">
+    <value>自定义光标文件</value>
+  </data>
+  <data name="Canvas_CustomPenCursorPathHint" xml:space="preserve">
+    <value>没选文件就用软件自带的</value>
+  </data>
+  <data name="Canvas_SelectCustomPenCursor" xml:space="preserve">
+    <value>挑个光标文件…</value>
+  </data>
+  <data name="Canvas_CustomPenCursorFilter" xml:space="preserve">
+    <value>光标文件|*.cur;*.ani</value>
+  </data>
   <data name="Canvas_SwitchBackAfterEraser" xml:space="preserve">
     <value>用完橡皮擦自动切回批注模式</value>
   </data>

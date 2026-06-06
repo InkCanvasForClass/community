@@ -157,6 +157,12 @@ namespace Ink_Canvas
         public double HighlighterAlpha { get; set; } = 255;
         [JsonProperty("isShowCursor")]
         public bool IsShowCursor { get; set; }
+        /// <summary>画笔光标类型：0 系统光标，1 软件内置光标（默认），2 用户自定义光标。</summary>
+        [JsonProperty("penCursorType")]
+        public int PenCursorType { get; set; } = 1;
+        /// <summary>用户自定义光标文件路径（当 PenCursorType == 2 时使用）。</summary>
+        [JsonProperty("customPenCursorPath")]
+        public string CustomPenCursorPath { get; set; } = "";
         /// <summary>笔锋存储值：0 基于点集，1 基于速率，2 关闭，3 实时笔锋（速度与压感混合）。界面下拉顺序为实时笔锋、点集、速率、关闭。</summary>
         [JsonProperty("inkStyle")]
         public int InkStyle { get; set; }

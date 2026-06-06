@@ -32,13 +32,45 @@
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:CanvasStrings.Canvas_GroupTitle}" />
 
-                    <!-- 简单开关：声明式绑定，0 code-behind -->
-                    <controls:LabeledSettingsCard
+                    <!-- 画笔光标：开关 + 展开后选择系统/内置/自定义光标 -->
+                    <ui:SettingsExpander x:Name="ExpanderShowPenCursor"
                             Header="{x:Static props:CanvasStrings.Canvas_ShowPenCursor}"
-                            Icon="{x:Static ui:SegoeFluentIcons.PointerHand}"
-                            SwitchName="ToggleSwitchShowCursor"
-                            helpers:SettingsBinder.PropertyPath="Canvas.IsShowCursor"
-                            helpers:SettingsBinder.SettingsChanged="OnIsShowCursorChanged" />
+                            Description="{x:Static props:CanvasStrings.Canvas_PenCursorTypeHint}"
+                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchShowCursor, Mode=OneWay}"
+                            d:Visibility="Visible" d:IsExpanded="True">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.PointerHand}" />
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchShowCursor"
+                                OnContent="{DynamicResource Common_On}"
+                                OffContent="{DynamicResource Common_Off}"
+                                helpers:SettingsBinder.PropertyPath="Canvas.IsShowCursor"
+                                helpers:SettingsBinder.SettingsChanged="OnIsShowCursorChanged" />
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_PenCursorType}">
+                                <ComboBox x:Name="ComboBoxPenCursorType" SelectedIndex="1"
+                                          helpers:SettingsBinder.PropertyPath="Canvas.PenCursorType"
+                                          helpers:SettingsBinder.SettingsChanged="OnPenCursorTypeChanged"
+                                          SelectionChanged="ComboBoxPenCursorType_SelectionChanged">
+                                    <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_PenCursorType_System}" />
+                                    <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_PenCursorType_BuiltIn}" />
+                                    <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_PenCursorType_Custom}" />
+                                </ComboBox>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard x:Name="CardCustomPenCursorPath"
+                                    Header="{x:Static props:CanvasStrings.Canvas_CustomPenCursorPath}"
+                                    Description="{x:Static props:CanvasStrings.Canvas_CustomPenCursorPathHint}"
+                                    Visibility="Collapsed">
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock x:Name="CustomPenCursorPathText"
+                                               VerticalAlignment="Center" MaxWidth="300"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <Button Content="{x:Static props:CanvasStrings.Canvas_SelectCustomPenCursor}"
+                                            Click="SelectCustomPenCursor_Click" />
+                                </ikw:SimpleStackPanel>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
 
                     <!-- 互斥开关：需要 code-behind 处理联动逻辑 -->
                     <controls:LabeledSettingsCard x:Name="CardEnablePressureTouchMode"

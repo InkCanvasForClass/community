@@ -439,10 +439,12 @@ namespace Ink_Canvas
                 if (Settings.Canvas.IsShowCursor)
                 {
                     inkCanvas.ForceCursor = true;
+                    SetCursorBasedOnEditingMode(inkCanvas);
                 }
                 else
                 {
                     inkCanvas.ForceCursor = false;
+                    inkCanvas.UseCustomCursor = false;
                 }
 
 

@@ -62,7 +62,7 @@
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:HomeStrings.Home_Basic}" />
 
-                    <ui:SettingsCard Header="{x:Static props:StartupStrings.Start}" Description="{x:Static props:NavStrings.Nav_Startup}"
+                    <ui:SettingsCard Header="{x:Static props:StartupStrings.Start}" Description="{x:Static props:NavStrings.Nav_Startup_Tooltip}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="StartupPage">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Play}" />
