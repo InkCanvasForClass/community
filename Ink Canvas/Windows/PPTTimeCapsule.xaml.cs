@@ -790,6 +790,44 @@ namespace Ink_Canvas.Windows
 
         private void RestoreTimerWindow()
         {
+            // 检查缓存引用是否有效（窗口可能已关闭）
+            if (parentControl != null)
+            {
+                if (parentControl.IsLoaded)
+                {
+                    parentControl.Show();
+                    parentControl.Activate();
+                    parentControl.UpdateActivityTime();
+                    return;
+                }
+                parentControl = null;
+            }
+
+            // 从 Application 查找已有的计时器窗口
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window is NewStyleTimerWindow timerWin && timerWin.IsLoaded)
+                {
+                    parentControl = timerWin;
+                    timerWin.Show();
+                    timerWin.Activate();
+                    timerWin.UpdateActivityTime();
+                    return;
+                }
+            }
+
+            // 没有可用的计时器窗口，创建一个新的
+            var newTimer = new NewStyleTimerWindow { Owner = Application.Current.MainWindow };
+            newTimer.TimerCompleted += (s, args) =>
+            {
+                if (MainWindow.Settings?.PowerPointSettings?.EnablePPTTimeCapsule == true
+                    && (Application.Current.MainWindow as MainWindow)?.IsInPptPresentationMode == true)
+                {
+                    OnTimerCompleted();
+                }
+            };
+            parentControl = newTimer;
+            newTimer.Show();
         }
 
         private void TimerWindow_Closed(object sender, EventArgs e)

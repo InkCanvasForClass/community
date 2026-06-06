@@ -1279,6 +1279,21 @@ namespace Ink_Canvas
                 {
                     Owner = this
                 };
+
+                // 连接 PPT 时间胶囊
+                PPTTimeCapsule?.SetParentControl(timerWindow);
+
+                // 监听计时器完成事件
+                timerWindow.TimerCompleted += (s, args) =>
+                {
+                    if (Settings.PowerPointSettings.EnablePPTTimeCapsule &&
+                        IsInPptPresentationMode &&
+                        PPTTimeCapsule != null)
+                    {
+                        PPTTimeCapsule.OnTimerCompleted();
+                    }
+                };
+
                 timerWindow.Show();
             }
             else

@@ -1309,8 +1309,14 @@ namespace Ink_Canvas.Windows
                 {
                     if (_minimizedWindow != null && _minimizedWindow.IsVisible) return;
 
+                    bool pptCapsuleActive = MainWindow.Settings?.PowerPointSettings?.EnablePPTTimeCapsule == true
+                        && (Application.Current.MainWindow as MainWindow)?.IsInPptPresentationMode == true;
+
                     Hide();
-                    _minimizedWindow = new NewStyleMinimizedTimerWindow(
+
+                    if (!pptCapsuleActive)
+                    {
+                        _minimizedWindow = new NewStyleMinimizedTimerWindow(
                         () => GetRemainingTime(),
                         () => !isTimerRunning || isPaused,
                         () =>
@@ -1325,6 +1331,7 @@ namespace Ink_Canvas.Windows
                         });
                     _minimizedWindow.Closed += (s, args) => { _minimizedWindow = null; };
                     _minimizedWindow.Show();
+                    }
                 });
             }
         }
