@@ -924,6 +924,7 @@ namespace Ink_Canvas
             else
             {
                 //关闭黑板
+                PauseAllCanvasMediaPlayback();
                 HideSubPanelsImmediately();
 
                 // 只有在PPT放映模式下且页数有效时才显示翻页按钮
@@ -4978,7 +4979,7 @@ namespace Ink_Canvas
             // Open file dialog to select image
             var dialog = new OpenFileDialog
             {
-                Filter = "图片、PDF 与媒体|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf;*.mp4;*.mkv;*.mp3|图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf|媒体文件|*.mp4;*.mkv;*.mp3"
+                Filter = "图片、PDF 与媒体|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf;*.mp4;*.mkv;*.mkw;*.mp3|图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf|媒体文件|*.mp4;*.mkv;*.mkw;*.mp3"
             };
             if (dialog.ShowDialog() == true)
             {
@@ -4989,7 +4990,7 @@ namespace Ink_Canvas
                     : await CreateAndCompressImageAsync(filePath);
                 if (element != null)
                 {
-                    string timestamp = element is MediaElement
+                    string timestamp = IsCanvasMediaElement(element)
                         ? "media_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff")
                         : "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
                     if (string.IsNullOrEmpty(element.Name)) element.Name = timestamp;
@@ -5019,20 +5020,7 @@ namespace Ink_Canvas
                     inkCanvas.Children.Add(element);
 
                     // 绑定事件处理器
-                    element.MouseLeftButtonDown += Element_MouseLeftButtonDown;
-                    element.MouseLeftButtonUp += Element_MouseLeftButtonUp;
-                    element.MouseMove += Element_MouseMove;
-                    element.MouseWheel += Element_MouseWheel;
-
-                    // 触摸事件
-                    element.TouchDown += Element_TouchDown;
-                    element.TouchUp += Element_TouchUp;
-                    element.IsManipulationEnabled = true;
-                    element.ManipulationDelta += Element_ManipulationDelta;
-                    element.ManipulationCompleted += Element_ManipulationCompleted;
-
-                    // 设置光标
-                    element.Cursor = Cursors.Hand;
+                    BindElementEvents(element);
 
                     timeMachine.CommitElementInsertHistory(element);
 
@@ -5053,7 +5041,7 @@ namespace Ink_Canvas
             if (TryBlockFrozenPageMutation("插入图片")) return;
             var dialog = new OpenFileDialog
             {
-                Filter = "图片、PDF 与媒体|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf;*.mp4;*.mkv;*.mp3|图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf|媒体文件|*.mp4;*.mkv;*.mp3"
+                Filter = "图片、PDF 与媒体|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf;*.mp4;*.mkv;*.mkw;*.mp3|图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf|媒体文件|*.mp4;*.mkv;*.mkw;*.mp3"
             };
             if (dialog.ShowDialog() == true)
             {
@@ -5064,7 +5052,7 @@ namespace Ink_Canvas
                     : await CreateAndCompressImageAsync(filePath);
                 if (element != null)
                 {
-                    string timestamp = element is MediaElement
+                    string timestamp = IsCanvasMediaElement(element)
                         ? "media_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff")
                         : "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
                     if (string.IsNullOrEmpty(element.Name)) element.Name = timestamp;
@@ -5094,20 +5082,7 @@ namespace Ink_Canvas
                     inkCanvas.Children.Add(element);
 
                     // 绑定事件处理器
-                    element.MouseLeftButtonDown += Element_MouseLeftButtonDown;
-                    element.MouseLeftButtonUp += Element_MouseLeftButtonUp;
-                    element.MouseMove += Element_MouseMove;
-                    element.MouseWheel += Element_MouseWheel;
-
-                    // 触摸事件
-                    element.TouchDown += Element_TouchDown;
-                    element.TouchUp += Element_TouchUp;
-                    element.IsManipulationEnabled = true;
-                    element.ManipulationDelta += Element_ManipulationDelta;
-                    element.ManipulationCompleted += Element_ManipulationCompleted;
-
-                    // 设置光标
-                    element.Cursor = Cursors.Hand;
+                    BindElementEvents(element);
 
                     timeMachine.CommitElementInsertHistory(element);
 
@@ -5128,7 +5103,7 @@ namespace Ink_Canvas
             if (TryBlockFrozenPageMutation(FloatingBarStrings.Board_InsertImage)) return;
             var dialog = new OpenFileDialog
             {
-                Filter = "图片、PDF 与媒体|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf;*.mp4;*.mkv;*.mp3|图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf|媒体文件|*.mp4;*.mkv;*.mp3"
+                Filter = "图片、PDF 与媒体|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf;*.mp4;*.mkv;*.mkw;*.mp3|图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf|媒体文件|*.mp4;*.mkv;*.mkw;*.mp3"
             };
             if (dialog.ShowDialog() == true)
             {
@@ -5139,7 +5114,7 @@ namespace Ink_Canvas
                     : await CreateAndCompressImageAsync(filePath);
                 if (element != null)
                 {
-                    string timestamp = element is MediaElement
+                    string timestamp = IsCanvasMediaElement(element)
                         ? "media_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff")
                         : "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
                     if (string.IsNullOrEmpty(element.Name)) element.Name = timestamp;
@@ -5169,20 +5144,7 @@ namespace Ink_Canvas
                     inkCanvas.Children.Add(element);
 
                     // 绑定事件处理器
-                    element.MouseLeftButtonDown += Element_MouseLeftButtonDown;
-                    element.MouseLeftButtonUp += Element_MouseLeftButtonUp;
-                    element.MouseMove += Element_MouseMove;
-                    element.MouseWheel += Element_MouseWheel;
-
-                    // 触摸事件
-                    element.TouchDown += Element_TouchDown;
-                    element.TouchUp += Element_TouchUp;
-                    element.IsManipulationEnabled = true;
-                    element.ManipulationDelta += Element_ManipulationDelta;
-                    element.ManipulationCompleted += Element_ManipulationCompleted;
-
-                    // 设置光标
-                    element.Cursor = Cursors.Hand;
+                    BindElementEvents(element);
 
                     timeMachine.CommitElementInsertHistory(element);
 

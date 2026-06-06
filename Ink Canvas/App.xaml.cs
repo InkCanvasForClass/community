@@ -1300,6 +1300,7 @@ namespace Ink_Canvas
             };
 
             mainWindow.Show();
+            WindowTopmostManager.Initialize(mainWindow);
             _ = Task.Run(async () =>
             {
                 await Task.Delay(600);

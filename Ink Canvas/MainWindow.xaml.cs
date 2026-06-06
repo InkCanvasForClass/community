@@ -2027,8 +2027,8 @@ namespace Ink_Canvas
 
             UninstallKeyboardHook();
 
-            // 从Z-Order管理器中移除主窗口
-            WindowZOrderManager.UnregisterWindow(this);
+            // 清理统一窗口置顶管理器
+            WindowTopmostManager.Shutdown();
 
             LogHelper.WriteLogToFile("Ink Canvas closed", LogHelper.LogType.Event);
 
@@ -2361,7 +2361,18 @@ namespace Ink_Canvas
 
             // 检查是否点击了空白区域或其他非图片元素
             var hitTest = e.OriginalSource;
-            if (!(hitTest is Image) && !(hitTest is MediaElement))
+            var dependencyObject = hitTest as DependencyObject;
+            bool clickedMediaControl = false;
+            while (dependencyObject != null)
+            {
+                if (dependencyObject is CanvasMediaControl)
+                {
+                    clickedMediaControl = true;
+                    break;
+                }
+                dependencyObject = VisualTreeHelper.GetParent(dependencyObject);
+            }
+            if (!(hitTest is Image) && !(hitTest is MediaElement) && !(hitTest is CanvasMediaControl) && !clickedMediaControl)
             {
                 // 如果当前有选中的元素，取消选中状态
                 if (currentSelectedElement != null)

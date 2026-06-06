@@ -970,6 +970,7 @@ namespace Ink_Canvas
             Settings.Canvas.ClearCanvasAndClearTimeMachine = false;
             Settings.Canvas.FitToCurve = false;
             Settings.Canvas.UseAdvancedBezierSmoothing = true;
+            Settings.Canvas.MergeInkSmoothingWithUndo = false;
             Settings.Canvas.EnablePressureTouchMode = false;
             Settings.Canvas.DisablePressure = false;
             Settings.Canvas.AutoStraightenLine = true;

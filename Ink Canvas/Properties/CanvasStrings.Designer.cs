@@ -118,6 +118,10 @@ namespace Ink_Canvas.Properties
 
         public static string Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint => ResourceManager.GetString(nameof(Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint), _resourceCulture);
 
+        public static string Canvas_MergeInkSmoothingWithUndo => ResourceManager.GetString(nameof(Canvas_MergeInkSmoothingWithUndo), _resourceCulture);
+
+        public static string Canvas_MergeInkSmoothingWithUndoHint => ResourceManager.GetString(nameof(Canvas_MergeInkSmoothingWithUndoHint), _resourceCulture);
+
         public static string Canvas_No => ResourceManager.GetString(nameof(Canvas_No), _resourceCulture);
 
         public static string Canvas_RestoreColor => ResourceManager.GetString(nameof(Canvas_RestoreColor), _resourceCulture);

@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using Ink_Canvas.WorkflowAutomation.Models;
 using System.Windows;
 
@@ -37,7 +38,7 @@ namespace Ink_Canvas.WorkflowAutomation.Actions
                 {
                     var mw = Application.Current.MainWindow as MainWindow;
                     if (mw == null) return;
-                    mw.Topmost = s.Topmost;
+                    WindowTopmostManager.ApplyMainWindowTopmost(mw, s.Topmost);
                 });
             };
 
@@ -50,7 +51,7 @@ namespace Ink_Canvas.WorkflowAutomation.Actions
                 {
                     var mw = Application.Current.MainWindow as MainWindow;
                     if (mw == null) return;
-                    mw.Topmost = !s.Topmost;
+                    WindowTopmostManager.ApplyMainWindowTopmost(mw, !s.Topmost);
                 });
             };
 

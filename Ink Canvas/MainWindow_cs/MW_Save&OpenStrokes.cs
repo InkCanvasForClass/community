@@ -39,6 +39,10 @@ namespace Ink_Canvas
         public double Height { get; set; }
         public string Stretch { get; set; } = "Fill"; // 默认为Fill
         public string MediaKind { get; set; }
+        public string MediaDisplayName { get; set; }
+        public double? MediaPositionSeconds { get; set; }
+        public double? MediaSpeedRatio { get; set; }
+        public double? MediaVolume { get; set; }
         /// <summary>PDF 当前页（从 0 开始），仅 Type == Pdf 时有效。</summary>
         public int? PdfCurrentPage { get; set; }
         /// <summary>保存时的 PDF 总页数，用于校验；仅 Type == Pdf 时有效。</summary>
@@ -81,6 +85,26 @@ namespace Ink_Canvas
                         PdfPageCount = (int)pdf.PageCount
                     });
                 }
+                else if (child is CanvasMediaControl mediaControl && TryGetMediaSourcePath(mediaControl, out var mediaSourcePath))
+                {
+                    string extension = Path.GetExtension(mediaSourcePath);
+                    var mediaPosition = mediaControl.GetPlaybackPositionOrNull();
+                    elementInfos.Add(new CanvasElementInfo
+                    {
+                        Type = "Media",
+                        SourcePath = mediaSourcePath,
+                        Left = InkCanvas.GetLeft(mediaControl),
+                        Top = InkCanvas.GetTop(mediaControl),
+                        Width = mediaControl.Width,
+                        Height = mediaControl.Height,
+                        Stretch = "Uniform",
+                        MediaKind = string.Equals(extension, ".mp3", StringComparison.OrdinalIgnoreCase) ? "Audio" : "Video",
+                        MediaDisplayName = mediaControl.DisplayName,
+                        MediaPositionSeconds = mediaPosition?.TotalSeconds,
+                        MediaSpeedRatio = mediaControl.PlaybackRate,
+                        MediaVolume = mediaControl.VolumeLevel
+                    });
+                }
                 else if (child is MediaElement media && media.Source != null)
                 {
                     string sourcePath = media.Source.IsFile ? media.Source.LocalPath : media.Source.OriginalString;
@@ -111,24 +135,33 @@ namespace Ink_Canvas
 
             try
             {
-                var mediaElement = new MediaElement
+                var mediaControl = new CanvasMediaControl
                 {
                     Name = "media_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff"),
-                    Source = new Uri(info.SourcePath),
-                    LoadedBehavior = MediaState.Manual,
-                    UnloadedBehavior = MediaState.Manual,
-                    Stretch = Enum.TryParse<Stretch>(info.Stretch, out var stretch) ? stretch : Stretch.Fill,
-                    Width = info.Width > 0 && !double.IsNaN(info.Width) ? info.Width : 256,
-                    Height = info.Height > 0 && !double.IsNaN(info.Height) ? info.Height : 256,
-                    ToolTip = Path.GetFileName(info.SourcePath)
+                    Width = info.Width > 0 && !double.IsNaN(info.Width) ? info.Width : 800,
+                    Height = info.Height > 0 && !double.IsNaN(info.Height) ? info.Height : (string.Equals(info.MediaKind, "Audio", StringComparison.OrdinalIgnoreCase) ? 168 : 520),
+                    ToolTip = string.IsNullOrWhiteSpace(info.MediaDisplayName) ? Path.GetFileName(info.SourcePath) : info.MediaDisplayName
                 };
+                mediaControl.Initialize(info.SourcePath, info.MediaDisplayName);
+                if (info.MediaSpeedRatio.HasValue)
+                {
+                    mediaControl.SetPlaybackRate(info.MediaSpeedRatio.Value);
+                }
+                if (info.MediaVolume.HasValue)
+                {
+                    mediaControl.SetVolumeLevel(info.MediaVolume.Value);
+                }
+                if (info.MediaPositionSeconds.HasValue)
+                {
+                    mediaControl.SetPlaybackPosition(TimeSpan.FromSeconds(Math.Max(0, info.MediaPositionSeconds.Value)));
+                }
 
-                AttachMediaFailureNotification(mediaElement);
-                InkCanvas.SetLeft(mediaElement, info.Left);
-                InkCanvas.SetTop(mediaElement, info.Top);
-                InitializeElementTransform(mediaElement);
-                BindElementEvents(mediaElement);
-                inkCanvas.Children.Add(mediaElement);
+                AttachMediaFailureNotification(mediaControl);
+                InkCanvas.SetLeft(mediaControl, info.Left);
+                InkCanvas.SetTop(mediaControl, info.Top);
+                InitializeElementTransform(mediaControl);
+                BindElementEvents(mediaControl);
+                inkCanvas.Children.Add(mediaControl);
             }
             catch (Exception ex)
             {

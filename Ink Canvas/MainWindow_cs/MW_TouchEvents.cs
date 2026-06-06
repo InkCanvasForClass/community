@@ -1,3 +1,4 @@
+using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
@@ -583,7 +584,7 @@ namespace Ink_Canvas
                 var child = inkCanvas.Children[i];
 
                 // 保存图片、媒体元素等非笔画相关的UI元素
-                if (child is Image || child is MediaElement ||
+                if (child is Image || child is MediaElement || child is CanvasMediaControl ||
                     (child is Border border && border.Name != "EraserOverlayCanvas"))
                 {
                     // 创建元素的深拷贝，避免直接引用导致的问题
@@ -637,6 +638,35 @@ namespace Ink_Canvas
                     }
 
                     return clonedImage;
+                }
+                else if (originalElement is CanvasMediaControl originalMediaControl)
+                {
+                    var clonedMediaControl = new CanvasMediaControl
+                    {
+                        Width = originalMediaControl.Width,
+                        Height = originalMediaControl.Height,
+                        Name = originalMediaControl.Name,
+                        IsHitTestVisible = originalMediaControl.IsHitTestVisible,
+                        Focusable = originalMediaControl.Focusable,
+                        RenderTransform = originalMediaControl.RenderTransform?.Clone()
+                    };
+
+                    if (!string.IsNullOrWhiteSpace(originalMediaControl.SourcePath))
+                    {
+                        clonedMediaControl.Initialize(originalMediaControl.SourcePath, originalMediaControl.DisplayName);
+                    }
+                    clonedMediaControl.SetPlaybackRate(originalMediaControl.PlaybackRate);
+                    clonedMediaControl.SetVolumeLevel(originalMediaControl.VolumeLevel);
+                    var playbackPosition = originalMediaControl.GetPlaybackPositionOrNull();
+                    if (playbackPosition.HasValue)
+                    {
+                        clonedMediaControl.SetPlaybackPosition(playbackPosition.Value);
+                    }
+
+                    InkCanvas.SetLeft(clonedMediaControl, InkCanvas.GetLeft(originalMediaControl));
+                    InkCanvas.SetTop(clonedMediaControl, InkCanvas.GetTop(originalMediaControl));
+
+                    return clonedMediaControl;
                 }
                 else if (originalElement is MediaElement originalMedia)
                 {
@@ -2099,6 +2129,10 @@ namespace Ink_Canvas
                         // 对媒体元素也应用变换
                         ApplyMatrixTransformToMediaElement(mediaElement, matrix);
                     }
+                    else if (child is CanvasMediaControl mediaControl)
+                    {
+                        ApplyMatrixTransformToCanvasMediaControl(mediaControl, matrix);
+                    }
                 }
             }
             catch (Exception ex)
@@ -2152,6 +2186,25 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"应用媒体元素变换失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void ApplyMatrixTransformToCanvasMediaControl(CanvasMediaControl mediaControl, Matrix matrix)
+        {
+            try
+            {
+                if (!(mediaControl.RenderTransform is TransformGroup transformGroup))
+                {
+                    transformGroup = new TransformGroup();
+                    mediaControl.RenderTransform = transformGroup;
+                }
+
+                var matrixTransform = new MatrixTransform(matrix);
+                transformGroup.Children.Add(matrixTransform);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"应用媒体控件变换失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
     }

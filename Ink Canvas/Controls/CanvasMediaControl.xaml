@@ -1,0 +1,126 @@
+<UserControl x:Class="Ink_Canvas.Controls.CanvasMediaControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             x:Name="Root"
+             mc:Ignorable="d"
+             d:DesignWidth="480"
+             d:DesignHeight="320"
+             Focusable="False"
+             SnapsToDevicePixels="True">
+    <Border Background="#F71C1C1C"
+            BorderBrush="#66000000"
+            BorderThickness="1"
+            CornerRadius="8">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition x:Name="PreviewRow" Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid x:Name="PreviewHost" ClipToBounds="True">
+                <Border x:Name="AudioPlaceholder"
+                        Background="#FF1C1C1C"
+                        Visibility="Collapsed">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="♪"
+                                   FontSize="36"
+                                   HorizontalAlignment="Center"
+                                   Foreground="#FFF5F5F5" />
+                        <TextBlock x:Name="AudioTitleTextBlock"
+                                   Margin="12,8,12,0"
+                                   Foreground="#FFF5F5F5"
+                                   FontSize="14"
+                                   TextAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"
+                                   MaxWidth="320" />
+                    </StackPanel>
+                </Border>
+
+                <MediaElement x:Name="Player"
+                              LoadedBehavior="Manual"
+                              UnloadedBehavior="Manual"
+                              Stretch="Uniform"
+                              MediaOpened="Player_MediaOpened"
+                              MediaEnded="Player_MediaEnded" />
+            </Grid>
+
+            <Grid Grid.Row="1" Margin="12,10,12,12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Slider x:Name="ProgressSlider"
+                        Minimum="0"
+                        Maximum="1"
+                        Value="0"
+                        PreviewMouseLeftButtonDown="ProgressSlider_PreviewMouseLeftButtonDown"
+                        PreviewMouseLeftButtonUp="ProgressSlider_PreviewMouseLeftButtonUp"
+                        LostMouseCapture="ProgressSlider_LostMouseCapture"
+                        ValueChanged="ProgressSlider_ValueChanged" />
+
+                <Grid Grid.Row="1" Margin="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button x:Name="PlayPauseButton"
+                            Grid.Column="0"
+                            MinWidth="52"
+                            Padding="10,4"
+                            Click="PlayPauseButton_Click">
+                        <TextBlock x:Name="PlayPauseIconTextBlock"
+                                   FontSize="14"
+                                   Text="▶" />
+                    </Button>
+
+                    <TextBlock x:Name="TimeTextBlock"
+                               Grid.Column="1"
+                               Margin="10,0,0,0"
+                               VerticalAlignment="Center"
+                               Foreground="#FFF5F5F5"
+                               Text="00:00 / 00:00" />
+
+                    <TextBlock x:Name="SpeedLabelTextBlock"
+                               Grid.Column="3"
+                               Margin="12,0,6,0"
+                               VerticalAlignment="Center"
+                               Foreground="#FFF5F5F5" />
+
+                    <ComboBox x:Name="SpeedComboBox"
+                              Grid.Column="4"
+                              Width="76"
+                              SelectedIndex="1"
+                              SelectionChanged="SpeedComboBox_SelectionChanged">
+                        <ComboBoxItem Content="0.5x" Tag="0.5" />
+                        <ComboBoxItem Content="1.0x" Tag="1.0" />
+                        <ComboBoxItem Content="1.5x" Tag="1.5" />
+                        <ComboBoxItem Content="2.0x" Tag="2.0" />
+                    </ComboBox>
+
+                    <TextBlock x:Name="VolumeLabelTextBlock"
+                               Grid.Column="5"
+                               Margin="12,0,6,0"
+                               VerticalAlignment="Center"
+                               Foreground="#FFF5F5F5" />
+
+                    <Slider x:Name="VolumeSlider"
+                            Grid.Column="6"
+                            Width="90"
+                            Minimum="0"
+                            Maximum="1"
+                            Value="0.6"
+                            ValueChanged="VolumeSlider_ValueChanged" />
+                </Grid>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>

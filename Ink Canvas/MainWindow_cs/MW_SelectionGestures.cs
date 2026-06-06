@@ -636,7 +636,7 @@ namespace Ink_Canvas
             }
 
             // 检查是否有图片元素被选中（通过currentSelectedElement）
-            if (currentSelectedElement != null && (currentSelectedElement is Image || currentSelectedElement is PdfEmbeddedView))
+            if (currentSelectedElement != null && IsBitmapLikeCanvasElement(currentSelectedElement))
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                 HideSelectionDisplay();

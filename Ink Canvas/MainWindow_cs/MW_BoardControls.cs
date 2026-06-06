@@ -86,7 +86,7 @@ namespace Ink_Canvas
             var missingElements = 0;
             foreach (UIElement child in inkCanvas.Children)
             {
-                if (child is Image || child is MediaElement || child is PdfEmbeddedView)
+                if (child is Image || child is MediaElement || child is CanvasMediaControl || child is PdfEmbeddedView)
                 {
                     if (child is Image img && img.Tag is string tag && tag == VideoPresenterLiveFrameTag)
                     {
@@ -327,6 +327,16 @@ namespace Ink_Canvas
                         }
                         BindElementEvents(media);
                     }
+                    else if (element is CanvasMediaControl mediaControl)
+                    {
+                        double left = InkCanvas.GetLeft(mediaControl);
+                        double top = InkCanvas.GetTop(mediaControl);
+                        if (double.IsNaN(left) || double.IsNaN(top))
+                        {
+                            CenterAndScaleElement(mediaControl);
+                        }
+                        BindElementEvents(mediaControl);
+                    }
                     else if (element is PdfEmbeddedView pdf)
                     {
                         double left = InkCanvas.GetLeft(pdf);
@@ -471,6 +481,7 @@ namespace Ink_Canvas
             }
 
             VideoPresenter_BeforePageLeave();
+            PauseAllCanvasMediaPlayback();
             SaveStrokes();
 
             ClearStrokes(true);
@@ -516,6 +527,7 @@ namespace Ink_Canvas
             }
 
             VideoPresenter_BeforePageLeave();
+            PauseAllCanvasMediaPlayback();
             SaveStrokes();
 
             ClearStrokes(true);
@@ -562,6 +574,7 @@ namespace Ink_Canvas
             }
 
             VideoPresenter_BeforePageLeave();
+            PauseAllCanvasMediaPlayback();
             SaveStrokes();
             ClearStrokes(true);
 
@@ -634,6 +647,7 @@ namespace Ink_Canvas
 
             if (pageIndex == CurrentWhiteboardIndex)
             {
+                PauseAllCanvasMediaPlayback();
                 ClearStrokes(true);
 
                 var oldTotal = WhiteboardTotalCount;
