@@ -7,29 +7,33 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Threading;
 
 namespace Ink_Canvas.Controls
 {
     public partial class DynamicNotificationControl : UserControl
     {
-        private readonly DispatcherTimer autoCloseTimer = new DispatcherTimer();
+        private readonly Stopwatch countdownStopwatch = new Stopwatch();
         private NotificationMessage currentMessage;
+        private TimeSpan countdownDuration;
+        private TimeSpan countdownRemaining;
         private bool isExpanded;
         private bool isDarkTheme = true;
+        private bool isClosing;
+        private bool isCountdownRendering;
 
         public event EventHandler Closed;
 
         public DynamicNotificationControl()
         {
             InitializeComponent();
-            autoCloseTimer.Tick += AutoCloseTimer_Tick;
+            RootContainer.SizeChanged += RootContainer_SizeChanged;
         }
 
         public void Show(NotificationMessage message)
         {
             currentMessage = message;
             isExpanded = message?.ForcePopup == true;
+            isClosing = false;
 
             TitleTextBlock.Text = string.IsNullOrWhiteSpace(message?.Title) ? NotificationStrings.DefaultTitle : message.Title;
             SummaryTextBlock.Text = message?.Summary ?? string.Empty;
@@ -44,9 +48,7 @@ namespace Ink_Canvas.Controls
             ApplyThemeColors(message);
             BeginShowAnimation();
 
-            autoCloseTimer.Stop();
-            autoCloseTimer.Interval = TimeSpan.FromSeconds(Math.Max(1, message?.DisplaySeconds ?? 5));
-            autoCloseTimer.Start();
+            StartCountdown(TimeSpan.FromSeconds(Math.Max(1, message?.DisplaySeconds ?? 5)));
         }
 
         /// <summary>
@@ -91,6 +93,7 @@ namespace Ink_Canvas.Controls
             IconGlyph.Foreground = new SolidColorBrush(foreground);
             IconBackgroundBorder.Background = new SolidColorBrush(iconBackground);
             CloseButtonText.Foreground = new SolidColorBrush(secondaryForeground);
+            CountdownProgressPath.Stroke = new SolidColorBrush(border);
 
             // 操作按钮使用半透明主题色
             if (isDarkTheme)
@@ -182,25 +185,148 @@ namespace Ink_Canvas.Controls
 
         private void UserControl_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            autoCloseTimer.Stop();
+            PauseCountdown();
         }
 
         private void UserControl_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            if (currentMessage != null)
+            if (currentMessage != null && !isClosing)
             {
-                autoCloseTimer.Start();
+                ResumeCountdown();
             }
         }
 
-        private void AutoCloseTimer_Tick(object sender, EventArgs e)
+        private void RootContainer_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            Close();
+            UpdateCountdownProgress();
+        }
+
+        private void StartCountdown(TimeSpan duration)
+        {
+            countdownDuration = duration;
+            countdownRemaining = duration;
+            countdownStopwatch.Restart();
+            CountdownProgressPath.Visibility = Visibility.Visible;
+            BeginCountdownRendering();
+            UpdateCountdownProgress();
+        }
+
+        private void PauseCountdown()
+        {
+            if (!countdownStopwatch.IsRunning) return;
+
+            countdownRemaining = GetCountdownRemaining();
+            countdownStopwatch.Reset();
+            StopCountdownRendering();
+            UpdateCountdownProgress();
+        }
+
+        private void ResumeCountdown()
+        {
+            if (countdownRemaining <= TimeSpan.Zero)
+            {
+                Close();
+                return;
+            }
+
+            countdownStopwatch.Restart();
+            BeginCountdownRendering();
+        }
+
+        private void BeginCountdownRendering()
+        {
+            if (isCountdownRendering) return;
+
+            CompositionTarget.Rendering += CompositionTarget_Rendering;
+            isCountdownRendering = true;
+        }
+
+        private void StopCountdownRendering()
+        {
+            if (!isCountdownRendering) return;
+
+            CompositionTarget.Rendering -= CompositionTarget_Rendering;
+            isCountdownRendering = false;
+        }
+
+        private void CompositionTarget_Rendering(object sender, EventArgs e)
+        {
+            UpdateCountdownProgress();
+        }
+
+        private TimeSpan GetCountdownRemaining()
+        {
+            var remaining = countdownRemaining - countdownStopwatch.Elapsed;
+            return remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero;
+        }
+
+        private void UpdateCountdownProgress()
+        {
+            var remaining = countdownStopwatch.IsRunning ? GetCountdownRemaining() : countdownRemaining;
+            if (remaining <= TimeSpan.Zero)
+            {
+                Close();
+                return;
+            }
+
+            var progress = countdownDuration.TotalMilliseconds <= 0 ? 0 : remaining.TotalMilliseconds / countdownDuration.TotalMilliseconds;
+            UpdateCountdownProgressPath(progress);
+        }
+
+        private void UpdateCountdownProgressPath(double progress)
+        {
+            var width = RootContainer.ActualWidth;
+            var height = RootContainer.ActualHeight;
+            if (width <= 0 || height <= 0)
+            {
+                return;
+            }
+
+            progress = Math.Max(0, Math.Min(1, progress));
+            var thickness = CountdownProgressPath.StrokeThickness;
+            var radius = Math.Max(0, RootBorder.CornerRadius.TopLeft - thickness / 2);
+            var left = thickness / 2;
+            var top = thickness / 2;
+            var right = Math.Max(left, width - thickness / 2);
+            var bottom = Math.Max(top, height - thickness / 2);
+            var horizontalLength = Math.Max(0, right - left - radius * 2);
+            var verticalLength = Math.Max(0, bottom - top - radius * 2);
+            var arcLength = Math.PI * radius / 2;
+            var totalLength = horizontalLength * 2 + verticalLength * 2 + arcLength * 4;
+            if (totalLength <= 0)
+            {
+                return;
+            }
+
+            var start = new Point((left + right) / 2, top);
+            var figure = new PathFigure { StartPoint = start, IsClosed = true, IsFilled = false };
+            figure.Segments.Add(new LineSegment(new Point(right - radius, top), true));
+            figure.Segments.Add(new ArcSegment(new Point(right, top + radius), new Size(radius, radius), 0, false, SweepDirection.Clockwise, true));
+            figure.Segments.Add(new LineSegment(new Point(right, bottom - radius), true));
+            figure.Segments.Add(new ArcSegment(new Point(right - radius, bottom), new Size(radius, radius), 0, false, SweepDirection.Clockwise, true));
+            figure.Segments.Add(new LineSegment(new Point(left + radius, bottom), true));
+            figure.Segments.Add(new ArcSegment(new Point(left, bottom - radius), new Size(radius, radius), 0, false, SweepDirection.Clockwise, true));
+            figure.Segments.Add(new LineSegment(new Point(left, top + radius), true));
+            figure.Segments.Add(new ArcSegment(new Point(left + radius, top), new Size(radius, radius), 0, false, SweepDirection.Clockwise, true));
+            figure.Segments.Add(new LineSegment(start, true));
+
+            CountdownProgressPath.Data = new PathGeometry(new[] { figure });
+            CountdownProgressPath.StrokeDashOffset = 0;
+            CountdownProgressPath.StrokeDashArray = new DoubleCollection
+            {
+                totalLength * progress / thickness,
+                totalLength / thickness
+            };
         }
 
         private void Close()
         {
-            autoCloseTimer.Stop();
+            if (isClosing) return;
+
+            isClosing = true;
+            StopCountdownRendering();
+            countdownStopwatch.Reset();
+            CountdownProgressPath.Visibility = Visibility.Collapsed;
             BeginHideAnimation();
         }
 

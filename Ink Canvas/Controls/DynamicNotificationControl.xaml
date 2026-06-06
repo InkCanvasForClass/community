@@ -115,5 +115,15 @@
                 </StackPanel>
             </StackPanel>
             </Grid>
-        </Border>    </Grid>
+        </Border>
+
+        <Path x:Name="CountdownProgressPath"
+              Panel.ZIndex="1"
+              IsHitTestVisible="False"
+              StrokeThickness="2.5"
+              StrokeStartLineCap="Round"
+              StrokeEndLineCap="Round"
+              StrokeLineJoin="Round"
+              Visibility="Collapsed" />
+    </Grid>
 </UserControl>
