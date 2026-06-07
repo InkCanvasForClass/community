@@ -364,9 +364,9 @@ namespace Ink_Canvas
         public int TotalPageCount => _totalCount;
 
         /// <summary>
-        /// 外部调用：将墨迹插入当前小白板页面
+        /// 外部调用：将墨迹插入当前小白板页面，自动缩放至可见范围内
         /// </summary>
-        /// <param name="strokes">要插入的墨迹集合（会被克隆）</param>
+        /// <param name="strokes">要插入的墨迹集合（坐标基于主画布全屏坐标系，会被克隆并缩放）</param>
         public void InsertStrokes(StrokeCollection strokes)
         {
             if (strokes == null || strokes.Count == 0) return;
@@ -374,12 +374,66 @@ namespace Ink_Canvas
             SaveCurrentPage();
 
             var cloned = strokes.Clone();
+
+            // 将墨迹坐标从主画布（全屏）映射到小白板（缩放+居中）
+            TransformStrokesToMiniCanvas(cloned);
+
             MiniInkCanvas.Strokes.Add(cloned);
 
             // 确保新插入的墨迹不处于选中态（参考ICA克隆模式）
             MiniInkCanvas.Select((StrokeCollection)null);
 
             SaveCurrentPage();
+        }
+
+        /// <summary>
+        /// 将墨迹坐标从全屏主画布映射到小白板画布（等比缩放+居中）
+        /// </summary>
+        private void TransformStrokesToMiniCanvas(StrokeCollection strokes)
+        {
+            if (strokes.Count == 0) return;
+
+            // 主画布尺寸 = 屏幕分辨率（墨迹坐标基于此）
+            var screen = System.Windows.Forms.Screen.PrimaryScreen;
+            if (screen == null) return;
+            double mainWidth = screen.Bounds.Width;
+            double mainHeight = screen.Bounds.Height;
+            if (mainWidth <= 0 || mainHeight <= 0) return;
+
+            // 小白板画布实际渲染尺寸
+            double miniWidth = MiniInkCanvas.ActualWidth;
+            double miniHeight = MiniInkCanvas.ActualHeight;
+            if (miniWidth <= 0 || miniHeight <= 0) return;
+
+            // 避免与屏幕尺寸完全相同时不做无意义变换
+            if (Math.Abs(mainWidth - miniWidth) < 1 && Math.Abs(mainHeight - miniHeight) < 1) return;
+
+            // 等比缩放因子（取较小比，确保完全可见）
+            double scaleX = miniWidth / mainWidth;
+            double scaleY = miniHeight / mainHeight;
+            double scale = Math.Min(scaleX, scaleY);
+
+            // 偏移量：缩放后居中
+            double scaledWidth = mainWidth * scale;
+            double scaledHeight = mainHeight * scale;
+            double offsetX = (miniWidth - scaledWidth) / 2.0;
+            double offsetY = (miniHeight - scaledHeight) / 2.0;
+
+            var m = new Matrix();
+            m.Scale(scale, scale);
+            m.Translate(offsetX, offsetY);
+
+            foreach (var stroke in strokes)
+            {
+                var pts = stroke.StylusPoints;
+                var newPts = new StylusPointCollection();
+                foreach (var pt in pts)
+                {
+                    var transformed = m.Transform(new Point(pt.X, pt.Y));
+                    newPts.Add(new StylusPoint(transformed.X, transformed.Y, pt.PressureFactor));
+                }
+                stroke.StylusPoints = newPts;
+            }
         }
 
         #endregion
