@@ -102,7 +102,7 @@ namespace Ink_Canvas
 
         /// <summary>
         /// 处理墨迹选择插入白板鼠标释放事件
-        /// 克隆选中墨迹，弹出目标选择菜单（小白板/常规白板），确认后再取消选中并插入
+        /// 克隆选中墨迹，弹出目标选择菜单（小白板/常规白板），确认后插入
         /// </summary>
         /// <param name="sender">事件发送者</param>
         /// <param name="e">鼠标按钮事件参数</param>
@@ -114,7 +114,8 @@ namespace Ink_Canvas
             var strokes = inkCanvas.GetSelectedStrokes();
             if (strokes.Count == 0) return;
 
-            // 克隆墨迹（暂不取消选择，保持选中态直到用户确认插入目标）
+            // 参考ICA模式：先取消选中，再克隆（确保克隆出的墨迹不携带选中态）
+            inkCanvas.Select(new StrokeCollection());
             _pendingInsertStrokes = strokes.Clone();
 
             // 在发送者附近弹出目标选择菜单
@@ -127,20 +128,8 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 取消当前画布上的墨迹选择并隐藏选中态显示
-        /// </summary>
-        private void ClearCurrentStrokeSelection()
-        {
-            if (inkCanvas.GetSelectedStrokes().Count > 0)
-            {
-                inkCanvas.Select(new StrokeCollection());
-            }
-            HideSelectionDisplay();
-            GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-        }
-
-        /// <summary>
         /// 将暂存的墨迹插入常规白板（当前页面）
+        /// 参考ICA的BorderStrokeSelectionCloneToBoardOrNewPage_Click模式
         /// </summary>
         internal void ExecuteInsertStrokesToRegularWhiteboard()
         {
@@ -148,22 +137,20 @@ namespace Ink_Canvas
 
             try
             {
-                // 先取消主画布上的选中态
-                ClearCurrentStrokeSelection();
+                // 确保主画布上没有选中状态（防止选中态渲染污染克隆墨迹）
+                inkCanvas.Select(new StrokeCollection());
+                HideSelectionDisplay();
+                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
 
-                if (currentMode == 1)
+                if (currentMode != 1)
                 {
-                    // 已在白板模式，直接插入当前页面
-                    inkCanvas.Strokes.Add(_pendingInsertStrokes);
-                    timeMachine.CommitStrokeUserInputHistory(_pendingInsertStrokes);
-                }
-                else
-                {
-                    // 从屏幕批注模式切换到白板模式，再插入
+                    // 从屏幕批注模式切换到白板模式（内部会 save→clear→restore）
                     ImageBlackboard_MouseUp(null, null);
-                    inkCanvas.Strokes.Add(_pendingInsertStrokes);
-                    timeMachine.CommitStrokeUserInputHistory(_pendingInsertStrokes);
                 }
+
+                // 切换模式后，白板画布已就绪，此时加入克隆的墨迹
+                inkCanvas.Strokes.Add(_pendingInsertStrokes);
+                timeMachine.CommitStrokeUserInputHistory(_pendingInsertStrokes);
 
                 LogHelper.WriteLogToFile($"墨迹插入常规白板完成: {_pendingInsertStrokes.Count} 个墨迹");
             }
@@ -186,8 +173,10 @@ namespace Ink_Canvas
 
             try
             {
-                // 先取消主画布上的选中态
-                ClearCurrentStrokeSelection();
+                // 确保主画布上没有选中状态
+                inkCanvas.Select(new StrokeCollection());
+                HideSelectionDisplay();
+                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
 
                 if (_miniWhiteboardWindow == null || !_miniWhiteboardWindow.IsLoaded)
                 {

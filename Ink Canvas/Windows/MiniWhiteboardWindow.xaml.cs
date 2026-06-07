@@ -371,18 +371,15 @@ namespace Ink_Canvas
         {
             if (strokes == null || strokes.Count == 0) return;
 
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                SaveCurrentPage();
+            SaveCurrentPage();
 
-                var cloned = strokes.Clone();
-                MiniInkCanvas.Strokes.Add(cloned);
+            var cloned = strokes.Clone();
+            MiniInkCanvas.Strokes.Add(cloned);
 
-                // 确保新插入的墨迹不处于选中态
-                MiniInkCanvas.Select((StrokeCollection)null);
+            // 确保新插入的墨迹不处于选中态（参考ICA克隆模式）
+            MiniInkCanvas.Select((StrokeCollection)null);
 
-                SaveCurrentPage();
-            }));
+            SaveCurrentPage();
         }
 
         #endregion
