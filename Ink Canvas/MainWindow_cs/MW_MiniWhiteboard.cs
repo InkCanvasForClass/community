@@ -44,6 +44,18 @@ namespace Ink_Canvas
                 WhiteboardModeSelectionPopup.IsOpen = false;
                 ToggleMiniWhiteboard();
             };
+
+            // 墨迹选择栏「插入白板」菜单事件
+            InsertToWhiteboardContent.FullWhiteboardClick += (s, e) =>
+            {
+                InsertToWhiteboardPopup.IsOpen = false;
+                ExecuteInsertStrokesToRegularWhiteboard();
+            };
+            InsertToWhiteboardContent.MiniWhiteboardClick += (s, e) =>
+            {
+                InsertToWhiteboardPopup.IsOpen = false;
+                ExecuteInsertStrokesToMiniWhiteboard();
+            };
         }
 
         /// <summary>

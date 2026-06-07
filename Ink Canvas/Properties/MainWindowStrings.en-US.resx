@@ -74,6 +74,9 @@
   <data name="Main_ContextPageTurn" xml:space="preserve">
     <value>Pages</value>
   </data>
+  <data name="Main_ContextInsertToWhiteboard" xml:space="preserve">
+    <value>To Board</value>
+  </data>
   <data name="Main_InkReplayPlaying" xml:space="preserve">
     <value>Replaying ink...</value>
   </data>

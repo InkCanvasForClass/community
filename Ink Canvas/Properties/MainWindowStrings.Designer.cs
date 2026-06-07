@@ -56,6 +56,8 @@ namespace Ink_Canvas.Properties
 
         public static string Main_ContextPageTurn => ResourceManager.GetString(nameof(Main_ContextPageTurn), _resourceCulture);
 
+        public static string Main_ContextInsertToWhiteboard => ResourceManager.GetString(nameof(Main_ContextInsertToWhiteboard), _resourceCulture);
+
         public static string Main_InkReplayPlaying => ResourceManager.GetString(nameof(Main_InkReplayPlaying), _resourceCulture);
 
         public static string Main_InkReplayExitHint => ResourceManager.GetString(nameof(Main_InkReplayExitHint), _resourceCulture);

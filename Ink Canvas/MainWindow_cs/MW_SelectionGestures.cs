@@ -23,6 +23,11 @@ namespace Ink_Canvas
         private object lastBorderMouseDownObject;
 
         /// <summary>
+        /// 暂存待插入白板的克隆墨迹（在弹出目标选择菜单期间使用）
+        /// </summary>
+        private StrokeCollection _pendingInsertStrokes;
+
+        /// <summary>
         /// 处理边界鼠标按下事件
         /// </summary>
         /// <param name="sender">事件发送者</param>
@@ -93,6 +98,101 @@ namespace Ink_Canvas
             var strokes = inkCanvas.GetSelectedStrokes();
             inkCanvas.Select(new StrokeCollection());
             CloneStrokesToNewBoard(strokes);
+        }
+
+        /// <summary>
+        /// 处理墨迹选择插入白板鼠标释放事件
+        /// 弹出目标选择菜单（小白板/常规白板），将选中墨迹插入目标白板
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        private void BorderStrokeSelectionInsertToWhiteboard_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (TryBlockFrozenPageMutation("插入墨迹到白板")) return;
+            if (lastBorderMouseDownObject != sender) return;
+
+            var strokes = inkCanvas.GetSelectedStrokes();
+            if (strokes.Count == 0) return;
+
+            // 克隆墨迹并取消选择，避免克隆后原墨迹残留选中状态
+            _pendingInsertStrokes = strokes.Clone();
+            inkCanvas.Select(new StrokeCollection());
+
+            // 在发送者附近弹出目标选择菜单
+            if (sender is FrameworkElement fe)
+            {
+                InsertToWhiteboardPopup.PlacementTarget = fe;
+                InsertToWhiteboardPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            }
+            InsertToWhiteboardPopup.IsOpen = true;
+        }
+
+        /// <summary>
+        /// 将暂存的墨迹插入常规白板（当前页面）
+        /// </summary>
+        internal void ExecuteInsertStrokesToRegularWhiteboard()
+        {
+            if (_pendingInsertStrokes == null || _pendingInsertStrokes.Count == 0) return;
+
+            try
+            {
+                if (currentMode == 1)
+                {
+                    // 已在白板模式，直接插入当前页面
+                    inkCanvas.Strokes.Add(_pendingInsertStrokes);
+                    timeMachine.CommitStrokeUserInputHistory(_pendingInsertStrokes);
+                }
+                else
+                {
+                    // 从屏幕批注模式切换到白板模式，再插入
+                    ImageBlackboard_MouseUp(null, null);
+                    inkCanvas.Strokes.Add(_pendingInsertStrokes);
+                    timeMachine.CommitStrokeUserInputHistory(_pendingInsertStrokes);
+                }
+
+                LogHelper.WriteLogToFile($"墨迹插入常规白板完成: {_pendingInsertStrokes.Count} 个墨迹");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"墨迹插入常规白板失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+            finally
+            {
+                _pendingInsertStrokes = null;
+            }
+        }
+
+        /// <summary>
+        /// 将暂存的墨迹插入小白板（浮窗）的当前页面
+        /// </summary>
+        internal void ExecuteInsertStrokesToMiniWhiteboard()
+        {
+            if (_pendingInsertStrokes == null || _pendingInsertStrokes.Count == 0) return;
+
+            try
+            {
+                if (_miniWhiteboardWindow == null || !_miniWhiteboardWindow.IsLoaded)
+                {
+                    OpenMiniWhiteboard();
+                }
+                else if (!_miniWhiteboardWindow.IsVisible)
+                {
+                    _miniWhiteboardWindow.Show();
+                    _miniWhiteboardWindow.Activate();
+                }
+
+                _miniWhiteboardWindow.InsertStrokes(_pendingInsertStrokes);
+
+                LogHelper.WriteLogToFile($"墨迹插入小白板完成: {_pendingInsertStrokes.Count} 个墨迹");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"墨迹插入小白板失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+            finally
+            {
+                _pendingInsertStrokes = null;
+            }
         }
 
         /// <summary>

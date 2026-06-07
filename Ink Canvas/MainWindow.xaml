@@ -296,6 +296,17 @@
                                            HorizontalAlignment="Center" />
                             </ikw:SimpleStackPanel>
                         </Border>
+                        <Border Name="BorderStrokeSelectionInsertToWhiteboard" Margin="0,2,-9,2" Background="Transparent"
+                                CornerRadius="{Binding ElementName=BorderStrokeSelectionControl, Path=CornerRadius}"
+                                Width="40" MouseDown="Border_MouseDown"
+                                MouseUp="BorderStrokeSelectionInsertToWhiteboard_MouseUp">
+                            <ikw:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <Image Source="{DynamicResource QuickPanelBlackboardIcon}"
+                                       RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
+                                <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextInsertToWhiteboard}" FontSize="8" Foreground="{DynamicResource FloatBarForeground}"
+                                           HorizontalAlignment="Center" />
+                            </ikw:SimpleStackPanel>
+                        </Border>
                         <Border Width="1" Height="45" BorderBrush="{DynamicResource FloatBarForeground}"
                                 Background="{DynamicResource FloatBarForeground}" />
                         <Border CornerRadius="{Binding ElementName=BorderStrokeSelectionControl, Path=CornerRadius}"
@@ -897,6 +908,10 @@
             <!--白板按钮右键二级菜单-->
             <Popup x:Name="WhiteboardModeSelectionPopup" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
                 <localControls:WhiteboardModeSelectionPopupContent x:Name="WhiteboardModeSelectionContent" />
+            </Popup>
+            <!--墨迹选择栏：插入白板目标选择菜单-->
+            <Popup x:Name="InsertToWhiteboardPopup" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
+                <localControls:WhiteboardModeSelectionPopupContent x:Name="InsertToWhiteboardContent" />
             </Popup>
         </Grid>
         <Grid Name="GridForFloatingBarDraging" Background="#01000000" Visibility="Collapsed"  d:Visibility="Visible"

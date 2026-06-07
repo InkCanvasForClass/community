@@ -74,6 +74,9 @@
   <data name="Main_ContextPageTurn" xml:space="preserve">
     <value>翻页</value>
   </data>
+  <data name="Main_ContextInsertToWhiteboard" xml:space="preserve">
+    <value>插入白板</value>
+  </data>
   <data name="Main_InkReplayPlaying" xml:space="preserve">
     <value>正在重播墨迹...</value>
   </data>

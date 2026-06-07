@@ -363,6 +363,25 @@ namespace Ink_Canvas
         /// </summary>
         public int TotalPageCount => _totalCount;
 
+        /// <summary>
+        /// 外部调用：将墨迹插入当前小白板页面
+        /// </summary>
+        /// <param name="strokes">要插入的墨迹集合（会被克隆）</param>
+        public void InsertStrokes(StrokeCollection strokes)
+        {
+            if (strokes == null || strokes.Count == 0) return;
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                SaveCurrentPage();
+
+                var cloned = strokes.Clone();
+                MiniInkCanvas.Strokes.Add(cloned);
+
+                SaveCurrentPage();
+            }));
+        }
+
         #endregion
     }
 }
