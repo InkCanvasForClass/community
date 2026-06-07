@@ -187,8 +187,6 @@ namespace Ink_Canvas.Helpers
             {
                 lock (SyncRoot)
                 {
-                    ScanOpenWindowsCore();
-
                     if (_isPaused) return;
 
                     if (_mainWindowTopmostEnabled || _topmostMaintenanceEnabled)
