@@ -37,6 +37,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdateSliderText(PPTRSButtonOpacityValueSlider, PPTRSButtonOpacityText, "{0:P0}");
             UpdateSliderText(PPTLBButtonOpacityValueSlider, PPTLBButtonOpacityText, "{0:P0}");
             UpdateSliderText(PPTRBButtonOpacityValueSlider, PPTRBButtonOpacityText, "{0:P0}");
+            UpdateSliderText(PPTNavBarScaleValueSlider, PPTNavBarScaleText, "{0:F2}");
         }
 
         private void UpdateSliderText(Slider slider, TextBlock textBlock, string format)
@@ -78,6 +79,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             PPTRSButtonOpacityValueSlider.Value = ppt.PPTRSButtonOpacity;
             PPTLBButtonOpacityValueSlider.Value = ppt.PPTLBButtonOpacity;
             PPTRBButtonOpacityValueSlider.Value = ppt.PPTRBButtonOpacity;
+
+            PPTNavBarScaleValueSlider.Value = ppt.PPTNavBarScale;
 
             var sOpt = ppt.PPTSButtonsOption.ToString();
             CheckboxSPPTDisplayPage.IsChecked = sOpt.Length > 0 && sOpt[0] == '2';
@@ -323,6 +326,19 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.Settings.PowerPointSettings.PPTRBButtonOpacity = roundedValue;
             SettingsManager.SaveSettingsToFile();
             SettingsActionHub.OnPPTButtonOpacityChanged("RB", roundedValue);
+        }
+
+        private void PPTNavBarScaleValueSlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            UpdateSliderText(PPTNavBarScaleValueSlider, PPTNavBarScaleText, "{0:F2}");
+            if (!_isLoaded) return;
+            double roundedValue = Math.Round(PPTNavBarScaleValueSlider.Value, 2);
+            PPTNavBarScaleValueSlider.ValueChanged -= PPTNavBarScaleValueSlider_ValueChanged;
+            PPTNavBarScaleValueSlider.Value = roundedValue;
+            PPTNavBarScaleValueSlider.ValueChanged += PPTNavBarScaleValueSlider_ValueChanged;
+            SettingsManager.Settings.PowerPointSettings.PPTNavBarScale = roundedValue;
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnPPTNavBarScaleChanged(roundedValue);
         }
 
         #endregion

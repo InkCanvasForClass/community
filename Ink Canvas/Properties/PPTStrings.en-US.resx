@@ -81,6 +81,9 @@
   <data name="FlipButtonsTitle" xml:space="preserve">
     <value>PPT page-turn buttons</value>
   </data>
+  <data name="FlipButtonsScale" xml:space="preserve">
+    <value>Page-turn button size</value>
+  </data>
   <data name="GoToFirstPageOnReenter" xml:space="preserve">
     <value>Go to first slide when starting a slideshow</value>
   </data>

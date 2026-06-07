@@ -388,5 +388,11 @@ namespace Ink_Canvas.Controls
 
         public void SetPageButtonVisibility(Visibility v) => PageButtonBorder.Visibility = v;
         public void SetBarOpacity(double opacity) => RootBorder.Opacity = opacity;
+
+        public void SetBarScale(double scale)
+        {
+            NavBarScaleTransform.ScaleX = scale;
+            NavBarScaleTransform.ScaleY = scale;
+        }
     }
 }

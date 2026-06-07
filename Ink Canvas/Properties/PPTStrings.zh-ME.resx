@@ -81,6 +81,9 @@
   <data name="FlipButtonsTitle" xml:space="preserve">
     <value>PPT 翻页按钮</value>
   </data>
+  <data name="FlipButtonsScale" xml:space="preserve">
+    <value>翻页按钮大小</value>
+  </data>
   <data name="GoToFirstPageOnReenter" xml:space="preserve">
     <value>进放映时回到首页</value>
   </data>
