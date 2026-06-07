@@ -139,6 +139,20 @@
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
+                    <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_QuotePosition}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.POI}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ComboBox x:Name="ComboBoxChickenSoupPosition"
+                                  MinWidth="180"
+                                  SelectionChanged="ComboBoxChickenSoupPosition_SelectionChanged">
+                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuotePosition_TopRight}" Tag="TopRight" />
+                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuotePosition_TopLeft}" Tag="TopLeft" />
+                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuotePosition_BottomRight}" Tag="BottomRight" />
+                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuotePosition_BottomLeft}" Tag="BottomLeft" />
+                        </ComboBox>
+                    </ui:SettingsCard>
+
                     <controls:LabeledSettingsCard x:Name="CardEnableQuickPanel"
                             Header="{x:Static props:ThemeStrings.Theme_EnableQuickPanel}"
                             Icon="{x:Static ui:SegoeFluentIcons.Pinned}"

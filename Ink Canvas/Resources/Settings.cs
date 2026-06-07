@@ -535,6 +535,8 @@ namespace Ink_Canvas
         public bool IsShowQuickPanel { get; set; } = true;
         [JsonProperty("chickenSoupSource")]
         public int ChickenSoupSource { get; set; } = 1;
+        [JsonProperty("chickenSoupPosition")]
+        public string ChickenSoupPosition { get; set; } = "TopRight";
         [JsonProperty("hitokotoCategories", NullValueHandling = NullValueHandling.Ignore)]
         public List<string> HitokotoCategories { get; set; }
         [JsonProperty("isShowModeFingerToggleSwitch")]

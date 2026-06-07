@@ -855,6 +855,7 @@ namespace Ink_Canvas
 
                 if (Settings.Appearance.EnableChickenSoupInWhiteboardMode)
                 {
+                    ApplyChickenSoupPosition();
                     BlackBoardWaterMark.Visibility = Visibility.Visible;
                 }
                 else

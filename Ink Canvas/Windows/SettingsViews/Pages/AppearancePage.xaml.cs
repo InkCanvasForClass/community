@@ -100,6 +100,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardEnableTimeDisplayInWhiteboardMode.IsOn = settings.Appearance.EnableTimeDisplayInWhiteboardMode;
             CardEnableChickenSoupInWhiteboardMode.IsOn = settings.Appearance.EnableChickenSoupInWhiteboardMode;
 
+            SelectComboBoxItemByTag(ComboBoxChickenSoupPosition, settings.Appearance.ChickenSoupPosition);
+
             _suppressChickenSoupSourceSelectionChanged = true;
             try
             {
@@ -261,6 +263,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 BtnHitokotoCustomize.Visibility = idx == 3 ? Visibility.Visible : Visibility.Collapsed;
             SettingsManager.SaveSettingsToFile();
             SettingsActionHub.OnChickenSoupSourceChanged();
+        }
+
+        private void ComboBoxChickenSoupPosition_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            var position = GetSelectedComboBoxTag(ComboBoxChickenSoupPosition, "TopRight");
+            SettingsManager.Settings.Appearance.ChickenSoupPosition = position;
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnChickenSoupPositionChanged();
         }
 
         private async void BtnHitokotoCustomize_Click(object sender, RoutedEventArgs e)

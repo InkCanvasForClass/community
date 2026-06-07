@@ -1048,6 +1048,11 @@ namespace Ink_Canvas.Properties
             dict["Theme_QuoteSource_OsuQuotes"] = ("ThemeStrings", "Theme_QuoteSource_OsuQuotes");
             dict["Theme_QuoteSource_PhigrosTips"] = ("ThemeStrings", "Theme_QuoteSource_PhigrosTips");
             dict["Theme_ShowQuoteInWhiteboard"] = ("ThemeStrings", "Theme_ShowQuoteInWhiteboard");
+            dict["Theme_QuotePosition"] = ("ThemeStrings", "Theme_QuotePosition");
+            dict["Theme_QuotePosition_TopLeft"] = ("ThemeStrings", "Theme_QuotePosition_TopLeft");
+            dict["Theme_QuotePosition_TopRight"] = ("ThemeStrings", "Theme_QuotePosition_TopRight");
+            dict["Theme_QuotePosition_BottomLeft"] = ("ThemeStrings", "Theme_QuotePosition_BottomLeft");
+            dict["Theme_QuotePosition_BottomRight"] = ("ThemeStrings", "Theme_QuotePosition_BottomRight");
             dict["Theme_ShowTimeInWhiteboard"] = ("ThemeStrings", "Theme_ShowTimeInWhiteboard");
             dict["Theme_Splash_Autumn"] = ("ThemeStrings", "Theme_Splash_Autumn");
             dict["Theme_Splash_Custom"] = ("ThemeStrings", "Theme_Splash_Custom");

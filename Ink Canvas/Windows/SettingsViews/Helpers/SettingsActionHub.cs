@@ -201,6 +201,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             if (mw != null) mw.UpdateChickenSoupTextAsync().ConfigureAwait(false);
         }
 
+        public static void OnChickenSoupPositionChanged()
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.ApplyChickenSoupPosition();
+        }
+
         public static void OnQuickPanelBottomOffsetChanged(double value)
         {
             var mw = GetMainWindow();

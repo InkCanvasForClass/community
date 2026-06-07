@@ -207,7 +207,7 @@
                 <TextBlock Text="{Binding nowDate}" Name="WaterMarkDate" Visibility="Collapsed"  d:Visibility="Visible" Margin="2,0,0,0"
                            FontSize="16" Foreground="White" Opacity="0.45" />
             </ikw:SimpleStackPanel>
-            <TextBlock Canvas.Right="25" Canvas.Top="15" Text="{x:Static props:MainWindowStrings.Main_WatermarkText}" Name="BlackBoardWaterMark"
+            <TextBlock Text="{x:Static props:MainWindowStrings.Main_WatermarkText}" Name="BlackBoardWaterMark"
                        Visibility="Collapsed"  d:Visibility="Visible" FontSize="24" FontWeight="Bold" Foreground="White" Opacity="0.5" />
         </Canvas>
         <!--墨迹/图片选择器-->

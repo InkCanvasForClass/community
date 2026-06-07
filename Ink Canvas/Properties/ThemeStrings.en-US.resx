@@ -210,6 +210,21 @@
   <data name="Theme_ShowQuoteInWhiteboard" xml:space="preserve">
     <value>Show quotes in whiteboard</value>
   </data>
+  <data name="Theme_QuotePosition" xml:space="preserve">
+    <value>Quote position in whiteboard</value>
+  </data>
+  <data name="Theme_QuotePosition_TopLeft" xml:space="preserve">
+    <value>Top left</value>
+  </data>
+  <data name="Theme_QuotePosition_TopRight" xml:space="preserve">
+    <value>Top right</value>
+  </data>
+  <data name="Theme_QuotePosition_BottomLeft" xml:space="preserve">
+    <value>Bottom left</value>
+  </data>
+  <data name="Theme_QuotePosition_BottomRight" xml:space="preserve">
+    <value>Bottom right</value>
+  </data>
   <data name="Theme_ShowTimeInWhiteboard" xml:space="preserve">
     <value>Show time and date in whiteboard</value>
   </data>

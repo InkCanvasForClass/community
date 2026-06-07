@@ -210,6 +210,21 @@
   <data name="Theme_ShowQuoteInWhiteboard" xml:space="preserve">
     <value>在白板中显示信仰の源 1（好喝的/毒的鸡汤）</value>
   </data>
+  <data name="Theme_QuotePosition" xml:space="preserve">
+    <value>信仰の源在白板中的位置</value>
+  </data>
+  <data name="Theme_QuotePosition_TopLeft" xml:space="preserve">
+    <value>左上角</value>
+  </data>
+  <data name="Theme_QuotePosition_TopRight" xml:space="preserve">
+    <value>右上角</value>
+  </data>
+  <data name="Theme_QuotePosition_BottomLeft" xml:space="preserve">
+    <value>左下角</value>
+  </data>
+  <data name="Theme_QuotePosition_BottomRight" xml:space="preserve">
+    <value>右下角</value>
+  </data>
   <data name="Theme_ShowTimeInWhiteboard" xml:space="preserve">
     <value>在白板中显示当前时间和日期</value>
   </data>
