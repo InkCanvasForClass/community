@@ -190,7 +190,7 @@
     <value>When on, show time capsule in PPT show; can replace minimized timer window.</value>
   </data>
   <data name="TimeCapsuleOpacity" xml:space="preserve">
-    <value>Time capsule opacity:</value>
+    <value>Time capsule opacity</value>
   </data>
   <data name="TimeCapsulePos_Center" xml:space="preserve">
     <value>Top center</value>
@@ -202,7 +202,7 @@
     <value>Top right</value>
   </data>
   <data name="TimeCapsulePosition" xml:space="preserve">
-    <value>Time capsule position:</value>
+    <value>Time capsule position</value>
   </data>
   <data name="TimeCapsuleResetPosition" xml:space="preserve">
     <value>Reset position</value>
@@ -211,7 +211,7 @@
     <value>Reset time capsule to default position</value>
   </data>
   <data name="TimeCapsuleScale" xml:space="preserve">
-    <value>Time capsule scale:</value>
+    <value>Time capsule scale</value>
   </data>
   <data name="TwoFingerGesture" xml:space="preserve">
     <value>Allow two-finger gestures in slide show</value>
