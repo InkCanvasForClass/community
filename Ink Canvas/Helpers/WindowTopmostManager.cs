@@ -193,8 +193,12 @@ namespace Ink_Canvas.Helpers
 
                     if (_mainWindowTopmostEnabled || _topmostMaintenanceEnabled)
                     {
-                        ApplyZOrderCore();
-                        PopupManagerHelper.NotifyTopmostMaintained();
+                        // 仅当有窗口丢失 TOPMOST 状态时才重新应用（避免无意义的 Win32 调用导致 Z 序抖动）
+                        if (HasAnyWindowLostTopmost())
+                        {
+                            ApplyZOrderCore();
+                            PopupManagerHelper.NotifyTopmostMaintained();
+                        }
                     }
                     else
                     {
@@ -206,6 +210,28 @@ namespace Ink_Canvas.Helpers
             {
                 LogHelper.WriteLogToFile($"窗口置顶管理出错: {ex.Message}", LogHelper.LogType.Error);
             }
+        }
+
+        /// <summary>
+        /// 检查是否有已注册的窗口丢失了 TOPMOST 状态（被其他应用抢占）
+        /// </summary>
+        private static bool HasAnyWindowLostTopmost()
+        {
+            foreach (var w in ManagedWindows)
+            {
+                if (!NativeWindowHelper.IsWindowReady(w.Handle)) continue;
+
+                if (w.IsMainWindow)
+                {
+                    if (_mainWindowTopmostEnabled && !IsTopmostApplied(w.Handle))
+                        return true;
+                }
+                else if (w.AppliedTopmost && !IsTopmostApplied(w.Handle))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private static void Window_SourceInitialized(object sender, EventArgs e)
@@ -234,6 +260,8 @@ namespace Ink_Canvas.Helpers
                 if (managedWindow != null)
                 {
                     managedWindow.ZOrder = ++_zOrderSeed;
+                    // 用户点击激活的窗口需要强制重新设置 Z 序（即使已处于 TOPMOST 状态）
+                    managedWindow.AppliedTopmost = false;
                 }
 
                 if (!_isPaused && (_mainWindowTopmostEnabled || _topmostMaintenanceEnabled))
@@ -332,37 +360,57 @@ namespace Ink_Canvas.Helpers
                 .OrderBy(w => w.ZOrder)
                 .ToList();
 
-            if (mainWindow != null && NativeWindowHelper.IsWindowReady(mainWindow.Handle))
-            {
-                if (_mainWindowTopmostEnabled)
-                {
-                    mainWindow.Window.Topmost = true;
-                    NativeWindowHelper.SetTopmost(mainWindow.Handle);
-                    mainWindow.AppliedTopmost = true;
-                }
-                else
-                {
-                    mainWindow.Window.Topmost = false;
-                    NativeWindowHelper.SetNotTopmost(mainWindow.Handle);
-                    mainWindow.AppliedTopmost = false;
-                }
-            }
-
+            // Z序规范：主窗口先置顶，子窗口按打开顺序逐级覆盖（后打开的高于先打开的）
             if (_mainWindowTopmostEnabled || _topmostMaintenanceEnabled)
             {
-                foreach (var childWindow in childWindows)
+                // 1) 主窗口先设为 TOPMOST
+                if (mainWindow != null && NativeWindowHelper.IsWindowReady(mainWindow.Handle))
                 {
-                    childWindow.Window.Topmost = true;
-                    NativeWindowHelper.SetTopmost(childWindow.Handle);
-                    childWindow.AppliedTopmost = true;
+                    if (!mainWindow.AppliedTopmost || !IsTopmostApplied(mainWindow.Handle))
+                    {
+                        mainWindow.Window.Topmost = true;
+                        NativeWindowHelper.SetTopmost(mainWindow.Handle);
+                        mainWindow.AppliedTopmost = true;
+                    }
                 }
 
+                // 2) 子窗口按 ZOrder 升序设为 TOPMOST（后打开的 ZOrder 更大，排在 TOPMOST 队列更高位）
+                foreach (var childWindow in childWindows)
+                {
+                    if (!childWindow.AppliedTopmost || !IsTopmostApplied(childWindow.Handle))
+                    {
+                        childWindow.Window.Topmost = true;
+                        NativeWindowHelper.SetTopmost(childWindow.Handle);
+                        childWindow.AppliedTopmost = true;
+                    }
+                }
+
+                // 3) 最后提升 Popup 窗口（如 ComboBox 下拉），确保它们在所有窗口之上
                 BoostPopupWindowsAboveChildren();
             }
             else
             {
+                if (mainWindow != null && NativeWindowHelper.IsWindowReady(mainWindow.Handle))
+                {
+                    if (mainWindow.AppliedTopmost || mainWindow.Window.Topmost)
+                    {
+                        mainWindow.Window.Topmost = false;
+                        NativeWindowHelper.SetNotTopmost(mainWindow.Handle);
+                        mainWindow.AppliedTopmost = false;
+                    }
+                }
+
                 ReleaseManagedChildTopmostCore();
             }
+        }
+
+        /// <summary>
+        /// 检查窗口当前是否已处于 TOPMOST 状态（避免重复调用 Win32 API 导致 Z 序抖动）
+        /// </summary>
+        private static bool IsTopmostApplied(IntPtr handle)
+        {
+            int exStyle = NativeWindowHelper.GetWindowLong(handle, NativeWindowHelper.GWL_EXSTYLE);
+            return (exStyle & NativeWindowHelper.WS_EX_TOPMOST) != 0;
         }
 
         /// <summary>
