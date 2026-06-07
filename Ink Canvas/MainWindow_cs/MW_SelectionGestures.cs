@@ -41,7 +41,8 @@ namespace Ink_Canvas
             // 如果发送者是 BoardRandomDrawToolBtn 或 BoardSingleDrawToolBtn，且它们被隐藏，则不处理事件
             if (sender is FrameworkElement element)
             {
-                if ((element == BoardRandomDrawToolBtn || element == BoardSingleDrawToolBtn) &&
+                if ((BoardRandomDrawToolBtn != null && element == BoardRandomDrawToolBtn ||
+                     BoardSingleDrawToolBtn != null && element == BoardSingleDrawToolBtn) &&
                     element.Visibility != Visibility.Visible)
                 {
                     return;

@@ -203,6 +203,8 @@ namespace Ink_Canvas
                 SetMenuGeometry(OpenToolBtn, XamlGraphicsIconGeometries.OpenIconGeometry);
                 SetMenuGeometry(ReplayToolBtn, XamlGraphicsIconGeometries.ReplayIconGeometry);
                 SetMenuGeometry(ScreenshotToolBtn, XamlGraphicsIconGeometries.ScreenshotIconGeometry);
+                SetMenuGeometry(ShapeDrawToolBtn, XamlGraphicsIconGeometries.ShapesIcon);
+                SetMenuGeometry(RedoToolBtn, XamlGraphicsIconGeometries.RedoIcon);
                 SetMenuGeometry(ManualToolBtn, XamlGraphicsIconGeometries.ManualIconGeometry);
                 SetMenuGeometry(SettingsToolBtn, XamlGraphicsIconGeometries.SettingsIconGeometry);
 
@@ -213,6 +215,8 @@ namespace Ink_Canvas
                 SetMenuGeometry(BoardOpenToolBtn, XamlGraphicsIconGeometries.OpenIconGeometry);
                 SetMenuGeometry(BoardReplayToolBtn, XamlGraphicsIconGeometries.ReplayIconGeometry);
                 SetMenuGeometry(BoardScreenshotToolBtn, XamlGraphicsIconGeometries.ScreenshotIconGeometry);
+                SetMenuGeometry(BoardShapeDrawToolBtn, XamlGraphicsIconGeometries.ShapesIcon);
+                SetMenuGeometry(BoardRedoToolBtn, XamlGraphicsIconGeometries.RedoIcon);
                 SetMenuGeometry(BoardManualToolBtn, XamlGraphicsIconGeometries.ManualIconGeometry);
                 SetMenuGeometry(BoardSettingsToolBtn, XamlGraphicsIconGeometries.SettingsIconGeometry);
 

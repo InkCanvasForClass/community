@@ -15,7 +15,7 @@
     <Grid>
         <controls:PopupShellContent x:Name="Shell" Title="{x:Static props:FloatingBarStrings.Board_EraserOptions}" d:Visibility="Collapsed" />
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
-            <ikw:SimpleStackPanel Margin="10">
+            <ikw:SimpleStackPanel Margin="10" Spacing="3">
                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="2"
                                      VerticalAlignment="Center"
                                      HorizontalAlignment="Center">
@@ -47,16 +47,15 @@
                     <TabItem Header="{x:Static props:FloatingBarStrings.Board_EraserShape_Blackboard}" />
                 </TabControl>
                 <Button x:Name="ClearInkButton" Foreground="White"
-                        HorizontalAlignment="Center" Margin="0,6,0,0"
-                        MinHeight="28" Padding="12,4">
+                        HorizontalAlignment="Center">
                     <Button.Resources>
                         <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundKey}" Color="#b91c1c" />
                         <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPointerOverKey}" Color="#b91c1c" />
                         <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPressedKey}" Color="#991b1b" />
                     </Button.Resources>
                     <Button.Content>
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="3">
-                            <Image RenderOptions.BitmapScalingMode="HighQuality" Height="12">
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="2">
+                            <Image RenderOptions.BitmapScalingMode="HighQuality" Height="18">
                                 <Image.Source>
                                     <DrawingImage>
                                         <DrawingImage.Drawing>
@@ -68,23 +67,22 @@
                                     </DrawingImage>
                                 </Image.Source>
                             </Image>
-                            <TextBlock FontSize="10" VerticalAlignment="Center"
+                            <TextBlock VerticalAlignment="Center"
                                        Foreground="White" FontWeight="Bold"
                                        Text="{x:Static props:FloatingBarStrings.Board_ClearInk}" />
                         </ikw:SimpleStackPanel>
                     </Button.Content>
                 </Button>
                 <Button x:Name="ClearInkAndHistoryButton" Foreground="White"
-                        HorizontalAlignment="Center" Margin="0,4,0,4"
-                        MinHeight="28" Padding="12,4">
+                        HorizontalAlignment="Center">
                     <Button.Resources>
                         <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundKey}" Color="#b91c1c" />
                         <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPointerOverKey}" Color="#b91c1c" />
                         <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPressedKey}" Color="#991b1b" />
                     </Button.Resources>
                     <Button.Content>
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="4" Margin="-4,-1">
-                            <Image RenderOptions.BitmapScalingMode="HighQuality" Height="12">
+                        <ikw:SimpleStackPanel Orientation="Horizontal">
+                            <Image RenderOptions.BitmapScalingMode="HighQuality" Height="18">
                                 <Image.Source>
                                     <DrawingImage>
                                         <DrawingImage.Drawing>
@@ -96,8 +94,8 @@
                                     </DrawingImage>
                                 </Image.Source>
                             </Image>
-                            <TextBlock FontSize="9" VerticalAlignment="Center"
-                                       Foreground="White"
+                            <TextBlock VerticalAlignment="Center"
+                                       Foreground="White" FontWeight="Bold"
                                        Text="{x:Static props:FloatingBarStrings.Board_ClearInkAndHistory}" />
                         </ikw:SimpleStackPanel>
                     </Button.Content>

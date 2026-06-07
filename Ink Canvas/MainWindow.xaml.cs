@@ -107,6 +107,8 @@ namespace Ink_Canvas
         internal ToolMenuButton BoardOpenToolBtn => BoardToolsPopupContent?.OpenBtn;
         internal ToolMenuButton BoardReplayToolBtn => BoardToolsPopupContent?.ReplayBtn;
         internal ToolMenuButton BoardScreenshotToolBtn => BoardToolsPopupContent?.ScreenshotBtn;
+        internal ToolMenuButton BoardShapeDrawToolBtn => BoardToolsPopupContent?.ShapeDrawBtn;
+        internal ToolMenuButton BoardRedoToolBtn => BoardToolsPopupContent?.RedoBtn;
         internal ToolMenuButton BoardManualToolBtn => BoardToolsPopupContent?.ManualBtn;
         internal ToolMenuButton BoardSettingsToolBtn => BoardToolsPopupContent?.SettingsBtn;
 
@@ -118,6 +120,8 @@ namespace Ink_Canvas
         internal ToolMenuButton OpenToolBtn => MainToolsPopupContent?.OpenBtn;
         internal ToolMenuButton ReplayToolBtn => MainToolsPopupContent?.ReplayBtn;
         internal ToolMenuButton ScreenshotToolBtn => MainToolsPopupContent?.ScreenshotBtn;
+        internal ToolMenuButton ShapeDrawToolBtn => MainToolsPopupContent?.ShapeDrawBtn;
+        internal ToolMenuButton RedoToolBtn => MainToolsPopupContent?.RedoBtn;
         internal ToolMenuButton ManualToolBtn => MainToolsPopupContent?.ManualBtn;
         internal ToolMenuButton SettingsToolBtn => MainToolsPopupContent?.SettingsBtn;
 
@@ -163,17 +167,34 @@ namespace Ink_Canvas
         {
             if (content == null) return;
 
-            content.TimerBtn.ButtonMouseUp += ImageCountdownTimer_MouseUp;
-            content.RandomDrawBtn.ButtonMouseUp += SymbolIconRand_MouseUp;
-            content.SingleDrawBtn.ButtonMouseUp += SymbolIconRandOne_MouseUp;
-            content.SaveBtn.ButtonMouseDown += Border_MouseDown;
-            content.SaveBtn.ButtonMouseUp += SymbolIconSaveStrokes_MouseUp;
-            content.OpenBtn.ButtonMouseDown += Border_MouseDown;
-            content.OpenBtn.ButtonMouseUp += SymbolIconOpenStrokes_MouseUp;
-            content.ReplayBtn.ButtonMouseUp += GridInkReplayButton_MouseUp;
-            content.ScreenshotBtn.ButtonMouseUp += SymbolIconScreenshot_MouseUp;
-            content.ManualBtn.ButtonMouseUp += OperatingGuideWindowIcon_MouseUp;
-            content.SettingsBtn.ButtonMouseUp += SymbolIconSettings_Click;
+            if (content.TimerBtn != null)
+                content.TimerBtn.ButtonMouseUp += ImageCountdownTimer_MouseUp;
+            if (content.RandomDrawBtn != null)
+                content.RandomDrawBtn.ButtonMouseUp += SymbolIconRand_MouseUp;
+            if (content.SingleDrawBtn != null)
+                content.SingleDrawBtn.ButtonMouseUp += SymbolIconRandOne_MouseUp;
+            if (content.SaveBtn != null)
+            {
+                content.SaveBtn.ButtonMouseDown += Border_MouseDown;
+                content.SaveBtn.ButtonMouseUp += SymbolIconSaveStrokes_MouseUp;
+            }
+            if (content.OpenBtn != null)
+            {
+                content.OpenBtn.ButtonMouseDown += Border_MouseDown;
+                content.OpenBtn.ButtonMouseUp += SymbolIconOpenStrokes_MouseUp;
+            }
+            if (content.ReplayBtn != null)
+                content.ReplayBtn.ButtonMouseUp += GridInkReplayButton_MouseUp;
+            if (content.ScreenshotBtn != null)
+                content.ScreenshotBtn.ButtonMouseUp += SymbolIconScreenshot_MouseUp;
+            if (content.ShapeDrawBtn != null)
+                content.ShapeDrawBtn.ButtonMouseUp += ImageDrawShape_MouseUp;
+            if (content.RedoBtn != null)
+                content.RedoBtn.ButtonMouseUp += SymbolIconRedo_MouseUp;
+            if (content.ManualBtn != null)
+                content.ManualBtn.ButtonMouseUp += OperatingGuideWindowIcon_MouseUp;
+            if (content.SettingsBtn != null)
+                content.SettingsBtn.ButtonMouseUp += SymbolIconSettings_Click;
             content.CloseButtonControl.Click += CloseBordertools_Click;
         }
 

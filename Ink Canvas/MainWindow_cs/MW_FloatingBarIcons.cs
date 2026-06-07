@@ -1244,7 +1244,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
-        private async void SymbolIconScreenshot_MouseUp(object sender, MouseButtonEventArgs e)
+        internal async void SymbolIconScreenshot_MouseUp(object sender, MouseButtonEventArgs e)
         {
             HideSubPanelsImmediately();
             await Task.Delay(50);
@@ -1265,7 +1265,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
-        private void ImageCountdownTimer_MouseUp(object sender, MouseButtonEventArgs e)
+        internal void ImageCountdownTimer_MouseUp(object sender, MouseButtonEventArgs e)
         {
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
@@ -1332,10 +1332,10 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
-        private void SymbolIconRand_MouseUp(object sender, MouseButtonEventArgs e)
+        internal void SymbolIconRand_MouseUp(object sender, MouseButtonEventArgs e)
         {
             // 如果控件被隐藏，不处理事件
-            if (BoardRandomDrawToolBtn.Visibility != Visibility.Visible) return;
+            if (BoardRandomDrawToolBtn == null || BoardRandomDrawToolBtn.Visibility != Visibility.Visible) return;
 
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
@@ -1377,10 +1377,10 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
-        private void SymbolIconRandOne_MouseUp(object sender, MouseButtonEventArgs e)
+        internal void SymbolIconRandOne_MouseUp(object sender, MouseButtonEventArgs e)
         {
             // 如果控件被隐藏，不处理事件
-            if (BoardSingleDrawToolBtn.Visibility != Visibility.Visible) return;
+            if (BoardSingleDrawToolBtn == null || BoardSingleDrawToolBtn.Visibility != Visibility.Visible) return;
 
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
@@ -1777,11 +1777,13 @@ namespace Ink_Canvas
                 HideSubPanels();
                 if (currentMode == 0)
                 {
+                    MainToolsPopupContent?.ApplyMenuLayout();
                     AnimationsHelper.ShowPopupWithSlideAndFade(BorderTools);
                     _popupManager?.BringToFront(BorderTools);
                 }
                 else
                 {
+                    BoardToolsPopupContent?.ApplyMenuLayout();
                     AnimationsHelper.ShowPopupWithSlideAndFade(BoardBorderToolsPopup);
                     _popupManager?.BringToFront(BoardBorderToolsPopup);
                 }

@@ -406,6 +406,15 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Personalize}"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="ToolbarMenuPageItem"
+                            Content="{x:Static props:NavStrings.Nav_ToolbarMenu}"
+                            Tag="ToolbarMenuPage"
+                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_ToolbarMenu_Tooltip}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BulletedList}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
 
@@ -435,6 +444,15 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_BoardAppearance_Tooltip}">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Personalize}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="BoardMenuPageItem"
+                            Content="{x:Static props:NavStrings.Nav_BoardMenu}"
+                            Tag="BoardMenuPage"
+                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_BoardMenu_Tooltip}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BulletedList}"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>

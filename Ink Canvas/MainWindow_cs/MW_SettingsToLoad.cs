@@ -595,8 +595,10 @@ namespace Ink_Canvas
             // RandSettings - UI initialization (settings loading moved to RandomDrawPage)
             if (Settings.RandSettings != null)
             {
-                BoardRandomDrawToolBtn.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
-                BoardSingleDrawToolBtn.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
+                if (BoardRandomDrawToolBtn != null)
+                    BoardRandomDrawToolBtn.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
+                if (BoardSingleDrawToolBtn != null)
+                    BoardSingleDrawToolBtn.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
             }
             else
             {

@@ -643,8 +643,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             var mw = GetMainWindow();
             if (mw != null)
             {
-                mw.BoardRandomDrawToolBtn.Visibility = isOn ? Visibility.Visible : Visibility.Collapsed;
-                mw.BoardSingleDrawToolBtn.Visibility = isOn ? Visibility.Visible : Visibility.Collapsed;
+                if (mw.BoardRandomDrawToolBtn != null)
+                    mw.BoardRandomDrawToolBtn.Visibility = isOn ? Visibility.Visible : Visibility.Collapsed;
+                if (mw.BoardSingleDrawToolBtn != null)
+                    mw.BoardSingleDrawToolBtn.Visibility = isOn ? Visibility.Visible : Visibility.Collapsed;
             }
         }
 

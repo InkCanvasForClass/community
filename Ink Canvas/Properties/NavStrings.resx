@@ -189,6 +189,18 @@
   <data name="Nav_BoardAppearance_Tooltip" xml:space="preserve">
     <value>白板工具栏外观设置</value>
   </data>
+  <data name="Nav_ToolbarMenu" xml:space="preserve">
+    <value>菜单</value>
+  </data>
+  <data name="Nav_ToolbarMenu_Tooltip" xml:space="preserve">
+    <value>工具栏菜单排序与可见性</value>
+  </data>
+  <data name="Nav_BoardMenu" xml:space="preserve">
+    <value>菜单</value>
+  </data>
+  <data name="Nav_BoardMenu_Tooltip" xml:space="preserve">
+    <value>白板菜单排序与可见性</value>
+  </data>
   <data name="Nav_CanvasAndInk_Tooltip" xml:space="preserve">
     <value>画板与墨迹设置</value>
   </data>

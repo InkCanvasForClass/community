@@ -695,7 +695,7 @@
                     </Popup>
                     <!--工具菜单-->
                     <Popup x:Name="BoardBorderToolsPopup" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
-                        <localControls:ToolsPopupContent x:Name="BoardToolsPopupContent" IsBoardMode="True" />
+                        <localControls:BoardToolsPopupContent x:Name="BoardToolsPopupContent" />
                     </Popup>
                 </Grid>
                 <!-- 右下角 -->
@@ -898,7 +898,7 @@
                 <localControls:EraserPopupContent x:Name="EraserPopupContent" />
             </Popup>
             <Popup x:Name="BorderTools" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
-                <localControls:ToolsPopupContent x:Name="MainToolsPopupContent" />
+                <localControls:FloatingBarToolsPopupContent x:Name="MainToolsPopupContent" />
             </Popup>
             <Popup x:Name="BorderDrawShape" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
                 <localControls:ShapeDrawPopupContent x:Name="ShapeDrawPopupContent" />
