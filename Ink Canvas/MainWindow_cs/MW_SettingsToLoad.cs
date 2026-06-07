@@ -316,6 +316,7 @@ namespace Ink_Canvas
                     ViewboxBlackboardRightSide.Opacity = Settings.Appearance.BoardToolbarRightOpacity;
 
                     ApplyQuickPanelBottomOffset(Settings.Appearance.QuickPanelBottomOffset);
+                    ApplyQuickPanelOpacity(Settings.Appearance.QuickPanelOpacity);
                     ApplySidePanelSettings();
 
                     if (Settings.Appearance.IsTransparentButtonBackground)
@@ -873,6 +874,18 @@ namespace Ink_Canvas
 
             var rightQuickPanelMargin = RightUnFoldButtonQuickPanel.Margin;
             RightUnFoldButtonQuickPanel.Margin = new Thickness(rightQuickPanelMargin.Left, rightQuickPanelMargin.Top, rightQuickPanelMargin.Right, offset);
+        }
+
+        internal void ApplyQuickPanelOpacity(double opacity)
+        {
+            if (LeftUnFoldButtonQuickPanel != null)
+                LeftUnFoldButtonQuickPanel.Opacity = opacity;
+            if (RightUnFoldButtonQuickPanel != null)
+                RightUnFoldButtonQuickPanel.Opacity = opacity;
+            if (LeftSidePanel != null)
+                LeftSidePanel.Opacity = opacity;
+            if (RightSidePanel != null)
+                RightSidePanel.Opacity = opacity;
         }
     }
 }

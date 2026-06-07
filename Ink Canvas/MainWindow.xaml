@@ -18,6 +18,7 @@
         Loaded="Window_Loaded"
         Background="Transparent"
         ShowInTaskbar="False"
+        PreviewMouseDown="Window_PreviewMouseDown"
         Title="InkCanvasforClass"
         Topmost="True"
         Closing="Window_Closing"

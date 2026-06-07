@@ -575,6 +575,15 @@ namespace Ink_Canvas
         [JsonProperty("allowDragSidePanel")]
         public bool AllowDragSidePanel { get; set; } = true;
 
+        [JsonProperty("quickPanelOpacity")]
+        public double QuickPanelOpacity { get; set; } = 1.0;
+
+        [JsonProperty("isAutoCollapseQuickPanel")]
+        public bool IsAutoCollapseQuickPanel { get; set; } = false;
+
+        [JsonProperty("autoCollapseQuickPanelDelay")]
+        public double AutoCollapseQuickPanelDelay { get; set; } = 3.0;
+
         [JsonProperty("toolbarPosition")]
         public ToolbarPosition ToolbarPosition { get; set; } = ToolbarPosition.Right;
 

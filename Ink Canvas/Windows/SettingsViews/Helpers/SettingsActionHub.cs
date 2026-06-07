@@ -207,6 +207,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             if (mw != null) mw.ApplyQuickPanelBottomOffset(value);
         }
 
+        public static void OnQuickPanelOpacityChanged(double value)
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.ApplyQuickPanelOpacity(value);
+        }
+
+        public static void OnAutoCollapseQuickPanelChanged()
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.UpdateAutoCollapseQuickPanelTimer();
+        }
+
         public static void OnUnFoldButtonImageTypeChanged(int selectedIndex)
         {
             var mw = GetMainWindow();

@@ -339,4 +339,13 @@
   <data name="Theme_Hitokoto_CustomizeTitle" xml:space="preserve">
     <value>Customize Hitokoto Categories</value>
   </data>
+  <data name="Theme_QuickPanelOpacity" xml:space="preserve">
+    <value>Sidebar opacity</value>
+  </data>
+  <data name="Theme_AutoCollapseQuickPanel" xml:space="preserve">
+    <value>Auto-collapse sidebar when clicking elsewhere</value>
+  </data>
+  <data name="Theme_AutoCollapseQuickPanelDelay" xml:space="preserve">
+    <value>Auto-collapse delay</value>
+  </data>
 </root>

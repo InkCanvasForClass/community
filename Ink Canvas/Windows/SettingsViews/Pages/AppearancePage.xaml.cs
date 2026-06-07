@@ -54,6 +54,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void UpdateAllSliderTexts()
         {
             UpdateSliderText(QuickPanelBottomOffsetSlider, QuickPanelBottomOffsetText, "{0:F0}");
+            UpdateSliderText(QuickPanelOpacitySlider, QuickPanelOpacityText, "{0:P0}");
+            UpdateSliderText(AutoCollapseDelaySlider, AutoCollapseDelayText, "{0:F1}s");
         }
 
         private void UpdateSliderText(Slider slider, TextBlock textBlock, string format)
@@ -114,6 +116,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             QuickPanelBottomOffsetSlider.Value = settings.Appearance.QuickPanelBottomOffset;
             ComboBoxUnFoldBtnImg.SelectedIndex = settings.Appearance.UnFoldButtonImageType;
             CardAllowDragSidePanel.IsOn = settings.Appearance.AllowDragSidePanel;
+            QuickPanelOpacitySlider.Value = settings.Appearance.QuickPanelOpacity;
+            CardAutoCollapseQuickPanel.IsOn = settings.Appearance.IsAutoCollapseQuickPanel;
+            AutoCollapseDelaySlider.Value = settings.Appearance.AutoCollapseQuickPanelDelay;
 
             CardUseLegacyFloatingBarUI.IsOn = settings.Appearance.UseLegacyFloatingBarUI;
 
@@ -338,6 +343,31 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.Appearance.AllowDragSidePanel = CardAllowDragSidePanel.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void QuickPanelOpacitySlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            UpdateSliderText(QuickPanelOpacitySlider, QuickPanelOpacityText, "{0:P0}");
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.QuickPanelOpacity = QuickPanelOpacitySlider.Value;
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnQuickPanelOpacityChanged(QuickPanelOpacitySlider.Value);
+        }
+
+        private void ToggleSwitchAutoCollapseQuickPanel_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.IsAutoCollapseQuickPanel = CardAutoCollapseQuickPanel.IsOn;
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnAutoCollapseQuickPanelChanged();
+        }
+
+        private void AutoCollapseDelaySlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            UpdateSliderText(AutoCollapseDelaySlider, AutoCollapseDelayText, "{0:F1}s");
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.AutoCollapseQuickPanelDelay = AutoCollapseDelaySlider.Value;
             SettingsManager.SaveSettingsToFile();
         }
 

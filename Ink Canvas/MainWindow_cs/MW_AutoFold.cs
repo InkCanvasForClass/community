@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
 
 namespace Ink_Canvas
 {
@@ -22,6 +23,11 @@ namespace Ink_Canvas
         private bool isFloatingBarChangingHideMode;
 
         private int _sidePanelAnimVersion = 0;
+
+        /// <summary>
+        /// 自动收起侧栏计时器
+        /// </summary>
+        private DispatcherTimer _autoCollapseTimer;
 
         /// <summary>
         /// 立即关闭白板模式，恢复到批注模式。
@@ -188,6 +194,8 @@ namespace Ink_Canvas
                 {
                     LeftUnFoldButtonQuickPanel.Margin = new Thickness(QuickPanelUnfoldedMargin, 0, 0, Settings.Appearance.QuickPanelBottomOffset);
                 });
+
+                StartAutoCollapseQuickPanelTimer();
             }
             else
             {
@@ -231,6 +239,8 @@ namespace Ink_Canvas
                 {
                     RightUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, QuickPanelUnfoldedMargin, Settings.Appearance.QuickPanelBottomOffset);
                 });
+
+                StartAutoCollapseQuickPanelTimer();
             }
             else
             {
@@ -319,6 +329,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void HideQuickPanel_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            StopAutoCollapseQuickPanelTimer();
             HideLeftQuickPanel();
             HideRightQuickPanel();
             SidePannelMarginAnimation(-10);
@@ -524,6 +535,127 @@ namespace Ink_Canvas
                 if (MarginFromEdge == -50) LeftSidePanel.Visibility = Visibility.Collapsed;
             });
             isFloatingBarChangingHideMode = false;
+        }
+
+        /// <summary>
+        /// 启动自动收起侧栏计时器
+        /// </summary>
+        internal void StartAutoCollapseQuickPanelTimer()
+        {
+            if (!Settings.Appearance.IsAutoCollapseQuickPanel) return;
+
+            StopAutoCollapseQuickPanelTimer();
+
+            _autoCollapseTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(Settings.Appearance.AutoCollapseQuickPanelDelay)
+            };
+            _autoCollapseTimer.Tick += AutoCollapseTimer_Tick;
+            _autoCollapseTimer.Start();
+        }
+
+        /// <summary>
+        /// 停止自动收起侧栏计时器
+        /// </summary>
+        internal void StopAutoCollapseQuickPanelTimer()
+        {
+            if (_autoCollapseTimer != null)
+            {
+                _autoCollapseTimer.Stop();
+                _autoCollapseTimer.Tick -= AutoCollapseTimer_Tick;
+                _autoCollapseTimer = null;
+            }
+        }
+
+        /// <summary>
+        /// 自动收起侧栏计时器到期时执行
+        /// </summary>
+        private void AutoCollapseTimer_Tick(object sender, EventArgs e)
+        {
+            StopAutoCollapseQuickPanelTimer();
+            HideQuickPanelAndResetMargin();
+        }
+
+        /// <summary>
+        /// 更新自动收起侧栏计时器（根据当前设置）
+        /// </summary>
+        internal void UpdateAutoCollapseQuickPanelTimer()
+        {
+            if (!Settings.Appearance.IsAutoCollapseQuickPanel)
+            {
+                StopAutoCollapseQuickPanelTimer();
+            }
+        }
+
+        /// <summary>
+        /// 隐藏快捷面板并重置侧边栏边距
+        /// </summary>
+        private void HideQuickPanelAndResetMargin()
+        {
+            if (LeftUnFoldButtonQuickPanel.Visibility == Visibility.Visible ||
+                RightUnFoldButtonQuickPanel.Visibility == Visibility.Visible)
+            {
+                HideLeftQuickPanel();
+                HideRightQuickPanel();
+                SidePannelMarginAnimation(-10);
+            }
+        }
+
+        /// <summary>
+        /// 处理主窗口上的鼠标按下事件，用于检测点击其他区域时自动收起侧栏
+        /// </summary>
+        internal void HandleAutoCollapseOnMouseDown(MouseButtonEventArgs e)
+        {
+            if (!Settings.Appearance.IsAutoCollapseQuickPanel) return;
+            if (!isFloatingBarFolded) return;
+
+            bool isQuickPanelVisible = LeftUnFoldButtonQuickPanel.Visibility == Visibility.Visible ||
+                                       RightUnFoldButtonQuickPanel.Visibility == Visibility.Visible;
+
+            if (!isQuickPanelVisible) return;
+
+            // 检查点击目标是否在快捷面板或侧边栏按钮内
+            var hitTarget = e.OriginalSource as DependencyObject;
+            if (hitTarget != null)
+            {
+                // 如果点击在快捷面板或侧边栏按钮内，不收起
+                if (IsDescendantOf(hitTarget, LeftUnFoldButtonQuickPanel) ||
+                    IsDescendantOf(hitTarget, RightUnFoldButtonQuickPanel) ||
+                    IsDescendantOf(hitTarget, LeftSidePanel) ||
+                    IsDescendantOf(hitTarget, RightSidePanel))
+                {
+                    // 重置计时器
+                    StartAutoCollapseQuickPanelTimer();
+                    return;
+                }
+            }
+
+            // 点击了其他区域，立即收起
+            StopAutoCollapseQuickPanelTimer();
+            HideQuickPanelAndResetMargin();
+        }
+
+        /// <summary>
+        /// 检查一个元素是否是另一个元素的子元素
+        /// </summary>
+        private static bool IsDescendantOf(DependencyObject child, FrameworkElement parent)
+        {
+            if (parent == null) return false;
+            var current = child;
+            while (current != null)
+            {
+                if (current == parent) return true;
+                current = System.Windows.Media.VisualTreeHelper.GetParent(current);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 主窗口鼠标按下预览事件，用于检测点击其他区域时自动收起侧栏
+        /// </summary>
+        private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            HandleAutoCollapseOnMouseDown(e);
         }
 
         private bool IsFloatingBarUiAbsentFromScreens()

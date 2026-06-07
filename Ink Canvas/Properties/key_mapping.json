@@ -4390,5 +4390,17 @@
     "Theme_AllowDragSidePanel":  {
                                      "NewKey":  "Theme_AllowDragSidePanel",
                                      "Group":  "ThemeStrings"
-                                 }
+                                 },
+    "Theme_QuickPanelOpacity":  {
+                                    "NewKey":  "Theme_QuickPanelOpacity",
+                                    "Group":  "ThemeStrings"
+                                },
+    "Theme_AutoCollapseQuickPanel":  {
+                                         "NewKey":  "Theme_AutoCollapseQuickPanel",
+                                         "Group":  "ThemeStrings"
+                                     },
+    "Theme_AutoCollapseQuickPanelDelay":  {
+                                              "NewKey":  "Theme_AutoCollapseQuickPanelDelay",
+                                              "Group":  "ThemeStrings"
+                                          }
 }

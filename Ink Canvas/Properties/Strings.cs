@@ -1065,6 +1065,9 @@ namespace Ink_Canvas.Properties
             dict["Theme_UnfoldIcon_ClassicPen"] = ("ThemeStrings", "Theme_UnfoldIcon_ClassicPen");
             dict["Theme_UnfoldIcon_Stripe"] = ("ThemeStrings", "Theme_UnfoldIcon_Stripe");
             dict["Theme_AllowDragSidePanel"] = ("ThemeStrings", "Theme_AllowDragSidePanel");
+            dict["Theme_QuickPanelOpacity"] = ("ThemeStrings", "Theme_QuickPanelOpacity");
+            dict["Theme_AutoCollapseQuickPanel"] = ("ThemeStrings", "Theme_AutoCollapseQuickPanel");
+            dict["Theme_AutoCollapseQuickPanelDelay"] = ("ThemeStrings", "Theme_AutoCollapseQuickPanelDelay");
             dict["Theme_Upload"] = ("ThemeStrings", "Theme_Upload");
             dict["Theme_UseLegacyFloatingBarUI"] = ("ThemeStrings", "Theme_UseLegacyFloatingBarUI");
             dict["Theme_WindowBackdrop"] = ("ThemeStrings", "Theme_WindowBackdrop");

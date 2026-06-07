@@ -237,5 +237,11 @@ namespace Ink_Canvas.Properties
         public static string Theme_Hitokoto_SelectAll => ResourceManager.GetString(nameof(Theme_Hitokoto_SelectAll), _resourceCulture);
 
         public static string Theme_Hitokoto_CustomizeTitle => ResourceManager.GetString(nameof(Theme_Hitokoto_CustomizeTitle), _resourceCulture);
+
+        public static string Theme_QuickPanelOpacity => ResourceManager.GetString(nameof(Theme_QuickPanelOpacity), _resourceCulture);
+
+        public static string Theme_AutoCollapseQuickPanel => ResourceManager.GetString(nameof(Theme_AutoCollapseQuickPanel), _resourceCulture);
+
+        public static string Theme_AutoCollapseQuickPanelDelay => ResourceManager.GetString(nameof(Theme_AutoCollapseQuickPanelDelay), _resourceCulture);
     }
 }
