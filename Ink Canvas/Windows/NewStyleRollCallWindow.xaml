@@ -17,7 +17,8 @@
         ui:ThemeManager.IsThemeAware="True"
         ui:WindowHelper.SystemBackdropType="None"
         ui:WindowHelper.UseModernWindowStyle="True"
-        ui:WindowHelper.CornerStyle="Round">
+        ui:WindowHelper.CornerStyle="Round"
+        FontFamily="Segoe UI, Microsoft YaHei UI">
 
     <Window.Resources>
         <ResourceDictionary>

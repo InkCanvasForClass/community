@@ -22,9 +22,9 @@
                 </Grid.ColumnDefinitions>
                 <Viewbox HorizontalAlignment="Center" Margin="20,0">
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="50" MinHeight="470">
-                        <Label Name="LabelOutput" FontSize="130" Content="" Block.TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource RandWindowTextForeground}"/>
-                        <Label Name="LabelOutput2" FontSize="130" Visibility="Collapsed" Content="" Block.TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource RandWindowTextForeground}"/>
-                        <Label Name="LabelOutput3" FontSize="130" Visibility="Collapsed" Content="" Block.TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource RandWindowTextForeground}"/>
+                        <Label Name="LabelOutput" FontFamily="Segoe UI, Microsoft YaHei UI" FontWeight="Bold" FontSize="130" Content="" Block.TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource RandWindowTextForeground}"/>
+                        <Label Name="LabelOutput2" FontFamily="Segoe UI, Microsoft YaHei UI" FontWeight="Bold" FontSize="130" Visibility="Collapsed" Content="" Block.TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource RandWindowTextForeground}"/>
+                        <Label Name="LabelOutput3" FontFamily="Segoe UI, Microsoft YaHei UI" FontWeight="Bold" FontSize="130" Visibility="Collapsed" Content="" Block.TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource RandWindowTextForeground}"/>
                     </ikw:SimpleStackPanel>
                 </Viewbox>
                 <ikw:SimpleStackPanel Spacing="8" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Opacity="1" Name="PeopleControlPane" Width="256">
