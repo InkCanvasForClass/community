@@ -121,8 +121,7 @@
             <Setter Property="dd:DragDrop.IsDropTarget" Value="True"/>
             <Setter Property="dd:DragDrop.UseDefaultEffectDataTemplate" Value="False"/>
             <Setter Property="dd:DragDrop.DropTargetAdornerBrush" Value="#2563eb"/>
-            <Setter Property="ScrollViewer.PanningMode" Value="HorizontalOnly"/>
-            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
             <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
