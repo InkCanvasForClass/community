@@ -1258,6 +1258,9 @@ namespace Ink_Canvas
         {
             var inkCanvas1 = sender as InkCanvas;
             if (inkCanvas1 == null) return;
+
+            SetDynamicRendererEnabled(inkCanvas1, inkCanvas1.EditingMode != InkCanvasEditingMode.None);
+
             if (IsCurrentPageFrozen && IsFreezeMutatingMode(inkCanvas1.EditingMode))
             {
                 TryBlockFrozenPageMutation("修改冻结页面");
@@ -1307,6 +1310,28 @@ namespace Ink_Canvas
                     DisableEraserOverlay();
                     Trace.WriteLine("Eraser: Overlay disabled in non-eraser mode");
                 }
+            }
+        }
+
+        private void SetDynamicRendererEnabled(InkCanvas canvas, bool enabled)
+        {
+            if (canvas == null) return;
+            try
+            {
+                var prop = typeof(InkCanvas).GetProperty("DynamicRenderer",
+                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                if (prop != null)
+                {
+                    var renderer = prop.GetValue(canvas) as System.Windows.Input.StylusPlugIns.DynamicRenderer;
+                    if (renderer != null)
+                    {
+                        renderer.Enabled = enabled;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to set DynamicRenderer enabled to {enabled}: {ex}");
             }
         }
 

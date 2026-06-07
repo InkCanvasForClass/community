@@ -216,6 +216,8 @@ namespace Ink_Canvas
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
             }
+
+            SetDynamicRendererEnabled(inkCanvas, inkCanvas.EditingMode != InkCanvasEditingMode.None);
         }
 
         private void InitializeRealtimeBrushTipState(int stylusId, StylusDownEventArgs e)
