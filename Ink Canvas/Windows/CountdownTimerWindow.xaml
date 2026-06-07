@@ -22,7 +22,7 @@
                     <ikw:SimpleStackPanel MouseMove="WindowDragMove" Orientation="Horizontal" Height="28.5" Margin="0,0,0,25"
                                          VerticalAlignment="Center"
                                          HorizontalAlignment="Center">
-                        <TextBlock Name="TextBlockHour" FontFamily="Segeo UI"
+                        <TextBlock Name="TextBlockHour" FontFamily="Segoe UI"
                                    Margin="0,0,0,0" Visibility="Collapsed"
                                    Foreground="{DynamicResource TimerWindowTextForeground}"
                                    Text="00" FontSize="26"/>
