@@ -102,7 +102,7 @@ namespace Ink_Canvas
 
         /// <summary>
         /// 处理墨迹选择插入白板鼠标释放事件
-        /// 弹出目标选择菜单（小白板/常规白板），将选中墨迹插入目标白板
+        /// 克隆选中墨迹，弹出目标选择菜单（小白板/常规白板），确认后再取消选中并插入
         /// </summary>
         /// <param name="sender">事件发送者</param>
         /// <param name="e">鼠标按钮事件参数</param>
@@ -114,9 +114,8 @@ namespace Ink_Canvas
             var strokes = inkCanvas.GetSelectedStrokes();
             if (strokes.Count == 0) return;
 
-            // 克隆墨迹并取消选择，避免克隆后原墨迹残留选中状态
+            // 克隆墨迹（暂不取消选择，保持选中态直到用户确认插入目标）
             _pendingInsertStrokes = strokes.Clone();
-            inkCanvas.Select(new StrokeCollection());
 
             // 在发送者附近弹出目标选择菜单
             if (sender is FrameworkElement fe)
@@ -128,6 +127,19 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 取消当前画布上的墨迹选择并隐藏选中态显示
+        /// </summary>
+        private void ClearCurrentStrokeSelection()
+        {
+            if (inkCanvas.GetSelectedStrokes().Count > 0)
+            {
+                inkCanvas.Select(new StrokeCollection());
+            }
+            HideSelectionDisplay();
+            GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+        }
+
+        /// <summary>
         /// 将暂存的墨迹插入常规白板（当前页面）
         /// </summary>
         internal void ExecuteInsertStrokesToRegularWhiteboard()
@@ -136,6 +148,9 @@ namespace Ink_Canvas
 
             try
             {
+                // 先取消主画布上的选中态
+                ClearCurrentStrokeSelection();
+
                 if (currentMode == 1)
                 {
                     // 已在白板模式，直接插入当前页面
@@ -171,6 +186,9 @@ namespace Ink_Canvas
 
             try
             {
+                // 先取消主画布上的选中态
+                ClearCurrentStrokeSelection();
+
                 if (_miniWhiteboardWindow == null || !_miniWhiteboardWindow.IsLoaded)
                 {
                     OpenMiniWhiteboard();

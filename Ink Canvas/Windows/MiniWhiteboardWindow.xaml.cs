@@ -378,6 +378,9 @@ namespace Ink_Canvas
                 var cloned = strokes.Clone();
                 MiniInkCanvas.Strokes.Add(cloned);
 
+                // 确保新插入的墨迹不处于选中态
+                MiniInkCanvas.Select((StrokeCollection)null);
+
                 SaveCurrentPage();
             }));
         }
