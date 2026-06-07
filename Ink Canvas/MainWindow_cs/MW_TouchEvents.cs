@@ -47,7 +47,6 @@ namespace Ink_Canvas
         /// 多点触控延迟时间（毫秒）
         /// </summary>
         private const double MULTI_TOUCH_DELAY_MS = 100;
-        private bool isMultiTouchTimerActive;
         private bool isPalmEraserActive;
         private bool palmEraserWasEnabledBeforeMultiTouch;
         private InkCanvasEditingMode palmEraserPreviousEditingMode = InkCanvasEditingMode.Ink;
@@ -1510,6 +1509,7 @@ namespace Ink_Canvas
                     }
                     lastTouchDownStrokeCollection = inkCanvas.Strokes.Clone();
                 }
+                dec.Remove(e.TouchDevice.Id);
                 dec.Add(e.TouchDevice.Id);
                 return;
             }
@@ -1518,7 +1518,10 @@ namespace Ink_Canvas
             inkCanvas.CaptureTouch(e.TouchDevice);
             ViewboxFloatingBar.IsHitTestVisible = false;
             BlackboardUIGridForInkReplay.IsHitTestVisible = false;
-            lastTouchDownTime = DateTime.Now;
+            var touchDownTime = DateTime.Now;
+            dec.Remove(e.TouchDevice.Id);
+            if (dec.Count == 0)
+                lastTouchDownTime = touchDownTime;
             dec.Add(e.TouchDevice.Id);
 
             if (ShouldUseRealtimeVelocityBrushTipForTouch()
@@ -1636,23 +1639,12 @@ namespace Ink_Canvas
                 if (isInMultiTouchMode || !Settings.Gesture.IsEnableTwoFingerGesture) return;
                 if (inkCanvas.EditingMode == InkCanvasEditingMode.None ||
                     inkCanvas.EditingMode == InkCanvasEditingMode.Select) return;
-                var timeSinceLastTouch = (DateTime.Now - lastTouchDownTime).TotalMilliseconds;
+                var timeSinceLastTouch = (touchDownTime - lastTouchDownTime).TotalMilliseconds;
                 if (timeSinceLastTouch < MULTI_TOUCH_DELAY_MS && inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
                 {
-                    if (!isMultiTouchTimerActive)
-                    {
-                        isMultiTouchTimerActive = true;
-                        var remainingTime = MULTI_TOUCH_DELAY_MS - timeSinceLastTouch;
-                        Task.Delay((int)remainingTime).ContinueWith(_ =>
-                        {
-                            Dispatcher.Invoke(() =>
-                            {
-                                if (dec.Count > 1 && inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
-                                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                                isMultiTouchTimerActive = false;
-                            });
-                        });
-                    }
+                    // 避免在 WPF wet ink 正在绘制时通过延迟任务异步切换 EditingMode。
+                    // 5eff424b 引入的异步 Ink -> None 切换会打断湿墨迹渲染，造成预览层出现多余直线；
+                    // 过短间隔内出现的第二触点仅忽略本次多指切换，等待后续触摸/抬起流程自然清理。
                     return;
                 }
 
@@ -1804,18 +1796,18 @@ namespace Ink_Canvas
                 }
             }
 
-            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint && !isPalmEraserActive)
-            {
-                return;
-            }
+            var isRegularEraserTouch = inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint && !isPalmEraserActive;
             inkCanvas.ReleaseAllTouchCaptures();
             ViewboxFloatingBar.IsHitTestVisible = true;
             BlackboardUIGridForInkReplay.IsHitTestVisible = true;
 
             dec.Remove(e.TouchDevice.Id);
 
-            if (dec.Count <= 1)
-                isMultiTouchTimerActive = false;
+            if (dec.Count == 0)
+                lastTouchDownTime = DateTime.MinValue;
+
+            if (isRegularEraserTouch)
+                return;
 
             if (drawingShapeMode != 0)
             {
