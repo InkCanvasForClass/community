@@ -66,6 +66,8 @@ namespace Ink_Canvas.Properties
 
         public static string FlipButtonsTitle => ResourceManager.GetString(nameof(FlipButtonsTitle), _resourceCulture);
 
+        public static string FlipButtonsScale => ResourceManager.GetString(nameof(FlipButtonsScale), _resourceCulture);
+
         public static string GoToFirstPageOnReenter => ResourceManager.GetString(nameof(GoToFirstPageOnReenter), _resourceCulture);
 
         public static string GroupTitle => ResourceManager.GetString(nameof(GroupTitle), _resourceCulture);

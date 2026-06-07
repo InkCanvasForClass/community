@@ -652,6 +652,9 @@ namespace Ink_Canvas
         [JsonProperty("pptRBButtonOpacity")]
         public double PPTRBButtonOpacity { get; set; } = 0.5;
 
+        [JsonProperty("pptNavBarScale")]
+        public double PPTNavBarScale { get; set; } = 1.0;
+
         // -- new --
 
         [JsonProperty("powerPointSupport")]

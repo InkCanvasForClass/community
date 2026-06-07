@@ -25,6 +25,7 @@ namespace Ink_Canvas.Helpers
         public double PPTRSButtonOpacity { get; set; } = 0.5;
         public double PPTLBButtonOpacity { get; set; } = 0.5;
         public double PPTRBButtonOpacity { get; set; } = 0.5;
+        public double PPTNavBarScale { get; set; } = 1.0;
         #endregion
 
         #region Private Fields
@@ -297,6 +298,7 @@ namespace Ink_Canvas.Helpers
                 {
                     UpdateSideButtonStyles();
                     UpdateBottomButtonStyles();
+                    ApplyNavBarScale();
                 }
                 catch (Exception ex)
                 {
@@ -443,6 +445,21 @@ namespace Ink_Canvas.Helpers
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"更新底部按钮样式失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void ApplyNavBarScale()
+        {
+            try
+            {
+                _mainWindow.LeftBottomPanelForPPTNavigation.SetBarScale(PPTNavBarScale);
+                _mainWindow.RightBottomPanelForPPTNavigation.SetBarScale(PPTNavBarScale);
+                _mainWindow.LeftSidePanelForPPTNavigation.SetBarScale(PPTNavBarScale);
+                _mainWindow.RightSidePanelForPPTNavigation.SetBarScale(PPTNavBarScale);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"应用翻页按钮缩放失败: {ex}", LogHelper.LogType.Error);
             }
         }
         #endregion

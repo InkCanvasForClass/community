@@ -41,7 +41,7 @@ namespace Ink_Canvas.WorkflowAutomation.Actions
 
                     if (s.Fold && !mw.isFloatingBarFolded)
                     {
-                        _ = mw.FoldFloatingBar(null, true);
+                        _ = mw.FoldFloatingBar(new object(), true);
                     }
                     else if (!s.Fold && mw.isFloatingBarFolded)
                     {
@@ -69,7 +69,7 @@ namespace Ink_Canvas.WorkflowAutomation.Actions
                     }
                     else if (!s.Fold && !mw.isFloatingBarFolded)
                     {
-                        _ = mw.FoldFloatingBar(null, true);
+                        _ = mw.FoldFloatingBar(new object(), true);
                     }
                 });
 

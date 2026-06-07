@@ -202,6 +202,20 @@
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
+                    <ui:SettingsCard Header="{x:Static props:PPTStrings.FlipButtonsScale}"
+                            Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Zoom}"/>
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock x:Name="PPTNavBarScaleText"
+                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                            <Slider x:Name="PPTNavBarScaleValueSlider" Minimum="0.5"
+                                    Maximum="1.5" Width="200" IsSnapToTickEnabled="True"
+                                    TickFrequency="0.05" ValueChanged="PPTNavBarScaleValueSlider_ValueChanged"/>
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
                     <controls:LabeledSettingsCard x:Name="CardEnablePPTButtonPageClickable"
                             Header="{x:Static props:PPTStrings.PageButtonClickable}"
                             Description="{x:Static props:PPTStrings.PageButtonClickableHint}"

@@ -634,6 +634,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             mw?.ResetPPTTimeCapsuleOffset();
         }
 
+        public static void OnPPTNavBarScaleChanged(double scale)
+        {
+            var mw = GetMainWindow();
+            if (mw?.PPTUIManager != null)
+            {
+                mw.PPTUIManager.PPTNavBarScale = scale;
+                mw.PPTUIManager.UpdateNavigationButtonStyles();
+            }
+            mw?.UpdatePPTBtnPreview();
+        }
+
         #endregion
 
         #region RandomDraw
