@@ -3047,7 +3047,6 @@ namespace Ink_Canvas
                     pos.X = NormalizeFloatingBarLeftForScreen(pos.X, floatingBarWidth, screenWidth);
                 }
 
-                // 与旧版 1.7.18.7 一致：根据与默认位置的距离判断是否恢复用户保存的位置
                 if (pointPPT.X != -1 || pointPPT.Y != -1)
                 {
                     if (Math.Abs(pointPPT.Y - pos.Y) > 50)
