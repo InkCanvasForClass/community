@@ -1,3 +1,4 @@
+using Ink_Canvas.WorkflowAutomation;
 using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
@@ -1352,6 +1353,7 @@ namespace Ink_Canvas
             }
             ApplyLanguageFromSettings();
             InitializeNotificationProviders();
+            AutomationBootstrap.Initialize();
 
             // 启动时根据设置恢复调试控制台显示状态
             if (Settings?.Advanced != null && Settings.Advanced.IsDebugConsoleEnabled)

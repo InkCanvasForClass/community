@@ -57,8 +57,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdateFileAssociationStatus();
             SliderTouchHelper.AddTouchSupportToAllSliders(this);
 
-            // Initialize workflow system
-            AutomationBootstrap.Initialize();
             RefreshWorkflowList();
 
             // Default to preset panel
