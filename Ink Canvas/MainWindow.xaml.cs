@@ -1,4 +1,3 @@
-using Ink_Canvas.WorkflowAutomation;
 using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
@@ -7,6 +6,7 @@ using Ink_Canvas.Properties;
 using Ink_Canvas.Windows;
 using Ink_Canvas.Windows.SettingsViews;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
+using Ink_Canvas.WorkflowAutomation;
 using iNKORE.UI.WPF.Modern;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Win32;

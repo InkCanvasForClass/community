@@ -1,5 +1,4 @@
 using Ink_Canvas.WorkflowAutomation.Abstractions;
-using Ink_Canvas.WorkflowAutomation.Services;
 
 namespace Ink_Canvas.WorkflowAutomation.Triggers
 {

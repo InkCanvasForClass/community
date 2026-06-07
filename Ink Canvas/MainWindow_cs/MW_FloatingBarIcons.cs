@@ -21,7 +21,6 @@ using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using Application = System.Windows.Application;
 using Button = System.Windows.Controls.Button;
-using Cursors = System.Windows.Input.Cursors;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;

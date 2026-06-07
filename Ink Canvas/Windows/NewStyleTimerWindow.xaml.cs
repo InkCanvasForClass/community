@@ -1329,8 +1329,8 @@ namespace Ink_Canvas.Windows
                         {
                             StopTimer();
                         });
-                    _minimizedWindow.Closed += (s, args) => { _minimizedWindow = null; };
-                    _minimizedWindow.Show();
+                        _minimizedWindow.Closed += (s, args) => { _minimizedWindow = null; };
+                        _minimizedWindow.Show();
                     }
                 });
             }

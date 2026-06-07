@@ -1,10 +1,10 @@
+using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
-using Ink_Canvas.Windows.SettingsViews.Helpers;
 
 namespace Ink_Canvas.Helpers
 {
