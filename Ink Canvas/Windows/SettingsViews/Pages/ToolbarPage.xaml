@@ -97,8 +97,8 @@
         </Style>
     </Page.Resources>
 
-    <ScrollViewer PanningMode="VerticalFirst">
-        <ikw:SimpleStackPanel Spacing="4">
+    <ScrollViewer x:Name="PageScrollViewer" PanningMode="VerticalFirst">
+        <ikw:SimpleStackPanel Spacing="4" Margin="24,0,24,0">
 
             <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_ConfigProfiles}" FontSize="14" FontWeight="SemiBold" Margin="0,20,0,6"/>
             <DockPanel Margin="0,0,0,4">
@@ -176,7 +176,7 @@
 
                 <!-- ===== Tab 1: 组件库 ===== -->
                 <TabItem Header="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentLibrary}">
-                    <ScrollViewer PanningMode="VerticalFirst" VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer PanningMode="VerticalFirst" VerticalScrollBarVisibility="Disabled" PreviewMouseWheel="NestedScrollViewer_PreviewMouseWheel">
                         <ikw:SimpleStackPanel Spacing="4" Margin="0,8,0,0">
                             <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentLibraryHint}"
                                        Opacity="0.65" FontSize="12" Margin="0,0,0,8"/>
@@ -200,7 +200,7 @@
                     <TabItem.Visibility>
                         <Binding Path="SelectedEntry" Converter="{StaticResource NullToVisibilityConverter}"/>
                     </TabItem.Visibility>
-                    <ScrollViewer PanningMode="VerticalFirst" VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer PanningMode="VerticalFirst" VerticalScrollBarVisibility="Disabled" PreviewMouseWheel="NestedScrollViewer_PreviewMouseWheel">
                         <ikw:SimpleStackPanel Spacing="4" Margin="0,8,0,0">
 
                             <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentProperties}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
@@ -354,7 +354,7 @@
                     <TabItem.Visibility>
                         <Binding Path="SelectedEntry" Converter="{StaticResource NullToVisibilityConverter}"/>
                     </TabItem.Visibility>
-                    <ScrollViewer PanningMode="VerticalFirst" VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer PanningMode="VerticalFirst" VerticalScrollBarVisibility="Disabled" PreviewMouseWheel="NestedScrollViewer_PreviewMouseWheel">
                         <ikw:SimpleStackPanel Spacing="4" Margin="0,8,0,0">
 
                             <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_HideByRules}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4"/>

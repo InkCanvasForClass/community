@@ -11,6 +11,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
 
@@ -65,6 +66,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             Loaded += OnPageLoaded;
         }
 
+        private void NestedScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (PageScrollViewer == null) return;
+
+            PageScrollViewer.ScrollToVerticalOffset(PageScrollViewer.VerticalOffset - e.Delta);
+            e.Handled = true;
+        }
+
         private void OnPageLoaded(object sender, RoutedEventArgs e)
         {
             try
@@ -80,6 +89,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 LogHelper.WriteLogToFile($"{LogTag}: OnPageLoaded 异常: {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}", LogHelper.LogType.Error);
             }
             _isLoaded = true;
+            Dispatcher.BeginInvoke(() => PageScrollViewer?.ScrollToTop(), System.Windows.Threading.DispatcherPriority.ContextIdle);
         }
 
         #region Config file management

@@ -12,6 +12,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
+using System.Windows.Input;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
@@ -161,6 +162,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             InitializeComponent();
             DataContext = this;
             Loaded += OnPageLoaded;
+        }
+
+        private void NestedScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (PageScrollViewer == null) return;
+
+            PageScrollViewer.ScrollToVerticalOffset(PageScrollViewer.VerticalOffset - e.Delta);
+            e.Handled = true;
         }
 
         private void OnPageLoaded(object sender, RoutedEventArgs e)
