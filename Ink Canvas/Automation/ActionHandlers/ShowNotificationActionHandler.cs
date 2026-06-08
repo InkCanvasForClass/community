@@ -15,8 +15,7 @@ namespace Ink_Canvas.WorkflowAutomation.ActionHandlers
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    var mw = Application.Current.MainWindow as MainWindow;
-                    mw?.ShowNotification(s.Message);
+                    ShowNotificationAction.ShowAutomationNotification(s);
                 });
             });
         }

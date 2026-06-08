@@ -1158,6 +1158,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 "ProcessName" => "进程名",
                 "TitleContains" => "标题包含",
                 "IgnoreCase" => "忽略大小写",
+                "Type" => "通知类型",
                 "Message" => "通知内容",
                 "SavePath" => "保存路径",
                 "SaveAsXml" => "保存为 XML",
