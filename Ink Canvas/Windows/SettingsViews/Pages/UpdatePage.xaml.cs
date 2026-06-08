@@ -381,6 +381,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             _state = state;
 
+            CompletedStatusGlyph.Visibility = state == UpdateUiState.Idle ? Visibility.Visible : Visibility.Collapsed;
+            StatusIcon.Visibility = state == UpdateUiState.Idle ? Visibility.Collapsed : Visibility.Visible;
+
             CheckUpdateButton.Visibility = Visibility.Collapsed;
             UpdateNowButton.Visibility = Visibility.Collapsed;
             UpdateLaterButton.Visibility = Visibility.Collapsed;
