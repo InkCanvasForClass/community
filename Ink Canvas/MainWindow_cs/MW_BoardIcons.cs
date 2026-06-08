@@ -305,10 +305,8 @@ namespace Ink_Canvas
         {
             if (TryBlockFrozenPageMutation("切换到选择工具")) return;
 
-            forceEraser = false;
-            forcePointEraser = false;
-            drawingShapeMode = 0;
-            SetCurrentToolMode(InkCanvasEditingMode.Select);
+            BtnSelect_Click(null, null);
+
             UpdateCurrentToolMode("select");
             SetCursorBasedOnEditingMode(inkCanvas);
             HideSubPanels("select");
