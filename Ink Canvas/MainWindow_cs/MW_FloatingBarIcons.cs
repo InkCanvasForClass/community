@@ -611,8 +611,11 @@ namespace Ink_Canvas
                     case "pen":
                     case "color":
                         {
-                            Pen_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
-                            Pen_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("pen", true));
+                            if (Pen_Icon != null && Pen_Icon.Icon != null)
+                            {
+                                Pen_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
+                                Pen_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("pen", true));
+                            }
                             if (boardPen != null)
                             {
                                 boardPen.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
@@ -626,9 +629,12 @@ namespace Ink_Canvas
                         }
                     case "eraser":
                         {
-                            Eraser_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
-                            Eraser_Icon.Icon.Geometry =
-                                Geometry.Parse(GetCorrectIcon("eraserCircle", true));
+                            if (Eraser_Icon != null && Eraser_Icon.Icon != null)
+                            {
+                                Eraser_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
+                                Eraser_Icon.Icon.Geometry =
+                                    Geometry.Parse(GetCorrectIcon("eraserCircle", true));
+                            }
                             if (boardEraser != null)
                             {
                                 boardEraser.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
@@ -642,9 +648,12 @@ namespace Ink_Canvas
                         }
                     case "eraserByStrokes":
                         {
-                            EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
-                            EraserByStrokes_Icon.Icon.Geometry =
-                                Geometry.Parse(GetCorrectIcon("eraserStroke", true));
+                            if (EraserByStrokes_Icon != null && EraserByStrokes_Icon.Icon != null)
+                            {
+                                EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
+                                EraserByStrokes_Icon.Icon.Geometry =
+                                    Geometry.Parse(GetCorrectIcon("eraserStroke", true));
+                            }
                             if (boardStrokeEraser != null)
                             {
                                 boardStrokeEraser.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
@@ -658,9 +667,12 @@ namespace Ink_Canvas
                         }
                     case "select":
                         {
-                            SymbolIconSelect.Icon.Brush = new SolidColorBrush(highlightColor);
-                            SymbolIconSelect.Icon.Geometry =
-                                Geometry.Parse(GetCorrectIcon("lassoSelect", true));
+                            if (SymbolIconSelect != null && SymbolIconSelect.Icon != null)
+                            {
+                                SymbolIconSelect.Icon.Brush = new SolidColorBrush(highlightColor);
+                                SymbolIconSelect.Icon.Geometry =
+                                    Geometry.Parse(GetCorrectIcon("lassoSelect", true));
+                            }
                             if (boardSelect != null)
                             {
                                 boardSelect.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
@@ -674,9 +686,12 @@ namespace Ink_Canvas
                         }
                     case "cursor":
                         {
-                            Cursor_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
-                            Cursor_Icon.Icon.Geometry =
-                                Geometry.Parse(GetCorrectIcon("cursor", true));
+                            if (Cursor_Icon != null && Cursor_Icon.Icon != null)
+                            {
+                                Cursor_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
+                                Cursor_Icon.Icon.Geometry =
+                                    Geometry.Parse(GetCorrectIcon("cursor", true));
+                            }
                             bool isDarkThemeForCursor = Settings.Appearance.Theme == 1 ||
                                                         (Settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
                             if (isDarkThemeForCursor)
