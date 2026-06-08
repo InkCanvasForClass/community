@@ -222,7 +222,8 @@ namespace Ink_Canvas
             else
             {
                 SetDynamicRendererEnabled(inkCanvas, inkCanvas.EditingMode != InkCanvasEditingMode.None
-                                                   && inkCanvas.EditingMode != InkCanvasEditingMode.Select);
+                                                   && inkCanvas.EditingMode != InkCanvasEditingMode.Select
+                                                   && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke);
             }
         }
 
