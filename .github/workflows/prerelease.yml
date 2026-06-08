@@ -625,12 +625,12 @@ jobs:
           files: |
             InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}-x64.zip
             InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}-x64.Setup.exe
-            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}-x64.zip.sigstore.json
-            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}-x64.Setup.exe.sigstore.json
             InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip
             InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.Setup.exe
-            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip.sigstore.json
-            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.Setup.exe.sigstore.json
+            build-files-${{ needs.prepare.outputs.version }}-AnyCPU/InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}-x64.zip.sigstore.json
+            build-files-${{ needs.prepare.outputs.version }}-AnyCPU/InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}-x64.Setup.exe.sigstore.json
+            build-files-${{ needs.prepare.outputs.version }}-x86/InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip.sigstore.json
+            build-files-${{ needs.prepare.outputs.version }}-x86/InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.Setup.exe.sigstore.json
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
