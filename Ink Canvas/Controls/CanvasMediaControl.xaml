@@ -77,9 +77,11 @@
                             MinWidth="52"
                             Padding="10,4"
                             Click="PlayPauseButton_Click">
-                        <TextBlock x:Name="PlayPauseIconTextBlock"
-                                   FontSize="14"
-                                   Text="▶" />
+                        <Path x:Name="PlayPauseIconPath"
+                              Width="18"
+                              Height="18"
+                              Stretch="Uniform"
+                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                     </Button>
 
                     <TextBlock x:Name="TimeTextBlock"
