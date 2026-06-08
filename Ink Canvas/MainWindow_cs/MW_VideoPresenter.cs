@@ -64,6 +64,13 @@ namespace Ink_Canvas
 
         public void ToggleVideoPresenterSidebarPublic()
         {
+            if (Settings?.Canvas?.LaunchSeewoVideoShowcaseForWhiteboardBooth == true)
+            {
+                ImageBlackboard_MouseUp(null, null);
+                SoftwareLauncher.LaunchEasiCamera("希沃视频展台");
+                return;
+            }
+
             ToggleVideoPresenterSidebar();
         }
 
