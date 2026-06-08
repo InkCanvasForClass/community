@@ -103,6 +103,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardEnablePPTTimeCapsule.IsOn = ppt.EnablePPTTimeCapsule;
             ComboBoxPPTTimeCapsulePosition.SelectedIndex = ppt.PPTTimeCapsulePosition;
             CardShowPPTSidebarByDefault.IsOn = ppt.ShowPPTSidebarByDefault;
+            CardShowPPTModePrompt.IsOn = ppt.ShowPPTModePrompt;
 
             CardAutoSaveScreenShotInPowerPoint.IsOn = ppt.IsAutoSaveScreenShotInPowerPoint;
             CardAutoSaveStrokesInPowerPoint.IsOn = ppt.IsAutoSaveStrokesInPowerPoint;
@@ -213,6 +214,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.Settings.PowerPointSettings.ShowPPTSidebarByDefault = CardShowPPTSidebarByDefault.IsOn;
             SettingsManager.SaveSettingsToFile();
             SettingsActionHub.OnShowPPTSidebarByDefaultChanged();
+        }
+
+        private void ToggleSwitchShowPPTModePrompt_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.PowerPointSettings.ShowPPTModePrompt = CardShowPPTModePrompt.IsOn;
+            SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchEnablePPTButtonPageClickable_OnToggled(object sender, RoutedEventArgs e)

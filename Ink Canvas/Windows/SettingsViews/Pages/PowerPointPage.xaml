@@ -320,6 +320,12 @@
                             Icon="{x:Static ui:SegoeFluentIcons.OpenPane}"
                             Toggled="ToggleSwitchShowPPTSidebarByDefault_Toggled"/>
 
+                    <controls:LabeledSettingsCard x:Name="CardShowPPTModePrompt"
+                            Header="{x:Static props:PPTStrings.PPT_ModePrompt_Setting}"
+                            Description="{x:Static props:PPTStrings.PPT_ModePrompt_SettingHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Info}"
+                            Toggled="ToggleSwitchShowPPTModePrompt_Toggled"/>
+
                     <TextBlock Text="{x:Static props:PPTStrings.AutoScreenshot}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoSaveScreenShotInPowerPoint"

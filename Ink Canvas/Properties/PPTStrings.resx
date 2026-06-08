@@ -252,6 +252,18 @@
   <data name="PPT_AutoPlay_Detected" xml:space="preserve">
     <value>检测到此演示文档中自动播放或排练计时已经启用，可能导致幻灯片自动翻页，是否取消？</value>
   </data>
+  <data name="PPT_ModePrompt_Message" xml:space="preserve">
+    <value>点击批注栏图标可折叠/展开批注。</value>
+  </data>
+  <data name="PPT_ModePrompt_Setting" xml:space="preserve">
+    <value>进入 PPT 模式时显示批注栏提示</value>
+  </data>
+  <data name="PPT_ModePrompt_SettingHint" xml:space="preserve">
+    <value>开启后，每次进入 PPT 放映/联动模式时都会提示如何折叠或展开批注栏。</value>
+  </data>
+  <data name="PPT_ModePrompt_Title" xml:space="preserve">
+    <value>已进入 PPT 模式</value>
+  </data>
   <data name="PPT_SlidesNotFound" xml:space="preserve">
     <value>未找到幻灯片</value>
   </data>

@@ -180,6 +180,14 @@ namespace Ink_Canvas.Properties
 
         public static string PPT_AutoPlay_Detected => ResourceManager.GetString(nameof(PPT_AutoPlay_Detected), _resourceCulture);
 
+        public static string PPT_ModePrompt_Message => ResourceManager.GetString(nameof(PPT_ModePrompt_Message), _resourceCulture);
+
+        public static string PPT_ModePrompt_Setting => ResourceManager.GetString(nameof(PPT_ModePrompt_Setting), _resourceCulture);
+
+        public static string PPT_ModePrompt_SettingHint => ResourceManager.GetString(nameof(PPT_ModePrompt_SettingHint), _resourceCulture);
+
+        public static string PPT_ModePrompt_Title => ResourceManager.GetString(nameof(PPT_ModePrompt_Title), _resourceCulture);
+
         public static string PPT_SlidesNotFound => ResourceManager.GetString(nameof(PPT_SlidesNotFound), _resourceCulture);
     }
 }

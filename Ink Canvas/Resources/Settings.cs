@@ -705,6 +705,9 @@ namespace Ink_Canvas
         public bool UseRotPptLink { get; set; } = false;
         [JsonProperty("showPPTSidebarByDefault")]
         public bool ShowPPTSidebarByDefault { get; set; } = false;
+
+        [JsonProperty("showPPTModePrompt")]
+        public bool ShowPPTModePrompt { get; set; } = false;
     }
 
     public class Automation
