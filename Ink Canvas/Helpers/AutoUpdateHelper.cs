@@ -26,7 +26,7 @@ namespace Ink_Canvas.Helpers
     {
         // 定义超时时间为10秒
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(10);
-        private static readonly string updatesFolderPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "AutoUpdate");
+        private static readonly string updatesFolderPath = Path.Combine(AppContext.BaseDirectory, "AutoUpdate");
         private static string statusFilePath;
         // 全局下载取消令牌；UI 通过 RequestCancelDownload 取消当前下载
         private static CancellationTokenSource _activeDownloadCts;
@@ -1870,8 +1870,8 @@ namespace Ink_Canvas.Helpers
                 }
                 LogHelper.WriteLogToFile($"AutoUpdate | ZIP文件大小: {fileInfo.Length} 字节");
 
-                string currentAppDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                string appPath = Assembly.GetExecutingAssembly().Location;
+                string currentAppDir = AppContext.BaseDirectory;
+                string appPath = Process.GetCurrentProcess().MainModule.FileName;
                 int currentProcessId = Process.GetCurrentProcess().Id;
 
                 LogHelper.WriteLogToFile($"AutoUpdate | 当前应用程序目录: {currentAppDir}");

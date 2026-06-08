@@ -26,6 +26,11 @@ on:
         required: true
         default: false
         type: boolean
+      include_runtime:
+        description: "Publish as self-contained single-file build with .NET runtime"
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}-${{ github.sha }}
@@ -225,18 +230,50 @@ jobs:
           cache-dependency-path: "**/packages.lock.json"
 
       - name: Restore Package
-        run: dotnet restore "Ink Canvas.sln" --locked-mode
+        run: |
+          $runtimeIdentifier = if ("${{ matrix.architecture }}" -eq "AnyCPU") { "win-x64" } else { "win-x86" }
+          $includeRuntime = "${{ github.event.inputs.include_runtime }}" -eq "true"
 
-      - name: Build the Solution (Release)
+          if ($includeRuntime) {
+            dotnet restore "Ink Canvas.sln" --locked-mode -p:Platform="${{ matrix.architecture }}" --runtime $runtimeIdentifier
+          } else {
+            dotnet restore "Ink Canvas.sln" --locked-mode -p:Platform="${{ matrix.architecture }}"
+          }
+
+      - name: Build or publish app (Release)
         env:
           DLASS_TELEMETRY_TOKEN: ${{ secrets.DLASS_TELEMETRY_TOKEN }}
         run: |
-          msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
+          $runtimeIdentifier = if ("${{ matrix.architecture }}" -eq "AnyCPU") { "win-x64" } else { "win-x86" }
+          $publishDir = "artifacts/publish/${{ matrix.architecture }}"
+          $includeRuntime = "${{ github.event.inputs.include_runtime }}" -eq "true"
+
+          if ($includeRuntime) {
+            dotnet publish "Ink Canvas/InkCanvasForClass.csproj" `
+              --configuration Release `
+              --no-restore `
+              --runtime $runtimeIdentifier `
+              --self-contained true `
+              --output $publishDir `
+              -p:Platform="${{ matrix.architecture }}" `
+              -p:GitFlow="Github Action" `
+              -p:PublishSingleFile=true `
+              -p:PublishTrimmed=false `
+              -p:IncludeNativeLibrariesForSelfExtract=true `
+              -p:UseMultiToolTask=true `
+              -p:EnforceProcessCountAcrossBuilds=true `
+              -p:RunAnalyzers=false
+          } else {
+            msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
+
+            New-Item -ItemType Directory -Path $publishDir -Force
+            Copy-Item "Ink Canvas\bin\Release\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\*" $publishDir -Recurse -Force
+          }
 
       - name: Check if exe file is generated
         id: check-exe
         run: |
-          $exePath = "Ink Canvas\bin\Release\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\InkCanvasForClass.exe"
+          $exePath = "artifacts/publish/${{ matrix.architecture }}/InkCanvasForClass.exe"
 
           if (Test-Path $exePath) {
             echo "build_success=true" >> $env:GITHUB_OUTPUT
@@ -283,8 +320,8 @@ jobs:
           # 创建发布目录
           New-Item -ItemType Directory -Path "release" -Force
 
-          # 复制发布文件（使用架构特定的路径）
-          Copy-Item "Ink Canvas\bin\Release\$architecture\net6.0-windows10.0.19041.0\*" "release/" -Recurse -Force
+          # 复制发布文件（使用架构特定的发布路径）
+          Copy-Item "artifacts\publish\$architecture\*" "release/" -Recurse -Force
 
           # 创建压缩包
           Compress-Archive -Path "release/*" -DestinationPath $archiveName -Force
