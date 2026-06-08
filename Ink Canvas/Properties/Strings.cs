@@ -391,6 +391,8 @@ namespace Ink_Canvas.Properties
             dict["CrashWindowTitle"] = ("CrashStrings", "CrashWindowTitle");
             dict["Debug_ShowConsole_Desc"] = ("AdvancedStrings", "Debug_ShowConsole_Desc");
             dict["Debug_ShowConsole_Header"] = ("AdvancedStrings", "Debug_ShowConsole_Header");
+            dict["Debug_PptComProbe_Desc"] = ("AdvancedStrings", "Debug_PptComProbe_Desc");
+            dict["Debug_PptComProbe_Header"] = ("AdvancedStrings", "Debug_PptComProbe_Header");
             dict["FileAssoc_Check"] = ("SecurityStrings", "FileAssoc_Check");
             dict["FileAssoc_Title"] = ("SecurityStrings", "FileAssoc_Title");
             dict["FileAssoc_Unregister"] = ("SecurityStrings", "FileAssoc_Unregister");

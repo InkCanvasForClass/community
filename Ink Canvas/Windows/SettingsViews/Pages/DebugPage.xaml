@@ -38,6 +38,13 @@ mc:Ignorable="d"
                     IsOn="False"
                     Toggled="ToggleSwitchDebugConsole_Toggled"/>
 
+                <controls:LabeledSettingsCard x:Name="ToggleSwitchPptComDebugProbe"
+                    Header="{x:Static props:AdvancedStrings.Debug_PptComProbe_Header}"
+                    Description="{x:Static props:AdvancedStrings.Debug_PptComProbe_Desc}"
+                    Icon="{x:Static ui:SegoeFluentIcons.Bug}"
+                    IsOn="False"
+                    Toggled="ToggleSwitchPptComDebugProbe_Toggled"/>
+
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                     Text="{x:Static props:AdvancedStrings.Debug_IconSettings}" />
 

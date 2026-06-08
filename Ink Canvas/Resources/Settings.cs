@@ -965,6 +965,9 @@ namespace Ink_Canvas
         [JsonProperty("isDebugConsoleEnabled")]
         public bool IsDebugConsoleEnabled { get; set; } = false;
 
+        [JsonProperty("isPptComDebugProbeEnabled")]
+        public bool IsPptComDebugProbeEnabled { get; set; } = false;
+
         [JsonProperty("isEnableFullScreenHelper")]
         public bool IsEnableFullScreenHelper { get; set; }
 

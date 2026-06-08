@@ -2,7 +2,9 @@ using Microsoft.Office.Interop.PowerPoint;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -62,6 +64,7 @@ namespace Ink_Canvas.Helpers
         private WpsWindowInfo _lastForegroundWpsWindow;
         private DateTime _lastWindowCheckTime = DateTime.MinValue;
         private bool _lastSlideShowState;
+        private DateTime _lastPptComDebugProbeTime = DateTime.MinValue;
         private volatile bool _cachedIsConnected;
         private volatile bool _cachedIsInSlideShow;
         private readonly object _lockObject = new object();
@@ -124,6 +127,8 @@ namespace Ink_Canvas.Helpers
                     CheckAndConnectToPPT();
                 }
 
+                RunPptComDebugProbeIfEnabled("TimerTick", tick);
+
                 if (IsConnected)
                 {
                     // 放映状态检查频率降为每 2 个 tick（约 2 秒）
@@ -168,6 +173,8 @@ namespace Ink_Canvas.Helpers
 
                     if (pptApp != null && !IsConnected)
                     {
+                        RunPptComDebugProbeIfEnabled("BeforeConnect", 0, pptApp);
+
                         // 有可用的PPT/WPS应用程序且当前未连接，建立连接
                         ConnectToPPT(pptApp);
                     }
@@ -349,6 +356,8 @@ namespace Ink_Canvas.Helpers
 
                 // 获取当前演示文稿信息
                 UpdateCurrentPresentationInfo();
+
+                RunPptComDebugProbeIfEnabled("AfterConnect", 0, PPTApplication);
 
                 // 触发连接成功事件
                 PPTConnectionChanged?.Invoke(true);
@@ -737,12 +746,164 @@ namespace Ink_Canvas.Helpers
         }
         #endregion
 
+        #region PPT COM Debug Probe
+        private bool IsPptComDebugProbeEnabled => MainWindow.Settings?.Advanced?.IsPptComDebugProbeEnabled == true;
+
+        private void RunPptComDebugProbeIfEnabled(string reason, int tick, object application = null)
+        {
+            if (!IsPptComDebugProbeEnabled) return;
+            if (reason == "TimerTick" && DateTime.Now - _lastPptComDebugProbeTime < TimeSpan.FromSeconds(4)) return;
+
+            _lastPptComDebugProbeTime = DateTime.Now;
+            try
+            {
+                RunPptComDebugProbe(reason, tick, application ?? PPTApplication);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[PPT-COM-Probe] 探针执行异常: {ex}", LogHelper.LogType.Warning);
+            }
+        }
+
+        private void RunPptComDebugProbe(string reason, int tick, object application)
+        {
+            var sb = new StringBuilder(4096);
+            sb.AppendLine($"[PPT-COM-Probe] ===== {reason} tick={tick} time={DateTime.Now:O} =====");
+            sb.AppendLine($"State: IsConnected={IsConnected}, cachedConnected={_cachedIsConnected}, IsInSlideShow={IsInSlideShow}, cachedInSlideShow={_cachedIsInSlideShow}, SlidesCount={SlidesCount}, IsSupportWPS={IsSupportWPS}, SkipAnimationsWhenNavigating={SkipAnimationsWhenNavigating}");
+            AppendObjectProbe(sb, "PPTApplication", application);
+            AppendObjectProbe(sb, "CurrentPresentation", CurrentPresentation);
+            AppendObjectProbe(sb, "CurrentSlides", CurrentSlides);
+            AppendObjectProbe(sb, "CurrentSlide", CurrentSlide);
+            AppendProcessProbe(sb);
+            AppendWindowProbe(sb, "ForegroundWindow", GetForegroundWindow());
+
+            if (application != null && SafeIsComObject(application))
+            {
+                dynamic app = application;
+                AppendComValue(sb, "Application.Name", () => app.Name);
+                AppendComValue(sb, "Application.Caption", () => app.Caption);
+                AppendComValue(sb, "Application.Version", () => app.Version);
+                AppendComValue(sb, "Application.Path", () => app.Path);
+                AppendComValue(sb, "Application.HWND", () => app.HWND);
+                AppendComValue(sb, "Application.Visible", () => app.Visible);
+                AppendComValue(sb, "Application.Presentations.Count", () => app.Presentations.Count);
+                AppendComValue(sb, "Application.Windows.Count", () => app.Windows.Count);
+                AppendComValue(sb, "Application.SlideShowWindows.Count", () => app.SlideShowWindows.Count);
+                AppendComValue(sb, "Application.ActivePresentation.Name", () => app.ActivePresentation.Name);
+                AppendComValue(sb, "Application.ActivePresentation.FullName", () => app.ActivePresentation.FullName);
+                AppendComValue(sb, "Application.ActivePresentation.Slides.Count", () => app.ActivePresentation.Slides.Count);
+                AppendComValue(sb, "Application.ActivePresentation.SlideShowWindow.View.CurrentShowPosition", () => app.ActivePresentation.SlideShowWindow.View.CurrentShowPosition);
+                AppendComValue(sb, "Application.ActiveWindow.Caption", () => app.ActiveWindow.Caption);
+                AppendComValue(sb, "Application.ActiveWindow.HWND", () => app.ActiveWindow.HWND);
+                AppendComValue(sb, "Application.ActiveWindow.ViewType", () => app.ActiveWindow.ViewType);
+                AppendComValue(sb, "Application.ActiveWindow.Selection.Type", () => app.ActiveWindow.Selection.Type);
+                AppendComValue(sb, "Application.ActiveWindow.Selection.SlideRange.SlideNumber", () => app.ActiveWindow.Selection.SlideRange.SlideNumber);
+                AppendComValue(sb, "Application.SlideShowWindows[1].Presentation.Name", () => app.SlideShowWindows[1].Presentation.Name);
+                AppendComValue(sb, "Application.SlideShowWindows[1].IsFullScreen", () => app.SlideShowWindows[1].IsFullScreen);
+                AppendComValue(sb, "Application.SlideShowWindows[1].HWND", () => app.SlideShowWindows[1].HWND);
+                AppendComValue(sb, "Application.SlideShowWindows[1].View.CurrentShowPosition", () => app.SlideShowWindows[1].View.CurrentShowPosition);
+                AppendComValue(sb, "Application.SlideShowWindows[1].View.State", () => app.SlideShowWindows[1].View.State);
+                AppendComValue(sb, "Application.SlideShowWindows[1].View.Slide.SlideNumber", () => app.SlideShowWindows[1].View.Slide.SlideNumber);
+                AppendComValue(sb, "Application.SlideShowWindows[1].View.Slide.Name", () => app.SlideShowWindows[1].View.Slide.Name);
+            }
+
+            LogHelper.WriteLogToFile(sb.ToString(), LogHelper.LogType.Trace);
+        }
+
+        private static bool SafeIsComObject(object value)
+        {
+            try { return value != null && Marshal.IsComObject(value); }
+            catch { return false; }
+        }
+
+        private static void AppendObjectProbe(StringBuilder sb, string name, object value)
+        {
+            if (value == null)
+            {
+                sb.AppendLine($"{name}: <null>");
+                return;
+            }
+
+            sb.AppendLine($"{name}: Type={value.GetType().FullName}, IsComObject={SafeIsComObject(value)}, Hash=0x{RuntimeHelpers.GetHashCode(value):X8}");
+        }
+
+        private void AppendProcessProbe(StringBuilder sb)
+        {
+            try
+            {
+                var current = Process.GetCurrentProcess();
+                sb.AppendLine($"Process: PID={current.Id}, Name={current.ProcessName}, Threads={current.Threads.Count}, WorkingSet={current.WorkingSet64}");
+            }
+            catch (Exception ex)
+            {
+                sb.AppendLine($"Process: ERROR {FormatProbeException(ex)}");
+            }
+        }
+
+        private void AppendWindowProbe(StringBuilder sb, string name, IntPtr hWnd)
+        {
+            if (hWnd == IntPtr.Zero)
+            {
+                sb.AppendLine($"{name}: <zero>");
+                return;
+            }
+
+            try
+            {
+                var info = GetWindowInfo(hWnd);
+                sb.AppendLine($"{name}: HWND=0x{hWnd.ToInt64():X}, PID={info.ProcessId}, Process={info.ProcessName}, Visible={info.IsVisible}, Minimized={info.IsMinimized}, Maximized={info.IsMaximized}, Rect={info.Rect.Left},{info.Rect.Top},{info.Rect.Right},{info.Rect.Bottom}, Class='{info.ClassName}', Title='{info.Title}'");
+            }
+            catch (Exception ex)
+            {
+                sb.AppendLine($"{name}: HWND=0x{hWnd.ToInt64():X}, ERROR {FormatProbeException(ex)}");
+            }
+        }
+
+        private static void AppendComValue(StringBuilder sb, string label, Func<object> getter)
+        {
+            try
+            {
+                var value = getter();
+                sb.AppendLine($"{label}: {FormatProbeValue(value)}");
+            }
+            catch (COMException ex)
+            {
+                sb.AppendLine($"{label}: COMException HR=0x{(uint)ex.HResult:X8}, Message={ex.Message}");
+            }
+            catch (InvalidComObjectException ex)
+            {
+                sb.AppendLine($"{label}: InvalidComObjectException Message={ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                sb.AppendLine($"{label}: ERROR {FormatProbeException(ex)}");
+            }
+        }
+
+        private static string FormatProbeValue(object value)
+        {
+            if (value == null) return "<null>";
+            if (value is string str) return $"\"{str}\"";
+            if (value is IntPtr ptr) return $"0x{ptr.ToInt64():X}";
+            if (value is IFormattable formattable) return formattable.ToString(null, CultureInfo.InvariantCulture);
+            return SafeIsComObject(value)
+                ? $"COM:{value.GetType().FullName}@0x{RuntimeHelpers.GetHashCode(value):X8}"
+                : value.ToString();
+        }
+
+        private static string FormatProbeException(Exception ex)
+        {
+            return $"{ex.GetType().Name}: {ex.Message}";
+        }
+        #endregion
+
         #region Event Handlers
         private void OnPresentationOpen(Presentation pres)
         {
             try
             {
                 UpdateCurrentPresentationInfo();
+                RunPptComDebugProbeIfEnabled("PresentationOpen", 0);
                 PresentationOpen?.Invoke(pres);
                 LogHelper.WriteLogToFile($"演示文稿已打开: {pres?.Name}", LogHelper.LogType.Event);
             }
@@ -757,6 +918,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 PresentationClose?.Invoke(pres);
+                RunPptComDebugProbeIfEnabled("PresentationClose", 0);
 
                 DisconnectFromPPT();
             }
@@ -772,6 +934,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 UpdateCurrentPresentationInfo();
+                RunPptComDebugProbeIfEnabled("SlideShowBegin", 0);
                 SlideShowBegin?.Invoke(wn);
             }
             catch (Exception ex)
@@ -785,6 +948,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 UpdateCurrentPresentationInfo();
+                RunPptComDebugProbeIfEnabled("SlideShowNextSlide", 0);
                 SlideShowNextSlide?.Invoke(wn);
             }
             catch (Exception ex)
@@ -804,6 +968,7 @@ namespace Ink_Canvas.Helpers
                     RecordWpsProcessForManagement();
                 }
 
+                RunPptComDebugProbeIfEnabled("SlideShowEnd", 0);
                 SlideShowEnd?.Invoke(pres);
             }
             catch (Exception ex)
