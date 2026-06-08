@@ -133,12 +133,6 @@ jobs:
             # 生成新版本号（4位格式，如1.7.18.0）
             $newVersion = "$major.$minor.$patch.$build"
             
-            # 根据是否为预发布决定版本号最后一位
-            # 如果是预发布，确保最后一位不为0（使用1）
-            if ($isPrerelease -and $build -eq 0) {
-              $build = 1
-              $newVersion = "$major.$minor.$patch.$build"
-            }
             $tagName = $newVersion
             
             echo "tag_name=$tagName" >> $env:GITHUB_OUTPUT
