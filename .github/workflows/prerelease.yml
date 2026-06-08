@@ -235,9 +235,9 @@ jobs:
           $includeRuntime = "${{ github.event.inputs.include_runtime }}" -eq "true"
 
           if ($includeRuntime) {
-            dotnet restore "Ink Canvas.sln" --locked-mode -p:Platform="${{ matrix.architecture }}" --runtime $runtimeIdentifier
+            dotnet restore "Ink Canvas/InkCanvasForClass.csproj" --locked-mode -p:Platform="${{ matrix.architecture }}" --runtime $runtimeIdentifier
           } else {
-            dotnet restore "Ink Canvas.sln" --locked-mode -p:Platform="${{ matrix.architecture }}"
+            dotnet restore "Ink Canvas.sln" --locked-mode
           }
 
       - name: Build or publish app (Release)
