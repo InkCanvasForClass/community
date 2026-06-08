@@ -28,6 +28,7 @@ namespace Ink_Canvas
         private readonly Dictionary<int, Point> _touchPoints = new Dictionary<int, Point>();
         private bool _isMultiTouchDragging;
         private Point _multiTouchLastCenter;
+        private InkCanvasEditingMode _lastMiniInkCanvasEditingMode = InkCanvasEditingMode.Ink;
 
         // Undo/redo per page
         private readonly List<bool> _pageLastModeIsRedo = new List<bool>();
@@ -78,36 +79,31 @@ namespace Ink_Canvas
 
         private void RootGrid_PreviewTouchDown(object sender, TouchEventArgs e)
         {
-            var touchPoint = e.GetTouchPoint(RootGrid);
-            _touchPoints[e.TouchDevice.Id] = touchPoint.Position;
+            _touchPoints[e.TouchDevice.Id] = GetTouchScreenPosition(e);
+            MiniInkCanvas.CaptureTouch(e.TouchDevice);
 
-            if (_touchPoints.Count >= 2 && !_isMultiTouchDragging)
+            if (_touchPoints.Count >= 2)
             {
-                _isMultiTouchDragging = true;
+                if (!_isMultiTouchDragging)
+                {
+                    _lastMiniInkCanvasEditingMode = MiniInkCanvas.EditingMode;
+                    MiniInkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    _isMultiTouchDragging = true;
+                }
+
                 _multiTouchLastCenter = GetTouchCenter();
-                // 阻止 InkCanvas 接收多指事件
                 e.Handled = true;
-            }
-            else if (_touchPoints.Count < 2)
-            {
-                // 单指不进入拖动模式，确保 InkCanvas 正常绘制
-                _isMultiTouchDragging = false;
             }
         }
 
         private void RootGrid_PreviewTouchMove(object sender, TouchEventArgs e)
         {
-            var touchPoint = e.GetTouchPoint(RootGrid);
-            _touchPoints[e.TouchDevice.Id] = touchPoint.Position;
+            if (!_touchPoints.ContainsKey(e.TouchDevice.Id)) return;
+
+            _touchPoints[e.TouchDevice.Id] = GetTouchScreenPosition(e);
 
             // 单指移动：不拦截，交给 InkCanvas 绘制
-            if (_touchPoints.Count < 2)
-            {
-                _isMultiTouchDragging = false;
-                return;
-            }
-
-            if (!_isMultiTouchDragging) return;
+            if (_touchPoints.Count < 2 || !_isMultiTouchDragging) return;
 
             var center = GetTouchCenter();
             var deltaX = center.X - _multiTouchLastCenter.X;
@@ -123,10 +119,17 @@ namespace Ink_Canvas
         private void RootGrid_PreviewTouchUp(object sender, TouchEventArgs e)
         {
             _touchPoints.Remove(e.TouchDevice.Id);
+            MiniInkCanvas.ReleaseTouchCapture(e.TouchDevice);
 
             if (_touchPoints.Count < 2 && _isMultiTouchDragging)
             {
                 _isMultiTouchDragging = false;
+                MiniInkCanvas.EditingMode = _lastMiniInkCanvasEditingMode;
+            }
+
+            if (_touchPoints.Count == 0)
+            {
+                MiniInkCanvas.ReleaseAllTouchCaptures();
             }
         }
 
@@ -139,6 +142,12 @@ namespace Ink_Canvas
                 y += pt.Y;
             }
             return new Point(x / _touchPoints.Count, y / _touchPoints.Count);
+        }
+
+        private Point GetTouchScreenPosition(TouchEventArgs e)
+        {
+            var point = e.GetTouchPoint(this).Position;
+            return PointToScreen(point);
         }
 
         #endregion
