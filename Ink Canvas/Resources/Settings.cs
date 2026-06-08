@@ -1236,5 +1236,8 @@ namespace Ink_Canvas
 
         [JsonProperty("penColor")]
         public string PenColor { get; set; } = "#FFFFFFFF";
+
+        [JsonProperty("currentColorIndex")]
+        public int CurrentColorIndex { get; set; } = 0; // 0=White, 1=Black, 2=Red, 3=Orange, 4=Yellow, 5=Green, 6=Blue, 7=Purple
     }
 }

@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace Ink_Canvas
 {
@@ -87,27 +88,36 @@ namespace Ink_Canvas
                 // 阻止 InkCanvas 接收多指事件
                 e.Handled = true;
             }
+            else if (_touchPoints.Count < 2)
+            {
+                // 单指不进入拖动模式，确保 InkCanvas 正常绘制
+                _isMultiTouchDragging = false;
+            }
         }
 
         private void RootGrid_PreviewTouchMove(object sender, TouchEventArgs e)
         {
-            if (!_isMultiTouchDragging) return;
-
             var touchPoint = e.GetTouchPoint(RootGrid);
             _touchPoints[e.TouchDevice.Id] = touchPoint.Position;
 
-            if (_touchPoints.Count >= 2)
+            // 单指移动：不拦截，交给 InkCanvas 绘制
+            if (_touchPoints.Count < 2)
             {
-                var center = GetTouchCenter();
-                var deltaX = center.X - _multiTouchLastCenter.X;
-                var deltaY = center.Y - _multiTouchLastCenter.Y;
-
-                Left += deltaX;
-                Top += deltaY;
-
-                _multiTouchLastCenter = center;
-                e.Handled = true;
+                _isMultiTouchDragging = false;
+                return;
             }
+
+            if (!_isMultiTouchDragging) return;
+
+            var center = GetTouchCenter();
+            var deltaX = center.X - _multiTouchLastCenter.X;
+            var deltaY = center.Y - _multiTouchLastCenter.Y;
+
+            Left += deltaX;
+            Top += deltaY;
+
+            _multiTouchLastCenter = center;
+            e.Handled = true;
         }
 
         private void RootGrid_PreviewTouchUp(object sender, TouchEventArgs e)
@@ -294,25 +304,84 @@ namespace Ink_Canvas
 
         #region Pen Settings
 
+        // 调色盘颜色索引：0=White, 1=Black, 2=Red, 3=Orange, 4=Yellow, 5=Green, 6=Blue, 7=Purple
+        private static readonly Color[] PaletteColors = new Color[]
+        {
+            Colors.White,
+            Colors.Black,
+            Color.FromRgb(0xFF, 0x00, 0x00), // Red
+            Color.FromRgb(0xFF, 0xA5, 0x00), // Orange
+            Color.FromRgb(0xFF, 0xFF, 0x00), // Yellow
+            Color.FromRgb(0x16, 0xA3, 0x4A), // Green
+            Color.FromRgb(0x25, 0x63, 0xEB), // Blue
+            Color.FromRgb(0x93, 0x33, 0xEA), // Purple
+        };
+
         private void ApplyPenSettings()
         {
             var settings = MainWindow.Settings.MiniWhiteboard ??= new MiniWhiteboardSettings();
 
-            // Parse pen color (default: white for dark board background)
-            Color penColor = Colors.White;
-            if (!string.IsNullOrEmpty(settings.PenColor) && settings.PenColor.StartsWith("#"))
+            // 优先使用 colorIndex，兼容旧的 penColor 字符串
+            int colorIdx = settings.CurrentColorIndex;
+            if (colorIdx >= 0 && colorIdx < PaletteColors.Length)
+            {
+                MiniInkCanvas.DefaultDrawingAttributes.Color = PaletteColors[colorIdx];
+            }
+            else if (!string.IsNullOrEmpty(settings.PenColor) && settings.PenColor.StartsWith("#"))
             {
                 try
                 {
-                    penColor = (Color)ColorConverter.ConvertFromString(settings.PenColor);
+                    MiniInkCanvas.DefaultDrawingAttributes.Color = (Color)ColorConverter.ConvertFromString(settings.PenColor);
                 }
                 catch { }
             }
 
-            // Apply to canvas
-            MiniInkCanvas.DefaultDrawingAttributes.Color = penColor;
             MiniInkCanvas.DefaultDrawingAttributes.Width = settings.PenWidth;
             MiniInkCanvas.DefaultDrawingAttributes.Height = settings.PenWidth;
+
+            UpdateColorIndicator();
+        }
+
+        private void UpdateColorIndicator()
+        {
+            var settings = MainWindow.Settings.MiniWhiteboard ??= new MiniWhiteboardSettings();
+            int idx = settings.CurrentColorIndex;
+            if (idx >= 0 && idx < PaletteColors.Length)
+            {
+                ColorIndicator.Fill = new SolidColorBrush(PaletteColors[idx]);
+            }
+        }
+
+        #endregion
+
+        #region Color Palette
+
+        private void ColorBtn_Click(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+            ColorPalettePopup.IsOpen = !ColorPalettePopup.IsOpen;
+        }
+
+        private void ColorSwatch_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Ellipse ellipse && ellipse.Fill is SolidColorBrush brush)
+            {
+                Color selectedColor = brush.Color;
+                MiniInkCanvas.DefaultDrawingAttributes.Color = selectedColor;
+                ColorIndicator.Fill = new SolidColorBrush(selectedColor);
+
+                // 保存颜色索引到 settings
+                var settings = MainWindow.Settings.MiniWhiteboard ??= new MiniWhiteboardSettings();
+                int idx = Array.IndexOf(PaletteColors, selectedColor);
+                if (idx >= 0)
+                {
+                    settings.CurrentColorIndex = idx;
+                    settings.PenColor = selectedColor.ToString();
+                }
+
+                ColorPalettePopup.IsOpen = false;
+                e.Handled = true;
+            }
         }
 
         #endregion
