@@ -213,6 +213,14 @@ namespace Ink_Canvas.Helpers
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         private static extern void GetStartupInfoW(ref STARTUPINFOW lpStartupInfo);
 
+        [DllImport("userenv.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool CreateEnvironmentBlock(out IntPtr lpEnvironment, IntPtr hToken, bool bInherit);
+
+        [DllImport("userenv.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool DestroyEnvironmentBlock(IntPtr lpEnvironment);
+
         #endregion
 
         #region Public API
@@ -711,7 +719,7 @@ namespace Ink_Canvas.Helpers
 
         private static bool LaunchWithToken(IntPtr token, string extraArgs)
         {
-            string exePath = Process.GetCurrentProcess().MainModule.FileName;
+            string exePath = GetExecutablePathForRelaunch();
             string workDir = System.IO.Path.GetDirectoryName(exePath);
 
             // 重建命令行：保留原始参数，追加 --skip-mutex-check 防止单实例阻塞
@@ -722,6 +730,11 @@ namespace Ink_Canvas.Helpers
             for (int i = 1; i < args.Length; i++)
             {
                 if (string.Equals(args[i], "--enable-uia-topmost-helper", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                // 单文件发布下，托管入口程序集位于 bundle 解压目录；重启时必须使用真实 exe，
+                // 不能把 EntryAssembly.Location / 解压路径带给新进程。
+                if (string.Equals(args[i], exePath, StringComparison.OrdinalIgnoreCase))
                     continue;
 
                 cmdBuilder.Append(' ');
@@ -741,28 +754,69 @@ namespace Ink_Canvas.Helpers
             var si = new STARTUPINFOW { cb = (uint)Marshal.SizeOf(typeof(STARTUPINFOW)) };
             GetStartupInfoW(ref si);
 
-            bool ok = CreateProcessWithTokenW(
-                token,
-                LOGON_WITH_PROFILE,
-                null,
-                cmdBuilder,
-                CREATE_UNICODE_ENVIRONMENT,
-                IntPtr.Zero,
-                workDir,
-                ref si,
-                out PROCESS_INFORMATION pi);
-
-            if (!ok)
+            IntPtr environment = IntPtr.Zero;
+            uint creationFlags = CREATE_UNICODE_ENVIRONMENT;
+            if (CreateEnvironmentBlock(out environment, token, false))
             {
-                int err = Marshal.GetLastWin32Error();
-                LogHelper.WriteLogToFile($"UIAccess | CreateProcessWithTokenW 失败: {err}", LogHelper.LogType.Error);
-                return false;
+                creationFlags |= CREATE_UNICODE_ENVIRONMENT;
+            }
+            else
+            {
+                int envErr = Marshal.GetLastWin32Error();
+                LogHelper.WriteLogToFile($"UIAccess | CreateEnvironmentBlock 失败，使用当前环境继续启动: {envErr}", LogHelper.LogType.Warning);
             }
 
-            CloseHandle(pi.hProcess);
-            CloseHandle(pi.hThread);
-            LogHelper.WriteLogToFile($"UIAccess | 已使用 UIAccess 令牌启动新进程 (PID={pi.dwProcessId})");
-            return true;
+            try
+            {
+                bool ok = CreateProcessWithTokenW(
+                    token,
+                    LOGON_WITH_PROFILE,
+                    exePath,
+                    cmdBuilder,
+                    creationFlags,
+                    environment,
+                    workDir,
+                    ref si,
+                    out PROCESS_INFORMATION pi);
+
+                if (!ok)
+                {
+                    int err = Marshal.GetLastWin32Error();
+                    LogHelper.WriteLogToFile($"UIAccess | CreateProcessWithTokenW 失败: {err}; Exe={exePath}; WorkDir={workDir}; Cmd={cmdBuilder}", LogHelper.LogType.Error);
+                    return false;
+                }
+
+                CloseHandle(pi.hProcess);
+                CloseHandle(pi.hThread);
+                LogHelper.WriteLogToFile($"UIAccess | 已使用 UIAccess 令牌启动新进程 (PID={pi.dwProcessId}, Exe={exePath})");
+                return true;
+            }
+            finally
+            {
+                if (environment != IntPtr.Zero)
+                {
+                    DestroyEnvironmentBlock(environment);
+                }
+            }
+        }
+
+        private static string GetExecutablePathForRelaunch()
+        {
+            string mainModulePath = null;
+            try
+            {
+                mainModulePath = Process.GetCurrentProcess().MainModule?.FileName;
+            }
+            catch { }
+
+            if (!string.IsNullOrEmpty(mainModulePath) && System.IO.File.Exists(mainModulePath))
+                return mainModulePath;
+
+            string processPath = Environment.ProcessPath;
+            if (!string.IsNullOrEmpty(processPath) && System.IO.File.Exists(processPath))
+                return processPath;
+
+            return System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
         }
 
         private static void AppendQuoted(StringBuilder sb, string arg)
