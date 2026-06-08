@@ -81,6 +81,14 @@
                                  Foreground="{DynamicResource IconForeground}"/>
                 </Border>
 
+                <!-- 颜色选择 -->
+                <Border x:Name="ColorBtn" Style="{StaticResource MiniToolBtn}" Width="28"
+                        MouseLeftButtonUp="ColorBtn_Click"
+                        ToolTip="Color">
+                    <Ellipse x:Name="ColorIndicator" Width="14" Height="14"
+                             Fill="White" Stroke="{DynamicResource IconForeground}" StrokeThickness="1"/>
+                </Border>
+
                 <!-- 橡皮擦 -->
                 <Border x:Name="EraserBtn" Style="{StaticResource MiniToolBtn}"
                         MouseLeftButtonUp="EraserBtn_Click"
@@ -154,5 +162,49 @@
 
             </StackPanel>
         </Border>
+
+        <!-- 调色盘 Popup -->
+        <Popup x:Name="ColorPalettePopup" PlacementTarget="{Binding ElementName=ColorBtn}"
+               Placement="Top" StaysOpen="False" AllowsTransparency="True"
+               HorizontalOffset="-30" VerticalOffset="-4">
+            <Border Background="{DynamicResource BoardFloatBarBackground}"
+                    BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
+                    BorderThickness="1" CornerRadius="6" Padding="6,4">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,2">
+                        <Ellipse x:Name="SwatchWhite" Width="22" Height="22" Fill="White"
+                                 Stroke="Gray" StrokeThickness="1" Margin="1,0" Cursor="Hand"
+                                 MouseLeftButtonUp="ColorSwatch_Click"/>
+                        <Ellipse x:Name="SwatchBlack" Width="22" Height="22" Fill="Black"
+                                 Stroke="Gray" StrokeThickness="1" Margin="1,0" Cursor="Hand"
+                                 MouseLeftButtonUp="ColorSwatch_Click"/>
+                        <Ellipse x:Name="SwatchRed" Width="22" Height="22" Fill="#FF0000"
+                                 Stroke="Gray" StrokeThickness="1" Margin="1,0" Cursor="Hand"
+                                 MouseLeftButtonUp="ColorSwatch_Click"/>
+                        <Ellipse x:Name="SwatchOrange" Width="22" Height="22" Fill="#FFA500"
+                                 Stroke="Gray" StrokeThickness="1" Margin="1,0" Cursor="Hand"
+                                 MouseLeftButtonUp="ColorSwatch_Click"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,2,0,0">
+                        <Ellipse x:Name="SwatchYellow" Width="22" Height="22" Fill="#FFFF00"
+                                 Stroke="Gray" StrokeThickness="1" Margin="1,0" Cursor="Hand"
+                                 MouseLeftButtonUp="ColorSwatch_Click"/>
+                        <Ellipse x:Name="SwatchGreen" Width="22" Height="22" Fill="#16A34A"
+                                 Stroke="Gray" StrokeThickness="1" Margin="1,0" Cursor="Hand"
+                                 MouseLeftButtonUp="ColorSwatch_Click"/>
+                        <Ellipse x:Name="SwatchBlue" Width="22" Height="22" Fill="#2563EB"
+                                 Stroke="Gray" StrokeThickness="1" Margin="1,0" Cursor="Hand"
+                                 MouseLeftButtonUp="ColorSwatch_Click"/>
+                        <Ellipse x:Name="SwatchPurple" Width="22" Height="22" Fill="#9333EA"
+                                 Stroke="Gray" StrokeThickness="1" Margin="1,0" Cursor="Hand"
+                                 MouseLeftButtonUp="ColorSwatch_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Popup>
     </Grid>
 </Window>
