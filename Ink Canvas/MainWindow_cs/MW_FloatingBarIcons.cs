@@ -112,8 +112,11 @@ namespace Ink_Canvas
                 {
                     Gesture_Icon.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.EnabledGestureIcon);
                     Gesture_Icon.Badge.Geometry = Geometry.Parse("F0 M24,24z M0,0z " + XamlGraphicsIconGeometries.EnabledGestureIconBadgeCheck);
-                    Gesture_Icon.IconBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                    Gesture_Icon.Badge.Brush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                    if (!ToolbarRegistry.GetUseRedStyle(Gesture_Icon))
+                    {
+                        Gesture_Icon.IconBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                        Gesture_Icon.Badge.Brush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                    }
                 }
             }
             else
@@ -122,9 +125,12 @@ namespace Ink_Canvas
                 {
                     Gesture_Icon.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.DisabledGestureIcon);
                     Gesture_Icon.Badge.Geometry = Geometry.Parse("F0 M24,24z M0,0z");
-                    Gesture_Icon.IconBrush = isDarkTheme
-                        ? new SolidColorBrush(Color.FromRgb(244, 244, 245))
-                        : new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                    if (!ToolbarRegistry.GetUseRedStyle(Gesture_Icon))
+                    {
+                        Gesture_Icon.IconBrush = isDarkTheme
+                            ? new SolidColorBrush(Color.FromRgb(244, 244, 245))
+                            : new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                    }
                 }
             }
 
@@ -568,11 +574,11 @@ namespace Ink_Canvas
             {
                 if (mode != "clear")
                 {
-                    if (Cursor_Icon != null) { Cursor_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); Cursor_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("cursor", false)); }
-                    if (Pen_Icon != null) { Pen_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); Pen_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("pen", false)); }
-                    if (EraserByStrokes_Icon != null) { EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); EraserByStrokes_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("eraserStroke", false)); }
-                    if (Eraser_Icon != null) { Eraser_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); Eraser_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("eraserCircle", false)); }
-                    if (SymbolIconSelect != null) { SymbolIconSelect.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); SymbolIconSelect.Icon.Geometry = Geometry.Parse(GetCorrectIcon("lassoSelect", false)); }
+                    if (Cursor_Icon != null) { if (!ToolbarRegistry.GetUseRedStyle(Cursor_Icon)) Cursor_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); Cursor_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("cursor", false)); }
+                    if (Pen_Icon != null) { if (!ToolbarRegistry.GetUseRedStyle(Pen_Icon)) Pen_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); Pen_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("pen", false)); }
+                    if (EraserByStrokes_Icon != null) { if (!ToolbarRegistry.GetUseRedStyle(EraserByStrokes_Icon)) EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); EraserByStrokes_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("eraserStroke", false)); }
+                    if (Eraser_Icon != null) { if (!ToolbarRegistry.GetUseRedStyle(Eraser_Icon)) Eraser_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); Eraser_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("eraserCircle", false)); }
+                    if (SymbolIconSelect != null) { if (!ToolbarRegistry.GetUseRedStyle(SymbolIconSelect)) SymbolIconSelect.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); SymbolIconSelect.Icon.Geometry = Geometry.Parse(GetCorrectIcon("lassoSelect", false)); }
 
                     bool isDarkThemeForButtons = Settings.Appearance.Theme == 1 ||
                                                  (Settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
@@ -613,7 +619,8 @@ namespace Ink_Canvas
                         {
                             if (Pen_Icon != null && Pen_Icon.Icon != null)
                             {
-                                Pen_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
+                                if (!ToolbarRegistry.GetUseRedStyle(Pen_Icon))
+                                    Pen_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
                                 Pen_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("pen", true));
                             }
                             if (boardPen != null)
@@ -631,7 +638,8 @@ namespace Ink_Canvas
                         {
                             if (Eraser_Icon != null && Eraser_Icon.Icon != null)
                             {
-                                Eraser_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
+                                if (!ToolbarRegistry.GetUseRedStyle(Eraser_Icon))
+                                    Eraser_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
                                 Eraser_Icon.Icon.Geometry =
                                     Geometry.Parse(GetCorrectIcon("eraserCircle", true));
                             }
@@ -650,7 +658,8 @@ namespace Ink_Canvas
                         {
                             if (EraserByStrokes_Icon != null && EraserByStrokes_Icon.Icon != null)
                             {
-                                EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
+                                if (!ToolbarRegistry.GetUseRedStyle(EraserByStrokes_Icon))
+                                    EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
                                 EraserByStrokes_Icon.Icon.Geometry =
                                     Geometry.Parse(GetCorrectIcon("eraserStroke", true));
                             }
@@ -669,7 +678,8 @@ namespace Ink_Canvas
                         {
                             if (SymbolIconSelect != null && SymbolIconSelect.Icon != null)
                             {
-                                SymbolIconSelect.Icon.Brush = new SolidColorBrush(highlightColor);
+                                if (!ToolbarRegistry.GetUseRedStyle(SymbolIconSelect))
+                                    SymbolIconSelect.Icon.Brush = new SolidColorBrush(highlightColor);
                                 SymbolIconSelect.Icon.Geometry =
                                     Geometry.Parse(GetCorrectIcon("lassoSelect", true));
                             }
@@ -688,7 +698,8 @@ namespace Ink_Canvas
                         {
                             if (Cursor_Icon != null && Cursor_Icon.Icon != null)
                             {
-                                Cursor_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
+                                if (!ToolbarRegistry.GetUseRedStyle(Cursor_Icon))
+                                    Cursor_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
                                 Cursor_Icon.Icon.Geometry =
                                     Geometry.Parse(GetCorrectIcon("cursor", true));
                             }
@@ -5235,7 +5246,8 @@ namespace Ink_Canvas
                 void ResetIcon(ToolbarImageButton button, string iconType)
                 {
                     if (button == null) return;
-                    button.Icon.Brush = foregroundBrush;
+                    if (!ToolbarRegistry.GetUseRedStyle(button))
+                        button.Icon.Brush = foregroundBrush;
                     button.Icon.Geometry = Geometry.Parse(GetCorrectIcon(iconType, false));
                 }
 
@@ -5278,7 +5290,8 @@ namespace Ink_Canvas
 
                 if (targetButton != null && targetIconType != null)
                 {
-                    targetButton.Icon.Brush = new SolidColorBrush(highlightBarColor);
+                    if (!ToolbarRegistry.GetUseRedStyle(targetButton))
+                        targetButton.Icon.Brush = new SolidColorBrush(highlightBarColor);
                     targetButton.Icon.Geometry = Geometry.Parse(GetCorrectIcon(targetIconType, true));
                 }
             }

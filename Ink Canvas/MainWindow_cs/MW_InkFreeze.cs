@@ -1,4 +1,5 @@
 using Ink_Canvas.Controls;
+using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using System;
@@ -208,7 +209,8 @@ namespace Ink_Canvas
 
                     var foreground = FloatBarForegroundColor;
                     var frozenColor = IsCurrentThemeDark() ? Color.FromRgb(102, 204, 255) : Color.FromRgb(30, 58, 138);
-                    Freeze_Icon.Icon.Brush = new SolidColorBrush(isFrozen ? frozenColor : foreground);
+                    if (!ToolbarRegistry.GetUseRedStyle(Freeze_Icon))
+                        Freeze_Icon.Icon.Brush = new SolidColorBrush(isFrozen ? frozenColor : foreground);
                 }
 
                 if (BoardInkFreezeBtn != null)

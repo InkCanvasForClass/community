@@ -225,23 +225,28 @@ namespace Ink_Canvas
 
                 SetAllFloatingBarButtonsToColor(FloatBarForegroundColor);
 
+                void SetSelectedFloatingBarButtonBrush(ToolbarImageButton btn)
+                {
+                    if (btn != null && !ToolbarRegistry.GetUseRedStyle(btn)) btn.Icon.Brush = new SolidColorBrush(selectedColor);
+                }
+
                 switch (_currentToolMode)
                 {
                     case "cursor":
-                        if (Cursor_Icon != null) Cursor_Icon.Icon.Brush = new SolidColorBrush(selectedColor);
+                        SetSelectedFloatingBarButtonBrush(Cursor_Icon);
                         break;
                     case "pen":
                     case "color":
-                        if (Pen_Icon != null) Pen_Icon.Icon.Brush = new SolidColorBrush(selectedColor);
+                        SetSelectedFloatingBarButtonBrush(Pen_Icon);
                         break;
                     case "eraser":
-                        if (Eraser_Icon != null) Eraser_Icon.Icon.Brush = new SolidColorBrush(selectedColor);
+                        SetSelectedFloatingBarButtonBrush(Eraser_Icon);
                         break;
                     case "eraserByStrokes":
-                        if (EraserByStrokes_Icon != null) EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(selectedColor);
+                        SetSelectedFloatingBarButtonBrush(EraserByStrokes_Icon);
                         break;
                     case "select":
-                        if (SymbolIconSelect != null) SymbolIconSelect.Icon.Brush = new SolidColorBrush(selectedColor);
+                        SetSelectedFloatingBarButtonBrush(SymbolIconSelect);
                         break;
                 }
             }
@@ -253,21 +258,27 @@ namespace Ink_Canvas
         void SetAllFloatingBarButtonsToColor(Color color)
         {
             var brush = new SolidColorBrush(color);
-            if (Cursor_Icon != null) Cursor_Icon.Icon.Brush = brush;
-            if (Pen_Icon != null) Pen_Icon.Icon.Brush = brush;
-            if (EraserByStrokes_Icon != null) EraserByStrokes_Icon.Icon.Brush = brush;
-            if (Eraser_Icon != null) Eraser_Icon.Icon.Brush = brush;
-            if (SymbolIconSelect != null) SymbolIconSelect.Icon.Brush = brush;
-            if (ShapeDrawFloatingBarBtn != null) ShapeDrawFloatingBarBtn.Icon.Brush = brush;
-            if (SymbolIconUndo != null) SymbolIconUndo.Icon.Brush = brush;
-            if (SymbolIconRedo != null) SymbolIconRedo.Icon.Brush = brush;
-            if (CursorWithDelFloatingBarBtn != null && !ToolbarRegistry.GetUseRedStyle(CursorWithDelFloatingBarBtn)) CursorWithDelFloatingBarBtn.Icon.Brush = brush;
-            if (WhiteboardFloatingBarBtn != null) WhiteboardFloatingBarBtn.Icon.Brush = brush;
-            if (ToolsFloatingBarBtn != null) ToolsFloatingBarBtn.Icon.Brush = brush;
-            if (Fold_Icon != null) Fold_Icon.Icon.Brush = brush;
-            if (Freeze_Icon != null) Freeze_Icon.Icon.Brush = brush;
-            if (Gesture_Icon != null) Gesture_Icon.Icon.Brush = brush;
-            if (Exit_Icon != null) Exit_Icon.Icon.Brush = brush;
+
+            void SetFloatingBarButtonBrush(ToolbarImageButton btn)
+            {
+                if (btn != null && !ToolbarRegistry.GetUseRedStyle(btn)) btn.Icon.Brush = brush;
+            }
+
+            SetFloatingBarButtonBrush(Cursor_Icon);
+            SetFloatingBarButtonBrush(Pen_Icon);
+            SetFloatingBarButtonBrush(EraserByStrokes_Icon);
+            SetFloatingBarButtonBrush(Eraser_Icon);
+            SetFloatingBarButtonBrush(SymbolIconSelect);
+            SetFloatingBarButtonBrush(ShapeDrawFloatingBarBtn);
+            SetFloatingBarButtonBrush(SymbolIconUndo);
+            SetFloatingBarButtonBrush(SymbolIconRedo);
+            SetFloatingBarButtonBrush(CursorWithDelFloatingBarBtn);
+            SetFloatingBarButtonBrush(WhiteboardFloatingBarBtn);
+            SetFloatingBarButtonBrush(ToolsFloatingBarBtn);
+            SetFloatingBarButtonBrush(Fold_Icon);
+            SetFloatingBarButtonBrush(Freeze_Icon);
+            SetFloatingBarButtonBrush(Gesture_Icon);
+            SetFloatingBarButtonBrush(Exit_Icon);
         }
 
         private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
@@ -312,11 +323,6 @@ namespace Ink_Canvas
                 if (BorderStrokeSelectionControl != null)
                 {
                     BorderStrokeSelectionControl.InvalidateVisual();
-                    var viewbox = BorderStrokeSelectionControl.Child as Viewbox;
-                    if (viewbox?.Child is ui.SimpleStackPanel stackPanel)
-                    {
-                        RefreshIconsRecursive(stackPanel);
-                    }
                 }
             }
             catch (Exception)
@@ -331,46 +337,6 @@ namespace Ink_Canvas
                 if (BorderImageSelectionControl != null)
                 {
                     BorderImageSelectionControl.InvalidateVisual();
-                    var viewbox = BorderImageSelectionControl.Child as Viewbox;
-                    if (viewbox?.Child is ui.SimpleStackPanel stackPanel)
-                    {
-                        RefreshIconsRecursive(stackPanel);
-                    }
-                }
-            }
-            catch (Exception)
-            {
-            }
-        }
-
-        private void RefreshIconsRecursive(System.Windows.Controls.Panel panel)
-        {
-            try
-            {
-                foreach (var child in panel.Children)
-                {
-                    if (child is Image image)
-                    {
-                        image.InvalidateVisual();
-                    }
-                    else if (child is System.Windows.Controls.Panel childPanel)
-                    {
-                        RefreshIconsRecursive(childPanel);
-                    }
-                    else if (child is Border border && border.Child is System.Windows.Controls.Panel borderPanel)
-                    {
-                        RefreshIconsRecursive(borderPanel);
-                    }
-                    else if (child is Grid grid)
-                    {
-                        foreach (var gridChild in grid.Children)
-                        {
-                            if (gridChild is Image gridImage)
-                            {
-                                gridImage.InvalidateVisual();
-                            }
-                        }
-                    }
                 }
             }
             catch (Exception)
@@ -382,7 +348,10 @@ namespace Ink_Canvas
         {
             try
             {
-                CheckEnableTwoFingerGestureBtnColorPrompt();
+                if (isLoaded)
+                {
+                    CheckEnableTwoFingerGestureBtnColorPrompt();
+                }
             }
             catch (Exception)
             {
@@ -393,31 +362,16 @@ namespace Ink_Canvas
         {
             try
             {
-                foreach (Window window in Application.Current.Windows)
+                if (isLoaded)
                 {
-                    if (window is CountdownTimerWindow timerWindow)
+                    foreach (Window window in Application.Current.Windows)
                     {
-                        timerWindow.RefreshTheme();
-                    }
-                    else if (window is RandWindow randWindow)
-                    {
-                        randWindow.RefreshTheme();
-                    }
-                    else if (window is QuickDrawWindow quickDrawWindow)
-                    {
-                        quickDrawWindow.RefreshTheme();
-                    }
-                    else if (window is OperatingGuideWindow operatingGuideWindow)
-                    {
-                        operatingGuideWindow.RefreshTheme();
-                    }
-                    else if (window is Windows.SettingsViews.SettingsWindow settingsWindow)
-                    {
-                        settingsWindow.RefreshTheme();
+                        if (window == this || window == null) continue;
+
+                        ThemeManager.SetRequestedTheme(window, IsCurrentThemeDark() ? ElementTheme.Dark : ElementTheme.Light);
+                        window.InvalidateVisual();
                     }
                 }
-
-                DynamicNotification?.RefreshTheme(IsCurrentThemeDark());
             }
             catch (Exception)
             {
