@@ -411,7 +411,8 @@ namespace Ink_Canvas.Controls
             return string.Equals(ext, ".mp3", StringComparison.OrdinalIgnoreCase)
                 || string.Equals(ext, ".wav", StringComparison.OrdinalIgnoreCase)
                 || string.Equals(ext, ".m4a", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(ext, ".aac", StringComparison.OrdinalIgnoreCase);
+                || string.Equals(ext, ".aac", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(ext, ".flac", StringComparison.OrdinalIgnoreCase);
         }
 
         private static string FormatTime(TimeSpan value)

@@ -4951,7 +4951,7 @@ namespace Ink_Canvas
             // Open file dialog to select image
             var dialog = new OpenFileDialog
             {
-                Filter = "图片、PDF 与媒体|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf;*.mp4;*.mkv;*.mkw;*.mp3|图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf|媒体文件|*.mp4;*.mkv;*.mkw;*.mp3"
+                Filter = MainWindowStrings.Main_FileInsert_OpenDialogFilter
             };
             if (dialog.ShowDialog() == true)
             {
@@ -5013,7 +5013,7 @@ namespace Ink_Canvas
             if (TryBlockFrozenPageMutation("插入图片")) return;
             var dialog = new OpenFileDialog
             {
-                Filter = "图片、PDF 与媒体|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf;*.mp4;*.mkv;*.mkw;*.mp3|图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf|媒体文件|*.mp4;*.mkv;*.mkw;*.mp3"
+                Filter = MainWindowStrings.Main_FileInsert_OpenDialogFilter
             };
             if (dialog.ShowDialog() == true)
             {
@@ -5075,7 +5075,7 @@ namespace Ink_Canvas
             if (TryBlockFrozenPageMutation(FloatingBarStrings.Board_InsertImage)) return;
             var dialog = new OpenFileDialog
             {
-                Filter = "图片、PDF 与媒体|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf;*.mp4;*.mkv;*.mkw;*.mp3|图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf|媒体文件|*.mp4;*.mkv;*.mkw;*.mp3"
+                Filter = MainWindowStrings.Main_FileInsert_OpenDialogFilter
             };
             if (dialog.ShowDialog() == true)
             {

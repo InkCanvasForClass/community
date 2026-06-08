@@ -1,5 +1,6 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using Microsoft.Win32;
 using System;
 using System.Diagnostics;
@@ -64,7 +65,7 @@ namespace Ink_Canvas
         private async void BtnImageInsert_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "图片、PDF 与媒体|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf;*.mp4;*.mkv;*.mkw;*.mp3|图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf|媒体文件|*.mp4;*.mkv;*.mkw;*.mp3";
+            openFileDialog.Filter = MainWindowStrings.Main_FileInsert_OpenDialogFilter;
 
             if (openFileDialog.ShowDialog() == true)
             {
@@ -1160,7 +1161,16 @@ namespace Ink_Canvas
             return string.Equals(extension, ".mp4", StringComparison.OrdinalIgnoreCase)
                 || string.Equals(extension, ".mkv", StringComparison.OrdinalIgnoreCase)
                 || string.Equals(extension, ".mkw", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(extension, ".mp3", StringComparison.OrdinalIgnoreCase);
+                || string.Equals(extension, ".wmv", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(extension, ".webm", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(extension, ".flv", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(extension, ".mov", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(extension, ".avi", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(extension, ".mp3", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(extension, ".m4a", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(extension, ".aac", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(extension, ".flac", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(extension, ".wav", StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool TryGetMediaSourcePath(FrameworkElement element, out string sourcePath)
@@ -1350,7 +1360,7 @@ namespace Ink_Canvas
         private async void BtnMediaInsert_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Media files (*.mp4; *.mkv; *.mkw; *.mp3; *.avi; *.wmv)|*.mp4;*.mkv;*.mkw;*.mp3;*.avi;*.wmv";
+            openFileDialog.Filter = MainWindowStrings.Main_MediaInsert_OpenDialogFilter;
 
             if (openFileDialog.ShowDialog() == true)
             {
@@ -1386,11 +1396,9 @@ namespace Ink_Canvas
         private async Task<FrameworkElement> CreateMediaElementAsync(string filePath)
         {
             string fileExtension = Path.GetExtension(filePath);
-            if (!IsSupportedMediaExtension(fileExtension)
-                && !string.Equals(fileExtension, ".avi", StringComparison.OrdinalIgnoreCase)
-                && !string.Equals(fileExtension, ".wmv", StringComparison.OrdinalIgnoreCase))
+            if (!IsSupportedMediaExtension(fileExtension))
             {
-                ShowNotification("不支持的媒体格式。");
+                ShowNotification(MainWindowStrings.Main_MediaInsert_UnsupportedFormat);
                 return null;
             }
 
@@ -1421,7 +1429,7 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"插入媒体失败: {ex.Message}", LogHelper.LogType.Error);
-                ShowNotification($"插入媒体失败：{ex.Message}");
+                ShowNotification(string.Format(MainWindowStrings.Main_MediaInsert_InsertFailed, ex.Message));
                 return null;
             }
         }

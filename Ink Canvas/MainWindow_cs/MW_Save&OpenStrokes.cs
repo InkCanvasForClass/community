@@ -98,7 +98,7 @@ namespace Ink_Canvas
                         Width = mediaControl.Width,
                         Height = mediaControl.Height,
                         Stretch = "Uniform",
-                        MediaKind = string.Equals(extension, ".mp3", StringComparison.OrdinalIgnoreCase) ? "Audio" : "Video",
+                        MediaKind = mediaControl.IsAudioOnly ? "Audio" : "Video",
                         MediaDisplayName = mediaControl.DisplayName,
                         MediaPositionSeconds = mediaPosition?.TotalSeconds,
                         MediaSpeedRatio = mediaControl.PlaybackRate,
@@ -120,7 +120,11 @@ namespace Ink_Canvas
                             Width = media.Width,
                             Height = media.Height,
                             Stretch = media.Stretch.ToString(),
-                            MediaKind = string.Equals(extension, ".mp3", StringComparison.OrdinalIgnoreCase) ? "Audio" : "Video"
+                            MediaKind = string.Equals(extension, ".mp3", StringComparison.OrdinalIgnoreCase)
+                                || string.Equals(extension, ".wav", StringComparison.OrdinalIgnoreCase)
+                                || string.Equals(extension, ".m4a", StringComparison.OrdinalIgnoreCase)
+                                || string.Equals(extension, ".aac", StringComparison.OrdinalIgnoreCase)
+                                || string.Equals(extension, ".flac", StringComparison.OrdinalIgnoreCase) ? "Audio" : "Video"
                         });
                     }
                 }

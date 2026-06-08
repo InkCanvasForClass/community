@@ -208,6 +208,15 @@ namespace Ink_Canvas.Properties
         public static string Main_EnterSettings_Message => ResourceManager.GetString(nameof(Main_EnterSettings_Message), _resourceCulture);
 
         public static string Main_AutoFold_ClearingAndFolding => ResourceManager.GetString(nameof(Main_AutoFold_ClearingAndFolding), _resourceCulture);
+
+        public static string Main_FileInsert_OpenDialogFilter => ResourceManager.GetString(nameof(Main_FileInsert_OpenDialogFilter), _resourceCulture);
+
+        public static string Main_MediaInsert_OpenDialogFilter => ResourceManager.GetString(nameof(Main_MediaInsert_OpenDialogFilter), _resourceCulture);
+
+        public static string Main_MediaInsert_UnsupportedFormat => ResourceManager.GetString(nameof(Main_MediaInsert_UnsupportedFormat), _resourceCulture);
+
+        public static string Main_MediaInsert_InsertFailed => ResourceManager.GetString(nameof(Main_MediaInsert_InsertFailed), _resourceCulture);
+
         public static string Main_PDF_InsertFailed => ResourceManager.GetString(nameof(Main_PDF_InsertFailed), _resourceCulture);
 
         public static string Main_Board_FrozenCannotDelete => ResourceManager.GetString(nameof(Main_Board_FrozenCannotDelete), _resourceCulture);

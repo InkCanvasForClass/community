@@ -305,6 +305,18 @@
   <data name="Main_AutoFold_ClearingAndFolding" xml:space="preserve">
     <value>正在清空墨迹并收纳至侧边栏，可进入批注模式后通过【撤销】功能来恢复原先墨迹。</value>
   </data>
+  <data name="Main_FileInsert_OpenDialogFilter" xml:space="preserve">
+    <value>图片、PDF 与媒体|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf;*.mp4;*.mkv;*.mkw;*.wmv;*.webm;*.flv;*.mov;*.avi;*.mp3;*.m4a;*.aac;*.flac;*.wav|图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf|媒体文件|*.mp4;*.mkv;*.mkw;*.wmv;*.webm;*.flv;*.mov;*.avi;*.mp3;*.m4a;*.aac;*.flac;*.wav|视频文件|*.mp4;*.mkv;*.mkw;*.wmv;*.webm;*.flv;*.mov;*.avi|音频文件|*.mp3;*.m4a;*.aac;*.flac;*.wav</value>
+  </data>
+  <data name="Main_MediaInsert_OpenDialogFilter" xml:space="preserve">
+    <value>媒体文件|*.mp4;*.mkv;*.mkw;*.wmv;*.webm;*.flv;*.mov;*.avi;*.mp3;*.m4a;*.aac;*.flac;*.wav|视频文件|*.mp4;*.mkv;*.mkw;*.wmv;*.webm;*.flv;*.mov;*.avi|音频文件|*.mp3;*.m4a;*.aac;*.flac;*.wav</value>
+  </data>
+  <data name="Main_MediaInsert_UnsupportedFormat" xml:space="preserve">
+    <value>不支持的媒体格式。</value>
+  </data>
+  <data name="Main_MediaInsert_InsertFailed" xml:space="preserve">
+    <value>插入媒体失败：{0}</value>
+  </data>
   <data name="Main_PDF_InsertFailed" xml:space="preserve">
     <value>插入 PDF 失败: {0}</value>
   </data>

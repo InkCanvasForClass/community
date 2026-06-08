@@ -341,6 +341,18 @@
   <data name="Main_AutoFold_ClearingAndFolding" xml:space="preserve">
     <value>Clearing ink and folding to sidebar. You can restore the original ink via Undo after entering annotation mode.</value>
   </data>
+  <data name="Main_FileInsert_OpenDialogFilter" xml:space="preserve">
+    <value>Images, PDF and media|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf;*.mp4;*.mkv;*.mkw;*.wmv;*.webm;*.flv;*.mov;*.avi;*.mp3;*.m4a;*.aac;*.flac;*.wav|Image files|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf|Media files|*.mp4;*.mkv;*.mkw;*.wmv;*.webm;*.flv;*.mov;*.avi;*.mp3;*.m4a;*.aac;*.flac;*.wav|Video files|*.mp4;*.mkv;*.mkw;*.wmv;*.webm;*.flv;*.mov;*.avi|Audio files|*.mp3;*.m4a;*.aac;*.flac;*.wav</value>
+  </data>
+  <data name="Main_MediaInsert_OpenDialogFilter" xml:space="preserve">
+    <value>Media files|*.mp4;*.mkv;*.mkw;*.wmv;*.webm;*.flv;*.mov;*.avi;*.mp3;*.m4a;*.aac;*.flac;*.wav|Video files|*.mp4;*.mkv;*.mkw;*.wmv;*.webm;*.flv;*.mov;*.avi|Audio files|*.mp3;*.m4a;*.aac;*.flac;*.wav</value>
+  </data>
+  <data name="Main_MediaInsert_UnsupportedFormat" xml:space="preserve">
+    <value>Unsupported media format.</value>
+  </data>
+  <data name="Main_MediaInsert_InsertFailed" xml:space="preserve">
+    <value>Failed to insert media: {0}</value>
+  </data>
   <data name="Main_PDF_InsertFailed" xml:space="preserve">
     <value>Failed to insert PDF: {0}</value>
   </data>
