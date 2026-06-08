@@ -323,7 +323,7 @@ jobs:
 
       - name: Build MSI installer with Inno Setup
         if: steps.check-exe.outputs.build_success == 'true'
-        uses: Minionguyjpro/Inno-Setup-Action@v1.2.7
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.8
         with:
           path: build/InkCanvasForClass CE.iss
           options: /O.
