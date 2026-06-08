@@ -52,11 +52,26 @@ namespace Ink_Canvas
                 HideSubPanels();
                 if (currentMode == 0)
                 {
+                    // 如果几何按钮不在浮动栏中，PlacementTarget 可能为 null，
+                    // 回退到工具按钮作为定位目标
+                    if (BorderDrawShape.PlacementTarget == null ||
+                        !IsPlacementTargetVisible(BorderDrawShape.PlacementTarget))
+                    {
+                        BorderDrawShape.PlacementTarget = ToolsFloatingBarBtn ?? ShapeDrawFloatingBarBtn;
+                    }
                     AnimationsHelper.ShowPopupWithSlideAndFade(BorderDrawShape);
                     _popupManager?.BringToFront(BorderDrawShape);
                 }
                 else
                 {
+                    // 白板模式：如果几何按钮不在白板工具栏中，回退到白板工具按钮
+                    if (BoardBorderDrawShape.PlacementTarget == null ||
+                        !IsPlacementTargetVisible(BoardBorderDrawShape.PlacementTarget))
+                    {
+                        var boardToolsBtn = FindView("board.tools");
+                        if (boardToolsBtn != null)
+                            BoardBorderDrawShape.PlacementTarget = boardToolsBtn;
+                    }
                     AnimationsHelper.ShowPopupWithSlideAndFade(BoardBorderDrawShape);
                     _popupManager?.BringToFront(BoardBorderDrawShape);
                 }
@@ -64,6 +79,24 @@ namespace Ink_Canvas
         }
 
         #endregion Floating Bar Control
+
+        /// <summary>
+        /// 检查 Popup 的 PlacementTarget 是否在可视树中且可见
+        /// </summary>
+        private bool IsPlacementTargetVisible(UIElement target)
+        {
+            if (target == null) return false;
+            // 检查元素是否连接到实际的渲染窗口（PresentationSource）
+            if (PresentationSource.FromVisual(target) == null) return false;
+            if (target is FrameworkElement fe)
+            {
+                // 检查元素是否可见
+                if (fe.Visibility != Visibility.Visible) return false;
+                // 检查元素是否在屏幕上有实际尺寸
+                if (fe.ActualWidth <= 0 && fe.ActualHeight <= 0) return false;
+            }
+            return true;
+        }
 
         /// <summary>
         /// 形状绘制模式
