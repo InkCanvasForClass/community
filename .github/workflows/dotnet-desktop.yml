@@ -38,7 +38,7 @@ jobs:
       - name: Restore Package
         run: |
           $runtimeIdentifier = if ("${{ matrix.architecture }}" -eq "AnyCPU") { "win-x64" } else { "win-x86" }
-          dotnet restore "Ink Canvas/InkCanvasForClass.csproj" --locked-mode -p:Platform="${{ matrix.architecture }}" --runtime $runtimeIdentifier
+          dotnet restore "Ink Canvas/InkCanvasForClass.csproj" --locked-mode -p:Platform="${{ matrix.architecture }}"
 
       - name: Publish single-file app
         env:
