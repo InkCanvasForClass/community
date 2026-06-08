@@ -125,6 +125,7 @@ namespace Ink_Canvas.Controls
             {
                 bool expanded = (bool)e.NewValue;
                 bar.PreviewList.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
+                bar.ApplyRootOpacity();
                 bar.ApplyLayout();
                 if (expanded)
                 {
@@ -388,7 +389,13 @@ namespace Ink_Canvas.Controls
         }
 
         public void SetPageButtonVisibility(Visibility v) => PageButtonBorder.Visibility = v;
-        public void SetBarOpacity(double opacity) => RootBorder.Opacity = opacity;
+        public void SetBarOpacity(double opacity)
+        {
+            _collapsedOpacity = opacity;
+            ApplyRootOpacity();
+        }
+
+        private void ApplyRootOpacity() => RootBorder.Opacity = IsPreviewExpanded ? 1 : _collapsedOpacity;
 
         public void SetBarScale(double scale)
         {
@@ -398,5 +405,6 @@ namespace Ink_Canvas.Controls
         }
 
         private double _currentScale = 1.0;
+        private double _collapsedOpacity = 1.0;
     }
 }
