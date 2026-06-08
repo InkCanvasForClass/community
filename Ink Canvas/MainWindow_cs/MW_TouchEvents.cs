@@ -55,6 +55,7 @@ namespace Ink_Canvas
         private readonly Guid RealtimeVelocityBrushTipAppliedGuid = new Guid("74E57D95-945F-4A8C-B52A-7D3EF2D4FD5B");
         internal const int MouseRealtimeStrokeId = -100001;
         private readonly HashSet<int> _activeRealtimeTouchStrokeIds = new HashSet<int>();
+        private readonly HashSet<int> _activeRealtimeStylusStrokeIds = new HashSet<int>();
         private readonly HashSet<int> _activeTouchStrokeIds = new HashSet<int>();
         private bool _isInkCanvasManipulationEnabledBeforeTouchInk;
         private bool _hasStoredInkCanvasManipulationStateForTouchInk;
@@ -184,7 +185,7 @@ namespace Ink_Canvas
 
         private void EndTouchInkInputIfIdle()
         {
-            if (_activeRealtimeTouchStrokeIds.Count != 0 || _activeTouchStrokeIds.Count != 0)
+            if (_activeRealtimeTouchStrokeIds.Count != 0 || _activeRealtimeStylusStrokeIds.Count != 0 || _activeTouchStrokeIds.Count != 0)
                 return;
             if (!_hasStoredInkCanvasManipulationStateForTouchInk)
                 return;
@@ -210,14 +211,18 @@ namespace Ink_Canvas
                 && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                SetDynamicRendererEnabled(inkCanvas, false);
             }
             else if (!ShouldUseRealtimeVelocityBrushTip()
                      && inkCanvas.EditingMode == InkCanvasEditingMode.None)
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                SetDynamicRendererEnabled(inkCanvas, true);
             }
-
-            SetDynamicRendererEnabled(inkCanvas, inkCanvas.EditingMode != InkCanvasEditingMode.None);
+            else
+            {
+                SetDynamicRendererEnabled(inkCanvas, inkCanvas.EditingMode != InkCanvasEditingMode.None);
+            }
         }
 
         private void InitializeRealtimeBrushTipState(int stylusId, StylusDownEventArgs e)
@@ -228,12 +233,14 @@ namespace Ink_Canvas
                 return;
             }
 
-            var startPoint = e.GetPosition(this);
+            var startPoint = e.GetPosition(inkCanvas);
             _realtimeBrushTipStates[stylusId] = new RealtimeBrushTipState
             {
                 LastRawX = (float)startPoint.X,
                 LastRawY = (float)startPoint.Y,
-                LastTimestampMs = RealtimeNowMs()
+                LastTimestampMs = RealtimeNowMs(),
+                HasTouchPoint = true,
+                LastTouchPoint = startPoint
             };
         }
 
@@ -955,6 +962,41 @@ namespace Ink_Canvas
                 || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke
                 || inkCanvas.EditingMode == InkCanvasEditingMode.Select) return;
 
+            var stylusId = e.StylusDevice.Id;
+            if (ShouldUseRealtimeVelocityBrushTip()
+                && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
+                && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
+                && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
+            {
+                if (VisualCanvasList.TryGetValue(stylusId, out var staleCanvas) && inkCanvas.Children.Contains(staleCanvas))
+                    inkCanvas.Children.Remove(staleCanvas);
+                StrokeVisualList.Remove(stylusId);
+                VisualCanvasList.Remove(stylusId);
+                TouchDownPointsList.Remove(stylusId);
+                CleanupRealtimeBrushTipState(stylusId);
+
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                SetDynamicRendererEnabled(inkCanvas, false);
+                inkCanvas.CaptureStylus();
+                ViewboxFloatingBar.IsHitTestVisible = false;
+                BlackboardUIGridForInkReplay.IsHitTestVisible = false;
+                SetCursorBasedOnEditingMode(inkCanvas);
+
+                var p = e.GetPosition(inkCanvas);
+                _activeRealtimeStylusStrokeIds.Add(stylusId);
+                BeginTouchInkInput();
+                CancelPauseStraightenTimer(stylusId);
+                InitializeRealtimeBrushTipState(stylusId, e);
+                var sv = GetStrokeVisual(stylusId);
+                TryAppendRealtimeVelocityBrushTipInterpolatedPoints(sv, stylusId, p);
+                sv.Redraw();
+                _pauseStraightenInkModeStartPos = p;
+                _pauseStraightenInkModeTracking = true;
+                TouchDownPointsList[stylusId] = InkCanvasEditingMode.None;
+                e.Handled = true;
+                return;
+            }
+
             InitializeRealtimeBrushTipState(e.StylusDevice.Id, e);
             CancelPauseStraightenTimer(e.StylusDevice.Id);
             _pauseStraightenInkModeStartPos = e.GetPosition(inkCanvas);
@@ -990,6 +1032,49 @@ namespace Ink_Canvas
         {
             if (IsTouchStylusDevice(e.StylusDevice))
                 return;
+
+            var stylusId = e.StylusDevice.Id;
+            if (_activeRealtimeStylusStrokeIds.Contains(stylusId))
+            {
+                try
+                {
+                    var sv = GetStrokeVisual(stylusId);
+                    sv?.ForceRedraw();
+                    var stroke = sv?.Stroke;
+                    if (stroke != null)
+                    {
+                        if (!stroke.ContainsPropertyData(RealtimeVelocityBrushTipAppliedGuid))
+                            stroke.AddPropertyData(RealtimeVelocityBrushTipAppliedGuid, true);
+                        inkCanvas.Strokes.Add(stroke);
+                        inkCanvas_StrokeCollected(inkCanvas, new InkCanvasStrokeCollectedEventArgs(stroke));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"MainWindow_StylusUp 实时笔锋出错: {ex}", LogHelper.LogType.Error);
+                    Label.Content = ex.ToString();
+                }
+                finally
+                {
+                    if (VisualCanvasList.TryGetValue(stylusId, out var visualCanvas) && inkCanvas.Children.Contains(visualCanvas))
+                        inkCanvas.Children.Remove(visualCanvas);
+                    StrokeVisualList.Remove(stylusId);
+                    VisualCanvasList.Remove(stylusId);
+                    TouchDownPointsList.Remove(stylusId);
+                    CleanupRealtimeBrushTipState(stylusId);
+                    CancelPauseStraightenTimer(stylusId);
+                    CancelPauseStraightenTimer(-200001);
+                    _pauseStraightenInkModeTracking = false;
+                    _activeRealtimeStylusStrokeIds.Remove(stylusId);
+                    EndTouchInkInputIfIdle();
+                    inkCanvas.ReleaseStylusCapture();
+                    ViewboxFloatingBar.IsHitTestVisible = true;
+                    BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+                    SetCursorBasedOnEditingMode(inkCanvas);
+                    e.Handled = true;
+                }
+                return;
+            }
 
             if (drawingShapeMode != 0)
             {
@@ -1117,6 +1202,25 @@ namespace Ink_Canvas
                     {
                         Point stylusPoint = e.GetPosition(inkCanvas);
                         MouseTouchMove(stylusPoint);
+                    }
+                    return;
+                }
+
+                var stylusId = e.StylusDevice.Id;
+                if (_activeRealtimeStylusStrokeIds.Contains(stylusId))
+                {
+                    try
+                    {
+                        var p = e.GetPosition(inkCanvas);
+                        var sv = GetStrokeVisual(stylusId);
+                        if (TryAppendRealtimeVelocityBrushTipInterpolatedPoints(sv, stylusId, p))
+                            sv.ForceRedraw();
+                        ResetPauseStraightenTimer(stylusId);
+                        e.Handled = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine(ex);
                     }
                     return;
                 }
