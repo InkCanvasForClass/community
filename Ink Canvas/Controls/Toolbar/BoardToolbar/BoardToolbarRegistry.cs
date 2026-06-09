@@ -293,55 +293,10 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                 Directory.CreateDirectory(dir);
 
             var defaultPath = GetConfigFilePath("default");
-            var layout = BoardToolbarLayoutSettings.CreateDefault();
-
             if (!File.Exists(defaultPath))
             {
-                SaveConfigFile("default", layout);
+                SaveConfigFile("default", BoardToolbarLayoutSettings.CreateDefault());
                 LogHelper.WriteLogToFile("BoardToolbarRegistry: 首次启动，创建 default.json", LogHelper.LogType.Info);
-                return;
-            }
-
-            try
-            {
-                var existing = LoadConfigFile("default");
-                if (existing == null || existing.Areas == null)
-                {
-                    SaveConfigFile("default", layout);
-                    LogHelper.WriteLogToFile("BoardToolbarRegistry: 配置无效，重建 default.json", LogHelper.LogType.Info);
-                    return;
-                }
-
-                var defaultIds = new HashSet<string>();
-                foreach (var area in layout.Areas)
-                {
-                    foreach (var group in area.Groups)
-                    {
-                        foreach (var comp in group.Components)
-                            defaultIds.Add($"{area.Id}:{comp.Id}");
-                    }
-                }
-
-                var existingIds = new HashSet<string>();
-                foreach (var area in existing.Areas)
-                {
-                    foreach (var group in area.Groups)
-                    {
-                        foreach (var comp in group.Components)
-                            existingIds.Add($"{area.Id}:{comp.Id}");
-                    }
-                }
-
-                if (!defaultIds.SetEquals(existingIds))
-                {
-                    SaveConfigFile("default", layout);
-                    LogHelper.WriteLogToFile("BoardToolbarRegistry: 检测到组件变更，更新 default.json", LogHelper.LogType.Info);
-                }
-            }
-            catch (Exception ex)
-            {
-                SaveConfigFile("default", layout);
-                LogHelper.WriteLogToFile($"BoardToolbarRegistry: 配置校验失败，重建 default.json: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
 
