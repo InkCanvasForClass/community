@@ -1,3 +1,4 @@
+using iNKORE.UI.WPF.Modern.Controls;
 using System.Windows.Controls;
 
 namespace Ink_Canvas.Controls
@@ -28,6 +29,8 @@ namespace Ink_Canvas.Controls
         public GeometryButton DrawParabola1Btn => ImageDrawParabola1;
         public GeometryButton DrawParabolaWithFocalPointBtn => ImageDrawParabolaWithFocalPoint;
         public GeometryButton DrawParabola2Btn => ImageDrawParabola2;
+
+        public ToggleSwitch ShowCircleCenterToggle => ToggleSwitchShowCircleCenter;
 
         public Button CloseButtonControl => Shell?.CloseButtonControl;
 

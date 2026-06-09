@@ -46,6 +46,16 @@ mc:Ignorable="d">
                     <controls:GeometryButton x:Name="BoardImageDrawCylinder" IconSource="{DynamicResource GeoIconCylinder}" Label="{x:Static props:GeometryStrings.DrawCylinder}" />
                     <controls:GeometryButton x:Name="BoardImageDrawCone" IconSource="{DynamicResource GeoIconCone}" Label="{x:Static props:GeometryStrings.DrawCone}" />
                 </ikw:SimpleStackPanel>
+                <ikw:SimpleStackPanel x:Name="CircleCenterRow" Orientation="Horizontal" Height="38" Spacing="8"
+                                     Margin="4,0,4,4"
+                                     VerticalAlignment="Center">
+                    <Label Content="{x:Static props:CanvasStrings.Canvas_ShowCircleCenter}"
+                           Foreground="{DynamicResource FloatBarForeground}"
+                           VerticalAlignment="Center"
+                           Padding="0" />
+                    <ui:ToggleSwitch x:Name="ToggleSwitchShowCircleCenter"
+                                     MinWidth="0" OnContent="" OffContent="" />
+                </ikw:SimpleStackPanel>
             </ikw:SimpleStackPanel>
         </ContentControl>
     </Grid>

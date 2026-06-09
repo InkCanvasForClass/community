@@ -59,6 +59,9 @@ namespace Ink_Canvas
                     {
                         BorderDrawShape.PlacementTarget = ToolsFloatingBarBtn ?? ShapeDrawFloatingBarBtn;
                     }
+                    // 同步圆心显示开关状态
+                    if (ShapeDrawPopupContent?.ShowCircleCenterToggle != null)
+                        ShapeDrawPopupContent.ShowCircleCenterToggle.IsOn = Settings.Canvas.ShowCircleCenter;
                     AnimationsHelper.ShowPopupWithSlideAndFade(BorderDrawShape);
                     _popupManager?.BringToFront(BorderDrawShape);
                 }
@@ -72,6 +75,9 @@ namespace Ink_Canvas
                         if (boardToolsBtn != null)
                             BoardBorderDrawShape.PlacementTarget = boardToolsBtn;
                     }
+                    // 同步圆心显示开关状态
+                    if (BoardShapeDrawPopupContent?.ShowCircleCenterToggle != null)
+                        BoardShapeDrawPopupContent.ShowCircleCenterToggle.IsOn = Settings.Canvas.ShowCircleCenter;
                     AnimationsHelper.ShowPopupWithSlideAndFade(BoardBorderDrawShape);
                     _popupManager?.BringToFront(BoardBorderDrawShape);
                 }

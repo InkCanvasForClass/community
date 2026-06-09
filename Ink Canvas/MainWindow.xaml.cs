@@ -253,6 +253,7 @@ namespace Ink_Canvas
             content.DrawParabolaWithFocalPointBtn.ButtonMouseUp += BtnDrawParabolaWithFocalPoint_Click;
             content.DrawParabola2Btn.ButtonMouseUp += BtnDrawParabola2_Click;
             content.CloseButtonControl.Click += CloseBordertools_Click;
+            content.ShowCircleCenterToggle.Toggled += ToggleSwitchShowCircleCenter_Toggled;
         }
 
         private bool _penPaletteEventsWired;
@@ -420,6 +421,7 @@ namespace Ink_Canvas
             content.DrawParabolaWithFocalPointBtn.ButtonMouseUp += BtnDrawParabolaWithFocalPoint_Click;
             content.DrawParabola2Btn.ButtonMouseUp += BtnDrawParabola2_Click;
             content.CloseButtonControl.Click += CloseBordertools_Click;
+            content.ShowCircleCenterToggle.Toggled += ToggleSwitchShowCircleCenter_Toggled;
         }
 
         /// <summary>
@@ -2753,6 +2755,21 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"切换墨迹纠正功能时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void ToggleSwitchShowCircleCenter_Toggled(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var toggle = sender as ToggleSwitch;
+                if (toggle == null) return;
+                Settings.Canvas.ShowCircleCenter = toggle.IsOn;
+                SaveSettingsToFile();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"切换圆心显示时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
