@@ -14,6 +14,7 @@ namespace Ink_Canvas.Controls
         public GeometryButton DrawCircleBtn => BoardImageDrawCircle;
         public GeometryButton DrawDashedCircleBtn => BoardImageDrawDashedCircle;
         public GeometryButton DrawEllipseCenterBtn => BoardImageDrawEllipseCenter;
+        public GeometryButton DrawEllipseCenterWithFocalPointBtn => BoardImageDrawEllipseCenterWithFocalPoint;
         public GeometryButton DrawCuboidBtn => BoardImageDrawCuboid;
         public GeometryButton DrawRectangleBtn => BoardImageDrawRectangle;
         public GeometryButton DrawCylinderBtn => BoardImageDrawCylinder;

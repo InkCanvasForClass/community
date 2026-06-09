@@ -238,6 +238,7 @@ namespace Ink_Canvas
             content.DrawCircleBtn.ButtonMouseUp += BtnDrawCircle_Click;
             content.DrawDashedCircleBtn.ButtonMouseUp += BtnDrawDashedCircle_Click;
             content.DrawEllipseCenterBtn.ButtonMouseUp += BtnDrawCenterEllipse_Click;
+            content.DrawEllipseCenterWithFocalPointBtn.ButtonMouseUp += BtnDrawCenterEllipseWithFocalPoint_Click;
             content.DrawCuboidBtn.ButtonMouseUp += BtnDrawCuboid_Click;
             content.DrawRectangleBtn.ButtonMouseUp += BtnDrawRectangle_Click;
             content.DrawCylinderBtn.ButtonMouseUp += BtnDrawCylinder_Click;
@@ -406,6 +407,7 @@ namespace Ink_Canvas
             content.DrawCircleBtn.ButtonMouseUp += BtnDrawCircle_Click;
             content.DrawDashedCircleBtn.ButtonMouseUp += BtnDrawDashedCircle_Click;
             content.DrawEllipseCenterBtn.ButtonMouseUp += BtnDrawCenterEllipse_Click;
+            content.DrawEllipseCenterWithFocalPointBtn.ButtonMouseUp += BtnDrawCenterEllipseWithFocalPoint_Click;
             content.DrawCuboidBtn.ButtonMouseUp += BtnDrawCuboid_Click;
             content.DrawRectangleBtn.ButtonMouseUp += BtnDrawRectangle_Click;
             content.DrawCylinderBtn.ButtonMouseUp += BtnDrawCylinder_Click;

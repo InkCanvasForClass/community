@@ -54,6 +54,9 @@
   <data name="DrawCenteredEllipse" xml:space="preserve">
     <value>Centered ellipse</value>
   </data>
+  <data name="DrawCenteredEllipseWithFocalPoint" xml:space="preserve">
+    <value>Ellipse with focal points</value>
+  </data>
   <data name="DrawCenteredSquare" xml:space="preserve">
     <value>Centered square</value>
   </data>

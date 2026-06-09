@@ -22,6 +22,7 @@ mc:Ignorable="d">
                     <controls:GeometryButton x:Name="BoardImageDrawCircle" IconSource="{DynamicResource GeoIconCircle}" Label="{x:Static props:GeometryStrings.DrawCenteredCircle}" />
                     <controls:GeometryButton x:Name="BoardImageDrawDashedCircle" IconSource="{DynamicResource GeoIconDashedCircle}" Label="{x:Static props:GeometryStrings.DrawCenteredDashedCircle}" />
                     <controls:GeometryButton x:Name="BoardImageDrawEllipseCenter" IconSource="{DynamicResource GeoIconEllipseCenter}" Label="{x:Static props:GeometryStrings.DrawCenteredEllipse}" />
+                    <controls:GeometryButton x:Name="BoardImageDrawEllipseCenterWithFocalPoint" IconSource="{DynamicResource DrawShapeImageSource.EllipseCenterWithFocalPoint}" Label="{x:Static props:GeometryStrings.DrawCenteredEllipseWithFocalPoint}" />
                 </ikw:SimpleStackPanel>
                 <ikw:SimpleStackPanel x:Name="BoardOnlyRow1" Orientation="Horizontal" Height="38" Spacing="2"
                                      Margin="4,0,4,0">
@@ -36,8 +37,8 @@ mc:Ignorable="d">
                     <controls:GeometryButton x:Name="ImageDrawHyperbola" IconSource="{DynamicResource DrawShapeImageSource.Hyperbola}" Label="{x:Static props:GeometryStrings.DrawHyperbola}" />
                     <controls:GeometryButton x:Name="ImageDrawHyperbolaWithFocalPoint" IconSource="{DynamicResource DrawShapeImageSource.HyperbolaWithFocalPoint}" Label="{x:Static props:GeometryStrings.DrawHyperbolaWithFocal}" />
                     <controls:GeometryButton x:Name="ImageDrawParabola1" IconSource="{DynamicResource DrawShapeImageSource.Parabola}" Label="{x:Static props:GeometryStrings.DrawParabola}" />
-                    <controls:GeometryButton x:Name="ImageDrawParabolaWithFocalPoint" IconSource="{DynamicResource DrawShapeImageSource.ParabolaWithFocalPoint}" Label="{x:Static props:GeometryStrings.DrawParabolaWithFocal}" />
-                    <controls:GeometryButton x:Name="ImageDrawParabola2" IconSource="{DynamicResource DrawShapeImageSource.Parabola}" Label="{x:Static props:GeometryStrings.DrawParabola2}" />
+                    <controls:GeometryButton x:Name="ImageDrawParabolaWithFocalPoint" IconSource="{DynamicResource DrawShapeImageSource.ParabolaWithFocalPoint}" IconRotation="90" Label="{x:Static props:GeometryStrings.DrawParabolaWithFocal}" />
+                    <controls:GeometryButton x:Name="ImageDrawParabola2" IconSource="{DynamicResource DrawShapeImageSource.Parabola}" IconRotation="90" Label="{x:Static props:GeometryStrings.DrawParabola2}" />
                 </ikw:SimpleStackPanel>
                 <ikw:SimpleStackPanel Orientation="Horizontal" Height="38" Spacing="2"
                                      Margin="4,0,4,4">

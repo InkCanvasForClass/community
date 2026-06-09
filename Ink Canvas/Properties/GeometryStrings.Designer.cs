@@ -48,6 +48,8 @@ namespace Ink_Canvas.Properties
 
         public static string DrawCenteredEllipse => ResourceManager.GetString(nameof(DrawCenteredEllipse), _resourceCulture);
 
+        public static string DrawCenteredEllipseWithFocalPoint => ResourceManager.GetString(nameof(DrawCenteredEllipseWithFocalPoint), _resourceCulture);
+
         public static string DrawCenteredSquare => ResourceManager.GetString(nameof(DrawCenteredSquare), _resourceCulture);
 
         public static string DrawCone => ResourceManager.GetString(nameof(DrawCone), _resourceCulture);

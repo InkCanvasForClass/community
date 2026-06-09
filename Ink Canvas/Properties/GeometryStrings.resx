@@ -54,6 +54,9 @@
   <data name="DrawCenteredEllipse" xml:space="preserve">
     <value>中心椭圆</value>
   </data>
+  <data name="DrawCenteredEllipseWithFocalPoint" xml:space="preserve">
+    <value>焦点椭圆</value>
+  </data>
   <data name="DrawCenteredSquare" xml:space="preserve">
     <value>中心正方</value>
   </data>
