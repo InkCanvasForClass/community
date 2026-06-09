@@ -75,50 +75,47 @@
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:ThemeStrings.Theme_BlackboardScale80}" />
 
-                    <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_BoardScaleLeft}">
-                        <ui:SettingsCard.HeaderIcon>
+                    <ui:SettingsExpander Header="{x:Static props:ThemeStrings.Theme_BlackboardScale80}"
+                                         IsExpanded="True">
+                        <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BackToWindow}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock x:Name="ViewboxBlackBoardLeftScaleText"
-                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                            <Slider x:Name="ViewboxBlackBoardLeftScaleTransformValueSlider" Minimum="0.5"
-                                    Maximum="1.5" Width="200"
-                                    IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
-                                    TickPlacement="None" AutoToolTipPlacement="None"
-                                    ValueChanged="ViewboxBlackBoardLeftScaleTransformValueSlider_ValueChanged" />
-                        </ikw:SimpleStackPanel>
-                    </ui:SettingsCard>
-
-                    <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_BoardScaleCenter}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BackToWindow}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock x:Name="ViewboxBlackBoardCenterScaleText"
-                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                            <Slider x:Name="ViewboxBlackBoardCenterScaleTransformValueSlider" Minimum="0.5"
-                                    Maximum="1.5" Width="200"
-                                    IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
-                                    TickPlacement="None" AutoToolTipPlacement="None"
-                                    ValueChanged="ViewboxBlackBoardCenterScaleTransformValueSlider_ValueChanged" />
-                        </ikw:SimpleStackPanel>
-                    </ui:SettingsCard>
-
-                    <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_BoardScaleRight}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BackToWindow}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock x:Name="ViewboxBlackBoardRightScaleText"
-                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                            <Slider x:Name="ViewboxBlackBoardRightScaleTransformValueSlider" Minimum="0.5"
-                                    Maximum="1.5" Width="200"
-                                    IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
-                                    TickPlacement="None" AutoToolTipPlacement="None"
-                                    ValueChanged="ViewboxBlackBoardRightScaleTransformValueSlider_ValueChanged" />
-                        </ikw:SimpleStackPanel>
-                    </ui:SettingsCard>
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_BoardScaleLeft}">
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock x:Name="ViewboxBlackBoardLeftScaleText"
+                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                    <Slider x:Name="ViewboxBlackBoardLeftScaleTransformValueSlider" Minimum="0.5"
+                                            Maximum="1.5" Width="200"
+                                            IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
+                                            TickPlacement="None" AutoToolTipPlacement="None"
+                                            ValueChanged="ViewboxBlackBoardLeftScaleTransformValueSlider_ValueChanged" />
+                                </ikw:SimpleStackPanel>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_BoardScaleCenter}">
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock x:Name="ViewboxBlackBoardCenterScaleText"
+                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                    <Slider x:Name="ViewboxBlackBoardCenterScaleTransformValueSlider" Minimum="0.5"
+                                            Maximum="1.5" Width="200"
+                                            IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
+                                            TickPlacement="None" AutoToolTipPlacement="None"
+                                            ValueChanged="ViewboxBlackBoardCenterScaleTransformValueSlider_ValueChanged" />
+                                </ikw:SimpleStackPanel>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_BoardScaleRight}">
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock x:Name="ViewboxBlackBoardRightScaleText"
+                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                    <Slider x:Name="ViewboxBlackBoardRightScaleTransformValueSlider" Minimum="0.5"
+                                            Maximum="1.5" Width="200"
+                                            IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
+                                            TickPlacement="None" AutoToolTipPlacement="None"
+                                            ValueChanged="ViewboxBlackBoardRightScaleTransformValueSlider_ValueChanged" />
+                                </ikw:SimpleStackPanel>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
 
                     <Rectangle Height="48" />
                 </ikw:SimpleStackPanel>
