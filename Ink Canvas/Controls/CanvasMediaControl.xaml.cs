@@ -167,6 +167,7 @@ namespace Ink_Canvas.Controls
             if (handler == null) return;
             PreviewHost.MouseLeftButtonDown += (_, e) => handler(this, e);
             AudioPlaceholder.MouseLeftButtonDown += (_, e) => handler(this, e);
+            Player.MouseLeftButtonDown += (_, e) => handler(this, e);
         }
 
         public void RegisterTouchSelectHandler(EventHandler<TouchEventArgs> handler)
@@ -174,6 +175,7 @@ namespace Ink_Canvas.Controls
             if (handler == null) return;
             PreviewHost.TouchDown += (_, e) => handler(this, e);
             AudioPlaceholder.TouchDown += (_, e) => handler(this, e);
+            Player.TouchDown += (_, e) => handler(this, e);
         }
 
         public static bool IsInteractiveChildTarget(DependencyObject current)
