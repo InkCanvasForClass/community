@@ -237,6 +237,13 @@ namespace Ink_Canvas.Controls
         {
             _isPlaying = false;
             _positionTimer.Stop();
+            try
+            {
+                Player.Stop();
+            }
+            catch
+            {
+            }
             SeekTo(TimeSpan.Zero);
             UpdatePlayPauseGlyph();
         }
