@@ -42,6 +42,7 @@
                               LoadedBehavior="Manual"
                               UnloadedBehavior="Manual"
                               Stretch="Uniform"
+                              IsHitTestVisible="False"
                               MediaOpened="Player_MediaOpened"
                               MediaEnded="Player_MediaEnded" />
             </Grid>

@@ -24,6 +24,8 @@ namespace Ink_Canvas.Controls
         private TimeSpan _pendingPosition = TimeSpan.Zero;
         private double _pendingSpeedRatio = 1.0;
         private bool _suppressNestedSelection;
+        private MouseButtonEventHandler _registeredSelectHandler;
+        private EventHandler<TouchEventArgs> _registeredTouchSelectHandler;
 
         public CanvasMediaControl()
         {
@@ -165,17 +167,35 @@ namespace Ink_Canvas.Controls
         public void RegisterSelectHandler(MouseButtonEventHandler handler)
         {
             if (handler == null) return;
-            PreviewHost.MouseLeftButtonDown += (_, e) => handler(this, e);
-            AudioPlaceholder.MouseLeftButtonDown += (_, e) => handler(this, e);
-            Player.MouseLeftButtonDown += (_, e) => handler(this, e);
+
+            // Unregister previous handler if exists
+            if (_registeredSelectHandler != null)
+            {
+                PreviewHost.MouseLeftButtonDown -= _registeredSelectHandler;
+                AudioPlaceholder.MouseLeftButtonDown -= _registeredSelectHandler;
+            }
+
+            // Register new handler
+            _registeredSelectHandler = (s, e) => handler(this, e);
+            PreviewHost.MouseLeftButtonDown += _registeredSelectHandler;
+            AudioPlaceholder.MouseLeftButtonDown += _registeredSelectHandler;
         }
 
         public void RegisterTouchSelectHandler(EventHandler<TouchEventArgs> handler)
         {
             if (handler == null) return;
-            PreviewHost.TouchDown += (_, e) => handler(this, e);
-            AudioPlaceholder.TouchDown += (_, e) => handler(this, e);
-            Player.TouchDown += (_, e) => handler(this, e);
+
+            // Unregister previous handler if exists
+            if (_registeredTouchSelectHandler != null)
+            {
+                PreviewHost.TouchDown -= _registeredTouchSelectHandler;
+                AudioPlaceholder.TouchDown -= _registeredTouchSelectHandler;
+            }
+
+            // Register new handler
+            _registeredTouchSelectHandler = (s, e) => handler(this, e);
+            PreviewHost.TouchDown += _registeredTouchSelectHandler;
+            AudioPlaceholder.TouchDown += _registeredTouchSelectHandler;
         }
 
         public static bool IsInteractiveChildTarget(DependencyObject current)
