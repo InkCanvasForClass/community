@@ -4,20 +4,19 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-             mc:Ignorable="d"
-             d:DesignHeight="38" d:DesignWidth="32">
+             mc:Ignorable="d">
     <ikw:SimpleStackPanel x:Name="ButtonPanel"
                           MouseDown="ButtonPanel_MouseDown"
                           MouseUp="ButtonPanel_MouseUp"
                           Background="Transparent"
                           Orientation="Vertical"
-                          Height="38" Width="32"
-                          Margin="0,0,0,0">
+                          Height="60" Width="48"
+                          Spacing="2">
         <Image x:Name="ButtonImage"
                RenderOptions.BitmapScalingMode="HighQuality"
-               Margin="0,4,0,2" Height="19" Width="19" />
-        <Label x:Name="LabelControl"
-               FontSize="8"
+               Margin="0,6,0,0" Height="36" Width="36" />
+        <Label x:Name="LabelControl" d:Background="Red"
+               FontSize="12" d:Height="12" d:Width="48"
                HorizontalAlignment="Center" />
     </ikw:SimpleStackPanel>
 </UserControl>

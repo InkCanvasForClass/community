@@ -10,9 +10,8 @@ mc:Ignorable="d">
     <Grid>
         <controls:PopupShellContent x:Name="Shell" Title="{x:Static props:FloatingBarStrings.Board_Shape}" d:Visibility="Collapsed" />
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
-            <ikw:SimpleStackPanel Margin="2" Spacing="1">
-                <ikw:SimpleStackPanel Orientation="Horizontal" Height="38" Spacing="2"
-                                     Margin="4,4,4,0">
+            <ikw:SimpleStackPanel Margin="2" Spacing="12">
+                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                     <controls:GeometryButton x:Name="BoardImageDrawLine" IconSource="{DynamicResource GeoIconLine}" Label="{x:Static props:GeometryStrings.DrawLine}" />
                     <controls:GeometryButton x:Name="BoardImageDrawDashedLine" IconSource="{DynamicResource GeoIconDashedLine}" Label="{x:Static props:GeometryStrings.DrawDashedLine}" />
                     <controls:GeometryButton x:Name="BoardImageDrawDotLine" IconSource="{DynamicResource GeoIconDotLine}" Label="{x:Static props:GeometryStrings.DrawDottedLine}" />
@@ -24,38 +23,33 @@ mc:Ignorable="d">
                     <controls:GeometryButton x:Name="BoardImageDrawEllipseCenter" IconSource="{DynamicResource GeoIconEllipseCenter}" Label="{x:Static props:GeometryStrings.DrawCenteredEllipse}" />
                     <controls:GeometryButton x:Name="BoardImageDrawEllipseCenterWithFocalPoint" IconSource="{DynamicResource DrawShapeImageSource.EllipseCenterWithFocalPoint}" Label="{x:Static props:GeometryStrings.DrawCenteredEllipseWithFocalPoint}" />
                 </ikw:SimpleStackPanel>
-                <ikw:SimpleStackPanel x:Name="BoardOnlyRow1" Orientation="Horizontal" Height="38" Spacing="2"
-                                     Margin="4,0,4,0">
+                <ikw:SimpleStackPanel x:Name="BoardOnlyRow1" Orientation="Horizontal" Spacing="6">
                     <controls:GeometryButton x:Name="ImageDrawCoordinate1" IconSource="{DynamicResource DrawShapeImageSource.Coordinate1}" Label="{x:Static props:GeometryStrings.DrawCoordinate1}" />
                     <controls:GeometryButton x:Name="ImageDrawCoordinate2" IconSource="{DynamicResource DrawShapeImageSource.Coordinate2}" Label="{x:Static props:GeometryStrings.DrawCoordinate2}" />
                     <controls:GeometryButton x:Name="ImageDrawCoordinate3" IconSource="{DynamicResource DrawShapeImageSource.Coordinate3}" Label="{x:Static props:GeometryStrings.DrawCoordinate3}" />
                     <controls:GeometryButton x:Name="ImageDrawCoordinate4" IconSource="{DynamicResource DrawShapeImageSource.Coordinate4}" Label="{x:Static props:GeometryStrings.DrawCoordinate4}" />
                     <controls:GeometryButton x:Name="ImageDrawCoordinate5" IconSource="{DynamicResource DrawShapeImageSource.Coordinate5}" Label="{x:Static props:GeometryStrings.DrawCoordinate5}" />
-                </ikw:SimpleStackPanel>
-                <ikw:SimpleStackPanel x:Name="BoardOnlyRow2" Orientation="Horizontal" Height="38" Spacing="2"
-                                     Margin="4,0,4,0">
                     <controls:GeometryButton x:Name="ImageDrawHyperbola" IconSource="{DynamicResource DrawShapeImageSource.Hyperbola}" Label="{x:Static props:GeometryStrings.DrawHyperbola}" />
                     <controls:GeometryButton x:Name="ImageDrawHyperbolaWithFocalPoint" IconSource="{DynamicResource DrawShapeImageSource.HyperbolaWithFocalPoint}" Label="{x:Static props:GeometryStrings.DrawHyperbolaWithFocal}" />
                     <controls:GeometryButton x:Name="ImageDrawParabola1" IconSource="{DynamicResource DrawShapeImageSource.Parabola}" Label="{x:Static props:GeometryStrings.DrawParabola}" />
                     <controls:GeometryButton x:Name="ImageDrawParabolaWithFocalPoint" IconSource="{DynamicResource DrawShapeImageSource.ParabolaWithFocalPoint}" IconRotation="90" Label="{x:Static props:GeometryStrings.DrawParabolaWithFocal}" />
                     <controls:GeometryButton x:Name="ImageDrawParabola2" IconSource="{DynamicResource DrawShapeImageSource.Parabola}" IconRotation="90" Label="{x:Static props:GeometryStrings.DrawParabola2}" />
                 </ikw:SimpleStackPanel>
-                <ikw:SimpleStackPanel Orientation="Horizontal" Height="38" Spacing="2"
-                                     Margin="4,0,4,4">
+                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                     <controls:GeometryButton x:Name="BoardImageDrawCuboid" IconSource="{DynamicResource GeoIconCuboid}" Label="{x:Static props:GeometryStrings.DrawCuboid}" />
                     <controls:GeometryButton x:Name="BoardImageDrawRectangle" IconSource="{DynamicResource GeoIconRectangle}" Label="{x:Static props:GeometryStrings.DrawSquare}" />
                     <controls:GeometryButton x:Name="BoardImageDrawCylinder" IconSource="{DynamicResource GeoIconCylinder}" Label="{x:Static props:GeometryStrings.DrawCylinder}" />
                     <controls:GeometryButton x:Name="BoardImageDrawCone" IconSource="{DynamicResource GeoIconCone}" Label="{x:Static props:GeometryStrings.DrawCone}" />
-                </ikw:SimpleStackPanel>
-                <ikw:SimpleStackPanel x:Name="CircleCenterRow" Orientation="Horizontal" Height="38" Spacing="8"
-                                     Margin="4,0,4,4"
-                                     VerticalAlignment="Center">
-                    <Label Content="{x:Static props:CanvasStrings.Canvas_ShowCircleCenter}"
-                           Foreground="{DynamicResource FloatBarForeground}"
-                           VerticalAlignment="Center"
-                           Padding="0" />
-                    <ui:ToggleSwitch x:Name="ToggleSwitchShowCircleCenter"
-                                     MinWidth="0" OnContent="" OffContent="" />
+                    <ikw:SimpleStackPanel x:Name="CircleCenterRow" Orientation="Horizontal" Height="38" Spacing="8"
+                                          
+                                          VerticalAlignment="Center">
+                        <Label Content="{x:Static props:CanvasStrings.Canvas_ShowCircleCenter}"
+                               Foreground="{DynamicResource FloatBarForeground}"
+                               VerticalAlignment="Center"
+                               Padding="0" />
+                        <ui:ToggleSwitch x:Name="ToggleSwitchShowCircleCenter"
+                                         MinWidth="0" OnContent="" OffContent="" />
+                    </ikw:SimpleStackPanel>
                 </ikw:SimpleStackPanel>
             </ikw:SimpleStackPanel>
         </ContentControl>
