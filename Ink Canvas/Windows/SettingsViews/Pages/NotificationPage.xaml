@@ -70,8 +70,6 @@
                     </ui:SettingsExpander.HeaderIcon>
                     <ui:SettingsExpander.Content>
                         <ui:ToggleSwitch x:Name="ToggleSwitchDictationDoNotDisturb"
-                                      OnContent="{DynamicResource Common_On}"
-                                      OffContent="{DynamicResource Common_Off}"
                                       Toggled="ToggleSwitchDictationDoNotDisturb_Toggled" />
                     </ui:SettingsExpander.Content>
                     <ui:SettingsExpander.Items>

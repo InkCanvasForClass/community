@@ -910,6 +910,9 @@ namespace Ink_Canvas
 
             TryApplyPreferredLanguageFromSettings();
 
+            // 同步 Common_On/Common_Off 等本地化资源到 Application.Resources
+            Helpers.LocalizationHelper.SyncCommonResources();
+
             // 根据设置决定是否显示启动画面
             if (ShouldShowSplashScreen() && !IsLaunchByFileOrUri(e.Args))
             {

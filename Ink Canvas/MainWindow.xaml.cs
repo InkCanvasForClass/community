@@ -1404,6 +1404,7 @@ namespace Ink_Canvas
                 else ViewboxFloatingBarMarginAnimation(100, true, skipAnimation: true);
             }
             ApplyLanguageFromSettings();
+            Helpers.LocalizationHelper.SyncCommonResources();
             InitializeNotificationProviders();
             AutomationBootstrap.Initialize();
 

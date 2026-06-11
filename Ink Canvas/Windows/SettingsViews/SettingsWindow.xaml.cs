@@ -141,6 +141,8 @@ namespace Ink_Canvas.Windows.SettingsViews
                         LoadPluginSettingsPages();
                         UpdateUpdateBadgeVisibility();
                         UpdateAnnouncementUnreadBadge();
+                        // 绑定设置窗口中的 ToggleSwitch 本地化文本
+                        Ink_Canvas.Helpers.LocalizationHelper.BindToggleSwitchesInWindow(this);
                     }), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
                 }), System.Windows.Threading.DispatcherPriority.Normal);
 

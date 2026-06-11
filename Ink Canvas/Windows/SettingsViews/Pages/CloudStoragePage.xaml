@@ -68,8 +68,6 @@
                                             <ui:ToggleSwitch x:Name="ToggleProviderEnabled"
                                                              Grid.Column="1"
                                                              IsOn="{Binding IsEnabled, Mode=OneWay}"
-                                                             OnContent="{DynamicResource Common_On}"
-                                                             OffContent="{DynamicResource Common_Off}"
                                                              Toggled="ToggleProviderEnabled_Toggled" />
                                         </Grid>
                                     </DataTemplate>
