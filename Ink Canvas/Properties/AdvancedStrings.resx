@@ -1,0 +1,148 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AvoidFullScreenHelper" xml:space="preserve">
+    <value>启用 AvoidFullScreenHelper</value>
+  </data>
+  <data name="AvoidFullScreenHelperHint" xml:space="preserve">
+    <value>避免画布全屏，应该可以解决任务栏非置顶和 Win11 任务栏无法点击的问题，会导致左侧或顶部有 AppBar（Dock栏软件）时导致浮动工具栏偏移，重启icc后生效。</value>
+  </data>
+  <data name="ConfirmExit" xml:space="preserve">
+    <value>关闭软件时二次弹窗确认</value>
+  </data>
+  <data name="DPIChangeDetection" xml:space="preserve">
+    <value>启用 DPIChangeDetection</value>
+  </data>
+  <data name="DPIChangeDetectionHint" xml:space="preserve">
+    <value>当检测到系统 DPI 变化时，会尝试检测 FloatingBar 是否在屏幕内显示，如果不在屏幕内显示将会尝试移动到屏幕内可见区域（DPI调大会触发，如果 DPI 调小是不会触发工具栏位置移动的，请您手动调整）。</value>
+  </data>
+  <data name="EdgeGestureUtil" xml:space="preserve">
+    <value>启用 EdgeGestureUtil</value>
+  </data>
+  <data name="EdgeGestureUtilHint_Part1" xml:space="preserve">
+    <value>EdgeGestureUtil 是 icc 最新引入的可以暂时阻止在使用触摸时触发边缘手势（如 Windows10 环境下，屏幕左边缘滑动进入任务视图，右边缘滑动弹出通知中心；Windows11 环境下，底部向上滑动打开开始菜单），其原理是使用了 System.EdgeGesture.DisableTouchWhenFullscreen （当应用程序窗口处于活动状态且处于全屏模式 (或拥有的窗口) 处于活动状态时，防止边缘手势行为。）来实现的。如果有异常，请关闭该选项，该选项应该能够实时生效。（Win7 和 Win8 用户该选项无法使用）</value>
+  </data>
+  <data name="EraserBindTouchHint" xml:space="preserve">
+    <value>BoundsWidth 参数作为接触面积区分界限</value>
+  </data>
+  <data name="EraserBindTouchMultiplier" xml:space="preserve">
+    <value>橡皮擦绑定触摸大小倍数</value>
+  </data>
+  <data name="Experimental" xml:space="preserve">
+    <value>实验性选项</value>
+  </data>
+  <data name="FingerModeBoundsWidthHeader" xml:space="preserve">
+    <value>手指模式 BoundsWidth</value>
+  </data>
+  <data name="ForceFullScreen" xml:space="preserve">
+    <value>启用 ForceFullScreen</value>
+  </data>
+  <data name="ForceFullScreenHint" xml:space="preserve">
+    <value>当检测到窗口大小变化时，自动使用 Win32 API 将本窗口的大小设置为主显示器大小（设备像素大小），不需要可以关闭，实时生效。</value>
+  </data>
+  <data name="FullScreenHelper" xml:space="preserve">
+    <value>启用 FullScreenHelper</value>
+  </data>
+  <data name="FullScreenHelperHint" xml:space="preserve">
+    <value>感谢 lindexi 大佬提供的 FullScreenHelper，可以减少任务栏弹出的问题，且支持多显示器自动全屏（虽然对icc来说没什么用就是了），如果遇到一些玄学问题，可以关闭该功能，重启icc后生效。</value>
+  </data>
+  <data name="LogByDate" xml:space="preserve">
+    <value>日志以日期保存</value>
+  </data>
+  <data name="Logging" xml:space="preserve">
+    <value>记录日志</value>
+  </data>
+  <data name="LogRotateHint" xml:space="preserve">
+    <value>日志文件超过 512 KB 时会自动删除。开启日期保存后，日志将保存在 Logs 文件夹中，当文件夹大小超过 5MB 时自动清空。</value>
+  </data>
+  <data name="NibModeBoundsWidthHeader" xml:space="preserve">
+    <value>笔尖模式 BoundsWidth</value>
+  </data>
+  <data name="QuadIRMode" xml:space="preserve">
+    <value>四边红外模式</value>
+  </data>
+  <data name="ResolutionChangeDetection" xml:space="preserve">
+    <value>启用 ResolutionChangeDetection</value>
+  </data>
+  <data name="ResolutionChangeDetectionHint" xml:space="preserve">
+    <value>检测到系统分辨率变化时，会检查 FloatingBar 是否仍在屏幕可见范围内；如果已经移出屏幕，会尝试将其移回可见区域。该功能通常会在降低分辨率后触发；如果 FloatingBar 本就在屏幕内，则不会自动调整位置。</value>
+  </data>
+  <data name="SpecialScreenMode" xml:space="preserve">
+    <value>特殊屏幕模式</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>高级设置</value>
+  </data>
+  <data name="TouchMultiplier" xml:space="preserve">
+    <value>触摸倍数</value>
+  </data>
+  <data name="TouchMultiplierCalibrateHint" xml:space="preserve">
+    <value>在下方区域内用笔尖点击以估计触摸大小倍数</value>
+  </data>
+  <data name="TouchMultiplierHint" xml:space="preserve">
+    <value>可在手指触摸画板时显示圆形橡皮或手掌触摸画板时显示的橡皮比
+手掌大很多时调整</value>
+  </data>
+  <data name="TouchMultiplierValueHint" xml:space="preserve">
+    <value>数值仅供参考</value>
+  </data>
+  <data name="Debug_ShowConsole_Desc" xml:space="preserve">
+    <value>显示一个独立的控制台窗口，用于实时输出日志（开启后立即生效；关闭设置中的「启用日志记录」将不会输出内容）。</value>
+  </data>
+  <data name="Debug_ShowConsole_Header" xml:space="preserve">
+    <value>显示调试窗口</value>
+  </data>
+  <data name="Debug_PptComProbe_Desc" xml:space="preserve">
+    <value>开启后会在PPT连接、放映切换和定时轮询时输出大量COM对象、窗口、进程与状态探针信息。仅建议排查PPT/WPS联动问题时临时开启。</value>
+  </data>
+  <data name="Debug_PptComProbe_Header" xml:space="preserve">
+    <value>启用PPT COM调试探针</value>
+  </data>
+  <data name="Debug_IconSettings" xml:space="preserve">
+    <value>图标设置</value>
+  </data>
+  <data name="Debug_SettingsExpanderExample" xml:space="preserve">
+    <value>SettingsExpander 示例</value>
+  </data>
+</root>

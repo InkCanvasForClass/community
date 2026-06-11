@@ -1,0 +1,46 @@
+<local:ToolsPopupContent xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Controls.BoardToolsPopupContent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+             xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+             xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+             xmlns:helpers="clr-namespace:Ink_Canvas.Helpers"
+             xmlns:local="clr-namespace:Ink_Canvas.Controls"
+             mc:Ignorable="d">
+    <local:ToolsPopupContent.Resources>
+        <Style x:Key="AutoFitToolPopupLabel8" TargetType="Label">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource FloatBarForeground}" />
+            <Setter Property="helpers:AutoFontSizeHelper.IsEnabled" Value="True" />
+            <Setter Property="helpers:AutoFontSizeHelper.MinFontSize" Value="3.5" />
+            <Setter Property="helpers:AutoFontSizeHelper.MaxFontSize" Value="20" />
+            <Setter Property="helpers:AutoFontSizeHelper.Step" Value="0.25" />
+        </Style>
+    </local:ToolsPopupContent.Resources>
+    <Grid>
+        <controls:PopupShellContent x:Name="Shell" Title="{x:Static props:FloatingBarStrings.Tools_MoreFeaturesTitle}" d:Visibility="Collapsed" />
+        <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
+            <ikw:SimpleStackPanel x:Name="MenuPanel" Margin="2" Spacing="3" HorizontalAlignment="Center">
+                <ikw:SimpleStackPanel.Resources>
+                    <Style TargetType="Label" BasedOn="{StaticResource AutoFitToolPopupLabel8}" />
+                </ikw:SimpleStackPanel.Resources>
+                <!-- All buttons declared here; layout is applied dynamically via ApplyMenuLayout() -->
+                <controls:ToolMenuButton x:Name="TimerToolBtn" Label="{x:Static props:FloatingBarStrings.QuickPanel_Timer}" Visibility="Collapsed" />
+                <controls:ToolMenuButton x:Name="RandomDrawToolBtn" Label="{x:Static props:FloatingBarStrings.Tools_RandomDraw}" Visibility="Collapsed" />
+                <controls:ToolMenuButton x:Name="SingleDrawToolBtn" Label="{x:Static props:FloatingBarStrings.QuickPanel_SingleDraw}" Visibility="Collapsed" />
+                <controls:ToolMenuButton x:Name="SaveToolBtn" Label="{x:Static props:FloatingBarStrings.Tools_Save}" Visibility="Collapsed" />
+                <controls:ToolMenuButton x:Name="OpenToolBtn" Label="{x:Static props:FloatingBarStrings.Tools_Open}" Visibility="Collapsed" />
+                <controls:ToolMenuButton x:Name="ReplayToolBtn" Label="{x:Static props:FloatingBarStrings.Tools_Replay}" Visibility="Collapsed" />
+                <controls:ToolMenuButton x:Name="ScreenshotToolBtn" Label="{x:Static props:FloatingBarStrings.Tools_Screenshot}" Visibility="Collapsed" />
+                <controls:ToolMenuButton x:Name="ShapeDrawToolBtn" Label="{x:Static props:FloatingBarStrings.FloatingBar_Geometry}" Visibility="Collapsed" />
+                <controls:ToolMenuButton x:Name="RedoToolBtn" Label="{x:Static props:FloatingBarStrings.Board_Redo}" Visibility="Collapsed" />
+                <controls:ToolMenuButton x:Name="ManualToolBtn" Label="{x:Static props:FloatingBarStrings.Tools_Manual}" Visibility="Collapsed" />
+                <controls:ToolMenuButton x:Name="SettingsToolBtn" Label="{x:Static props:NavStrings.Settings_Title}" Visibility="Collapsed" />
+            </ikw:SimpleStackPanel>
+        </ContentControl>
+    </Grid>
+</local:ToolsPopupContent>

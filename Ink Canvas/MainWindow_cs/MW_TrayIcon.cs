@@ -1,5 +1,6 @@
 using H.NotifyIcon;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using iNKORE.UI.WPF.Controls;
 using System;
 using System.Diagnostics;
@@ -168,7 +169,7 @@ namespace Ink_Canvas
                 {
                     FoldFloatingBarTrayIconMenuItemIconEyeOff.Visibility = Visibility.Hidden;
                     FoldFloatingBarTrayIconMenuItemIconEyeOn.Visibility = Visibility.Visible;
-                    FoldFloatingBarTrayIconMenuItemHeaderText.Text = "退出收纳模式";
+                    FoldFloatingBarTrayIconMenuItemHeaderText.Text = MainWindowStrings.Main_Tray_ExitFoldMode;
                     if (!HideICCMainWindowTrayIconMenuItem.IsChecked)
                     {
                         ResetFloatingBarPositionTrayIconMenuItem.IsEnabled = false;
@@ -179,7 +180,7 @@ namespace Ink_Canvas
                 {
                     FoldFloatingBarTrayIconMenuItemIconEyeOff.Visibility = Visibility.Visible;
                     FoldFloatingBarTrayIconMenuItemIconEyeOn.Visibility = Visibility.Hidden;
-                    FoldFloatingBarTrayIconMenuItemHeaderText.Text = "切换为收纳模式";
+                    FoldFloatingBarTrayIconMenuItemHeaderText.Text = MainWindowStrings.Main_Tray_EnterFoldMode;
                     if (!HideICCMainWindowTrayIconMenuItem.IsChecked)
                     {
                         ResetFloatingBarPositionTrayIconMenuItem.IsEnabled = true;
@@ -456,7 +457,7 @@ namespace Ink_Canvas
         /// 处理重置浮动栏位置托盘菜单项的点击事件，包括以下步骤：
         /// 1. 获取主窗口实例
         /// 2. 如果主窗口已加载：
-        ///    - 检查是否处于PPT演示模式
+        ///    - 清空用户拖动标志和已保存的位置坐标，让动画走默认位置分支
         ///    - 如果浮动栏当前未处于收纳模式：
         ///       - 如果不处于PPT演示模式，调用PureViewboxFloatingBarMarginAnimationInDesktopMode方法重置浮动栏位置
         ///       - 否则，调用PureViewboxFloatingBarMarginAnimationInPPTMode方法重置浮动栏位置
@@ -473,6 +474,11 @@ namespace Ink_Canvas
                 });
                 if (!mainWin.isFloatingBarFolded)
                 {
+                    // 清空保存的状态，强制动画走默认位置分支
+                    mainWin._userHasDraggedFloatingBar = false;
+                    mainWin.pointDesktop = new Point(-1, -1);
+                    mainWin.pointPPT = new Point(-1, -1);
+
                     if (!isInPPTPresentationMode) mainWin.PureViewboxFloatingBarMarginAnimationInDesktopMode();
                     else mainWin.PureViewboxFloatingBarMarginAnimationInPPTMode();
                 }
@@ -616,14 +622,14 @@ namespace Ink_Canvas
                                 var textBlock = headerPanel.Children[0] as TextBlock;
                                 if (textBlock != null)
                                 {
-                                    if (textBlock.Text == "禁用所有快捷键")
+                                    if (textBlock.Text == MainWindowStrings.Main_Tray_DisableHotkeys)
                                     {
-                                        textBlock.Text = "启用所有快捷键";
+                                        textBlock.Text = MainWindowStrings.Main_Tray_EnableHotkeys;
                                         LogHelper.WriteLogToFile("已禁用所有快捷键", LogHelper.LogType.Event);
                                     }
                                     else
                                     {
-                                        textBlock.Text = "禁用所有快捷键";
+                                        textBlock.Text = MainWindowStrings.Main_Tray_DisableHotkeys;
                                         // 重新启用快捷键
                                         hotkeyManager.EnableHotkeyRegistration();
                                         LogHelper.WriteLogToFile("已启用所有快捷键", LogHelper.LogType.Event);

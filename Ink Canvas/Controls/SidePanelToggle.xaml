@@ -4,15 +4,77 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-             mc:Ignorable="d">
-    <Viewbox Height="50" Width="32" VerticalAlignment="Center">
-        <ikw:SimpleStackPanel>
-            <Border x:Name="PanelBorder" Background="#9918181b" Opacity="1"
-                    CornerRadius="0,25,25,0" Height="50" Width="32">
-                <Image x:Name="ChevronImage" Margin="10,0,0,0"
-                       Source="{DynamicResource QuickPanelUnfoldChevronIcon}"
-                       RenderOptions.BitmapScalingMode="HighQuality" Height="14" Width="14" />
+             mc:Ignorable="d"
+             d:DesignHeight="150" d:DesignWidth="80">
+    <Grid Width="80" Height="150" VerticalAlignment="Center">
+        <!-- New Minimalist Grab Handle - 这里才是实际的点击和拖动区域 -->
+        <Border x:Name="PanelBorder"
+                Width="24" Height="110"
+                Background="Transparent"
+                Cursor="Hand"
+                CornerRadius="12"
+                VerticalAlignment="Center">
+            <!-- Solid 100% Pure Black 1px Border Outline, positioned dynamically by C# -->
+            <Border x:Name="InnerStripe"
+                    BorderBrush="Black"
+                    BorderThickness="1"
+                    CornerRadius="4.5"
+                    Width="9" Height="92"
+                    VerticalAlignment="Center">
+                <!-- Inner translucent stripe (width 7, height 90) that animates opacity -->
+                <Border Background="Black"
+                        CornerRadius="3.5"
+                        Width="7" Height="90"
+                        HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Opacity" Value="0.4"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsMouseOver, ElementName=PanelBorder}" Value="True">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0.85" Duration="0:0:0.15"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0.4" Duration="0:0:0.15"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    
+                    <Image x:Name="ChevronImage"
+                           Source="{DynamicResource QuickPanelUnfoldChevronIcon}"
+                           RenderOptions.BitmapScalingMode="HighQuality"
+                           Height="8" Width="8"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           IsHitTestVisible="False">
+                        <Image.Effect>
+                            <DropShadowEffect Color="Black" BlurRadius="2" ShadowDepth="0" Opacity="0"/>
+                        </Image.Effect>
+                    </Image>
+                </Border>
             </Border>
-        </ikw:SimpleStackPanel>
-    </Viewbox>
+        </Border>
+
+        <!-- Classic Capsule Handle -->
+        <Viewbox x:Name="ClassicViewbox" Height="50" Width="32" VerticalAlignment="Center" Visibility="Collapsed">
+            <ikw:SimpleStackPanel>
+                <Border x:Name="ClassicPanelBorder" Background="#9918181b" Opacity="1"
+                        CornerRadius="0,25,25,0" Height="50" Width="32">
+                    <Image x:Name="ClassicChevronImage" Margin="10,0,0,0"
+                           Source="{DynamicResource QuickPanelUnfoldChevronIcon}"
+                           RenderOptions.BitmapScalingMode="HighQuality" Height="14" Width="14"
+                           IsHitTestVisible="False"/>
+                </Border>
+            </ikw:SimpleStackPanel>
+        </Viewbox>
+    </Grid>
 </UserControl>

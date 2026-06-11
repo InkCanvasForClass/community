@@ -1,0 +1,300 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AutoFold_App_AdmoxBoard" xml:space="preserve">
+    <value>安道白板</value>
+  </data>
+  <data name="AutoFold_App_AdmoxBooth" xml:space="preserve">
+    <value>安道展台</value>
+  </data>
+  <data name="AutoFold_App_HiteBoard" xml:space="preserve">
+    <value>鸿合白板</value>
+  </data>
+  <data name="AutoFold_App_HiteCamera" xml:space="preserve">
+    <value>鸿合展台</value>
+  </data>
+  <data name="AutoFold_App_HiteLightBoard" xml:space="preserve">
+    <value>鸿合轻量白板</value>
+  </data>
+  <data name="AutoFold_App_MaxHubBoard" xml:space="preserve">
+    <value>MaxHub白板</value>
+  </data>
+  <data name="AutoFold_App_MSWhiteboard" xml:space="preserve">
+    <value>微软白板</value>
+  </data>
+  <data name="AutoFold_App_SeewoBoard3" xml:space="preserve">
+    <value>希沃白板 3</value>
+  </data>
+  <data name="AutoFold_App_SeewoBoard5" xml:space="preserve">
+    <value>希沃白板 5</value>
+  </data>
+  <data name="AutoFold_App_SeewoCamera" xml:space="preserve">
+    <value>希沃展台</value>
+  </data>
+  <data name="AutoFold_App_SeewoLightBoard" xml:space="preserve">
+    <value>希沃轻白板</value>
+  </data>
+  <data name="AutoFold_App_SeewoLightBoard5C" xml:space="preserve">
+    <value>希沃轻白板 5C</value>
+  </data>
+  <data name="AutoFold_App_WenXiangBoard" xml:space="preserve">
+    <value>文香白板</value>
+  </data>
+  <data name="AutoFold_App_YiYunBoard" xml:space="preserve">
+    <value>艺云白板</value>
+  </data>
+  <data name="AutoFold_App_YiYunBooth" xml:space="preserve">
+    <value>艺云展台</value>
+  </data>
+  <data name="AutoFold_Mode" xml:space="preserve">
+    <value>收纳模式</value>
+  </data>
+  <data name="AutoFold_OldZyBoard" xml:space="preserve">
+    <value>中原旧白板</value>
+  </data>
+  <data name="AutoKill_EasiNote5" xml:space="preserve">
+    <value>自动查杀 希沃白板 5</value>
+  </data>
+  <data name="AutoKill_HiteAfterKillEnterAnnotation" xml:space="preserve">
+    <value>鸿合屏幕书写查杀后自动进入批注</value>
+  </data>
+  <data name="AutoKill_HiteAnnotation" xml:space="preserve">
+    <value>自动查杀 鸿合屏幕书写</value>
+  </data>
+  <data name="AutoKill_ICA" xml:space="preserve">
+    <value>自动查杀 ICA （新版旧版通杀）</value>
+  </data>
+  <data name="AutoKill_InkCanvasIC" xml:space="preserve">
+    <value>自动查杀 Ink Canvas 和 IC+</value>
+  </data>
+  <data name="AutoKill_Inkeys" xml:space="preserve">
+    <value>自动查杀 智绘教 Inkeys（仅限新版）</value>
+  </data>
+  <data name="AutoKill_PptTools" xml:space="preserve">
+    <value>自动查杀 希沃 PPT 小工具</value>
+  </data>
+  <data name="AutoKill_PptToolsHint" xml:space="preserve">
+    <value>请注意，查杀 PPT 小工具会导致希沃课堂授课助手无法使用，直接进入希沃课堂授课助手安装目录删除 Office.dll 文件即可进入 PPT 放映时不会启动希沃的 PPT 工具栏。</value>
+  </data>
+  <data name="AutoKill_SeewoDesktop2Anno" xml:space="preserve">
+    <value>自动查杀 希沃桌面 2.0 桌面批注</value>
+  </data>
+  <data name="AutoKill_SeewoDesktop2AnnoHint" xml:space="preserve">
+    <value>由于希沃桌面 2.0 提供的桌面批注是 64 位应用程序，icc是 32 位程序无法访问，所以目前暂不做精准匹配，只匹配进程名称 DesktopAnnotation，后面会考虑封装一套基于 P/Invoke 和 WMI 的综合进程识别方案。如果遇到同进程名的软件直接不开启该选项就行了，见谅！</value>
+  </data>
+  <data name="AutoKill_Title" xml:space="preserve">
+    <value>自动查杀</value>
+  </data>
+  <data name="AutoKill_YouJiao" xml:space="preserve">
+    <value>自动查杀 优教授课端</value>
+  </data>
+  <data name="Automation_AutoFoldInPPT" xml:space="preserve">
+    <value>播放 PPT 时自动收纳</value>
+  </data>
+  <data name="Automation_AutoFoldTitle" xml:space="preserve">
+    <value>自动收纳</value>
+  </data>
+  <data name="Automation_KeepFoldAfterExit" xml:space="preserve">
+    <value>软件退出后保持收纳模式</value>
+  </data>
+  <data name="Automation_KeepFoldAfterExitHint" xml:space="preserve">
+    <value>开启后，执行自动收纳的软件在软件退出后不退出收纳模式，保持收纳状态</value>
+  </data>
+  <data name="Automation_SaveFileName_Custom" xml:space="preserve">
+    <value>自定义...</value>
+  </data>
+  <data name="Automation_SaveFileName_CustomTemplate_Desc" xml:space="preserve">
+    <value>可用占位符：{date} {time} {datetime} {mode} {page} {count} {type}</value>
+  </data>
+  <data name="Automation_SaveFileName_CustomTemplate_Header" xml:space="preserve">
+    <value>自定义模板</value>
+  </data>
+  <data name="Automation_SaveFileName_Date" xml:space="preserve">
+    <value>日期</value>
+  </data>
+  <data name="Automation_SaveFileName_DateMode" xml:space="preserve">
+    <value>日期 + 模式</value>
+  </data>
+  <data name="Automation_SaveFileName_DateModePage" xml:space="preserve">
+    <value>日期 + 模式 + 页码</value>
+  </data>
+  <data name="Automation_SaveFileName_DateModePageCount" xml:space="preserve">
+    <value>日期 + 模式 + 页码 + 笔画数</value>
+  </data>
+  <data name="Automation_SaveFileName_DateTime" xml:space="preserve">
+    <value>日期 + 时间</value>
+  </data>
+  <data name="Automation_SaveFileName_Timestamp" xml:space="preserve">
+    <value>时间戳（默认）</value>
+  </data>
+  <data name="Automation_SaveFileNameFormat" xml:space="preserve">
+    <value>文件名格式</value>
+  </data>
+  <data name="Automation_Title" xml:space="preserve">
+    <value>自动化</value>
+  </data>
+  <data name="Automation_UseCustomSaveFileName_Desc" xml:space="preserve">
+    <value>开启后可选择保存文件的命名方式</value>
+  </data>
+  <data name="Automation_UseCustomSaveFileName_Header" xml:space="preserve">
+    <value>使用自定义保存文件名</value>
+  </data>
+  <data name="FloatingInterceptor_App_ChangYanClass" xml:space="preserve">
+    <value>畅言智慧课堂</value>
+  </data>
+  <data name="FloatingInterceptor_App_ChangYanPPT" xml:space="preserve">
+    <value>畅言 PPT</value>
+  </data>
+  <data name="FloatingInterceptor_App_HiteAnnotation" xml:space="preserve">
+    <value>鸿合屏幕书写</value>
+  </data>
+  <data name="FloatingInterceptor_App_IntelligentClass" xml:space="preserve">
+    <value>天喻教育云</value>
+  </data>
+  <data name="FloatingInterceptor_App_SeewoBoard5C" xml:space="preserve">
+    <value>希沃白板 5C</value>
+  </data>
+  <data name="FloatingInterceptor_App_SeewoDesktopAnnotation" xml:space="preserve">
+    <value>希沃桌面画笔</value>
+  </data>
+  <data name="FloatingInterceptor_App_SeewoDesktopSideBar" xml:space="preserve">
+    <value>希沃桌面侧栏</value>
+  </data>
+  <data name="FloatingInterceptor_App_SeewoPinco" xml:space="preserve">
+    <value>希沃品课</value>
+  </data>
+  <data name="FloatingInterceptor_App_SeewoPincoDrawing" xml:space="preserve">
+    <value>希沃品课画笔</value>
+  </data>
+  <data name="FloatingInterceptor_App_SeewoPPTTools" xml:space="preserve">
+    <value>希沃 PPT 小工具</value>
+  </data>
+  <data name="FloatingInterceptor_Enable" xml:space="preserve">
+    <value>启用悬浮窗拦截</value>
+  </data>
+  <data name="FloatingInterceptor_Title" xml:space="preserve">
+    <value>悬浮窗拦截</value>
+  </data>
+  <data name="FoldMode_AutoFoldAfterPPT" xml:space="preserve">
+    <value>退出 PPT 放映模式后自动收纳浮动栏</value>
+  </data>
+  <data name="FoldMode_AutoFoldAfterPPTHint" xml:space="preserve">
+    <value>开启后，退出 PPT 放映模式后会自动收纳浮动栏</value>
+  </data>
+  <data name="FoldMode_AutoFoldAfterWhiteboard" xml:space="preserve">
+    <value>退出白板时自动收纳</value>
+  </data>
+  <data name="FoldMode_AutoFoldAfterWhiteboardHint" xml:space="preserve">
+    <value>开启后，退出白板模式时会自动收纳到侧边栏</value>
+  </data>
+  <data name="FoldMode_ExitToAnnotation" xml:space="preserve">
+    <value>退出收纳模式时自动切换至批注模式</value>
+  </data>
+  <data name="FoldMode_ExitToAnnotationHint" xml:space="preserve">
+    <value>开启后，退出收纳模式时将自动切换至批注模式，便于快速批注</value>
+  </data>
+  <data name="AutoFold_Group_Seewo" xml:space="preserve">
+    <value>希沃</value>
+  </data>
+  <data name="AutoFold_Group_Hite" xml:space="preserve">
+    <value>鸿合</value>
+  </data>
+  <data name="AutoFold_Group_Other" xml:space="preserve">
+    <value>其他白板</value>
+  </data>
+  <data name="FloatingInterceptor_Group_Seewo" xml:space="preserve">
+    <value>希沃</value>
+  </data>
+  <data name="FileAssoc_CheckDesc" xml:space="preserve">
+    <value>查看 .icstk 文件是否已关联到 Ink Canvas</value>
+  </data>
+  <data name="FileAssoc_RegisterHeader" xml:space="preserve">
+    <value>注册文件关联</value>
+  </data>
+  <data name="FileAssoc_RegisterDesc" xml:space="preserve">
+    <value>将 .icstk 文件关联到 Ink Canvas</value>
+  </data>
+  <data name="FileAssoc_UnregisterDesc" xml:space="preserve">
+    <value>移除 .icstk 文件与 Ink Canvas 的关联</value>
+  </data>
+  <data name="FileAssoc_NotChecked" xml:space="preserve">
+    <value>未检查</value>
+  </data>
+  <data name="FileAssoc_RegisterSuccess" xml:space="preserve">
+    <value>文件关联注册成功</value>
+  </data>
+  <data name="FileAssoc_RegisterFailed" xml:space="preserve">
+    <value>文件关联注册失败</value>
+  </data>
+  <data name="FileAssoc_UnregisterSuccess" xml:space="preserve">
+    <value>文件关联已取消</value>
+  </data>
+  <data name="FileAssoc_UnregisterFailed" xml:space="preserve">
+    <value>取消文件关联失败</value>
+  </data>
+  <data name="FileAssoc_Registered" xml:space="preserve">
+    <value>✓ .icstk文件关联已注册</value>
+  </data>
+  <data name="FileAssoc_NotRegistered" xml:space="preserve">
+    <value>✗ .icstk文件关联未注册</value>
+  </data>
+  <data name="FileAssoc_CheckError" xml:space="preserve">
+    <value>✗ 检查文件关联状态时出错</value>
+  </data>
+  <data name="Storage_AutoDeleteDaysThreshold" xml:space="preserve">
+    <value>自动删除天数阈值</value>
+  </data>
+  <data name="Storage_MinAutomationStrokes" xml:space="preserve">
+    <value>自动化最小笔画数</value>
+  </data>
+  <data name="FileAssoc_LoadedStrokesFile" xml:space="preserve">
+    <value>已加载墨迹文件: {0}</value>
+  </data>
+  <data name="FileAssoc_SwitchedToBoardMode" xml:space="preserve">
+    <value>已切换到白板模式</value>
+  </data>
+  <data name="FileAssoc_ExitedFoldMode" xml:space="preserve">
+    <value>已退出收纳模式并恢复浮动栏</value>
+  </data>
+</root>

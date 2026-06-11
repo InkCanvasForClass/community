@@ -1,3 +1,4 @@
+using Ink_Canvas.Properties;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -452,7 +453,7 @@ namespace Ink_Canvas.Helpers
                 ClassNamePattern = "Qt5QWindowToolSaveBits",
                 IsEnabled = true,
                 RequiresAdmin = false,
-                Description = "鸿合屏幕书写"
+                Description = AutomationStrings.FloatingInterceptor_App_HiteAnnotation
             };
 
             // 畅言智慧课堂 主栏悬浮窗（父规则）

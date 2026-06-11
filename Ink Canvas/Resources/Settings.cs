@@ -1,4 +1,4 @@
-using Ink_Canvas.Controls.Toolbar;
+using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Newtonsoft.Json;
 using OSVersionExtension;
 using System;
@@ -48,6 +48,87 @@ namespace Ink_Canvas
 
         [JsonProperty("toolbarConfigName")]
         public string ToolbarConfigName { get; set; } = "default";
+
+        [JsonProperty("boardToolbarConfigName")]
+        public string BoardToolbarConfigName { get; set; } = "default";
+
+        [JsonProperty("performance")]
+        public PerformanceSettings Performance { get; set; } = new PerformanceSettings();
+
+        [JsonProperty("miniWhiteboard")]
+        public MiniWhiteboardSettings MiniWhiteboard { get; set; } = new MiniWhiteboardSettings();
+    }
+
+    public class PerformanceSettings
+    {
+        [JsonProperty("isMonitoringEnabled")]
+        public bool IsMonitoringEnabled { get; set; } = false;
+
+        [JsonProperty("history")]
+        public List<PerformanceRunRecord> History { get; set; } = new List<PerformanceRunRecord>();
+
+        [JsonProperty("deviceScore")]
+        public int DeviceScore { get; set; } = -1;
+
+        [JsonProperty("cpuScore")]
+        public int CpuScore { get; set; } = -1;
+
+        [JsonProperty("memoryScore")]
+        public int MemoryScore { get; set; } = -1;
+
+        [JsonProperty("diskScore")]
+        public int DiskScore { get; set; } = -1;
+
+        [JsonProperty("lastTestTime")]
+        public string LastTestTime { get; set; } = string.Empty;
+    }
+
+    public class PerformanceRunRecord
+    {
+        [JsonProperty("startTime")]
+        public string StartTime { get; set; } = string.Empty;
+
+        [JsonProperty("endTime")]
+        public string EndTime { get; set; } = string.Empty;
+
+        [JsonProperty("durationSeconds")]
+        public double DurationSeconds { get; set; }
+
+        [JsonProperty("avgCpuPercent")]
+        public double AvgCpuPercent { get; set; }
+
+        [JsonProperty("peakCpuPercent")]
+        public double PeakCpuPercent { get; set; }
+
+        [JsonProperty("avgMemoryMb")]
+        public double AvgMemoryMb { get; set; }
+
+        [JsonProperty("peakMemoryMb")]
+        public double PeakMemoryMb { get; set; }
+
+        [JsonProperty("sampleCount")]
+        public int SampleCount { get; set; }
+
+        [JsonProperty("smoothingSampleCount")]
+        public int SmoothingSampleCount { get; set; }
+
+        [JsonProperty("smoothingAvgTotalMs")]
+        public double SmoothingAvgTotalMs { get; set; }
+
+        [JsonProperty("smoothingMaxTotalMs")]
+        public double SmoothingMaxTotalMs { get; set; }
+
+        [JsonProperty("smoothingAvgBezierMs")]
+        public double SmoothingAvgBezierMs { get; set; }
+
+        [JsonProperty("smoothingAvgResampleMs")]
+        public double SmoothingAvgResampleMs { get; set; }
+
+        [JsonProperty("smoothingAvgInputPoints")]
+        public double SmoothingAvgInputPoints { get; set; }
+
+        [JsonProperty("smoothingAvgOutputPoints")]
+        public double SmoothingAvgOutputPoints { get; set; }
     }
 
     public class NotificationSettings
@@ -64,14 +145,16 @@ namespace Ink_Canvas
         [JsonProperty("isForcePopupEnabled")]
         public bool IsForcePopupEnabled { get; set; } = true;
 
-        [JsonProperty("announcementApiBaseUrl")]
-        public string AnnouncementApiBaseUrl { get; set; } = "https://dev-api.dy.ci/api/announcement/client/announcements/";
+        [JsonIgnore]
+        public string AnnouncementApiBaseUrl => "https://dev-api.dy.ci/api/announcement/client/announcements/";
 
-        [JsonProperty("announcementWebSocketUrl")]
-        public string AnnouncementWebSocketUrl { get; set; } = string.Empty;
+        [JsonIgnore]
+        public string AnnouncementWebSocketUrl => string.Empty;
 
-        [JsonProperty("announcementSoftwareToken")]
-        public string AnnouncementSoftwareToken { get; set; } = "d7dd5a04175844318da871a40b7bc59d";
+        [JsonIgnore]
+        public string AnnouncementSoftwareToken => "092fb28012b3985e2b84341c0643eab0";
+
+        public const string BuiltInSoftwareToken = "492e41ea8eb61fc9a1d336b3852a4478";
 
         [JsonProperty("placement")]
         public string Placement { get; set; } = "TopCenter";
@@ -80,7 +163,7 @@ namespace Ink_Canvas
         public string AnimationMode { get; set; } = "Standard";
 
         [JsonProperty("updateDurationSeconds")]
-        public int UpdateDurationSeconds { get; set; } = 5;
+        public int UpdateDurationSeconds { get; set; } = 3;
 
         [JsonProperty("urgentDurationSeconds")]
         public int UrgentDurationSeconds { get; set; } = 10;
@@ -131,6 +214,11 @@ namespace Ink_Canvas
         public bool RequirePasswordOnModifyOrClearNameList { get; set; } = false;
         [JsonProperty("enableProcessProtection")]
         public bool EnableProcessProtection { get; set; } = true;
+
+        [JsonProperty("usbVerificationEnabled")]
+        public bool UsbVerificationEnabled { get; set; } = false;
+        [JsonProperty("usbAuthorizedSns")]
+        public string UsbAuthorizedSns { get; set; } = "";
     }
 
     public class Canvas
@@ -147,6 +235,12 @@ namespace Ink_Canvas
         public double HighlighterAlpha { get; set; } = 255;
         [JsonProperty("isShowCursor")]
         public bool IsShowCursor { get; set; }
+        /// <summary>画笔光标类型：0 系统光标，1 软件内置光标（默认），2 用户自定义光标。</summary>
+        [JsonProperty("penCursorType")]
+        public int PenCursorType { get; set; } = 1;
+        /// <summary>用户自定义光标文件路径（当 PenCursorType == 2 时使用）。</summary>
+        [JsonProperty("customPenCursorPath")]
+        public string CustomPenCursorPath { get; set; } = "";
         /// <summary>笔锋存储值：0 基于点集，1 基于速率，2 关闭，3 实时笔锋（速度与压感混合）。界面下拉顺序为实时笔锋、点集、速率、关闭。</summary>
         [JsonProperty("inkStyle")]
         public int InkStyle { get; set; }
@@ -162,6 +256,8 @@ namespace Ink_Canvas
         public bool FitToCurve { get; set; } // 默认关闭原来的贝塞尔平滑
         [JsonProperty("useAdvancedBezierSmoothing")]
         public bool UseAdvancedBezierSmoothing { get; set; } = true; // 默认启用高级贝塞尔曲线平滑
+        [JsonProperty("mergeInkSmoothingWithUndo")]
+        public bool MergeInkSmoothingWithUndo { get; set; } = false;
         [JsonProperty("useAsyncInkSmoothing")]
         public bool UseAsyncInkSmoothing { get; set; } = true; // 默认启用异步墨迹平滑
         [JsonProperty("useHardwareAcceleration")]
@@ -236,6 +332,8 @@ namespace Ink_Canvas
         public int EraserAutoSwitchBackDelaySeconds { get; set; } = 10; // 默认10秒
         [JsonProperty("velocityBrushTipMix")]
         public double VelocityBrushTipMix { get; set; } = 0.45;
+        [JsonProperty("realtimeBrushTipMinDistanceScale")]
+        public double RealtimeBrushTipMinDistanceScale { get; set; } = 0.5;
         [JsonProperty("enableVelocityBrushTip")]
         public bool EnableVelocityBrushTip { get; set; }
 
@@ -266,8 +364,6 @@ namespace Ink_Canvas
         public bool IsEnableTwoFingerZoom { get; set; } = true;
         [JsonProperty("isEnableTwoFingerTranslate")]
         public bool IsEnableTwoFingerTranslate { get; set; } = true;
-        [JsonProperty("AutoSwitchTwoFingerGesture")]
-        public bool AutoSwitchTwoFingerGesture { get; set; } = true;
         [JsonProperty("isEnableTwoFingerRotation")]
         public bool IsEnableTwoFingerRotation { get; set; }
         [JsonProperty("isEnableTwoFingerRotationOnSelection")]
@@ -369,6 +465,14 @@ namespace Ink_Canvas
         CloseApp = 9
     }
 
+    public enum ToolbarPosition
+    {
+        Right = 0,
+        Left = 1,
+        Top = 2,
+        Bottom = 3
+    }
+
     public class Appearance
     {
         [JsonProperty("isColorfulViewboxFloatingBar")]
@@ -393,6 +497,16 @@ namespace Ink_Canvas
         public double ViewboxFloatingBarOpacityInPPTValue { get; set; } = 0.5;
         [JsonProperty("viewboxBlackBoardScaleTransformValue")]
         public double ViewboxBlackBoardScaleTransformValue { get; set; } = 1;
+        [JsonProperty("viewboxBlackBoardLeftScaleTransformValue")]
+        public double ViewboxBlackBoardLeftScaleTransformValue { get; set; } = 1;
+        [JsonProperty("viewboxBlackBoardRightScaleTransformValue")]
+        public double ViewboxBlackBoardRightScaleTransformValue { get; set; } = 1;
+        [JsonProperty("boardToolbarLeftOpacity")]
+        public double BoardToolbarLeftOpacity { get; set; } = 0.77;
+        [JsonProperty("boardToolbarCenterOpacity")]
+        public double BoardToolbarCenterOpacity { get; set; } = 0.77;
+        [JsonProperty("boardToolbarRightOpacity")]
+        public double BoardToolbarRightOpacity { get; set; } = 0.77;
         [JsonProperty("isTransparentButtonBackground")]
         public bool IsTransparentButtonBackground { get; set; } = true;
         [JsonProperty("isShowExitButton")]
@@ -421,6 +535,8 @@ namespace Ink_Canvas
         public bool IsShowQuickPanel { get; set; } = true;
         [JsonProperty("chickenSoupSource")]
         public int ChickenSoupSource { get; set; } = 1;
+        [JsonProperty("chickenSoupPosition")]
+        public string ChickenSoupPosition { get; set; } = "TopRight";
         [JsonProperty("hitokotoCategories", NullValueHandling = NullValueHandling.Ignore)]
         public List<string> HitokotoCategories { get; set; }
         [JsonProperty("isShowModeFingerToggleSwitch")]
@@ -433,22 +549,6 @@ namespace Ink_Canvas
         // 浮动栏按钮显示控制
         [JsonProperty("useLegacyFloatingBarUI")]
         public bool UseLegacyFloatingBarUI { get; set; } = false;
-        [JsonProperty("isShowShapeButton")]
-        public bool IsShowShapeButton { get; set; } = true;
-        [JsonProperty("isShowUndoButton")]
-        public bool IsShowUndoButton { get; set; } = true;
-        [JsonProperty("isShowRedoButton")]
-        public bool IsShowRedoButton { get; set; } = true;
-        [JsonProperty("isShowClearButton")]
-        public bool IsShowClearButton { get; set; } = true;
-        [JsonProperty("isShowWhiteboardButton")]
-        public bool IsShowWhiteboardButton { get; set; } = true;
-        [JsonProperty("isShowHideButton")]
-        public bool IsShowHideButton { get; set; } = true;
-        [JsonProperty("isShowLassoSelectButton")]
-        public bool IsShowLassoSelectButton { get; set; } = true;
-        [JsonProperty("isShowClearAndMouseButton")]
-        public bool IsShowClearAndMouseButton { get; set; } = true;
         [JsonProperty("eraserDisplayOption")]
         public int EraserDisplayOption { get; set; }
         [JsonProperty("isShowQuickColorPalette")]
@@ -464,6 +564,39 @@ namespace Ink_Canvas
 
         [JsonProperty("quickPanelBottomOffset")]
         public double QuickPanelBottomOffset { get; set; } = -150;
+
+        [JsonProperty("useMinimalistGrabHandle")]
+        public bool UseMinimalistGrabHandle { get; set; } = true;
+
+        [JsonProperty("showGrabHandleChevron")]
+        public bool ShowGrabHandleChevron { get; set; } = false;
+
+        [JsonProperty("useFloatingQuickPanel")]
+        public bool UseFloatingQuickPanel { get; set; } = true;
+
+        [JsonProperty("allowDragSidePanel")]
+        public bool AllowDragSidePanel { get; set; } = true;
+
+        [JsonProperty("quickPanelOpacity")]
+        public double QuickPanelOpacity { get; set; } = 1.0;
+
+        [JsonProperty("isAutoCollapseQuickPanel")]
+        public bool IsAutoCollapseQuickPanel { get; set; } = false;
+
+        [JsonProperty("autoCollapseQuickPanelDelay")]
+        public double AutoCollapseQuickPanelDelay { get; set; } = 3.0;
+
+        [JsonProperty("toolbarPosition")]
+        public ToolbarPosition ToolbarPosition { get; set; } = ToolbarPosition.Right;
+
+        [JsonProperty("reverseToolbarContent")]
+        public bool ReverseToolbarContent { get; set; } = false;
+
+        [JsonProperty("autoFlipWhenSpaceInsufficient")]
+        public bool AutoFlipWhenSpaceInsufficient { get; set; } = true;
+
+        [JsonProperty("flipContentOnAutoFlip")]
+        public bool FlipContentOnAutoFlip { get; set; } = false;
 
     }
 
@@ -519,6 +652,9 @@ namespace Ink_Canvas
         [JsonProperty("pptRBButtonOpacity")]
         public double PPTRBButtonOpacity { get; set; } = 0.5;
 
+        [JsonProperty("pptNavBarScale")]
+        public double PPTNavBarScale { get; set; } = 1.0;
+
         // -- new --
 
         [JsonProperty("powerPointSupport")]
@@ -569,6 +705,9 @@ namespace Ink_Canvas
         public bool UseRotPptLink { get; set; } = false;
         [JsonProperty("showPPTSidebarByDefault")]
         public bool ShowPPTSidebarByDefault { get; set; } = false;
+
+        [JsonProperty("showPPTModePrompt")]
+        public bool ShowPPTModePrompt { get; set; } = false;
     }
 
     public class Automation
@@ -691,7 +830,7 @@ namespace Ink_Canvas
         public bool IsAutoSaveStrokesAtScreenshot { get; set; }
 
         [JsonProperty("isAutoSaveStrokesAtClear")]
-        public bool IsAutoSaveStrokesAtClear { get; set; }
+        public bool IsAutoSaveScreenshotAtClear { get; set; }
 
         [JsonProperty("isEnablePhotoCorrection")]
         public bool IsEnablePhotoCorrection { get; set; } = false;
@@ -828,6 +967,9 @@ namespace Ink_Canvas
 
         [JsonProperty("isDebugConsoleEnabled")]
         public bool IsDebugConsoleEnabled { get; set; } = false;
+
+        [JsonProperty("isPptComDebugProbeEnabled")]
+        public bool IsPptComDebugProbeEnabled { get; set; } = false;
 
         [JsonProperty("isEnableFullScreenHelper")]
         public bool IsEnableFullScreenHelper { get; set; }
@@ -1075,5 +1217,33 @@ namespace Ink_Canvas
         private List<string> _enabledProviders = new List<string>();
     }
 
+    public class MiniWhiteboardSettings
+    {
+        [JsonProperty("isEnabled")]
+        public bool IsEnabled { get; set; } = true;
 
+        [JsonProperty("defaultWidth")]
+        public double DefaultWidth { get; set; } = 400;
+
+        [JsonProperty("defaultHeight")]
+        public double DefaultHeight { get; set; } = 300;
+
+        [JsonProperty("defaultOpacity")]
+        public double DefaultOpacity { get; set; } = 0.95;
+
+        [JsonProperty("backgroundColor")]
+        public string BackgroundColor { get; set; } = "#FF2A2A2A";
+
+        [JsonProperty("syncWithPptPages")]
+        public bool SyncWithPptPages { get; set; } = true;
+
+        [JsonProperty("penWidth")]
+        public double PenWidth { get; set; } = 3;
+
+        [JsonProperty("penColor")]
+        public string PenColor { get; set; } = "#FFFFFFFF";
+
+        [JsonProperty("currentColorIndex")]
+        public int CurrentColorIndex { get; set; } = 0; // 0=White, 1=Black, 2=Red, 3=Orange, 4=Yellow, 5=Green, 6=Blue, 7=Purple
+    }
 }

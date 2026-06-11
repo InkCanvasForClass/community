@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Collections.Generic;
@@ -194,15 +195,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 if (_hotkeyManager == null)
                 {
-                    MessageBox.Show("快捷键管理器尚未初始化，无法保存变更。", "错误",
+                    MessageBox.Show(HotkeyStrings.Hotkey_ManagerNotInit, HotkeyStrings.Hotkey_Error,
                         MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
                 if (IsHotkeyConflict(e.Key, e.Modifiers, e.HotkeyName))
                 {
-                    MessageBox.Show($"快捷键 {e.Modifiers}+{e.Key} 已被其他功能使用，请选择其他组合。",
-                        "快捷键冲突", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show(string.Format(HotkeyStrings.Hotkey_ConflictMessage, $"{e.Modifiers}+{e.Key}"),
+                        HotkeyStrings.Hotkey_ConflictTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -284,9 +285,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 case "Redo": return () => _mainWindow.SymbolIconRedo_MouseUp(null, null);
                 case "Clear": return () => _mainWindow.SymbolIconDelete_MouseUp(null, null);
                 case "Paste": return () => _mainWindow.HandleGlobalPaste(null, null);
-                case "SelectTool": return () => _mainWindow.SymbolIconSelect_MouseUp(null, null);
+                case "SelectTool": return () => _mainWindow.SwitchToSelectFromHotkey();
                 case "DrawTool": return () => _mainWindow.PenIcon_Click(null, null);
-                case "EraserTool": return () => _mainWindow.EraserIcon_Click(null, null);
+                case "EraserTool": return () => _mainWindow.SwitchToEraserFromHotkey();
                 case "BlackboardTool": return () => _mainWindow.ImageBlackboard_MouseUp(null, null);
                 case "QuitDrawTool": return () => _mainWindow.CursorIcon_Click(null, null);
                 case "Pen1": return () => SwitchToPenType(0);
@@ -294,7 +295,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 case "Pen3": return () => SwitchToPenType(2);
                 case "Pen4": return () => SwitchToPenType(3);
                 case "Pen5": return () => SwitchToPenType(4);
-                case "DrawLine": return () => _mainWindow.BtnDrawLine_Click(null, null);
+                case "DrawLine": return () => _mainWindow.DrawLineFromHotkey();
                 case "Screenshot": return () => _mainWindow.SaveScreenShotToDesktop();
                 case "QuickDraw": return () => _mainWindow.OpenQuickDrawFromHotkey();
                 case "Hide": return () => _mainWindow.SymbolIconEmoji_MouseUp(null, null);
@@ -328,7 +329,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 if (_hotkeyManager == null) return;
 
-                var result = MessageBox.Show("确定要重置所有快捷键为默认设置吗？", "确认重置",
+                var result = MessageBox.Show(HotkeyStrings.Hotkey_ConfirmResetMessage, HotkeyStrings.Hotkey_ConfirmResetTitle,
                     MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result != MessageBoxResult.Yes) return;
 
@@ -337,13 +338,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 _hotkeyManager.SaveHotkeysToSettings();
                 LoadCurrentHotkeys();
 
-                MessageBox.Show("快捷键已重置为默认设置。", "重置完成",
+                MessageBox.Show(HotkeyStrings.Hotkey_ResetCompleteMessage, HotkeyStrings.Hotkey_ResetCompleteTitle,
                     MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"重置快捷键时出错: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show($"重置快捷键时出错: {ex.Message}", "错误",
+                MessageBox.Show(string.Format(HotkeyStrings.Hotkey_ResetErrorMessage, ex.Message), HotkeyStrings.Hotkey_Error,
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -354,13 +355,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 if (_hotkeyManager == null) return;
                 _hotkeyManager.SaveHotkeysToSettings();
-                MessageBox.Show("快捷键设置已保存。", "保存成功",
+                MessageBox.Show(HotkeyStrings.Hotkey_SaveSuccessMessage, HotkeyStrings.Hotkey_SaveSuccessTitle,
                     MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"保存快捷键设置时出错: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show($"保存快捷键设置时出错: {ex.Message}", "错误",
+                MessageBox.Show(string.Format(HotkeyStrings.Hotkey_SaveErrorMessage, ex.Message), HotkeyStrings.Hotkey_Error,
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

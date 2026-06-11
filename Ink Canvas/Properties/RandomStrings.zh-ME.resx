@@ -1,0 +1,411 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Random_BackgroundSelectLabel" xml:space="preserve">
+    <value>背景选择：</value>
+  </data>
+  <data name="Random_BackgroundSettingsTitle" xml:space="preserve">
+    <value>点名窗口背景设置（仅老版点名UI有效）</value>
+  </data>
+  <data name="Random_EnableButtons" xml:space="preserve">
+    <value>启用随机抽和单次抽按钮</value>
+  </data>
+  <data name="Random_EnableQuickButton" xml:space="preserve">
+    <value>启用快抽悬浮按钮</value>
+  </data>
+  <data name="Random_ExternalType_ClassIsland" xml:space="preserve">
+    <value>ClassIsland 点名</value>
+  </data>
+  <data name="Random_ExternalType_NamePicker" xml:space="preserve">
+    <value>NamePicker 点名</value>
+  </data>
+  <data name="Random_ExternalType_SecRandom" xml:space="preserve">
+    <value>SecRandom 点名</value>
+  </data>
+  <data name="Random_ExternalTypeLabel" xml:space="preserve">
+    <value>点名类型</value>
+  </data>
+  <data name="Random_ML_AvoidRepeat" xml:space="preserve">
+    <value>启用 AI 避免重复点名</value>
+  </data>
+  <data name="Random_ML_Hint" xml:space="preserve">
+    <value>AI 会分析最近的点名历史，智能避免重复选到同一个人，绝绝子~</value>
+  </data>
+  <data name="Random_ML_HistoryCount" xml:space="preserve">
+    <value>避免重复历史记录数量</value>
+  </data>
+  <data name="Random_ML_Weight" xml:space="preserve">
+    <value>避免重复权重</value>
+  </data>
+  <data name="Random_NewUI_Enable" xml:space="preserve">
+    <value>启用新点名 UI</value>
+  </data>
+  <data name="Random_NewUI_Title" xml:space="preserve">
+    <value>新点名 UI 设置</value>
+  </data>
+  <data name="Random_OnceCloseDelay" xml:space="preserve">
+    <value>单次抽人窗口关闭延迟</value>
+  </data>
+  <data name="Random_OnceMaxStudents" xml:space="preserve">
+    <value>单次随机点名人数上限</value>
+  </data>
+  <data name="Random_ShowEditNamesButton" xml:space="preserve">
+    <value>显示修改点名名单的按钮</value>
+  </data>
+  <data name="Random_Title" xml:space="preserve">
+    <value>点名与计时器</value>
+  </data>
+  <data name="Random_UseExternal" xml:space="preserve">
+    <value>直接叫外援点名</value>
+  </data>
+  <data name="Random_SelectTimerAlarm" xml:space="preserve">
+    <value>选个计时器铃声</value>
+  </data>
+  <data name="Random_AudioFilter" xml:space="preserve">
+    <value>音频文件 (*.wav)|*.wav|所有文件 (*.*)|*.*</value>
+  </data>
+  <data name="Random_CustomAlarmSuccess" xml:space="preserve">
+    <value>自定义铃声设置成功，好家伙~</value>
+  </data>
+  <data name="Random_AlarmSetupSuccess" xml:space="preserve">
+    <value>设置成功，奥利给！</value>
+  </data>
+  <data name="Random_ResetAlarmSuccess" xml:space="preserve">
+    <value>已重置为默认铃声~</value>
+  </data>
+  <data name="Random_ResetSuccess" xml:space="preserve">
+    <value>重置成功！</value>
+  </data>
+  <data name="Random_SelectProgressiveAlarm" xml:space="preserve">
+    <value>选择渐进提醒音频文件</value>
+  </data>
+  <data name="Random_Error" xml:space="preserve">
+    <value>翻车了</value>
+  </data>
+  <data name="Random_Hint" xml:space="preserve">
+    <value>提示一下哈</value>
+  </data>
+  <data name="Random_Browse" xml:space="preserve">
+    <value>翻翻看...</value>
+  </data>
+  <data name="Random_Cancel" xml:space="preserve">
+    <value>算了算了</value>
+  </data>
+  <data name="Random_Preview" xml:space="preserve">
+    <value>先看看</value>
+  </data>
+  <data name="Random_Name" xml:space="preserve">
+    <value>名字</value>
+  </data>
+  <data name="Random_Delete" xml:space="preserve">
+    <value>干掉</value>
+  </data>
+  <data name="Random_RollCall_WindowTitle" xml:space="preserve">
+    <value>Ink Canvas 画板 - 点名啦</value>
+  </data>
+  <data name="Random_RollCall_ClickToStart" xml:space="preserve">
+    <value>戳我开始点名</value>
+  </data>
+  <data name="Random_RollCall_Ready" xml:space="preserve">
+    <value>准备好了，随时开干</value>
+  </data>
+  <data name="Random_RollCall_PeopleCount" xml:space="preserve">
+    <value>抽几个人</value>
+  </data>
+  <data name="Random_RollCall_DecreaseCount" xml:space="preserve">
+    <value>少抽一个</value>
+  </data>
+  <data name="Random_RollCall_IncreaseCount" xml:space="preserve">
+    <value>多抽一个</value>
+  </data>
+  <data name="Random_RollCall_Mode" xml:space="preserve">
+    <value>点名姿势</value>
+  </data>
+  <data name="Random_RollCall_ModeSequential" xml:space="preserve">
+    <value>排队来</value>
+  </data>
+  <data name="Random_RollCall_ModeGroup" xml:space="preserve">
+    <value>分拨来</value>
+  </data>
+  <data name="Random_RollCall_ModeExternal" xml:space="preserve">
+    <value>叫外援</value>
+  </data>
+  <data name="Random_RollCall_ExternalCall" xml:space="preserve">
+    <value>叫外援点名</value>
+  </data>
+  <data name="Random_RollCall_NameListManagement" xml:space="preserve">
+    <value>名单管理大权</value>
+  </data>
+  <data name="Random_RollCall_Import" xml:space="preserve">
+    <value>搞进来</value>
+  </data>
+  <data name="Random_RollCall_History" xml:space="preserve">
+    <value>前科记录</value>
+  </data>
+  <data name="Random_RollCall_Start" xml:space="preserve">
+    <value>开点名！</value>
+  </data>
+  <data name="Random_RollCall_Stop" xml:space="preserve">
+    <value>停停停！</value>
+  </data>
+  <data name="Random_RollCall_ReadyToDraw" xml:space="preserve">
+    <value>准备开奖...</value>
+  </data>
+  <data name="Random_RollCall_SingleDrawMode" xml:space="preserve">
+    <value>单抽模式 - 60个号码球</value>
+  </data>
+  <data name="Random_RollCall_NameListCountFormat" xml:space="preserve">
+    <value>名单上有 {0} 号人</value>
+  </data>
+  <data name="Random_RollCall_NoResult" xml:space="preserve">
+    <value>查无此人</value>
+  </data>
+  <data name="Random_RollCall_ImportedNamesFormat" xml:space="preserve">
+    <value>搞进来了 {0} 个人</value>
+  </data>
+  <data name="Random_RollCall_ImportFailedFormat" xml:space="preserve">
+    <value>名单导入翻车了: {0}</value>
+  </data>
+  <data name="Random_RollCall_OpenHistoryFailedFormat" xml:space="preserve">
+    <value>前科记录打不开: {0}</value>
+  </data>
+  <data name="Random_RollCall_ListAndHistoryCleared" xml:space="preserve">
+    <value>名单和前科都清空了，重新做人</value>
+  </data>
+  <data name="Random_RollCall_ClearFailedFormat" xml:space="preserve">
+    <value>清空翻车了: {0}</value>
+  </data>
+  <data name="Random_RollCall_ModeSelectedRandom" xml:space="preserve">
+    <value>选了随机点名，看命吧</value>
+  </data>
+  <data name="Random_RollCall_ModeSelectedSequential" xml:space="preserve">
+    <value>选了顺序点名，排队来</value>
+  </data>
+  <data name="Random_RollCall_ModeSelectedGroup" xml:space="preserve">
+    <value>选了分组点名，组团来</value>
+  </data>
+  <data name="Random_RollCall_ModeSelectedExternalFormat" xml:space="preserve">
+    <value>选了叫外援点名 ({0})</value>
+  </data>
+  <data name="Random_RollCall_ExternalCallerSelectedFormat" xml:space="preserve">
+    <value>外援已选定: {0}</value>
+  </data>
+  <data name="Random_RollCall_ExternalCallerFirstUse" xml:space="preserve">
+    <value>第一次叫外援啊，先确认外援软件装好了没~
+没装的话去官网下载装一下。装好了就再点一下这个按钮。</value>
+  </data>
+  <data name="Random_RollCall_ExternalCallerLaunchedFormat" xml:space="preserve">
+    <value>外援已召唤: {0}</value>
+  </data>
+  <data name="Random_RollCall_ExternalCallerFailedFormat" xml:space="preserve">
+    <value>外援叫不动：{0}</value>
+  </data>
+  <data name="Random_RollCall_ExceedNameList" xml:space="preserve">
+    <value>抽的人数不能比名单上的人还多啊！</value>
+  </data>
+  <data name="Random_RollCall_RollCalling" xml:space="preserve">
+    <value>点名中...</value>
+  </data>
+  <data name="Random_RollCall_DonePeopleFormat" xml:space="preserve">
+    <value>点名完毕，抽了 {0} 个幸运儿</value>
+  </data>
+  <data name="Random_RollCall_Drawing" xml:space="preserve">
+    <value>开奖中...</value>
+  </data>
+  <data name="Random_RollCall_DoneNumbersFormat" xml:space="preserve">
+    <value>开奖完毕，抽了 {0} 个号码</value>
+  </data>
+  <data name="Random_RollCall_Stopped" xml:space="preserve">
+    <value>点名被叫停了</value>
+  </data>
+  <data name="Random_RollCall_DoneSingleFormat" xml:space="preserve">
+    <value>开奖结果：{0}</value>
+  </data>
+  <data name="Random_History_WindowTitle" xml:space="preserve">
+    <value>Ink Canvas 抽奖 - 前科记录</value>
+  </data>
+  <data name="Random_History_Title" xml:space="preserve">
+    <value>前科记录</value>
+  </data>
+  <data name="Random_History_NoHistory" xml:space="preserve">
+    <value>暂无前科，良民一个</value>
+  </data>
+  <data name="Random_History_StatsTitle" xml:space="preserve">
+    <value>被抽次数统计大赏：</value>
+  </data>
+  <data name="Random_History_CountFormat" xml:space="preserve">
+    <value>{0}: 被抽{1}次</value>
+  </data>
+  <data name="Random_History_SummaryFormat" xml:space="preserve">
+    <value>共 {0} 条前科，最后更新：{1}</value>
+  </data>
+  <data name="Random_History_LoadFailedFormat" xml:space="preserve">
+    <value>前科记录加载翻车: {0}</value>
+  </data>
+  <data name="Random_NamesInput_WindowTitle" xml:space="preserve">
+    <value>Ink Canvas 抽奖 - 搞人进来</value>
+  </data>
+  <data name="Random_NamesInput_Hint" xml:space="preserve">
+    <value>下面输入名单，一行一个（建议直接粘贴表格姓名列，省事）</value>
+  </data>
+  <data name="Random_NamesInput_SaveConfirm" xml:space="preserve">
+    <value>要不要保存啊？</value>
+  </data>
+  <data name="Random_NamesInput_Title" xml:space="preserve">
+    <value>搞人进来</value>
+  </data>
+  <data name="Random_ManageBg_WindowTitle" xml:space="preserve">
+    <value>管理点名背景板</value>
+  </data>
+  <data name="Random_ManageBg_Title" xml:space="preserve">
+    <value>管理自定义点名背景板</value>
+  </data>
+  <data name="Random_ManageBg_SetAsCurrent" xml:space="preserve">
+    <value>就用它了</value>
+  </data>
+  <data name="Random_ManageBg_SetSuccessFormat" xml:space="preserve">
+    <value>"{0}"已被钦定为当前背景</value>
+  </data>
+  <data name="Random_ManageBg_SetSuccessTitle" xml:space="preserve">
+    <value>钦定成功</value>
+  </data>
+  <data name="Random_ManageBg_DeleteConfirmFormat" xml:space="preserve">
+    <value>真要干掉背景"{0}"吗？</value>
+  </data>
+  <data name="Random_ManageBg_DeleteConfirmTitle" xml:space="preserve">
+    <value>确认干掉</value>
+  </data>
+  <data name="Random_ManageBg_DeleteFailedFormat" xml:space="preserve">
+    <value>干掉背景翻车了: {0}</value>
+  </data>
+  <data name="Random_AddBg_WindowTitle" xml:space="preserve">
+    <value>添加自定义点名背景板</value>
+  </data>
+  <data name="Random_AddBg_Title" xml:space="preserve">
+    <value>添加自定义点名背景板</value>
+  </data>
+  <data name="Random_AddBg_SelectImage" xml:space="preserve">
+    <value>选个背景图：</value>
+  </data>
+  <data name="Random_AddBg_NameLabel" xml:space="preserve">
+    <value>背景叫啥：</value>
+  </data>
+  <data name="Random_AddBg_PreviewLabel" xml:space="preserve">
+    <value>先看看：</value>
+  </data>
+  <data name="Random_AddBg_NoImage" xml:space="preserve">
+    <value>还没选图呢</value>
+  </data>
+  <data name="Random_AddBg_ImageFilter" xml:space="preserve">
+    <value>图片文件|*.png;*.jpg;*.jpeg;*.bmp;*.gif</value>
+  </data>
+  <data name="Random_AddBg_SelectImageTitle" xml:space="preserve">
+    <value>选个背景图</value>
+  </data>
+  <data name="Random_AddBg_LoadImageFailedFormat" xml:space="preserve">
+    <value>图加载不出来: {0}</value>
+  </data>
+  <data name="Random_AddBg_SaveFailedFormat" xml:space="preserve">
+    <value>保存背景翻车了: {0}</value>
+  </data>
+  <data name="Random_CustomIcon_Title" xml:space="preserve">
+    <value>自定义浮动栏图标管理大权</value>
+  </data>
+  <data name="Random_AddIcon_WindowTitle" xml:space="preserve">
+    <value>添加自定义小图标</value>
+  </data>
+  <data name="Random_AddIcon_Title" xml:space="preserve">
+    <value>添加自定义浮动栏小图标</value>
+  </data>
+  <data name="Random_AddIcon_SelectFile" xml:space="preserve">
+    <value>选个图标文件：</value>
+  </data>
+  <data name="Random_AddIcon_NameLabel" xml:space="preserve">
+    <value>图标叫啥：</value>
+  </data>
+  <data name="Random_AddIcon_PreviewLabel" xml:space="preserve">
+    <value>先看看：</value>
+  </data>
+  <data name="Random_AddIcon_ImageFilter" xml:space="preserve">
+    <value>图片文件|*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.ico</value>
+  </data>
+  <data name="Random_AddIcon_SelectFileTitle" xml:space="preserve">
+    <value>选个图标文件</value>
+  </data>
+  <data name="Random_AddIcon_LoadImageFailedFormat" xml:space="preserve">
+    <value>图加载不出来: {0}</value>
+  </data>
+  <data name="Random_AddIcon_SaveFailedFormat" xml:space="preserve">
+    <value>保存图标翻车了: {0}</value>
+  </data>
+  <data name="Random_QuickDraw_WindowTitle" xml:space="preserve">
+    <value>快抽窗口</value>
+  </data>
+  <data name="Random_QuickDraw_Title" xml:space="preserve">
+    <value>快抽</value>
+  </data>
+  <data name="Random_Rand_ClickToImport" xml:space="preserve">
+    <value>戳这里搞人进来</value>
+  </data>
+  <data name="Random_RollCall_NameListVerifyTitle" xml:space="preserve">
+    <value>名单修改验身</value>
+  </data>
+  <data name="Random_RollCall_NameListVerifyMessage" xml:space="preserve">
+    <value>请输入安全密码或 TOTP 验证码来修改名单，别想偷偷改~</value>
+  </data>
+  <data name="Random_RollCall_NameListClearVerifyTitle" xml:space="preserve">
+    <value>名单清空验身</value>
+  </data>
+  <data name="Random_RollCall_NameListClearVerifyMessage" xml:space="preserve">
+    <value>请输入安全密码或 TOTP 验证码来清空名单，别想偷偷清~</value>
+  </data>
+</root>

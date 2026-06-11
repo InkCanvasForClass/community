@@ -36,7 +36,7 @@ namespace Ink_Canvas
         {
             if (originText != TextBoxNames.Text)
             {
-                var result = MessageBox.Show("是否保存？", "名单导入", MessageBoxButton.YesNo);
+                var result = MessageBox.Show(Properties.RandomStrings.Random_NamesInput_SaveConfirm, Properties.RandomStrings.Random_NamesInput_Title, MessageBoxButton.YesNo);
                 if (result == MessageBoxResult.Yes)
                 {
                     var path = App.RootPath + "Names.txt";

@@ -29,7 +29,7 @@ namespace Ink_Canvas
             if (sender is Button button && button.Tag is CustomPickNameBackground background)
             {
                 // 找到背景在列表中的索引（加8，因为前8个是默认值）
-                int index = Backgrounds.IndexOf(background) + 1; // 增加1因为索引0将是"默认"
+                int index = Backgrounds.IndexOf(background) + 1; // 增加1因为索引0将是CanvasStrings.Canvas_Color_Default
 
                 // 更新设置
                 MainWindow.Settings.RandSettings.SelectedBackgroundIndex = index;
@@ -40,7 +40,7 @@ namespace Ink_Canvas
                 // 保存设置
                 MainWindow.SaveSettingsToFile();
 
-                MessageBox.Show($"已将\"{background.Name}\"设置为当前点名背景", "设置成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(string.Format(Properties.RandomStrings.Random_ManageBg_SetSuccessFormat, background.Name), Properties.RandomStrings.Random_ManageBg_SetSuccessTitle, MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -48,7 +48,7 @@ namespace Ink_Canvas
         {
             if (sender is Button button && button.Tag is CustomPickNameBackground background)
             {
-                if (MessageBox.Show($"确定要删除背景\"{background.Name}\"吗？", "确认删除", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                if (MessageBox.Show(string.Format(Properties.RandomStrings.Random_ManageBg_DeleteConfirmFormat, background.Name), Properties.RandomStrings.Random_ManageBg_DeleteConfirmTitle, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
                     try
                     {
@@ -84,7 +84,7 @@ namespace Ink_Canvas
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"删除背景时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(string.Format(Properties.RandomStrings.Random_ManageBg_DeleteFailedFormat, ex.Message), Properties.RandomStrings.Random_Error, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }

@@ -1,5 +1,6 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -30,13 +31,18 @@ namespace Ink_Canvas
     // 1. 定义元素信息结构
     public class CanvasElementInfo
     {
-        public string Type { get; set; } // "Image" | "Pdf"
+        public string Type { get; set; } // "Image" | "Pdf" | "Media"
         public string SourcePath { get; set; }
         public double Left { get; set; }
         public double Top { get; set; }
         public double Width { get; set; }
         public double Height { get; set; }
         public string Stretch { get; set; } = "Fill"; // 默认为Fill
+        public string MediaKind { get; set; }
+        public string MediaDisplayName { get; set; }
+        public double? MediaPositionSeconds { get; set; }
+        public double? MediaSpeedRatio { get; set; }
+        public double? MediaVolume { get; set; }
         /// <summary>PDF 当前页（从 0 开始），仅 Type == Pdf 时有效。</summary>
         public int? PdfCurrentPage { get; set; }
         /// <summary>保存时的 PDF 总页数，用于校验；仅 Type == Pdf 时有效。</summary>
@@ -79,6 +85,91 @@ namespace Ink_Canvas
                         PdfPageCount = (int)pdf.PageCount
                     });
                 }
+                else if (child is CanvasMediaControl mediaControl && TryGetMediaSourcePath(mediaControl, out var mediaSourcePath))
+                {
+                    string extension = Path.GetExtension(mediaSourcePath);
+                    var mediaPosition = mediaControl.GetPlaybackPositionOrNull();
+                    elementInfos.Add(new CanvasElementInfo
+                    {
+                        Type = "Media",
+                        SourcePath = mediaSourcePath,
+                        Left = InkCanvas.GetLeft(mediaControl),
+                        Top = InkCanvas.GetTop(mediaControl),
+                        Width = mediaControl.Width,
+                        Height = mediaControl.Height,
+                        Stretch = "Uniform",
+                        MediaKind = mediaControl.IsAudioOnly ? "Audio" : "Video",
+                        MediaDisplayName = mediaControl.DisplayName,
+                        MediaPositionSeconds = mediaPosition?.TotalSeconds,
+                        MediaSpeedRatio = mediaControl.PlaybackRate,
+                        MediaVolume = mediaControl.VolumeLevel
+                    });
+                }
+                else if (child is MediaElement media && media.Source != null)
+                {
+                    string sourcePath = media.Source.IsFile ? media.Source.LocalPath : media.Source.OriginalString;
+                    if (!string.IsNullOrEmpty(sourcePath))
+                    {
+                        string extension = Path.GetExtension(sourcePath);
+                        elementInfos.Add(new CanvasElementInfo
+                        {
+                            Type = "Media",
+                            SourcePath = sourcePath,
+                            Left = InkCanvas.GetLeft(media),
+                            Top = InkCanvas.GetTop(media),
+                            Width = media.Width,
+                            Height = media.Height,
+                            Stretch = media.Stretch.ToString(),
+                            MediaKind = string.Equals(extension, ".mp3", StringComparison.OrdinalIgnoreCase)
+                                || string.Equals(extension, ".wav", StringComparison.OrdinalIgnoreCase)
+                                || string.Equals(extension, ".m4a", StringComparison.OrdinalIgnoreCase)
+                                || string.Equals(extension, ".aac", StringComparison.OrdinalIgnoreCase)
+                                || string.Equals(extension, ".flac", StringComparison.OrdinalIgnoreCase) ? "Audio" : "Video"
+                        });
+                    }
+                }
+            }
+        }
+
+        private void RestoreMediaFromElementInfo(CanvasElementInfo info)
+        {
+            if (info == null || inkCanvas == null) return;
+            if (!string.Equals(info.Type, "Media", StringComparison.OrdinalIgnoreCase)) return;
+            if (string.IsNullOrEmpty(info.SourcePath) || !File.Exists(info.SourcePath)) return;
+
+            try
+            {
+                var mediaControl = new CanvasMediaControl
+                {
+                    Name = "media_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff"),
+                    Width = info.Width > 0 && !double.IsNaN(info.Width) ? info.Width : 800,
+                    Height = info.Height > 0 && !double.IsNaN(info.Height) ? info.Height : (string.Equals(info.MediaKind, "Audio", StringComparison.OrdinalIgnoreCase) ? 168 : 520),
+                    ToolTip = string.IsNullOrWhiteSpace(info.MediaDisplayName) ? Path.GetFileName(info.SourcePath) : info.MediaDisplayName
+                };
+                mediaControl.Initialize(info.SourcePath, info.MediaDisplayName);
+                if (info.MediaSpeedRatio.HasValue)
+                {
+                    mediaControl.SetPlaybackRate(info.MediaSpeedRatio.Value);
+                }
+                if (info.MediaVolume.HasValue)
+                {
+                    mediaControl.SetVolumeLevel(info.MediaVolume.Value);
+                }
+                if (info.MediaPositionSeconds.HasValue)
+                {
+                    mediaControl.SetPlaybackPosition(TimeSpan.FromSeconds(Math.Max(0, info.MediaPositionSeconds.Value)));
+                }
+
+                AttachMediaFailureNotification(mediaControl);
+                InkCanvas.SetLeft(mediaControl, info.Left);
+                InkCanvas.SetTop(mediaControl, info.Top);
+                InitializeElementTransform(mediaControl);
+                BindElementEvents(mediaControl);
+                inkCanvas.Children.Add(mediaControl);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"从 .elements.json 恢复媒体失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -240,7 +331,7 @@ namespace Ink_Canvas
                                 {
                                     Dispatcher.Invoke(() =>
                                     {
-                                        ShowNotification($"多页面XML墨迹成功保存为 {savedCount} 个XML文件");
+                                        ShowNotification(string.Format(MainWindowStrings.Main_Strokes_SaveMultiPageXmlSuccess, savedCount));
                                     });
                                 });
                             }
@@ -263,7 +354,7 @@ namespace Ink_Canvas
                             {
                                 Dispatcher.Invoke(() =>
                                 {
-                                    ShowNotification("墨迹成功保存为XML格式至 " + xmlPath);
+                                    ShowNotification(string.Format(MainWindowStrings.Main_Strokes_SaveXmlSuccess, xmlPath));
                                 });
                             });
                         }
@@ -418,7 +509,7 @@ namespace Ink_Canvas
                             {
                                 Dispatcher.Invoke(() =>
                                 {
-                                    ShowNotification($"多页面墨迹成功保存为 {allPageStrokes.Count} 个icstk文件");
+                                    ShowNotification(string.Format(MainWindowStrings.Main_Strokes_SaveMultiPageIcstkSuccess, allPageStrokes.Count));
                                 });
                             });
                         }
@@ -437,7 +528,7 @@ namespace Ink_Canvas
                                 {
                                     Dispatcher.Invoke(() =>
                                     {
-                                        ShowNotification("墨迹成功保存为XML格式至 " + xmlPath);
+                                        ShowNotification(string.Format(MainWindowStrings.Main_Strokes_SaveXmlSuccess, xmlPath));
                                     });
                                 });
                             }
@@ -454,7 +545,7 @@ namespace Ink_Canvas
                                 {
                                     Dispatcher.Invoke(() =>
                                     {
-                                        ShowNotification("墨迹成功保存至 " + savePathWithName);
+                                        ShowNotification(string.Format(MainWindowStrings.Main_Strokes_SaveSuccess, savePathWithName));
                                     });
                                 });
                             }
@@ -483,7 +574,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                ShowNotification("墨迹保存失败");
+                ShowNotification(MainWindowStrings.Main_Strokes_SaveFailed);
                 LogHelper.WriteLogToFile("墨迹保存失败 | " + ex, LogHelper.LogType.Error);
             }
         }
@@ -598,7 +689,7 @@ namespace Ink_Canvas
                     {
                         writer.WriteLine($"保存时间: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
                         writer.WriteLine($"总页数: {allPageStrokes.Count}");
-                        writer.WriteLine($"模式: {(currentMode == 0 ? "PPT放映" : "白板")}");
+                        writer.WriteLine($"模式: {(currentMode == 0 ? "PPT放映" : FloatingBarStrings.FloatingBar_Whiteboard)}");
                         writer.WriteLine($"格式: XML");
                         if (currentMode != 0)
                         {
@@ -642,7 +733,7 @@ namespace Ink_Canvas
                         {
                             Dispatcher.Invoke(() =>
                             {
-                                ShowNotification($"多页面XML墨迹成功保存至压缩包 {zipFileName}");
+                                ShowNotification(string.Format(MainWindowStrings.Main_Strokes_SaveMultiPageXmlZipSuccess, zipFileName));
                             });
                         });
                     }
@@ -709,7 +800,7 @@ namespace Ink_Canvas
                     {
                         writer.WriteLine($"保存时间: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
                         writer.WriteLine($"总页数: {allPageStrokes.Count}");
-                        writer.WriteLine($"模式: {(currentMode == 0 ? "PPT放映" : "白板")}");
+                        writer.WriteLine($"模式: {(currentMode == 0 ? "PPT放映" : FloatingBarStrings.FloatingBar_Whiteboard)}");
                         if (currentMode != 0)
                         {
                             writer.WriteLine($"当前页面: {CurrentWhiteboardIndex}");
@@ -753,7 +844,7 @@ namespace Ink_Canvas
                         {
                             Dispatcher.Invoke(() =>
                             {
-                                ShowNotification($"多页面墨迹成功保存至压缩包 {zipFileName}");
+                                ShowNotification(string.Format(MainWindowStrings.Main_Strokes_SaveMultiPageZipSuccess, zipFileName));
                             });
                         });
                     }
@@ -859,7 +950,7 @@ namespace Ink_Canvas
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        ShowNotification("墨迹成功全页面保存至 " + Path.ChangeExtension(savePathWithName, "png"));
+                        ShowNotification(string.Format(MainWindowStrings.Main_Strokes_SaveFullPageSuccess, Path.ChangeExtension(savePathWithName, "png")));
                     });
                 });
             }
@@ -922,8 +1013,8 @@ namespace Ink_Canvas
 
             var openFileDialog = new OpenFileDialog();
             openFileDialog.InitialDirectory = Settings.Automation.AutoSavedStrokesLocation;
-            openFileDialog.Title = "打开墨迹文件";
-            openFileDialog.Filter = "Ink Canvas Strokes File (*.icstk)|*.icstk|XML墨迹文件 (*.xml)|*.xml|ICC压缩包 (*.zip)|*.zip|所有支持的文件 (*.icstk;*.xml;*.zip)|*.icstk;*.xml;*.zip";
+            openFileDialog.Title = MainWindowStrings.Main_Strokes_OpenFileDialogTitle;
+            openFileDialog.Filter = MainWindowStrings.Main_Strokes_OpenFileDialogFilter;
             if (openFileDialog.ShowDialog() != true) return;
             LogHelper.WriteLogToFile($"Strokes Insert: Name: {openFileDialog.FileName}",
                 LogHelper.LogType.Event);
@@ -952,7 +1043,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                ShowNotification("墨迹打开失败");
+                ShowNotification(MainWindowStrings.Main_Strokes_OpenFailed);
                 LogHelper.WriteLogToFile($"墨迹打开失败: {ex}", LogHelper.LogType.Error);
             }
         }
@@ -984,7 +1075,7 @@ namespace Ink_Canvas
 
                     // 根据元数据信息决定恢复模式
                     bool isPPTMode = metadata.ContainsKey("模式") && metadata["模式"].Contains("PPT放映");
-                    bool isWhiteboardMode = metadata.ContainsKey("模式") && metadata["模式"].Contains("白板");
+                    bool isWhiteboardMode = metadata.ContainsKey("模式") && metadata["模式"].Contains(FloatingBarStrings.FloatingBar_Whiteboard);
 
                     // 检查当前是否处于PPT模式
                     bool isCurrentlyInPPTMode = IsInPptPresentationMode && pptApplication != null;
@@ -1006,13 +1097,13 @@ namespace Ink_Canvas
                     else
                     {
                         // 模式不匹配时，显示提示信息
-                        string savedMode = isPPTMode ? "PPT放映" : (isWhiteboardMode ? "白板" : "未知");
-                        string currentMode = isCurrentlyInPPTMode ? "PPT放映" : (isCurrentlyInWhiteboardMode ? "白板" : "桌面");
-                        ShowNotification($"墨迹保存模式({savedMode})与当前模式({currentMode})不匹配，无法恢复墨迹");
+                        string savedMode = isPPTMode ? "PPT放映" : (isWhiteboardMode ? FloatingBarStrings.FloatingBar_Whiteboard : "未知");
+                        string currentMode = isCurrentlyInPPTMode ? "PPT放映" : (isCurrentlyInWhiteboardMode ? FloatingBarStrings.FloatingBar_Whiteboard : "桌面");
+                        ShowNotification(string.Format(MainWindowStrings.Main_Strokes_ModeMismatch, savedMode, currentMode));
                         LogHelper.WriteLogToFile($"模式不匹配：保存模式={savedMode}，当前模式={currentMode}", LogHelper.LogType.Warning);
                     }
 
-                    ShowNotification($"成功打开ICC压缩包，共{(metadata.ContainsKey("总页数") ? metadata["总页数"] : "0")}页");
+                    ShowNotification(string.Format(MainWindowStrings.Main_Strokes_OpenIccSuccess, metadata.ContainsKey("总页数") ? metadata["总页数"] : "0"));
                 }
                 finally
                 {
@@ -1301,6 +1392,10 @@ namespace Ink_Canvas
                         {
                             Dispatcher.BeginInvoke(new Action(() => { _ = RestorePdfFromElementInfoAsync(info); }), DispatcherPriority.Loaded);
                         }
+                        else if (string.Equals(info.Type, "Media", StringComparison.OrdinalIgnoreCase) && File.Exists(info.SourcePath))
+                        {
+                            RestoreMediaFromElementInfo(info);
+                        }
                     }
                 }
             }
@@ -1455,6 +1550,10 @@ namespace Ink_Canvas
                     else if (string.Equals(info.Type, "Pdf", StringComparison.OrdinalIgnoreCase) && File.Exists(info.SourcePath))
                     {
                         Dispatcher.BeginInvoke(new Action(() => { _ = RestorePdfFromElementInfoAsync(info); }), DispatcherPriority.Loaded);
+                    }
+                    else if (string.Equals(info.Type, "Media", StringComparison.OrdinalIgnoreCase) && File.Exists(info.SourcePath))
+                    {
+                        RestoreMediaFromElementInfo(info);
                     }
                 }
             }

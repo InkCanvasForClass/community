@@ -1,4 +1,5 @@
 using Ink_Canvas.Controls;
+using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using System;
@@ -111,7 +112,7 @@ namespace Ink_Canvas
             if (!IsValidFreezePageIndex(pageIndex)) return;
             if (frozenPages[pageIndex])
             {
-                if (notify) ShowNotification("该页面已冻结");
+                if (notify) ShowNotification(MainWindowStrings.Main_Freeze_PageFrozen);
                 UpdateInkFreezeButtonState();
                 return;
             }
@@ -124,7 +125,7 @@ namespace Ink_Canvas
             }
 
             UpdateInkFreezeButtonState();
-            if (notify) ShowNotification(pageIndex == 0 ? "当前批注页已冻结" : $"白板第 {pageIndex} 页已冻结");
+            if (notify) ShowNotification(pageIndex == 0 ? MainWindowStrings.Main_Freeze_AnnotationPageFrozen : string.Format(MainWindowStrings.Main_Freeze_WhiteboardPageFrozen, pageIndex));
         }
 
         private async Task<bool> UnfreezePageAsync(int pageIndex, bool skipVerification = false, bool notify = true)
@@ -141,11 +142,11 @@ namespace Ink_Canvas
                 bool ok = await SecurityManager.PromptAndVerifyPasswordOrTotpAsync(
                     Settings,
                     this,
-                    "解冻验证",
-                    "请输入安全密码或 TOTP 动态验证码以解冻当前页面。");
+                    MainWindowStrings.Main_Freeze_VerifyTitle,
+                    MainWindowStrings.Main_Freeze_VerifyMessage);
                 if (!ok)
                 {
-                    if (notify) ShowNotification("解冻验证未通过");
+                    if (notify) ShowNotification(MainWindowStrings.Main_Freeze_VerifyFailed);
                     return false;
                 }
             }
@@ -155,7 +156,7 @@ namespace Ink_Canvas
                 ApplyFreezeStateToCurrentStrokes();
 
             UpdateInkFreezeButtonState();
-            if (notify) ShowNotification(pageIndex == 0 ? "当前批注页已解冻" : $"白板第 {pageIndex} 页已解冻");
+            if (notify) ShowNotification(pageIndex == 0 ? MainWindowStrings.Main_Freeze_PageUnfrozen : string.Format(MainWindowStrings.Main_Freeze_WhiteboardPageUnfrozen, pageIndex));
             return true;
         }
 
@@ -201,29 +202,46 @@ namespace Ink_Canvas
                 if (Freeze_Icon != null)
                 {
                     bool isFrozen = IsCurrentPageFrozen;
-                    Freeze_Icon.Label = Strings.GetString(isFrozen ? "FloatingBar_Unfreeze" : "FloatingBar_Freeze")
-                                        ?? (isFrozen ? "解冻" : "冻结");
+                    Freeze_Icon.Label = isFrozen ? FloatingBarStrings.FloatingBar_Unfreeze : FloatingBarStrings.FloatingBar_Freeze;
                     Freeze_Icon.Icon.Geometry = Geometry.Parse(isFrozen
                         ? XamlGraphicsIconGeometries.UnfreezeIconGeometry
                         : XamlGraphicsIconGeometries.FreezeIconGeometry);
 
                     var foreground = FloatBarForegroundColor;
                     var frozenColor = IsCurrentThemeDark() ? Color.FromRgb(102, 204, 255) : Color.FromRgb(30, 58, 138);
-                    Freeze_Icon.Icon.Brush = new SolidColorBrush(isFrozen ? frozenColor : foreground);
+                    if (!ToolbarRegistry.GetUseRedStyle(Freeze_Icon))
+                        Freeze_Icon.Icon.Brush = new SolidColorBrush(isFrozen ? frozenColor : foreground);
                 }
 
                 if (BoardInkFreezeBtn != null)
                 {
                     int pageIndex = GetCurrentFreezePageIndex();
                     bool isFrozen = IsPageFrozen(pageIndex);
-                    BoardInkFreezeBtn.Label = Strings.GetString(isFrozen ? "FloatingBar_Unfreeze" : "FloatingBar_Freeze")
-                                              ?? (isFrozen ? "解冻" : "冻结");
+                    BoardInkFreezeBtn.Label = isFrozen ? FloatingBarStrings.FloatingBar_Unfreeze : FloatingBarStrings.FloatingBar_Freeze;
                     BoardInkFreezeBtn.IconGeometry = isFrozen
                         ? XamlGraphicsIconGeometries.UnfreezeIconGeometry
                         : XamlGraphicsIconGeometries.FreezeIconGeometry;
 
-                    var frozenColor = IsCurrentThemeDark() ? Color.FromRgb(102, 204, 255) : Color.FromRgb(30, 58, 138);
-                    BoardInkFreezeBtn.IconBrush = new SolidColorBrush(isFrozen ? frozenColor : FloatBarForegroundColor);
+                    if (isFrozen)
+                    {
+                        BoardInkFreezeBtn.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                        BoardInkFreezeBtn.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                        BoardInkFreezeBtn.IconBrush = new SolidColorBrush(Colors.GhostWhite);
+                        BoardInkFreezeBtn.Foreground = new SolidColorBrush(Colors.GhostWhite);
+                    }
+                    else
+                    {
+                        bool isDark = Settings.Appearance.Theme == 1 ||
+                            (Settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
+                        BoardInkFreezeBtn.Background = new SolidColorBrush(isDark
+                            ? Color.FromRgb(42, 42, 42)
+                            : Color.FromRgb(244, 244, 245));
+                        BoardInkFreezeBtn.BorderBrush = new SolidColorBrush(isDark
+                            ? Color.FromRgb(85, 85, 85)
+                            : Color.FromRgb(161, 161, 170));
+                        BoardInkFreezeBtn.IconBrush = new SolidColorBrush(FloatBarForegroundColor);
+                        BoardInkFreezeBtn.Foreground = new SolidColorBrush(FloatBarForegroundColor);
+                    }
                 }
             }
             catch (Exception ex)
@@ -240,6 +258,7 @@ namespace Ink_Canvas
                 if (IsPageFrozen(pageIndex))
                 {
                     await UnfreezePageAsync(pageIndex);
+                    PenIcon_Click(null, null);
                 }
                 else
                 {
@@ -302,8 +321,8 @@ namespace Ink_Canvas
             {
                 lastFreezeBlockNotificationUtc = DateTime.UtcNow;
                 ShowNotification(string.IsNullOrWhiteSpace(action)
-                    ? "当前页面已冻结，不能修改内容"
-                    : $"当前页面已冻结，不能{action}");
+                    ? MainWindowStrings.Main_Freeze_FrozenNoEdit
+                    : string.Format(MainWindowStrings.Main_Freeze_FrozenNoAction, action));
             }
 
             return true;
@@ -327,7 +346,7 @@ namespace Ink_Canvas
             freezeCourseRecordedUtc = DateTime.UtcNow;
             delayedFreezeTimer?.Stop();
             delayedFreezePageIndex = null;
-            ShowNotification(pageIndex == 0 ? "已记录当前批注页，等待课程结束后冻结" : $"已记录白板第 {pageIndex} 页，等待课程结束后冻结");
+            ShowNotification(pageIndex == 0 ? MainWindowStrings.Main_Freeze_Recorded : string.Format(MainWindowStrings.Main_Freeze_RecordedWhiteboard, pageIndex));
         }
 
         private void HandleInkFreezeCourseEnd(int pageIndex)
@@ -343,7 +362,7 @@ namespace Ink_Canvas
             delayedFreezeTimer?.Stop();
             delayedFreezePageIndex = null;
             freezeCourseRecordedPageIndex = null;
-            if (notify) ShowNotification("已取消自动冻结倒计时");
+            if (notify) ShowNotification(MainWindowStrings.Main_Freeze_CancelCountdown);
         }
 
         private void ScheduleDelayedFreeze(int pageIndex, DateTime referenceTimeUtc)
@@ -370,11 +389,11 @@ namespace Ink_Canvas
                 if (pageLastUserInkMutationUtc[target.Value] <= delayedFreezeReferenceUtc)
                     FreezePage(target.Value, true);
                 else
-                    ShowNotification("检测到页面操作，已取消自动冻结");
+                    ShowNotification(MainWindowStrings.Main_Freeze_CancelByOperation);
             };
             delayedFreezeTimer.Start();
 
-            ShowNotification("将在 3 分钟后检查并自动冻结页面");
+            ShowNotification(MainWindowStrings.Main_Freeze_AutoFreezeIn3Min);
         }
     }
 }

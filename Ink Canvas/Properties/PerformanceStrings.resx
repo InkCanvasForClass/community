@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Title" xml:space="preserve">
+    <value>性能</value>
+  </data>
+  <data name="EnableMonitoring" xml:space="preserve">
+    <value>启用性能监测</value>
+  </data>
+  <data name="EnableMonitoringHint" xml:space="preserve">
+    <value>在软件运行期间定期采集 CPU 和内存使用情况，记录最近 30 次运行的性能数据。关闭后将停止采集并清除历史记录。</value>
+  </data>
+  <data name="CurrentSession" xml:space="preserve">
+    <value>当前运行状态</value>
+  </data>
+  <data name="CpuUsage" xml:space="preserve">
+    <value>CPU 占用</value>
+  </data>
+  <data name="SystemCpuUsage" xml:space="preserve">
+    <value>设备 CPU</value>
+  </data>
+  <data name="MemoryUsage" xml:space="preserve">
+    <value>内存占用</value>
+  </data>
+  <data name="MonitoringInactive" xml:space="preserve">
+    <value>性能监测未启用</value>
+  </data>
+  <data name="MonitoringActive" xml:space="preserve">
+    <value>正在采集中...</value>
+  </data>
+  <data name="HistorySection" xml:space="preserve">
+    <value>历史运行记录</value>
+  </data>
+  <data name="HistoryHint" xml:space="preserve">
+    <value>记录最近 30 次软件运行期间的平均 CPU 和内存占用</value>
+  </data>
+  <data name="NoHistory" xml:space="preserve">
+    <value>暂无历史数据</value>
+  </data>
+  <data name="HistoryRunCount" xml:space="preserve">
+    <value>共 {0} 次运行记录</value>
+  </data>
+  <data name="AvgCpuLabel" xml:space="preserve">
+    <value>平均 CPU</value>
+  </data>
+  <data name="AvgMemoryLabel" xml:space="preserve">
+    <value>平均内存</value>
+  </data>
+  <data name="PeakCpuLabel" xml:space="preserve">
+    <value>最高 CPU</value>
+  </data>
+  <data name="PeakMemoryLabel" xml:space="preserve">
+    <value>最高内存</value>
+  </data>
+  <data name="ClearHistory" xml:space="preserve">
+    <value>清除历史记录</value>
+  </data>
+  <data name="ClearHistoryConfirm" xml:space="preserve">
+    <value>确定要清除所有性能历史记录吗？此操作不可撤销。</value>
+  </data>
+  <data name="DeviceScoreSection" xml:space="preserve">
+    <value>设备性能评估</value>
+  </data>
+  <data name="DeviceScoreHint" xml:space="preserve">
+    <value>评估当前设备的硬件性能，判断能否流畅运行本软件</value>
+  </data>
+  <data name="RunDeviceTest" xml:space="preserve">
+    <value>开始评估</value>
+  </data>
+  <data name="DeviceScoreResult" xml:space="preserve">
+    <value>综合评分</value>
+  </data>
+  <data name="DeviceScoreExcellent" xml:space="preserve">
+    <value>优秀 — 设备性能出色，可流畅运行</value>
+  </data>
+  <data name="DeviceScoreGood" xml:space="preserve">
+    <value>良好 — 设备性能足够，运行无压力</value>
+  </data>
+  <data name="DeviceScoreFair" xml:space="preserve">
+    <value>一般 — 设备性能基本满足，可能出现轻微卡顿</value>
+  </data>
+  <data name="DeviceScorePoor" xml:space="preserve">
+    <value>较差 — 设备性能不足，建议升级硬件</value>
+  </data>
+  <data name="DeviceScoreUnknown" xml:space="preserve">
+    <value>未评估</value>
+  </data>
+  <data name="CpuScore" xml:space="preserve">
+    <value>处理器评分</value>
+  </data>
+  <data name="MemoryScore" xml:space="preserve">
+    <value>内存评分</value>
+  </data>
+  <data name="DiskScore" xml:space="preserve">
+    <value>磁盘评分</value>
+  </data>
+  <data name="LastTestTime" xml:space="preserve">
+    <value>上次评估时间</value>
+  </data>
+  <data name="TestInProgress" xml:space="preserve">
+    <value>正在评估中...</value>
+  </data>
+  <data name="InkSmoothingSection" xml:space="preserve">
+    <value>墨迹纠正耗时</value>
+  </data>
+  <data name="InkSmoothingHint" xml:space="preserve">
+    <value>统计最近 100 次笔画平滑处理的耗时数据</value>
+  </data>
+  <data name="InkSmoothingInactive" xml:space="preserve">
+    <value>曲线平滑未启用或暂无数据</value>
+  </data>
+  <data name="InkSmoothingAvgTotal" xml:space="preserve">
+    <value>平均总耗时</value>
+  </data>
+  <data name="InkSmoothingMaxTotal" xml:space="preserve">
+    <value>最大总耗时</value>
+  </data>
+  <data name="InkSmoothingAvgBezier" xml:space="preserve">
+    <value>贝塞尔计算</value>
+  </data>
+  <data name="InkSmoothingAvgResample" xml:space="preserve">
+    <value>重采样耗时</value>
+  </data>
+  <data name="InkSmoothingAvgInputPoints" xml:space="preserve">
+    <value>平均输入点数</value>
+  </data>
+  <data name="InkSmoothingAvgOutputPoints" xml:space="preserve">
+    <value>平均输出点数</value>
+  </data>
+  <data name="InkSmoothingSampleCount" xml:space="preserve">
+    <value>已采样笔画数</value>
+  </data>
+</root>

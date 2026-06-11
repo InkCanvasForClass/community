@@ -1,4 +1,4 @@
-<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.StoragePage"
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.StoragePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -6,10 +6,9 @@
       xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d"
-      Title="{i18n:I18n Key=Storage_Title}">
+      Title="{x:Static props:StorageStrings.Storage_Title}">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -29,7 +28,7 @@
                 Spacing="{StaticResource SettingsCardSpacing}">
 
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                           Text="{i18n:I18n Key=Storage_Title}" />
+                           Text="{x:Static props:StorageStrings.Storage_Title}" />
 
                 <!-- 概览卡片 -->
                 <Border Background="{DynamicResource {x:Static ui:ThemeKeys.LayerFillColorDefaultBrushKey}}"
@@ -42,14 +41,14 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <ikw:SimpleStackPanel Orientation="Vertical" Spacing="2">
-                                <TextBlock Text="{i18n:I18n Key=Storage_TotalUsage}" FontSize="13"
+                                <TextBlock Text="{x:Static props:StorageStrings.Storage_TotalUsage}" FontSize="13"
                                            Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
                                 <TextBlock x:Name="TotalSizeTextBlock" Text="—"
                                            FontSize="28" FontWeight="SemiBold"/>
                             </ikw:SimpleStackPanel>
                             <ikw:SimpleStackPanel Grid.Column="1" Orientation="Vertical"
                                                   Spacing="2" HorizontalAlignment="Right">
-                                <TextBlock Text="{i18n:I18n Key=Storage_DiskPercent}" FontSize="13"
+                                <TextBlock Text="{x:Static props:StorageStrings.Storage_DiskPercent}" FontSize="13"
                                            Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                                            HorizontalAlignment="Right"/>
                                 <TextBlock x:Name="DiskPercentTextBlock" Text="—"
@@ -98,143 +97,146 @@
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="14">
                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                 <Border Width="10" Height="10" CornerRadius="2" Background="#3B82F6"/>
-                                <TextBlock Text="{i18n:I18n Key=Storage_Legend_Core}" FontSize="12"/>
+                                <TextBlock Text="{x:Static props:StorageStrings.Storage_Legend_Core}" FontSize="12"/>
                             </ikw:SimpleStackPanel>
                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                 <Border Width="10" Height="10" CornerRadius="2" Background="#10B981"/>
-                                <TextBlock Text="{i18n:I18n Key=Storage_Legend_Logs}" FontSize="12"/>
+                                <TextBlock Text="{x:Static props:StorageStrings.Storage_Logs_Header}" FontSize="12"/>
                             </ikw:SimpleStackPanel>
                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                 <Border Width="10" Height="10" CornerRadius="2" Background="#F59E0B"/>
-                                <TextBlock Text="{i18n:I18n Key=Storage_Legend_Ink}" FontSize="12"/>
+                                <TextBlock Text="{x:Static props:StorageStrings.Storage_Legend_Ink}" FontSize="12"/>
                             </ikw:SimpleStackPanel>
                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                 <Border Width="10" Height="10" CornerRadius="2" Background="#8B5CF6"/>
-                                <TextBlock Text="{i18n:I18n Key=Storage_Legend_Backups}" FontSize="12"/>
+                                <TextBlock Text="{x:Static props:StorageStrings.Storage_Legend_Backups}" FontSize="12"/>
                             </ikw:SimpleStackPanel>
                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                 <Border Width="10" Height="10" CornerRadius="2" Background="#EC4899"/>
-                                <TextBlock Text="{i18n:I18n Key=Storage_Legend_Custom}" FontSize="12"/>
+                                <TextBlock Text="{x:Static props:StorageStrings.Storage_Legend_Custom}" FontSize="12"/>
                             </ikw:SimpleStackPanel>
                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                 <Border Width="10" Height="10" CornerRadius="2" Background="#06B6D4"/>
-                                <TextBlock Text="{i18n:I18n Key=Storage_Legend_Plugins}" FontSize="12"/>
+                                <TextBlock Text="{x:Static props:StorageStrings.Storage_Plugins_Header}" FontSize="12"/>
                             </ikw:SimpleStackPanel>
                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                 <Border Width="10" Height="10" CornerRadius="2" Background="#EF4444"/>
-                                <TextBlock Text="{i18n:I18n Key=Storage_Legend_Update}" FontSize="12"/>
+                                <TextBlock Text="{x:Static props:StorageStrings.Storage_Legend_Update}" FontSize="12"/>
                             </ikw:SimpleStackPanel>
                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                 <Border Width="10" Height="10" CornerRadius="2" Background="#6B7280"/>
-                                <TextBlock Text="{i18n:I18n Key=Storage_Legend_Other}" FontSize="12"/>
+                                <TextBlock Text="{x:Static props:StorageStrings.Storage_Legend_Other}" FontSize="12"/>
                             </ikw:SimpleStackPanel>
                         </ikw:SimpleStackPanel>
                     </ikw:SimpleStackPanel>
                 </Border>
 
                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
-                    <Button x:Name="BtnRefresh" Content="{i18n:I18n Key=Storage_Refresh}" Click="BtnRefresh_Click"/>
-                    <Button x:Name="BtnOpenAppFolder" Content="{i18n:I18n Key=Storage_OpenAppFolder}" Click="BtnOpenAppFolder_Click"/>
+                    <Button x:Name="BtnRefresh" Content="{x:Static props:StorageStrings.Storage_Refresh}" Click="BtnRefresh_Click"/>
+                    <Button x:Name="BtnOpenAppFolder" Content="{x:Static props:StorageStrings.Storage_OpenAppFolder}" Click="BtnOpenAppFolder_Click"/>
                 </ikw:SimpleStackPanel>
 
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                           Text="{i18n:I18n Key=Storage_CategoryDetails}" />
+                           Text="{x:Static props:StorageStrings.Storage_CategoryDetails}" />
 
                 <!-- 核心文件 -->
                 <ui:SettingsExpander x:Name="CoreExpander"
-                                     Header="{i18n:I18n Key=Storage_Core_Header}"
-                                     Description="{i18n:I18n Key=Storage_Core_Desc}">
+                                     Header="{x:Static props:StorageStrings.Storage_Legend_Core}"
+                                     Description="{x:Static props:StorageStrings.Storage_Core_Desc}"
+                                     IsExpanded="True">
                     <ui:SettingsExpander.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
                     </ui:SettingsExpander.HeaderIcon>
                     <TextBlock x:Name="CoreSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     <ui:SettingsExpander.Items>
-                        <ui:SettingsCard Description="{i18n:I18n Key=Storage_Core_NotCleanable}"/>
+                        <ui:SettingsCard Description="{x:Static props:StorageStrings.Storage_Core_NotCleanable}"/>
                     </ui:SettingsExpander.Items>
                 </ui:SettingsExpander>
 
                 <!-- 日志 -->
                 <ui:SettingsCard x:Name="LogsExpander"
-                                 Header="{i18n:I18n Key=Storage_Logs_Header}"
-                                 Description="{i18n:I18n Key=Storage_Logs_Desc}">
+                                 Header="{x:Static props:StorageStrings.Storage_Logs_Header}"
+                                 Description="{x:Static props:StorageStrings.Storage_Logs_Desc}">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.OpenFile}"/>
                     </ui:SettingsCard.HeaderIcon>
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                         <TextBlock x:Name="LogsSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        <Button x:Name="BtnCleanLogs" Content="{i18n:I18n Key=Storage_Clean}" Click="BtnCleanLogs_Click"/>
+                        <Button x:Name="BtnCleanLogs" Content="{x:Static props:StorageStrings.Storage_Clean}" Click="BtnCleanLogs_Click"/>
                     </ikw:SimpleStackPanel>
                 </ui:SettingsCard>
 
                 <!-- 墨迹 -->
                 <ui:SettingsCard x:Name="InkExpander"
-                                 Header="{i18n:I18n Key=Storage_Ink_Header}"
-                                 Description="{i18n:I18n Key=Storage_Ink_Desc}">
+                                 Header="{x:Static props:StorageStrings.Storage_Legend_Ink}"
+                                 Description="{x:Static props:StorageStrings.Storage_Ink_Desc}">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
                     </ui:SettingsCard.HeaderIcon>
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                         <TextBlock x:Name="InkSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        <Button x:Name="BtnCleanInk" Content="{i18n:I18n Key=Storage_Clean}" Click="BtnCleanInk_Click"/>
+                        <Button x:Name="BtnCleanInk" Content="{x:Static props:StorageStrings.Storage_Clean}" Click="BtnCleanInk_Click"/>
                     </ikw:SimpleStackPanel>
                 </ui:SettingsCard>
 
                 <!-- 备份 -->
                 <ui:SettingsCard x:Name="BackupsExpander"
-                                 Header="{i18n:I18n Key=Storage_Backups_Header}"
-                                 Description="{i18n:I18n Key=Storage_Backups_Desc}">
+                                 Header="{x:Static props:StorageStrings.Storage_Legend_Backups}"
+                                 Description="{x:Static props:StorageStrings.Storage_Backups_Desc}">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}"/>
                     </ui:SettingsCard.HeaderIcon>
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                         <TextBlock x:Name="BackupsSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        <Button x:Name="BtnCleanBackups" Content="{i18n:I18n Key=Storage_Clean}" Click="BtnCleanBackups_Click"/>
+                        <Button x:Name="BtnCleanBackups" Content="{x:Static props:StorageStrings.Storage_Clean}" Click="BtnCleanBackups_Click"/>
                     </ikw:SimpleStackPanel>
                 </ui:SettingsCard>
 
                 <!-- 自定义文件 -->
                 <ui:SettingsExpander x:Name="CustomExpander"
-                                     Header="{i18n:I18n Key=Storage_Custom_Header}"
-                                     Description="{i18n:I18n Key=Storage_Custom_Desc}">
+                                     Header="{x:Static props:StorageStrings.Storage_Legend_Custom}"
+                                     Description="{x:Static props:StorageStrings.Storage_Custom_Desc}"
+                                     IsExpanded="True">
                     <ui:SettingsExpander.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Photo}"/>
                     </ui:SettingsExpander.HeaderIcon>
                     <TextBlock x:Name="CustomSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     <ui:SettingsExpander.Items>
-                        <ui:SettingsCard Description="{i18n:I18n Key=Storage_Custom_Hint}"/>
+                        <ui:SettingsCard Description="{x:Static props:StorageStrings.Storage_Custom_Hint}"/>
                     </ui:SettingsExpander.Items>
                 </ui:SettingsExpander>
 
                 <!-- 插件 -->
                 <ui:SettingsExpander x:Name="PluginsExpander"
-                                     Header="{i18n:I18n Key=Storage_Plugins_Header}"
-                                     Description="{i18n:I18n Key=Storage_Plugins_Desc}">
+                                     Header="{x:Static props:StorageStrings.Storage_Legend_Plugins}"
+                                     Description="{x:Static props:StorageStrings.Storage_Plugins_Desc}"
+                                     IsExpanded="True">
                     <ui:SettingsExpander.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Puzzle}"/>
                     </ui:SettingsExpander.HeaderIcon>
                     <TextBlock x:Name="PluginsSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     <ui:SettingsExpander.Items>
-                        <ui:SettingsCard Description="{i18n:I18n Key=Storage_Plugins_Hint}"/>
+                        <ui:SettingsCard Description="{x:Static props:StorageStrings.Storage_Plugins_Hint}"/>
                     </ui:SettingsExpander.Items>
                 </ui:SettingsExpander>
 
                 <!-- 自动更新 -->
                 <ui:SettingsCard x:Name="UpdateExpander"
-                                 Header="{i18n:I18n Key=Storage_Update_Header}"
-                                 Description="{i18n:I18n Key=Storage_Update_Desc}">
+                                 Header="{x:Static props:StorageStrings.Storage_Legend_Update}"
+                                 Description="{x:Static props:StorageStrings.Storage_Update_Desc}">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}"/>
                     </ui:SettingsCard.HeaderIcon>
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                         <TextBlock x:Name="UpdateSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        <Button x:Name="BtnCleanUpdate" Content="{i18n:I18n Key=Storage_Clean}" Click="BtnCleanUpdate_Click"/>
+                        <Button x:Name="BtnCleanUpdate" Content="{x:Static props:StorageStrings.Storage_Clean}" Click="BtnCleanUpdate_Click"/>
                     </ikw:SimpleStackPanel>
                 </ui:SettingsCard>
 
                 <!-- 其他 -->
                 <ui:SettingsCard x:Name="OtherExpander"
-                                 Header="{i18n:I18n Key=Storage_Other_Header}"
-                                 Description="{i18n:I18n Key=Storage_Other_Desc}">
+                                 Header="{x:Static props:StorageStrings.Storage_Legend_Other}"
+                                 Description="{x:Static props:StorageStrings.Storage_Other_Desc}">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.More}"/>
                     </ui:SettingsCard.HeaderIcon>

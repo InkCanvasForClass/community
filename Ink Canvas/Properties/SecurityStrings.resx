@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="FileAssoc_Check" xml:space="preserve">
+    <value>检查关联状态</value>
+  </data>
+  <data name="FileAssoc_Title" xml:space="preserve">
+    <value>文件关联管理</value>
+  </data>
+  <data name="FileAssoc_Unregister" xml:space="preserve">
+    <value>取消文件关联</value>
+  </data>
+  <data name="SecurityPanel__InkCanvasForClass_Hint" xml:space="preserve">
+    <value>关闭 InkCanvasForClass 时进行密码验证</value>
+  </data>
+  <data name="SecurityPanel__Settingsjson_Hint" xml:space="preserve">
+    <value>重置 Settings.json 前进行二次验证</value>
+  </data>
+  <data name="SecurityPanel_Hint" xml:space="preserve">
+    <value>开启后需要设置密码</value>
+  </data>
+  <data name="SecurityPanel_Hint_1" xml:space="preserve">
+    <value>设置或修改安全密码</value>
+  </data>
+  <data name="SecurityPanel_Hint_2" xml:space="preserve">
+    <value>打开设置面板/新设置窗口时进行验证</value>
+  </data>
+  <data name="SecurityPanel_Hint_4" xml:space="preserve">
+    <value>开启后关键文件会被只读占用</value>
+  </data>
+  <data name="Security_SectionPassword" xml:space="preserve">
+    <value>安全密码</value>
+  </data>
+  <data name="Security_InfoBarTitle" xml:space="preserve">
+    <value>说明</value>
+  </data>
+  <data name="Security_PasswordInfoBarMessage" xml:space="preserve">
+    <value>安全密码默认关闭。开启后可用于退出软件、进入设置与重置配置等操作时的二次验证。</value>
+  </data>
+  <data name="Security_EnablePassword" xml:space="preserve">
+    <value>启用安全密码</value>
+  </data>
+  <data name="Security_PasswordManagement" xml:space="preserve">
+    <value>密码管理</value>
+  </data>
+  <data name="Security_SetOrChangePassword" xml:space="preserve">
+    <value>设置/修改密码</value>
+  </data>
+  <data name="Security_EnableTotp" xml:space="preserve">
+    <value>启用 TOTP 验证</value>
+  </data>
+  <data name="Security_EnableTotpHint" xml:space="preserve">
+    <value>可用于冻结笔迹解冻等二次验证</value>
+  </data>
+  <data name="Security_TotpSecretKey" xml:space="preserve">
+    <value>TOTP 密钥</value>
+  </data>
+  <data name="Security_TotpSecretKeyHint" xml:space="preserve">
+    <value>在身份验证器中手动添加该密钥</value>
+  </data>
+  <data name="Security_GenerateOrResetKey" xml:space="preserve">
+    <value>生成/重置密钥</value>
+  </data>
+  <data name="Security_RequirePasswordOnExit" xml:space="preserve">
+    <value>退出软件需要验证</value>
+  </data>
+  <data name="Security_RequirePasswordOnEnterSettings" xml:space="preserve">
+    <value>进入设置需要验证</value>
+  </data>
+  <data name="Security_RequirePasswordOnResetConfig" xml:space="preserve">
+    <value>重置配置需要验证</value>
+  </data>
+  <data name="Security_RequirePasswordOnModifyOrClearNameList" xml:space="preserve">
+    <value>修改/清空点名名单需要验证</value>
+  </data>
+  <data name="Security_RequirePasswordOnModifyOrClearNameList_Hint" xml:space="preserve">
+    <value>对点名名单进行修改或清空前进行验证</value>
+  </data>
+  <data name="Security_ProcessProtection" xml:space="preserve">
+    <value>进程保护</value>
+  </data>
+  <data name="Security_ProcessProtectionInfoBarMessage" xml:space="preserve">
+    <value>进程保护默认开启：运行期间保护根目录下的程序文件（exe/dll/config）不被外部修改。</value>
+  </data>
+  <data name="Security_DisablePasswordTitle" xml:space="preserve">
+    <value>关闭安全密码</value>
+  </data>
+  <data name="Security_DisablePasswordMessage" xml:space="preserve">
+    <value>请输入安全密码或 TOTP 验证码以关闭安全密码功能。</value>
+  </data>
+  <data name="Security_ResetTotpTitle" xml:space="preserve">
+    <value>重置 TOTP 密钥</value>
+  </data>
+  <data name="Security_ResetTotpMessage" xml:space="preserve">
+    <value>请输入安全密码或当前 TOTP 动态验证码以重置密钥。</value>
+  </data>
+  <data name="Security_UsbSectionHeader" xml:space="preserve">
+    <value>U盘维护验证</value>
+  </data>
+  <data name="Security_UsbInfoBarMessage" xml:space="preserve">
+    <value>启用U盘验证后，当需要安全验证时，若插入了已授权的U盘，将自动跳过验证，方便维护人员直接操作。</value>
+  </data>
+  <data name="Security_EnableUsbVerification" xml:space="preserve">
+    <value>启用U盘验证</value>
+  </data>
+  <data name="Security_EnableUsbVerification_Hint" xml:space="preserve">
+    <value>允许插入已授权的U盘作为一种免密的安全验证方式</value>
+  </data>
+  <data name="Security_UsbAuthorizedSns" xml:space="preserve">
+    <value>已授权的U盘序列号</value>
+  </data>
+  <data name="Security_UsbAuthorizedSns_Hint" xml:space="preserve">
+    <value>已授权的设备序列号列表（多台设备使用英文逗号分隔）</value>
+  </data>
+  <data name="Security_UsbDetectAndAuthorize" xml:space="preserve">
+    <value>检测并授权新U盘</value>
+  </data>
+  <data name="Security_UsbDetectAndAuthorize_Hint" xml:space="preserve">
+    <value>扫描当前连接的U盘，并快速将其序列号加入授权列表中</value>
+  </data>
+  <data name="Security_UsbRefreshDrives" xml:space="preserve">
+    <value>刷新设备</value>
+  </data>
+  <data name="Security_UsbAuthorizeDrive" xml:space="preserve">
+    <value>授权所选U盘</value>
+  </data>
+  <data name="Security_UsbPromptNoValidSn" xml:space="preserve">
+    <value>所选U盘无有效序列号</value>
+  </data>
+  <data name="Security_UsbPromptAlreadyAuthorized" xml:space="preserve">
+    <value>该U盘序列号已被授权</value>
+  </data>
+  <data name="Security_UsbPromptAuthorizeSuccess" xml:space="preserve">
+    <value>成功授权该U盘序列号！已加入授权列表。</value>
+  </data>
+  <data name="Security_UsbPromptSelectDrive" xml:space="preserve">
+    <value>请先选择一个检测到的U盘</value>
+  </data>
+  <data name="Security_UsbPromptNoDriveDetected" xml:space="preserve">
+    <value>未检测到U盘</value>
+  </data>
+  <data name="Security_UsbPromptLocalDisk" xml:space="preserve">
+    <value>本地磁盘</value>
+  </data>
+  <data name="Security_UsbBypassDialogHint" xml:space="preserve">
+    <value>
+(已启用U盘安全验证，您可以插入已授权的维护U盘以自动验证通过)</value>
+  </data>
+  <data name="Security_UsbBypassDialogHintShort" xml:space="preserve">
+    <value>
+(已启用U盘安全验证，可直接插入已授权的维护U盘)</value>
+  </data>
+</root>

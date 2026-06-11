@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Tray_ClickAction_CloseApp" xml:space="preserve">
+    <value>退出软件</value>
+  </data>
+  <data name="Tray_ClickAction_DisableAllHotkeys" xml:space="preserve">
+    <value>禁用/启用所有快捷键</value>
+  </data>
+  <data name="Tray_ClickAction_ForceFullScreen" xml:space="preserve">
+    <value>强制全屏化</value>
+  </data>
+  <data name="Tray_ClickAction_HideShowMainWindow" xml:space="preserve">
+    <value>隐藏/显示主窗口</value>
+  </data>
+  <data name="Tray_ClickAction_OpenSettings" xml:space="preserve">
+    <value>打开设置</value>
+  </data>
+  <data name="Tray_ClickAction_ResetFloatingBarPosition" xml:space="preserve">
+    <value>重置工具栏位置</value>
+  </data>
+  <data name="Tray_ClickAction_RestartApp" xml:space="preserve">
+    <value>重启软件</value>
+  </data>
+  <data name="Tray_ClickAction_ShowMenu" xml:space="preserve">
+    <value>打开菜单</value>
+  </data>
+  <data name="Tray_ClickAction_TempShowMainWindow" xml:space="preserve">
+    <value>临时显示主窗口</value>
+  </data>
+  <data name="Tray_ClickAction_ToggleFoldFloatingBar" xml:space="preserve">
+    <value>切换浮动栏收纳模式</value>
+  </data>
+  <data name="Tray_EnableTrayIcon" xml:space="preserve">
+    <value>启用托盘图标</value>
+  </data>
+  <data name="Tray_GroupTitle" xml:space="preserve">
+    <value>任务栏托盘图标</value>
+  </data>
+  <data name="Tray_LeftClickAction" xml:space="preserve">
+    <value>托盘左键点击</value>
+  </data>
+  <data name="Tray_RightClickAction" xml:space="preserve">
+    <value>托盘右键点击</value>
+  </data>
+  <data name="Window_WindowChromeRendering" xml:space="preserve">
+    <value>以 WindowChrome 模式渲染</value>
+  </data>
+  <data name="Window_WindowChromeRendering_RestartRequired" xml:space="preserve">
+    <value>切换 WindowChrome 渲染模式需要重启软件才能生效，是否立即重启？</value>
+  </data>
+  <data name="Window_WindowChromeRenderingHint" xml:space="preserve">
+    <value>使用 DWM/WindowChrome 绘制透明主窗口，通常比 AllowsTransparency 更流畅；需要重启后生效。</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>窗口</value>
+  </data>
+  <data name="WindowSettings" xml:space="preserve">
+    <value>窗口设置</value>
+  </data>
+  <data name="MultiScreenSupport" xml:space="preserve">
+    <value>多屏支持</value>
+  </data>
+  <data name="MultiScreenSupportHint" xml:space="preserve">
+    <value>启用后将根据当前显示器环境启用多屏逻辑</value>
+  </data>
+  <data name="FollowMouseScreen" xml:space="preserve">
+    <value>自动跟随鼠标选择显示屏</value>
+  </data>
+  <data name="FollowMouseScreenHint" xml:space="preserve">
+    <value>默认开启：自动以鼠标所在显示屏作为当前目标显示屏</value>
+  </data>
+</root>

@@ -177,6 +177,30 @@ private void SomeFloatSlider_ValueChanged(object sender, RoutedPropertyChangedEv
 2. 如果子项需要开关功能，应在 `ui:SettingsCard` 内手动放置 `CheckBox` 或 `ui:ToggleSwitch`。
 3. `SettingsExpander` 的直接内容区域（非 Items）可放置 `ui:ToggleSwitch` 等控件，作为该组的总开关。
 
+**IsExpanded 属性规则：**
+
+4. **有开关的 SettingsExpander**：`IsExpanded` 必须绑定到开关的 `IsOn` 属性，实现"开则展开，关则折叠"：
+
+```xml
+<ui:SettingsExpander Header="托盘图标"
+                     IsExpanded="{Binding IsOn, ElementName=ToggleSwitchTrayIcon, Mode=OneWay}">
+    <ui:ToggleSwitch x:Name="ToggleSwitchTrayIcon" ... />
+    <ui:SettingsExpander.Items>
+        <!-- 子项 -->
+    </ui:SettingsExpander.Items>
+</ui:SettingsExpander>
+```
+
+5. **无开关的 SettingsExpander**：`IsExpanded` 必须设为 `True`，默认展开：
+
+```xml
+<ui:SettingsExpander Header="核心文件" IsExpanded="True">
+    <ui:SettingsExpander.Items>
+        <!-- 子项 -->
+    </ui:SettingsExpander.Items>
+</ui:SettingsExpander>
+```
+
 **子项中使用开关的正确写法：**
 
 ```xml

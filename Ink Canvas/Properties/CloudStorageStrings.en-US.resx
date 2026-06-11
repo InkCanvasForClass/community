@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="CloudStorage_Manage" xml:space="preserve">
+    <value>Cloud storage management</value>
+  </data>
+  <data name="CloudStorage_UploadDelay" xml:space="preserve">
+    <value>Upload Delay</value>
+  </data>
+  <data name="CloudStorage_UploadDelayDesc" xml:space="preserve">
+    <value>Set the shared delay time for all upload providers, range 0-60 minutes.</value>
+  </data>
+  <data name="CloudStorage_Minutes" xml:space="preserve">
+    <value>min</value>
+  </data>
+  <data name="CloudStorage_UploadProviders" xml:space="preserve">
+    <value>Upload Providers</value>
+  </data>
+  <data name="CloudStorage_UploadProvidersDesc" xml:space="preserve">
+    <value>Select the cloud upload services available for auto-saving files.</value>
+  </data>
+  <data name="CloudStorage_ProviderList" xml:space="preserve">
+    <value>Provider List</value>
+  </data>
+  <data name="CloudStorage_ProviderListDesc" xml:space="preserve">
+    <value>Disabling a provider will prevent auto-saved files from being sent to that service.</value>
+  </data>
+  <data name="CloudStorage_Dlass" xml:space="preserve">
+    <value>Dlass</value>
+  </data>
+  <data name="CloudStorage_UserToken" xml:space="preserve">
+    <value>User Token</value>
+  </data>
+  <data name="CloudStorage_UserTokenDesc" xml:space="preserve">
+    <value>Save and select the user Token used to access the Dlass server.</value>
+  </data>
+  <data name="CloudStorage_TokenNotSet" xml:space="preserve">
+    <value>Token not set</value>
+  </data>
+  <data name="CloudStorage_SavedTokens" xml:space="preserve">
+    <value>Saved Tokens</value>
+  </data>
+  <data name="CloudStorage_SavedTokensDesc" xml:space="preserve">
+    <value>Select the current Token from the list of saved Tokens on this device.</value>
+  </data>
+  <data name="CloudStorage_NewToken" xml:space="preserve">
+    <value>New Token</value>
+  </data>
+  <data name="CloudStorage_NewTokenDesc" xml:space="preserve">
+    <value>Enter a new user Token. It will be automatically set as the current Token after saving.</value>
+  </data>
+  <data name="CloudStorage_TokenActions" xml:space="preserve">
+    <value>Token Actions</value>
+  </data>
+  <data name="CloudStorage_SaveToken" xml:space="preserve">
+    <value>Save Token</value>
+  </data>
+  <data name="CloudStorage_DeleteToken" xml:space="preserve">
+    <value>Delete Token</value>
+  </data>
+  <data name="CloudStorage_OpenDlassDashboard" xml:space="preserve">
+    <value>Open Dlass Dashboard</value>
+  </data>
+  <data name="CloudStorage_ConnectionStatus" xml:space="preserve">
+    <value>Connection Status</value>
+  </data>
+  <data name="CloudStorage_ConnectionStatusDesc" xml:space="preserve">
+    <value>Verify the current Token and load the available class list.</value>
+  </data>
+  <data name="CloudStorage_NotConnected" xml:space="preserve">
+    <value>Not connected</value>
+  </data>
+  <data name="CloudStorage_TestConnection" xml:space="preserve">
+    <value>Test Connection</value>
+  </data>
+  <data name="CloudStorage_ClassSelection" xml:space="preserve">
+    <value>Class Selection</value>
+  </data>
+  <data name="CloudStorage_ClassSelectionDesc" xml:space="preserve">
+    <value>After a successful connection, the available classes for the current Token will be loaded automatically.</value>
+  </data>
+  <data name="CloudStorage_AutoUploadNotes" xml:space="preserve">
+    <value>Auto-upload Notes</value>
+  </data>
+  <data name="CloudStorage_AutoUploadNotesDesc" xml:space="preserve">
+    <value>When enabled, saved PNG screenshots and ICSTK ink files will be automatically uploaded to the selected class whiteboard.</value>
+  </data>
+  <data name="CloudStorage_WebDav" xml:space="preserve">
+    <value>WebDav</value>
+  </data>
+  <data name="CloudStorage_WebDavSettings" xml:space="preserve">
+    <value>WebDav Settings</value>
+  </data>
+  <data name="CloudStorage_WebDavSettingsDesc" xml:space="preserve">
+    <value>Configure the WebDav server address, account, and upload root directory.</value>
+  </data>
+  <data name="CloudStorage_WebDavUrl" xml:space="preserve">
+    <value>WebDav URL</value>
+  </data>
+  <data name="CloudStorage_WebDavUrlDesc" xml:space="preserve">
+    <value>Server address, e.g. https://example.com/dav.</value>
+  </data>
+  <data name="CloudStorage_Username" xml:space="preserve">
+    <value>Username</value>
+  </data>
+  <data name="CloudStorage_Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="CloudStorage_RootDirectory" xml:space="preserve">
+    <value>Root Directory</value>
+  </data>
+  <data name="CloudStorage_RootDirectoryDesc" xml:space="preserve">
+    <value>Can be left empty; if filled, files will be uploaded to this directory.</value>
+  </data>
+  <data name="CloudStorage_WebDavActions" xml:space="preserve">
+    <value>WebDav Actions</value>
+  </data>
+  <data name="CloudStorage_SaveWebDavSettings" xml:space="preserve">
+    <value>Save WebDav Settings</value>
+  </data>
+  <data name="CloudStorage_Restore" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="CloudStorage_NoSavedToken" xml:space="preserve">
+    <value>(No saved Token)</value>
+  </data>
+  <data name="CloudStorage_WaitingForConnection" xml:space="preserve">
+    <value>(Waiting for connection)</value>
+  </data>
+  <data name="CloudStorage_UnknownTeacher" xml:space="preserve">
+    <value>Unknown Teacher</value>
+  </data>
+  <data name="CloudStorage_NoAvailableClasses" xml:space="preserve">
+    <value>(No available classes)</value>
+  </data>
+  <data name="CloudStorage_PleaseEnterNewToken" xml:space="preserve">
+    <value>Please enter a new user Token</value>
+  </data>
+  <data name="CloudStorage_Tip" xml:space="preserve">
+    <value>Tip</value>
+  </data>
+  <data name="CloudStorage_TokenSavedAndSelected" xml:space="preserve">
+    <value>Token saved and selected successfully</value>
+  </data>
+  <data name="CloudStorage_Success" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="CloudStorage_SaveTokenError" xml:space="preserve">
+    <value>Error saving Token: </value>
+  </data>
+  <data name="CloudStorage_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="CloudStorage_PleaseSelectToken" xml:space="preserve">
+    <value>Please select a Token first</value>
+  </data>
+  <data name="CloudStorage_ConfirmDeleteToken" xml:space="preserve">
+    <value>Are you sure you want to delete the selected Token?</value>
+  </data>
+  <data name="CloudStorage_Confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="CloudStorage_WebDavSettingsSaved" xml:space="preserve">
+    <value>WebDav settings saved</value>
+  </data>
+  <data name="CloudStorage_SaveWebDavError" xml:space="preserve">
+    <value>Error saving WebDav settings: </value>
+  </data>
+  <data name="CloudStorage_DlassRegistrationPrompt" xml:space="preserve">
+    <value>Have you registered a Dlass account?
+
+• If registered: enter your user Token on this page
+• If not registered: the browser will open to the Dlass Dashboard</value>
+  </data>
+  <data name="CloudStorage_DlassRegistrationTitle" xml:space="preserve">
+    <value>Dlass Account Registration</value>
+  </data>
+  <data name="CloudStorage_CannotOpenBrowser" xml:space="preserve">
+    <value>Cannot open browser. Please visit manually: https://dlass.tech/dashboard</value>
+  </data>
+  <data name="CloudStorage_Testing" xml:space="preserve">
+    <value>Testing...</value>
+  </data>
+  <data name="CloudStorage_ConnectedFormat" xml:space="preserve">
+    <value>Connected ({0} whiteboard(s) found)</value>
+  </data>
+  <data name="CloudStorage_ConnectionFailed" xml:space="preserve">
+    <value>Connection failed</value>
+  </data>
+  <data name="CloudStorage_DeleteTokenError" xml:space="preserve">
+    <value>Error deleting Token: </value>
+  </data>
+  <data name="CloudStorage_TokenSelected" xml:space="preserve">
+    <value>Token selected</value>
+  </data>
+</root>

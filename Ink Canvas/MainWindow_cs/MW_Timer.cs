@@ -235,8 +235,8 @@ namespace Ink_Canvas
             timerNtpSync.Start();
             timerKillProcess.Start();
             nowTimeVM.nowDate = DateTime.Now.ToString("yyyy'年'MM'月'dd'日' dddd");
-            nowTimeVM.nowTime = Settings.Appearance.Use24HourTimeFormat 
-                ? DateTime.Now.ToString("HH:mm:ss") 
+            nowTimeVM.nowTime = Settings.Appearance.Use24HourTimeFormat
+                ? DateTime.Now.ToString("HH:mm:ss")
                 : DateTime.Now.ToString("tt hh'时'mm'分'ss'秒'");
 
             InitHighPrecisionTimeDisplay();
@@ -669,7 +669,7 @@ namespace Ink_Canvas
                     {
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
-                            ShowNotification("「智绘教 Inkeys」已自动关闭");
+                            ShowNotification(Properties.MainWindowStrings.Main_Timer_AutoClosedInkeys);
                         }));
                     }
 
@@ -677,7 +677,7 @@ namespace Ink_Canvas
                     {
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
-                            ShowNotification("「优教授课端」已自动关闭");
+                            ShowNotification(Properties.MainWindowStrings.Main_Timer_AutoClosedYouJiao);
                         }));
                     }
 
@@ -685,7 +685,7 @@ namespace Ink_Canvas
                     {
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
-                            ShowNotification("「希沃桌面 2.0 桌面批注」已自动关闭");
+                            ShowNotification(Properties.MainWindowStrings.Main_Timer_AutoClosedSeewoDesktop);
                         }));
                     }
                 }

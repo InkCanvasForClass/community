@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Crash_Desc" xml:space="preserve">
+    <value>软件崩溃了怎么办？选一个自动操作：</value>
+  </data>
+  <data name="Crash_NoAction" xml:space="preserve">
+    <value>摆烂不管</value>
+  </data>
+  <data name="Crash_ShowCrashWindow" xml:space="preserve">
+    <value>弹窗看崩溃详情（不重启）</value>
+  </data>
+  <data name="Crash_SilentRestart" xml:space="preserve">
+    <value>静默复活</value>
+  </data>
+  <data name="Crash_Title" xml:space="preserve">
+    <value>崩了之后怎么办</value>
+  </data>
+  <data name="CrashWindowTitle" xml:space="preserve">
+    <value>崩溃详情 - InkCanvasForClass</value>
+  </data>
+  <data name="CrashWindowHeader" xml:space="preserve">
+    <value>InkCanvasForClass 翻车了，破防了</value>
+  </data>
+  <data name="CrashWindowDescription" xml:space="preserve">
+    <value>以下是本次翻车的详细信息，复制发给开发者让他们修~</value>
+  </data>
+  <data name="CrashWindowFooter" xml:space="preserve">
+    <value>当前设置为只显示崩溃详情，不会自动复活。</value>
+  </data>
+  <data name="CrashWindowCopy" xml:space="preserve">
+    <value>复制详情</value>
+  </data>
+  <data name="CrashWindowClose" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="CrashWindowNoDetails" xml:space="preserve">
+    <value>没有崩溃详情，离谱~</value>
+  </data>
+</root>

@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="ApiBaseUrl" xml:space="preserve">
+    <value>Announcement API URL</value>
+  </data>
+  <data name="ApiBaseUrlHint" xml:space="preserve">
+    <value>Base server URL used to fetch announcement lists.</value>
+  </data>
+  <data name="CenterHint" xml:space="preserve">
+    <value>View received remote announcements and realtime push messages.</value>
+  </data>
+  <data name="CenterTitle" xml:space="preserve">
+    <value>Announcement center</value>
+  </data>
+  <data name="ClearHistory" xml:space="preserve">
+    <value>Clear history</value>
+  </data>
+  <data name="ConnectionHint" xml:space="preserve">
+    <value>Configure the announcement HTTP API, WebSocket realtime push URL, and access token.</value>
+  </data>
+  <data name="ConnectionTitle" xml:space="preserve">
+    <value>Connection settings</value>
+  </data>
+  <data name="ItemCount" xml:space="preserve">
+    <value>{0} announcements. Select an item on the left to view details.</value>
+  </data>
+  <data name="MarkAllAsRead" xml:space="preserve">
+    <value>Mark all as read</value>
+  </data>
+  <data name="NavTooltip" xml:space="preserve">
+    <value>Remote announcement, realtime push, and announcement history settings</value>
+  </data>
+  <data name="NoItems" xml:space="preserve">
+    <value>No announcements</value>
+  </data>
+  <data name="PageTitle" xml:space="preserve">
+    <value>Announcements</value>
+  </data>
+  <data name="Token" xml:space="preserve">
+    <value>Announcement access token</value>
+  </data>
+  <data name="TokenHint" xml:space="preserve">
+    <value>Access token used by the announcement system to identify this application.</value>
+  </data>
+  <data name="WebSocketUrl" xml:space="preserve">
+    <value>Realtime push URL</value>
+  </data>
+  <data name="WebSocketUrlHint" xml:space="preserve">
+    <value>Leave empty to automatically derive the WebSocket URL from the API URL.</value>
+  </data>
+</root>

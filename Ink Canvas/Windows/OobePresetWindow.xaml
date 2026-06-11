@@ -1,4 +1,4 @@
-<Window x:Class="Ink_Canvas.Windows.OobePresetWindow"
+<Window xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.OobePresetWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,7 +6,7 @@
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
         mc:Ignorable="d"
-        Title="选择预设配置 - InkCanvasForClass CE"
+        Title="{x:Static props:OobeStrings.Oobe_PresetTitle}"
         Height="560" Width="680"
         MinHeight="420" MinWidth="520"
         WindowStartupLocation="CenterOwner"
@@ -57,7 +57,7 @@
                     <Image Source="\Resources\icc.ico" Width="18"
                            RenderOptions.BitmapScalingMode="HighQuality" />
                     <TextBlock VerticalAlignment="Center"
-                               Text="选择预设配置"
+                               Text="{x:Static props:OobeStrings.Oobe_PresetTitle}"
                                TextWrapping="NoWrap" />
                 </ikw:SimpleStackPanel>
                 <Rectangle Grid.Column="2"
@@ -93,11 +93,11 @@
                 </Border>
                 <ikw:SimpleStackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
                     <TextBlock Style="{DynamicResource TitleTextBlockStyle}"
-                               Text="选择预设配置" />
+                               Text="{x:Static props:OobeStrings.Oobe_PresetTitle}" />
                     <TextBlock Style="{DynamicResource BodyTextBlockStyle}"
                                Opacity="0.85"
                                TextWrapping="Wrap"
-                               Text="选择一套由开发者调校的推荐配置，一键完成设置。所有选项可在「设置」中随时修改。" />
+                               Text="{x:Static props:OobeStrings.Oobe_PresetSubtitle}" />
                 </ikw:SimpleStackPanel>
             </Grid>
         </Border>
@@ -142,26 +142,26 @@
                         </Border>
                         <ikw:SimpleStackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
                             <TextBlock Style="{DynamicResource BodyStrongTextBlockStyle}"
-                                       Text="课堂标准配置" />
+                                       Text="{x:Static props:OobeStrings.Oobe_PresetStandard}" />
                             <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
                                        Opacity="0.75"
                                        TextWrapping="Wrap"
-                                       Text="启用 PPT 联动、自动保存墨迹、托盘图标、双指手势，适合大多数课堂场景。" />
+                                       Text="{x:Static props:OobeStrings.Oobe_PresetStandardDesc}" />
                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6" Margin="0,4,0,0">
                                 <Border CornerRadius="4" Padding="6,2"
                                         Background="{DynamicResource SystemControlBackgroundAccentBrush}">
                                     <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
-                                               Foreground="White" Text="PPT 联动" />
+                                               Foreground="White" Text="{x:Static props:OobeStrings.Oobe_PresetTagPPTLink}" />
                                 </Border>
                                 <Border CornerRadius="4" Padding="6,2"
                                         Background="{DynamicResource SystemControlBackgroundAccentBrush}">
                                     <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
-                                               Foreground="White" Text="自动保存" />
+                                               Foreground="White" Text="{x:Static props:StorageStrings.AutoSave_Title}" />
                                 </Border>
                                 <Border CornerRadius="4" Padding="6,2"
                                         Background="{DynamicResource SystemControlBackgroundAccentBrush}">
                                     <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
-                                               Foreground="White" Text="双指手势" />
+                                               Foreground="White" Text="{x:Static props:OobeStrings.Oobe_PresetTagTwoFinger}" />
                                 </Border>
                             </ikw:SimpleStackPanel>
                         </ikw:SimpleStackPanel>
@@ -208,26 +208,26 @@
                         </Border>
                         <ikw:SimpleStackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
                             <TextBlock Style="{DynamicResource BodyStrongTextBlockStyle}"
-                                       Text="简洁轻量配置" />
+                                       Text="{x:Static props:OobeStrings.Oobe_PresetLite}" />
                             <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
                                        Opacity="0.75"
                                        TextWrapping="Wrap"
-                                       Text="关闭大部分自动化与联动功能，保持最小后台行为，适合简单批注场景。" />
+                                       Text="{x:Static props:OobeStrings.Oobe_PresetLiteDesc}" />
                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6" Margin="0,4,0,0">
                                 <Border CornerRadius="4" Padding="6,2"
                                         Background="#FF6366F1">
                                     <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
-                                               Foreground="White" Text="PPT 联动" />
+                                               Foreground="White" Text="{x:Static props:OobeStrings.Oobe_PresetTagPPTLink}" />
                                 </Border>
                                 <Border CornerRadius="4" Padding="6,2"
                                         Background="#FF6366F1">
                                     <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
-                                               Foreground="White" Text="托盘图标" />
+                                               Foreground="White" Text="{x:Static props:OobeStrings.Oobe_PresetTagTrayIcon}" />
                                 </Border>
                                 <Border CornerRadius="4" Padding="6,2"
                                         Background="#FF6366F1">
                                     <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
-                                               Foreground="White" Text="自动保存" />
+                                               Foreground="White" Text="{x:Static props:StorageStrings.AutoSave_Title}" />
                                 </Border>
                             </ikw:SimpleStackPanel>
                         </ikw:SimpleStackPanel>
@@ -262,7 +262,7 @@
                            Style="{DynamicResource CaptionTextBlockStyle}"
                            Opacity="0.7"
                            TextWrapping="Wrap"
-                           Text="选择预设后将直接完成初始设置，无需逐步配置。" />
+                           Text="{x:Static props:OobeStrings.Oobe_PresetNote}" />
 
                 <Button Grid.Column="1"
                         x:Name="BtnCancel"
@@ -272,7 +272,7 @@
                         Click="BtnCancel_Click">
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Back}" FontSize="12" />
-                        <TextBlock Text="返回" />
+                        <TextBlock Text="{x:Static props:OobeStrings.Oobe_PresetBack}" />
                     </ikw:SimpleStackPanel>
                 </Button>
 
@@ -285,7 +285,7 @@
                         Click="BtnApply_Click">
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Accept}" FontSize="12" />
-                        <TextBlock Text="应用并开始使用" />
+                        <TextBlock Text="{x:Static props:OobeStrings.Oobe_PresetApply}" />
                     </ikw:SimpleStackPanel>
                 </Button>
             </Grid>

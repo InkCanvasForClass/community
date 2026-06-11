@@ -1,4 +1,4 @@
-<Window x:Class="Ink_Canvas.RollCallHistoryWindow"
+<Window xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.RollCallHistoryWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -9,7 +9,7 @@
         mc:Ignorable="d" FontFamily="Microsoft YaHei UI"
         WindowStartupLocation="CenterScreen"
         Topmost="True"
-        Title="Ink Canvas 抽奖 - 点名历史记录" Height="500" Width="400"
+        Title="{x:Static props:RandomStrings.Random_History_WindowTitle}" Height="500" Width="400"
         Loaded="Window_Loaded"
         ui:ThemeManager.IsThemeAware="True"
         ui:TitleBar.ExtendViewIntoTitleBar="True"
@@ -56,7 +56,7 @@
         
         <!-- 主内容区 -->
         <Grid Grid.Row="1" Background="{DynamicResource RollCallHistoryWindowBackground}" Margin="10,10,10,10">
-            <Label Content="点名历史记录" 
+            <Label Content="{x:Static props:RandomStrings.Random_History_Title}" 
                    Margin="10" 
                    Foreground="{DynamicResource RollCallHistoryWindowForeground}"
                   />
@@ -72,7 +72,7 @@
             <Button Margin="10" 
                     VerticalAlignment="Bottom" 
                     HorizontalAlignment="Right"
-                    Content="关闭" 
+                    Content="{x:Static props:NotificationStrings.AnimationOff}" 
                    
                     Width="100" 
                     Click="Button_Click"

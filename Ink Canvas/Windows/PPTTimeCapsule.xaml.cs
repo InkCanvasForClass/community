@@ -19,7 +19,7 @@ namespace Ink_Canvas.Windows
         private System.Timers.Timer timeUpdateTimer;
         private System.Timers.Timer countdownUpdateTimer;
         private DateTime lastTime = DateTime.MinValue;
-        private TimerControl parentControl;
+        private NewStyleTimerWindow parentControl;
         private bool wasTimerRunning = false;
         private bool isOvertime = false;
         private Storyboard capsuleExpandStoryboard;
@@ -208,7 +208,7 @@ namespace Ink_Canvas.Windows
         /// <summary>
         /// 设置父计时器控件
         /// </summary>
-        public void SetParentControl(TimerControl parent)
+        public void SetParentControl(NewStyleTimerWindow parent)
         {
             parentControl = parent;
             if (parentControl != null)
@@ -790,53 +790,48 @@ namespace Ink_Canvas.Windows
 
         private void RestoreTimerWindow()
         {
-            var mainWindow = Application.Current.MainWindow as MainWindow;
-            if (mainWindow != null)
+            // 检查缓存引用是否有效（窗口可能已关闭）
+            if (parentControl != null)
             {
-                mainWindow.AdjustTimerContainerSize();
-
-                // 显示主计时器窗口
-                var timerContainer = mainWindow.FindName("TimerContainer") as FrameworkElement;
-                if (timerContainer != null)
+                if (parentControl.IsLoaded)
                 {
-                    timerContainer.Visibility = Visibility.Visible;
+                    parentControl.Show();
+                    parentControl.Activate();
+                    parentControl.UpdateActivityTime();
+                    return;
                 }
+                parentControl = null;
+            }
 
-                // 隐藏最小化计时器容器
-                var minimizedContainer = mainWindow.FindName("MinimizedTimerContainer") as FrameworkElement;
-                if (minimizedContainer != null)
+            // 从 Application 查找已有的计时器窗口
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window is NewStyleTimerWindow timerWin && timerWin.IsLoaded)
                 {
-                    minimizedContainer.Visibility = Visibility.Collapsed;
-                }
-
-                if (mainWindow.TimerControl != null)
-                {
-                    mainWindow.TimerControl.UpdateActivityTime();
-
-                    mainWindow.TimerControl.CloseRequested -= TimerControl_CloseRequested;
-                    mainWindow.TimerControl.CloseRequested += TimerControl_CloseRequested;
+                    parentControl = timerWin;
+                    timerWin.Show();
+                    timerWin.Activate();
+                    timerWin.UpdateActivityTime();
+                    return;
                 }
             }
+
+            // 没有可用的计时器窗口，创建一个新的
+            var newTimer = new NewStyleTimerWindow { Owner = Application.Current.MainWindow };
+            newTimer.TimerCompleted += (s, args) =>
+            {
+                if (MainWindow.Settings?.PowerPointSettings?.EnablePPTTimeCapsule == true
+                    && (Application.Current.MainWindow as MainWindow)?.IsInPptPresentationMode == true)
+                {
+                    OnTimerCompleted();
+                }
+            };
+            parentControl = newTimer;
+            newTimer.Show();
         }
 
-        private void TimerControl_CloseRequested(object sender, EventArgs e)
+        private void TimerWindow_Closed(object sender, EventArgs e)
         {
-            // 当计时器窗口关闭时，隐藏TimerContainer
-            var mainWindow = Application.Current.MainWindow as MainWindow;
-            if (mainWindow != null)
-            {
-                var timerContainer = mainWindow.FindName("TimerContainer") as FrameworkElement;
-                if (timerContainer != null)
-                {
-                    timerContainer.Visibility = Visibility.Collapsed;
-                }
-
-                var minimizedContainer = mainWindow.FindName("MinimizedTimerContainer") as FrameworkElement;
-                if (minimizedContainer != null)
-                {
-                    minimizedContainer.Visibility = Visibility.Collapsed;
-                }
-            }
         }
 
         private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)

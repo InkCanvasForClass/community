@@ -1,8 +1,8 @@
+using Ink_Canvas.Properties;
+using iNKORE.UI.WPF.Modern.Controls;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using iNKORE.UI.WPF.Modern.Controls;
-using Ink_Canvas.Properties;
 
 namespace Ink_Canvas.Controls
 {
@@ -88,15 +88,15 @@ namespace Ink_Canvas.Controls
 
             Shell.TabBar.Tabs.Add(new PopupTabItem
             {
-                Header = Strings.GetString("Board_Pen") ?? "Pen"
+                Header = FloatingBarStrings.Board_Pen
             });
             Shell.TabBar.Tabs.Add(new PopupTabItem
             {
-                Header = Strings.GetString("Board_Highlighter") ?? "Highlighter"
+                Header = FloatingBarStrings.Board_Highlighter
             });
             Shell.TabBar.Tabs.Add(new PopupTabItem
             {
-                Header = Strings.GetString("Board_LaserPen") ?? "Laser Pen"
+                Header = FloatingBarStrings.Board_LaserPen
             });
             Shell.TabBar.SelectedIndex = 0;
 
@@ -185,6 +185,15 @@ namespace Ink_Canvas.Controls
             DefaultPenColorsPanel.Visibility = Visibility.Collapsed;
             HighlighterPenColorsPanel.Visibility = Visibility.Collapsed;
             LaserPenColorsPanel.Visibility = Visibility.Visible;
+        }
+
+        private void PenWidthPresetButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button { Tag: string value } &&
+                double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var width))
+            {
+                PenWidthSlider.Value = width;
+            }
         }
 
         public void SwitchToDefaultPen()

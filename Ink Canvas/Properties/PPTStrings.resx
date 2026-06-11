@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AutoSaveStrokes" xml:space="preserve">
+    <value>自动保存幻灯片墨迹</value>
+  </data>
+  <data name="AutoSaveStrokesHint" xml:space="preserve">
+    <value>开启 自动保存幻灯片墨迹 后将在结束幻灯片放映时自动将保存已有墨迹，并在下次打开时自动加载（文件名和幻灯片页数都要相同）</value>
+  </data>
+  <data name="AutoScreenshot" xml:space="preserve">
+    <value>自动幻灯片截屏</value>
+  </data>
+  <data name="AutoScreenshotHint" xml:space="preserve">
+    <value>开启 自动幻灯片截屏 后将会在幻灯片有墨迹时翻页自动截屏</value>
+  </data>
+  <data name="BlackBackground" xml:space="preserve">
+    <value>黑色背景</value>
+  </data>
+  <data name="BottomGroupTitle" xml:space="preserve">
+    <value>左下右下</value>
+  </data>
+  <data name="EnhancedPreview" xml:space="preserve">
+    <value>PPT 页码按钮增强型预览</value>
+  </data>
+  <data name="EnhancedPreviewHint" xml:space="preserve">
+    <value>手动开启后，点击页码按钮将显示缩略图页列表（支持 WPS 与 PowerPoint），并可点击跳转到目标页。</value>
+  </data>
+  <data name="Enhancement" xml:space="preserve">
+    <value>PowerPoint 联动增强</value>
+  </data>
+  <data name="EnterAnnotationOnShow" xml:space="preserve">
+    <value>进入 PPT 放映时自动进入批注模式</value>
+  </data>
+  <data name="FingerGestureSlide" xml:space="preserve">
+    <value>允许使用手指手势进行幻灯片翻页</value>
+  </data>
+  <data name="FingerGestureSlideHint" xml:space="preserve">
+    <value>允许开启画板时使用手指手势进行幻灯片翻页（启用后，在幻灯片放映模式下，当画板无墨迹时，使用手指（笔尖或手掌无法识别）左右滑动即可控制幻灯片翻页。）</value>
+  </data>
+  <data name="FlipButtonsTitle" xml:space="preserve">
+    <value>PPT翻页按钮</value>
+  </data>
+  <data name="FlipButtonsScale" xml:space="preserve">
+    <value>翻页按钮大小</value>
+  </data>
+  <data name="GoToFirstPageOnReenter" xml:space="preserve">
+    <value>进入放映时回到首页</value>
+  </data>
+  <data name="GroupTitle" xml:space="preserve">
+    <value>PPT联动</value>
+  </data>
+  <data name="HalfOpacity" xml:space="preserve">
+    <value>半透明</value>
+  </data>
+  <data name="KillWppHint" xml:space="preserve">
+    <value>关闭后将不会自动查杀 WPP 残留进程，可能导致 WPP 关闭 时卡顿或无法彻底退出。</value>
+  </data>
+  <data name="KillWppProcess" xml:space="preserve">
+    <value>WPP 进程查杀（防止 WPP 残留进程）</value>
+  </data>
+  <data name="LeftBottomOffset" xml:space="preserve">
+    <value>左下偏移</value>
+  </data>
+  <data name="LeftBottomOpacity" xml:space="preserve">
+    <value>左下透明度</value>
+  </data>
+  <data name="LeftOffset" xml:space="preserve">
+    <value>左侧偏移</value>
+  </data>
+  <data name="LeftOpacity" xml:space="preserve">
+    <value>左侧透明度</value>
+  </data>
+  <data name="LongPressPageTurn" xml:space="preserve">
+    <value>PPT 翻页按钮长按翻页</value>
+  </data>
+  <data name="LongPressPageTurnHint" xml:space="preserve">
+    <value>开启该选项后，长按PPT翻页按钮可以连续翻页，提高翻页效率。</value>
+  </data>
+  <data name="NotifyAutoPlay" xml:space="preserve">
+    <value>提示是否已启用自动播放</value>
+  </data>
+  <data name="NotifyHiddenPage" xml:space="preserve">
+    <value>提示隐藏幻灯片</value>
+  </data>
+  <data name="PageButtonClickable" xml:space="preserve">
+    <value>PPT 页码按钮可点击</value>
+  </data>
+  <data name="PageButtonClickableHint" xml:space="preserve">
+    <value>开启该选项后，点击页码按钮可唤起页码导航。默认调用 PowerPoint 网格缩略图（WPS 不支持）；可在下方子设置手动开启增强型预览以支持 WPS。</value>
+  </data>
+  <data name="Position_Left" xml:space="preserve">
+    <value>左侧</value>
+  </data>
+  <data name="Position_LeftBottom" xml:space="preserve">
+    <value>左下</value>
+  </data>
+  <data name="Position_Right" xml:space="preserve">
+    <value>右侧</value>
+  </data>
+  <data name="Position_RightBottom" xml:space="preserve">
+    <value>右下</value>
+  </data>
+  <data name="RememberLastPage" xml:space="preserve">
+    <value>记忆并提示上次播放位置</value>
+  </data>
+  <data name="RememberLastPageHint" xml:space="preserve">
+    <value>开启后会记录上次播放的页数，点击&quot;是&quot;后会自动跳转</value>
+  </data>
+  <data name="RightBottomOffset" xml:space="preserve">
+    <value>右下偏移</value>
+  </data>
+  <data name="RightBottomOpacity" xml:space="preserve">
+    <value>右下透明度</value>
+  </data>
+  <data name="RightOffset" xml:space="preserve">
+    <value>右侧偏移</value>
+  </data>
+  <data name="RightOpacity" xml:space="preserve">
+    <value>右侧透明度</value>
+  </data>
+  <data name="ShowFlipButtons" xml:space="preserve">
+    <value>在 PPT 模式下显示翻页按钮</value>
+  </data>
+  <data name="ShowPageNumber" xml:space="preserve">
+    <value>显示页码</value>
+  </data>
+  <data name="ShowQuickPanelInShow" xml:space="preserve">
+    <value>PPT 放映时显示快速面板</value>
+  </data>
+  <data name="ShowQuickPanelInShowHint" xml:space="preserve">
+    <value>关闭后在 PPT 放映时不显示快速面板</value>
+  </data>
+  <data name="SideGroupTitle" xml:space="preserve">
+    <value>两侧</value>
+  </data>
+  <data name="SkipAnimations" xml:space="preserve">
+    <value>抢占焦点放映（用于跳过 PPT 动画）</value>
+  </data>
+  <data name="SupportPowerPoint" xml:space="preserve">
+    <value>Microsoft PowerPoint 支持</value>
+  </data>
+  <data name="SupportWPS" xml:space="preserve">
+    <value>WPS 支持</value>
+  </data>
+  <data name="TimeCapsule" xml:space="preserve">
+    <value>PPT 时间显示胶囊</value>
+  </data>
+  <data name="TimeCapsuleHint" xml:space="preserve">
+    <value>开启后在 PPT 放映模式下显示时间胶囊，可替代最小化计时器窗口</value>
+  </data>
+  <data name="TimeCapsuleOpacity" xml:space="preserve">
+    <value>时间胶囊透明度</value>
+  </data>
+  <data name="TimeCapsulePos_Center" xml:space="preserve">
+    <value>顶部居中</value>
+  </data>
+  <data name="TimeCapsulePos_TL" xml:space="preserve">
+    <value>左上角</value>
+  </data>
+  <data name="TimeCapsulePos_TR" xml:space="preserve">
+    <value>右上角</value>
+  </data>
+  <data name="TimeCapsulePosition" xml:space="preserve">
+    <value>时间胶囊位置</value>
+  </data>
+  <data name="TimeCapsuleResetPosition" xml:space="preserve">
+    <value>重置位置</value>
+  </data>
+  <data name="TimeCapsuleResetPositionHint" xml:space="preserve">
+    <value>将时间胶囊重置到默认位置</value>
+  </data>
+  <data name="TimeCapsuleScale" xml:space="preserve">
+    <value>时间胶囊大小</value>
+  </data>
+  <data name="TwoFingerGesture" xml:space="preserve">
+    <value>允许幻灯片模式下的双指手势</value>
+  </data>
+  <data name="PPTQuickPanel_CloseMagnifier" xml:space="preserve">
+    <value>关闭放大镜</value>
+  </data>
+  <data name="PPTQuickPanel_FocusMagnifier" xml:space="preserve">
+    <value>聚焦放大镜</value>
+  </data>
+  <data name="PPTQuickPanel_Insert" xml:space="preserve">
+    <value>插入</value>
+  </data>
+  <data name="PPTQuickPanel_MagnifierHint" xml:space="preserve">
+    <value>拖动选择框移动，拖动控制点缩放，按 ESC 关闭</value>
+  </data>
+  <data name="PPTQuickPanel_OpenMagnifier" xml:space="preserve">
+    <value>开启放大镜</value>
+  </data>
+  <data name="PPTQuickPanel_ScreenshotInsert" xml:space="preserve">
+    <value>截图插入</value>
+  </data>
+  <data name="PPTQuickPanel_Sound" xml:space="preserve">
+    <value>声音</value>
+  </data>
+  <data name="PPTQuickPanel_Zoom" xml:space="preserve">
+    <value>缩放</value>
+  </data>
+  <data name="UseRot" xml:space="preserve">
+    <value>使用 ROT 联动</value>
+  </data>
+  <data name="PPT_RememberLastPage_Prompt" xml:space="preserve">
+    <value>上次播放到了第 {0} 页, 是否立即跳转</value>
+  </data>
+  <data name="PPT_HiddenSlides_Detected" xml:space="preserve">
+    <value>检测到此演示文档中包含隐藏的幻灯片，是否取消隐藏？</value>
+  </data>
+  <data name="PPT_AutoPlay_Detected" xml:space="preserve">
+    <value>检测到此演示文档中自动播放或排练计时已经启用，可能导致幻灯片自动翻页，是否取消？</value>
+  </data>
+  <data name="PPT_ModePrompt_Message" xml:space="preserve">
+    <value>点击批注栏图标可折叠/展开批注。</value>
+  </data>
+  <data name="PPT_ModePrompt_Setting" xml:space="preserve">
+    <value>进入 PPT 模式时显示批注栏提示</value>
+  </data>
+  <data name="PPT_ModePrompt_SettingHint" xml:space="preserve">
+    <value>开启后，每次进入 PPT 放映/联动模式时都会提示如何折叠或展开批注栏。</value>
+  </data>
+  <data name="PPT_ModePrompt_Title" xml:space="preserve">
+    <value>已进入 PPT 模式</value>
+  </data>
+  <data name="PPT_SlidesNotFound" xml:space="preserve">
+    <value>未找到幻灯片</value>
+  </data>
+</root>

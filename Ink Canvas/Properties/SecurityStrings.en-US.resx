@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="FileAssoc_Check" xml:space="preserve">
+    <value>Check status</value>
+  </data>
+  <data name="FileAssoc_Title" xml:space="preserve">
+    <value>File association</value>
+  </data>
+  <data name="FileAssoc_Unregister" xml:space="preserve">
+    <value>Remove association</value>
+  </data>
+  <data name="SecurityPanel__InkCanvasForClass_Hint" xml:space="preserve">
+    <value>Password verification when closing InkCanvasForClass</value>
+  </data>
+  <data name="SecurityPanel__Settingsjson_Hint" xml:space="preserve">
+    <value>Secondary verification before resetting Settings.json</value>
+  </data>
+  <data name="SecurityPanel_Hint" xml:space="preserve">
+    <value>Need to set password when enabled</value>
+  </data>
+  <data name="SecurityPanel_Hint_1" xml:space="preserve">
+    <value>Set or modify security password</value>
+  </data>
+  <data name="SecurityPanel_Hint_2" xml:space="preserve">
+    <value>Verification when opening settings panel/new settings window</value>
+  </data>
+  <data name="SecurityPanel_Hint_4" xml:space="preserve">
+    <value>When enabled, key files will be occupied as read-only</value>
+  </data>
+  <data name="Security_SectionPassword" xml:space="preserve">
+    <value>Security Password</value>
+  </data>
+  <data name="Security_InfoBarTitle" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="Security_PasswordInfoBarMessage" xml:space="preserve">
+    <value>Security password is off by default. When enabled, it can be used for secondary verification when exiting, entering settings, or resetting configuration.</value>
+  </data>
+  <data name="Security_EnablePassword" xml:space="preserve">
+    <value>Enable Security Password</value>
+  </data>
+  <data name="Security_PasswordManagement" xml:space="preserve">
+    <value>Password Management</value>
+  </data>
+  <data name="Security_SetOrChangePassword" xml:space="preserve">
+    <value>Set/Change Password</value>
+  </data>
+  <data name="Security_EnableTotp" xml:space="preserve">
+    <value>Enable TOTP Verification</value>
+  </data>
+  <data name="Security_EnableTotpHint" xml:space="preserve">
+    <value>Can be used for secondary verification such as unfreezing ink strokes</value>
+  </data>
+  <data name="Security_TotpSecretKey" xml:space="preserve">
+    <value>TOTP Secret Key</value>
+  </data>
+  <data name="Security_TotpSecretKeyHint" xml:space="preserve">
+    <value>Manually add this key in your authenticator app</value>
+  </data>
+  <data name="Security_GenerateOrResetKey" xml:space="preserve">
+    <value>Generate/Reset Key</value>
+  </data>
+  <data name="Security_RequirePasswordOnExit" xml:space="preserve">
+    <value>Require Verification on Exit</value>
+  </data>
+  <data name="Security_RequirePasswordOnEnterSettings" xml:space="preserve">
+    <value>Require Verification to Enter Settings</value>
+  </data>
+  <data name="Security_RequirePasswordOnResetConfig" xml:space="preserve">
+    <value>Require Verification to Reset Config</value>
+  </data>
+  <data name="Security_RequirePasswordOnModifyOrClearNameList" xml:space="preserve">
+    <value>Require Verification to Modify/Clear Name List</value>
+  </data>
+  <data name="Security_RequirePasswordOnModifyOrClearNameList_Hint" xml:space="preserve">
+    <value>Verify before modifying or clearing the name list</value>
+  </data>
+  <data name="Security_ProcessProtection" xml:space="preserve">
+    <value>Process Protection</value>
+  </data>
+  <data name="Security_ProcessProtectionInfoBarMessage" xml:space="preserve">
+    <value>Process protection is on by default: protects program files (exe/dll/config) in the root directory from external modification while running.</value>
+  </data>
+  <data name="Security_DisablePasswordTitle" xml:space="preserve">
+    <value>Disable Security Password</value>
+  </data>
+  <data name="Security_DisablePasswordMessage" xml:space="preserve">
+    <value>Please enter the security password or TOTP code to disable the security password feature.</value>
+  </data>
+  <data name="Security_ResetTotpTitle" xml:space="preserve">
+    <value>Reset TOTP Secret Key</value>
+  </data>
+  <data name="Security_ResetTotpMessage" xml:space="preserve">
+    <value>Please enter the security password or current TOTP code to reset the key.</value>
+  </data>
+  <data name="Security_UsbSectionHeader" xml:space="preserve">
+    <value>USB Maintenance Verification</value>
+  </data>
+  <data name="Security_UsbInfoBarMessage" xml:space="preserve">
+    <value>After enabling USB verification, when security verification is required, inserting an authorized USB drive will automatically bypass it, allowing maintenance personnel to operate directly.</value>
+  </data>
+  <data name="Security_EnableUsbVerification" xml:space="preserve">
+    <value>Enable USB Verification</value>
+  </data>
+  <data name="Security_EnableUsbVerification_Hint" xml:space="preserve">
+    <value>Allows inserting an authorized USB drive as a password-free security verification method</value>
+  </data>
+  <data name="Security_UsbAuthorizedSns" xml:space="preserve">
+    <value>Authorized USB Serial Numbers</value>
+  </data>
+  <data name="Security_UsbAuthorizedSns_Hint" xml:space="preserve">
+    <value>List of authorized device serial numbers (comma-separated for multiple devices)</value>
+  </data>
+  <data name="Security_UsbDetectAndAuthorize" xml:space="preserve">
+    <value>Detect &amp; Authorize New USB</value>
+  </data>
+  <data name="Security_UsbDetectAndAuthorize_Hint" xml:space="preserve">
+    <value>Scan currently connected USB drives and quickly add their serial numbers to the authorized list</value>
+  </data>
+  <data name="Security_UsbRefreshDrives" xml:space="preserve">
+    <value>Refresh Devices</value>
+  </data>
+  <data name="Security_UsbAuthorizeDrive" xml:space="preserve">
+    <value>Authorize Selected USB</value>
+  </data>
+  <data name="Security_UsbPromptNoValidSn" xml:space="preserve">
+    <value>The selected USB drive has no valid serial number.</value>
+  </data>
+  <data name="Security_UsbPromptAlreadyAuthorized" xml:space="preserve">
+    <value>This USB serial number is already authorized.</value>
+  </data>
+  <data name="Security_UsbPromptAuthorizeSuccess" xml:space="preserve">
+    <value>USB serial number successfully authorized and added to the list.</value>
+  </data>
+  <data name="Security_UsbPromptSelectDrive" xml:space="preserve">
+    <value>Please select a detected USB drive first.</value>
+  </data>
+  <data name="Security_UsbPromptNoDriveDetected" xml:space="preserve">
+    <value>No USB drive detected</value>
+  </data>
+  <data name="Security_UsbPromptLocalDisk" xml:space="preserve">
+    <value>Local Disk</value>
+  </data>
+  <data name="Security_UsbBypassDialogHint" xml:space="preserve">
+    <value>
+(USB verification enabled. You can insert an authorized USB drive to automatically verify.)</value>
+  </data>
+  <data name="Security_UsbBypassDialogHintShort" xml:space="preserve">
+    <value>
+(USB verification enabled. Direct insert authorized USB.)</value>
+  </data>
+</root>

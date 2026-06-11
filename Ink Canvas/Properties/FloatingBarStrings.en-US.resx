@@ -1,0 +1,648 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Board_Background" xml:space="preserve">
+    <value>Background</value>
+  </data>
+  <data name="Board_ClearInk" xml:space="preserve">
+    <value>Clear ink</value>
+  </data>
+  <data name="Board_ClearInkAndHistory" xml:space="preserve">
+    <value>Clear ink &amp; history</value>
+  </data>
+  <data name="Board_DeleteThisPage" xml:space="preserve">
+    <value>Delete this page</value>
+  </data>
+  <data name="Board_Eraser" xml:space="preserve">
+    <value>Eraser</value>
+  </data>
+  <data name="Board_EraserOptions" xml:space="preserve">
+    <value>Eraser options</value>
+  </data>
+  <data name="Board_EraserShape_Blackboard" xml:space="preserve">
+    <value>Blackboard</value>
+  </data>
+  <data name="Board_EraserShape_Circle" xml:space="preserve">
+    <value>Circle</value>
+  </data>
+  <data name="Board_Gesture" xml:space="preserve">
+    <value>Gesture</value>
+  </data>
+  <data name="Board_Highlighter" xml:space="preserve">
+    <value>Highlighter</value>
+  </data>
+  <data name="Board_InsertImage" xml:space="preserve">
+    <value>Insert file</value>
+  </data>
+  <data name="Board_LaserPen" xml:space="preserve">
+    <value>Laser Pen</value>
+  </data>
+  <data name="Board_NewPage" xml:space="preserve">
+    <value>New page</value>
+  </data>
+  <data name="Board_NextPage" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="Board_Page" xml:space="preserve">
+    <value>Page</value>
+  </data>
+  <data name="Board_Pen" xml:space="preserve">
+    <value>Pen</value>
+  </data>
+  <data name="Board_PreviousPage" xml:space="preserve">
+    <value>Previous</value>
+  </data>
+  <data name="Board_Redo" xml:space="preserve">
+    <value>Redo</value>
+  </data>
+  <data name="Board_Screenshot" xml:space="preserve">
+    <value>Screenshot</value>
+  </data>
+  <data name="Board_Select" xml:space="preserve">
+    <value>Select</value>
+  </data>
+  <data name="Board_SelectImage" xml:space="preserve">
+    <value>Insert file</value>
+  </data>
+  <data name="Board_Shape" xml:space="preserve">
+    <value>Shapes</value>
+  </data>
+  <data name="Board_Size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="Board_StrokeEraser" xml:space="preserve">
+    <value>Stroke eraser</value>
+  </data>
+  <data name="Board_Tools" xml:space="preserve">
+    <value>Tools</value>
+  </data>
+  <data name="Board_TwoFingerMove" xml:space="preserve">
+    <value>Two-finger move</value>
+  </data>
+  <data name="Board_Undo" xml:space="preserve">
+    <value>Undo</value>
+  </data>
+  <data name="Board_VideoBooth" xml:space="preserve">
+    <value>Video Booth</value>
+  </data>
+  <data name="FloatingBar_Annotate" xml:space="preserve">
+    <value>Annotate</value>
+  </data>
+  <data name="FloatingBar_AreaEraser" xml:space="preserve">
+    <value>Area eraser</value>
+  </data>
+  <data name="FloatingBar_Clear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="FloatingBar_ClearAndMouse" xml:space="preserve">
+    <value>Clear &amp; cursor</value>
+  </data>
+  <data name="FloatingBar_ExitButton" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="FloatingBar_Freeze" xml:space="preserve">
+    <value>Freeze</value>
+  </data>
+  <data name="FloatingBar_Geometry" xml:space="preserve">
+    <value>Shapes</value>
+  </data>
+  <data name="FloatingBar_Gesture_MultiTouchWriting" xml:space="preserve">
+    <value>Multi-touch writing</value>
+  </data>
+  <data name="FloatingBar_Gesture_TwoFingerRotate" xml:space="preserve">
+    <value>Two-finger rotate</value>
+  </data>
+  <data name="FloatingBar_Gesture_TwoFingerZoom" xml:space="preserve">
+    <value>Two-finger zoom</value>
+  </data>
+  <data name="FloatingBar_GestureButton" xml:space="preserve">
+    <value>Gesture</value>
+  </data>
+  <data name="FloatingBar_Hide" xml:space="preserve">
+    <value>Hide</value>
+  </data>
+  <data name="FloatingBar_LassoSelect" xml:space="preserve">
+    <value>Lasso</value>
+  </data>
+  <data name="FloatingBar_Mouse" xml:space="preserve">
+    <value>Mouse</value>
+  </data>
+  <data name="FloatingBar_StrokeEraser" xml:space="preserve">
+    <value>Stroke eraser</value>
+  </data>
+  <data name="FloatingBar_Unfreeze" xml:space="preserve">
+    <value>Unfreeze</value>
+  </data>
+  <data name="FloatingBar_Whiteboard" xml:space="preserve">
+    <value>Board</value>
+  </data>
+  <data name="OldUI_Dark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="OldUI_Exit" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="OldUI_Thickness" xml:space="preserve">
+    <value>Thickness</value>
+  </data>
+  <data name="QuickPanel_ExitShow" xml:space="preserve">
+    <value>Exit slide show</value>
+  </data>
+  <data name="QuickPanel_Show" xml:space="preserve">
+    <value>Annotation bar</value>
+  </data>
+  <data name="QuickPanel_SingleDraw" xml:space="preserve">
+    <value>Single draw</value>
+  </data>
+  <data name="QuickPanel_Timer" xml:space="preserve">
+    <value>Timer</value>
+  </data>
+  <data name="Tools_Manual" xml:space="preserve">
+    <value>Manual</value>
+  </data>
+  <data name="Tools_MoreFeaturesTitle" xml:space="preserve">
+    <value>More features</value>
+  </data>
+  <data name="Tools_Open" xml:space="preserve">
+    <value>Open...</value>
+  </data>
+  <data name="Tools_RandomDraw" xml:space="preserve">
+    <value>Random draw</value>
+  </data>
+  <data name="Tools_Replay" xml:space="preserve">
+    <value>Replay</value>
+  </data>
+  <data name="Tools_Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Tools_Screenshot" xml:space="preserve">
+    <value>Screenshot</value>
+  </data>
+  <data name="ToolbarPage_ConfigProfiles" xml:space="preserve">
+    <value>Profile</value>
+  </data>
+  <data name="ToolbarPage_NewProfile" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="ToolbarPage_DuplicateProfile" xml:space="preserve">
+    <value>Duplicate</value>
+  </data>
+  <data name="ToolbarPage_DeleteProfile" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="ToolbarPage_AddedComponentsHint" xml:space="preserve">
+    <value>Components below will be shown on the floating toolbar. Drag from the library to add.</value>
+  </data>
+  <data name="ToolbarPage_AddedComponents" xml:space="preserve">
+    <value>Added Components</value>
+  </data>
+  <data name="ToolbarPage_GroupChildren" xml:space="preserve">
+    <value>Group Components</value>
+  </data>
+  <data name="ToolbarPage_GroupChildrenHint" xml:space="preserve">
+    <value>Drag components from the library here to add, or drag to reorder.</value>
+  </data>
+  <data name="ToolbarPage_ComponentLibrary" xml:space="preserve">
+    <value>Library</value>
+  </data>
+  <data name="ToolbarPage_ComponentLibraryHint" xml:space="preserve">
+    <value>Drag components to the added list or group list above to add to toolbar.</value>
+  </data>
+  <data name="ToolbarPage_ComponentSettings" xml:space="preserve">
+    <value>Component Settings</value>
+  </data>
+  <data name="ToolbarPage_ComponentProperties" xml:space="preserve">
+    <value>Properties</value>
+  </data>
+  <data name="ToolbarPage_SeparateBorder" xml:space="preserve">
+    <value>Separate Border</value>
+  </data>
+  <data name="ToolbarPage_SeparateBorderDesc" xml:space="preserve">
+    <value>Display a separate border wrapper for this component</value>
+  </data>
+  <data name="ToolbarPage_DisplayMode" xml:space="preserve">
+    <value>Display Mode</value>
+  </data>
+  <data name="ToolbarPage_QuickPaletteDisplayModeDesc" xml:space="preserve">
+    <value>Choose color count for quick palette</value>
+  </data>
+  <data name="ToolbarPage_Size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="ToolbarPage_FixedWidth" xml:space="preserve">
+    <value>Fixed Width</value>
+  </data>
+  <data name="ToolbarPage_FixedHeight" xml:space="preserve">
+    <value>Fixed Height</value>
+  </data>
+  <data name="ToolbarPage_MinWidth" xml:space="preserve">
+    <value>Min Width</value>
+  </data>
+  <data name="ToolbarPage_MaxWidth" xml:space="preserve">
+    <value>Max Width</value>
+  </data>
+  <data name="ToolbarPage_MinHeight" xml:space="preserve">
+    <value>Min Height</value>
+  </data>
+  <data name="ToolbarPage_MaxHeight" xml:space="preserve">
+    <value>Max Height</value>
+  </data>
+  <data name="ToolbarPage_Alignment" xml:space="preserve">
+    <value>Alignment</value>
+  </data>
+  <data name="ToolbarPage_HorizontalAlignment" xml:space="preserve">
+    <value>Horizontal</value>
+  </data>
+  <data name="ToolbarPage_VerticalAlignment" xml:space="preserve">
+    <value>Vertical</value>
+  </data>
+  <data name="ToolbarPage_Left" xml:space="preserve">
+    <value>Left</value>
+  </data>
+  <data name="ToolbarPage_Center" xml:space="preserve">
+    <value>Center</value>
+  </data>
+  <data name="ToolbarPage_Right" xml:space="preserve">
+    <value>Right</value>
+  </data>
+  <data name="ToolbarPage_Top" xml:space="preserve">
+    <value>Top</value>
+  </data>
+  <data name="ToolbarPage_Bottom" xml:space="preserve">
+    <value>Bottom</value>
+  </data>
+  <data name="ToolbarPage_Stretch" xml:space="preserve">
+    <value>Stretch</value>
+  </data>
+  <data name="ToolbarPage_Appearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="ToolbarPage_FontSize" xml:space="preserve">
+    <value>Font Size</value>
+  </data>
+  <data name="ToolbarPage_IconSize" xml:space="preserve">
+    <value>Icon Size</value>
+  </data>
+  <data name="ToolbarPage_Opacity" xml:space="preserve">
+    <value>Opacity</value>
+  </data>
+  <data name="ToolbarPage_RedStyle" xml:space="preserve">
+    <value>Red accent</value>
+  </data>
+  <data name="ToolbarPage_RedStyleDesc" xml:space="preserve">
+    <value>Display this component's icon and label in red</value>
+  </data>
+  <data name="ToolbarPage_Margin" xml:space="preserve">
+    <value>Margin</value>
+  </data>
+  <data name="ToolbarPage_MarginHint" xml:space="preserve">
+    <value>Left, Top, Right, Bottom</value>
+  </data>
+  <data name="ToolbarPage_ResetComponentSettings" xml:space="preserve">
+    <value>Reset Settings</value>
+  </data>
+  <data name="ToolbarPage_HideByRules" xml:space="preserve">
+    <value>Hide by Rules</value>
+  </data>
+  <data name="ToolbarPage_HideByRulesDesc" xml:space="preserve">
+    <value>Hide this component when the ruleset is satisfied.</value>
+  </data>
+  <data name="ToolbarPage_AnyConditionGroupMet" xml:space="preserve">
+    <value>When any condition group below is met</value>
+  </data>
+  <data name="ToolbarPage_AllConditionGroupsMet" xml:space="preserve">
+    <value>When all condition groups below are met</value>
+  </data>
+  <data name="ToolbarPage_Reverse" xml:space="preserve">
+    <value>Reverse</value>
+  </data>
+  <data name="ToolbarPage_AddGroup" xml:space="preserve">
+    <value>Add Group</value>
+  </data>
+  <data name="ToolbarPage_AnyConditionMet" xml:space="preserve">
+    <value>When any condition below is met</value>
+  </data>
+  <data name="ToolbarPage_AllConditionsMet" xml:space="preserve">
+    <value>When all conditions below are met</value>
+  </data>
+  <data name="ToolbarPage_Rule" xml:space="preserve">
+    <value>Rule</value>
+  </data>
+  <data name="ToolbarPage_EnableConditionGroup" xml:space="preserve">
+    <value>Enable condition group</value>
+  </data>
+  <data name="ToolbarPage_ResetLayout" xml:space="preserve">
+    <value>Reset to Default Layout</value>
+  </data>
+  <data name="ToolbarPage_AddToAdded" xml:space="preserve">
+    <value>Add to added components</value>
+  </data>
+  <data name="ToolbarPage_Duplicate" xml:space="preserve">
+    <value>Duplicate</value>
+  </data>
+  <data name="ToolbarPage_NewConfig" xml:space="preserve">
+    <value>New Profile</value>
+  </data>
+  <data name="ToolbarPage_CopyConfig" xml:space="preserve">
+    <value>Copy Profile</value>
+  </data>
+  <data name="ToolbarPage_EnterConfigName" xml:space="preserve">
+    <value>Enter profile name:</value>
+  </data>
+  <data name="ToolbarPage_EnterNewConfigName" xml:space="preserve">
+    <value>Enter new profile name:</value>
+  </data>
+  <data name="ToolbarPage_DuplicateConfigExists" xml:space="preserve">
+    <value>A profile with the same name already exists.</value>
+  </data>
+  <data name="ToolbarPage_Hint" xml:space="preserve">
+    <value>Hint</value>
+  </data>
+  <data name="ToolbarPage_AtLeastOneConfig" xml:space="preserve">
+    <value>At least one profile must be kept.</value>
+  </data>
+  <data name="ToolbarPage_ConfirmDeleteConfig" xml:space="preserve">
+    <value>Are you sure you want to delete profile</value>
+  </data>
+  <data name="ToolbarPage_ConfirmDelete" xml:space="preserve">
+    <value>Confirm Delete</value>
+  </data>
+  <data name="ToolbarPage_OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="ToolbarPage_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="ToolbarItem_Desc_Cursor" xml:space="preserve">
+    <value>Cursor</value>
+  </data>
+  <data name="ToolbarItem_Desc_Pen" xml:space="preserve">
+    <value>Pen</value>
+  </data>
+  <data name="ToolbarItem_Desc_Clear" xml:space="preserve">
+    <value>Clear ink</value>
+  </data>
+  <data name="ToolbarItem_Desc_InkFreeze" xml:space="preserve">
+    <value>Ink freeze</value>
+  </data>
+  <data name="ToolbarItem_Desc_Eraser" xml:space="preserve">
+    <value>Area eraser</value>
+  </data>
+  <data name="ToolbarItem_Desc_StrokeEraser" xml:space="preserve">
+    <value>Stroke eraser</value>
+  </data>
+  <data name="ToolbarItem_Desc_Select" xml:space="preserve">
+    <value>Lasso select</value>
+  </data>
+  <data name="ToolbarItem_Desc_CursorWithDel" xml:space="preserve">
+    <value>Clear &amp; switch to cursor</value>
+  </data>
+  <data name="ToolbarItem_Desc_Fold" xml:space="preserve">
+    <value>Collapse toolbar</value>
+  </data>
+  <data name="ToolbarItem_Desc_Gesture" xml:space="preserve">
+    <value>Gesture</value>
+  </data>
+  <data name="ToolbarItem_Desc_Exit" xml:space="preserve">
+    <value>Exit presentation</value>
+  </data>
+  <data name="ToolbarItem_Desc_QuickColorPalette" xml:space="preserve">
+    <value>Quick color palette</value>
+  </data>
+  <data name="ToolbarItem_Desc_Group" xml:space="preserve">
+    <value>Group multiple tools together</value>
+  </data>
+  <data name="ToolbarItem_Desc_Separator" xml:space="preserve">
+    <value>Separator</value>
+  </data>
+  <data name="FloatingBar_QuickPaletteMode" xml:space="preserve">
+    <value>Quick Palette</value>
+  </data>
+  <data name="ToolbarCondition_Annotating" xml:space="preserve">
+    <value>Annotation mode</value>
+  </data>
+  <data name="ToolbarCondition_PptMode" xml:space="preserve">
+    <value>PPT mode</value>
+  </data>
+  <data name="ToolbarCondition_Collapsed" xml:space="preserve">
+    <value>Toolbar collapsed</value>
+  </data>
+  <data name="FloatingBar_PenTipStyle" xml:space="preserve">
+    <value>Pen Tip Style</value>
+  </data>
+  <data name="FloatingBar_PenStyle_RealTime" xml:space="preserve">
+    <value>Real-time</value>
+  </data>
+  <data name="FloatingBar_PenStyle_PointSet" xml:space="preserve">
+    <value>Point Set</value>
+  </data>
+  <data name="FloatingBar_PenStyle_Velocity" xml:space="preserve">
+    <value>Velocity</value>
+  </data>
+  <data name="FloatingBar_PenStyle_Off" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="FloatingBar_HighlighterOverlap" xml:space="preserve">
+    <value>Overlap Darken</value>
+  </data>
+  <data name="FloatingBar_Opacity" xml:space="preserve">
+    <value>Opacity</value>
+  </data>
+  <data name="FloatingBar_FadeDelay" xml:space="preserve">
+    <value>Delay</value>
+  </data>
+  <data name="FloatingBar_FadeSpeed" xml:space="preserve">
+    <value>Speed</value>
+  </data>
+  <data name="FloatingBar_ColorThemeLight" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="BoardToolbarPage_ConfigProfiles" xml:space="preserve">
+    <value>Configuration Profiles</value>
+  </data>
+  <data name="BoardToolbarPage_NewProfile" xml:space="preserve">
+    <value>New Profile</value>
+  </data>
+  <data name="BoardToolbarPage_DuplicateProfile" xml:space="preserve">
+    <value>Duplicate Profile</value>
+  </data>
+  <data name="BoardToolbarPage_DeleteProfile" xml:space="preserve">
+    <value>Delete Profile</value>
+  </data>
+  <data name="BoardToolbarPage_Areas" xml:space="preserve">
+    <value>Areas</value>
+  </data>
+  <data name="BoardToolbarPage_LeftArea" xml:space="preserve">
+    <value>Left Area</value>
+  </data>
+  <data name="BoardToolbarPage_CenterArea" xml:space="preserve">
+    <value>Center Area</value>
+  </data>
+  <data name="BoardToolbarPage_RightArea" xml:space="preserve">
+    <value>Right Area</value>
+  </data>
+  <data name="BoardToolbarPage_ComponentLibrary" xml:space="preserve">
+    <value>Component Library</value>
+  </data>
+  <data name="BoardToolbarPage_AddGroup" xml:space="preserve">
+    <value>+ New Group</value>
+  </data>
+  <data name="BoardToolbarPage_AddGroup2" xml:space="preserve">
+    <value>New Group</value>
+  </data>
+  <data name="BoardToolbarPage_AddComponent2" xml:space="preserve">
+    <value>Add Component</value>
+  </data>
+  <data name="BoardToolbarPage_NewGroupName" xml:space="preserve">
+    <value>Enter new group name</value>
+  </data>
+  <data name="BoardToolbarPage_ResetDefault" xml:space="preserve">
+    <value>Reset to Default</value>
+  </data>
+  <data name="BoardToolbarPage_AtLeastOneConfig" xml:space="preserve">
+    <value>At least one configuration profile must remain.</value>
+  </data>
+  <data name="BoardToolbarPage_ConfirmDeleteConfig" xml:space="preserve">
+    <value>Are you sure you want to delete this profile?</value>
+  </data>
+  <data name="BoardToolbarPage_EnterNewConfigName" xml:space="preserve">
+    <value>Enter new profile name:</value>
+  </data>
+  <data name="BoardToolbarPage_ResetConfirm" xml:space="preserve">
+    <value>Are you sure you want to reset to default layout? Current layout will be overwritten.</value>
+  </data>
+  <data name="BoardToolbarPage_AreaComponents" xml:space="preserve">
+    <value>Standalone Components</value>
+  </data>
+  <data name="BoardToolbarPage_AreaComponentsHint" xml:space="preserve">
+    <value>Components not in any group will be displayed independently. Drag from library to add.</value>
+  </data>
+  <data name="BoardToolbarPage_AreaGroups" xml:space="preserve">
+    <value>Groups</value>
+  </data>
+  <data name="BoardToolbarPage_Position" xml:space="preserve">
+    <value>Button Position</value>
+  </data>
+  <data name="BoardToolbarPage_PositionDesc" xml:space="preserve">
+    <value>Controls the position style of the button within its group</value>
+  </data>
+  <data name="BoardToolbarPage_PositionFirst" xml:space="preserve">
+    <value>First</value>
+  </data>
+  <data name="BoardToolbarPage_PositionMiddle" xml:space="preserve">
+    <value>Middle</value>
+  </data>
+  <data name="BoardToolbarPage_PositionLast" xml:space="preserve">
+    <value>Last</value>
+  </data>
+  <data name="BoardToolbarPage_PositionSingle" xml:space="preserve">
+    <value>Single</value>
+  </data>
+  <data name="BoardToolbarPage_MoveUp" xml:space="preserve">
+    <value>Move Up</value>
+  </data>
+  <data name="BoardToolbarPage_MoveDown" xml:space="preserve">
+    <value>Move Down</value>
+  </data>
+  <data name="BoardToolbarPage_GroupNavigation" xml:space="preserve">
+    <value>Navigation</value>
+  </data>
+  <data name="BoardToolbarPage_GroupVideoBooth" xml:space="preserve">
+    <value>Video Booth</value>
+  </data>
+  <data name="BoardToolbarPage_GroupGesture" xml:space="preserve">
+    <value>Gesture &amp; Background</value>
+  </data>
+  <data name="BoardToolbarPage_GroupTools" xml:space="preserve">
+    <value>Annotation Tools</value>
+  </data>
+  <data name="BoardToolbarPage_GroupSystem" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="BoardToolbarPage_GroupAddPage" xml:space="preserve">
+    <value>Add Page</value>
+  </data>
+  <data name="BoardToolbarPage_Title" xml:space="preserve">
+    <value>Board Toolbar</value>
+  </data>
+  <data name="FloatingBar_MiniWhiteboard" xml:space="preserve">
+    <value>Mini Whiteboard</value>
+  </data>
+  <data name="MiniWhiteboard_Undo" xml:space="preserve">
+    <value>Undo</value>
+  </data>
+  <data name="MiniWhiteboard_Redo" xml:space="preserve">
+    <value>Redo</value>
+  </data>
+  <data name="MiniWhiteboard_Clear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="MiniWhiteboard_NewPage" xml:space="preserve">
+    <value>New Page</value>
+  </data>
+  <data name="MiniWhiteboard_DeletePage" xml:space="preserve">
+    <value>Delete Page</value>
+  </data>
+  <data name="MiniWhiteboard_PageInfo" xml:space="preserve">
+    <value>Page</value>
+  </data>
+  <data name="MiniWhiteboard_Pen" xml:space="preserve">
+    <value>Pen</value>
+  </data>
+  <data name="MiniWhiteboard_Eraser" xml:space="preserve">
+    <value>Eraser</value>
+  </data>
+  <data name="MiniWhiteboard_Settings_Enable" xml:space="preserve">
+    <value>Enable Mini Whiteboard</value>
+  </data>
+  <data name="MiniWhiteboard_Settings_SyncPpt" xml:space="preserve">
+    <value>Sync pages with PPT</value>
+  </data>
+  <data name="MiniWhiteboard_Settings_DefaultSize" xml:space="preserve">
+    <value>Default Size</value>
+  </data>
+  <data name="MiniWhiteboard_Settings_Opacity" xml:space="preserve">
+    <value>Opacity</value>
+  </data>
+</root>

@@ -23,6 +23,11 @@ namespace Ink_Canvas
         private object lastBorderMouseDownObject;
 
         /// <summary>
+        /// 暂存待插入白板的克隆墨迹（在弹出目标选择菜单期间使用）
+        /// </summary>
+        private StrokeCollection _pendingInsertStrokes;
+
+        /// <summary>
         /// 处理边界鼠标按下事件
         /// </summary>
         /// <param name="sender">事件发送者</param>
@@ -36,7 +41,8 @@ namespace Ink_Canvas
             // 如果发送者是 BoardRandomDrawToolBtn 或 BoardSingleDrawToolBtn，且它们被隐藏，则不处理事件
             if (sender is FrameworkElement element)
             {
-                if ((element == BoardRandomDrawToolBtn || element == BoardSingleDrawToolBtn) &&
+                if ((BoardRandomDrawToolBtn != null && element == BoardRandomDrawToolBtn ||
+                     BoardSingleDrawToolBtn != null && element == BoardSingleDrawToolBtn) &&
                     element.Visibility != Visibility.Visible)
                 {
                     return;
@@ -93,6 +99,108 @@ namespace Ink_Canvas
             var strokes = inkCanvas.GetSelectedStrokes();
             inkCanvas.Select(new StrokeCollection());
             CloneStrokesToNewBoard(strokes);
+        }
+
+        /// <summary>
+        /// 处理墨迹选择插入白板鼠标释放事件
+        /// 克隆选中墨迹，弹出目标选择菜单（小白板/常规白板），确认后插入
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        private void BorderStrokeSelectionInsertToWhiteboard_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (TryBlockFrozenPageMutation("插入墨迹到白板")) return;
+            if (lastBorderMouseDownObject != sender) return;
+
+            var strokes = inkCanvas.GetSelectedStrokes();
+            if (strokes.Count == 0) return;
+
+            // 参考ICA模式：先取消选中，再克隆（确保克隆出的墨迹不携带选中态）
+            inkCanvas.Select(new StrokeCollection());
+            _pendingInsertStrokes = strokes.Clone();
+
+            // 在发送者附近弹出目标选择菜单
+            if (sender is FrameworkElement fe)
+            {
+                InsertToWhiteboardPopup.PlacementTarget = fe;
+                InsertToWhiteboardPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            }
+            InsertToWhiteboardPopup.IsOpen = true;
+        }
+
+        /// <summary>
+        /// 将暂存的墨迹插入常规白板（当前页面）
+        /// 参考ICA的BorderStrokeSelectionCloneToBoardOrNewPage_Click模式
+        /// </summary>
+        internal void ExecuteInsertStrokesToRegularWhiteboard()
+        {
+            if (_pendingInsertStrokes == null || _pendingInsertStrokes.Count == 0) return;
+
+            try
+            {
+                // 确保主画布上没有选中状态（防止选中态渲染污染克隆墨迹）
+                inkCanvas.Select(new StrokeCollection());
+                HideSelectionDisplay();
+                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+
+                if (currentMode != 1)
+                {
+                    // 从屏幕批注模式切换到白板模式（内部会 save→clear→restore）
+                    ImageBlackboard_MouseUp(null, null);
+                }
+
+                // 切换模式后，白板画布已就绪，此时加入克隆的墨迹
+                inkCanvas.Strokes.Add(_pendingInsertStrokes);
+                timeMachine.CommitStrokeUserInputHistory(_pendingInsertStrokes);
+
+                LogHelper.WriteLogToFile($"墨迹插入常规白板完成: {_pendingInsertStrokes.Count} 个墨迹");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"墨迹插入常规白板失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+            finally
+            {
+                _pendingInsertStrokes = null;
+            }
+        }
+
+        /// <summary>
+        /// 将暂存的墨迹插入小白板（浮窗）的当前页面
+        /// </summary>
+        internal void ExecuteInsertStrokesToMiniWhiteboard()
+        {
+            if (_pendingInsertStrokes == null || _pendingInsertStrokes.Count == 0) return;
+
+            try
+            {
+                // 确保主画布上没有选中状态
+                inkCanvas.Select(new StrokeCollection());
+                HideSelectionDisplay();
+                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+
+                if (_miniWhiteboardWindow == null || !_miniWhiteboardWindow.IsLoaded)
+                {
+                    OpenMiniWhiteboard();
+                }
+                else if (!_miniWhiteboardWindow.IsVisible)
+                {
+                    _miniWhiteboardWindow.Show();
+                    _miniWhiteboardWindow.Activate();
+                }
+
+                _miniWhiteboardWindow.InsertStrokes(_pendingInsertStrokes);
+
+                LogHelper.WriteLogToFile($"墨迹插入小白板完成: {_pendingInsertStrokes.Count} 个墨迹");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"墨迹插入小白板失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+            finally
+            {
+                _pendingInsertStrokes = null;
+            }
         }
 
         /// <summary>
@@ -636,7 +744,7 @@ namespace Ink_Canvas
             }
 
             // 检查是否有图片元素被选中（通过currentSelectedElement）
-            if (currentSelectedElement != null && (currentSelectedElement is Image || currentSelectedElement is PdfEmbeddedView))
+            if (currentSelectedElement != null && IsBitmapLikeCanvasElement(currentSelectedElement))
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                 HideSelectionDisplay();

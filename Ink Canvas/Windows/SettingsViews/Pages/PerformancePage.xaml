@@ -1,0 +1,338 @@
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.PerformancePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
+      xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+      xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+      xmlns:sys="clr-namespace:System;assembly=mscorlib"
+      xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+      mc:Ignorable="d"
+      Title="{x:Static props:PerformanceStrings.Title}">
+
+    <ScrollViewer PanningMode="VerticalFirst">
+        <Grid Margin="59,0,59,0">
+            <FrameworkElement.Resources>
+                <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
+                <Style x:Key="SettingsSectionHeaderTextBlockStyle"
+                    BasedOn="{StaticResource BodyStrongTextBlockStyle}"
+                    TargetType="TextBlock">
+                    <Style.Setters>
+                        <Setter Property="Margin" Value="1,30,0,6" />
+                    </Style.Setters>
+                </Style>
+                <Style x:Key="MetricValueStyle" TargetType="TextBlock">
+                    <Style.Setters>
+                        <Setter Property="FontFamily" Value="Consolas" />
+                        <Setter Property="FontSize" Value="14" />
+                        <Setter Property="VerticalAlignment" Value="Center" />
+                    </Style.Setters>
+                </Style>
+            </FrameworkElement.Resources>
+            <Grid>
+                <ikw:SimpleStackPanel MaxWidth="1000"
+                    HorizontalAlignment="Stretch"
+                    Spacing="{StaticResource SettingsCardSpacing}">
+
+                    <!-- 性能监测开关 -->
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="{x:Static props:PerformanceStrings.Title}" />
+
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchEnableMonitoring"
+                        Header="{x:Static props:PerformanceStrings.EnableMonitoring}"
+                        Description="{x:Static props:PerformanceStrings.EnableMonitoringHint}"
+                        Icon="{x:Static ui:SegoeFluentIcons.SpeedHigh}"
+                        IsOn="False"
+                        Toggled="ToggleSwitchEnableMonitoring_Toggled"/>
+
+                    <!-- 当前运行状态 -->
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="{x:Static props:PerformanceStrings.CurrentSession}" />
+
+                    <ui:SettingsCard x:Name="CardCurrentStatus"
+                        Header="{x:Static props:PerformanceStrings.MonitoringInactive}"
+                        Description=""
+                        ContentAlignment="Left">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.PreviewLink}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel x:Name="PanelCurrentMetrics" Spacing="12"
+                            Orientation="Horizontal" Visibility="Collapsed">
+                            <ikw:SimpleStackPanel Spacing="2">
+                                <TextBlock Text="{x:Static props:PerformanceStrings.CpuUsage}"
+                                    FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <TextBlock x:Name="TextCurrentCpu"
+                                    Style="{StaticResource MetricValueStyle}" Text="-- %" />
+                            </ikw:SimpleStackPanel>
+                            <Rectangle Width="1" Height="36"
+                                Fill="{DynamicResource ControlStrokeColorDefaultBrush}" />
+                            <ikw:SimpleStackPanel Spacing="2">
+                                <TextBlock Text="{x:Static props:PerformanceStrings.MemoryUsage}"
+                                    FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <TextBlock x:Name="TextCurrentMemory"
+                                    Style="{StaticResource MetricValueStyle}" Text="-- MB" />
+                            </ikw:SimpleStackPanel>
+                            <Rectangle Width="1" Height="36"
+                                Fill="{DynamicResource ControlStrokeColorDefaultBrush}" />
+                            <ikw:SimpleStackPanel Spacing="2">
+                                <TextBlock Text="{x:Static props:PerformanceStrings.SystemCpuUsage}"
+                                    FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <TextBlock x:Name="TextSystemCpu"
+                                    Style="{StaticResource MetricValueStyle}" Text="-- %" />
+                            </ikw:SimpleStackPanel>
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <!-- 历史记录 -->
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="{x:Static props:PerformanceStrings.HistorySection}" />
+
+                    <ui:SettingsCard x:Name="CardHistory"
+                        Header="{x:Static props:PerformanceStrings.HistoryHint}"
+                        ContentAlignment="Left">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AreaChart}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Spacing="8">
+                            <TextBlock x:Name="TextHistorySummary"
+                                Text="{x:Static props:PerformanceStrings.NoHistory}"
+                                FontSize="14" />
+                            <ikw:SimpleStackPanel x:Name="PanelHistoryStats" Spacing="16"
+                                Orientation="Horizontal" Visibility="Collapsed">
+                                <ikw:SimpleStackPanel Spacing="2">
+                                    <TextBlock Text="{x:Static props:PerformanceStrings.AvgCpuLabel}"
+                                        FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock x:Name="TextHistoryAvgCpu"
+                                        Style="{StaticResource MetricValueStyle}" />
+                                </ikw:SimpleStackPanel>
+                                <ikw:SimpleStackPanel Spacing="2">
+                                    <TextBlock Text="{x:Static props:PerformanceStrings.PeakCpuLabel}"
+                                        FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock x:Name="TextHistoryPeakCpu"
+                                        Style="{StaticResource MetricValueStyle}" />
+                                </ikw:SimpleStackPanel>
+                                <ikw:SimpleStackPanel Spacing="2">
+                                    <TextBlock Text="{x:Static props:PerformanceStrings.AvgMemoryLabel}"
+                                        FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock x:Name="TextHistoryAvgMem"
+                                        Style="{StaticResource MetricValueStyle}" />
+                                </ikw:SimpleStackPanel>
+                                <ikw:SimpleStackPanel Spacing="2">
+                                    <TextBlock Text="{x:Static props:PerformanceStrings.PeakMemoryLabel}"
+                                        FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock x:Name="TextHistoryPeakMem"
+                                        Style="{StaticResource MetricValueStyle}" />
+                                </ikw:SimpleStackPanel>
+                            </ikw:SimpleStackPanel>
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard x:Name="CardHistorySmoothing"
+                        Header="{x:Static props:PerformanceStrings.InkSmoothingSection}"
+                        Description="{x:Static props:PerformanceStrings.HistoryHint}"
+                        ContentAlignment="Left">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Draw}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Spacing="8">
+                            <TextBlock x:Name="TextSmoothingHistorySummary"
+                                Text="{x:Static props:PerformanceStrings.NoHistory}"
+                                FontSize="14" />
+                            <ikw:SimpleStackPanel x:Name="PanelSmoothingHistoryStats" Spacing="16"
+                                Orientation="Horizontal" Visibility="Collapsed">
+                                <ikw:SimpleStackPanel Spacing="2">
+                                    <TextBlock Text="{x:Static props:PerformanceStrings.InkSmoothingAvgTotal}"
+                                        FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock x:Name="TextSmoothingHistoryAvgTotal"
+                                        Style="{StaticResource MetricValueStyle}" />
+                                </ikw:SimpleStackPanel>
+                                <ikw:SimpleStackPanel Spacing="2">
+                                    <TextBlock Text="{x:Static props:PerformanceStrings.InkSmoothingMaxTotal}"
+                                        FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock x:Name="TextSmoothingHistoryMaxTotal"
+                                        Style="{StaticResource MetricValueStyle}" />
+                                </ikw:SimpleStackPanel>
+                                <ikw:SimpleStackPanel Spacing="2">
+                                    <TextBlock Text="{x:Static props:PerformanceStrings.InkSmoothingAvgBezier}"
+                                        FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock x:Name="TextSmoothingHistoryAvgBezier"
+                                        Style="{StaticResource MetricValueStyle}" />
+                                </ikw:SimpleStackPanel>
+                                <ikw:SimpleStackPanel Spacing="2">
+                                    <TextBlock Text="{x:Static props:PerformanceStrings.InkSmoothingAvgResample}"
+                                        FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock x:Name="TextSmoothingHistoryAvgResample"
+                                        Style="{StaticResource MetricValueStyle}" />
+                                </ikw:SimpleStackPanel>
+                            </ikw:SimpleStackPanel>
+                            <ikw:SimpleStackPanel x:Name="PanelSmoothingHistoryPointStats" Spacing="16"
+                                Orientation="Horizontal" Visibility="Collapsed">
+                                <ikw:SimpleStackPanel Spacing="2">
+                                    <TextBlock Text="{x:Static props:PerformanceStrings.InkSmoothingAvgInputPoints}"
+                                        FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock x:Name="TextSmoothingHistoryAvgInput"
+                                        Style="{StaticResource MetricValueStyle}" />
+                                </ikw:SimpleStackPanel>
+                                <ikw:SimpleStackPanel Spacing="2">
+                                    <TextBlock Text="{x:Static props:PerformanceStrings.InkSmoothingAvgOutputPoints}"
+                                        FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock x:Name="TextSmoothingHistoryAvgOutput"
+                                        Style="{StaticResource MetricValueStyle}" />
+                                </ikw:SimpleStackPanel>
+                                <ikw:SimpleStackPanel Spacing="2">
+                                    <TextBlock Text="{x:Static props:PerformanceStrings.InkSmoothingSampleCount}"
+                                        FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock x:Name="TextSmoothingHistorySampleCount"
+                                        Style="{StaticResource MetricValueStyle}" />
+                                </ikw:SimpleStackPanel>
+                            </ikw:SimpleStackPanel>
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard x:Name="CardClearHistory"
+                        Header="{x:Static props:PerformanceStrings.HistorySection}"
+                        Description="{x:Static props:PerformanceStrings.ClearHistory}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <Button Content="{x:Static props:PerformanceStrings.ClearHistory}"
+                                Click="CardClearHistory_Click" />
+                    </ui:SettingsCard>
+
+                    <!-- 设备性能评估 -->
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="{x:Static props:PerformanceStrings.DeviceScoreSection}" />
+
+                    <ui:SettingsCard x:Name="CardDeviceScore"
+                        Header="{x:Static props:PerformanceStrings.DeviceScoreHint}"
+                        ContentAlignment="Left">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Health}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Spacing="12">
+                            <ikw:SimpleStackPanel x:Name="PanelDeviceScoreResult" Spacing="8"
+                                Visibility="Collapsed">
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="16">
+                                    <ikw:SimpleStackPanel Spacing="2">
+                                        <TextBlock Text="{x:Static props:PerformanceStrings.DeviceScoreResult}"
+                                            FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock x:Name="TextOverallScore"
+                                            FontSize="28" FontWeight="SemiBold" />
+                                    </ikw:SimpleStackPanel>
+                                    <Rectangle Width="1" Height="48"
+                                        Fill="{DynamicResource ControlStrokeColorDefaultBrush}" />
+                                    <ikw:SimpleStackPanel Spacing="2">
+                                        <TextBlock Text="{x:Static props:PerformanceStrings.CpuScore}"
+                                            FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock x:Name="TextCpuScore"
+                                            Style="{StaticResource MetricValueStyle}" />
+                                    </ikw:SimpleStackPanel>
+                                    <ikw:SimpleStackPanel Spacing="2">
+                                        <TextBlock Text="{x:Static props:PerformanceStrings.MemoryScore}"
+                                            FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock x:Name="TextMemoryScore"
+                                            Style="{StaticResource MetricValueStyle}" />
+                                    </ikw:SimpleStackPanel>
+                                    <ikw:SimpleStackPanel Spacing="2">
+                                        <TextBlock Text="{x:Static props:PerformanceStrings.DiskScore}"
+                                            FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock x:Name="TextDiskScore"
+                                            Style="{StaticResource MetricValueStyle}" />
+                                    </ikw:SimpleStackPanel>
+                                </ikw:SimpleStackPanel>
+                                <TextBlock x:Name="TextScoreDescription"
+                                    FontSize="14" TextWrapping="Wrap" />
+                                <TextBlock x:Name="TextLastTestTime"
+                                    FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                            </ikw:SimpleStackPanel>
+                            <TextBlock x:Name="TextDeviceScorePlaceholder"
+                                Text="{x:Static props:PerformanceStrings.DeviceScoreUnknown}"
+                                FontSize="14"
+                                Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard x:Name="CardRunDeviceTest"
+                        Header="{x:Static props:PerformanceStrings.DeviceScoreSection}"
+                        Description="{x:Static props:PerformanceStrings.DeviceScoreHint}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Play}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <Button x:Name="BtnRunDeviceTest"
+                                Content="{x:Static props:PerformanceStrings.RunDeviceTest}"
+                                Click="CardRunDeviceTest_Click" />
+                    </ui:SettingsCard>
+
+                    <!-- 墨迹纠正耗时 -->
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="{x:Static props:PerformanceStrings.InkSmoothingSection}" />
+
+                    <ui:SettingsCard x:Name="CardInkSmoothing"
+                        Header="{x:Static props:PerformanceStrings.InkSmoothingHint}"
+                        ContentAlignment="Left">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Draw}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Spacing="12">
+                            <TextBlock x:Name="TextInkSmoothingInactive"
+                                Text="{x:Static props:PerformanceStrings.InkSmoothingInactive}"
+                                FontSize="14"
+                                Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <ikw:SimpleStackPanel x:Name="PanelInkSmoothingStats" Spacing="16"
+                                Orientation="Horizontal" Visibility="Collapsed">
+                                <ikw:SimpleStackPanel Spacing="2">
+                                    <TextBlock Text="{x:Static props:PerformanceStrings.InkSmoothingAvgTotal}"
+                                        FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock x:Name="TextSmoothingAvgTotal"
+                                        Style="{StaticResource MetricValueStyle}" />
+                                </ikw:SimpleStackPanel>
+                                <ikw:SimpleStackPanel Spacing="2">
+                                    <TextBlock Text="{x:Static props:PerformanceStrings.InkSmoothingMaxTotal}"
+                                        FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock x:Name="TextSmoothingMaxTotal"
+                                        Style="{StaticResource MetricValueStyle}" />
+                                </ikw:SimpleStackPanel>
+                                <ikw:SimpleStackPanel Spacing="2">
+                                    <TextBlock Text="{x:Static props:PerformanceStrings.InkSmoothingAvgBezier}"
+                                        FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock x:Name="TextSmoothingAvgBezier"
+                                        Style="{StaticResource MetricValueStyle}" />
+                                </ikw:SimpleStackPanel>
+                                <ikw:SimpleStackPanel Spacing="2">
+                                    <TextBlock Text="{x:Static props:PerformanceStrings.InkSmoothingAvgResample}"
+                                        FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock x:Name="TextSmoothingAvgResample"
+                                        Style="{StaticResource MetricValueStyle}" />
+                                </ikw:SimpleStackPanel>
+                            </ikw:SimpleStackPanel>
+                            <ikw:SimpleStackPanel x:Name="PanelInkSmoothingPointStats" Spacing="16"
+                                Orientation="Horizontal" Visibility="Collapsed">
+                                <ikw:SimpleStackPanel Spacing="2">
+                                    <TextBlock Text="{x:Static props:PerformanceStrings.InkSmoothingAvgInputPoints}"
+                                        FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock x:Name="TextSmoothingAvgInput"
+                                        Style="{StaticResource MetricValueStyle}" />
+                                </ikw:SimpleStackPanel>
+                                <ikw:SimpleStackPanel Spacing="2">
+                                    <TextBlock Text="{x:Static props:PerformanceStrings.InkSmoothingAvgOutputPoints}"
+                                        FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock x:Name="TextSmoothingAvgOutput"
+                                        Style="{StaticResource MetricValueStyle}" />
+                                </ikw:SimpleStackPanel>
+                                <ikw:SimpleStackPanel Spacing="2">
+                                    <TextBlock Text="{x:Static props:PerformanceStrings.InkSmoothingSampleCount}"
+                                        FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock x:Name="TextSmoothingSampleCount"
+                                        Style="{StaticResource MetricValueStyle}" />
+                                </ikw:SimpleStackPanel>
+                            </ikw:SimpleStackPanel>
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <Rectangle Height="48" />
+                </ikw:SimpleStackPanel>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</ui:Page>

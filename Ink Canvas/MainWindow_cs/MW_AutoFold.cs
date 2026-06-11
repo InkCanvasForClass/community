@@ -5,8 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
 
 namespace Ink_Canvas
 {
@@ -21,6 +21,13 @@ namespace Ink_Canvas
         /// 浮动栏正在改变隐藏模式的标志，用于防止重复操作。
         /// </summary>
         private bool isFloatingBarChangingHideMode;
+
+        private int _sidePanelAnimVersion = 0;
+
+        /// <summary>
+        /// 自动收起侧栏计时器
+        /// </summary>
+        private DispatcherTimer _autoCollapseTimer;
 
         /// <summary>
         /// 立即关闭白板模式，恢复到批注模式。
@@ -123,7 +130,7 @@ namespace Ink_Canvas
                 if (currentMode != 0) CloseWhiteboardImmediately();
                 if (IsAnnotating)
                     if (foldFloatingBarByUser && inkCanvas.Strokes.Count > 2)
-                        ShowNotification("正在清空墨迹并收纳至侧边栏，可进入批注模式后通过【撤销】功能来恢复原先墨迹。");
+                        ShowNotification(Properties.MainWindowStrings.Main_AutoFold_ClearingAndFolding);
                 lastBorderMouseDownObject = sender;
                 CursorWithDelIcon_Click(sender, null);
             });
@@ -163,10 +170,11 @@ namespace Ink_Canvas
         /// 2. 如果显示快捷面板，则隐藏右侧快捷面板，显示左侧快捷面板并执行动画
         /// 3. 否则，调用展开浮动栏的方法
         /// </remarks>
-        private async void LeftUnFoldButtonDisplayQuickPanel_MouseUp(object sender, MouseButtonEventArgs e)
+        private async void LeftUnFoldButtonDisplayQuickPanel_MouseUp(object sender, RoutedEventArgs e)
         {
             if (Settings.Appearance.IsShowQuickPanel)
             {
+                SidePannelMarginAnimation(-50);
                 HideRightQuickPanel();
                 LeftUnFoldButtonQuickPanel.Visibility = Visibility.Visible;
                 await Dispatcher.InvokeAsync(() =>
@@ -174,8 +182,8 @@ namespace Ink_Canvas
                     var marginAnimation = new ThicknessAnimation
                     {
                         Duration = TimeSpan.FromSeconds(0.1),
-                        From = new Thickness(-50, 0, 0, Settings.Appearance.QuickPanelBottomOffset),
-                        To = new Thickness(-1, 0, 0, Settings.Appearance.QuickPanelBottomOffset)
+                        From = new Thickness(QuickPanelFoldedMargin, 0, 0, Settings.Appearance.QuickPanelBottomOffset),
+                        To = new Thickness(QuickPanelUnfoldedMargin, 0, 0, Settings.Appearance.QuickPanelBottomOffset)
                     };
                     marginAnimation.EasingFunction = new CubicEase();
                     LeftUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, marginAnimation);
@@ -184,12 +192,15 @@ namespace Ink_Canvas
 
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    LeftUnFoldButtonQuickPanel.Margin = new Thickness(-1, 0, 0, Settings.Appearance.QuickPanelBottomOffset);
+                    LeftUnFoldButtonQuickPanel.Margin = new Thickness(QuickPanelUnfoldedMargin, 0, 0, Settings.Appearance.QuickPanelBottomOffset);
                 });
+
+                StartAutoCollapseQuickPanelTimer();
             }
             else
             {
-                UnFoldFloatingBar_MouseUp(sender, e);
+                var mouseEventArgs = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left);
+                UnFoldFloatingBar_MouseUp(sender, mouseEventArgs);
             }
         }
 
@@ -197,17 +208,18 @@ namespace Ink_Canvas
         /// 处理右侧展开按钮显示快捷面板的鼠标点击事件。
         /// </summary>
         /// <param name="sender">事件发送者。</param>
-        /// <param name="e">鼠标按钮事件参数。</param>
+        /// <param name="e">路由事件参数。</param>
         /// <remarks>
         /// 操作包括：
         /// 1. 检查是否显示快捷面板
         /// 2. 如果显示快捷面板，则隐藏左侧快捷面板，显示右侧快捷面板并执行动画
         /// 3. 否则，调用展开浮动栏的方法
         /// </remarks>
-        private async void RightUnFoldButtonDisplayQuickPanel_MouseUp(object sender, MouseButtonEventArgs e)
+        private async void RightUnFoldButtonDisplayQuickPanel_MouseUp(object sender, RoutedEventArgs e)
         {
             if (Settings.Appearance.IsShowQuickPanel)
             {
+                SidePannelMarginAnimation(-50);
                 HideLeftQuickPanel();
                 RightUnFoldButtonQuickPanel.Visibility = Visibility.Visible;
                 await Dispatcher.InvokeAsync(() =>
@@ -215,8 +227,8 @@ namespace Ink_Canvas
                     var marginAnimation = new ThicknessAnimation
                     {
                         Duration = TimeSpan.FromSeconds(0.1),
-                        From = new Thickness(0, 0, -50, Settings.Appearance.QuickPanelBottomOffset),
-                        To = new Thickness(0, 0, -1, Settings.Appearance.QuickPanelBottomOffset)
+                        From = new Thickness(0, 0, QuickPanelFoldedMargin, Settings.Appearance.QuickPanelBottomOffset),
+                        To = new Thickness(0, 0, QuickPanelUnfoldedMargin, Settings.Appearance.QuickPanelBottomOffset)
                     };
                     marginAnimation.EasingFunction = new CubicEase();
                     RightUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, marginAnimation);
@@ -225,12 +237,15 @@ namespace Ink_Canvas
 
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    RightUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, -1, Settings.Appearance.QuickPanelBottomOffset);
+                    RightUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, QuickPanelUnfoldedMargin, Settings.Appearance.QuickPanelBottomOffset);
                 });
+
+                StartAutoCollapseQuickPanelTimer();
             }
             else
             {
-                UnFoldFloatingBar_MouseUp(sender, e);
+                var mouseEventArgs = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left);
+                UnFoldFloatingBar_MouseUp(sender, mouseEventArgs);
             }
         }
 
@@ -252,8 +267,8 @@ namespace Ink_Canvas
                     var marginAnimation = new ThicknessAnimation
                     {
                         Duration = TimeSpan.FromSeconds(0.1),
-                        From = new Thickness(-1, 0, 0, Settings.Appearance.QuickPanelBottomOffset),
-                        To = new Thickness(-50, 0, 0, Settings.Appearance.QuickPanelBottomOffset)
+                        From = new Thickness(QuickPanelUnfoldedMargin, 0, 0, Settings.Appearance.QuickPanelBottomOffset),
+                        To = new Thickness(QuickPanelFoldedMargin, 0, 0, Settings.Appearance.QuickPanelBottomOffset)
                     };
                     marginAnimation.EasingFunction = new CubicEase();
                     LeftUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, marginAnimation);
@@ -262,7 +277,7 @@ namespace Ink_Canvas
 
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    LeftUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, -50, Settings.Appearance.QuickPanelBottomOffset);
+                    LeftUnFoldButtonQuickPanel.Margin = new Thickness(QuickPanelFoldedMargin, 0, 0, Settings.Appearance.QuickPanelBottomOffset);
                     LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
                 });
             }
@@ -286,8 +301,8 @@ namespace Ink_Canvas
                     var marginAnimation = new ThicknessAnimation
                     {
                         Duration = TimeSpan.FromSeconds(0.1),
-                        From = new Thickness(0, 0, -1, Settings.Appearance.QuickPanelBottomOffset),
-                        To = new Thickness(0, 0, -50, Settings.Appearance.QuickPanelBottomOffset)
+                        From = new Thickness(0, 0, QuickPanelUnfoldedMargin, Settings.Appearance.QuickPanelBottomOffset),
+                        To = new Thickness(0, 0, QuickPanelFoldedMargin, Settings.Appearance.QuickPanelBottomOffset)
                     };
                     marginAnimation.EasingFunction = new CubicEase();
                     RightUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, marginAnimation);
@@ -296,7 +311,7 @@ namespace Ink_Canvas
 
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    RightUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, -50, Settings.Appearance.QuickPanelBottomOffset);
+                    RightUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, QuickPanelFoldedMargin, Settings.Appearance.QuickPanelBottomOffset);
                     RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
                 });
             }
@@ -314,8 +329,10 @@ namespace Ink_Canvas
         /// </remarks>
         private void HideQuickPanel_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            StopAutoCollapseQuickPanelTimer();
             HideLeftQuickPanel();
             HideRightQuickPanel();
+            SidePannelMarginAnimation(-10);
         }
 
         /// <summary>
@@ -416,10 +433,23 @@ namespace Ink_Canvas
                 // 新只在屏幕模式下显示浮动栏
                 if (currentMode == 0)
                 {
+                    // 强制更新布局以确保ActualWidth正确
+                    ViewboxFloatingBar.UpdateLayout();
+
+                    // 等待一小段时间让布局完全更新
+                    Task.Delay(50);
+
+                    // 再次强制更新布局
+                    ViewboxFloatingBar.UpdateLayout();
+
+                    // 强制重新测量和排列
+                    ViewboxFloatingBar.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                    ViewboxFloatingBar.Arrange(new Rect(ViewboxFloatingBar.DesiredSize));
+
                     if (IsInPptPresentationMode)
                         ViewboxFloatingBarMarginAnimation(60);
                     else
-                        ViewboxFloatingBarMarginAnimation(100, true);
+                        PureViewboxFloatingBarMarginAnimationInDesktopMode();
                 }
                 SidePannelMarginAnimation(-50, !unfoldFloatingBarByUser);
             });
@@ -463,9 +493,17 @@ namespace Ink_Canvas
         /// </remarks>
         private async void SidePannelMarginAnimation(int MarginFromEdge, bool isNoAnimation = false) // Possible value: -50, -10
         {
+            int thisVersion = ++_sidePanelAnimVersion;
+
             await Dispatcher.InvokeAsync(() =>
             {
-                if (MarginFromEdge == -10) LeftSidePanel.Visibility = Visibility.Visible;
+                if (MarginFromEdge == -10)
+                {
+                    if (isFloatingBarFolded)
+                        LeftSidePanel.Visibility = Visibility.Visible;
+                    else
+                        LeftSidePanel.Visibility = Visibility.Collapsed;
+                }
 
                 var LeftSidePanelmarginAnimation = new ThicknessAnimation
                 {
@@ -487,6 +525,8 @@ namespace Ink_Canvas
 
             await Task.Delay(600);
 
+            if (_sidePanelAnimVersion != thisVersion) return;
+
             await Dispatcher.InvokeAsync(() =>
             {
                 LeftSidePanel.Margin = new Thickness(MarginFromEdge, 0, 0, Settings.Appearance.QuickPanelBottomOffset);
@@ -495,6 +535,127 @@ namespace Ink_Canvas
                 if (MarginFromEdge == -50) LeftSidePanel.Visibility = Visibility.Collapsed;
             });
             isFloatingBarChangingHideMode = false;
+        }
+
+        /// <summary>
+        /// 启动自动收起侧栏计时器
+        /// </summary>
+        internal void StartAutoCollapseQuickPanelTimer()
+        {
+            if (!Settings.Appearance.IsAutoCollapseQuickPanel) return;
+
+            StopAutoCollapseQuickPanelTimer();
+
+            _autoCollapseTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(Settings.Appearance.AutoCollapseQuickPanelDelay)
+            };
+            _autoCollapseTimer.Tick += AutoCollapseTimer_Tick;
+            _autoCollapseTimer.Start();
+        }
+
+        /// <summary>
+        /// 停止自动收起侧栏计时器
+        /// </summary>
+        internal void StopAutoCollapseQuickPanelTimer()
+        {
+            if (_autoCollapseTimer != null)
+            {
+                _autoCollapseTimer.Stop();
+                _autoCollapseTimer.Tick -= AutoCollapseTimer_Tick;
+                _autoCollapseTimer = null;
+            }
+        }
+
+        /// <summary>
+        /// 自动收起侧栏计时器到期时执行
+        /// </summary>
+        private void AutoCollapseTimer_Tick(object sender, EventArgs e)
+        {
+            StopAutoCollapseQuickPanelTimer();
+            HideQuickPanelAndResetMargin();
+        }
+
+        /// <summary>
+        /// 更新自动收起侧栏计时器（根据当前设置）
+        /// </summary>
+        internal void UpdateAutoCollapseQuickPanelTimer()
+        {
+            if (!Settings.Appearance.IsAutoCollapseQuickPanel)
+            {
+                StopAutoCollapseQuickPanelTimer();
+            }
+        }
+
+        /// <summary>
+        /// 隐藏快捷面板并重置侧边栏边距
+        /// </summary>
+        private void HideQuickPanelAndResetMargin()
+        {
+            if (LeftUnFoldButtonQuickPanel.Visibility == Visibility.Visible ||
+                RightUnFoldButtonQuickPanel.Visibility == Visibility.Visible)
+            {
+                HideLeftQuickPanel();
+                HideRightQuickPanel();
+                SidePannelMarginAnimation(-10);
+            }
+        }
+
+        /// <summary>
+        /// 处理主窗口上的鼠标按下事件，用于检测点击其他区域时自动收起侧栏
+        /// </summary>
+        internal void HandleAutoCollapseOnMouseDown(MouseButtonEventArgs e)
+        {
+            if (!Settings.Appearance.IsAutoCollapseQuickPanel) return;
+            if (!isFloatingBarFolded) return;
+
+            bool isQuickPanelVisible = LeftUnFoldButtonQuickPanel.Visibility == Visibility.Visible ||
+                                       RightUnFoldButtonQuickPanel.Visibility == Visibility.Visible;
+
+            if (!isQuickPanelVisible) return;
+
+            // 检查点击目标是否在快捷面板或侧边栏按钮内
+            var hitTarget = e.OriginalSource as DependencyObject;
+            if (hitTarget != null)
+            {
+                // 如果点击在快捷面板或侧边栏按钮内，不收起
+                if (IsDescendantOf(hitTarget, LeftUnFoldButtonQuickPanel) ||
+                    IsDescendantOf(hitTarget, RightUnFoldButtonQuickPanel) ||
+                    IsDescendantOf(hitTarget, LeftSidePanel) ||
+                    IsDescendantOf(hitTarget, RightSidePanel))
+                {
+                    // 重置计时器
+                    StartAutoCollapseQuickPanelTimer();
+                    return;
+                }
+            }
+
+            // 点击了其他区域，立即收起
+            StopAutoCollapseQuickPanelTimer();
+            HideQuickPanelAndResetMargin();
+        }
+
+        /// <summary>
+        /// 检查一个元素是否是另一个元素的子元素
+        /// </summary>
+        private static bool IsDescendantOf(DependencyObject child, FrameworkElement parent)
+        {
+            if (parent == null) return false;
+            var current = child;
+            while (current != null)
+            {
+                if (current == parent) return true;
+                current = System.Windows.Media.VisualTreeHelper.GetParent(current);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 主窗口鼠标按下预览事件，用于检测点击其他区域时自动收起侧栏
+        /// </summary>
+        private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            HandleAutoCollapseOnMouseDown(e);
         }
 
         private bool IsFloatingBarUiAbsentFromScreens()
@@ -576,5 +737,6 @@ namespace Ink_Canvas
         {
             _ = VerifyStartupFoldAbsenceAfterDelayAsync();
         }
+
     }
 }

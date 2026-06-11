@@ -1,0 +1,270 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="ActionsTitle" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="AnimationMode" xml:space="preserve">
+    <value>Animation mode</value>
+  </data>
+  <data name="AnimationModeHint" xml:space="preserve">
+    <value>Control animation intensity for notification enter, expand, and exit.</value>
+  </data>
+  <data name="AnimationOff" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="AnimationSimple" xml:space="preserve">
+    <value>Simple</value>
+  </data>
+  <data name="AnimationStandard" xml:space="preserve">
+    <value>Standard</value>
+  </data>
+  <data name="BehaviorTitle" xml:space="preserve">
+    <value>Display behavior</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="DefaultTitle" xml:space="preserve">
+    <value>Notification</value>
+  </data>
+  <data name="DictationDoNotDisturb" xml:space="preserve">
+    <value>Popup do not disturb</value>
+  </data>
+  <data name="DictationDoNotDisturbHint" xml:space="preserve">
+    <value>Suppress popups and system notifications in selected scenarios while keeping messages in history.</value>
+  </data>
+  <data name="DictationDoNotDisturbPpt" xml:space="preserve">
+    <value>Do not notify during PPT slideshow</value>
+  </data>
+  <data name="DictationDoNotDisturbPptHint" xml:space="preserve">
+    <value>Suppress dynamic notifications, legacy notifications, and Windows toasts while presenting slides.</value>
+  </data>
+  <data name="DictationDoNotDisturbWhiteboard" xml:space="preserve">
+    <value>Do not notify in whiteboard mode</value>
+  </data>
+  <data name="DictationDoNotDisturbWhiteboardHint" xml:space="preserve">
+    <value>Suppress dynamic notifications, legacy notifications, and Windows toasts in whiteboard or blackboard mode.</value>
+  </data>
+  <data name="EnableAnnouncements" xml:space="preserve">
+    <value>Enable announcements</value>
+  </data>
+  <data name="EnableAnnouncementsHint" xml:space="preserve">
+    <value>Fetch announcements after startup and receive realtime announcement pushes.</value>
+  </data>
+  <data name="EnableDynamic" xml:space="preserve">
+    <value>Enable dynamic notifications</value>
+  </data>
+  <data name="EnableDynamicHint" xml:space="preserve">
+    <value>Use a top pill notification for announcements, updates, and local messages.</value>
+  </data>
+  <data name="EnableForcePopup" xml:space="preserve">
+    <value>Enable important announcement popups</value>
+  </data>
+  <data name="EnableForcePopupHint" xml:space="preserve">
+    <value>Important announcements can open expanded by default while remaining dismissible.</value>
+  </data>
+  <data name="EnableWindowsToast" xml:space="preserve">
+    <value>Enable Windows system notifications</value>
+  </data>
+  <data name="EnableWindowsToastHint" xml:space="preserve">
+    <value>Important notices and updates may also appear as system toasts.</value>
+  </data>
+  <data name="GroupTitle" xml:space="preserve">
+    <value>Notification management</value>
+  </data>
+  <data name="ImportantDuration" xml:space="preserve">
+    <value>Important notification duration</value>
+  </data>
+  <data name="ImportantDurationHint" xml:space="preserve">
+    <value>Seconds before important messages close automatically.</value>
+  </data>
+  <data name="NavTooltip" xml:space="preserve">
+    <value>Announcement, message reminder, and dynamic notification settings</value>
+  </data>
+  <data name="NewVersion" xml:space="preserve">
+    <value>New version available: {0}</value>
+  </data>
+  <data name="OtherDuration" xml:space="preserve">
+    <value>Other notification duration</value>
+  </data>
+  <data name="OtherDurationHint" xml:space="preserve">
+    <value>Seconds before other messages close automatically.</value>
+  </data>
+  <data name="Placement" xml:space="preserve">
+    <value>Dynamic notification position</value>
+  </data>
+  <data name="PlacementHint" xml:space="preserve">
+    <value>Choose where dynamic notifications appear in the main window.</value>
+  </data>
+  <data name="PlacementTopCenter" xml:space="preserve">
+    <value>Top center</value>
+  </data>
+  <data name="PlacementTopLeft" xml:space="preserve">
+    <value>Top left</value>
+  </data>
+  <data name="PlacementTopRight" xml:space="preserve">
+    <value>Top right</value>
+  </data>
+  <data name="PlacementFloatingBarAbove" xml:space="preserve">
+    <value>Above floating toolbar</value>
+  </data>
+  <data name="Provider_Announcement" xml:space="preserve">
+    <value>Announcement provider</value>
+  </data>
+  <data name="Provider_AnnouncementDesc" xml:space="preserve">
+    <value>Fetch remote announcements and receive realtime pushes.</value>
+  </data>
+  <data name="Provider_Disabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="Provider_HttpOnly" xml:space="preserve">
+    <value>HTTP polling available, realtime push unavailable</value>
+  </data>
+  <data name="Provider_Local" xml:space="preserve">
+    <value>Local message provider</value>
+  </data>
+  <data name="Provider_LocalDesc" xml:space="preserve">
+    <value>Receives app internal prompts, errors, and plugin messages.</value>
+  </data>
+  <data name="Provider_NoToken" xml:space="preserve">
+    <value>Token not configured</value>
+  </data>
+  <data name="Provider_Reconnecting" xml:space="preserve">
+    <value>Reconnecting</value>
+  </data>
+  <data name="Provider_Running" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="Provider_Starting" xml:space="preserve">
+    <value>Starting</value>
+  </data>
+  <data name="Provider_Stopped" xml:space="preserve">
+    <value>Stopped</value>
+  </data>
+  <data name="Provider_WaitingRestart" xml:space="preserve">
+    <value>Takes effect on next startup</value>
+  </data>
+  <data name="Provider_WindowsToast" xml:space="preserve">
+    <value>Windows system notifications</value>
+  </data>
+  <data name="Provider_WindowsToastDesc" xml:space="preserve">
+    <value>Also display messages as system toasts or tray balloons.</value>
+  </data>
+  <data name="ProviderManagement" xml:space="preserve">
+    <value>Reminder provider management</value>
+  </data>
+  <data name="ProviderManagementHint" xml:space="preserve">
+    <value>View enabled and runtime status for announcement, local message, and system notification providers.</value>
+  </data>
+  <data name="ProviderRefresh" xml:space="preserve">
+    <value>Refresh status</value>
+  </data>
+  <data name="ProviderTitle" xml:space="preserve">
+    <value>Reminder providers</value>
+  </data>
+  <data name="ReminderDuration" xml:space="preserve">
+    <value>Reminder notification duration</value>
+  </data>
+  <data name="ReminderDurationHint" xml:space="preserve">
+    <value>Seconds before reminder messages close automatically.</value>
+  </data>
+  <data name="SettingsTitle" xml:space="preserve">
+    <value>Notification settings</value>
+  </data>
+  <data name="Test" xml:space="preserve">
+    <value>Test notification</value>
+  </data>
+  <data name="TestButton" xml:space="preserve">
+    <value>Send test notification</value>
+  </data>
+  <data name="TestHint" xml:space="preserve">
+    <value>Send a test notification to the message queue immediately.</value>
+  </data>
+  <data name="TestSummary" xml:space="preserve">
+    <value>Dynamic notifications and the message queue are working.</value>
+  </data>
+  <data name="TestText" xml:space="preserve">
+    <value>Test text</value>
+  </data>
+  <data name="TestTitle" xml:space="preserve">
+    <value>Notification test</value>
+  </data>
+  <data name="Type_Important" xml:space="preserve">
+    <value>Important</value>
+  </data>
+  <data name="Type_Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="Type_Reminder" xml:space="preserve">
+    <value>Reminder</value>
+  </data>
+  <data name="Type_Update" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="Type_Urgent" xml:space="preserve">
+    <value>Urgent</value>
+  </data>
+  <data name="UpdateDuration" xml:space="preserve">
+    <value>Update notification duration</value>
+  </data>
+  <data name="UpdateDurationHint" xml:space="preserve">
+    <value>Seconds before update messages close automatically.</value>
+  </data>
+  <data name="UpdateTitle" xml:space="preserve">
+    <value>New version available</value>
+  </data>
+  <data name="UrgentDuration" xml:space="preserve">
+    <value>Urgent notification duration</value>
+  </data>
+  <data name="UrgentDurationHint" xml:space="preserve">
+    <value>Seconds before urgent messages close automatically.</value>
+  </data>
+  <data name="ViewDetails" xml:space="preserve">
+    <value>View details</value>
+  </data>
+  <data name="ViewHistory" xml:space="preserve">
+    <value>View history</value>
+  </data>
+</root>

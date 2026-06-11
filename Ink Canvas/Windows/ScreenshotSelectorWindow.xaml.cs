@@ -1,4 +1,4 @@
-﻿using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -39,6 +39,11 @@ namespace Ink_Canvas
         private DateTime _lastBlankClickTime = DateTime.MinValue;
         private WpfPoint _lastBlankClickPosition;
         private readonly BitmapSource _inkOverlayPreview;
+
+        private readonly System.Windows.Media.Brush _modeButtonDefaultBrush = System.Windows.Application.Current.TryFindResource(iNKORE.UI.WPF.Modern.ThemeKeys.ButtonBackgroundKey) as System.Windows.Media.Brush
+            ?? new SolidColorBrush(Color.FromRgb(45, 45, 45));
+        private readonly System.Windows.Media.Brush _modeButtonActiveBrush = System.Windows.Application.Current.TryFindResource(iNKORE.UI.WPF.Modern.ThemeKeys.AccentFillColorDefaultBrushKey) as System.Windows.Media.Brush
+            ?? new SolidColorBrush(Color.FromRgb(0, 120, 212));
 
         private const int DoubleClickTimeThresholdMs = 300; // 双击判定时间阈值（常见范围 200~500ms）
         private const double DoubleClickDistanceThresholdPx = 12; // 双击判定位置阈值（像素）
@@ -105,10 +110,15 @@ namespace Ink_Canvas
 
         private void InitializeButtonStates()
         {
-            RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-            FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-            FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-            CameraModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            SetActiveModeButton(null);
+        }
+
+        private void SetActiveModeButton(System.Windows.Controls.Button activeButton)
+        {
+            RectangleModeButton.Background = activeButton == RectangleModeButton ? _modeButtonActiveBrush : _modeButtonDefaultBrush;
+            FreehandModeButton.Background = activeButton == FreehandModeButton ? _modeButtonActiveBrush : _modeButtonDefaultBrush;
+            FullScreenButton.Background = activeButton == FullScreenButton ? _modeButtonActiveBrush : _modeButtonDefaultBrush;
+            CameraModeButton.Background = activeButton == CameraModeButton ? _modeButtonActiveBrush : _modeButtonDefaultBrush;
         }
 
         private void InitializeInkPreview()
@@ -124,7 +134,7 @@ namespace Ink_Canvas
             {
                 IncludeInkCheckBox.IsEnabled = false;
                 IncludeInkCheckBox.Opacity = 0.6;
-                IncludeInkCheckBox.ToolTip = "当前无可预览墨迹";
+                IncludeInkCheckBox.ToolTip = Properties.MainWindowStrings.Main_Screenshot_NoInkPreview;
             }
 
             UpdateInkPreviewVisibility();
@@ -215,7 +225,7 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    CameraSelectionComboBox.Items.Add("未找到摄像头设备");
+                    CameraSelectionComboBox.Items.Add(Properties.MainWindowStrings.Main_Screenshot_NoCamera);
                     CameraSelectionComboBox.SelectedIndex = 0;
                 }
             }
@@ -250,7 +260,7 @@ namespace Ink_Canvas
                             if (bitmapSource != null)
                             {
                                 CameraPreviewImage.Source = bitmapSource;
-                                CameraStatusText.Text = "摄像头已连接";
+                                CameraStatusText.Text = Properties.MainWindowStrings.Main_Screenshot_CameraConnected;
                             }
 
                             // 释放临时位图
@@ -275,7 +285,7 @@ namespace Ink_Canvas
             {
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    CameraStatusText.Text = $"摄像头错误: {error}";
+                    CameraStatusText.Text = string.Format(Properties.MainWindowStrings.Main_Screenshot_CameraError, error);
                 }));
             }
             catch (Exception ex)
@@ -410,11 +420,9 @@ namespace Ink_Canvas
             ResetSelectionState();
 
             _isFreehandMode = false;
-            RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235)); // 蓝色
-            FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-            FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            SetActiveModeButton(RectangleModeButton);
             IncludeInkCheckBox.IsEnabled = _inkOverlayPreview != null;
-            HintText.Text = "拖拽鼠标选择矩形区域";
+            HintText.Text = Properties.MainWindowStrings.Main_Screenshot_DragToSelect;
             HintTextBorder.Visibility = Visibility.Visible;
         }
 
@@ -424,11 +432,9 @@ namespace Ink_Canvas
             ResetSelectionState();
 
             _isFreehandMode = true;
-            FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235)); // 蓝色
-            RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-            FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            SetActiveModeButton(FreehandModeButton);
             IncludeInkCheckBox.IsEnabled = _inkOverlayPreview != null;
-            HintText.Text = "按住鼠标左键自由绘制，松开后可继续调整或重新绘制，确认后再截图";
+            HintText.Text = Properties.MainWindowStrings.Main_Screenshot_FreeDrawHint;
             HintTextBorder.Visibility = Visibility.Visible;
         }
 
@@ -440,10 +446,7 @@ namespace Ink_Canvas
             // 设置全屏截图模式
             _isFreehandMode = false;
             _isCameraMode = false;
-            FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235)); // 蓝色
-            RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-            FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-            CameraModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            SetActiveModeButton(FullScreenButton);
 
             // 隐藏摄像头预览
             CameraPreviewBorder.Visibility = Visibility.Collapsed;
@@ -463,14 +466,11 @@ namespace Ink_Canvas
                 // 设置摄像头模式
                 _isFreehandMode = false;
                 _isCameraMode = true;
-                CameraModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235)); // 蓝色
-                RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-                FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-                FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+                SetActiveModeButton(CameraModeButton);
 
                 // 显示摄像头预览
                 CameraPreviewBorder.Visibility = Visibility.Visible;
-                HintText.Text = "摄像头预览模式，点击确认截图按钮进行截图";
+                HintText.Text = Properties.MainWindowStrings.Main_Screenshot_CameraMode;
                 HintTextBorder.Visibility = Visibility.Visible;
                 IncludeInkCheckBox.IsEnabled = false;
                 IncludeInkCheckBox.IsChecked = false;
@@ -486,13 +486,13 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    CameraStatusText.Text = "未找到摄像头设备";
+                    CameraStatusText.Text = Properties.MainWindowStrings.Main_Screenshot_NoCamera;
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"启动摄像头模式失败: {ex.Message}", LogHelper.LogType.Error);
-                CameraStatusText.Text = $"启动摄像头失败: {ex.Message}";
+                CameraStatusText.Text = string.Format(Properties.MainWindowStrings.Main_Screenshot_CameraStartFailed, ex.Message);
             }
         }
 
@@ -601,18 +601,18 @@ namespace Ink_Canvas
                     }
                     else
                     {
-                        CameraStatusText.Text = "无法获取摄像头画面";
+                        CameraStatusText.Text = Properties.MainWindowStrings.Main_Screenshot_CameraFrameFailed;
                     }
                 }
                 else
                 {
-                    CameraStatusText.Text = "摄像头未启动";
+                    CameraStatusText.Text = Properties.MainWindowStrings.Main_Screenshot_CameraNotStarted;
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"摄像头截图失败: {ex.Message}", LogHelper.LogType.Error);
-                CameraStatusText.Text = $"摄像头截图失败: {ex.Message}";
+                CameraStatusText.Text = string.Format(Properties.MainWindowStrings.Main_Screenshot_CameraCaptureFailed, ex.Message);
             }
         }
 
@@ -818,7 +818,7 @@ namespace Ink_Canvas
 
                             SelectedArea = new DrawingRectangle(screenX, screenY, screenWidth, screenHeight);
                             UpdateFreehandSelectionMask(optimizedPath);
-                            HintText.Text = "自由选区已完成，可点击确认截图/添加到白板；重新拖动可重画";
+                            HintText.Text = Properties.MainWindowStrings.Main_Screenshot_FreeSelectDone;
                             HintTextBorder.Visibility = Visibility.Visible;
                             return;
                         }
@@ -832,7 +832,7 @@ namespace Ink_Canvas
                     OverlayRectangle.Visibility = Visibility.Visible;
                     SelectedArea = null;
                     SelectedPath = null;
-                    HintText.Text = "自由选区过小，请重新绘制";
+                    HintText.Text = Properties.MainWindowStrings.Main_Screenshot_FreeSelectTooSmall;
                     HintTextBorder.Visibility = Visibility.Visible;
                     return;
                 }
@@ -845,7 +845,7 @@ namespace Ink_Canvas
                         _currentSelection = rect;
                         _isAdjusting = true;
                         ShowControlPoints();
-                        HintText.Text = "拖拽控制点调整选择区域，或拖拽边框移动位置";
+                        HintText.Text = Properties.MainWindowStrings.Main_Screenshot_DragToAdjust;
                         HintTextBorder.Visibility = Visibility.Visible;
                     }
                     else
@@ -853,7 +853,7 @@ namespace Ink_Canvas
                         SelectedArea = null;
                         SelectionRectangle.Visibility = Visibility.Collapsed;
                         SizeInfoBorder.Visibility = Visibility.Collapsed;
-                        HintText.Text = "请拖拽选择区域，右键或双击可全选";
+                        HintText.Text = Properties.MainWindowStrings.Main_Screenshot_DragToSelectArea;
                         HintTextBorder.Visibility = Visibility.Visible;
                         return;
                     }
@@ -1174,7 +1174,7 @@ namespace Ink_Canvas
             }
             else
             {
-                HintText.Text = "请先选择截图区域";
+                HintText.Text = Properties.MainWindowStrings.Main_Screenshot_SelectFirst;
                 HintTextBorder.Visibility = Visibility.Visible;
                 return;
             }
@@ -1186,7 +1186,7 @@ namespace Ink_Canvas
         {
             if (!SelectedArea.HasValue || SelectedPath == null || SelectedPath.Count < 3)
             {
-                HintText.Text = "请先拖动鼠标绘制自由选区";
+                HintText.Text = Properties.MainWindowStrings.Main_Screenshot_DrawFirst;
                 HintTextBorder.Visibility = Visibility.Visible;
                 return;
             }
@@ -1208,15 +1208,13 @@ namespace Ink_Canvas
             _isAdjusting = false;
             _isSelecting = false;
             _isFreehandMode = false;
-            RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-            FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128));
-            FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128));
+            SetActiveModeButton(RectangleModeButton);
 
             UpdateSelectionDisplay();
             SelectedPath = null;
             SelectedArea = new DrawingRectangle(virtualScreen.X, virtualScreen.Y, virtualScreen.Width, virtualScreen.Height);
 
-            HintText.Text = "已全选屏幕，点击确认截图或添加到白板";
+            HintText.Text = Properties.MainWindowStrings.Main_Screenshot_FullScreenSelected;
             HintTextBorder.Visibility = Visibility.Visible;
         }
 
@@ -1461,10 +1459,7 @@ namespace Ink_Canvas
             SelectedPath = null;
             CameraImage = null;
 
-            RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-            FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-            FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-            CameraModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            SetActiveModeButton(null);
         }
 
         #region 摄像头旋转和分辨率控制
@@ -1535,17 +1530,29 @@ namespace Ink_Canvas
         {
             try
             {
-                // 清理摄像头资源
-                if (_cameraService != null)
+                void CleanupResources()
                 {
-                    _cameraService.StopPreview();
-                    _cameraService.Dispose();
-                    _cameraService = null;
+                    if (_cameraService != null)
+                    {
+                        _cameraService.StopPreview();
+                        _cameraService.Dispose();
+                        _cameraService = null;
+                    }
+
+                    _capturedCameraImage?.Dispose();
+                    _capturedCameraImage = null;
+                    CameraImage?.Dispose();
+                    CameraImage = null;
                 }
 
-                // 清理摄像头图像
-                _capturedCameraImage?.Dispose();
-                CameraImage?.Dispose();
+                if (Dispatcher == null || Dispatcher.CheckAccess())
+                {
+                    CleanupResources();
+                }
+                else if (!Dispatcher.HasShutdownStarted && !Dispatcher.HasShutdownFinished)
+                {
+                    Dispatcher.Invoke((Action)CleanupResources, DispatcherPriority.Send);
+                }
             }
             catch (Exception ex)
             {

@@ -1,5 +1,6 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Models;
+using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System.Windows;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
@@ -34,9 +35,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var notification = SettingsManager.Settings.Notification;
             CardEnableAnnouncements.IsOn = notification.IsAnnouncementEnabled;
             CardEnableForcePopup.IsOn = notification.IsForcePopupEnabled;
-            ApiBaseUrlTextBox.Text = notification.AnnouncementApiBaseUrl ?? string.Empty;
-            WebSocketUrlTextBox.Text = notification.AnnouncementWebSocketUrl ?? string.Empty;
-            TokenTextBox.Text = notification.AnnouncementSoftwareToken ?? string.Empty;
         }
 
         private void SaveSettings()
@@ -50,13 +48,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             NotificationProviderRegistry.RegisterOrUpdate(new NotificationProviderStatus
             {
                 ProviderId = "announcement",
-                DisplayName = Ink_Canvas.Properties.Strings.GetString("Notification_Provider_Announcement") ?? "公告提供商",
-                Description = Ink_Canvas.Properties.Strings.GetString("Notification_Provider_AnnouncementDesc") ?? "拉取远端公告并接收实时推送。",
+                DisplayName = NotificationStrings.Provider_Announcement,
+                Description = NotificationStrings.Provider_AnnouncementDesc,
                 IsEnabled = SettingsManager.Settings.Notification.IsAnnouncementEnabled,
                 IsRunning = false,
                 Status = SettingsManager.Settings.Notification.IsAnnouncementEnabled
-                    ? Ink_Canvas.Properties.Strings.GetString("Notification_Provider_WaitingRestart") ?? "将在下次启动时生效"
-                    : Ink_Canvas.Properties.Strings.GetString("Notification_Provider_Disabled") ?? "已禁用"
+                    ? NotificationStrings.Provider_WaitingRestart
+                    : NotificationStrings.Provider_Disabled
             });
         }
 
@@ -82,27 +80,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 Owner = Window.GetWindow(this)
             };
             window.ShowDialog();
-        }
-
-        private void ApiBaseUrlTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Notification.AnnouncementApiBaseUrl = ApiBaseUrlTextBox.Text.Trim();
-            SaveSettings();
-        }
-
-        private void WebSocketUrlTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Notification.AnnouncementWebSocketUrl = WebSocketUrlTextBox.Text.Trim();
-            SaveSettings();
-        }
-
-        private void TokenTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Notification.AnnouncementSoftwareToken = TokenTextBox.Text.Trim();
-            SaveSettings();
         }
     }
 }

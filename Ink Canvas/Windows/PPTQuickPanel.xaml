@@ -1,4 +1,4 @@
-<UserControl x:Class="Ink_Canvas.Windows.PPTQuickPanel"
+<UserControl xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.PPTQuickPanel"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -150,7 +150,7 @@
                         <StackPanel x:Name="ContentPanel" Margin="12,12,12,12" Orientation="Vertical">
 
                             <!-- 区段：声音 -->
-                            <TextBlock Text="声音" Style="{StaticResource GameBarSectionTitle}">
+                            <TextBlock Text="{x:Static props:PPTStrings.PPTQuickPanel_Sound}" Style="{StaticResource GameBarSectionTitle}">
                                 <TextBlock.Foreground>
                                     <SolidColorBrush x:Name="MagnifierTitleForegroundBrush" Color="White"/>
                                 </TextBlock.Foreground>
@@ -251,17 +251,17 @@
                             </Separator>
 
                             <!-- 区段：插入图片 -->
-                            <TextBlock Text="插入" Style="{StaticResource GameBarSectionTitle}"/>
+                            <TextBlock Text="{x:Static props:PPTStrings.PPTQuickPanel_Insert}" Style="{StaticResource GameBarSectionTitle}"/>
 
                             <StackPanel Orientation="Vertical" Margin="0,0,0,4">
                                 <Button x:Name="InsertImageSelectFileButton"
-                                        Content="选择文件"
+                                        Content="{x:Static props:TimerStrings.Timer_ProgressiveSelectFile}"
                                         Style="{StaticResource GameBarFlatButton}"
                                         Margin="0,0,0,6"
                                         Click="InsertImageSelectFileButton_Click"/>
 
                                 <Button x:Name="InsertImageScreenshotButton"
-                                        Content="截图插入"
+                                        Content="{x:Static props:PPTStrings.PPTQuickPanel_ScreenshotInsert}"
                                         Style="{StaticResource GameBarFlatButton}"
                                         Click="InsertImageScreenshotButton_Click"/>
                             </StackPanel>
@@ -270,7 +270,7 @@
                             <Border x:Name="MagnifierSection">
                                 <StackPanel>
                                     <TextBlock x:Name="MagnifierTitleText"
-                                               Text="聚焦放大镜"
+                                               Text="{x:Static props:PPTStrings.PPTQuickPanel_FocusMagnifier}"
                                                Style="{StaticResource GameBarSectionTitle}">
                                         <TextBlock.Foreground>
                                             <SolidColorBrush x:Name="MagnifierTitleForeground2Brush" Color="White"/>
@@ -278,7 +278,7 @@
                                     </TextBlock>
 
                                     <Button x:Name="MagnifierToggleButton"
-                                            Content="开启放大镜"
+                                            Content="{x:Static props:PPTStrings.PPTQuickPanel_OpenMagnifier}"
                                             Style="{StaticResource GameBarFlatButton}"
                                             Margin="0,0,0,6"
                                             Click="MagnifierToggleButton_Click"/>
@@ -291,7 +291,7 @@
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0"
-                                                       Text="缩放"
+                                                       Text="{x:Static props:PPTStrings.PPTQuickPanel_Zoom}"
                                                        FontSize="11"
                                                        VerticalAlignment="Center"
                                                        Margin="4,0,8,0"
@@ -319,7 +319,7 @@
                                     </Border>
 
                                     <TextBlock x:Name="MagnifierDescText"
-                                               Text="拖动选择框移动，拖动控制点缩放，按 ESC 关闭"
+                                               Text="{x:Static props:PPTStrings.PPTQuickPanel_MagnifierHint}"
                                                FontSize="11"
                                                Margin="2,0,0,0"
                                                TextWrapping="Wrap">

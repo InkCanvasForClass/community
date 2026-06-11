@@ -269,9 +269,9 @@ namespace Ink_Canvas.Helpers
                 RegisterHotkey("Paste", Key.V, ModifierKeys.Control, () => _mainWindow.HandleGlobalPaste(null, null));
 
                 // 工具切换快捷键
-                RegisterHotkey("SelectTool", Key.S, ModifierKeys.Alt, () => _mainWindow.SymbolIconSelect_MouseUp(null, null));
+                RegisterHotkey("SelectTool", Key.S, ModifierKeys.Alt, () => _mainWindow.SwitchToSelectFromHotkey());
                 RegisterHotkey("DrawTool", Key.D, ModifierKeys.Alt, () => _mainWindow.PenIcon_Click(null, null));
-                RegisterHotkey("EraserTool", Key.E, ModifierKeys.Alt, () => _mainWindow.EraserIcon_Click(null, null));
+                RegisterHotkey("EraserTool", Key.E, ModifierKeys.Alt, () => _mainWindow.SwitchToEraserFromHotkey());
                 RegisterHotkey("BlackboardTool", Key.B, ModifierKeys.Alt, () => _mainWindow.ImageBlackboard_MouseUp(null, null));
                 RegisterHotkey("QuitDrawTool", Key.Q, ModifierKeys.Alt, () => _mainWindow.KeyChangeToQuitDrawTool(null, null));
 
@@ -283,7 +283,7 @@ namespace Ink_Canvas.Helpers
                 RegisterHotkey("Pen5", Key.D5, ModifierKeys.Alt, () => SwitchToPenType(4));
 
                 // 功能快捷键
-                RegisterHotkey("DrawLine", Key.L, ModifierKeys.Alt, () => _mainWindow.BtnDrawLine_Click(null, null));
+                RegisterHotkey("DrawLine", Key.L, ModifierKeys.Alt, () => _mainWindow.DrawLineFromHotkey());
                 RegisterHotkey("Screenshot", Key.C, ModifierKeys.Alt, () => _mainWindow.SaveScreenShotToDesktop());
                 RegisterHotkey("QuickDraw", Key.K, ModifierKeys.Alt, () => _mainWindow.OpenQuickDrawFromHotkey());
                 RegisterHotkey("Hide", Key.V, ModifierKeys.Alt, () => _mainWindow.SymbolIconEmoji_MouseUp(null, null));
@@ -1241,11 +1241,11 @@ namespace Ink_Canvas.Helpers
                     case "Paste":
                         return () => _mainWindow.HandleGlobalPaste(null, null);
                     case "SelectTool":
-                        return () => _mainWindow.SymbolIconSelect_MouseUp(null, null);
+                        return () => _mainWindow.SwitchToSelectFromHotkey();
                     case "DrawTool":
                         return () => _mainWindow.PenIcon_Click(null, null);
                     case "EraserTool":
-                        return () => _mainWindow.EraserIcon_Click(null, null);
+                        return () => _mainWindow.SwitchToEraserFromHotkey();
                     case "BlackboardTool":
                         return () => _mainWindow.ImageBlackboard_MouseUp(null, null);
                     case "QuitDrawTool":
@@ -1261,7 +1261,7 @@ namespace Ink_Canvas.Helpers
                     case "Pen5":
                         return () => SwitchToPenType(4);
                     case "DrawLine":
-                        return () => _mainWindow.BtnDrawLine_Click(null, null);
+                        return () => _mainWindow.DrawLineFromHotkey();
                     case "Screenshot":
                         return () => _mainWindow.SaveScreenShotToDesktop();
                     case "QuickDraw":

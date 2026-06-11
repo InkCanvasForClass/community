@@ -154,6 +154,7 @@ namespace Ink_Canvas.Controls
             {
                 bool expanded = (bool)e.NewValue;
                 bar.PreviewList.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
+                bar.ApplyRootOpacity();
                 bar.ApplyLayout();
                 if (expanded)
                 {
@@ -224,6 +225,7 @@ namespace Ink_Canvas.Controls
             ClearValue(MaxHeightProperty);
 
             double availableHeight = ComputeAvailableHeight();
+            double scale = _currentScale;
 
             switch (dir)
             {
@@ -237,7 +239,7 @@ namespace Ink_Canvas.Controls
                     {
                         // 预览面板拉宽到 280,贴向同侧角落
                         PreviewList.Width = 280;
-                        PreviewList.MaxHeight = Math.Max(200, availableHeight - 50);
+                        PreviewList.MaxHeight = Math.Max(200, availableHeight - 50 * scale) / scale;
                         PreviewList.HorizontalAlignment = dir == NavDirection.LeftBottom
                             ? HorizontalAlignment.Left
                             : HorizontalAlignment.Right;
@@ -249,7 +251,7 @@ namespace Ink_Canvas.Controls
                     else
                     {
                         PreviewList.SetBinding(WidthProperty, new System.Windows.Data.Binding(nameof(ButtonRow.ActualWidth)) { Source = ButtonRow });
-                        PreviewList.MaxHeight = 380;
+                        PreviewList.MaxHeight = 380 / scale;
                     }
                     PreviousButtonGeometry.Geometry = HArrowLeft;
                     NextButtonGeometry.Geometry = HArrowRight;
@@ -261,7 +263,7 @@ namespace Ink_Canvas.Controls
                     ButtonRow.Orientation = Orientation.Vertical;
                     ButtonRow.Width = 50;
                     PreviewList.Width = 240;
-                    PreviewList.MaxHeight = 480;
+                    PreviewList.MaxHeight = 480 / scale;
                     PreviousButtonGeometry.Geometry = VArrowUp;
                     NextButtonGeometry.Geometry = VArrowDown;
                     break;
@@ -271,7 +273,7 @@ namespace Ink_Canvas.Controls
                     ButtonRow.Orientation = Orientation.Vertical;
                     ButtonRow.Width = 50;
                     PreviewList.Width = 240;
-                    PreviewList.MaxHeight = 480;
+                    PreviewList.MaxHeight = 480 / scale;
                     PreviousButtonGeometry.Geometry = VArrowUp;
                     NextButtonGeometry.Geometry = VArrowDown;
                     break;
@@ -426,6 +428,22 @@ namespace Ink_Canvas.Controls
         }
 
         public void SetPageButtonVisibility(Visibility v) => PageButtonBorder.Visibility = v;
-        public void SetBarOpacity(double opacity) => RootBorder.Opacity = opacity;
+        public void SetBarOpacity(double opacity)
+        {
+            _collapsedOpacity = opacity;
+            ApplyRootOpacity();
+        }
+
+        private void ApplyRootOpacity() => RootBorder.Opacity = IsPreviewExpanded ? 1 : _collapsedOpacity;
+
+        public void SetBarScale(double scale)
+        {
+            _currentScale = scale;
+            NavBarScaleTransform.ScaleX = scale;
+            NavBarScaleTransform.ScaleY = scale;
+        }
+
+        private double _currentScale = 1.0;
+        private double _collapsedOpacity = 1.0;
     }
 }

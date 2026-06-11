@@ -1,0 +1,300 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AutoFold_App_AdmoxBoard" xml:space="preserve">
+    <value>Admox Whiteboard</value>
+  </data>
+  <data name="AutoFold_App_AdmoxBooth" xml:space="preserve">
+    <value>Admox visual presenter</value>
+  </data>
+  <data name="AutoFold_App_HiteBoard" xml:space="preserve">
+    <value>HiteBoard</value>
+  </data>
+  <data name="AutoFold_App_HiteCamera" xml:space="preserve">
+    <value>Hite visual presenter</value>
+  </data>
+  <data name="AutoFold_App_HiteLightBoard" xml:space="preserve">
+    <value>Hite Lite Whiteboard</value>
+  </data>
+  <data name="AutoFold_App_MaxHubBoard" xml:space="preserve">
+    <value>MaxHub Whiteboard</value>
+  </data>
+  <data name="AutoFold_App_MSWhiteboard" xml:space="preserve">
+    <value>Microsoft Whiteboard</value>
+  </data>
+  <data name="AutoFold_App_SeewoBoard3" xml:space="preserve">
+    <value>Seewo Whiteboard 3</value>
+  </data>
+  <data name="AutoFold_App_SeewoBoard5" xml:space="preserve">
+    <value>Seewo Whiteboard 5</value>
+  </data>
+  <data name="AutoFold_App_SeewoCamera" xml:space="preserve">
+    <value>Seewo Visual Presenter</value>
+  </data>
+  <data name="AutoFold_App_SeewoLightBoard" xml:space="preserve">
+    <value>Seewo Lite Whiteboard</value>
+  </data>
+  <data name="AutoFold_App_SeewoLightBoard5C" xml:space="preserve">
+    <value>Seewo Lite Whiteboard 5C</value>
+  </data>
+  <data name="AutoFold_App_WenXiangBoard" xml:space="preserve">
+    <value>WenXiang Whiteboard</value>
+  </data>
+  <data name="AutoFold_App_YiYunBoard" xml:space="preserve">
+    <value>YiYun Whiteboard</value>
+  </data>
+  <data name="AutoFold_App_YiYunBooth" xml:space="preserve">
+    <value>YiYun visual presenter</value>
+  </data>
+  <data name="AutoFold_Mode" xml:space="preserve">
+    <value>Fold mode</value>
+  </data>
+  <data name="AutoFold_OldZyBoard" xml:space="preserve">
+    <value>old ZhongYuan whiteboard</value>
+  </data>
+  <data name="AutoKill_EasiNote5" xml:space="preserve">
+    <value>Auto kill Seewo Whiteboard 5</value>
+  </data>
+  <data name="AutoKill_HiteAfterKillEnterAnnotation" xml:space="preserve">
+    <value>Enter annotation after killing Hite screen writing</value>
+  </data>
+  <data name="AutoKill_HiteAnnotation" xml:space="preserve">
+    <value>Auto kill Hite screen writing</value>
+  </data>
+  <data name="AutoKill_ICA" xml:space="preserve">
+    <value>Auto kill ICA (both new &amp; old)</value>
+  </data>
+  <data name="AutoKill_InkCanvasIC" xml:space="preserve">
+    <value>Auto kill Ink Canvas and IC+</value>
+  </data>
+  <data name="AutoKill_Inkeys" xml:space="preserve">
+    <value>Auto kill Inkeys (new only)</value>
+  </data>
+  <data name="AutoKill_PptTools" xml:space="preserve">
+    <value>Auto kill Seewo PPT tools</value>
+  </data>
+  <data name="AutoKill_PptToolsHint" xml:space="preserve">
+    <value>Killing PPT tools disables Seewo classroom helper. Delete Office.dll in its install folder to stop the PPT toolbar without auto kill.</value>
+  </data>
+  <data name="AutoKill_SeewoDesktop2Anno" xml:space="preserve">
+    <value>Auto kill Seewo Desktop 2.0 annotation</value>
+  </data>
+  <data name="AutoKill_SeewoDesktop2AnnoHint" xml:space="preserve">
+    <value>Seewo Desktop 2.0 annotation is 64-bit so ICC (32-bit) cannot inspect it deeply; only process name DesktopAnnotation is matched. If you have another app with the same name, keep this off.</value>
+  </data>
+  <data name="AutoKill_Title" xml:space="preserve">
+    <value>Auto kill</value>
+  </data>
+  <data name="AutoKill_YouJiao" xml:space="preserve">
+    <value>Auto kill YouJiao teacher</value>
+  </data>
+  <data name="Automation_AutoFoldInPPT" xml:space="preserve">
+    <value>Auto fold while playing PPT</value>
+  </data>
+  <data name="Automation_AutoFoldTitle" xml:space="preserve">
+    <value>Auto fold</value>
+  </data>
+  <data name="Automation_KeepFoldAfterExit" xml:space="preserve">
+    <value>Keep folded after app exit</value>
+  </data>
+  <data name="Automation_KeepFoldAfterExitHint" xml:space="preserve">
+    <value>Remember the folded state even after the app restarts.</value>
+  </data>
+  <data name="Automation_SaveFileName_Custom" xml:space="preserve">
+    <value>Custom...</value>
+  </data>
+  <data name="Automation_SaveFileName_CustomTemplate_Desc" xml:space="preserve">
+    <value>Available placeholders: {date} {time} {datetime} {mode} {page} {count} {type}</value>
+  </data>
+  <data name="Automation_SaveFileName_CustomTemplate_Header" xml:space="preserve">
+    <value>Custom template</value>
+  </data>
+  <data name="Automation_SaveFileName_Date" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="Automation_SaveFileName_DateMode" xml:space="preserve">
+    <value>Date + Mode</value>
+  </data>
+  <data name="Automation_SaveFileName_DateModePage" xml:space="preserve">
+    <value>Date + Mode + Page</value>
+  </data>
+  <data name="Automation_SaveFileName_DateModePageCount" xml:space="preserve">
+    <value>Date + Mode + Page + Stroke count</value>
+  </data>
+  <data name="Automation_SaveFileName_DateTime" xml:space="preserve">
+    <value>Date + Time</value>
+  </data>
+  <data name="Automation_SaveFileName_Timestamp" xml:space="preserve">
+    <value>Timestamp (default)</value>
+  </data>
+  <data name="Automation_SaveFileNameFormat" xml:space="preserve">
+    <value>File name format</value>
+  </data>
+  <data name="Automation_Title" xml:space="preserve">
+    <value>Automation</value>
+  </data>
+  <data name="Automation_UseCustomSaveFileName_Desc" xml:space="preserve">
+    <value>Customize how your saved files are named</value>
+  </data>
+  <data name="Automation_UseCustomSaveFileName_Header" xml:space="preserve">
+    <value>Use custom save file name</value>
+  </data>
+  <data name="FloatingInterceptor_App_ChangYanClass" xml:space="preserve">
+    <value>Changyan smart classroom</value>
+  </data>
+  <data name="FloatingInterceptor_App_ChangYanPPT" xml:space="preserve">
+    <value>Changyan PPT</value>
+  </data>
+  <data name="FloatingInterceptor_App_HiteAnnotation" xml:space="preserve">
+    <value>Hite screen writing</value>
+  </data>
+  <data name="FloatingInterceptor_App_IntelligentClass" xml:space="preserve">
+    <value>Tianyu Education Cloud</value>
+  </data>
+  <data name="FloatingInterceptor_App_SeewoBoard5C" xml:space="preserve">
+    <value>Seewo Whiteboard 5C</value>
+  </data>
+  <data name="FloatingInterceptor_App_SeewoDesktopAnnotation" xml:space="preserve">
+    <value>Seewo desktop pen</value>
+  </data>
+  <data name="FloatingInterceptor_App_SeewoDesktopSideBar" xml:space="preserve">
+    <value>Seewo desktop sidebar</value>
+  </data>
+  <data name="FloatingInterceptor_App_SeewoPinco" xml:space="preserve">
+    <value>Seewo Pinco</value>
+  </data>
+  <data name="FloatingInterceptor_App_SeewoPincoDrawing" xml:space="preserve">
+    <value>Seewo Pinco pen</value>
+  </data>
+  <data name="FloatingInterceptor_App_SeewoPPTTools" xml:space="preserve">
+    <value>Seewo PPT Tools</value>
+  </data>
+  <data name="FloatingInterceptor_Enable" xml:space="preserve">
+    <value>Enable floating window interceptor</value>
+  </data>
+  <data name="FloatingInterceptor_Title" xml:space="preserve">
+    <value>Floating window interceptor</value>
+  </data>
+  <data name="FoldMode_AutoFoldAfterPPT" xml:space="preserve">
+    <value>Auto fold floating bar after PPT show</value>
+  </data>
+  <data name="FoldMode_AutoFoldAfterPPTHint" xml:space="preserve">
+    <value>Automatically hide or fold the toolbar after exiting a presentation.</value>
+  </data>
+  <data name="FoldMode_AutoFoldAfterWhiteboard" xml:space="preserve">
+    <value>Auto fold when exiting whiteboard</value>
+  </data>
+  <data name="FoldMode_AutoFoldAfterWhiteboardHint" xml:space="preserve">
+    <value>Automatically fold the sidebar when exiting the whiteboard.</value>
+  </data>
+  <data name="FoldMode_ExitToAnnotation" xml:space="preserve">
+    <value>Switch to annotation when exiting fold mode</value>
+  </data>
+  <data name="FoldMode_ExitToAnnotationHint" xml:space="preserve">
+    <value>When on, exiting fold mode switches back to annotation for convenience.</value>
+  </data>
+  <data name="AutoFold_Group_Seewo" xml:space="preserve">
+    <value>Seewo</value>
+  </data>
+  <data name="AutoFold_Group_Hite" xml:space="preserve">
+    <value>Hite</value>
+  </data>
+  <data name="AutoFold_Group_Other" xml:space="preserve">
+    <value>Other Whiteboards</value>
+  </data>
+  <data name="FloatingInterceptor_Group_Seewo" xml:space="preserve">
+    <value>Seewo</value>
+  </data>
+  <data name="FileAssoc_CheckDesc" xml:space="preserve">
+    <value>Check if .icstk files are associated with Ink Canvas</value>
+  </data>
+  <data name="FileAssoc_RegisterHeader" xml:space="preserve">
+    <value>Register File Association</value>
+  </data>
+  <data name="FileAssoc_RegisterDesc" xml:space="preserve">
+    <value>Associate .icstk files with Ink Canvas</value>
+  </data>
+  <data name="FileAssoc_UnregisterDesc" xml:space="preserve">
+    <value>Remove the association between .icstk files and Ink Canvas</value>
+  </data>
+  <data name="FileAssoc_NotChecked" xml:space="preserve">
+    <value>Not checked</value>
+  </data>
+  <data name="FileAssoc_RegisterSuccess" xml:space="preserve">
+    <value>File association registered successfully</value>
+  </data>
+  <data name="FileAssoc_RegisterFailed" xml:space="preserve">
+    <value>File association registration failed</value>
+  </data>
+  <data name="FileAssoc_UnregisterSuccess" xml:space="preserve">
+    <value>File association removed</value>
+  </data>
+  <data name="FileAssoc_UnregisterFailed" xml:space="preserve">
+    <value>Failed to remove file association</value>
+  </data>
+  <data name="FileAssoc_Registered" xml:space="preserve">
+    <value>✓ .icstk file association registered</value>
+  </data>
+  <data name="FileAssoc_NotRegistered" xml:space="preserve">
+    <value>✗ .icstk file association not registered</value>
+  </data>
+  <data name="FileAssoc_CheckError" xml:space="preserve">
+    <value>✗ Error checking file association status</value>
+  </data>
+  <data name="Storage_AutoDeleteDaysThreshold" xml:space="preserve">
+    <value>Auto-delete Days Threshold</value>
+  </data>
+  <data name="Storage_MinAutomationStrokes" xml:space="preserve">
+    <value>Minimum Automation Strokes</value>
+  </data>
+  <data name="FileAssoc_LoadedStrokesFile" xml:space="preserve">
+    <value>Loaded strokes file: {0}</value>
+  </data>
+  <data name="FileAssoc_SwitchedToBoardMode" xml:space="preserve">
+    <value>Switched to whiteboard mode</value>
+  </data>
+  <data name="FileAssoc_ExitedFoldMode" xml:space="preserve">
+    <value>Exited fold mode and restored floating bar</value>
+  </data>
+</root>

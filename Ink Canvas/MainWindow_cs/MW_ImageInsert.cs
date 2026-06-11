@@ -157,12 +157,12 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    ShowNotification("截图已取消");
+                    ShowNotification(Properties.MainWindowStrings.Main_ImageInsert_ScreenshotCancelled);
                 }
             }
             catch (Exception ex)
             {
-                ShowNotification($"截图失败: {ex.Message}");
+                ShowNotification($"{Properties.MainWindowStrings.Main_ImageInsert_ScreenshotFailed}: {ex.Message}");
                 Visibility = Visibility.Visible;
             }
         }
@@ -205,7 +205,7 @@ namespace Ink_Canvas
                     }
                     else
                     {
-                        ShowNotification("全屏截图失败");
+                        ShowNotification(Properties.MainWindowStrings.Main_ImageInsert_FullScreenFailed);
                     }
                 }
 
@@ -214,7 +214,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                ShowNotification($"全屏截图失败: {ex.Message}");
+                ShowNotification($"{Properties.MainWindowStrings.Main_ImageInsert_FullScreenFailed}: {ex.Message}");
                 Visibility = Visibility.Visible;
             }
         }
@@ -506,7 +506,7 @@ namespace Ink_Canvas
                 // 验证位图有效性
                 if (bitmap == null || bitmap.Width <= 0 || bitmap.Height <= 0)
                 {
-                    ShowNotification("无效的截图");
+                    ShowNotification(Properties.MainWindowStrings.Main_ImageInsert_InvalidScreenshot);
                     return Task.CompletedTask;
                 }
 
@@ -515,7 +515,7 @@ namespace Ink_Canvas
 
                 if (bitmapSource == null)
                 {
-                    ShowNotification("转换截图失败");
+                    ShowNotification(Properties.MainWindowStrings.Main_ImageInsert_ConvertFailed);
                     return Task.CompletedTask;
                 }
 
@@ -564,11 +564,11 @@ namespace Ink_Canvas
                 UpdateCurrentToolMode("select");
                 HideSubPanels("select");
 
-                ShowNotification("截图已插入到画布");
+                ShowNotification(Properties.MainWindowStrings.Main_ImageInsert_Inserted);
             }
             catch (Exception ex)
             {
-                ShowNotification($"插入截图失败: {ex.Message}");
+                ShowNotification($"{Properties.MainWindowStrings.Main_ImageInsert_InsertFailed}: {ex.Message}");
                 LogHelper.WriteLogToFile($"插入截图失败: {ex.Message}", LogHelper.LogType.Error);
             }
             finally
@@ -595,8 +595,10 @@ namespace Ink_Canvas
         /// 8. 提交历史记录
         /// 9. 插入图片后切换到选择模式并刷新浮动栏高光显示
         /// </remarks>
-        private Task InsertBitmapSourceToCanvas(BitmapSource bitmapSource, string successMessage = "截图已插入到画布", string failureMessagePrefix = "插入截图失败")
+        private Task InsertBitmapSourceToCanvas(BitmapSource bitmapSource, string successMessage = null, string failureMessagePrefix = null)
         {
+            successMessage = successMessage ?? Properties.MainWindowStrings.Main_ImageInsert_Inserted;
+            failureMessagePrefix = failureMessagePrefix ?? Properties.MainWindowStrings.Main_ImageInsert_InsertFailed;
             if (TryBlockFrozenPageMutation("插入截图")) return Task.CompletedTask;
             try
             {

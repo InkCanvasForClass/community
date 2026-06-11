@@ -40,7 +40,7 @@ namespace Ink_Canvas
                         if (!isFloatingBarFolded)
                         {
                             FoldFloatingBar_MouseUp(new object(), null);
-                            ShowNotification("已进入收纳模式");
+                            ShowNotification(Properties.MainWindowStrings.Main_Uri_EnterFoldMode);
                         }
                         return;
                     case "unfold":
@@ -48,38 +48,38 @@ namespace Ink_Canvas
                         if (isFloatingBarFolded)
                         {
                             UnFoldFloatingBar_MouseUp(new object(), null);
-                            ShowNotification("已退出收纳模式");
+                            ShowNotification(Properties.MainWindowStrings.Main_Uri_ExitFoldMode);
                         }
                         return;
                     case "toggle":
                         if (isFloatingBarFolded)
                         {
                             UnFoldFloatingBar_MouseUp(new object(), null);
-                            ShowNotification("已退出收纳模式");
+                            ShowNotification(Properties.MainWindowStrings.Main_Uri_ExitFoldMode);
                         }
                         else
                         {
                             FoldFloatingBar_MouseUp(new object(), null);
-                            ShowNotification("已进入收纳模式");
+                            ShowNotification(Properties.MainWindowStrings.Main_Uri_EnterFoldMode);
                         }
                         return;
                     case "thoroughhideon":
                         Settings.Automation.ThoroughlyHideWhenFolded = true;
                         SaveSettingsToFile();
-                        ShowNotification("已开启：收起时彻底隐藏");
+                        ShowNotification(Properties.MainWindowStrings.Main_Uri_HideOnFoldEnabled);
                         if (isFloatingBarFolded)
                             this.Visibility = Visibility.Hidden;
                         return;
                     case "thoroughhideoff":
                         Settings.Automation.ThoroughlyHideWhenFolded = false;
                         SaveSettingsToFile();
-                        ShowNotification("已关闭：收起时彻底隐藏");
+                        ShowNotification(Properties.MainWindowStrings.Main_Uri_HideOnFoldDisabled);
                         this.Visibility = Visibility.Visible;
                         return;
                     case "thoroughhidetoggle":
                         Settings.Automation.ThoroughlyHideWhenFolded = !Settings.Automation.ThoroughlyHideWhenFolded;
                         SaveSettingsToFile();
-                        ShowNotification(Settings.Automation.ThoroughlyHideWhenFolded ? "已开启：收起时彻底隐藏" : "已关闭：收起时彻底隐藏");
+                        ShowNotification(Settings.Automation.ThoroughlyHideWhenFolded ? Properties.MainWindowStrings.Main_Uri_HideOnFoldEnabled : Properties.MainWindowStrings.Main_Uri_HideOnFoldDisabled);
                         if (isFloatingBarFolded)
                             this.Visibility = Settings.Automation.ThoroughlyHideWhenFolded ? Visibility.Hidden : Visibility.Visible;
                         return;
@@ -266,13 +266,13 @@ namespace Ink_Canvas
                 if (!ConfigProfileManager.ApplyProfile(profileName.Trim()))
                 {
                     File.WriteAllText(resultPath, "error: 方案不存在或应用失败", System.Text.Encoding.UTF8);
-                    ShowNotification($"切换失败：方案「{profileName}」不存在");
+                    ShowNotification(string.Format(Properties.MainWindowStrings.Main_Uri_SchemeNotFound, profileName));
                     return;
                 }
                 _lastAppliedProfileName = profileName.Trim();
                 ReloadSettingsFromFile();
                 File.WriteAllText(resultPath, "ok", System.Text.Encoding.UTF8);
-                ShowNotification($"已通过 URI 切换至方案「{profileName}」");
+                ShowNotification(string.Format(Properties.MainWindowStrings.Main_Uri_SwitchedScheme, profileName));
                 LogHelper.WriteLogToFile($"URI 已切换配置方案: {profileName}", LogHelper.LogType.Event);
             }
             catch (Exception ex)

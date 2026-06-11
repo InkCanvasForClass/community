@@ -1,0 +1,120 @@
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.ToolbarMenuPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
+      xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+      xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+      xmlns:dd="urn:gong-wpf-dragdrop"
+      xmlns:toolbar="clr-namespace:Ink_Canvas.Controls.Toolbar"
+      mc:Ignorable="d"
+      Title="{x:Static props:NavStrings.Nav_ToolbarMenu}">
+
+    <Page.Resources>
+        <local:MenuItemIdToNameConverter x:Key="IdToNameConverter"/>
+
+        <DataTemplate x:Key="AddedItemTemplate" DataType="{x:Type sys:String}"
+                      xmlns:sys="clr-namespace:System;assembly=mscorlib">
+            <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="6" Padding="10,6" Margin="2"
+                    Cursor="Hand">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="&#xE76F;" FontFamily="Segoe MDL2 Assets" FontSize="11"
+                               VerticalAlignment="Center" Margin="0,0,6,0" Opacity="0.45"/>
+                    <TextBlock Text="{Binding Converter={StaticResource IdToNameConverter}}"
+                               VerticalAlignment="Center" FontSize="13"/>
+                    <Button Content="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                            Click="RemoveItem_Click" Margin="8,0,0,0"
+                            Background="Transparent" BorderThickness="0"
+                            Padding="4,2" VerticalAlignment="Center"
+                            Cursor="Hand"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="LibraryItemTemplate">
+            <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="6" Padding="10,8" Margin="3" Width="200"
+                    Cursor="Hand">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="{Binding DisplayName}" FontWeight="Medium" FontSize="13"/>
+                        <TextBlock Text="{Binding Description}" Opacity="0.65" FontSize="12"
+                                   TextWrapping="Wrap" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                            Click="AddLibraryItem_Click"
+                            Background="Transparent" BorderThickness="0"
+                            Padding="6,4" VerticalAlignment="Center"
+                            Cursor="Hand"/>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <Style x:Key="DragDropListBoxStyle" TargetType="ListBox">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="dd:DragDrop.IsDragSource" Value="True"/>
+            <Setter Property="dd:DragDrop.IsDropTarget" Value="True"/>
+            <Setter Property="dd:DragDrop.UseDefaultEffectDataTemplate" Value="False"/>
+            <Setter Property="dd:DragDrop.DropTargetAdornerBrush" Value="#2563eb"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+    </Page.Resources>
+
+    <ScrollViewer PanningMode="VerticalFirst">
+        <ikw:SimpleStackPanel Spacing="4">
+
+            <TextBlock Text="{x:Static props:NavStrings.Nav_ToolbarMenu}" FontSize="14" FontWeight="SemiBold" Margin="0,20,0,6"/>
+            <TextBlock Text="配置浮动栏工具菜单中显示的项目和顺序，最多 9 个（3×3 布局）。"
+                       Opacity="0.65" FontSize="13" Margin="0,0,0,12" TextWrapping="Wrap"/>
+
+            <TextBlock Text="已添加的菜单项" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,6"/>
+            <Border BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="8" Padding="6"
+                    Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}"
+                    MinHeight="64">
+                <ListBox x:Name="AddedList"
+                         ItemTemplate="{StaticResource AddedItemTemplate}"
+                         Style="{StaticResource DragDropListBoxStyle}"
+                         dd:DragDrop.DropHandler="{Binding}"
+                         MinHeight="48">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                </ListBox>
+            </Border>
+
+            <TextBlock Text="可添加的菜单项" FontSize="14" FontWeight="SemiBold" Margin="0,12,0,6"/>
+            <ListBox x:Name="LibraryList"
+                     ItemTemplate="{StaticResource LibraryItemTemplate}"
+                     Background="Transparent" BorderThickness="0"
+                     SelectionMode="Single">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+            </ListBox>
+
+            <Button Content="恢复默认布局" Click="ButtonReset_Click"
+                    Padding="20,10" HorizontalAlignment="Left" Margin="0,16,0,20"/>
+
+            <Rectangle Height="48" />
+
+        </ikw:SimpleStackPanel>
+    </ScrollViewer>
+</ui:Page>

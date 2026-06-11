@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Nav_Advanced" xml:space="preserve">
+    <value>高级</value>
+  </data>
+  <data name="Nav_Advanced_Settings" xml:space="preserve">
+    <value>高级设置</value>
+  </data>
+  <data name="Nav_Automation_Settings" xml:space="preserve">
+    <value>自动化设置</value>
+  </data>
+  <data name="Nav_FriendlyLinks" xml:space="preserve">
+    <value>赞助及友链</value>
+  </data>
+  <data name="Nav_Plugins" xml:space="preserve">
+    <value>插件</value>
+  </data>
+  <data name="Nav_PPT_Settings" xml:space="preserve">
+    <value>PPT设置</value>
+  </data>
+  <data name="Nav_Shortcuts" xml:space="preserve">
+    <value>快捷键</value>
+  </data>
+  <data name="Nav_Startup" xml:space="preserve">
+    <value>基本</value>
+  </data>
+  <data name="Nav_Theme_Settings" xml:space="preserve">
+    <value>个性化设置</value>
+  </data>
+  <data name="Settings_ModeDesc" xml:space="preserve">
+    <value>选择软件运行模式。仅 PPT 模式下，软件将完全隐藏，仅在 PPT 放映时出现。（实验性功能，可能不稳定。）</value>
+  </data>
+  <data name="Settings_ModeDesc_1" xml:space="preserve">
+    <value>运行模式</value>
+  </data>
+  <data name="Settings_Nav_Hotkey_Tooltip" xml:space="preserve">
+    <value>快捷键设置</value>
+  </data>
+  <data name="Settings_Nav_Security" xml:space="preserve">
+    <value>安全</value>
+  </data>
+  <data name="Settings_Nav_Security_Tooltip" xml:space="preserve">
+    <value>安全密码与进程保护</value>
+  </data>
+  <data name="Settings_Plugins" xml:space="preserve">
+    <value>插件管理</value>
+  </data>
+  <data name="Settings_Title" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="Nav_SettingsWindow_Title" xml:space="preserve">
+    <value>InkCanvasForClass 设置</value>
+  </data>
+  <data name="Nav_AppSettings" xml:space="preserve">
+    <value>应用设置</value>
+  </data>
+  <data name="Nav_SearchSettings" xml:space="preserve">
+    <value>查找设置</value>
+  </data>
+  <data name="Nav_Home" xml:space="preserve">
+    <value>首页</value>
+  </data>
+  <data name="Nav_Home_Tooltip" xml:space="preserve">
+    <value>快速导航</value>
+  </data>
+  <data name="Nav_ICCSettings" xml:space="preserve">
+    <value>ICC CE 设置</value>
+  </data>
+  <data name="Nav_Basic" xml:space="preserve">
+    <value>基本</value>
+  </data>
+  <data name="Nav_General" xml:space="preserve">
+    <value>通用</value>
+  </data>
+  <data name="Nav_General_Tooltip" xml:space="preserve">
+    <value>通用设置</value>
+  </data>
+  <data name="Nav_Startup_Tooltip" xml:space="preserve">
+    <value>启动与基本行为设置</value>
+  </data>
+  <data name="Nav_Clock" xml:space="preserve">
+    <value>时钟</value>
+  </data>
+  <data name="Nav_Clock_Tooltip" xml:space="preserve">
+    <value>时钟显示设置</value>
+  </data>
+  <data name="Nav_ToolbarComponents" xml:space="preserve">
+    <value>组件</value>
+  </data>
+  <data name="Nav_ToolbarComponents_Tooltip" xml:space="preserve">
+    <value>工具栏按钮排序与可见性</value>
+  </data>
+  <data name="Nav_ToolbarAppearance" xml:space="preserve">
+    <value>外观</value>
+  </data>
+  <data name="Nav_ToolbarAppearance_Tooltip" xml:space="preserve">
+    <value>工具栏外观设置</value>
+  </data>
+  <data name="Nav_Basic_Tooltip" xml:space="preserve">
+    <value>基本设置</value>
+  </data>
+  <data name="Nav_Privacy" xml:space="preserve">
+    <value>隐私</value>
+  </data>
+  <data name="Nav_Privacy_Tooltip" xml:space="preserve">
+    <value>隐私与遥测设置</value>
+  </data>
+  <data name="Nav_MainInterface" xml:space="preserve">
+    <value>主界面</value>
+  </data>
+  <data name="Nav_MainInterface_Tooltip" xml:space="preserve">
+    <value>主界面设置</value>
+  </data>
+  <data name="Nav_Window" xml:space="preserve">
+    <value>窗口</value>
+  </data>
+  <data name="Nav_Window_Tooltip" xml:space="preserve">
+    <value>窗口设置</value>
+  </data>
+  <data name="Nav_Toolbar" xml:space="preserve">
+    <value>工具栏</value>
+  </data>
+  <data name="Nav_Toolbar_Tooltip" xml:space="preserve">
+    <value>工具栏按钮排序与可见性</value>
+  </data>
+  <data name="Nav_BoardToolbar" xml:space="preserve">
+    <value>白板工具栏</value>
+  </data>
+  <data name="Nav_BoardToolbar_Tooltip" xml:space="preserve">
+    <value>白板工具栏组件配置</value>
+  </data>
+  <data name="Nav_Board" xml:space="preserve">
+    <value>白板</value>
+  </data>
+  <data name="Nav_Board_Tooltip" xml:space="preserve">
+    <value>白板工具栏与外观设置</value>
+  </data>
+  <data name="Nav_BoardComponents" xml:space="preserve">
+    <value>组件</value>
+  </data>
+  <data name="Nav_BoardComponents_Tooltip" xml:space="preserve">
+    <value>白板工具栏组件配置</value>
+  </data>
+  <data name="Nav_BoardAppearance" xml:space="preserve">
+    <value>外观</value>
+  </data>
+  <data name="Nav_BoardAppearance_Tooltip" xml:space="preserve">
+    <value>白板工具栏外观设置</value>
+  </data>
+  <data name="Nav_ToolbarMenu" xml:space="preserve">
+    <value>菜单</value>
+  </data>
+  <data name="Nav_ToolbarMenu_Tooltip" xml:space="preserve">
+    <value>工具栏菜单排序与可见性</value>
+  </data>
+  <data name="Nav_BoardMenu" xml:space="preserve">
+    <value>菜单</value>
+  </data>
+  <data name="Nav_BoardMenu_Tooltip" xml:space="preserve">
+    <value>白板菜单排序与可见性</value>
+  </data>
+  <data name="Nav_CanvasAndInk_Tooltip" xml:space="preserve">
+    <value>画板与墨迹设置</value>
+  </data>
+  <data name="Nav_Canvas_Tooltip" xml:space="preserve">
+    <value>画板设置</value>
+  </data>
+  <data name="Nav_InkRecognition_Tooltip" xml:space="preserve">
+    <value>墨迹纠正设置</value>
+  </data>
+  <data name="Nav_PPT_Tooltip" xml:space="preserve">
+    <value>PPT联动设置</value>
+  </data>
+  <data name="Nav_Update_Tooltip" xml:space="preserve">
+    <value>更新设置</value>
+  </data>
+  <data name="Nav_RandomDraw_Tooltip" xml:space="preserve">
+    <value>随机点名与计时器</value>
+  </data>
+  <data name="Nav_PluginSettings" xml:space="preserve">
+    <value>插件设置</value>
+  </data>
+  <data name="Nav_AboutInkCanvas" xml:space="preserve">
+    <value>关于 InkCanvasForClass</value>
+  </data>
+  <data name="Nav_NavigateError" xml:space="preserve">
+    <value>导航到页面时出错: {0}</value>
+  </data>
+  <data name="Nav_Error" xml:space="preserve">
+    <value>错误</value>
+  </data>
+  <data name="Nav_PluginSettingsFormat" xml:space="preserve">
+    <value>{0} 设置</value>
+  </data>
+  <data name="Nav_IndexBuildFailed" xml:space="preserve">
+    <value>为页面 {0} 建索引失败: {1}</value>
+  </data>
+  <data name="Nav_LoadPluginSettingsFailed" xml:space="preserve">
+    <value>加载插件设置页面时出错: {0}</value>
+  </data>
+  <data name="Nav_PreloadPageFailed" xml:space="preserve">
+    <value>预加载设置页面 {0} 失败: {1}</value>
+  </data>
+  <data name="Nav_PreloadPagesFailed" xml:space="preserve">
+    <value>异步预加载设置页面时出错: {0}</value>
+  </data>
+  <data name="Settings_Description" xml:space="preserve">
+    <value>这里是设置页面</value>
+  </data>
+  <data name="Nav_Performance" xml:space="preserve">
+    <value>性能</value>
+  </data>
+  <data name="Nav_Performance_Tooltip" xml:space="preserve">
+    <value>性能监测与设备评估</value>
+  </data>
+</root>

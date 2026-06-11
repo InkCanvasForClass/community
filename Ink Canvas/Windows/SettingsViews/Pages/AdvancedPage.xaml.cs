@@ -1,8 +1,8 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
-using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,6 +19,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private bool _isRefreshingConfigProfileList = false;
         private string _lastAppliedProfileName;
 
+        // 自动校准相关
+        private int _calibrateStep = 0;
+        private double _nibTouchWidth = 0;
+        private double _fingerTouchWidth = 0;
+        private double _palmTouchWidth = 0;
+
         public AdvancedPage()
         {
             InitializeComponent();
@@ -32,6 +38,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _isLoaded = true;
             RefreshConfigProfileList();
             UpdateAllSliderTexts();
+            SliderTouchHelper.AddTouchSupportToAllSliders(this);
         }
 
         private void UpdateAllSliderTexts()
@@ -39,12 +46,26 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdateSliderText(TouchMultiplierSlider, TouchMultiplierText, "{0:F2}");
             UpdateSliderText(NibModeBoundsWidthSlider, NibModeBoundsWidthText, "{0:0}");
             UpdateSliderText(FingerModeBoundsWidthSlider, FingerModeBoundsWidthText, "{0:0}");
+            UpdateMiniWhiteboardSizeText();
+            UpdateMiniWhiteboardOpacityText();
         }
 
         private void UpdateSliderText(Slider slider, TextBlock textBlock, string format)
         {
             if (slider == null || textBlock == null) return;
             textBlock.Text = string.Format(format, slider.Value);
+        }
+
+        private void UpdateMiniWhiteboardSizeText()
+        {
+            if (MiniWhiteboardSizeText == null || MiniWhiteboardWidthSlider == null || MiniWhiteboardHeightSlider == null) return;
+            MiniWhiteboardSizeText.Text = $"{(int)MiniWhiteboardWidthSlider.Value} × {(int)MiniWhiteboardHeightSlider.Value}";
+        }
+
+        private void UpdateMiniWhiteboardOpacityText()
+        {
+            if (MiniWhiteboardOpacityText == null || MiniWhiteboardOpacitySlider == null) return;
+            MiniWhiteboardOpacityText.Text = $"{Math.Round(MiniWhiteboardOpacitySlider.Value * 100):0}%";
         }
 
         private void Page_Unloaded(object sender, RoutedEventArgs e)
@@ -69,17 +90,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ToggleSwitchIsLogEnabled.IsOn = settings.Advanced.IsLogEnabled;
             ToggleSwitchIsSaveLogByDate.IsOn = settings.Advanced.IsSaveLogByDate;
             ToggleSwitchIsSecondConfimeWhenShutdownApp.IsOn = settings.Advanced.IsSecondConfirmWhenShutdownApp;
-            ToggleSwitchIsAutoBackupBeforeUpdate.IsOn = settings.Advanced.IsAutoBackupBeforeUpdate;
-            ToggleSwitchIsAutoBackupEnabled.IsOn = settings.Advanced.IsAutoBackupEnabled;
 
-            foreach (ComboBoxItem item in ComboBoxAutoBackupInterval.Items)
-            {
-                if (item.Tag != null && int.TryParse(item.Tag.ToString(), out int interval) && interval == settings.Advanced.AutoBackupIntervalDays)
-                {
-                    ComboBoxAutoBackupInterval.SelectedItem = item;
-                    break;
-                }
-            }
+            settings.MiniWhiteboard ??= new MiniWhiteboardSettings();
+            ToggleSwitchMiniWhiteboardEnabled.IsOn = settings.MiniWhiteboard.IsEnabled;
+            ToggleSwitchMiniWhiteboardSyncPpt.IsOn = settings.MiniWhiteboard.SyncWithPptPages;
+            MiniWhiteboardWidthSlider.Value = settings.MiniWhiteboard.DefaultWidth;
+            MiniWhiteboardHeightSlider.Value = settings.MiniWhiteboard.DefaultHeight;
+            MiniWhiteboardOpacitySlider.Value = settings.MiniWhiteboard.DefaultOpacity;
 
             CardTouchMultiplier.IsExpanded = settings.Advanced.IsSpecialScreen;
         }
@@ -98,8 +115,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.Canvas.UseHardwareAcceleration = !ToggleSwitchDisableHardwareAcceleration.IsOn;
-            var mw = GetMainWindow();
-            if (mw != null) mw.UpdateInkSmoothingConfig();
+            SettingsActionHub.OnHardwareAccelerationChanged();
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -120,6 +136,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!SettingsManager.Settings.Advanced.IsQuadIR) value = args.Width;
             else value = Math.Sqrt(args.Width * args.Height);
 
+            TextBlockShowRawValue.Text = value.ToString();
             TextBlockShowCalculatedMultiplier.Text = (5 / (value * 1.1)).ToString();
         }
 
@@ -139,14 +156,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdateSliderText(NibModeBoundsWidthSlider, NibModeBoundsWidthText, "{0:0}");
             if (!_isLoaded) return;
             SettingsManager.Settings.Advanced.NibModeBoundsWidth = (int)e.NewValue;
-            var mw = GetMainWindow();
-            if (mw != null)
-            {
-                if (SettingsManager.Settings.Startup.IsEnableNibMode)
-                    mw.BoundsWidth = SettingsManager.Settings.Advanced.NibModeBoundsWidth;
-                else
-                    mw.BoundsWidth = SettingsManager.Settings.Advanced.FingerModeBoundsWidth;
-            }
+            SettingsActionHub.OnNibModeBoundsWidthChanged();
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -155,14 +165,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdateSliderText(FingerModeBoundsWidthSlider, FingerModeBoundsWidthText, "{0:0}");
             if (!_isLoaded) return;
             SettingsManager.Settings.Advanced.FingerModeBoundsWidth = (int)e.NewValue;
-            var mw = GetMainWindow();
-            if (mw != null)
-            {
-                if (SettingsManager.Settings.Startup.IsEnableNibMode)
-                    mw.BoundsWidth = SettingsManager.Settings.Advanced.NibModeBoundsWidth;
-                else
-                    mw.BoundsWidth = SettingsManager.Settings.Advanced.FingerModeBoundsWidth;
-            }
+            SettingsActionHub.OnFingerModeBoundsWidthChanged();
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -170,6 +173,142 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.Advanced.IsQuadIR = ToggleSwitchIsQuadIR.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        #endregion
+
+        #region Auto Calibrate
+
+        private void BtnStartCalibrate_Click(object sender, RoutedEventArgs e)
+        {
+            _calibrateStep = 1;
+            _nibTouchWidth = 0;
+            _fingerTouchWidth = 0;
+            _palmTouchWidth = 0;
+
+            BtnStartCalibrate.IsEnabled = false;
+            BorderCalibrate.IsEnabled = true;
+            TextCalibrateHint.Text = "请用 笔尖 点击此处";
+            TextNibCalibrated.Text = "笔尖值: 等待校准...";
+            TextFingerCalibrated.Text = "手指值: 未校准";
+            TextPalmCalibrated.Text = "手掌值: 未校准";
+            TextCalibrateResult.Text = "";
+        }
+
+        private void BorderCalibrate_TouchDown(object sender, TouchEventArgs e)
+        {
+            var args = e.GetTouchPoint(null).Bounds;
+            double touchWidth;
+            if (!SettingsManager.Settings.Advanced.IsQuadIR)
+                touchWidth = args.Width;
+            else
+                touchWidth = Math.Sqrt(args.Width * args.Height);
+
+            switch (_calibrateStep)
+            {
+                case 1:
+                    _nibTouchWidth = touchWidth;
+                    TextNibCalibrated.Text = $"笔尖值: {touchWidth:F2}";
+                    TextCalibrateHint.Text = "请用 手指 点击此处";
+                    _calibrateStep = 2;
+                    break;
+
+                case 2:
+                    _fingerTouchWidth = touchWidth;
+                    TextFingerCalibrated.Text = $"手指值: {touchWidth:F2}";
+                    TextCalibrateHint.Text = "请用 手掌 点击此处（模拟误触）";
+                    _calibrateStep = 3;
+                    break;
+
+                case 3:
+                    _palmTouchWidth = touchWidth;
+                    TextPalmCalibrated.Text = $"手掌值: {touchWidth:F2}";
+                    ApplyCalibratedSettings();
+                    _calibrateStep = 0;
+                    BtnStartCalibrate.IsEnabled = true;
+                    BorderCalibrate.IsEnabled = false;
+                    TextCalibrateHint.Text = "校准完成！点击按钮重新校准";
+                    break;
+            }
+
+            e.Handled = true;
+        }
+
+        private void ApplyCalibratedSettings()
+        {
+            if (!_isLoaded) return;
+
+            // 计算笔尖模式阈值：笔尖值 × 1.5，在 1-50 之间
+            double nibThreshold = _nibTouchWidth * 1.5;
+            nibThreshold = Math.Max(1, Math.Min(50, nibThreshold));
+            SettingsManager.Settings.Advanced.NibModeBoundsWidth = (int)Math.Round(nibThreshold);
+            NibModeBoundsWidthSlider.Value = SettingsManager.Settings.Advanced.NibModeBoundsWidth;
+
+            // 计算手指模式阈值：手指值 × 1.5，在 1-50 之间
+            double fingerThreshold = _fingerTouchWidth * 1.5;
+            fingerThreshold = Math.Max(1, Math.Min(50, fingerThreshold));
+            SettingsManager.Settings.Advanced.FingerModeBoundsWidth = (int)Math.Round(fingerThreshold);
+            FingerModeBoundsWidthSlider.Value = SettingsManager.Settings.Advanced.FingerModeBoundsWidth;
+
+            // 计算触摸倍率：使用手指值，和原来的公式一致
+            double touchMultiplier = 5 / (_fingerTouchWidth * 1.1);
+            touchMultiplier = Math.Max(0, Math.Min(2, touchMultiplier));
+            SettingsManager.Settings.Advanced.TouchMultiplier = Math.Round(touchMultiplier, 2);
+            TouchMultiplierSlider.Value = SettingsManager.Settings.Advanced.TouchMultiplier;
+
+            UpdateAllSliderTexts();
+            SettingsActionHub.OnNibModeBoundsWidthChanged();
+            SettingsActionHub.OnFingerModeBoundsWidthChanged();
+            SettingsManager.SaveSettingsToFile();
+
+            TextCalibrateResult.Text = $"校准成功！笔尖阈值={(int)nibThreshold}，手指阈值={(int)fingerThreshold}，触摸倍率={touchMultiplier:F2}";
+        }
+
+        #endregion
+
+        #region Mini Whiteboard
+
+        private void ToggleSwitchMiniWhiteboardEnabled_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.MiniWhiteboard ??= new MiniWhiteboardSettings();
+            SettingsManager.Settings.MiniWhiteboard.IsEnabled = ToggleSwitchMiniWhiteboardEnabled.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchMiniWhiteboardSyncPpt_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.MiniWhiteboard ??= new MiniWhiteboardSettings();
+            SettingsManager.Settings.MiniWhiteboard.SyncWithPptPages = ToggleSwitchMiniWhiteboardSyncPpt.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void MiniWhiteboardWidthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            UpdateMiniWhiteboardSizeText();
+            if (!_isLoaded) return;
+            SettingsManager.Settings.MiniWhiteboard ??= new MiniWhiteboardSettings();
+            SettingsManager.Settings.MiniWhiteboard.DefaultWidth = MiniWhiteboardWidthSlider.Value;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void MiniWhiteboardHeightSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            UpdateMiniWhiteboardSizeText();
+            if (!_isLoaded) return;
+            SettingsManager.Settings.MiniWhiteboard ??= new MiniWhiteboardSettings();
+            SettingsManager.Settings.MiniWhiteboard.DefaultHeight = MiniWhiteboardHeightSlider.Value;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void MiniWhiteboardOpacitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            UpdateMiniWhiteboardOpacityText();
+            if (!_isLoaded) return;
+            SettingsManager.Settings.MiniWhiteboard ??= new MiniWhiteboardSettings();
+            SettingsManager.Settings.MiniWhiteboard.DefaultOpacity = MiniWhiteboardOpacitySlider.Value;
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -196,123 +335,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             SettingsManager.Settings.Advanced.IsSecondConfirmWhenShutdownApp = ToggleSwitchIsSecondConfimeWhenShutdownApp.IsOn;
             SettingsManager.SaveSettingsToFile();
-        }
-
-        #endregion
-
-        #region Backup
-
-        private void ToggleSwitchIsAutoBackupBeforeUpdate_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Advanced.IsAutoBackupBeforeUpdate = ToggleSwitchIsAutoBackupBeforeUpdate.IsOn;
-            SettingsManager.SaveSettingsToFile();
-        }
-
-        private void ToggleSwitchIsAutoBackupEnabled_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Advanced.IsAutoBackupEnabled = ToggleSwitchIsAutoBackupEnabled.IsOn;
-            SettingsManager.SaveSettingsToFile();
-        }
-
-        private void ComboBoxAutoBackupInterval_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            if (ComboBoxAutoBackupInterval.SelectedItem is ComboBoxItem selectedItem && selectedItem.Tag != null)
-            {
-                if (int.TryParse(selectedItem.Tag.ToString(), out int interval))
-                {
-                    SettingsManager.Settings.Advanced.AutoBackupIntervalDays = interval;
-                    SettingsManager.SaveSettingsToFile();
-                }
-            }
-        }
-
-        private void BtnManualBackup_Click(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-
-            try
-            {
-                string backupDir = Path.Combine(App.RootPath, "Backups");
-                if (!Directory.Exists(backupDir))
-                {
-                    Directory.CreateDirectory(backupDir);
-                    LogHelper.WriteLogToFile($"创建备份目录: {backupDir}");
-                }
-
-                string backupFileName = $"Settings_Backup_{DateTime.Now:yyyyMMdd_HHmmss}.json";
-                string backupPath = Path.Combine(backupDir, backupFileName);
-
-                string settingsJson = Newtonsoft.Json.JsonConvert.SerializeObject(SettingsManager.Settings, Newtonsoft.Json.Formatting.Indented);
-                File.WriteAllText(backupPath, settingsJson);
-
-                LogHelper.WriteLogToFile($"成功创建设置备份: {backupPath}");
-                MessageBox.Show($"设置已成功备份到:\n{backupPath}", "备份成功", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"创建设置备份时出错: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show($"创建备份失败: {ex.Message}", "备份失败", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void BtnRestoreBackup_Click(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-
-            try
-            {
-                string backupDir = Path.Combine(App.RootPath, "Backups");
-                if (!Directory.Exists(backupDir))
-                {
-                    Directory.CreateDirectory(backupDir);
-                    LogHelper.WriteLogToFile($"创建备份目录: {backupDir}");
-                    MessageBox.Show("没有找到备份文件，请先创建备份", "还原失败", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                var dlg = new Microsoft.Win32.OpenFileDialog();
-                dlg.InitialDirectory = backupDir;
-                dlg.Filter = "设置备份文件|Settings_Backup_*.json|所有JSON文件|*.json";
-                dlg.Title = "选择要还原的备份文件";
-
-                if (dlg.ShowDialog() == true)
-                {
-                    string backupJson = File.ReadAllText(dlg.FileName);
-                    Settings backupSettings = Newtonsoft.Json.JsonConvert.DeserializeObject<Settings>(backupJson);
-
-                    if (backupSettings != null)
-                    {
-                        if (MessageBox.Show("确定要还原选择的备份文件吗？当前设置将被覆盖。", "确认还原",
-                                MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-                        {
-                            string currentSettingsJson = Newtonsoft.Json.JsonConvert.SerializeObject(SettingsManager.Settings, Newtonsoft.Json.Formatting.Indented);
-                            string tempBackupPath = Path.Combine(backupDir, $"Settings_Before_Restore_{DateTime.Now:yyyyMMdd_HHmmss}.json");
-                            File.WriteAllText(tempBackupPath, currentSettingsJson);
-
-                            SettingsManager.Settings = backupSettings;
-                            SettingsManager.SaveSettingsToFile();
-
-                            var mw = GetMainWindow();
-                            if (mw != null) mw.ReloadSettingsFromFile();
-
-                            LogHelper.WriteLogToFile($"成功从备份还原设置: {dlg.FileName}");
-                            MessageBox.Show("设置已成功还原，部分设置可能需要重启软件后生效。", "还原成功", MessageBoxButton.OK, MessageBoxImage.Information);
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show("无法解析备份文件，文件可能已损坏", "还原失败", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"还原设置备份时出错: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show($"还原备份失败: {ex.Message}", "还原失败", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
         }
 
         #endregion
@@ -375,7 +397,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     if (mw != null)
                     {
                         mw.ReloadSettingsFromFile();
-                        mw.ShowNotification($"已切换至方案「{name}」");
+                        mw.ShowNotification(string.Format(ConfigStrings.SwitchedToProfile, name));
                     }
                 }
             }
@@ -396,7 +418,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             };
             var label = new System.Windows.Controls.TextBlock
             {
-                Text = "方案名称",
+                Text = ConfigStrings.ProfileNameLabel,
                 Margin = new Thickness(0, 0, 0, 8)
             };
             var content = new iNKORE.UI.WPF.Controls.SimpleStackPanel { Spacing = 6 };
@@ -404,10 +426,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             content.Children.Add(input);
             var dialog = new ContentDialog
             {
-                Title = "另存为方案",
+                Title = ConfigStrings.SaveAsProfileTitle,
                 Content = content,
-                PrimaryButtonText = "保存",
-                SecondaryButtonText = "取消",
+                PrimaryButtonText = FloatingBarStrings.Tools_Save,
+                SecondaryButtonText = CommonStrings.Common_Cancel,
                 Owner = Window.GetWindow(this) ?? GetMainWindow()
             };
             var result = await dialog.ShowAsync();
@@ -415,7 +437,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var name = input.Text?.Trim();
             if (string.IsNullOrEmpty(name))
             {
-                MessageBox.Show("请输入方案名称。", "另存为方案", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(ConfigStrings.SaveAs_EnterName, ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
             try
@@ -426,15 +448,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     _lastAppliedProfileName = name;
                     RefreshConfigProfileList();
                     var mw = GetMainWindow();
-                    if (mw != null) mw.ShowNotification($"已另存为方案：{name}");
+                    if (mw != null) mw.ShowNotification(string.Format(ConfigStrings.SavedAsProfile, name));
                 }
                 else
-                    MessageBox.Show("保存失败，请查看日志。", "另存为方案", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show(ConfigStrings.SaveAs_Failed, ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"另存为方案失败: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show($"保存失败: {ex.Message}", "另存为方案", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(ConfigStrings.SaveAs_FailedMsg, ex.Message), ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -444,12 +466,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var name = ComboBoxConfigProfile?.SelectedItem as string;
             if (string.IsNullOrEmpty(name))
             {
-                MessageBox.Show("请先选择要删除的配置文件。", "配置文件", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(ConfigStrings.Delete_SelectFirst, ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
             try
             {
-                if (MessageBox.Show($"确定要删除配置文件「{name}」吗？", "确认删除", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+                if (MessageBox.Show(string.Format(ConfigStrings.Delete_ConfirmMsg, name), ConfigStrings.Delete_ConfirmTitle, MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
                     return;
                 if (ConfigProfileManager.DeleteProfile(name))
                 {
@@ -462,21 +484,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                         if (mw != null)
                         {
                             mw.ReloadSettingsFromFile();
-                            mw.ShowNotification($"已删除方案「{name}」，已切换至「{nextName}」");
+                            mw.ShowNotification(string.Format(ConfigStrings.DeletedAndSwitched, name, nextName));
                         }
                     }
                     else
                     {
-                        if (mw != null) mw.ShowNotification($"已删除方案：{name}");
+                        if (mw != null) mw.ShowNotification(string.Format(ConfigStrings.DeletedProfile, name));
                     }
                 }
                 else
-                    MessageBox.Show("删除配置文件失败，请查看日志。", "配置文件", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show(ConfigStrings.Delete_Failed, ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"删除配置文件失败: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show($"删除配置文件失败: {ex.Message}", "配置文件", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(ConfigStrings.Delete_FailedMsg, ex.Message), ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

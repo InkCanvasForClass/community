@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AppearancePanel_24HourTimeFormat" xml:space="preserve">
+    <value>Use 24-hour format</value>
+  </data>
+  <data name="Theme_BlackboardScale80" xml:space="preserve">
+    <value>Whiteboard UI 80% scale</value>
+  </data>
+  <data name="Theme_BoardToolbarOpacity" xml:space="preserve">
+    <value>Board Toolbar Opacity</value>
+  </data>
+  <data name="Theme_BoardToolbarOpacityLeft" xml:space="preserve">
+    <value>Bottom-left Opacity</value>
+  </data>
+  <data name="Theme_BoardToolbarOpacityCenter" xml:space="preserve">
+    <value>Center Opacity</value>
+  </data>
+  <data name="Theme_BoardToolbarOpacityRight" xml:space="preserve">
+    <value>Bottom-right Opacity</value>
+  </data>
+  <data name="Theme_BoardScaleLeft" xml:space="preserve">
+    <value>Bottom-left Scale</value>
+  </data>
+  <data name="Theme_BoardScaleCenter" xml:space="preserve">
+    <value>Center Scale</value>
+  </data>
+  <data name="Theme_BoardScaleRight" xml:space="preserve">
+    <value>Bottom-right Scale</value>
+  </data>
+  <data name="Theme_Clear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="Theme_CustomFloatingIconLabel" xml:space="preserve">
+    <value>Custom floating icon</value>
+  </data>
+  <data name="Theme_CustomSplash_NotSelected" xml:space="preserve">
+    <value>No custom image selected</value>
+  </data>
+  <data name="Theme_CustomSplashImage" xml:space="preserve">
+    <value>Custom Splash Image</value>
+  </data>
+  <data name="Theme_CustomSplashImage_Desc" xml:space="preserve">
+    <value>Select a custom image as the splash screen background (supports JPG, PNG, BMP, etc.)</value>
+  </data>
+  <data name="Theme_CustomSplashTextPosition" xml:space="preserve">
+    <value>Text Position</value>
+  </data>
+  <data name="Theme_CustomSplashTextPosition_Desc" xml:space="preserve">
+    <value>Set the position of loading text and progress bar</value>
+  </data>
+  <data name="Theme_Dark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="Theme_EnableQuickPanel" xml:space="preserve">
+    <value>Enable quick panel in docked mode</value>
+  </data>
+  <data name="Theme_EnableSplash" xml:space="preserve">
+    <value>Enable startup animation</value>
+  </data>
+  <data name="Theme_FloatingBarButtonsTitle" xml:space="preserve">
+    <value>Floating bar buttons</value>
+  </data>
+  <data name="Theme_FloatingBarIcon" xml:space="preserve">
+    <value>Floating toolbar icon</value>
+  </data>
+  <data name="Theme_FloatingBarOpacity" xml:space="preserve">
+    <value>Floating toolbar opacity</value>
+  </data>
+  <data name="Theme_FloatingBarOpacityInPPT" xml:space="preserve">
+    <value>Floating bar opacity in PPT</value>
+  </data>
+  <data name="Theme_FloatingBarOpacityInPPTHint" xml:space="preserve">
+    <value>Takes effect after re-entering slide show</value>
+  </data>
+  <data name="Theme_FloatingBarScale" xml:space="preserve">
+    <value>Floating toolbar scale</value>
+  </data>
+  <data name="Theme_FloatingIcon_CoolapkAbused" xml:space="preserve">
+    <value>Coolapk abused emoji</value>
+  </data>
+  <data name="Theme_FloatingIcon_CoolapkCrossEye" xml:space="preserve">
+    <value>Coolapk cross-eye emoji</value>
+  </data>
+  <data name="Theme_FloatingIcon_CoolapkGreenHatDoge" xml:space="preserve">
+    <value>Coolapk green-hat Doge</value>
+  </data>
+  <data name="Theme_FloatingIcon_CoolapkSmile" xml:space="preserve">
+    <value>Coolapk grin emoji</value>
+  </data>
+  <data name="Theme_FloatingIcon_CoolapkUnderwear" xml:space="preserve">
+    <value>Coolapk underwear emoji</value>
+  </data>
+  <data name="Theme_FloatingIcon_IccBlackTransparent" xml:space="preserve">
+    <value>&quot;ICC-CE&quot; black transparent</value>
+  </data>
+  <data name="Theme_FloatingIcon_IccDark" xml:space="preserve">
+    <value>&quot;ICC-CE&quot; dark</value>
+  </data>
+  <data name="Theme_FloatingIcon_IccDarkBreath" xml:space="preserve">
+    <value>&quot;ICC-CE&quot; dark breathing</value>
+  </data>
+  <data name="Theme_FloatingIcon_IccDefault" xml:space="preserve">
+    <value>&quot;ICC-CE&quot; default</value>
+  </data>
+  <data name="Theme_FloatingIcon_IccNoShadow" xml:space="preserve">
+    <value>&quot;ICC-CE&quot; no shadow</value>
+  </data>
+  <data name="Theme_FloatingIcon_IccWhiteTransparent" xml:space="preserve">
+    <value>&quot;ICC-CE&quot; white transparent</value>
+  </data>
+  <data name="Theme_FloatingIcon_TiebaEmoji" xml:space="preserve">
+    <value>Tieba emoji</value>
+  </data>
+  <data name="Theme_GroupTitle" xml:space="preserve">
+    <value>Personalization</value>
+  </data>
+  <data name="Theme_Label" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+  <data name="Theme_Language_ChineseSimplified" xml:space="preserve">
+    <value>Simplified Chinese (简体中文)</value>
+  </data>
+  <data name="Theme_Language_English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Theme_Language_MemeChinese" xml:space="preserve">
+    <value>Meme Chinese (梗体中文)</value>
+  </data>
+  <data name="Theme_Language_RestartHint" xml:space="preserve">
+    <value>You need to restart the app for language changes to fully take effect.</value>
+  </data>
+  <data name="Theme_LanguageLabel" xml:space="preserve">
+    <value>UI language</value>
+  </data>
+  <data name="Theme_Light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="Theme_Manage" xml:space="preserve">
+    <value>Manage</value>
+  </data>
+  <data name="Theme_QuickPalette_DoubleRow" xml:space="preserve">
+    <value>Double row (8 colors)</value>
+  </data>
+  <data name="Theme_QuickPalette_SingleRow" xml:space="preserve">
+    <value>Single row (6 colors)</value>
+  </data>
+  <data name="Theme_QuickPanelBottomOffset" xml:space="preserve">
+    <value>Quick panel vertical offset</value>
+  </data>
+  <data name="Theme_QuoteSource" xml:space="preserve">
+    <value>Where is the quote from?</value>
+  </data>
+  <data name="Theme_QuoteSource_GaokaoBless" xml:space="preserve">
+    <value>Gaokao blessings</value>
+  </data>
+  <data name="Theme_QuoteSource_Hitokoto" xml:space="preserve">
+    <value>Hitokoto API</value>
+  </data>
+  <data name="Theme_QuoteSource_Mottos" xml:space="preserve">
+    <value>Inspirational mottos</value>
+  </data>
+  <data name="Theme_QuoteSource_OsuQuotes" xml:space="preserve">
+    <value>osu! player quotes</value>
+  </data>
+  <data name="Theme_QuoteSource_PhigrosTips" xml:space="preserve">
+    <value>Phigros Tips</value>
+  </data>
+  <data name="Theme_ShowQuoteInWhiteboard" xml:space="preserve">
+    <value>Show quotes in whiteboard</value>
+  </data>
+  <data name="Theme_QuotePosition" xml:space="preserve">
+    <value>Quote position in whiteboard</value>
+  </data>
+  <data name="Theme_QuotePosition_TopLeft" xml:space="preserve">
+    <value>Top left</value>
+  </data>
+  <data name="Theme_QuotePosition_TopRight" xml:space="preserve">
+    <value>Top right</value>
+  </data>
+  <data name="Theme_QuotePosition_BottomLeft" xml:space="preserve">
+    <value>Bottom left</value>
+  </data>
+  <data name="Theme_QuotePosition_BottomRight" xml:space="preserve">
+    <value>Bottom right</value>
+  </data>
+  <data name="Theme_ShowTimeInWhiteboard" xml:space="preserve">
+    <value>Show time and date in whiteboard</value>
+  </data>
+  <data name="Theme_Splash_Autumn" xml:space="preserve">
+    <value>Autumn</value>
+  </data>
+  <data name="Theme_Splash_Custom" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="Theme_Splash_Horse" xml:space="preserve">
+    <value>Year-of-Horse special</value>
+  </data>
+  <data name="Theme_Splash_Random" xml:space="preserve">
+    <value>Random</value>
+  </data>
+  <data name="Theme_Splash_Seasonal" xml:space="preserve">
+    <value>Follow seasons</value>
+  </data>
+  <data name="Theme_Splash_Spring" xml:space="preserve">
+    <value>Spring</value>
+  </data>
+  <data name="Theme_Splash_Summer" xml:space="preserve">
+    <value>Summer</value>
+  </data>
+  <data name="Theme_Splash_Winter" xml:space="preserve">
+    <value>Winter</value>
+  </data>
+  <data name="Theme_SplashStyle" xml:space="preserve">
+    <value>Startup animation style</value>
+  </data>
+  <data name="Theme_System" xml:space="preserve">
+    <value>Follow system</value>
+  </data>
+  <data name="Theme_UnfoldButtonIcon" xml:space="preserve">
+    <value>Un-dock button icon</value>
+  </data>
+  <data name="Theme_UnfoldIcon_Arrow" xml:space="preserve">
+    <value>Arrow</value>
+  </data>
+  <data name="Theme_UnfoldIcon_ClassicArrow" xml:space="preserve">
+    <value>Semi-circle (Arrow)</value>
+  </data>
+  <data name="Theme_UnfoldIcon_ClassicPen" xml:space="preserve">
+    <value>Semi-circle (Pen)</value>
+  </data>
+  <data name="Theme_UnfoldIcon_Stripe" xml:space="preserve">
+    <value>Stripe</value>
+  </data>
+  <data name="Theme_AllowDragSidePanel" xml:space="preserve">
+    <value>Allow adjusting side panel position by dragging</value>
+  </data>
+  <data name="Theme_Upload" xml:space="preserve">
+    <value>Upload</value>
+  </data>
+  <data name="Theme_UseLegacyFloatingBarUI" xml:space="preserve">
+    <value>Use legacy floating bar UI</value>
+  </data>
+  <data name="Theme_WindowBackdrop" xml:space="preserve">
+    <value>Window background style</value>
+  </data>
+  <data name="Theme_WindowBackdrop_Acrylic" xml:space="preserve">
+    <value>Acrylic</value>
+  </data>
+  <data name="Theme_WindowBackdrop_Acrylic10" xml:space="preserve">
+    <value>Acrylic (Windows 10 compatible)</value>
+  </data>
+  <data name="Theme_WindowBackdrop_Acrylic11" xml:space="preserve">
+    <value>Acrylic (Windows 11 compatible)</value>
+  </data>
+  <data name="Theme_WindowBackdrop_Description" xml:space="preserve">
+    <value>Controls Mica, Acrylic, and other background effects for modern windows such as Settings and OOBE.</value>
+  </data>
+  <data name="Theme_WindowBackdrop_Mica" xml:space="preserve">
+    <value>Mica</value>
+  </data>
+  <data name="Theme_WindowBackdrop_None" xml:space="preserve">
+    <value>No background effect</value>
+  </data>
+  <data name="Theme_WindowBackdrop_Tabbed" xml:space="preserve">
+    <value>Tabbed background</value>
+  </data>
+  <data name="Theme_WindowBackdrop_Transient" xml:space="preserve">
+    <value>Transient background</value>
+  </data>
+  <data name="Theme_FloatingBarButtonsDescription" xml:space="preserve">
+    <value>Go to the Toolbar settings page to manage floating toolbar component display and ordering.</value>
+  </data>
+  <data name="Theme_SelectCustomSplashImage" xml:space="preserve">
+    <value>Select Custom Splash Image</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Animation" xml:space="preserve">
+    <value>Animation</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Manga" xml:space="preserve">
+    <value>Manga</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Game" xml:space="preserve">
+    <value>Game</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Literature" xml:space="preserve">
+    <value>Literature</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Original" xml:space="preserve">
+    <value>Original</value>
+  </data>
+  <data name="Theme_HitokotoCategory_FromWeb" xml:space="preserve">
+    <value>From Web</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Movie" xml:space="preserve">
+    <value>Movie &amp; TV</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Poetry" xml:space="preserve">
+    <value>Poetry</value>
+  </data>
+  <data name="Theme_HitokotoCategory_NeteaseCloud" xml:space="preserve">
+    <value>Netease Cloud</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Philosophy" xml:space="preserve">
+    <value>Philosophy</value>
+  </data>
+  <data name="Theme_HitokotoCategory_Humor" xml:space="preserve">
+    <value>Humor</value>
+  </data>
+  <data name="Theme_Hitokoto_SelectAll" xml:space="preserve">
+    <value>Select All</value>
+  </data>
+  <data name="Theme_Hitokoto_CustomizeTitle" xml:space="preserve">
+    <value>Customize Hitokoto Categories</value>
+  </data>
+  <data name="Theme_QuickPanelOpacity" xml:space="preserve">
+    <value>Sidebar opacity</value>
+  </data>
+  <data name="Theme_AutoCollapseQuickPanel" xml:space="preserve">
+    <value>Auto-collapse sidebar when clicking elsewhere</value>
+  </data>
+  <data name="Theme_AutoCollapseQuickPanelDelay" xml:space="preserve">
+    <value>Auto-collapse delay</value>
+  </data>
+</root>

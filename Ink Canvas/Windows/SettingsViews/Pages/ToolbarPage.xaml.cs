@@ -1,6 +1,7 @@
 using GongSolutions.Wpf.DragDrop;
-using Ink_Canvas.Controls.Toolbar;
+using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
+using System.Windows.Input;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
@@ -94,6 +96,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             TextBoxMarginTop.Text = entry.GetSettingDouble(ComponentSettingKeys.MarginTop)?.ToString() ?? "";
             TextBoxMarginRight.Text = entry.GetSettingDouble(ComponentSettingKeys.MarginRight)?.ToString() ?? "";
             TextBoxMarginBottom.Text = entry.GetSettingDouble(ComponentSettingKeys.MarginBottom)?.ToString() ?? "";
+            CheckBoxUseRedStyle.IsChecked = entry.GetSettingBool(ComponentSettingKeys.UseRedStyle);
 
             var hAlign = entry.GetSettingString(ComponentSettingKeys.HorizontalAlignment) ?? "";
             ComboBoxHAlign.SelectedIndex = hAlign switch { "Left" => 1, "Center" => 2, "Right" => 3, "Stretch" => 4, _ => 0 };
@@ -111,11 +114,46 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var ruleset = ToolbarRegistry.GetEffectiveRuleset(entry);
             ComboBoxRulesetMode.SelectedIndex = (int)ruleset.Mode;
             CheckBoxRulesetReversed.IsChecked = ruleset.IsReversed;
-            // 先清空再重新赋值，确保完全更新
+
+            // 评估规则集并更新所有层级的状态
+            UpdateRulesetStateIndicator(ruleset);
+
+            // 设置 ItemsSource（评估后设置，确保 Ellipse 绑定到最新的 State）
             ItemsControlGroups.ItemsSource = null;
             ItemsControlGroups.ItemsSource = ruleset.Groups;
 
             _suppressSave = false;
+        }
+
+        private void UpdateRulesetStateIndicator(ToolbarRuleset ruleset)
+        {
+            if (ruleset == null)
+            {
+                EllipseRulesetState.Fill = Brushes.DarkGray;
+                return;
+            }
+
+            // 获取当前上下文状态
+            var mainWindow = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
+            bool isAnnotating = mainWindow?.IsAnnotating ?? false;
+            bool isPptMode = mainWindow?.IsInPptPresentationMode ?? false;
+
+            var context = new Dictionary<string, bool>
+            {
+                ["isAnnotating"] = isAnnotating,
+                ["isPptMode"] = isPptMode,
+                ["isContentCollapsedByUser"] = ToolbarRegistry.IsContentCollapsedByUser
+            };
+
+            // 评估规则集并更新所有层级的状态
+            ToolbarRegistry.EvaluateRuleset(ruleset, context);
+
+            EllipseRulesetState.Fill = ruleset.State switch
+            {
+                2 => Brushes.Green,
+                1 => Brushes.IndianRed,
+                _ => Brushes.DarkGray
+            };
         }
 
         public ToolbarPage()
@@ -124,6 +162,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             InitializeComponent();
             DataContext = this;
             Loaded += OnPageLoaded;
+        }
+
+        private void NestedScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (PageScrollViewer == null) return;
+
+            PageScrollViewer.ScrollToVerticalOffset(PageScrollViewer.VerticalOffset - e.Delta);
+            e.Handled = true;
         }
 
         private void OnPageLoaded(object sender, RoutedEventArgs e)
@@ -166,7 +212,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void ButtonNewConfig_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new InputDialog("请输入配置文件名称：", "新建配置", "")
+            var dialog = new InputDialog(FloatingBarStrings.ToolbarPage_EnterConfigName, FloatingBarStrings.ToolbarPage_NewConfig, "")
             {
                 Owner = Window.GetWindow(this)
             };
@@ -180,7 +226,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var existing = ToolbarRegistry.ListConfigFiles();
             if (existing.Contains(name, StringComparer.OrdinalIgnoreCase))
             {
-                MessageBox.Show("同名配置文件已存在。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(FloatingBarStrings.ToolbarPage_DuplicateConfigExists, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -197,7 +243,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var currentName = ComboBoxConfigFile.SelectedItem as string;
             if (string.IsNullOrEmpty(currentName)) return;
 
-            var dialog = new InputDialog("请输入新配置文件名称：", "复制配置", currentName + "_copy")
+            var dialog = new InputDialog(FloatingBarStrings.ToolbarPage_EnterNewConfigName, FloatingBarStrings.ToolbarPage_CopyConfig, currentName + "_copy")
             {
                 Owner = Window.GetWindow(this)
             };
@@ -211,7 +257,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var existing = ToolbarRegistry.ListConfigFiles();
             if (existing.Contains(name, StringComparer.OrdinalIgnoreCase))
             {
-                MessageBox.Show("同名配置文件已存在。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(FloatingBarStrings.ToolbarPage_DuplicateConfigExists, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -232,11 +278,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var files = ToolbarRegistry.ListConfigFiles();
             if (files.Count <= 1)
             {
-                MessageBox.Show("至少需要保留一个配置文件。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(FloatingBarStrings.ToolbarPage_AtLeastOneConfig, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (MessageBox.Show($"确定要删除配置 \"{name}\" 吗？", "确认删除",
+            if (MessageBox.Show($"{FloatingBarStrings.ToolbarPage_ConfirmDeleteConfig} \"{name}\"?", FloatingBarStrings.ToolbarPage_ConfirmDelete,
                 MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
                 return;
 
@@ -452,6 +498,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded || ActiveEntry == null) return;
             ActiveEntry.ShowSeparateBorder = CheckBoxShowSeparateBorder.IsChecked == true;
+            SaveSettings();
+        }
+
+        private void CheckBoxUseRedStyle_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded || ActiveEntry == null || _suppressSave) return;
+            if (CheckBoxUseRedStyle.IsChecked == true)
+                ActiveEntry.SetSetting(ComponentSettingKeys.UseRedStyle, true);
+            else
+                ActiveEntry.Settings?.Remove(ComponentSettingKeys.UseRedStyle);
             SaveSettings();
         }
 
@@ -891,9 +947,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             panel.Children.Add(_textBox);
 
             var btnPanel = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
-            var okBtn = new Button { Content = "确定", Padding = new Thickness(20, 6, 20, 6), IsDefault = true };
+            var okBtn = new Button { Content = FloatingBarStrings.ToolbarPage_OK, Padding = new Thickness(20, 6, 20, 6), IsDefault = true };
             okBtn.Click += (s, e) => { InputText = _textBox.Text; DialogResult = true; };
-            var cancelBtn = new Button { Content = "取消", Padding = new Thickness(20, 6, 20, 6), Margin = new Thickness(8, 0, 0, 0), IsCancel = true };
+            var cancelBtn = new Button { Content = FloatingBarStrings.ToolbarPage_Cancel, Padding = new Thickness(20, 6, 20, 6), Margin = new Thickness(8, 0, 0, 0), IsCancel = true };
             btnPanel.Children.Add(okBtn);
             btnPanel.Children.Add(cancelBtn);
             panel.Children.Add(btnPanel);

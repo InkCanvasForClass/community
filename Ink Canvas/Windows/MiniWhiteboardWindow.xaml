@@ -1,0 +1,210 @@
+<Window xmlns:props="clr-namespace:Ink_Canvas.Properties"
+        xmlns:fb="clr-namespace:Ink_Canvas.Properties"
+        x:Class="Ink_Canvas.MiniWhiteboardWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+        mc:Ignorable="d"
+        Title="{x:Static fb:FloatingBarStrings.FloatingBar_MiniWhiteboard}"
+        Topmost="True"
+        ShowInTaskbar="False"
+        Focusable="False"
+        Width="400" Height="300"
+        MinWidth="260" MinHeight="180"
+        WindowStartupLocation="CenterScreen"
+        Loaded="Window_Loaded"
+        Closing="Window_Closing"
+        ui:ThemeManager.IsThemeAware="True"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        ui:WindowHelper.CornerStyle="Round"
+        ui:TitleBar.ExtendViewIntoTitleBar="True"
+        ui:TitleBar.Height="0">
+
+    <Window.Resources>
+        <Style x:Key="MiniToolBtn" TargetType="Border">
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="1,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource BoardFloatBarButtonBackgroundPointerOverKey}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <!-- 无标题栏窗口：画布内嵌悬浮白板工具栏，工具栏不贴边 -->
+    <Grid x:Name="RootGrid"
+          Background="#01000000"
+          ClipToBounds="True"
+          PreviewTouchDown="RootGrid_PreviewTouchDown"
+          PreviewTouchMove="RootGrid_PreviewTouchMove"
+          PreviewTouchUp="RootGrid_PreviewTouchUp">
+        <InkCanvas x:Name="MiniInkCanvas"
+                   Background="#10FFFFFF"
+                   EditingMode="Ink"
+                   ClipToBounds="True"
+                   ForceCursor="True"
+                   Margin="0">
+            <InkCanvas.DefaultDrawingAttributes>
+                <DrawingAttributes Color="White"
+                                   Width="3" Height="3"
+                                   FitToCurve="True"
+                                   IgnorePressure="False" />
+            </InkCanvas.DefaultDrawingAttributes>
+        </InkCanvas>
+
+        <!-- 内嵌一体式图标工具栏：底部悬浮，不贴边 -->
+        <Border x:Name="MiniToolbar"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                Background="{DynamicResource BoardFloatBarBackground}"
+                BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="6"
+                Margin="0,0,0,14"
+                Padding="2">
+            <StackPanel Orientation="Horizontal">
+
+                <!-- 画笔 -->
+                <Border x:Name="PenBtn" Style="{StaticResource MiniToolBtn}"
+                        MouseLeftButtonUp="PenBtn_Click"
+                        ToolTip="{x:Static fb:FloatingBarStrings.Board_Pen}">
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" FontSize="14"
+                                 Foreground="{DynamicResource IconForeground}"/>
+                </Border>
+
+                <!-- 颜色选择 -->
+                <Border x:Name="ColorBtn" Style="{StaticResource MiniToolBtn}" Width="28"
+                        MouseLeftButtonUp="ColorBtn_Click"
+                        ToolTip="Color">
+                    <Ellipse x:Name="ColorIndicator" Width="14" Height="14"
+                             Fill="White" Stroke="{DynamicResource IconForeground}" StrokeThickness="1"/>
+                </Border>
+
+                <!-- 橡皮擦 -->
+                <Border x:Name="EraserBtn" Style="{StaticResource MiniToolBtn}"
+                        MouseLeftButtonUp="EraserBtn_Click"
+                        ToolTip="{x:Static fb:FloatingBarStrings.Board_Eraser}">
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EraseTool}" FontSize="14"
+                                 Foreground="{DynamicResource IconForeground}"/>
+                </Border>
+
+                <!-- 分隔线 -->
+                <Border Width="1" Height="16" Background="{DynamicResource BoardFloatBarBorderBrush}" Margin="3,0" VerticalAlignment="Center"/>
+
+                <!-- 撤销 -->
+                <Border x:Name="UndoBtn" Style="{StaticResource MiniToolBtn}"
+                        MouseLeftButtonUp="UndoBtn_Click"
+                        ToolTip="{x:Static fb:FloatingBarStrings.Board_Undo}">
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Undo}" FontSize="14"
+                                 Foreground="{DynamicResource IconForeground}"/>
+                </Border>
+
+                <!-- 清除 -->
+                <Border x:Name="ClearBtn" Style="{StaticResource MiniToolBtn}"
+                        MouseLeftButtonUp="ClearBtn_Click"
+                        ToolTip="{x:Static fb:FloatingBarStrings.MiniWhiteboard_Clear}">
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" FontSize="14"
+                                 Foreground="{DynamicResource IconForeground}"/>
+                </Border>
+
+                <!-- 分隔线 -->
+                <Border Width="1" Height="16" Background="{DynamicResource BoardFloatBarBorderBrush}" Margin="3,0" VerticalAlignment="Center"/>
+
+                <!-- 上一页 -->
+                <Border Style="{StaticResource MiniToolBtn}"
+                        MouseLeftButtonUp="PrevPageBtn_Click"
+                        ToolTip="{x:Static fb:FloatingBarStrings.Board_PreviousPage}">
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronLeft}" FontSize="14"
+                                 Foreground="{DynamicResource IconForeground}"/>
+                </Border>
+
+                <!-- 页码 -->
+                <TextBlock x:Name="PageInfoText" Text="1/1"
+                           FontSize="11" FontFamily="Consolas"
+                           Foreground="{DynamicResource IconForeground}"
+                           VerticalAlignment="Center" Margin="2,0"/>
+
+                <!-- 下一页 -->
+                <Border Style="{StaticResource MiniToolBtn}"
+                        MouseLeftButtonUp="NextPageBtn_Click"
+                        ToolTip="{x:Static fb:FloatingBarStrings.Board_NextPage}">
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronRight}" FontSize="14"
+                                 Foreground="{DynamicResource IconForeground}"/>
+                </Border>
+
+                <!-- 新建页面 -->
+                <Border Style="{StaticResource MiniToolBtn}"
+                        MouseLeftButtonUp="AddPageBtn_Click"
+                        ToolTip="{x:Static fb:FloatingBarStrings.Board_NewPage}">
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" FontSize="14"
+                                 Foreground="{DynamicResource IconForeground}"/>
+                </Border>
+
+                <!-- 分隔线 -->
+                <Border Width="1" Height="16" Background="{DynamicResource BoardFloatBarBorderBrush}" Margin="3,0" VerticalAlignment="Center"/>
+
+                <!-- 收起 -->
+                <Border Style="{StaticResource MiniToolBtn}"
+                        MouseLeftButtonUp="FoldBtn_Click"
+                        ToolTip="{x:Static fb:FloatingBarStrings.FloatingBar_Hide}">
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronDown}" FontSize="14"
+                                 Foreground="{DynamicResource IconForeground}"/>
+                </Border>
+
+            </StackPanel>
+        </Border>
+
+        <!-- 调色盘 Popup -->
+        <Popup x:Name="ColorPalettePopup" PlacementTarget="{Binding ElementName=ColorBtn}"
+               Placement="Top" StaysOpen="False" AllowsTransparency="True"
+               HorizontalOffset="-30" VerticalOffset="-4">
+            <Border Background="{DynamicResource BoardFloatBarBackground}"
+                    BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
+                    BorderThickness="1" CornerRadius="6" Padding="6,4">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,2">
+                        <Ellipse x:Name="SwatchWhite" Width="22" Height="22" Fill="White"
+                                 Stroke="Gray" StrokeThickness="1" Margin="1,0" Cursor="Hand"
+                                 MouseLeftButtonUp="ColorSwatch_Click"/>
+                        <Ellipse x:Name="SwatchBlack" Width="22" Height="22" Fill="Black"
+                                 Stroke="Gray" StrokeThickness="1" Margin="1,0" Cursor="Hand"
+                                 MouseLeftButtonUp="ColorSwatch_Click"/>
+                        <Ellipse x:Name="SwatchRed" Width="22" Height="22" Fill="#FF0000"
+                                 Stroke="Gray" StrokeThickness="1" Margin="1,0" Cursor="Hand"
+                                 MouseLeftButtonUp="ColorSwatch_Click"/>
+                        <Ellipse x:Name="SwatchOrange" Width="22" Height="22" Fill="#FFA500"
+                                 Stroke="Gray" StrokeThickness="1" Margin="1,0" Cursor="Hand"
+                                 MouseLeftButtonUp="ColorSwatch_Click"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,2,0,0">
+                        <Ellipse x:Name="SwatchYellow" Width="22" Height="22" Fill="#FFFF00"
+                                 Stroke="Gray" StrokeThickness="1" Margin="1,0" Cursor="Hand"
+                                 MouseLeftButtonUp="ColorSwatch_Click"/>
+                        <Ellipse x:Name="SwatchGreen" Width="22" Height="22" Fill="#16A34A"
+                                 Stroke="Gray" StrokeThickness="1" Margin="1,0" Cursor="Hand"
+                                 MouseLeftButtonUp="ColorSwatch_Click"/>
+                        <Ellipse x:Name="SwatchBlue" Width="22" Height="22" Fill="#2563EB"
+                                 Stroke="Gray" StrokeThickness="1" Margin="1,0" Cursor="Hand"
+                                 MouseLeftButtonUp="ColorSwatch_Click"/>
+                        <Ellipse x:Name="SwatchPurple" Width="22" Height="22" Fill="#9333EA"
+                                 Stroke="Gray" StrokeThickness="1" Margin="1,0" Cursor="Hand"
+                                 MouseLeftButtonUp="ColorSwatch_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Popup>
+    </Grid>
+</Window>

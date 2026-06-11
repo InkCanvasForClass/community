@@ -224,7 +224,6 @@ namespace Ink_Canvas
                     if (isStartup)
                     {
                         _pendingStartupAutoUpdateCheck = true;
-                        LogHelper.WriteLogToFile("AutoUpdate | Startup check deferred until UI is stable");
                     }
                     else
                     {
@@ -259,79 +258,90 @@ namespace Ink_Canvas
             {
                 if (Settings.Appearance != null)
                 {
-                if (Settings.Appearance.ViewboxFloatingBarScaleTransformValue != 0)
-                {
-                    double userVal = Settings.Appearance.ViewboxFloatingBarScaleTransformValue;
-                    // 限制用户设置值在有效范围内
-                    double clampedUserVal = (userVal > 0.5 && userVal < 1.25) ? userVal :
-                                               userVal <= 0.5 ? 0.5 :
-                                               userVal >= 1.25 ? 1.25 : 1.0;
+                    if (Settings.Appearance.ViewboxFloatingBarScaleTransformValue != 0)
+                    {
+                        double userVal = Settings.Appearance.ViewboxFloatingBarScaleTransformValue;
+                        // 限制用户设置值在有效范围内
+                        double clampedUserVal = (userVal > 0.5 && userVal < 1.25) ? userVal :
+                                                   userVal <= 0.5 ? 0.5 :
+                                                   userVal >= 1.25 ? 1.25 : 1.0;
 
-                    double actualScale = clampedUserVal;
+                        double actualScale = clampedUserVal;
 
-                    // 最终范围限制：0.5x ~ 1.25x
-                    ViewboxFloatingBarScaleTransform.ScaleX = actualScale;
-                    ViewboxFloatingBarScaleTransform.ScaleY = actualScale;
-                }
+                        // 最终范围限制：0.5x ~ 1.25x
+                        ViewboxFloatingBarScaleTransform.ScaleX = actualScale;
+                        ViewboxFloatingBarScaleTransform.ScaleY = actualScale;
+                    }
 
-                switch (Settings.Appearance.UnFoldButtonImageType)
-                {
-                    case 0:
-                        RightUnFoldBtnImgChevron.Source =
-                            new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
-                        RightUnFoldBtnImgChevron.Width = 14;
-                        RightUnFoldBtnImgChevron.Height = 14;
-                        RightUnFoldBtnImgChevron.RenderTransform = new RotateTransform(180);
-                        LeftUnFoldBtnImgChevron.Source =
-                            new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
-                        LeftUnFoldBtnImgChevron.Width = 14;
-                        LeftUnFoldBtnImgChevron.Height = 14;
-                        LeftUnFoldBtnImgChevron.RenderTransform = null;
-                        break;
-                    case 1:
-                        RightUnFoldBtnImgChevron.Source =
-                            new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
-                        RightUnFoldBtnImgChevron.Width = 18;
-                        RightUnFoldBtnImgChevron.Height = 18;
-                        RightUnFoldBtnImgChevron.RenderTransform = null;
-                        LeftUnFoldBtnImgChevron.Source =
-                            new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
-                        LeftUnFoldBtnImgChevron.Width = 18;
-                        LeftUnFoldBtnImgChevron.Height = 18;
-                        LeftUnFoldBtnImgChevron.RenderTransform = null;
-                        break;
-                }
+                    switch (Settings.Appearance.UnFoldButtonImageType)
+                    {
+                        case 0:
+                            RightUnFoldBtnImgChevron.Source =
+                                new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
+                            RightUnFoldBtnImgChevron.Width = 14;
+                            RightUnFoldBtnImgChevron.Height = 14;
+                            RightUnFoldBtnImgChevron.RenderTransform = new RotateTransform(180);
+                            LeftUnFoldBtnImgChevron.Source =
+                                new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
+                            LeftUnFoldBtnImgChevron.Width = 14;
+                            LeftUnFoldBtnImgChevron.Height = 14;
+                            LeftUnFoldBtnImgChevron.RenderTransform = null;
+                            break;
+                        case 1:
+                            RightUnFoldBtnImgChevron.Source =
+                                new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
+                            RightUnFoldBtnImgChevron.Width = 18;
+                            RightUnFoldBtnImgChevron.Height = 18;
+                            RightUnFoldBtnImgChevron.RenderTransform = null;
+                            LeftUnFoldBtnImgChevron.Source =
+                                new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
+                            LeftUnFoldBtnImgChevron.Width = 18;
+                            LeftUnFoldBtnImgChevron.Height = 18;
+                            LeftUnFoldBtnImgChevron.RenderTransform = null;
+                            break;
+                    }
 
-                ViewboxFloatingBar.Opacity = Settings.Appearance.ViewboxFloatingBarOpacityValue;
+                    ViewboxFloatingBar.Opacity = Settings.Appearance.ViewboxFloatingBarOpacityValue;
 
-                ViewboxBlackboardCenterSideScaleTransform.ScaleX = Settings.Appearance.ViewboxBlackBoardScaleTransformValue;
-                ViewboxBlackboardCenterSideScaleTransform.ScaleY = Settings.Appearance.ViewboxBlackBoardScaleTransformValue;
+                    ViewboxBlackboardCenterSideScaleTransform.ScaleX = Settings.Appearance.ViewboxBlackBoardScaleTransformValue;
+                    ViewboxBlackboardCenterSideScaleTransform.ScaleY = Settings.Appearance.ViewboxBlackBoardScaleTransformValue;
 
-                ApplyQuickPanelBottomOffset(Settings.Appearance.QuickPanelBottomOffset);
+                    ViewboxBlackboardLeftSideScaleTransform.ScaleX = Settings.Appearance.ViewboxBlackBoardLeftScaleTransformValue;
+                    ViewboxBlackboardLeftSideScaleTransform.ScaleY = Settings.Appearance.ViewboxBlackBoardLeftScaleTransformValue;
+                    ViewboxBlackboardRightSideScaleTransform.ScaleX = Settings.Appearance.ViewboxBlackBoardRightScaleTransformValue;
+                    ViewboxBlackboardRightSideScaleTransform.ScaleY = Settings.Appearance.ViewboxBlackBoardRightScaleTransformValue;
 
-                if (Settings.Appearance.IsTransparentButtonBackground)
-                {
-                    { /* Old UI removed */ }
-                }
-                else
-                {
-                    { /* Old UI removed */ }
-                }
+                    ViewboxBlackboardLeftSide.Opacity = Settings.Appearance.BoardToolbarLeftOpacity;
+                    ViewboxBlackboardCenterSide.Opacity = Settings.Appearance.BoardToolbarCenterOpacity;
+                    ViewboxBlackboardRightSide.Opacity = Settings.Appearance.BoardToolbarRightOpacity;
 
-                if (Settings.Appearance.FloatingBarImg >= 12 + Settings.Appearance.CustomFloatingBarImgs.Count)
-                {
-                    Settings.Appearance.FloatingBarImg = 0;
-                }
+                    ApplyQuickPanelBottomOffset(Settings.Appearance.QuickPanelBottomOffset);
+                    ApplyQuickPanelOpacity(Settings.Appearance.QuickPanelOpacity);
+                    ApplySidePanelSettings();
 
-                UpdateFloatingBarIcon();
-                UpdateFloatingBarButtonsVisibility();
-                UpdateFloatingBarIcons();
+                    if (Settings.Appearance.IsTransparentButtonBackground)
+                    {
+                        { /* Old UI removed */ }
+                    }
+                    else
+                    {
+                        { /* Old UI removed */ }
+                    }
 
-                var _taskbar = Application.Current.Resources["TaskbarTrayIcon"];
-                if (_taskbar is FrameworkElement fe)
-                    fe.Visibility = Settings.Appearance.EnableTrayIcon ? Visibility.Visible : Visibility.Collapsed;
+                    if (Settings.Appearance.FloatingBarImg >= 12 + Settings.Appearance.CustomFloatingBarImgs.Count)
+                    {
+                        Settings.Appearance.FloatingBarImg = 0;
+                    }
 
-                SystemEvents_UserPreferenceChanged(null, null);
+                    UpdateFloatingBarIcon();
+                    UpdateFloatingBarButtonsVisibility();
+                    UpdateFloatingBarIcons();
+
+                    var _taskbar = Application.Current.Resources["TaskbarTrayIcon"];
+                    if (_taskbar is FrameworkElement fe)
+                        fe.Visibility = Settings.Appearance.EnableTrayIcon ? Visibility.Visible : Visibility.Collapsed;
+
+                    SystemEvents_UserPreferenceChanged(null, null);
                 }
                 else
                 {
@@ -430,10 +440,12 @@ namespace Ink_Canvas
                 if (Settings.Canvas.IsShowCursor)
                 {
                     inkCanvas.ForceCursor = true;
+                    SetCursorBasedOnEditingMode(inkCanvas);
                 }
                 else
                 {
                     inkCanvas.ForceCursor = false;
+                    inkCanvas.UseCustomCursor = false;
                 }
 
 
@@ -583,8 +595,10 @@ namespace Ink_Canvas
             // RandSettings - UI initialization (settings loading moved to RandomDrawPage)
             if (Settings.RandSettings != null)
             {
-                BoardRandomDrawToolBtn.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
-                BoardSingleDrawToolBtn.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
+                if (BoardRandomDrawToolBtn != null)
+                    BoardRandomDrawToolBtn.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
+                if (BoardSingleDrawToolBtn != null)
+                    BoardSingleDrawToolBtn.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
             }
             else
             {
@@ -862,6 +876,18 @@ namespace Ink_Canvas
 
             var rightQuickPanelMargin = RightUnFoldButtonQuickPanel.Margin;
             RightUnFoldButtonQuickPanel.Margin = new Thickness(rightQuickPanelMargin.Left, rightQuickPanelMargin.Top, rightQuickPanelMargin.Right, offset);
+        }
+
+        internal void ApplyQuickPanelOpacity(double opacity)
+        {
+            if (LeftUnFoldButtonQuickPanel != null)
+                LeftUnFoldButtonQuickPanel.Opacity = opacity;
+            if (RightUnFoldButtonQuickPanel != null)
+                RightUnFoldButtonQuickPanel.Opacity = opacity;
+            if (LeftSidePanel != null)
+                LeftSidePanel.Opacity = opacity;
+            if (RightSidePanel != null)
+                RightSidePanel.Opacity = opacity;
         }
     }
 }

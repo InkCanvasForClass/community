@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Nav_Advanced" xml:space="preserve">
+    <value>Advanced</value>
+  </data>
+  <data name="Nav_Advanced_Settings" xml:space="preserve">
+    <value>Advanced</value>
+  </data>
+  <data name="Nav_Automation_Settings" xml:space="preserve">
+    <value>Automation</value>
+  </data>
+  <data name="Nav_FriendlyLinks" xml:space="preserve">
+    <value>Sponsor &amp; friendly links</value>
+  </data>
+  <data name="Nav_Plugins" xml:space="preserve">
+    <value>Plugins</value>
+  </data>
+  <data name="Nav_PPT_Settings" xml:space="preserve">
+    <value>PPT</value>
+  </data>
+  <data name="Nav_Shortcuts" xml:space="preserve">
+    <value>Shortcuts</value>
+  </data>
+  <data name="Nav_Startup" xml:space="preserve">
+    <value>Basic</value>
+  </data>
+  <data name="Nav_Theme_Settings" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="Settings_ModeDesc" xml:space="preserve">
+    <value>Choose run mode. In PPT-only mode the app is hidden until slide show. (Experimental)</value>
+  </data>
+  <data name="Settings_ModeDesc_1" xml:space="preserve">
+    <value>Run mode</value>
+  </data>
+  <data name="Settings_Nav_Hotkey_Tooltip" xml:space="preserve">
+    <value>Hotkey settings</value>
+  </data>
+  <data name="Settings_Nav_Security" xml:space="preserve">
+    <value>Security</value>
+  </data>
+  <data name="Settings_Nav_Security_Tooltip" xml:space="preserve">
+    <value>Security password and process protection</value>
+  </data>
+  <data name="Settings_Plugins" xml:space="preserve">
+    <value>Plugins</value>
+  </data>
+  <data name="Settings_Title" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Nav_SettingsWindow_Title" xml:space="preserve">
+    <value>InkCanvasForClass Settings</value>
+  </data>
+  <data name="Nav_AppSettings" xml:space="preserve">
+    <value>App Settings</value>
+  </data>
+  <data name="Nav_SearchSettings" xml:space="preserve">
+    <value>Search settings</value>
+  </data>
+  <data name="Nav_Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="Nav_Home_Tooltip" xml:space="preserve">
+    <value>Quick navigation</value>
+  </data>
+  <data name="Nav_ICCSettings" xml:space="preserve">
+    <value>ICC CE Settings</value>
+  </data>
+  <data name="Nav_Basic" xml:space="preserve">
+    <value>Basic</value>
+  </data>
+  <data name="Nav_General" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="Nav_General_Tooltip" xml:space="preserve">
+    <value>General settings</value>
+  </data>
+  <data name="Nav_Startup_Tooltip" xml:space="preserve">
+    <value>Startup and basic behavior settings</value>
+  </data>
+  <data name="Nav_Clock" xml:space="preserve">
+    <value>Clock</value>
+  </data>
+  <data name="Nav_Clock_Tooltip" xml:space="preserve">
+    <value>Clock display settings</value>
+  </data>
+  <data name="Nav_ToolbarComponents" xml:space="preserve">
+    <value>Components</value>
+  </data>
+  <data name="Nav_ToolbarComponents_Tooltip" xml:space="preserve">
+    <value>Toolbar button order and visibility</value>
+  </data>
+  <data name="Nav_ToolbarAppearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="Nav_ToolbarAppearance_Tooltip" xml:space="preserve">
+    <value>Toolbar appearance settings</value>
+  </data>
+  <data name="Nav_Basic_Tooltip" xml:space="preserve">
+    <value>Basic settings</value>
+  </data>
+  <data name="Nav_Privacy" xml:space="preserve">
+    <value>Privacy</value>
+  </data>
+  <data name="Nav_Privacy_Tooltip" xml:space="preserve">
+    <value>Privacy &amp; telemetry settings</value>
+  </data>
+  <data name="Nav_MainInterface" xml:space="preserve">
+    <value>Main Interface</value>
+  </data>
+  <data name="Nav_MainInterface_Tooltip" xml:space="preserve">
+    <value>Main interface settings</value>
+  </data>
+  <data name="Nav_Window" xml:space="preserve">
+    <value>Window</value>
+  </data>
+  <data name="Nav_Window_Tooltip" xml:space="preserve">
+    <value>Window settings</value>
+  </data>
+  <data name="Nav_Toolbar" xml:space="preserve">
+    <value>Toolbar</value>
+  </data>
+  <data name="Nav_Toolbar_Tooltip" xml:space="preserve">
+    <value>Toolbar button order &amp; visibility</value>
+  </data>
+  <data name="Nav_BoardToolbar" xml:space="preserve">
+    <value>Board Toolbar</value>
+  </data>
+  <data name="Nav_BoardToolbar_Tooltip" xml:space="preserve">
+    <value>Board toolbar component configuration</value>
+  </data>
+  <data name="Nav_Board" xml:space="preserve">
+    <value>Board</value>
+  </data>
+  <data name="Nav_Board_Tooltip" xml:space="preserve">
+    <value>Board toolbar &amp; appearance settings</value>
+  </data>
+  <data name="Nav_BoardComponents" xml:space="preserve">
+    <value>Components</value>
+  </data>
+  <data name="Nav_BoardComponents_Tooltip" xml:space="preserve">
+    <value>Board toolbar component configuration</value>
+  </data>
+  <data name="Nav_BoardAppearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="Nav_BoardAppearance_Tooltip" xml:space="preserve">
+    <value>Board toolbar appearance settings</value>
+  </data>
+  <data name="Nav_CanvasAndInk_Tooltip" xml:space="preserve">
+    <value>Canvas &amp; ink settings</value>
+  </data>
+  <data name="Nav_Canvas_Tooltip" xml:space="preserve">
+    <value>Canvas settings</value>
+  </data>
+  <data name="Nav_InkRecognition_Tooltip" xml:space="preserve">
+    <value>Ink correction settings</value>
+  </data>
+  <data name="Nav_PPT_Tooltip" xml:space="preserve">
+    <value>PPT integration settings</value>
+  </data>
+  <data name="Nav_Update_Tooltip" xml:space="preserve">
+    <value>Update settings</value>
+  </data>
+  <data name="Nav_RandomDraw_Tooltip" xml:space="preserve">
+    <value>Random picker &amp; timer</value>
+  </data>
+  <data name="Nav_PluginSettings" xml:space="preserve">
+    <value>Plugin settings</value>
+  </data>
+  <data name="Nav_AboutInkCanvas" xml:space="preserve">
+    <value>About InkCanvasForClass</value>
+  </data>
+  <data name="Nav_NavigateError" xml:space="preserve">
+    <value>Error navigating to page: {0}</value>
+  </data>
+  <data name="Nav_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Nav_PluginSettingsFormat" xml:space="preserve">
+    <value>{0} Settings</value>
+  </data>
+  <data name="Nav_IndexBuildFailed" xml:space="preserve">
+    <value>Failed to build index for page {0}: {1}</value>
+  </data>
+  <data name="Nav_LoadPluginSettingsFailed" xml:space="preserve">
+    <value>Error loading plugin settings page: {0}</value>
+  </data>
+  <data name="Nav_PreloadPageFailed" xml:space="preserve">
+    <value>Failed to preload settings page {0}: {1}</value>
+  </data>
+  <data name="Nav_PreloadPagesFailed" xml:space="preserve">
+    <value>Error during async preload of settings pages: {0}</value>
+  </data>
+  <data name="Settings_Description" xml:space="preserve">
+    <value>This is the settings page</value>
+  </data>
+  <data name="Nav_Performance" xml:space="preserve">
+    <value>Performance</value>
+  </data>
+  <data name="Nav_Performance_Tooltip" xml:space="preserve">
+    <value>Performance monitoring and device evaluation</value>
+  </data>
+</root>

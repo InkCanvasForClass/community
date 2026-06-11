@@ -1,4 +1,4 @@
-<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.WindowPage"
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.WindowPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -7,13 +7,12 @@
       xmlns:helpers="clr-namespace:Ink_Canvas.Windows.SettingsViews.Helpers"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       xmlns:c="clr-namespace:Ink_Canvas.Converter"
       mc:Ignorable="d"
 
-      Title="窗口">
+      Title="{x:Static props:WindowStrings.Title}">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -37,39 +36,39 @@
                     Spacing="{StaticResource SettingsCardSpacing}">
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="窗口设置" />
+                        Text="{x:Static props:WindowStrings.WindowSettings}" />
 
                     <controls:LabeledSettingsCard x:Name="CardNoFocusMode"
-                            Header="{i18n:I18n Key=Startup_NoFocusMode}"
-                            Description="{i18n:I18n Key=Startup_NoFocusModeHint}"
+                            Header="{x:Static props:StartupStrings.NoFocusMode}"
+                            Description="{x:Static props:StartupStrings.NoFocusModeHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.View}"
                             SwitchName="ToggleSwitchNoFocusMode"
                             Toggled="ToggleSwitchNoFocusMode_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardWindowMode"
-                            Header="{i18n:I18n Key=Startup_NoBorderMode}"
-                            Description="{i18n:I18n Key=Startup_NoBorderModeHint}"
+                            Header="{x:Static props:StartupStrings.NoBorderMode}"
+                            Description="{x:Static props:StartupStrings.NoBorderModeHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.FullScreen}"
                             SwitchName="ToggleSwitchWindowMode"
                             Toggled="ToggleSwitchWindowMode_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardWindowChromeRendering"
-                            Header="{i18n:I18n Key=Window_WindowChromeRendering}"
-                            Description="{i18n:I18n Key=Window_WindowChromeRenderingHint}"
+                            Header="{x:Static props:WindowStrings.Window_WindowChromeRendering}"
+                            Description="{x:Static props:WindowStrings.Window_WindowChromeRenderingHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.SpeedHigh}"
                             SwitchName="ToggleSwitchWindowChromeRendering"
                             Toggled="ToggleSwitchWindowChromeRendering_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardAvoidFullScreen"
-                            Header="{i18n:I18n Key=Advanced_AvoidFullScreenHelper}"
-                            Description="{i18n:I18n Key=Advanced_AvoidFullScreenHelperHint}"
+                            Header="{x:Static props:AdvancedStrings.AvoidFullScreenHelper}"
+                            Description="{x:Static props:AdvancedStrings.AvoidFullScreenHelperHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.Cancel}"
                             SwitchName="ToggleSwitchAvoidFullScreen"
                             Toggled="ToggleSwitchAvoidFullScreen_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardMultiScreenSupport"
-                            Header="多屏支持"
-                            Description="启用后将根据当前显示器环境启用多屏逻辑"
+                            Header="{x:Static props:WindowStrings.MultiScreenSupport}"
+                            Description="{x:Static props:WindowStrings.MultiScreenSupportHint}"
                             SwitchName="ToggleSwitchMultiScreenSupport"
                             Toggled="ToggleSwitchMultiScreenSupport_Toggled">
                         <controls:LabeledSettingsCard.HeaderIcon>
@@ -78,8 +77,8 @@
                     </controls:LabeledSettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardFollowMouseScreen"
-                            Header="自动跟随鼠标选择显示屏"
-                            Description="默认开启：自动以鼠标所在显示屏作为当前目标显示屏"
+                            Header="{x:Static props:WindowStrings.FollowMouseScreen}"
+                            Description="{x:Static props:WindowStrings.FollowMouseScreenHint}"
                             Visibility="{Binding IsOn, ElementName=CardMultiScreenSupport, Converter={StaticResource BooleanToVisibilityConverter}}"
                             SwitchName="ToggleSwitchFollowMouseScreen"
                             Toggled="ToggleSwitchFollowMouseScreen_Toggled">
@@ -89,8 +88,8 @@
                     </controls:LabeledSettingsCard>
 
                     <ui:SettingsExpander x:Name="ExpanderAlwaysOnTop"
-                            Header="{i18n:I18n Key=Startup_TopMost}"
-                            Description="{i18n:I18n Key=Startup_TopMostHint}"
+                            Header="{x:Static props:StartupStrings.TopMost}"
+                            Description="{x:Static props:StartupStrings.TopMostHint}"
                             IsExpanded="{Binding IsOn, ElementName=ToggleSwitchAlwaysOnTop, Mode=OneWay}"
                             d:Visibility="Visible" d:IsExpanded="True">
                         <ui:SettingsExpander.HeaderIcon>
@@ -104,14 +103,14 @@
                             <helpers:TopMostModeTemplateSelector>
                                 <helpers:TopMostModeTemplateSelector.SelectionTemplate>
                                     <DataTemplate>
-                                        <ui:SettingsCard Header="{i18n:I18n Key=Startup_TopMostMode}">
+                                        <ui:SettingsCard Header="{x:Static props:StartupStrings.TopMostMode}">
                                             <StackPanel Orientation="Horizontal">
-                                                <RadioButton Content="{i18n:I18n Key=Startup_TopMostMode_Normal}"
+                                                <RadioButton Content="{x:Static props:StartupStrings.TopMostMode_Normal}"
                                                         GroupName="TopMostMode"
                                                         Checked="RadioTopMostNormal_Checked"
                                                         Loaded="RadioTopMostNormal_Loaded"
                                                         Margin="0,0,16,0" />
-                                                <RadioButton Content="{i18n:I18n Key=Startup_TopMostMode_UIA}"
+                                                <RadioButton Content="{x:Static props:StartupStrings.TopMostMode_UIA}"
                                                         GroupName="TopMostMode"
                                                         Checked="RadioTopMostUIA_Checked"
                                                         Loaded="RadioTopMostUIA_Loaded" />

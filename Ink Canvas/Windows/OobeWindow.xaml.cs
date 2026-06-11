@@ -164,7 +164,7 @@ namespace Ink_Canvas.Windows
                     {
                         CardFloatingWindowInterceptor.IsOn = _settings.Automation.FloatingWindowInterceptor.IsEnabled;
                     }
-                    CardAutoSaveStrokesAtClear.IsOn = _settings.Automation.IsAutoSaveStrokesAtClear;
+                    CardAutoSaveStrokesAtClear.IsOn = _settings.Automation.IsAutoSaveScreenshotAtClear;
                     CardSaveScreenshotsInDateFolders.IsOn = _settings.Automation.IsSaveScreenshotsInDateFolders;
                 }
             }
@@ -273,7 +273,7 @@ namespace Ink_Canvas.Windows
                 {
                     _settings.Automation.IsAutoFoldInPPTSlideShow = CardAutoFoldInPPTSlideShow.IsOn;
                     _settings.Automation.IsEnableAutoSaveStrokes = CardEnableAutoSaveStrokes.IsOn;
-                    _settings.Automation.IsAutoSaveStrokesAtClear = CardAutoSaveStrokesAtClear.IsOn;
+                    _settings.Automation.IsAutoSaveScreenshotAtClear = CardAutoSaveStrokesAtClear.IsOn;
                     _settings.Automation.IsSaveScreenshotsInDateFolders = CardSaveScreenshotsInDateFolders.IsOn;
                     if (_settings.Automation.FloatingWindowInterceptor != null)
                     {
@@ -503,7 +503,7 @@ namespace Ink_Canvas.Windows
                         _stepPanels[i].Visibility = i == _currentStep ? Visibility.Visible : Visibility.Collapsed;
                     }
 
-                    StepIndicatorText.Text = $"步骤 {_currentStep + 1} / {StepCount}";
+                    StepIndicatorText.Text = string.Format(Properties.OobeStrings.Oobe_StepFormat, _currentStep + 1, StepCount);
                     ApplyStepMeta(_currentStep);
 
                     if (StepScrollViewer != null) StepScrollViewer.ScrollToTop();
@@ -524,7 +524,7 @@ namespace Ink_Canvas.Windows
 
                 // Footer 步骤计数
                 if (isWelcome) FooterStepText.Text = string.Empty;
-                else if (isFinish) FooterStepText.Text = $"{StepCount} / {StepCount} · 完成";
+                else if (isFinish) FooterStepText.Text = string.Format(Properties.OobeStrings.Oobe_StepFinishFormat, StepCount, StepCount);
                 else FooterStepText.Text = $"{_currentStep + 1} / {StepCount}";
 
                 // 上一步按钮: 欢迎页隐藏
@@ -534,12 +534,12 @@ namespace Ink_Canvas.Windows
                 BtnConfirm.Visibility = isWelcome ? Visibility.Collapsed : Visibility.Visible;
                 if (isFinish)
                 {
-                    BtnConfirmText.Text = "保存并开始使用";
+                    BtnConfirmText.Text = Properties.OobeStrings.Oobe_SaveAndStart;
                     BtnConfirmIcon.Icon = SegoeFluentIcons.Accept;
                 }
                 else
                 {
-                    BtnConfirmText.Text = "下一步";
+                    BtnConfirmText.Text = Properties.OobeStrings.Oobe_Next;
                     BtnConfirmIcon.Icon = SegoeFluentIcons.ChevronRight;
                 }
 
@@ -567,36 +567,36 @@ namespace Ink_Canvas.Windows
             switch (step)
             {
                 case 0:
-                    title = "启动与隐私";
-                    subtitle = "遥测、隐私协议、自动更新与崩溃处理。";
+                    title = Properties.OobeStrings.Oobe_Step1Title;
+                    subtitle = Properties.OobeStrings.Oobe_Step1Subtitle;
                     break;
                 case 1:
-                    title = "画板与墨迹";
-                    subtitle = "光标、压感、墨迹显示与墨迹纠正。";
+                    title = Properties.OobeStrings.Oobe_Step2Title;
+                    subtitle = Properties.OobeStrings.Oobe_Step2Subtitle;
                     break;
                 case 2:
-                    title = "手势操作";
-                    subtitle = "双指缩放/平移、手掌擦等。";
+                    title = Properties.OobeStrings.Oobe_Step3Title;
+                    subtitle = Properties.OobeStrings.Oobe_Step3Subtitle;
                     break;
                 case 3:
-                    title = "个性化";
-                    subtitle = "主题、启动动画、托盘、快速面板与快捷键。";
+                    title = ThemeStrings.Theme_GroupTitle;
+                    subtitle = Properties.OobeStrings.Oobe_Step4Subtitle;
                     break;
                 case 4:
-                    title = "PowerPoint 联动";
-                    subtitle = "放映联动、墨迹与截屏自动保存、时间胶囊。";
+                    title = Properties.OobeStrings.Oobe_Step5Title;
+                    subtitle = Properties.OobeStrings.Oobe_Step5Subtitle;
                     break;
                 case 5:
-                    title = "自动化与截图";
-                    subtitle = "自动收纳、墨迹自动保存、悬浮窗拦截与截图保存。";
+                    title = Properties.OobeStrings.Oobe_Step6Title;
+                    subtitle = Properties.OobeStrings.Oobe_Step6Subtitle;
                     break;
                 case 6:
-                    title = "随机点名";
-                    subtitle = "点名窗口选项。";
+                    title = RandomStrings.Random_Title;
+                    subtitle = Properties.OobeStrings.Oobe_Step7Subtitle;
                     break;
                 case 7:
-                    title = "高级选项";
-                    subtitle = "日志等高级配置。";
+                    title = Properties.OobeStrings.Oobe_Step8Title;
+                    subtitle = Properties.OobeStrings.Oobe_Step8Subtitle;
                     break;
                 default:
                     title = string.Empty; subtitle = string.Empty;
@@ -614,32 +614,32 @@ namespace Ink_Canvas.Windows
             string telemetryText;
             switch (ComboBoxTelemetryUploadLevel.SelectedIndex)
             {
-                case 0: telemetryText = "不上传任何匿名使用数据"; break;
-                case 1: telemetryText = "基础(崩溃信息、版本与系统信息)"; break;
-                default: telemetryText = "可选(功能使用频率等)"; break;
+                case 0: telemetryText = Properties.OobeStrings.Oobe_TelemetryNone; break;
+                case 1: telemetryText = Properties.OobeStrings.Oobe_TelemetryBasic; break;
+                default: telemetryText = Properties.OobeStrings.Oobe_TelemetryOptional; break;
             }
 
             string themeText;
-            string backdropText = GetSelectedComboBoxContent(ComboBoxWindowBackdrop, Strings.GetString("Theme_WindowBackdrop_None") ?? "None");
+            string backdropText = GetSelectedComboBoxContent(ComboBoxWindowBackdrop, ThemeStrings.Theme_WindowBackdrop_None);
             switch (ComboBoxTheme.SelectedIndex)
             {
-                case 0: themeText = "浅色"; break;
-                case 1: themeText = "深色"; break;
-                default: themeText = "跟随系统"; break;
+                case 0: themeText = Properties.OobeStrings.Oobe_ThemeLight; break;
+                case 1: themeText = FloatingBarStrings.OldUI_Dark; break;
+                default: themeText = ThemeStrings.Theme_System; break;
             }
 
-            AddSummaryRow(SegoeFluentIcons.Shield, "遥测级别", telemetryText);
-            AddSummaryRow(SegoeFluentIcons.Sync, "自动检查更新", BoolText(CardAutoUpdate.IsOn));
-            AddSummaryRow(SegoeFluentIcons.Personalize, "应用主题", themeText);
-            AddSummaryRow(SegoeFluentIcons.FullScreen, Strings.GetString("Theme_WindowBackdrop") ?? "Theme_WindowBackdrop", backdropText);
-            AddSummaryRow(SegoeFluentIcons.Slideshow, "PowerPoint / WPS 联动", BoolText(CardPptSupport.IsOn));
-            AddSummaryRow(SegoeFluentIcons.TouchPointer, "双指缩放 / 平移",
+            AddSummaryRow(SegoeFluentIcons.Shield, Properties.OobeStrings.Oobe_SummaryTelemetryLevel, telemetryText);
+            AddSummaryRow(SegoeFluentIcons.Sync, UpdateStrings.Header_AutoUpdate, BoolText(CardAutoUpdate.IsOn));
+            AddSummaryRow(SegoeFluentIcons.Personalize, Properties.OobeStrings.Oobe_SummaryAppTheme, themeText);
+            AddSummaryRow(SegoeFluentIcons.FullScreen, ThemeStrings.Theme_WindowBackdrop, backdropText);
+            AddSummaryRow(SegoeFluentIcons.Slideshow, Properties.OobeStrings.Oobe_SummaryPptLink, BoolText(CardPptSupport.IsOn));
+            AddSummaryRow(SegoeFluentIcons.TouchPointer, Properties.OobeStrings.Oobe_SummaryTwoFingerZoom,
                 $"{BoolText(CardTwoFingerZoom.IsOn)} / {BoolText(CardTwoFingerTranslate.IsOn)}");
-            AddSummaryRow(SegoeFluentIcons.Pin, "系统托盘图标", BoolText(CardEnableTrayIcon.IsOn));
-            AddSummaryRow(SegoeFluentIcons.Document, "启用日志", BoolText(CardIsLogEnabled.IsOn));
+            AddSummaryRow(SegoeFluentIcons.Pin, Properties.OobeStrings.Oobe_SummaryTrayIcon, BoolText(CardEnableTrayIcon.IsOn));
+            AddSummaryRow(SegoeFluentIcons.Document, Properties.OobeStrings.Oobe_SummaryLogEnabled, BoolText(CardIsLogEnabled.IsOn));
         }
 
-        private static string BoolText(bool value) => value ? "已启用" : "已关闭";
+        private static string BoolText(bool value) => value ? Properties.OobeStrings.Oobe_BoolEnabled : Properties.OobeStrings.Oobe_BoolDisabled;
 
         private static string GetSelectedComboBoxContent(ComboBox comboBox, string fallback)
         {

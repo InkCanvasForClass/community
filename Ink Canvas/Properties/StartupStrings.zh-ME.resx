@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="SilentUpdate_TimeRange" xml:space="preserve">
+    <value>静默更新时间段</value>
+  </data>
+  <data name="AutoUpdateHint" xml:space="preserve">
+    <value>开启后软件启动时自动看看有没有新活。</value>
+  </data>
+  <data name="EnableNibMode" xml:space="preserve">
+    <value>笔尖模式（只听笔的话）</value>
+  </data>
+  <data name="EnableNibModeHint" xml:space="preserve">
+    <value>启用后只响应笔尖触摸，手掌和手指统统忽略，高冷得很</value>
+  </data>
+  <data name="ExternalProtocol" xml:space="preserve">
+    <value>外部协议召唤术 (icc://)</value>
+  </data>
+  <data name="ExternalProtocolHint" xml:space="preserve">
+    <value>通过 icc:// 协议从外部召唤控制软件</value>
+  </data>
+  <data name="FixVersionHint" xml:space="preserve">
+    <value>版本修复会根据当前通道下载最新版本并安装，软件装坏了可以用这个抢救</value>
+  </data>
+  <data name="FoldAtStartup" xml:space="preserve">
+    <value>开机后自动缩到侧边栏（低调行事）</value>
+  </data>
+  <data name="FoldAtStartupHint" xml:space="preserve">
+    <value>开机启动后自动缩到侧边栏，不碍事</value>
+  </data>
+  <data name="NoBorderMode" xml:space="preserve">
+    <value>窗口无边框模式（沉浸式体验）</value>
+  </data>
+  <data name="NoBorderModeHint" xml:space="preserve">
+    <value>隐藏窗口边框，沉浸感拉满</value>
+  </data>
+  <data name="NoFocusMode" xml:space="preserve">
+    <value>窗口无焦点模式</value>
+  </data>
+  <data name="NoFocusModeHint" xml:space="preserve">
+    <value>窗口失去焦点时照样能接收输入，不抛弃不放弃</value>
+  </data>
+  <data name="RunAtStartup" xml:space="preserve">
+    <value>开机就起飞</value>
+  </data>
+  <data name="RunAtStartupHint" xml:space="preserve">
+    <value>系统启动时自动运行软件，不用你手动开</value>
+  </data>
+  <data name="SilentUpdateFullHint" xml:space="preserve">
+    <value>关掉静默更新后，下载完安装包会弹窗问你要不要更新；开启静默更新后，下载完安装包每隔十分钟检测：①在静默更新时间段内 ②没在写字 ③没在画板里。全满足就关软件自动更新，偷偷干活。</value>
+  </data>
+  <data name="SilentUpdateHint" xml:space="preserve">
+    <value>静默更新在软件闲着的时候偷偷装，完全不用你动手，躺平就行</value>
+  </data>
+  <data name="SmartUpdate" xml:space="preserve">
+    <value>智慧更新（聪明版）</value>
+  </data>
+  <data name="SmartUpdateHint" xml:space="preserve">
+    <value>开启后用统一平台 API 检查更新并获取下载链接，更聪明。</value>
+  </data>
+  <data name="Start" xml:space="preserve">
+    <value>启动</value>
+  </data>
+  <data name="Startup_Behavior" xml:space="preserve">
+    <value>行为</value>
+  </data>
+  <data name="TimePeriodHint" xml:space="preserve">
+    <value>如果终止时间比起始时间早，就把终止时间当成第二天的时间。如果起始和终止时间一样，就是全天候模式。</value>
+  </data>
+  <data name="TopMost" xml:space="preserve">
+    <value>窗口置顶（永远C位）</value>
+  </data>
+  <data name="TopMostHint" xml:space="preserve">
+    <value>窗口永远显示在其他窗口之上，C位出道</value>
+  </data>
+  <data name="TopMostMode" xml:space="preserve">
+    <value>置顶模式</value>
+  </data>
+  <data name="TopMostMode_Normal" xml:space="preserve">
+    <value>普通置顶</value>
+  </data>
+  <data name="TopMostMode_Normal_RestartRequired" xml:space="preserve">
+    <value>切换到普通置顶模式需要重启软件才生效，现在重启吗？</value>
+  </data>
+  <data name="TopMostMode_RestartAsAdmin" xml:space="preserve">
+    <value>重启到管理员模式（升权！）</value>
+  </data>
+  <data name="TopMostMode_CurrentUIAccessNormal" xml:space="preserve">
+    <value>当前是拥有 UIA 权限的降权进程</value>
+  </data>
+  <data name="TopMostMode_RestartAsNormal" xml:space="preserve">
+    <value>切换到非管理员模式</value>
+  </data>
+  <data name="TopMostMode_UIA" xml:space="preserve">
+    <value>UIA 置顶（需要一次 UAC 授权）</value>
+  </data>
+  <data name="TopMostMode_UIA_RestartRequired" xml:space="preserve">
+    <value>切换到 UIA 置顶模式需要弹出 UAC 授权并重启成普通用户 UIA 进程，现在继续吗？</value>
+  </data>
+  <data name="UpdateChannel" xml:space="preserve">
+    <value>更新通道</value>
+  </data>
+  <data name="UpdateChannelHint" xml:space="preserve">
+    <value>稳定版稳如老狗，预览版尝鲜体验同时比 Beta 版更稳，测试版抢先体验新功能</value>
+  </data>
+  <data name="UpdatePackageArchitecture" xml:space="preserve">
+    <value>软件架构</value>
+  </data>
+  <data name="UpdatePackageArchitectureHint" xml:space="preserve">
+    <value>选择要下载的更新包架构，默认跟当前软件架构走</value>
+  </data>
+</root>

@@ -41,6 +41,34 @@ namespace Ink_Canvas.Controls
             set => SetValue(IconSourceProperty, value);
         }
 
+        public static readonly DependencyProperty IconRotationProperty = DependencyProperty.Register(
+            nameof(IconRotation), typeof(double), typeof(GeometryButton),
+            new PropertyMetadata(0.0, OnIconRotationChanged));
+
+        private static void OnIconRotationChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var button = (GeometryButton)d;
+            if (button.ButtonImage != null)
+            {
+                var angle = (double)e.NewValue;
+                if (angle != 0)
+                {
+                    button.ButtonImage.RenderTransformOrigin = new Point(0.5, 0.5);
+                    button.ButtonImage.RenderTransform = new RotateTransform(angle);
+                }
+                else
+                {
+                    button.ButtonImage.RenderTransform = Transform.Identity;
+                }
+            }
+        }
+
+        public double IconRotation
+        {
+            get => (double)GetValue(IconRotationProperty);
+            set => SetValue(IconRotationProperty, value);
+        }
+
         public event MouseButtonEventHandler ButtonMouseDown;
         public event MouseButtonEventHandler ButtonMouseUp;
 

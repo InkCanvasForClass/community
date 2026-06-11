@@ -1,5 +1,4 @@
 using System;
-using System.Windows;
 using System.Windows.Input;
 
 namespace Ink_Canvas
@@ -144,8 +143,11 @@ namespace Ink_Canvas
         /// <remarks>仅当画布控件面板可见时生效</remarks>
         private void KeyChangeToSelect(object sender, ExecutedRoutedEventArgs e)
         {
-            if (IsAnnotating)
-                SymbolIconSelect_MouseUp(lastBorderMouseDownObject, null);
+            if (!IsAnnotating)
+            {
+                PenIcon_Click(lastBorderMouseDownObject, null);
+            }
+            SymbolIconSelect_MouseUp(lastBorderMouseDownObject, null);
         }
 
         /// <summary>
@@ -159,6 +161,11 @@ namespace Ink_Canvas
             if (isFloatingBarFolded)
             {
                 await UnFoldFloatingBar(new object());
+            }
+
+            if (!IsAnnotating)
+            {
+                PenIcon_Click(lastBorderMouseDownObject, null);
             }
 
             if (Eraser_Icon.Background != null)
@@ -195,7 +202,52 @@ namespace Ink_Canvas
         /// <remarks>仅当画布控件面板可见时生效</remarks>
         private void KeyDrawLine(object sender, ExecutedRoutedEventArgs e)
         {
-            if (IsAnnotating) BtnDrawLine_Click(lastMouseDownSender, null);
+            DrawLineFromHotkey();
+        }
+
+        internal async void DrawLineFromHotkey()
+        {
+            if (isFloatingBarFolded)
+            {
+                await UnFoldFloatingBar(new object());
+            }
+
+            if (!IsAnnotating)
+            {
+                PenIcon_Click(lastBorderMouseDownObject, null);
+            }
+
+            BtnDrawLine_Click(lastMouseDownSender, null);
+        }
+
+        internal async void SwitchToEraserFromHotkey()
+        {
+            if (isFloatingBarFolded)
+            {
+                await UnFoldFloatingBar(new object());
+            }
+
+            if (!IsAnnotating)
+            {
+                PenIcon_Click(lastBorderMouseDownObject, null);
+            }
+
+            EraserIcon_Click(lastBorderMouseDownObject, null);
+        }
+
+        internal async void SwitchToSelectFromHotkey()
+        {
+            if (isFloatingBarFolded)
+            {
+                await UnFoldFloatingBar(new object());
+            }
+
+            if (!IsAnnotating)
+            {
+                PenIcon_Click(lastBorderMouseDownObject, null);
+            }
+
+            SymbolIconSelect_MouseUp(lastBorderMouseDownObject, null);
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.ExperimentalPage"
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.ExperimentalPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -6,12 +6,11 @@
       xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-      xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       mc:Ignorable="d"
 
-      Title="实验性选项">
+      Title="{x:Static props:AdvancedStrings.Experimental}">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -31,36 +30,36 @@
                     Spacing="{StaticResource SettingsCardSpacing}">
 
                     <controls:LabeledSettingsCard x:Name="CardFullScreenHelper"
-                            Header="{i18n:I18n Key=Advanced_FullScreenHelper}"
-                            Description="{i18n:I18n Key=Advanced_FullScreenHelperHint}"
+                            Header="{x:Static props:AdvancedStrings.FullScreenHelper}"
+                            Description="{x:Static props:AdvancedStrings.FullScreenHelperHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.FullScreen}"
                             SwitchName="ToggleSwitchFullScreenHelper"
                             Toggled="ToggleSwitchFullScreenHelper_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardEdgeGestureUtil"
-                            Header="{i18n:I18n Key=Advanced_EdgeGestureUtil}"
-                            Description="{i18n:I18n Key=Advanced_EdgeGestureUtilHint_Part1}"
+                            Header="{x:Static props:AdvancedStrings.EdgeGestureUtil}"
+                            Description="{x:Static props:AdvancedStrings.EdgeGestureUtilHint_Part1}"
                             Icon="{x:Static ui:SegoeFluentIcons.AlignLeft}"
                             SwitchName="ToggleSwitchEdgeGestureUtil"
                             Toggled="ToggleSwitchEdgeGestureUtil_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardForceFullScreen"
-                            Header="{i18n:I18n Key=Advanced_ForceFullScreen}"
-                            Description="{i18n:I18n Key=Advanced_ForceFullScreenHint}"
+                            Header="{x:Static props:AdvancedStrings.ForceFullScreen}"
+                            Description="{x:Static props:AdvancedStrings.ForceFullScreenHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.Video}"
                             SwitchName="ToggleSwitchForceFullScreen"
                             Toggled="ToggleSwitchForceFullScreen_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardDPIChangeDetection"
-                            Header="{i18n:I18n Key=Advanced_DPIChangeDetection}"
-                            Description="{i18n:I18n Key=Advanced_DPIChangeDetectionHint}"
+                            Header="{x:Static props:AdvancedStrings.DPIChangeDetection}"
+                            Description="{x:Static props:AdvancedStrings.DPIChangeDetectionHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.View}"
                             SwitchName="ToggleSwitchDPIChangeDetection"
                             Toggled="ToggleSwitchDPIChangeDetection_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardResolutionChangeDetection"
-                            Header="{i18n:I18n Key=Advanced_ResolutionChangeDetection}"
-                            Description="{i18n:I18n Key=Advanced_ResolutionChangeDetectionHint}"
+                            Header="{x:Static props:AdvancedStrings.ResolutionChangeDetection}"
+                            Description="{x:Static props:AdvancedStrings.ResolutionChangeDetectionHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.Accept}"
                             SwitchName="ToggleSwitchResolutionChangeDetection"
                             Toggled="ToggleSwitchResolutionChangeDetection_Toggled" />

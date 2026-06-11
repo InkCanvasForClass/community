@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Crash_Desc" xml:space="preserve">
+    <value>Choose what to do when an unhandled exception occurs</value>
+  </data>
+  <data name="Crash_NoAction" xml:space="preserve">
+    <value>Do nothing</value>
+  </data>
+  <data name="Crash_ShowCrashWindow" xml:space="preserve">
+    <value>Show details and stay open</value>
+  </data>
+  <data name="Crash_SilentRestart" xml:space="preserve">
+    <value>Restart silently</value>
+  </data>
+  <data name="Crash_Title" xml:space="preserve">
+    <value>Crash Handling</value>
+  </data>
+  <data name="CrashWindowTitle" xml:space="preserve">
+    <value>Crash details - InkCanvasForClass</value>
+  </data>
+  <data name="CrashWindowHeader" xml:space="preserve">
+    <value>InkCanvasForClass encountered an unhandled exception</value>
+  </data>
+  <data name="CrashWindowDescription" xml:space="preserve">
+    <value>Crash details are shown below. You can copy them and send them to the developers.</value>
+  </data>
+  <data name="CrashWindowFooter" xml:space="preserve">
+    <value>The current setting only shows crash details and will not restart automatically.</value>
+  </data>
+  <data name="CrashWindowCopy" xml:space="preserve">
+    <value>Copy details</value>
+  </data>
+  <data name="CrashWindowClose" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="CrashWindowNoDetails" xml:space="preserve">
+    <value>No crash details are available.</value>
+  </data>
+</root>

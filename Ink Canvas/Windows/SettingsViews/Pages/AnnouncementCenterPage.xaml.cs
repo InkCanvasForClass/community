@@ -1,6 +1,6 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Models;
-using Ink_Canvas.Windows.SettingsViews;
+using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System.Linq;
 using System.Windows;
@@ -53,7 +53,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private string GetCountText(int count)
         {
-            var template = Ink_Canvas.Properties.Strings.GetString("Announcement_ItemCount") ?? "共 {0} 条公告";
+            var template = AnnouncementStrings.ItemCount;
             return string.Format(template, count);
         }
 
@@ -81,8 +81,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private string GetTypeText(NotificationMessageType type)
         {
-            var key = "Notification_Type_" + type;
-            return Ink_Canvas.Properties.Strings.GetString(key) ?? type.ToString();
+            return type switch
+            {
+                NotificationMessageType.Update => NotificationStrings.Type_Update,
+                NotificationMessageType.Urgent => NotificationStrings.Type_Urgent,
+                NotificationMessageType.Important => NotificationStrings.Type_Important,
+                NotificationMessageType.Reminder => NotificationStrings.Type_Reminder,
+                NotificationMessageType.Other => NotificationStrings.Type_Other,
+                _ => type.ToString()
+            };
         }
 
         private void ClearHistoryButton_Click(object sender, RoutedEventArgs e)

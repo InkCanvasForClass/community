@@ -18,7 +18,7 @@ namespace Ink_Canvas.Helpers
                 Type = NotificationMessageType.Update,
                 Level = NotificationMessageLevel.Normal,
                 Title = "InkCanvasForClass CE",
-                Summary = string.Format(Strings.GetString("Notification_NewVersion") ?? "发现新版本：{0}", version),
+                Summary = string.Format(NotificationStrings.NewVersion, version),
                 DisplaySeconds = 5
             });
         }

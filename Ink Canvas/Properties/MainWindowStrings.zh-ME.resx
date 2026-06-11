@@ -1,0 +1,538 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Main_WatermarkText" xml:space="preserve">
+    <value>少点抱怨多点爱，摸鱼也要讲武德</value>
+  </data>
+  <data name="Main_ContextClone" xml:space="preserve">
+    <value>影分身</value>
+  </data>
+  <data name="Main_ContextCloneToNewPage" xml:space="preserve">
+    <value>分身到新页</value>
+  </data>
+  <data name="Main_ContextFlip" xml:space="preserve">
+    <value>翻跟头</value>
+  </data>
+  <data name="Main_ContextBrushSize" xml:space="preserve">
+    <value>笔有多粗</value>
+  </data>
+  <data name="Main_ContextDelete" xml:space="preserve">
+    <value>送走</value>
+  </data>
+  <data name="Main_ContextZoom" xml:space="preserve">
+    <value>放大镜</value>
+  </data>
+  <data name="Main_ContextPageTurn" xml:space="preserve">
+    <value>翻牌子</value>
+  </data>
+  <data name="Main_InkReplayPlaying" xml:space="preserve">
+    <value>墨迹正在回放中，请欣赏...</value>
+  </data>
+  <data name="Main_InkReplayExitHint" xml:space="preserve">
+    <value>双击屏幕跑路</value>
+  </data>
+  <data name="Main_Strokes_SaveSuccess" xml:space="preserve">
+    <value>墨迹已安家到 {0}，请放心</value>
+  </data>
+  <data name="Main_Strokes_SaveFailed" xml:space="preserve">
+    <value>墨迹保存翻车了</value>
+  </data>
+  <data name="Main_Strokes_OpenFailed" xml:space="preserve">
+    <value>墨迹打开失败，这波寄了</value>
+  </data>
+  <data name="Main_Strokes_OpenIccSuccess" xml:space="preserve">
+    <value>ICC压缩包已成功开箱，共{0}页，血赚！</value>
+  </data>
+  <data name="Main_Strokes_OpenFileDialogTitle" xml:space="preserve">
+    <value>打开墨迹文件</value>
+  </data>
+  <data name="Main_Strokes_OpenFileDialogFilter" xml:space="preserve">
+    <value>Ink Canvas 墨迹文件 (*.icstk)|*.icstk|XML墨迹文件 (*.xml)|*.xml|ICC压缩包 (*.zip)|*.zip|啥都能开的文件 (*.icstk;*.xml;*.zip)|*.icstk;*.xml;*.zip</value>
+  </data>
+  <data name="Main_Strokes_SaveMultiPageXmlSuccess" xml:space="preserve">
+    <value>多页面XML墨迹存为 {0} 个文件，文档狂魔！</value>
+  </data>
+  <data name="Main_Strokes_SaveXmlSuccess" xml:space="preserve">
+    <value>墨迹变身XML住进 {0}，科技感拉满</value>
+  </data>
+  <data name="Main_Strokes_SaveMultiPageIcstkSuccess" xml:space="preserve">
+    <value>多页面墨迹存为 {0} 个文件，量大管饱！</value>
+  </data>
+  <data name="Main_Strokes_SaveMultiPageXmlZipSuccess" xml:space="preserve">
+    <value>多页面XML墨迹打包进 {0}，压缩包大师！</value>
+  </data>
+  <data name="Main_Strokes_SaveMultiPageZipSuccess" xml:space="preserve">
+    <value>多页面墨迹打包进 {0}，压缩包大师！</value>
+  </data>
+  <data name="Main_Strokes_SaveFullPageSuccess" xml:space="preserve">
+    <value>墨迹全页面截图存到 {0}，一镜到底！</value>
+  </data>
+  <data name="Main_Strokes_ModeMismatch" xml:space="preserve">
+    <value>保存模式({0})和当前模式({1})八字不合，墨迹恢复不了啦</value>
+  </data>
+  <data name="Main_Freeze_PageFrozen" xml:space="preserve">
+    <value>这页已经被冻住了，别再冻了</value>
+  </data>
+  <data name="Main_Freeze_AnnotationPageFrozen" xml:space="preserve">
+    <value>批注页已封印，谁也别想动</value>
+  </data>
+  <data name="Main_Freeze_WhiteboardPageFrozen" xml:space="preserve">
+    <value>白板第 {0} 页已封印，谁也别想动</value>
+  </data>
+  <data name="Main_Freeze_PageUnfrozen" xml:space="preserve">
+    <value>批注页解封啦，又可以浪了</value>
+  </data>
+  <data name="Main_Freeze_WhiteboardPageUnfrozen" xml:space="preserve">
+    <value>白板第 {0} 页解封啦，又可以浪了</value>
+  </data>
+  <data name="Main_Freeze_VerifyTitle" xml:space="preserve">
+    <value>解封验证</value>
+  </data>
+  <data name="Main_Freeze_VerifyMessage" xml:space="preserve">
+    <value>请输入暗号或动态令牌来解封此页面，不然没门。</value>
+  </data>
+  <data name="Main_Freeze_VerifyFailed" xml:space="preserve">
+    <value>验证翻车了，解封失败</value>
+  </data>
+  <data name="Main_Freeze_FrozenNoEdit" xml:space="preserve">
+    <value>页面已冻住，改不了啦，放弃吧</value>
+  </data>
+  <data name="Main_Freeze_FrozenNoAction" xml:space="preserve">
+    <value>页面已冻住，{0}不了，放弃吧</value>
+  </data>
+  <data name="Main_Freeze_Recorded" xml:space="preserve">
+    <value>已盯上批注页，下课就冻住它</value>
+  </data>
+  <data name="Main_Freeze_RecordedWhiteboard" xml:space="preserve">
+    <value>已盯上白板第 {0} 页，下课就冻住它</value>
+  </data>
+  <data name="Main_Freeze_CancelCountdown" xml:space="preserve">
+    <value>自动冻结倒计时已取消，续命成功</value>
+  </data>
+  <data name="Main_Freeze_CancelByOperation" xml:space="preserve">
+    <value>发现有人在搞事情，自动冻结取消</value>
+  </data>
+  <data name="Main_Freeze_AutoFreezeIn3Min" xml:space="preserve">
+    <value>3 分钟后自动冻结，最后倒计时开始</value>
+  </data>
+  <data name="Main_Screenshot_SaveSuccess" xml:space="preserve">
+    <value>截图已安家落户到 {0} 啦~</value>
+  </data>
+  <data name="Main_Screenshot_Cancelled" xml:space="preserve">
+    <value>截图被你鸽了</value>
+  </data>
+  <data name="Main_Screenshot_NoValidArea" xml:space="preserve">
+    <value>你选了个寂寞，没有有效区域啊</value>
+  </data>
+  <data name="Main_Screenshot_Failed" xml:space="preserve">
+    <value>截图翻车了</value>
+  </data>
+  <data name="Main_Screenshot_FailedWithError" xml:space="preserve">
+    <value>截图翻车了: {0}</value>
+  </data>
+  <data name="Main_Screenshot_ConvertFailed" xml:space="preserve">
+    <value>截图变身失败，魔法失灵了</value>
+  </data>
+  <data name="Main_ImageInsert_ScreenshotCancelled" xml:space="preserve">
+    <value>截图又被你鸽了</value>
+  </data>
+  <data name="Main_ImageInsert_ScreenshotFailed" xml:space="preserve">
+    <value>截图又翻车了</value>
+  </data>
+  <data name="Main_ImageInsert_FullScreenFailed" xml:space="preserve">
+    <value>全屏截图也翻车了</value>
+  </data>
+  <data name="Main_ImageInsert_InvalidScreenshot" xml:space="preserve">
+    <value>这截图不对劲啊</value>
+  </data>
+  <data name="Main_ImageInsert_ConvertFailed" xml:space="preserve">
+    <value>截图变身失败，魔法又失灵了</value>
+  </data>
+  <data name="Main_ImageInsert_Inserted" xml:space="preserve">
+    <value>截图已安家到画布啦~</value>
+  </data>
+  <data name="Main_ImageInsert_InsertFailed" xml:space="preserve">
+    <value>截图塞不进去，寄了</value>
+  </data>
+  <data name="Main_Clipboard_ImageDetected" xml:space="preserve">
+    <value>检测到剪贴板里有图，右键白板就能贴，别客气</value>
+  </data>
+  <data name="Main_Clipboard_PasteImage" xml:space="preserve">
+    <value>贴图</value>
+  </data>
+  <data name="Main_Clipboard_NoImage" xml:space="preserve">
+    <value>剪贴板空空如也，图呢图呢？</value>
+  </data>
+  <data name="Main_Clipboard_CannotGetImage" xml:space="preserve">
+    <value>剪贴板的图拿不出来，它害羞了</value>
+  </data>
+  <data name="Main_Clipboard_ImagePasted" xml:space="preserve">
+    <value>图已从剪贴板飞到白板上啦~</value>
+  </data>
+  <data name="Main_Clipboard_PasteFailed" xml:space="preserve">
+    <value>贴图翻车了: {0}</value>
+  </data>
+  <data name="Main_Hitokoto_Loading" xml:space="preserve">
+    <value>正在去一言搬砖...</value>
+  </data>
+  <data name="Main_Hitokoto_Unavailable" xml:space="preserve">
+    <value>一言寄了，用不了</value>
+  </data>
+  <data name="Main_Hitokoto_HttpUnavailable" xml:space="preserve">
+    <value>一言寄了（HTTP 库也挂了）</value>
+  </data>
+  <data name="Main_Hitokoto_NoContent" xml:space="preserve">
+    <value>一言啥也没说就跑了</value>
+  </data>
+  <data name="Main_Settings_ResetVerify" xml:space="preserve">
+    <value>重置配置验明正身</value>
+  </data>
+  <data name="Main_Settings_ResetVerifyMessage" xml:space="preserve">
+    <value>请输入暗号或动态令牌来确认重置配置，不然没门。</value>
+  </data>
+  <data name="Main_Settings_ResetDone" xml:space="preserve">
+    <value>设置已一键还原出厂设置啦~</value>
+  </data>
+  <data name="Main_RollCall_CannotCallExternal" xml:space="preserve">
+    <value>外部点名叫不动：{0}</value>
+  </data>
+  <data name="Main_InkReplay_Paused" xml:space="preserve">
+    <value>暂停了！摸鱼时间~</value>
+  </data>
+  <data name="Main_CloseConfirm_Level1" xml:space="preserve">
+    <value>真要走？没保存的墨迹可就没了哦~</value>
+  </data>
+  <data name="Main_CloseConfirm_Level2" xml:space="preserve">
+    <value>你真的狠得下心关掉我吗？💔</value>
+  </data>
+  <data name="Main_CloseConfirm_Level3" xml:space="preserve">
+    <value>最后一次机会了，确定要关？</value>
+  </data>
+  <data name="Main_EnterSettings" xml:space="preserve">
+    <value>溜进设置</value>
+  </data>
+  <data name="Main_EnterSettings_Message" xml:space="preserve">
+    <value>请输入暗号或动态令牌才能溜进设置，不然没门。</value>
+  </data>
+  <data name="Main_Board_FrozenCannotDelete" xml:space="preserve">
+    <value>页面冻住了，删不动，放弃吧</value>
+  </data>
+  <data name="Main_Board_CustomBgApplied" xml:space="preserve">
+    <value>自定义背景色已安排上: {0}</value>
+  </data>
+  <data name="Main_Tray_ExitFoldMode" xml:space="preserve">
+    <value>从收纳里钻出来</value>
+  </data>
+  <data name="Main_Tray_EnterFoldMode" xml:space="preserve">
+    <value>缩进去当个收纳怪</value>
+  </data>
+  <data name="Main_Tray_DisableHotkeys" xml:space="preserve">
+    <value>把快捷键全封印了</value>
+  </data>
+  <data name="Main_Tray_EnableHotkeys" xml:space="preserve">
+    <value>快捷键解封，放虎归山</value>
+  </data>
+  <data name="Main_Colors_DarkTheme" xml:space="preserve">
+    <value>黑化</value>
+  </data>
+  <data name="Main_Colors_LightTheme" xml:space="preserve">
+    <value>亮瞎眼</value>
+  </data>
+  <data name="Main_Uri_EnterFoldMode" xml:space="preserve">
+    <value>已缩进去当收纳怪啦</value>
+  </data>
+  <data name="Main_Uri_ExitFoldMode" xml:space="preserve">
+    <value>收纳怪钻出来啦</value>
+  </data>
+  <data name="Main_Uri_HideOnFoldEnabled" xml:space="preserve">
+    <value>已开启：缩起来就原地蒸发</value>
+  </data>
+  <data name="Main_Uri_HideOnFoldDisabled" xml:space="preserve">
+    <value>已关闭：缩起来也不会蒸发</value>
+  </data>
+  <data name="Main_Uri_SchemeNotFound" xml:space="preserve">
+    <value>切换翻车：方案「{0}」查无此人</value>
+  </data>
+  <data name="Main_Uri_SwitchedScheme" xml:space="preserve">
+    <value>已通过 URI 魔法切换至方案「{0}」</value>
+  </data>
+  <data name="Main_Timer_AutoClosedInkeys" xml:space="preserve">
+    <value>「智绘教 Inkeys」被自动送走了</value>
+  </data>
+  <data name="Main_Timer_AutoClosedYouJiao" xml:space="preserve">
+    <value>「优教授课端」被自动干掉了</value>
+  </data>
+  <data name="Main_Timer_AutoClosedSeewoDesktop" xml:space="preserve">
+    <value>「希沃桌面 2.0 桌面批注」被自动请走了</value>
+  </data>
+  <data name="Main_DisplayChanged" xml:space="preserve">
+    <value>屏幕叛变了！变成了{0}x{1}）</value>
+  </data>
+  <data name="Main_DPIChanged" xml:space="preserve">
+    <value>DPI 搞事情，从 {0}x{1} 变成 {2}x{3} 了</value>
+  </data>
+  <data name="Main_StrokesFileLoaded" xml:space="preserve">
+    <value>墨迹文件已加载: {0}，稳了</value>
+  </data>
+  <data name="Main_StrokesFileOpenFailed" xml:space="preserve">
+    <value>墨迹文件打不开，这波寄了</value>
+  </data>
+  <data name="Main_ExitVerify" xml:space="preserve">
+    <value>跑路验证</value>
+  </data>
+  <data name="Main_ExitVerifyWithTotp" xml:space="preserve">
+    <value>请输入暗号或动态令牌才能跑路，不然没门。</value>
+  </data>
+  <data name="Main_ExitVerifyPasswordOnly" xml:space="preserve">
+    <value>请输入暗号才能跑路，不然没门。</value>
+  </data>
+  <data name="Main_AutoFold_ClearingAndFolding" xml:space="preserve">
+    <value>正在把墨迹清空塞进侧边栏，别慌，进批注模式点【撤销】还能救回来~</value>
+  </data>
+  <data name="Main_FileInsert_OpenDialogFilter" xml:space="preserve">
+    <value>图片、PDF 和能播的玩意儿|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf;*.mp4;*.mkv;*.mkw;*.wmv;*.webm;*.flv;*.mov;*.avi;*.mp3;*.m4a;*.aac;*.flac;*.wav|图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf|媒体文件|*.mp4;*.mkv;*.mkw;*.wmv;*.webm;*.flv;*.mov;*.avi;*.mp3;*.m4a;*.aac;*.flac;*.wav|视频文件|*.mp4;*.mkv;*.mkw;*.wmv;*.webm;*.flv;*.mov;*.avi|音频文件|*.mp3;*.m4a;*.aac;*.flac;*.wav</value>
+  </data>
+  <data name="Main_MediaInsert_OpenDialogFilter" xml:space="preserve">
+    <value>媒体文件|*.mp4;*.mkv;*.mkw;*.wmv;*.webm;*.flv;*.mov;*.avi;*.mp3;*.m4a;*.aac;*.flac;*.wav|视频文件|*.mp4;*.mkv;*.mkw;*.wmv;*.webm;*.flv;*.mov;*.avi|音频文件|*.mp3;*.m4a;*.aac;*.flac;*.wav</value>
+  </data>
+  <data name="Main_MediaInsert_UnsupportedFormat" xml:space="preserve">
+    <value>这媒体格式不支持，播不动。</value>
+  </data>
+  <data name="Main_MediaInsert_InsertFailed" xml:space="preserve">
+    <value>媒体塞不进去，寄了：{0}</value>
+  </data>
+  <data name="Main_PDF_InsertFailed" xml:space="preserve">
+    <value>PDF 塞不进去，寄了: {0}</value>
+  </data>
+  <data name="Main_Security_Tip" xml:space="preserve">
+    <value>友情提示</value>
+  </data>
+  <data name="Main_Security_PasswordTooShort" xml:space="preserve">
+    <value>密码太短了吧，再来</value>
+  </data>
+  <data name="Main_Security_PasswordMismatch" xml:space="preserve">
+    <value>两次密码对不上号啊</value>
+  </data>
+  <data name="Main_Security_CurrentPasswordWrong" xml:space="preserve">
+    <value>当前密码不对哦</value>
+  </data>
+  <data name="Main_Security_NewPasswordTooShort" xml:space="preserve">
+    <value>新密码太短了，长一点嘛</value>
+  </data>
+  <data name="Main_Security_NewPasswordMismatch" xml:space="preserve">
+    <value>新密码两次输入不一样，再看看</value>
+  </data>
+  <data name="Main_Security_SetPasswordTitle" xml:space="preserve">
+    <value>设置安全密码</value>
+  </data>
+  <data name="Main_Security_ChangePasswordTitle" xml:space="preserve">
+    <value>修改安全密码</value>
+  </data>
+  <data name="Main_Security_EnterNewPassword" xml:space="preserve">
+    <value>输个新密码呗</value>
+  </data>
+  <data name="Main_Security_NewPasswordLabel" xml:space="preserve">
+    <value>新密码</value>
+  </data>
+  <data name="Main_Security_ConfirmNewPasswordLabel" xml:space="preserve">
+    <value>再输一次新密码</value>
+  </data>
+  <data name="Main_Security_CurrentPasswordLabel" xml:space="preserve">
+    <value>当前密码</value>
+  </data>
+  <data name="Main_Security_ChangePasswordHint" xml:space="preserve">
+    <value>输入当前密码，然后设个新的</value>
+  </data>
+  <data name="Main_Security_TotpOnlyHint" xml:space="preserve">
+    <value>输入 6 位 TOTP 验证码</value>
+  </data>
+  <data name="Main_Security_PasswordOrTotpHint" xml:space="preserve">
+    <value>输安全密码或者 6 位 TOTP 验证码都行</value>
+  </data>
+  <data name="Main_Security_PasswordOnlyHint" xml:space="preserve">
+    <value>输入安全密码</value>
+  </data>
+  <data name="Main_Update_FailedTitle" xml:space="preserve">
+    <value>更新翻车了</value>
+  </data>
+  <data name="Main_Update_FilesInUse" xml:space="preserve">
+    <value>更新失败：文件被占着呢，覆盖不了
+关掉所有相关程序再来一次吧</value>
+  </data>
+  <data name="Main_Update_CopyError" xml:space="preserve">
+    <value>更新失败：复制文件时出幺蛾子了
+{0}</value>
+  </data>
+  <data name="Main_Update_LaunchFailedTitle" xml:space="preserve">
+    <value>启动翻车了</value>
+  </data>
+  <data name="Main_Update_LaunchFailed" xml:space="preserve">
+    <value>更新完了但启动不了：{0}
+自己手动开一下吧</value>
+  </data>
+  <data name="Main_Update_LaunchNotFoundTitle" xml:space="preserve">
+    <value>文件跑路了</value>
+  </data>
+  <data name="Main_Update_LaunchNotFound" xml:space="preserve">
+    <value>更新完了但找不到程序文件：{0}
+检查一下更新是不是真成功了</value>
+  </data>
+  <data name="Main_Update_Failed" xml:space="preserve">
+    <value>更新翻车了：{0}</value>
+  </data>
+  <data name="Main_Screenshot_DragToSelect" xml:space="preserve">
+    <value>拖拖鼠标框个地盘</value>
+  </data>
+  <data name="Main_Screenshot_FreeDrawHint" xml:space="preserve">
+    <value>按住左键随便画，松手还能改，画好了再确认截图</value>
+  </data>
+  <data name="Main_Screenshot_CameraMode" xml:space="preserve">
+    <value>摄像头模式，看准了点确认截图</value>
+  </data>
+  <data name="Main_Screenshot_NoCamera" xml:space="preserve">
+    <value>找不到摄像头啊喂</value>
+  </data>
+  <data name="Main_Screenshot_CameraStartFailed" xml:space="preserve">
+    <value>摄像头起不来: {0}</value>
+  </data>
+  <data name="Main_Screenshot_CameraFrameFailed" xml:space="preserve">
+    <value>摄像头画面抓不到</value>
+  </data>
+  <data name="Main_Screenshot_CameraNotStarted" xml:space="preserve">
+    <value>摄像头还没开呢</value>
+  </data>
+  <data name="Main_Screenshot_CameraCaptureFailed" xml:space="preserve">
+    <value>摄像头截图翻车: {0}</value>
+  </data>
+  <data name="Main_Screenshot_FreeSelectDone" xml:space="preserve">
+    <value>自由选区画好啦，点确认/加白板就行，想重画就再拖</value>
+  </data>
+  <data name="Main_Screenshot_FreeSelectTooSmall" xml:space="preserve">
+    <value>选区太小了啦，重新画吧</value>
+  </data>
+  <data name="Main_Screenshot_DragToAdjust" xml:space="preserve">
+    <value>拖控制点调大小，拖边框挪位置</value>
+  </data>
+  <data name="Main_Screenshot_DragToSelectArea" xml:space="preserve">
+    <value>拖一下选区域，右键或双击直接全选</value>
+  </data>
+  <data name="Main_Screenshot_SelectFirst" xml:space="preserve">
+    <value>先选个截图区域再说</value>
+  </data>
+  <data name="Main_Screenshot_DrawFirst" xml:space="preserve">
+    <value>先画个自由选区再说</value>
+  </data>
+  <data name="Main_Screenshot_FullScreenSelected" xml:space="preserve">
+    <value>全屏已选，点确认或加白板就完事了</value>
+  </data>
+  <data name="Main_Screenshot_NoInkPreview" xml:space="preserve">
+    <value>没有墨迹可以预览哦</value>
+  </data>
+  <data name="Main_Screenshot_CameraConnected" xml:space="preserve">
+    <value>摄像头连上啦</value>
+  </data>
+  <data name="Main_Screenshot_CameraError" xml:space="preserve">
+    <value>摄像头出毛病了: {0}</value>
+  </data>
+  <data name="Main_Screenshot_WindowTitle" xml:space="preserve">
+    <value>选一下要截哪里</value>
+  </data>
+  <data name="Main_Screenshot_RectangleMode" xml:space="preserve">
+    <value>矩形模式</value>
+  </data>
+  <data name="Main_Screenshot_FreehandMode" xml:space="preserve">
+    <value>自由绘制</value>
+  </data>
+  <data name="Main_Screenshot_FullScreenMode" xml:space="preserve">
+    <value>全屏截图</value>
+  </data>
+  <data name="Main_Screenshot_CameraCaptureMode" xml:space="preserve">
+    <value>摄像头截图</value>
+  </data>
+  <data name="Main_Screenshot_IncludeInk" xml:space="preserve">
+    <value>包含墨迹</value>
+  </data>
+  <data name="Main_Screenshot_ConfirmCapture" xml:space="preserve">
+    <value>确认截图</value>
+  </data>
+  <data name="Main_Screenshot_AddToWhiteboard" xml:space="preserve">
+    <value>添加到白板</value>
+  </data>
+  <data name="Main_Screenshot_SwitchCamera" xml:space="preserve">
+    <value>切换摄像头</value>
+  </data>
+  <data name="Main_Screenshot_Rotation" xml:space="preserve">
+    <value>旋转:</value>
+  </data>
+  <data name="Main_Screenshot_Resolution" xml:space="preserve">
+    <value>分辨率:</value>
+  </data>
+  <data name="Main_Screenshot_CameraNotConnected" xml:space="preserve">
+    <value>摄像头没连上</value>
+  </data>
+  <data name="Main_Screenshot_DefaultHint" xml:space="preserve">
+    <value>拖一下选区域，右键或双击可全屏；自由绘制松开后点确认</value>
+  </data>
+  <data name="Main_Privacy_FileNotFound" xml:space="preserve">
+    <value>隐私说明文件找不到了（privacy.txt）</value>
+  </data>
+  <data name="Main_Privacy_ReadError" xml:space="preserve">
+    <value>隐私说明读取出错了，寄</value>
+  </data>
+  <data name="Main_App_RestartLoopDetected" xml:space="preserve">
+    <value>程序已经连续重启5次了，自动重启已停。快联系开发者或者检查下系统环境吧</value>
+  </data>
+  <data name="Main_App_UnexpectedError" xml:space="preserve">
+    <value>哎呀，出了点意外，InkCanvasForClass 可能要翻车了。
+建议赶紧存墨迹然后重启保平安。</value>
+  </data>
+</root>

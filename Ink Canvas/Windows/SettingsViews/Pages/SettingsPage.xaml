@@ -1,4 +1,4 @@
-<ui:Page
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties"
     x:Class="Ink_Canvas.Windows.SettingsViews.Pages.SettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -6,13 +6,13 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
     xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-    Title="设置"
+    Title="{x:Static props:NavStrings.Settings_Title}"
     mc:Ignorable="d">
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid>
             <StackPanel Margin="24">
-                <TextBlock Text="设置" Style="{DynamicResource TitleTextBlockStyle}" Margin="0,0,0,16" />
-                <TextBlock Text="这里是设置页面" Style="{DynamicResource BodyTextBlockStyle}" />
+                <TextBlock Text="{x:Static props:NavStrings.Settings_Title}" Style="{DynamicResource TitleTextBlockStyle}" Margin="0,0,0,16" />
+                <TextBlock Text="{x:Static props:NavStrings.Settings_Description}" Style="{DynamicResource BodyTextBlockStyle}" />
                 <Rectangle Height="48" />
             </StackPanel>
         </Grid>

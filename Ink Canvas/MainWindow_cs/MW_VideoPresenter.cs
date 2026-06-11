@@ -62,6 +62,18 @@ namespace Ink_Canvas
             ToggleVideoPresenterSidebar();
         }
 
+        public void ToggleVideoPresenterSidebarPublic()
+        {
+            if (Settings?.Canvas?.LaunchSeewoVideoShowcaseForWhiteboardBooth == true)
+            {
+                ImageBlackboard_MouseUp(null, null);
+                SoftwareLauncher.LaunchEasiCamera("希沃视频展台");
+                return;
+            }
+
+            ToggleVideoPresenterSidebar();
+        }
+
         /// <summary>
         /// 切换视频演示侧栏的显示状态并在显示时初始化相关控件与状态。
         /// </summary>

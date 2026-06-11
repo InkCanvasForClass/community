@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -98,7 +99,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             try
             {
-                AppVersionTextBlock.Text = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                var version = Assembly.GetExecutingAssembly().GetName().Version;
+                AppVersionTextBlock.Text = version.Major + "." + version.Minor + "." + version.Build + "." + version.Revision;
+                var informationalVersion = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+                if (informationalVersion != null)
+                {
+                    string infoVersion = informationalVersion.InformationalVersion;
+                    int lastDotIndex = infoVersion.LastIndexOf('.');
+                    if (lastDotIndex >= 0 && lastDotIndex < infoVersion.Length - 7)
+                    {
+                        AppVersionTextBlock.Text += " (" + infoVersion.Substring(lastDotIndex + 1) + ")";
+                    }
+                }
                 RefreshDeviceInfo();
             }
             catch (Exception ex)
@@ -124,16 +136,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 switch (usageFrequency)
                 {
                     case DeviceIdentifier.UsageFrequency.High:
-                        frequencyText = "高频用户";
+                        frequencyText = AboutStrings.UsageFrequency_High;
                         break;
                     case DeviceIdentifier.UsageFrequency.Medium:
-                        frequencyText = "中频用户";
+                        frequencyText = AboutStrings.UsageFrequency_Medium;
                         break;
                     case DeviceIdentifier.UsageFrequency.Low:
-                        frequencyText = "低频用户";
+                        frequencyText = AboutStrings.UsageFrequency_Low;
                         break;
                     default:
-                        frequencyText = "未知";
+                        frequencyText = AboutStrings.Unknown;
                         break;
                 }
                 UsageFrequencyTextBlock.Text = frequencyText;
@@ -143,16 +155,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 switch (updatePriority)
                 {
                     case DeviceIdentifier.UpdatePriority.High:
-                        priorityText = "高优先级（优先推送更新）";
+                        priorityText = AboutStrings.UpdatePriority_High;
                         break;
                     case DeviceIdentifier.UpdatePriority.Medium:
-                        priorityText = "中优先级（正常推送更新）";
+                        priorityText = AboutStrings.UpdatePriority_Medium;
                         break;
                     case DeviceIdentifier.UpdatePriority.Low:
-                        priorityText = "低优先级（延迟推送更新）";
+                        priorityText = AboutStrings.UpdatePriority_Low;
                         break;
                     default:
-                        priorityText = "未知";
+                        priorityText = AboutStrings.Unknown;
                         break;
                 }
                 UpdatePriorityTextBlock.Text = priorityText;
@@ -166,11 +178,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"刷新设备信息失败: {ex.Message}", LogHelper.LogType.Error);
-                DeviceIdTextBlock.Text = "获取失败";
-                UsageFrequencyTextBlock.Text = "获取失败";
-                UpdatePriorityTextBlock.Text = "获取失败";
-                LaunchCountTextBlock.Text = "获取失败";
-                TotalUsageTextBlock.Text = "获取失败";
+                DeviceIdTextBlock.Text = AboutStrings.DeviceInfo_Failed;
+                UsageFrequencyTextBlock.Text = AboutStrings.DeviceInfo_Failed;
+                UpdatePriorityTextBlock.Text = AboutStrings.DeviceInfo_Failed;
+                LaunchCountTextBlock.Text = AboutStrings.DeviceInfo_Failed;
+                TotalUsageTextBlock.Text = AboutStrings.DeviceInfo_Failed;
             }
         }
     }

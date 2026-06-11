@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AutoSave_Title" xml:space="preserve">
+    <value>Auto save</value>
+  </data>
+  <data name="Backup_AutoBeforeUpdate" xml:space="preserve">
+    <value>Backup before update</value>
+  </data>
+  <data name="Backup_AutoPeriodic" xml:space="preserve">
+    <value>Periodic auto-backup</value>
+  </data>
+  <data name="Backup_Desc" xml:space="preserve">
+    <value>You can manually back up current settings or restore previous backups; backups are also created automatically before updates.</value>
+  </data>
+  <data name="Backup_Interval" xml:space="preserve">
+    <value>Backup interval</value>
+  </data>
+  <data name="Backup_Interval_14Days" xml:space="preserve">
+    <value>14 days</value>
+  </data>
+  <data name="Backup_Interval_1Day" xml:space="preserve">
+    <value>1 day</value>
+  </data>
+  <data name="Backup_Interval_30Days" xml:space="preserve">
+    <value>30 days</value>
+  </data>
+  <data name="Backup_Interval_3Days" xml:space="preserve">
+    <value>3 days</value>
+  </data>
+  <data name="Backup_Interval_7Days" xml:space="preserve">
+    <value>7 days</value>
+  </data>
+  <data name="Backup_Interval_DefaultHint" xml:space="preserve">
+    <value>(default: 7 days)</value>
+  </data>
+  <data name="Backup_Manual" xml:space="preserve">
+    <value>Backup now</value>
+  </data>
+  <data name="Backup_Restore" xml:space="preserve">
+    <value>Restore backup</value>
+  </data>
+  <data name="Backup_Title" xml:space="preserve">
+    <value>Backup &amp; Restore</value>
+  </data>
+  <data name="Storage_AutoDeleteTitle" xml:space="preserve">
+    <value>Auto delete old strokes and screenshots</value>
+  </data>
+  <data name="Storage_AutoSaveInk" xml:space="preserve">
+    <value>Auto-save ink periodically</value>
+  </data>
+  <data name="Storage_AutoSaveInkOnScreenshot" xml:space="preserve">
+    <value>Auto-save ink when screenshotting</value>
+  </data>
+  <data name="Storage_AutoSaveInterval" xml:space="preserve">
+    <value>Save interval</value>
+  </data>
+  <data name="Storage_AutoSaveInterval_10Min" xml:space="preserve">
+    <value>10 minutes</value>
+  </data>
+  <data name="Storage_AutoSaveInterval_15Min" xml:space="preserve">
+    <value>15 minutes</value>
+  </data>
+  <data name="Storage_AutoSaveInterval_1Min" xml:space="preserve">
+    <value>1 minute</value>
+  </data>
+  <data name="Storage_AutoSaveInterval_30Min" xml:space="preserve">
+    <value>30 minutes</value>
+  </data>
+  <data name="Storage_AutoSaveInterval_3Min" xml:space="preserve">
+    <value>3 minutes</value>
+  </data>
+  <data name="Storage_AutoSaveInterval_5Min" xml:space="preserve">
+    <value>5 minutes</value>
+  </data>
+  <data name="Storage_AutoSaveInterval_60Min" xml:space="preserve">
+    <value>60 minutes</value>
+  </data>
+  <data name="Storage_AutoScreenshotOnClear" xml:space="preserve">
+    <value>Auto screenshot on clear</value>
+  </data>
+  <data name="Storage_Backups_Desc" xml:space="preserve">
+    <value>Settings / config backups (.json / .zip) under Backups.</value>
+  </data>
+  <data name="Storage_Backups_Header" xml:space="preserve">
+    <value>Backups</value>
+  </data>
+  <data name="Storage_CalculateFailed" xml:space="preserve">
+    <value>Calculation failed</value>
+  </data>
+  <data name="Storage_Calculating" xml:space="preserve">
+    <value>Calculating…</value>
+  </data>
+  <data name="Storage_CategoryDetails" xml:space="preserve">
+    <value>Category details</value>
+  </data>
+  <data name="Storage_Clean" xml:space="preserve">
+    <value>Clean</value>
+  </data>
+  <data name="Storage_CleanFailed" xml:space="preserve">
+    <value>Cleanup failed: {0}</value>
+  </data>
+  <data name="Storage_Confirm_Body" xml:space="preserve">
+    <value>All files in the &quot;{0}&quot; category will be permanently deleted. Continue?</value>
+  </data>
+  <data name="Storage_Confirm_Second_Body" xml:space="preserve">
+    <value>Confirm again: are you sure you want to delete &quot;{0}&quot;?</value>
+  </data>
+  <data name="Storage_Confirm_Second_Title" xml:space="preserve">
+    <value>Confirm again</value>
+  </data>
+  <data name="Storage_Confirm_Title" xml:space="preserve">
+    <value>Confirm cleanup</value>
+  </data>
+  <data name="Storage_Core_Desc" xml:space="preserve">
+    <value>Includes .json configs, .enc usage stats, .exe / .dll executables and .dat data files.</value>
+  </data>
+  <data name="Storage_Core_NotCleanable" xml:space="preserve">
+    <value>Core files cannot be cleaned to keep the application functional.</value>
+  </data>
+  <data name="Storage_Custom_Desc" xml:space="preserve">
+    <value>Custom icons and roll-call backgrounds (icons / backgrounds, .png).</value>
+  </data>
+  <data name="Storage_Custom_Header" xml:space="preserve">
+    <value>Custom files</value>
+  </data>
+  <data name="Storage_Custom_Hint" xml:space="preserve">
+    <value>Custom files are added by the user and won&apos;t be auto-cleaned. Manage them in their dedicated UI.</value>
+  </data>
+  <data name="Storage_DiskPercent" xml:space="preserve">
+    <value>Disk percentage</value>
+  </data>
+  <data name="Storage_Ink_Desc" xml:space="preserve">
+    <value>.icstk / .xml / screenshot .png files under Saves.</value>
+  </data>
+  <data name="Storage_Ink_Header" xml:space="preserve">
+    <value>Ink</value>
+  </data>
+  <data name="Storage_Legend_Backups" xml:space="preserve">
+    <value>Backups</value>
+  </data>
+  <data name="Storage_Legend_Core" xml:space="preserve">
+    <value>Core</value>
+  </data>
+  <data name="Storage_Legend_Custom" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="Storage_Legend_Ink" xml:space="preserve">
+    <value>Ink</value>
+  </data>
+  <data name="Storage_Legend_Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="Storage_Legend_Update" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="Storage_Legend_Plugins" xml:space="preserve">
+    <value>Plugins</value>
+  </data>
+  <data name="Storage_Logs_Desc" xml:space="preserve">
+    <value>.txt logs and crash reports under Logs / Crashes. Cleanable.</value>
+  </data>
+  <data name="Storage_Logs_Header" xml:space="preserve">
+    <value>Logs</value>
+  </data>
+  <data name="Storage_NavTitle" xml:space="preserve">
+    <value>Storage</value>
+  </data>
+  <data name="Storage_NavTooltip" xml:space="preserve">
+    <value>View and clean storage used by ICC CE</value>
+  </data>
+  <data name="Storage_OpenAppFolder" xml:space="preserve">
+    <value>Open app folder</value>
+  </data>
+  <data name="Storage_Other_Desc" xml:space="preserve">
+    <value>Files not classified into the categories above.</value>
+  </data>
+  <data name="Storage_PathBrowse" xml:space="preserve">
+    <value>Browse</value>
+  </data>
+  <data name="Storage_Plugins_Desc" xml:space="preserve">
+    <value>.iccpp plugin packages under the plugins directory.</value>
+  </data>
+  <data name="Storage_Plugins_Header" xml:space="preserve">
+    <value>Plugins</value>
+  </data>
+  <data name="Storage_Plugins_Hint" xml:space="preserve">
+    <value>Use the plugins page to uninstall plugins.</value>
+  </data>
+  <data name="Storage_Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Storage_SaveAsXml" xml:space="preserve">
+    <value>Save as XML format</value>
+  </data>
+  <data name="Storage_SaveFullPageStrokes" xml:space="preserve">
+    <value>Save full-page strokes</value>
+  </data>
+  <data name="Storage_ScreenshotsByDateFolder" xml:space="preserve">
+    <value>Save screenshots in date folders</value>
+  </data>
+  <data name="Storage_Title" xml:space="preserve">
+    <value>Storage</value>
+  </data>
+  <data name="Storage_TotalUsage" xml:space="preserve">
+    <value>ICC CE total usage</value>
+  </data>
+  <data name="Storage_Update_Desc" xml:space="preserve">
+    <value>Installer packages and download cache under AutoUpdate. Refreshed each release.</value>
+  </data>
+  <data name="Storage_Update_Header" xml:space="preserve">
+    <value>Auto update</value>
+  </data>
+  <data name="Backup_SuccessTitle" xml:space="preserve">
+    <value>Backup Successful</value>
+  </data>
+  <data name="Backup_SuccessMsg" xml:space="preserve">
+    <value>Settings backed up to:
+{0}</value>
+  </data>
+  <data name="Backup_FailedTitle" xml:space="preserve">
+    <value>Backup Failed</value>
+  </data>
+  <data name="Backup_CreateFailedMsg" xml:space="preserve">
+    <value>Failed to create backup: {0}</value>
+  </data>
+  <data name="Restore_FailedTitle" xml:space="preserve">
+    <value>Restore Failed</value>
+  </data>
+  <data name="Restore_NoBackupFound" xml:space="preserve">
+    <value>No backup files found. Please create a backup first.</value>
+  </data>
+  <data name="Restore_FilterLabel" xml:space="preserve">
+    <value>Settings Backup Files</value>
+  </data>
+  <data name="Restore_AllJsonFilter" xml:space="preserve">
+    <value>All JSON Files</value>
+  </data>
+  <data name="Restore_SelectFileTitle" xml:space="preserve">
+    <value>Select Backup File to Restore</value>
+  </data>
+  <data name="Restore_ConfirmTitle" xml:space="preserve">
+    <value>Confirm Restore</value>
+  </data>
+  <data name="Restore_ConfirmMsg" xml:space="preserve">
+    <value>Are you sure you want to restore the selected backup? Current settings will be overwritten.</value>
+  </data>
+  <data name="Restore_SuccessTitle" xml:space="preserve">
+    <value>Restore Successful</value>
+  </data>
+  <data name="Restore_SuccessMsg" xml:space="preserve">
+    <value>Settings restored successfully. Some settings may require a restart to take effect.</value>
+  </data>
+  <data name="Restore_ParseFailed" xml:space="preserve">
+    <value>Unable to parse backup file. The file may be corrupted.</value>
+  </data>
+  <data name="Restore_FailedMsg" xml:space="preserve">
+    <value>Failed to restore backup: {0}</value>
+  </data>
+</root>

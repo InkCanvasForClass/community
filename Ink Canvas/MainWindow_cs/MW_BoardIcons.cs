@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using System;
 using System.Diagnostics;
 using System.Windows;
@@ -218,7 +219,7 @@ namespace Ink_Canvas
             }
 
             // 显示提示信息
-            ShowNotification($"已应用自定义背景色: {colorHex}");
+            ShowNotification(string.Format(MainWindowStrings.Main_Board_CustomBgApplied, colorHex));
         }
 
         /// <summary>
@@ -304,12 +305,11 @@ namespace Ink_Canvas
         {
             if (TryBlockFrozenPageMutation("切换到选择工具")) return;
 
-            forceEraser = false;
-            forcePointEraser = false;
-            drawingShapeMode = 0;
-            // 使用集中化的工具模式切换方法
-            SetCurrentToolMode(InkCanvasEditingMode.Select);
+            BtnSelect_Click(null, null);
+
+            UpdateCurrentToolMode("select");
             SetCursorBasedOnEditingMode(inkCanvas);
+            HideSubPanels("select");
         }
 
         /// <summary>

@@ -1,0 +1,541 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Main_WatermarkText" xml:space="preserve">
+    <value>More understanding, less complaining</value>
+  </data>
+  <data name="Main_ContextClone" xml:space="preserve">
+    <value>Clone</value>
+  </data>
+  <data name="Main_ContextCloneToNewPage" xml:space="preserve">
+    <value>Clone to New Page</value>
+  </data>
+  <data name="Main_ContextFlip" xml:space="preserve">
+    <value>Flip</value>
+  </data>
+  <data name="Main_ContextBrushSize" xml:space="preserve">
+    <value>Brush Size</value>
+  </data>
+  <data name="Main_ContextDelete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Main_ContextZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="Main_ContextPageTurn" xml:space="preserve">
+    <value>Pages</value>
+  </data>
+  <data name="Main_ContextInsertToWhiteboard" xml:space="preserve">
+    <value>To Board</value>
+  </data>
+  <data name="Main_InkReplayPlaying" xml:space="preserve">
+    <value>Replaying ink...</value>
+  </data>
+  <data name="Main_InkReplayExitHint" xml:space="preserve">
+    <value>Double-tap to exit replay</value>
+  </data>
+  <data name="Main_Strokes_SaveSuccess" xml:space="preserve">
+    <value>Strokes saved to {0}</value>
+  </data>
+  <data name="Main_Strokes_SaveFailed" xml:space="preserve">
+    <value>Failed to save strokes</value>
+  </data>
+  <data name="Main_Strokes_OpenFailed" xml:space="preserve">
+    <value>Failed to open strokes</value>
+  </data>
+  <data name="Main_Strokes_OpenIccSuccess" xml:space="preserve">
+    <value>ICC archive opened successfully, {0} pages</value>
+  </data>
+  <data name="Main_Strokes_OpenFileDialogTitle" xml:space="preserve">
+    <value>Open Strokes File</value>
+  </data>
+  <data name="Main_Strokes_OpenFileDialogFilter" xml:space="preserve">
+    <value>Ink Canvas Strokes File (*.icstk)|*.icstk|XML Strokes File (*.xml)|*.xml|ICC Archive (*.zip)|*.zip|All Supported Files (*.icstk;*.xml;*.zip)|*.icstk;*.xml;*.zip</value>
+  </data>
+  <data name="Main_Strokes_SaveMultiPageXmlSuccess" xml:space="preserve">
+    <value>Multi-page XML strokes saved as {0} XML files</value>
+  </data>
+  <data name="Main_Strokes_SaveXmlSuccess" xml:space="preserve">
+    <value>Strokes saved as XML to {0}</value>
+  </data>
+  <data name="Main_Strokes_SaveMultiPageIcstkSuccess" xml:space="preserve">
+    <value>Multi-page strokes saved as {0} icstk files</value>
+  </data>
+  <data name="Main_Strokes_SaveMultiPageXmlZipSuccess" xml:space="preserve">
+    <value>Multi-page XML strokes saved to archive {0}</value>
+  </data>
+  <data name="Main_Strokes_SaveMultiPageZipSuccess" xml:space="preserve">
+    <value>Multi-page strokes saved to archive {0}</value>
+  </data>
+  <data name="Main_Strokes_SaveFullPageSuccess" xml:space="preserve">
+    <value>Strokes saved as full-page image to {0}</value>
+  </data>
+  <data name="Main_Strokes_ModeMismatch" xml:space="preserve">
+    <value>Stroke save mode ({0}) does not match current mode ({1}), cannot restore strokes</value>
+  </data>
+  <data name="Main_Freeze_PageFrozen" xml:space="preserve">
+    <value>This page is already frozen</value>
+  </data>
+  <data name="Main_Freeze_AnnotationPageFrozen" xml:space="preserve">
+    <value>Annotation page frozen</value>
+  </data>
+  <data name="Main_Freeze_WhiteboardPageFrozen" xml:space="preserve">
+    <value>Whiteboard page {0} frozen</value>
+  </data>
+  <data name="Main_Freeze_PageUnfrozen" xml:space="preserve">
+    <value>Annotation page unfrozen</value>
+  </data>
+  <data name="Main_Freeze_WhiteboardPageUnfrozen" xml:space="preserve">
+    <value>Whiteboard page {0} unfrozen</value>
+  </data>
+  <data name="Main_Freeze_VerifyTitle" xml:space="preserve">
+    <value>Unfreeze Verification</value>
+  </data>
+  <data name="Main_Freeze_VerifyMessage" xml:space="preserve">
+    <value>Please enter the security password or TOTP code to unfreeze this page.</value>
+  </data>
+  <data name="Main_Freeze_VerifyFailed" xml:space="preserve">
+    <value>Unfreeze verification failed</value>
+  </data>
+  <data name="Main_Freeze_FrozenNoEdit" xml:space="preserve">
+    <value>This page is frozen and cannot be modified</value>
+  </data>
+  <data name="Main_Freeze_FrozenNoAction" xml:space="preserve">
+    <value>This page is frozen, cannot {0}</value>
+  </data>
+  <data name="Main_Freeze_Recorded" xml:space="preserve">
+    <value>Annotation page recorded, will freeze after class ends</value>
+  </data>
+  <data name="Main_Freeze_RecordedWhiteboard" xml:space="preserve">
+    <value>Whiteboard page {0} recorded, will freeze after class ends</value>
+  </data>
+  <data name="Main_Freeze_CancelCountdown" xml:space="preserve">
+    <value>Auto-freeze countdown cancelled</value>
+  </data>
+  <data name="Main_Freeze_CancelByOperation" xml:space="preserve">
+    <value>Page activity detected, auto-freeze cancelled</value>
+  </data>
+  <data name="Main_Freeze_AutoFreezeIn3Min" xml:space="preserve">
+    <value>Will check and auto-freeze the page in 3 minutes</value>
+  </data>
+  <data name="Main_Screenshot_SaveSuccess" xml:space="preserve">
+    <value>Screenshot saved to {0}</value>
+  </data>
+  <data name="Main_Screenshot_Cancelled" xml:space="preserve">
+    <value>Screenshot cancelled</value>
+  </data>
+  <data name="Main_Screenshot_NoValidArea" xml:space="preserve">
+    <value>No valid screenshot area selected</value>
+  </data>
+  <data name="Main_Screenshot_Failed" xml:space="preserve">
+    <value>Screenshot failed</value>
+  </data>
+  <data name="Main_Screenshot_FailedWithError" xml:space="preserve">
+    <value>Screenshot failed: {0}</value>
+  </data>
+  <data name="Main_Screenshot_ConvertFailed" xml:space="preserve">
+    <value>Screenshot conversion failed</value>
+  </data>
+  <data name="Main_ImageInsert_ScreenshotCancelled" xml:space="preserve">
+    <value>Screenshot cancelled</value>
+  </data>
+  <data name="Main_ImageInsert_ScreenshotFailed" xml:space="preserve">
+    <value>Screenshot failed</value>
+  </data>
+  <data name="Main_ImageInsert_FullScreenFailed" xml:space="preserve">
+    <value>Full screen capture failed</value>
+  </data>
+  <data name="Main_ImageInsert_InvalidScreenshot" xml:space="preserve">
+    <value>Invalid screenshot</value>
+  </data>
+  <data name="Main_ImageInsert_ConvertFailed" xml:space="preserve">
+    <value>Screenshot conversion failed</value>
+  </data>
+  <data name="Main_ImageInsert_Inserted" xml:space="preserve">
+    <value>Screenshot inserted to canvas</value>
+  </data>
+  <data name="Main_ImageInsert_InsertFailed" xml:space="preserve">
+    <value>Failed to insert screenshot</value>
+  </data>
+  <data name="Main_Clipboard_ImageDetected" xml:space="preserve">
+    <value>Image detected in clipboard, right-click on canvas to paste</value>
+  </data>
+  <data name="Main_Clipboard_PasteImage" xml:space="preserve">
+    <value>Paste Image</value>
+  </data>
+  <data name="Main_Clipboard_NoImage" xml:space="preserve">
+    <value>No image in clipboard</value>
+  </data>
+  <data name="Main_Clipboard_CannotGetImage" xml:space="preserve">
+    <value>Cannot get clipboard image</value>
+  </data>
+  <data name="Main_Clipboard_ImagePasted" xml:space="preserve">
+    <value>Image pasted from clipboard</value>
+  </data>
+  <data name="Main_Clipboard_PasteFailed" xml:space="preserve">
+    <value>Paste image failed: {0}</value>
+  </data>
+  <data name="Main_Hitokoto_Loading" xml:space="preserve">
+    <value>Fetching Hitokoto...</value>
+  </data>
+  <data name="Main_Hitokoto_Unavailable" xml:space="preserve">
+    <value>Hitokoto is unavailable</value>
+  </data>
+  <data name="Main_Hitokoto_HttpUnavailable" xml:space="preserve">
+    <value>Hitokoto is unavailable (HTTP library not available)</value>
+  </data>
+  <data name="Main_Hitokoto_NoContent" xml:space="preserve">
+    <value>Hitokoto returned no content</value>
+  </data>
+  <data name="Main_Settings_ResetVerify" xml:space="preserve">
+    <value>Reset Configuration Verification</value>
+  </data>
+  <data name="Main_Settings_ResetVerifyMessage" xml:space="preserve">
+    <value>Please enter the security password or TOTP code to confirm resetting the configuration.</value>
+  </data>
+  <data name="Main_Settings_ResetDone" xml:space="preserve">
+    <value>Settings have been reset to default recommended settings~</value>
+  </data>
+  <data name="Main_RollCall_CannotCallExternal" xml:space="preserve">
+    <value>Cannot call external roll call: {0}</value>
+  </data>
+  <data name="Main_InkReplay_Paused" xml:space="preserve">
+    <value>Paused!</value>
+  </data>
+  <data name="Main_CloseConfirm_Level1" xml:space="preserve">
+    <value>Continue to close InkCanvasForClass? Unsaved ink will be lost.</value>
+  </data>
+  <data name="Main_CloseConfirm_Level2" xml:space="preserve">
+    <value>Are you really sure you want to close InkCanvasForClass?</value>
+  </data>
+  <data name="Main_CloseConfirm_Level3" xml:space="preserve">
+    <value>Final confirmation: Are you sure you want to close InkCanvasForClass?</value>
+  </data>
+  <data name="Main_EnterSettings" xml:space="preserve">
+    <value>Enter Settings</value>
+  </data>
+  <data name="Main_EnterSettings_Message" xml:space="preserve">
+    <value>Please enter the security password or TOTP code to enter settings.</value>
+  </data>
+  <data name="Main_Board_FrozenCannotDelete" xml:space="preserve">
+    <value>This page is frozen and cannot be deleted</value>
+  </data>
+  <data name="Main_Board_CustomBgApplied" xml:space="preserve">
+    <value>Custom background color applied: {0}</value>
+  </data>
+  <data name="Main_Tray_ExitFoldMode" xml:space="preserve">
+    <value>Exit Fold Mode</value>
+  </data>
+  <data name="Main_Tray_EnterFoldMode" xml:space="preserve">
+    <value>Switch to Fold Mode</value>
+  </data>
+  <data name="Main_Tray_DisableHotkeys" xml:space="preserve">
+    <value>Disable All Hotkeys</value>
+  </data>
+  <data name="Main_Tray_EnableHotkeys" xml:space="preserve">
+    <value>Enable All Hotkeys</value>
+  </data>
+  <data name="Main_Colors_DarkTheme" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="Main_Colors_LightTheme" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="Main_Uri_EnterFoldMode" xml:space="preserve">
+    <value>Fold mode activated</value>
+  </data>
+  <data name="Main_Uri_ExitFoldMode" xml:space="preserve">
+    <value>Fold mode deactivated</value>
+  </data>
+  <data name="Main_Uri_HideOnFoldEnabled" xml:space="preserve">
+    <value>Enabled: Hide completely when folded</value>
+  </data>
+  <data name="Main_Uri_HideOnFoldDisabled" xml:space="preserve">
+    <value>Disabled: Hide completely when folded</value>
+  </data>
+  <data name="Main_Uri_SchemeNotFound" xml:space="preserve">
+    <value>Switch failed: Profile "{0}" does not exist</value>
+  </data>
+  <data name="Main_Uri_SwitchedScheme" xml:space="preserve">
+    <value>Switched to profile "{0}" via URI</value>
+  </data>
+  <data name="Main_Timer_AutoClosedInkeys" xml:space="preserve">
+    <value>Inkeys has been automatically closed</value>
+  </data>
+  <data name="Main_Timer_AutoClosedYouJiao" xml:space="preserve">
+    <value>YouJiao Teaching has been automatically closed</value>
+  </data>
+  <data name="Main_Timer_AutoClosedSeewoDesktop" xml:space="preserve">
+    <value>Seewo Desktop 2.0 Annotation has been automatically closed</value>
+  </data>
+  <data name="Main_DisplayChanged" xml:space="preserve">
+    <value>Display changed to {0}x{1}</value>
+  </data>
+  <data name="Main_DPIChanged" xml:space="preserve">
+    <value>System DPI changed from {0}x{1} to {2}x{3}</value>
+  </data>
+  <data name="Main_StrokesFileLoaded" xml:space="preserve">
+    <value>Strokes file loaded: {0}</value>
+  </data>
+  <data name="Main_StrokesFileOpenFailed" xml:space="preserve">
+    <value>Failed to open strokes file</value>
+  </data>
+  <data name="Main_ExitVerify" xml:space="preserve">
+    <value>Exit Verification</value>
+  </data>
+  <data name="Main_ExitVerifyWithTotp" xml:space="preserve">
+    <value>Please enter the security password or TOTP code to exit the application.</value>
+  </data>
+  <data name="Main_ExitVerifyPasswordOnly" xml:space="preserve">
+    <value>Please enter the security password to exit the application.</value>
+  </data>
+  <data name="Main_AutoFold_ClearingAndFolding" xml:space="preserve">
+    <value>Clearing ink and folding to sidebar. You can restore the original ink via Undo after entering annotation mode.</value>
+  </data>
+  <data name="Main_FileInsert_OpenDialogFilter" xml:space="preserve">
+    <value>Images, PDF and media|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf;*.mp4;*.mkv;*.mkw;*.wmv;*.webm;*.flv;*.mov;*.avi;*.mp3;*.m4a;*.aac;*.flac;*.wav|Image files|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf|Media files|*.mp4;*.mkv;*.mkw;*.wmv;*.webm;*.flv;*.mov;*.avi;*.mp3;*.m4a;*.aac;*.flac;*.wav|Video files|*.mp4;*.mkv;*.mkw;*.wmv;*.webm;*.flv;*.mov;*.avi|Audio files|*.mp3;*.m4a;*.aac;*.flac;*.wav</value>
+  </data>
+  <data name="Main_MediaInsert_OpenDialogFilter" xml:space="preserve">
+    <value>Media files|*.mp4;*.mkv;*.mkw;*.wmv;*.webm;*.flv;*.mov;*.avi;*.mp3;*.m4a;*.aac;*.flac;*.wav|Video files|*.mp4;*.mkv;*.mkw;*.wmv;*.webm;*.flv;*.mov;*.avi|Audio files|*.mp3;*.m4a;*.aac;*.flac;*.wav</value>
+  </data>
+  <data name="Main_MediaInsert_UnsupportedFormat" xml:space="preserve">
+    <value>Unsupported media format.</value>
+  </data>
+  <data name="Main_MediaInsert_InsertFailed" xml:space="preserve">
+    <value>Failed to insert media: {0}</value>
+  </data>
+  <data name="Main_PDF_InsertFailed" xml:space="preserve">
+    <value>Failed to insert PDF: {0}</value>
+  </data>
+  <data name="Main_Security_Tip" xml:space="preserve">
+    <value>Notice</value>
+  </data>
+  <data name="Main_Security_PasswordTooShort" xml:space="preserve">
+    <value>Password is too short.</value>
+  </data>
+  <data name="Main_Security_PasswordMismatch" xml:space="preserve">
+    <value>The passwords you entered do not match.</value>
+  </data>
+  <data name="Main_Security_CurrentPasswordWrong" xml:space="preserve">
+    <value>Current password is incorrect.</value>
+  </data>
+  <data name="Main_Security_NewPasswordTooShort" xml:space="preserve">
+    <value>New password is too short.</value>
+  </data>
+  <data name="Main_Security_NewPasswordMismatch" xml:space="preserve">
+    <value>The new passwords you entered do not match.</value>
+  </data>
+  <data name="Main_Security_SetPasswordTitle" xml:space="preserve">
+    <value>Set Security Password</value>
+  </data>
+  <data name="Main_Security_ChangePasswordTitle" xml:space="preserve">
+    <value>Change Security Password</value>
+  </data>
+  <data name="Main_Security_EnterNewPassword" xml:space="preserve">
+    <value>Enter new password</value>
+  </data>
+  <data name="Main_Security_NewPasswordLabel" xml:space="preserve">
+    <value>New Password</value>
+  </data>
+  <data name="Main_Security_ConfirmNewPasswordLabel" xml:space="preserve">
+    <value>Confirm New Password</value>
+  </data>
+  <data name="Main_Security_CurrentPasswordLabel" xml:space="preserve">
+    <value>Current Password</value>
+  </data>
+  <data name="Main_Security_ChangePasswordHint" xml:space="preserve">
+    <value>Enter your current password and set a new one.</value>
+  </data>
+  <data name="Main_Security_TotpOnlyHint" xml:space="preserve">
+    <value>Enter the 6-digit TOTP verification code.</value>
+  </data>
+  <data name="Main_Security_PasswordOrTotpHint" xml:space="preserve">
+    <value>Enter your security password or 6-digit TOTP verification code.</value>
+  </data>
+  <data name="Main_Security_PasswordOnlyHint" xml:space="preserve">
+    <value>Enter your security password.</value>
+  </data>
+  <data name="Main_Update_FailedTitle" xml:space="preserve">
+    <value>Update Failed</value>
+  </data>
+  <data name="Main_Update_FilesInUse" xml:space="preserve">
+    <value>Update failed: Some files could not be overwritten. They may be in use.
+Please close all related programs and try again.</value>
+  </data>
+  <data name="Main_Update_CopyError" xml:space="preserve">
+    <value>Update failed: File copy error
+{0}</value>
+  </data>
+  <data name="Main_Update_LaunchFailedTitle" xml:space="preserve">
+    <value>Launch Failed</value>
+  </data>
+  <data name="Main_Update_LaunchFailed" xml:space="preserve">
+    <value>Update completed, but failed to launch the application: {0}
+Please start the application manually.</value>
+  </data>
+  <data name="Main_Update_LaunchNotFoundTitle" xml:space="preserve">
+    <value>File Missing</value>
+  </data>
+  <data name="Main_Update_LaunchNotFound" xml:space="preserve">
+    <value>Update completed, but the application file was not found: {0}
+Please check if the update was successful.</value>
+  </data>
+  <data name="Main_Update_Failed" xml:space="preserve">
+    <value>Update failed: {0}</value>
+  </data>
+  <data name="Main_Screenshot_DragToSelect" xml:space="preserve">
+    <value>Drag to select a rectangular area</value>
+  </data>
+  <data name="Main_Screenshot_FreeDrawHint" xml:space="preserve">
+    <value>Hold left mouse button to draw freely, release to adjust or redraw, then confirm to capture</value>
+  </data>
+  <data name="Main_Screenshot_CameraMode" xml:space="preserve">
+    <value>Camera preview mode, click confirm to capture</value>
+  </data>
+  <data name="Main_Screenshot_NoCamera" xml:space="preserve">
+    <value>No camera device found</value>
+  </data>
+  <data name="Main_Screenshot_CameraStartFailed" xml:space="preserve">
+    <value>Failed to start camera: {0}</value>
+  </data>
+  <data name="Main_Screenshot_CameraFrameFailed" xml:space="preserve">
+    <value>Unable to get camera frame</value>
+  </data>
+  <data name="Main_Screenshot_CameraNotStarted" xml:space="preserve">
+    <value>Camera not started</value>
+  </data>
+  <data name="Main_Screenshot_CameraCaptureFailed" xml:space="preserve">
+    <value>Camera capture failed: {0}</value>
+  </data>
+  <data name="Main_Screenshot_FreeSelectDone" xml:space="preserve">
+    <value>Free selection complete, click confirm/add to whiteboard; drag again to redraw</value>
+  </data>
+  <data name="Main_Screenshot_FreeSelectTooSmall" xml:space="preserve">
+    <value>Free selection too small, please redraw</value>
+  </data>
+  <data name="Main_Screenshot_DragToAdjust" xml:space="preserve">
+    <value>Drag control points to adjust selection, or drag border to move</value>
+  </data>
+  <data name="Main_Screenshot_DragToSelectArea" xml:space="preserve">
+    <value>Drag to select area, right-click or double-click to select all</value>
+  </data>
+  <data name="Main_Screenshot_SelectFirst" xml:space="preserve">
+    <value>Please select a screenshot area first</value>
+  </data>
+  <data name="Main_Screenshot_DrawFirst" xml:space="preserve">
+    <value>Please draw a free selection first</value>
+  </data>
+  <data name="Main_Screenshot_FullScreenSelected" xml:space="preserve">
+    <value>Full screen selected, click confirm or add to whiteboard</value>
+  </data>
+  <data name="Main_Screenshot_NoInkPreview" xml:space="preserve">
+    <value>No ink preview available</value>
+  </data>
+  <data name="Main_Screenshot_CameraConnected" xml:space="preserve">
+    <value>Camera connected</value>
+  </data>
+  <data name="Main_Screenshot_CameraError" xml:space="preserve">
+    <value>Camera error: {0}</value>
+  </data>
+  <data name="Main_Screenshot_WindowTitle" xml:space="preserve">
+    <value>Select screenshot area</value>
+  </data>
+  <data name="Main_Screenshot_RectangleMode" xml:space="preserve">
+    <value>Rectangle</value>
+  </data>
+  <data name="Main_Screenshot_FreehandMode" xml:space="preserve">
+    <value>Freehand</value>
+  </data>
+  <data name="Main_Screenshot_FullScreenMode" xml:space="preserve">
+    <value>Full screen</value>
+  </data>
+  <data name="Main_Screenshot_CameraCaptureMode" xml:space="preserve">
+    <value>Camera</value>
+  </data>
+  <data name="Main_Screenshot_IncludeInk" xml:space="preserve">
+    <value>Include ink</value>
+  </data>
+  <data name="Main_Screenshot_ConfirmCapture" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="Main_Screenshot_AddToWhiteboard" xml:space="preserve">
+    <value>Add to whiteboard</value>
+  </data>
+  <data name="Main_Screenshot_SwitchCamera" xml:space="preserve">
+    <value>Switch camera</value>
+  </data>
+  <data name="Main_Screenshot_Rotation" xml:space="preserve">
+    <value>Rotation:</value>
+  </data>
+  <data name="Main_Screenshot_Resolution" xml:space="preserve">
+    <value>Resolution:</value>
+  </data>
+  <data name="Main_Screenshot_CameraNotConnected" xml:space="preserve">
+    <value>Camera not connected</value>
+  </data>
+  <data name="Main_Screenshot_DefaultHint" xml:space="preserve">
+    <value>Drag to select an area; right-click or double-click to select the full screen; confirm after freehand drawing</value>
+  </data>
+  <data name="Main_Privacy_FileNotFound" xml:space="preserve">
+    <value>Privacy policy file not found (privacy.txt).</value>
+  </data>
+  <data name="Main_Privacy_ReadError" xml:space="preserve">
+    <value>Error reading privacy policy file.</value>
+  </data>
+  <data name="Main_App_RestartLoopDetected" xml:space="preserve">
+    <value>The app has restarted 5 times in a row. Auto-restart stopped. Please contact the developer or check your system environment.</value>
+  </data>
+  <data name="Main_App_UnexpectedError" xml:space="preserve">
+    <value>Sorry, an unexpected error occurred that may cause InkCanvasForClass to run unstably.
+    It is recommended to save your ink and restart the application.</value>
+  </data>
+</root>

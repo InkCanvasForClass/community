@@ -53,6 +53,10 @@
         </Style>
     </UserControl.Resources>
 
+    <Viewbox x:Name="ScaleViewbox" Stretch="None">
+        <Viewbox.LayoutTransform>
+            <ScaleTransform x:Name="NavBarScaleTransform"/>
+        </Viewbox.LayoutTransform>
     <Border x:Name="RootBorder" BorderThickness="1" BorderBrush="#a1a1aa"
             Background="#f4f4f5" Opacity="1" CornerRadius="6">
         <Border.Effect>
@@ -133,4 +137,5 @@
             </ikw:SimpleStackPanel>
         </DockPanel>
     </Border>
+    </Viewbox>
 </UserControl>

@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Pages;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
@@ -6,9 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Interop;
-using System.Windows.Media;
 using System.Windows.Navigation;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using Screen = System.Windows.Forms.Screen;
@@ -21,23 +20,32 @@ namespace Ink_Canvas.Windows.SettingsViews
         {
             { "HomePage", typeof(HomePage) },
             { "StartupPage", typeof(StartupPage) },
+            { "ClockPage", typeof(ClockPage) },
             { "PrivacyPage", typeof(PrivacyPage) },
             { "SecurityPage", typeof(SecurityPage) },
             { "WindowPage", typeof(WindowPage) },
             { "AppearancePage", typeof(AppearancePage) },
             { "HotkeyPage", typeof(HotkeyPage) },
             { "ToolbarPage", typeof(ToolbarPage) },
+            { "ToolbarAppearancePage", typeof(ToolbarAppearancePage) },
+            { "ToolbarMenuPage", typeof(ToolbarMenuPage) },
+            { "BoardToolbarPage", typeof(BoardToolbarPage) },
+            { "BoardAppearancePage", typeof(BoardAppearancePage) },
+            { "BoardMenuPage", typeof(BoardMenuPage) },
             { "UpdatePage", typeof(UpdatePage) },
             { "NotificationPage", typeof(NotificationPage) },
             { "AnnouncementCenterPage", typeof(AnnouncementCenterPage) },
             { "ExperimentalPage", typeof(ExperimentalPage) },
             { "AdvancedPage", typeof(AdvancedPage) },
             { "StoragePage", typeof(StoragePage) },
-            { "AutomationPage", typeof(AutomationPage) },
+            { "BackupPage", typeof(BackupPage) },
+            { "CloudStoragePage", typeof(CloudStoragePage) },
+            { "AutomationWorkflowPage", typeof(AutomationWorkflowPage) },
             { "PowerPointPage", typeof(PowerPointPage) },
             { "RandomDrawPage", typeof(RandomDrawPage) },
             { "CanvasPage", typeof(CanvasPage) },
             { "InkRecognitionPage", typeof(InkRecognitionPage) },
+            { "PerformancePage", typeof(PerformancePage) },
             { "DebugPage", typeof(DebugPage) },
             { "FriendlyLinksPage", typeof(FriendlyLinksPage) },
             { "AboutPage", typeof(AboutPage) },
@@ -73,24 +81,32 @@ namespace Ink_Canvas.Windows.SettingsViews
             {
                 { "HomePage", typeof(HomePage) },
                 { "StartupPage", typeof(StartupPage) },
+                { "ClockPage", typeof(ClockPage) },
                 { "PrivacyPage", typeof(PrivacyPage) },
                 { "SecurityPage", typeof(SecurityPage) },
                 { "WindowPage", typeof(WindowPage) },
                 { "AppearancePage", typeof(AppearancePage) },
                 { "HotkeyPage", typeof(HotkeyPage) },
                 { "ToolbarPage", typeof(ToolbarPage) },
+                { "ToolbarAppearancePage", typeof(ToolbarAppearancePage) },
+                { "ToolbarMenuPage", typeof(ToolbarMenuPage) },
+                { "BoardToolbarPage", typeof(BoardToolbarPage) },
+                { "BoardAppearancePage", typeof(BoardAppearancePage) },
+                { "BoardMenuPage", typeof(BoardMenuPage) },
                 { "UpdatePage", typeof(UpdatePage) },
                 { "NotificationPage", typeof(NotificationPage) },
-            { "AnnouncementCenterPage", typeof(AnnouncementCenterPage) },
+                { "AnnouncementCenterPage", typeof(AnnouncementCenterPage) },
                 { "ExperimentalPage", typeof(ExperimentalPage) },
                 { "AdvancedPage", typeof(AdvancedPage) },
                 { "StoragePage", typeof(StoragePage) },
+                { "BackupPage", typeof(BackupPage) },
                 { "CloudStoragePage", typeof(CloudStoragePage) },
-                { "AutomationPage", typeof(AutomationPage) },
+                { "AutomationWorkflowPage", typeof(AutomationWorkflowPage) },
                 { "PowerPointPage", typeof(PowerPointPage) },
                 { "RandomDrawPage", typeof(RandomDrawPage) },
                 { "CanvasPage", typeof(CanvasPage) },
                 { "InkRecognitionPage", typeof(InkRecognitionPage) },
+                { "PerformancePage", typeof(PerformancePage) },
                 { "DebugPage", typeof(DebugPage) },
                 { "FriendlyLinksPage", typeof(FriendlyLinksPage) },
                 { "AboutPage", typeof(AboutPage) },
@@ -104,7 +120,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             {
                 NavigateToPage("HomePage");
                 NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems[0];
-                NavigationViewControl.Header = "首页";
+                NavigationViewControl.Header = NavStrings.Nav_Home;
             }
 
             UpdateAppTitleBarMargin();
@@ -118,7 +134,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 {
                     NavigateToPage("HomePage");
                     NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems[0];
-                    NavigationViewControl.Header = "首页";
+                    NavigationViewControl.Header = NavStrings.Nav_Home;
 
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
@@ -325,7 +341,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             if (args.IsSettingsSelected)
             {
                 NavigateToPage("Settings");
-                NavigationViewControl.Header = "设置";
+                NavigationViewControl.Header = NavStrings.Settings_Title;
                 return;
             }
 
@@ -362,7 +378,11 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         public void NavigateToPage(string pageTag, Ink_Canvas.Plugins.PluginInfo pluginInfo = null)
         {
-            if (!_pageTypes.TryGetValue(pageTag, out Type pageType)) return;
+            if (!_pageTypes.TryGetValue(pageTag, out Type pageType))
+            {
+                LogHelper.WriteLogToFile($"SettingsWindow: NavigateToPage 找不到页面类型 [{pageTag}]，已注册: [{string.Join(", ", _pageTypes.Keys)}]", LogHelper.LogType.Warning);
+                return;
+            }
 
             try
             {
@@ -370,10 +390,8 @@ namespace Ink_Canvas.Windows.SettingsViews
 
                 if (!_pages.TryGetValue(pageTag, out var cachedPage))
                 {
-                    Ink_Canvas.Helpers.LogHelper.WriteLogToFile($"SettingsWindow: 创建页面实例 {pageTag} ({pageType.Name})", Ink_Canvas.Helpers.LogHelper.LogType.Info);
                     cachedPage = Activator.CreateInstance(pageType);
                     _pages.Add(pageTag, cachedPage);
-                    Ink_Canvas.Helpers.LogHelper.WriteLogToFile($"SettingsWindow: 页面实例 {pageTag} 创建成功", Ink_Canvas.Helpers.LogHelper.LogType.Info);
                 }
 
                 if (cachedPage is PluginSettingsPage pluginSettingsPage && pluginInfo != null)
@@ -395,7 +413,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 }
 
                 Ink_Canvas.Helpers.LogHelper.WriteLogToFile($"SettingsWindow: 导航到 {pageTag} 异常: {detail}", Ink_Canvas.Helpers.LogHelper.LogType.Error);
-                MessageBox.Show($"导航到页面时出错: {ex.InnerException?.Message ?? ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(NavStrings.Nav_NavigateError, ex.InnerException?.Message ?? ex.Message), NavStrings.Nav_Error, MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -421,7 +439,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             if (currentPageType == typeof(SettingsPage))
             {
                 NavigationViewControl.SelectedItem = NavigationViewControl.SettingsItem;
-                NavigationViewControl.Header = "设置";
+                NavigationViewControl.Header = NavStrings.Settings_Title;
                 return;
             }
 
@@ -592,7 +610,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"为页面 {tag} 建索引失败: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine(string.Format(NavStrings.Nav_IndexBuildFailed, tag, ex.Message));
                 }
             }
 
@@ -603,7 +621,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 var name = info?.Name;
                 if (!string.IsNullOrWhiteSpace(name))
                 {
-                    _searchIndex.Add(new SearchEntry { Text = $"{name} 设置", PageTag = pageTag });
+                    _searchIndex.Add(new SearchEntry { Text = string.Format(NavStrings.Nav_PluginSettingsFormat, name), PageTag = pageTag });
                 }
             }
 
@@ -765,7 +783,7 @@ namespace Ink_Canvas.Windows.SettingsViews
 
                         var navItem = new NavigationViewItem
                         {
-                            Content = string.Format("{0} 设置", plugin.Name),
+                            Content = string.Format(NavStrings.Nav_PluginSettingsFormat, plugin.Name),
                             Tag = pageTag
                         };
 
@@ -780,7 +798,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine(string.Format("加载插件设置页面时出错: {0}", ex.Message));
+                System.Diagnostics.Debug.WriteLine(string.Format(NavStrings.Nav_LoadPluginSettingsFailed, ex.Message));
             }
         }
         #endregion
@@ -817,14 +835,14 @@ namespace Ink_Canvas.Windows.SettingsViews
                         }
                         catch (Exception ex)
                         {
-                            System.Diagnostics.Debug.WriteLine($"预加载设置页面 {tag} 失败: {ex.Message}");
+                            System.Diagnostics.Debug.WriteLine(string.Format(NavStrings.Nav_PreloadPageFailed, tag, ex.Message));
                         }
                     }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"异步预加载设置页面时出错: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine(string.Format(NavStrings.Nav_PreloadPagesFailed, ex.Message));
             }
         }
 

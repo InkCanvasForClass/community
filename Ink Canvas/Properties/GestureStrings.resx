@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Gesture_AllowRotateScale" xml:space="preserve">
+    <value>允许双指旋转与缩放选中的墨迹</value>
+  </data>
+  <data name="Gesture_AllowRotateScaleHint" xml:space="preserve">
+    <value>允许选中墨迹后对墨迹进行双指或多指缩放操作（此设置不受「允许双指旋转」设置的影响）</value>
+  </data>
+  <data name="Gesture_EnablePalmEraser" xml:space="preserve">
+    <value>启用手掌擦</value>
+  </data>
+  <data name="Gesture_PalmHint" xml:space="preserve">
+    <value>低敏感度：需要更大的触摸面积和更多触摸点，减少误判；高敏感度：更容易触发手掌擦，但可能误判手指。</value>
+  </data>
+  <data name="Gesture_PalmSensitivity" xml:space="preserve">
+    <value>手掌擦敏感度</value>
+  </data>
+  <data name="Gesture_PalmSensitivityHigh" xml:space="preserve">
+    <value>高敏感度</value>
+  </data>
+  <data name="Gesture_PalmSensitivityLow" xml:space="preserve">
+    <value>低敏感度</value>
+  </data>
+  <data name="Gesture_PalmSensitivityMedium" xml:space="preserve">
+    <value>中敏感度</value>
+  </data>
+  <data name="Gesture_Title" xml:space="preserve">
+    <value>手势</value>
+  </data>
+</root>

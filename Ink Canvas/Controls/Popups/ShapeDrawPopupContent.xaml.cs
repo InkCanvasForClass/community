@@ -1,4 +1,4 @@
-using System.Windows;
+using iNKORE.UI.WPF.Modern.Controls;
 using System.Windows.Controls;
 
 namespace Ink_Canvas.Controls
@@ -14,6 +14,7 @@ namespace Ink_Canvas.Controls
         public GeometryButton DrawCircleBtn => BoardImageDrawCircle;
         public GeometryButton DrawDashedCircleBtn => BoardImageDrawDashedCircle;
         public GeometryButton DrawEllipseCenterBtn => BoardImageDrawEllipseCenter;
+        public GeometryButton DrawEllipseCenterWithFocalPointBtn => BoardImageDrawEllipseCenterWithFocalPoint;
         public GeometryButton DrawCuboidBtn => BoardImageDrawCuboid;
         public GeometryButton DrawRectangleBtn => BoardImageDrawRectangle;
         public GeometryButton DrawCylinderBtn => BoardImageDrawCylinder;
@@ -29,6 +30,8 @@ namespace Ink_Canvas.Controls
         public GeometryButton DrawParabola1Btn => ImageDrawParabola1;
         public GeometryButton DrawParabolaWithFocalPointBtn => ImageDrawParabolaWithFocalPoint;
         public GeometryButton DrawParabola2Btn => ImageDrawParabola2;
+
+        public ToggleSwitch ShowCircleCenterToggle => ToggleSwitchShowCircleCenter;
 
         public Button CloseButtonControl => Shell?.CloseButtonControl;
 

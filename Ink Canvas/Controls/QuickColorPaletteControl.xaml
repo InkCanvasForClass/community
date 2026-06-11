@@ -11,7 +11,7 @@
         <StackPanel Name="QuickColorPalettePanel"
                     Orientation="Vertical"
                     VerticalAlignment="Center">
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,1" VerticalAlignment="Center">
+            <StackPanel Name="Row1" Orientation="Horizontal" Margin="0,0,0,1" VerticalAlignment="Center">
                 <controls:ColorPickerButton x:Name="QuickColorBlack" Color="Black" CheckIconFill="White" ButtonSize="17" CheckIconSize="11"
                                             ButtonMouseUp="QuickColorBlack_Click" ToolTip="Black"/>
                 <controls:ColorPickerButton x:Name="QuickColorWhite" Color="White" CheckIconFill="Black" ButtonSize="17" CheckIconSize="11"
@@ -21,7 +21,7 @@
                 <controls:ColorPickerButton x:Name="QuickColorOrange" Color="#FFA500" CheckIconFill="Black" ButtonSize="17" CheckIconSize="11"
                                             ButtonMouseUp="QuickColorOrange_Click" ToolTip="Orange"/>
             </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,1,0,0" VerticalAlignment="Center">
+            <StackPanel Name="Row2" Orientation="Horizontal" Margin="0,1,0,0" VerticalAlignment="Center">
                 <controls:ColorPickerButton x:Name="QuickColorYellow" Color="#FFFF00" CheckIconFill="Black" ButtonSize="17" CheckIconSize="11"
                                             ButtonMouseUp="QuickColorYellow_Click" ToolTip="Yellow"/>
                 <controls:ColorPickerButton x:Name="QuickColorGreen" Color="#16A34A" CheckIconFill="Black" ButtonSize="17" CheckIconSize="11"

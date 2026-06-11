@@ -835,6 +835,34 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        public static object GetTelemetryStats()
+        {
+            try
+            {
+                var stats = GetUsageStatsCached(true);
+                stats.CheckAndResetWeeklyStats();
+                return new
+                {
+                    last_launch_time = stats.LastLaunchTime,
+                    launch_count = stats.LaunchCount,
+                    total_usage_seconds = stats.TotalUsageSeconds,
+                    average_session_seconds = stats.AverageSessionSeconds,
+                    last_update_check = stats.LastUpdateCheck,
+                    weekly_launch_count = stats.WeeklyLaunchCount,
+                    weekly_usage_seconds = stats.WeeklyUsageSeconds,
+                    week_start_date = stats.WeekStartDate,
+                    last_week_launch_count = stats.LastWeekLaunchCount,
+                    last_week_usage_seconds = stats.LastWeekUsageSeconds,
+                    last_modified = stats.LastModified
+                };
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"DeviceIdentifier | 获取遥测统计失败: {ex.Message}", LogHelper.LogType.Error);
+                return null;
+            }
+        }
+
 
 
         /// <summary>

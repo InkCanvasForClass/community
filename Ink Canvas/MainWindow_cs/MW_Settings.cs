@@ -1,5 +1,5 @@
 using Ink_Canvas.Controls;
-using Ink_Canvas.Controls.Toolbar;
+using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using OSVersionExtension;
@@ -164,7 +164,7 @@ namespace Ink_Canvas
                 }
                 else if (Settings.Appearance.ChickenSoupSource == 3)
                 {
-                    BlackBoardWaterMark.Text = "正在获取一言...";
+                    BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_Loading;
 
                     try
                     {
@@ -176,13 +176,13 @@ namespace Ink_Canvas
                         catch (Exception initEx)
                         {
                             LogHelper.WriteLogToFile($"一言 HTTP 客户端初始化失败: {initEx.Message}", LogHelper.LogType.Warning);
-                            BlackBoardWaterMark.Text = "一言功能不可用（HTTP 库不可用）";
+                            BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_HttpUnavailable;
                             return;
                         }
 
                         if (clientObj == null || !(clientObj is HttpClient client))
                         {
-                            BlackBoardWaterMark.Text = "一言功能不可用（HTTP 库不可用）";
+                            BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_HttpUnavailable;
                             return;
                         }
 
@@ -206,13 +206,13 @@ namespace Ink_Canvas
                         }
                         else
                         {
-                            BlackBoardWaterMark.Text = "一言暂时没有返回内容";
+                            BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_NoContent;
                         }
                     }
                     catch (Exception ex)
                     {
                         LogHelper.WriteLogToFile($"一言 API 请求失败: {ex.Message}", LogHelper.LogType.Warning);
-                        BlackBoardWaterMark.Text = "一言功能不可用";
+                        BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_Unavailable;
                     }
                 }
                 else if (Settings.Appearance.ChickenSoupSource == 4)
@@ -226,8 +226,46 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"更新白板名言时出错: {ex.Message}", LogHelper.LogType.Warning);
                 if (Settings.Appearance.ChickenSoupSource == 3 && BlackBoardWaterMark != null)
                 {
-                    try { BlackBoardWaterMark.Text = "一言功能不可用"; } catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
+                    try { BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_Unavailable; } catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
                 }
+            }
+        }
+
+        /// <summary>
+        /// 根据设置应用白板名言的位置。
+        /// </summary>
+        internal void ApplyChickenSoupPosition()
+        {
+            if (BlackBoardWaterMark == null) return;
+
+            var position = Settings.Appearance.ChickenSoupPosition ?? "TopRight";
+            const double margin = 25;
+
+            // 清除旧的 Canvas 附加属性
+            System.Windows.Controls.Canvas.SetLeft(BlackBoardWaterMark, double.NaN);
+            System.Windows.Controls.Canvas.SetTop(BlackBoardWaterMark, double.NaN);
+            System.Windows.Controls.Canvas.SetRight(BlackBoardWaterMark, double.NaN);
+            System.Windows.Controls.Canvas.SetBottom(BlackBoardWaterMark, double.NaN);
+
+            switch (position)
+            {
+                case "TopLeft":
+                    System.Windows.Controls.Canvas.SetLeft(BlackBoardWaterMark, margin);
+                    System.Windows.Controls.Canvas.SetTop(BlackBoardWaterMark, margin);
+                    break;
+                case "BottomRight":
+                    System.Windows.Controls.Canvas.SetRight(BlackBoardWaterMark, margin);
+                    System.Windows.Controls.Canvas.SetBottom(BlackBoardWaterMark, margin);
+                    break;
+                case "BottomLeft":
+                    System.Windows.Controls.Canvas.SetLeft(BlackBoardWaterMark, margin);
+                    System.Windows.Controls.Canvas.SetBottom(BlackBoardWaterMark, margin);
+                    break;
+                case "TopRight":
+                default:
+                    System.Windows.Controls.Canvas.SetRight(BlackBoardWaterMark, margin);
+                    System.Windows.Controls.Canvas.SetTop(BlackBoardWaterMark, margin);
+                    break;
             }
         }
 
@@ -442,6 +480,7 @@ namespace Ink_Canvas
                 _pptUIManager.PPTRSButtonOpacity = Settings.PowerPointSettings.PPTRSButtonOpacity;
                 _pptUIManager.PPTLBButtonOpacity = Settings.PowerPointSettings.PPTLBButtonOpacity;
                 _pptUIManager.PPTRBButtonOpacity = Settings.PowerPointSettings.PPTRBButtonOpacity;
+                _pptUIManager.PPTNavBarScale = Settings.PowerPointSettings.PPTNavBarScale;
                 _pptUIManager.UpdateNavigationPanelsVisibility();
                 _pptUIManager.UpdateNavigationButtonStyles();
             }
@@ -544,7 +583,7 @@ namespace Ink_Canvas
             if (sender == BoardPenWidthSlider) PenWidthSlider.Value = value;
             else if (sender == PenWidthSlider) BoardPenWidthSlider.Value = value;
             _isUpdatingSliders = false;
-            
+
             if (penType == 0)
             {
                 drawingAttributes.Height = value / 2;
@@ -590,7 +629,7 @@ namespace Ink_Canvas
             var NowG = drawingAttributes.Color.G;
             var NowB = drawingAttributes.Color.B;
             drawingAttributes.Color = Color.FromArgb((byte)value, NowR, NowG, NowB);
-            
+
             if (penType == 0)
             {
                 Settings.Canvas.InkAlpha = value;
@@ -906,14 +945,6 @@ namespace Ink_Canvas
             Settings.Appearance.EnableTrayIcon = true;
 
             // 浮动栏按钮显示控制默认值
-            Settings.Appearance.IsShowShapeButton = true;
-            Settings.Appearance.IsShowUndoButton = true;
-            Settings.Appearance.IsShowRedoButton = true;
-            Settings.Appearance.IsShowClearButton = true;
-            Settings.Appearance.IsShowWhiteboardButton = true;
-            Settings.Appearance.IsShowHideButton = true;
-            Settings.Appearance.IsShowLassoSelectButton = true;
-            Settings.Appearance.IsShowClearAndMouseButton = true;
             Settings.Appearance.IsShowQuickColorPalette = false;
             Settings.Appearance.QuickColorPaletteDisplayMode = 1;
             Settings.Appearance.EraserDisplayOption = 0;
@@ -945,7 +976,7 @@ namespace Ink_Canvas
             Settings.Automation.IsAutoKillSeewoLauncher2DesktopAnnotation = false;
             Settings.Automation.IsSaveScreenshotsInDateFolders = false;
             Settings.Automation.IsAutoSaveStrokesAtScreenshot = true;
-            Settings.Automation.IsAutoSaveStrokesAtClear = true;
+            Settings.Automation.IsAutoSaveScreenshotAtClear = true;
             Settings.Automation.IsAutoClearWhenExitingWritingMode = false;
             Settings.Automation.MinimumAutomationStrokeNumber = 0;
             Settings.Automation.AutoDelSavedFiles = AutoDelSavedFilesDays;
@@ -978,6 +1009,7 @@ namespace Ink_Canvas
             Settings.Canvas.ClearCanvasAndClearTimeMachine = false;
             Settings.Canvas.FitToCurve = false;
             Settings.Canvas.UseAdvancedBezierSmoothing = true;
+            Settings.Canvas.MergeInkSmoothingWithUndo = false;
             Settings.Canvas.EnablePressureTouchMode = false;
             Settings.Canvas.DisablePressure = false;
             Settings.Canvas.AutoStraightenLine = true;
@@ -989,7 +1021,6 @@ namespace Ink_Canvas
             Settings.Canvas.UsingWhiteboard = false;
             Settings.Canvas.HyperbolaAsymptoteOption = 0;
 
-            Settings.Gesture.AutoSwitchTwoFingerGesture = true;
             Settings.Gesture.IsEnableTwoFingerTranslate = true;
             Settings.Gesture.IsEnableTwoFingerZoom = false;
             Settings.Gesture.IsEnableTwoFingerRotation = false;
@@ -1024,7 +1055,7 @@ namespace Ink_Canvas
             {
                 if (sender != null && Ink_Canvas.Helpers.SecurityManager.IsPasswordRequiredForResetConfig(Settings))
                 {
-                    bool ok = await Ink_Canvas.Helpers.SecurityManager.PromptAndVerifyPasswordOrTotpAsync(Settings, this, "重置配置验证", "请输入安全密码或 TOTP 验证码以确认重置配置。");
+                    bool ok = await Ink_Canvas.Helpers.SecurityManager.PromptAndVerifyPasswordOrTotpAsync(Settings, this, Properties.MainWindowStrings.Main_Settings_ResetVerify, Properties.MainWindowStrings.Main_Settings_ResetVerifyMessage);
                     if (!ok) return;
                 }
             }
@@ -1037,21 +1068,21 @@ namespace Ink_Canvas
                 isLoaded = false;
                 SetSettingsToRecommendation();
                 SaveSettingsToFile();
-                
+
                 // 确保工具栏配置也被重置为默认值
                 var configName = SettingsManager.Settings?.ToolbarConfigName ?? "default";
                 ToolbarRegistry.SaveConfigFile(configName, ToolbarRegistry.CreateDefaultLayout());
-                
+
                 LoadSettings(isStartup: false, skipAutoUpdateCheck: true);
-                
+
                 // 重置后重建工具栏
                 RebuildToolbar();
-                
+
                 isLoaded = true;
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
-            try { ShowNotification("设置已重置为默认推荐设置~"); } catch { }
+            try { ShowNotification(Properties.MainWindowStrings.Main_Settings_ResetDone); } catch { }
         }
 
         private async void SpecialVersionResetToSuggestion_Click()
@@ -1065,16 +1096,16 @@ namespace Ink_Canvas
                 Settings.Automation.AutoDelSavedFilesDaysThreshold = 15;
                 Settings.Automation.AutoSavedStrokesLocation = @"D:\Ink Canvas\AutoSavedStrokes";
                 SaveSettingsToFile();
-                
+
                 // 确保工具栏配置也被重置为默认值
                 var configName = SettingsManager.Settings?.ToolbarConfigName ?? "default";
                 ToolbarRegistry.SaveConfigFile(configName, ToolbarRegistry.CreateDefaultLayout());
-                
+
                 LoadSettings(isStartup: false, skipAutoUpdateCheck: true);
-                
+
                 // 重置后重建工具栏
                 RebuildToolbar();
-                
+
                 isLoaded = true;
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -1256,6 +1287,66 @@ namespace Ink_Canvas
 
 
         #endregion
+
+        public double QuickPanelUnfoldedMargin => 8.0;
+        public double QuickPanelFoldedMargin => -60.0;
+
+        public void ApplySidePanelSettings()
+        {
+            LeftSidePanel?.ApplySettings();
+            RightSidePanel?.ApplySettings();
+            ApplyQuickPanelLayoutSettings();
+        }
+
+        public void ApplyQuickPanelLayoutSettings()
+        {
+            if (LeftQuickPanelBorder != null)
+            {
+                LeftQuickPanelBorder.CornerRadius = new CornerRadius(6);
+                LeftQuickPanelBorder.ClipToBounds = false;
+            }
+            if (LeftQuickPanelShadow != null)
+            {
+                LeftQuickPanelShadow.Opacity = 0.3;
+            }
+
+            if (RightQuickPanelBorder != null)
+            {
+                RightQuickPanelBorder.CornerRadius = new CornerRadius(6);
+                RightQuickPanelBorder.ClipToBounds = false;
+            }
+            if (RightQuickPanelShadow != null)
+            {
+                RightQuickPanelShadow.Opacity = 0.3;
+            }
+
+            // Update unfolded/folded margins in real-time
+            if (LeftUnFoldButtonQuickPanel != null)
+            {
+                var leftMargin = LeftUnFoldButtonQuickPanel.Margin;
+                double newLeft = LeftUnFoldButtonQuickPanel.Visibility == Visibility.Visible ? QuickPanelUnfoldedMargin : QuickPanelFoldedMargin;
+                LeftUnFoldButtonQuickPanel.Margin = new Thickness(newLeft, leftMargin.Top, leftMargin.Right, leftMargin.Bottom);
+            }
+            if (RightUnFoldButtonQuickPanel != null)
+            {
+                var rightMargin = RightUnFoldButtonQuickPanel.Margin;
+                double newRight = RightUnFoldButtonQuickPanel.Visibility == Visibility.Visible ? QuickPanelUnfoldedMargin : QuickPanelFoldedMargin;
+                RightUnFoldButtonQuickPanel.Margin = new Thickness(rightMargin.Left, rightMargin.Top, newRight, rightMargin.Bottom);
+            }
+
+            if (LeftSidePanel != null)
+            {
+                var leftMargin = LeftSidePanel.Margin;
+                double newLeft = LeftSidePanel.Visibility == Visibility.Visible ? -10.0 : QuickPanelFoldedMargin;
+                LeftSidePanel.Margin = new Thickness(newLeft, leftMargin.Top, leftMargin.Right, leftMargin.Bottom);
+            }
+            if (RightSidePanel != null)
+            {
+                var rightMargin = RightSidePanel.Margin;
+                double newRight = RightSidePanel.Visibility == Visibility.Visible ? -10.0 : QuickPanelFoldedMargin;
+                RightSidePanel.Margin = new Thickness(rightMargin.Left, rightMargin.Top, newRight, rightMargin.Bottom);
+            }
+        }
 
     }
 }

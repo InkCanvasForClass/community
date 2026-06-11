@@ -15,6 +15,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             Loaded += (s, e) =>
             {
                 ToggleSwitchDebugConsole.IsOn = SettingsManager.Settings.Advanced.IsDebugConsoleEnabled;
+                ToggleSwitchPptComDebugProbe.IsOn = SettingsManager.Settings.Advanced.IsPptComDebugProbeEnabled;
                 _isLoaded = true;
             };
             Unloaded += (s, e) => _isLoaded = false;
@@ -29,6 +30,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             if (isOn) DebugConsoleManager.Show();
             else DebugConsoleManager.Hide();
+        }
+
+        private void ToggleSwitchPptComDebugProbe_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Advanced.IsPptComDebugProbeEnabled = ToggleSwitchPptComDebugProbe.IsOn;
+            SettingsManager.SaveSettingsToFile();
         }
     }
 }

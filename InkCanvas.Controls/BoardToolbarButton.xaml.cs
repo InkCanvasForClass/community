@@ -167,19 +167,15 @@ namespace Ink_Canvas.Controls
             {
                 case ButtonPosition.First:
                     ButtonBorder.CornerRadius = new CornerRadius(5, 0, 0, 5);
-                    ButtonBorder.BorderThickness = new Thickness(1, 1, 0, 1);
                     break;
                 case ButtonPosition.Middle:
                     ButtonBorder.CornerRadius = new CornerRadius(0);
-                    ButtonBorder.BorderThickness = new Thickness(0, 1, 0, 1);
                     break;
                 case ButtonPosition.Last:
                     ButtonBorder.CornerRadius = new CornerRadius(0, 5, 5, 0);
-                    ButtonBorder.BorderThickness = new Thickness(0, 1, 1, 1);
                     break;
                 case ButtonPosition.Single:
                     ButtonBorder.CornerRadius = new CornerRadius(5);
-                    ButtonBorder.BorderThickness = new Thickness(1);
                     break;
             }
         }

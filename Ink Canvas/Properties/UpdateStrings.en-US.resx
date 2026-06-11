@@ -1,0 +1,256 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Header_AutoUpdate" xml:space="preserve">
+    <value>Auto-update</value>
+  </data>
+  <data name="Header_SilentUpdate" xml:space="preserve">
+    <value>Silent update</value>
+  </data>
+  <data name="Msg_RestartLimit" xml:space="preserve">
+    <value>App has restarted 5 times. Auto-restart stopped. Contact the developer or check the system.</value>
+  </data>
+  <data name="Msg_RestartLimitTitle" xml:space="preserve">
+    <value>Too many restarts</value>
+  </data>
+  <data name="Msg_UpdateDownloadFailed" xml:space="preserve">
+    <value>Update download failed. Please check your network and try again.</value>
+  </data>
+  <data name="Update_Beta" xml:space="preserve">
+    <value>Beta</value>
+  </data>
+  <data name="Update_Channel" xml:space="preserve">
+    <value>Update channel</value>
+  </data>
+  <data name="Update_PackageArch_X64" xml:space="preserve">
+    <value>64-bit (x64)</value>
+  </data>
+  <data name="Update_PackageArch_X86" xml:space="preserve">
+    <value>32-bit (x86)</value>
+  </data>
+  <data name="Update_Preview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="Update_Release" xml:space="preserve">
+    <value>Stable (Release)</value>
+  </data>
+  <data name="Status_Loading" xml:space="preserve">
+    <value>Loading update status...</value>
+  </data>
+  <data name="Btn_CheckUpdate" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="Btn_DownloadAndInstall" xml:space="preserve">
+    <value>Download and install</value>
+  </data>
+  <data name="Btn_InstallOnExit" xml:space="preserve">
+    <value>Install on exit</value>
+  </data>
+  <data name="Btn_SkipVersion" xml:space="preserve">
+    <value>Skip this version</value>
+  </data>
+  <data name="Tab_Changelog" xml:space="preserve">
+    <value>Changelog</value>
+  </data>
+  <data name="Tab_UpdateSettings" xml:space="preserve">
+    <value>Update settings</value>
+  </data>
+  <data name="SilentUpdate_TimeRangeSettings" xml:space="preserve">
+    <value>Silent update time range settings</value>
+  </data>
+  <data name="Section_Maintenance" xml:space="preserve">
+    <value>Maintenance</value>
+  </data>
+  <data name="Tab_HistoryVersions" xml:space="preserve">
+    <value>Version history</value>
+  </data>
+  <data name="History_SelectVersion" xml:space="preserve">
+    <value>Select a previous version</value>
+  </data>
+  <data name="History_SelectVersionDesc" xml:space="preserve">
+    <value>Select a previous version to roll back (will download and install that version).</value>
+  </data>
+  <data name="Btn_RollbackToVersion" xml:space="preserve">
+    <value>Roll back to this version</value>
+  </data>
+  <data name="Progress_PreparingDownload" xml:space="preserve">
+    <value>Preparing download...</value>
+  </data>
+  <data name="Changelog_SwitchHint" xml:space="preserve">
+    <value>Switch to *Version history* or click *Check for updates* to view the changelog.</value>
+  </data>
+  <data name="Changelog_ClickHint" xml:space="preserve">
+    <value>Click *Check for updates* to get the latest version and changelog.</value>
+  </data>
+  <data name="Status_UpToDate" xml:space="preserve">
+    <value>Already up to date</value>
+  </data>
+  <data name="Status_Checking" xml:space="preserve">
+    <value>Checking for updates...</value>
+  </data>
+  <data name="Progress_ConnectingServer" xml:space="preserve">
+    <value>Connecting to update server...</value>
+  </data>
+  <data name="Status_NewVersionAvailable" xml:space="preserve">
+    <value>New version {0} available</value>
+  </data>
+  <data name="Status_VersionTransition" xml:space="preserve">
+    <value>Current version {0} → {1}</value>
+  </data>
+  <data name="Status_Downloading" xml:space="preserve">
+    <value>Downloading update...</value>
+  </data>
+  <data name="Status_TargetVersion" xml:space="preserve">
+    <value>Target version {0}</value>
+  </data>
+  <data name="Status_Downloaded" xml:space="preserve">
+    <value>Update downloaded</value>
+  </data>
+  <data name="Status_WillInstallOnExit" xml:space="preserve">
+    <value>Will install {0} when the app closes</value>
+  </data>
+  <data name="Status_NetworkError" xml:space="preserve">
+    <value>Network error</value>
+  </data>
+  <data name="Status_NetworkErrorHint" xml:space="preserve">
+    <value>Please check your network connection and try again.</value>
+  </data>
+  <data name="Status_CurrentVersion" xml:space="preserve">
+    <value>Current version {0}</value>
+  </data>
+  <data name="Version_Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="Changelog_Loading" xml:space="preserve">
+    <value>Loading changelog...</value>
+  </data>
+  <data name="Changelog_NoData" xml:space="preserve">
+    <value>No changelog available.</value>
+  </data>
+  <data name="Changelog_LoadFailed" xml:space="preserve">
+    <value>Failed to load changelog: {0}</value>
+  </data>
+  <data name="Progress_DownloadingBackground" xml:space="preserve">
+    <value>Downloading in background...</value>
+  </data>
+  <data name="Status_SkippedVersion" xml:space="preserve">
+    <value>Skipped version {0}</value>
+  </data>
+  <data name="History_Loading" xml:space="preserve">
+    <value>Loading version history...</value>
+  </data>
+  <data name="History_NoData" xml:space="preserve">
+    <value>No version history available.</value>
+  </data>
+  <data name="History_LoadFailed" xml:space="preserve">
+    <value>Failed to load version history: {0}</value>
+  </data>
+  <data name="History_NoChangelog" xml:space="preserve">
+    <value>No changelog</value>
+  </data>
+  <data name="Rollback_DownloadFailedMsg" xml:space="preserve">
+    <value>Download failed: {0}</value>
+  </data>
+  <data name="Rollback_DownloadComplete" xml:space="preserve">
+    <value>Download complete, preparing to install...</value>
+  </data>
+  <data name="Rollback_DownloadFailedRetry" xml:space="preserve">
+    <value>Download failed. Please check your network and try again.</value>
+  </data>
+  <data name="PauseAutoUpdate_Title" xml:space="preserve">
+    <value>Pause auto-update</value>
+  </data>
+  <data name="PauseAutoUpdate_SelectDuration" xml:space="preserve">
+    <value>Choose how long to pause auto-update after rollback:</value>
+  </data>
+  <data name="PauseAutoUpdate_Days" xml:space="preserve">
+    <value>{0} days</value>
+  </data>
+  <data name="FixVersion_ConfirmBody" xml:space="preserve">
+    <value>This will download and install the latest version from the current channel. The app will close and update automatically.
+
+Are you sure you want to repair the installation?</value>
+  </data>
+  <data name="FixVersion_ConfirmTitle" xml:space="preserve">
+    <value>Confirm installation repair</value>
+  </data>
+  <data name="FixVersion_InProgress" xml:space="preserve">
+    <value>Repairing...</value>
+  </data>
+  <data name="FixVersion_FailedBody" xml:space="preserve">
+    <value>Repair failed. This may be due to a network issue, or you may already have the latest version installed.</value>
+  </data>
+  <data name="FixVersion_FailedTitle" xml:space="preserve">
+    <value>Repair failed</value>
+  </data>
+  <data name="FixVersion_ErrorBody" xml:space="preserve">
+    <value>Error during installation repair: {0}</value>
+  </data>
+  <data name="FixVersion_ErrorTitle" xml:space="preserve">
+    <value>Repair error</value>
+  </data>
+  <data name="InstallUpdate_Msg" xml:space="preserve">
+    <value>Update downloaded. Click OK to close the app and install the new version!</value>
+  </data>
+  <data name="InstallUpdate_Title" xml:space="preserve">
+    <value>Install update</value>
+  </data>
+  <data name="Btn_OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Channel_PrivacyRequired" xml:space="preserve">
+    <value>Before joining the preview/beta channel, please check &quot;I have read and agree to the privacy notice in privacy&quot; on the About page.</value>
+  </data>
+  <data name="Channel_PrivacyRequiredTitle" xml:space="preserve">
+    <value>Privacy agreement required</value>
+  </data>
+  <data name="Channel_TelemetryRequired" xml:space="preserve">
+    <value>Joining the preview/beta channel requires enabling anonymous basic data upload.
+
+Enable anonymous usage data upload now?</value>
+  </data>
+  <data name="Channel_TelemetryRequiredTitle" xml:space="preserve">
+    <value>Anonymous data upload required</value>
+  </data>
+</root>

@@ -5,7 +5,6 @@ using Ink_Canvas.Properties;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Win32;
 using Newtonsoft.Json;
-using Sentry;
 using System;
 using System.Diagnostics;
 using System.Globalization;
@@ -79,8 +78,18 @@ namespace Ink_Canvas
         internal static DateTime appStartTime { get; private set; }
         // 新增：最后一次错误信息
         private static string lastErrorMessage = string.Empty;
+        private volatile bool powerPointShutdownCleanupCompleted;
         // 新增：是否已初始化崩溃监听器
         private static bool crashListenersInitialized;
+        private static readonly object cpuUsageLock = new object();
+        private static bool hasCpuUsageSample;
+        private static ulong previousSystemIdleTime;
+        private static ulong previousSystemKernelTime;
+        private static ulong previousSystemUserTime;
+        private static TimeSpan previousProcessTotalProcessorTime;
+        private static DateTime previousCpuSampleTime = DateTime.MinValue;
+        private static double? lastSystemCpuUsagePercent;
+        private static double? lastProcessCpuUsagePercent;
         private IntPtr processDestroyHook = IntPtr.Zero;
         private IntPtr monitoredMainWindowHandle = IntPtr.Zero;
         private bool mainWindowDestroyedLogged;
@@ -88,7 +97,7 @@ namespace Ink_Canvas
         // 新增：启动画面相关
         private static SplashScreen _splashScreen;
         private static bool _isSplashScreenShown = false;
-        private static System.Resources.ResourceSet _pendingLocalizedResourceSet;
+        // _pendingLocalizedResourceSet removed - using Strings.LoadAllToResources
         private static readonly Stopwatch startupStopwatch = new Stopwatch();
         private static readonly Stopwatch splashStopwatch = new Stopwatch();
 
@@ -97,32 +106,14 @@ namespace Ink_Canvas
 
         public App()
         {
+            AppContext.SetSwitch("Switch.System.Windows.Input.Stylus.EnablePointerSupport", true);
+
             try
             {
                 SetCurrentProcessExplicitAppUserModelID("InkCanvasForClass.CE");
             }
             catch
             {
-            }
-
-            try
-            {
-                var dsn = GetDlassTelemetryDsn();
-                if (!string.IsNullOrWhiteSpace(dsn))
-                {
-                    SentrySdk.Init(options =>
-                    {
-                        options.Dsn = dsn;
-                        options.Debug = false;
-                        options.SendDefaultPii = true;
-                        options.TracesSampleRate = 1.0;
-                        options.IsGlobalModeEnabled = true;
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"初始化 Dlass 遥测失败: {ex}", LogHelper.LogType.Warning);
             }
 
             // 配置TLS协议以支持Windows 7
@@ -137,10 +128,17 @@ namespace Ink_Canvas
                 return;
             }
 
+            if (args.Contains("--enable-uia-topmost-helper"))
+            {
+                Environment.Exit(UIAccessHelper.LaunchNormalUserWithUIAccessFromElevatedHelper() ? 0 : 1);
+                return;
+            }
+
             // 启动时优先同步设置，确保CrashAction为最新
             SyncCrashActionFromSettings();
 
             Startup += App_Startup;
+            SessionEnding += App_SessionEnding;
             DispatcherUnhandledException += App_DispatcherUnhandledException;
             StartHeartbeatMonitor();
 
@@ -352,6 +350,16 @@ namespace Ink_Canvas
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool SetConsoleCtrlHandler(ConsoleCtrlDelegate handler, bool add);
 
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool GetSystemTimes(out FILETIME lpIdleTime, out FILETIME lpKernelTime, out FILETIME lpUserTime);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct FILETIME
+        {
+            public uint dwLowDateTime;
+            public uint dwHighDateTime;
+        }
+
         private delegate bool ConsoleCtrlDelegate(int ctrlType);
         private delegate void WinEventDelegate(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime);
 
@@ -406,36 +414,36 @@ namespace Ink_Canvas
             string reason = e.Reason == SessionEndReasons.Logoff ? "用户注销" : "系统关机";
             WriteCrashLog($"系统会话即将结束: {reason}");
 
-            // 清理PowerPoint进程守护和悬浮窗拦截器
+            if (!powerPointShutdownCleanupCompleted)
+            {
+                WriteCrashLog("PowerPoint模块等待WPF会话结束事件清理");
+            }
+
+            DeviceIdentifier.SaveUsageStatsOnShutdown();
+        }
+
+        private void App_SessionEnding(object sender, System.Windows.SessionEndingCancelEventArgs e)
+        {
+            CleanupPowerPointModuleForShutdown();
+        }
+
+        private void CleanupPowerPointModuleForShutdown()
+        {
+            if (powerPointShutdownCleanupCompleted) return;
+
             try
             {
-                // 获取主窗口实例
-                var mainWindow = Current.MainWindow as MainWindow;
-                if (mainWindow != null)
+                if (Current?.MainWindow is MainWindow mainWindow)
                 {
-                    // 清理PowerPoint进程守护
-                    var method = mainWindow.GetType().GetMethod("StopPowerPointProcessMonitoring",
-                        BindingFlags.NonPublic | BindingFlags.Instance);
-                    method?.Invoke(mainWindow, null);
-                    WriteCrashLog("PowerPoint进程守护已在系统关机时清理");
-
-                    // 清理悬浮窗拦截器
-                    var interceptorField = mainWindow.GetType().GetField("_floatingWindowInterceptorManager",
-                        BindingFlags.NonPublic | BindingFlags.Instance);
-                    var interceptorManager = interceptorField?.GetValue(mainWindow);
-                    if (interceptorManager != null)
-                    {
-                        var disposeMethod = interceptorManager.GetType().GetMethod("Dispose");
-                        disposeMethod?.Invoke(interceptorManager, null);
-                    }
+                    mainWindow.UnloadPPTModuleForShutdown();
+                    powerPointShutdownCleanupCompleted = true;
+                    WriteCrashLog("PowerPoint模块已在系统关机时清理");
                 }
             }
             catch (Exception ex)
             {
                 WriteCrashLog($"清理资源失败: {ex.Message}");
             }
-
-            DeviceIdentifier.SaveUsageStatsOnShutdown();
         }
 
         // 控制台取消事件处理
@@ -557,6 +565,67 @@ namespace Ink_Canvas
             return $"{timeSpan.Seconds}秒";
         }
 
+        private static void UpdateCpuUsageSnapshot()
+        {
+            try
+            {
+                if (!GetSystemTimes(out FILETIME idleTime, out FILETIME kernelTime, out FILETIME userTime))
+                {
+                    return;
+                }
+
+                DateTime sampleTime = DateTime.UtcNow;
+                ulong currentIdleTime = ToUInt64(idleTime);
+                ulong currentKernelTime = ToUInt64(kernelTime);
+                ulong currentUserTime = ToUInt64(userTime);
+                TimeSpan currentProcessCpuTime = Process.GetCurrentProcess().TotalProcessorTime;
+
+                lock (cpuUsageLock)
+                {
+                    if (hasCpuUsageSample)
+                    {
+                        ulong idleDelta = currentIdleTime - previousSystemIdleTime;
+                        ulong kernelDelta = currentKernelTime - previousSystemKernelTime;
+                        ulong userDelta = currentUserTime - previousSystemUserTime;
+                        ulong totalDelta = kernelDelta + userDelta;
+
+                        if (totalDelta > 0)
+                        {
+                            ulong busyDelta = totalDelta > idleDelta ? totalDelta - idleDelta : 0;
+                            lastSystemCpuUsagePercent = Math.Clamp(busyDelta * 100d / totalDelta, 0d, 100d);
+                        }
+
+                        double elapsedSeconds = (sampleTime - previousCpuSampleTime).TotalSeconds;
+                        double processCpuSeconds = (currentProcessCpuTime - previousProcessTotalProcessorTime).TotalSeconds;
+                        if (elapsedSeconds > 0 && Environment.ProcessorCount > 0 && processCpuSeconds >= 0)
+                        {
+                            lastProcessCpuUsagePercent = Math.Clamp(processCpuSeconds / (elapsedSeconds * Environment.ProcessorCount) * 100d, 0d, 100d);
+                        }
+                    }
+
+                    previousSystemIdleTime = currentIdleTime;
+                    previousSystemKernelTime = currentKernelTime;
+                    previousSystemUserTime = currentUserTime;
+                    previousProcessTotalProcessorTime = currentProcessCpuTime;
+                    previousCpuSampleTime = sampleTime;
+                    hasCpuUsageSample = true;
+                }
+            }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+        }
+
+        private static ulong ToUInt64(FILETIME fileTime)
+        {
+            return ((ulong)fileTime.dwHighDateTime << 32) | fileTime.dwLowDateTime;
+        }
+
+        private static string FormatCpuUsagePercent(double? cpuUsagePercent)
+        {
+            return cpuUsagePercent.HasValue
+                ? cpuUsagePercent.Value.ToString("F1", CultureInfo.InvariantCulture) + "%"
+                : "采样不足";
+        }
+
         public static void ShowSplashScreen()
         {
             if (_isSplashScreenShown)
@@ -661,6 +730,8 @@ namespace Ink_Canvas
         {
             try
             {
+                UpdateCpuUsageSnapshot();
+
                 // 确保目录存在
                 if (!Directory.Exists(crashLogFile))
                 {
@@ -673,11 +744,14 @@ namespace Ink_Canvas
                 string logFileName = Path.Combine(crashLogFile, $"Crash_{appStartTimeStr}.txt");
 
                 // 收集系统状态信息
-                string memoryUsage = (Process.GetCurrentProcess().WorkingSet64 / (1024 * 1024)) + " MB";
-                string cpuTime = Process.GetCurrentProcess().TotalProcessorTime.ToString();
-                string processUptime = FormatTimeSpan(DateTime.Now - Process.GetCurrentProcess().StartTime);
+                var currentProcess = Process.GetCurrentProcess();
+                string memoryUsage = (currentProcess.WorkingSet64 / (1024 * 1024)) + " MB";
+                string cpuTime = currentProcess.TotalProcessorTime.ToString();
+                string processUptime = FormatTimeSpan(DateTime.Now - currentProcess.StartTime);
+                string systemCpuUsage = FormatCpuUsagePercent(lastSystemCpuUsagePercent);
+                string processCpuUsage = FormatCpuUsagePercent(lastProcessCpuUsagePercent);
 
-                string statusInfo = $"[内存: {memoryUsage}, CPU时间: {cpuTime}, 运行时长: {processUptime}]";
+                string statusInfo = $"[内存: {memoryUsage}, CPU时间: {cpuTime}, 进程CPU占用: {processCpuUsage}, 系统CPU占用: {systemCpuUsage}, 运行时长: {processUptime}]";
 
                 // 写入日志
                 File.AppendAllText(
@@ -770,7 +844,7 @@ namespace Ink_Canvas
                 }
             }
 
-            Ink_Canvas.MainWindow.ShowNewMessage(Strings.GetString("Msg_UnexpectedError"));
+            Ink_Canvas.MainWindow.ShowNewMessage(MainWindowStrings.Main_App_UnexpectedError);
             LogHelper.NewLog(e.Exception.ToString());
 
             // 记录到崩溃日志
@@ -799,7 +873,7 @@ namespace Ink_Canvas
                 StartupCount.Increment();
                 if (StartupCount.GetCount() >= 5)
                 {
-                    MessageBox.Show(Strings.GetString("Msg_RestartLimit"), Strings.GetString("Msg_RestartLimitTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(MainWindowStrings.Main_App_RestartLoopDetected, UpdateStrings.Msg_RestartLimitTitle, MessageBoxButton.OK, MessageBoxImage.Error);
                     StartupCount.Reset();
                     Environment.Exit(1);
                 }
@@ -836,13 +910,11 @@ namespace Ink_Canvas
 
             TryApplyPreferredLanguageFromSettings();
 
-            _pendingLocalizedResourceSet = Strings.ResourceManager.GetResourceSet(CultureInfo.CurrentUICulture, true, true);
-
             // 根据设置决定是否显示启动画面
             if (ShouldShowSplashScreen() && !IsLaunchByFileOrUri(e.Args))
             {
                 ShowSplashScreen();
-                SetSplashMessage(Strings.GetString("Splash_Starting"));
+                SetSplashMessage("正在启动 Ink Canvas...");
                 SetSplashProgress(25);
 
                 // 强制刷新UI，确保启动画面显示
@@ -852,7 +924,19 @@ namespace Ink_Canvas
             await Task.Delay(100);
             RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
-            LogHelper.NewLog(string.Format("Ink Canvas Starting (Version: {0})", Assembly.GetExecutingAssembly().GetName().Version));
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            var informationalVersion = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            string versionString = version.Major + "." + version.Minor + "." + version.Build + "." + version.Revision;
+            if (informationalVersion != null)
+            {
+                string infoVersion = informationalVersion.InformationalVersion;
+                int lastDotIndex = infoVersion.LastIndexOf('.');
+                if (lastDotIndex >= 0 && lastDotIndex < infoVersion.Length - 7)
+                {
+                    versionString += " (" + infoVersion.Substring(lastDotIndex + 1) + ")";
+                }
+            }
+            LogHelper.NewLog(string.Format("Ink Canvas Starting (Version: {0})", versionString));
 
             // 检查是否为最终应用启动（更新后的应用）
             bool isFinalApp = e.Args.Contains("--final-app");
@@ -1168,7 +1252,6 @@ namespace Ink_Canvas
             {
                 var inkCanvasService = new Plugins.InkCanvasService(mainWindow);
                 Plugins.PluginManager.Instance.RegisterService<Plugins.IInkCanvasService>(inkCanvasService);
-                LogHelper.WriteLogToFile("InkCanvasService registered for plugins");
             }
             catch (Exception ex)
             {
@@ -1179,7 +1262,6 @@ namespace Ink_Canvas
             {
                 var appRestartService = new Plugins.AppRestartService();
                 Plugins.PluginManager.Instance.RegisterService<Plugins.IAppRestartService>(appRestartService);
-                LogHelper.WriteLogToFile("AppRestartService registered for plugins");
             }
             catch (Exception ex)
             {
@@ -1220,19 +1302,12 @@ namespace Ink_Canvas
             };
 
             mainWindow.Show();
+            WindowTopmostManager.Initialize(mainWindow);
             _ = Task.Run(async () =>
             {
                 await Task.Delay(600);
                 Dispatcher.Invoke(() => _taskbar?.ForceCreate());
             });
-            _ = Dispatcher.BeginInvoke(new Action(() =>
-            {
-                if (_pendingLocalizedResourceSet != null)
-                {
-                    LoadLocalizedResources(_pendingLocalizedResourceSet);
-                    _pendingLocalizedResourceSet = null;
-                }
-            }), DispatcherPriority.ApplicationIdle);
 
             // 处理启动时的URI参数
             string startupUriArg = e.Args.FirstOrDefault(a => a.StartsWith("icc:", StringComparison.OrdinalIgnoreCase));
@@ -1330,14 +1405,7 @@ namespace Ink_Canvas
                 {
                     DeviceIdentifier.RecordAppLaunch();
                     var systemVersion = DeviceIdentifier.GetSystemVersion();
-                    if (!string.IsNullOrWhiteSpace(systemVersion))
-                    {
-                        SentrySdk.ConfigureScope(scope =>
-                        {
-                            scope.SetTag("system_version", systemVersion);
-                        });
-                    }
-
+                    LogHelper.WriteLogToFile($"App | 系统版本: {systemVersion}");
                     LogHelper.WriteLogToFile($"App | 设备ID: {DeviceIdentifier.GetDeviceId()}");
                     LogHelper.WriteLogToFile($"App | 使用频率: {DeviceIdentifier.GetUsageFrequency()}");
                     LogHelper.WriteLogToFile($"App | 更新优先级: {DeviceIdentifier.GetUpdatePriority()}");
@@ -1371,15 +1439,6 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"启动时预加载语言失败: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        private void LoadLocalizedResources(System.Resources.ResourceSet resourceSet)
-        {
-            foreach (System.Collections.DictionaryEntry entry in resourceSet)
-            {
-                if (entry.Key is string key && entry.Value is string value)
-                    Current.Resources[key] = value;
             }
         }
 
@@ -1433,11 +1492,17 @@ namespace Ink_Canvas
         /// </remarks>
         private void StartHeartbeatMonitor()
         {
+            UpdateCpuUsageSnapshot();
+
             heartbeatTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(1)
             };
-            heartbeatTimer.Tick += (_, __) => lastHeartbeat = DateTime.Now;
+            heartbeatTimer.Tick += (_, __) =>
+            {
+                lastHeartbeat = DateTime.Now;
+                UpdateCpuUsageSnapshot();
+            };
             heartbeatTimer.Start();
 
             watchdogTimer = new Timer(_ =>
@@ -1456,14 +1521,16 @@ namespace Ink_Canvas
                     if (elapsedSinceStart.TotalMinutes >= 2)
                     {
                         string timeType = _isSplashScreenShown ? "启动画面已显示" : "应用启动开始";
-                        LogHelper.WriteLogToFile($"检测到启动假死：{timeType}{elapsedSinceStart.TotalMinutes:F2}分钟，但未收到启动完成心跳，自动重启。", LogHelper.LogType.Error);
+                        string restartReason = $"检测到启动假死：{timeType}{elapsedSinceStart.TotalMinutes:F2}分钟，但未收到启动完成心跳，自动重启。";
+                        LogHelper.WriteLogToFile(restartReason, LogHelper.LogType.Error);
+                        WriteCrashLog(restartReason);
                         SyncCrashActionFromSettings();
                         if (CrashAction == CrashActionType.SilentRestart)
                         {
                             StartupCount.Increment();
                             if (StartupCount.GetCount() >= 5)
                             {
-                                MessageBox.Show(Strings.GetString("Msg_RestartLimit"), Strings.GetString("Msg_RestartLimitTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessageBox.Show(UpdateStrings.Msg_RestartLimit, UpdateStrings.Msg_RestartLimitTitle, MessageBoxButton.OK, MessageBoxImage.Error);
                                 StartupCount.Reset();
                                 Environment.Exit(1);
                             }
@@ -1494,14 +1561,16 @@ namespace Ink_Canvas
 
                     if (sinceHeartbeat.TotalSeconds > 10)
                     {
-                        LogHelper.NewLog("检测到主线程无响应，自动重启。");
+                        string restartReason = $"检测到主线程无响应，自动重启。心跳超时 {sinceHeartbeat.TotalSeconds:F1} 秒。";
+                        LogHelper.NewLog(restartReason);
+                        WriteCrashLog(restartReason);
                         SyncCrashActionFromSettings();
                         if (CrashAction == CrashActionType.SilentRestart)
                         {
                             StartupCount.Increment();
                             if (StartupCount.GetCount() >= 5)
                             {
-                                MessageBox.Show(Strings.GetString("Msg_RestartLimit"), Strings.GetString("Msg_RestartLimitTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessageBox.Show(UpdateStrings.Msg_RestartLimit, UpdateStrings.Msg_RestartLimitTitle, MessageBoxButton.OK, MessageBoxImage.Error);
                                 StartupCount.Reset();
                                 Environment.Exit(1);
                             }
@@ -1580,7 +1649,7 @@ namespace Ink_Canvas
                         StartupCount.Increment();
                         if (StartupCount.GetCount() >= 5)
                         {
-                            MessageBox.Show(Strings.GetString("Msg_RestartLimit"), Strings.GetString("Msg_RestartLimitTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show(MainWindowStrings.Main_App_RestartLoopDetected, UpdateStrings.Msg_RestartLimitTitle, MessageBoxButton.OK, MessageBoxImage.Error);
                             StartupCount.Reset();
                             Environment.Exit(1);
                         }
@@ -1593,71 +1662,6 @@ namespace Ink_Canvas
                 }
                 catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                 Environment.Exit(0);
-            }
-        }
-
-        internal static string GetDlassTelemetryDsn()
-        {
-            try
-            {
-                var envDsn = Environment.GetEnvironmentVariable("DLASS_SENTRY_DSN");
-                if (!string.IsNullOrWhiteSpace(envDsn))
-                {
-                    return envDsn;
-                }
-
-                try
-                {
-                    var assembly = Assembly.GetExecutingAssembly();
-                    var resourceName = "Ink_Canvas.telemetry_dsn.txt";
-                    using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-                    {
-                        if (stream != null)
-                        {
-                            using (StreamReader reader = new StreamReader(stream, System.Text.Encoding.UTF8))
-                            {
-                                string dsn = reader.ReadToEnd().Trim();
-                                if (!string.IsNullOrWhiteSpace(dsn))
-                                {
-                                    return dsn;
-                                }
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"从程序集资源读取遥测 DSN 失败: {ex.Message}", LogHelper.LogType.Warning);
-                }
-
-                string assemblyLocation = Assembly.GetExecutingAssembly().Location;
-                string currentDir = Path.GetDirectoryName(assemblyLocation);
-
-                for (int i = 0; i < 5; i++)
-                {
-                    string dsnFilePath = Path.Combine(currentDir, "telemetry_dsn.txt");
-                    if (File.Exists(dsnFilePath))
-                    {
-                        string dsn = File.ReadAllText(dsnFilePath, System.Text.Encoding.UTF8).Trim();
-                        if (!string.IsNullOrWhiteSpace(dsn))
-                        {
-                            return dsn;
-                        }
-                    }
-
-                    DirectoryInfo parentDir = Directory.GetParent(currentDir);
-                    if (parentDir == null)
-                    {
-                        break;
-                    }
-                    currentDir = parentDir.FullName;
-                }
-
-                return string.Empty;
-            }
-            catch
-            {
-                return string.Empty;
             }
         }
 
@@ -1708,6 +1712,16 @@ namespace Ink_Canvas
                 // 记录应用退出状态
                 string exitType = IsAppExitByUser ? "用户主动退出" : "应用程序退出";
                 WriteCrashLog($"{exitType}，退出代码: {e.ApplicationExitCode}");
+
+                // 停止性能监测并保存运行记录
+                try
+                {
+                    PerformanceMonitorHelper.StopAndSave();
+                }
+                catch (Exception perfEx)
+                {
+                    LogHelper.WriteLogToFile($"保存性能监测数据失败: {perfEx.Message}", LogHelper.LogType.Warning);
+                }
 
                 // 记录应用退出（设备标识符）
                 try
