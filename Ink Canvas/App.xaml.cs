@@ -106,7 +106,7 @@ namespace Ink_Canvas
 
         public App()
         {
-            AppContext.SetSwitch("Switch.System.Windows.Input.Stylus.EnablePointerSupport", true);
+            AppContext.SetSwitch("Switch.System.Windows.Input.Stylus.EnablePointerSupport", false);
 
             try
             {
