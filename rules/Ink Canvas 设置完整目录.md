@@ -63,6 +63,20 @@
 │           ├── TextBlock: 配置说明
 │           ├── SettingsCard: 配置方案 → ComboBox
 │           └── SettingsCard → Button: 删除 / Button: 另存为
+│   └── 性能
+│       ├── TextBlock "性能监测"
+│       │   └── LabeledSettingsCard: 启用监测 → ToggleSwitch
+│       ├── TextBlock "当前运行状态"
+│       │   └── SettingsCard: 当前状态 → TextBlock + Panel
+│       ├── TextBlock "历史记录"
+│       │   ├── SettingsCard: 历史摘要 → TextBlock + Panel
+│       │   ├── SettingsCard: 墨迹平滑历史 → TextBlock + Panel
+│       │   └── SettingsCard: 清除历史 → Button
+│       ├── TextBlock "设备性能评估"
+│       │   ├── SettingsCard: 设备评分 → TextBlock + Panel
+│       │   └── SettingsCard: 运行设备测试 → Button
+│       └── TextBlock "墨迹纠正耗时"
+│           └── SettingsCard: 墨迹平滑统计 → TextBlock + Panel
 ├── 主界面
 │   ├── 窗口
 │   │   └── TextBlock "窗口设置"
@@ -261,11 +275,6 @@
 │   │   └── TextBlock "操作"
 │   │       └── SettingsCard: 测试通知 → Button
 │   └── 公告中心
-├── 公告
-│   └── TextBlock "无"
-│       ├── LabeledSettingsCard: 启用公告 → ToggleSwitch
-│       ├── LabeledSettingsCard: 启用强制弹窗 → ToggleSwitch
-│       └── SettingsCard: 公告中心 → Button
 ├── 实验性
 │   └── TextBlock "无"
 │       ├── LabeledSettingsCard: 全屏辅助 → ToggleSwitch
@@ -399,83 +408,87 @@
 │       ├── TextBlock "可添加的菜单项"
 │       │   └── ListBox: 可用菜单项库
 │       └── Button: 恢复默认布局
-├── 自动化
-│   ├── TextBlock "自动折叠"
-│   │   ├── SettingsExpander: 希沃系列（默认展开）
-│   │   │   ├── SettingsCard: 希沃白板 5 → ToggleSwitch
-│   │   │   ├── SettingsCard: 希沃摄像 → ToggleSwitch
-│   │   │   ├── SettingsCard: 希沃白板 3 → ToggleSwitch
-│   │   │   ├── SettingsCard: 希沃白板 3C → ToggleSwitch
-│   │   │   ├── SettingsCard: 希沃白板 5C → ToggleSwitch
-│   │   │   └── SettingsCard: 希沃 Pinco → ToggleSwitch
-│   │   ├── SettingsExpander: 鸿合系列（默认展开）
-│   │   │   ├── SettingsCard: 鸿合白板 → ToggleSwitch
-│   │   │   ├── SettingsCard: 鸿合摄像 → ToggleSwitch
-│   │   │   └── SettingsCard: 鸿合灯板 → ToggleSwitch
-│   │   ├── SettingsExpander: 其他（默认展开）
-│   │   │   ├── SettingsCard: 文香白板 → ToggleSwitch
-│   │   │   ├── SettingsCard: Microsoft Whiteboard → ToggleSwitch
-│   │   │   ├── SettingsCard: Admox 白板 → ToggleSwitch
-│   │   │   ├── SettingsCard: Admox 展台 → ToggleSwitch
-│   │   │   ├── SettingsCard: 易云白板 → ToggleSwitch
-│   │   │   ├── SettingsCard: 易云展台 → ToggleSwitch
-│   │   │   ├── SettingsCard: MaxHub 白板 → ToggleSwitch
-│   │   │   └── SettingsCard: 旧版中银白板 → ToggleSwitch
-│   │   ├── LabeledSettingsCard: PPT 放映时自动折叠 → ToggleSwitch
-│   │   ├── LabeledSettingsCard: 退出白板后自动折叠 → ToggleSwitch
-│   │   ├── LabeledSettingsCard: 退出 PPT 后自动折叠 → ToggleSwitch
-│   │   └── LabeledSettingsCard: 软件退出后保持折叠 → ToggleSwitch
-│   ├── TextBlock "自动结束"
-│   │   ├── LabeledSettingsCard: PPT 工具 → ToggleSwitch
-│   │   ├── LabeledSettingsCard: EasiNote 5 → ToggleSwitch
-│   │   ├── LabeledSettingsCard: 鸿合批注 → ToggleSwitch
-│   │   ├── LabeledSettingsCard: 幼教 → ToggleSwitch
-│   │   ├── LabeledSettingsCard: 希沃桌面2批注 → ToggleSwitch
-│   │   ├── LabeledSettingsCard: InkCanvas IC → ToggleSwitch
-│   │   ├── LabeledSettingsCard: ICA → ToggleSwitch
-│   │   └── LabeledSettingsCard: Inkeys → ToggleSwitch
-│   ├── TextBlock "折叠模式"
-│   │   ├── LabeledSettingsCard: 退出折叠时进入批注 → ToggleSwitch
-│   │   └── LabeledSettingsCard: 结束鸿合后进入批注 → ToggleSwitch
-│   ├── TextBlock "自动保存"
-│   │   ├── LabeledSettingsCard: 截图按日期文件夹保存 → ToggleSwitch
-│   │   ├── LabeledSettingsCard: 截图时自动保存墨迹 → ToggleSwitch
-│   │   ├── LabeledSettingsCard: 清除时自动截图 → ToggleSwitch
-│   │   ├── LabeledSettingsCard: 保存墨迹为 XML → ToggleSwitch
-│   │   ├── LabeledSettingsCard: 自动保存墨迹 → ToggleSwitch
-│   │   ├── SettingsCard: 自动保存间隔 → ComboBox
-│   │   ├── LabeledSettingsCard: 自动删除保存文件 → ToggleSwitch
-│   │   ├── SettingsCard: 自动删除天数阈值 → ComboBox
-│   │   ├── SettingsCard: 最少自动化墨迹数 → Slider
-│   │   ├── LabeledSettingsCard: 保存整页墨迹 → ToggleSwitch
-│   │   ├── LabeledSettingsCard: 使用自定义保存文件名 → ToggleSwitch
-│   │   └── SettingsExpander: 保存文件名格式（默认展开）
-│   │       ├── ComboBox: 文件名格式预设
-│   │       └── SettingsCard: 自定义模板 → TextBox
-│   ├── TextBlock "浮动栏拦截"
-│   │   ├── SettingsExpander: 希沃系列（默认展开）
-│   │   │   ├── SettingsCard: 希沃白板 3 → ToggleSwitch
-│   │   │   ├── SettingsCard: 希沃白板 5 → ToggleSwitch
-│   │   │   ├── SettingsCard: 希沃白板 5C → ToggleSwitch
-│   │   │   ├── SettingsCard: 希沃 Pinco → ToggleSwitch
-│   │   │   ├── SettingsCard: 希沃 Pinco 绘画 → ToggleSwitch
-│   │   │   ├── SettingsCard: 希沃 PPT 工具 → ToggleSwitch
-│   │   │   ├── SettingsCard: 希沃桌面批注 → ToggleSwitch
-│   │   │   └── SettingsCard: 希沃桌面侧栏 → ToggleSwitch
-│   │   └── SettingsExpander: 其他（默认展开）
-│   │       ├── SettingsCard: AiClass → ToggleSwitch
-│   │       ├── SettingsCard: 鸿合批注 → ToggleSwitch
-│   │       ├── SettingsCard: 畅言智慧课堂 → ToggleSwitch
-│   │       ├── SettingsCard: 畅言 PPT → ToggleSwitch
-│   │       └── SettingsCard: 天喻教育云 → ToggleSwitch
-│   └── TextBlock "文件关联"
-│       └── SettingsExpander: 文件关联检查（默认展开）
-│           ├── TextBlock + Button: 检查状态
-│           ├── SettingsCard: 注册文件关联 → Button
-│           └── SettingsCard: 取消注册文件关联 → Button
-├── 自定义自动化
-│   └── TextBlock "自定义自动化规则"
-│       └── SettingsCard: 创建自定义的触发器→条件→行动规则 → Clickable
+├── 自动化 (AutomationWorkflowPage)
+│   ├── (左侧导航栏)
+│   │   ├── 预设自动化（固定项）
+│   │   └── 工作流列表（动态）
+│   ├── (预设面板 - 选择"预设自动化"时显示)
+│   │   ├── TextBlock "自动折叠"
+│   │   │   ├── SettingsExpander: 希沃系列（默认展开）
+│   │   │   │   ├── SettingsCard: 希沃白板 5 → ToggleSwitch
+│   │   │   │   ├── SettingsCard: 希沃摄像 → ToggleSwitch
+│   │   │   │   ├── SettingsCard: 希沃白板 3 → ToggleSwitch
+│   │   │   │   ├── SettingsCard: 希沃白板 3C → ToggleSwitch
+│   │   │   │   ├── SettingsCard: 希沃白板 5C → ToggleSwitch
+│   │   │   │   └── SettingsCard: 希沃 Pinco → ToggleSwitch
+│   │   │   ├── SettingsExpander: 鸿合系列（默认展开）
+│   │   │   │   ├── SettingsCard: 鸿合白板 → ToggleSwitch
+│   │   │   │   ├── SettingsCard: 鸿合摄像 → ToggleSwitch
+│   │   │   │   └── SettingsCard: 鸿合灯板 → ToggleSwitch
+│   │   │   ├── SettingsExpander: 其他（默认展开）
+│   │   │   │   ├── SettingsCard: 文香白板 → ToggleSwitch
+│   │   │   │   ├── SettingsCard: Microsoft Whiteboard → ToggleSwitch
+│   │   │   │   ├── SettingsCard: Admox 白板 → ToggleSwitch
+│   │   │   │   ├── SettingsCard: Admox 展台 → ToggleSwitch
+│   │   │   │   ├── SettingsCard: 易云白板 → ToggleSwitch
+│   │   │   │   ├── SettingsCard: 易云展台 → ToggleSwitch
+│   │   │   │   ├── SettingsCard: MaxHub 白板 → ToggleSwitch
+│   │   │   │   └── SettingsCard: 旧版中银白板 → ToggleSwitch
+│   │   │   ├── LabeledSettingsCard: PPT 放映时自动折叠 → ToggleSwitch
+│   │   │   ├── LabeledSettingsCard: 退出白板后自动折叠 → ToggleSwitch
+│   │   │   ├── LabeledSettingsCard: 退出 PPT 后自动折叠 → ToggleSwitch
+│   │   │   └── LabeledSettingsCard: 软件退出后保持折叠 → ToggleSwitch
+│   │   ├── TextBlock "自动结束"
+│   │   │   ├── LabeledSettingsCard: PPT 工具 → ToggleSwitch
+│   │   │   ├── LabeledSettingsCard: EasiNote 5 → ToggleSwitch
+│   │   │   ├── LabeledSettingsCard: 鸿合批注 → ToggleSwitch
+│   │   │   ├── LabeledSettingsCard: 幼教 → ToggleSwitch
+│   │   │   ├── LabeledSettingsCard: 希沃桌面2批注 → ToggleSwitch
+│   │   │   ├── LabeledSettingsCard: InkCanvas IC → ToggleSwitch
+│   │   │   ├── LabeledSettingsCard: ICA → ToggleSwitch
+│   │   │   └── LabeledSettingsCard: Inkeys → ToggleSwitch
+│   │   ├── TextBlock "折叠模式"
+│   │   │   ├── LabeledSettingsCard: 退出折叠时进入批注 → ToggleSwitch
+│   │   │   └── LabeledSettingsCard: 结束鸿合后进入批注 → ToggleSwitch
+│   │   ├── TextBlock "自动保存"
+│   │   │   ├── LabeledSettingsCard: 截图按日期文件夹保存 → ToggleSwitch
+│   │   │   ├── LabeledSettingsCard: 截图时自动保存墨迹 → ToggleSwitch
+│   │   │   ├── LabeledSettingsCard: 清除时自动截图 → ToggleSwitch
+│   │   │   ├── LabeledSettingsCard: 保存墨迹为 XML → ToggleSwitch
+│   │   │   ├── LabeledSettingsCard: 自动保存墨迹 → ToggleSwitch
+│   │   │   ├── SettingsCard: 自动保存间隔 → ComboBox
+│   │   │   ├── LabeledSettingsCard: 自动删除保存文件 → ToggleSwitch
+│   │   │   ├── SettingsCard: 自动删除天数阈值 → ComboBox
+│   │   │   ├── SettingsCard: 最少自动化墨迹数 → Slider
+│   │   │   ├── LabeledSettingsCard: 保存整页墨迹 → ToggleSwitch
+│   │   │   ├── LabeledSettingsCard: 使用自定义保存文件名 → ToggleSwitch
+│   │   │   └── SettingsExpander: 保存文件名格式（默认展开）
+│   │   │       ├── ComboBox: 文件名格式预设
+│   │   │       └── SettingsCard: 自定义模板 → TextBox
+│   │   ├── TextBlock "浮动栏拦截"
+│   │   │   ├── SettingsExpander: 希沃系列（默认展开）
+│   │   │   │   ├── SettingsCard: 希沃白板 3 → ToggleSwitch
+│   │   │   │   ├── SettingsCard: 希沃白板 5 → ToggleSwitch
+│   │   │   │   ├── SettingsCard: 希沃白板 5C → ToggleSwitch
+│   │   │   │   ├── SettingsCard: 希沃 Pinco → ToggleSwitch
+│   │   │   │   ├── SettingsCard: 希沃 Pinco 绘画 → ToggleSwitch
+│   │   │   │   ├── SettingsCard: 希沃 PPT 工具 → ToggleSwitch
+│   │   │   │   ├── SettingsCard: 希沃桌面批注 → ToggleSwitch
+│   │   │   │   └── SettingsCard: 希沃桌面侧栏 → ToggleSwitch
+│   │   │   └── SettingsExpander: 其他（默认展开）
+│   │   │       ├── SettingsCard: AiClass → ToggleSwitch
+│   │   │       ├── SettingsCard: 鸿合批注 → ToggleSwitch
+│   │   │       ├── SettingsCard: 畅言智慧课堂 → ToggleSwitch
+│   │   │       ├── SettingsCard: 畅言 PPT → ToggleSwitch
+│   │   │       └── SettingsCard: 天喻教育云 → ToggleSwitch
+│   │   └── TextBlock "文件关联"
+│   │       └── SettingsExpander: 文件关联检查（默认展开）
+│   │           ├── TextBlock + Button: 检查状态
+│   │           ├── SettingsCard: 注册文件关联 → Button
+│   │           └── SettingsCard: 取消注册文件关联 → Button
+│   └── (工作流编辑器 - 选择工作流时显示)
+│       └── TextBlock "自定义自动化规则"
+│           └── SettingsCard: 创建自定义的触发器→条件→行动规则 → Clickable
 ├── 随机点名
 │   ├── TextBlock "随机点名"
 │   │   ├── LabeledSettingsCard: 显示编辑名单按钮 → ToggleSwitch
@@ -508,27 +521,12 @@
 │       └── SettingsExpander: SettingsExpander 示例（默认展开）
 │           ├── CopyButton
 │           └── SettingsCard: Customization
-├── 性能
-│   ├── TextBlock "性能监测"
-│   │   └── LabeledSettingsCard: 启用监测 → ToggleSwitch
-│   ├── TextBlock "当前运行状态"
-│   │   └── SettingsCard: 当前状态 → TextBlock + Panel
-│   ├── TextBlock "历史记录"
-│   │   ├── SettingsCard: 历史摘要 → TextBlock + Panel
-│   │   ├── SettingsCard: 墨迹平滑历史 → TextBlock + Panel
-│   │   └── SettingsCard: 清除历史 → Button
-│   ├── TextBlock "设备性能评估"
-│   │   ├── SettingsCard: 设备评分 → TextBlock + Panel
-│   │   └── SettingsCard: 运行设备测试 → Button
-│   └── TextBlock "墨迹纠正耗时"
-│       └── SettingsCard: 墨迹平滑统计 → TextBlock + Panel
 ├── ── 插件设置 ──
 ├── 插件
 │   ├── TextBlock "无"
 │   │   ├── Border: 插件数量状态
 │   │   └── StackPanel: 插件容器（动态加载）
-│   └── 插件设置
-│       └── ContentControl: 插件设置内容（动态加载）
+│   └── （插件设置页面动态加载 → PluginSettingsPage）
 ├── ── 底部 ──
 ├── 友情链接
 │   └── TextBlock "无"

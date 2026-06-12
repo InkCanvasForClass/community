@@ -86,6 +86,26 @@
                             <TreeViewItem Header="SettingsCard → Button: 删除 / Button: 另存为" />
                         </TreeViewItem>
                     </TreeViewItem>
+                    <TreeViewItem Header="性能" Tag="PerformancePage">
+                        <TreeViewItem Header='TextBlock "性能监测"'>
+                            <TreeViewItem Header="LabeledSettingsCard: 启用监测 → ToggleSwitch" />
+                        </TreeViewItem>
+                        <TreeViewItem Header='TextBlock "当前运行状态"'>
+                            <TreeViewItem Header="SettingsCard: 当前状态 → TextBlock + Panel" />
+                        </TreeViewItem>
+                        <TreeViewItem Header='TextBlock "历史记录"'>
+                            <TreeViewItem Header="SettingsCard: 历史摘要 → TextBlock + Panel" />
+                            <TreeViewItem Header="SettingsCard: 墨迹平滑历史 → TextBlock + Panel" />
+                            <TreeViewItem Header="SettingsCard: 清除历史 → Button" />
+                        </TreeViewItem>
+                        <TreeViewItem Header='TextBlock "设备性能评估"'>
+                            <TreeViewItem Header="SettingsCard: 设备评分 → TextBlock + Panel" />
+                            <TreeViewItem Header="SettingsCard: 运行设备测试 → Button" />
+                        </TreeViewItem>
+                        <TreeViewItem Header='TextBlock "墨迹纠正耗时"'>
+                            <TreeViewItem Header="SettingsCard: 墨迹平滑统计 → TextBlock + Panel" />
+                        </TreeViewItem>
+                    </TreeViewItem>
                 </TreeViewItem>
                 <TreeViewItem Header="主界面">
                     <TreeViewItem Header="窗口">
@@ -337,7 +357,6 @@
                     </TreeViewItem>
                     <TreeViewItem Header="公告中心" Tag="AnnouncementCenterPage" />
                 </TreeViewItem>
-                <TreeViewItem Header="公告" Tag="AnnouncementPage" />
                 <TreeViewItem Header="实验性">
                     <TreeViewItem Header='TextBlock "无"'>
                         <TreeViewItem Header="LabeledSettingsCard: 全屏辅助 → ToggleSwitch" />
@@ -663,34 +682,12 @@
                         </TreeViewItem>
                     </TreeViewItem>
                 </TreeViewItem>
-                <TreeViewItem Header="性能" Tag="PerformancePage">
-                    <TreeViewItem Header='TextBlock "性能监测"'>
-                        <TreeViewItem Header="LabeledSettingsCard: 启用监测 → ToggleSwitch" />
-                    </TreeViewItem>
-                    <TreeViewItem Header='TextBlock "当前运行状态"'>
-                        <TreeViewItem Header="SettingsCard: 当前状态 → TextBlock + Panel" />
-                    </TreeViewItem>
-                    <TreeViewItem Header='TextBlock "历史记录"'>
-                        <TreeViewItem Header="SettingsCard: 历史摘要 → TextBlock + Panel" />
-                        <TreeViewItem Header="SettingsCard: 墨迹平滑历史 → TextBlock + Panel" />
-                        <TreeViewItem Header="SettingsCard: 清除历史 → Button" />
-                    </TreeViewItem>
-                    <TreeViewItem Header='TextBlock "设备性能评估"'>
-                        <TreeViewItem Header="SettingsCard: 设备评分 → TextBlock + Panel" />
-                        <TreeViewItem Header="SettingsCard: 运行设备测试 → Button" />
-                    </TreeViewItem>
-                    <TreeViewItem Header='TextBlock "墨迹纠正耗时"'>
-                        <TreeViewItem Header="SettingsCard: 墨迹平滑统计 → TextBlock + Panel" />
-                    </TreeViewItem>
-                </TreeViewItem>
                 <TreeViewItem Header="── 插件设置 ──" />
                 <TreeViewItem Header="插件">
                     <TreeViewItem Header='TextBlock "无"'>
                         <TreeViewItem Header="Border: 插件数量状态" />
                         <TreeViewItem Header="StackPanel: 插件容器（动态加载）" />
                     </TreeViewItem>
-                    <TreeViewItem Header="插件设置" Tag="PluginSettingsPage" />
-                </TreeViewItem>
                 <TreeViewItem Header="── 底部 ──" />
                 <TreeViewItem Header="友情链接">
                     <TreeViewItem Header='TextBlock "无"'>
