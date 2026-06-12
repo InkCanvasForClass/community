@@ -1091,6 +1091,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     AllowsTransparency = true,
                     StaysOpen = true,
                     IsOpen = false,
+                    PlacementTarget = btn,
                     Placement = System.Windows.Controls.Primitives.PlacementMode.Custom
                 };
 
@@ -1100,16 +1101,11 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
                 popup.CustomPopupPlacementCallback = (popupSize, targetSize, offset) =>
                 {
-                    var isVertical = btn.ActualHeight > btn.ActualWidth;
                     return new[]
                     {
-                        isVertical
-                            ? new CustomPopupPlacement(
-                                new Point(-popupSize.Width - 8, (targetSize.Height - popupSize.Height) / 2),
-                                PopupPrimaryAxis.Horizontal)
-                            : new CustomPopupPlacement(
-                                new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height - 8),
-                                PopupPrimaryAxis.Vertical)
+                        new CustomPopupPlacement(
+                            new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height - 8),
+                            PopupPrimaryAxis.Vertical)
                     };
                 };
 
