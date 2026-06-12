@@ -401,31 +401,31 @@
                             </TreeViewItem>
                         </TreeViewItem>
                     </TreeViewItem>
-                </TreeViewItem>
-                <TreeViewItem Header="云存储" IsExpanded="True">
-                    <TreeViewItem Header='TextBlock "云存储管理"'>
-                        <TreeViewItem Header="SettingsCard: 上传延迟 → TextBox" />
-                        <TreeViewItem Header="SettingsExpander: 上传提供商（默认展开）">
-                            <TreeViewItem Header="SettingsCard: 提供商列表 → ItemsControl" />
+                    <TreeViewItem Header="云存储" IsExpanded="True">
+                        <TreeViewItem Header='TextBlock "云存储管理"'>
+                            <TreeViewItem Header="SettingsCard: 上传延迟 → TextBox" />
+                            <TreeViewItem Header="SettingsExpander: 上传提供商（默认展开）">
+                                <TreeViewItem Header="SettingsCard: 提供商列表 → ItemsControl" />
+                            </TreeViewItem>
                         </TreeViewItem>
-                    </TreeViewItem>
-                    <TreeViewItem Header='TextBlock "Dlass"' IsExpanded="True">
-                        <TreeViewItem Header="SettingsExpander: 用户令牌（默认展开）">
-                            <TreeViewItem Header="SettingsCard: 已保存令牌 → ComboBox" />
-                            <TreeViewItem Header="SettingsCard: 新令牌 → TextBox" />
-                            <TreeViewItem Header="SettingsCard: 令牌操作 → Button × 3" />
+                        <TreeViewItem Header='TextBlock "Dlass"' IsExpanded="True">
+                            <TreeViewItem Header="SettingsExpander: 用户令牌（默认展开）">
+                                <TreeViewItem Header="SettingsCard: 已保存令牌 → ComboBox" />
+                                <TreeViewItem Header="SettingsCard: 新令牌 → TextBox" />
+                                <TreeViewItem Header="SettingsCard: 令牌操作 → Button × 3" />
+                            </TreeViewItem>
+                            <TreeViewItem Header="SettingsCard: 连接状态 → TextBlock + Button" />
+                            <TreeViewItem Header="SettingsCard: 班级选择 → ComboBox" />
+                            <TreeViewItem Header="LabeledSettingsCard: 自动上传笔记 → ToggleSwitch" />
                         </TreeViewItem>
-                        <TreeViewItem Header="SettingsCard: 连接状态 → TextBlock + Button" />
-                        <TreeViewItem Header="SettingsCard: 班级选择 → ComboBox" />
-                        <TreeViewItem Header="LabeledSettingsCard: 自动上传笔记 → ToggleSwitch" />
-                    </TreeViewItem>
-                    <TreeViewItem Header='TextBlock "WebDAV"'>
-                        <TreeViewItem Header="SettingsExpander: WebDAV 设置（默认展开）">
-                            <TreeViewItem Header="SettingsCard: WebDAV URL → TextBox" />
-                            <TreeViewItem Header="SettingsCard: 用户名 → TextBox" />
-                            <TreeViewItem Header="SettingsCard: 密码 → PasswordBox" />
-                            <TreeViewItem Header="SettingsCard: 根目录 → TextBox" />
-                            <TreeViewItem Header="SettingsCard: 操作 → Button × 2" />
+                        <TreeViewItem Header='TextBlock "WebDAV"'>
+                            <TreeViewItem Header="SettingsExpander: WebDAV 设置（默认展开）">
+                                <TreeViewItem Header="SettingsCard: WebDAV URL → TextBox" />
+                                <TreeViewItem Header="SettingsCard: 用户名 → TextBox" />
+                                <TreeViewItem Header="SettingsCard: 密码 → PasswordBox" />
+                                <TreeViewItem Header="SettingsCard: 根目录 → TextBox" />
+                                <TreeViewItem Header="SettingsCard: 操作 → Button × 2" />
+                            </TreeViewItem>
                         </TreeViewItem>
                     </TreeViewItem>
                 </TreeViewItem>

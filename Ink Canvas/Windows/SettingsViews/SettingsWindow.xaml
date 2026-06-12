@@ -365,17 +365,16 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="CloudStoragePageItem"
+                            Content="{x:Static props:CloudStorageStrings.CloudStorage_Manage}"
+                            Tag="CloudStoragePage"
+                            ToolTipService.ToolTip="{x:Static props:CloudStorageStrings.CloudStorage_Manage}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
-                </ui:NavigationViewItem>
-
-                <ui:NavigationViewItem
-                    x:Name="CloudStoragePageItem"
-                    Content="{x:Static props:CloudStorageStrings.CloudStorage_Manage}"
-                    Tag="CloudStoragePage"
-                    ToolTipService.ToolTip="{x:Static props:CloudStorageStrings.CloudStorage_Manage}">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}"/>
-                    </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
                 <!-- 工具栏 -->

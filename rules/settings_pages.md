@@ -30,8 +30,8 @@
 ├── 实验性 (ExperimentalPage)
 ├── 存储
 │   ├── 存储管理 (StoragePage)
-│   └── 备份与还原 (BackupPage)
-├── 云存储 (CloudStoragePage)
+│   ├── 备份与还原 (BackupPage)
+│   └── 云存储 (CloudStoragePage)
 ├── 工具栏
 │   ├── 组件 (ToolbarPage)
 │   ├── 外观 (ToolbarAppearancePage)

@@ -307,26 +307,26 @@
 │           └── SettingsExpander: 手动操作（默认展开）
 │               ├── SettingsCard: 手动备份 → Clickable
 │               └── SettingsCard: 还原备份 → Clickable
-├── 云存储
-│   ├── TextBlock "云存储管理"
-│   │   ├── SettingsCard: 上传延迟 → TextBox
-│   │   └── SettingsExpander: 上传提供商（默认展开）
-│   │       └── SettingsCard: 提供商列表 → ItemsControl
-│   ├── TextBlock "Dlass"
-│   │   ├── SettingsExpander: 用户令牌（默认展开）
-│   │   │   ├── SettingsCard: 已保存令牌 → ComboBox
-│   │   │   ├── SettingsCard: 新令牌 → TextBox
-│   │   │   └── SettingsCard: 令牌操作 → Button × 3
-│   │   ├── SettingsCard: 连接状态 → TextBlock + Button
-│   │   ├── SettingsCard: 班级选择 → ComboBox
-│   │   └── LabeledSettingsCard: 自动上传笔记 → ToggleSwitch
-│   └── TextBlock "WebDAV"
-│       └── SettingsExpander: WebDAV 设置（默认展开）
-│           ├── SettingsCard: WebDAV URL → TextBox
-│           ├── SettingsCard: 用户名 → TextBox
-│           ├── SettingsCard: 密码 → PasswordBox
-│           ├── SettingsCard: 根目录 → TextBox
-│           └── SettingsCard: 操作 → Button × 2
+│   └── 云存储
+│       ├── TextBlock "云存储管理"
+│       │   ├── SettingsCard: 上传延迟 → TextBox
+│       │   └── SettingsExpander: 上传提供商（默认展开）
+│       │       └── SettingsCard: 提供商列表 → ItemsControl
+│       ├── TextBlock "Dlass"
+│       │   ├── SettingsExpander: 用户令牌（默认展开）
+│       │   │   ├── SettingsCard: 已保存令牌 → ComboBox
+│       │   │   ├── SettingsCard: 新令牌 → TextBox
+│       │   │   └── SettingsCard: 令牌操作 → Button × 3
+│       │   ├── SettingsCard: 连接状态 → TextBlock + Button
+│       │   ├── SettingsCard: 班级选择 → ComboBox
+│       │   └── LabeledSettingsCard: 自动上传笔记 → ToggleSwitch
+│       └── TextBlock "WebDAV"
+│           └── SettingsExpander: WebDAV 设置（默认展开）
+│               ├── SettingsCard: WebDAV URL → TextBox
+│               ├── SettingsCard: 用户名 → TextBox
+│               ├── SettingsCard: 密码 → PasswordBox
+│               ├── SettingsCard: 根目录 → TextBox
+│               └── SettingsCard: 操作 → Button × 2
 ├── 工具栏
 │   ├── 组件
 │   │   ├── TextBlock "配置方案"
