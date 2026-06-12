@@ -10,4 +10,8 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Include="InkCanvas.PluginSdk.targets" Pack="True" PackagePath="build\net6.0-windows10.0.19041.0" />
+  </ItemGroup>
+
 </Project>

@@ -6,12 +6,27 @@ namespace Ink_Canvas.Plugins
     {
         protected IPluginHost Host { get; private set; }
 
-        public abstract string Id { get; }
-        public abstract string Name { get; }
-        public abstract string Version { get; }
-        public abstract string Description { get; }
-        public abstract string Author { get; }
-        public abstract int Order { get; }
+        /// <summary>
+        /// 插件清单信息，从 manifest.json 加载。如果清单存在，则 Id/Name/Version 等属性优先从清单读取。
+        /// </summary>
+        public PluginManifest Manifest { get; set; }
+
+        /// <summary>
+        /// 插件配置目录路径
+        /// </summary>
+        public string PluginConfigFolder { get; set; } = "";
+
+        /// <summary>
+        /// 插件所在目录路径
+        /// </summary>
+        public string PluginFolder { get; set; } = "";
+
+        public virtual string Id => Manifest?.Id ?? "";
+        public virtual string Name => Manifest?.Name ?? "";
+        public virtual string Version => Manifest?.Version ?? "";
+        public virtual string Description => Manifest?.Description ?? "";
+        public virtual string Author => Manifest?.Author ?? "";
+        public virtual int Order => 0;
 
         public virtual void Initialize(IPluginHost host)
         {

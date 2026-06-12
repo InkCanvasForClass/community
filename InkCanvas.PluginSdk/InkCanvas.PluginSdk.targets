@@ -1,0 +1,34 @@
+<Project>
+	<PropertyGroup>
+		<!-- 设置 CreateIcpx=true 时，编译后自动打包为 .icpx 插件包 -->
+		<CreateIcpx Condition="'$(CreateIcpx)'==''">false</CreateIcpx>
+		<IcpxOutputDirectory Condition="'$(IcpxOutputDirectory)'==''">$(MSBuildProjectDirectory)\icpx</IcpxOutputDirectory>
+		<IcpxPackageName Condition="'$(IcpxPackageName)'==''">$(MSBuildProjectName).icpx</IcpxPackageName>
+	</PropertyGroup>
+
+	<Target Name="CreateIcpxPackage"
+	        AfterTargets="Build"
+	        Condition="'$(CreateIcpx)'=='true'">
+		<Error Condition="!Exists('$(OutputPath)manifest.json')"
+		       Code="ICSDK001"
+		       Text="manifest.json not found in output directory. Please add a manifest.json to your project." />
+
+		<MakeDir Directories="$(IcpxOutputDirectory)"
+		         Condition="!Exists('$(IcpxOutputDirectory)')" />
+
+		<Message Text="Creating plugin package: $(IcpxOutputDirectory)\$(IcpxPackageName)" Importance="high" />
+
+		<ZipDirectory SourceDirectory="$(OutputPath)"
+		              Overwrite="true"
+		              DestinationFile="$(IcpxOutputDirectory)\$(IcpxPackageName)" />
+
+		<Message Text="Plugin package created successfully." Importance="high" />
+	</Target>
+
+	<!-- 自动将 manifest.json 复制到输出目录 -->
+	<ItemGroup>
+		<None Condition="Exists('$(MSBuildProjectDirectory)\manifest.json')"
+		      Include="manifest.json"
+		      CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+</Project>

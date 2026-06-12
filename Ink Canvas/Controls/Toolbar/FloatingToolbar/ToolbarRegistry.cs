@@ -405,17 +405,65 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
             var layout = LoadConfigFile(configName);
             if (layout != null && layout.Components != null && layout.Components.Count > 0)
+            {
+                EnsurePluginEntries(layout);
                 return layout;
+            }
 
             var files = ListConfigFiles();
             if (files.Count > 0 && files[0] != configName)
             {
                 layout = LoadConfigFile(files[0]);
                 if (layout != null && layout.Components != null && layout.Components.Count > 0)
+                {
+                    EnsurePluginEntries(layout);
                     return layout;
+                }
             }
 
-            return CreateDefaultLayout();
+            layout = CreateDefaultLayout();
+            EnsurePluginEntries(layout);
+            return layout;
+        }
+
+        /// <summary>
+        /// 确保已注册的插件工具栏项存在于布局配置中，缺失的自动追加。
+        /// </summary>
+        private static void EnsurePluginEntries(ToolbarLayoutSettings layout)
+        {
+            if (layout?.Components == null) return;
+            if (_pluginItems.Count == 0) return;
+
+            // 收集布局中已有的所有组件 ID（包括分组内的子组件）
+            var existingIds = new HashSet<string>();
+            CollectEntryIds(layout.Components, existingIds);
+
+            foreach (var pluginItem in _pluginItems)
+            {
+                if (!existingIds.Contains(pluginItem.Id))
+                {
+                    var wrapper = new PluginToolbarItemWrapper(pluginItem);
+                    var entry = new ToolbarComponentEntry
+                    {
+                        Id = pluginItem.Id,
+                        HidingRuleset = wrapper.DefaultHidingRuleset?.Clone(),
+                        ShowSeparateBorder = wrapper.DefaultShowSeparateBorder
+                    };
+                    layout.Components.Add(entry);
+                    LogHelper.WriteLogToFile($"ToolbarRegistry: 自动追加插件组件 [{pluginItem.Id}]", LogHelper.LogType.Info);
+                }
+            }
+        }
+
+        private static void CollectEntryIds(List<ToolbarComponentEntry> entries, HashSet<string> ids)
+        {
+            foreach (var entry in entries)
+            {
+                if (!entry.IsGroup)
+                    ids.Add(entry.Id);
+                if (entry.Children != null && entry.Children.Count > 0)
+                    CollectEntryIds(entry.Children, ids);
+            }
         }
 
         #endregion
