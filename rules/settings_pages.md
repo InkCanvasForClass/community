@@ -26,6 +26,7 @@
 ├── 通知
 │   ├── 通知设置 (NotificationPage)
 │   └── 公告中心 (AnnouncementCenterPage)
+├── 公告 (AnnouncementPage)
 ├── 实验性 (ExperimentalPage)
 ├── 存储
 │   ├── 存储管理 (StoragePage)
@@ -34,12 +35,19 @@
 ├── 工具栏
 │   ├── 组件 (ToolbarPage)
 │   ├── 外观 (ToolbarAppearancePage)
-│   └── 白板工具栏 (BoardToolbarPage)
+│   └── 菜单 (ToolbarMenuPage)
+├── 白板
+│   ├── 组件 (BoardToolbarPage)
+│   ├── 外观 (BoardAppearancePage)
+│   └── 菜单 (BoardMenuPage)
 ├── 自动化 (AutomationPage)
+│   └── 自定义自动化 (AutomationWorkflowPage)
 ├── 随机点名 (RandomDrawPage)
 ├── Debug (DebugPage)
+├── 性能 (PerformancePage)
 ├── ── 插件设置 ──（分隔符）
 ├── 插件 (PluginPage)
+│   └── 插件设置 (PluginSettingsPage)
 ├── ── 底部 ──（分隔符）
 ├── 友情链接 (FriendlyLinksPage)
 └── 关于 Ink Canvas (AboutPage)
@@ -77,7 +85,11 @@
 | Nav_Toolbar | 工具栏 |
 | Nav_ToolbarComponents | 组件 |
 | Nav_ToolbarAppearance | 外观 |
+| Nav_ToolbarMenu | 菜单 |
+| Nav_Board | 白板 |
 | Nav_BoardToolbar | 白板工具栏 |
+| Nav_BoardAppearance | 白板外观 |
+| Nav_BoardMenu | 白板菜单 |
 | Nav_Automation | 自动化 |
 | Nav_RandomDraw | 随机点名 |
 | Nav_Debug | Debug |
@@ -132,16 +144,24 @@ private static readonly Dictionary<string, Type> _pageDict = new()
     { "Update", typeof(UpdatePage) },
     { "Notification", typeof(NotificationPage) },
     { "AnnouncementCenter", typeof(AnnouncementCenterPage) },
+    { "Announcement", typeof(AnnouncementPage) },
     { "Experimental", typeof(ExperimentalPage) },
     { "Storage", typeof(StoragePage) },
     { "Backup", typeof(BackupPage) },
     { "CloudStorage", typeof(CloudStoragePage) },
     { "Toolbar", typeof(ToolbarPage) },
     { "ToolbarAppearance", typeof(ToolbarAppearancePage) },
+    { "ToolbarMenu", typeof(ToolbarMenuPage) },
+    { "BoardToolbar", typeof(BoardToolbarPage) },
+    { "BoardMenu", typeof(BoardMenuPage) },
+    { "BoardAppearance", typeof(BoardAppearancePage) },
     { "Automation", typeof(AutomationPage) },
+    { "AutomationWorkflow", typeof(AutomationWorkflowPage) },
     { "RandomDraw", typeof(RandomDrawPage) },
     { "Debug", typeof(DebugPage) },
+    { "Performance", typeof(PerformancePage) },
     { "Plugin", typeof(PluginPage) },
+    { "PluginSettings", typeof(PluginSettingsPage) },
     { "FriendlyLinks", typeof(FriendlyLinksPage) },
     { "About", typeof(AboutPage) },
 };

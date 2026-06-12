@@ -242,7 +242,6 @@
 │   │   ├── TextBlock "通知"
 │   │   │   ├── LabeledSettingsCard: 启用公告 → ToggleSwitch
 │   │   │   ├── LabeledSettingsCard: 启用强制弹窗 → ToggleSwitch
-│   │   │   ├── SettingsCard: 公告中心 → Button
 │   │   │   ├── LabeledSettingsCard: 启用动态 → ToggleSwitch
 │   │   │   ├── LabeledSettingsCard: 启用 Windows 通知 → ToggleSwitch
 │   │   │   └── SettingsExpander: 听写免打扰 → ToggleSwitch（开则展开）
@@ -262,9 +261,11 @@
 │   │   └── TextBlock "操作"
 │   │       └── SettingsCard: 测试通知 → Button
 │   └── 公告中心
-│       └── TextBlock "无"
-│           ├── Button: 全部标为已读
-│           └── Button: 清空历史
+├── 公告
+│   └── TextBlock "无"
+│       ├── LabeledSettingsCard: 启用公告 → ToggleSwitch
+│       ├── LabeledSettingsCard: 启用强制弹窗 → ToggleSwitch
+│       └── SettingsCard: 公告中心 → Button
 ├── 实验性
 │   └── TextBlock "无"
 │       ├── LabeledSettingsCard: 全屏辅助 → ToggleSwitch
@@ -348,12 +349,56 @@
 │   │   │       ├── ComboBox: 规则集模式 + CheckBox: 反转 + Button: 添加组
 │   │   │       └── ItemsControl: 条件组列表（动态）
 │   │   └── Button: 重置布局
-│   └── 外观
-│       └── TextBlock "基本"
-│           ├── SettingsCard: 浮动栏缩放 → Slider
-│           └── SettingsExpander: 浮动栏透明度（默认展开）
-│               ├── SettingsCard: 浮动栏透明度 → Slider
-│               └── SettingsCard: PPT 中浮动栏透明度 → Slider
+│   ├── 外观
+│   │   └── TextBlock "基本"
+│   │       ├── SettingsCard: 浮动栏缩放 → Slider
+│   │       └── SettingsExpander: 浮动栏透明度（默认展开）
+│   │           ├── SettingsCard: 浮动栏透明度 → Slider
+│   │           └── SettingsCard: PPT 中浮动栏透明度 → Slider
+│   └── 菜单
+│       ├── TextBlock "已添加的菜单项"
+│       │   └── ListBox: 已添加菜单项（3×3 布局，可拖拽排序，最多 9 个）
+│       ├── TextBlock "可添加的菜单项"
+│       │   └── ListBox: 可用菜单项库
+│       └── Button: 恢复默认布局
+├── 白板
+│   ├── 组件
+│   │   ├── TextBlock "配置方案"
+│   │   │   ├── ComboBox: 配置方案选择
+│   │   │   └── Button: 新建 + Button: 复制 + Button: 删除
+│   │   ├── RadioButton: 左侧/中央/右侧区域选择
+│   │   ├── Button: 添加组
+│   │   ├── ItemsControl: 分组列表（含拖拽排序）
+│   │   │   └── ListBox: 分组内组件（可拖拽排序）
+│   │   ├── TabControl
+│   │   │   ├── Tab: 组件库
+│   │   │   │   └── ListBox: 可用组件库
+│   │   │   └── Tab: 组件设置
+│   │   │       ├── TextBlock "尺寸"
+│   │   │       │   └── Grid: 固定宽高/最小最大宽高 → TextBox × 4
+│   │   │       ├── TextBlock "外观"
+│   │   │       │   └── Grid: 字号/透明度 → TextBox × 2
+│   │   │       ├── TextBlock "边距"
+│   │   │       │   └── Grid: 左/上/右/下 → TextBox × 4
+│   │   │       └── Button: 重置组件设置
+│   │   └── Button: 恢复默认布局
+│   ├── 外观
+│   │   ├── TextBlock "白板工具栏透明度"
+│   │   │   └── SettingsExpander: 白板工具栏透明度（默认展开）
+│   │   │       ├── SettingsCard: 左侧 → Slider
+│   │   │       ├── SettingsCard: 中央 → Slider
+│   │   │       └── SettingsCard: 右侧 → Slider
+│   │   └── TextBlock "黑板缩放 80%"
+│   │       └── SettingsExpander: 黑板缩放 80%（默认展开）
+│   │           ├── SettingsCard: 左侧 → Slider
+│   │           ├── SettingsCard: 中央 → Slider
+│   │           └── SettingsCard: 右侧 → Slider
+│   └── 菜单
+│       ├── TextBlock "已添加的菜单项"
+│       │   └── ListBox: 已添加菜单项（3×3 布局，可拖拽排序，最多 9 个）
+│       ├── TextBlock "可添加的菜单项"
+│       │   └── ListBox: 可用菜单项库
+│       └── Button: 恢复默认布局
 ├── 自动化
 │   ├── TextBlock "自动折叠"
 │   │   ├── SettingsExpander: 希沃系列（默认展开）
@@ -428,6 +473,9 @@
 │           ├── TextBlock + Button: 检查状态
 │           ├── SettingsCard: 注册文件关联 → Button
 │           └── SettingsCard: 取消注册文件关联 → Button
+├── 自定义自动化
+│   └── TextBlock "自定义自动化规则"
+│       └── SettingsCard: 创建自定义的触发器→条件→行动规则 → Clickable
 ├── 随机点名
 │   ├── TextBlock "随机点名"
 │   │   ├── LabeledSettingsCard: 显示编辑名单按钮 → ToggleSwitch
@@ -460,11 +508,27 @@
 │       └── SettingsExpander: SettingsExpander 示例（默认展开）
 │           ├── CopyButton
 │           └── SettingsCard: Customization
+├── 性能
+│   ├── TextBlock "性能监测"
+│   │   └── LabeledSettingsCard: 启用监测 → ToggleSwitch
+│   ├── TextBlock "当前运行状态"
+│   │   └── SettingsCard: 当前状态 → TextBlock + Panel
+│   ├── TextBlock "历史记录"
+│   │   ├── SettingsCard: 历史摘要 → TextBlock + Panel
+│   │   ├── SettingsCard: 墨迹平滑历史 → TextBlock + Panel
+│   │   └── SettingsCard: 清除历史 → Button
+│   ├── TextBlock "设备性能评估"
+│   │   ├── SettingsCard: 设备评分 → TextBlock + Panel
+│   │   └── SettingsCard: 运行设备测试 → Button
+│   └── TextBlock "墨迹纠正耗时"
+│       └── SettingsCard: 墨迹平滑统计 → TextBlock + Panel
 ├── ── 插件设置 ──
 ├── 插件
-│   └── TextBlock "无"
-│       ├── Border: 插件数量状态
-│       └── StackPanel: 插件容器（动态加载）
+│   ├── TextBlock "无"
+│   │   ├── Border: 插件数量状态
+│   │   └── StackPanel: 插件容器（动态加载）
+│   └── 插件设置
+│       └── ContentControl: 插件设置内容（动态加载）
 ├── ── 底部 ──
 ├── 友情链接
 │   └── TextBlock "无"
