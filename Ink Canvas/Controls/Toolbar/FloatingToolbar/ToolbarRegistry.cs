@@ -1,5 +1,4 @@
-﻿using Ink_Canvas.Helpers;
-using Ink_Canvas.Plugins;
+using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Newtonsoft.Json;
@@ -18,7 +17,6 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
     public static class ToolbarRegistry
     {
         private static List<IToolbarItem> _items;
-        private static readonly List<PluginToolbarItemInfo> _pluginItems = new List<PluginToolbarItemInfo>();
         internal const string InjectedTag = "ToolbarRegistryInjected";
         internal const string ContentBorderTag = "ToolbarContentBorder";
         internal const string SelectionCanvasTag = "ToolbarSelectionCanvas";
@@ -217,31 +215,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 })
                 .Where(i => i != null)
                 .ToList();
-
-            // 添加插件注册的工具栏项
-            foreach (var pluginItem in _pluginItems)
-            {
-                _items.Add(new PluginToolbarItemWrapper(pluginItem));
-            }
-
             return _items;
         }
-
-        public static void RegisterPluginItem(PluginToolbarItemInfo itemInfo)
-        {
-            if (itemInfo == null || string.IsNullOrEmpty(itemInfo.Id)) return;
-
-            _pluginItems.Add(itemInfo);
-            LogHelper.WriteLogToFile($"ToolbarRegistry: 插件注册工具栏项 [{itemInfo.Id}]", LogHelper.LogType.Info);
-
-            // 如果 Discover 已经被调用过，需要重置缓存
-            if (_items != null)
-            {
-                _items.Add(new PluginToolbarItemWrapper(itemInfo));
-            }
-        }
-
-        public static IReadOnlyList<PluginToolbarItemInfo> GetPluginItems() => _pluginItems.AsReadOnly();
 
         #region Config file system
 
@@ -993,13 +968,6 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 // 强制应用显示模式，确保独立边框模式下也能正确显示
                 qcp.ForceApplyDisplayMode();
             }
-
-            // 插件自定义设置：通过 PluginToolbarItemInfo.ApplySettings 回调应用
-            if (view.Tag is string tag && tag == InjectedTag)
-            {
-                var pluginItem = _pluginItems.FirstOrDefault(p => p.Id == entry.Id);
-                pluginItem?.ApplySettings?.Invoke(view, entry.Settings);
-            }
         }
 
         private static void ApplyRedStyle(ToolbarImageButton btn)
@@ -1053,39 +1021,6 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     new ToolbarComponentEntry { Id = "builtin.exit", HidingRuleset = ToolbarRuleset.PptOnly(), ShowSeparateBorder = true }
                 }
             };
-        }
-    }
-
-    /// <summary>
-    /// 将 PluginToolbarItemInfo 包装为 IToolbarItem，供 ToolbarRegistry 内部使用。
-    /// </summary>
-    internal class PluginToolbarItemWrapper : IToolbarItem
-    {
-        private readonly PluginToolbarItemInfo _info;
-
-        public string Id => _info.Id;
-        public string DisplayName => _info.DisplayName;
-        public string Description => _info.Description;
-        public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
-        public bool DefaultShowSeparateBorder => false;
-        public bool DefaultPreventHideOnDragClick => false;
-
-        public PluginToolbarItemWrapper(PluginToolbarItemInfo info)
-        {
-            _info = info;
-        }
-
-        public FrameworkElement BuildView(IToolbarHost host)
-        {
-            var view = _info.ViewFactory?.Invoke();
-            if (view != null)
-                view.Tag = ToolbarRegistry.InjectedTag;
-            return view;
-        }
-
-        public void ApplyOrientation(FrameworkElement view, Orientation orientation)
-        {
-            _info.ApplyOrientation?.Invoke(view, orientation);
         }
     }
 }

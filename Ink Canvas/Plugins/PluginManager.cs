@@ -236,21 +236,6 @@ namespace Ink_Canvas.Plugins
             _services[typeof(T)] = service;
         }
 
-        public void RegisterToolbarItem(PluginToolbarItemInfo itemInfo)
-        {
-            if (itemInfo == null || string.IsNullOrEmpty(itemInfo.Id)) return;
-
-            try
-            {
-                Controls.Toolbar.FloatingToolbar.ToolbarRegistry.RegisterPluginItem(itemInfo);
-                Log(string.Format("Plugin registered toolbar item: {0}", itemInfo.Id));
-            }
-            catch (Exception ex)
-            {
-                LogError(string.Format("Failed to register toolbar item {0}", itemInfo.Id), ex);
-            }
-        }
-
         protected virtual void OnPluginLoaded(PluginInfo pluginInfo)
         {
             var handler = PluginLoaded;
