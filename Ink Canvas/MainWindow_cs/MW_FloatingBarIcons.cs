@@ -226,6 +226,19 @@ namespace Ink_Canvas
         private PopupManagerHelper _popupManager;
 
         /// <summary>
+        /// 获取 PopupManagerHelper 实例，供插件等外部组件使用
+        /// </summary>
+        public PopupManagerHelper GetPopupManager() => _popupManager;
+
+        /// <summary>
+        /// 关闭所有已注册的 Popup 弹窗
+        /// </summary>
+        public void CloseAllPopups()
+        {
+            HideSubPanelsImmediately();
+        }
+
+        /// <summary>
         /// 浮动工具栏移动事件处理
         /// </summary>
         /// <param name="sender">发送者</param>

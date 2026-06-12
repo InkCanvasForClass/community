@@ -26,6 +26,12 @@ namespace Ink_Canvas.Plugins
         public Action<FrameworkElement, Orientation> ApplyOrientation { get; set; }
         public Action<FrameworkElement, Dictionary<string, object>> ApplySettings { get; set; }
         public List<PluginToolbarSettingInfo> CustomSettings { get; set; } = new List<PluginToolbarSettingInfo>();
+
+        /// <summary>
+        /// 弹窗内容工厂。若提供此属性，点击按钮时将自动打开包含此内容的弹窗菜单。
+        /// 返回的 FrameworkElement 将作为 Popup 的 Child 显示。
+        /// </summary>
+        public Func<FrameworkElement> PopupContentFactory { get; set; }
     }
 
     /// <summary>

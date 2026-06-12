@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -1080,6 +1081,77 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             var view = _info.ViewFactory?.Invoke();
             if (view != null)
                 view.Tag = ToolbarRegistry.InjectedTag;
+
+            // 如果提供了弹窗内容工厂，自动创建 Popup 并绑定按钮点击
+            if (_info.PopupContentFactory != null && view is ToolbarImageButton btn)
+            {
+                var popup = new System.Windows.Controls.Primitives.Popup
+                {
+                    Name = "PluginPopup_" + _info.Id.Replace('.', '_'),
+                    AllowsTransparency = true,
+                    StaysOpen = true,
+                    IsOpen = false,
+                    Placement = System.Windows.Controls.Primitives.PlacementMode.Custom
+                };
+
+                var popupContent = _info.PopupContentFactory();
+                if (popupContent != null)
+                    popup.Child = popupContent;
+
+                popup.CustomPopupPlacementCallback = (popupSize, targetSize, offset) =>
+                {
+                    var isVertical = btn.ActualHeight > btn.ActualWidth;
+                    return new[]
+                    {
+                        isVertical
+                            ? new CustomPopupPlacement(
+                                new Point(-popupSize.Width - 8, (targetSize.Height - popupSize.Height) / 2),
+                                PopupPrimaryAxis.Horizontal)
+                            : new CustomPopupPlacement(
+                                new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height - 8),
+                                PopupPrimaryAxis.Vertical)
+                    };
+                };
+
+                // 注册 Popup 到 PopupManagerHelper
+                btn.Loaded += (s, e) =>
+                {
+                    var window = Window.GetWindow(btn);
+                    if (window is MainWindow mw)
+                    {
+                        mw.GetPopupManager()?.RegisterPopup(popup);
+                    }
+                };
+
+                btn.ButtonMouseUp += (s, e) =>
+                {
+                    if (popup.IsOpen)
+                    {
+                        popup.IsOpen = false;
+                    }
+                    else
+                    {
+                        // 关闭主窗口中其他已打开的 Popup
+                        var window = Window.GetWindow(btn);
+                        if (window is MainWindow mw)
+                        {
+                            mw.CloseAllPopups();
+                        }
+                        AnimationsHelper.ShowPopupWithSlideAndFade(popup);
+                    }
+                };
+
+                // 弹窗关闭按钮支持
+                if (popupContent is PopupShellContent shell)
+                {
+                    shell.CloseButtonControl.Click += (s, e) => popup.IsOpen = false;
+                }
+                else if (popupContent is PopupTabShellContent tabShell)
+                {
+                    tabShell.CloseButtonControl.Click += (s, e) => popup.IsOpen = false;
+                }
+            }
+
             return view;
         }
 
