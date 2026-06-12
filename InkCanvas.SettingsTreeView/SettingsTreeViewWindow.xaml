@@ -688,6 +688,7 @@
                         <TreeViewItem Header="Border: 插件数量状态" />
                         <TreeViewItem Header="StackPanel: 插件容器（动态加载）" />
                     </TreeViewItem>
+                </TreeViewItem>
                 <TreeViewItem Header="── 底部 ──" />
                 <TreeViewItem Header="友情链接">
                     <TreeViewItem Header='TextBlock "无"'>
