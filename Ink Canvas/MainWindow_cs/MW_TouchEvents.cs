@@ -211,19 +211,11 @@ namespace Ink_Canvas
                 && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                SetDynamicRendererEnabled(inkCanvas, false);
             }
             else if (!ShouldUseRealtimeVelocityBrushTip()
                      && inkCanvas.EditingMode == InkCanvasEditingMode.None)
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                SetDynamicRendererEnabled(inkCanvas, true);
-            }
-            else
-            {
-                SetDynamicRendererEnabled(inkCanvas, inkCanvas.EditingMode != InkCanvasEditingMode.None
-                                                   && inkCanvas.EditingMode != InkCanvasEditingMode.Select
-                                                   && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke);
             }
         }
 
@@ -985,7 +977,6 @@ namespace Ink_Canvas
                 CleanupRealtimeBrushTipState(stylusId);
 
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                SetDynamicRendererEnabled(inkCanvas, false);
                 inkCanvas.CaptureStylus();
                 ViewboxFloatingBar.IsHitTestVisible = false;
                 BlackboardUIGridForInkReplay.IsHitTestVisible = false;
