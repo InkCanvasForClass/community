@@ -547,7 +547,7 @@ namespace Ink_Canvas.Windows
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"初始化音频控制失败: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"初始化音频控制失败（音频设备可能不可用）: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 

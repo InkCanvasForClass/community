@@ -1376,6 +1376,7 @@ namespace Ink_Canvas
         private bool forcePointEraser;
         private bool _pendingStartupAutoUpdateCheck;
         private bool _sliderTouchSupportInitialized;
+        private bool _deferredPhaseBCompleted;
 
         /// <summary>
         /// 在窗口加载完成后初始化应用的核心子系统、UI 状态和运行时监控组件。
@@ -2494,6 +2495,9 @@ namespace Ink_Canvas
 
         private async Task RunDeferredStartupPhaseBAsync()
         {
+            if (_deferredPhaseBCompleted) return;
+            _deferredPhaseBCompleted = true;
+
             await Task.Delay(600);
 
             try
