@@ -46,6 +46,7 @@
             <c:IsEnabledToOpacityConverter x:Key="IsEnabledToOpacityConverter" />
             <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <c:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
+            <c:VisibilityConverter x:Key="VisibilityConverter" />
             <c:IntNumberToString x:Key="IntNumberToString" />
             <c:IntNumberToString2 x:Key="IntNumberToString2" />
             <c:StringToGeometryConverter x:Key="StringToGeometryConverter" />
@@ -300,7 +301,8 @@
                         <Border Name="BorderStrokeSelectionInsertToWhiteboard" Margin="0,2,-9,2" Background="Transparent"
                                 CornerRadius="{Binding ElementName=BorderStrokeSelectionControl, Path=CornerRadius}"
                                 Width="40" MouseDown="Border_MouseDown"
-                                MouseUp="BorderStrokeSelectionInsertToWhiteboard_MouseUp">
+                                MouseUp="BorderStrokeSelectionInsertToWhiteboard_MouseUp"
+                                Visibility="{Binding Visibility, ElementName=GridBackgroundCover, Converter={StaticResource VisibilityConverter}}">
                             <ikw:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                                 <Image Source="{DynamicResource QuickPanelBlackboardIcon}"
                                        RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
