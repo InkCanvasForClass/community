@@ -5,8 +5,10 @@ using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Navigation;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
@@ -163,6 +165,9 @@ namespace Ink_Canvas.Windows.SettingsViews
             this.MouseEnter += (s, e) => ShowCursor(true);
             this.Activated += (s, e) => ShowCursor(true);
 
+            // 触摸标题栏时绕过 WPF DragMove，避免 UI 线程阻塞
+            AppTitleBar.TouchDown += AppTitleBar_TouchDown;
+
             this.StateChanged += (sender, e) =>
             {
                 if (this.WindowState == WindowState.Maximized)
@@ -243,8 +248,35 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         #region 修复触摸屏鼠标指针消失问题
 
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        [DllImport("user32.dll")]
         private static extern int ShowCursor(bool bShow);
+        #endregion
+
+        #region 触摸拖动窗口修复（避免 UI 线程阻塞）
+
+        [DllImport("user32.dll")]
+        private static extern bool ReleaseCapture();
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+
+        private const int WM_NCLBUTTONDOWN = 0x00A1;
+        private const int HTCAPTION = 0x0002;
+
+        private void AppTitleBar_TouchDown(object sender, TouchEventArgs e)
+        {
+            // 触摸标题栏时，使用 Win32 原生移动窗口代替 WPF DragMove
+            // WPF DragMove 进入阻塞式消息泵，导致 UI 线程假死
+            // Win32 WM_NCLBUTTONDOWN 由 DWM 合成器驱动，不阻塞 UI 线程
+            e.Handled = true;
+            AppTitleBar.CaptureTouch(e.TouchDevice);
+
+            var hwnd = new WindowInteropHelper(this).Handle;
+            ReleaseCapture();
+            SendMessage(hwnd, WM_NCLBUTTONDOWN, (IntPtr)HTCAPTION, IntPtr.Zero);
+
+            AppTitleBar.ReleaseTouchCapture(e.TouchDevice);
+        }
         #endregion
 
         #region 高DPI/多屏自适应窗口控制
