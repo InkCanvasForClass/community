@@ -1398,23 +1398,6 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile("开始加载插件");
                     await PluginManager.Instance.LoadAllAsync();
                     LogHelper.WriteLogToFile(string.Format("插件加载完成，共加载 {0} 个插件", PluginManager.Instance.Plugins.Count));
-
-                    // 插件加载完成后重建工具栏，确保插件注册的组件正确显示
-                    if (PluginManager.Instance.Plugins.Count > 0 && MainWindow is MainWindow mw)
-                    {
-                        _ = mw.Dispatcher.BeginInvoke(new Action(() =>
-                        {
-                            try
-                            {
-                                mw.RebuildToolbar();
-                                LogHelper.WriteLogToFile("插件加载后已重建工具栏", LogHelper.LogType.Info);
-                            }
-                            catch (Exception ex)
-                            {
-                                LogHelper.WriteLogToFile($"插件加载后重建工具栏失败: {ex.Message}", LogHelper.LogType.Error);
-                            }
-                        }), System.Windows.Threading.DispatcherPriority.Loaded);
-                    }
                 }
                 catch (Exception ex)
                 {
