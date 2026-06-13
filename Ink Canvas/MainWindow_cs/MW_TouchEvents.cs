@@ -63,6 +63,24 @@ namespace Ink_Canvas
         private readonly Dictionary<int, DispatcherTimer> _pauseStraightenTimers = new Dictionary<int, DispatcherTimer>();
         private const int PauseStraightenDelayMs = 300;
 
+        private bool IsPointInFloatingBarArea(Point inkCanvasPoint)
+        {
+            try
+            {
+                if (ViewboxFloatingBar == null || !ViewboxFloatingBar.IsVisible) return false;
+                if (ViewboxFloatingBar.ActualWidth <= 0 || ViewboxFloatingBar.ActualHeight <= 0) return false;
+
+                var ptInWindow = inkCanvas.TranslatePoint(inkCanvasPoint, this);
+                var bounds = ViewboxFloatingBar.TransformToAncestor(this).TransformBounds(
+                    new Rect(0, 0, ViewboxFloatingBar.ActualWidth, ViewboxFloatingBar.ActualHeight));
+                return bounds.Contains(ptInWindow);
+            }
+            catch (InvalidOperationException)
+            {
+                return false;
+            }
+        }
+
         private sealed class OneEuroFilter
         {
             private readonly float _minCutoff;
