@@ -262,9 +262,7 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         protected override void OnTouchDown(TouchEventArgs e)
         {
-            // 触摸标题栏时，使用 Win32 原生移动窗口代替 WPF DragMove
-            // WPF DragMove 进入阻塞式消息泵，导致 UI 线程假死
-            // Win32 WM_NCLBUTTONDOWN 由 DWM 合成器驱动，不阻塞 UI 线程
+
             var source = e.OriginalSource as DependencyObject;
             if (source != null && IsInsideTitleBar(source))
             {
@@ -289,7 +287,10 @@ namespace Ink_Canvas.Windows.SettingsViews
             {
                 if (current == AppTitleBar)
                     return true;
-                current = System.Windows.Media.VisualTreeHelper.GetParent(current);
+                if (current is System.Windows.Media.Visual || current is System.Windows.Media.Media3D.Visual3D)
+                    current = System.Windows.Media.VisualTreeHelper.GetParent(current);
+                else
+                    current = LogicalTreeHelper.GetParent(current);
             }
             return false;
         }
