@@ -1402,7 +1402,7 @@ namespace Ink_Canvas
                     // 插件加载完成后重建工具栏，确保插件注册的组件正确显示
                     if (PluginManager.Instance.Plugins.Count > 0 && MainWindow is MainWindow mw)
                     {
-                        mw.Dispatcher.BeginInvoke(new Action(() =>
+                        _ = mw.Dispatcher.BeginInvoke(new Action(() =>
                         {
                             try
                             {

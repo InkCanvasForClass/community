@@ -13,7 +13,6 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,6 +27,20 @@ namespace Ink_Canvas.Helpers
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(10);
         private static readonly string updatesFolderPath = Path.Combine(AppContext.BaseDirectory, "AutoUpdate");
         private static string statusFilePath;
+        private static readonly HashSet<string> UpdateFilesToOverwrite = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "InkCanvas.IACoreHelper.exe",
+            "InkCanvas.IACoreHelper.exe.config",
+            "InkCanvasForClass.deps.json",
+            "InkCanvasForClass.dll",
+            "InkCanvasForClass.dll.config",
+            "InkCanvasForClass.exe",
+            "InkCanvasForClass.runtimeconfig.json"
+        };
+        private static readonly HashSet<string> UpdateDirectoriesToOverwrite = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "runtimes"
+        };
         // 全局下载取消令牌；UI 通过 RequestCancelDownload 取消当前下载
         private static CancellationTokenSource _activeDownloadCts;
         private static readonly object _activeDownloadLock = new object();
@@ -57,35 +70,6 @@ namespace Ink_Canvas.Helpers
                 if (ReferenceEquals(_activeDownloadCts, cts)) _activeDownloadCts = null;
             }
             try { cts?.Dispose(); } catch { }
-        }
-
-        private static string GetUpdateManifestFilePath(string extractPath)
-        {
-            return Path.Combine(extractPath, "update_manifest.txt");
-        }
-
-        private static void WriteUpdateManifest(string zipFilePath, string manifestPath)
-        {
-            using (ZipArchive archive = ZipFile.OpenRead(zipFilePath))
-            {
-                var entries = archive.Entries
-                    .Where(entry => !string.IsNullOrEmpty(entry.Name))
-                    .Select(entry => entry.FullName.Replace('\\', '/'))
-                    .Where(entryName => !entryName.Split('/').Any(part => part == ".."))
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .OrderBy(entryName => entryName, StringComparer.OrdinalIgnoreCase);
-
-                File.WriteAllLines(manifestPath, entries, Encoding.UTF8);
-            }
-        }
-
-        private static HashSet<string> ReadUpdateManifest(string manifestPath)
-        {
-            return new HashSet<string>(
-                File.ReadAllLines(manifestPath)
-                    .Select(line => line.Trim().Replace('\\', '/'))
-                    .Where(line => !string.IsNullOrEmpty(line)),
-                StringComparer.OrdinalIgnoreCase);
         }
 
         public static bool IsX64UpdatePackageSelected()
@@ -1909,7 +1893,6 @@ namespace Ink_Canvas.Helpers
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | 开始解压ZIP文件到: {extractPath}");
                     SafeZipExtractor.ExtractZipSafely(zipFilePath, extractPath, overwrite: true);
-                    WriteUpdateManifest(zipFilePath, GetUpdateManifestFilePath(extractPath));
                     LogHelper.WriteLogToFile("AutoUpdate | ZIP文件解压完成");
                 }
                 catch (Exception ex)
@@ -2135,20 +2118,8 @@ namespace Ink_Canvas.Helpers
 
                 try
                 {
-                    string manifestPath = GetUpdateManifestFilePath(extractPath);
-                    if (!File.Exists(manifestPath))
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 更新清单不存在: {manifestPath}", LogHelper.LogType.Error);
-
-                        if (!isSilence)
-                        {
-                            MessageBox.Show(MainWindowStrings.Main_Update_FilesInUse, MainWindowStrings.Main_Update_FailedTitle, MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                        return;
-                    }
-
-                    HashSet<string> updateFiles = ReadUpdateManifest(manifestPath);
-                    bool copySuccess = await CopyDirectoryWithRetryAsync(extractPath, targetPath, updateFiles);
+                    // 使用递归复制方法，支持重试机制
+                    bool copySuccess = await CopyDirectoryWithRetryAsync(extractPath, targetPath);
                     if (copySuccess)
                     {
                         LogHelper.WriteLogToFile("AutoUpdate | 文件复制完成");
@@ -2305,7 +2276,7 @@ namespace Ink_Canvas.Helpers
         }
 
         // 异步复制目录的辅助方法（带重试机制）
-        private static async Task<bool> CopyDirectoryWithRetryAsync(string sourceDir, string destinationDir, HashSet<string> updateFiles, string relativeDir = "")
+        private static async Task<bool> CopyDirectoryWithRetryAsync(string sourceDir, string destinationDir, bool overwriteAllFiles = false)
         {
             var dir = new DirectoryInfo(sourceDir);
             DirectoryInfo[] dirs = dir.GetDirectories();
@@ -2320,17 +2291,17 @@ namespace Ink_Canvas.Helpers
             // 复制文件
             foreach (FileInfo file in dir.GetFiles())
             {
-                string relativePath = string.IsNullOrEmpty(relativeDir) ? file.Name : $"{relativeDir}/{file.Name}";
-                if (!updateFiles.Contains(relativePath))
+                // 只覆盖指定的文件，跳过其他文件
+                if (!overwriteAllFiles && !UpdateFilesToOverwrite.Contains(file.Name))
                 {
-                    LogHelper.WriteLogToFile($"AutoUpdate | 跳过文件（不在更新包清单中）: {relativePath}");
+                    LogHelper.WriteLogToFile($"AutoUpdate | 跳过文件（不在覆盖列表中）: {file.Name}");
                     continue;
                 }
 
                 string targetFilePath = Path.Combine(destinationDir, file.Name);
                 bool fileCopied = false;
 
-                LogHelper.WriteLogToFile($"AutoUpdate | 开始覆盖文件: {relativePath}");
+                LogHelper.WriteLogToFile($"AutoUpdate | 开始覆盖文件: {file.Name}");
 
                 // 重试机制，最多重试3次
                 for (int retry = 0; retry < 3; retry++)
@@ -2357,7 +2328,7 @@ namespace Ink_Canvas.Helpers
 
                         await Task.Run(() => file.CopyTo(targetFilePath));
                         fileCopied = true;
-                        LogHelper.WriteLogToFile($"AutoUpdate | 文件覆盖成功: {relativePath}");
+                        LogHelper.WriteLogToFile($"AutoUpdate | 文件覆盖成功: {file.Name}");
                         break;
                     }
                     catch (Exception ex)
@@ -2381,15 +2352,14 @@ namespace Ink_Canvas.Helpers
             // 递归复制子目录
             foreach (DirectoryInfo subDir in dirs)
             {
-                string relativeSubDir = string.IsNullOrEmpty(relativeDir) ? subDir.Name : $"{relativeDir}/{subDir.Name}";
-                if (!updateFiles.Any(path => path.StartsWith(relativeSubDir + "/", StringComparison.OrdinalIgnoreCase)))
+                if (!overwriteAllFiles && !UpdateDirectoriesToOverwrite.Contains(subDir.Name))
                 {
-                    LogHelper.WriteLogToFile($"AutoUpdate | 跳过目录（不在更新包清单中）: {relativeSubDir}");
+                    LogHelper.WriteLogToFile($"AutoUpdate | 跳过目录（不在覆盖列表中）: {subDir.Name}");
                     continue;
                 }
 
                 string newDestinationDir = Path.Combine(destinationDir, subDir.Name);
-                bool subDirCopied = await CopyDirectoryWithRetryAsync(subDir.FullName, newDestinationDir, updateFiles, relativeSubDir);
+                bool subDirCopied = await CopyDirectoryWithRetryAsync(subDir.FullName, newDestinationDir, overwriteAllFiles: true);
                 if (!subDirCopied)
                 {
                     allFilesCopied = false;
@@ -2400,7 +2370,7 @@ namespace Ink_Canvas.Helpers
         }
 
         // 异步复制目录的辅助方法（原版本，保留兼容性）
-        private static async Task CopyDirectoryAsync(string sourceDir, string destinationDir, HashSet<string> updateFiles, string relativeDir = "")
+        private static async Task CopyDirectoryAsync(string sourceDir, string destinationDir, bool overwriteAllFiles = false)
         {
             var dir = new DirectoryInfo(sourceDir);
             DirectoryInfo[] dirs = dir.GetDirectories();
@@ -2414,17 +2384,17 @@ namespace Ink_Canvas.Helpers
             // 复制文件
             foreach (FileInfo file in dir.GetFiles())
             {
-                string relativePath = string.IsNullOrEmpty(relativeDir) ? file.Name : $"{relativeDir}/{file.Name}";
-                if (!updateFiles.Contains(relativePath))
+                // 只覆盖指定的文件，跳过其他文件
+                if (!overwriteAllFiles && !UpdateFilesToOverwrite.Contains(file.Name))
                 {
-                    LogHelper.WriteLogToFile($"AutoUpdate | 跳过文件（不在更新包清单中）: {relativePath}");
+                    LogHelper.WriteLogToFile($"AutoUpdate | 跳过文件（不在覆盖列表中）: {file.Name}");
                     continue;
                 }
 
                 string targetFilePath = Path.Combine(destinationDir, file.Name);
                 try
                 {
-                    LogHelper.WriteLogToFile($"AutoUpdate | 开始覆盖文件: {relativePath}");
+                    LogHelper.WriteLogToFile($"AutoUpdate | 开始覆盖文件: {file.Name}");
 
                     // 如果目标文件存在且正在使用，先删除
                     if (File.Exists(targetFilePath))
@@ -2433,7 +2403,7 @@ namespace Ink_Canvas.Helpers
                     }
 
                     await Task.Run(() => file.CopyTo(targetFilePath));
-                    LogHelper.WriteLogToFile($"AutoUpdate | 文件覆盖成功: {relativePath}");
+                    LogHelper.WriteLogToFile($"AutoUpdate | 文件覆盖成功: {file.Name}");
                 }
                 catch (Exception ex)
                 {
@@ -2445,15 +2415,14 @@ namespace Ink_Canvas.Helpers
             // 递归复制子目录
             foreach (DirectoryInfo subDir in dirs)
             {
-                string relativeSubDir = string.IsNullOrEmpty(relativeDir) ? subDir.Name : $"{relativeDir}/{subDir.Name}";
-                if (!updateFiles.Any(path => path.StartsWith(relativeSubDir + "/", StringComparison.OrdinalIgnoreCase)))
+                if (!overwriteAllFiles && !UpdateDirectoriesToOverwrite.Contains(subDir.Name))
                 {
-                    LogHelper.WriteLogToFile($"AutoUpdate | 跳过目录（不在更新包清单中）: {relativeSubDir}");
+                    LogHelper.WriteLogToFile($"AutoUpdate | 跳过目录（不在覆盖列表中）: {subDir.Name}");
                     continue;
                 }
 
                 string newDestinationDir = Path.Combine(destinationDir, subDir.Name);
-                await CopyDirectoryAsync(subDir.FullName, newDestinationDir, updateFiles, relativeSubDir);
+                await CopyDirectoryAsync(subDir.FullName, newDestinationDir, overwriteAllFiles: true);
             }
         }
 
