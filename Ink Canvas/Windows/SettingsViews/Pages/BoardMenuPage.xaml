@@ -73,8 +73,8 @@
         </Style>
     </Page.Resources>
 
-    <ScrollViewer PanningMode="VerticalFirst">
-        <ikw:SimpleStackPanel Spacing="4">
+    <ScrollViewer x:Name="PageScrollViewer" PanningMode="VerticalFirst">
+        <ikw:SimpleStackPanel Spacing="4" Margin="24,0,24,0">
 
             <TextBlock Text="{x:Static props:NavStrings.Nav_BoardMenu}" FontSize="14" FontWeight="SemiBold" Margin="0,20,0,6"/>
             <TextBlock Text="配置白板工具菜单中显示的项目和顺序，最多 9 个（3×3 布局）。"
