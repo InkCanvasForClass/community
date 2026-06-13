@@ -419,30 +419,26 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 {
                     if (border.Tag != null || border.Cursor == Cursors.Hand)
                     {
-                        // 跳过拖放 ListBox 内的 Border，避免触摸处理与 GongSolutions 拖放冲突导致 UI 假死
-                        if (!IsInsideDragDropListBoxItem(border))
+                        border.IsManipulationEnabled = true;
+
+                        border.TouchDown += (s, e) =>
                         {
-                            border.IsManipulationEnabled = true;
-
-                            border.TouchDown += (s, e) =>
+                            var touchPoint = e.GetTouchPoint(border);
+                            var mouseEvent = new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Left)
                             {
-                                var touchPoint = e.GetTouchPoint(border);
-                                var mouseEvent = new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Left)
-                                {
-                                    RoutedEvent = UIElement.MouseLeftButtonDownEvent,
-                                    Source = border
-                                };
-                                border.RaiseEvent(mouseEvent);
-                                border.CaptureTouch(e.TouchDevice);
-                                e.Handled = true;
+                                RoutedEvent = UIElement.MouseLeftButtonDownEvent,
+                                Source = border
                             };
+                            border.RaiseEvent(mouseEvent);
+                            border.CaptureTouch(e.TouchDevice);
+                            e.Handled = true;
+                        };
 
-                            border.TouchUp += (s, e) =>
-                            {
-                                border.ReleaseTouchCapture(e.TouchDevice);
-                                e.Handled = true;
-                            };
-                        }
+                        border.TouchUp += (s, e) =>
+                        {
+                            border.ReleaseTouchCapture(e.TouchDevice);
+                            e.Handled = true;
+                        };
                     }
                 }
                 else if (child is Button button)
@@ -472,39 +468,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
 
                 EnableTouchSupportForControls(child);
             }
-        }
-
-        /// <summary>
-        /// 检查元素是否位于拖放 ListBox 的 ListBoxItem 内部。
-        /// 如果是，则不应添加触摸处理，否则会与 GongSolutions.WPF.DragDrop 的拖放逻辑冲突，导致触摸拖动时 UI 线程阻塞。
-        /// </summary>
-        private static bool IsInsideDragDropListBoxItem(DependencyObject element)
-        {
-            var current = element;
-            while (current != null)
-            {
-                if (current is ListBoxItem)
-                {
-                    // 继续向上查找 ListBox
-                    var parent = Media.VisualTreeHelper.GetParent(current);
-                    while (parent != null)
-                    {
-                        if (parent is ListBox listBox)
-                        {
-                            // 检查 ListBox 是否启用了拖放（IsDragSource 或 IsDropTarget）
-                            var isDragSource = listBox.GetValue(GongSolutions.Wpf.DragDrop.DragDrop.IsDragSourceProperty);
-                            var isDropTarget = listBox.GetValue(GongSolutions.Wpf.DragDrop.DragDrop.IsDropTargetProperty);
-                            if (isDragSource is true || isDropTarget is true)
-                                return true;
-                            break;
-                        }
-                        parent = Media.VisualTreeHelper.GetParent(parent);
-                    }
-                    return false;
-                }
-                current = Media.VisualTreeHelper.GetParent(current);
-            }
-            return false;
         }
     }
 }
