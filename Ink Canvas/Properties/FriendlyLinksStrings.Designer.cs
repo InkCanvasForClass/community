@@ -44,6 +44,8 @@ namespace Ink_Canvas.Properties
 
         public static string FriendlyLinks_FriendsSectionTitle => ResourceManager.GetString(nameof(FriendlyLinks_FriendsSectionTitle), _resourceCulture);
 
+        public static string FriendlyLinks_DeveloperCloudDescription => ResourceManager.GetString(nameof(FriendlyLinks_DeveloperCloudDescription), _resourceCulture);
+
         public static string FriendlyLinks_InkeysDescription => ResourceManager.GetString(nameof(FriendlyLinks_InkeysDescription), _resourceCulture);
 
         public static string FriendlyLinks_NamePickerDescription => ResourceManager.GetString(nameof(FriendlyLinks_NamePickerDescription), _resourceCulture);
