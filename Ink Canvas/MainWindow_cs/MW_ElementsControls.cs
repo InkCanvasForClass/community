@@ -2906,6 +2906,9 @@ namespace Ink_Canvas
                 return;
             }
 
+            if (element is PdfEmbeddedView)
+                lockAspect = true;
+
             if (!(element.RenderTransform is TransformGroup transformGroup)) return;
             var scaleTransform = transformGroup.Children.OfType<ScaleTransform>().FirstOrDefault();
             var translateTransform = transformGroup.Children.OfType<TranslateTransform>().FirstOrDefault();
