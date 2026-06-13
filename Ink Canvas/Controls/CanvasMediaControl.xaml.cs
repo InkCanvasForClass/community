@@ -165,6 +165,7 @@ namespace Ink_Canvas.Controls
         public void RegisterSelectHandler(MouseButtonEventHandler handler)
         {
             if (handler == null) return;
+            Root.MouseLeftButtonDown += (_, e) => handler(this, e);
             PreviewHost.MouseLeftButtonDown += (_, e) => handler(this, e);
             AudioPlaceholder.MouseLeftButtonDown += (_, e) => handler(this, e);
         }
@@ -172,6 +173,7 @@ namespace Ink_Canvas.Controls
         public void RegisterTouchSelectHandler(EventHandler<TouchEventArgs> handler)
         {
             if (handler == null) return;
+            Root.TouchDown += (_, e) => handler(this, e);
             PreviewHost.TouchDown += (_, e) => handler(this, e);
             AudioPlaceholder.TouchDown += (_, e) => handler(this, e);
         }
