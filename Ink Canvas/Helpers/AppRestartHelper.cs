@@ -92,18 +92,21 @@ namespace Ink_Canvas.Helpers
                 bool started;
                 if (IsRunningAsAdmin())
                 {
-                    started = UIAccessHelper.RestartAsNormalUserWithUIAccess();
+                    started = UIAccessHelper.RestartAsNormalUserWithUIAccess(sourcePid: (uint)Process.GetCurrentProcess().Id);
                 }
                 else
                 {
                     string exePath = Process.GetCurrentProcess().MainModule.FileName;
+                    int currentPid = Process.GetCurrentProcess().Id;
                     var psi = new ProcessStartInfo(exePath)
                     {
-                        Arguments = "--enable-uia-topmost-helper",
+                        Arguments = $"--enable-uia-topmost-helper --uia-source-pid {currentPid}",
                         UseShellExecute = true,
                         Verb = "runas"
                     };
                     Process.Start(psi);
+                    // 保持原进程短暂存活，确保提升的 helper 可以复制当前进程令牌。
+                    System.Threading.Thread.Sleep(2000);
                     started = true;
                 }
 

@@ -217,6 +217,22 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             {
                 if (SettingsManager.Settings.Advanced.EnableUIAccessTopMost && SettingsManager.Settings.Advanced.IsAlwaysOnTop)
                 {
+                    // UIA helper 启动出的目标进程不再重复触发 UIA 重启，避免重启循环。
+                    if (Array.IndexOf(Environment.GetCommandLineArgs(), "--uia-child") >= 0)
+                    {
+                        if (UIAccessHelper.HasUIAccess())
+                        {
+                            LogHelper.WriteLogToFile("UIAccess | 当前进程由 UIA helper 启动且已具有 UIAccess 权限");
+                        }
+                        else
+                        {
+                            LogHelper.WriteLogToFile("UIAccess | 当前进程由 UIA helper 启动，但未检测到 UIAccess 权限", LogHelper.LogType.Warning);
+                        }
+
+                        App.IsUIAccessTopMostEnabled = UIAccessHelper.HasUIAccess();
+                        return;
+                    }
+
                     var identity = WindowsIdentity.GetCurrent();
                     var principal = new WindowsPrincipal(identity);
 
