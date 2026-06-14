@@ -70,6 +70,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 ToggleSwitchFlipContentOnAutoFlip.IsOn = settings.Appearance.FlipContentOnAutoFlip;
             }
+
+            // 加载禁止工具栏动画设置
+            if (CardDisableToolbarAnimation != null)
+            {
+                CardDisableToolbarAnimation.IsOn = settings.Appearance.DisableToolbarAnimation;
+            }
         }
 
         private void UpdateAllSliderTexts()
@@ -186,6 +192,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (ToggleSwitchFlipContentOnAutoFlip == null) return;
 
             SettingsManager.Settings.Appearance.FlipContentOnAutoFlip = ToggleSwitchFlipContentOnAutoFlip.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void DisableToolbarAnimationToggleSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            if (CardDisableToolbarAnimation == null) return;
+
+            SettingsManager.Settings.Appearance.DisableToolbarAnimation = CardDisableToolbarAnimation.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
     }

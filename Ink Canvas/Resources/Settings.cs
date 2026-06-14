@@ -598,6 +598,9 @@ namespace Ink_Canvas
         [JsonProperty("flipContentOnAutoFlip")]
         public bool FlipContentOnAutoFlip { get; set; } = false;
 
+        [JsonProperty("disableToolbarAnimation")]
+        public bool DisableToolbarAnimation { get; set; } = false;
+
     }
 
     public class PowerPointSettings

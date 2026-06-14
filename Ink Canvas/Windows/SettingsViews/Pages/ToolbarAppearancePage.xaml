@@ -47,6 +47,12 @@
                             SwitchName="ToggleSwitchReverseToolbarContent"
                             Toggled="ReverseToolbarContentToggleSwitch_Toggled" />
 
+                    <controls:LabeledSettingsCard x:Name="CardDisableToolbarAnimation"
+                            Header="禁止工具栏动画"
+                            Description="开启后非选定工具栏按钮不会自动下沉居中"
+                            SwitchName="ToggleSwitchDisableToolbarAnimation"
+                            Toggled="DisableToolbarAnimationToggleSwitch_Toggled" />
+
                     <ui:SettingsExpander x:Name="ExpanderAutoFlipWhenSpaceInsufficient"
                             Header="空间不足时自动翻转" d:IsExpanded="True"
                             IsExpanded="{Binding IsOn, ElementName=ToggleSwitchAutoFlipWhenSpaceInsufficient, Mode=OneWay}"

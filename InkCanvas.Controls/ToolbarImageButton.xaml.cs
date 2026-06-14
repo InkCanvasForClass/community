@@ -1,13 +1,16 @@
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 
 namespace Ink_Canvas.Controls
 {
     public partial class ToolbarImageButton : UserControl
     {
         private static ToolbarImageButton _lastPressedButton;
+        private bool _isVerticalOrientation;
 
         public static readonly DependencyProperty LabelProperty = DependencyProperty.Register(
             nameof(Label), typeof(string), typeof(ToolbarImageButton),
@@ -89,6 +92,7 @@ namespace Ink_Canvas.Controls
 
         public void ApplyOrientation(bool isVertical)
         {
+            _isVerticalOrientation = isVertical;
             if (isVertical)
             {
                 ButtonPanel.Width = 43;
@@ -100,6 +104,50 @@ namespace Ink_Canvas.Controls
                 ButtonPanel.Width = 44;
                 ButtonPanel.Height = 43;
                 ButtonBorder.Margin = new Thickness(0, 2, 0, 7);
+            }
+        }
+
+        public void SetSelectedVisualOffset(bool isSelected)
+        {
+            if (ButtonContent == null) return;
+
+            var transform = ButtonContent.RenderTransform as TranslateTransform;
+
+            if (_isVerticalOrientation)
+            {
+                // 选定项：左边距归零，内容不动
+                // 非选定项：恢复左边距，内容向左偏移2px居中
+                ButtonBorder.Margin = isSelected
+                    ? new Thickness(0, 0, 7, 0)
+                    : new Thickness(2, 0, 7, 0);
+
+                double targetX = isSelected ? 0 : -2;
+                double fromX = transform?.X ?? 0;
+                if (Math.Abs(fromX - targetX) < 0.5) return;
+
+                var newTransform = new TranslateTransform(fromX, 0);
+                ButtonContent.RenderTransform = newTransform;
+                var animX = new DoubleAnimation(targetX, new Duration(TimeSpan.FromMilliseconds(120)))
+                { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } };
+                newTransform.BeginAnimation(TranslateTransform.XProperty, animX);
+            }
+            else
+            {
+                // 选定项：上边距归零，内容不动
+                // 非选定项：恢复上边距，内容下移2px居中
+                ButtonBorder.Margin = isSelected
+                    ? new Thickness(0, 0, 0, 7)
+                    : new Thickness(0, 2, 0, 7);
+
+                double targetY = isSelected ? 0 : 2;
+                double fromY = transform?.Y ?? 0;
+                if (Math.Abs(fromY - targetY) < 0.5) return;
+
+                var newTransform = new TranslateTransform(0, fromY);
+                ButtonContent.RenderTransform = newTransform;
+                var animY = new DoubleAnimation(targetY, new Duration(TimeSpan.FromMilliseconds(120)))
+                { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } };
+                newTransform.BeginAnimation(TranslateTransform.YProperty, animY);
             }
         }
 
@@ -127,16 +175,21 @@ namespace Ink_Canvas.Controls
             if (!IsEnabled) return;
             if (_lastPressedButton != null && _lastPressedButton != this)
             {
-                _lastPressedButton.ButtonBorder.Background = Brushes.Transparent;
+                _lastPressedButton.PressedBackground.Background = Brushes.Transparent;
             }
             _lastPressedButton = this;
-            ButtonBorder.Background = new SolidColorBrush(Color.FromArgb(28, 24, 24, 27));
+            PressedBackground.Background = new SolidColorBrush(Color.FromArgb(28, 24, 24, 27));
             ButtonMouseDown?.Invoke(this, e);
         }
 
         private void ButtonPanel_MouseLeave(object sender, MouseEventArgs e)
         {
             if (!IsEnabled) return;
+            if (_lastPressedButton == this)
+            {
+                PressedBackground.Background = Brushes.Transparent;
+                _lastPressedButton = null;
+            }
             ButtonMouseLeave?.Invoke(this, e);
         }
 
@@ -145,7 +198,7 @@ namespace Ink_Canvas.Controls
             if (!IsEnabled) return;
             if (_lastPressedButton == this)
             {
-                ButtonBorder.Background = Brushes.Transparent;
+                PressedBackground.Background = Brushes.Transparent;
                 _lastPressedButton = null;
             }
             ButtonMouseUp?.Invoke(this, e);
