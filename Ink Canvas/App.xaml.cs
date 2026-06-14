@@ -1537,6 +1537,22 @@ namespace Ink_Canvas
         private static volatile bool isAppExiting = false;
 
         /// <summary>
+        /// [调试用] 停止心跳计时器，模拟主线程无响应，下一次守护检查将触发心跳超时重启。
+        /// </summary>
+        internal static void DebugStopHeartbeat()
+        {
+            try
+            {
+                heartbeatTimer?.Stop();
+                LogHelper.WriteLogToFile("[Debug] 心跳计时器已手动停止，等待守护检查检测超时", LogHelper.LogType.Warning);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Debug] 停止心跳计时器失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
         /// 启动并管理应用的心跳与守护检查定时器，监测启动阶段与主线程是否无响应，并在符合配置的情况下尝试静默重启应用。
         /// </summary>
         /// <remarks>

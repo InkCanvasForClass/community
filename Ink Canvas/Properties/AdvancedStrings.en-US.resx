@@ -144,4 +144,34 @@
   <data name="Debug_SettingsExpanderExample" xml:space="preserve">
     <value>SettingsExpander Example</value>
   </data>
+  <data name="Debug_CrashTest_Section" xml:space="preserve">
+    <value>Crash Restart Test</value>
+  </data>
+  <data name="Debug_SimulateCrash_Header" xml:space="preserve">
+    <value>Simulate Crash</value>
+  </data>
+  <data name="Debug_SimulateCrash_Desc" xml:space="preserve">
+    <value>Click to trigger an unhandled exception immediately. Use this to verify the crash restart breaker mechanism works correctly.</value>
+  </data>
+  <data name="Debug_SimulateCrash_Button" xml:space="preserve">
+    <value>Trigger Crash</value>
+  </data>
+  <data name="Debug_SimulateHeartbeatTimeout_Header" xml:space="preserve">
+    <value>Simulate Heartbeat Timeout</value>
+  </data>
+  <data name="Debug_SimulateHeartbeatTimeout_Desc" xml:space="preserve">
+    <value>Click to stop the heartbeat timer. The next guard check will detect the timeout and trigger a restart.</value>
+  </data>
+  <data name="Debug_SimulateHeartbeatTimeout_Button" xml:space="preserve">
+    <value>Stop Heartbeat</value>
+  </data>
+  <data name="Debug_ResetStartupCount_Header" xml:space="preserve">
+    <value>Reset Breaker Counter</value>
+  </data>
+  <data name="Debug_ResetStartupCount_Desc" xml:space="preserve">
+    <value>Clear the startup-count file to unlock the breaker lock caused by consecutive crashes.</value>
+  </data>
+  <data name="Debug_ResetStartupCount_Button" xml:space="preserve">
+    <value>Reset Counter</value>
+  </data>
 </root>

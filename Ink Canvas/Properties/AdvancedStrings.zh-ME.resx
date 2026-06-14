@@ -144,4 +144,34 @@
   <data name="Debug_SettingsExpanderExample" xml:space="preserve">
     <value>SettingsExpander 示例</value>
   </data>
+  <data name="Debug_CrashTest_Section" xml:space="preserve">
+    <value>崩溃重启测试</value>
+  </data>
+  <data name="Debug_SimulateCrash_Header" xml:space="preserve">
+    <value>模拟崩溃（砰！）</value>
+  </data>
+  <data name="Debug_SimulateCrash_Desc" xml:space="preserve">
+    <value>点一下直接炸一个未处理异常，用来验证崩溃重启熔断有没有乖乖干活。</value>
+  </data>
+  <data name="Debug_SimulateCrash_Button" xml:space="preserve">
+    <value>💥 炸一下</value>
+  </data>
+  <data name="Debug_SimulateHeartbeatTimeout_Header" xml:space="preserve">
+    <value>假装心跳停了</value>
+  </data>
+  <data name="Debug_SimulateHeartbeatTimeout_Desc" xml:space="preserve">
+    <value>点一下把心跳计时器干掉，下一轮守护检查发现没心跳就会触发重启。</value>
+  </data>
+  <data name="Debug_SimulateHeartbeatTimeout_Button" xml:space="preserve">
+    <value>停止心跳</value>
+  </data>
+  <data name="Debug_ResetStartupCount_Header" xml:space="preserve">
+    <value>重置熔断计数器</value>
+  </data>
+  <data name="Debug_ResetStartupCount_Desc" xml:space="preserve">
+    <value>清掉 startup-count 文件，解锁连环崩导致的熔断封锁。</value>
+  </data>
+  <data name="Debug_ResetStartupCount_Button" xml:space="preserve">
+    <value>重置计数</value>
+  </data>
 </root>

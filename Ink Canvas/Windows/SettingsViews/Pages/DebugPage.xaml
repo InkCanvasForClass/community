@@ -46,6 +46,37 @@ mc:Ignorable="d"
                     Toggled="ToggleSwitchPptComDebugProbe_Toggled"/>
 
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                    Text="{x:Static props:AdvancedStrings.Debug_CrashTest_Section}" />
+
+                <ui:SettingsCard Header="{x:Static props:AdvancedStrings.Debug_SimulateCrash_Header}"
+                    Description="{x:Static props:AdvancedStrings.Debug_SimulateCrash_Desc}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Error}"/>
+                    </ui:SettingsCard.HeaderIcon>
+                    <Button Content="{x:Static props:AdvancedStrings.Debug_SimulateCrash_Button}" Click="BtnTestCrash_Click"
+                        Style="{DynamicResource AccentButtonStyle}"
+                        Padding="14,6"/>
+                </ui:SettingsCard>
+
+                <ui:SettingsCard Header="{x:Static props:AdvancedStrings.Debug_SimulateHeartbeatTimeout_Header}"
+                    Description="{x:Static props:AdvancedStrings.Debug_SimulateHeartbeatTimeout_Desc}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Stopwatch}"/>
+                    </ui:SettingsCard.HeaderIcon>
+                    <Button Content="{x:Static props:AdvancedStrings.Debug_SimulateHeartbeatTimeout_Button}" Click="BtnTestHeartbeatTimeout_Click"
+                        Padding="14,6"/>
+                </ui:SettingsCard>
+
+                <ui:SettingsCard Header="{x:Static props:AdvancedStrings.Debug_ResetStartupCount_Header}"
+                    Description="{x:Static props:AdvancedStrings.Debug_ResetStartupCount_Desc}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}"/>
+                    </ui:SettingsCard.HeaderIcon>
+                    <Button Content="{x:Static props:AdvancedStrings.Debug_ResetStartupCount_Button}" Click="BtnResetStartupCount_Click"
+                        Padding="14,6"/>
+                </ui:SettingsCard>
+
+                <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                     Text="{x:Static props:AdvancedStrings.Debug_IconSettings}" />
 
                 <ui:SettingsExpander Header="{x:Static props:AdvancedStrings.Debug_SettingsExpanderExample}" IsEnabled="True"

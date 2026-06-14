@@ -107,5 +107,25 @@ namespace Ink_Canvas.Properties
         public static string Debug_IconSettings => ResourceManager.GetString(nameof(Debug_IconSettings), _resourceCulture);
 
         public static string Debug_SettingsExpanderExample => ResourceManager.GetString(nameof(Debug_SettingsExpanderExample), _resourceCulture);
+
+        public static string Debug_CrashTest_Section => ResourceManager.GetString(nameof(Debug_CrashTest_Section), _resourceCulture);
+
+        public static string Debug_SimulateCrash_Header => ResourceManager.GetString(nameof(Debug_SimulateCrash_Header), _resourceCulture);
+
+        public static string Debug_SimulateCrash_Desc => ResourceManager.GetString(nameof(Debug_SimulateCrash_Desc), _resourceCulture);
+
+        public static string Debug_SimulateCrash_Button => ResourceManager.GetString(nameof(Debug_SimulateCrash_Button), _resourceCulture);
+
+        public static string Debug_SimulateHeartbeatTimeout_Header => ResourceManager.GetString(nameof(Debug_SimulateHeartbeatTimeout_Header), _resourceCulture);
+
+        public static string Debug_SimulateHeartbeatTimeout_Desc => ResourceManager.GetString(nameof(Debug_SimulateHeartbeatTimeout_Desc), _resourceCulture);
+
+        public static string Debug_SimulateHeartbeatTimeout_Button => ResourceManager.GetString(nameof(Debug_SimulateHeartbeatTimeout_Button), _resourceCulture);
+
+        public static string Debug_ResetStartupCount_Header => ResourceManager.GetString(nameof(Debug_ResetStartupCount_Header), _resourceCulture);
+
+        public static string Debug_ResetStartupCount_Desc => ResourceManager.GetString(nameof(Debug_ResetStartupCount_Desc), _resourceCulture);
+
+        public static string Debug_ResetStartupCount_Button => ResourceManager.GetString(nameof(Debug_ResetStartupCount_Button), _resourceCulture);
     }
 }
