@@ -54,6 +54,9 @@
   <data name="Tray_ClickAction_HideShowMainWindow" xml:space="preserve">
     <value>Hide/show main window</value>
   </data>
+  <data name="Tray_ClickAction_NoAction" xml:space="preserve">
+    <value>No action</value>
+  </data>
   <data name="Tray_ClickAction_OpenSettings" xml:space="preserve">
     <value>Open settings</value>
   </data>

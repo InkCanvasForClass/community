@@ -1131,6 +1131,7 @@ namespace Ink_Canvas.Properties
             dict["Tray_ClickAction_DisableAllHotkeys"] = ("WindowStrings", "Tray_ClickAction_DisableAllHotkeys");
             dict["Tray_ClickAction_ForceFullScreen"] = ("WindowStrings", "Tray_ClickAction_ForceFullScreen");
             dict["Tray_ClickAction_HideShowMainWindow"] = ("WindowStrings", "Tray_ClickAction_HideShowMainWindow");
+            dict["Tray_ClickAction_NoAction"] = ("WindowStrings", "Tray_ClickAction_NoAction");
             dict["Tray_ClickAction_OpenSettings"] = ("WindowStrings", "Tray_ClickAction_OpenSettings");
             dict["Tray_ClickAction_ResetFloatingBarPosition"] = ("WindowStrings", "Tray_ClickAction_ResetFloatingBarPosition");
             dict["Tray_ClickAction_RestartApp"] = ("WindowStrings", "Tray_ClickAction_RestartApp");

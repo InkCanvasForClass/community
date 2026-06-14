@@ -48,6 +48,8 @@ namespace Ink_Canvas.Properties
 
         public static string Tray_ClickAction_HideShowMainWindow => ResourceManager.GetString(nameof(Tray_ClickAction_HideShowMainWindow), _resourceCulture);
 
+        public static string Tray_ClickAction_NoAction => ResourceManager.GetString(nameof(Tray_ClickAction_NoAction), _resourceCulture);
+
         public static string Tray_ClickAction_OpenSettings => ResourceManager.GetString(nameof(Tray_ClickAction_OpenSettings), _resourceCulture);
 
         public static string Tray_ClickAction_ResetFloatingBarPosition => ResourceManager.GetString(nameof(Tray_ClickAction_ResetFloatingBarPosition), _resourceCulture);

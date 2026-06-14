@@ -54,6 +54,9 @@
   <data name="Tray_ClickAction_HideShowMainWindow" xml:space="preserve">
     <value>隐藏/显示主窗口</value>
   </data>
+  <data name="Tray_ClickAction_NoAction" xml:space="preserve">
+    <value>无操作</value>
+  </data>
   <data name="Tray_ClickAction_OpenSettings" xml:space="preserve">
     <value>打开设置</value>
   </data>

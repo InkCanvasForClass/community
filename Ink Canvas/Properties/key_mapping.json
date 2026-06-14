@@ -467,6 +467,10 @@
                                                 "NewKey":  "Tray_ClickAction_HideShowMainWindow",
                                                 "Group":  "WindowStrings"
                                             },
+    "Tray_ClickAction_NoAction":  {
+                                      "NewKey":  "Tray_ClickAction_NoAction",
+                                      "Group":  "WindowStrings"
+                                  },
     "Notification_AnimationSimple":  {
                                          "NewKey":  "AnimationSimple",
                                          "Group":  "NotificationStrings"

@@ -81,6 +81,7 @@
                                     <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_ResetFloatingBarPosition}" />
                                     <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_RestartApp}" />
                                     <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_CloseApp}" />
+                                    <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_NoAction}" />
                                 </ComboBox>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{x:Static props:WindowStrings.Tray_RightClickAction}">
@@ -97,6 +98,7 @@
                                     <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_ResetFloatingBarPosition}" />
                                     <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_RestartApp}" />
                                     <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_CloseApp}" />
+                                    <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_NoAction}" />
                                 </ComboBox>
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>

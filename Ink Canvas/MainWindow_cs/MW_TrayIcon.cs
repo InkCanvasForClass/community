@@ -71,6 +71,8 @@ namespace Ink_Canvas
                 case TrayClickAction.CloseApp:
                     CloseAppTrayIconMenuItem_Clicked(null, null);
                     break;
+                case TrayClickAction.NoAction:
+                    break;
             }
         }
 
