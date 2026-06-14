@@ -182,7 +182,7 @@ namespace Ink_Canvas.Helpers
 
                     if (slider.IsSnapToTickEnabled && slider.TickFrequency > 0)
                     {
-                        var tickCount = (int)((slider.Maximum - slider.Minimum) / slider.TickFrequency);
+                        var tickCount = (int)Math.Round((slider.Maximum - slider.Minimum) / slider.TickFrequency);
                         var tickIndex = (int)Math.Round(relativePosition * tickCount);
                         newValue = slider.Minimum + tickIndex * slider.TickFrequency;
                     }
@@ -238,7 +238,7 @@ namespace Ink_Canvas.Helpers
 
                 if (slider.IsSnapToTickEnabled && slider.TickFrequency > 0)
                 {
-                    var tickCount = (int)((slider.Maximum - slider.Minimum) / slider.TickFrequency);
+                    var tickCount = (int)Math.Round((slider.Maximum - slider.Minimum) / slider.TickFrequency);
                     var tickIndex = (int)Math.Round(relativePosition * tickCount);
                     newValue = slider.Minimum + tickIndex * slider.TickFrequency;
                 }
