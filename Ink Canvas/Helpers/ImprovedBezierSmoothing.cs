@@ -276,13 +276,8 @@ namespace Ink_Canvas.Helpers
         {
             if (points.Length == 0) return points;
 
-            // 如果点数过多，进行重采样
-            if (points.Length > _config.MaxPointsPerStroke)
-            {
-                return ResamplePoints(points, _config.ResampleInterval);
-            }
-
-            return points;
+            // 重采样为等距点，保证笔画均匀
+            return ResamplePoints(points, _config.ResampleInterval);
         }
 
         /// <summary>

@@ -107,22 +107,17 @@ namespace Ink_Canvas.Helpers
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            // 放宽点数限制
-            if (smoothedPoints.Length > originalPoints.Length * 3.0)
-            {
-                System.Diagnostics.Debug.WriteLine($"AsyncAdvancedBezierSmoothing: 点数过多，进行重采样");
-                // 如果点数增加太多，进行重采样
-                var resampleWatch = System.Diagnostics.Stopwatch.StartNew();
-                smoothedPoints = ResampleEquidistantOptimized(smoothedPoints, ResampleInterval);
-                resampleWatch.Stop();
-                PerformanceMonitor?.RecordResampleTime(resampleWatch.Elapsed);
-            }
+            // 重采样为等距点，保证笔画均匀
+            var resampleWatch = System.Diagnostics.Stopwatch.StartNew();
+            smoothedPoints = ResampleEquidistantOptimized(smoothedPoints, ResampleInterval);
+            resampleWatch.Stop();
+            PerformanceMonitor?.RecordResampleTime(resampleWatch.Elapsed);
 
             // 记录输入/输出点数
             PerformanceMonitor?.RecordPointCounts(originalPoints.Length, smoothedPoints.Length);
 
-            // 进一步放宽最终检查
-            if (smoothedPoints.Length > originalPoints.Length * 2.5)
+            // 最终点数安全检查
+            if (smoothedPoints.Length > originalPoints.Length * 3.0)
             {
                 System.Diagnostics.Debug.WriteLine($"AsyncAdvancedBezierSmoothing: 重采样后点数仍然过多，返回原始笔画");
                 // 如果仍然太多点，使用原始笔画
@@ -773,6 +768,9 @@ namespace Ink_Canvas.Helpers
                 System.Diagnostics.Debug.WriteLine($"AdvancedBezierSmoothing: 点数增加过多，返回原始笔画 (原始:{originalPoints.Length}, 平滑后:{smoothedPoints.Length})");
                 return stroke; // 如果点数增加太多，返回原始笔画
             }
+
+            // 重采样为等距点，保证笔画均匀
+            smoothedPoints = ResampleEquidistant(smoothedPoints.ToList(), ResampleInterval).ToArray();
 
             var smoothedStroke = new Stroke(new StylusPointCollection(smoothedPoints))
             {
