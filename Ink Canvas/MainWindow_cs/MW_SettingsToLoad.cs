@@ -32,6 +32,16 @@ namespace Ink_Canvas
             LoadSettings(false, skipAutoUpdateCheck: true);
         }
 
+        /// <summary>
+        /// 重置为默认设置并记录失败原因。仅在 <see cref="Settings"/> 仍为 null 或加载链路完全失败时调用。
+        /// </summary>
+        /// <param name="reason">失败原因描述，会以 Warning 级别写入日志。</param>
+        private void FallbackToDefaultSettings(string reason)
+        {
+            LogHelper.WriteLogToFile(reason, LogHelper.LogType.Warning);
+            BtnResetToSuggestion_Click(null, null);
+        }
+
         /// <param name="skipAutoUpdateCheck">指示是否跳过自动更新检查；为 true 时不会在加载设置后执行自动更新检测。</param>
         private void LoadSettings(bool isStartup = false, bool skipAutoUpdateCheck = false)
         {
@@ -68,8 +78,7 @@ namespace Ink_Canvas
                             // 如果仍然失败，使用默认设置
                             if (Settings == null)
                             {
-                                LogHelper.WriteLogToFile("从备份恢复失败，使用默认设置", LogHelper.LogType.Warning);
-                                BtnResetToSuggestion_Click(null, null);
+                                FallbackToDefaultSettings("从备份恢复失败，使用默认设置");
                             }
                         }
                     }
@@ -94,15 +103,14 @@ namespace Ink_Canvas
                             catch (Exception restoreEx)
                             {
                                 LogHelper.WriteLogToFile($"从备份恢复后重新加载失败: {restoreEx.Message}", LogHelper.LogType.Error);
-                                BtnResetToSuggestion_Click(null, null);
+                                FallbackToDefaultSettings("从备份恢复后重新加载失败，使用默认设置");
                             }
                         }
 
                         // 如果仍然失败，使用默认设置
                         if (Settings == null)
                         {
-                            LogHelper.WriteLogToFile("从备份恢复失败，使用默认设置", LogHelper.LogType.Warning);
-                            BtnResetToSuggestion_Click(null, null);
+                            FallbackToDefaultSettings("从备份恢复失败，使用默认设置");
                         }
                     }
                 }
@@ -124,21 +132,14 @@ namespace Ink_Canvas
                         catch (Exception restoreEx)
                         {
                             LogHelper.WriteLogToFile($"从备份恢复后加载失败: {restoreEx.Message}", LogHelper.LogType.Error);
-                            BtnResetToSuggestion_Click(null, null);
+                            FallbackToDefaultSettings("从备份恢复后加载失败，使用默认设置");
                         }
-                    }
-                    else
-                    {
-                        // 备份恢复失败（备份目录不存在等），使用默认设置
-                        LogHelper.WriteLogToFile("备份恢复失败，使用默认设置", LogHelper.LogType.Warning);
-                        BtnResetToSuggestion_Click(null, null);
                     }
 
                     // 如果仍然失败，使用默认设置
                     if (Settings == null)
                     {
-                        LogHelper.WriteLogToFile("从备份恢复失败，使用默认设置", LogHelper.LogType.Warning);
-                        BtnResetToSuggestion_Click(null, null);
+                        FallbackToDefaultSettings("从备份恢复失败，使用默认设置");
                     }
                 }
             }
@@ -182,16 +183,6 @@ namespace Ink_Canvas
                 {
                     LogHelper.WriteLogToFile($"启动时切换光标模式失败: {ex.Message}", LogHelper.LogType.Warning);
                 }
-            }
-
-            try
-            {
-                if (Settings?.Startup != null)
-                {
-                }
-            }
-            catch
-            {
             }
 
             if (Settings.Startup != null)
@@ -241,16 +232,13 @@ namespace Ink_Canvas
                 BoundsWidth = Settings.Advanced.FingerModeBoundsWidth;
             }
 
-            if (Settings.Startup != null)
+            if (Settings.Startup.CrashAction == 0)
             {
-                if (Settings.Startup.CrashAction == 0)
-                {
-                    App.CrashAction = App.CrashActionType.SilentRestart;
-                }
-                else
-                {
-                    App.CrashAction = App.CrashActionType.NoAction;
-                }
+                App.CrashAction = App.CrashActionType.SilentRestart;
+            }
+            else
+            {
+                App.CrashAction = App.CrashActionType.NoAction;
             }
 
             // Appearance - UI initialization (settings loading moved to AppearancePage)
@@ -320,15 +308,6 @@ namespace Ink_Canvas
                             RightUnFoldBtnImgChevron.Height = 18;
                             RightUnFoldBtnImgChevron.RenderTransform = null;
                             break;
-                    }
-
-                    if (Settings.Appearance.IsTransparentButtonBackground)
-                    {
-                        { /* Old UI removed */ }
-                    }
-                    else
-                    {
-                        { /* Old UI removed */ }
                     }
 
                     if (Settings.Appearance.FloatingBarImg >= 12 + Settings.Appearance.CustomFloatingBarImgs.Count)
