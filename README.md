@@ -123,6 +123,9 @@
 感谢 [yuwenhui2020](https://github.com/yuwenhui2020) 为 `Ink Canvas 使用说明` 做出的贡献！  
 感谢 [CN-Ironegg](https://github.com/CN-Ironegg)、[jiajiaxd](https://github.com/jiajiaxd)、[Kengwang](https://github.com/kengwang)、[Raspberry Kan](https://github.com/Raspberry-Monster)、[clover-yan](https://github.com/clover-yan)、[STBBRD](https://github.com/STBBRD)、[ChangSakura](https://github.com/WuChanging) 为本项目贡献代码！
 
+## 赞助
+😻👉 [给CJK捐款谢谢喵](https://www.ifdian.net/a/CJIK_mkp)
+
 ## License
 
 GPLv3
