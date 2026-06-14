@@ -437,8 +437,11 @@ namespace Ink_Canvas.Helpers
                     return;
                 }
 
+                // 获取目标透明度（菜单透明度设置）
+                double targetOpacity = GetPopupTargetOpacity(popup);
+
                 child.Visibility = Visibility.Visible;
-                child.Opacity = 0.5;
+                child.Opacity = targetOpacity * 0.5;
                 child.RenderTransform = new TranslateTransform(0, 10);
 
                 popup.IsOpen = true;
@@ -450,8 +453,8 @@ namespace Ink_Canvas.Helpers
 
                 var fadeInAnimation = new DoubleAnimation
                 {
-                    From = 0.5,
-                    To = 1,
+                    From = targetOpacity * 0.5,
+                    To = targetOpacity,
                     Duration = TimeSpan.FromSeconds(duration)
                 };
                 fadeInAnimation.EasingFunction = new CubicEase();
@@ -490,11 +493,13 @@ namespace Ink_Canvas.Helpers
                     return;
                 }
 
+                double targetOpacity = GetPopupTargetOpacity(popup);
+
                 var sb = new Storyboard();
 
                 var fadeOutAnimation = new DoubleAnimation
                 {
-                    From = 1,
+                    From = targetOpacity,
                     To = 0,
                     Duration = TimeSpan.FromSeconds(duration)
                 };
@@ -516,7 +521,7 @@ namespace Ink_Canvas.Helpers
                 sb.Completed += (s, e) =>
                 {
                     popup.IsOpen = false;
-                    child.Opacity = 1;
+                    child.Opacity = targetOpacity;
                     child.RenderTransform = new TranslateTransform();
                 };
 
@@ -524,6 +529,38 @@ namespace Ink_Canvas.Helpers
                 sb.Begin(child);
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+        }
+
+        /// <summary>
+        /// 根据 Popup 名称获取其目标透明度（菜单透明度设置）
+        /// </summary>
+        private static double GetPopupTargetOpacity(Popup popup)
+        {
+            var settings = Ink_Canvas.Windows.SettingsViews.Helpers.SettingsManager.Settings;
+            var mw = Application.Current.MainWindow as Ink_Canvas.MainWindow;
+            bool isPPTMode = mw != null && mw.currentMode == 2;
+
+            // 浮动栏菜单
+            string name = popup.Name;
+            if (name == "PenPalette" || name == "EraserSizePanel" || name == "BorderTools"
+                || name == "BorderDrawShape" || name == "TwoFingerGestureBorder")
+            {
+                return isPPTMode
+                    ? settings.Appearance.FloatingBarMenuOpacityInPPT
+                    : settings.Appearance.FloatingBarMenuOpacity;
+            }
+
+            // 白板菜单
+            if (name == "BoardTwoFingerGestureBorder" || name == "BackgroundPalette"
+                || name == "BoardPenPalette" || name == "BoardEraserSizePanel"
+                || name == "BoardBorderDrawShape" || name == "BoardImageOptionsPanel"
+                || name == "BoardBorderToolsPopup")
+            {
+                return settings.Appearance.BoardMenuOpacity;
+            }
+
+            // 其他 Popup 默认不透明
+            return 1.0;
         }
 
     }

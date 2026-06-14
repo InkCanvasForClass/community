@@ -127,6 +127,41 @@
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
+                    <Rectangle Height="16" />
+                    <ui:SettingsExpander Header="{x:Static props:ThemeStrings.Theme_FloatingBarMenuOpacity}"
+                                         IsExpanded="True">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.PreviewLink}" />
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_FloatingBarMenuOpacity}">
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock x:Name="FloatingBarMenuOpacityText"
+                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                    <Slider x:Name="FloatingBarMenuOpacitySlider" Minimum="0.3"
+                                            Maximum="1" Width="200"
+                                            IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
+                                            TickPlacement="None" AutoToolTipPlacement="None"
+                                            ValueChanged="FloatingBarMenuOpacitySlider_ValueChanged" />
+                                </ikw:SimpleStackPanel>
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_FloatingBarMenuOpacityInPPT}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Play}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock x:Name="FloatingBarMenuOpacityInPPTText"
+                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                    <Slider x:Name="FloatingBarMenuOpacityInPPTSlider" Minimum="0.3"
+                                            Maximum="1" Width="200"
+                                            IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
+                                            TickPlacement="None" AutoToolTipPlacement="None"
+                                            ValueChanged="FloatingBarMenuOpacityInPPTSlider_ValueChanged" />
+                                </ikw:SimpleStackPanel>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
+
                     <Rectangle Height="48" />
                 </ikw:SimpleStackPanel>
             </Grid>

@@ -253,5 +253,11 @@ namespace Ink_Canvas.Properties
         public static string Theme_QuotePosition_BottomLeft => ResourceManager.GetString(nameof(Theme_QuotePosition_BottomLeft), _resourceCulture);
 
         public static string Theme_QuotePosition_BottomRight => ResourceManager.GetString(nameof(Theme_QuotePosition_BottomRight), _resourceCulture);
+
+        public static string Theme_FloatingBarMenuOpacity => ResourceManager.GetString(nameof(Theme_FloatingBarMenuOpacity), _resourceCulture);
+
+        public static string Theme_FloatingBarMenuOpacityInPPT => ResourceManager.GetString(nameof(Theme_FloatingBarMenuOpacityInPPT), _resourceCulture);
+
+        public static string Theme_BoardMenuOpacity => ResourceManager.GetString(nameof(Theme_BoardMenuOpacity), _resourceCulture);
     }
 }

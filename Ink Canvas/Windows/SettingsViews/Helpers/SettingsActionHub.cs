@@ -175,6 +175,25 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             if (mw != null) mw.ViewboxBlackboardRightSide.Opacity = value;
         }
 
+        public static void OnFloatingBarMenuOpacityChanged(double value)
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.ApplyFloatingBarMenuOpacity();
+        }
+
+        public static void OnFloatingBarMenuOpacityInPPTChanged(double value)
+        {
+            var mw = GetMainWindow();
+            if (mw != null && mw.currentMode == 2)
+                mw.ApplyFloatingBarMenuOpacity();
+        }
+
+        public static void OnBoardMenuOpacityChanged(double value)
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.ApplyBoardMenuOpacity();
+        }
+
         public static void OnTimeDisplayInWhiteboardChanged(bool isOn)
         {
             var mw = GetMainWindow();

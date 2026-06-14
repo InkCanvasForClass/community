@@ -363,4 +363,13 @@
   <data name="Theme_AutoCollapseQuickPanelDelay" xml:space="preserve">
     <value>Auto-collapse delay</value>
   </data>
+  <data name="Theme_FloatingBarMenuOpacity" xml:space="preserve">
+    <value>Floating bar menu opacity</value>
+  </data>
+  <data name="Theme_FloatingBarMenuOpacityInPPT" xml:space="preserve">
+    <value>Menu opacity in PPT mode</value>
+  </data>
+  <data name="Theme_BoardMenuOpacity" xml:space="preserve">
+    <value>Whiteboard menu opacity</value>
+  </data>
 </root>

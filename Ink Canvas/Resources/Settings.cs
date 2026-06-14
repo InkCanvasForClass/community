@@ -496,6 +496,12 @@ namespace Ink_Canvas
         public TrayClickAction TrayRightClickAction { get; set; } = TrayClickAction.ShowMenu;
         [JsonProperty("viewboxFloatingBarOpacityInPPTValue")]
         public double ViewboxFloatingBarOpacityInPPTValue { get; set; } = 0.5;
+        [JsonProperty("floatingBarMenuOpacity")]
+        public double FloatingBarMenuOpacity { get; set; } = 1.0;
+        [JsonProperty("floatingBarMenuOpacityInPPT")]
+        public double FloatingBarMenuOpacityInPPT { get; set; } = 1.0;
+        [JsonProperty("boardMenuOpacity")]
+        public double BoardMenuOpacity { get; set; } = 1.0;
         [JsonProperty("viewboxBlackBoardScaleTransformValue")]
         public double ViewboxBlackBoardScaleTransformValue { get; set; } = 1;
         [JsonProperty("viewboxBlackBoardLeftScaleTransformValue")]

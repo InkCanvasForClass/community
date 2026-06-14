@@ -363,4 +363,13 @@
   <data name="Theme_AutoCollapseQuickPanelDelay" xml:space="preserve">
     <value>自动收起延迟时间</value>
   </data>
+  <data name="Theme_FloatingBarMenuOpacity" xml:space="preserve">
+    <value>浮动栏菜单透明度</value>
+  </data>
+  <data name="Theme_FloatingBarMenuOpacityInPPT" xml:space="preserve">
+    <value>浮栏菜单在 PPT 下透明度</value>
+  </data>
+  <data name="Theme_BoardMenuOpacity" xml:space="preserve">
+    <value>白板菜单透明度</value>
+  </data>
 </root>

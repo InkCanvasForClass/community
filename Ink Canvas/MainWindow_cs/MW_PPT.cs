@@ -1257,6 +1257,7 @@ namespace Ink_Canvas
 
                     // 设置浮动栏透明度和边距
                     _pptUIManager?.SetFloatingBarOpacity(Settings.Appearance.ViewboxFloatingBarOpacityInPPTValue);
+                    ApplyFloatingBarMenuOpacity();
                     _pptUIManager?.SetMainPanelMargin(new Thickness(10, 10, 10, 10));
 
                     // 显示侧边栏退出按钮
@@ -1625,6 +1626,7 @@ namespace Ink_Canvas
 
                         _pptUIManager?.SetMainPanelMargin(new Thickness(10, 10, 10, 55));
                         _pptUIManager?.SetFloatingBarOpacity(Settings.Appearance.ViewboxFloatingBarOpacityValue);
+                        ApplyFloatingBarMenuOpacity();
 
                         if (currentMode != 0)
                         {

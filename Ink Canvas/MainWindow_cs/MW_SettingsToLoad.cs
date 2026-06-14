@@ -275,6 +275,9 @@ namespace Ink_Canvas
                     ViewboxBlackboardCenterSide.Opacity = Settings.Appearance.BoardToolbarCenterOpacity;
                     ViewboxBlackboardRightSide.Opacity = Settings.Appearance.BoardToolbarRightOpacity;
 
+                    ApplyFloatingBarMenuOpacity();
+                    ApplyBoardMenuOpacity();
+
                     ApplyQuickPanelBottomOffset(Settings.Appearance.QuickPanelBottomOffset);
                     ApplyQuickPanelOpacity(Settings.Appearance.QuickPanelOpacity);
                     ApplySidePanelSettings();
@@ -870,6 +873,38 @@ namespace Ink_Canvas
                 LeftSidePanel.Opacity = opacity;
             if (RightSidePanel != null)
                 RightSidePanel.Opacity = opacity;
+        }
+
+        /// <summary>
+        /// 应用浮动栏菜单透明度（根据当前是否在 PPT 模式下选择对应设置值）
+        /// </summary>
+        internal void ApplyFloatingBarMenuOpacity()
+        {
+            double opacity = currentMode == 2
+                ? Settings.Appearance.FloatingBarMenuOpacityInPPT
+                : Settings.Appearance.FloatingBarMenuOpacity;
+
+            if (PenPalettePopupContent != null) PenPalettePopupContent.Opacity = opacity;
+            if (EraserPopupContent != null) EraserPopupContent.Opacity = opacity;
+            if (MainToolsPopupContent != null) MainToolsPopupContent.Opacity = opacity;
+            if (ShapeDrawPopupContent != null) ShapeDrawPopupContent.Opacity = opacity;
+            if (FloatingBarGesturePopupContent != null) FloatingBarGesturePopupContent.Opacity = opacity;
+        }
+
+        /// <summary>
+        /// 应用白板菜单透明度
+        /// </summary>
+        internal void ApplyBoardMenuOpacity()
+        {
+            double opacity = Settings.Appearance.BoardMenuOpacity;
+
+            if (BoardGesturePopupContent != null) BoardGesturePopupContent.Opacity = opacity;
+            if (BackgroundPalettePopupContent != null) BackgroundPalettePopupContent.Opacity = opacity;
+            if (BoardPenPalettePopupContent != null) BoardPenPalettePopupContent.Opacity = opacity;
+            if (BoardEraserPopupContent != null) BoardEraserPopupContent.Opacity = opacity;
+            if (BoardShapeDrawPopupContent != null) BoardShapeDrawPopupContent.Opacity = opacity;
+            if (BoardImageOptionsPopupContent != null) BoardImageOptionsPopupContent.Opacity = opacity;
+            if (BoardToolsPopupContent != null) BoardToolsPopupContent.Opacity = opacity;
         }
     }
 }

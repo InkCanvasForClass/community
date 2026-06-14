@@ -39,6 +39,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             BoardToolbarLeftOpacitySlider.Value = settings.Appearance.BoardToolbarLeftOpacity;
             BoardToolbarCenterOpacitySlider.Value = settings.Appearance.BoardToolbarCenterOpacity;
             BoardToolbarRightOpacitySlider.Value = settings.Appearance.BoardToolbarRightOpacity;
+            BoardMenuOpacitySlider.Value = settings.Appearance.BoardMenuOpacity;
 
             ViewboxBlackBoardLeftScaleTransformValueSlider.Value = settings.Appearance.ViewboxBlackBoardLeftScaleTransformValue;
             ViewboxBlackBoardCenterScaleTransformValueSlider.Value = settings.Appearance.ViewboxBlackBoardScaleTransformValue;
@@ -50,6 +51,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdateSliderText(BoardToolbarLeftOpacitySlider, BoardToolbarLeftOpacityText, "{0:F2}");
             UpdateSliderText(BoardToolbarCenterOpacitySlider, BoardToolbarCenterOpacityText, "{0:F2}");
             UpdateSliderText(BoardToolbarRightOpacitySlider, BoardToolbarRightOpacityText, "{0:F2}");
+            UpdateSliderText(BoardMenuOpacitySlider, BoardMenuOpacityText, "{0:F2}");
             UpdateSliderText(ViewboxBlackBoardLeftScaleTransformValueSlider, ViewboxBlackBoardLeftScaleText, "{0:F2}");
             UpdateSliderText(ViewboxBlackBoardCenterScaleTransformValueSlider, ViewboxBlackBoardCenterScaleText, "{0:F2}");
             UpdateSliderText(ViewboxBlackBoardRightScaleTransformValueSlider, ViewboxBlackBoardRightScaleText, "{0:F2}");
@@ -104,6 +106,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.Settings.Appearance.BoardToolbarRightOpacity = val;
             SettingsManager.SaveSettingsToFile();
             SettingsActionHub.OnBoardToolbarRightOpacityChanged(val);
+        }
+
+        private void BoardMenuOpacitySlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            UpdateSliderText(BoardMenuOpacitySlider, BoardMenuOpacityText, "{0:F2}");
+            if (!_isLoaded) return;
+            var val = Math.Round(BoardMenuOpacitySlider.Value, 2);
+            if (BoardMenuOpacitySlider.Value != val)
+            {
+                BoardMenuOpacitySlider.Value = val;
+                return;
+            }
+            SettingsManager.Settings.Appearance.BoardMenuOpacity = val;
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnBoardMenuOpacityChanged(val);
         }
 
         private void ViewboxBlackBoardLeftScaleTransformValueSlider_ValueChanged(object sender, RoutedEventArgs e)
