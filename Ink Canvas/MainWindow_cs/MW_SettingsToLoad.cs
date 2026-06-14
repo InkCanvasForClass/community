@@ -273,34 +273,6 @@ namespace Ink_Canvas
                         ViewboxFloatingBarScaleTransform.ScaleY = actualScale;
                     }
 
-                    switch (Settings.Appearance.UnFoldButtonImageType)
-                    {
-                        case 0:
-                            RightUnFoldBtnImgChevron.Source =
-                                new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
-                            RightUnFoldBtnImgChevron.Width = 14;
-                            RightUnFoldBtnImgChevron.Height = 14;
-                            RightUnFoldBtnImgChevron.RenderTransform = new RotateTransform(180);
-                            LeftUnFoldBtnImgChevron.Source =
-                                new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
-                            LeftUnFoldBtnImgChevron.Width = 14;
-                            LeftUnFoldBtnImgChevron.Height = 14;
-                            LeftUnFoldBtnImgChevron.RenderTransform = null;
-                            break;
-                        case 1:
-                            RightUnFoldBtnImgChevron.Source =
-                                new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
-                            RightUnFoldBtnImgChevron.Width = 18;
-                            RightUnFoldBtnImgChevron.Height = 18;
-                            RightUnFoldBtnImgChevron.RenderTransform = null;
-                            LeftUnFoldBtnImgChevron.Source =
-                                new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
-                            LeftUnFoldBtnImgChevron.Width = 18;
-                            LeftUnFoldBtnImgChevron.Height = 18;
-                            LeftUnFoldBtnImgChevron.RenderTransform = null;
-                            break;
-                    }
-
                     ViewboxFloatingBar.Opacity = Settings.Appearance.ViewboxFloatingBarOpacityValue;
 
                     ViewboxBlackboardCenterSideScaleTransform.ScaleX = Settings.Appearance.ViewboxBlackBoardScaleTransformValue;
@@ -318,6 +290,37 @@ namespace Ink_Canvas
                     ApplyQuickPanelBottomOffset(Settings.Appearance.QuickPanelBottomOffset);
                     ApplyQuickPanelOpacity(Settings.Appearance.QuickPanelOpacity);
                     ApplySidePanelSettings();
+
+                    // 在 ApplySidePanelSettings 之后设置图标变换，防止被 UpdateLayoutState 覆盖
+                    switch (Settings.Appearance.UnFoldButtonImageType)
+                    {
+                        case 0:
+                            RightUnFoldBtnImgChevron.Source =
+                                new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
+                            RightUnFoldBtnImgChevron.Width = 14;
+                            RightUnFoldBtnImgChevron.Height = 14;
+                            RightUnFoldBtnImgChevron.RenderTransform = new RotateTransform(180);
+                            RightUnFoldBtnImgChevron.RenderTransformOrigin = new System.Windows.Point(0.5, 0.5);
+                            LeftUnFoldBtnImgChevron.Source =
+                                new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
+                            LeftUnFoldBtnImgChevron.Width = 14;
+                            LeftUnFoldBtnImgChevron.Height = 14;
+                            LeftUnFoldBtnImgChevron.RenderTransform = null;
+                            break;
+                        case 1:
+                            LeftUnFoldBtnImgChevron.Source =
+                                new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
+                            LeftUnFoldBtnImgChevron.Width = 18;
+                            LeftUnFoldBtnImgChevron.Height = 18;
+                            LeftUnFoldBtnImgChevron.RenderTransformOrigin = new System.Windows.Point(0.5, 0.5);
+                            LeftUnFoldBtnImgChevron.RenderTransform = new ScaleTransform(-1, 1);
+                            RightUnFoldBtnImgChevron.Source =
+                                new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
+                            RightUnFoldBtnImgChevron.Width = 18;
+                            RightUnFoldBtnImgChevron.Height = 18;
+                            RightUnFoldBtnImgChevron.RenderTransform = null;
+                            break;
+                    }
 
                     if (Settings.Appearance.IsTransparentButtonBackground)
                     {

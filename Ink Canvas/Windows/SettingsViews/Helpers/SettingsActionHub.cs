@@ -244,12 +244,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             }
             else if (selectedIndex == 1)
             {
+                mw.LeftUnFoldBtnImgChevron.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
+                mw.LeftUnFoldBtnImgChevron.Width = 18; mw.LeftUnFoldBtnImgChevron.Height = 18;
+                mw.LeftUnFoldBtnImgChevron.RenderTransformOrigin = new Point(0.5, 0.5);
+                mw.LeftUnFoldBtnImgChevron.RenderTransform = new System.Windows.Media.ScaleTransform(-1, 1);
                 mw.RightUnFoldBtnImgChevron.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
                 mw.RightUnFoldBtnImgChevron.Width = 18; mw.RightUnFoldBtnImgChevron.Height = 18;
                 mw.RightUnFoldBtnImgChevron.RenderTransform = null;
-                mw.LeftUnFoldBtnImgChevron.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/pen-white.png"));
-                mw.LeftUnFoldBtnImgChevron.Width = 18; mw.LeftUnFoldBtnImgChevron.Height = 18;
-                mw.LeftUnFoldBtnImgChevron.RenderTransform = null;
             }
         }
 

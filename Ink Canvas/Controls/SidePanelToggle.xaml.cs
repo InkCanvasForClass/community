@@ -202,20 +202,23 @@ namespace Ink_Canvas.Controls
             {
                 if (ClassicViewbox == null || ClassicPanelBorder == null || ClassicChevronImage == null) return;
 
+                bool isPenIcon = settings?.UnFoldButtonImageType == 1;
+
                 if (isRightSide)
                 {
                     ClassicViewbox.HorizontalAlignment = HorizontalAlignment.Right;
                     ClassicPanelBorder.CornerRadius = new CornerRadius(25, 0, 0, 25);
                     ClassicChevronImage.Margin = new Thickness(0, 0, 10, 0);
                     ClassicChevronImage.RenderTransformOrigin = new Point(0.5, 0.5);
-                    ClassicChevronImage.RenderTransform = new RotateTransform(180);
+                    ClassicChevronImage.RenderTransform = isPenIcon ? null : new RotateTransform(180);
                 }
                 else
                 {
                     ClassicViewbox.HorizontalAlignment = HorizontalAlignment.Left;
                     ClassicPanelBorder.CornerRadius = new CornerRadius(0, 25, 25, 0);
                     ClassicChevronImage.Margin = new Thickness(10, 0, 0, 0);
-                    ClassicChevronImage.RenderTransform = null;
+                    ClassicChevronImage.RenderTransformOrigin = new Point(0.5, 0.5);
+                    ClassicChevronImage.RenderTransform = isPenIcon ? new ScaleTransform(-1, 1) : null;
                 }
             }
         }
