@@ -80,6 +80,8 @@ namespace Ink_Canvas.WorkflowAutomation
             services.AddTrigger<PptSlideShowExitTrigger>();
             services.AddTrigger<AnnotationModeEnterTrigger>();
             services.AddTrigger<AnnotationModeExitTrigger>();
+            services.AddTrigger<WhiteboardEnterTrigger>();
+            services.AddTrigger<WhiteboardExitTrigger>();
             services.AddTrigger<RulesetChangedTrigger>();
 
             // 4. 注册行动（对齐 ClassIsland 的 AddAction<TSettings>()）

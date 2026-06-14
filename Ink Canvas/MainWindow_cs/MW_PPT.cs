@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.WorkflowAutomation;
 using iNKORE.UI.WPF.Modern;
 using Microsoft.Office.Core;
 using Microsoft.Office.Interop.PowerPoint;
@@ -1629,6 +1630,7 @@ namespace Ink_Canvas
                         {
                             CloseWhiteboardImmediately();
                             currentMode = 0;
+                            AutomationBootstrap.Monitor?.NotifyInternalStateChanged();
                         }
 
                         SyncPdfPageSidebarWithCanvas();

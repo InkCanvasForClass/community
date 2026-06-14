@@ -2,6 +2,7 @@ using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
+using Ink_Canvas.WorkflowAutomation;
 using iNKORE.UI.WPF.Modern;
 using System;
 using System.Collections.Generic;
@@ -869,6 +870,7 @@ namespace Ink_Canvas
                     if (currentMode == 1)
                     {
                         currentMode = 0;
+                        AutomationBootstrap.Monitor?.NotifyInternalStateChanged();
                         GridBackgroundCover.Visibility = Visibility.Collapsed;
                         AnimationsHelper.HideWithSlideAndFade(BlackboardLeftSide);
                         AnimationsHelper.HideWithSlideAndFade(BlackboardCenterSide);
@@ -4547,6 +4549,7 @@ namespace Ink_Canvas
                 if (currentMode == 0)
                 {
                     currentMode++;
+                    AutomationBootstrap.Monitor?.NotifyInternalStateChanged();
                     GridBackgroundCover.Visibility = Visibility.Collapsed;
                     AnimationsHelper.HideWithSlideAndFade(BlackboardLeftSide);
                     AnimationsHelper.HideWithSlideAndFade(BlackboardCenterSide);
@@ -4597,6 +4600,7 @@ namespace Ink_Canvas
                     case 0: //屏幕模式
                         VideoPresenter_OnExitWhiteboardMode();
                         currentMode = 0;
+                        AutomationBootstrap.Monitor?.NotifyInternalStateChanged();
                         GridBackgroundCover.Visibility = Visibility.Collapsed;
                         AnimationsHelper.HideWithSlideAndFade(BlackboardLeftSide);
                         AnimationsHelper.HideWithSlideAndFade(BlackboardCenterSide);
@@ -4675,6 +4679,7 @@ namespace Ink_Canvas
                         break;
                     case 1: //黑板或白板模式
                         currentMode = 1;
+                        AutomationBootstrap.Monitor?.NotifyInternalStateChanged();
                         GridBackgroundCover.Visibility = Visibility.Visible;
                         AnimationsHelper.ShowWithSlideFromBottomAndFade(BlackboardLeftSide);
                         AnimationsHelper.ShowWithSlideFromBottomAndFade(BlackboardCenterSide);

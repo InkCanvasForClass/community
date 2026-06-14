@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.WorkflowAutomation;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -41,6 +42,7 @@ namespace Ink_Canvas
                 if (currentMode == 1)
                 {
                     currentMode = 0;
+                    AutomationBootstrap.Monitor?.NotifyInternalStateChanged();
                     GridBackgroundCover.Visibility = Visibility.Collapsed;
                     AnimationsHelper.HideWithSlideAndFade(BlackboardLeftSide);
                     AnimationsHelper.HideWithSlideAndFade(BlackboardCenterSide);
