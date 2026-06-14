@@ -5564,9 +5564,9 @@ namespace Ink_Canvas
                     KeyFrames =
                     {
                         new DiscreteDoubleKeyFrame(from < to ? 0.0 : dimension, KeyTime.FromPercent(0.0)),
-                        new DiscreteDoubleKeyFrame(from < to ? dimension : 0.0, KeyTime.FromPercent(1.0))
+                        new DiscreteDoubleKeyFrame(from < to ? dimension : 0.0, KeyTime.FromPercent(0.333)),
                     },
-                    Duration = TimeSpan.FromMilliseconds(200)
+                    Duration = TimeSpan.FromMilliseconds(600)
                 };
 
                 Storyboard.SetTarget(posAnim, indicatorBar);
