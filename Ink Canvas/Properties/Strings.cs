@@ -525,6 +525,11 @@ namespace Ink_Canvas.Properties
             dict["Home_UpdateSettings"] = ("HomeStrings", "Home_UpdateSettings");
             dict["Home_Window"] = ("HomeStrings", "Home_Window");
             dict["Home_WindowSettings"] = ("HomeStrings", "Home_WindowSettings");
+            dict["Home_ClockSettings"] = ("HomeStrings", "Home_ClockSettings");
+            dict["Home_PerformanceSettings"] = ("HomeStrings", "Home_PerformanceSettings");
+            dict["Home_BackupSettings"] = ("HomeStrings", "Home_BackupSettings");
+            dict["Home_BoardSettings"] = ("HomeStrings", "Home_BoardSettings");
+            dict["Home_FriendlyLinks"] = ("HomeStrings", "Home_FriendlyLinks");
             dict["Hotkey_NotSet"] = ("CommonStrings", "Hotkey_NotSet");
             dict["Hotkey_InfoBarTitle"] = ("HotkeyStrings", "Hotkey_InfoBarTitle");
             dict["Hotkey_InfoBarMessage"] = ("HotkeyStrings", "Hotkey_InfoBarMessage");

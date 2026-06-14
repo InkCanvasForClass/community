@@ -102,6 +102,21 @@
   <data name="Home_WindowSettings" xml:space="preserve">
     <value>Window settings</value>
   </data>
+  <data name="Home_ClockSettings" xml:space="preserve">
+    <value>Clock display settings</value>
+  </data>
+  <data name="Home_PerformanceSettings" xml:space="preserve">
+    <value>Performance monitoring and device evaluation</value>
+  </data>
+  <data name="Home_BackupSettings" xml:space="preserve">
+    <value>Settings and data backup</value>
+  </data>
+  <data name="Home_BoardSettings" xml:space="preserve">
+    <value>Board toolbar and appearance settings</value>
+  </data>
+  <data name="Home_FriendlyLinks" xml:space="preserve">
+    <value>Sponsors and friendly links</value>
+  </data>
   <data name="Splash_Starting" xml:space="preserve">
     <value>Starting Ink Canvas...</value>
   </data>
