@@ -106,8 +106,6 @@ namespace Ink_Canvas
 
         public App()
         {
-            AppContext.SetSwitch("Switch.System.Windows.Input.Stylus.EnablePointerSupport", false);
-
             try
             {
                 SetCurrentProcessExplicitAppUserModelID("InkCanvasForClass.CE");
@@ -130,7 +128,18 @@ namespace Ink_Canvas
 
             if (args.Contains("--enable-uia-topmost-helper"))
             {
-                Environment.Exit(UIAccessHelper.LaunchNormalUserWithUIAccessFromElevatedHelper() ? 0 : 1);
+                uint sourcePid = 0;
+                for (int i = 0; i < args.Length - 1; i++)
+                {
+                    if (string.Equals(args[i], "--uia-source-pid", StringComparison.OrdinalIgnoreCase)
+                        && uint.TryParse(args[i + 1], out uint parsedPid))
+                    {
+                        sourcePid = parsedPid;
+                        break;
+                    }
+                }
+
+                Environment.Exit(UIAccessHelper.LaunchNormalUserWithUIAccessFromElevatedHelper(sourcePid) ? 0 : 1);
                 return;
             }
 
@@ -909,6 +918,9 @@ namespace Ink_Canvas
             startupStopwatch.Restart();
 
             TryApplyPreferredLanguageFromSettings();
+
+            // 同步 Common_On/Common_Off 等本地化资源到 Application.Resources
+            Helpers.LocalizationHelper.SyncCommonResources();
 
             // 根据设置决定是否显示启动画面
             if (ShouldShowSplashScreen() && !IsLaunchByFileOrUri(e.Args))

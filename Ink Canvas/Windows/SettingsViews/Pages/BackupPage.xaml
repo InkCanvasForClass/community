@@ -37,8 +37,6 @@
                                          Header="{x:Static props:StorageStrings.Backup_AutoPeriodic}"
                                          IsExpanded="{Binding IsOn, ElementName=ToggleSwitchIsAutoBackupEnabled, Mode=OneWay}">
                         <ui:ToggleSwitch x:Name="ToggleSwitchIsAutoBackupEnabled"
-                                         OnContent="{DynamicResource Common_On}"
-                                         OffContent="{DynamicResource Common_Off}"
                                          Toggled="ToggleSwitchIsAutoBackupEnabled_Toggled"/>
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{x:Static props:StorageStrings.Backup_Interval}"

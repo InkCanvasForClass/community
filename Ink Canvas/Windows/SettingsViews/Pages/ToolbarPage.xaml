@@ -226,6 +226,10 @@
                                 </ui:SettingsCard>
                             </StackPanel>
 
+                            <!-- 插件自定义设置面板（动态生成） -->
+                            <StackPanel x:Name="PanelPluginCustomSettings" Visibility="Collapsed">
+                            </StackPanel>
+
                             <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_Size}" FontSize="14" FontWeight="SemiBold" Margin="0,12,0,4"/>
                             <Grid Margin="0,0,0,4">
                                 <Grid.ColumnDefinitions>

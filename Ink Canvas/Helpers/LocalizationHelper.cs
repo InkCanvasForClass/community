@@ -1,4 +1,5 @@
 using Ink_Canvas.Properties;
+using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.IO;
 using System.Reflection;
 using System.Resources;
 using System.Threading;
+using System.Windows;
 using System.Xml.Linq;
 
 namespace Ink_Canvas.Helpers
@@ -27,7 +29,189 @@ namespace Ink_Canvas.Helpers
                 Thread.CurrentThread.CurrentCulture = value;
                 Strings.Culture = value;
                 SetAllResourceCultures(value);
+                SyncCommonResources();
             }
+        }
+
+        private static ResourceManager _originalModernStringsRM;
+        private static bool _modernStringsPatched;
+
+        internal static void SyncCommonResources()
+        {
+            try
+            {
+                var onText = CommonStrings.Common_On;
+                var offText = CommonStrings.Common_Off;
+
+                if (System.Windows.Application.Current?.Resources != null)
+                {
+                    System.Windows.Application.Current.Resources["Common_On"] = onText;
+                    System.Windows.Application.Current.Resources["Common_Off"] = offText;
+                }
+
+                // 替换 iNKORE.UI.WPF.Modern.Strings 的 ResourceManager，让 ToggleSwitch
+                // 构造函数中的 SetCurrentValue 直接拿到正确的本地化文本
+                PatchModernStrings(onText, offText);
+
+                // 延迟更新所有已加载的 ToggleSwitch
+                System.Windows.Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    UpdateAllToggleSwitches(onText, offText);
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// 反射替换 iNKORE.UI.WPF.Modern.Strings 的 ResourceManager，
+        /// 注入 ToggleSwitchOn/ToggleSwitchOff 的本地化翻译。
+        /// </summary>
+        private static void PatchModernStrings(string onText, string offText)
+        {
+            try
+            {
+                var stringsType = typeof(iNKORE.UI.WPF.Modern.ThemeManager).Assembly
+                    .GetType("iNKORE.UI.WPF.Modern.Strings");
+                if (stringsType == null) return;
+
+                var resourceManField = stringsType.GetField("resourceMan",
+                    BindingFlags.Static | BindingFlags.NonPublic);
+                if (resourceManField == null) return;
+
+                // 触发 ResourceManager 的初始化（如果尚未初始化）
+                var rmProp = stringsType.GetProperty("ResourceManager",
+                    BindingFlags.Public | BindingFlags.Static);
+                rmProp?.GetValue(null);
+
+                var current = (ResourceManager)resourceManField.GetValue(null);
+
+                if (!_modernStringsPatched)
+                {
+                    _originalModernStringsRM = current;
+                    _modernStringsPatched = true;
+                }
+
+                var toggleKeys = new Dictionary<string, string>
+                {
+                    { "ToggleSwitchOn", onText },
+                    { "ToggleSwitchOff", offText },
+                };
+
+                var patched = new ToggleSwitchResourceManager(
+                    _originalModernStringsRM ?? current, toggleKeys);
+                resourceManField.SetValue(null, patched);
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// 自定义 ResourceManager，拦截 ToggleSwitchOn/ToggleSwitchOff 的 GetString 调用，
+        /// 返回本地化文本，其余转发给原始 ResourceManager。
+        /// </summary>
+        private class ToggleSwitchResourceManager : ResourceManager
+        {
+            private readonly ResourceManager _fallback;
+            private readonly Dictionary<string, string> _overrides;
+
+            public ToggleSwitchResourceManager(ResourceManager fallback, Dictionary<string, string> overrides)
+            {
+                _fallback = fallback;
+                _overrides = overrides;
+            }
+
+            public override string GetString(string name)
+            {
+                if (_overrides.TryGetValue(name, out var value))
+                    return value;
+                return _fallback.GetString(name);
+            }
+
+            public override string GetString(string name, CultureInfo culture)
+            {
+                if (_overrides.TryGetValue(name, out var value))
+                    return value;
+                return _fallback.GetString(name, culture);
+            }
+
+            public override object GetObject(string name) => _fallback.GetObject(name);
+            public override object GetObject(string name, CultureInfo culture) => _fallback.GetObject(name, culture);
+            public override ResourceSet GetResourceSet(CultureInfo culture, bool createIfNotExists, bool tryParents)
+                => _fallback.GetResourceSet(culture, createIfNotExists, tryParents);
+        }
+
+        /// <summary>
+        /// 遍历所有窗口的逻辑树，更新已创建的 ToggleSwitch。
+        /// 保留 XAML 中设置了 OnContent="" / OffContent="" 的开关不变。
+        /// </summary>
+        private static void UpdateAllToggleSwitches(string onText, string offText)
+        {
+            try
+            {
+                if (System.Windows.Application.Current == null) return;
+                foreach (System.Windows.Window window in System.Windows.Application.Current.Windows)
+                {
+                    UpdateToggleSwitchesInLogicalTree(window, onText, offText);
+                }
+            }
+            catch { }
+        }
+
+        private static void UpdateToggleSwitchesInLogicalTree(DependencyObject parent, string onText, string offText)
+        {
+            if (parent == null) return;
+            try
+            {
+                if (parent is ToggleSwitch ts)
+                {
+                    UpdateSingleToggleSwitch(ts, onText, offText);
+                }
+                var children = System.Windows.LogicalTreeHelper.GetChildren(parent);
+                foreach (var child in children)
+                {
+                    if (child is DependencyObject depChild)
+                    {
+                        UpdateToggleSwitchesInLogicalTree(depChild, onText, offText);
+                    }
+                }
+            }
+            catch { }
+        }
+
+        private static void UpdateSingleToggleSwitch(ToggleSwitch ts, string onText, string offText)
+        {
+            try
+            {
+                var onLocal = ts.ReadLocalValue(ToggleSwitch.OnContentProperty);
+                var offLocal = ts.ReadLocalValue(ToggleSwitch.OffContentProperty);
+
+                // 保留 XAML 中显式设为 "" 的
+                if (!(onLocal is string onStr && onStr == ""))
+                {
+                    ts.ClearValue(ToggleSwitch.OnContentProperty);
+                    ts.SetCurrentValue(ToggleSwitch.OnContentProperty, onText);
+                }
+
+                if (!(offLocal is string offStr && offStr == ""))
+                {
+                    ts.ClearValue(ToggleSwitch.OffContentProperty);
+                    ts.SetCurrentValue(ToggleSwitch.OffContentProperty, offText);
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// 为指定窗口中的 ToggleSwitch 绑定本地化文本。
+        /// 用于设置窗口等后打开的窗口。
+        /// </summary>
+        internal static void BindToggleSwitchesInWindow(System.Windows.Window window)
+        {
+            try
+            {
+                UpdateToggleSwitchesInLogicalTree(window,
+                    CommonStrings.Common_On, CommonStrings.Common_Off);
+            }
+            catch { }
         }
 
         public static bool TrySetCulture(string cultureName)

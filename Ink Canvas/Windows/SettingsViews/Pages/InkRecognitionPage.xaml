@@ -128,8 +128,6 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.LineDisplay}" />
                         </ui:SettingsExpander.HeaderIcon>
                         <ui:ToggleSwitch x:Name="ToggleSwitchAutoStraightenLine"
-                                OnContent="{DynamicResource Common_On}"
-                                OffContent="{DynamicResource Common_Off}"
                                 Toggled="ToggleSwitchAutoStraightenLine_Toggled" />
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{x:Static props:CanvasStrings.InkRecog_LengthThreshold}">
@@ -153,15 +151,11 @@
                             <ui:SettingsCard Header="{x:Static props:CanvasStrings.InkRecog_HighPrecisionStraighten}"
                                     Description="{x:Static props:CanvasStrings.InkRecog_HighPrecisionHint}">
                                 <ui:ToggleSwitch x:Name="ToggleSwitchHighPrecisionLineStraighten"
-                                        OnContent="{DynamicResource Common_On}"
-                                        OffContent="{DynamicResource Common_Off}"
                                         Toggled="ToggleSwitchHighPrecisionLineStraighten_Toggled" />
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{x:Static props:CanvasStrings.InkRecog_PauseStraightenLine}"
                                     Description="{x:Static props:CanvasStrings.InkRecog_PauseStraightenHint}">
                                 <ui:ToggleSwitch x:Name="ToggleSwitchPauseStraightenLine"
-                                        OnContent="{DynamicResource Common_On}"
-                                        OffContent="{DynamicResource Common_Off}"
                                         Toggled="ToggleSwitchPauseStraightenLine_Toggled" />
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{x:Static props:CanvasStrings.InkRecog_PauseStraightenDelay}">
@@ -184,8 +178,6 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />
                         </ui:SettingsExpander.HeaderIcon>
                         <ui:ToggleSwitch x:Name="ToggleSwitchLineEndpointSnapping"
-                                OnContent="{DynamicResource Common_On}"
-                                OffContent="{DynamicResource Common_Off}"
                                 Toggled="ToggleSwitchLineEndpointSnapping_Toggled" />
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{x:Static props:CanvasStrings.InkRecog_SnappingDistance}"

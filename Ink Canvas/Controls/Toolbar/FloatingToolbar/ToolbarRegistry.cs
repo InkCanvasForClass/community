@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Plugins;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Newtonsoft.Json;
@@ -9,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -17,6 +19,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
     public static class ToolbarRegistry
     {
         private static List<IToolbarItem> _items;
+        private static readonly List<PluginToolbarItemInfo> _pluginItems = new List<PluginToolbarItemInfo>();
         internal const string InjectedTag = "ToolbarRegistryInjected";
         internal const string ContentBorderTag = "ToolbarContentBorder";
         internal const string SelectionCanvasTag = "ToolbarSelectionCanvas";
@@ -215,8 +218,31 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 })
                 .Where(i => i != null)
                 .ToList();
+
+            // 添加插件注册的工具栏项
+            foreach (var pluginItem in _pluginItems)
+            {
+                _items.Add(new PluginToolbarItemWrapper(pluginItem));
+            }
+
             return _items;
         }
+
+        public static void RegisterPluginItem(PluginToolbarItemInfo itemInfo)
+        {
+            if (itemInfo == null || string.IsNullOrEmpty(itemInfo.Id)) return;
+
+            _pluginItems.Add(itemInfo);
+            LogHelper.WriteLogToFile($"ToolbarRegistry: 插件注册工具栏项 [{itemInfo.Id}]", LogHelper.LogType.Info);
+
+            // 如果 Discover 已经被调用过，需要重置缓存
+            if (_items != null)
+            {
+                _items.Add(new PluginToolbarItemWrapper(itemInfo));
+            }
+        }
+
+        public static IReadOnlyList<PluginToolbarItemInfo> GetPluginItems() => _pluginItems.AsReadOnly();
 
         #region Config file system
 
@@ -968,6 +994,13 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 // 强制应用显示模式，确保独立边框模式下也能正确显示
                 qcp.ForceApplyDisplayMode();
             }
+
+            // 插件自定义设置：通过 PluginToolbarItemInfo.ApplySettings 回调应用
+            var pluginItem = _pluginItems.FirstOrDefault(p => p.Id == entry.Id);
+            if (pluginItem != null)
+            {
+                pluginItem.ApplySettings?.Invoke(view, entry.Settings);
+            }
         }
 
         private static void ApplyRedStyle(ToolbarImageButton btn)
@@ -1021,6 +1054,106 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     new ToolbarComponentEntry { Id = "builtin.exit", HidingRuleset = ToolbarRuleset.PptOnly(), ShowSeparateBorder = true }
                 }
             };
+        }
+    }
+
+    /// <summary>
+    /// 将 PluginToolbarItemInfo 包装为 IToolbarItem，供 ToolbarRegistry 内部使用。
+    /// </summary>
+    internal class PluginToolbarItemWrapper : IToolbarItem
+    {
+        private readonly PluginToolbarItemInfo _info;
+
+        public string Id => _info.Id;
+        public string DisplayName => _info.DisplayName;
+        public string Description => _info.Description;
+        public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
+        public bool DefaultShowSeparateBorder => false;
+        public bool DefaultPreventHideOnDragClick => false;
+
+        public PluginToolbarItemWrapper(PluginToolbarItemInfo info)
+        {
+            _info = info;
+        }
+
+        public FrameworkElement BuildView(IToolbarHost host)
+        {
+            var view = _info.ViewFactory?.Invoke();
+            if (view != null)
+                view.Tag = ToolbarRegistry.InjectedTag;
+
+            // 如果提供了弹窗内容工厂，自动创建 Popup 并绑定按钮点击
+            if (_info.PopupContentFactory != null && view is ToolbarImageButton btn)
+            {
+                var popup = new System.Windows.Controls.Primitives.Popup
+                {
+                    Name = "PluginPopup_" + _info.Id.Replace('.', '_'),
+                    AllowsTransparency = true,
+                    StaysOpen = true,
+                    IsOpen = false,
+                    PlacementTarget = btn,
+                    Placement = System.Windows.Controls.Primitives.PlacementMode.Custom
+                };
+
+                var popupContent = _info.PopupContentFactory();
+                if (popupContent != null)
+                    popup.Child = popupContent;
+
+                popup.CustomPopupPlacementCallback = (popupSize, targetSize, offset) =>
+                {
+                    return new[]
+                    {
+                        new CustomPopupPlacement(
+                            new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height - 8),
+                            PopupPrimaryAxis.Vertical)
+                    };
+                };
+
+                // 注册 Popup 到 PopupManagerHelper
+                btn.Loaded += (s, e) =>
+                {
+                    var window = Window.GetWindow(btn);
+                    if (window is MainWindow mw)
+                    {
+                        mw.GetPopupManager()?.RegisterPopup(popup);
+                    }
+                };
+
+                btn.ButtonMouseUp += (s, e) =>
+                {
+                    if (popup.IsOpen)
+                    {
+                        popup.IsOpen = false;
+                    }
+                    else
+                    {
+                        // 关闭主窗口中其他已打开的 Popup
+                        var window = Window.GetWindow(btn);
+                        if (window is MainWindow mw)
+                        {
+                            mw.CloseAllPopups();
+                        }
+                        AnimationsHelper.ShowPopupWithSlideAndFade(popup);
+                    }
+                };
+
+                // 弹窗关闭按钮支持
+                if (popupContent is PopupShellContent shell)
+                {
+                    shell.CloseButtonControl.Click += (s, e) => popup.IsOpen = false;
+                }
+                else if (popupContent is PopupTabShellContent tabShell)
+                {
+                    tabShell.CloseButtonControl.Click += (s, e) => popup.IsOpen = false;
+                }
+            }
+
+            return view;
+        }
+
+        public void ApplyOrientation(FrameworkElement view, Orientation orientation)
+        {
+            _info.ApplyOrientation?.Invoke(view, orientation);
         }
     }
 }

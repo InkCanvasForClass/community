@@ -2245,8 +2245,8 @@ namespace Ink_Canvas.Helpers
         {
             if (!_disposed)
             {
-                StopMonitoring(isShutdown: true);
-                StopWpsProcessCheckTimer();
+                if (!_isModuleUnloading)
+                    StopMonitoring(isShutdown: true);
 
                 _unifiedPptTimer?.Dispose();
 

@@ -7,8 +7,6 @@
                      Description="{Binding Description, RelativeSource={RelativeSource AncestorType=UserControl}}"
                      Header="{Binding Header, RelativeSource={RelativeSource AncestorType=UserControl}}">
         <ui:ToggleSwitch x:Name="ToggleSwitch"
-                         OnContent="{DynamicResource Common_On}"
-                         OffContent="{DynamicResource Common_Off}"
                          IsOn="{Binding IsOn, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
                          Toggled="ToggleSwitch_Toggled"/>
     </ui:SettingsCard>

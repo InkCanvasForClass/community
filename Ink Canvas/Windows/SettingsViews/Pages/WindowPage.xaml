@@ -96,8 +96,6 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}" />
                         </ui:SettingsExpander.HeaderIcon>
                         <ui:ToggleSwitch x:Name="ToggleSwitchAlwaysOnTop"
-                                OnContent="{DynamicResource Common_On}"
-                                OffContent="{DynamicResource Common_Off}"
                                 Toggled="ToggleSwitchAlwaysOnTop_Toggled" />
                         <ui:SettingsExpander.ItemTemplate>
                             <helpers:TopMostModeTemplateSelector>

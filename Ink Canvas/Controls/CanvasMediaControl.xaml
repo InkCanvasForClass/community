@@ -23,19 +23,51 @@
                 <Border x:Name="AudioPlaceholder"
                         Background="#FF1C1C1C"
                         Visibility="Collapsed">
-                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <TextBlock Text="♪"
-                                   FontSize="36"
-                                   HorizontalAlignment="Center"
-                                   Foreground="#FFF5F5F5" />
-                        <TextBlock x:Name="AudioTitleTextBlock"
-                                   Margin="12,8,12,0"
-                                   Foreground="#FFF5F5F5"
-                                   FontSize="14"
-                                   TextAlignment="Center"
-                                   TextTrimming="CharacterEllipsis"
-                                   MaxWidth="320" />
-                    </StackPanel>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- 音频图标和标题 - 固定在顶部 -->
+                        <StackPanel Grid.Row="0"
+                                    HorizontalAlignment="Center"
+                                    Margin="0,12,0,4">
+                            <TextBlock Text="♪"
+                                       FontSize="36"
+                                       HorizontalAlignment="Center"
+                                       Foreground="#FFF5F5F5" />
+                            <TextBlock x:Name="AudioTitleTextBlock"
+                                       Margin="12,4,12,0"
+                                       Foreground="#FFF5F5F5"
+                                       FontSize="14"
+                                       TextAlignment="Center"
+                                       TextTrimming="CharacterEllipsis"
+                                       MaxWidth="320" />
+                        </StackPanel>
+
+                        <!-- 单行歌词显示 - 紧贴底部控件区 -->
+                        <StackPanel x:Name="LyricsPanel"
+                                    Grid.Row="1"
+                                    Visibility="Collapsed"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Bottom"
+                                    Margin="8,4,8,6">
+                            <TextBlock x:Name="LyricTextBlock"
+                                       FontSize="15"
+                                       Foreground="#FFF5F5F5"
+                                       HorizontalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis"
+                                       MaxWidth="460"/>
+                            <TextBlock x:Name="LyricTranslationBlock"
+                                       FontSize="12"
+                                       Foreground="#CCFFFFFF"
+                                       HorizontalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis"
+                                       MaxWidth="460"
+                                       Visibility="Collapsed"/>
+                        </StackPanel>
+                    </Grid>
                 </Border>
 
                 <MediaElement x:Name="Player"
@@ -70,13 +102,34 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
                     <Button x:Name="PlayPauseButton"
                             Grid.Column="0"
                             MinWidth="52"
                             Padding="10,4"
+                            Foreground="White"
                             Click="PlayPauseButton_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bd"
+                                        Background="Transparent"
+                                        CornerRadius="4"
+                                        Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bd" Property="Background" Value="#22FFFFFF"/>
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter TargetName="Bd" Property="Background" Value="#44FFFFFF"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
                         <Path x:Name="PlayPauseIconPath"
                               Width="18"
                               Height="18"
@@ -108,11 +161,12 @@
                         <ComboBoxItem Content="2.0x" Tag="2.0" />
                     </ComboBox>
 
-                    <TextBlock x:Name="VolumeLabelTextBlock"
+                    <TextBlock x:Name="VolumePercentText"
                                Grid.Column="5"
                                Margin="12,0,6,0"
                                VerticalAlignment="Center"
-                               Foreground="#FFF5F5F5" />
+                               Foreground="#FFF5F5F5"
+                               Text="60%" />
 
                     <Slider x:Name="VolumeSlider"
                             Grid.Column="6"
@@ -120,6 +174,7 @@
                             Minimum="0"
                             Maximum="1"
                             Value="0.6"
+                            AutoToolTipPlacement="None"
                             ValueChanged="VolumeSlider_ValueChanged" />
                 </Grid>
             </Grid>

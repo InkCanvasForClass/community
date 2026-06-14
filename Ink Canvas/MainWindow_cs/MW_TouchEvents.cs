@@ -211,19 +211,11 @@ namespace Ink_Canvas
                 && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                SetDynamicRendererEnabled(inkCanvas, false);
             }
             else if (!ShouldUseRealtimeVelocityBrushTip()
                      && inkCanvas.EditingMode == InkCanvasEditingMode.None)
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                SetDynamicRendererEnabled(inkCanvas, true);
-            }
-            else
-            {
-                SetDynamicRendererEnabled(inkCanvas, inkCanvas.EditingMode != InkCanvasEditingMode.None
-                                                   && inkCanvas.EditingMode != InkCanvasEditingMode.Select
-                                                   && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke);
             }
         }
 
@@ -598,6 +590,13 @@ namespace Ink_Canvas
                 if (child is Image || child is MediaElement || child is CanvasMediaControl ||
                     (child is Border border && border.Name != "EraserOverlayCanvas"))
                 {
+                    // CanvasMediaControl 直接保留原始引用，避免克隆导致播放状态丢失
+                    if (child is CanvasMediaControl)
+                    {
+                        preservedElements.Add(child);
+                        continue;
+                    }
+
                     // 创建元素的深拷贝，避免直接引用导致的问题
                     var clonedElement = CloneUIElement(child);
                     if (clonedElement != null)
@@ -978,7 +977,6 @@ namespace Ink_Canvas
                 CleanupRealtimeBrushTipState(stylusId);
 
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                SetDynamicRendererEnabled(inkCanvas, false);
                 inkCanvas.CaptureStylus();
                 ViewboxFloatingBar.IsHitTestVisible = false;
                 BlackboardUIGridForInkReplay.IsHitTestVisible = false;

@@ -545,9 +545,8 @@ namespace Ink_Canvas.Windows
                 device.Activate(ref IID_IAudioEndpointVolume, 0, IntPtr.Zero, out interfacePointer);
                 _audioEndpointVolume = interfacePointer as IAudioEndpointVolume;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                LogHelper.WriteLogToFile($"初始化音频控制失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 

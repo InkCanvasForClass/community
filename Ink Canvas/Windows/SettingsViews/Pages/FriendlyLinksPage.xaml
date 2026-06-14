@@ -59,6 +59,15 @@
                         NavigateUri="https://github.com/Alan-CRL/Inkeys/" />
                 </ui:SettingsCard>
 
+                <ui:SettingsCard Header="开发者云平台"
+                    Description="{x:Static props:FriendlyLinksStrings.FriendlyLinks_DeveloperCloudDescription}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <ui:HyperlinkButton Content="{x:Static props:FriendlyLinksStrings.FriendlyLinks_Visit}"
+                        NavigateUri="https://developer.dy.ci/" />
+                </ui:SettingsCard>
+
                 <Rectangle Height="48" />
             </ikw:SimpleStackPanel>
         </Grid>

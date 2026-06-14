@@ -1404,7 +1404,14 @@ namespace Ink_Canvas
 
             try
             {
-                string savePath = Path.Combine(Settings.Automation.AutoSavedStrokesLocation, "File Dependency");
+                var autoSavedPath = Settings?.Automation?.AutoSavedStrokesLocation;
+                if (string.IsNullOrEmpty(autoSavedPath))
+                {
+                    ShowNotification(MainWindowStrings.Main_MediaInsert_InsertFailed);
+                    return null;
+                }
+
+                string savePath = Path.Combine(autoSavedPath, "File Dependency");
                 if (!Directory.Exists(savePath))
                 {
                     Directory.CreateDirectory(savePath);
@@ -1413,6 +1420,21 @@ namespace Ink_Canvas
                 string timestamp = "media_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
                 string newFilePath = Path.Combine(savePath, timestamp + fileExtension);
                 await Task.Run(() => File.Copy(filePath, newFilePath, true));
+
+                // Copy matching LRC file if present (non-fatal)
+                try
+                {
+                    var originalLrcPath = Path.ChangeExtension(filePath, ".lrc");
+                    if (File.Exists(originalLrcPath))
+                    {
+                        var newLrcPath = Path.Combine(savePath, timestamp + ".lrc");
+                        await Task.Run(() => File.Copy(originalLrcPath, newLrcPath, true));
+                    }
+                }
+                catch
+                {
+                    // LRC copy failure should not prevent media insertion
+                }
 
                 return await Dispatcher.InvokeAsync(() =>
                 {
@@ -1428,7 +1450,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"插入媒体失败: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"插入媒体失败: {ex}", LogHelper.LogType.Error);
                 ShowNotification(string.Format(MainWindowStrings.Main_MediaInsert_InsertFailed, ex.Message));
                 return null;
             }
@@ -2905,6 +2927,9 @@ namespace Ink_Canvas
                 ResizeCanvasMediaControlByCorner(mediaControl, canvasDelta, corner, lockAspect);
                 return;
             }
+
+            if (element is PdfEmbeddedView)
+                lockAspect = true;
 
             if (!(element.RenderTransform is TransformGroup transformGroup)) return;
             var scaleTransform = transformGroup.Children.OfType<ScaleTransform>().FirstOrDefault();

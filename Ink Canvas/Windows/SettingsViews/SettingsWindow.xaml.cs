@@ -141,6 +141,8 @@ namespace Ink_Canvas.Windows.SettingsViews
                         LoadPluginSettingsPages();
                         UpdateUpdateBadgeVisibility();
                         UpdateAnnouncementUnreadBadge();
+                        // 绑定设置窗口中的 ToggleSwitch 本地化文本
+                        Ink_Canvas.Helpers.LocalizationHelper.BindToggleSwitchesInWindow(this);
                     }), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
                 }), System.Windows.Threading.DispatcherPriority.Normal);
 
@@ -815,6 +817,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             try
             {
                 var tags = _pageTypes.Keys.ToList();
+                int count = 0;
                 foreach (var tag in tags)
                 {
                     if (_pages.ContainsKey(tag))
@@ -824,20 +827,28 @@ namespace Ink_Canvas.Windows.SettingsViews
                     if (type == typeof(PluginSettingsPage))
                         continue;
 
-                    await Dispatcher.InvokeAsync(() =>
+                    try
                     {
-                        try
+                        if (!_pages.ContainsKey(tag))
                         {
-                            if (_pages.ContainsKey(tag))
-                                return;
                             var page = Activator.CreateInstance(type);
                             _pages[tag] = page;
                         }
-                        catch (Exception ex)
-                        {
-                            System.Diagnostics.Debug.WriteLine(string.Format(NavStrings.Nav_PreloadPageFailed, tag, ex.Message));
-                        }
-                    }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine(string.Format(NavStrings.Nav_PreloadPageFailed, tag, ex.Message));
+                    }
+
+                    // 每加载一页后让出 UI 线程，防止阻塞心跳定时器
+                    if (++count % 3 == 0)
+                    {
+                        await System.Threading.Tasks.Task.Delay(50);
+                    }
+                    else
+                    {
+                        await System.Windows.Threading.Dispatcher.Yield(System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                    }
                 }
             }
             catch (Exception ex)

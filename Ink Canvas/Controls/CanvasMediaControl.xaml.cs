@@ -1,6 +1,8 @@
+using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using System;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -24,6 +26,10 @@ namespace Ink_Canvas.Controls
         private TimeSpan _pendingPosition = TimeSpan.Zero;
         private double _pendingSpeedRatio = 1.0;
         private bool _suppressNestedSelection;
+
+        // LRC lyrics state
+        private LrcData _lrcData;
+        private int _currentLrcIndex = -1;
 
         public CanvasMediaControl()
         {
@@ -55,9 +61,10 @@ namespace Ink_Canvas.Controls
             AudioTitleTextBlock.Text = DisplayName;
             AudioPlaceholder.Visibility = IsAudioOnly ? Visibility.Visible : Visibility.Collapsed;
             PreviewRow.Height = IsAudioOnly ? GridLength.Auto : new GridLength(1, GridUnitType.Star);
+            LoadLrcFile(sourcePath);
             if (IsAudioOnly)
             {
-                Height = 168;
+                Height = _lrcData != null ? 210 : 168;
                 Width = Width > 0 ? Width : 520;
             }
             else
@@ -71,6 +78,7 @@ namespace Ink_Canvas.Controls
             UpdateLocalizedTexts();
             UpdatePlayPauseGlyph();
             UpdateTimeText();
+            UpdateVolumePercentText();
         }
 
         public void SetPlaybackPosition(TimeSpan position)
@@ -165,6 +173,7 @@ namespace Ink_Canvas.Controls
         public void RegisterSelectHandler(MouseButtonEventHandler handler)
         {
             if (handler == null) return;
+            Root.MouseLeftButtonDown += (_, e) => handler(this, e);
             PreviewHost.MouseLeftButtonDown += (_, e) => handler(this, e);
             AudioPlaceholder.MouseLeftButtonDown += (_, e) => handler(this, e);
         }
@@ -172,6 +181,7 @@ namespace Ink_Canvas.Controls
         public void RegisterTouchSelectHandler(EventHandler<TouchEventArgs> handler)
         {
             if (handler == null) return;
+            Root.TouchDown += (_, e) => handler(this, e);
             PreviewHost.TouchDown += (_, e) => handler(this, e);
             AudioPlaceholder.TouchDown += (_, e) => handler(this, e);
         }
@@ -199,13 +209,13 @@ namespace Ink_Canvas.Controls
         public void UpdateLocalizedTexts()
         {
             SpeedLabelTextBlock.Text = FloatingBarStrings.FloatingBar_FadeSpeed;
-            VolumeLabelTextBlock.Text = TimerStrings.Timer_Volume;
         }
 
         private void CanvasMediaControl_Loaded(object sender, RoutedEventArgs e)
         {
             ApplySelectedSpeed();
             Player.Volume = VolumeSlider.Value;
+            UpdateVolumePercentText();
         }
 
         private void CanvasMediaControl_Unloaded(object sender, RoutedEventArgs e)
@@ -217,6 +227,7 @@ namespace Ink_Canvas.Controls
         {
             if (!_isMediaOpened || _isDraggingProgress) return;
             UpdateProgressFromPlayer();
+            UpdateLyricsHighlight();
         }
 
         private void Player_MediaOpened(object sender, RoutedEventArgs e)
@@ -283,7 +294,14 @@ namespace Ink_Canvas.Controls
 
         private void VolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            Player.Volume = e.NewValue;
+            if (Player != null) Player.Volume = e.NewValue;
+            UpdateVolumePercentText();
+        }
+
+        private void UpdateVolumePercentText()
+        {
+            if (VolumePercentText != null)
+                VolumePercentText.Text = $"{(int)(VolumeSlider.Value * 100)}%";
         }
 
         private void ProgressSlider_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -456,6 +474,62 @@ namespace Ink_Canvas.Controls
                 return;
             }
             base.OnMouseLeftButtonDown(e);
+        }
+
+        private void LoadLrcFile(string audioPath)
+        {
+            // Reset previous lyrics state
+            _lrcData = null;
+            _currentLrcIndex = -1;
+            if (LyricsPanel != null) LyricsPanel.Visibility = Visibility.Collapsed;
+            if (LyricTextBlock != null) LyricTextBlock.Text = string.Empty;
+            if (LyricTranslationBlock != null)
+            {
+                LyricTranslationBlock.Text = string.Empty;
+                LyricTranslationBlock.Visibility = Visibility.Collapsed;
+            }
+
+            // Try to find a matching LRC file
+            var lrcPath = Path.ChangeExtension(audioPath, ".lrc");
+            var data = LrcParser.ParseFile(lrcPath);
+            if (data == null || data.Lines.Count == 0)
+                return;
+
+            _lrcData = data;
+            if (LyricsPanel != null) LyricsPanel.Visibility = Visibility.Visible;
+            // Adjust height for bilingual lyrics
+            if (IsAudioOnly && data.Lines.Any(l => !string.IsNullOrEmpty(l.Translation)))
+            {
+                Height = 240;
+            }
+        }
+
+        private void UpdateLyricsHighlight()
+        {
+            if (_lrcData == null || _lrcData.Lines.Count == 0) return;
+
+            var position = Player.Position;
+            var newIndex = LrcParser.GetCurrentLineIndex(_lrcData.Lines, position);
+            if (newIndex == _currentLrcIndex) return;
+
+            _currentLrcIndex = newIndex;
+
+            if (newIndex >= 0 && newIndex < _lrcData.Lines.Count)
+            {
+                var line = _lrcData.Lines[newIndex];
+                LyricTextBlock.Text = line.Text;
+
+                if (!string.IsNullOrEmpty(line.Translation))
+                {
+                    LyricTranslationBlock.Text = line.Translation;
+                    LyricTranslationBlock.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    LyricTranslationBlock.Text = string.Empty;
+                    LyricTranslationBlock.Visibility = Visibility.Collapsed;
+                }
+            }
         }
 
         private static T FindAncestor<T>(DependencyObject current) where T : DependencyObject

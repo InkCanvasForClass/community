@@ -57,6 +57,9 @@
   <data name="FriendlyLinks_InkeysDescription" xml:space="preserve">
     <value>智能教学桌面工具，yyds</value>
   </data>
+  <data name="FriendlyLinks_DeveloperCloudDescription" xml:space="preserve">
+    <value>开发者云平台</value>
+  </data>
   <data name="FriendlyLinks_NamePickerDescription" xml:space="preserve">
     <value>随机点名与抽取工具，天选之人就是你</value>
   </data>

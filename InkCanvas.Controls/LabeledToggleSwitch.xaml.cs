@@ -44,24 +44,6 @@ namespace Ink_Canvas.Controls
             set => SetValue(IsOnProperty, value);
         }
 
-        public static readonly DependencyProperty OnContentProperty = DependencyProperty.Register(
-            nameof(OnContent), typeof(string), typeof(LabeledToggleSwitch), new PropertyMetadata(string.Empty));
-
-        public string OnContent
-        {
-            get => (string)GetValue(OnContentProperty);
-            set => SetValue(OnContentProperty, value);
-        }
-
-        public static readonly DependencyProperty OffContentProperty = DependencyProperty.Register(
-            nameof(OffContent), typeof(string), typeof(LabeledToggleSwitch), new PropertyMetadata(string.Empty));
-
-        public string OffContent
-        {
-            get => (string)GetValue(OffContentProperty);
-            set => SetValue(OffContentProperty, value);
-        }
-
         public static readonly DependencyProperty ShowWhenProperty = DependencyProperty.Register(
             nameof(ShowWhen), typeof(bool), typeof(LabeledToggleSwitch), new PropertyMetadata(true, OnShowWhenChanged));
 

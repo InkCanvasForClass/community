@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Ink_Canvas.Plugins
@@ -25,8 +27,13 @@ namespace Ink_Canvas.Plugins
 
         private readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();
         private readonly string _pluginsDirectory;
+        private readonly string _pluginPackagesDirectory;
+        private readonly string _pluginConfigsDirectory;
         private readonly List<PluginInfo> _plugins = new List<PluginInfo>();
-        private readonly Dictionary<string, AssemblyLoadContext> _assemblyContexts = new Dictionary<string, AssemblyLoadContext>();
+        private readonly Dictionary<string, PluginLoadContext> _assemblyContexts = new Dictionary<string, PluginLoadContext>();
+
+        public static readonly string ManifestFileName = "manifest.json";
+        public static readonly string PluginPackageExtension = ".icpx";
 
         public IReadOnlyList<PluginInfo> Plugins
         {
@@ -39,11 +46,21 @@ namespace Ink_Canvas.Plugins
 
         private PluginManager()
         {
-            _pluginsDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
+            var basePath = AppDomain.CurrentDomain.BaseDirectory;
+            _pluginsDirectory = Path.Combine(basePath, "Plugins");
+            _pluginPackagesDirectory = Path.Combine(basePath, "PluginPackages");
+            _pluginConfigsDirectory = Path.Combine(basePath, "PluginConfigs");
 
-            if (!Directory.Exists(_pluginsDirectory))
+            EnsureDirectoryExists(_pluginsDirectory);
+            EnsureDirectoryExists(_pluginPackagesDirectory);
+            EnsureDirectoryExists(_pluginConfigsDirectory);
+        }
+
+        private static void EnsureDirectoryExists(string path)
+        {
+            if (!Directory.Exists(path))
             {
-                Directory.CreateDirectory(_pluginsDirectory);
+                Directory.CreateDirectory(path);
             }
         }
 
@@ -51,128 +68,385 @@ namespace Ink_Canvas.Plugins
         {
             try
             {
-                if (!Directory.Exists(_pluginsDirectory))
-                {
-                    Log("Plugins directory does not exist, skipping plugin loading");
-                    return;
-                }
+                // 1. 处理待安装的 .icpx 插件包
+                ProcessPluginPackages();
 
-                Log(string.Format("Loading plugins from: {0}", _pluginsDirectory));
+                // 2. 扫描插件目录，加载清单
+                DiscoverPlugins();
 
-                var pluginFiles = new List<string>();
+                // 3. 解析依赖顺序
+                var loadOrder = ResolveLoadOrder();
 
-                try
+                // 4. 按顺序加载插件
+                foreach (var pluginId in loadOrder)
                 {
-                    var topLevelFiles = Directory.GetFiles(_pluginsDirectory, "*.dll", SearchOption.TopDirectoryOnly);
-                    pluginFiles.AddRange(topLevelFiles);
-                    Log(string.Format("Found {0} top-level plugin files", topLevelFiles.Length));
-                }
-                catch (Exception ex)
-                {
-                    LogError(string.Format("Error getting top-level plugin files: {0}", ex.Message));
-                }
+                    var info = _plugins.FirstOrDefault(p => p.Id == pluginId);
+                    if (info == null || info.LoadStatus != PluginLoadStatus.NotLoaded) continue;
 
-                try
-                {
-                    var subDirectories = Directory.GetDirectories(_pluginsDirectory);
-                    foreach (var subDir in subDirectories)
-                    {
-                        try
-                        {
-                            var subDirFiles = Directory.GetFiles(subDir, "*.dll", SearchOption.TopDirectoryOnly);
-                            pluginFiles.AddRange(subDirFiles);
-                            Log(string.Format("Found {0} plugin files in directory: {1}", subDirFiles.Length, Path.GetFileName(subDir)));
-                        }
-                        catch (Exception ex)
-                        {
-                            LogError(string.Format("Error scanning subdirectory {0}: {1}", Path.GetFileName(subDir), ex.Message));
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    LogError(string.Format("Error getting subdirectories: {0}", ex.Message));
-                }
-
-                Log(string.Format("Found total {0} potential plugin files", pluginFiles.Count));
-
-                foreach (var pluginFile in pluginFiles)
-                {
                     try
                     {
-                        await LoadPluginAsync(pluginFile);
+                        LoadPlugin(info);
                     }
                     catch (Exception ex)
                     {
-                        LogError(string.Format("Failed to load plugin from {0}", Path.GetFileName(pluginFile)), ex);
+                        info.LoadStatus = PluginLoadStatus.Error;
+                        info.Exception = ex;
+                        LogError(string.Format("Failed to load plugin {0}", info.Name), ex);
                     }
                 }
 
                 _plugins.Sort((a, b) => a.Order.CompareTo(b.Order));
-                Log(string.Format("Plugin loading complete. Loaded {0} plugins", _plugins.Count));
+                Log(string.Format("Plugin loading complete. Loaded {0} plugins", _plugins.Count(p => p.LoadStatus == PluginLoadStatus.Loaded)));
             }
             catch (Exception ex)
             {
                 LogError("Failed to load plugins", ex);
             }
-        }
-
-        private async Task LoadPluginAsync(string pluginFile)
-        {
-            var fileName = Path.GetFileName(pluginFile);
-            Log(string.Format("Loading plugin: {0}", fileName));
-
-            var alc = new PluginAssemblyLoadContext(pluginFile, isCollectible: true);
-
-            try
-            {
-                var assembly = alc.LoadFromAssemblyPath(pluginFile);
-                var pluginTypes = assembly.GetTypes()
-                    .Where(t => typeof(IPlugin).IsAssignableFrom(t) && !t.IsAbstract && t.IsClass);
-
-                foreach (var pluginType in pluginTypes)
-                {
-                    var pluginInstance = Activator.CreateInstance(pluginType) as IPlugin;
-                    if (pluginInstance == null) continue;
-
-                    var pluginInfo = new PluginInfo
-                    {
-                        Id = pluginInstance.Id,
-                        Name = pluginInstance.Name,
-                        Version = pluginInstance.Version,
-                        Description = pluginInstance.Description,
-                        Author = pluginInstance.Author,
-                        Order = pluginInstance.Order,
-                        Instance = pluginInstance,
-                        IsLoaded = true
-                    };
-
-                    _plugins.Add(pluginInfo);
-                    _assemblyContexts[pluginInfo.Id] = alc;
-
-                    try
-                    {
-                        pluginInstance.Initialize(this);
-                        Log(string.Format("Plugin loaded: {0} v{1} by {2}", pluginInfo.Name, pluginInfo.Version, pluginInfo.Author));
-                        OnPluginLoaded(pluginInfo);
-                    }
-                    catch (Exception ex)
-                    {
-                        LogError(string.Format("Failed to initialize plugin {0}", pluginInfo.Name), ex);
-                        _plugins.Remove(pluginInfo);
-                        _assemblyContexts.Remove(pluginInfo.Id);
-                        alc.Unload();
-                    }
-                }
-            }
-            catch
-            {
-                alc.Unload();
-                throw;
-            }
 
             await Task.CompletedTask;
         }
+
+        #region Plugin Package Installation
+
+        /// <summary>
+        /// 处理 PluginPackages 目录中的 .icpx 插件包，将其解压安装到 Plugins 目录。
+        /// </summary>
+        private void ProcessPluginPackages()
+        {
+            if (!Directory.Exists(_pluginPackagesDirectory)) return;
+
+            foreach (var pkgPath in Directory.GetFiles(_pluginPackagesDirectory)
+                .Where(x => Path.GetExtension(x).Equals(PluginPackageExtension, StringComparison.OrdinalIgnoreCase)))
+            {
+                try
+                {
+                    using var pkg = ZipFile.OpenRead(pkgPath);
+                    var manifestEntry = pkg.GetEntry(ManifestFileName);
+                    if (manifestEntry == null)
+                    {
+                        Log(string.Format("Package {0} missing manifest.json, skipping", Path.GetFileName(pkgPath)));
+                        continue;
+                    }
+
+                    string manifestText;
+                    using (var reader = new StreamReader(manifestEntry.Open()))
+                    {
+                        manifestText = reader.ReadToEnd();
+                    }
+
+                    var manifest = JsonSerializer.Deserialize<PluginManifest>(manifestText);
+                    if (manifest == null || string.IsNullOrEmpty(manifest.Id))
+                    {
+                        Log(string.Format("Package {0} has invalid manifest, skipping", Path.GetFileName(pkgPath)));
+                        continue;
+                    }
+
+                    var targetPath = Path.Combine(_pluginsDirectory, manifest.Id);
+                    if (Directory.Exists(targetPath))
+                    {
+                        Directory.Delete(targetPath, true);
+                    }
+                    Directory.CreateDirectory(targetPath);
+                    ZipFile.ExtractToDirectory(pkgPath, targetPath);
+
+                    Log(string.Format("Installed plugin package: {0} v{1}", manifest.Name, manifest.Version));
+                }
+                catch (Exception ex)
+                {
+                    LogError(string.Format("Error installing package {0}", Path.GetFileName(pkgPath)), ex);
+                }
+                finally
+                {
+                    try { File.Delete(pkgPath); } catch { }
+                }
+            }
+        }
+
+        #endregion
+
+        #region Plugin Discovery
+
+        /// <summary>
+        /// 扫描 Plugins 目录下的子目录，解析 manifest.json 发现插件。
+        /// 同时兼容旧的 DLL 直接放置方式（无 manifest）。
+        /// </summary>
+        private void DiscoverPlugins()
+        {
+            var loadedIds = new HashSet<string>();
+
+            // 1. 扫描带 manifest.json 的插件目录
+            foreach (var subDir in Directory.GetDirectories(_pluginsDirectory))
+            {
+                var manifestPath = Path.Combine(subDir, ManifestFileName);
+                if (!File.Exists(manifestPath)) continue;
+
+                try
+                {
+                    var manifestText = File.ReadAllText(manifestPath);
+                    var manifest = JsonSerializer.Deserialize<PluginManifest>(manifestText);
+                    if (manifest == null || string.IsNullOrEmpty(manifest.Id)) continue;
+
+                    if (loadedIds.Contains(manifest.Id)) continue;
+                    loadedIds.Add(manifest.Id);
+
+                    var info = new PluginInfo
+                    {
+                        Id = manifest.Id,
+                        Name = manifest.Name,
+                        Version = manifest.Version,
+                        Description = manifest.Description,
+                        Author = manifest.Author,
+                        Manifest = manifest,
+                        PluginFolderPath = Path.GetFullPath(subDir),
+                        PluginConfigFolder = Path.Combine(_pluginConfigsDirectory, manifest.Id),
+                        LoadStatus = PluginLoadStatus.NotLoaded
+                    };
+
+                    EnsureDirectoryExists(info.PluginConfigFolder);
+                    _plugins.Add(info);
+                    Log(string.Format("Discovered plugin: {0} v{1}", manifest.Name, manifest.Version));
+                }
+                catch (Exception ex)
+                {
+                    LogError(string.Format("Error reading manifest in {0}", Path.GetFileName(subDir)), ex);
+                }
+            }
+
+            // 2. 兼容旧方式：扫描 Plugins 根目录下的 DLL（无 manifest）
+            foreach (var dllFile in Directory.GetFiles(_pluginsDirectory, "*.dll", SearchOption.TopDirectoryOnly))
+            {
+                try
+                {
+                    // 尝试从 DLL 中获取插件信息
+                    var tempContext = new PluginLoadContext(dllFile, null);
+                    var assembly = tempContext.LoadFromAssemblyPath(dllFile);
+                    var pluginType = FindPluginEntrance(assembly);
+                    if (pluginType == null)
+                    {
+                        tempContext.Unload();
+                        continue;
+                    }
+
+                    var tempInstance = Activator.CreateInstance(pluginType) as IPlugin;
+                    if (tempInstance == null || loadedIds.Contains(tempInstance.Id))
+                    {
+                        tempContext.Unload();
+                        continue;
+                    }
+
+                    loadedIds.Add(tempInstance.Id);
+
+                    var info = new PluginInfo
+                    {
+                        Id = tempInstance.Id,
+                        Name = tempInstance.Name,
+                        Version = tempInstance.Version,
+                        Description = tempInstance.Description,
+                        Author = tempInstance.Author,
+                        Order = tempInstance.Order,
+                        PluginFolderPath = Path.GetDirectoryName(dllFile),
+                        PluginConfigFolder = Path.Combine(_pluginConfigsDirectory, tempInstance.Id),
+                        LoadStatus = PluginLoadStatus.NotLoaded
+                    };
+
+                    EnsureDirectoryExists(info.PluginConfigFolder);
+                    _plugins.Add(info);
+                    Log(string.Format("Discovered legacy plugin: {0} v{1}", info.Name, info.Version));
+                    tempContext.Unload();
+                }
+                catch (Exception ex)
+                {
+                    LogError(string.Format("Error scanning DLL {0}", Path.GetFileName(dllFile)), ex);
+                }
+            }
+        }
+
+        #endregion
+
+        #region Dependency Resolution
+
+        /// <summary>
+        /// 解析插件加载顺序，基于依赖关系进行拓扑排序。
+        /// </summary>
+        private List<string> ResolveLoadOrder()
+        {
+            var plugins = _plugins.Where(p => p.LoadStatus == PluginLoadStatus.NotLoaded).ToList();
+            var nodes = plugins.ToDictionary(p => p.Id, p => new DependencyNode(p));
+
+            foreach (var node in nodes)
+            {
+                ResolveDependencyNode(nodes, node.Value, new List<DependencyNode>());
+            }
+
+            return nodes
+                .Where(x => x.Value.Plugin.LoadStatus == PluginLoadStatus.NotLoaded)
+                .OrderBy(x => x.Value.Depth)
+                .Select(x => x.Key)
+                .ToList();
+        }
+
+        private void ResolveDependencyNode(Dictionary<string, DependencyNode> allNodes, DependencyNode node, List<DependencyNode> walking)
+        {
+            if (node.IsDiscovered) return;
+
+            if (walking.Contains(node))
+            {
+                node.Plugin.LoadStatus = PluginLoadStatus.Error;
+                node.Plugin.Exception = new InvalidOperationException(
+                    string.Format("Circular dependency detected: {0}", string.Join(" -> ", walking.Select(x => x.Plugin.Id))));
+                return;
+            }
+
+            node.IsDiscovered = true;
+            var depth = 0;
+
+            if (node.Plugin.Manifest?.Dependencies != null)
+            {
+                foreach (var dep in node.Plugin.Manifest.Dependencies)
+                {
+                    if (!allNodes.TryGetValue(dep.Id, out var depNode) || depNode.Plugin.LoadStatus != PluginLoadStatus.NotLoaded)
+                    {
+                        if (dep.IsRequired)
+                        {
+                            node.Plugin.LoadStatus = PluginLoadStatus.Error;
+                            node.Plugin.Exception = new InvalidOperationException(
+                                string.Format("Plugin {0} requires missing dependency {1}", node.Plugin.Id, dep.Id));
+                            return;
+                        }
+                        continue;
+                    }
+
+                    ResolveDependencyNode(allNodes, depNode, walking);
+                    depth = Math.Max(depth, depNode.Depth);
+                }
+            }
+
+            node.Depth = depth + 1;
+        }
+
+        private class DependencyNode
+        {
+            public PluginInfo Plugin { get; }
+            public bool IsDiscovered { get; set; }
+            public int Depth { get; set; }
+
+            public DependencyNode(PluginInfo plugin)
+            {
+                Plugin = plugin;
+            }
+        }
+
+        #endregion
+
+        #region Plugin Loading
+
+        private void LoadPlugin(PluginInfo info)
+        {
+            Log(string.Format("Loading plugin: {0}", info.Name));
+
+            string assemblyPath;
+            if (info.Manifest != null && !string.IsNullOrEmpty(info.Manifest.EntranceAssembly))
+            {
+                // 从 manifest 指定的入口程序集加载
+                assemblyPath = Path.Combine(info.PluginFolderPath, info.Manifest.EntranceAssembly);
+            }
+            else
+            {
+                // 旧方式：从插件目录查找 DLL
+                assemblyPath = Directory.GetFiles(info.PluginFolderPath, "*.dll", SearchOption.TopDirectoryOnly)
+                    .FirstOrDefault();
+            }
+
+            if (string.IsNullOrEmpty(assemblyPath) || !File.Exists(assemblyPath))
+            {
+                info.LoadStatus = PluginLoadStatus.Error;
+                info.Exception = new FileNotFoundException("Plugin assembly not found", assemblyPath);
+                return;
+            }
+
+            var loadContext = new PluginLoadContext(assemblyPath, info, _assemblyContexts);
+
+            try
+            {
+                var assembly = loadContext.LoadFromAssemblyPath(assemblyPath);
+                var pluginType = FindPluginEntrance(assembly);
+                if (pluginType == null)
+                {
+                    info.LoadStatus = PluginLoadStatus.Error;
+                    info.Exception = new InvalidOperationException("No plugin entrance class found in assembly");
+                    loadContext.Unload();
+                    return;
+                }
+
+                var pluginInstance = Activator.CreateInstance(pluginType) as IPlugin;
+                if (pluginInstance == null)
+                {
+                    info.LoadStatus = PluginLoadStatus.Error;
+                    info.Exception = new InvalidOperationException("Failed to create plugin instance");
+                    loadContext.Unload();
+                    return;
+                }
+
+                // 如果是 PluginBase 实例，注入 Manifest 和路径信息
+                if (pluginInstance is PluginBase pluginBase)
+                {
+                    pluginBase.Manifest = info.Manifest;
+                    pluginBase.PluginConfigFolder = info.PluginConfigFolder;
+                    pluginBase.PluginFolder = info.PluginFolderPath;
+                }
+
+                // 用 manifest 或实例信息更新 PluginInfo
+                if (info.Manifest == null)
+                {
+                    info.Id = pluginInstance.Id;
+                    info.Name = pluginInstance.Name;
+                    info.Version = pluginInstance.Version;
+                    info.Description = pluginInstance.Description;
+                    info.Author = pluginInstance.Author;
+                    info.Order = pluginInstance.Order;
+                }
+
+                info.Instance = pluginInstance;
+                info.IsLoaded = true;
+                info.LoadStatus = PluginLoadStatus.Loaded;
+                _assemblyContexts[info.Id] = loadContext;
+
+                pluginInstance.Initialize(this);
+                Log(string.Format("Plugin loaded: {0} v{1} by {2}", info.Name, info.Version, info.Author));
+                OnPluginLoaded(info);
+            }
+            catch
+            {
+                loadContext.Unload();
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 在程序集中查找插件入口类。优先查找带 [PluginEntrance] 特性的类，其次查找 IPlugin 实现类。
+        /// </summary>
+        private static Type FindPluginEntrance(Assembly assembly)
+        {
+            var types = assembly.GetTypes()
+                .Where(t => !t.IsAbstract && t.IsClass && typeof(IPlugin).IsAssignableFrom(t))
+                .ToList();
+
+            // 优先查找带 [PluginEntrance] 特性的类
+            var entrance = types.FirstOrDefault(t =>
+                t.GetCustomAttributes(typeof(PluginEntranceAttribute), true).Length > 0);
+            if (entrance != null) return entrance;
+
+            // 其次查找 PluginBase 子类
+            var pluginBase = types.FirstOrDefault(t => typeof(PluginBase).IsAssignableFrom(t));
+            if (pluginBase != null) return pluginBase;
+
+            // 最后查找任意 IPlugin 实现
+            return types.FirstOrDefault();
+        }
+
+        #endregion
+
+        #region Plugin Unloading
 
         public void UnloadPlugin(PluginInfo plugin)
         {
@@ -181,6 +455,7 @@ namespace Ink_Canvas.Plugins
                 plugin.Instance.Shutdown();
                 _plugins.Remove(plugin);
                 plugin.IsLoaded = false;
+                plugin.LoadStatus = PluginLoadStatus.NotLoaded;
 
                 if (_assemblyContexts.TryGetValue(plugin.Id, out var alc))
                 {
@@ -204,6 +479,10 @@ namespace Ink_Canvas.Plugins
                 UnloadPlugin(plugin);
             }
         }
+
+        #endregion
+
+        #region IPluginHost Implementation
 
         public void Log(string message)
         {
@@ -236,6 +515,25 @@ namespace Ink_Canvas.Plugins
             _services[typeof(T)] = service;
         }
 
+        public void RegisterToolbarItem(PluginToolbarItemInfo itemInfo)
+        {
+            if (itemInfo == null || string.IsNullOrEmpty(itemInfo.Id)) return;
+
+            try
+            {
+                Controls.Toolbar.FloatingToolbar.ToolbarRegistry.RegisterPluginItem(itemInfo);
+                Log(string.Format("Plugin registered toolbar item: {0}", itemInfo.Id));
+            }
+            catch (Exception ex)
+            {
+                LogError(string.Format("Failed to register toolbar item {0}", itemInfo.Id), ex);
+            }
+        }
+
+        #endregion
+
+        #region Events
+
         protected virtual void OnPluginLoaded(PluginInfo pluginInfo)
         {
             var handler = PluginLoaded;
@@ -263,25 +561,71 @@ namespace Ink_Canvas.Plugins
             }
         }
 
-        private class PluginAssemblyLoadContext : AssemblyLoadContext
+        #endregion
+
+        #region AssemblyLoadContext
+
+        /// <summary>
+        /// 插件程序集加载上下文，支持依赖解析和插件间依赖共享。
+        /// </summary>
+        private class PluginLoadContext : AssemblyLoadContext
         {
             private readonly AssemblyDependencyResolver _resolver;
+            private readonly PluginInfo _info;
+            private readonly Dictionary<string, PluginLoadContext> _allContexts;
 
-            public PluginAssemblyLoadContext(string pluginPath, bool isCollectible)
-                : base(string.Format("PluginContext_{0}", Path.GetFileNameWithoutExtension(pluginPath)), isCollectible)
+            public PluginLoadContext(string pluginPath, PluginInfo info, Dictionary<string, PluginLoadContext> allContexts = null)
+                : base(string.Format("PluginContext_{0}", info?.Id ?? Path.GetFileNameWithoutExtension(pluginPath)), isCollectible: true)
             {
                 _resolver = new AssemblyDependencyResolver(pluginPath);
+                _info = info;
+                _allContexts = allContexts;
             }
 
             protected override Assembly Load(AssemblyName assemblyName)
             {
+                // 1. 尝试从依赖的插件加载上下文中查找
+                if (_info?.Manifest?.Dependencies != null && _allContexts != null)
+                {
+                    foreach (var dep in _info.Manifest.Dependencies)
+                    {
+                        if (_allContexts.TryGetValue(dep.Id, out var depContext))
+                        {
+                            try
+                            {
+                                var assembly = depContext.Load(assemblyName);
+                                if (assembly != null) return assembly;
+                            }
+                            catch { }
+                        }
+                    }
+                }
+
+                // 2. 尝试从默认上下文（主程序）加载，共享主程序集
+                var defaultAssembly = Default.LoadFromAssemblyName(assemblyName);
+                if (defaultAssembly != null) return defaultAssembly;
+
+                // 3. 从插件目录解析依赖
                 var assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
                 if (assemblyPath != null)
                 {
                     return LoadFromAssemblyPath(assemblyPath);
                 }
+
                 return null;
             }
+
+            protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
+            {
+                var libraryPath = _resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
+                if (libraryPath != null)
+                {
+                    return LoadUnmanagedDllFromPath(libraryPath);
+                }
+                return IntPtr.Zero;
+            }
         }
+
+        #endregion
     }
 }

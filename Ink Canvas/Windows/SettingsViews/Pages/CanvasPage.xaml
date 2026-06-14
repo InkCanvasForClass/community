@@ -42,8 +42,6 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.PointerHand}" />
                         </ui:SettingsExpander.HeaderIcon>
                         <ui:ToggleSwitch x:Name="ToggleSwitchShowCursor"
-                                OnContent="{DynamicResource Common_On}"
-                                OffContent="{DynamicResource Common_Off}"
                                 helpers:SettingsBinder.PropertyPath="Canvas.IsShowCursor"
                                 helpers:SettingsBinder.SettingsChanged="OnIsShowCursorChanged" />
                         <ui:SettingsExpander.Items>
@@ -196,8 +194,6 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" />
                         </ui:SettingsExpander.HeaderIcon>
                         <ui:ToggleSwitch x:Name="ToggleSwitchBrushAutoRestore"
-                                OnContent="{DynamicResource Common_On}"
-                                OffContent="{DynamicResource Common_Off}"
                                 helpers:SettingsBinder.PropertyPath="Canvas.EnableBrushAutoRestore" />
                         <ui:SettingsExpander.Items>
                             <!-- TextBox：暂不支持声明式，保留 code-behind -->
@@ -257,8 +253,6 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Switch}" />
                         </ui:SettingsExpander.HeaderIcon>
                         <ui:ToggleSwitch x:Name="ToggleSwitchEnableEraserAutoSwitchBack"
-                                OnContent="{DynamicResource Common_On}"
-                                OffContent="{DynamicResource Common_Off}"
                                 helpers:SettingsBinder.PropertyPath="Canvas.EnableEraserAutoSwitchBack" />
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_SwitchBackDelay}"
@@ -296,8 +290,6 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EraseTool}" />
                         </ui:SettingsExpander.HeaderIcon>
                         <ui:ToggleSwitch x:Name="ToggleSwitchEnablePalmEraser"
-                                OnContent="{DynamicResource Common_On}"
-                                OffContent="{DynamicResource Common_Off}"
                                 helpers:SettingsBinder.PropertyPath="Canvas.EnablePalmEraser" />
                         <ui:SettingsExpander.Items>
                             <ui:SettingsCard Header="{x:Static props:GestureStrings.Gesture_PalmSensitivity}">

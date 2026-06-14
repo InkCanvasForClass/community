@@ -13,7 +13,8 @@
 │   ├── 时钟 (ClockPage)
 │   ├── 隐私 (PrivacyPage)
 │   ├── 安全 (SecurityPage)
-│   └── 高级 (AdvancedPage)
+│   ├── 高级 (AdvancedPage)
+│   └── 性能 (PerformancePage)
 ├── 主界面
 │   ├── 窗口 (WindowPage)
 │   ├── 个性化 (AppearancePage)
@@ -29,14 +30,18 @@
 ├── 实验性 (ExperimentalPage)
 ├── 存储
 │   ├── 存储管理 (StoragePage)
-│   └── 备份与还原 (BackupPage)
-├── 云存储 (CloudStoragePage)
+│   ├── 备份与还原 (BackupPage)
+│   └── 云存储 (CloudStoragePage)
 ├── 工具栏
 │   ├── 组件 (ToolbarPage)
 │   ├── 外观 (ToolbarAppearancePage)
-│   └── 白板工具栏 (BoardToolbarPage)
-├── 自动化 (AutomationPage)
-├── 随机点名 (RandomDrawPage)
+│   └── 菜单 (ToolbarMenuPage)
+├── 白板
+│   ├── 组件 (BoardToolbarPage)
+│   ├── 外观 (BoardAppearancePage)
+│   └── 菜单 (BoardMenuPage)
+├── 自动化 (AutomationWorkflowPage)
+├── 点名与计时器 (RandomDrawPage)
 ├── Debug (DebugPage)
 ├── ── 插件设置 ──（分隔符）
 ├── 插件 (PluginPage)
@@ -51,36 +56,46 @@
 
 | 资源键 | 中文值 |
 |--------|--------|
+| Nav_Home | 首页 |
+| Nav_ICCSettings | ICC CE 设置 |
 | Nav_General | 通用 |
 | Nav_Startup | 基本 |
 | Nav_Clock | 时钟 |
 | Nav_Privacy | 隐私 |
-| Nav_Security | 安全 |
+| Settings_Nav_Security | 安全 |
 | Nav_Advanced | 高级 |
+| Nav_Performance | 性能 |
 | Nav_MainInterface | 主界面 |
 | Nav_Window | 窗口 |
-| Nav_Appearance | 个性化 |
-| Nav_Hotkey | 快捷键 |
-| Nav_CanvasSettings | 画板设置 |
-| Nav_Canvas | 画布 |
-| Nav_InkRecognition | 墨迹识别 |
-| Nav_PPT | PPT联动 |
-| Nav_Update | 更新 |
-| Nav_Notification | 通知 |
-| Nav_NotificationSettings | 通知设置 |
-| Nav_AnnouncementCenter | 公告中心 |
-| Nav_Experimental | 实验性 |
-| Nav_Storage | 存储 |
-| Nav_StorageManagement | 存储管理 |
-| Nav_Backup | 备份与还原 |
-| Nav_CloudStorage | 云存储 |
+| Theme_GroupTitle | 个性化 |
+| Nav_Shortcuts | 快捷键 |
+| Canvas_GroupTitle | 画板设置 / 画布 |
+| InkRecog_Title | 墨迹识别 |
+| PPTStrings.GroupTitle | PPT联动 |
+| NotificationStrings.Type_Update | 更新 |
+| NotificationStrings.DefaultTitle | 通知 |
+| NotificationStrings.SettingsTitle | 通知设置 |
+| AnnouncementStrings.CenterTitle | 公告中心 |
+| AdvancedStrings.Experimental | 实验性 |
+| StorageStrings.Storage_NavTitle | 存储 |
+| StorageStrings.Storage_Title | 存储管理 |
+| StorageStrings.Backup_Title | 备份与还原 |
+| CloudStorageStrings.CloudStorage_Manage | 云存储 |
 | Nav_Toolbar | 工具栏 |
 | Nav_ToolbarComponents | 组件 |
 | Nav_ToolbarAppearance | 外观 |
-| Nav_BoardToolbar | 白板工具栏 |
-| Nav_Automation | 自动化 |
-| Nav_RandomDraw | 随机点名 |
-| Nav_Debug | Debug |
+| Nav_ToolbarMenu | 菜单 |
+| Nav_Board | 白板 |
+| Nav_BoardComponents | 组件(白板) |
+| Nav_BoardAppearance | 外观(白板) |
+| Nav_BoardMenu | 菜单(白板) |
+| AutomationStrings.Automation_Title | 自动化 |
+| RandomStrings.Random_Title | 点名与计时器 |
+| (硬编码) "Debug" | Debug |
+| Nav_PluginSettings | 插件设置(分隔符) |
+| Nav_Plugins | 插件 |
+| Nav_FriendlyLinks | 友情链接 |
+| Nav_AboutInkCanvas | 关于 Ink Canvas |
 
 ## 页面类型映射
 
@@ -118,32 +133,40 @@ _pageTypes = new Dictionary<string, Type>
 ```csharp
 private static readonly Dictionary<string, Type> _pageDict = new()
 {
-    { "Startup", typeof(StartupPage) },
-    { "Clock", typeof(ClockPage) },
-    { "Privacy", typeof(PrivacyPage) },
-    { "Security", typeof(SecurityPage) },
-    { "Advanced", typeof(AdvancedPage) },
-    { "Window", typeof(WindowPage) },
-    { "Appearance", typeof(AppearancePage) },
-    { "Hotkey", typeof(HotkeyPage) },
-    { "Canvas", typeof(CanvasPage) },
-    { "InkRecognition", typeof(InkRecognitionPage) },
-    { "PowerPoint", typeof(PowerPointPage) },
-    { "Update", typeof(UpdatePage) },
-    { "Notification", typeof(NotificationPage) },
-    { "AnnouncementCenter", typeof(AnnouncementCenterPage) },
-    { "Experimental", typeof(ExperimentalPage) },
-    { "Storage", typeof(StoragePage) },
-    { "Backup", typeof(BackupPage) },
-    { "CloudStorage", typeof(CloudStoragePage) },
-    { "Toolbar", typeof(ToolbarPage) },
-    { "ToolbarAppearance", typeof(ToolbarAppearancePage) },
-    { "Automation", typeof(AutomationPage) },
-    { "RandomDraw", typeof(RandomDrawPage) },
-    { "Debug", typeof(DebugPage) },
-    { "Plugin", typeof(PluginPage) },
-    { "FriendlyLinks", typeof(FriendlyLinksPage) },
-    { "About", typeof(AboutPage) },
+    { "HomePage", typeof(HomePage) },
+    { "StartupPage", typeof(StartupPage) },
+    { "ClockPage", typeof(ClockPage) },
+    { "PrivacyPage", typeof(PrivacyPage) },
+    { "SecurityPage", typeof(SecurityPage) },
+    { "AdvancedPage", typeof(AdvancedPage) },
+    { "PerformancePage", typeof(PerformancePage) },
+    { "WindowPage", typeof(WindowPage) },
+    { "AppearancePage", typeof(AppearancePage) },
+    { "HotkeyPage", typeof(HotkeyPage) },
+    { "CanvasPage", typeof(CanvasPage) },
+    { "InkRecognitionPage", typeof(InkRecognitionPage) },
+    { "PowerPointPage", typeof(PowerPointPage) },
+    { "UpdatePage", typeof(UpdatePage) },
+    { "NotificationPage", typeof(NotificationPage) },
+    { "AnnouncementCenterPage", typeof(AnnouncementCenterPage) },
+    { "ExperimentalPage", typeof(ExperimentalPage) },
+    { "StoragePage", typeof(StoragePage) },
+    { "BackupPage", typeof(BackupPage) },
+    { "CloudStoragePage", typeof(CloudStoragePage) },
+    { "ToolbarPage", typeof(ToolbarPage) },
+    { "ToolbarAppearancePage", typeof(ToolbarAppearancePage) },
+    { "ToolbarMenuPage", typeof(ToolbarMenuPage) },
+    { "BoardToolbarPage", typeof(BoardToolbarPage) },
+    { "BoardAppearancePage", typeof(BoardAppearancePage) },
+    { "BoardMenuPage", typeof(BoardMenuPage) },
+    { "AutomationWorkflowPage", typeof(AutomationWorkflowPage) },
+    { "RandomDrawPage", typeof(RandomDrawPage) },
+    { "DebugPage", typeof(DebugPage) },
+    { "PluginPage", typeof(PluginPage) },
+    { "PluginSettingsPage", typeof(PluginSettingsPage) },
+    { "FriendlyLinksPage", typeof(FriendlyLinksPage) },
+    { "AboutPage", typeof(AboutPage) },
+    { "Settings", typeof(SettingsPage) },
 };
 ```
 

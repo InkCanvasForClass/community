@@ -432,3 +432,10 @@ SKILL_FloatingToolbarRefactoring.md
 /Samples
 /SamplePlugin
 /_tmpbuild/
+*.xlsx
+*.csv
+
+# qoder
+/.qoder
+/.claude
+/.vscode
