@@ -14,6 +14,7 @@ namespace Ink_Canvas.Controls
         public Button ApplyBtn => ApplyBackgroundColorBtn;
         public Border WhiteboardBtn => WhiteboardModeBtn;
         public Border BlackboardBtn => BlackboardModeBtn;
+        public Border DarkModeBtnControl => DarkModeBtn;
         public Button CloseButtonControl => Shell?.CloseButtonControl;
 
         public BackgroundPalettePopupContent()

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -359,6 +359,9 @@
   </data>
   <data name="Canvas_ApplyColor" xml:space="preserve">
     <value>应用颜色</value>
+  </data>
+  <data name="Canvas_DarkMode" xml:space="preserve">
+    <value>黑底</value>
   </data>
   <data name="Shape_RemoveAsymptote" xml:space="preserve">
     <value>是否移除渐近线？</value>

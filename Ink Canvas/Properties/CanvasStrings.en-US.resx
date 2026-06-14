@@ -360,6 +360,9 @@
   <data name="Canvas_ApplyColor" xml:space="preserve">
     <value>Apply Color</value>
   </data>
+  <data name="Canvas_DarkMode" xml:space="preserve">
+    <value>Dark</value>
+  </data>
   <data name="Shape_RemoveAsymptote" xml:space="preserve">
     <value>Remove asymptote lines?</value>
   </data>

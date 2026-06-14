@@ -14,9 +14,9 @@ mc:Ignorable="d">
                            Foreground="{DynamicResource TextForeground}"
                            FontSize="10" FontWeight="Bold"
                            HorizontalAlignment="Center"/>
-                <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20">
+                <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
                     <Border x:Name="WhiteboardModeBtn"
-                            Width="60" Height="30"
+                            Width="50" Height="30"
                             Background="#2563eb"
                             CornerRadius="4">
                         <TextBlock Text="{x:Static props:FloatingBarStrings.FloatingBar_Whiteboard}" FontSize="10"
@@ -25,10 +25,19 @@ mc:Ignorable="d">
                                    VerticalAlignment="Center" />
                     </Border>
                     <Border x:Name="BlackboardModeBtn"
-                            Width="60" Height="30"
+                            Width="50" Height="30"
                             Background="LightGray"
                             CornerRadius="4">
                         <TextBlock Text="{x:Static props:CanvasStrings.Canvas_Blackboard}"
+                                   Foreground="Black"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </Border>
+                    <Border x:Name="DarkModeBtn"
+                            Width="50" Height="30"
+                            Background="LightGray"
+                            CornerRadius="4">
+                        <TextBlock Text="{x:Static props:CanvasStrings.Canvas_DarkMode}"
                                    Foreground="Black"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center" />

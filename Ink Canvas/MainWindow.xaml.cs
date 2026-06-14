@@ -209,6 +209,7 @@ namespace Ink_Canvas
             var content = BackgroundPalettePopupContent;
             content.WhiteboardBtn.MouseUp += WhiteboardModeBtn_MouseUp;
             content.BlackboardBtn.MouseUp += BlackboardModeBtn_MouseUp;
+            content.DarkModeBtnControl.MouseUp += DarkModeBtn_MouseUp;
             content.RSlider.ValueChanged += BackgroundRSlider_ValueChanged;
             content.GSlider.ValueChanged += BackgroundGSlider_ValueChanged;
             content.BSlider.ValueChanged += BackgroundBSlider_ValueChanged;

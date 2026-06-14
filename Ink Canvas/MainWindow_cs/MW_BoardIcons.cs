@@ -92,6 +92,31 @@ namespace Ink_Canvas
             UpdateBackgroundButtonsState();
         }
 
+        private void DarkModeBtn_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            Settings.Canvas.UsingWhiteboard = false;
+            SaveSettingsToFile();
+            ICCWaterMarkWhite.Visibility = Visibility.Visible;
+            ICCWaterMarkDark.Visibility = Visibility.Collapsed;
+
+            Color darkModeColor = Color.FromRgb(0, 0, 0);
+
+            if (currentMode == 1)
+            {
+                GridBackgroundCover.Background = new SolidColorBrush(darkModeColor);
+                UpdateRGBSliders(darkModeColor);
+                CustomBackgroundColor = darkModeColor;
+                string colorHex = $"#{darkModeColor.R:X2}{darkModeColor.G:X2}{darkModeColor.B:X2}";
+                Settings.Canvas.CustomBackgroundColor = colorHex;
+                SaveSettingsToFile();
+            }
+
+            CheckLastColor(5);
+            forceEraser = false;
+            CheckColorTheme(true);
+            UpdateBackgroundButtonsState();
+        }
+
         private void BackgroundRSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (BackgroundRValue != null)
@@ -144,14 +169,25 @@ namespace Ink_Canvas
 
         private void UpdateBackgroundButtonsState()
         {
+            // 判断当前背景色最接近哪个预设
+            bool isWhiteboard = Settings.Canvas.UsingWhiteboard;
+            bool isDarkMode = false;
+            if (!isWhiteboard && CustomBackgroundColor.HasValue)
+            {
+                Color c = CustomBackgroundColor.Value;
+                // 如果背景色接近纯黑（RGB都很低），则认为是黑底模式
+                if (c.R <= 10 && c.G <= 10 && c.B <= 10)
+                    isDarkMode = true;
+            }
+
             if (WhiteboardModeBtn != null)
             {
-                WhiteboardModeBtn.Background = Settings.Canvas.UsingWhiteboard ?
+                WhiteboardModeBtn.Background = isWhiteboard ?
                     new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb)) :
                     new SolidColorBrush(Colors.LightGray);
                 if (WhiteboardModeBtn.Child is TextBlock whiteboardText)
                 {
-                    whiteboardText.Foreground = Settings.Canvas.UsingWhiteboard ?
+                    whiteboardText.Foreground = isWhiteboard ?
                         new SolidColorBrush(Colors.White) :
                         new SolidColorBrush(Colors.Black);
                 }
@@ -159,12 +195,25 @@ namespace Ink_Canvas
 
             if (BlackboardModeBtn != null)
             {
-                BlackboardModeBtn.Background = !Settings.Canvas.UsingWhiteboard ?
+                BlackboardModeBtn.Background = (!isWhiteboard && !isDarkMode) ?
                     new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb)) :
                     new SolidColorBrush(Colors.LightGray);
                 if (BlackboardModeBtn.Child is TextBlock blackboardText)
                 {
-                    blackboardText.Foreground = !Settings.Canvas.UsingWhiteboard ?
+                    blackboardText.Foreground = (!isWhiteboard && !isDarkMode) ?
+                        new SolidColorBrush(Colors.White) :
+                        new SolidColorBrush(Colors.Black);
+                }
+            }
+
+            if (DarkModeBtn != null)
+            {
+                DarkModeBtn.Background = isDarkMode ?
+                    new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb)) :
+                    new SolidColorBrush(Colors.LightGray);
+                if (DarkModeBtn.Child is TextBlock darkModeText)
+                {
+                    darkModeText.Foreground = isDarkMode ?
                         new SolidColorBrush(Colors.White) :
                         new SolidColorBrush(Colors.Black);
                 }
