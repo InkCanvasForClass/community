@@ -308,6 +308,45 @@
   <data name="Main_Uri_SwitchedScheme" xml:space="preserve">
     <value>Switched to profile "{0}" via URI</value>
   </data>
+  <data name="Main_Uri_Restart" xml:space="preserve">
+    <value>Restarting app via URI</value>
+  </data>
+  <data name="Main_Uri_RestartAdmin" xml:space="preserve">
+    <value>Restarting app as administrator via URI</value>
+  </data>
+  <data name="Main_Uri_RestartNormal" xml:space="preserve">
+    <value>Restarting app as normal user via URI</value>
+  </data>
+  <data name="Main_Uri_Exit" xml:space="preserve">
+    <value>Exiting app via URI</value>
+  </data>
+  <data name="Main_Uri_ClearInk" xml:space="preserve">
+    <value>Ink cleared via URI</value>
+  </data>
+  <data name="Main_Uri_ClearInkAndHistory" xml:space="preserve">
+    <value>Ink and history cleared via URI</value>
+  </data>
+  <data name="Main_Uri_Undo" xml:space="preserve">
+    <value>Undo executed via URI</value>
+  </data>
+  <data name="Main_Uri_Redo" xml:space="preserve">
+    <value>Redo executed via URI</value>
+  </data>
+  <data name="Main_Uri_NextPage" xml:space="preserve">
+    <value>Switched to next page</value>
+  </data>
+  <data name="Main_Uri_PreviousPage" xml:space="preserve">
+    <value>Switched to previous page</value>
+  </data>
+  <data name="Main_Uri_NewPage" xml:space="preserve">
+    <value>New whiteboard page added via URI</value>
+  </data>
+  <data name="Main_Uri_DeletePage" xml:space="preserve">
+    <value>Current whiteboard page deleted via URI</value>
+  </data>
+  <data name="Main_Uri_Screenshot" xml:space="preserve">
+    <value>Taking screenshot via URI</value>
+  </data>
   <data name="Main_Timer_AutoClosedInkeys" xml:space="preserve">
     <value>Inkeys has been automatically closed</value>
   </data>

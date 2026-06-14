@@ -305,6 +305,45 @@
   <data name="Main_Uri_SwitchedScheme" xml:space="preserve">
     <value>已通过 URI 魔法切换至方案「{0}」</value>
   </data>
+  <data name="Main_Uri_Restart" xml:space="preserve">
+    <value>URI 让我重启一下，马上回来</value>
+  </data>
+  <data name="Main_Uri_RestartAdmin" xml:space="preserve">
+    <value>URI 说要管理员模式重启，变身中…</value>
+  </data>
+  <data name="Main_Uri_RestartNormal" xml:space="preserve">
+    <value>URI 说要普通模式重启，降级中…</value>
+  </data>
+  <data name="Main_Uri_Exit" xml:space="preserve">
+    <value>URI 让我跑路了，拜拜</value>
+  </data>
+  <data name="Main_Uri_ClearInk" xml:space="preserve">
+    <value>URI 帮你把墨迹擦干净了</value>
+  </data>
+  <data name="Main_Uri_ClearInkAndHistory" xml:space="preserve">
+    <value>URI 连墨迹带历史一起清空了</value>
+  </data>
+  <data name="Main_Uri_Undo" xml:space="preserve">
+    <value>URI 帮你按了撤销</value>
+  </data>
+  <data name="Main_Uri_Redo" xml:space="preserve">
+    <value>URI 帮你按了重做</value>
+  </data>
+  <data name="Main_Uri_NextPage" xml:space="preserve">
+    <value>翻到下一页啦</value>
+  </data>
+  <data name="Main_Uri_PreviousPage" xml:space="preserve">
+    <value>翻回上一页啦</value>
+  </data>
+  <data name="Main_Uri_NewPage" xml:space="preserve">
+    <value>URI 给你变出一页新的白板</value>
+  </data>
+  <data name="Main_Uri_DeletePage" xml:space="preserve">
+    <value>URI 把当前白板页吞掉了</value>
+  </data>
+  <data name="Main_Uri_Screenshot" xml:space="preserve">
+    <value>URI 让我截个图，茄子！</value>
+  </data>
   <data name="Main_Timer_AutoClosedInkeys" xml:space="preserve">
     <value>「智绘教 Inkeys」被自动送走了</value>
   </data>

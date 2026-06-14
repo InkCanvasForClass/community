@@ -181,6 +181,32 @@ namespace Ink_Canvas.Properties
 
         public static string Main_Uri_SwitchedScheme => ResourceManager.GetString(nameof(Main_Uri_SwitchedScheme), _resourceCulture);
 
+        public static string Main_Uri_Restart => ResourceManager.GetString(nameof(Main_Uri_Restart), _resourceCulture);
+
+        public static string Main_Uri_RestartAdmin => ResourceManager.GetString(nameof(Main_Uri_RestartAdmin), _resourceCulture);
+
+        public static string Main_Uri_RestartNormal => ResourceManager.GetString(nameof(Main_Uri_RestartNormal), _resourceCulture);
+
+        public static string Main_Uri_Exit => ResourceManager.GetString(nameof(Main_Uri_Exit), _resourceCulture);
+
+        public static string Main_Uri_ClearInk => ResourceManager.GetString(nameof(Main_Uri_ClearInk), _resourceCulture);
+
+        public static string Main_Uri_ClearInkAndHistory => ResourceManager.GetString(nameof(Main_Uri_ClearInkAndHistory), _resourceCulture);
+
+        public static string Main_Uri_Undo => ResourceManager.GetString(nameof(Main_Uri_Undo), _resourceCulture);
+
+        public static string Main_Uri_Redo => ResourceManager.GetString(nameof(Main_Uri_Redo), _resourceCulture);
+
+        public static string Main_Uri_NextPage => ResourceManager.GetString(nameof(Main_Uri_NextPage), _resourceCulture);
+
+        public static string Main_Uri_PreviousPage => ResourceManager.GetString(nameof(Main_Uri_PreviousPage), _resourceCulture);
+
+        public static string Main_Uri_NewPage => ResourceManager.GetString(nameof(Main_Uri_NewPage), _resourceCulture);
+
+        public static string Main_Uri_DeletePage => ResourceManager.GetString(nameof(Main_Uri_DeletePage), _resourceCulture);
+
+        public static string Main_Uri_Screenshot => ResourceManager.GetString(nameof(Main_Uri_Screenshot), _resourceCulture);
+
         public static string Main_Tray_ExitFoldMode => ResourceManager.GetString(nameof(Main_Tray_ExitFoldMode), _resourceCulture);
 
         public static string Main_Tray_EnterFoldMode => ResourceManager.GetString(nameof(Main_Tray_EnterFoldMode), _resourceCulture);

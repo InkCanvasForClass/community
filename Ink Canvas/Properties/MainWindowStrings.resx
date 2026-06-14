@@ -263,6 +263,45 @@
   <data name="Main_Uri_SwitchedScheme" xml:space="preserve">
     <value>已通过 URI 切换至方案「{0}」</value>
   </data>
+  <data name="Main_Uri_Restart" xml:space="preserve">
+    <value>正在通过 URI 重启应用</value>
+  </data>
+  <data name="Main_Uri_RestartAdmin" xml:space="preserve">
+    <value>正在通过 URI 以管理员身份重启应用</value>
+  </data>
+  <data name="Main_Uri_RestartNormal" xml:space="preserve">
+    <value>正在通过 URI 以普通权限重启应用</value>
+  </data>
+  <data name="Main_Uri_Exit" xml:space="preserve">
+    <value>正在通过 URI 退出应用</value>
+  </data>
+  <data name="Main_Uri_ClearInk" xml:space="preserve">
+    <value>已通过 URI 清除墨迹</value>
+  </data>
+  <data name="Main_Uri_ClearInkAndHistory" xml:space="preserve">
+    <value>已通过 URI 清除墨迹和历史记录</value>
+  </data>
+  <data name="Main_Uri_Undo" xml:space="preserve">
+    <value>已通过 URI 执行撤销</value>
+  </data>
+  <data name="Main_Uri_Redo" xml:space="preserve">
+    <value>已通过 URI 执行重做</value>
+  </data>
+  <data name="Main_Uri_NextPage" xml:space="preserve">
+    <value>已切换至下一页</value>
+  </data>
+  <data name="Main_Uri_PreviousPage" xml:space="preserve">
+    <value>已切换至上一页</value>
+  </data>
+  <data name="Main_Uri_NewPage" xml:space="preserve">
+    <value>已通过 URI 新建白板页</value>
+  </data>
+  <data name="Main_Uri_DeletePage" xml:space="preserve">
+    <value>已通过 URI 删除当前白板页</value>
+  </data>
+  <data name="Main_Uri_Screenshot" xml:space="preserve">
+    <value>正在通过 URI 截图</value>
+  </data>
   <data name="Main_Tray_ExitFoldMode" xml:space="preserve">
     <value>退出收纳模式</value>
   </data>

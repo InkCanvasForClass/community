@@ -2,6 +2,7 @@ using Ink_Canvas.Helpers;
 using Newtonsoft.Json;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace Ink_Canvas
@@ -9,6 +10,7 @@ namespace Ink_Canvas
     /// <summary>
     /// 处理 icc: URL 协议命令
     /// 支持：收纳/展开/切换、彻底隐藏、点名/计时器/白板、工具状态切换与查询、配置方案列表与切换。
+    /// 支持：重启/退出、清空墨迹、撤销/重做、翻页/新建/删除白板页、截图、选择工具。
     /// 配置方案：icc://config-profile/list 输出列表到 %TEMP%\InkCanvasConfigProfileList.json；
     ///          icc://config-profile/switch?name=方案名 切换方案，结果写入 %TEMP%\InkCanvasConfigProfileSwitchResult.txt。
     /// </summary>
@@ -96,6 +98,66 @@ namespace Ink_Canvas
                     case "board":
                         ImageBlackboard_MouseUp(null, null);
                         return;
+                    case "restart":
+                        ShowNotification(Properties.MainWindowStrings.Main_Uri_Restart);
+                        _ = Task.Delay(300).ContinueWith(_ => Dispatcher.Invoke(() => AppRestartHelper.RestartWithCurrentPrivileges()));
+                        return;
+                    case "restart/admin":
+                        ShowNotification(Properties.MainWindowStrings.Main_Uri_RestartAdmin);
+                        _ = Task.Delay(300).ContinueWith(_ => Dispatcher.Invoke(() => AppRestartHelper.RestartAsAdmin()));
+                        return;
+                    case "restart/normal":
+                        ShowNotification(Properties.MainWindowStrings.Main_Uri_RestartNormal);
+                        _ = Task.Delay(300).ContinueWith(_ => Dispatcher.Invoke(() => AppRestartHelper.RestartAsNormal()));
+                        return;
+                    case "exit":
+                    case "quit":
+                        ShowNotification(Properties.MainWindowStrings.Main_Uri_Exit);
+                        _ = Task.Delay(300).ContinueWith(_ => Dispatcher.Invoke(() => ExitApplication(null, null)));
+                        return;
+                    case "clear":
+                    case "clearink":
+                        EraserPanelSymbolIconDelete_MouseUp(null, null);
+                        ShowNotification(Properties.MainWindowStrings.Main_Uri_ClearInk);
+                        return;
+                    case "clearall":
+                    case "clearinkandhistory":
+                        BoardSymbolIconDeleteInkAndHistories_MouseUp(null, null);
+                        ShowNotification(Properties.MainWindowStrings.Main_Uri_ClearInkAndHistory);
+                        return;
+                    case "undo":
+                        SymbolIconUndo_MouseUp(null, null);
+                        ShowNotification(Properties.MainWindowStrings.Main_Uri_Undo);
+                        return;
+                    case "redo":
+                        SymbolIconRedo_MouseUp(null, null);
+                        ShowNotification(Properties.MainWindowStrings.Main_Uri_Redo);
+                        return;
+                    case "nextpage":
+                    case "page/next":
+                        SwitchToNextPage();
+                        ShowNotification(Properties.MainWindowStrings.Main_Uri_NextPage);
+                        return;
+                    case "previouspage":
+                    case "prevpage":
+                    case "page/previous":
+                        SwitchToPreviousPage();
+                        ShowNotification(Properties.MainWindowStrings.Main_Uri_PreviousPage);
+                        return;
+                    case "newpage":
+                    case "page/add":
+                        AddWhiteboardPage();
+                        ShowNotification(Properties.MainWindowStrings.Main_Uri_NewPage);
+                        return;
+                    case "deletepage":
+                    case "page/delete":
+                        DeleteWhiteboardPage();
+                        ShowNotification(Properties.MainWindowStrings.Main_Uri_DeletePage);
+                        return;
+                    case "screenshot":
+                        ShowNotification(Properties.MainWindowStrings.Main_Uri_Screenshot);
+                        _ = Task.Delay(300).ContinueWith(_ => Dispatcher.Invoke(async () => await CaptureScreenshotAndInsert()));
+                        return;
                     case "freeze":
                     case "lock":
                     case "ink-freeze":
@@ -156,6 +218,10 @@ namespace Ink_Canvas
                         case "eraserstroke":
                             PenIcon_Click(null, null);
                             EraserIconByStrokes_Click(EraserByStrokes_Icon, null);
+                            break;
+                        case "select":
+                        case "lasso":
+                            SymbolIconSelect_MouseUp(null, null);
                             break;
                         default:
                             LogHelper.WriteLogToFile($"未知的 URI 工具: {tool}", LogHelper.LogType.Warning);
