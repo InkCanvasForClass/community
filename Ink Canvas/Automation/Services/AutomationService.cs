@@ -39,7 +39,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         {
             if (!IsAutomationEnabled) return;
 
-            foreach (var workflow in Workflows.Where(x => x is { ActionSet: { IsOn: true, IsRevertEnabled: true }, IsConditionEnabled: true }))
+            foreach (var workflow in Workflows.Where(x => x.ActionSet.IsOn && x.ActionSet.IsRevertEnabled))
             {
                 if (RulesetService.IsRulesetSatisfied(workflow.Ruleset))
                     continue;
@@ -338,7 +338,9 @@ namespace Ink_Canvas.WorkflowAutomation.Services
 
             if (workflow.ActionSet.IsRevertEnabled && workflow.ActionSet.IsOn) return;
 
-            if (workflow.IsConditionEnabled)
+            // 当启用自动恢复时，始终检查条件——自动恢复依赖条件判断来决定何时恢复，
+            // 没有条件检查的自动恢复是无意义的
+            if (workflow.IsConditionEnabled || workflow.ActionSet.IsRevertEnabled)
             {
                 if (!RulesetService.IsRulesetSatisfied(workflow.Ruleset)) return;
             }

@@ -60,6 +60,7 @@ namespace Ink_Canvas.WorkflowAutomation.Models
         /// <summary>
         /// 行动组被触发后还未恢复。
         /// </summary>
+        [Newtonsoft.Json.JsonIgnore]
         public bool IsOn
         {
             get => _isOn;
