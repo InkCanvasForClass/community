@@ -1928,7 +1928,7 @@ namespace Ink_Canvas.Helpers
                     LogHelper.WriteLogToFile($"AutoUpdate | 准备启动新版本进程: {newAppPath}");
 
                     // 启动新版本进程（以更新模式）
-                    string arguments = $"--update-mode --old-process-id={currentProcessId} --extract-path=\"{extractPath}\" --target-path=\"{currentAppDir}\" --is-silence={isInSilence}";
+                    string arguments = $"--update-mode --old-process-id={currentProcessId} --extract-path=\"{extractPath.TrimEnd('\\')}\" --target-path=\"{currentAppDir.TrimEnd('\\')}\" --is-silence={isInSilence}";
 
                     LogHelper.WriteLogToFile($"AutoUpdate | 启动新进程的命令行: {newAppPath} {arguments}");
 
