@@ -44,6 +44,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
+            var mw = Application.Current.MainWindow as MainWindow;
+            mw?.UpdateCustomIconsInComboBox();
             LoadSettings();
             _isLoaded = true;
             UpdateAllSliderTexts();

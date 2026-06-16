@@ -6,6 +6,7 @@ using OSVersionExtension;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -410,6 +411,38 @@ namespace Ink_Canvas
         /// </remarks>
         public void UpdateCustomIconsInComboBox()
         {
+            var page = Application.Current.Windows.OfType<Window>()
+                .SelectMany(w => FindVisualChildren<iNKORE.UI.WPF.Modern.Controls.NavigationView>(w))
+                .SelectMany(nv => FindVisualChildren<Windows.SettingsViews.Pages.AppearancePage>(nv))
+                .FirstOrDefault();
+            if (page == null) return;
+
+            var comboBox = page.FindName("ComboBoxFloatingBarImg") as ComboBox;
+            if (comboBox == null) return;
+
+            // 保留前12个内置图标选项，移除所有自定义图标选项
+            while (comboBox.Items.Count > 12)
+            {
+                comboBox.Items.RemoveAt(comboBox.Items.Count - 1);
+            }
+
+            // 添加自定义图标选项
+            foreach (var customIcon in Settings.Appearance.CustomFloatingBarImgs)
+            {
+                comboBox.Items.Add(new ComboBoxItem { Content = customIcon.Name });
+            }
+        }
+
+        private static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
+        {
+            if (depObj == null) yield break;
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+            {
+                var child = VisualTreeHelper.GetChild(depObj, i);
+                if (child is T t) yield return t;
+                foreach (var childOfChild in FindVisualChildren<T>(child))
+                    yield return childOfChild;
+            }
         }
 
 
