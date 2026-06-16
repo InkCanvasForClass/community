@@ -413,7 +413,7 @@ namespace Ink_Canvas
         {
             var page = Application.Current.Windows.OfType<Window>()
                 .SelectMany(w => FindVisualChildren<iNKORE.UI.WPF.Modern.Controls.NavigationView>(w))
-                .SelectMany(nv => FindVisualChildren<Windows.SettingsViews.Pages.AppearancePage>(nv))
+                .SelectMany(nv => FindVisualChildren<Windows.SettingsViews.Pages.ToolbarAppearancePage>(nv))
                 .FirstOrDefault();
             if (page == null) return;
 

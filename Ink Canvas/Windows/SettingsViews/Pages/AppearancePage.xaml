@@ -75,84 +75,6 @@
                         </ComboBox>
                     </ui:SettingsCard>
 
-                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{x:Static props:ThemeStrings.Theme_FloatingBarIcon}" />
-
-                    <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_FloatingBarIcon}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Photo}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ComboBox x:Name="ComboBoxFloatingBarImg"
-                                  SelectedIndex="0"
-                                  SelectionChanged="ComboBoxFloatingBarImg_SelectionChanged">
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_FloatingIcon_IccDefault}" />
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_FloatingIcon_IccNoShadow}" />
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_FloatingIcon_IccDark}" />
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_FloatingIcon_IccDarkBreath}" />
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_FloatingIcon_IccWhiteTransparent}" />
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_FloatingIcon_IccBlackTransparent}" />
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_FloatingIcon_CoolapkCrossEye}" />
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_FloatingIcon_CoolapkAbused}" />
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_FloatingIcon_CoolapkSmile}" />
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_FloatingIcon_CoolapkUnderwear}" />
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_FloatingIcon_CoolapkGreenHatDoge}" />
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_FloatingIcon_TiebaEmoji}" />
-                        </ComboBox>
-                    </ui:SettingsCard>
-
-                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
-                        <Button x:Name="ButtonAddCustomIcon" Content="{x:Static props:ThemeStrings.Theme_Upload}"
-                                Click="ButtonAddCustomIcon_Click" Padding="10,3"/>
-                        <Button x:Name="ButtonManageCustomIcons" Content="{x:Static props:ThemeStrings.Theme_Manage}"
-                                Click="ButtonManageCustomIcons_Click" Padding="10,3"/>
-                    </ikw:SimpleStackPanel>
-
-                    <controls:LabeledSettingsCard x:Name="CardEnableTimeDisplayInWhiteboardMode"
-                            Header="{x:Static props:ThemeStrings.Theme_ShowTimeInWhiteboard}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Pinned}"
-                            SwitchName="ToggleSwitchEnableTimeDisplayInWhiteboardMode"
-                            Toggled="ToggleSwitchEnableTimeDisplayInWhiteboardMode_Toggled" />
-
-                    <controls:LabeledSettingsCard x:Name="CardEnableChickenSoupInWhiteboardMode"
-                            Header="{x:Static props:ThemeStrings.Theme_ShowQuoteInWhiteboard}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Message}"
-                            SwitchName="ToggleSwitchEnableChickenSoupInWhiteboardMode"
-                            Toggled="ToggleSwitchEnableChickenSoupInWhiteboardMode_Toggled" />
-
-                    <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_QuoteSource}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Heart}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <ComboBox x:Name="ComboBoxChickenSoupSource"
-                                      SelectionChanged="ComboBoxChickenSoupSource_SelectionChanged">
-                                <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuoteSource_OsuQuotes}" />
-                                <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuoteSource_Mottos}" />
-                                <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuoteSource_GaokaoBless}" />
-                                <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuoteSource_Hitokoto}" />
-                                <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuoteSource_PhigrosTips}" />
-                            </ComboBox>
-                            <Button x:Name="BtnHitokotoCustomize" Content="{x:Static props:ThemeStrings.Theme_Splash_Custom}"
-                                    Padding="14,4" MinWidth="65" VerticalAlignment="Center"
-                                    Click="BtnHitokotoCustomize_Click"
-                                    Visibility="Collapsed" />
-                        </ikw:SimpleStackPanel>
-                    </ui:SettingsCard>
-
-                    <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_QuotePosition}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.POI}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ComboBox x:Name="ComboBoxChickenSoupPosition"
-                                  MinWidth="180"
-                                  SelectionChanged="ComboBoxChickenSoupPosition_SelectionChanged">
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuotePosition_TopRight}" Tag="TopRight" />
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuotePosition_TopLeft}" Tag="TopLeft" />
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuotePosition_BottomRight}" Tag="BottomRight" />
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuotePosition_BottomLeft}" Tag="BottomLeft" />
-                        </ComboBox>
-                    </ui:SettingsCard>
-
                     <controls:LabeledSettingsCard x:Name="CardEnableQuickPanel"
                             Header="{x:Static props:ThemeStrings.Theme_EnableQuickPanel}"
                             Icon="{x:Static ui:SegoeFluentIcons.Pinned}"
@@ -228,24 +150,6 @@
                                     TickPlacement="None" AutoToolTipPlacement="None"
                                     ValueChanged="AutoCollapseDelaySlider_ValueChanged" />
                         </ikw:SimpleStackPanel>
-                    </ui:SettingsCard>
-
-                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{x:Static props:ThemeStrings.Theme_FloatingBarButtonsTitle}" />
-
-                    <controls:LabeledSettingsCard x:Name="CardUseLegacyFloatingBarUI"
-                            Header="{x:Static props:ThemeStrings.Theme_UseLegacyFloatingBarUI}"
-                            Icon="{x:Static ui:SegoeFluentIcons.History}"
-                            SwitchName="ToggleSwitchUseLegacyFloatingBarUI"
-                            Toggled="ToggleSwitchUseLegacyFloatingBarUI_Toggled" />
-
-                    <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_FloatingBarButtonsTitle}"
-                            Description="{x:Static props:ThemeStrings.Theme_FloatingBarButtonsDescription}"
-                            IsClickEnabled="True"
-                            Click="CardFloatingBarButtons_Click">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ViewAll}" />
-                        </ui:SettingsCard.HeaderIcon>
                     </ui:SettingsCard>
 
                     <Rectangle Height="48" />

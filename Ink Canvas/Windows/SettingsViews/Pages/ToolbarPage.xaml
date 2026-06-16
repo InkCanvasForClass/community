@@ -8,6 +8,7 @@
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:dd="urn:gong-wpf-dragdrop"
       xmlns:toolbar="clr-namespace:Ink_Canvas.Controls.Toolbar.FloatingToolbar"
+      xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       mc:Ignorable="d"
       Title="工具栏">
 
@@ -100,6 +101,13 @@
     <ScrollViewer x:Name="PageScrollViewer" PanningMode="VerticalFirst">
         <ikw:SimpleStackPanel Spacing="4" Margin="24,0,24,0">
 
+            <controls:LabeledSettingsCard x:Name="CardUseLegacyFloatingBarUI"
+                    Header="{x:Static props:ThemeStrings.Theme_UseLegacyFloatingBarUI}"
+                    Icon="{x:Static ui:SegoeFluentIcons.History}"
+                    SwitchName="ToggleSwitchUseLegacyFloatingBarUI"
+                    Toggled="ToggleSwitchUseLegacyFloatingBarUI_Toggled" />
+
+            <Rectangle Height="16" />
             <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_ConfigProfiles}" FontSize="14" FontWeight="SemiBold" Margin="0,20,0,6"/>
             <DockPanel Margin="0,0,0,4">
                 <ComboBox x:Name="ComboBoxConfigFile" SelectionChanged="ComboBoxConfigFile_SelectionChanged"

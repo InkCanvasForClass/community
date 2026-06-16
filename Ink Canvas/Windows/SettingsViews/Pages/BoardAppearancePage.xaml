@@ -7,6 +7,7 @@
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
+      xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       mc:Ignorable="d"
       Title="{x:Static props:NavStrings.Nav_BoardAppearance}">
 
@@ -26,6 +27,55 @@
                 <ikw:SimpleStackPanel MaxWidth="1000"
                     HorizontalAlignment="Stretch"
                     Spacing="{StaticResource SettingsCardSpacing}">
+
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="{x:Static props:ThemeStrings.Theme_ShowTimeInWhiteboard}" />
+
+                    <controls:LabeledSettingsCard x:Name="CardEnableTimeDisplayInWhiteboardMode"
+                            Header="{x:Static props:ThemeStrings.Theme_ShowTimeInWhiteboard}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Pinned}"
+                            SwitchName="ToggleSwitchEnableTimeDisplayInWhiteboardMode"
+                            Toggled="ToggleSwitchEnableTimeDisplayInWhiteboardMode_Toggled" />
+
+                    <controls:LabeledSettingsCard x:Name="CardEnableChickenSoupInWhiteboardMode"
+                            Header="{x:Static props:ThemeStrings.Theme_ShowQuoteInWhiteboard}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Message}"
+                            SwitchName="ToggleSwitchEnableChickenSoupInWhiteboardMode"
+                            Toggled="ToggleSwitchEnableChickenSoupInWhiteboardMode_Toggled" />
+
+                    <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_QuoteSource}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Heart}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <ComboBox x:Name="ComboBoxChickenSoupSource"
+                                      SelectionChanged="ComboBoxChickenSoupSource_SelectionChanged">
+                                <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuoteSource_OsuQuotes}" />
+                                <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuoteSource_Mottos}" />
+                                <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuoteSource_GaokaoBless}" />
+                                <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuoteSource_Hitokoto}" />
+                                <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuoteSource_PhigrosTips}" />
+                            </ComboBox>
+                            <Button x:Name="BtnHitokotoCustomize" Content="{x:Static props:ThemeStrings.Theme_Splash_Custom}"
+                                    Padding="14,4" MinWidth="65" VerticalAlignment="Center"
+                                    Click="BtnHitokotoCustomize_Click"
+                                    Visibility="Collapsed" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_QuotePosition}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.POI}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ComboBox x:Name="ComboBoxChickenSoupPosition"
+                                  MinWidth="180"
+                                  SelectionChanged="ComboBoxChickenSoupPosition_SelectionChanged">
+                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuotePosition_TopRight}" Tag="TopRight" />
+                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuotePosition_TopLeft}" Tag="TopLeft" />
+                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuotePosition_BottomRight}" Tag="BottomRight" />
+                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuotePosition_BottomLeft}" Tag="BottomLeft" />
+                        </ComboBox>
+                    </ui:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:ThemeStrings.Theme_BoardToolbarOpacity}" />

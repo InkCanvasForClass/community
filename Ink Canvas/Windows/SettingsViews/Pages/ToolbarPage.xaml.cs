@@ -186,6 +186,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _isLoaded = true;
         }
 
+        private void ToggleSwitchUseLegacyFloatingBarUI_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.UseLegacyFloatingBarUI = CardUseLegacyFloatingBarUI.IsOn;
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnUseLegacyFloatingBarUIChanged();
+        }
+
         #region Config file management
 
         private void RefreshConfigFileList()
@@ -319,6 +327,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 AddedComponents.Add(CloneEntry(entry));
             }
+
+            if (CardUseLegacyFloatingBarUI != null)
+                CardUseLegacyFloatingBarUI.IsOn = SettingsManager.Settings.Appearance.UseLegacyFloatingBarUI;
 
             LogHelper.WriteLogToFile($"{LogTag}: LoadSettings 完成 Count={AddedComponents.Count}", LogHelper.LogType.Info);
         }
