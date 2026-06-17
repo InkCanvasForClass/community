@@ -1308,6 +1308,7 @@ namespace Ink_Canvas.Windows
                 Dispatcher.Invoke(() =>
                 {
                     if (_minimizedWindow != null && _minimizedWindow.IsVisible) return;
+                    if (IsFullscreenWindowOpen) return;
 
                     bool pptCapsuleActive = MainWindow.Settings?.PowerPointSettings?.EnablePPTTimeCapsule == true
                         && (Application.Current.MainWindow as MainWindow)?.IsInPptPresentationMode == true;
