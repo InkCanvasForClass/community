@@ -313,6 +313,37 @@ namespace Ink_Canvas
 
         private void UpdateFloatingBarIconComboBox()
         {
+            try
+            {
+                foreach (Window window in Application.Current.Windows)
+                {
+                    if (window is Ink_Canvas.Windows.SettingsViews.SettingsWindow)
+                    {
+                        var comboBox = FindChildByName<System.Windows.Controls.ComboBox>(window, "ComboBoxFloatingBarImg");
+                        if (comboBox != null)
+                        {
+                            comboBox.SelectedIndex = Settings.Appearance.FloatingBarImg;
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        private static T FindChildByName<T>(DependencyObject parent, string name) where T : FrameworkElement
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T fe && fe.Name == name)
+                    return fe;
+                var result = FindChildByName<T>(child, name);
+                if (result != null)
+                    return result;
+            }
+            return null;
         }
 
         private void RefreshStrokeSelectionIcons()
