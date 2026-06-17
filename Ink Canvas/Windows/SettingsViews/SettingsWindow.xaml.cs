@@ -234,7 +234,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 using (var themeKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(
                     @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"))
                 {
-                    if (themeKey?.GetValue("SystemUsesLightTheme") is int v) return v == 1;
+                    if (themeKey?.GetValue("AppsUseLightTheme") is int v) return v == 1;
                 }
             }
             catch { }
