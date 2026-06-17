@@ -1,6 +1,7 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Models;
 using Ink_Canvas.Properties;
+using Ink_Canvas.Windows;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ namespace Ink_Canvas
     {
         private int lastNotificationShowTime;
         private int notificationShowTime = 2500;
+        private bool _startupUnreadNotificationShown;
 
         public static void ShowNewMessage(string notice, bool isShowImmediately = true)
         {
@@ -57,6 +59,10 @@ namespace Ink_Canvas
             if (_announcementService == null && Settings?.Notification?.IsAnnouncementEnabled == true)
             {
                 _announcementService = new AnnouncementService(Settings);
+
+                AnnouncementService.UnreadCountChanged -= OnAnnouncementUnreadCountChanged;
+                AnnouncementService.UnreadCountChanged += OnAnnouncementUnreadCountChanged;
+
                 Dispatcher.BeginInvoke(new Action(async () =>
                 {
                     try
@@ -184,6 +190,60 @@ namespace Ink_Canvas
             }
             catch
             {
+            }
+        }
+
+        private void OnAnnouncementUnreadCountChanged()
+        {
+            if (_startupUnreadNotificationShown) return;
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (_startupUnreadNotificationShown) return;
+                ShowStartupUnreadNotification();
+            }));
+        }
+
+        private void ShowStartupUnreadNotification()
+        {
+            try
+            {
+                if (_startupUnreadNotificationShown) return;
+                _startupUnreadNotificationShown = true;
+
+                var count = AnnouncementService.GetUnreadCount(Settings);
+                if (count <= 0) return;
+
+                NotificationCenterService.Enqueue(new NotificationMessage
+                {
+                    Id = "startup-unread-announcements",
+                    Type = NotificationMessageType.Reminder,
+                    Level = NotificationMessageLevel.Normal,
+                    Title = AnnouncementStrings.StartupUnreadTitle,
+                    Summary = string.Format(AnnouncementStrings.StartupUnreadSummary, count),
+                    ActionText = AnnouncementStrings.StartupUnreadAction,
+                    Icon = "Info",
+                    DisplaySeconds = 8,
+                    Priority = 50,
+                    Source = "startup-unread",
+                    ProviderId = "announcement",
+                    Action = () =>
+                    {
+                        try
+                        {
+                            var window = new AnnouncementCenterWindow { Owner = this };
+                            window.Show();
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"打开公告中心失败: {ex.Message}", LogHelper.LogType.Warning);
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"启动未读公告通知失败: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
 

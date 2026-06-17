@@ -90,4 +90,13 @@
   <data name="WebSocketUrlHint" xml:space="preserve">
     <value>可留空，留空时会根据 API 地址自动生成 WebSocket 地址。</value>
   </data>
+  <data name="StartupUnreadTitle" xml:space="preserve">
+    <value>未读通知</value>
+  </data>
+  <data name="StartupUnreadSummary" xml:space="preserve">
+    <value>您有 {0} 条未读通知</value>
+  </data>
+  <data name="StartupUnreadAction" xml:space="preserve">
+    <value>查看详情</value>
+  </data>
 </root>

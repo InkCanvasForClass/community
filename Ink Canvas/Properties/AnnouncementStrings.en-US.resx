@@ -90,4 +90,13 @@
   <data name="WebSocketUrlHint" xml:space="preserve">
     <value>Leave empty to automatically derive the WebSocket URL from the API URL.</value>
   </data>
+  <data name="StartupUnreadTitle" xml:space="preserve">
+    <value>Unread notifications</value>
+  </data>
+  <data name="StartupUnreadSummary" xml:space="preserve">
+    <value>You have {0} unread notifications</value>
+  </data>
+  <data name="StartupUnreadAction" xml:space="preserve">
+    <value>View details</value>
+  </data>
 </root>

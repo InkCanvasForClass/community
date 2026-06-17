@@ -71,5 +71,11 @@ namespace Ink_Canvas.Properties
         public static string WebSocketUrl => ResourceManager.GetString(nameof(WebSocketUrl), _resourceCulture);
 
         public static string WebSocketUrlHint => ResourceManager.GetString(nameof(WebSocketUrlHint), _resourceCulture);
+
+        public static string StartupUnreadTitle => ResourceManager.GetString(nameof(StartupUnreadTitle), _resourceCulture);
+
+        public static string StartupUnreadSummary => ResourceManager.GetString(nameof(StartupUnreadSummary), _resourceCulture);
+
+        public static string StartupUnreadAction => ResourceManager.GetString(nameof(StartupUnreadAction), _resourceCulture);
     }
 }
