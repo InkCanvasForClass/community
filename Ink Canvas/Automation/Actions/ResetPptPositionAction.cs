@@ -1,5 +1,4 @@
 using Ink_Canvas.WorkflowAutomation.Abstractions;
-using Ink_Canvas.WorkflowAutomation.Models;
 using System.Windows;
 
 namespace Ink_Canvas.WorkflowAutomation.ActionHandlers
@@ -9,23 +8,6 @@ namespace Ink_Canvas.WorkflowAutomation.ActionHandlers
     /// </summary>
     public class ResetPptPositionActionSettings
     {
-    }
-
-    /// <summary>
-    /// 重置工具栏在PPT模式位置的旧式注册（兼容 Actions 目录）
-    /// </summary>
-    public static class ResetPptPositionAction
-    {
-        public const string ActionId = "inkcanvas.resetpptposition";
-
-        public static ActionRegistryInfo Register()
-        {
-            var info = new ActionRegistryInfo(ActionId, "重置PPT模式位置", "Presentation")
-            {
-                SettingsType = typeof(ResetPptPositionActionSettings)
-            };
-            return info;
-        }
     }
 
     /// <summary>

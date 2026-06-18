@@ -1,4 +1,3 @@
-using Ink_Canvas.WorkflowAutomation.Models;
 using System.Diagnostics;
 
 namespace Ink_Canvas.WorkflowAutomation.Rules
@@ -20,31 +19,6 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
     public static class ProcessRunningRule
     {
         public const string RuleId = "inkcanvas.processrunning";
-
-        public static RuleRegistryInfo Register()
-        {
-            var info = new RuleRegistryInfo(RuleId, "进程正在运行", "ApplicationOutline")
-            {
-                SettingsType = typeof(ProcessRunningRuleSettings)
-            };
-
-            info.Handle = (settings) =>
-            {
-                var s = settings as ProcessRunningRuleSettings;
-                if (s == null || string.IsNullOrEmpty(s.ProcessName)) return false;
-
-                try
-                {
-                    return Process.GetProcessesByName(s.ProcessName).Length > 0;
-                }
-                catch
-                {
-                    return false;
-                }
-            };
-
-            return info;
-        }
 
         public static bool Evaluate(object settings)
         {
