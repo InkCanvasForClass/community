@@ -2090,7 +2090,7 @@ namespace Ink_Canvas
             bool hasMultipleManipulators = e.Manipulators.Count() >= 2;
             bool shouldUseTwoFingerGesture = (dec.Count >= 2 && hasMultipleManipulators &&
                                              (Settings.PowerPointSettings.IsEnableTwoFingerGestureInPresentationMode ||
-                                              !ArePptControlsVisible)) ||
+                                              !ArePPTControlsVisible)) ||
                                             isSingleFingerDragMode;
 
             if (shouldUseTwoFingerGesture)

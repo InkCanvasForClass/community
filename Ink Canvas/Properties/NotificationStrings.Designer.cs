@@ -62,9 +62,9 @@ namespace Ink_Canvas.Properties
 
         public static string DictationDoNotDisturbHint => ResourceManager.GetString(nameof(DictationDoNotDisturbHint), _resourceCulture);
 
-        public static string DictationDoNotDisturbPpt => ResourceManager.GetString(nameof(DictationDoNotDisturbPpt), _resourceCulture);
+        public static string DictationDoNotDisturbPPT => ResourceManager.GetString(nameof(DictationDoNotDisturbPPT), _resourceCulture);
 
-        public static string DictationDoNotDisturbPptHint => ResourceManager.GetString(nameof(DictationDoNotDisturbPptHint), _resourceCulture);
+        public static string DictationDoNotDisturbPPTHint => ResourceManager.GetString(nameof(DictationDoNotDisturbPPTHint), _resourceCulture);
 
         public static string DictationDoNotDisturbWhiteboard => ResourceManager.GetString(nameof(DictationDoNotDisturbWhiteboard), _resourceCulture);
 

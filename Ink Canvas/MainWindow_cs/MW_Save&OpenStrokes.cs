@@ -249,7 +249,7 @@ namespace Ink_Canvas
                     List<StrokeCollection> allPageStrokes = new List<StrokeCollection>();
 
                     // 检查PPT放映模式下的多页面墨迹
-                    if (IsInPptPresentationMode && _pptManager?.IsConnected == true)
+                    if (IsInPPTPresentationMode && _pptManager?.IsConnected == true)
                     {
                         hasMultiplePages = true;
                         var totalSlides = _pptManager.SlidesCount;
@@ -293,7 +293,7 @@ namespace Ink_Canvas
                     if (hasMultiplePages && allPageStrokes.Count > 0)
                     {
                         // 检查是否是PPT模式
-                        bool isPPTMode = IsInPptPresentationMode && _pptManager?.IsConnected == true;
+                        bool isPPTMode = IsInPPTPresentationMode && _pptManager?.IsConnected == true;
 
                         if (isPPTMode)
                         {
@@ -367,7 +367,7 @@ namespace Ink_Canvas
                     List<StrokeCollection> allPageStrokes = new List<StrokeCollection>();
 
                     // 检查PPT放映模式下的多页面墨迹
-                    if (IsInPptPresentationMode && _pptManager?.IsConnected == true)
+                    if (IsInPPTPresentationMode && _pptManager?.IsConnected == true)
                     {
                         hasMultiplePages = true;
                         // 收集PPT放映模式下的所有页面墨迹
@@ -431,7 +431,7 @@ namespace Ink_Canvas
                     List<StrokeCollection> allPageStrokes = new List<StrokeCollection>();
 
                     // 检查PPT放映模式下的多页面墨迹
-                    if (IsInPptPresentationMode && _pptManager?.IsConnected == true)
+                    if (IsInPPTPresentationMode && _pptManager?.IsConnected == true)
                     {
                         hasMultiplePages = true;
                         var totalSlides = _pptManager.SlidesCount;
@@ -1078,7 +1078,7 @@ namespace Ink_Canvas
                     bool isWhiteboardMode = metadata.ContainsKey("模式") && metadata["模式"].Contains(FloatingBarStrings.FloatingBar_Whiteboard);
 
                     // 检查当前是否处于PPT模式
-                    bool isCurrentlyInPPTMode = IsInPptPresentationMode && pptApplication != null;
+                    bool isCurrentlyInPPTMode = IsInPPTPresentationMode && pptApplication != null;
 
                     // 检查当前是否处于白板模式
                     bool isCurrentlyInWhiteboardMode = currentMode != 0;
@@ -1161,7 +1161,7 @@ namespace Ink_Canvas
             try
             {
                 // 确保当前处于PPT放映模式
-                if (!IsInPptPresentationMode || pptApplication == null)
+                if (!IsInPPTPresentationMode || pptApplication == null)
                 {
                     throw new InvalidOperationException("当前不在PPT放映模式，无法恢复PPT墨迹");
                 }
@@ -1169,18 +1169,18 @@ namespace Ink_Canvas
                 // 检查PPT文件路径是否匹配
                 if (metadata.ContainsKey("PPT文件路径"))
                 {
-                    string savedPptPath = metadata["PPT文件路径"];
-                    string currentPptPath = pptApplication.SlideShowWindows[1].Presentation.FullName;
+                    string savedPPTPath = metadata["PPT文件路径"];
+                    string currentPPTPath = pptApplication.SlideShowWindows[1].Presentation.FullName;
 
-                    if (!string.IsNullOrEmpty(savedPptPath) && !string.IsNullOrEmpty(currentPptPath))
+                    if (!string.IsNullOrEmpty(savedPPTPath) && !string.IsNullOrEmpty(currentPPTPath))
                     {
                         // 使用文件路径哈希值进行比较，避免路径格式差异
-                        string savedHash = HashHelper.GetFileHash(savedPptPath);
-                        string currentHash = HashHelper.GetFileHash(currentPptPath);
+                        string savedHash = HashHelper.GetFileHash(savedPPTPath);
+                        string currentHash = HashHelper.GetFileHash(currentPPTPath);
 
                         if (savedHash != currentHash)
                         {
-                            throw new InvalidOperationException($"墨迹文件与当前PPT文件不匹配。保存的PPT: {savedPptPath}，当前PPT: {currentPptPath}");
+                            throw new InvalidOperationException($"墨迹文件与当前PPT文件不匹配。保存的PPT: {savedPPTPath}，当前PPT: {currentPPTPath}");
                         }
                     }
                 }

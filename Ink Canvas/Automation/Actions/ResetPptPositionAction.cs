@@ -7,14 +7,14 @@ namespace Ink_Canvas.WorkflowAutomation.ActionHandlers
     /// <summary>
     /// 重置工具栏在PPT模式的位置的行动设置
     /// </summary>
-    public class ResetPptPositionActionSettings
+    public class ResetPPTPositionActionSettings
     {
     }
 
     /// <summary>
     /// 重置工具栏在PPT模式位置的旧式注册（兼容 Actions 目录）
     /// </summary>
-    public static class ResetPptPositionAction
+    public static class ResetPPTPositionAction
     {
         public const string ActionId = "inkcanvas.resetpptposition";
 
@@ -22,7 +22,7 @@ namespace Ink_Canvas.WorkflowAutomation.ActionHandlers
         {
             var info = new ActionRegistryInfo(ActionId, "重置PPT模式位置", "Presentation")
             {
-                SettingsType = typeof(ResetPptPositionActionSettings)
+                SettingsType = typeof(ResetPPTPositionActionSettings)
             };
             return info;
         }
@@ -32,9 +32,9 @@ namespace Ink_Canvas.WorkflowAutomation.ActionHandlers
     /// 重置工具栏在PPT模式位置的 ActionHandler。
     /// 对齐 ClassIsland 的 ActionHandler 模式，通过 DI 注入 IActionService 注册处理程序。
     /// </summary>
-    public class ResetPptPositionActionHandler
+    public class ResetPPTPositionActionHandler
     {
-        public ResetPptPositionActionHandler(IActionService actionService)
+        public ResetPPTPositionActionHandler(IActionService actionService)
         {
             actionService.RegisterActionHandler("inkcanvas.resetpptposition", (settings, guid) =>
             {
@@ -48,7 +48,7 @@ namespace Ink_Canvas.WorkflowAutomation.ActionHandlers
                     mw.pointPPT = new Point(-1, -1);
 
                     // 仅在非折叠且处于PPT模式下执行动画
-                    if (!mw.isFloatingBarFolded && mw.IsInPptPresentationMode)
+                    if (!mw.isFloatingBarFolded && mw.IsInPPTPresentationMode)
                     {
                         mw.PureViewboxFloatingBarMarginAnimationInPPTMode();
                     }

@@ -129,8 +129,8 @@ namespace Ink_Canvas
         internal Image LeftUnFoldBtnImgChevron => LeftSidePanel?.ChevronIcon;
         internal Image RightUnFoldBtnImgChevron => RightSidePanel?.ChevronIcon;
 
-        internal bool IsInPptPresentationMode { get; set; }
-        internal bool ArePptControlsVisible { get; set; }
+        internal bool IsInPPTPresentationMode { get; set; }
+        internal bool ArePPTControlsVisible { get; set; }
 
         internal static readonly DependencyProperty IsUndoEnabledProperty =
             DependencyProperty.Register(nameof(IsUndoEnabled), typeof(bool), typeof(MainWindow),
@@ -659,7 +659,7 @@ namespace Ink_Canvas
 
             WindowSettingsHelper.OnStopKillProcessTimer = () => timerKillProcess.Stop();
             WindowSettingsHelper.OnStartKillProcessTimer = () => timerKillProcess.Start();
-            WindowSettingsHelper.OnPptOnlyModeChanged = (enabled) => CheckMainWindowVisibility();
+            WindowSettingsHelper.OnPPTOnlyModeChanged = (enabled) => CheckMainWindowVisibility();
             timeMachine.OnRedoStateChanged += TimeMachine_OnRedoStateChanged;
             timeMachine.OnUndoStateChanged += TimeMachine_OnUndoStateChanged;
             inkCanvas.Strokes.StrokesChanged += StrokesOnStrokesChanged;
@@ -1243,8 +1243,8 @@ namespace Ink_Canvas
                 foreach (var gest in gestures)
                     //Trace.WriteLine(string.Format("Gesture: {0}, Confidence: {1}", gest.ApplicationGesture, gest.RecognitionConfidence));
                     // 只有在PPT放映模式下才响应翻页手势
-                    if (ArePptControlsVisible &&
-                        IsInPptPresentationMode &&
+                    if (ArePPTControlsVisible &&
+                        IsInPPTPresentationMode &&
                         PPTManager?.IsInSlideShow == true)
                     {
                         if (gest.ApplicationGesture == ApplicationGesture.Left)
@@ -1481,7 +1481,7 @@ namespace Ink_Canvas
             // 启动时直接设置浮动栏位置，跳过动画
             if (currentMode == 0)
             {
-                if (IsInPptPresentationMode) ViewboxFloatingBarMarginAnimation(60, skipAnimation: true);
+                if (IsInPPTPresentationMode) ViewboxFloatingBarMarginAnimation(60, skipAnimation: true);
                 else ViewboxFloatingBarMarginAnimation(100, true, skipAnimation: true);
             }
             ApplyLanguageFromSettings();
@@ -1629,7 +1629,7 @@ namespace Ink_Canvas
 
             // 检查模式设置并应用
             CheckMainWindowVisibility();
-            EnsurePptOnlyVisibilityProbeTimer();
+            EnsurePPTOnlyVisibilityProbeTimer();
 
             // 检查是否通过--board参数启动，如果是则自动切换到白板模式
             if (App.StartWithBoardMode)
@@ -1695,7 +1695,7 @@ namespace Ink_Canvas
                     Dispatcher.Invoke(() =>
                     {
                         isFloatingBarOutsideScreen = IsOutsideOfScreenHelper.IsOutsideOfScreen(ViewboxFloatingBar);
-                        isInPPTPresentationMode = IsInPptPresentationMode;
+                        isInPPTPresentationMode = IsInPPTPresentationMode;
                     });
                     if (isFloatingBarOutsideScreen) dpiChangedDelayAction.DebounceAction(3000, null, () =>
                     {
@@ -1782,10 +1782,10 @@ namespace Ink_Canvas
                 }
 
                 if (!_forceCloseFromExitOrRestartButton &&
-                    IsInPptPresentationMode)
+                    IsInPPTPresentationMode)
                 {
                     e.Cancel = true;
-                    await ExitPptPresentation();
+                    await ExitPPTPresentation();
                     LogHelper.WriteLogToFile("Ink Canvas closing converted to exit PPT", LogHelper.LogType.Event);
                     return;
                 }
@@ -2515,7 +2515,7 @@ namespace Ink_Canvas
         // 快速面板退出PPT放映按钮事件
         private async void ExitPPTSlideShow_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            await ExitPptPresentation();
+            await ExitPPTPresentation();
         }
 
         private void HistoryRollbackButton_Click(object sender, RoutedEventArgs e)
@@ -2909,7 +2909,7 @@ namespace Ink_Canvas
                 SaveSettingsToFile();
 
                 // 如果当前在PPT放映模式，需要立即更新时间胶囊和快捷面板的显示状态
-                if (IsInPptPresentationMode)
+                if (IsInPPTPresentationMode)
                 {
                     UpdatePPTTimeCapsuleVisibility();
                     UpdatePPTQuickPanelVisibility();
@@ -2934,7 +2934,7 @@ namespace Ink_Canvas
                     Settings.PowerPointSettings.PPTTimeCapsulePosition = comboBox.SelectedIndex;
                     SaveSettingsToFile();
 
-                    if (IsInPptPresentationMode)
+                    if (IsInPPTPresentationMode)
                     {
                         UpdatePPTTimeCapsulePosition();
                     }
@@ -2958,7 +2958,7 @@ namespace Ink_Canvas
                 if (PPTTimeCapsuleContainer == null || PPTTimeCapsule == null) return;
 
                 if (Settings.PowerPointSettings.EnablePPTTimeCapsule &&
-                    IsInPptPresentationMode)
+                    IsInPPTPresentationMode)
                 {
                     PPTTimeCapsuleContainer.Visibility = Visibility.Visible;
                     UpdatePPTTimeCapsulePosition();
@@ -2986,7 +2986,7 @@ namespace Ink_Canvas
                 if (PPTQuickPanelContainer == null || PPTQuickPanel == null) return;
 
                 // 仅在 PPT 模式下且用户开启“PPT 放映时显示快速面板”时显示
-                bool inSlideShow = IsInPptPresentationMode;
+                bool inSlideShow = IsInPPTPresentationMode;
                 bool showQuickPanel = Settings.PowerPointSettings.ShowPPTSidebarByDefault;
                 if (inSlideShow && showQuickPanel)
                 {
@@ -3201,7 +3201,7 @@ namespace Ink_Canvas
                 }
 
                 // 在PPT放映模式下，工具模式切换时需要更新工具栏组件的显示状态
-                if (IsInPptPresentationMode)
+                if (IsInPPTPresentationMode)
                 {
                     UpdateToolbarComponentVisibility();
                 }
@@ -3283,7 +3283,7 @@ namespace Ink_Canvas
                     }
 
                     // 仅PPT模式：以 COM/UI 状态为主，Win32 检测全屏放映窗口（screenClass）作兜底，避免 COM 异常时无法唤出
-                    bool comUiSlideShow = IsInPptPresentationMode;
+                    bool comUiSlideShow = IsInPPTPresentationMode;
                     bool win32SlideShow = IsPowerPointSlideshowSurfacePresentWin32();
                     bool isInSlideShow = comUiSlideShow || win32SlideShow;
                     if (isInSlideShow && !IsVisible)

@@ -462,7 +462,7 @@
   <data name="ToolbarCondition_Annotating" xml:space="preserve">
     <value>批注模式</value>
   </data>
-  <data name="ToolbarCondition_PptMode" xml:space="preserve">
+  <data name="ToolbarCondition_PPTMode" xml:space="preserve">
     <value>PPT模式</value>
   </data>
   <data name="ToolbarCondition_Collapsed" xml:space="preserve">
@@ -636,7 +636,7 @@
   <data name="MiniWhiteboard_Settings_Enable" xml:space="preserve">
     <value>启用小白板</value>
   </data>
-  <data name="MiniWhiteboard_Settings_SyncPpt" xml:space="preserve">
+  <data name="MiniWhiteboard_Settings_SyncPPT" xml:space="preserve">
     <value>页面与PPT联动</value>
   </data>
   <data name="MiniWhiteboard_Settings_DefaultSize" xml:space="preserve">

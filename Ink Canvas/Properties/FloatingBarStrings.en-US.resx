@@ -462,7 +462,7 @@
   <data name="ToolbarCondition_Annotating" xml:space="preserve">
     <value>Annotation mode</value>
   </data>
-  <data name="ToolbarCondition_PptMode" xml:space="preserve">
+  <data name="ToolbarCondition_PPTMode" xml:space="preserve">
     <value>PPT mode</value>
   </data>
   <data name="ToolbarCondition_Collapsed" xml:space="preserve">
@@ -636,7 +636,7 @@
   <data name="MiniWhiteboard_Settings_Enable" xml:space="preserve">
     <value>Enable Mini Whiteboard</value>
   </data>
-  <data name="MiniWhiteboard_Settings_SyncPpt" xml:space="preserve">
+  <data name="MiniWhiteboard_Settings_SyncPPT" xml:space="preserve">
     <value>Sync pages with PPT</value>
   </data>
   <data name="MiniWhiteboard_Settings_DefaultSize" xml:space="preserve">

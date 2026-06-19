@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Threading;
-using InkCanvasPptAgent.Contracts;
+using InkCanvasPPTAgent.Contracts;
 using Newtonsoft.Json;
 
 namespace InkCanvas.PowerPointAddIn.Core
@@ -17,9 +17,9 @@ namespace InkCanvas.PowerPointAddIn.Core
             CaptureSyncContext();
         }
 
-        public PptState GetState()
+        public PPTState GetState()
         {
-            var state = new PptState();
+            var state = new PPTState();
 
             try
             {

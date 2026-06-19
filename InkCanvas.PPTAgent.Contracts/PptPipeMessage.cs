@@ -1,6 +1,6 @@
-namespace InkCanvasPptAgent.Contracts
+namespace InkCanvasPPTAgent.Contracts
 {
-    public static class PptMessageTypes
+    public static class PPTMessageTypes
     {
         public const string Command = "cmd";
         public const string State = "state";
@@ -9,7 +9,7 @@ namespace InkCanvasPptAgent.Contracts
         public const string Error = "error";
     }
 
-    public sealed class PptPipeMessage<T>
+    public sealed class PPTPipeMessage<T>
     {
         public int Version { get; set; } = PipeConstants.ProtocolVersion;
         public string Type { get; set; }

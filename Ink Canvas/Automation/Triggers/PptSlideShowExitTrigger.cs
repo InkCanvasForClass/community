@@ -6,7 +6,7 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
     /// <summary>
     /// PPT放映退出触发器设置
     /// </summary>
-    public class PptSlideShowExitSettings
+    public class PPTSlideShowExitSettings
     {
     }
 
@@ -15,7 +15,7 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
     /// 通过 SystemEventMonitor 的进程和窗口事件驱动，无需独立轮询。
     /// </summary>
     [TriggerInfo("inkcanvas.pptslideshowexit", "退出PPT放映", "Presentation")]
-    public class PptSlideShowExitTrigger : TriggerBase<PptSlideShowExitSettings>
+    public class PPTSlideShowExitTrigger : TriggerBase<PPTSlideShowExitSettings>
     {
         private bool _wasInSlideShow = false;
 

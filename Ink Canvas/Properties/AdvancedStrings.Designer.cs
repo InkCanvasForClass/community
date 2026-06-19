@@ -100,9 +100,9 @@ namespace Ink_Canvas.Properties
 
         public static string Debug_ShowConsole_Header => ResourceManager.GetString(nameof(Debug_ShowConsole_Header), _resourceCulture);
 
-        public static string Debug_PptComProbe_Desc => ResourceManager.GetString(nameof(Debug_PptComProbe_Desc), _resourceCulture);
+        public static string Debug_PPTComProbe_Desc => ResourceManager.GetString(nameof(Debug_PPTComProbe_Desc), _resourceCulture);
 
-        public static string Debug_PptComProbe_Header => ResourceManager.GetString(nameof(Debug_PptComProbe_Header), _resourceCulture);
+        public static string Debug_PPTComProbe_Header => ResourceManager.GetString(nameof(Debug_PPTComProbe_Header), _resourceCulture);
 
         public static string Debug_IconSettings => ResourceManager.GetString(nameof(Debug_IconSettings), _resourceCulture);
 

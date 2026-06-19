@@ -379,7 +379,7 @@ namespace Ink_Canvas
                 LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
                 RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             });
-            if (sender == null || ArePptControlsVisible)
+            if (sender == null || ArePPTControlsVisible)
                 unfoldFloatingBarByUser = false;
             else
                 unfoldFloatingBarByUser = true;
@@ -409,8 +409,8 @@ namespace Ink_Canvas
                 }
 
                 // 只有在PPT放映模式下且页数有效时才显示翻页按钮
-                if (ArePptControlsVisible &&
-                    IsInPptPresentationMode &&
+                if (ArePPTControlsVisible &&
+                    IsInPPTPresentationMode &&
                     PPTManager?.IsInSlideShow == true &&
                     PPTManager?.SlidesCount > 0)
                 {
@@ -446,7 +446,7 @@ namespace Ink_Canvas
                     ViewboxFloatingBar.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
                     ViewboxFloatingBar.Arrange(new Rect(ViewboxFloatingBar.DesiredSize));
 
-                    if (IsInPptPresentationMode)
+                    if (IsInPPTPresentationMode)
                         ViewboxFloatingBarMarginAnimation(60);
                     else
                         PureViewboxFloatingBarMarginAnimationInDesktopMode();

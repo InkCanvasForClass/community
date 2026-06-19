@@ -368,7 +368,7 @@
   <data name="Oobe_SummaryAppTheme" xml:space="preserve">
     <value>App Theme</value>
   </data>
-  <data name="Oobe_SummaryPptLink" xml:space="preserve">
+  <data name="Oobe_SummaryPPTLink" xml:space="preserve">
     <value>PowerPoint / WPS Integration</value>
   </data>
   <data name="Oobe_SummaryTwoFingerZoom" xml:space="preserve">

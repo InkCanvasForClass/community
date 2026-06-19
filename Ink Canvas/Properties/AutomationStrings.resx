@@ -111,10 +111,10 @@
   <data name="AutoKill_Inkeys" xml:space="preserve">
     <value>自动查杀 智绘教 Inkeys（仅限新版）</value>
   </data>
-  <data name="AutoKill_PptTools" xml:space="preserve">
+  <data name="AutoKill_PPTTools" xml:space="preserve">
     <value>自动查杀 希沃 PPT 小工具</value>
   </data>
-  <data name="AutoKill_PptToolsHint" xml:space="preserve">
+  <data name="AutoKill_PPTToolsHint" xml:space="preserve">
     <value>请注意，查杀 PPT 小工具会导致希沃课堂授课助手无法使用，直接进入希沃课堂授课助手安装目录删除 Office.dll 文件即可进入 PPT 放映时不会启动希沃的 PPT 工具栏。</value>
   </data>
   <data name="AutoKill_SeewoDesktop2Anno" xml:space="preserve">

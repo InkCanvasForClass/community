@@ -136,7 +136,7 @@
   <ItemGroup>
     <ProjectReference Include="..\InkCanvas.PluginSdk\InkCanvas.PluginSdk.csproj" />
     <ProjectReference Include="..\InkCanvas.Controls\InkCanvas.Controls.csproj" />
-    <ProjectReference Include="..\InkCanvas.PptAgent.Contracts\InkCanvas.PptAgent.Contracts.csproj" />
+    <ProjectReference Include="..\InkCanvas.PPTAgent.Contracts\InkCanvas.PPTAgent.Contracts.csproj" />
     <ProjectReference Include="..\InkCanvas.IACoreHelper\InkCanvas.IACoreHelper.csproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <Private>false</Private>
@@ -166,9 +166,9 @@
     <Copy SourceFiles="..\InkCanvas.PowerPointAddIn\bin\$(Configuration)\InkCanvas.PowerPointAddIn.dll.manifest"
           DestinationFolder="$(OutputPath)ppt-agent" SkipUnchangedFiles="true"
           Condition="Exists('..\InkCanvas.PowerPointAddIn\bin\$(Configuration)\InkCanvas.PowerPointAddIn.dll.manifest')" />
-    <Copy SourceFiles="..\InkCanvas.PptAgent.Contracts\bin\$(Configuration)\netstandard2.0\InkCanvas.PptAgent.Contracts.dll"
+    <Copy SourceFiles="..\InkCanvas.PPTAgent.Contracts\bin\$(Configuration)\netstandard2.0\InkCanvas.PPTAgent.Contracts.dll"
           DestinationFolder="$(OutputPath)ppt-agent" SkipUnchangedFiles="true"
-          Condition="Exists('..\InkCanvas.PptAgent.Contracts\bin\$(Configuration)\netstandard2.0\InkCanvas.PptAgent.Contracts.dll')" />
+          Condition="Exists('..\InkCanvas.PPTAgent.Contracts\bin\$(Configuration)\netstandard2.0\InkCanvas.PPTAgent.Contracts.dll')" />
     <Copy SourceFiles="$(NuGetPackageRoot)newtonsoft.json\13.0.4\lib\net45\Newtonsoft.Json.dll"
           DestinationFolder="$(OutputPath)ppt-agent" SkipUnchangedFiles="true"
           Condition="Exists('$(NuGetPackageRoot)newtonsoft.json\13.0.4\lib\net45\Newtonsoft.Json.dll')" />

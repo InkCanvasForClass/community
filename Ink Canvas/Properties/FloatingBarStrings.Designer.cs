@@ -160,7 +160,7 @@ namespace Ink_Canvas.Properties
 
         public static string ToolbarCondition_Collapsed => ResourceManager.GetString(nameof(ToolbarCondition_Collapsed), _resourceCulture);
 
-        public static string ToolbarCondition_PptMode => ResourceManager.GetString(nameof(ToolbarCondition_PptMode), _resourceCulture);
+        public static string ToolbarCondition_PPTMode => ResourceManager.GetString(nameof(ToolbarCondition_PPTMode), _resourceCulture);
 
         public static string ToolbarItem_Desc_Clear => ResourceManager.GetString(nameof(ToolbarItem_Desc_Clear), _resourceCulture);
 
@@ -434,7 +434,7 @@ namespace Ink_Canvas.Properties
 
         public static string MiniWhiteboard_Settings_Enable => ResourceManager.GetString(nameof(MiniWhiteboard_Settings_Enable), _resourceCulture);
 
-        public static string MiniWhiteboard_Settings_SyncPpt => ResourceManager.GetString(nameof(MiniWhiteboard_Settings_SyncPpt), _resourceCulture);
+        public static string MiniWhiteboard_Settings_SyncPPT => ResourceManager.GetString(nameof(MiniWhiteboard_Settings_SyncPPT), _resourceCulture);
 
         public static string MiniWhiteboard_Settings_DefaultSize => ResourceManager.GetString(nameof(MiniWhiteboard_Settings_DefaultSize), _resourceCulture);
 

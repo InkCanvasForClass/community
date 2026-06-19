@@ -147,7 +147,6 @@ namespace Ink_Canvas.Properties
         public static string Oobe_Step8Subtitle => ResourceManager.GetString(nameof(Oobe_Step8Subtitle), _resourceCulture);
         public static string Oobe_SummaryTelemetryLevel => ResourceManager.GetString(nameof(Oobe_SummaryTelemetryLevel), _resourceCulture);
         public static string Oobe_SummaryAppTheme => ResourceManager.GetString(nameof(Oobe_SummaryAppTheme), _resourceCulture);
-        public static string Oobe_SummaryPptLink => ResourceManager.GetString(nameof(Oobe_SummaryPptLink), _resourceCulture);
         public static string Oobe_SummaryTwoFingerZoom => ResourceManager.GetString(nameof(Oobe_SummaryTwoFingerZoom), _resourceCulture);
         public static string Oobe_SummaryLogEnabled => ResourceManager.GetString(nameof(Oobe_SummaryLogEnabled), _resourceCulture);
     }

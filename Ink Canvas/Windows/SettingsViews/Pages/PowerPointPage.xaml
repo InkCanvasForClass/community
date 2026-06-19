@@ -37,13 +37,13 @@
                             Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
                             Toggled="ToggleSwitchSupportPowerPoint_Toggled"/>
 
-                    <ui:SettingsCard x:Name="CardPptArchitecture"
+                    <ui:SettingsCard x:Name="CardPPTArchitecture"
                             Header="{x:Static props:PPTStrings.PPTArchitecture}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />
                         </ui:SettingsCard.HeaderIcon>
-                        <ComboBox x:Name="ComboBoxPptArchitecture"
-                                  SelectionChanged="ComboBoxPptArchitecture_SelectionChanged">
+                        <ComboBox x:Name="ComboBoxPPTArchitecture"
+                                  SelectionChanged="ComboBoxPPTArchitecture_SelectionChanged">
                             <ComboBoxItem Content="{x:Static props:PPTStrings.PPTComArchitecture}" />
                             <ComboBoxItem Content="{x:Static props:PPTStrings.PPTRotArchitecture}" />
                             <ComboBoxItem Content="{x:Static props:PPTStrings.PPTAgentArchitecture}" />

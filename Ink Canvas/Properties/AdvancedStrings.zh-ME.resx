@@ -132,10 +132,10 @@
   <data name="Debug_ShowConsole_Header" xml:space="preserve">
     <value>显示调试窗口（开发者快乐屋）</value>
   </data>
-  <data name="Debug_PptComProbe_Desc" xml:space="preserve">
+  <data name="Debug_PPTComProbe_Desc" xml:space="preserve">
     <value>打开后会在PPT连接、放映切换和定时轮询时疯狂输出COM对象、窗口、进程和状态探针信息。只建议排查PPT/WPS联动玄学问题时临时打开。</value>
   </data>
-  <data name="Debug_PptComProbe_Header" xml:space="preserve">
+  <data name="Debug_PPTComProbe_Header" xml:space="preserve">
     <value>启用PPT COM探针（日志轰炸机）</value>
   </data>
   <data name="Debug_IconSettings" xml:space="preserve">

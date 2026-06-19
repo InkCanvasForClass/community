@@ -1,4 +1,4 @@
-<UserControl x:Class="Ink_Canvas.Controls.PptNavBar"
+<UserControl x:Class="Ink_Canvas.Controls.PPTNavBar"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -8,8 +8,8 @@
              mc:Ignorable="d"
              d:DesignHeight="50" d:DesignWidth="200">
     <UserControl.Resources>
-        <SolidColorBrush x:Key="PptNavBarItemForeground" Color="#71717a"/>
-        <DataTemplate x:Key="PptPreviewItemTemplate">
+        <SolidColorBrush x:Key="PPTNavBarItemForeground" Color="#71717a"/>
+        <DataTemplate x:Key="PPTPreviewItemTemplate">
             <Grid Margin="2,4">
                 <Border CornerRadius="8" Background="Transparent" Padding="6">
                     <Grid>
@@ -19,14 +19,14 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"
                                    FontSize="12" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource PptNavBarItemForeground}"
+                                   Foreground="{DynamicResource PPTNavBarItemForeground}"
                                    Text="{Binding SlideNumber}"/>
                         <Image Grid.Column="1" Source="{Binding Thumbnail}" Stretch="Uniform"/>
                     </Grid>
                 </Border>
             </Grid>
         </DataTemplate>
-        <Style x:Key="PptPreviewItemContainerStyle" TargetType="ListBoxItem">
+        <Style x:Key="PPTPreviewItemContainerStyle" TargetType="ListBoxItem">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="0"/>
@@ -70,8 +70,8 @@
                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                      ScrollViewer.VerticalScrollBarVisibility="Auto"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                     ItemTemplate="{StaticResource PptPreviewItemTemplate}"
-                     ItemContainerStyle="{StaticResource PptPreviewItemContainerStyle}"
+                     ItemTemplate="{StaticResource PPTPreviewItemTemplate}"
+                     ItemContainerStyle="{StaticResource PPTPreviewItemContainerStyle}"
                      MouseUp="PreviewList_MouseUp"/>
             <ikw:SimpleStackPanel x:Name="ButtonRow" Orientation="Horizontal"
                                   HorizontalAlignment="Center" VerticalAlignment="Center">

@@ -75,10 +75,10 @@
   <data name="DictationDoNotDisturbHint" xml:space="preserve">
     <value>Suppress popups and system notifications in selected scenarios while keeping messages in history.</value>
   </data>
-  <data name="DictationDoNotDisturbPpt" xml:space="preserve">
+  <data name="DictationDoNotDisturbPPT" xml:space="preserve">
     <value>Do not notify during PPT slideshow</value>
   </data>
-  <data name="DictationDoNotDisturbPptHint" xml:space="preserve">
+  <data name="DictationDoNotDisturbPPTHint" xml:space="preserve">
     <value>Suppress dynamic notifications, legacy notifications, and Windows toasts while presenting slides.</value>
   </data>
   <data name="DictationDoNotDisturbWhiteboard" xml:space="preserve">

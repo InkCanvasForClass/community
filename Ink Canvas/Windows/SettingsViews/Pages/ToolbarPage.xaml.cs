@@ -140,12 +140,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // 获取当前上下文状态
             var mainWindow = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
             bool isAnnotating = mainWindow?.IsAnnotating ?? false;
-            bool isPptMode = mainWindow?.IsInPptPresentationMode ?? false;
+            bool isPPTMode = mainWindow?.IsInPPTPresentationMode ?? false;
 
             var context = new Dictionary<string, bool>
             {
                 ["isAnnotating"] = isAnnotating,
-                ["isPptMode"] = isPptMode,
+                ["isPPTMode"] = isPPTMode,
                 ["isContentCollapsedByUser"] = ToolbarRegistry.IsContentCollapsedByUser
             };
 

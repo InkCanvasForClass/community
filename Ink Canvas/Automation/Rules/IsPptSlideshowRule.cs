@@ -5,14 +5,14 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
     /// <summary>
     /// PPT放映中规则设置
     /// </summary>
-    public class IsPptSlideshowRuleSettings
+    public class IsPPTSlideshowRuleSettings
     {
     }
 
     /// <summary>
     /// 判断当前是否处于PPT放映模式的规则。
     /// </summary>
-    public static class IsPptSlideshowRule
+    public static class IsPPTSlideshowRule
     {
         public const string RuleId = "inkcanvas.ispptslideshow";
 
@@ -20,7 +20,7 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
         {
             var info = new RuleRegistryInfo(RuleId, "PPT放映中", "Presentation")
             {
-                SettingsType = typeof(IsPptSlideshowRuleSettings)
+                SettingsType = typeof(IsPPTSlideshowRuleSettings)
             };
 
             info.Handle = (settings) =>

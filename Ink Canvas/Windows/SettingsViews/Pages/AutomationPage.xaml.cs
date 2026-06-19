@@ -58,7 +58,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardAutoFoldInMaxHubWhiteboard.IsOn = auto.IsAutoFoldInMaxHubWhiteboard;
             CardAutoFoldInPPTSlideShow.IsOn = auto.IsAutoFoldInPPTSlideShow;
 
-            CardAutoKillPptService.IsOn = auto.IsAutoKillPptService;
+            CardAutoKillPPTService.IsOn = auto.IsAutoKillPPTService;
             CardAutoKillEasiNote.IsOn = auto.IsAutoKillEasiNote;
             CardAutoKillHiteAnnotation.IsOn = auto.IsAutoKillHiteAnnotation;
             CardAutoKillVComYouJiao.IsOn = auto.IsAutoKillVComYouJiao;
@@ -118,7 +118,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ToggleSwitchAiClassFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("AiClassFloating") && auto.FloatingWindowInterceptor.InterceptRules["AiClassFloating"];
                 ToggleSwitchHiteAnnotationFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("HiteAnnotationFloating") && auto.FloatingWindowInterceptor.InterceptRules["HiteAnnotationFloating"];
                 ToggleSwitchChangYanFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("ChangYanFloating") && auto.FloatingWindowInterceptor.InterceptRules["ChangYanFloating"];
-                ToggleSwitchChangYanPptFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("ChangYanPptFloating") && auto.FloatingWindowInterceptor.InterceptRules["ChangYanPptFloating"];
+                ToggleSwitchChangYanPPTFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("ChangYanPPTFloating") && auto.FloatingWindowInterceptor.InterceptRules["ChangYanPPTFloating"];
                 ToggleSwitchIntelligentClassFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("IntelligentClassFloating") && auto.FloatingWindowInterceptor.InterceptRules["IntelligentClassFloating"];
                 ToggleSwitchSeewoDesktopAnnotationFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoDesktopAnnotationFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoDesktopAnnotationFloating"];
                 ToggleSwitchSeewoDesktopSideBarFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoDesktopSideBarFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoDesktopSideBarFloating"];
@@ -290,10 +290,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsActionHub.OnAutoKillChanged();
         }
 
-        private void ToggleSwitchAutoKillPptService_Toggled(object sender, RoutedEventArgs e)
+        private void ToggleSwitchAutoKillPPTService_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Automation.IsAutoKillPptService = CardAutoKillPptService.IsOn;
+            SettingsManager.Settings.Automation.IsAutoKillPPTService = CardAutoKillPPTService.IsOn;
             SettingsManager.SaveSettingsToFile();
             UpdateAutoKillTimer();
         }
@@ -549,7 +549,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 || ToggleSwitchAiClassFloating.IsOn
                 || ToggleSwitchHiteAnnotationFloating.IsOn
                 || ToggleSwitchChangYanFloating.IsOn
-                || ToggleSwitchChangYanPptFloating.IsOn
+                || ToggleSwitchChangYanPPTFloating.IsOn
                 || ToggleSwitchIntelligentClassFloating.IsOn
                 || ToggleSwitchSeewoDesktopAnnotationFloating.IsOn
                 || ToggleSwitchSeewoDesktopSideBarFloating.IsOn;
@@ -621,10 +621,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdateFloatingWindowInterceptorEnabled();
         }
 
-        private void ToggleSwitchChangYanPptFloating_Toggled(object sender, RoutedEventArgs e)
+        private void ToggleSwitchChangYanPPTFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("ChangYanPptFloating", ToggleSwitchChangYanPptFloating.IsOn);
+            SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("ChangYanPPTFloating", ToggleSwitchChangYanPPTFloating.IsOn);
             UpdateFloatingWindowInterceptorEnabled();
         }
 

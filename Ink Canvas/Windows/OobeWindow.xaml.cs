@@ -53,7 +53,7 @@ namespace Ink_Canvas.Windows
                 StepCanvasPanel,
                 StepGesturesPanel,
                 StepAppearancePanel,
-                StepPptPanel,
+                StepPPTPanel,
                 StepAutomationPanel,
                 StepLuckyRandomPanel,
                 StepAdvancedPanel,
@@ -65,7 +65,7 @@ namespace Ink_Canvas.Windows
                 NavItemCanvas,
                 NavItemGestures,
                 NavItemAppearance,
-                NavItemPpt,
+                NavItemPPT,
                 NavItemAutomation,
                 NavItemLuckyRandom,
                 NavItemAdvanced,
@@ -146,10 +146,10 @@ namespace Ink_Canvas.Windows
             {
                 if (_settings.PowerPointSettings != null)
                 {
-                    CardPptSupport.IsOn = _settings.PowerPointSettings.PowerPointSupport;
-                    CardPptAutoSaveStrokes.IsOn = _settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint;
-                    CardPptAutoSaveScreenshots.IsOn = _settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint;
-                    CardPptTimeCapsule.IsOn = _settings.PowerPointSettings.EnablePPTTimeCapsule;
+                    CardPPTSupport.IsOn = _settings.PowerPointSettings.PowerPointSupport;
+                    CardPPTAutoSaveStrokes.IsOn = _settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint;
+                    CardPPTAutoSaveScreenshots.IsOn = _settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint;
+                    CardPPTTimeCapsule.IsOn = _settings.PowerPointSettings.EnablePPTTimeCapsule;
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -259,10 +259,10 @@ namespace Ink_Canvas.Windows
             {
                 if (_settings.PowerPointSettings != null)
                 {
-                    _settings.PowerPointSettings.PowerPointSupport = CardPptSupport.IsOn;
-                    _settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint = CardPptAutoSaveStrokes.IsOn;
-                    _settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint = CardPptAutoSaveScreenshots.IsOn;
-                    _settings.PowerPointSettings.EnablePPTTimeCapsule = CardPptTimeCapsule.IsOn;
+                    _settings.PowerPointSettings.PowerPointSupport = CardPPTSupport.IsOn;
+                    _settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint = CardPPTAutoSaveStrokes.IsOn;
+                    _settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint = CardPPTAutoSaveScreenshots.IsOn;
+                    _settings.PowerPointSettings.EnablePPTTimeCapsule = CardPPTTimeCapsule.IsOn;
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -632,7 +632,7 @@ namespace Ink_Canvas.Windows
             AddSummaryRow(SegoeFluentIcons.Sync, UpdateStrings.Header_AutoUpdate, BoolText(CardAutoUpdate.IsOn));
             AddSummaryRow(SegoeFluentIcons.Personalize, Properties.OobeStrings.Oobe_SummaryAppTheme, themeText);
             AddSummaryRow(SegoeFluentIcons.FullScreen, ThemeStrings.Theme_WindowBackdrop, backdropText);
-            AddSummaryRow(SegoeFluentIcons.Slideshow, Properties.OobeStrings.Oobe_SummaryPptLink, BoolText(CardPptSupport.IsOn));
+            AddSummaryRow(SegoeFluentIcons.Slideshow, Properties.OobeStrings.Oobe_SummaryPPTLink, BoolText(CardPPTSupport.IsOn));
             AddSummaryRow(SegoeFluentIcons.TouchPointer, Properties.OobeStrings.Oobe_SummaryTwoFingerZoom,
                 $"{BoolText(CardTwoFingerZoom.IsOn)} / {BoolText(CardTwoFingerTranslate.IsOn)}");
             AddSummaryRow(SegoeFluentIcons.Pin, Properties.OobeStrings.Oobe_SummaryTrayIcon, BoolText(CardEnableTrayIcon.IsOn));

@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace InkCanvasPptAgent.Contracts
+namespace InkCanvasPPTAgent.Contracts
 {
     public static class PipeFrame
     {

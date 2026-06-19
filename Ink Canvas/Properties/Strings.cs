@@ -139,8 +139,8 @@ namespace Ink_Canvas.Properties
             dict["AutoKill_ICA"] = ("AutomationStrings", "AutoKill_ICA");
             dict["AutoKill_InkCanvasIC"] = ("AutomationStrings", "AutoKill_InkCanvasIC");
             dict["AutoKill_Inkeys"] = ("AutomationStrings", "AutoKill_Inkeys");
-            dict["AutoKill_PptTools"] = ("AutomationStrings", "AutoKill_PptTools");
-            dict["AutoKill_PptToolsHint"] = ("AutomationStrings", "AutoKill_PptToolsHint");
+            dict["AutoKill_PPTTools"] = ("AutomationStrings", "AutoKill_PPTTools");
+            dict["AutoKill_PPTToolsHint"] = ("AutomationStrings", "AutoKill_PPTToolsHint");
             dict["AutoKill_SeewoDesktop2Anno"] = ("AutomationStrings", "AutoKill_SeewoDesktop2Anno");
             dict["AutoKill_SeewoDesktop2AnnoHint"] = ("AutomationStrings", "AutoKill_SeewoDesktop2AnnoHint");
             dict["AutoKill_Title"] = ("AutomationStrings", "AutoKill_Title");
@@ -391,8 +391,8 @@ namespace Ink_Canvas.Properties
             dict["CrashWindowTitle"] = ("CrashStrings", "CrashWindowTitle");
             dict["Debug_ShowConsole_Desc"] = ("AdvancedStrings", "Debug_ShowConsole_Desc");
             dict["Debug_ShowConsole_Header"] = ("AdvancedStrings", "Debug_ShowConsole_Header");
-            dict["Debug_PptComProbe_Desc"] = ("AdvancedStrings", "Debug_PptComProbe_Desc");
-            dict["Debug_PptComProbe_Header"] = ("AdvancedStrings", "Debug_PptComProbe_Header");
+            dict["Debug_PPTComProbe_Desc"] = ("AdvancedStrings", "Debug_PPTComProbe_Desc");
+            dict["Debug_PPTComProbe_Header"] = ("AdvancedStrings", "Debug_PPTComProbe_Header");
             dict["FileAssoc_Check"] = ("SecurityStrings", "FileAssoc_Check");
             dict["FileAssoc_Title"] = ("SecurityStrings", "FileAssoc_Title");
             dict["FileAssoc_Unregister"] = ("SecurityStrings", "FileAssoc_Unregister");
@@ -423,7 +423,7 @@ namespace Ink_Canvas.Properties
             dict["MiniWhiteboard_Pen"] = ("FloatingBarStrings", "MiniWhiteboard_Pen");
             dict["MiniWhiteboard_Eraser"] = ("FloatingBarStrings", "MiniWhiteboard_Eraser");
             dict["MiniWhiteboard_Settings_Enable"] = ("FloatingBarStrings", "MiniWhiteboard_Settings_Enable");
-            dict["MiniWhiteboard_Settings_SyncPpt"] = ("FloatingBarStrings", "MiniWhiteboard_Settings_SyncPpt");
+            dict["MiniWhiteboard_Settings_SyncPPT"] = ("FloatingBarStrings", "MiniWhiteboard_Settings_SyncPPT");
             dict["MiniWhiteboard_Settings_DefaultSize"] = ("FloatingBarStrings", "MiniWhiteboard_Settings_DefaultSize");
             dict["MiniWhiteboard_Settings_Opacity"] = ("FloatingBarStrings", "MiniWhiteboard_Settings_Opacity");
             dict["FloatingInterceptor_App_ChangYanClass"] = ("AutomationStrings", "FloatingInterceptor_App_ChangYanClass");
@@ -653,8 +653,8 @@ namespace Ink_Canvas.Properties
             dict["Notification_DefaultTitle"] = ("NotificationStrings", "DefaultTitle");
             dict["Notification_DictationDoNotDisturb"] = ("NotificationStrings", "DictationDoNotDisturb");
             dict["Notification_DictationDoNotDisturbHint"] = ("NotificationStrings", "DictationDoNotDisturbHint");
-            dict["Notification_DictationDoNotDisturbPpt"] = ("NotificationStrings", "DictationDoNotDisturbPpt");
-            dict["Notification_DictationDoNotDisturbPptHint"] = ("NotificationStrings", "DictationDoNotDisturbPptHint");
+            dict["Notification_DictationDoNotDisturbPPT"] = ("NotificationStrings", "DictationDoNotDisturbPPT");
+            dict["Notification_DictationDoNotDisturbPPTHint"] = ("NotificationStrings", "DictationDoNotDisturbPPTHint");
             dict["Notification_DictationDoNotDisturbWhiteboard"] = ("NotificationStrings", "DictationDoNotDisturbWhiteboard");
             dict["Notification_DictationDoNotDisturbWhiteboardHint"] = ("NotificationStrings", "DictationDoNotDisturbWhiteboardHint");
             dict["Notification_EnableAnnouncements"] = ("NotificationStrings", "EnableAnnouncements");
@@ -1294,7 +1294,7 @@ namespace Ink_Canvas.Properties
             dict["ToolbarItem_Desc_Group"] = ("FloatingBarStrings", "ToolbarItem_Desc_Group");
             dict["ToolbarItem_Desc_Separator"] = ("FloatingBarStrings", "ToolbarItem_Desc_Separator");
             dict["ToolbarCondition_Annotating"] = ("FloatingBarStrings", "ToolbarCondition_Annotating");
-            dict["ToolbarCondition_PptMode"] = ("FloatingBarStrings", "ToolbarCondition_PptMode");
+            dict["ToolbarCondition_PPTMode"] = ("FloatingBarStrings", "ToolbarCondition_PPTMode");
             dict["ToolbarCondition_Collapsed"] = ("FloatingBarStrings", "ToolbarCondition_Collapsed");
             dict["Performance_Title"] = ("PerformanceStrings", "Title");
             dict["Performance_EnableMonitoring"] = ("PerformanceStrings", "EnableMonitoring");

@@ -7,7 +7,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
     {
         public override string Id => "builtin.exit";
         public override string LocalizationKey => "FloatingBar_ExitButton";
-        public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.PptOnly();
+        public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.PPTOnly();
         public override bool DefaultShowSeparateBorder => true;
         public override bool DefaultPreventHideOnDragClick => true;
         public override string Description => FloatingBarStrings.ToolbarItem_Desc_Exit;

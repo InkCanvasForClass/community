@@ -140,7 +140,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardAutoFoldInMaxHubWhiteboard.IsOn = auto.IsAutoFoldInMaxHubWhiteboard;
             CardAutoFoldInPPTSlideShow.IsOn = auto.IsAutoFoldInPPTSlideShow;
 
-            CardAutoKillPptService.IsOn = auto.IsAutoKillPptService;
+            CardAutoKillPPTService.IsOn = auto.IsAutoKillPPTService;
             CardAutoKillEasiNote.IsOn = auto.IsAutoKillEasiNote;
             CardAutoKillHiteAnnotation.IsOn = auto.IsAutoKillHiteAnnotation;
             CardAutoKillVComYouJiao.IsOn = auto.IsAutoKillVComYouJiao;
@@ -200,7 +200,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ToggleSwitchAiClassFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("AiClassFloating") && auto.FloatingWindowInterceptor.InterceptRules["AiClassFloating"];
                 ToggleSwitchHiteAnnotationFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("HiteAnnotationFloating") && auto.FloatingWindowInterceptor.InterceptRules["HiteAnnotationFloating"];
                 ToggleSwitchChangYanFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("ChangYanFloating") && auto.FloatingWindowInterceptor.InterceptRules["ChangYanFloating"];
-                ToggleSwitchChangYanPptFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("ChangYanPptFloating") && auto.FloatingWindowInterceptor.InterceptRules["ChangYanPptFloating"];
+                ToggleSwitchChangYanPPTFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("ChangYanPPTFloating") && auto.FloatingWindowInterceptor.InterceptRules["ChangYanPPTFloating"];
                 ToggleSwitchIntelligentClassFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("IntelligentClassFloating") && auto.FloatingWindowInterceptor.InterceptRules["IntelligentClassFloating"];
                 ToggleSwitchSeewoDesktopAnnotationFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoDesktopAnnotationFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoDesktopAnnotationFloating"];
                 ToggleSwitchSeewoDesktopSideBarFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoDesktopSideBarFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoDesktopSideBarFloating"];
@@ -265,8 +265,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void UpdateAutoKillTimer() => SettingsActionHub.OnAutoKillChanged();
 
-        private void ToggleSwitchAutoKillPptService_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoKillPptService = CardAutoKillPptService.IsOn; SettingsManager.SaveSettingsToFile(); UpdateAutoKillTimer(); }
+        private void ToggleSwitchAutoKillPPTService_Toggled(object sender, RoutedEventArgs e)
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoKillPPTService = CardAutoKillPPTService.IsOn; SettingsManager.SaveSettingsToFile(); UpdateAutoKillTimer(); }
         private void ToggleSwitchAutoKillEasiNote_Toggled(object sender, RoutedEventArgs e)
         { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoKillEasiNote = CardAutoKillEasiNote.IsOn; SettingsManager.SaveSettingsToFile(); UpdateAutoKillTimer(); }
         private void ToggleSwitchAutoKillHiteAnnotation_Toggled(object sender, RoutedEventArgs e)
@@ -403,7 +403,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 || ToggleSwitchAiClassFloating.IsOn
                 || ToggleSwitchHiteAnnotationFloating.IsOn
                 || ToggleSwitchChangYanFloating.IsOn
-                || ToggleSwitchChangYanPptFloating.IsOn
+                || ToggleSwitchChangYanPPTFloating.IsOn
                 || ToggleSwitchIntelligentClassFloating.IsOn
                 || ToggleSwitchSeewoDesktopAnnotationFloating.IsOn
                 || ToggleSwitchSeewoDesktopSideBarFloating.IsOn;
@@ -430,8 +430,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("HiteAnnotationFloating", ToggleSwitchHiteAnnotationFloating.IsOn); UpdateFloatingWindowInterceptorEnabled(); }
         private void ToggleSwitchChangYanFloating_Toggled(object sender, RoutedEventArgs e)
         { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("ChangYanFloating", ToggleSwitchChangYanFloating.IsOn); UpdateFloatingWindowInterceptorEnabled(); }
-        private void ToggleSwitchChangYanPptFloating_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("ChangYanPptFloating", ToggleSwitchChangYanPptFloating.IsOn); UpdateFloatingWindowInterceptorEnabled(); }
+        private void ToggleSwitchChangYanPPTFloating_Toggled(object sender, RoutedEventArgs e)
+        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("ChangYanPPTFloating", ToggleSwitchChangYanPPTFloating.IsOn); UpdateFloatingWindowInterceptorEnabled(); }
         private void ToggleSwitchIntelligentClassFloating_Toggled(object sender, RoutedEventArgs e)
         { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("IntelligentClassFloating", ToggleSwitchIntelligentClassFloating.IsOn); UpdateFloatingWindowInterceptorEnabled(); }
         private void ToggleSwitchSeewoDesktopAnnotationFloating_Toggled(object sender, RoutedEventArgs e)

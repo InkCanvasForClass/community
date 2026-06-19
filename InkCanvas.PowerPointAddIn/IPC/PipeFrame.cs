@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
-using InkCanvasPptAgent.Contracts;
+using InkCanvasPPTAgent.Contracts;
 
 namespace InkCanvas.PowerPointAddIn.IPC
 {

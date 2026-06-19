@@ -6,7 +6,7 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
     /// <summary>
     /// PPT放映进入触发器设置
     /// </summary>
-    public class PptSlideShowEnterSettings
+    public class PPTSlideShowEnterSettings
     {
     }
 
@@ -15,7 +15,7 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
     /// 通过 SystemEventMonitor 的进程和窗口事件驱动，无需独立轮询。
     /// </summary>
     [TriggerInfo("inkcanvas.pptslideshowenter", "进入PPT放映", "Presentation")]
-    public class PptSlideShowEnterTrigger : TriggerBase<PptSlideShowEnterSettings>
+    public class PPTSlideShowEnterTrigger : TriggerBase<PPTSlideShowEnterSettings>
     {
         private bool _wasInSlideShow = false;
 

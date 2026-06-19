@@ -616,14 +616,14 @@
                                     Source="{DynamicResource ResourceKey=SeewoImageSource.HorizontalPreviousSlideNormal}" />
                             </Grid>
                         </Border>
-                        <Border Visibility="{Binding ElementName=PptNavigationBtn, Path=Visibility}" Width="36"
+                        <Border Visibility="{Binding ElementName=PPTNavigationBtn, Path=Visibility}" Width="36"
                                 Height="36" CornerRadius="5" Background="{DynamicResource FloatBarBackground}" d:BorderBrush="Red" d:Background="Green"
                                 BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}">
                             <Grid MouseUp="PPTNavigationBtn_MouseUp">
                                 <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
-                                           Foreground="{Binding ElementName=PptNavigationTextBlock, Path=Foreground}"
-                                           FontSize="{Binding ElementName=PptNavigationTextBlock, Path=FontSize}"
-                                           Text="{Binding ElementName=PptNavigationTextBlock, Path=Text}" />
+                                           Foreground="{Binding ElementName=PPTNavigationTextBlock, Path=Foreground}"
+                                           FontSize="{Binding ElementName=PPTNavigationTextBlock, Path=FontSize}"
+                                           Text="{Binding ElementName=PPTNavigationTextBlock, Path=Text}" />
                             </Grid>
                         </Border>
                         <Border Width="36" Height="36" CornerRadius="5"
@@ -818,12 +818,12 @@
         <!--// PPT 底部翻页按钮 //-->
         <Grid>
             <Grid Visibility="Visible">
-                <localControls:PptNavBar x:Name="LeftBottomPanelForPPTNavigation"
+                <localControls:PPTNavBar x:Name="LeftBottomPanelForPPTNavigation"
                                          Visibility="Collapsed"  d:Visibility="Visible"
                                          Direction="LeftBottom"
                                          Margin="6,0,0,6"
                                          HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
-                <localControls:PptNavBar x:Name="RightBottomPanelForPPTNavigation"
+                <localControls:PPTNavBar x:Name="RightBottomPanelForPPTNavigation"
                                          Visibility="Collapsed"  d:Visibility="Visible"
                                          Direction="RightBottom"
                                          Margin="0,0,6,6"
@@ -836,13 +836,13 @@
             <TextBlock Name="PPTBtnPageTotal" Text="/ ?"/>
         </ikw:SimpleStackPanel>
         <!--PPT侧边翻页按钮//左-->
-        <localControls:PptNavBar x:Name="LeftSidePanelForPPTNavigation"
+        <localControls:PPTNavBar x:Name="LeftSidePanelForPPTNavigation"
                                  Visibility="Collapsed"  d:Visibility="Visible"
                                  Direction="LeftSide"
                                  Margin="6,0,0,0"
                                  HorizontalAlignment="Left" VerticalAlignment="Center"/>
         <!--PPT侧边翻页按钮//右-->
-        <localControls:PptNavBar x:Name="RightSidePanelForPPTNavigation"
+        <localControls:PPTNavBar x:Name="RightSidePanelForPPTNavigation"
                                  Visibility="Collapsed"  d:Visibility="Visible"
                                  Direction="RightSide"
                                  Margin="0,0,6,0"
@@ -1094,7 +1094,7 @@
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelPeopleMoneyIcon}" Label="{x:Static props:FloatingBarStrings.Tools_RandomDraw}" ButtonMouseUp="SymbolIconRand_MouseUp" />
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelTimerIcon}" Label="{x:Static props:FloatingBarStrings.QuickPanel_Timer}" ButtonMouseUp="ImageCountdownTimer_MouseUp" />
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelBlackboardIcon}" Label="{x:Static props:FloatingBarStrings.FloatingBar_Whiteboard}" ButtonMouseUp="ImageBlackboard_MouseUp" />
-                    <controls:QuickPanelButton x:Name="BtnExitPptFromSidebarLeft" IconSource="{DynamicResource QuickPanelEndSlideshowIcon}" Label="{x:Static props:FloatingBarStrings.QuickPanel_ExitShow}" LabelFontSize="7" Visibility="Collapsed"  d:Visibility="Visible" ButtonMouseUp="ExitPPTSlideShow_MouseUp" />
+                    <controls:QuickPanelButton x:Name="BtnExitPPTFromSidebarLeft" IconSource="{DynamicResource QuickPanelEndSlideshowIcon}" Label="{x:Static props:FloatingBarStrings.QuickPanel_ExitShow}" LabelFontSize="7" Visibility="Collapsed"  d:Visibility="Visible" ButtonMouseUp="ExitPPTSlideShow_MouseUp" />
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelEyeIcon}" Label="{x:Static props:FloatingBarStrings.QuickPanel_Show}" ButtonMouseUp="UnFoldFloatingBar_MouseUp" />
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelChevronLeftIcon}" ButtonMouseUp="HideQuickPanel_MouseUp" />
                 </ikw:SimpleStackPanel>
@@ -1118,7 +1118,7 @@
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelPeopleMoneyIcon}" Label="{x:Static props:FloatingBarStrings.Tools_RandomDraw}" ButtonMouseUp="SymbolIconRand_MouseUp" />
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelTimerIcon}" Label="{x:Static props:FloatingBarStrings.QuickPanel_Timer}" ButtonMouseUp="ImageCountdownTimer_MouseUp" />
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelBlackboardIcon}" Label="{x:Static props:FloatingBarStrings.FloatingBar_Whiteboard}" ButtonMouseUp="ImageBlackboard_MouseUp" />
-                    <controls:QuickPanelButton x:Name="BtnExitPptFromSidebarRight" IconSource="{DynamicResource QuickPanelEndSlideshowIcon}" Label="{x:Static props:FloatingBarStrings.QuickPanel_ExitShow}" LabelFontSize="7" Visibility="Collapsed"  d:Visibility="Visible" ButtonMouseUp="ExitPPTSlideShow_MouseUp" />
+                    <controls:QuickPanelButton x:Name="BtnExitPPTFromSidebarRight" IconSource="{DynamicResource QuickPanelEndSlideshowIcon}" Label="{x:Static props:FloatingBarStrings.QuickPanel_ExitShow}" LabelFontSize="7" Visibility="Collapsed"  d:Visibility="Visible" ButtonMouseUp="ExitPPTSlideShow_MouseUp" />
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelEyeIcon}" Label="{x:Static props:FloatingBarStrings.QuickPanel_Show}" ButtonMouseUp="UnFoldFloatingBar_MouseUp" />
                     <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelChevronLeftIcon}" ButtonMouseUp="HideQuickPanel_MouseUp" RenderTransformOrigin="0.5,0.5">
                         <controls:QuickPanelButton.RenderTransform>

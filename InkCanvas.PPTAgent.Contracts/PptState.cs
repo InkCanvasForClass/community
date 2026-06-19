@@ -1,6 +1,6 @@
-namespace InkCanvasPptAgent.Contracts
+namespace InkCanvasPPTAgent.Contracts
 {
-    public sealed class PptState
+    public sealed class PPTState
     {
         public int SlideIndex { get; set; }
         public int TotalSlides { get; set; }

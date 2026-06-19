@@ -165,11 +165,11 @@
                         IsOn="True"
                         Toggled="ToggleSwitchMiniWhiteboardEnabled_Toggled" />
 
-                    <controls:LabeledSettingsCard x:Name="ToggleSwitchMiniWhiteboardSyncPpt"
-                        Header="{x:Static props:FloatingBarStrings.MiniWhiteboard_Settings_SyncPpt}"
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchMiniWhiteboardSyncPPT"
+                        Header="{x:Static props:FloatingBarStrings.MiniWhiteboard_Settings_SyncPPT}"
                         Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
                         IsOn="True"
-                        Toggled="ToggleSwitchMiniWhiteboardSyncPpt_Toggled" />
+                        Toggled="ToggleSwitchMiniWhiteboardSyncPPT_Toggled" />
 
                     <ui:SettingsCard Header="{x:Static props:FloatingBarStrings.MiniWhiteboard_Settings_DefaultSize}">
                         <ikw:SimpleStackPanel Orientation="Vertical" Spacing="8">

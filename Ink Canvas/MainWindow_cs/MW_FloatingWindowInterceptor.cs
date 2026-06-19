@@ -141,11 +141,11 @@ namespace Ink_Canvas
             if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.ChangYanFloating, toggle.IsOn);
         }
 
-        private void ToggleSwitchChangYanPptFloating_Toggled(object sender, RoutedEventArgs e)
+        private void ToggleSwitchChangYanPPTFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
             var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.ChangYanPptFloating, toggle.IsOn);
+            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.ChangYanPPTFloating, toggle.IsOn);
         }
 
         private void ToggleSwitchIntelligentClassFloating_Toggled(object sender, RoutedEventArgs e)

@@ -1,7 +1,7 @@
 ﻿using System;
 using InkCanvas.PowerPointAddIn.Core;
 using InkCanvas.PowerPointAddIn.IPC;
-using InkCanvasPptAgent.Contracts;
+using InkCanvasPPTAgent.Contracts;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
@@ -25,11 +25,11 @@ namespace InkCanvas.PowerPointAddIn
                 _pipeHost.Start();
 
                 // 订阅 PowerPoint 事件，主动推送状态
-                Application.PresentationOpen += _ => _publisher.RaiseEvent(PptEvents.PresentationOpen, _controller.GetState());
-                Application.PresentationClose += _ => _publisher.RaiseEvent(PptEvents.PresentationClose, _controller.GetState());
-                Application.SlideShowBegin += _ => _publisher.RaiseEvent(PptEvents.SlideShowBegin, _controller.GetState());
-                Application.SlideShowNextSlide += _ => _publisher.RaiseEvent(PptEvents.SlideShowNextSlide, _controller.GetState());
-                Application.SlideShowEnd += _ => _publisher.RaiseEvent(PptEvents.SlideShowEnd, _controller.GetState());
+                Application.PresentationOpen += _ => _publisher.RaiseEvent(PPTEvents.PresentationOpen, _controller.GetState());
+                Application.PresentationClose += _ => _publisher.RaiseEvent(PPTEvents.PresentationClose, _controller.GetState());
+                Application.SlideShowBegin += _ => _publisher.RaiseEvent(PPTEvents.SlideShowBegin, _controller.GetState());
+                Application.SlideShowNextSlide += _ => _publisher.RaiseEvent(PPTEvents.SlideShowNextSlide, _controller.GetState());
+                Application.SlideShowEnd += _ => _publisher.RaiseEvent(PPTEvents.SlideShowEnd, _controller.GetState());
 
                 System.Diagnostics.Debug.WriteLine("ICC PPT Agent: startup complete");
             }
@@ -43,51 +43,51 @@ namespace InkCanvas.PowerPointAddIn
         {
             try
             {
-                var envelope = JsonConvert.DeserializeObject<PptPipeMessage<object>>(json);
-                if (envelope == null || envelope.Type != PptMessageTypes.Command)
+                var envelope = JsonConvert.DeserializeObject<PPTPipeMessage<object>>(json);
+                if (envelope == null || envelope.Type != PPTMessageTypes.Command)
                     return null;
 
                 string command = envelope.Cmd;
 
                 switch (command)
                 {
-                    case PptCommands.State:
+                    case PPTCommands.State:
                         return _publisher.SendResponse(command, _controller.GetState(), envelope.RequestId);
 
-                    case PptCommands.Next:
+                    case PPTCommands.Next:
                         bool nextResult = _controller.Next();
                         return _publisher.SendResponse(command, _controller.GetState(), envelope.RequestId, nextResult);
 
-                    case PptCommands.Previous:
+                    case PPTCommands.Previous:
                         bool prevResult = _controller.Previous();
                         return _publisher.SendResponse(command, _controller.GetState(), envelope.RequestId, prevResult);
 
-                    case PptCommands.GotoSlide:
+                    case PPTCommands.GotoSlide:
                         var gotoReq = envelope.Data != null ? ((JObject)envelope.Data).ToObject<GotoSlideRequest>() : null;
                         bool gotoResult = gotoReq != null && _controller.GotoSlide(gotoReq.SlideNumber);
                         return _publisher.SendResponse(command, _controller.GetState(), envelope.RequestId, gotoResult);
 
-                    case PptCommands.StartSlideShow:
+                    case PPTCommands.StartSlideShow:
                         bool startResult = _controller.StartSlideShow();
                         return _publisher.SendResponse(command, _controller.GetState(), envelope.RequestId, startResult);
 
-                    case PptCommands.EndSlideShow:
+                    case PPTCommands.EndSlideShow:
                         bool endResult = _controller.EndSlideShow();
                         return _publisher.SendResponse(command, _controller.GetState(), envelope.RequestId, endResult);
 
-                    case PptCommands.ShowSlideNavigation:
+                    case PPTCommands.ShowSlideNavigation:
                         bool navResult = _controller.ShowSlideNavigation();
                         return _publisher.SendResponse(command, _controller.GetState(), envelope.RequestId, navResult);
 
-                    case PptCommands.DisableAutoPlayTimings:
+                    case PPTCommands.DisableAutoPlayTimings:
                         bool disableResult = _controller.DisableAutoPlayTimings();
                         return _publisher.SendResponse(command, _controller.GetState(), envelope.RequestId, disableResult);
 
-                    case PptCommands.UnhideHiddenSlides:
+                    case PPTCommands.UnhideHiddenSlides:
                         bool unhideResult = _controller.UnhideHiddenSlides();
                         return _publisher.SendResponse(command, _controller.GetState(), envelope.RequestId, unhideResult);
 
-                    case PptCommands.ExportSlideThumbnails:
+                    case PPTCommands.ExportSlideThumbnails:
                         // Agent 模式下暂不支持缩略图导出，返回空列表
                         return _publisher.SendResponse(command, new ExportSlideThumbnailsResponse(), envelope.RequestId);
 

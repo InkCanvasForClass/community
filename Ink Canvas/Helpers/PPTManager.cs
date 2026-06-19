@@ -52,9 +52,9 @@ namespace Ink_Canvas.Helpers
         #endregion
 
         #region Private Fields
-        private Timer _unifiedPptTimer;
+        private Timer _unifiedPPTTimer;
         private int _monitorTickCount;
-        private volatile bool _unifiedPptTimerRunning;
+        private volatile bool _unifiedPPTTimerRunning;
         private bool _isWpsMonitoringEnabled;
 
         private Process _wpsProcess;
@@ -65,12 +65,12 @@ namespace Ink_Canvas.Helpers
         private WpsWindowInfo _lastForegroundWpsWindow;
         private DateTime _lastWindowCheckTime = DateTime.MinValue;
         private bool _lastSlideShowState;
-        private DateTime _lastPptComDebugProbeTime = DateTime.MinValue;
+        private DateTime _lastPPTComDebugProbeTime = DateTime.MinValue;
         private volatile bool _cachedIsConnected;
         private volatile bool _cachedIsInSlideShow;
         private readonly object _lockObject = new object();
         private bool _disposed;
-        private static bool IsPptBusyHResult(uint hr) => hr == 0x80010001 || hr == 0x8001010A;
+        private static bool IsPPTBusyHResult(uint hr) => hr == 0x80010001 || hr == 0x8001010A;
         private static bool IsNoActivePresentationHResult(uint hr) => hr == 0x80048240;
         private const int ConnectionCheckIntervalTicks = 3;
         private const int SlideShowCheckIntervalTicks = 2;
@@ -85,23 +85,23 @@ namespace Ink_Canvas.Helpers
 
         private void InitializeConnectionTimer()
         {
-            _unifiedPptTimer = new Timer(2000);
-            _unifiedPptTimer.Elapsed += OnUnifiedPptTimerElapsed;
-            _unifiedPptTimer.AutoReset = true;
+            _unifiedPPTTimer = new Timer(2000);
+            _unifiedPPTTimer.Elapsed += OnUnifiedPPTTimerElapsed;
+            _unifiedPPTTimer.AutoReset = true;
         }
 
         public void StartMonitoring()
         {
             if (!_disposed)
             {
-                _unifiedPptTimer?.Start();
+                _unifiedPPTTimer?.Start();
                 LogHelper.WriteLogToFile("PPT监控已启动", LogHelper.LogType.Trace);
             }
         }
 
         public void StopMonitoring(bool isShutdown = false)
         {
-            _unifiedPptTimer?.Stop();
+            _unifiedPPTTimer?.Stop();
             StopWpsProcessCheckTimer();
             DisconnectFromPPT(isShutdown);
             LogHelper.WriteLogToFile("PPT监控已停止", LogHelper.LogType.Trace);
@@ -109,15 +109,15 @@ namespace Ink_Canvas.Helpers
         #endregion
 
         #region Connection Management
-        private void OnUnifiedPptTimerElapsed(object sender, ElapsedEventArgs e)
+        private void OnUnifiedPPTTimerElapsed(object sender, ElapsedEventArgs e)
         {
             if (_disposed || _isModuleUnloading)
                 return;
 
-            if (_unifiedPptTimerRunning)
+            if (_unifiedPPTTimerRunning)
                 return;
 
-            _unifiedPptTimerRunning = true;
+            _unifiedPPTTimerRunning = true;
             try
             {
                 var tick = Interlocked.Increment(ref _monitorTickCount);
@@ -128,7 +128,7 @@ namespace Ink_Canvas.Helpers
                     CheckAndConnectToPPT();
                 }
 
-                RunPptComDebugProbeIfEnabled("TimerTick", tick);
+                RunPPTComDebugProbeIfEnabled("TimerTick", tick);
 
                 if (IsConnected)
                 {
@@ -150,7 +150,7 @@ namespace Ink_Canvas.Helpers
             }
             finally
             {
-                _unifiedPptTimerRunning = false;
+                _unifiedPPTTimerRunning = false;
             }
         }
 
@@ -174,7 +174,7 @@ namespace Ink_Canvas.Helpers
 
                     if (pptApp != null && !IsConnected)
                     {
-                        RunPptComDebugProbeIfEnabled("BeforeConnect", 0, pptApp);
+                        RunPPTComDebugProbeIfEnabled("BeforeConnect", 0, pptApp);
 
                         // 有可用的PPT/WPS应用程序且当前未连接，建立连接
                         ConnectToPPT(pptApp);
@@ -231,7 +231,7 @@ namespace Ink_Canvas.Helpers
             {
                 var hr = (uint)comEx.HResult;
                 _cachedIsInSlideShow = false;
-                if (!IsPptBusyHResult(hr) && (hr == 0x8001010E || hr == 0x80004005 || hr == 0x800706B5))
+                if (!IsPPTBusyHResult(hr) && (hr == 0x8001010E || hr == 0x80004005 || hr == 0x800706B5))
                 {
                     _cachedIsConnected = false;
                     DisconnectFromPPT();
@@ -358,7 +358,7 @@ namespace Ink_Canvas.Helpers
                 // 获取当前演示文稿信息
                 UpdateCurrentPresentationInfo();
 
-                RunPptComDebugProbeIfEnabled("AfterConnect", 0, PPTApplication);
+                RunPPTComDebugProbeIfEnabled("AfterConnect", 0, PPTApplication);
 
                 // 触发连接成功事件
                 PPTConnectionChanged?.Invoke(true);
@@ -488,7 +488,7 @@ namespace Ink_Canvas.Helpers
                 }
 
                 _isModuleUnloading = true;
-                _unifiedPptTimer?.Stop();
+                _unifiedPPTTimer?.Stop();
 
                 PPTConnectionChanged?.Invoke(false);
 
@@ -520,7 +520,7 @@ namespace Ink_Canvas.Helpers
                             {
                                 if (!_disposed)
                                 {
-                                    _unifiedPptTimer?.Start();
+                                    _unifiedPPTTimer?.Start();
                                 }
                             }
                             catch (ObjectDisposedException)
@@ -748,17 +748,17 @@ namespace Ink_Canvas.Helpers
         #endregion
 
         #region PPT COM Debug Probe
-        private bool IsPptComDebugProbeEnabled => MainWindow.Settings?.Advanced?.IsPptComDebugProbeEnabled == true;
+        private bool IsPPTComDebugProbeEnabled => MainWindow.Settings?.Advanced?.IsPPTComDebugProbeEnabled == true;
 
-        private void RunPptComDebugProbeIfEnabled(string reason, int tick, object application = null)
+        private void RunPPTComDebugProbeIfEnabled(string reason, int tick, object application = null)
         {
-            if (!IsPptComDebugProbeEnabled) return;
-            if (reason == "TimerTick" && DateTime.Now - _lastPptComDebugProbeTime < TimeSpan.FromSeconds(4)) return;
+            if (!IsPPTComDebugProbeEnabled) return;
+            if (reason == "TimerTick" && DateTime.Now - _lastPPTComDebugProbeTime < TimeSpan.FromSeconds(4)) return;
 
-            _lastPptComDebugProbeTime = DateTime.Now;
+            _lastPPTComDebugProbeTime = DateTime.Now;
             try
             {
-                RunPptComDebugProbe(reason, tick, application ?? PPTApplication);
+                RunPPTComDebugProbe(reason, tick, application ?? PPTApplication);
             }
             catch (Exception ex)
             {
@@ -766,7 +766,7 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        private void RunPptComDebugProbe(string reason, int tick, object application)
+        private void RunPPTComDebugProbe(string reason, int tick, object application)
         {
             var sb = new StringBuilder(4096);
             sb.AppendLine($"[PPT-COM-Probe] ===== {reason} tick={tick} time={DateTime.Now:O} =====");
@@ -904,7 +904,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 UpdateCurrentPresentationInfo();
-                RunPptComDebugProbeIfEnabled("PresentationOpen", 0);
+                RunPPTComDebugProbeIfEnabled("PresentationOpen", 0);
                 PresentationOpen?.Invoke(pres);
                 LogHelper.WriteLogToFile($"演示文稿已打开: {pres?.Name}", LogHelper.LogType.Event);
             }
@@ -919,7 +919,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 PresentationClose?.Invoke(pres);
-                RunPptComDebugProbeIfEnabled("PresentationClose", 0);
+                RunPPTComDebugProbeIfEnabled("PresentationClose", 0);
 
                 DisconnectFromPPT();
             }
@@ -935,7 +935,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 UpdateCurrentPresentationInfo();
-                RunPptComDebugProbeIfEnabled("SlideShowBegin", 0);
+                RunPPTComDebugProbeIfEnabled("SlideShowBegin", 0);
                 SlideShowBegin?.Invoke(wn);
             }
             catch (Exception ex)
@@ -949,7 +949,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 UpdateCurrentPresentationInfo();
-                RunPptComDebugProbeIfEnabled("SlideShowNextSlide", 0);
+                RunPPTComDebugProbeIfEnabled("SlideShowNextSlide", 0);
                 SlideShowNextSlide?.Invoke(wn);
             }
             catch (Exception ex)
@@ -969,7 +969,7 @@ namespace Ink_Canvas.Helpers
                     RecordWpsProcessForManagement();
                 }
 
-                RunPptComDebugProbeIfEnabled("SlideShowEnd", 0);
+                RunPPTComDebugProbeIfEnabled("SlideShowEnd", 0);
                 SlideShowEnd?.Invoke(pres);
             }
             catch (Exception ex)
@@ -1099,7 +1099,7 @@ namespace Ink_Canvas.Helpers
             catch (COMException comEx)
             {
                 var hr = (uint)comEx.HResult;
-                if (!IsPptBusyHResult(hr) && (hr == 0x8001010E || hr == 0x80004005))
+                if (!IsPPTBusyHResult(hr) && (hr == 0x8001010E || hr == 0x80004005))
                     DisconnectFromPPT();
                 LogHelper.WriteLogToFile($"切换到下一页失败: {comEx.Message}", LogHelper.LogType.Error);
                 return false;
@@ -1149,7 +1149,7 @@ namespace Ink_Canvas.Helpers
             catch (COMException comEx)
             {
                 var hr = (uint)comEx.HResult;
-                if (!IsPptBusyHResult(hr) && (hr == 0x8001010E || hr == 0x80004005))
+                if (!IsPPTBusyHResult(hr) && (hr == 0x8001010E || hr == 0x80004005))
                     DisconnectFromPPT();
                 LogHelper.WriteLogToFile($"切换到上一页失败: {comEx.Message}", LogHelper.LogType.Error);
                 return false;
@@ -1270,7 +1270,7 @@ namespace Ink_Canvas.Helpers
                     catch (COMException comEx)
                     {
                         var hr = (uint)comEx.HResult;
-                        if (IsNoActivePresentationHResult(hr) || IsPptBusyHResult(hr))
+                        if (IsNoActivePresentationHResult(hr) || IsPPTBusyHResult(hr))
                             return null;
                         throw;
                     }
@@ -1286,9 +1286,9 @@ namespace Ink_Canvas.Helpers
             catch (COMException comEx)
             {
                 var hr = (uint)comEx.HResult;
-                if (!IsPptBusyHResult(hr) && (hr == 0x8001010E || hr == 0x80004005))
+                if (!IsPPTBusyHResult(hr) && (hr == 0x8001010E || hr == 0x80004005))
                     DisconnectFromPPT();
-                if (!IsPptBusyHResult(hr) && !IsNoActivePresentationHResult(hr))
+                if (!IsPPTBusyHResult(hr) && !IsNoActivePresentationHResult(hr))
                     LogHelper.WriteLogToFile($"获取当前活跃演示文稿失败: {comEx.Message}", LogHelper.LogType.Warning);
                 return CurrentPresentation;
             }
@@ -1299,9 +1299,9 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        public List<PptSlideThumbnail> ExportSlideThumbnails(int width, int height)
+        public List<PPTSlideThumbnail> ExportSlideThumbnails(int width, int height)
         {
-            var result = new List<PptSlideThumbnail>();
+            var result = new List<PPTSlideThumbnail>();
             string tempDir = null;
             Presentation activePresentation = null;
             Slides slides = null;
@@ -1334,7 +1334,7 @@ namespace Ink_Canvas.Helpers
                         slide = slides[i];
                         var imagePath = Path.Combine(tempDir, $"slide_{i:0000}.png");
                         slide.Export(imagePath, "PNG", width, height);
-                        result.Add(new PptSlideThumbnail
+                        result.Add(new PPTSlideThumbnail
                         {
                             SlideNumber = i,
                             PngBytes = File.ReadAllBytes(imagePath)
@@ -1440,7 +1440,7 @@ namespace Ink_Canvas.Helpers
             catch (COMException comEx)
             {
                 var hr = (uint)comEx.HResult;
-                if (!IsPptBusyHResult(hr) && (hr == 0x8001010E || hr == 0x80004005))
+                if (!IsPPTBusyHResult(hr) && (hr == 0x8001010E || hr == 0x80004005))
                     DisconnectFromPPT();
                 return 0;
             }
@@ -1470,9 +1470,9 @@ namespace Ink_Canvas.Helpers
             catch (COMException comEx)
             {
                 var hr = (uint)comEx.HResult;
-                if (!IsPptBusyHResult(hr) && (hr == 0x8001010E || hr == 0x80004005))
+                if (!IsPPTBusyHResult(hr) && (hr == 0x8001010E || hr == 0x80004005))
                     DisconnectFromPPT();
-                if (!IsPptBusyHResult(hr))
+                if (!IsPPTBusyHResult(hr))
                     LogHelper.WriteLogToFile($"获取演示文稿名称失败: {comEx.Message}", LogHelper.LogType.Warning);
                 return "";
             }
@@ -2320,7 +2320,7 @@ namespace Ink_Canvas.Helpers
                 if (!_isModuleUnloading)
                     StopMonitoring(isShutdown: true);
 
-                _unifiedPptTimer?.Dispose();
+                _unifiedPPTTimer?.Dispose();
 
                 _disposed = true;
             }
