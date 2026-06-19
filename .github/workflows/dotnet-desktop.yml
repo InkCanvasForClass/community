@@ -78,6 +78,7 @@ jobs:
             /p:Configuration=Debug `
             /p:SignManifests=true `
             /p:ManifestKeyFile=clickonce.pfx `
+            /p:ManifestCertificatePassword= `
             /verbosity:minimal -maxcpucount
           $pptAgentDir = "Ink Canvas\bin\Debug\AnyCPU\net6.0-windows10.0.19041.0\ppt-agent"
           New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
@@ -103,6 +104,7 @@ jobs:
             /p:Configuration=Debug `
             /p:SignManifests=true `
             /p:ManifestKeyFile=clickonce.pfx `
+            /p:ManifestCertificatePassword= `
             /verbosity:minimal -maxcpucount
           $pptAgentDir = "Ink Canvas\bin\Debug\x86\net6.0-windows10.0.19041.0\ppt-agent"
           New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null

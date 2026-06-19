@@ -297,6 +297,7 @@ jobs:
             /p:Configuration=Release `
             /p:SignManifests=true `
             /p:ManifestKeyFile=clickonce.pfx `
+            /p:ManifestCertificatePassword= `
             /verbosity:minimal -maxcpucount
           $publishDir = "artifacts/publish/${{ matrix.architecture }}"
           $pptAgentDir = "$publishDir\ppt-agent"
