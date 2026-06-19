@@ -134,6 +134,7 @@ jobs:
 
       - name: Check if exe file is generated
         id: check-exe
+        shell: pwsh
         run: |
           $exePath = "Ink Canvas\bin\Debug\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\InkCanvasForClass.exe"
 
@@ -145,7 +146,7 @@ jobs:
             if ("${{ github.event_name }}" -eq "workflow_dispatch") {
               exit 1
             }
-          fi
+          }
 
       - name: Create Package (if build succeeded)
         id: create-archive
