@@ -37,6 +37,18 @@
                             Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
                             Toggled="ToggleSwitchSupportPowerPoint_Toggled"/>
 
+                    <ui:SettingsCard x:Name="CardPptArchitecture"
+                            Header="{x:Static props:PPTStrings.PPTArchitecture}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ComboBox x:Name="ComboBoxPptArchitecture"
+                                  SelectionChanged="ComboBoxPptArchitecture_SelectionChanged">
+                            <ComboBoxItem Content="{x:Static props:PPTStrings.PPTComArchitecture}" />
+                            <ComboBoxItem Content="{x:Static props:PPTStrings.PPTRotArchitecture}" />
+                        </ComboBox>
+                    </ui:SettingsCard>
+
                     <controls:LabeledSettingsCard x:Name="CardPowerPointEnhancement"
                             Header="{x:Static props:PPTStrings.Enhancement}"
                             Icon="{x:Static ui:SegoeFluentIcons.Puzzle}"
@@ -46,11 +58,6 @@
                             Header="{x:Static props:PPTStrings.SkipAnimations}"
                             Icon="{x:Static ui:SegoeFluentIcons.FastForward}"
                             Toggled="ToggleSwitchSkipAnimationsWhenGoNext_Toggled"/>
-
-                    <controls:LabeledSettingsCard x:Name="CardUseRotPptLink"
-                            Header="{x:Static props:PPTStrings.UseRot}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Link}"
-                            Toggled="ToggleSwitchUseRotPptLink_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardSupportWPS"
                             Header="{x:Static props:PPTStrings.SupportWPS}"

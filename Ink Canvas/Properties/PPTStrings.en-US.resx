@@ -178,7 +178,16 @@
     <value>Preempt focus to skip PowerPoint animations</value>
   </data>
   <data name="SupportPowerPoint" xml:space="preserve">
-    <value>Microsoft PowerPoint support</value>
+    <value>PPT integration master switch</value>
+  </data>
+  <data name="PPTArchitecture" xml:space="preserve">
+    <value>PPT architecture</value>
+  </data>
+  <data name="PPTComArchitecture" xml:space="preserve">
+    <value>PPT COM architecture</value>
+  </data>
+  <data name="PPTRotArchitecture" xml:space="preserve">
+    <value>ROT architecture</value>
   </data>
   <data name="SupportWPS" xml:space="preserve">
     <value>WPS support</value>

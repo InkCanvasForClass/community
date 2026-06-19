@@ -98,6 +98,12 @@ namespace Ink_Canvas.Properties
 
         public static string PageButtonClickableHint => ResourceManager.GetString(nameof(PageButtonClickableHint), _resourceCulture);
 
+        public static string PPTArchitecture => ResourceManager.GetString(nameof(PPTArchitecture), _resourceCulture);
+
+        public static string PPTComArchitecture => ResourceManager.GetString(nameof(PPTComArchitecture), _resourceCulture);
+
+        public static string PPTRotArchitecture => ResourceManager.GetString(nameof(PPTRotArchitecture), _resourceCulture);
+
         public static string Position_Left => ResourceManager.GetString(nameof(Position_Left), _resourceCulture);
 
         public static string Position_LeftBottom => ResourceManager.GetString(nameof(Position_LeftBottom), _resourceCulture);

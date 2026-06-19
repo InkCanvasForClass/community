@@ -57,11 +57,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var ppt = SettingsManager.Settings.PowerPointSettings;
 
             CardSupportPowerPoint.IsOn = ppt.PowerPointSupport;
+            ComboBoxPptArchitecture.SelectedIndex = ppt.UseRotPptLink ? 1 : 0;
             CardPowerPointEnhancement.IsOn = ppt.EnablePowerPointEnhancement;
             CardSkipAnimationsWhenGoNext.IsOn = ppt.SkipAnimationsWhenGoNext;
-            CardUseRotPptLink.IsOn = ppt.UseRotPptLink;
             CardSupportWPS.IsOn = ppt.IsSupportWPS;
             CardEnableWppProcessKill.IsOn = ppt.EnableWppProcessKill;
+            UpdatePptArchitectureDependentCards();
 
             CardShowPPTButton.IsOn = ppt.ShowPPTButton;
             var displayOpt = ppt.PPTButtonsDisplayOption.ToString();
@@ -118,6 +119,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         #region PPT Basic
 
+        private void UpdatePptArchitectureDependentCards()
+        {
+            bool isRotArchitecture = SettingsManager.Settings.PowerPointSettings.UseRotPptLink;
+            var visibility = isRotArchitecture ? Visibility.Collapsed : Visibility.Visible;
+            CardPowerPointEnhancement.Visibility = visibility;
+            CardSupportWPS.Visibility = visibility;
+            CardEnableWppProcessKill.Visibility = visibility;
+        }
+
         private void ToggleSwitchSupportPowerPoint_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
@@ -146,25 +156,29 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsActionHub.OnPPTEnhancementChanged(CardPowerPointEnhancement.IsOn);
         }
 
-        private void ToggleSwitchSkipAnimationsWhenGoNext_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.SkipAnimationsWhenGoNext = CardSkipAnimationsWhenGoNext.IsOn;
-            SettingsManager.SaveSettingsToFile();
-            SettingsActionHub.OnSkipAnimationsWhenGoNextChanged(CardSkipAnimationsWhenGoNext.IsOn);
-        }
-
-        private void ToggleSwitchUseRotPptLink_Toggled(object sender, RoutedEventArgs e)
+        private void ComboBoxPptArchitecture_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!_isLoaded) return;
             var ppt = SettingsManager.Settings.PowerPointSettings;
-            ppt.UseRotPptLink = CardUseRotPptLink.IsOn;
+            bool useRotPptLink = ComboBoxPptArchitecture.SelectedIndex == 1;
+            if (ppt.UseRotPptLink == useRotPptLink) return;
+
+            ppt.UseRotPptLink = useRotPptLink;
+            UpdatePptArchitectureDependentCards();
             SettingsManager.SaveSettingsToFile();
             try
             {
                 SettingsActionHub.OnUseRotPptLinkChanged();
             }
             catch (Exception ex) { LogHelper.WriteLogToFile($"切换 PPT 联动架构失败: {ex}", LogHelper.LogType.Error); }
+        }
+
+        private void ToggleSwitchSkipAnimationsWhenGoNext_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.PowerPointSettings.SkipAnimationsWhenGoNext = CardSkipAnimationsWhenGoNext.IsOn;
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnSkipAnimationsWhenGoNextChanged(CardSkipAnimationsWhenGoNext.IsOn);
         }
 
         private void ToggleSwitchSupportWPS_Toggled(object sender, RoutedEventArgs e)

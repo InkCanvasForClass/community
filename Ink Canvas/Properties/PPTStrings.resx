@@ -178,7 +178,16 @@
     <value>抢占焦点放映（用于跳过 PPT 动画）</value>
   </data>
   <data name="SupportPowerPoint" xml:space="preserve">
-    <value>Microsoft PowerPoint 支持</value>
+    <value>PPT联动总开关</value>
+  </data>
+  <data name="PPTArchitecture" xml:space="preserve">
+    <value>PPT 架构切换</value>
+  </data>
+  <data name="PPTComArchitecture" xml:space="preserve">
+    <value>PPT COM 架构</value>
+  </data>
+  <data name="PPTRotArchitecture" xml:space="preserve">
+    <value>ROT 架构</value>
   </data>
   <data name="SupportWPS" xml:space="preserve">
     <value>WPS 支持</value>
