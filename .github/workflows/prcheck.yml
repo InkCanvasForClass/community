@@ -82,6 +82,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
           Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll" $pptAgentDir -Force
           Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.vsto" $pptAgentDir -Force -ErrorAction SilentlyContinue
+          Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll.manifest" $pptAgentDir -Force -ErrorAction SilentlyContinue
           Copy-Item "InkCanvas.PptAgent.Contracts\bin\Debug\netstandard2.0\InkCanvas.PptAgent.Contracts.dll" $pptAgentDir -Force
 
       - name: Check VSTO DLL exists
