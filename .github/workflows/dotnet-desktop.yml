@@ -50,26 +50,31 @@ jobs:
       - name: Restore signing certificate
         shell: pwsh
         run: |
+          $ok = $false
           if ("${{ secrets.CERT_PFX_BASE64 }}" -ne "") {
-            # 从 Secrets 恢复 PFX
-            $cert = [System.Convert]::FromBase64String("${{ secrets.CERT_PFX_BASE64 }}")
-            [System.IO.File]::WriteAllBytes("clickonce.pfx", $cert)
-            # 导入到 cert store（MSBuild 签名需要）
-            Import-PfxCertificate -FilePath "clickonce.pfx" -CertStoreLocation Cert:\CurrentUser\My -Password (New-Object System.Security.SecureString)
-            Write-Host "Certificate imported to Cert:\CurrentUser\My"
-          } else {
-            # 无 secrets 时生成自签名证书（自动进入 cert store）
+            try {
+              $bytes = [Convert]::FromBase64String("${{ secrets.CERT_PFX_BASE64 }}")
+              [IO.File]::WriteAllBytes("clickonce.pfx", $bytes)
+              $pwd = ConvertTo-SecureString "${{ secrets.CERT_PFX_PASSWORD }}" -AsPlainText -Force
+              Import-PfxCertificate -FilePath "clickonce.pfx" -CertStoreLocation Cert:\CurrentUser\My -Password $pwd | Out-Null
+              $ok = $true
+              Write-Host "Certificate imported from secrets"
+            } catch {
+              Write-Host "Import PFX failed, falling back to self-signed: $($_.Exception.Message)"
+            }
+          }
+          if (-not $ok) {
             New-SelfSignedCertificate `
               -Type CodeSigningCert `
               -Subject "CN=ICC PowerPoint Agent CI" `
               -CertStoreLocation "Cert:\CurrentUser\My" `
               -KeyExportPolicy Exportable `
               -NotAfter (Get-Date).AddYears(2) | Out-Null
-            Write-Host "Generated self-signed certificate in cert store"
+            Write-Host "Generated self-signed certificate"
           }
-          # 验证证书存在
-          $found = Get-ChildItem Cert:\CurrentUser\My | Where-Object { $_.HasPrivateKey -and $_.Subject -like "*ICC*" }
-          if (-not $found) { throw "No signing certificate found in Cert:\CurrentUser\My" }
+          $found = Get-ChildItem Cert:\CurrentUser\My | Where-Object { $_.HasPrivateKey -and $_.Subject -like "*ICC*" } | Select-Object -First 1
+          if (-not $found) { throw "No signing certificate found" }
+          echo "SIGN_THUMBPRINT=$($found.Thumbprint)" >> $env:GITHUB_ENV
           Write-Host "Signing certificate ready: $($found.Thumbprint)"
 
       - name: Build the Solution
@@ -83,9 +88,8 @@ jobs:
         run: |
           msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" `
             /p:Configuration=Debug `
-            /p:ManifestKeyFile=clickonce.pfx `
-            /p:ManifestCertificatePassword="" `
-            /p:ManifestCertStoreLocation="" `
+            /p:SignManifests=true `
+            /p:ManifestCertificateThumbprint=$env:SIGN_THUMBPRINT `
             /verbosity:minimal -maxcpucount
           $pptAgentDir = "Ink Canvas\bin\Debug\AnyCPU\net6.0-windows10.0.19041.0\ppt-agent"
           New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
@@ -109,9 +113,8 @@ jobs:
         run: |
           msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" `
             /p:Configuration=Debug `
-            /p:ManifestKeyFile=clickonce.pfx `
-            /p:ManifestCertificatePassword="" `
-            /p:ManifestCertStoreLocation="" `
+            /p:SignManifests=true `
+            /p:ManifestCertificateThumbprint=$env:SIGN_THUMBPRINT `
             /verbosity:minimal -maxcpucount
           $pptAgentDir = "Ink Canvas\bin\Debug\x86\net6.0-windows10.0.19041.0\ppt-agent"
           New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null

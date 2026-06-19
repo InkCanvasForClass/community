@@ -48,23 +48,24 @@ jobs:
       - name: Restore signing certificate
         shell: pwsh
         run: |
+          $ok = $false
           if ("${{ secrets.CERT_PFX_BASE64 }}" -ne "") {
-            $cert = [System.Convert]::FromBase64String("${{ secrets.CERT_PFX_BASE64 }}")
-            [System.IO.File]::WriteAllBytes("clickonce.pfx", $cert)
-            Import-PfxCertificate -FilePath "clickonce.pfx" -CertStoreLocation Cert:\CurrentUser\My -Password (New-Object System.Security.SecureString)
-            Write-Host "Certificate imported to Cert:\CurrentUser\My"
-          } else {
-            New-SelfSignedCertificate `
-              -Type CodeSigningCert `
-              -Subject "CN=ICC PowerPoint Agent PR" `
-              -CertStoreLocation "Cert:\CurrentUser\My" `
-              -KeyExportPolicy Exportable `
-              -NotAfter (Get-Date).AddYears(2) | Out-Null
-            Write-Host "Generated self-signed certificate in cert store"
+            try {
+              $bytes = [Convert]::FromBase64String("${{ secrets.CERT_PFX_BASE64 }}")
+              [IO.File]::WriteAllBytes("clickonce.pfx", $bytes)
+              $pwd = ConvertTo-SecureString "${{ secrets.CERT_PFX_PASSWORD }}" -AsPlainText -Force
+              Import-PfxCertificate -FilePath "clickonce.pfx" -CertStoreLocation Cert:\CurrentUser\My -Password $pwd | Out-Null
+              $ok = $true
+            } catch {
+              Write-Host "Import failed, falling back to self-signed: $($_.Exception.Message)"
+            }
           }
-          $found = Get-ChildItem Cert:\CurrentUser\My | Where-Object { $_.HasPrivateKey -and $_.Subject -like "*ICC*" }
-          if (-not $found) { throw "No signing certificate found in Cert:\CurrentUser\My" }
-          Write-Host "Signing certificate ready: $($found.Thumbprint)"
+          if (-not $ok) {
+            New-SelfSignedCertificate -Type CodeSigningCert -Subject "CN=ICC PowerPoint Agent PR" -CertStoreLocation "Cert:\CurrentUser\My" -KeyExportPolicy Exportable -NotAfter (Get-Date).AddYears(2) | Out-Null
+          }
+          $found = Get-ChildItem Cert:\CurrentUser\My | Where-Object { $_.HasPrivateKey -and $_.Subject -like "*ICC*" } | Select-Object -First 1
+          if (-not $found) { throw "No signing certificate found" }
+          echo "SIGN_THUMBPRINT=$($found.Thumbprint)" >> $env:GITHUB_ENV
 
       - name: Build the Solution
         run: msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Debug" /p:GitFlow="$GITFLOW" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
@@ -74,9 +75,8 @@ jobs:
         run: |
           msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" `
             /p:Configuration=Debug `
-            /p:ManifestKeyFile=clickonce.pfx `
-            /p:ManifestCertificatePassword="" `
-            /p:ManifestCertStoreLocation="" `
+            /p:SignManifests=true `
+            /p:ManifestCertificateThumbprint=$env:SIGN_THUMBPRINT `
             /verbosity:minimal -maxcpucount
           $pptAgentDir = "Ink Canvas\bin\Debug\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\ppt-agent"
           New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
