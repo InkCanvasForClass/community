@@ -12,6 +12,7 @@ namespace InkCanvas.PowerPointAddIn.IPC
         private readonly Func<string, string> _dispatch;
         private readonly object _sendLock = new object();
         private CancellationTokenSource _cts;
+        private NamedPipeServerStream _currentPipe;
         private volatile bool _clientConnected;
         private bool _disposed;
 
@@ -20,6 +21,29 @@ namespace InkCanvas.PowerPointAddIn.IPC
         public PipeHost(Func<string, string> dispatch)
         {
             _dispatch = dispatch;
+        }
+
+        /// <summary>
+        /// 向当前连接的客户端主动推送消息（状态/事件）。
+        /// 线程安全，可从任意线程调用。
+        /// </summary>
+        public void SendFrame(string json)
+        {
+            var pipe = _currentPipe;
+            if (pipe == null || !pipe.IsConnected || string.IsNullOrEmpty(json)) return;
+
+            lock (_sendLock)
+            {
+                try
+                {
+                    if (pipe.IsConnected)
+                        PipeFrame.WriteFrame(pipe, json);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"ICC PPT Agent push error: {ex.Message}");
+                }
+            }
         }
 
         public void Start()
@@ -59,6 +83,7 @@ namespace InkCanvas.PowerPointAddIn.IPC
                         PipeOptions.Asynchronous);
 
                     await pipe.WaitForConnectionAsync(token).ConfigureAwait(false);
+                    _currentPipe = pipe;
                     _clientConnected = true;
                     System.Diagnostics.Debug.WriteLine("ICC PPT Agent: client connected");
 
@@ -72,6 +97,7 @@ namespace InkCanvas.PowerPointAddIn.IPC
                 finally
                 {
                     _clientConnected = false;
+                    _currentPipe = null;
                     try { pipe?.Dispose(); } catch { }
                 }
             }

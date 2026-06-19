@@ -40,6 +40,14 @@ jobs:
       - name: Build the Solution
         run: msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Debug" /p:GitFlow="$GITFLOW" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
 
+      - name: Build VSTO Add-in
+        run: |
+          msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" /p:Configuration=Debug /p:SignManifests=false /verbosity:minimal -maxcpucount
+          $pptAgentDir = "Ink Canvas\bin\Debug\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\ppt-agent"
+          New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
+          Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll" $pptAgentDir -Force
+          Copy-Item "InkCanvas.PptAgent.Contracts\bin\Debug\netstandard2.0\InkCanvas.PptAgent.Contracts.dll" $pptAgentDir -Force
+
       - name: Check if exe file is generated
         id: check-exe
         run: |

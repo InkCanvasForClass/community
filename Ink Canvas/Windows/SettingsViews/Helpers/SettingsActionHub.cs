@@ -486,14 +486,22 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                     ppt.IsSupportWPS = false;
                     SettingsManager.SaveSettingsToFile();
                 }
+
+                // 切换到 Agent 模式时，自动注册 VSTO 插件
+                if (ppt.PptLinkMode == PptLinkMode.Agent)
+                {
+                    if (!VstoRegistrationHelper.EnsureRegistered())
+                    {
+                        LogHelper.WriteLogToFile("VSTO 插件注册失败，Agent 模式可能无法正常工作", LogHelper.LogType.Warning);
+                    }
+                }
+
                 mw.InitializePPTManagers();
                 if (ppt.PowerPointSupport) mw.StartPPTMonitoring();
                 LogHelper.WriteLogToFile($"已切换 PPT 联动架构为 {ppt.PptLinkMode}", LogHelper.LogType.Event);
             }
             catch (Exception ex) { LogHelper.WriteLogToFile($"切换 PPT 联动架构失败: {ex}", LogHelper.LogType.Error); }
         }
-
-        public static void OnUseRotPptLinkChanged() => OnPptLinkModeChanged();
 
         public static void OnSupportWPSChanged()
         {

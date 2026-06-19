@@ -270,6 +270,7 @@ namespace Ink_Canvas
                         _pptManager = new ROTPPTManager();
                         break;
                     case PptLinkMode.Agent:
+                        VstoRegistrationHelper.EnsureRegistered();
                         _pptManager = new PptAgentLinkManager();
                         break;
                     default:

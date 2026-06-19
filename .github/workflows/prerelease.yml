@@ -264,6 +264,15 @@ jobs:
             Copy-Item "Ink Canvas\bin\Release\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\*" $publishDir -Recurse -Force
           }
 
+      - name: Build VSTO Add-in
+        run: |
+          msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" /p:Configuration=Release /p:SignManifests=false /verbosity:minimal -maxcpucount
+          $publishDir = "artifacts/publish/${{ matrix.architecture }}"
+          $pptAgentDir = "$publishDir\ppt-agent"
+          New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
+          Copy-Item "InkCanvas.PowerPointAddIn\bin\Release\InkCanvas.PowerPointAddIn.dll" $pptAgentDir -Force
+          Copy-Item "InkCanvas.PptAgent.Contracts\bin\Debug\netstandard2.0\InkCanvas.PptAgent.Contracts.dll" $pptAgentDir -Force
+
       - name: Check if exe file is generated
         id: check-exe
         run: |

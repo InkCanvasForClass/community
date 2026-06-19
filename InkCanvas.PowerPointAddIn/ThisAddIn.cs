@@ -20,13 +20,8 @@ namespace InkCanvas.PowerPointAddIn
             try
             {
                 _controller = new PPTController(Application);
-                _publisher = new PPTStatePublisher(json =>
-                {
-                    // 当前架构：PipeHost 是请求-响应模式，publisher 的主动推送
-                    // 通过 pipe 的 SendFrame 直接写入。
-                    // 这里预留扩展点，后续可改为独立写入通道。
-                });
                 _pipeHost = new PipeHost(HandleIncomingMessage);
+                _publisher = new PPTStatePublisher(json => _pipeHost.SendFrame(json));
                 _pipeHost.Start();
 
                 // 订阅 PowerPoint 事件，主动推送状态
@@ -91,6 +86,10 @@ namespace InkCanvas.PowerPointAddIn
                     case PptCommands.UnhideHiddenSlides:
                         bool unhideResult = _controller.UnhideHiddenSlides();
                         return _publisher.SendResponse(command, _controller.GetState(), envelope.RequestId, unhideResult);
+
+                    case PptCommands.ExportSlideThumbnails:
+                        // Agent 模式下暂不支持缩略图导出，返回空列表
+                        return _publisher.SendResponse(command, new ExportSlideThumbnailsResponse(), envelope.RequestId);
 
                     default:
                         return _publisher.SendError(envelope.RequestId, $"Unknown command: {command}");

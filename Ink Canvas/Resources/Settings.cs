@@ -721,12 +721,6 @@ namespace Ink_Canvas
         [JsonProperty("pptLinkMode")]
         public PptLinkMode PptLinkMode { get; set; } = PptLinkMode.Com;
 
-        [JsonProperty("useRotPptLink")]
-        public bool UseRotPptLink
-        {
-            get => PptLinkMode == PptLinkMode.Rot;
-            set => PptLinkMode = value ? PptLinkMode.Rot : PptLinkMode.Com;
-        }
         [JsonProperty("showPPTSidebarByDefault")]
         public bool ShowPPTSidebarByDefault { get; set; } = false;
 
