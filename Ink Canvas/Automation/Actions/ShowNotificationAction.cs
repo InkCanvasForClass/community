@@ -1,7 +1,9 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Models;
 using Ink_Canvas.Properties;
+using Ink_Canvas.WorkflowAutomation.Models;
 using System;
+using System.Windows;
 
 namespace Ink_Canvas.WorkflowAutomation.Actions
 {
@@ -26,6 +28,32 @@ namespace Ink_Canvas.WorkflowAutomation.Actions
     /// </summary>
     public static class ShowNotificationAction
     {
+        public const string ActionId = "inkcanvas.shownotification";
+
+        public static ActionRegistryInfo Register()
+        {
+            var info = new ActionRegistryInfo(ActionId, "显示通知", "Message")
+            {
+                SettingsType = typeof(ShowNotificationActionSettings)
+            };
+
+            info.Handle = (settings, guid) =>
+            {
+                var s = settings as ShowNotificationActionSettings;
+                if (s == null || string.IsNullOrEmpty(s.Message)) return;
+
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    ShowAutomationNotification(s);
+                });
+            };
+
+            // 显示通知不支持恢复
+            info.RevertHandle = null;
+
+            return info;
+        }
+
         public static void ShowAutomationNotification(ShowNotificationActionSettings settings)
         {
             if (settings == null || string.IsNullOrEmpty(settings.Message)) return;
