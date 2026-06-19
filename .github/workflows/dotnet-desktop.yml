@@ -39,7 +39,6 @@ jobs:
         run: dotnet restore "Ink Canvas.sln" --locked-mode
 
       - name: Install VSTO Runtime
-        if: matrix.architecture == 'AnyCPU'
         shell: pwsh
         run: |
           $url = "https://go.microsoft.com/fwlink/?LinkId=158918"
@@ -48,8 +47,7 @@ jobs:
           Start-Process -FilePath $out -ArgumentList "/quiet /norestart" -Wait -NoNewWindow
           Write-Host "VSTO Runtime installed"
 
-      - name: Generate VSTO signing certificate
-        if: matrix.architecture == 'AnyCPU'
+      - name: Generate signing certificate
         id: gen-cert
         shell: pwsh
         run: |
@@ -57,21 +55,10 @@ jobs:
             -Type CodeSigningCert `
             -Subject "CN=ICC PowerPoint Agent CI" `
             -CertStoreLocation "Cert:\CurrentUser\My" `
+            -KeyExportPolicy Exportable `
             -NotAfter (Get-Date).AddYears(2)
-          $pfxPath = "InkCanvas.PowerPointAddIn\InkCanvas.PowerPointAddIn_TemporaryKey.pfx"
-          Export-PfxCertificate -Cert $cert -FilePath $pfxPath -Password (New-Object System.Security.SecureString)
-          echo "VSTO_CERT_THUMBPRINT=$($cert.Thumbprint)" >> $env:GITHUB_OUTPUT
-
-      - name: Configure VSTO signing
-        if: matrix.architecture == 'AnyCPU'
-        shell: pwsh
-        run: |
-          $thumbprint = "${{ steps.gen-cert.outputs.VSTO_CERT_THUMBPRINT }}"
-          $csproj = "InkCanvas.PowerPointAddIn\InkCanvas.PowerPointAddIn.csproj"
-          $content = Get-Content $csproj -Raw
-          $content = $content -replace '<SignManifests>true</SignManifests>',
-            "<SignManifests>true</SignManifests><ManifestCertificateThumbprint>$thumbprint</ManifestCertificateThumbprint><ManifestKeyFile>InkCanvas.PowerPointAddIn_TemporaryKey.pfx</ManifestKeyFile><ManifestCertificatePassword></ManifestCertificatePassword>"
-          Set-Content $csproj $content -NoNewline
+          Export-PfxCertificate -Cert $cert -FilePath "clickonce.pfx" -Password (New-Object System.Security.SecureString)
+          echo "THUMBPRINT=$($cert.Thumbprint)" >> $env:GITHUB_OUTPUT
 
       - name: Build the Solution
         env:
@@ -80,8 +67,13 @@ jobs:
 
       - name: Build VSTO Add-in
         if: matrix.architecture == 'AnyCPU'
+        shell: pwsh
         run: |
-          msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" /p:Configuration=Debug /verbosity:minimal -maxcpucount
+          msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" `
+            /p:Configuration=Debug `
+            /p:SignManifests=true `
+            /p:ManifestKeyFile=clickonce.pfx `
+            /verbosity:minimal -maxcpucount
           $pptAgentDir = "Ink Canvas\bin\Debug\AnyCPU\net6.0-windows10.0.19041.0\ppt-agent"
           New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
           Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll" $pptAgentDir -Force
@@ -91,8 +83,7 @@ jobs:
       - name: Check VSTO build result
         if: matrix.architecture == 'AnyCPU'
         run: |
-          $dllPath = "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll"
-          if (Test-Path $dllPath) {
+          if (Test-Path "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll") {
             Write-Host "VSTO DLL OK"
           } else {
             Write-Error "VSTO DLL not found"
@@ -101,8 +92,13 @@ jobs:
 
       - name: Build VSTO Add-in (x86)
         if: matrix.architecture == 'x86'
+        shell: pwsh
         run: |
-          msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" /p:Configuration=Debug /verbosity:minimal -maxcpucount
+          msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" `
+            /p:Configuration=Debug `
+            /p:SignManifests=true `
+            /p:ManifestKeyFile=clickonce.pfx `
+            /verbosity:minimal -maxcpucount
           $pptAgentDir = "Ink Canvas\bin\Debug\x86\net6.0-windows10.0.19041.0\ppt-agent"
           New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
           Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll" $pptAgentDir -Force
@@ -112,8 +108,7 @@ jobs:
       - name: Check VSTO build result (x86)
         if: matrix.architecture == 'x86'
         run: |
-          $dllPath = "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll"
-          if (Test-Path $dllPath) {
+          if (Test-Path "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll") {
             Write-Host "VSTO DLL OK"
           } else {
             Write-Error "VSTO DLL not found"
@@ -129,11 +124,11 @@ jobs:
             echo "build_success=true" >> $env:GITHUB_OUTPUT
           } else {
             echo "build_success=false" >> $env:GITHUB_OUTPUT
-            
+
             if ("${{ github.event_name }}" -eq "workflow_dispatch") {
               exit 1
             }
-          }
+          fi
 
       - name: Create Package (if build succeeded)
         id: create-archive

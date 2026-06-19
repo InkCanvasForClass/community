@@ -37,9 +37,6 @@ jobs:
       - name: Restore Package
         run: dotnet restore "Ink Canvas.sln" --locked-mode
 
-      - name: Build the Solution
-        run: msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Debug" /p:GitFlow="$GITFLOW" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
-
       - name: Install VSTO Runtime
         shell: pwsh
         run: |
@@ -48,22 +45,29 @@ jobs:
           Invoke-WebRequest -Uri $url -OutFile $out -MaximumRedirection 10
           Start-Process -FilePath $out -ArgumentList "/quiet /norestart" -Wait -NoNewWindow
 
-      - name: Generate VSTO signing certificate
+      - name: Generate signing certificate
         id: gen-cert
         shell: pwsh
         run: |
-          $cert = New-SelfSignedCertificate -Type CodeSigningCert -Subject "CN=ICC PowerPoint Agent CI" -CertStoreLocation "Cert:\CurrentUser\My" -NotAfter (Get-Date).AddYears(2)
-          Export-PfxCertificate -Cert $cert -FilePath "InkCanvas.PowerPointAddIn\InkCanvas.PowerPointAddIn_TemporaryKey.pfx" -Password (New-Object System.Security.SecureString)
-          echo "CERT_THUMBPRINT=$($cert.Thumbprint)" >> $env:GITHUB_OUTPUT
+          $cert = New-SelfSignedCertificate `
+            -Type CodeSigningCert `
+            -Subject "CN=ICC PowerPoint Agent PR" `
+            -CertStoreLocation "Cert:\CurrentUser\My" `
+            -KeyExportPolicy Exportable `
+            -NotAfter (Get-Date).AddYears(2)
+          Export-PfxCertificate -Cert $cert -FilePath "clickonce.pfx" -Password (New-Object System.Security.SecureString)
+
+      - name: Build the Solution
+        run: msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Debug" /p:GitFlow="$GITFLOW" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
 
       - name: Build VSTO Add-in
+        shell: pwsh
         run: |
-          $thumbprint = "${{ steps.gen-cert.outputs.CERT_THUMBPRINT }}"
-          $csproj = "InkCanvas.PowerPointAddIn\InkCanvas.PowerPointAddIn.csproj"
-          $content = Get-Content $csproj -Raw
-          $content = $content -replace '<SignManifests>true</SignManifests>', "<SignManifests>true</SignManifests><ManifestCertificateThumbprint>$thumbprint</ManifestCertificateThumbprint><ManifestKeyFile>InkCanvas.PowerPointAddIn_TemporaryKey.pfx</ManifestKeyFile><ManifestCertificatePassword></ManifestCertificatePassword>"
-          Set-Content $csproj $content -NoNewline
-          msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" /p:Configuration=Debug /verbosity:minimal -maxcpucount
+          msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" `
+            /p:Configuration=Debug `
+            /p:SignManifests=true `
+            /p:ManifestKeyFile=clickonce.pfx `
+            /verbosity:minimal -maxcpucount
           $pptAgentDir = "Ink Canvas\bin\Debug\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\ppt-agent"
           New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
           Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll" $pptAgentDir -Force
@@ -88,11 +92,11 @@ jobs:
             echo "build_success=true" >> $env:GITHUB_OUTPUT
           } else {
             echo "build_success=false" >> $env:GITHUB_OUTPUT
-            
+
             if ("${{ github.event_name }}" -eq "workflow_dispatch") {
               exit 1
             }
-          }
+          fi
 
       - name: Create Package (if build succeeded)
         id: create-archive
