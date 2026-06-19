@@ -184,7 +184,8 @@ namespace Ink_Canvas.Helpers
                 {
                     FileName = regasmExe,
                     Arguments = args,
-                    UseShellExecute = false,
+                    UseShellExecute = true,
+                    Verb = "runas",
                     WindowStyle = ProcessWindowStyle.Hidden,
                     CreateNoWindow = true
                 };
