@@ -180,29 +180,57 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.SaveSettingsToFile();
         }
 
-        private void ButtonAddCustomBackground_Click(object sender, RoutedEventArgs e)
+        private async void ButtonAddCustomBackground_Click(object sender, RoutedEventArgs e)
         {
             var mw = Application.Current.MainWindow as MainWindow;
             if (mw == null) return;
 
-            AddPickNameBackgroundWindow dialog = new AddPickNameBackgroundWindow(mw);
-            dialog.Owner = mw;
-            dialog.ShowDialog();
-
-            if (dialog.IsSuccess)
+            var content = new AddPickNameBackgroundWindow(mw);
+            var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
             {
-                ComboBoxPickNameBackground.SelectedIndex = ComboBoxPickNameBackground.Items.Count - 1;
-            }
+                Title = Properties.RandomStrings.Random_AddBg_WindowTitle,
+                Content = content,
+                PrimaryButtonText = FloatingBarStrings.Tools_Save,
+                CloseButtonText = Properties.RandomStrings.Random_Cancel,
+                Owner = Window.GetWindow(this) ?? mw,
+                DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Primary
+            };
+
+            content.OnInputChanged += () =>
+            {
+                dialog.IsPrimaryButtonEnabled = content.CanSave();
+            };
+            dialog.IsPrimaryButtonEnabled = content.CanSave();
+
+            dialog.PrimaryButtonClick += async (s, args) =>
+            {
+                var deferral = args.GetDeferral();
+                if (content.Save())
+                {
+                    ComboBoxPickNameBackground.SelectedIndex = ComboBoxPickNameBackground.Items.Count - 1;
+                    dialog.Hide();
+                }
+                deferral.Complete();
+            };
+
+            await dialog.ShowAsync();
         }
 
-        private void ButtonManageBackgrounds_Click(object sender, RoutedEventArgs e)
+        private async void ButtonManageBackgrounds_Click(object sender, RoutedEventArgs e)
         {
             var mw = Application.Current.MainWindow as MainWindow;
             if (mw == null) return;
 
-            ManagePickNameBackgroundsWindow dialog = new ManagePickNameBackgroundsWindow(mw);
-            Ink_Canvas.Helpers.WindowTopmostManager.RegisterWindow(dialog);
-            dialog.Show();
+            var content = new ManagePickNameBackgroundsWindow(mw);
+            var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+            {
+                Title = Properties.RandomStrings.Random_ManageBg_WindowTitle,
+                Content = content,
+                CloseButtonText = Properties.NotificationStrings.AnimationOff,
+                Owner = Window.GetWindow(this) ?? mw,
+                DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Close
+            };
+            await dialog.ShowAsync();
         }
 
         #endregion
