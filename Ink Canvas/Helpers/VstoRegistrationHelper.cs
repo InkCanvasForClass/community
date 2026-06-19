@@ -18,8 +18,8 @@ namespace Ink_Canvas.Helpers
         private const string Description = "ICC PowerPoint Agent - NamedPipe PPT Linkage";
 
         private static string AgentDir => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ppt-agent");
-        private static string VstoDllPath => Path.Combine(AgentDir, AddInDllName);
         private static string VstoManifestPath => Path.Combine(AgentDir, AddInVstoName);
+        private static string VstoDllPath => Path.Combine(AgentDir, AddInDllName);
 
         public static bool IsRegistered()
         {
@@ -33,15 +33,18 @@ namespace Ink_Canvas.Helpers
             catch { return false; }
         }
 
-        public static bool IsDllAvailable() => File.Exists(VstoDllPath);
+        /// <summary>
+        /// 检查 VSTO 插件文件是否可用（优先检查 .vsto 清单，回退到 DLL）。
+        /// </summary>
+        public static bool IsVstoAvailable() => File.Exists(VstoManifestPath) || File.Exists(VstoDllPath);
 
         public static bool EnsureRegistered()
         {
             CleanupRegistry();
 
-            if (!IsDllAvailable())
+            if (!IsVstoAvailable())
             {
-                LogHelper.WriteLogToFile($"VSTO 插件 DLL 不存在: {VstoDllPath}", LogHelper.LogType.Warning);
+                LogHelper.WriteLogToFile($"VSTO 插件文件不存在: {AgentDir}", LogHelper.LogType.Warning);
                 return false;
             }
             return Register();
@@ -49,9 +52,9 @@ namespace Ink_Canvas.Helpers
 
         public static bool Register()
         {
-            if (!IsDllAvailable())
+            if (!IsVstoAvailable())
             {
-                LogHelper.WriteLogToFile($"VSTO 插件 DLL 不存在: {VstoDllPath}", LogHelper.LogType.Warning);
+                LogHelper.WriteLogToFile($"VSTO 插件文件不存在: {AgentDir}", LogHelper.LogType.Warning);
                 return false;
             }
 

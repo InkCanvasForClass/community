@@ -143,6 +143,42 @@
     </ProjectReference>
     <UpToDateCheckInput Include="..\InkCanvas.Controls\**\*.xaml" />
   </ItemGroup>
+  <Target Name="CopyVstoAgent" AfterTargets="Build">
+    <PropertyGroup>
+      <VstoRuntimePath>$(MSBuildProgramFiles32)\Microsoft Visual Studio\2022\Community\Common7\IDE\ReferenceAssemblies\v4.0</VstoRuntimePath>
+    </PropertyGroup>
+    <MakeDir Directories="$(OutputPath)ppt-agent" />
+    <Copy SourceFiles="..\InkCanvas.PowerPointAddIn\bin\$(Configuration)\InkCanvas.PowerPointAddIn.dll"
+          DestinationFolder="$(OutputPath)ppt-agent" SkipUnchangedFiles="true"
+          Condition="Exists('..\InkCanvas.PowerPointAddIn\bin\$(Configuration)\InkCanvas.PowerPointAddIn.dll')" />
+    <Copy SourceFiles="..\InkCanvas.PowerPointAddIn\bin\$(Configuration)\InkCanvas.PowerPointAddIn.vsto"
+          DestinationFolder="$(OutputPath)ppt-agent" SkipUnchangedFiles="true"
+          Condition="Exists('..\InkCanvas.PowerPointAddIn\bin\$(Configuration)\InkCanvas.PowerPointAddIn.vsto')" />
+    <Copy SourceFiles="..\InkCanvas.PowerPointAddIn\bin\$(Configuration)\InkCanvas.PowerPointAddIn.dll.manifest"
+          DestinationFolder="$(OutputPath)ppt-agent" SkipUnchangedFiles="true"
+          Condition="Exists('..\InkCanvas.PowerPointAddIn\bin\$(Configuration)\InkCanvas.PowerPointAddIn.dll.manifest')" />
+    <Copy SourceFiles="..\InkCanvas.PptAgent.Contracts\bin\$(Configuration)\netstandard2.0\InkCanvas.PptAgent.Contracts.dll"
+          DestinationFolder="$(OutputPath)ppt-agent" SkipUnchangedFiles="true"
+          Condition="Exists('..\InkCanvas.PptAgent.Contracts\bin\$(Configuration)\netstandard2.0\InkCanvas.PptAgent.Contracts.dll')" />
+    <Copy SourceFiles="$(NuGetPackageRoot)newtonsoft.json\13.0.4\lib\net45\Newtonsoft.Json.dll"
+          DestinationFolder="$(OutputPath)ppt-agent" SkipUnchangedFiles="true"
+          Condition="Exists('$(NuGetPackageRoot)newtonsoft.json\13.0.4\lib\net45\Newtonsoft.Json.dll')" />
+    <Copy SourceFiles="$(VstoRuntimePath)\Microsoft.Office.Tools.dll"
+          DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true"
+          Condition="Exists('$(VstoRuntimePath)\Microsoft.Office.Tools.dll')" />
+    <Copy SourceFiles="$(VstoRuntimePath)\Microsoft.Office.Tools.Common.dll"
+          DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true"
+          Condition="Exists('$(VstoRuntimePath)\Microsoft.Office.Tools.Common.dll')" />
+    <Copy SourceFiles="$(VstoRuntimePath)\Microsoft.Office.Tools.Common.v4.0.Utilities.dll"
+          DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true"
+          Condition="Exists('$(VstoRuntimePath)\Microsoft.Office.Tools.Common.v4.0.Utilities.dll')" />
+    <Copy SourceFiles="$(VstoRuntimePath)\Microsoft.Office.Tools.v4.0.Framework.dll"
+          DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true"
+          Condition="Exists('$(VstoRuntimePath)\Microsoft.Office.Tools.v4.0.Framework.dll')" />
+    <Copy SourceFiles="$(VstoRuntimePath)\Microsoft.VisualStudio.Tools.Applications.Runtime.dll"
+          DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true"
+          Condition="Exists('$(VstoRuntimePath)\Microsoft.VisualStudio.Tools.Applications.Runtime.dll')" />
+  </Target>
   <ItemGroup Condition="'$(MSBuildRuntimeType)' == 'Full'">
     <COMReference Include="IWshRuntimeLibrary">
       <Guid>{F935DC20-1CF0-11D0-ADB9-00C04FD58A0B}</Guid>
