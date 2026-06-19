@@ -17,6 +17,7 @@
         ResizeMode="CanResize"
         Topmost="True"
         Loaded="OobeWindow_OnLoaded"
+        Closing="OobeWindow_OnClosing"
         ui:ThemeManager.IsThemeAware="True"
         ui:TitleBar.ExtendViewIntoTitleBar="True"
         ui:WindowHelper.SystemBackdropType="None"

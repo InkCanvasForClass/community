@@ -1,7 +1,11 @@
 using Ink_Canvas.Helpers;
+using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
+using Screen = System.Windows.Forms.Screen;
 
 namespace Ink_Canvas.Windows
 {
@@ -15,6 +19,82 @@ namespace Ink_Canvas.Windows
         {
             InitializeComponent();
             WindowBackdropHelper.Apply(this);
+        }
+
+        #region 高DPI/多屏自适应窗口控制
+
+        private HwndSource _hwndSource;
+
+        private void GetWorkAreaSize(out double workAreaWidthDip, out double workAreaHeightDip, out double screenLeftDip, out double screenTopDip)
+        {
+            var windowHandle = new WindowInteropHelper(this).Handle;
+            var currentScreen = Screen.FromHandle(windowHandle);
+            var workingArea = currentScreen.WorkingArea;
+            var screenBounds = currentScreen.Bounds;
+
+            var source = PresentationSource.FromVisual(this);
+            double dpiScaleX = 1.0;
+            double dpiScaleY = 1.0;
+
+            if (source?.CompositionTarget != null)
+            {
+                dpiScaleX = source.CompositionTarget.TransformToDevice.M11;
+                dpiScaleY = source.CompositionTarget.TransformToDevice.M22;
+            }
+
+            workAreaWidthDip = workingArea.Width / dpiScaleX;
+            workAreaHeightDip = workingArea.Height / dpiScaleY;
+            screenLeftDip = screenBounds.Left / dpiScaleX;
+            screenTopDip = screenBounds.Top / dpiScaleY;
+        }
+
+        private void SetMaxSizeAndCenter()
+        {
+            if (!this.IsLoaded) return;
+
+            GetWorkAreaSize(out double workAreaWidthDip, out double workAreaHeightDip, out double screenLeftDip, out double screenTopDip);
+
+            this.MaxWidth = workAreaWidthDip;
+            this.MaxHeight = workAreaHeightDip;
+
+            this.Left = screenLeftDip + (workAreaWidthDip - this.ActualWidth) / 2;
+            this.Top = screenTopDip + (workAreaHeightDip - this.ActualHeight) / 2;
+        }
+
+        private void RegisterDpiChangedListener()
+        {
+            _hwndSource = PresentationSource.FromVisual(this) as HwndSource;
+            _hwndSource?.AddHook(DpiChangedWndProc);
+        }
+
+        private void UnregisterDpiChangedListener()
+        {
+            _hwndSource?.RemoveHook(DpiChangedWndProc);
+            _hwndSource = null;
+        }
+
+        private IntPtr DpiChangedWndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            const int WM_DPICHANGED = 0x02E0;
+            if (msg == WM_DPICHANGED)
+            {
+                SetMaxSizeAndCenter();
+                handled = true;
+            }
+            return IntPtr.Zero;
+        }
+
+        #endregion
+
+        private void OobePresetWindow_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            SetMaxSizeAndCenter();
+            RegisterDpiChangedListener();
+        }
+
+        private void OobePresetWindow_OnClosing(object sender, CancelEventArgs e)
+        {
+            UnregisterDpiChangedListener();
         }
 
         private void SelectPreset(PresetKind kind)

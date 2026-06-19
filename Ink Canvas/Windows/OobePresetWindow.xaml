@@ -16,7 +16,9 @@
         ui:WindowHelper.SystemBackdropType="None"
         ui:WindowHelper.UseModernWindowStyle="True"
         ui:WindowHelper.CornerStyle="Round"
-        ui:TitleBar.Height="40">
+        ui:TitleBar.Height="40"
+        Loaded="OobePresetWindow_OnLoaded"
+        Closing="OobePresetWindow_OnClosing">
 
     <Window.Resources>
         <ResourceDictionary>
