@@ -343,6 +343,9 @@
       },
       "inkcanvas.pluginsdk": {
         "type": "Project"
+      },
+      "inkcanvas.pptagent.contracts": {
+        "type": "Project"
       }
     },
     "net6.0-windows10.0.19041/win-arm64": {

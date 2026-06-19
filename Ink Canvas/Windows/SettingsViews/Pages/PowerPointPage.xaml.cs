@@ -1,5 +1,6 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
+using InkCanvasPptAgent.Contracts;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -57,7 +58,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var ppt = SettingsManager.Settings.PowerPointSettings;
 
             CardSupportPowerPoint.IsOn = ppt.PowerPointSupport;
-            ComboBoxPptArchitecture.SelectedIndex = ppt.UseRotPptLink ? 1 : 0;
+            ComboBoxPptArchitecture.SelectedIndex = (int)ppt.PptLinkMode;
             CardPowerPointEnhancement.IsOn = ppt.EnablePowerPointEnhancement;
             CardSkipAnimationsWhenGoNext.IsOn = ppt.SkipAnimationsWhenGoNext;
             CardSupportWPS.IsOn = ppt.IsSupportWPS;
@@ -121,8 +122,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void UpdatePptArchitectureDependentCards()
         {
-            bool isRotArchitecture = SettingsManager.Settings.PowerPointSettings.UseRotPptLink;
-            var visibility = isRotArchitecture ? Visibility.Collapsed : Visibility.Visible;
+            bool isComArchitecture = SettingsManager.Settings.PowerPointSettings.PptLinkMode == PptLinkMode.Com;
+            var visibility = isComArchitecture ? Visibility.Visible : Visibility.Collapsed;
             CardPowerPointEnhancement.Visibility = visibility;
             CardSupportWPS.Visibility = visibility;
             CardEnableWppProcessKill.Visibility = visibility;
@@ -160,15 +161,22 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             var ppt = SettingsManager.Settings.PowerPointSettings;
-            bool useRotPptLink = ComboBoxPptArchitecture.SelectedIndex == 1;
-            if (ppt.UseRotPptLink == useRotPptLink) return;
+            var selectedMode = (PptLinkMode)Math.Max(0, ComboBoxPptArchitecture.SelectedIndex);
+            if (ppt.PptLinkMode == selectedMode) return;
 
-            ppt.UseRotPptLink = useRotPptLink;
+            ppt.PptLinkMode = selectedMode;
+            if (ppt.PptLinkMode != PptLinkMode.Com)
+            {
+                ppt.EnablePowerPointEnhancement = false;
+                ppt.IsSupportWPS = false;
+                CardPowerPointEnhancement.IsOn = false;
+                CardSupportWPS.IsOn = false;
+            }
             UpdatePptArchitectureDependentCards();
             SettingsManager.SaveSettingsToFile();
             try
             {
-                SettingsActionHub.OnUseRotPptLinkChanged();
+                SettingsActionHub.OnPptLinkModeChanged();
             }
             catch (Exception ex) { LogHelper.WriteLogToFile($"切换 PPT 联动架构失败: {ex}", LogHelper.LogType.Error); }
         }

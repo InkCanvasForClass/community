@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net462</TargetFramework>
+    <AssemblyName>InkCanvas.PowerPointAddIn</AssemblyName>
+    <RootNamespace>PptAgent.PowerPointAddIn</RootNamespace>
+    <LangVersion>10</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.Office.Interop.PowerPoint" />
+    <Reference Include="Microsoft.Office.Core" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\InkCanvas.PptAgent.Contracts\InkCanvas.PptAgent.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="All" />
+  </ItemGroup>
+</Project>

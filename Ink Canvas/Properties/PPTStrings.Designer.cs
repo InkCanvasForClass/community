@@ -104,6 +104,14 @@ namespace Ink_Canvas.Properties
 
         public static string PPTRotArchitecture => ResourceManager.GetString(nameof(PPTRotArchitecture), _resourceCulture);
 
+        public static string PPTAgentArchitecture => ResourceManager.GetString(nameof(PPTAgentArchitecture), _resourceCulture);
+
+        public static string PPTAgentArchitectureHint => ResourceManager.GetString(nameof(PPTAgentArchitectureHint), _resourceCulture);
+
+        public static string PPTAgentNotConnected => ResourceManager.GetString(nameof(PPTAgentNotConnected), _resourceCulture);
+
+        public static string PPTAgentInstallHint => ResourceManager.GetString(nameof(PPTAgentInstallHint), _resourceCulture);
+
         public static string Position_Left => ResourceManager.GetString(nameof(Position_Left), _resourceCulture);
 
         public static string Position_LeftBottom => ResourceManager.GetString(nameof(Position_LeftBottom), _resourceCulture);

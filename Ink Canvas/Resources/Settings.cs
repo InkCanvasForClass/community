@@ -610,6 +610,13 @@ namespace Ink_Canvas
 
     }
 
+    public enum PptLinkMode
+    {
+        Com = 0,
+        Rot = 1,
+        Agent = 2
+    }
+
     public class PowerPointSettings
     {
         [JsonProperty("showPPTButton")]
@@ -711,8 +718,15 @@ namespace Ink_Canvas
         public double PPTTimeCapsuleOffsetX { get; set; } = 0;
         [JsonProperty("pptTimeCapsuleOffsetY")]
         public double PPTTimeCapsuleOffsetY { get; set; } = 0;
+        [JsonProperty("pptLinkMode")]
+        public PptLinkMode PptLinkMode { get; set; } = PptLinkMode.Com;
+
         [JsonProperty("useRotPptLink")]
-        public bool UseRotPptLink { get; set; } = false;
+        public bool UseRotPptLink
+        {
+            get => PptLinkMode == PptLinkMode.Rot;
+            set => PptLinkMode = value ? PptLinkMode.Rot : PptLinkMode.Com;
+        }
         [JsonProperty("showPPTSidebarByDefault")]
         public bool ShowPPTSidebarByDefault { get; set; } = false;
 

@@ -189,6 +189,18 @@
   <data name="PPTRotArchitecture" xml:space="preserve">
     <value>ROT 架构</value>
   </data>
+  <data name="PPTAgentArchitecture" xml:space="preserve">
+    <value>VSTO Agent 架构</value>
+  </data>
+  <data name="PPTAgentArchitectureHint" xml:space="preserve">
+    <value>让 PowerPoint 里面的小插件接管 PPT，ICC 只走 NamedPipe 发号施令，不碰 COM/ROT。</value>
+  </data>
+  <data name="PPTAgentNotConnected" xml:space="preserve">
+    <value>PPT Agent 还没连上</value>
+  </data>
+  <data name="PPTAgentInstallHint" xml:space="preserve">
+    <value>先打开 PowerPoint，并确认 ICC PowerPoint Agent 插件已经加载啦。</value>
+  </data>
   <data name="SupportWPS" xml:space="preserve">
     <value>WPS 支持</value>
   </data>

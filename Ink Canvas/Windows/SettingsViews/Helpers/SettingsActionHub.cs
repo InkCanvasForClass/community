@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using InkCanvasPptAgent.Contracts;
 using System;
 using System.Windows;
 
@@ -466,7 +467,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 mw.PPTManager.SkipAnimationsWhenNavigating = isOn;
         }
 
-        public static void OnUseRotPptLinkChanged()
+        public static void OnPptLinkModeChanged()
         {
             var mw = GetMainWindow();
             if (mw == null) return;
@@ -474,18 +475,25 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             try
             {
                 mw.StopPPTMonitoring();
-                if (ppt.UseRotPptLink && ppt.EnablePowerPointEnhancement)
+                if (ppt.PptLinkMode != PptLinkMode.Com && ppt.EnablePowerPointEnhancement)
                 {
                     ppt.EnablePowerPointEnhancement = false;
                     mw.StopPowerPointProcessMonitoring();
                     SettingsManager.SaveSettingsToFile();
                 }
+                if (ppt.PptLinkMode != PptLinkMode.Com && ppt.IsSupportWPS)
+                {
+                    ppt.IsSupportWPS = false;
+                    SettingsManager.SaveSettingsToFile();
+                }
                 mw.InitializePPTManagers();
                 if (ppt.PowerPointSupport) mw.StartPPTMonitoring();
-                LogHelper.WriteLogToFile($"已切换 PPT 联动架构为 {(ppt.UseRotPptLink ? "ROT" : "COM")}", LogHelper.LogType.Event);
+                LogHelper.WriteLogToFile($"已切换 PPT 联动架构为 {ppt.PptLinkMode}", LogHelper.LogType.Event);
             }
             catch (Exception ex) { LogHelper.WriteLogToFile($"切换 PPT 联动架构失败: {ex}", LogHelper.LogType.Error); }
         }
+
+        public static void OnUseRotPptLinkChanged() => OnPptLinkModeChanged();
 
         public static void OnSupportWPSChanged()
         {

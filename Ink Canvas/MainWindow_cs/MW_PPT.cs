@@ -1,5 +1,6 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.WorkflowAutomation;
+using InkCanvasPptAgent.Contracts;
 using iNKORE.UI.WPF.Modern;
 using Microsoft.Office.Core;
 using Microsoft.Office.Interop.PowerPoint;
@@ -262,14 +263,18 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile($"清理 Interop 状态异常: {ex}", LogHelper.LogType.Warning);
                 }
 
-                // 根据设置选择 COM / ROT 架构
-                if (Settings.PowerPointSettings.UseRotPptLink)
+                // 根据设置选择 COM / ROT / Agent 架构
+                switch (Settings.PowerPointSettings.PptLinkMode)
                 {
-                    _pptManager = new ROTPPTManager();
-                }
-                else
-                {
-                    _pptManager = new ComPPTLinkManager();
+                    case PptLinkMode.Rot:
+                        _pptManager = new ROTPPTManager();
+                        break;
+                    case PptLinkMode.Agent:
+                        _pptManager = new PptAgentLinkManager();
+                        break;
+                    default:
+                        _pptManager = new ComPPTLinkManager();
+                        break;
                 }
 
                 _pptManager.IsSupportWPS = Settings.PowerPointSettings.IsSupportWPS;
@@ -277,11 +282,11 @@ namespace Ink_Canvas
 
                 // 注册事件
                 _pptManager.PPTConnectionChanged += OnPPTConnectionChanged;
-                _pptManager.SlideShowBegin += o => OnPPTSlideShowBegin(o as SlideShowWindow);
-                _pptManager.SlideShowNextSlide += o => OnPPTSlideShowNextSlide(o as SlideShowWindow);
-                _pptManager.SlideShowEnd += o => OnPPTSlideShowEnd(o as Presentation);
-                _pptManager.PresentationOpen += o => OnPPTPresentationOpen(o as Presentation);
-                _pptManager.PresentationClose += o => OnPPTPresentationClose(o as Presentation);
+                _pptManager.SlideShowBegin += OnPPTSlideShowBegin;
+                _pptManager.SlideShowNextSlide += OnPPTSlideShowNextSlide;
+                _pptManager.SlideShowEnd += OnPPTSlideShowEnd;
+                _pptManager.PresentationOpen += OnPPTPresentationOpen;
+                _pptManager.PresentationClose += OnPPTPresentationClose;
                 _pptManager.SlideShowStateChanged += OnPPTSlideShowStateChanged;
 
                 _singlePPTInkManager = new PPTInkManager();
@@ -356,7 +361,7 @@ namespace Ink_Canvas
             try
             {
                 if (!Settings.PowerPointSettings.EnablePowerPointEnhancement) return;
-                if (Settings.PowerPointSettings.UseRotPptLink) return;
+                if (Settings.PowerPointSettings.PptLinkMode != PptLinkMode.Com) return;
 
                 // 创建PowerPoint应用程序实例
                 CreatePowerPointApplication();
@@ -411,7 +416,7 @@ namespace Ink_Canvas
         {
             try
             {
-                if (Settings.PowerPointSettings.UseRotPptLink) return;
+                if (Settings.PowerPointSettings.PptLinkMode != PptLinkMode.Com) return;
                 // 如果应用程序已存在且有效，则不重复创建
                 if (pptApplication != null && IsPowerPointApplicationValid())
                 {
@@ -470,7 +475,7 @@ namespace Ink_Canvas
             try
             {
                 if (_pptManager == null) return;
-                if (Settings.PowerPointSettings.UseRotPptLink) return;
+                if (Settings.PowerPointSettings.PptLinkMode != PptLinkMode.Com) return;
 
                 // 使用反射调用PPTManager的ConnectToPPT方法
                 var pptManagerType = _pptManager.GetType();
@@ -656,7 +661,7 @@ namespace Ink_Canvas
                     StopPowerPointProcessMonitoring();
                     return;
                 }
-                if (Settings.PowerPointSettings.UseRotPptLink) return;
+                if (Settings.PowerPointSettings.PptLinkMode != PptLinkMode.Com) return;
 
                 // 检查应用程序是否还在运行
                 if (!IsPowerPointApplicationValid())
@@ -963,8 +968,10 @@ namespace Ink_Canvas
         /// 操作包括：清理画布墨迹和备份历史记录，初始化墨迹管理器，处理跳转到首页或上次播放页的逻辑，检查隐藏幻灯片和自动播放设置，更新UI连接状态，并记录事件日志。
         /// 所有操作在UI线程异步执行，异常会被捕获并记录为错误日志。
         /// </remarks>
-        private void OnPPTPresentationOpen(Presentation pres)
+        private void OnPPTPresentationOpen(object payload)
         {
+            var pres = payload as Presentation;
+            var agentState = payload as PptState;
             try
             {
                 Application.Current.Dispatcher.InvokeAsync(() =>
@@ -980,28 +987,31 @@ namespace Ink_Canvas
                         TimeMachineHistories[0] = null;
                     }
 
-                    _singlePPTInkManager?.InitializePresentation(pres);
+                    if (pres != null)
+                    {
+                        _singlePPTInkManager?.InitializePresentation(pres);
+                    }
 
                     // 处理跳转到首页或上次播放页的逻辑
-                    HandlePresentationOpenNavigation(pres);
+                    HandlePresentationOpenNavigation(pres, agentState);
 
                     // 检查隐藏幻灯片
                     if (Settings.PowerPointSettings.IsNotifyHiddenPage)
                     {
-                        CheckAndNotifyHiddenSlides(pres);
+                        CheckAndNotifyHiddenSlides(pres, agentState);
                     }
 
                     // 检查自动播放设置
                     if (Settings.PowerPointSettings.IsNotifyAutoPlayPresentation)
                     {
-                        CheckAndNotifyAutoPlaySettings(pres);
+                        CheckAndNotifyAutoPlaySettings(pres, agentState);
                     }
 
                     _pptUIManager?.UpdateConnectionStatus(true);
 
                     SchedulePptEnhancedPreviewPreload();
 
-                    LogHelper.WriteLogToFile($"已打开新演示文稿: {pres.Name}，墨迹状态已清理", LogHelper.LogType.Event);
+                    LogHelper.WriteLogToFile($"已打开新演示文稿: {pres?.Name ?? agentState?.PresentationName ?? _pptManager?.GetPresentationName()}，墨迹状态已清理", LogHelper.LogType.Event);
                 });
             }
             catch (Exception ex)
@@ -1010,18 +1020,37 @@ namespace Ink_Canvas
             }
         }
 
-        private string GetPresentationStrokeFolderPath(Presentation presentation, string presentationName, int totalSlides)
+        private string GetPresentationStrokeFolderPath(Presentation presentation, string presentationName, int totalSlides, string presentationFullName = null)
         {
             string basePath = Path.Combine(Settings.Automation.AutoSavedStrokesLocation, "Auto Saved - Presentations");
-            if (presentation != null && !string.IsNullOrEmpty(presentation.FullName))
+            string fullName = presentationFullName;
+            string name = presentationName;
+            int slidesTotal = totalSlides;
+
+            if (presentation != null)
             {
-                string hash = HashHelper.GetFileHash(presentation.FullName);
-                return Path.Combine(basePath, $"{presentation.Name}_{presentation.Slides.Count}_{hash}");
+                try
+                {
+                    if (string.IsNullOrEmpty(fullName)) fullName = presentation.FullName;
+                    if (string.IsNullOrEmpty(name)) name = presentation.Name;
+                    if (slidesTotal <= 0) slidesTotal = presentation.Slides.Count;
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"读取演示文稿标识失败: {ex.Message}", LogHelper.LogType.Warning);
+                }
             }
-            return Path.Combine(basePath, $"{presentationName ?? ""}_{totalSlides}");
+
+            if (!string.IsNullOrEmpty(fullName))
+            {
+                string hash = HashHelper.GetFileHash(fullName);
+                return Path.Combine(basePath, $"{name ?? ""}_{slidesTotal}_{hash}");
+            }
+
+            return Path.Combine(basePath, $"{name ?? ""}_{slidesTotal}");
         }
 
-        private void OnPPTPresentationClose(Presentation pres)
+        private void OnPPTPresentationClose(object payload)
         {
             try
             {
@@ -1110,8 +1139,10 @@ namespace Ink_Canvas
         /// 
         /// 所有UI操作在UI线程异步执行，异常会被捕获并记录为错误日志。
         /// </remarks>
-        private async void OnPPTSlideShowBegin(SlideShowWindow wn)
+        private async void OnPPTSlideShowBegin(object payload)
         {
+            var wn = payload as SlideShowWindow;
+            var agentState = payload as PptState;
             try
             {
                 if (Settings.Automation.IsAutoFoldInPPTSlideShow)
@@ -1132,6 +1163,7 @@ namespace Ink_Canvas
                 int currentSlide = 0;
                 int totalSlides = 0;
                 string presentationName = null;
+                string presentationFullName = null;
                 Presentation activePresentation = null;
 
                 if (wn != null)
@@ -1144,6 +1176,7 @@ namespace Ink_Canvas
                             currentSlide = wn.View.CurrentShowPosition;
                             totalSlides = activePresentation.Slides.Count;
                             presentationName = activePresentation.Name;
+                            presentationFullName = activePresentation.FullName;
                         }
                     }
                     catch (COMException comEx)
@@ -1165,10 +1198,25 @@ namespace Ink_Canvas
 
                 if (activePresentation == null)
                 {
-                    activePresentation = _pptManager?.GetCurrentActivePresentation() as Presentation;
-                    currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
-                    totalSlides = _pptManager?.SlidesCount ?? 0;
-                    presentationName = _pptManager?.GetPresentationName() ?? activePresentation?.Name;
+                    if (agentState == null && _pptManager is PptAgentLinkManager agentManager)
+                    {
+                        agentState = agentManager.CurrentState;
+                    }
+
+                    if (agentState != null)
+                    {
+                        currentSlide = agentState.SlideIndex;
+                        totalSlides = agentState.TotalSlides;
+                        presentationName = agentState.PresentationName;
+                        presentationFullName = agentState.PresentationFullName;
+                    }
+                    else
+                    {
+                        activePresentation = _pptManager?.GetCurrentActivePresentation() as Presentation;
+                        currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
+                        totalSlides = _pptManager?.SlidesCount ?? 0;
+                        presentationName = _pptManager?.GetPresentationName() ?? activePresentation?.Name;
+                    }
                 }
 
                 _currentSlideShowPosition = currentSlide;
@@ -1183,7 +1231,7 @@ namespace Ink_Canvas
 
                 if (Settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint && !string.IsNullOrEmpty(presentationName))
                 {
-                    string strokePath = GetPresentationStrokeFolderPath(activePresentation, presentationName, totalSlides);
+                    string strokePath = GetPresentationStrokeFolderPath(activePresentation, presentationName, totalSlides, presentationFullName);
                     if (Directory.Exists(strokePath))
                     {
                         await Task.Run(() =>
@@ -1344,8 +1392,10 @@ namespace Ink_Canvas
         /// - 如果收到与当前记录相同的页码或已有切换正在处理，则忽略该事件。 
         /// - 在切换过程中会保存前一页的墨迹（如存在）、清空画布与历史、加载新页的墨迹、锁定新页墨迹并刷新当前页显示序号，同时更新内部的当前播放位置状态。
         /// </remarks>
-        private void OnPPTSlideShowNextSlide(SlideShowWindow wn)
+        private void OnPPTSlideShowNextSlide(object payload)
         {
+            var wn = payload as SlideShowWindow;
+            var agentState = payload as PptState;
             try
             {
                 int currentSlide = 0;
@@ -1379,10 +1429,10 @@ namespace Ink_Canvas
 
                 if (currentSlide <= 0)
                 {
-                    currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
+                    currentSlide = agentState?.SlideIndex ?? _pptManager?.GetCurrentSlideNumber() ?? 0;
                 }
 
-                totalSlides = _pptManager?.SlidesCount ?? 0;
+                totalSlides = agentState?.TotalSlides ?? _pptManager?.SlidesCount ?? 0;
 
                 if (currentSlide == _previousSlideID) return;
 
@@ -1465,8 +1515,10 @@ namespace Ink_Canvas
         /// 处理 PowerPoint 幻灯片放映结束时的清理与界面恢复，包括保存当前幻灯片墨迹、重置墨迹管理器状态、恢复主题与工具栏显示，并根据配置折叠或展示浮动工具栏等 UI 调整。
         /// </summary>
         /// <param name="pres">触发结束事件的 PowerPoint 演示文稿（Presentation）实例，用于保存墨迹并尝试读取放映时的当前页码。</param>
-        private async void OnPPTSlideShowEnd(Presentation pres)
+        private async void OnPPTSlideShowEnd(object payload)
         {
+            var pres = payload as Presentation;
+            var agentState = payload as PptState;
             try
             {
                 await Application.Current.Dispatcher.InvokeAsync(() => CollapseAllPptNavBarPreviews());
@@ -1492,7 +1544,7 @@ namespace Ink_Canvas
                         // 如果无法获取，尝试从演示文稿的SlideShowWindow获取
                         try
                         {
-                            if (pres.SlideShowWindow != null && pres.SlideShowWindow.View != null)
+                            if (pres != null && pres.SlideShowWindow != null && pres.SlideShowWindow.View != null)
                             {
                                 currentPage = pres.SlideShowWindow.View.CurrentShowPosition;
                             }
@@ -1526,8 +1578,9 @@ namespace Ink_Canvas
                     }
                 });
 
-                string presentationNameForSave = _pptManager?.GetPresentationName() ?? (pres != null ? pres.Name : null);
-                int totalSlidesForSave = _pptManager?.SlidesCount ?? 0;
+                string presentationNameForSave = agentState?.PresentationName ?? _pptManager?.GetPresentationName() ?? (pres != null ? pres.Name : null);
+                string presentationFullNameForSave = agentState?.PresentationFullName;
+                int totalSlidesForSave = agentState?.TotalSlides ?? _pptManager?.SlidesCount ?? 0;
                 if (totalSlidesForSave <= 0 && pres != null)
                 {
                     try
@@ -1550,7 +1603,7 @@ namespace Ink_Canvas
                 {
                     try
                     {
-                        string folderPathForPosition = GetPresentationStrokeFolderPath(pres, presentationNameForSave, totalSlidesForSave);
+                        string folderPathForPosition = GetPresentationStrokeFolderPath(pres, presentationNameForSave, totalSlidesForSave, presentationFullNameForSave);
                         if (!Directory.Exists(folderPathForPosition))
                             Directory.CreateDirectory(folderPathForPosition);
                         File.WriteAllText(Path.Combine(folderPathForPosition, "Position"), currentPage.ToString());
@@ -1563,7 +1616,7 @@ namespace Ink_Canvas
 
                 if (Settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint && !string.IsNullOrEmpty(presentationNameForSave) && totalSlidesForSave > 0)
                 {
-                    string folderPathForSave = GetPresentationStrokeFolderPath(pres, presentationNameForSave, totalSlidesForSave);
+                    string folderPathForSave = GetPresentationStrokeFolderPath(pres, presentationNameForSave, totalSlidesForSave, presentationFullNameForSave);
                     await Task.Run(() =>
                     {
                         try
@@ -1721,7 +1774,7 @@ namespace Ink_Canvas
         /// 2. 否则，如果设置了显示上次播放页通知，则显示上次播放页通知
         /// 异常会被捕获并记录为错误日志，确保方法执行不会中断。
         /// </remarks>
-        private void HandlePresentationOpenNavigation(Presentation pres)
+        private void HandlePresentationOpenNavigation(Presentation pres, PptState agentState = null)
         {
             try
             {
@@ -1732,7 +1785,7 @@ namespace Ink_Canvas
                 }
                 else if (Settings.PowerPointSettings.IsNotifyPreviousPage)
                 {
-                    ShowPreviousPageNotification(pres);
+                    ShowPreviousPageNotification(pres, agentState);
                 }
             }
             catch (Exception ex)
@@ -1851,13 +1904,18 @@ namespace Ink_Canvas
             _inlineDialogTcs?.TrySetResult(false);
         }
 
-        private async void ShowPreviousPageNotification(Presentation pres)
+        private async void ShowPreviousPageNotification(Presentation pres, PptState agentState = null)
         {
             try
             {
-                if (pres == null) return;
+                var presentationName = agentState?.PresentationName ?? pres?.Name ?? _pptManager?.GetPresentationName();
+                var presentationFullName = agentState?.PresentationFullName;
+                var totalSlides = agentState?.TotalSlides ?? _pptManager?.SlidesCount ?? 0;
+                if (pres != null && totalSlides <= 0)
+                    totalSlides = pres.Slides.Count;
+                if (string.IsNullOrEmpty(presentationName) || totalSlides <= 0) return;
 
-                var folderPath = GetPresentationStrokeFolderPath(pres, pres.Name, pres.Slides.Count);
+                var folderPath = GetPresentationStrokeFolderPath(pres, presentationName, totalSlides, presentationFullName);
                 var positionFile = Path.Combine(folderPath, "Position");
 
                 if (!File.Exists(positionFile)) return;
@@ -1870,17 +1928,8 @@ namespace Ink_Canvas
                     {
                         try
                         {
-                            var pptApp = _pptManager?.PPTApplication as Microsoft.Office.Interop.PowerPoint.Application;
-                            if (pptApp != null)
+                            if (_pptManager?.TryNavigateToSlide(page) == true)
                             {
-                                if (pptApp.SlideShowWindows.Count >= 1)
-                                {
-                                    pres.SlideShowWindow.View.GotoSlide(page);
-                                }
-                                else
-                                {
-                                    pres.Windows[1].View.GotoSlide(page);
-                                }
                                 if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) ExceptionHandler.TryExecute(() => this.Activate(), "激活主窗口失败（PPT 翻页时）");
                             }
                         }
@@ -1910,12 +1959,12 @@ namespace Ink_Canvas
         /// 5. 无论用户选择如何，都会重置IsShowingRestoreHiddenSlidesWindow标志
         /// 异常会被捕获并记录为错误日志，确保方法执行不会中断。
         /// </remarks>
-        private async void CheckAndNotifyHiddenSlides(Presentation pres)
+        private async void CheckAndNotifyHiddenSlides(Presentation pres, PptState agentState = null)
         {
             try
             {
-                bool hasHiddenSlides = false;
-                if (pres?.Slides != null)
+                bool hasHiddenSlides = agentState?.HasHiddenSlides == true;
+                if (!hasHiddenSlides && pres?.Slides != null)
                 {
                     foreach (Slide slide in pres.Slides)
                     {
@@ -1943,6 +1992,10 @@ namespace Ink_Canvas
                                         slide.SlideShowTransition.Hidden = MsoTriState.msoFalse;
                                 }
                             }
+                            else if (_pptManager is PptAgentLinkManager agentManager)
+                            {
+                                agentManager.TryUnhideHiddenSlides();
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -1961,6 +2014,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
+                IsShowingRestoreHiddenSlidesWindow = false;
                 LogHelper.WriteLogToFile($"检查隐藏幻灯片失败: {ex}", LogHelper.LogType.Error);
             }
         }
@@ -1979,14 +2033,14 @@ namespace Ink_Canvas
         /// 6. 无论用户选择如何，都会重置IsShowingAutoplaySlidesWindow标志
         /// 异常会被捕获并记录为错误日志，确保方法执行不会中断。
         /// </remarks>
-        private async void CheckAndNotifyAutoPlaySettings(Presentation pres)
+        private async void CheckAndNotifyAutoPlaySettings(Presentation pres, PptState agentState = null)
         {
             try
             {
                 if (IsInPptPresentationMode) return;
 
-                bool hasSlideTimings = false;
-                if (pres?.Slides != null)
+                bool hasSlideTimings = agentState?.HasAutoPlayTimings == true;
+                if (!hasSlideTimings && pres?.Slides != null)
                 {
                     foreach (Slide slide in pres.Slides)
                     {
@@ -2011,6 +2065,10 @@ namespace Ink_Canvas
                             {
                                 pres.SlideShowSettings.AdvanceMode = PpSlideShowAdvanceMode.ppSlideShowManualAdvance;
                             }
+                            else if (_pptManager is PptAgentLinkManager agentManager)
+                            {
+                                agentManager.TryDisableAutoPlayTimings();
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -2029,6 +2087,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
+                IsShowingAutoplaySlidesWindow = false;
                 LogHelper.WriteLogToFile($"检查自动播放设置失败: {ex}", LogHelper.LogType.Error);
             }
         }

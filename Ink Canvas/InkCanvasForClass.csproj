@@ -136,6 +136,7 @@
   <ItemGroup>
     <ProjectReference Include="..\InkCanvas.PluginSdk\InkCanvas.PluginSdk.csproj" />
     <ProjectReference Include="..\InkCanvas.Controls\InkCanvas.Controls.csproj" />
+    <ProjectReference Include="..\InkCanvas.PptAgent.Contracts\InkCanvas.PptAgent.Contracts.csproj" />
     <ProjectReference Include="..\InkCanvas.IACoreHelper\InkCanvas.IACoreHelper.csproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <Private>false</Private>
