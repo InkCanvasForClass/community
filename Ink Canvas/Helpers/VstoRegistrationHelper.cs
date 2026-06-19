@@ -1,35 +1,26 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using Microsoft.Win32;
 
 namespace Ink_Canvas.Helpers
 {
     /// <summary>
     /// VSTO PowerPoint 插件自动注册/反注册辅助类。
-    /// 当用户切换到 Agent 架构时，自动将 VSTO DLL 注册为 PowerPoint 加载项。
+    /// 优先使用 .vsto 清单加载，回退到 regasm COM 注册。
     /// </summary>
     public static class VstoRegistrationHelper
     {
         private const string AddInKeyName = @"Software\Microsoft\Office\PowerPoint\Addins\InkCanvas.PowerPointAddIn";
         private const string AddInDllName = "InkCanvas.PowerPointAddIn.dll";
+        private const string AddInVstoName = "InkCanvas.PowerPointAddIn.vsto";
         private const string FriendlyName = "ICC PowerPoint Agent";
         private const string Description = "ICC PowerPoint Agent - NamedPipe PPT Linkage";
 
-        /// <summary>
-        /// VSTO 插件 DLL 相对于应用程序基目录的路径。
-        /// </summary>
-        private static string VstoDllPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ppt-agent", AddInDllName);
+        private static string AgentDir => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ppt-agent");
+        private static string VstoDllPath => Path.Combine(AgentDir, AddInDllName);
+        private static string VstoManifestPath => Path.Combine(AgentDir, AddInVstoName);
 
-        /// <summary>
-        /// VSTO Contracts DLL 路径（需与插件 DLL 同目录）。
-        /// </summary>
-        private static string ContractsDllPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ppt-agent", "InkCanvas.PptAgent.Contracts.dll");
-
-        /// <summary>
-        /// 检查 VSTO 插件是否已注册到 PowerPoint。
-        /// </summary>
         public static bool IsRegistered()
         {
             try
@@ -39,44 +30,23 @@ namespace Ink_Canvas.Helpers
                     return key != null;
                 }
             }
-            catch
-            {
-                return false;
-            }
+            catch { return false; }
         }
 
-        /// <summary>
-        /// 检查 VSTO 插件 DLL 是否存在于预期位置。
-        /// </summary>
-        public static bool IsDllAvailable()
-        {
-            return File.Exists(VstoDllPath);
-        }
+        public static bool IsDllAvailable() => File.Exists(VstoDllPath);
 
-        /// <summary>
-        /// 确保 VSTO 插件已注册。未注册则执行注册。
-        /// </summary>
-        /// <returns>注册是否成功或已注册。</returns>
         public static bool EnsureRegistered()
         {
-            if (IsRegistered())
-            {
-                LogHelper.WriteLogToFile("VSTO 插件已注册，跳过", LogHelper.LogType.Trace);
-                return true;
-            }
+            CleanupRegistry();
 
             if (!IsDllAvailable())
             {
                 LogHelper.WriteLogToFile($"VSTO 插件 DLL 不存在: {VstoDllPath}", LogHelper.LogType.Warning);
                 return false;
             }
-
             return Register();
         }
 
-        /// <summary>
-        /// 注册 VSTO 插件到 PowerPoint。
-        /// </summary>
         public static bool Register()
         {
             if (!IsDllAvailable())
@@ -85,14 +55,6 @@ namespace Ink_Canvas.Helpers
                 return false;
             }
 
-            // 1. 执行 regasm 注册 COM 组件
-            if (!RunRegasm(false))
-            {
-                LogHelper.WriteLogToFile("VSTO regasm 注册失败", LogHelper.LogType.Error);
-                return false;
-            }
-
-            // 2. 写入加载项注册表
             try
             {
                 using (var key = Registry.CurrentUser.CreateSubKey(AddInKeyName))
@@ -105,9 +67,24 @@ namespace Ink_Canvas.Helpers
                     key.SetValue("Description", Description, RegistryValueKind.String);
                     key.SetValue("FriendlyName", FriendlyName, RegistryValueKind.String);
                     key.SetValue("LoadBehavior", 3, RegistryValueKind.DWord);
-                }
 
-                LogHelper.WriteLogToFile("VSTO 插件注册成功", LogHelper.LogType.Event);
+                    // 优先使用 .vsto 清单（ClickOnce 加载方式，不需要 regasm）
+                    if (File.Exists(VstoManifestPath))
+                    {
+                        string manifestUrl = $"file:///{VstoManifestPath.Replace("\\", "/")}";
+                        key.SetValue("Manifest", manifestUrl, RegistryValueKind.String);
+                        LogHelper.WriteLogToFile($"VSTO 插件注册成功（.vsto 清单）: {VstoManifestPath}", LogHelper.LogType.Event);
+                    }
+                    else
+                    {
+                        // 回退到 regasm COM 注册
+                        bool regasmOk = RunRegasm("/codebase /tlb");
+                        LogHelper.WriteLogToFile(regasmOk
+                            ? "VSTO 插件注册成功（regasm + 注册表）"
+                            : "VSTO 插件注册表已写入（regasm 失败）",
+                            regasmOk ? LogHelper.LogType.Event : LogHelper.LogType.Warning);
+                    }
+                }
                 return true;
             }
             catch (Exception ex)
@@ -117,20 +94,24 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        /// <summary>
-        /// 反注册 VSTO 插件。
-        /// </summary>
-        public static bool Unregister()
+        public static void CleanupRegistry()
         {
-            // 1. 执行 regasm /u 反注册
-            if (File.Exists(VstoDllPath))
-            {
-                RunRegasm(true);
-            }
-
-            // 2. 删除注册表项
             try
             {
+                if (Registry.CurrentUser.OpenSubKey(AddInKeyName) != null)
+                {
+                    Registry.CurrentUser.DeleteSubKeyTree(AddInKeyName, false);
+                    LogHelper.WriteLogToFile("VSTO 旧注册表项已清理", LogHelper.LogType.Trace);
+                }
+            }
+            catch { }
+        }
+
+        public static bool Unregister()
+        {
+            try
+            {
+                RunRegasm("/u");
                 Registry.CurrentUser.DeleteSubKeyTree(AddInKeyName, false);
                 LogHelper.WriteLogToFile("VSTO 插件已反注册", LogHelper.LogType.Event);
                 return true;
@@ -142,81 +123,66 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        /// <summary>
-        /// 执行 regasm.exe 注册或反注册。
-        /// </summary>
-        /// <param name="unregister">true 为反注册 (/u)，false 为注册。</param>
-        private static bool RunRegasm(bool unregister)
+        private static bool RunRegasm(string extraArgs)
         {
-            var regasmPaths = new[]
-            {
-                Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.Windows),
-                    @"Microsoft.NET\Framework64\v4.0.30319\regasm.exe"),
-                Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.Windows),
-                    @"Microsoft.NET\Framework\v4.0.30319\regasm.exe")
-            };
-
-            string regasmExe = null;
-            foreach (var path in regasmPaths)
-            {
-                if (File.Exists(path))
-                {
-                    regasmExe = path;
-                    break;
-                }
-            }
-
-            if (regasmExe == null)
+            string regasm = FindRegasm();
+            if (regasm == null)
             {
                 LogHelper.WriteLogToFile("未找到 regasm.exe", LogHelper.LogType.Error);
                 return false;
             }
 
-            string args = unregister
-                ? $"\"{VstoDllPath}\" /u"
-                : $"\"{VstoDllPath}\" /codebase /tlb";
-
+            string args = $"\"{VstoDllPath}\" {extraArgs}";
             try
             {
                 var psi = new ProcessStartInfo
                 {
-                    FileName = regasmExe,
+                    FileName = regasm,
                     Arguments = args,
-                    UseShellExecute = true,
-                    Verb = "runas",
-                    WindowStyle = ProcessWindowStyle.Hidden,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
                     CreateNoWindow = true
                 };
-
                 var process = Process.Start(psi);
                 if (process == null) return false;
 
-                process.WaitForExit(15000);
-                bool success = process.ExitCode == 0;
+                string stderr = process.StandardError.ReadToEnd();
+                process.WaitForExit(30000);
+                int exitCode = process.ExitCode;
                 process.Dispose();
 
-                if (success)
+                if (exitCode == 0)
                 {
-                    LogHelper.WriteLogToFile(
-                        $"regasm {(unregister ? "反注册" : "注册")}成功: {VstoDllPath}",
-                        LogHelper.LogType.Trace);
+                    LogHelper.WriteLogToFile($"regasm 成功: {args}", LogHelper.LogType.Trace);
+                    return true;
                 }
                 else
                 {
-                    LogHelper.WriteLogToFile(
-                        $"regasm 退出码 {process.ExitCode}: {VstoDllPath}",
-                        LogHelper.LogType.Warning);
+                    LogHelper.WriteLogToFile($"regasm 退出码 {exitCode}: {stderr}", LogHelper.LogType.Warning);
+                    return false;
                 }
-
-                return success;
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"regasm 执行失败: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"regasm 异常: {ex.Message}", LogHelper.LogType.Error);
                 return false;
             }
+        }
+
+        private static string FindRegasm()
+        {
+            string root = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.Windows),
+                @"Microsoft.NET\Framework64\v4.0.30319\regasm.exe");
+            if (File.Exists(root)) return root;
+
+            root = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.Windows),
+                @"Microsoft.NET\Framework\v4.0.30319\regasm.exe");
+            if (File.Exists(root)) return root;
+
+            return null;
         }
     }
 }
