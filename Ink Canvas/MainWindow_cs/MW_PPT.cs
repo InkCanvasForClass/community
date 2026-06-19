@@ -944,8 +944,6 @@ namespace Ink_Canvas
                         HideFloatingBarExitPPTBtn();
                         ResetPPTStateVariables();
                         _ = HandleManualSlideShowEnd();
-                        if (Settings.PowerPointSettings.UseRotPptLink)
-                            _pptManager?.ReloadConnection();
 
                         CheckMainWindowVisibility();
                     }
@@ -1529,7 +1527,24 @@ namespace Ink_Canvas
                 });
 
                 string presentationNameForSave = _pptManager?.GetPresentationName() ?? (pres != null ? pres.Name : null);
-                int totalSlidesForSave = _pptManager?.SlidesCount ?? (pres != null ? pres.Slides.Count : 0);
+                int totalSlidesForSave = _pptManager?.SlidesCount ?? 0;
+                if (totalSlidesForSave <= 0 && pres != null)
+                {
+                    try
+                    {
+                        totalSlidesForSave = pres.Slides.Count;
+                    }
+                    catch (COMException comEx)
+                    {
+                        var hr = (uint)comEx.HResult;
+                        if (hr != 0x80048240 && hr != 0x80010108 && hr != 0x800706BA && hr != 0x800706BE)
+                            LogHelper.WriteLogToFile($"读取放映结束总页数失败: {comEx.Message}", LogHelper.LogType.Warning);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"读取放映结束总页数失败: {ex.Message}", LogHelper.LogType.Warning);
+                    }
+                }
 
                 if (currentPage > 0 && Settings.PowerPointSettings.IsNotifyPreviousPage && !string.IsNullOrEmpty(presentationNameForSave) && totalSlidesForSave > 0)
                 {
@@ -2866,70 +2881,32 @@ namespace Ink_Canvas
         private List<PptEnhancedPreviewItem> BuildPptPreviewItems(CancellationToken cancellationToken)
         {
             var result = new List<PptEnhancedPreviewItem>();
-            string tempDir = null;
-            Presentation activePresentation = null;
-            Slides slides = null;
 
             try
             {
-                activePresentation = _pptManager?.GetCurrentActivePresentation() as Presentation;
-                if (activePresentation == null)
-                {
-                    return result;
-                }
+                var thumbnails = _pptManager?.ExportSlideThumbnails(480, 270);
+                if (thumbnails == null || thumbnails.Count == 0) return result;
 
-                slides = activePresentation.Slides;
-                if (slides == null) return result;
-
-                int count = slides.Count;
-                if (count <= 0) return result;
-
-                tempDir = Path.Combine(Path.GetTempPath(), "InkCanvas", "PPTPreviews", Guid.NewGuid().ToString("N"));
-                Directory.CreateDirectory(tempDir);
-
-                for (int i = 1; i <= count; i++)
+                foreach (var thumbnail in thumbnails)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    Slide slide = null;
-                    try
-                    {
-                        slide = slides[i];
-                        var imagePath = Path.Combine(tempDir, $"slide_{i:0000}.png");
-                        slide.Export(imagePath, "PNG", 480, 270);
-                        cancellationToken.ThrowIfCancellationRequested();
+                    if (thumbnail?.PngBytes == null || thumbnail.PngBytes.Length == 0) continue;
 
-                        var thumbnailStream = new MemoryStream(File.ReadAllBytes(imagePath), false);
-                        var image = LoadBitmapImage(thumbnailStream);
-                        if (image == null)
-                        {
-                            thumbnailStream.Dispose();
-                            continue;
-                        }
+                    var thumbnailStream = new MemoryStream(thumbnail.PngBytes, false);
+                    var image = LoadBitmapImage(thumbnailStream);
+                    if (image == null)
+                    {
+                        thumbnailStream.Dispose();
+                        continue;
+                    }
 
-                        thumbnailStream.Position = 0;
-
-                        result.Add(new PptEnhancedPreviewItem
-                        {
-                            SlideNumber = i,
-                            ThumbnailStream = thumbnailStream,
-                            Thumbnail = image
-                        });
-                    }
-                    catch (OperationCanceledException)
+                    thumbnailStream.Position = 0;
+                    result.Add(new PptEnhancedPreviewItem
                     {
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"生成PPT第{i}页缩略图失败: {ex.Message}", LogHelper.LogType.Warning);
-                    }
-                    finally
-                    {
-                        if (slide != null)
-                        {
-                            ExceptionHandler.TryExecute(() => Marshal.ReleaseComObject(slide), "释放 PPT Slide COM 对象失败");
-                        }
-                    }
+                        SlideNumber = thumbnail.SlideNumber,
+                        ThumbnailStream = thumbnailStream,
+                        Thumbnail = image
+                    });
                 }
             }
             catch (OperationCanceledException)
@@ -2940,13 +2917,6 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"构建PPT增强预览列表失败: {ex}", LogHelper.LogType.Error);
-            }
-            finally
-            {
-                if (!string.IsNullOrWhiteSpace(tempDir) && Directory.Exists(tempDir))
-                {
-                    ExceptionHandler.TryExecute(() => Directory.Delete(tempDir, true), "删除 PPT 临时目录失败");
-                }
             }
 
             return result;

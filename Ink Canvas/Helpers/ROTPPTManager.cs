@@ -2,6 +2,7 @@ using Microsoft.Office.Interop.PowerPoint;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -522,10 +523,15 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"PptComService异常: COM异常 (HR: 0x{hr:X8}) - {comEx.Message}", LogHelper.LogType.Error);
                 DisconnectFromPPT();
             }
-            catch (Exception ex)
+            finally
             {
-                LogHelper.WriteLogToFile($"PptComService异常: {ex.Message}", LogHelper.LogType.Error);
-                DisconnectFromPPT();
+                lock (_monitoringLock)
+                {
+                    if (ReferenceEquals(_monitoringThread, Thread.CurrentThread))
+                    {
+                        _monitoringThread = null;
+                    }
+                }
             }
         }
 
@@ -857,6 +863,11 @@ namespace Ink_Canvas.Helpers
                         Thread.Sleep(2000);
                         _isModuleUnloading = false;
 
+                        if (!_shouldStop && !_disposed)
+                        {
+                            StartMonitoring();
+                            LogHelper.WriteLogToFile("ROT PPT联动监控已恢复", LogHelper.LogType.Trace);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -1211,7 +1222,7 @@ namespace Ink_Canvas.Helpers
             {
                 try
                 {
-                    PresentationClose?.Invoke(pres ?? _pptActivePresentation);
+                    PresentationClose?.Invoke(null);
                 }
                 catch (Exception ex)
                 {
@@ -1378,8 +1389,6 @@ namespace Ink_Canvas.Helpers
                     RecordWpsProcessForManagement();
                 }
 
-                UpdateCurrentPresentationInfo();
-
                 if (_lastSlideShowState)
                 {
                     _lastSlideShowState = false;
@@ -1387,7 +1396,7 @@ namespace Ink_Canvas.Helpers
                     SlideShowStateChanged?.Invoke(false);
                 }
 
-                SlideShowEnd?.Invoke(pres);
+                SlideShowEnd?.Invoke(null);
             }
             catch (Exception ex)
             {
@@ -1797,6 +1806,69 @@ namespace Ink_Canvas.Helpers
                 SafeReleaseComObject(slideShowWindows);
                 SafeReleaseComObject(activeWindow);
             }
+        }
+
+        public List<PptSlideThumbnail> ExportSlideThumbnails(int width, int height)
+        {
+            var result = new List<PptSlideThumbnail>();
+            string tempDir = null;
+            object slides = null;
+
+            try
+            {
+                object activePresentation = CurrentPresentation;
+                if (activePresentation == null || !Marshal.IsComObject(activePresentation)) return result;
+
+                dynamic presentation = activePresentation;
+                slides = presentation.Slides;
+                if (slides == null) return result;
+
+                dynamic slideCollection = slides;
+                int count = slideCollection.Count;
+                if (count <= 0) return result;
+
+                tempDir = Path.Combine(Path.GetTempPath(), "InkCanvas", "PPTPreviews", Guid.NewGuid().ToString("N"));
+                Directory.CreateDirectory(tempDir);
+
+                for (int i = 1; i <= count; i++)
+                {
+                    object slide = null;
+                    try
+                    {
+                        slide = slideCollection[i];
+                        dynamic slideObj = slide;
+                        var imagePath = Path.Combine(tempDir, $"slide_{i:0000}.png");
+                        slideObj.Export(imagePath, "PNG", width, height);
+                        result.Add(new PptSlideThumbnail
+                        {
+                            SlideNumber = i,
+                            PngBytes = File.ReadAllBytes(imagePath)
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[ROT] 生成PPT第{i}页缩略图失败: {ex.Message}", LogHelper.LogType.Warning);
+                    }
+                    finally
+                    {
+                        SafeReleaseComObject(slide);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[ROT] 导出PPT缩略图失败: {ex}", LogHelper.LogType.Error);
+            }
+            finally
+            {
+                SafeReleaseComObject(slides);
+                if (!string.IsNullOrWhiteSpace(tempDir) && Directory.Exists(tempDir))
+                {
+                    ExceptionHandler.TryExecute(() => Directory.Delete(tempDir, true), "删除 ROT PPT 临时目录失败");
+                }
+            }
+
+            return result;
         }
 
         /// <summary>

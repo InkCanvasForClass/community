@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Ink_Canvas.Helpers
 {
@@ -97,6 +98,8 @@ namespace Ink_Canvas.Helpers
         public bool TryShowSlideNavigation() => _inner.TryShowSlideNavigation();
 
         public object GetCurrentActivePresentation() => _inner.GetCurrentActivePresentation();
+
+        public List<PptSlideThumbnail> ExportSlideThumbnails(int width, int height) => _inner.ExportSlideThumbnails(width, height);
         #endregion
 
         #region IDisposable

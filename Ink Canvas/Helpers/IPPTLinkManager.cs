@@ -1,7 +1,14 @@
 using System;
+using System.Collections.Generic;
 
 namespace Ink_Canvas.Helpers
 {
+    public sealed class PptSlideThumbnail
+    {
+        public int SlideNumber { get; set; }
+        public byte[] PngBytes { get; set; }
+    }
+
     public interface IPPTLinkManager : IDisposable
     {
         event Action<object> SlideShowBegin;
@@ -55,6 +62,7 @@ namespace Ink_Canvas.Helpers
         string GetPresentationName();
         bool TryShowSlideNavigation();
         object GetCurrentActivePresentation();
+        List<PptSlideThumbnail> ExportSlideThumbnails(int width, int height);
     }
 }
 

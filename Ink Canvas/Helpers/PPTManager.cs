@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -1296,6 +1297,77 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"获取当前活跃演示文稿失败: {ex}", LogHelper.LogType.Error);
                 return CurrentPresentation;
             }
+        }
+
+        public List<PptSlideThumbnail> ExportSlideThumbnails(int width, int height)
+        {
+            var result = new List<PptSlideThumbnail>();
+            string tempDir = null;
+            Presentation activePresentation = null;
+            Slides slides = null;
+            bool shouldReleasePresentation = false;
+
+            try
+            {
+                activePresentation = CurrentPresentation;
+                if (activePresentation == null || !Marshal.IsComObject(activePresentation))
+                {
+                    activePresentation = GetCurrentActivePresentation();
+                    shouldReleasePresentation = activePresentation != null && !ReferenceEquals(activePresentation, CurrentPresentation);
+                }
+                if (activePresentation == null) return result;
+
+                slides = activePresentation.Slides;
+                if (slides == null) return result;
+
+                int count = slides.Count;
+                if (count <= 0) return result;
+
+                tempDir = Path.Combine(Path.GetTempPath(), "InkCanvas", "PPTPreviews", Guid.NewGuid().ToString("N"));
+                Directory.CreateDirectory(tempDir);
+
+                for (int i = 1; i <= count; i++)
+                {
+                    Slide slide = null;
+                    try
+                    {
+                        slide = slides[i];
+                        var imagePath = Path.Combine(tempDir, $"slide_{i:0000}.png");
+                        slide.Export(imagePath, "PNG", width, height);
+                        result.Add(new PptSlideThumbnail
+                        {
+                            SlideNumber = i,
+                            PngBytes = File.ReadAllBytes(imagePath)
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"生成PPT第{i}页缩略图失败: {ex.Message}", LogHelper.LogType.Warning);
+                    }
+                    finally
+                    {
+                        SafeReleaseComObject(slide);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"导出PPT缩略图失败: {ex}", LogHelper.LogType.Error);
+            }
+            finally
+            {
+                SafeReleaseComObject(slides);
+                if (shouldReleasePresentation)
+                {
+                    SafeReleaseComObject(activePresentation);
+                }
+                if (!string.IsNullOrWhiteSpace(tempDir) && Directory.Exists(tempDir))
+                {
+                    ExceptionHandler.TryExecute(() => Directory.Delete(tempDir, true), "删除 PPT 临时目录失败");
+                }
+            }
+
+            return result;
         }
 
         /// <summary>
