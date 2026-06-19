@@ -4,14 +4,14 @@ using System.Threading;
 using InkCanvasPptAgent.Contracts;
 using Newtonsoft.Json;
 
-namespace PptAgent.PowerPointAddIn.Core
+namespace InkCanvas.PowerPointAddIn.Core
 {
-    public sealed class PptController
+    public sealed class PPTController
     {
         private readonly Microsoft.Office.Interop.PowerPoint.Application _application;
         private SynchronizationContext _syncContext;
 
-        public PptController(Microsoft.Office.Interop.PowerPoint.Application application)
+        public PPTController(Microsoft.Office.Interop.PowerPoint.Application application)
         {
             _application = application ?? throw new ArgumentNullException(nameof(application));
             CaptureSyncContext();
@@ -33,9 +33,7 @@ namespace PptAgent.PowerPointAddIn.Core
                     state.HasAutoPlayTimings = HasAutoPlayTimings(pres);
                 }
             }
-            catch
-            {
-            }
+            catch { }
 
             try
             {
@@ -45,9 +43,7 @@ namespace PptAgent.PowerPointAddIn.Core
                     state.SlideIndex = _application.SlideShowWindows[1].View.CurrentShowPosition;
                 }
             }
-            catch
-            {
-            }
+            catch { }
 
             return state;
         }
@@ -115,10 +111,7 @@ namespace PptAgent.PowerPointAddIn.Core
                     nav.Visible = true;
                     return true;
                 }
-                catch
-                {
-                    return false;
-                }
+                catch { return false; }
             });
         }
 
@@ -127,7 +120,8 @@ namespace PptAgent.PowerPointAddIn.Core
             return Run(() =>
             {
                 if (_application.Presentations.Count <= 0) return false;
-                _application.ActivePresentation.SlideShowSettings.AdvanceMode = Microsoft.Office.Interop.PowerPoint.PpSlideShowAdvanceMode.ppSlideShowManualAdvance;
+                _application.ActivePresentation.SlideShowSettings.AdvanceMode =
+                    Microsoft.Office.Interop.PowerPoint.PpSlideShowAdvanceMode.ppSlideShowManualAdvance;
                 return true;
             });
         }
@@ -144,14 +138,6 @@ namespace PptAgent.PowerPointAddIn.Core
                 }
                 return true;
             });
-        }
-
-        public void EnsureOnMainThread(Action action)
-        {
-            if (_syncContext != null)
-                _syncContext.Post(_ => action.Invoke(), null);
-            else
-                action.Invoke();
         }
 
         private void CaptureSyncContext()
@@ -171,13 +157,39 @@ namespace PptAgent.PowerPointAddIn.Core
                     try { result = action(); }
                     catch (Exception ex) { captured = ex; }
                 }, null);
-
-                if (captured != null)
-                    throw captured;
+                if (captured != null) throw captured;
                 return result;
             }
-
             return action.Invoke();
+        }
+
+        private static bool HasHiddenSlides(Microsoft.Office.Interop.PowerPoint.Presentation pres)
+        {
+            try
+            {
+                foreach (Microsoft.Office.Interop.PowerPoint.Slide slide in pres.Slides)
+                {
+                    if (slide.SlideShowTransition.Hidden == Microsoft.Office.Core.MsoTriState.msoTrue)
+                        return true;
+                }
+            }
+            catch { }
+            return false;
+        }
+
+        private static bool HasAutoPlayTimings(Microsoft.Office.Interop.PowerPoint.Presentation pres)
+        {
+            try
+            {
+                foreach (Microsoft.Office.Interop.PowerPoint.Slide slide in pres.Slides)
+                {
+                    if (slide.SlideShowTransition.AdvanceOnTime == Microsoft.Office.Core.MsoTriState.msoTrue &&
+                        slide.SlideShowTransition.AdvanceTime > 0)
+                        return true;
+                }
+            }
+            catch { }
+            return false;
         }
     }
 }

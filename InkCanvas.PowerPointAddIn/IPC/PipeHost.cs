@@ -1,21 +1,21 @@
 using System;
 using System.IO;
-using System.Security.AccessControl;
+using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
 using InkCanvasPptAgent.Contracts;
-using Newtonsoft.Json;
 
-namespace PptAgent.PowerPointAddIn.IPC
+namespace InkCanvas.PowerPointAddIn.IPC
 {
     public sealed class PipeHost : IDisposable
     {
         private readonly Func<string, string> _dispatch;
         private readonly object _sendLock = new object();
         private CancellationTokenSource _cts;
+        private volatile bool _clientConnected;
         private bool _disposed;
 
-        public bool IsEnabled { get; private set; }
+        public bool IsEnabled => _clientConnected;
 
         public PipeHost(Func<string, string> dispatch)
         {
@@ -25,88 +25,82 @@ namespace PptAgent.PowerPointAddIn.IPC
         public void Start()
         {
             if (_cts != null) return;
-
             _cts = new CancellationTokenSource();
             Task.Run(() => AcceptLoop(_cts.Token));
         }
 
-        public void SendFrame(string json)
+        public void Stop()
         {
-            // TODO: store latest stream for write when host implements single client accept.
-            _ = json;
+            try { _cts?.Cancel(); } catch { }
+            _cts?.Dispose();
+            _cts = null;
+            _clientConnected = false;
         }
 
         public void Dispose()
         {
             if (_disposed) return;
             _disposed = true;
-
-            try { _cts?.Cancel(); } catch { }
-            _cts?.Dispose();
-            _cts = null;
-            IsEnabled = false;
+            Stop();
         }
 
         private async Task AcceptLoop(CancellationToken token)
         {
             while (!token.IsCancellationRequested)
             {
-                System.IO.Pipes.NamedPipeServerStream pipe = null;
+                NamedPipeServerStream pipe = null;
                 try
                 {
-                    pipe = new System.IO.Pipes.NamedPipeServerStream(
+                    pipe = new NamedPipeServerStream(
                         PipeConstants.PipeName,
-                        System.IO.Pipes.PipeDirection.InOut,
+                        PipeDirection.InOut,
                         1,
-                        System.IO.Pipes.PipeTransmissionMode.Byte,
-                        System.IO.Pipes.PipeOptions.Asynchronous,
-                        4096,
-                        4096,
-                        CreatePipeSecurity(),
-                        System.IO.Pipes.HandleInheritability.None);
+                        PipeTransmissionMode.Byte,
+                        PipeOptions.Asynchronous);
 
                     await pipe.WaitForConnectionAsync(token).ConfigureAwait(false);
-                    IsEnabled = true;
+                    _clientConnected = true;
+                    System.Diagnostics.Debug.WriteLine("ICC PPT Agent: client connected");
 
-                    await HandleClient(pipe, token).ConfigureAwait(false);
+                    HandleClient(pipe, token);
                 }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
+                catch (OperationCanceledException) { break; }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"PPT Agent Pipe host error: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine($"ICC PPT Agent pipe error: {ex.Message}");
                 }
                 finally
                 {
+                    _clientConnected = false;
                     try { pipe?.Dispose(); } catch { }
-                    IsEnabled = false;
                 }
             }
         }
 
-        private async Task HandleClient(System.IO.Pipes.NamedPipeServerStream pipe, CancellationToken token)
+        private void HandleClient(NamedPipeServerStream pipe, CancellationToken token)
         {
             while (!token.IsCancellationRequested && pipe.IsConnected)
             {
-                var requestJson = PipeFrame.ReadFrame(pipe);
-                var responseJson = _dispatch.Invoke(requestJson);
-                if (!string.IsNullOrEmpty(responseJson))
+                try
                 {
-                    lock (_sendLock)
+                    string requestJson = PipeFrame.ReadFrame(pipe);
+                    string responseJson = _dispatch.Invoke(requestJson);
+                    if (!string.IsNullOrEmpty(responseJson))
                     {
-                        PipeFrame.WriteFrame(pipe, responseJson);
+                        lock (_sendLock)
+                        {
+                            if (pipe.IsConnected)
+                                PipeFrame.WriteFrame(pipe, responseJson);
+                        }
                     }
                 }
+                catch (IOException) { break; }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"ICC PPT Agent handle error: {ex.Message}");
+                    break;
+                }
             }
-        }
-
-        private static PipeSecurity CreatePipeSecurity()
-        {
-            var security = new PipeSecurity();
-            security.SetSecurityDescriptorSddlForm("D:(A;;FA;;;WD)S:(ML;;NW;;;LW)", AccessControlSections.All);
-            return security;
         }
     }
 }

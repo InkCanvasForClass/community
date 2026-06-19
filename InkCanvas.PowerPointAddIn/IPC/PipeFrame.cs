@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 using InkCanvasPptAgent.Contracts;
 
-namespace PptAgent.PowerPointAddIn.IPC
+namespace InkCanvas.PowerPointAddIn.IPC
 {
     public static class PipeFrame
     {
@@ -12,11 +12,11 @@ namespace PptAgent.PowerPointAddIn.IPC
             if (stream == null) throw new ArgumentNullException(nameof(stream));
             if (json == null) throw new ArgumentNullException(nameof(json));
 
-            var data = Encoding.UTF8.GetBytes(json);
+            byte[] data = Encoding.UTF8.GetBytes(json);
             if (data.Length <= 0 || data.Length > PipeConstants.MaxFrameSize)
                 throw new InvalidOperationException("Invalid frame size.");
 
-            var lenBytes = BitConverter.GetBytes(data.Length);
+            byte[] lenBytes = BitConverter.GetBytes(data.Length);
             stream.Write(lenBytes, 0, lenBytes.Length);
             stream.Write(data, 0, data.Length);
             stream.Flush();
@@ -26,26 +26,25 @@ namespace PptAgent.PowerPointAddIn.IPC
         {
             if (stream == null) throw new ArgumentNullException(nameof(stream));
 
-            var lenBytes = ReadExact(stream, 4);
-            var len = BitConverter.ToInt32(lenBytes, 0);
+            byte[] lenBytes = ReadExact(stream, 4);
+            int len = BitConverter.ToInt32(lenBytes, 0);
             if (len <= 0 || len > PipeConstants.MaxFrameSize)
                 throw new InvalidOperationException("Invalid frame size.");
 
-            var data = ReadExact(stream, len);
+            byte[] data = ReadExact(stream, len);
             return Encoding.UTF8.GetString(data);
         }
 
         private static byte[] ReadExact(Stream stream, int size)
         {
-            var buffer = new byte[size];
-            var offset = 0;
+            byte[] buffer = new byte[size];
+            int offset = 0;
 
             while (offset < size)
             {
-                var read = stream.Read(buffer, offset, size - offset);
+                int read = stream.Read(buffer, offset, size - offset);
                 if (read <= 0)
                     throw new IOException("Pipe closed.");
-
                 offset += read;
             }
 
