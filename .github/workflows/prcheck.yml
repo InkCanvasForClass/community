@@ -74,19 +74,16 @@ jobs:
         shell: pwsh
         run: |
           msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" `
-            /t:Publish `
             /p:Configuration=Debug `
-            /p:PublishDir="InkCanvas.PowerPointAddIn\bin\publish\" `
             /p:SignManifests=true `
             /p:ManifestCertificateThumbprint=$env:SIGN_THUMBPRINT `
             /verbosity:minimal -maxcpucount
           $pptAgentDir = "Ink Canvas\bin\Debug\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\ppt-agent"
           New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
-          Copy-Item "InkCanvas.PowerPointAddIn\bin\publish\InkCanvas.PowerPointAddIn.dll" $pptAgentDir -Force
-          Copy-Item "InkCanvas.PowerPointAddIn\bin\publish\InkCanvas.PowerPointAddIn.vsto" $pptAgentDir -Force -ErrorAction SilentlyContinue
-          Copy-Item "InkCanvas.PowerPointAddIn\bin\publish\InkCanvas.PowerPointAddIn.dll.manifest" $pptAgentDir -Force -ErrorAction SilentlyContinue
-          Copy-Item "InkCanvas.PowerPointAddIn\bin\publish\InkCanvas.PptAgent.Contracts.dll" $pptAgentDir -Force
-          Copy-Item "InkCanvas.PowerPointAddIn\bin\publish\Microsoft.Office.Tools.Common.v4.0.Utilities.dll" $pptAgentDir -Force -ErrorAction SilentlyContinue
+          Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll" $pptAgentDir -Force
+          Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.vsto" $pptAgentDir -Force -ErrorAction SilentlyContinue
+          Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll.manifest" $pptAgentDir -Force -ErrorAction SilentlyContinue
+          Copy-Item "InkCanvas.PptAgent.Contracts\bin\Debug\netstandard2.0\InkCanvas.PptAgent.Contracts.dll" $pptAgentDir -Force
 
       - name: Check VSTO DLL exists
         run: |
