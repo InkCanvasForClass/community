@@ -282,6 +282,9 @@
   <data name="Theme_UseLegacyFloatingBarUI" xml:space="preserve">
     <value>Use legacy floating bar UI</value>
   </data>
+  <data name="Theme_ShowPenColorOnFloatingBarIcon" xml:space="preserve">
+    <value>Pen icon shows current ink color</value>
+  </data>
   <data name="Theme_WindowBackdrop" xml:space="preserve">
     <value>Window background style</value>
   </data>

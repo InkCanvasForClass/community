@@ -607,7 +607,7 @@ namespace Ink_Canvas
             {
                 StartOrStoptimerCheckAutoFold();
 
-                if (Settings.Automation.IsAutoKillEasiNote || Settings.Automation.IsAutoKillPptService ||
+                if (Settings.Automation.IsAutoKillEasiNote || Settings.Automation.IsAutoKillPPTService ||
                     Settings.Automation.IsAutoKillHiteAnnotation || Settings.Automation.IsAutoKillInkCanvas
                     || Settings.Automation.IsAutoKillICA || Settings.Automation.IsAutoKillIDT ||
                     Settings.Automation.IsAutoKillVComYouJiao
@@ -629,7 +629,7 @@ namespace Ink_Canvas
 
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                if (IsInPptPresentationMode)
+                if (IsInPPTPresentationMode)
                     ViewboxFloatingBarMarginAnimation(60);
                 else
                     ViewboxFloatingBarMarginAnimation(100, true);

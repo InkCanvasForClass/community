@@ -413,7 +413,7 @@ namespace Ink_Canvas
         /// </summary>
         public void OnPPTSlideChangedExternal(int slideIndex)
         {
-            if (!MainWindow.Settings.MiniWhiteboard.SyncWithPptPages) return;
+            if (!MainWindow.Settings.MiniWhiteboard.SyncWithPPTPages) return;
             if (slideIndex < 0) return;
 
             Dispatcher.BeginInvoke(new Action(() =>

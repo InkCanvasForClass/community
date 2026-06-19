@@ -73,11 +73,11 @@ namespace Ink_Canvas.WorkflowAutomation
 
             // 3. 注册触发器（对齐 ClassIsland 的 AddTrigger<T>()）
             services.AddTrigger<ProcessDetectedTrigger>();
-            services.AddTrigger<PptSlideShowTrigger>();
+            services.AddTrigger<PPTSlideShowTrigger>();
             services.AddTrigger<TimerTrigger>();
             services.AddTrigger<WindowFocusChangedTrigger>();
-            services.AddTrigger<PptSlideShowEnterTrigger>();
-            services.AddTrigger<PptSlideShowExitTrigger>();
+            services.AddTrigger<PPTSlideShowEnterTrigger>();
+            services.AddTrigger<PPTSlideShowExitTrigger>();
             services.AddTrigger<AnnotationModeEnterTrigger>();
             services.AddTrigger<AnnotationModeExitTrigger>();
             services.AddTrigger<WhiteboardEnterTrigger>();
@@ -93,15 +93,16 @@ namespace Ink_Canvas.WorkflowAutomation
             services.AddAction<ShowNotificationActionSettings>("inkcanvas.shownotification", "显示通知", "BellOutline");
             services.AddAction<ToggleTopmostActionSettings>("inkcanvas.toggletopmost", "切换窗口置顶", "PinOutline");
             services.AddAction<ResetDesktopPositionActionSettings>("inkcanvas.resetdesktopposition", "重置桌面模式位置", "DockBottom");
-            services.AddAction<ResetPptPositionActionSettings>("inkcanvas.resetpptposition", "重置PPT模式位置", "Presentation");
+            services.AddAction<ResetPPTPositionActionSettings>("inkcanvas.resetpptposition", "重置PPT模式位置", "Presentation");
 
             // 5. 注册规则（对齐 ClassIsland 的 AddRule<TSettings>()）
             services.AddRule<ProcessRunningRuleSettings>("inkcanvas.processrunning", "进程正在运行", "ApplicationCogOutline");
             services.AddRule<WindowTitleContainsRuleSettings>("inkcanvas.windowtitlecontains", "窗口标题包含", "FormatTitle");
             services.AddRule<IsAnnotationModeRuleSettings>("inkcanvas.isannotationmode", "批注模式", "PenTool");
-            services.AddRule<IsPptSlideshowRuleSettings>("inkcanvas.ispptslideshow", "PPT放映中", "Presentation");
+            services.AddRule<IsPPTSlideshowRuleSettings>("inkcanvas.ispptslideshow", "PPT放映中", "Presentation");
             services.AddRule<ForegroundWindowProcessRuleSettings>("inkcanvas.foregroundwindowprocess", "前台窗口进程名", "Window");
             services.AddRule<IsFloatingBarFoldedRuleSettings>("inkcanvas.isfloatingbarfolded", "工具栏已折叠", "DockBottom");
+            services.AddRule<IsForegroundWhiteboardRuleSettings>("inkcanvas.isforegroundwhiteboard", "前台窗口是 ICC-CE 白板", "Whiteboard");
 
             // 6. 注册行动处理器（对齐 ClassIsland 的 IHostedService 模式）
             services.AddTransient<FoldActionHandler>();
@@ -112,7 +113,7 @@ namespace Ink_Canvas.WorkflowAutomation
             services.AddTransient<ShowNotificationActionHandler>();
             services.AddTransient<ToggleTopmostActionHandler>();
             services.AddTransient<ResetDesktopPositionActionHandler>();
-            services.AddTransient<ResetPptPositionActionHandler>();
+            services.AddTransient<ResetPPTPositionActionHandler>();
 
             // 7. 构建容器
             _serviceProvider = services.BuildServiceProvider();
@@ -134,7 +135,7 @@ namespace Ink_Canvas.WorkflowAutomation
             _serviceProvider.GetRequiredService<ShowNotificationActionHandler>();
             _serviceProvider.GetRequiredService<ToggleTopmostActionHandler>();
             _serviceProvider.GetRequiredService<ResetDesktopPositionActionHandler>();
-            _serviceProvider.GetRequiredService<ResetPptPositionActionHandler>();
+            _serviceProvider.GetRequiredService<ResetPPTPositionActionHandler>();
 
             // 10. 注册规则处理程序（对齐 ClassIsland 的 RegisterRuleHandler）
             RegisterRuleHandlers();
@@ -153,9 +154,10 @@ namespace Ink_Canvas.WorkflowAutomation
             _rulesetService.RegisterRuleHandler("inkcanvas.processrunning", ProcessRunningRule.Evaluate);
             _rulesetService.RegisterRuleHandler("inkcanvas.windowtitlecontains", WindowTitleContainsRule.Evaluate);
             _rulesetService.RegisterRuleHandler("inkcanvas.isannotationmode", IsAnnotationModeRule.Evaluate);
-            _rulesetService.RegisterRuleHandler("inkcanvas.ispptslideshow", IsPptSlideshowRule.Evaluate);
+            _rulesetService.RegisterRuleHandler("inkcanvas.ispptslideshow", IsPPTSlideshowRule.Evaluate);
             _rulesetService.RegisterRuleHandler("inkcanvas.foregroundwindowprocess", ForegroundWindowProcessRule.Evaluate);
             _rulesetService.RegisterRuleHandler("inkcanvas.isfloatingbarfolded", IsFloatingBarFoldedRule.Evaluate);
+            _rulesetService.RegisterRuleHandler("inkcanvas.isforegroundwhiteboard", IsForegroundWhiteboardRule.Evaluate);
         }
 
         /// <summary>

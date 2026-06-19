@@ -13,7 +13,7 @@ namespace Ink_Canvas.Controls
     /// 通过 <see cref="Direction"/> 切换底部条 (LB/RB) 与侧边条 (LS/RS) 布局,
     /// 预览列表内嵌于同一个 Border,展开时占据按钮组之外的剩余空间。
     /// </summary>
-    public partial class PptNavBar : UserControl
+    public partial class PPTNavBar : UserControl
     {
         public sealed class PreviewItem
         {
@@ -30,23 +30,23 @@ namespace Ink_Canvas.Controls
         }
 
         public static readonly DependencyProperty DirectionProperty = DependencyProperty.Register(
-            nameof(Direction), typeof(NavDirection), typeof(PptNavBar),
+            nameof(Direction), typeof(NavDirection), typeof(PPTNavBar),
             new PropertyMetadata(NavDirection.LeftBottom, OnDirectionChanged));
 
         public static readonly DependencyProperty CurrentSlideProperty = DependencyProperty.Register(
-            nameof(CurrentSlide), typeof(int), typeof(PptNavBar),
+            nameof(CurrentSlide), typeof(int), typeof(PPTNavBar),
             new PropertyMetadata(0, OnPageChanged));
 
         public static readonly DependencyProperty TotalSlidesProperty = DependencyProperty.Register(
-            nameof(TotalSlides), typeof(int), typeof(PptNavBar),
+            nameof(TotalSlides), typeof(int), typeof(PPTNavBar),
             new PropertyMetadata(0, OnPageChanged));
 
         public static readonly DependencyProperty PreviewItemsProperty = DependencyProperty.Register(
-            nameof(PreviewItems), typeof(IList<PreviewItem>), typeof(PptNavBar),
+            nameof(PreviewItems), typeof(IList<PreviewItem>), typeof(PPTNavBar),
             new PropertyMetadata(null, OnPreviewItemsChanged));
 
         public static readonly DependencyProperty IsPreviewExpandedProperty = DependencyProperty.Register(
-            nameof(IsPreviewExpanded), typeof(bool), typeof(PptNavBar),
+            nameof(IsPreviewExpanded), typeof(bool), typeof(PPTNavBar),
             new PropertyMetadata(false, OnIsPreviewExpandedChanged));
 
         public NavDirection Direction
@@ -94,7 +94,7 @@ namespace Ink_Canvas.Controls
         private static readonly Geometry VArrowUp = Geometry.Parse("F0 M24,24z M0,0z M11.0357,3.3994C11.5682,2.86687,12.4316,2.86687,12.9641,3.3994L19.5096,9.94485C20.0421,10.4774 20.0421,11.3408 19.5096,11.8733 18.9771,12.4059 18.1137,12.4059 17.5811,11.8733L13.3635,7.65575 13.3635,19.6364C13.3635,20.3895 12.753,21 11.9999,21 11.2468,21 10.6363,20.3895 10.6363,19.6364L10.6363,7.65575 6.41869,11.8733C5.88616,12.4059 5.02275,12.4059 4.49022,11.8733 3.95769,11.3408 3.95769,10.4774 4.49022,9.94485L11.0357,3.3994z");
         private static readonly Geometry VArrowDown = Geometry.Parse("F0 M24,24z M0,0z M11.0357,20.6006C11.5682,21.1331,12.4316,21.1331,12.9641,20.6006L19.5096,14.0551C20.0421,13.5226 20.0421,12.6592 19.5096,12.1267 18.9771,11.5941 18.1137,11.5941 17.5811,12.1267L13.3635,16.3443 13.3635,4.36364C13.3635,3.61052 12.753,3 11.9999,3 11.2468,3 10.6363,3.61052 10.6363,4.36364L10.6363,16.3443 6.41869,12.1267C5.88616,11.5941 5.02275,11.5941 4.49022,12.1267 3.95769,12.6592 3.95769,13.5226 4.49022,14.0551L11.0357,20.6006z");
 
-        public PptNavBar()
+        public PPTNavBar()
         {
             InitializeComponent();
             ApplyDirection(Direction);
@@ -102,17 +102,17 @@ namespace Ink_Canvas.Controls
 
         private static void OnDirectionChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is PptNavBar bar) bar.ApplyDirection((NavDirection)e.NewValue);
+            if (d is PPTNavBar bar) bar.ApplyDirection((NavDirection)e.NewValue);
         }
 
         private static void OnPageChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is PptNavBar bar) bar.RefreshPageText();
+            if (d is PPTNavBar bar) bar.RefreshPageText();
         }
 
         private static void OnPreviewItemsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is PptNavBar bar)
+            if (d is PPTNavBar bar)
             {
                 bar.PreviewList.ItemsSource = e.NewValue as IList<PreviewItem>;
                 bar.SyncPreviewSelection();
@@ -121,7 +121,7 @@ namespace Ink_Canvas.Controls
 
         private static void OnIsPreviewExpandedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is PptNavBar bar)
+            if (d is PPTNavBar bar)
             {
                 bool expanded = (bool)e.NewValue;
                 bar.PreviewList.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
@@ -385,7 +385,7 @@ namespace Ink_Canvas.Controls
             PageTotalText.Foreground = fgBrush;
             RootBorder.Background = bgBrush;
             RootBorder.BorderBrush = borderBrush;
-            Resources["PptNavBarItemForeground"] = fgBrush;
+            Resources["PPTNavBarItemForeground"] = fgBrush;
         }
 
         public void SetPageButtonVisibility(Visibility v) => PageButtonBorder.Visibility = v;

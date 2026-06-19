@@ -73,11 +73,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
 
         private static DispatcherTimer _pptOnlyVisibilityProbeTimer;
         private static Window _pptModeWindow;
-        private const int PptOnlyVisibilityProbeIntervalMs = 800;
+        private const int PPTOnlyVisibilityProbeIntervalMs = 800;
 
-        public static Action<bool> OnPptOnlyModeChanged { get; set; }
+        public static Action<bool> OnPPTOnlyModeChanged { get; set; }
 
-        public static void ApplyPptOnlyMode(Window window, bool isEnabled)
+        public static void ApplyPPTOnlyMode(Window window, bool isEnabled)
         {
             try
             {
@@ -88,11 +88,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 {
                     window.Hide();
                     LogHelper.WriteLogToFile("已切换到仅PPT模式，主窗口已隐藏", LogHelper.LogType.Event);
-                    EnsurePptOnlyVisibilityProbeTimer(window);
+                    EnsurePPTOnlyVisibilityProbeTimer(window);
                 }
                 else
                 {
-                    StopPptOnlyVisibilityProbeTimer();
+                    StopPPTOnlyVisibilityProbeTimer();
                     window.Show();
                     LogHelper.WriteLogToFile("已切换到正常模式，主窗口已显示", LogHelper.LogType.Event);
                 }
@@ -103,13 +103,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             }
         }
 
-        private static void EnsurePptOnlyVisibilityProbeTimer(Window window)
+        private static void EnsurePPTOnlyVisibilityProbeTimer(Window window)
         {
             try
             {
                 if (!SettingsManager.Settings.ModeSettings.IsPPTOnlyMode)
                 {
-                    StopPptOnlyVisibilityProbeTimer();
+                    StopPPTOnlyVisibilityProbeTimer();
                     return;
                 }
 
@@ -119,9 +119,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 {
                     _pptOnlyVisibilityProbeTimer = new DispatcherTimer
                     {
-                        Interval = TimeSpan.FromMilliseconds(PptOnlyVisibilityProbeIntervalMs)
+                        Interval = TimeSpan.FromMilliseconds(PPTOnlyVisibilityProbeIntervalMs)
                     };
-                    _pptOnlyVisibilityProbeTimer.Tick += PptOnlyVisibilityProbeTimer_Tick;
+                    _pptOnlyVisibilityProbeTimer.Tick += PPTOnlyVisibilityProbeTimer_Tick;
                 }
 
                 if (!_pptOnlyVisibilityProbeTimer.IsEnabled)
@@ -133,7 +133,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             }
         }
 
-        private static void StopPptOnlyVisibilityProbeTimer()
+        private static void StopPPTOnlyVisibilityProbeTimer()
         {
             try
             {
@@ -142,9 +142,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             catch { }
         }
 
-        private static void PptOnlyVisibilityProbeTimer_Tick(object sender, EventArgs e)
+        private static void PPTOnlyVisibilityProbeTimer_Tick(object sender, EventArgs e)
         {
-            OnPptOnlyModeChanged?.Invoke(true);
+            OnPPTOnlyModeChanged?.Invoke(true);
         }
 
         #endregion

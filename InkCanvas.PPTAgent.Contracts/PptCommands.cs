@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 
-namespace InkCanvasPptAgent.Contracts
+namespace InkCanvasPPTAgent.Contracts
 {
-    public static class PptCommands
+    public static class PPTCommands
     {
         public const string State = "state";
         public const string Next = "next";
@@ -16,7 +16,7 @@ namespace InkCanvasPptAgent.Contracts
         public const string UnhideHiddenSlides = "unhideHiddenSlides";
     }
 
-    public static class PptEvents
+    public static class PPTEvents
     {
         public const string PresentationOpen = "presentationOpen";
         public const string PresentationClose = "presentationClose";
@@ -36,7 +36,7 @@ namespace InkCanvasPptAgent.Contracts
         public int Height { get; set; }
     }
 
-    public sealed class PptSlideThumbnailData
+    public sealed class PPTSlideThumbnailData
     {
         public int SlideNumber { get; set; }
         public byte[] PngBytes { get; set; }
@@ -44,6 +44,6 @@ namespace InkCanvasPptAgent.Contracts
 
     public sealed class ExportSlideThumbnailsResponse
     {
-        public List<PptSlideThumbnailData> Slides { get; set; } = new List<PptSlideThumbnailData>();
+        public List<PPTSlideThumbnailData> Slides { get; set; } = new List<PPTSlideThumbnailData>();
     }
 }

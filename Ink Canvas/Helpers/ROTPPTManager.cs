@@ -85,7 +85,7 @@ namespace Ink_Canvas.Helpers
                 }
 
                 _shouldStop = false;
-                _monitoringThread = new Thread(PptComService)
+                _monitoringThread = new Thread(PPTComService)
                 {
                     IsBackground = true,
                     Name = "PPTMonitoringThread"
@@ -164,7 +164,7 @@ namespace Ink_Canvas.Helpers
         #endregion
 
         #region Connection Management
-        private void PptComService()
+        private void PPTComService()
         {
             _bindingEvents = false;
             _lastPolledSlideNumber = -1;
@@ -514,13 +514,13 @@ namespace Ink_Canvas.Helpers
             }
             catch (InvalidComObjectException ex)
             {
-                LogHelper.WriteLogToFile($"PptComService异常: COM对象已失效 - {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"PPTComService异常: COM对象已失效 - {ex.Message}", LogHelper.LogType.Error);
                 DisconnectFromPPT();
             }
             catch (COMException comEx)
             {
                 var hr = (uint)comEx.HResult;
-                LogHelper.WriteLogToFile($"PptComService异常: COM异常 (HR: 0x{hr:X8}) - {comEx.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"PPTComService异常: COM异常 (HR: 0x{hr:X8}) - {comEx.Message}", LogHelper.LogType.Error);
                 DisconnectFromPPT();
             }
             finally
@@ -1808,9 +1808,9 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        public List<PptSlideThumbnail> ExportSlideThumbnails(int width, int height)
+        public List<PPTSlideThumbnail> ExportSlideThumbnails(int width, int height)
         {
-            var result = new List<PptSlideThumbnail>();
+            var result = new List<PPTSlideThumbnail>();
             string tempDir = null;
             object slides = null;
 
@@ -1839,7 +1839,7 @@ namespace Ink_Canvas.Helpers
                         dynamic slideObj = slide;
                         var imagePath = Path.Combine(tempDir, $"slide_{i:0000}.png");
                         slideObj.Export(imagePath, "PNG", width, height);
-                        result.Add(new PptSlideThumbnail
+                        result.Add(new PPTSlideThumbnail
                         {
                             SlideNumber = i,
                             PngBytes = File.ReadAllBytes(imagePath)
@@ -2884,12 +2884,12 @@ namespace Ink_Canvas.Helpers
         /// 获取PPT窗口句柄
         /// </summary>
         /// <returns>窗口句柄，如果获取失败返回 IntPtr.Zero</returns>
-        public IntPtr GetPptHwnd()
+        public IntPtr GetPPTHwnd()
         {
             IntPtr ret = IntPtr.Zero;
 
             // 方法1: 尝试从 SlideShowWindow 获取
-            ret = GetPptHwndFromSlideShowWindow(_pptSlideShowWindow);
+            ret = GetPPTHwndFromSlideShowWindow(_pptSlideShowWindow);
 
             if (ret == IntPtr.Zero)
             {
@@ -2901,7 +2901,7 @@ namespace Ink_Canvas.Helpers
                         dynamic pres = _pptActivePresentation;
                         string fullName = pres.FullName;
                         string appName = PPTApplication.Name;
-                        ret = GetPptHwndWin32(fullName, appName);
+                        ret = GetPPTHwndWin32(fullName, appName);
                     }
                 }
                 catch (Exception)
@@ -2915,7 +2915,7 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 从 SlideShowWindow 对象获取窗口句柄
         /// </summary>
-        private IntPtr GetPptHwndFromSlideShowWindow(object pptSlideShowWindowObj)
+        private IntPtr GetPPTHwndFromSlideShowWindow(object pptSlideShowWindowObj)
         {
             IntPtr hwnd = IntPtr.Zero;
             if (pptSlideShowWindowObj == null) return IntPtr.Zero;
@@ -2955,7 +2955,7 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 通过窗口标题匹配获取PPT窗口句柄（备用方法）
         /// </summary>
-        private IntPtr GetPptHwndWin32(string presFullName, string appName)
+        private IntPtr GetPPTHwndWin32(string presFullName, string appName)
         {
             try
             {

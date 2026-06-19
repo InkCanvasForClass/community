@@ -48,20 +48,24 @@ jobs:
       - name: Restore signing certificate
         shell: pwsh
         run: |
+          $ok = $false
           if ("${{ secrets.CERT_PFX_BASE64 }}" -ne "") {
-            $cert = [System.Convert]::FromBase64String("${{ secrets.CERT_PFX_BASE64 }}")
-            [System.IO.File]::WriteAllBytes("clickonce.pfx", $cert)
-            Write-Host "Certificate restored from secrets"
-          } else {
-            $cert = New-SelfSignedCertificate `
-              -Type CodeSigningCert `
-              -Subject "CN=ICC PowerPoint Agent PR" `
-              -CertStoreLocation "Cert:\CurrentUser\My" `
-              -KeyExportPolicy Exportable `
-              -NotAfter (Get-Date).AddYears(2)
-            Export-PfxCertificate -Cert $cert -FilePath "clickonce.pfx" -Password (New-Object System.Security.SecureString)
-            Write-Host "Generated self-signed certificate"
+            try {
+              $bytes = [Convert]::FromBase64String("${{ secrets.CERT_PFX_BASE64 }}")
+              [IO.File]::WriteAllBytes("clickonce.pfx", $bytes)
+              $pwd = ConvertTo-SecureString "${{ secrets.CERT_PFX_PASSWORD }}" -AsPlainText -Force
+              Import-PfxCertificate -FilePath "clickonce.pfx" -CertStoreLocation Cert:\CurrentUser\My -Password $pwd | Out-Null
+              $ok = $true
+            } catch {
+              Write-Host "Import failed, falling back to self-signed: $($_.Exception.Message)"
+            }
           }
+          if (-not $ok) {
+            New-SelfSignedCertificate -Type CodeSigningCert -Subject "CN=ICC PowerPoint Agent PR" -CertStoreLocation "Cert:\CurrentUser\My" -KeyExportPolicy Exportable -NotAfter (Get-Date).AddYears(2) | Out-Null
+          }
+          $found = Get-ChildItem Cert:\CurrentUser\My | Where-Object { $_.HasPrivateKey -and $_.Subject -like "*ICC*" } | Select-Object -First 1
+          if (-not $found) { throw "No signing certificate found" }
+          echo "SIGN_THUMBPRINT=$($found.Thumbprint)" >> $env:GITHUB_ENV
 
       - name: Build the Solution
         run: msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Debug" /p:GitFlow="$GITFLOW" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
@@ -72,14 +76,17 @@ jobs:
           msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" `
             /p:Configuration=Debug `
             /p:SignManifests=true `
-            /p:ManifestKeyFile=clickonce.pfx `
-            /p:ManifestCertificatePassword= `
+            /p:ManifestCertificateThumbprint=$env:SIGN_THUMBPRINT `
             /verbosity:minimal -maxcpucount
           $pptAgentDir = "Ink Canvas\bin\Debug\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\ppt-agent"
           New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
-          Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll" $pptAgentDir -Force
-          Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.vsto" $pptAgentDir -Force -ErrorAction SilentlyContinue
-          Copy-Item "InkCanvas.PptAgent.Contracts\bin\Debug\netstandard2.0\InkCanvas.PptAgent.Contracts.dll" $pptAgentDir -Force
+          Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\*" $pptAgentDir -Recurse -Force
+          Copy-Item "InkCanvas.PPTAgent.Contracts\bin\Debug\netstandard2.0\InkCanvas.PPTAgent.Contracts.dll" $pptAgentDir -Force
+          Get-ChildItem $pptAgentDir | Select-Object Name
+          if (-not (Test-Path "$pptAgentDir\Microsoft.Office.Tools.Common.v4.0.Utilities.dll")) {
+            Write-Error "缺少 VSTO 依赖 DLL，artifact 不完整"
+            exit 1
+          }
 
       - name: Check VSTO DLL exists
         run: |

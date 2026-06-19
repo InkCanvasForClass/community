@@ -111,10 +111,10 @@
   <data name="AutoKill_Inkeys" xml:space="preserve">
     <value>Auto kill Inkeys (new only)</value>
   </data>
-  <data name="AutoKill_PptTools" xml:space="preserve">
+  <data name="AutoKill_PPTTools" xml:space="preserve">
     <value>Auto kill Seewo PPT tools</value>
   </data>
-  <data name="AutoKill_PptToolsHint" xml:space="preserve">
+  <data name="AutoKill_PPTToolsHint" xml:space="preserve">
     <value>Killing PPT tools disables Seewo classroom helper. Delete Office.dll in its install folder to stop the PPT toolbar without auto kill.</value>
   </data>
   <data name="AutoKill_SeewoDesktop2Anno" xml:space="preserve">

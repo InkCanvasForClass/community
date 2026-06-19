@@ -1,5 +1,5 @@
 using System;
-using InkCanvasPptAgent.Contracts;
+using InkCanvasPPTAgent.Contracts;
 using Newtonsoft.Json;
 
 namespace InkCanvas.PowerPointAddIn.Core
@@ -13,21 +13,21 @@ namespace InkCanvas.PowerPointAddIn.Core
             _send = send;
         }
 
-        public void PublishState(PptState state)
+        public void PublishState(PPTState state)
         {
-            var message = new PptPipeMessage<PptState>
+            var message = new PPTPipeMessage<PPTState>
             {
-                Type = PptMessageTypes.State,
+                Type = PPTMessageTypes.State,
                 Data = state
             };
             _send.Invoke(JsonConvert.SerializeObject(message));
         }
 
-        public void RaiseEvent(string eventName, PptState state)
+        public void RaiseEvent(string eventName, PPTState state)
         {
-            var message = new PptPipeMessage<PptState>
+            var message = new PPTPipeMessage<PPTState>
             {
-                Type = PptMessageTypes.Event,
+                Type = PPTMessageTypes.Event,
                 Cmd = eventName,
                 Data = state
             };
@@ -36,9 +36,9 @@ namespace InkCanvas.PowerPointAddIn.Core
 
         public string SendResponse(string command, object data, string requestId, bool success = true)
         {
-            var message = new PptPipeMessage<object>
+            var message = new PPTPipeMessage<object>
             {
-                Type = PptMessageTypes.Response,
+                Type = PPTMessageTypes.Response,
                 Cmd = command,
                 Data = data,
                 RequestId = requestId,
@@ -49,9 +49,9 @@ namespace InkCanvas.PowerPointAddIn.Core
 
         public string SendError(string requestId, string error)
         {
-            var message = new PptPipeMessage<object>
+            var message = new PPTPipeMessage<object>
             {
-                Type = PptMessageTypes.Error,
+                Type = PPTMessageTypes.Error,
                 RequestId = requestId,
                 Success = false,
                 Error = error

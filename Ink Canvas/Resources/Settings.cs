@@ -183,8 +183,8 @@ namespace Ink_Canvas
         [JsonProperty("isDictationDoNotDisturbEnabled")]
         public bool IsDictationDoNotDisturbEnabled { get; set; } = false;
 
-        [JsonProperty("isDictationDoNotDisturbInPptEnabled")]
-        public bool IsDictationDoNotDisturbInPptEnabled { get; set; } = true;
+        [JsonProperty("isDictationDoNotDisturbInPPTEnabled")]
+        public bool IsDictationDoNotDisturbInPPTEnabled { get; set; } = true;
 
         [JsonProperty("isDictationDoNotDisturbInWhiteboardEnabled")]
         public bool IsDictationDoNotDisturbInWhiteboardEnabled { get; set; } = true;
@@ -581,6 +581,9 @@ namespace Ink_Canvas
         [JsonProperty("useFloatingQuickPanel")]
         public bool UseFloatingQuickPanel { get; set; } = true;
 
+        [JsonProperty("showPenColorOnFloatingBarIcon")]
+        public bool ShowPenColorOnFloatingBarIcon { get; set; } = false;
+
         [JsonProperty("allowDragSidePanel")]
         public bool AllowDragSidePanel { get; set; } = true;
 
@@ -610,7 +613,7 @@ namespace Ink_Canvas
 
     }
 
-    public enum PptLinkMode
+    public enum PPTLinkMode
     {
         Com = 0,
         Rot = 1,
@@ -719,7 +722,7 @@ namespace Ink_Canvas
         [JsonProperty("pptTimeCapsuleOffsetY")]
         public double PPTTimeCapsuleOffsetY { get; set; } = 0;
         [JsonProperty("pptLinkMode")]
-        public PptLinkMode PptLinkMode { get; set; } = PptLinkMode.Com;
+        public PPTLinkMode PPTLinkMode { get; set; } = PPTLinkMode.Com;
 
         [JsonProperty("showPPTSidebarByDefault")]
         public bool ShowPPTSidebarByDefault { get; set; } = false;
@@ -817,8 +820,8 @@ namespace Ink_Canvas
         [JsonProperty("isAutoFoldAfterPPTSlideShow")]
         public bool IsAutoFoldAfterPPTSlideShow { get; set; }
 
-        [JsonProperty("isAutoKillPptService")]
-        public bool IsAutoKillPptService { get; set; }
+        [JsonProperty("isAutoKillPPTService")]
+        public bool IsAutoKillPPTService { get; set; }
 
         [JsonProperty("isAutoKillEasiNote")]
         public bool IsAutoKillEasiNote { get; set; }
@@ -934,12 +937,12 @@ namespace Ink_Canvas
             { "ChangYanCommonTools", false },
             { "ChangYanSceneToolbar", false },
             { "ChangYanDrawWindow", false },
-            { "ChangYanPptFloating", false },
-            { "ChangYanPptPageControl", false },
-            { "ChangYanPptGoBack", false },
-            { "ChangYanPptPreview", false },
+            { "ChangYanPPTFloating", false },
+            { "ChangYanPPTPageControl", false },
+            { "ChangYanPPTGoBack", false },
+            { "ChangYanPPTPreview", false },
             { "IntelligentClassFloating", false },
-            { "IntelligentClassPptFloating", false },
+            { "IntelligentClassPPTFloating", false },
             { "SeewoDesktopAnnotationFloating", false },
             { "SeewoDesktopSideBarFloating", false }
         };
@@ -986,8 +989,8 @@ namespace Ink_Canvas
         [JsonProperty("isDebugConsoleEnabled")]
         public bool IsDebugConsoleEnabled { get; set; } = false;
 
-        [JsonProperty("isPptComDebugProbeEnabled")]
-        public bool IsPptComDebugProbeEnabled { get; set; } = false;
+        [JsonProperty("isPPTComDebugProbeEnabled")]
+        public bool IsPPTComDebugProbeEnabled { get; set; } = false;
 
         [JsonProperty("isEnableFullScreenHelper")]
         public bool IsEnableFullScreenHelper { get; set; }
@@ -1252,8 +1255,8 @@ namespace Ink_Canvas
         [JsonProperty("backgroundColor")]
         public string BackgroundColor { get; set; } = "#FF2A2A2A";
 
-        [JsonProperty("syncWithPptPages")]
-        public bool SyncWithPptPages { get; set; } = true;
+        [JsonProperty("syncWithPPTPages")]
+        public bool SyncWithPPTPages { get; set; } = true;
 
         [JsonProperty("penWidth")]
         public double PenWidth { get; set; } = 3;

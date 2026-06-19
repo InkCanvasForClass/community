@@ -132,10 +132,10 @@
   <data name="Debug_ShowConsole_Header" xml:space="preserve">
     <value>Show debug console</value>
   </data>
-  <data name="Debug_PptComProbe_Desc" xml:space="preserve">
+  <data name="Debug_PPTComProbe_Desc" xml:space="preserve">
     <value>When enabled, outputs extensive COM object, window, process, and state probe information during PPT connection, slide show changes, and timer polling. Only enable temporarily while diagnosing PPT/WPS integration issues.</value>
   </data>
-  <data name="Debug_PptComProbe_Header" xml:space="preserve">
+  <data name="Debug_PPTComProbe_Header" xml:space="preserve">
     <value>Enable PPT COM debug probes</value>
   </data>
   <data name="Debug_IconSettings" xml:space="preserve">

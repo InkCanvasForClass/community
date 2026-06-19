@@ -1311,7 +1311,7 @@ namespace Ink_Canvas.Windows
                     if (IsFullscreenWindowOpen) return;
 
                     bool pptCapsuleActive = MainWindow.Settings?.PowerPointSettings?.EnablePPTTimeCapsule == true
-                        && (Application.Current.MainWindow as MainWindow)?.IsInPptPresentationMode == true;
+                        && (Application.Current.MainWindow as MainWindow)?.IsInPPTPresentationMode == true;
 
                     Hide();
 

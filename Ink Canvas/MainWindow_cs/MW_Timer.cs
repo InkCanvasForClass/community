@@ -554,7 +554,7 @@ namespace Ink_Canvas
             {
                 // 希沃相关： easinote swenserver RemoteProcess EasiNote.MediaHttpService smartnote.cloud EasiUpdate smartnote EasiUpdate3 EasiUpdate3Protect SeewoP2P CefSharp.BrowserSubprocess SeewoUploadService
                 var arg = "/F";
-                if (Settings.Automation.IsAutoKillPptService)
+                if (Settings.Automation.IsAutoKillPPTService)
                 {
                     var processes = Process.GetProcessesByName("PPTService");
                     if (processes.Length > 0) arg += " /IM PPTService.exe";

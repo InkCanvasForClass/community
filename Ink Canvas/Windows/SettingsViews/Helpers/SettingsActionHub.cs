@@ -1,5 +1,5 @@
 using Ink_Canvas.Helpers;
-using InkCanvasPptAgent.Contracts;
+using InkCanvasPPTAgent.Contracts;
 using System;
 using System.Windows;
 
@@ -290,7 +290,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 mw.pointPPT = new Point(-1, -1);
                 mw.ViewboxFloatingBarScaleTransform.ScaleX = actualScale;
                 mw.ViewboxFloatingBarScaleTransform.ScaleY = actualScale;
-                if (mw.IsInPptPresentationMode)
+                if (mw.IsInPPTPresentationMode)
                     mw.ViewboxFloatingBarMarginAnimation(60);
                 else
                     mw.ViewboxFloatingBarMarginAnimation(100, true);
@@ -364,7 +364,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             var mw = GetMainWindow();
             if (mw == null) return;
             var auto = SettingsManager.Settings.Automation;
-            bool anyKill = auto.IsAutoKillEasiNote || auto.IsAutoKillPptService ||
+            bool anyKill = auto.IsAutoKillEasiNote || auto.IsAutoKillPPTService ||
                 auto.IsAutoKillHiteAnnotation || auto.IsAutoKillInkCanvas ||
                 auto.IsAutoKillICA || auto.IsAutoKillIDT || auto.IsAutoKillVComYouJiao ||
                 auto.IsAutoKillSeewoLauncher2DesktopAnnotation;
@@ -467,7 +467,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 mw.PPTManager.SkipAnimationsWhenNavigating = isOn;
         }
 
-        public static void OnPptLinkModeChanged()
+        public static void OnPPTLinkModeChanged()
         {
             var mw = GetMainWindow();
             if (mw == null) return;
@@ -475,20 +475,20 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             try
             {
                 mw.StopPPTMonitoring();
-                if (ppt.PptLinkMode != PptLinkMode.Com && ppt.EnablePowerPointEnhancement)
+                if (ppt.PPTLinkMode != PPTLinkMode.Com && ppt.EnablePowerPointEnhancement)
                 {
                     ppt.EnablePowerPointEnhancement = false;
                     mw.StopPowerPointProcessMonitoring();
                     SettingsManager.SaveSettingsToFile();
                 }
-                if (ppt.PptLinkMode != PptLinkMode.Com && ppt.IsSupportWPS)
+                if (ppt.PPTLinkMode != PPTLinkMode.Com && ppt.IsSupportWPS)
                 {
                     ppt.IsSupportWPS = false;
                     SettingsManager.SaveSettingsToFile();
                 }
 
                 // 切换到 Agent 模式时，自动注册 VSTO 插件
-                if (ppt.PptLinkMode == PptLinkMode.Agent)
+                if (ppt.PPTLinkMode == PPTLinkMode.Agent)
                 {
                     if (!VstoRegistrationHelper.EnsureRegistered())
                     {
@@ -498,7 +498,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
 
                 mw.InitializePPTManagers();
                 if (ppt.PowerPointSupport) mw.StartPPTMonitoring();
-                LogHelper.WriteLogToFile($"已切换 PPT 联动架构为 {ppt.PptLinkMode}", LogHelper.LogType.Event);
+                LogHelper.WriteLogToFile($"已切换 PPT 联动架构为 {ppt.PPTLinkMode}", LogHelper.LogType.Event);
             }
             catch (Exception ex) { LogHelper.WriteLogToFile($"切换 PPT 联动架构失败: {ex}", LogHelper.LogType.Error); }
         }
@@ -543,7 +543,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         public static void OnShowPPTSidebarByDefaultChanged()
         {
             var mw = GetMainWindow();
-            if (mw != null && mw.IsInPptPresentationMode)
+            if (mw != null && mw.IsInPPTPresentationMode)
                 mw.UpdatePPTQuickPanelVisibility();
         }
 
@@ -575,7 +575,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         public static void OnPPTButtonsDisplayOptionChanged()
         {
             var mw = GetMainWindow();
-            if (mw?.PPTUIManager != null && mw.IsInPptPresentationMode)
+            if (mw?.PPTUIManager != null && mw.IsInPPTPresentationMode)
             {
                 mw.PPTUIManager.PPTButtonsDisplayOption = SettingsManager.Settings.PowerPointSettings.PPTButtonsDisplayOption;
                 mw.PPTUIManager.UpdateNavigationPanelsVisibility();
@@ -586,7 +586,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         public static void OnPPTSButtonsOptionChanged()
         {
             var mw = GetMainWindow();
-            if (mw?.PPTUIManager != null && mw.IsInPptPresentationMode)
+            if (mw?.PPTUIManager != null && mw.IsInPPTPresentationMode)
             {
                 mw.PPTUIManager.PPTSButtonsOption = SettingsManager.Settings.PowerPointSettings.PPTSButtonsOption;
                 mw.PPTUIManager.UpdateNavigationButtonStyles();
@@ -598,7 +598,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         {
             var mw = GetMainWindow();
             var ppt = SettingsManager.Settings.PowerPointSettings;
-            if (mw?.PPTUIManager != null && mw.IsInPptPresentationMode)
+            if (mw?.PPTUIManager != null && mw.IsInPPTPresentationMode)
             {
                 mw.PPTUIManager.PPTSButtonsOption = ppt.PPTSButtonsOption;
                 mw.PPTUIManager.PPTLSButtonOpacity = ppt.PPTLSButtonOpacity;
@@ -611,7 +611,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         public static void OnPPTBButtonsOptionChanged()
         {
             var mw = GetMainWindow();
-            if (mw?.PPTUIManager != null && mw.IsInPptPresentationMode)
+            if (mw?.PPTUIManager != null && mw.IsInPPTPresentationMode)
             {
                 mw.PPTUIManager.PPTBButtonsOption = SettingsManager.Settings.PowerPointSettings.PPTBButtonsOption;
                 mw.PPTUIManager.UpdateNavigationButtonStyles();
@@ -623,7 +623,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         {
             var mw = GetMainWindow();
             var ppt = SettingsManager.Settings.PowerPointSettings;
-            if (mw?.PPTUIManager != null && mw.IsInPptPresentationMode)
+            if (mw?.PPTUIManager != null && mw.IsInPPTPresentationMode)
             {
                 mw.PPTUIManager.PPTBButtonsOption = ppt.PPTBButtonsOption;
                 mw.PPTUIManager.PPTLBButtonOpacity = ppt.PPTLBButtonOpacity;
@@ -636,7 +636,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         public static void OnPPTTimeCapsuleChanged()
         {
             var mw = GetMainWindow();
-            if (mw != null && mw.IsInPptPresentationMode)
+            if (mw != null && mw.IsInPPTPresentationMode)
             {
                 mw.UpdatePPTTimeCapsuleVisibility();
                 mw.UpdatePPTQuickPanelVisibility();
@@ -646,21 +646,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         public static void OnPPTTimeCapsulePositionChanged()
         {
             var mw = GetMainWindow();
-            if (mw != null && mw.IsInPptPresentationMode)
+            if (mw != null && mw.IsInPPTPresentationMode)
                 mw.UpdatePPTTimeCapsulePosition();
         }
 
         public static void OnPPTTimeCapsuleOpacityChanged()
         {
             var mw = GetMainWindow();
-            if (mw != null && mw.IsInPptPresentationMode)
+            if (mw != null && mw.IsInPPTPresentationMode)
                 mw.UpdatePPTTimeCapsuleOpacity();
         }
 
         public static void OnPPTTimeCapsuleScaleChanged()
         {
             var mw = GetMainWindow();
-            if (mw != null && mw.IsInPptPresentationMode)
+            if (mw != null && mw.IsInPPTPresentationMode)
                 mw.UpdatePPTTimeCapsuleScale();
         }
 

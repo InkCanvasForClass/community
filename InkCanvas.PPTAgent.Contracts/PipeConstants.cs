@@ -1,4 +1,4 @@
-namespace InkCanvasPptAgent.Contracts
+namespace InkCanvasPPTAgent.Contracts
 {
     public static class PipeConstants
     {

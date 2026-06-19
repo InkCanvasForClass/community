@@ -93,7 +93,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             settings.MiniWhiteboard ??= new MiniWhiteboardSettings();
             ToggleSwitchMiniWhiteboardEnabled.IsOn = settings.MiniWhiteboard.IsEnabled;
-            ToggleSwitchMiniWhiteboardSyncPpt.IsOn = settings.MiniWhiteboard.SyncWithPptPages;
+            ToggleSwitchMiniWhiteboardSyncPPT.IsOn = settings.MiniWhiteboard.SyncWithPPTPages;
             MiniWhiteboardWidthSlider.Value = settings.MiniWhiteboard.DefaultWidth;
             MiniWhiteboardHeightSlider.Value = settings.MiniWhiteboard.DefaultHeight;
             MiniWhiteboardOpacitySlider.Value = settings.MiniWhiteboard.DefaultOpacity;
@@ -277,11 +277,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.SaveSettingsToFile();
         }
 
-        private void ToggleSwitchMiniWhiteboardSyncPpt_Toggled(object sender, RoutedEventArgs e)
+        private void ToggleSwitchMiniWhiteboardSyncPPT_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.MiniWhiteboard ??= new MiniWhiteboardSettings();
-            SettingsManager.Settings.MiniWhiteboard.SyncWithPptPages = ToggleSwitchMiniWhiteboardSyncPpt.IsOn;
+            SettingsManager.Settings.MiniWhiteboard.SyncWithPPTPages = ToggleSwitchMiniWhiteboardSyncPPT.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 

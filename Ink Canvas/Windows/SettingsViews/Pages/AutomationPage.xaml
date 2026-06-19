@@ -190,11 +190,11 @@
 
                     <TextBlock Text="{x:Static props:AutomationStrings.AutoKill_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
-                    <controls:LabeledSettingsCard x:Name="CardAutoKillPptService"
-                            Header="{x:Static props:AutomationStrings.AutoKill_PptTools}"
-                            Description="{x:Static props:AutomationStrings.AutoKill_PptToolsHint}"
+                    <controls:LabeledSettingsCard x:Name="CardAutoKillPPTService"
+                            Header="{x:Static props:AutomationStrings.AutoKill_PPTTools}"
+                            Description="{x:Static props:AutomationStrings.AutoKill_PPTToolsHint}"
                             IconSource="/Resources/Icons-png/PPTTools.png"
-                            Toggled="ToggleSwitchAutoKillPptService_Toggled"/>
+                            Toggled="ToggleSwitchAutoKillPPTService_Toggled"/>
 
                     <controls:LabeledSettingsCard x:Name="CardAutoKillEasiNote"
                             Header="{x:Static props:AutomationStrings.AutoKill_EasiNote5}"
@@ -438,7 +438,7 @@
                                 <ui:SettingsCard.HeaderIcon>
                                     <ui:ImageIcon Source="/Resources/Icons-png/畅言智慧课堂.png"/>
                                 </ui:SettingsCard.HeaderIcon>
-                                <ui:ToggleSwitch x:Name="ToggleSwitchChangYanPptFloating" Toggled="ToggleSwitchChangYanPptFloating_Toggled"/>
+                                <ui:ToggleSwitch x:Name="ToggleSwitchChangYanPPTFloating" Toggled="ToggleSwitchChangYanPPTFloating_Toggled"/>
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_IntelligentClass}">
                                 <ui:SettingsCard.HeaderIcon>

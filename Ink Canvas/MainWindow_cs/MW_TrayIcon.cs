@@ -472,7 +472,7 @@ namespace Ink_Canvas
                 var isInPPTPresentationMode = false;
                 Dispatcher.Invoke(() =>
                 {
-                    isInPPTPresentationMode = mainWin.IsInPptPresentationMode;
+                    isInPPTPresentationMode = mainWin.IsInPPTPresentationMode;
                 });
                 if (!mainWin.isFloatingBarFolded)
                 {

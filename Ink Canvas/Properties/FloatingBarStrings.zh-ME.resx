@@ -462,7 +462,7 @@
   <data name="ToolbarCondition_Annotating" xml:space="preserve">
     <value>批注模式</value>
   </data>
-  <data name="ToolbarCondition_PptMode" xml:space="preserve">
+  <data name="ToolbarCondition_PPTMode" xml:space="preserve">
     <value>PPT模式</value>
   </data>
   <data name="ToolbarCondition_Collapsed" xml:space="preserve">

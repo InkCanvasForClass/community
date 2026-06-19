@@ -198,19 +198,19 @@ namespace Ink_Canvas.Helpers
             /// <summary>
             /// 畅言智慧课堂 PPT悬浮窗
             /// </summary>
-            ChangYanPptFloating,
+            ChangYanPPTFloating,
             /// <summary>
             /// 畅言智慧课堂 PPT页面控制
             /// </summary>
-            ChangYanPptPageControl,
+            ChangYanPPTPageControl,
             /// <summary>
             /// 畅言智慧课堂 PPT返回
             /// </summary>
-            ChangYanPptGoBack,
+            ChangYanPPTGoBack,
             /// <summary>
             /// 畅言智慧课堂 PPT预览
             /// </summary>
-            ChangYanPptPreview,
+            ChangYanPPTPreview,
             /// <summary>
             /// 天喻教育云互动课堂 桌面悬浮窗（包括PPT控件）
             /// </summary>
@@ -218,7 +218,7 @@ namespace Ink_Canvas.Helpers
             /// <summary>
             /// 天喻教育云互动课堂 PPT悬浮窗
             /// </summary>
-            IntelligentClassPptFloating,
+            IntelligentClassPPTFloating,
             /// <summary>
             /// 希沃桌面 画笔悬浮窗
             /// </summary>
@@ -593,9 +593,9 @@ namespace Ink_Canvas.Helpers
             };
 
             // 畅言智慧课堂 PPT悬浮窗
-            _interceptRules[InterceptType.ChangYanPptFloating] = new InterceptRule
+            _interceptRules[InterceptType.ChangYanPPTFloating] = new InterceptRule
             {
-                Type = InterceptType.ChangYanPptFloating,
+                Type = InterceptType.ChangYanPPTFloating,
                 ProcessName = "ClassIn",
                 WindowTitlePattern = "Exch",
                 ClassNamePattern = "Qt5QWindowToolSaveBitsOwnDC",
@@ -603,48 +603,48 @@ namespace Ink_Canvas.Helpers
                 RequiresAdmin = true,
                 Description = "畅言智慧课堂 PPT悬浮窗",
                 ParentType = null,
-                ChildTypes = new List<InterceptType> { InterceptType.ChangYanPptPageControl, InterceptType.ChangYanPptGoBack, InterceptType.ChangYanPptPreview }
+                ChildTypes = new List<InterceptType> { InterceptType.ChangYanPPTPageControl, InterceptType.ChangYanPPTGoBack, InterceptType.ChangYanPPTPreview }
             };
 
             // 畅言智慧课堂 PPT页面控制（子规则）
-            _interceptRules[InterceptType.ChangYanPptPageControl] = new InterceptRule
+            _interceptRules[InterceptType.ChangYanPPTPageControl] = new InterceptRule
             {
-                Type = InterceptType.ChangYanPptPageControl,
+                Type = InterceptType.ChangYanPPTPageControl,
                 ProcessName = "ClassIn",
                 WindowTitlePattern = "PageCtl",
                 ClassNamePattern = "Qt5QWindowToolSaveBitsOwnDC",
                 IsEnabled = true,
                 RequiresAdmin = true,
                 Description = "畅言智慧课堂 PPT页面控制",
-                ParentType = InterceptType.ChangYanPptFloating,
+                ParentType = InterceptType.ChangYanPPTFloating,
                 ChildTypes = new List<InterceptType>()
             };
 
             // 畅言智慧课堂 PPT返回（子规则）
-            _interceptRules[InterceptType.ChangYanPptGoBack] = new InterceptRule
+            _interceptRules[InterceptType.ChangYanPPTGoBack] = new InterceptRule
             {
-                Type = InterceptType.ChangYanPptGoBack,
+                Type = InterceptType.ChangYanPPTGoBack,
                 ProcessName = "ClassIn",
                 WindowTitlePattern = "Goback",
                 ClassNamePattern = "Qt5QWindowToolSaveBitsOwnDC",
                 IsEnabled = true,
                 RequiresAdmin = true,
                 Description = "畅言智慧课堂 PPT返回",
-                ParentType = InterceptType.ChangYanPptFloating,
+                ParentType = InterceptType.ChangYanPPTFloating,
                 ChildTypes = new List<InterceptType>()
             };
 
             // 畅言智慧课堂 PPT预览（子规则）
-            _interceptRules[InterceptType.ChangYanPptPreview] = new InterceptRule
+            _interceptRules[InterceptType.ChangYanPPTPreview] = new InterceptRule
             {
-                Type = InterceptType.ChangYanPptPreview,
+                Type = InterceptType.ChangYanPPTPreview,
                 ProcessName = "ClassIn",
                 WindowTitlePattern = "Preview",
                 ClassNamePattern = "Qt5QWindowToolSaveBitsOwnDC",
                 IsEnabled = true,
                 RequiresAdmin = true,
                 Description = "畅言智慧课堂 PPT预览",
-                ParentType = InterceptType.ChangYanPptFloating,
+                ParentType = InterceptType.ChangYanPPTFloating,
                 ChildTypes = new List<InterceptType>()
             };
 
@@ -659,13 +659,13 @@ namespace Ink_Canvas.Helpers
                 RequiresAdmin = false,
                 Description = "天喻教育云互动课堂 桌面悬浮窗（包括PPT控件）",
                 ParentType = null,
-                ChildTypes = new List<InterceptType> { InterceptType.IntelligentClassPptFloating }
+                ChildTypes = new List<InterceptType> { InterceptType.IntelligentClassPPTFloating }
             };
 
             // 天喻教育云互动课堂 PPT悬浮窗（子规则）
-            _interceptRules[InterceptType.IntelligentClassPptFloating] = new InterceptRule
+            _interceptRules[InterceptType.IntelligentClassPPTFloating] = new InterceptRule
             {
-                Type = InterceptType.IntelligentClassPptFloating,
+                Type = InterceptType.IntelligentClassPPTFloating,
                 ProcessName = "IntelligentClass",
                 WindowTitlePattern = "",
                 ClassNamePattern = "HwndWrapper[IntelligentClass.Office.PowerPoint.vsto|vstolocal;VSTA_Main;",

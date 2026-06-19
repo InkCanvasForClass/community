@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Ink_Canvas.Helpers
 {
-    public sealed class PptSlideThumbnail
+    public sealed class PPTSlideThumbnail
     {
         public int SlideNumber { get; set; }
         public byte[] PngBytes { get; set; }
@@ -62,7 +62,7 @@ namespace Ink_Canvas.Helpers
         string GetPresentationName();
         bool TryShowSlideNavigation();
         object GetCurrentActivePresentation();
-        List<PptSlideThumbnail> ExportSlideThumbnails(int width, int height);
+        List<PPTSlideThumbnail> ExportSlideThumbnails(int width, int height);
     }
 }
 

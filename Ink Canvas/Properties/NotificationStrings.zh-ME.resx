@@ -75,10 +75,10 @@
   <data name="DictationDoNotDisturbHint" xml:space="preserve">
     <value>指定场景下屏蔽弹窗和系统通知，但消息还在历史里，不会真消失~</value>
   </data>
-  <data name="DictationDoNotDisturbPpt" xml:space="preserve">
+  <data name="DictationDoNotDisturbPPT" xml:space="preserve">
     <value>PPT 放映时别来烦我</value>
   </data>
-  <data name="DictationDoNotDisturbPptHint" xml:space="preserve">
+  <data name="DictationDoNotDisturbPPTHint" xml:space="preserve">
     <value>进入 PPT 放映后，不弹灵动通知、旧通知或 Windows Toast，让我安静讲课~</value>
   </data>
   <data name="DictationDoNotDisturbWhiteboard" xml:space="preserve">

@@ -443,8 +443,8 @@ namespace Ink_Canvas
 
         internal void UpdateToolbarComponentVisibility()
         {
-            var isPpt = IsInPptPresentationMode;
-            ToolbarRegistry.UpdateVisibilityByMode(StackPanelFloatingBarRoot, IsAnnotating, isPpt);
+            var isPPT = IsInPPTPresentationMode;
+            ToolbarRegistry.UpdateVisibilityByMode(StackPanelFloatingBarRoot, IsAnnotating, isPPT);
         }
 
         private void UpdateToolbarDimensions(Orientation orientation)

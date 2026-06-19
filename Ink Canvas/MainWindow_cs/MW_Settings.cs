@@ -463,7 +463,7 @@ namespace Ink_Canvas
         //private void ToggleSwitchShowBottomPPTNavigationPanel_OnToggled(object sender, RoutedEventArgs e) {
         //    if (!isLoaded) return;
         //    Settings.PowerPointSettings.IsShowBottomPPTNavigationPanel = ToggleSwitchShowBottomPPTNavigationPanel.IsOn;
-        //    if (IsInPptPresentationMode)
+        //    if (IsInPPTPresentationMode)
         //        //BottomViewboxPPTSidesControl.Visibility = Settings.PowerPointSettings.IsShowBottomPPTNavigationPanel
         //        //    ? Visibility.Visible
         //        //    : Visibility.Collapsed;
@@ -474,7 +474,7 @@ namespace Ink_Canvas
         //private void ToggleSwitchShowSidePPTNavigationPanel_OnToggled(object sender, RoutedEventArgs e) {
         //    if (!isLoaded) return;
         //    Settings.PowerPointSettings.IsShowSidePPTNavigationPanel = ToggleSwitchShowSidePPTNavigationPanel.IsOn;
-        //    if (IsInPptPresentationMode) {
+        //    if (IsInPPTPresentationMode) {
         //        LeftSidePanelForPPTNavigation.Visibility = Settings.PowerPointSettings.IsShowSidePPTNavigationPanel
         //            ? Visibility.Visible
         //            : Visibility.Collapsed;
@@ -498,7 +498,7 @@ namespace Ink_Canvas
         /// </summary>
         public void UpdatePPTUIManagerSettings()
         {
-            if (_pptUIManager != null && IsInPptPresentationMode)
+            if (_pptUIManager != null && IsInPPTPresentationMode)
             {
                 _pptUIManager.PPTButtonsDisplayOption = Settings.PowerPointSettings.PPTButtonsDisplayOption;
                 _pptUIManager.PPTSButtonsOption = Settings.PowerPointSettings.PPTSButtonsOption;
@@ -1000,7 +1000,7 @@ namespace Ink_Canvas
             Settings.Automation.IsAutoFoldInYiYunVisualPresenter = false;
             Settings.Automation.IsAutoFoldInMaxHubWhiteboard = false;
             Settings.Automation.IsAutoFoldInPPTSlideShow = false;
-            Settings.Automation.IsAutoKillPptService = false;
+            Settings.Automation.IsAutoKillPPTService = false;
             Settings.Automation.IsAutoKillEasiNote = false;
             Settings.Automation.IsAutoKillVComYouJiao = false;
             Settings.Automation.IsAutoKillInkCanvas = false;

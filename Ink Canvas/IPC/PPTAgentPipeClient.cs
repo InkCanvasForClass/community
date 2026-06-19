@@ -1,5 +1,5 @@
 using Ink_Canvas.Helpers;
-using InkCanvasPptAgent.Contracts;
+using InkCanvasPPTAgent.Contracts;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Ink_Canvas.IPC
 {
-    public sealed class PptAgentPipeClient : IDisposable
+    public sealed class PPTAgentPipeClient : IDisposable
     {
         private readonly object _sendLock = new object();
         private readonly ConcurrentDictionary<string, TaskCompletionSource<JToken>> _pendingRequests = new ConcurrentDictionary<string, TaskCompletionSource<JToken>>();
@@ -23,8 +23,8 @@ namespace Ink_Canvas.IPC
         private bool _disposed;
 
         public event Action<bool> ConnectionChanged;
-        public event Action<PptState> StateReceived;
-        public event Action<string, PptState> EventReceived;
+        public event Action<PPTState> StateReceived;
+        public event Action<string, PPTState> EventReceived;
 
         public bool IsConnected => _isConnected && _pipe?.IsConnected == true;
 
@@ -56,9 +56,9 @@ namespace Ink_Canvas.IPC
 
         public bool SendCommand(string command, object data = null)
         {
-            var message = new PptPipeMessage<object>
+            var message = new PPTPipeMessage<object>
             {
-                Type = PptMessageTypes.Command,
+                Type = PPTMessageTypes.Command,
                 Cmd = command,
                 Data = data,
                 RequestId = Guid.NewGuid().ToString("N")
@@ -73,9 +73,9 @@ namespace Ink_Canvas.IPC
             var tcs = new TaskCompletionSource<JToken>(TaskCreationOptions.RunContinuationsAsynchronously);
             _pendingRequests[requestId] = tcs;
 
-            var message = new PptPipeMessage<object>
+            var message = new PPTPipeMessage<object>
             {
-                Type = PptMessageTypes.Command,
+                Type = PPTMessageTypes.Command,
                 Cmd = command,
                 Data = data,
                 RequestId = requestId
@@ -125,7 +125,7 @@ namespace Ink_Canvas.IPC
 
                     _pipe = pipe;
                     SetConnected(true);
-                    SendCommand(PptCommands.State);
+                    SendCommand(PPTCommands.State);
 
                     Listen(pipe, token);
                 }
@@ -176,18 +176,18 @@ namespace Ink_Canvas.IPC
             try
             {
                 var obj = JObject.Parse(json);
-                var type = obj.Value<string>(nameof(PptPipeMessage<object>.Type));
-                var command = obj.Value<string>(nameof(PptPipeMessage<object>.Cmd));
-                var requestId = obj.Value<string>(nameof(PptPipeMessage<object>.RequestId));
-                var data = obj[nameof(PptPipeMessage<object>.Data)];
+                var type = obj.Value<string>(nameof(PPTPipeMessage<object>.Type));
+                var command = obj.Value<string>(nameof(PPTPipeMessage<object>.Cmd));
+                var requestId = obj.Value<string>(nameof(PPTPipeMessage<object>.RequestId));
+                var data = obj[nameof(PPTPipeMessage<object>.Data)];
 
-                if ((type == PptMessageTypes.Response || type == PptMessageTypes.Error) && !string.IsNullOrEmpty(requestId))
+                if ((type == PPTMessageTypes.Response || type == PPTMessageTypes.Error) && !string.IsNullOrEmpty(requestId))
                 {
                     if (_pendingRequests.TryRemove(requestId, out var tcs))
                     {
-                        if (type == PptMessageTypes.Error)
+                        if (type == PPTMessageTypes.Error)
                         {
-                            var error = obj.Value<string>(nameof(PptPipeMessage<object>.Error)) ?? "PPT Agent command failed.";
+                            var error = obj.Value<string>(nameof(PPTPipeMessage<object>.Error)) ?? "PPT Agent command failed.";
                             tcs.TrySetException(new InvalidOperationException(error));
                         }
                         else
@@ -198,17 +198,17 @@ namespace Ink_Canvas.IPC
                     return;
                 }
 
-                if (type == PptMessageTypes.State)
+                if (type == PPTMessageTypes.State)
                 {
-                    var state = data?.ToObject<PptState>();
+                    var state = data?.ToObject<PPTState>();
                     if (state != null)
                         StateReceived?.Invoke(state);
                     return;
                 }
 
-                if (type == PptMessageTypes.Event)
+                if (type == PPTMessageTypes.Event)
                 {
-                    var state = data?.ToObject<PptState>();
+                    var state = data?.ToObject<PPTState>();
                     EventReceived?.Invoke(command, state);
                 }
             }
@@ -218,7 +218,7 @@ namespace Ink_Canvas.IPC
             }
         }
 
-        private bool TrySendMessage<T>(PptPipeMessage<T> message)
+        private bool TrySendMessage<T>(PPTPipeMessage<T> message)
         {
             try
             {

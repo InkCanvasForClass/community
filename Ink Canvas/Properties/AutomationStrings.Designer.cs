@@ -86,9 +86,9 @@ namespace Ink_Canvas.Properties
 
         public static string AutoKill_Inkeys => ResourceManager.GetString(nameof(AutoKill_Inkeys), _resourceCulture);
 
-        public static string AutoKill_PptTools => ResourceManager.GetString(nameof(AutoKill_PptTools), _resourceCulture);
+        public static string AutoKill_PPTTools => ResourceManager.GetString(nameof(AutoKill_PPTTools), _resourceCulture);
 
-        public static string AutoKill_PptToolsHint => ResourceManager.GetString(nameof(AutoKill_PptToolsHint), _resourceCulture);
+        public static string AutoKill_PPTToolsHint => ResourceManager.GetString(nameof(AutoKill_PPTToolsHint), _resourceCulture);
 
         public static string AutoKill_SeewoDesktop2Anno => ResourceManager.GetString(nameof(AutoKill_SeewoDesktop2Anno), _resourceCulture);
 

@@ -140,12 +140,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // 获取当前上下文状态
             var mainWindow = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
             bool isAnnotating = mainWindow?.IsAnnotating ?? false;
-            bool isPptMode = mainWindow?.IsInPptPresentationMode ?? false;
+            bool isPPTMode = mainWindow?.IsInPPTPresentationMode ?? false;
 
             var context = new Dictionary<string, bool>
             {
                 ["isAnnotating"] = isAnnotating,
-                ["isPptMode"] = isPptMode,
+                ["isPPTMode"] = isPPTMode,
                 ["isContentCollapsedByUser"] = ToolbarRegistry.IsContentCollapsedByUser
             };
 
@@ -192,6 +192,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.Settings.Appearance.UseLegacyFloatingBarUI = CardUseLegacyFloatingBarUI.IsOn;
             SettingsManager.SaveSettingsToFile();
             SettingsActionHub.OnUseLegacyFloatingBarUIChanged();
+        }
+
+        private void ToggleSwitchShowPenColorOnFloatingBarIcon_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.ShowPenColorOnFloatingBarIcon = CardShowPenColorOnFloatingBarIcon.IsOn;
+            SettingsManager.SaveSettingsToFile();
+            // Refresh the pen icon color on the floating bar
+            if (Application.Current.MainWindow is MainWindow mainWindow)
+                mainWindow.UpdatePenIconColor();
         }
 
         #region Config file management
@@ -330,6 +340,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             if (CardUseLegacyFloatingBarUI != null)
                 CardUseLegacyFloatingBarUI.IsOn = SettingsManager.Settings.Appearance.UseLegacyFloatingBarUI;
+
+            if (CardShowPenColorOnFloatingBarIcon != null)
+                CardShowPenColorOnFloatingBarIcon.IsOn = SettingsManager.Settings.Appearance.ShowPenColorOnFloatingBarIcon;
 
             LogHelper.WriteLogToFile($"{LogTag}: LoadSettings 完成 Count={AddedComponents.Count}", LogHelper.LogType.Info);
         }

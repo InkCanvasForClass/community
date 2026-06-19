@@ -17,6 +17,7 @@
         ResizeMode="CanResize"
         Topmost="True"
         Loaded="OobeWindow_OnLoaded"
+        Closing="OobeWindow_OnClosing"
         ui:ThemeManager.IsThemeAware="True"
         ui:TitleBar.ExtendViewIntoTitleBar="True"
         ui:WindowHelper.SystemBackdropType="None"
@@ -116,7 +117,7 @@
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Personalize}" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
-                <ui:NavigationViewItem x:Name="NavItemPpt" Content="{x:Static props:OobeStrings.Oobe_NavPPT}" Tag="step4">
+                <ui:NavigationViewItem x:Name="NavItemPPT" Content="{x:Static props:OobeStrings.Oobe_NavPPT}" Tag="step4">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}" />
                     </ui:NavigationViewItem.Icon>
@@ -441,35 +442,35 @@
                                 </ikw:SimpleStackPanel>
 
                                 <!-- 步骤 5: PowerPoint -->
-                                <ikw:SimpleStackPanel x:Name="StepPptPanel"
+                                <ikw:SimpleStackPanel x:Name="StepPPTPanel"
                                                       Spacing="{StaticResource SettingsCardSpacing}"
                                                       Visibility="Collapsed">
                                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                                                Text="{x:Static props:OobeStrings.Oobe_Step5Title}" />
 
-                                    <controls:LabeledSettingsCard x:Name="CardPptSupport"
+                                    <controls:LabeledSettingsCard x:Name="CardPPTSupport"
                                                                   Header="{x:Static props:OobeStrings.Oobe_EnablePPTLink}"
                                                                   Description="{x:Static props:OobeStrings.Oobe_EnablePPTLinkDesc}"
                                                                   Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
-                                                                  SwitchName="ToggleSwitchPptSupport" />
+                                                                  SwitchName="ToggleSwitchPPTSupport" />
 
-                                    <controls:LabeledSettingsCard x:Name="CardPptAutoSaveStrokes"
+                                    <controls:LabeledSettingsCard x:Name="CardPPTAutoSaveStrokes"
                                                                   Header="{x:Static props:OobeStrings.Oobe_AutoSaveStrokes}"
                                                                   Description="{x:Static props:OobeStrings.Oobe_AutoSaveStrokesDesc}"
                                                                   Icon="{x:Static ui:SegoeFluentIcons.Save}"
-                                                                  SwitchName="ToggleSwitchPptAutoSaveStrokes" />
+                                                                  SwitchName="ToggleSwitchPPTAutoSaveStrokes" />
 
-                                    <controls:LabeledSettingsCard x:Name="CardPptAutoSaveScreenshots"
+                                    <controls:LabeledSettingsCard x:Name="CardPPTAutoSaveScreenshots"
                                                                   Header="{x:Static props:OobeStrings.Oobe_AutoScreenshot}"
                                                                   Description="{x:Static props:OobeStrings.Oobe_AutoScreenshotDesc}"
                                                                   Icon="{x:Static ui:SegoeFluentIcons.Camera}"
-                                                                  SwitchName="ToggleSwitchPptAutoSaveScreenshots" />
+                                                                  SwitchName="ToggleSwitchPPTAutoSaveScreenshots" />
 
-                                    <controls:LabeledSettingsCard x:Name="CardPptTimeCapsule"
+                                    <controls:LabeledSettingsCard x:Name="CardPPTTimeCapsule"
                                                                   Header="{x:Static props:OobeStrings.Oobe_EnableTimeCapsule}"
                                                                   Description="{x:Static props:OobeStrings.Oobe_EnableTimeCapsuleDesc}"
                                                                   Icon="{x:Static ui:SegoeFluentIcons.QuietHours}"
-                                                                  SwitchName="ToggleSwitchPptTimeCapsule" />
+                                                                  SwitchName="ToggleSwitchPPTTimeCapsule" />
                                 </ikw:SimpleStackPanel>
 
                                 <!-- 步骤 6: 自动化 + 截图 -->

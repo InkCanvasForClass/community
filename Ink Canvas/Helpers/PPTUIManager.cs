@@ -53,14 +53,14 @@ namespace Ink_Canvas.Helpers
                 {
                     if (isConnected)
                     {
-                        _mainWindow.ArePptControlsVisible = true;
+                        _mainWindow.ArePPTControlsVisible = true;
                         // Old UI removed:                         _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Visible;
                     }
                     else
                     {
-                        _mainWindow.ArePptControlsVisible = false;
+                        _mainWindow.ArePPTControlsVisible = false;
                         // Old UI removed:                         _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Collapsed;
-                        _mainWindow.IsInPptPresentationMode = false;
+                        _mainWindow.IsInPPTPresentationMode = false;
                         _mainWindow.UpdateToolbarComponentVisibility();
                         HideAllNavigationPanels();
                     }
@@ -83,10 +83,10 @@ namespace Ink_Canvas.Helpers
                 {
                     if (isInSlideShow)
                     {
-                        bool wasInSlideShow = _mainWindow.IsInPptPresentationMode;
+                        bool wasInSlideShow = _mainWindow.IsInPPTPresentationMode;
 
                         // Old UI removed:                         _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Collapsed;
-                        _mainWindow.IsInPptPresentationMode = true;
+                        _mainWindow.IsInPPTPresentationMode = true;
                         _mainWindow.UpdateToolbarComponentVisibility();
 
                         // 同步页码到所有翻页条 + 兼容旧绑定的隐藏 placeholder
@@ -122,7 +122,7 @@ namespace Ink_Canvas.Helpers
                     else
                     {
                         // Old UI removed:                         _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Visible;
-                        _mainWindow.IsInPptPresentationMode = false;
+                        _mainWindow.IsInPPTPresentationMode = false;
                         _mainWindow.UpdateToolbarComponentVisibility();
                         HideAllNavigationPanels();
                         _mainWindow.UpdatePPTTimeCapsuleVisibility();
@@ -236,7 +236,7 @@ namespace Ink_Canvas.Helpers
                     bool hasValidPageCount = slidesCount > 0;
 
                     bool shouldShowButtons = ShowPPTButton &&
-                                          _mainWindow.IsInPptPresentationMode &&
+                                          _mainWindow.IsInPPTPresentationMode &&
                                           isInSlideShow &&
                                           hasValidPageCount &&
                                           !MainWindow.Settings.Automation.IsAutoFoldInPPTSlideShow;
@@ -345,11 +345,11 @@ namespace Ink_Canvas.Helpers
                 {
                     var visibility = show ? Visibility.Visible : Visibility.Collapsed;
 
-                    if (_mainWindow.BtnExitPptFromSidebarLeft != null)
-                        _mainWindow.BtnExitPptFromSidebarLeft.Visibility = visibility;
+                    if (_mainWindow.BtnExitPPTFromSidebarLeft != null)
+                        _mainWindow.BtnExitPPTFromSidebarLeft.Visibility = visibility;
 
-                    if (_mainWindow.BtnExitPptFromSidebarRight != null)
-                        _mainWindow.BtnExitPptFromSidebarRight.Visibility = visibility;
+                    if (_mainWindow.BtnExitPPTFromSidebarRight != null)
+                        _mainWindow.BtnExitPPTFromSidebarRight.Visibility = visibility;
                 }
                 catch (Exception ex)
                 {

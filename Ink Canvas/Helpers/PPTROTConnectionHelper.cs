@@ -49,7 +49,7 @@ namespace Ink_Canvas.Helpers
         #region Constants
         private static readonly Guid PowerPointApplicationGuid = new Guid("91493441-5A91-11CF-8700-00AA0060263B");
 
-        private static readonly string[] PptLikeExtensions = new[]
+        private static readonly string[] PPTLikeExtensions = new[]
         {
             ".pptx", ".pptm", ".ppt",
             ".ppsx", ".ppsm", ".pps",
@@ -409,7 +409,7 @@ namespace Ink_Canvas.Helpers
                 return false;
 
             string lower = displayName.ToLowerInvariant();
-            foreach (var ext in PptLikeExtensions)
+            foreach (var ext in PPTLikeExtensions)
             {
                 if (lower.Contains(ext))
                     return true;
@@ -485,7 +485,7 @@ namespace Ink_Canvas.Helpers
                 IntPtr sswHwnd = IntPtr.Zero;
                 try
                 {
-                    sswHwnd = GetPptHwndFromSlideShowWindow(sswObj);
+                    sswHwnd = GetPPTHwndFromSlideShowWindow(sswObj);
                 }
                 catch { return false; }
                 if (sswHwnd == IntPtr.Zero) return false;
@@ -519,7 +519,7 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        private static IntPtr GetPptHwndFromSlideShowWindow(object pptSlideShowWindowObj)
+        private static IntPtr GetPPTHwndFromSlideShowWindow(object pptSlideShowWindowObj)
         {
             IntPtr hwnd = IntPtr.Zero;
             if (pptSlideShowWindowObj == null) return IntPtr.Zero;

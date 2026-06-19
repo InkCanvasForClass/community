@@ -1,16 +1,16 @@
 using Ink_Canvas.IPC;
-using InkCanvasPptAgent.Contracts;
+using InkCanvasPPTAgent.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Ink_Canvas.Helpers
 {
-    public sealed class PptAgentLinkManager : IPPTLinkManager
+    public sealed class PPTAgentLinkManager : IPPTLinkManager
     {
         private readonly object _stateLock = new object();
-        private PptAgentPipeClient _client;
-        private PptState _lastState = new PptState();
+        private PPTAgentPipeClient _client;
+        private PPTState _lastState = new PPTState();
         private bool _lastConnected;
         private bool _lastIsRunning;
         private int _lastSlideIndex;
@@ -32,14 +32,14 @@ namespace Ink_Canvas.Helpers
         public int SlidesCount => GetStateSnapshot().TotalSlides;
         public object PPTApplication => null;
 
-        public PptState CurrentState => GetStateSnapshot();
+        public PPTState CurrentState => GetStateSnapshot();
 
         public void StartMonitoring()
         {
             if (_disposed) return;
             if (_client != null) return;
 
-            _client = new PptAgentPipeClient();
+            _client = new PPTAgentPipeClient();
             _client.ConnectionChanged += OnConnectionChanged;
             _client.StateReceived += state => HandleState(state, null);
             _client.EventReceived += (eventName, state) => HandleState(state, eventName);
@@ -66,41 +66,41 @@ namespace Ink_Canvas.Helpers
             StartMonitoring();
         }
 
-        public bool TryStartSlideShow() => Send(PptCommands.StartSlideShow);
-        public bool TryEndSlideShow() => Send(PptCommands.EndSlideShow);
-        public bool TryNavigateNext() => Send(PptCommands.Next);
-        public bool TryNavigatePrevious() => Send(PptCommands.Previous);
+        public bool TryStartSlideShow() => Send(PPTCommands.StartSlideShow);
+        public bool TryEndSlideShow() => Send(PPTCommands.EndSlideShow);
+        public bool TryNavigateNext() => Send(PPTCommands.Next);
+        public bool TryNavigatePrevious() => Send(PPTCommands.Previous);
 
         public bool TryNavigateToSlide(int slideNumber)
         {
             if (slideNumber <= 0) return false;
-            return Send(PptCommands.GotoSlide, new GotoSlideRequest { SlideNumber = slideNumber });
+            return Send(PPTCommands.GotoSlide, new GotoSlideRequest { SlideNumber = slideNumber });
         }
 
         public int GetCurrentSlideNumber() => GetStateSnapshot().SlideIndex;
 
         public string GetPresentationName() => GetStateSnapshot().PresentationName ?? string.Empty;
 
-        public bool TryShowSlideNavigation() => Send(PptCommands.ShowSlideNavigation);
+        public bool TryShowSlideNavigation() => Send(PPTCommands.ShowSlideNavigation);
 
-        public bool TryUnhideHiddenSlides() => Send(PptCommands.UnhideHiddenSlides);
+        public bool TryUnhideHiddenSlides() => Send(PPTCommands.UnhideHiddenSlides);
 
-        public bool TryDisableAutoPlayTimings() => Send(PptCommands.DisableAutoPlayTimings);
+        public bool TryDisableAutoPlayTimings() => Send(PPTCommands.DisableAutoPlayTimings);
 
         public object GetCurrentActivePresentation() => null;
 
-        public List<PptSlideThumbnail> ExportSlideThumbnails(int width, int height)
+        public List<PPTSlideThumbnail> ExportSlideThumbnails(int width, int height)
         {
             var response = _client?.SendRequest<ExportSlideThumbnailsResponse>(
-                PptCommands.ExportSlideThumbnails,
+                PPTCommands.ExportSlideThumbnails,
                 new ExportSlideThumbnailsRequest { Width = width, Height = height });
 
             if (response?.Slides == null)
-                return new List<PptSlideThumbnail>();
+                return new List<PPTSlideThumbnail>();
 
             return response.Slides
                 .Where(s => s != null && s.PngBytes != null)
-                .Select(s => new PptSlideThumbnail { SlideNumber = s.SlideNumber, PngBytes = s.PngBytes })
+                .Select(s => new PPTSlideThumbnail { SlideNumber = s.SlideNumber, PngBytes = s.PngBytes })
                 .ToList();
         }
 
@@ -120,7 +120,7 @@ namespace Ink_Canvas.Helpers
                 _lastConnected = connected;
                 if (!connected)
                 {
-                    _lastState = new PptState();
+                    _lastState = new PPTState();
                     _lastIsRunning = false;
                     _lastSlideIndex = 0;
                     _lastPresentationName = null;
@@ -132,7 +132,7 @@ namespace Ink_Canvas.Helpers
                 SlideShowStateChanged?.Invoke(false);
         }
 
-        private void HandleState(PptState state, string eventName)
+        private void HandleState(PPTState state, string eventName)
         {
             if (state == null) return;
 
@@ -164,11 +164,11 @@ namespace Ink_Canvas.Helpers
 
                 if (!string.IsNullOrEmpty(eventName))
                 {
-                    raisePresentationOpen = eventName == PptEvents.PresentationOpen;
-                    raisePresentationClose = eventName == PptEvents.PresentationClose;
-                    raiseSlideShowBegin = eventName == PptEvents.SlideShowBegin;
-                    raiseSlideShowNext = eventName == PptEvents.SlideShowNextSlide;
-                    raiseSlideShowEnd = eventName == PptEvents.SlideShowEnd;
+                    raisePresentationOpen = eventName == PPTEvents.PresentationOpen;
+                    raisePresentationClose = eventName == PPTEvents.PresentationClose;
+                    raiseSlideShowBegin = eventName == PPTEvents.SlideShowBegin;
+                    raiseSlideShowNext = eventName == PPTEvents.SlideShowNextSlide;
+                    raiseSlideShowEnd = eventName == PPTEvents.SlideShowEnd;
                 }
                 else
                 {
@@ -197,11 +197,11 @@ namespace Ink_Canvas.Helpers
             if (raiseSlideShowEnd) SlideShowEnd?.Invoke(state);
         }
 
-        private PptState GetStateSnapshot()
+        private PPTState GetStateSnapshot()
         {
             lock (_stateLock)
             {
-                return new PptState
+                return new PPTState
                 {
                     SlideIndex = _lastState.SlideIndex,
                     TotalSlides = _lastState.TotalSlides,

@@ -1131,8 +1131,8 @@
                                                    "NewKey":  "Theme_FloatingIcon_IccWhiteTransparent",
                                                    "Group":  "ThemeStrings"
                                                },
-    "AutoKill_PptTools":  {
-                              "NewKey":  "AutoKill_PptTools",
+    "AutoKill_PPTTools":  {
+                              "NewKey":  "AutoKill_PPTTools",
                               "Group":  "AutomationStrings"
                           },
     "Random_EnableButtons":  {
@@ -2683,8 +2683,8 @@
                                            "NewKey":  "MiniWhiteboard_Settings_Enable",
                                            "Group":  "FloatingBarStrings"
                                        },
-    "MiniWhiteboard_Settings_SyncPpt":  {
-                                            "NewKey":  "MiniWhiteboard_Settings_SyncPpt",
+    "MiniWhiteboard_Settings_SyncPPT":  {
+                                            "NewKey":  "MiniWhiteboard_Settings_SyncPPT",
                                             "Group":  "FloatingBarStrings"
                                         },
     "MiniWhiteboard_Settings_DefaultSize":  {
@@ -3379,8 +3379,8 @@
                                               "NewKey":  "InkRecog_LineEndpointSnappingHint",
                                               "Group":  "CanvasStrings"
                                           },
-    "Notification_DictationDoNotDisturbPpt":  {
-                                                  "NewKey":  "DictationDoNotDisturbPpt",
+    "Notification_DictationDoNotDisturbPPT":  {
+                                                  "NewKey":  "DictationDoNotDisturbPPT",
                                                   "Group":  "NotificationStrings"
                                               },
     "Theme_Browse":  {
@@ -4123,8 +4123,8 @@
                       "NewKey":  "Nav_Theme",
                       "Group":  "NavStrings"
                   },
-    "AutoKill_PptToolsHint":  {
-                                  "NewKey":  "AutoKill_PptToolsHint",
+    "AutoKill_PPTToolsHint":  {
+                                  "NewKey":  "AutoKill_PPTToolsHint",
                                   "Group":  "AutomationStrings"
                               },
     "Storage_Legend_Custom":  {
@@ -4271,8 +4271,8 @@
                                 "NewKey":  "Backup_AutoPeriodic",
                                 "Group":  "StorageStrings"
                             },
-    "Notification_DictationDoNotDisturbPptHint":  {
-                                                      "NewKey":  "DictationDoNotDisturbPptHint",
+    "Notification_DictationDoNotDisturbPPTHint":  {
+                                                      "NewKey":  "DictationDoNotDisturbPPTHint",
                                                       "Group":  "NotificationStrings"
                                                   },
     "Random_CustomBackground_Manage":  {

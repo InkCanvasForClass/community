@@ -282,6 +282,9 @@
   <data name="Theme_UseLegacyFloatingBarUI" xml:space="preserve">
     <value>用老版装备栏 UI</value>
   </data>
+  <data name="Theme_ShowPenColorOnFloatingBarIcon" xml:space="preserve">
+    <value>批注图标显示当前画笔颜色</value>
+  </data>
   <data name="Theme_WindowBackdrop" xml:space="preserve">
     <value>窗口背景样式</value>
   </data>

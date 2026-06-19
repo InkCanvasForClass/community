@@ -5,12 +5,14 @@ using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using FontIcon = iNKORE.UI.WPF.Modern.Controls.FontIcon;
 using NavigationView = iNKORE.UI.WPF.Modern.Controls.NavigationView;
 using NavigationViewItem = iNKORE.UI.WPF.Modern.Controls.NavigationViewItem;
 using NavigationViewSelectionChangedEventArgs = iNKORE.UI.WPF.Modern.Controls.NavigationViewSelectionChangedEventArgs;
+using Screen = System.Windows.Forms.Screen;
 
 namespace Ink_Canvas.Windows
 {
@@ -53,7 +55,7 @@ namespace Ink_Canvas.Windows
                 StepCanvasPanel,
                 StepGesturesPanel,
                 StepAppearancePanel,
-                StepPptPanel,
+                StepPPTPanel,
                 StepAutomationPanel,
                 StepLuckyRandomPanel,
                 StepAdvancedPanel,
@@ -65,7 +67,7 @@ namespace Ink_Canvas.Windows
                 NavItemCanvas,
                 NavItemGestures,
                 NavItemAppearance,
-                NavItemPpt,
+                NavItemPPT,
                 NavItemAutomation,
                 NavItemLuckyRandom,
                 NavItemAdvanced,
@@ -146,10 +148,10 @@ namespace Ink_Canvas.Windows
             {
                 if (_settings.PowerPointSettings != null)
                 {
-                    CardPptSupport.IsOn = _settings.PowerPointSettings.PowerPointSupport;
-                    CardPptAutoSaveStrokes.IsOn = _settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint;
-                    CardPptAutoSaveScreenshots.IsOn = _settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint;
-                    CardPptTimeCapsule.IsOn = _settings.PowerPointSettings.EnablePPTTimeCapsule;
+                    CardPPTSupport.IsOn = _settings.PowerPointSettings.PowerPointSupport;
+                    CardPPTAutoSaveStrokes.IsOn = _settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint;
+                    CardPPTAutoSaveScreenshots.IsOn = _settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint;
+                    CardPPTTimeCapsule.IsOn = _settings.PowerPointSettings.EnablePPTTimeCapsule;
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -259,10 +261,10 @@ namespace Ink_Canvas.Windows
             {
                 if (_settings.PowerPointSettings != null)
                 {
-                    _settings.PowerPointSettings.PowerPointSupport = CardPptSupport.IsOn;
-                    _settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint = CardPptAutoSaveStrokes.IsOn;
-                    _settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint = CardPptAutoSaveScreenshots.IsOn;
-                    _settings.PowerPointSettings.EnablePPTTimeCapsule = CardPptTimeCapsule.IsOn;
+                    _settings.PowerPointSettings.PowerPointSupport = CardPPTSupport.IsOn;
+                    _settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint = CardPPTAutoSaveStrokes.IsOn;
+                    _settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint = CardPPTAutoSaveScreenshots.IsOn;
+                    _settings.PowerPointSettings.EnablePPTTimeCapsule = CardPPTTimeCapsule.IsOn;
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -465,6 +467,76 @@ namespace Ink_Canvas.Windows
 
         #endregion
 
+        #region 高DPI/多屏自适应窗口控制
+
+        private HwndSource _hwndSource;
+
+        private void GetWorkAreaSize(out double workAreaWidthDip, out double workAreaHeightDip, out double screenLeftDip, out double screenTopDip)
+        {
+            var windowHandle = new WindowInteropHelper(this).Handle;
+            var currentScreen = Screen.FromHandle(windowHandle);
+            var workingArea = currentScreen.WorkingArea;
+            var screenBounds = currentScreen.Bounds;
+
+            var source = PresentationSource.FromVisual(this);
+            double dpiScaleX = 1.0;
+            double dpiScaleY = 1.0;
+
+            if (source?.CompositionTarget != null)
+            {
+                dpiScaleX = source.CompositionTarget.TransformToDevice.M11;
+                dpiScaleY = source.CompositionTarget.TransformToDevice.M22;
+            }
+
+            workAreaWidthDip = workingArea.Width / dpiScaleX;
+            workAreaHeightDip = workingArea.Height / dpiScaleY;
+            screenLeftDip = screenBounds.Left / dpiScaleX;
+            screenTopDip = screenBounds.Top / dpiScaleY;
+        }
+
+        private void SetMaxSizeAndCenter()
+        {
+            if (!this.IsLoaded) return;
+
+            GetWorkAreaSize(out double workAreaWidthDip, out double workAreaHeightDip, out double screenLeftDip, out double screenTopDip);
+
+            this.MaxWidth = workAreaWidthDip;
+            this.MaxHeight = workAreaHeightDip;
+
+            this.Left = screenLeftDip + (workAreaWidthDip - this.ActualWidth) / 2;
+            this.Top = screenTopDip + (workAreaHeightDip - this.ActualHeight) / 2;
+        }
+
+        private void RegisterDpiChangedListener()
+        {
+            _hwndSource = PresentationSource.FromVisual(this) as HwndSource;
+            _hwndSource?.AddHook(DpiChangedWndProc);
+        }
+
+        private void UnregisterDpiChangedListener()
+        {
+            _hwndSource?.RemoveHook(DpiChangedWndProc);
+            _hwndSource = null;
+        }
+
+        private IntPtr DpiChangedWndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            const int WM_DPICHANGED = 0x02E0;
+            if (msg == WM_DPICHANGED)
+            {
+                SetMaxSizeAndCenter();
+                handled = true;
+            }
+            return IntPtr.Zero;
+        }
+
+        #endregion
+
+        private void OobeWindow_OnClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            UnregisterDpiChangedListener();
+        }
+
         private void OobeWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
             try
@@ -482,6 +554,9 @@ namespace Ink_Canvas.Windows
             {
                 Opacity = 1;
             }
+
+            SetMaxSizeAndCenter();
+            RegisterDpiChangedListener();
         }
 
         private void UpdateView(int animateDirection, bool instant = false)
@@ -632,7 +707,7 @@ namespace Ink_Canvas.Windows
             AddSummaryRow(SegoeFluentIcons.Sync, UpdateStrings.Header_AutoUpdate, BoolText(CardAutoUpdate.IsOn));
             AddSummaryRow(SegoeFluentIcons.Personalize, Properties.OobeStrings.Oobe_SummaryAppTheme, themeText);
             AddSummaryRow(SegoeFluentIcons.FullScreen, ThemeStrings.Theme_WindowBackdrop, backdropText);
-            AddSummaryRow(SegoeFluentIcons.Slideshow, Properties.OobeStrings.Oobe_SummaryPptLink, BoolText(CardPptSupport.IsOn));
+            AddSummaryRow(SegoeFluentIcons.Slideshow, Properties.OobeStrings.Oobe_SummaryPPTLink, BoolText(CardPPTSupport.IsOn));
             AddSummaryRow(SegoeFluentIcons.TouchPointer, Properties.OobeStrings.Oobe_SummaryTwoFingerZoom,
                 $"{BoolText(CardTwoFingerZoom.IsOn)} / {BoolText(CardTwoFingerTranslate.IsOn)}");
             AddSummaryRow(SegoeFluentIcons.Pin, Properties.OobeStrings.Oobe_SummaryTrayIcon, BoolText(CardEnableTrayIcon.IsOn));

@@ -1,6 +1,6 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
-using InkCanvasPptAgent.Contracts;
+using InkCanvasPPTAgent.Contracts;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -58,12 +58,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var ppt = SettingsManager.Settings.PowerPointSettings;
 
             CardSupportPowerPoint.IsOn = ppt.PowerPointSupport;
-            ComboBoxPptArchitecture.SelectedIndex = (int)ppt.PptLinkMode;
+            ComboBoxPPTArchitecture.SelectedIndex = (int)ppt.PPTLinkMode;
             CardPowerPointEnhancement.IsOn = ppt.EnablePowerPointEnhancement;
             CardSkipAnimationsWhenGoNext.IsOn = ppt.SkipAnimationsWhenGoNext;
             CardSupportWPS.IsOn = ppt.IsSupportWPS;
             CardEnableWppProcessKill.IsOn = ppt.EnableWppProcessKill;
-            UpdatePptArchitectureDependentCards();
+            UpdatePPTArchitectureDependentCards();
 
             CardShowPPTButton.IsOn = ppt.ShowPPTButton;
             var displayOpt = ppt.PPTButtonsDisplayOption.ToString();
@@ -120,9 +120,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         #region PPT Basic
 
-        private void UpdatePptArchitectureDependentCards()
+        private void UpdatePPTArchitectureDependentCards()
         {
-            bool isComArchitecture = SettingsManager.Settings.PowerPointSettings.PptLinkMode == PptLinkMode.Com;
+            bool isComArchitecture = SettingsManager.Settings.PowerPointSettings.PPTLinkMode == PPTLinkMode.Com;
             var visibility = isComArchitecture ? Visibility.Visible : Visibility.Collapsed;
             CardPowerPointEnhancement.Visibility = visibility;
             CardSupportWPS.Visibility = visibility;
@@ -157,26 +157,26 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsActionHub.OnPPTEnhancementChanged(CardPowerPointEnhancement.IsOn);
         }
 
-        private void ComboBoxPptArchitecture_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ComboBoxPPTArchitecture_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!_isLoaded) return;
             var ppt = SettingsManager.Settings.PowerPointSettings;
-            var selectedMode = (PptLinkMode)Math.Max(0, ComboBoxPptArchitecture.SelectedIndex);
-            if (ppt.PptLinkMode == selectedMode) return;
+            var selectedMode = (PPTLinkMode)Math.Max(0, ComboBoxPPTArchitecture.SelectedIndex);
+            if (ppt.PPTLinkMode == selectedMode) return;
 
-            ppt.PptLinkMode = selectedMode;
-            if (ppt.PptLinkMode != PptLinkMode.Com)
+            ppt.PPTLinkMode = selectedMode;
+            if (ppt.PPTLinkMode != PPTLinkMode.Com)
             {
                 ppt.EnablePowerPointEnhancement = false;
                 ppt.IsSupportWPS = false;
                 CardPowerPointEnhancement.IsOn = false;
                 CardSupportWPS.IsOn = false;
             }
-            UpdatePptArchitectureDependentCards();
+            UpdatePPTArchitectureDependentCards();
             SettingsManager.SaveSettingsToFile();
             try
             {
-                SettingsActionHub.OnPptLinkModeChanged();
+                SettingsActionHub.OnPPTLinkModeChanged();
             }
             catch (Exception ex) { LogHelper.WriteLogToFile($"切换 PPT 联动架构失败: {ex}", LogHelper.LogType.Error); }
         }

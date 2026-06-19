@@ -134,7 +134,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             };
         }
 
-        public static ToolbarRuleset PptOnly()
+        public static ToolbarRuleset PPTOnly()
         {
             return new ToolbarRuleset
             {
@@ -147,14 +147,14 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                         Mode = ToolbarLogicalMode.And,
                         Rules = new List<ToolbarRule>
                         {
-                            new ToolbarRule { ConditionId = "isPptMode", IsReversed = true }
+                            new ToolbarRule { ConditionId = "isPPTMode", IsReversed = true }
                         }
                     }
                 }
             };
         }
 
-        public static ToolbarRuleset PptAnnotationOnly()
+        public static ToolbarRuleset PPTAnnotationOnly()
         {
             return new ToolbarRuleset
             {
@@ -167,7 +167,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                         Mode = ToolbarLogicalMode.Or,
                         Rules = new List<ToolbarRule>
                         {
-                            new ToolbarRule { ConditionId = "isPptMode", IsReversed = true },
+                            new ToolbarRule { ConditionId = "isPPTMode", IsReversed = true },
                             new ToolbarRule { ConditionId = "isAnnotating", IsReversed = true }
                         }
                     }
@@ -304,8 +304,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
     {
         AlwaysShow = 0,
         AnnotationOnly = 1,
-        PptOnly = 2,
-        PptAnnotationOnly = 3,
-        AnnotationOrPptGesture = 4
+        PPTOnly = 2,
+        PPTAnnotationOnly = 3,
+        AnnotationOrPPTGesture = 4
     }
 }

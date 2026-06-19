@@ -353,7 +353,7 @@ namespace Ink_Canvas
                 }
 
                 var currentMargin = ViewboxFloatingBar.Margin;
-                if (IsInPptPresentationMode)
+                if (IsInPPTPresentationMode)
                     pointPPT = new Point(currentMargin.Left, currentMargin.Top);
                 else
                     pointDesktop = new Point(currentMargin.Left, currentMargin.Top);
@@ -634,7 +634,12 @@ namespace Ink_Canvas
                             if (Pen_Icon != null && Pen_Icon.Icon != null)
                             {
                                 if (!ToolbarRegistry.GetUseRedStyle(Pen_Icon))
-                                    Pen_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
+                                {
+                                    if (Settings.Appearance.ShowPenColorOnFloatingBarIcon)
+                                        Pen_Icon.Icon.Brush = new SolidColorBrush(inkCanvas.DefaultDrawingAttributes.Color);
+                                    else
+                                        Pen_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
+                                }
                                 Pen_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("pen", true));
                             }
                             if (boardPen != null)
@@ -762,7 +767,7 @@ namespace Ink_Canvas
 
                 if (autoAlignCenter) // 控制居中
                 {
-                    if (IsInPptPresentationMode)
+                    if (IsInPPTPresentationMode)
                     {
                         await Task.Delay(50);
                         ViewboxFloatingBarMarginAnimation(60);
@@ -969,8 +974,8 @@ namespace Ink_Canvas
                 HideSubPanelsImmediately();
 
                 // 只有在PPT放映模式下且页数有效时才显示翻页按钮
-                if (ArePptControlsVisible &&
-                    IsInPptPresentationMode &&
+                if (ArePPTControlsVisible &&
+                    IsInPPTPresentationMode &&
                     PPTManager?.IsInSlideShow == true &&
                     PPTManager?.SlidesCount > 0)
                 {
@@ -996,7 +1001,7 @@ namespace Ink_Canvas
                 if (Settings.Automation.IsAutoSaveScreenshotAtClear &&
                     inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber) CaptureAndEnqueueScreenshotSave(true);
 
-                if (!IsInPptPresentationMode)
+                if (!IsInPPTPresentationMode)
                     new Thread(() =>
                     {
                         Thread.Sleep(300);
@@ -1053,7 +1058,7 @@ namespace Ink_Canvas
                 }
             }
 
-            if (currentMode == 0 && inkCanvas.Strokes.Count == 0 && !IsInPptPresentationMode)
+            if (currentMode == 0 && inkCanvas.Strokes.Count == 0 && !IsInPPTPresentationMode)
                 CursorIcon_Click(null, null);
 
             { /* Old UI removed */ }
@@ -1085,7 +1090,7 @@ namespace Ink_Canvas
             {
                 BtnHideInkCanvas_Click(null, null);
 
-                if (IsInPptPresentationMode)
+                if (IsInPPTPresentationMode)
                 {
                     await Task.Delay(100);
                     ViewboxFloatingBarMarginAnimation(60);
@@ -1113,7 +1118,7 @@ namespace Ink_Canvas
                 if (Settings.Automation.IsAutoSaveScreenshotAtClear &&
                     inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
                 {
-                    if (IsInPptPresentationMode)
+                    if (IsInPPTPresentationMode)
                     {
                         var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
                         var presentationName = _pptManager?.GetPresentationName() ?? "";
@@ -1326,7 +1331,7 @@ namespace Ink_Canvas
                 timerWindow.TimerCompleted += (s, args) =>
                 {
                     if (Settings.PowerPointSettings.EnablePPTTimeCapsule &&
-                        IsInPptPresentationMode &&
+                        IsInPPTPresentationMode &&
                         PPTTimeCapsule != null)
                     {
                         PPTTimeCapsule.OnTimerCompleted();
@@ -2154,7 +2159,7 @@ namespace Ink_Canvas
             RebuildToolbar();
 
             // 更新工具栏位置
-            if (IsInPptPresentationMode)
+            if (IsInPPTPresentationMode)
                 ViewboxFloatingBarMarginAnimation(60);
             else
                 PureViewboxFloatingBarMarginAnimationInDesktopMode();
@@ -2241,7 +2246,7 @@ namespace Ink_Canvas
             ToolbarRegistry.UpdateVisibilityByMode(
                 FloatingBarRootPanel,
                 IsAnnotating,
-                IsInPptPresentationMode);
+                IsInPPTPresentationMode);
         }
 
         private double ClampFloatingBarLeft(double left, double floatingBarWidth, double screenWidth)
@@ -2574,7 +2579,7 @@ namespace Ink_Canvas
         private void SaveFloatingBarPositionPoint()
         {
             var currentPoint = new Point(ViewboxFloatingBar.Margin.Left, ViewboxFloatingBar.Margin.Top);
-            if (IsInPptPresentationMode)
+            if (IsInPPTPresentationMode)
                 pointPPT = currentPoint;
             else
                 pointDesktop = currentPoint;
@@ -2793,7 +2798,7 @@ namespace Ink_Canvas
                     else
                         pos.X = screenWidth - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleX;
                 }
-                else if (IsInPptPresentationMode)
+                else if (IsInPPTPresentationMode)
                 {
                     switch (toolbarPosition)
                     {
@@ -2822,7 +2827,7 @@ namespace Ink_Canvas
                     pos.X = NormalizeFloatingBarLeftForScreen(pos.X, floatingBarWidth, screenWidth);
                 }
 
-                if (IsInPptPresentationMode)
+                if (IsInPPTPresentationMode)
                 {
                     if (pointPPT.X != -1 || pointPPT.Y != -1)
                     {
@@ -3261,7 +3266,7 @@ namespace Ink_Canvas
                 _lastFloatingBarScreenDeviceName = mouseScreen.DeviceName;
                 RebuildCanvasOnTargetScreen(mouseScreen);
 
-                if (IsInPptPresentationMode)
+                if (IsInPPTPresentationMode)
                 {
                     PureViewboxFloatingBarMarginAnimationInPPTMode();
                 }
@@ -3358,7 +3363,7 @@ namespace Ink_Canvas
             if (inkCanvas.Strokes.Count > 0 &&
                 inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
             {
-                if (IsInPptPresentationMode)
+                if (IsInPPTPresentationMode)
                 {
                     var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
                     var presentationName = _pptManager?.GetPresentationName() ?? "";
@@ -3367,7 +3372,7 @@ namespace Ink_Canvas
                 else CaptureAndEnqueueScreenshotSave(true);
             }
 
-            if (!IsInPptPresentationMode)
+            if (!IsInPPTPresentationMode)
             {
                 if (Settings.Canvas.HideStrokeWhenSelecting)
                 {
@@ -3437,7 +3442,7 @@ namespace Ink_Canvas
                 HideSubPanels("cursor", true);
                 await Task.Delay(50);
 
-                if (IsInPptPresentationMode)
+                if (IsInPPTPresentationMode)
                     ViewboxFloatingBarMarginAnimation(60);
                 else
                     ViewboxFloatingBarMarginAnimation(100, true);
@@ -4447,9 +4452,9 @@ namespace Ink_Canvas
 
             if (inkCanvas.Strokes.Count != 0)
             {
+                // 注入历史记录以便支持撤销
                 var whiteboardIndex = CurrentWhiteboardIndex;
                 if (currentMode == 0) whiteboardIndex = 0;
-                strokeCollections[whiteboardIndex] = inkCanvas.Strokes.Clone();
             }
 
             ClearStrokes(false);
@@ -4518,7 +4523,7 @@ namespace Ink_Canvas
             if (Settings.Advanced.IsEnableAvoidFullScreenHelper &&
                 isFullScreenApplied &&
                 currentMode == 0 && // 不在白板模式
-                !IsInPptPresentationMode) // 不在PPT放映模式
+                !IsInPPTPresentationMode) // 不在PPT放映模式
             {
                 // 恢复为非画板模式，重新启用全屏限制
                 AvoidFullScreenHelper.SetBoardMode(false);
@@ -4617,7 +4622,7 @@ namespace Ink_Canvas
 
                         // 退出白板模式时取消全屏（仅在非PPT模式下）
                         if (Settings.Advanced.IsEnableAvoidFullScreenHelper &&
-                            !IsInPptPresentationMode) // 不在PPT放映模式
+                            !IsInPPTPresentationMode) // 不在PPT放映模式
                         {
                             // 恢复为非画板模式，重新启用全屏限制
                             AvoidFullScreenHelper.SetBoardMode(false);
@@ -4640,7 +4645,7 @@ namespace Ink_Canvas
                         // 退出白板时自动收纳功能 - 等待浮动栏完全展开后再收纳
                         // 当处于PPT放映模式时，不自动收纳
                         if (Settings.Automation.IsAutoFoldWhenExitWhiteboard && !isFloatingBarFolded &&
-                            !IsInPptPresentationMode)
+                            !IsInPPTPresentationMode)
                         {
                             // 使用异步延迟，等待浮动栏展开动画完成后再收纳
                             Task.Run(async () =>
@@ -4692,7 +4697,7 @@ namespace Ink_Canvas
 
                         // 进入白板模式时全屏（仅在非PPT模式下）
                         if (Settings.Advanced.IsEnableAvoidFullScreenHelper &&
-                            !IsInPptPresentationMode) // 不在PPT放映模式
+                            !IsInPPTPresentationMode) // 不在PPT放映模式
                         {
                             // 设置为画板模式，允许全屏操作
                             AvoidFullScreenHelper.SetBoardMode(true);
@@ -4811,7 +4816,7 @@ namespace Ink_Canvas
             else
             {
                 // Auto-clear Strokes 要等待截图完成再清理笔记
-                if (!IsInPptPresentationMode)
+                if (!IsInPPTPresentationMode)
                 {
                     if (isLoaded && Settings.Automation.IsAutoClearWhenExitingWritingMode)
                         if (inkCanvas.Strokes.Count > 0)
@@ -5215,6 +5220,23 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 更新浮动栏批注图标颜色，使其反映当前画笔颜色（需开启 ShowPenColorOnFloatingBarIcon）
+        /// </summary>
+        internal void UpdatePenIconColor()
+        {
+            if (!Settings.Appearance.ShowPenColorOnFloatingBarIcon) return;
+            if (Pen_Icon == null || Pen_Icon.Icon == null) return;
+            if (_currentToolMode != "pen" && _currentToolMode != "color") return;
+
+            try
+            {
+                var inkColor = inkCanvas.DefaultDrawingAttributes.Color;
+                Pen_Icon.Icon.Brush = new SolidColorBrush(inkColor);
+            }
+            catch { }
+        }
+
+        /// <summary>
         /// 设置浮动栏高光显示位置
         /// </summary>
         /// <param name="mode">模式名称</param>
@@ -5309,7 +5331,12 @@ namespace Ink_Canvas
                 if (targetButton != null && targetIconType != null)
                 {
                     if (!ToolbarRegistry.GetUseRedStyle(targetButton))
-                        targetButton.Icon.Brush = new SolidColorBrush(highlightBarColor);
+                    {
+                        if (Settings.Appearance.ShowPenColorOnFloatingBarIcon && targetButton == Pen_Icon)
+                            targetButton.Icon.Brush = new SolidColorBrush(inkCanvas.DefaultDrawingAttributes.Color);
+                        else
+                            targetButton.Icon.Brush = new SolidColorBrush(highlightBarColor);
+                    }
                     targetButton.Icon.Geometry = Geometry.Parse(GetCorrectIcon(targetIconType, true));
                 }
             }

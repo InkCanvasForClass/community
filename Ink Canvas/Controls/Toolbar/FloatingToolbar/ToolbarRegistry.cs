@@ -72,7 +72,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         public static List<KeyValuePair<string, string>> AvailableConditions => new List<KeyValuePair<string, string>>
         {
             new KeyValuePair<string, string>("isAnnotating", Strings.GetString("ToolbarCondition_Annotating") ?? "Annotation mode"),
-            new KeyValuePair<string, string>("isPptMode", Strings.GetString("ToolbarCondition_PptMode") ?? "PPT mode"),
+            new KeyValuePair<string, string>("isPPTMode", Strings.GetString("ToolbarCondition_PPTMode") ?? "PPT mode"),
             new KeyValuePair<string, string>("isContentCollapsedByUser", Strings.GetString("ToolbarCondition_Collapsed") ?? "Toolbar collapsed")
         };
 
@@ -183,9 +183,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             {
                 ToolbarHidingRule.AlwaysShow => ToolbarRuleset.AlwaysShow(),
                 ToolbarHidingRule.AnnotationOnly => ToolbarRuleset.AnnotationOnly(),
-                ToolbarHidingRule.PptOnly => ToolbarRuleset.PptOnly(),
-                ToolbarHidingRule.PptAnnotationOnly => ToolbarRuleset.PptAnnotationOnly(),
-                ToolbarHidingRule.AnnotationOrPptGesture => ToolbarRuleset.AnnotationOnly(),
+                ToolbarHidingRule.PPTOnly => ToolbarRuleset.PPTOnly(),
+                ToolbarHidingRule.PPTAnnotationOnly => ToolbarRuleset.PPTAnnotationOnly(),
+                ToolbarHidingRule.AnnotationOrPPTGesture => ToolbarRuleset.AnnotationOnly(),
                 _ => ToolbarRuleset.AlwaysShow()
             };
         }
@@ -790,12 +790,12 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             element.Visibility = Visibility.Visible;
         }
 
-        public static void UpdateVisibilityByMode(Panel rootPanel, bool isAnnotating, bool isPptMode)
+        public static void UpdateVisibilityByMode(Panel rootPanel, bool isAnnotating, bool isPPTMode)
         {
             var context = new Dictionary<string, bool>
             {
                 ["isAnnotating"] = isAnnotating,
-                ["isPptMode"] = isPptMode,
+                ["isPPTMode"] = isPPTMode,
                 ["isContentCollapsedByUser"] = _isContentCollapsedByUser
             };
             UpdatePanelVisibility(rootPanel, context);
@@ -1051,7 +1051,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     new ToolbarComponentEntry { Id = "builtin.tools", HidingRuleset = ToolbarRuleset.AlwaysShow().WithHideOnCollapsed() },
                     new ToolbarComponentEntry { Id = "builtin.fold", HidingRuleset = ToolbarRuleset.AlwaysShow().WithHideOnCollapsed() },
                     new ToolbarComponentEntry { Id = "builtin.gesture", HidingRuleset = ToolbarRuleset.AnnotationOnly(), ShowSeparateBorder = true },
-                    new ToolbarComponentEntry { Id = "builtin.exit", HidingRuleset = ToolbarRuleset.PptOnly(), ShowSeparateBorder = true }
+                    new ToolbarComponentEntry { Id = "builtin.exit", HidingRuleset = ToolbarRuleset.PPTOnly(), ShowSeparateBorder = true }
                 }
             };
         }

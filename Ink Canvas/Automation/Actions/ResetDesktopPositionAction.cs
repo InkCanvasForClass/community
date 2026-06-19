@@ -48,7 +48,7 @@ namespace Ink_Canvas.WorkflowAutomation.ActionHandlers
                     mw.pointDesktop = new Point(-1, -1);
 
                     // 仅在非折叠且非PPT模式下执行动画
-                    if (!mw.isFloatingBarFolded && !mw.IsInPptPresentationMode)
+                    if (!mw.isFloatingBarFolded && !mw.IsInPPTPresentationMode)
                     {
                         mw.PureViewboxFloatingBarMarginAnimationInDesktopMode();
                     }

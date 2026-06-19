@@ -43,7 +43,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardEnableDynamic.IsOn = notification.IsDynamicNotificationEnabled;
             CardEnableWindowsToast.IsOn = notification.IsWindowsToastEnabled;
             ToggleSwitchDictationDoNotDisturb.IsOn = notification.IsDictationDoNotDisturbEnabled;
-            CheckBoxDictationDoNotDisturbPpt.IsChecked = notification.IsDictationDoNotDisturbInPptEnabled;
+            CheckBoxDictationDoNotDisturbPPT.IsChecked = notification.IsDictationDoNotDisturbInPPTEnabled;
             CheckBoxDictationDoNotDisturbWhiteboard.IsChecked = notification.IsDictationDoNotDisturbInWhiteboardEnabled;
 
             SelectComboBoxItemByTag(ComboBoxPlacement, notification.Placement, "TopCenter");
@@ -181,7 +181,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void DictationDoNotDisturbMode_CheckChanged(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Notification.IsDictationDoNotDisturbInPptEnabled = CheckBoxDictationDoNotDisturbPpt.IsChecked == true;
+            SettingsManager.Settings.Notification.IsDictationDoNotDisturbInPPTEnabled = CheckBoxDictationDoNotDisturbPPT.IsChecked == true;
             SettingsManager.Settings.Notification.IsDictationDoNotDisturbInWhiteboardEnabled = CheckBoxDictationDoNotDisturbWhiteboard.IsChecked == true;
             SaveSettings();
         }

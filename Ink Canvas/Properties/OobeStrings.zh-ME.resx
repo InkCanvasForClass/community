@@ -368,7 +368,7 @@
   <data name="Oobe_SummaryAppTheme" xml:space="preserve">
     <value>应用主题（换皮）</value>
   </data>
-  <data name="Oobe_SummaryPptLink" xml:space="preserve">
+  <data name="Oobe_SummaryPPTLink" xml:space="preserve">
     <value>PPT / WPS 联动</value>
   </data>
   <data name="Oobe_SummaryTwoFingerZoom" xml:space="preserve">

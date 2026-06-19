@@ -821,7 +821,7 @@ namespace Ink_Canvas.Windows
             newTimer.TimerCompleted += (s, args) =>
             {
                 if (MainWindow.Settings?.PowerPointSettings?.EnablePPTTimeCapsule == true
-                    && (Application.Current.MainWindow as MainWindow)?.IsInPptPresentationMode == true)
+                    && (Application.Current.MainWindow as MainWindow)?.IsInPPTPresentationMode == true)
                 {
                     OnTimerCompleted();
                 }

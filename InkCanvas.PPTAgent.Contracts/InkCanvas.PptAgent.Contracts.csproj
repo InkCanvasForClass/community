@@ -3,8 +3,8 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
-    <RootNamespace>InkCanvasPptAgent.Contracts</RootNamespace>
-    <AssemblyName>InkCanvas.PptAgent.Contracts</AssemblyName>
+    <RootNamespace>InkCanvasPPTAgent.Contracts</RootNamespace>
+    <AssemblyName>InkCanvas.PPTAgent.Contracts</AssemblyName>
     <LangVersion>10</LangVersion>
   </PropertyGroup>
 </Project>

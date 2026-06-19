@@ -2,6 +2,7 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -394,6 +395,7 @@ namespace Ink_Canvas
             {
                 // 如果设置为清空图片，则直接清空所有子元素
                 Debug.WriteLine("BoardSymbolIconDelete: Clearing all children including images");
+                ShutdownAllCanvasMediaElements();
                 inkCanvas.Children.Clear();
             }
             else
@@ -433,6 +435,7 @@ namespace Ink_Canvas
             {
                 // 如果设置为清空图片，则直接清空所有子元素
                 Debug.WriteLine("BoardSymbolIconDeleteInkAndHistories: Clearing all children including images");
+                ShutdownAllCanvasMediaElements();
                 inkCanvas.Children.Clear();
             }
             else

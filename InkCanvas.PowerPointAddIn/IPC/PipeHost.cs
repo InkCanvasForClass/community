@@ -3,7 +3,7 @@ using System.IO;
 using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
-using InkCanvasPptAgent.Contracts;
+using InkCanvasPPTAgent.Contracts;
 
 namespace InkCanvas.PowerPointAddIn.IPC
 {
