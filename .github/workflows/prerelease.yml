@@ -277,8 +277,7 @@ jobs:
         shell: pwsh
         run: |
           $cert = New-SelfSignedCertificate -Type CodeSigningCert -Subject "CN=ICC PowerPoint Agent Release" -CertStoreLocation "Cert:\CurrentUser\My" -NotAfter (Get-Date).AddYears(2)
-          $pwd = ConvertTo-SecureString -String "release-build" -Force -AsPlainText
-          Export-PfxCertificate -Cert $cert -FilePath "InkCanvas.PowerPointAddIn\InkCanvas.PowerPointAddIn_TemporaryKey.pfx" -Password $pwd
+          Export-PfxCertificate -Cert $cert -FilePath "InkCanvas.PowerPointAddIn\InkCanvas.PowerPointAddIn_TemporaryKey.pfx" -Password (New-Object System.Security.SecureString)
           echo "CERT_THUMBPRINT=$($cert.Thumbprint)" >> $env:GITHUB_OUTPUT
 
       - name: Build VSTO Add-in
@@ -286,7 +285,7 @@ jobs:
           $thumbprint = "${{ steps.gen-cert.outputs.CERT_THUMBPRINT }}"
           $csproj = "InkCanvas.PowerPointAddIn\InkCanvas.PowerPointAddIn.csproj"
           $content = Get-Content $csproj -Raw
-          $content = $content -replace '<SignManifests>true</SignManifests>', "<SignManifests>true</SignManifests><ManifestCertificateThumbprint>$thumbprint</ManifestCertificateThumbprint><ManifestKeyFile>InkCanvas.PowerPointAddIn_TemporaryKey.pfx</ManifestKeyFile>"
+          $content = $content -replace '<SignManifests>true</SignManifests>', "<SignManifests>true</SignManifests><ManifestCertificateThumbprint>$thumbprint</ManifestCertificateThumbprint><ManifestKeyFile>InkCanvas.PowerPointAddIn_TemporaryKey.pfx</ManifestKeyFile><ManifestCertificatePassword></ManifestCertificatePassword>"
           Set-Content $csproj $content -NoNewline
           msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" /p:Configuration=Release /verbosity:minimal -maxcpucount
           $publishDir = "artifacts/publish/${{ matrix.architecture }}"
