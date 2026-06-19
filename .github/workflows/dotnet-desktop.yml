@@ -51,19 +51,26 @@ jobs:
         shell: pwsh
         run: |
           if ("${{ secrets.CERT_PFX_BASE64 }}" -ne "") {
+            # 从 Secrets 恢复 PFX
             $cert = [System.Convert]::FromBase64String("${{ secrets.CERT_PFX_BASE64 }}")
             [System.IO.File]::WriteAllBytes("clickonce.pfx", $cert)
-            Write-Host "Certificate restored from secrets"
+            # 导入到 cert store（MSBuild 签名需要）
+            Import-PfxCertificate -FilePath "clickonce.pfx" -CertStoreLocation Cert:\CurrentUser\My -Password (New-Object System.Security.SecureString)
+            Write-Host "Certificate imported to Cert:\CurrentUser\My"
           } else {
-            $cert = New-SelfSignedCertificate `
+            # 无 secrets 时生成自签名证书（自动进入 cert store）
+            New-SelfSignedCertificate `
               -Type CodeSigningCert `
               -Subject "CN=ICC PowerPoint Agent CI" `
               -CertStoreLocation "Cert:\CurrentUser\My" `
               -KeyExportPolicy Exportable `
-              -NotAfter (Get-Date).AddYears(2)
-            Export-PfxCertificate -Cert $cert -FilePath "clickonce.pfx" -Password (New-Object System.Security.SecureString)
-            Write-Host "Generated self-signed certificate"
+              -NotAfter (Get-Date).AddYears(2) | Out-Null
+            Write-Host "Generated self-signed certificate in cert store"
           }
+          # 验证证书存在
+          $found = Get-ChildItem Cert:\CurrentUser\My | Where-Object { $_.HasPrivateKey -and $_.Subject -like "*ICC*" }
+          if (-not $found) { throw "No signing certificate found in Cert:\CurrentUser\My" }
+          Write-Host "Signing certificate ready: $($found.Thumbprint)"
 
       - name: Build the Solution
         env:

@@ -51,17 +51,20 @@ jobs:
           if ("${{ secrets.CERT_PFX_BASE64 }}" -ne "") {
             $cert = [System.Convert]::FromBase64String("${{ secrets.CERT_PFX_BASE64 }}")
             [System.IO.File]::WriteAllBytes("clickonce.pfx", $cert)
-            Write-Host "Certificate restored from secrets"
+            Import-PfxCertificate -FilePath "clickonce.pfx" -CertStoreLocation Cert:\CurrentUser\My -Password (New-Object System.Security.SecureString)
+            Write-Host "Certificate imported to Cert:\CurrentUser\My"
           } else {
-            $cert = New-SelfSignedCertificate `
+            New-SelfSignedCertificate `
               -Type CodeSigningCert `
               -Subject "CN=ICC PowerPoint Agent PR" `
               -CertStoreLocation "Cert:\CurrentUser\My" `
               -KeyExportPolicy Exportable `
-              -NotAfter (Get-Date).AddYears(2)
-            Export-PfxCertificate -Cert $cert -FilePath "clickonce.pfx" -Password (New-Object System.Security.SecureString)
-            Write-Host "Generated self-signed certificate"
+              -NotAfter (Get-Date).AddYears(2) | Out-Null
+            Write-Host "Generated self-signed certificate in cert store"
           }
+          $found = Get-ChildItem Cert:\CurrentUser\My | Where-Object { $_.HasPrivateKey -and $_.Subject -like "*ICC*" }
+          if (-not $found) { throw "No signing certificate found in Cert:\CurrentUser\My" }
+          Write-Host "Signing certificate ready: $($found.Thumbprint)"
 
       - name: Build the Solution
         run: msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Debug" /p:GitFlow="$GITFLOW" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
