@@ -90,7 +90,6 @@ jobs:
             /t:Publish `
             /p:Configuration=Debug `
             /p:PublishDir="InkCanvas.PowerPointAddIn\bin\publish\" `
-            /p:PublishUrl="file:///${{ github.workspace }}/InkCanvas.PowerPointAddIn/bin/publish/" `
             /p:SignManifests=true `
             /p:ManifestCertificateThumbprint=$env:SIGN_THUMBPRINT `
             /verbosity:minimal -maxcpucount
@@ -120,7 +119,6 @@ jobs:
             /t:Publish `
             /p:Configuration=Debug `
             /p:PublishDir="InkCanvas.PowerPointAddIn\bin\publish\" `
-            /p:PublishUrl="file:///${{ github.workspace }}/InkCanvas.PowerPointAddIn/bin/publish/" `
             /p:SignManifests=true `
             /p:ManifestCertificateThumbprint=$env:SIGN_THUMBPRINT `
             /verbosity:minimal -maxcpucount
