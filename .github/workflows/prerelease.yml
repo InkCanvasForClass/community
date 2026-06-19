@@ -295,9 +295,9 @@ jobs:
         run: |
           msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" `
             /p:Configuration=Release `
-            /p:SignManifests=true `
             /p:ManifestKeyFile=clickonce.pfx `
-            /p:ManifestCertificatePassword= `
+            /p:ManifestCertificatePassword="" `
+            /p:ManifestCertStoreLocation="" `
             /verbosity:minimal -maxcpucount
           $publishDir = "artifacts/publish/${{ matrix.architecture }}"
           $pptAgentDir = "$publishDir\ppt-agent"

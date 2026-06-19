@@ -71,9 +71,9 @@ jobs:
         run: |
           msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" `
             /p:Configuration=Debug `
-            /p:SignManifests=true `
             /p:ManifestKeyFile=clickonce.pfx `
-            /p:ManifestCertificatePassword= `
+            /p:ManifestCertificatePassword="" `
+            /p:ManifestCertStoreLocation="" `
             /verbosity:minimal -maxcpucount
           $pptAgentDir = "Ink Canvas\bin\Debug\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\ppt-agent"
           New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
