@@ -50,6 +50,7 @@ jobs:
 
       - name: Generate VSTO signing certificate
         if: matrix.architecture == 'AnyCPU'
+        id: gen-cert
         shell: pwsh
         run: |
           $cert = New-SelfSignedCertificate `
@@ -59,9 +60,7 @@ jobs:
             -NotAfter (Get-Date).AddYears(2)
           $pfxPath = "InkCanvas.PowerPointAddIn\InkCanvas.PowerPointAddIn_TemporaryKey.pfx"
           Export-PfxCertificate -Cert $cert -FilePath $pfxPath -Password (New-Object System.Security.SecureString)
-          $thumbprint = $cert.Thumbprint
-          echo "VSTO_CERT_THUMBPRINT=$thumbprint" >> $env:GITHUB_OUTPUT
-          echo "Generated certificate thumbprint: $thumbprint"
+          echo "VSTO_CERT_THUMBPRINT=$($cert.Thumbprint)" >> $env:GITHUB_OUTPUT
 
       - name: Configure VSTO signing
         if: matrix.architecture == 'AnyCPU'
