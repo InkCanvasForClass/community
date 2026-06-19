@@ -102,6 +102,7 @@ namespace Ink_Canvas.WorkflowAutomation
             services.AddRule<IsPptSlideshowRuleSettings>("inkcanvas.ispptslideshow", "PPT放映中", "Presentation");
             services.AddRule<ForegroundWindowProcessRuleSettings>("inkcanvas.foregroundwindowprocess", "前台窗口进程名", "Window");
             services.AddRule<IsFloatingBarFoldedRuleSettings>("inkcanvas.isfloatingbarfolded", "工具栏已折叠", "DockBottom");
+            services.AddRule<IsForegroundWhiteboardRuleSettings>("inkcanvas.isforegroundwhiteboard", "前台窗口是 ICC-CE 白板", "Whiteboard");
 
             // 6. 注册行动处理器（对齐 ClassIsland 的 IHostedService 模式）
             services.AddTransient<FoldActionHandler>();
@@ -156,6 +157,7 @@ namespace Ink_Canvas.WorkflowAutomation
             _rulesetService.RegisterRuleHandler("inkcanvas.ispptslideshow", IsPptSlideshowRule.Evaluate);
             _rulesetService.RegisterRuleHandler("inkcanvas.foregroundwindowprocess", ForegroundWindowProcessRule.Evaluate);
             _rulesetService.RegisterRuleHandler("inkcanvas.isfloatingbarfolded", IsFloatingBarFoldedRule.Evaluate);
+            _rulesetService.RegisterRuleHandler("inkcanvas.isforegroundwhiteboard", IsForegroundWhiteboardRule.Evaluate);
         }
 
         /// <summary>
