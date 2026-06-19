@@ -634,7 +634,12 @@ namespace Ink_Canvas
                             if (Pen_Icon != null && Pen_Icon.Icon != null)
                             {
                                 if (!ToolbarRegistry.GetUseRedStyle(Pen_Icon))
-                                    Pen_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
+                                {
+                                    if (Settings.Appearance.ShowPenColorOnFloatingBarIcon)
+                                        Pen_Icon.Icon.Brush = new SolidColorBrush(inkCanvas.DefaultDrawingAttributes.Color);
+                                    else
+                                        Pen_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
+                                }
                                 Pen_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("pen", true));
                             }
                             if (boardPen != null)
@@ -5215,6 +5220,23 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 更新浮动栏批注图标颜色，使其反映当前画笔颜色（需开启 ShowPenColorOnFloatingBarIcon）
+        /// </summary>
+        internal void UpdatePenIconColor()
+        {
+            if (!Settings.Appearance.ShowPenColorOnFloatingBarIcon) return;
+            if (Pen_Icon == null || Pen_Icon.Icon == null) return;
+            if (_currentToolMode != "pen" && _currentToolMode != "color") return;
+
+            try
+            {
+                var inkColor = inkCanvas.DefaultDrawingAttributes.Color;
+                Pen_Icon.Icon.Brush = new SolidColorBrush(inkColor);
+            }
+            catch { }
+        }
+
+        /// <summary>
         /// 设置浮动栏高光显示位置
         /// </summary>
         /// <param name="mode">模式名称</param>
@@ -5309,7 +5331,12 @@ namespace Ink_Canvas
                 if (targetButton != null && targetIconType != null)
                 {
                     if (!ToolbarRegistry.GetUseRedStyle(targetButton))
-                        targetButton.Icon.Brush = new SolidColorBrush(highlightBarColor);
+                    {
+                        if (Settings.Appearance.ShowPenColorOnFloatingBarIcon && targetButton == Pen_Icon)
+                            targetButton.Icon.Brush = new SolidColorBrush(inkCanvas.DefaultDrawingAttributes.Color);
+                        else
+                            targetButton.Icon.Brush = new SolidColorBrush(highlightBarColor);
+                    }
                     targetButton.Icon.Geometry = Geometry.Parse(GetCorrectIcon(targetIconType, true));
                 }
             }

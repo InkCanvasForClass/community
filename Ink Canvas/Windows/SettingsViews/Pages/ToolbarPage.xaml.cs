@@ -194,6 +194,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsActionHub.OnUseLegacyFloatingBarUIChanged();
         }
 
+        private void ToggleSwitchShowPenColorOnFloatingBarIcon_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.ShowPenColorOnFloatingBarIcon = CardShowPenColorOnFloatingBarIcon.IsOn;
+            SettingsManager.SaveSettingsToFile();
+            // Refresh the pen icon color on the floating bar
+            if (Application.Current.MainWindow is MainWindow mainWindow)
+                mainWindow.UpdatePenIconColor();
+        }
+
         #region Config file management
 
         private void RefreshConfigFileList()
@@ -330,6 +340,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             if (CardUseLegacyFloatingBarUI != null)
                 CardUseLegacyFloatingBarUI.IsOn = SettingsManager.Settings.Appearance.UseLegacyFloatingBarUI;
+
+            if (CardShowPenColorOnFloatingBarIcon != null)
+                CardShowPenColorOnFloatingBarIcon.IsOn = SettingsManager.Settings.Appearance.ShowPenColorOnFloatingBarIcon;
 
             LogHelper.WriteLogToFile($"{LogTag}: LoadSettings 完成 Count={AddedComponents.Count}", LogHelper.LogType.Info);
         }

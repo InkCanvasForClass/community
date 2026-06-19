@@ -581,6 +581,9 @@ namespace Ink_Canvas
         [JsonProperty("useFloatingQuickPanel")]
         public bool UseFloatingQuickPanel { get; set; } = true;
 
+        [JsonProperty("showPenColorOnFloatingBarIcon")]
+        public bool ShowPenColorOnFloatingBarIcon { get; set; } = false;
+
         [JsonProperty("allowDragSidePanel")]
         public bool AllowDragSidePanel { get; set; } = true;
 

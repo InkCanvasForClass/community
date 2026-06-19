@@ -634,6 +634,9 @@ namespace Ink_Canvas
             {
                 UpdateQuickColorPaletteIndicator(inkCanvas.DefaultDrawingAttributes.Color);
             }
+
+            // 更新浮动栏批注图标颜色
+            UpdatePenIconColor();
         }
 
         /// <summary>
