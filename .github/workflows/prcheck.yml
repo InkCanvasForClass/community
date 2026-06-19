@@ -40,13 +40,35 @@ jobs:
       - name: Build the Solution
         run: msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Debug" /p:GitFlow="$GITFLOW" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
 
-      - name: Build VSTO Add-in
-        continue-on-error: true
+      - name: Install VSTO Runtime
+        shell: pwsh
         run: |
-          msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" /p:Configuration=Debug /p:SignManifests=false /verbosity:minimal -maxcpucount
+          $url = "https://go.microsoft.com/fwlink/?LinkId=499831"
+          $out = "$env:TEMP\VSTORuntime.exe"
+          Invoke-WebRequest -Uri $url -OutFile $out -UseBasicParsing
+          Start-Process -FilePath $out -ArgumentList "/quiet /norestart" -Wait -NoNewWindow
+
+      - name: Generate VSTO signing certificate
+        id: gen-cert
+        shell: pwsh
+        run: |
+          $cert = New-SelfSignedCertificate -Type CodeSigningCert -Subject "CN=ICC PowerPoint Agent CI" -CertStoreLocation "Cert:\CurrentUser\My" -NotAfter (Get-Date).AddYears(2)
+          $pwd = ConvertTo-SecureString -String "ci-build" -Force -AsPlainText
+          Export-PfxCertificate -Cert $cert -FilePath "InkCanvas.PowerPointAddIn\InkCanvas.PowerPointAddIn_TemporaryKey.pfx" -Password $pwd
+          echo "CERT_THUMBPRINT=$($cert.Thumbprint)" >> $env:GITHUB_OUTPUT
+
+      - name: Build VSTO Add-in
+        run: |
+          $thumbprint = "${{ steps.gen-cert.outputs.CERT_THUMBPRINT }}"
+          $csproj = "InkCanvas.PowerPointAddIn\InkCanvas.PowerPointAddIn.csproj"
+          $content = Get-Content $csproj -Raw
+          $content = $content -replace '<SignManifests>true</SignManifests>', "<SignManifests>true</SignManifests><ManifestCertificateThumbprint>$thumbprint</ManifestCertificateThumbprint><ManifestKeyFile>InkCanvas.PowerPointAddIn_TemporaryKey.pfx</ManifestKeyFile>"
+          Set-Content $csproj $content -NoNewline
+          msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" /p:Configuration=Debug /verbosity:minimal -maxcpucount
           $pptAgentDir = "Ink Canvas\bin\Debug\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\ppt-agent"
           New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
           Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll" $pptAgentDir -Force
+          Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.vsto" $pptAgentDir -Force -ErrorAction SilentlyContinue
           Copy-Item "InkCanvas.PptAgent.Contracts\bin\Debug\netstandard2.0\InkCanvas.PptAgent.Contracts.dll" $pptAgentDir -Force
 
       - name: Check VSTO DLL exists

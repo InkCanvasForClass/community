@@ -264,14 +264,36 @@ jobs:
             Copy-Item "Ink Canvas\bin\Release\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\*" $publishDir -Recurse -Force
           }
 
-      - name: Build VSTO Add-in
-        continue-on-error: true
+      - name: Install VSTO Runtime
+        shell: pwsh
         run: |
-          msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" /p:Configuration=Release /p:SignManifests=false /verbosity:minimal -maxcpucount
+          $url = "https://go.microsoft.com/fwlink/?LinkId=499831"
+          $out = "$env:TEMP\VSTORuntime.exe"
+          Invoke-WebRequest -Uri $url -OutFile $out -UseBasicParsing
+          Start-Process -FilePath $out -ArgumentList "/quiet /norestart" -Wait -NoNewWindow
+
+      - name: Generate VSTO signing certificate
+        id: gen-cert
+        shell: pwsh
+        run: |
+          $cert = New-SelfSignedCertificate -Type CodeSigningCert -Subject "CN=ICC PowerPoint Agent Release" -CertStoreLocation "Cert:\CurrentUser\My" -NotAfter (Get-Date).AddYears(2)
+          $pwd = ConvertTo-SecureString -String "release-build" -Force -AsPlainText
+          Export-PfxCertificate -Cert $cert -FilePath "InkCanvas.PowerPointAddIn\InkCanvas.PowerPointAddIn_TemporaryKey.pfx" -Password $pwd
+          echo "CERT_THUMBPRINT=$($cert.Thumbprint)" >> $env:GITHUB_OUTPUT
+
+      - name: Build VSTO Add-in
+        run: |
+          $thumbprint = "${{ steps.gen-cert.outputs.CERT_THUMBPRINT }}"
+          $csproj = "InkCanvas.PowerPointAddIn\InkCanvas.PowerPointAddIn.csproj"
+          $content = Get-Content $csproj -Raw
+          $content = $content -replace '<SignManifests>true</SignManifests>', "<SignManifests>true</SignManifests><ManifestCertificateThumbprint>$thumbprint</ManifestCertificateThumbprint><ManifestKeyFile>InkCanvas.PowerPointAddIn_TemporaryKey.pfx</ManifestKeyFile>"
+          Set-Content $csproj $content -NoNewline
+          msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" /p:Configuration=Release /verbosity:minimal -maxcpucount
           $publishDir = "artifacts/publish/${{ matrix.architecture }}"
           $pptAgentDir = "$publishDir\ppt-agent"
           New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
           Copy-Item "InkCanvas.PowerPointAddIn\bin\Release\InkCanvas.PowerPointAddIn.dll" $pptAgentDir -Force
+          Copy-Item "InkCanvas.PowerPointAddIn\bin\Release\InkCanvas.PowerPointAddIn.vsto" $pptAgentDir -Force -ErrorAction SilentlyContinue
           Copy-Item "InkCanvas.PptAgent.Contracts\bin\Debug\netstandard2.0\InkCanvas.PptAgent.Contracts.dll" $pptAgentDir -Force
 
       - name: Check VSTO DLL exists
