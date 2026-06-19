@@ -1984,9 +1984,7 @@ namespace Ink_Canvas
                 if (lastTouchDownStrokeCollection.Count() != inkCanvas.Strokes.Count() &&
                     !(drawingShapeMode == 9 && !isFirstTouchCuboid))
                 {
-                    var whiteboardIndex = CurrentWhiteboardIndex;
-                    if (currentMode == 0) whiteboardIndex = 0;
-                    strokeCollections[whiteboardIndex] = lastTouchDownStrokeCollection;
+                    // 笔画数量已变化（书写/擦除操作完成）
                 }
         }
 

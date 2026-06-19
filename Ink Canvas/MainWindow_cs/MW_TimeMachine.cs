@@ -472,6 +472,13 @@ namespace Ink_Canvas
                 stroke.StylusPointsReplaced -= Stroke_StylusPointsReplaced;
                 stroke.DrawingAttributesChanged -= Stroke_DrawingAttributesChanged;
                 StrokeInitialHistory.Remove(stroke);
+
+                // 清理绘制属性历史记录中的已移除笔画，防止内存泄漏
+                DrawingAttributesHistory.Remove(stroke);
+                foreach (var flagList in DrawingAttributesHistoryFlag.Values)
+                {
+                    flagList.Remove(stroke);
+                }
             }
 
             foreach (var stroke in e?.Added)

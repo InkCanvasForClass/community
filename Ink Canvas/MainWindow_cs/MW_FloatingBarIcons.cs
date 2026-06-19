@@ -4452,9 +4452,9 @@ namespace Ink_Canvas
 
             if (inkCanvas.Strokes.Count != 0)
             {
+                // 注入历史记录以便支持撤销
                 var whiteboardIndex = CurrentWhiteboardIndex;
                 if (currentMode == 0) whiteboardIndex = 0;
-                strokeCollections[whiteboardIndex] = inkCanvas.Strokes.Clone();
             }
 
             ClearStrokes(false);

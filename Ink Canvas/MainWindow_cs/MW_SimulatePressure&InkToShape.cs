@@ -2133,10 +2133,6 @@ namespace Ink_Canvas
         private void SetNewBackupOfStroke()
         {
             lastTouchDownStrokeCollection = inkCanvas.Strokes.Clone();
-            var whiteboardIndex = CurrentWhiteboardIndex;
-            if (currentMode == 0) whiteboardIndex = 0;
-
-            strokeCollections[whiteboardIndex] = lastTouchDownStrokeCollection;
         }
 
         /// <summary>

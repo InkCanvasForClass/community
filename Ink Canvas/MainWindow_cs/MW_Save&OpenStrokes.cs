@@ -876,9 +876,10 @@ namespace Ink_Canvas
         private void SaveSinglePageStrokesAsImage(string savePathWithName, bool newNotice)
         {
             // 全页面保存模式 - 保存整个墨迹页面的图像
-            var bitmap = new Bitmap(
+            using (var bitmap = new Bitmap(
                 Screen.PrimaryScreen.Bounds.Width,
-                Screen.PrimaryScreen.Bounds.Height);
+                Screen.PrimaryScreen.Bounds.Height))
+            {
 
             using (var g = Graphics.FromImage(bitmap))
             {
@@ -913,7 +914,8 @@ namespace Ink_Canvas
                 {
                     encoder.Save(ms);
                     ms.Seek(0, SeekOrigin.Begin);
-                    var imgBitmap = new Bitmap(ms);
+                    using (var imgBitmap = new Bitmap(ms))
+                    {
 
                     // 将生成的墨迹图像绘制到屏幕截图上
                     // 居中绘制，确保墨迹位于屏幕中央
@@ -940,8 +942,10 @@ namespace Ink_Canvas
                         {
                         }
                     });
+                    } // using imgBitmap
                 }
-            }
+            } // using g
+            } // using bitmap
 
             // 显示提示
             if (newNotice)
@@ -1377,9 +1381,15 @@ namespace Ink_Canvas
                     {
                         if (info.Type == "Image" && File.Exists(info.SourcePath))
                         {
+                            var bitmapImage = new BitmapImage();
+                            bitmapImage.BeginInit();
+                            bitmapImage.UriSource = new Uri(info.SourcePath);
+                            bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                            bitmapImage.EndInit();
+                            bitmapImage.Freeze();
                             var img = new Image
                             {
-                                Source = new BitmapImage(new Uri(info.SourcePath)),
+                                Source = bitmapImage,
                                 Width = info.Width,
                                 Height = info.Height,
                                 Stretch = Enum.TryParse<Stretch>(info.Stretch, out var stretch) ? stretch : Stretch.Fill
@@ -1536,9 +1546,15 @@ namespace Ink_Canvas
                 {
                     if (info.Type == "Image" && File.Exists(info.SourcePath))
                     {
+                        var bitmapImage = new BitmapImage();
+                        bitmapImage.BeginInit();
+                        bitmapImage.UriSource = new Uri(info.SourcePath);
+                        bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmapImage.EndInit();
+                        bitmapImage.Freeze();
                         var img = new Image
                         {
-                            Source = new BitmapImage(new Uri(info.SourcePath)),
+                            Source = bitmapImage,
                             Width = info.Width,
                             Height = info.Height,
                             Stretch = Enum.TryParse<Stretch>(info.Stretch, out var stretch) ? stretch : Stretch.Fill

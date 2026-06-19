@@ -3,6 +3,7 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -221,6 +222,9 @@ namespace Ink_Canvas
 
                 // 先清空当前画布的墨迹
                 inkCanvas.Strokes.Clear();
+
+                // 关闭所有媒体控件的播放器并释放文件句柄，再清空子元素
+                ShutdownAllCanvasMediaElements();
 
                 // 清空当前画布的所有内容（墨迹和图片）
                 // 这里必须清除图片，因为页面切换时需要完全重置画布状态
@@ -790,6 +794,22 @@ namespace Ink_Canvas
             BtnWhiteBoardDelete.IsEnabled = WhiteboardTotalCount != 1;
             UpdateInkFreezeButtonState();
             UpdateBoardToolbarState();
+        }
+
+        /// <summary>
+        /// 关闭画布上所有媒体控件的播放器并释放文件句柄，在清空画布前调用以防止内存泄漏。
+        /// </summary>
+        private void ShutdownAllCanvasMediaElements()
+        {
+            foreach (var mediaControl in inkCanvas.Children.OfType<CanvasMediaControl>())
+            {
+                mediaControl.Shutdown();
+            }
+            foreach (var media in inkCanvas.Children.OfType<System.Windows.Controls.MediaElement>())
+            {
+                media.Stop();
+                media.Source = null;
+            }
         }
     }
 }
