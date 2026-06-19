@@ -36,7 +36,7 @@ C:\Program Files\dotnet\dotnet.exe
 | Ink Canvas (主应用) | `Ink Canvas/InkCanvasForClass.csproj` | net6.0-windows10.0.19041.0 |
 | InkCanvas.Controls | `InkCanvas.Controls/InkCanvas.Controls.csproj` | net6.0-windows10.0.19041.0 |
 | InkCanvas.PluginSdk | `InkCanvas.PluginSdk/InkCanvas.PluginSdk.csproj` | net6.0-windows10.0.19041.0 |
-| InkCanvas.IACoreHelper | `InkCanvas.IACoreHelper/InkCanvas.IACoreHelper.csproj` | net6.0-windows10.0.19041.0 |
+| InkCanvas.IACoreHelper | `InkCanvas.IACoreHelper/InkCanvas.IACoreHelper.csproj` | net462 |
 | InkCanvas.SettingsTreeView | `InkCanvas.SettingsTreeView/InkCanvas.SettingsTreeView.csproj` | net6.0-windows10.0.19041.0 |
 
 ## 编译前检查

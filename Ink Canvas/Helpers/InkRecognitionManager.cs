@@ -96,7 +96,7 @@ namespace Ink_Canvas.Helpers
                     return RecognizeShapeWinRtOnDispatcherContext(strokes);
                 }
 
-                // IACore 必须走 IPC 辅助进程（x86/.NET 4.7.2）。
+                // IACore 必须走 IPC 辅助进程（x86/.NET 4.6.2）。
                 // 在 .NET 6 x64 主进程中本地加载 IAWinFX 会失败，故不再本地回退。
                 var ipcResult = IpcIACoreClient.Instance.Recognize(strokes);
                 return Task.FromResult(ipcResult);
