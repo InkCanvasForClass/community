@@ -201,8 +201,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (mw == null) return;
 
             ManagePickNameBackgroundsWindow dialog = new ManagePickNameBackgroundsWindow(mw);
-            dialog.Owner = mw;
-            dialog.ShowDialog();
+            dialog.Show();
         }
 
         #endregion

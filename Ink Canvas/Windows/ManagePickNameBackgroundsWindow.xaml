@@ -6,6 +6,8 @@
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         xmlns:local="clr-namespace:Ink_Canvas"
         mc:Ignorable="d"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        Topmost="False"
         Title="{x:Static props:RandomStrings.Random_ManageBg_WindowTitle}" Height="500" Width="750" WindowStartupLocation="CenterScreen">
     <Grid Margin="20">
         <Grid.RowDefinitions>

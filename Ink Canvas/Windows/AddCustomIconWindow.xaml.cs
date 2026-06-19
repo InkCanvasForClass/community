@@ -21,6 +21,8 @@ namespace Ink_Canvas
             mainWindow = owner;
             IsSuccess = false;
 
+            ApplyCurrentTheme();
+
             // 添加TextBox内容变化事件以检查是否可以保存
             IconNameTextBox.TextChanged += (s, e) => ValidateSaveButton();
         }
@@ -115,6 +117,36 @@ namespace Ink_Canvas
             {
                 MessageBox.Show(string.Format(Properties.RandomStrings.Random_AddIcon_SaveFailedFormat, ex.Message), Properties.RandomStrings.Random_Error, MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void ApplyCurrentTheme()
+        {
+            try
+            {
+                int themeIndex = MainWindow.Settings.Appearance.Theme;
+                var elementTheme = themeIndex switch
+                {
+                    0 => iNKORE.UI.WPF.Modern.ElementTheme.Light,
+                    1 => iNKORE.UI.WPF.Modern.ElementTheme.Dark,
+                    _ => IsSystemThemeLight() ? iNKORE.UI.WPF.Modern.ElementTheme.Light : iNKORE.UI.WPF.Modern.ElementTheme.Dark,
+                };
+                iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, elementTheme);
+            }
+            catch { }
+        }
+
+        private static bool IsSystemThemeLight()
+        {
+            try
+            {
+                using (var themeKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(
+                    @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"))
+                {
+                    if (themeKey?.GetValue("AppsUseLightTheme") is int v) return v == 1;
+                }
+            }
+            catch { }
+            return false;
         }
     }
 }

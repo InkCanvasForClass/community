@@ -262,7 +262,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var mw = Application.Current.MainWindow as MainWindow;
             if (mw == null) return;
             AddCustomIconWindow dialog = new AddCustomIconWindow(mw);
-            dialog.Owner = mw;
             dialog.ShowDialog();
             if (dialog.IsSuccess)
             {
@@ -275,8 +274,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var mw = Application.Current.MainWindow as MainWindow;
             if (mw == null) return;
             CustomIconWindow dialog = new CustomIconWindow(mw);
-            dialog.Owner = mw;
-            dialog.ShowDialog();
+            dialog.Show();
         }
 
         #endregion

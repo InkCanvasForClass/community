@@ -19,6 +19,8 @@ namespace Ink_Canvas
             InitializeComponent();
             mainWindow = owner;
 
+            ApplyCurrentTheme();
+
             // 从主窗口的设置获取自定义背景列表
             Backgrounds = new ObservableCollection<CustomPickNameBackground>(MainWindow.Settings.RandSettings.CustomPickNameBackgrounds);
             BackgroundsListView.ItemsSource = Backgrounds;
@@ -93,6 +95,36 @@ namespace Ink_Canvas
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void ApplyCurrentTheme()
+        {
+            try
+            {
+                int themeIndex = MainWindow.Settings.Appearance.Theme;
+                var elementTheme = themeIndex switch
+                {
+                    0 => iNKORE.UI.WPF.Modern.ElementTheme.Light,
+                    1 => iNKORE.UI.WPF.Modern.ElementTheme.Dark,
+                    _ => IsSystemThemeLight() ? iNKORE.UI.WPF.Modern.ElementTheme.Light : iNKORE.UI.WPF.Modern.ElementTheme.Dark,
+                };
+                iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, elementTheme);
+            }
+            catch { }
+        }
+
+        private static bool IsSystemThemeLight()
+        {
+            try
+            {
+                using (var themeKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(
+                    @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"))
+                {
+                    if (themeKey?.GetValue("AppsUseLightTheme") is int v) return v == 1;
+                }
+            }
+            catch { }
+            return false;
         }
     }
 }
