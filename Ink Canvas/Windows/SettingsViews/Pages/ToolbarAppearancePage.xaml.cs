@@ -274,6 +274,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var mw = Application.Current.MainWindow as MainWindow;
             if (mw == null) return;
             CustomIconWindow dialog = new CustomIconWindow(mw);
+            Ink_Canvas.Helpers.WindowTopmostManager.RegisterWindow(dialog);
             dialog.Show();
         }
 
