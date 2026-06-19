@@ -93,10 +93,13 @@ jobs:
             /verbosity:minimal -maxcpucount
           $pptAgentDir = "Ink Canvas\bin\Debug\AnyCPU\net6.0-windows10.0.19041.0\ppt-agent"
           New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
-          Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll" $pptAgentDir -Force
-          Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.vsto" $pptAgentDir -Force -ErrorAction SilentlyContinue
-          Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll.manifest" $pptAgentDir -Force -ErrorAction SilentlyContinue
+          Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\*" $pptAgentDir -Recurse -Force
           Copy-Item "InkCanvas.PPTAgent.Contracts\bin\Debug\netstandard2.0\InkCanvas.PPTAgent.Contracts.dll" $pptAgentDir -Force
+          Get-ChildItem $pptAgentDir | Select-Object Name
+          if (-not (Test-Path "$pptAgentDir\Microsoft.Office.Tools.Common.v4.0.Utilities.dll")) {
+            Write-Error "缺少 VSTO 依赖 DLL，artifact 不完整"
+            exit 1
+          }
 
       - name: Check VSTO build result
         if: matrix.architecture == 'AnyCPU'
@@ -119,10 +122,13 @@ jobs:
             /verbosity:minimal -maxcpucount
           $pptAgentDir = "Ink Canvas\bin\Debug\x86\net6.0-windows10.0.19041.0\ppt-agent"
           New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
-          Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll" $pptAgentDir -Force
-          Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.vsto" $pptAgentDir -Force -ErrorAction SilentlyContinue
-          Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll.manifest" $pptAgentDir -Force -ErrorAction SilentlyContinue
+          Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\*" $pptAgentDir -Recurse -Force
           Copy-Item "InkCanvas.PPTAgent.Contracts\bin\Debug\netstandard2.0\InkCanvas.PPTAgent.Contracts.dll" $pptAgentDir -Force
+          Get-ChildItem $pptAgentDir | Select-Object Name
+          if (-not (Test-Path "$pptAgentDir\Microsoft.Office.Tools.Common.v4.0.Utilities.dll")) {
+            Write-Error "缺少 VSTO 依赖 DLL，artifact 不完整"
+            exit 1
+          }
 
       - name: Check VSTO build result (x86)
         if: matrix.architecture == 'x86'

@@ -305,10 +305,13 @@ jobs:
           $publishDir = "artifacts/publish/${{ matrix.architecture }}"
           $pptAgentDir = "$publishDir\ppt-agent"
           New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
-          Copy-Item "InkCanvas.PowerPointAddIn\bin\Release\InkCanvas.PowerPointAddIn.dll" $pptAgentDir -Force
-          Copy-Item "InkCanvas.PowerPointAddIn\bin\Release\InkCanvas.PowerPointAddIn.vsto" $pptAgentDir -Force -ErrorAction SilentlyContinue
-          Copy-Item "InkCanvas.PowerPointAddIn\bin\Release\InkCanvas.PowerPointAddIn.dll.manifest" $pptAgentDir -Force -ErrorAction SilentlyContinue
-          Copy-Item "InkCanvas.PPTAgent.Contracts\bin\Debug\netstandard2.0\InkCanvas.PPTAgent.Contracts.dll" $pptAgentDir -Force
+          Copy-Item "InkCanvas.PowerPointAddIn\bin\Release\*" $pptAgentDir -Recurse -Force
+          Copy-Item "InkCanvas.PPTAgent.Contracts\bin\Release\netstandard2.0\InkCanvas.PPTAgent.Contracts.dll" $pptAgentDir -Force
+          Get-ChildItem $pptAgentDir | Select-Object Name
+          if (-not (Test-Path "$pptAgentDir\Microsoft.Office.Tools.Common.v4.0.Utilities.dll")) {
+            Write-Error "缺少 VSTO 依赖 DLL，artifact 不完整"
+            exit 1
+          }
 
       - name: Check VSTO DLL exists
         run: |
