@@ -274,13 +274,13 @@
     <value>Auto-play or rehearsal timings detected, which may cause automatic slide advancement. Disable?</value>
   </data>
   <data name="PPT_ModePrompt_Message" xml:space="preserve">
-    <value>Click the annotation bar icon to collapse or expand annotations.</value>
+    <value>Click the annotation bar icon to collapse/expand, drag to move, or click the page number to navigate.</value>
   </data>
   <data name="PPT_ModePrompt_Setting" xml:space="preserve">
     <value>Show annotation bar prompt when entering PPT mode</value>
   </data>
   <data name="PPT_ModePrompt_SettingHint" xml:space="preserve">
-    <value>When enabled, shows a hint for collapsing or expanding the annotation bar every time PPT slideshow/integration mode starts.</value>
+    <value>When enabled, shows a hint for basic annotation bar operations every time PPT slideshow/integration mode starts.</value>
   </data>
   <data name="PPT_ModePrompt_Title" xml:space="preserve">
     <value>PPT mode entered</value>

@@ -274,13 +274,13 @@
     <value>检测到自动播放或排练计时开着，幻灯片可能会自己跑，要不要封印它？</value>
   </data>
   <data name="PPT_ModePrompt_Message" xml:space="preserve">
-    <value>点击批注栏图标就能折叠/展开批注。</value>
+    <value>点击批注栏图标就能折叠/展开批注栏，拖动图标可移动位置，点击页数可快捷翻页。</value>
   </data>
   <data name="PPT_ModePrompt_Setting" xml:space="preserve">
     <value>进入 PPT 模式时提示批注栏用法</value>
   </data>
   <data name="PPT_ModePrompt_SettingHint" xml:space="preserve">
-    <value>开启后，每次进入 PPT 放映/联动模式都会提示怎么折叠或展开批注栏。</value>
+    <value>开启后，每次进入 PPT 放映/联动模式都会提示批注栏的基本操作。</value>
   </data>
   <data name="PPT_ModePrompt_Title" xml:space="preserve">
     <value>已进入 PPT 模式</value>
