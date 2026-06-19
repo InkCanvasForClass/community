@@ -198,6 +198,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <None Include="InkCanvas.PowerPointAddIn_1_TemporaryKey.pfx" />
+    <None Include="InkCanvas.PowerPointAddIn_2_TemporaryKey.pfx" />
     <None Include="InkCanvas.PowerPointAddIn_TemporaryKey.pfx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -247,10 +248,10 @@
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>78D791D122C0C75DF109BE643ADE7A8B07016C94</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>4FED88EC906BB5C32D5B6788722F03D7C3D48EF0</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>InkCanvas.PowerPointAddIn_1_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>InkCanvas.PowerPointAddIn_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <!-- Include the build rules for a C# project. -->
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
