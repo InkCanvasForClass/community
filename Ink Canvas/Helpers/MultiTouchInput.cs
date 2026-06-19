@@ -104,8 +104,29 @@ namespace Ink_Canvas.Helpers
         /// 在笔迹中添加点
         /// </summary>
         /// <param name="point"></param>
+        private bool _hasLastRawPoint;
+        private Point _lastRawPoint;
+        // 相邻采样点跳变超过该距离视为脏点（湿墨迹预览采样频繁，正常笔速不会有此跳变）
+        private const double MaxPointJump = 600.0;
+
         public void Add(StylusPoint point)
         {
+            // .NET 6 触摸栈偶发产生 (0,0) 或大幅跳变的脏点，直接加入会与正常笔迹
+            // 连成一条横穿屏幕的异常直线（即“异常湿墨迹”）。在源头过滤这些点。
+            if (point.X == 0 && point.Y == 0)
+                return;
+
+            if (_hasLastRawPoint)
+            {
+                var dx = point.X - _lastRawPoint.X;
+                var dy = point.Y - _lastRawPoint.Y;
+                if (dx * dx + dy * dy > MaxPointJump * MaxPointJump)
+                    return;
+            }
+
+            _lastRawPoint = new Point(point.X, point.Y);
+            _hasLastRawPoint = true;
+
             if (Stroke == null)
             {
                 var collection = new StylusPointCollection { point };
