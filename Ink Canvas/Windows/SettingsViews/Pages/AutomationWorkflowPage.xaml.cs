@@ -678,6 +678,22 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
         }
 
+        private static T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T target) return target;
+
+                var result = FindVisualChild<T>(child);
+                if (result != null) return result;
+            }
+
+            return null;
+        }
+
         // 行动操作
         private void BtnAddAction_Click(object sender, RoutedEventArgs e)
         {
@@ -698,10 +714,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void ComboBoxActionType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!_isLoaded) return;
+            if (!_isLoaded || _isUpdatingEditor) return;
             if (sender is ComboBox cb && cb.Tag is Ink_Canvas.WorkflowAutomation.Models.Action action)
             {
                 action.Id = cb.SelectedValue as string ?? "";
+                action.Settings = null;
+
+                if (FindVisualChild<AutomationSettingsPresenter>(cb.Parent) is { } presenter)
+                    presenter.RefreshContent();
+
                 Service.SaveConfig("ActionTypeChanged");
             }
         }
@@ -973,7 +994,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
         }
 
-        private void RefreshContent()
+        internal void RefreshContent()
         {
             var context = ResolveSettingsContext();
             if (context == null)
