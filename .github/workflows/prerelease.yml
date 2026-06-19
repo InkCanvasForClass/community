@@ -272,17 +272,23 @@ jobs:
           Invoke-WebRequest -Uri $url -OutFile $out -MaximumRedirection 10
           Start-Process -FilePath $out -ArgumentList "/quiet /norestart" -Wait -NoNewWindow
 
-      - name: Generate signing certificate
-        id: gen-cert
+      - name: Restore signing certificate
         shell: pwsh
         run: |
-          $cert = New-SelfSignedCertificate `
-            -Type CodeSigningCert `
-            -Subject "CN=ICC PowerPoint Agent Release" `
-            -CertStoreLocation "Cert:\CurrentUser\My" `
-            -KeyExportPolicy Exportable `
-            -NotAfter (Get-Date).AddYears(2)
-          Export-PfxCertificate -Cert $cert -FilePath "clickonce.pfx" -Password (New-Object System.Security.SecureString)
+          if ("${{ secrets.CERT_PFX_BASE64 }}" -ne "") {
+            $cert = [System.Convert]::FromBase64String("${{ secrets.CERT_PFX_BASE64 }}")
+            [System.IO.File]::WriteAllBytes("clickonce.pfx", $cert)
+            Write-Host "Certificate restored from secrets"
+          } else {
+            $cert = New-SelfSignedCertificate `
+              -Type CodeSigningCert `
+              -Subject "CN=ICC PowerPoint Agent Release" `
+              -CertStoreLocation "Cert:\CurrentUser\My" `
+              -KeyExportPolicy Exportable `
+              -NotAfter (Get-Date).AddYears(2)
+            Export-PfxCertificate -Cert $cert -FilePath "clickonce.pfx" -Password (New-Object System.Security.SecureString)
+            Write-Host "Generated self-signed certificate"
+          }
 
       - name: Build VSTO Add-in
         shell: pwsh
