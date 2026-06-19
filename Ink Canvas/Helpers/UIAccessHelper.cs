@@ -330,7 +330,7 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        public static bool RestartAsNormalUserWithUIAccess(string extraArgs = null, uint sourcePid = 0)
+        public static bool RestartAsNormalUserWithUIAccess(string extraArgs = null)
         {
             try
             {
@@ -346,23 +346,10 @@ namespace Ink_Canvas.Helpers
                     return false;
                 }
 
-                IntPtr userToken;
-                if (sourcePid != 0 && TryDuplicateUserPrimaryToken(sourcePid, sessionId, out userToken))
+                if (!GetUserPrimaryToken(sessionId, out IntPtr userToken))
                 {
-                    LogHelper.WriteLogToFile($"UIAccess | 已从原始进程 (PID={sourcePid}, Session={sessionId}) 复制用户令牌");
-                }
-                else
-                {
-                    if (sourcePid != 0)
-                    {
-                        LogHelper.WriteLogToFile($"UIAccess | 从原始进程 (PID={sourcePid}) 复制令牌失败，回退到 explorer.exe", LogHelper.LogType.Warning);
-                    }
-
-                    if (!GetUserPrimaryToken(sessionId, out userToken))
-                    {
-                        LogHelper.WriteLogToFile($"UIAccess | 获取普通用户令牌失败 (LastError={Marshal.GetLastWin32Error()})", LogHelper.LogType.Error);
-                        return false;
-                    }
+                    LogHelper.WriteLogToFile($"UIAccess | 获取普通用户令牌失败 (LastError={Marshal.GetLastWin32Error()})", LogHelper.LogType.Error);
+                    return false;
                 }
 
                 try
@@ -381,7 +368,7 @@ namespace Ink_Canvas.Helpers
                         }
 
                         LogHelper.WriteLogToFile("UIAccess | 已为普通用户令牌设置 UIAccess");
-                        return LaunchWithToken(userToken, AppendExtraArg(extraArgs, "--uia-child"));
+                        return LaunchWithToken(userToken, extraArgs);
                     }
                     finally
                     {
@@ -400,10 +387,10 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        public static bool LaunchNormalUserWithUIAccessFromElevatedHelper(uint sourcePid = 0)
+        public static bool LaunchNormalUserWithUIAccessFromElevatedHelper()
         {
-            LogHelper.WriteLogToFile($"UIAccess | 已进入 UIAccess 辅助启动模式 (SourcePID={sourcePid})");
-            return RestartAsNormalUserWithUIAccess(sourcePid: sourcePid);
+            LogHelper.WriteLogToFile("UIAccess | 已进入 UIAccess 辅助启动模式");
+            return RestartAsNormalUserWithUIAccess();
         }
 
         #endregion
@@ -733,7 +720,9 @@ namespace Ink_Canvas.Helpers
         private static bool LaunchWithToken(IntPtr token, string extraArgs)
         {
             string exePath = GetExecutablePathForRelaunch();
+            string workDir = System.IO.Path.GetDirectoryName(exePath);
 
+            // 重建命令行：保留原始参数，追加 --skip-mutex-check 防止单实例阻塞
             var cmdBuilder = new StringBuilder(32768);
             cmdBuilder.Append('"').Append(exePath).Append('"');
 
@@ -741,32 +730,23 @@ namespace Ink_Canvas.Helpers
             for (int i = 1; i < args.Length; i++)
             {
                 if (string.Equals(args[i], "--enable-uia-topmost-helper", StringComparison.OrdinalIgnoreCase))
-                {
                     continue;
-                }
 
-                if (string.Equals(args[i], "--uia-source-pid", StringComparison.OrdinalIgnoreCase))
-                {
-                    i++; // 跳过 PID 值
-                    continue;
-                }
-
+                // 单文件发布下，托管入口程序集位于 bundle 解压目录；重启时必须使用真实 exe，
+                // 不能把 EntryAssembly.Location / 解压路径带给新进程。
                 if (string.Equals(args[i], exePath, StringComparison.OrdinalIgnoreCase))
-                {
                     continue;
-                }
 
                 cmdBuilder.Append(' ');
                 AppendQuoted(cmdBuilder, args[i]);
             }
 
-            if (!string.IsNullOrWhiteSpace(extraArgs))
-            {
+            if (!string.IsNullOrEmpty(extraArgs))
                 cmdBuilder.Append(' ').Append(extraArgs);
-            }
 
+            // 防止单实例 Mutex 阻塞新进程
             if (Array.IndexOf(args, "--skip-mutex-check") < 0
-                && (extraArgs == null || extraArgs.IndexOf("--skip-mutex-check", StringComparison.OrdinalIgnoreCase) < 0))
+                && (extraArgs == null || extraArgs.IndexOf("--skip-mutex-check", StringComparison.Ordinal) < 0))
             {
                 cmdBuilder.Append(" --skip-mutex-check");
             }
@@ -774,29 +754,50 @@ namespace Ink_Canvas.Helpers
             var si = new STARTUPINFOW { cb = (uint)Marshal.SizeOf(typeof(STARTUPINFOW)) };
             GetStartupInfoW(ref si);
 
-            LogHelper.WriteLogToFile($"UIAccess | CreateProcessWithTokenW 启动: Cmd={cmdBuilder}");
-            bool ok = CreateProcessWithTokenW(
-                token,
-                LOGON_WITH_PROFILE,
-                null,
-                cmdBuilder,
-                CREATE_NEW_CONSOLE,
-                IntPtr.Zero,
-                null,
-                ref si,
-                out PROCESS_INFORMATION pi);
-
-            if (!ok)
+            IntPtr environment = IntPtr.Zero;
+            uint creationFlags = CREATE_UNICODE_ENVIRONMENT;
+            if (CreateEnvironmentBlock(out environment, token, false))
             {
-                int err = Marshal.GetLastWin32Error();
-                LogHelper.WriteLogToFile($"UIAccess | CreateProcessWithTokenW 失败: {err}; Exe={exePath}; Cmd={cmdBuilder}", LogHelper.LogType.Error);
-                return false;
+                creationFlags |= CREATE_UNICODE_ENVIRONMENT;
+            }
+            else
+            {
+                int envErr = Marshal.GetLastWin32Error();
+                LogHelper.WriteLogToFile($"UIAccess | CreateEnvironmentBlock 失败，使用当前环境继续启动: {envErr}", LogHelper.LogType.Warning);
             }
 
-            CloseHandle(pi.hProcess);
-            CloseHandle(pi.hThread);
-            LogHelper.WriteLogToFile($"UIAccess | 已使用 UIAccess 令牌启动新进程 (PID={pi.dwProcessId}, Exe={exePath})");
-            return true;
+            try
+            {
+                bool ok = CreateProcessWithTokenW(
+                    token,
+                    LOGON_WITH_PROFILE,
+                    exePath,
+                    cmdBuilder,
+                    creationFlags,
+                    environment,
+                    workDir,
+                    ref si,
+                    out PROCESS_INFORMATION pi);
+
+                if (!ok)
+                {
+                    int err = Marshal.GetLastWin32Error();
+                    LogHelper.WriteLogToFile($"UIAccess | CreateProcessWithTokenW 失败: {err}; Exe={exePath}; WorkDir={workDir}; Cmd={cmdBuilder}", LogHelper.LogType.Error);
+                    return false;
+                }
+
+                CloseHandle(pi.hProcess);
+                CloseHandle(pi.hThread);
+                LogHelper.WriteLogToFile($"UIAccess | 已使用 UIAccess 令牌启动新进程 (PID={pi.dwProcessId}, Exe={exePath})");
+                return true;
+            }
+            finally
+            {
+                if (environment != IntPtr.Zero)
+                {
+                    DestroyEnvironmentBlock(environment);
+                }
+            }
         }
 
         private static string GetExecutablePathForRelaunch()
@@ -816,13 +817,6 @@ namespace Ink_Canvas.Helpers
                 return processPath;
 
             return System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
-        }
-
-        private static string AppendExtraArg(string existing, string newArg)
-        {
-            if (string.IsNullOrWhiteSpace(existing))
-                return newArg;
-            return existing + " " + newArg;
         }
 
         private static void AppendQuoted(StringBuilder sb, string arg)

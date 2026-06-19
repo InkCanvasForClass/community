@@ -138,18 +138,7 @@ namespace Ink_Canvas
 
             if (args.Contains("--enable-uia-topmost-helper"))
             {
-                uint sourcePid = 0;
-                for (int i = 0; i < args.Length - 1; i++)
-                {
-                    if (string.Equals(args[i], "--uia-source-pid", StringComparison.OrdinalIgnoreCase)
-                        && uint.TryParse(args[i + 1], out uint parsedPid))
-                    {
-                        sourcePid = parsedPid;
-                        break;
-                    }
-                }
-
-                Environment.Exit(UIAccessHelper.LaunchNormalUserWithUIAccessFromElevatedHelper(sourcePid) ? 0 : 1);
+                Environment.Exit(UIAccessHelper.LaunchNormalUserWithUIAccessFromElevatedHelper() ? 0 : 1);
                 return;
             }
 
