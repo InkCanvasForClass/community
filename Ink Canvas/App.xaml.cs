@@ -107,6 +107,7 @@ namespace Ink_Canvas
         public App()
         {
             System.Windows.Forms.Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
+            AppContext.SetSwitch("Switch.System.Windows.Input.Stylus.EnablePointerSupport", true);
 
             try
             {
