@@ -42,9 +42,9 @@ jobs:
         if: matrix.architecture == 'AnyCPU'
         shell: pwsh
         run: |
-          $url = "https://download.microsoft.com/download/4/d/f/4dfd00a8-5385-42f7-8359-65dd50a40894/vstoruntime.exe"
+          $url = "https://go.microsoft.com/fwlink/?LinkId=158918"
           $out = "$env:TEMP\VSTORuntime.exe"
-          Invoke-WebRequest -Uri $url -OutFile $out -UseBasicParsing
+          Invoke-WebRequest -Uri $url -OutFile $out -MaximumRedirection 10
           Start-Process -FilePath $out -ArgumentList "/quiet /norestart" -Wait -NoNewWindow
           Write-Host "VSTO Runtime installed"
 
