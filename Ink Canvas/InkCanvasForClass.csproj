@@ -145,16 +145,7 @@
   </ItemGroup>
   <Target Name="CopyVstoAgent" AfterTargets="Build">
     <PropertyGroup>
-      <!-- 探测 VSTO 运行时：兼容 Community / BuildTools，x86 / x64 -->
-      <_VstoPath1>$(MSBuildProgramFiles32)\Microsoft Visual Studio\2022\Community\Common7\IDE\ReferenceAssemblies\v4.0</_VstoPath1>
-      <_VstoPath2>$(ProgramFiles)\Microsoft Visual Studio\2022\Community\Common7\IDE\ReferenceAssemblies\v4.0</_VstoPath2>
-      <_VstoPath3>$(MSBuildProgramFiles32)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\ReferenceAssemblies\v4.0</_VstoPath3>
-      <_VstoPath4>$(ProgramFiles)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\ReferenceAssemblies\v4.0</_VstoPath4>
-      <VstoRuntimePath Condition="Exists('$(_VstoPath1)')">$(_VstoPath1)</VstoRuntimePath>
-      <VstoRuntimePath Condition="'$(VstoRuntimePath)' == '' And Exists('$(_VstoPath2)')">$(_VstoPath2)</VstoRuntimePath>
-      <VstoRuntimePath Condition="'$(VstoRuntimePath)' == '' And Exists('$(_VstoPath3)')">$(_VstoPath3)</VstoRuntimePath>
-      <VstoRuntimePath Condition="'$(VstoRuntimePath)' == '' And Exists('$(_VstoPath4)')">$(_VstoPath4)</VstoRuntimePath>
-      <VstoRuntimePath Condition="'$(VstoRuntimePath)' == ''">$(_VstoPath1)</VstoRuntimePath>
+      <VstoRuntimePath>$(MSBuildProgramFiles32)\Microsoft Visual Studio\2022\Community\Common7\IDE\ReferenceAssemblies\v4.0</VstoRuntimePath>
     </PropertyGroup>
     <MakeDir Directories="$(OutputPath)ppt-agent" />
     <Copy SourceFiles="..\InkCanvas.PowerPointAddIn\bin\$(Configuration)\InkCanvas.PowerPointAddIn.dll"
@@ -173,19 +164,19 @@
           DestinationFolder="$(OutputPath)ppt-agent" SkipUnchangedFiles="true"
           Condition="Exists('$(NuGetPackageRoot)newtonsoft.json\13.0.4\lib\net45\Newtonsoft.Json.dll')" />
     <Copy SourceFiles="$(VstoRuntimePath)\Microsoft.Office.Tools.dll"
-          DestinationFolder="$(OutputPath)ppt-agent" SkipUnchangedFiles="true"
+          DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true"
           Condition="Exists('$(VstoRuntimePath)\Microsoft.Office.Tools.dll')" />
     <Copy SourceFiles="$(VstoRuntimePath)\Microsoft.Office.Tools.Common.dll"
-          DestinationFolder="$(OutputPath)ppt-agent" SkipUnchangedFiles="true"
+          DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true"
           Condition="Exists('$(VstoRuntimePath)\Microsoft.Office.Tools.Common.dll')" />
     <Copy SourceFiles="$(VstoRuntimePath)\Microsoft.Office.Tools.Common.v4.0.Utilities.dll"
-          DestinationFolder="$(OutputPath)ppt-agent" SkipUnchangedFiles="true"
+          DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true"
           Condition="Exists('$(VstoRuntimePath)\Microsoft.Office.Tools.Common.v4.0.Utilities.dll')" />
     <Copy SourceFiles="$(VstoRuntimePath)\Microsoft.Office.Tools.v4.0.Framework.dll"
-          DestinationFolder="$(OutputPath)ppt-agent" SkipUnchangedFiles="true"
+          DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true"
           Condition="Exists('$(VstoRuntimePath)\Microsoft.Office.Tools.v4.0.Framework.dll')" />
     <Copy SourceFiles="$(VstoRuntimePath)\Microsoft.VisualStudio.Tools.Applications.Runtime.dll"
-          DestinationFolder="$(OutputPath)ppt-agent" SkipUnchangedFiles="true"
+          DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true"
           Condition="Exists('$(VstoRuntimePath)\Microsoft.VisualStudio.Tools.Applications.Runtime.dll')" />
   </Target>
   <ItemGroup Condition="'$(MSBuildRuntimeType)' == 'Full'">
