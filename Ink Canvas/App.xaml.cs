@@ -106,6 +106,9 @@ namespace Ink_Canvas
 
         public App()
         {
+            System.Windows.Forms.Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
+            DisablePointerStylusInputStack();
+
             try
             {
                 SetCurrentProcessExplicitAppUserModelID("InkCanvasForClass.CE");
@@ -165,6 +168,20 @@ namespace Ink_Canvas
                 StartWatchdogIfNeeded();
             }
             Exit += App_Exit; // 注册退出事件
+        }
+
+        private void DisablePointerStylusInputStack()
+        {
+            try
+            {
+                var tabletDeviceCollectionType = Type.GetType("System.Windows.Input.TabletDeviceCollection, PresentationCore");
+                var enablePointerProperty = tabletDeviceCollectionType?.GetProperty("EnableWM_POINTER", BindingFlags.NonPublic | BindingFlags.Static);
+                enablePointerProperty?.SetValue(null, false);
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler.HandleException(ex, "禁用 WM_POINTER 输入栈失败", LogHelper.LogType.Warning);
+            }
         }
 
         // 配置TLS协议以支持Windows 7
