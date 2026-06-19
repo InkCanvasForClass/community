@@ -2997,31 +2997,25 @@ namespace Ink_Canvas
                     });
                 }
 
-                // 结束放映
-                if (_pptManager?.TryEndSlideShow() == true)
+                await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    // 如果成功结束放映，等待OnPPTSlideShowEnd事件处理收纳状态恢复
-                }
-                else
-                {
-                    LogHelper.WriteLogToFile("结束幻灯片放映失败", LogHelper.LogType.Warning);
+                    CursorIcon_Click(null, null);
+                });
 
-                    // 手动更新UI状态，防止事件未触发
-                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                await Task.Delay(100);
+                await Application.Current.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.Background);
+
+                _ = Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
                     {
-                        _pptUIManager?.UpdateSlideShowStatus(false);
-                        _pptUIManager?.UpdateSidebarExitButtons(false);
-                        HideFloatingBarExitPPTBtn();
-                        LogHelper.WriteLogToFile("手动更新放映结束UI状态", LogHelper.LogType.Trace);
-                        CheckMainWindowVisibility();
-                    });
-
-                    // 手动处理自动收纳，因为OnPPTSlideShowEnd事件可能未触发
-                    await HandleManualSlideShowEnd();
-                }
-
-                HideSubPanels("cursor");
-                SetCurrentToolMode(InkCanvasEditingMode.None);
+                        _pptManager?.TryEndSlideShow();
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"结束放映时发生异常: {ex}", LogHelper.LogType.Error);
+                    }
+                }), DispatcherPriority.Normal);
 
                 await Task.Delay(150);
                 if (!isFloatingBarFolded)
