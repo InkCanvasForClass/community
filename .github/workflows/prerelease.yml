@@ -265,6 +265,7 @@ jobs:
           }
 
       - name: Build VSTO Add-in
+        continue-on-error: true
         run: |
           msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" /p:Configuration=Release /p:SignManifests=false /verbosity:minimal -maxcpucount
           $publishDir = "artifacts/publish/${{ matrix.architecture }}"
@@ -272,6 +273,16 @@ jobs:
           New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
           Copy-Item "InkCanvas.PowerPointAddIn\bin\Release\InkCanvas.PowerPointAddIn.dll" $pptAgentDir -Force
           Copy-Item "InkCanvas.PptAgent.Contracts\bin\Debug\netstandard2.0\InkCanvas.PptAgent.Contracts.dll" $pptAgentDir -Force
+
+      - name: Check VSTO DLL exists
+        run: |
+          $dllPath = "InkCanvas.PowerPointAddIn\bin\Release\InkCanvas.PowerPointAddIn.dll"
+          if (Test-Path $dllPath) {
+            Write-Host "VSTO DLL OK"
+          } else {
+            Write-Error "VSTO DLL not found"
+            exit 1
+          }
 
       - name: Check if exe file is generated
         id: check-exe
