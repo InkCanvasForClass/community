@@ -680,7 +680,7 @@ namespace Ink_Canvas
         [JsonProperty("powerPointSupport")]
         public bool PowerPointSupport { get; set; } = true;
         [JsonProperty("isShowCanvasAtNewSlideShow")]
-        public bool IsShowCanvasAtNewSlideShow { get; set; } = true;
+        public bool IsShowCanvasAtNewSlideShow { get; set; } = false;
         [JsonProperty("isNoClearStrokeOnSelectWhenInPowerPoint")]
         public bool IsNoClearStrokeOnSelectWhenInPowerPoint { get; set; } = true;
         [JsonProperty("isShowStrokeOnSelectInPowerPoint")]

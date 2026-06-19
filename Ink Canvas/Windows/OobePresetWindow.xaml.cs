@@ -153,28 +153,28 @@ namespace Ink_Canvas.Windows
             // 启动与隐私
             settings.Startup.IsFoldAtStartup = true;
             settings.Startup.IsAutoUpdate = true;
-            settings.Startup.CrashAction = 0; // 静默重启
+            settings.Startup.CrashAction = 2; // 弹窗重启
             settings.Startup.TelemetryUploadLevel = settings.Startup.HasAcceptedTelemetryPrivacy
-                ? TelemetryUploadLevel.Basic
+                ? TelemetryUploadLevel.Extended
                 : TelemetryUploadLevel.None;
 
             // 画板与墨迹
             settings.Canvas.IsShowCursor = false;
             settings.Canvas.DisablePressure = false;
-            settings.Canvas.HideStrokeWhenSelecting = true;
-            settings.Canvas.EnablePalmEraser = true;
+            settings.Canvas.HideStrokeWhenSelecting = false;
+            settings.Canvas.EnablePalmEraser = false;
 
             // 墨迹纠正
             settings.InkToShape.IsInkToShapeEnabled = true;
 
             // 手势
-            settings.Gesture.IsEnableTwoFingerZoom = true;
+            settings.Gesture.IsEnableTwoFingerZoom = false;
             settings.Gesture.IsEnableTwoFingerTranslate = true;
 
             // 个性化
-            settings.Appearance.Theme = 2; // 跟随系统
-            settings.Appearance.WindowBackdrop = "None";
-            settings.Appearance.EnableSplashScreen = false;
+            settings.Appearance.Theme = 2; 
+            settings.Appearance.WindowBackdrop = "Acrylic";
+            settings.Appearance.EnableSplashScreen = true;
             settings.Appearance.EnableTrayIcon = true;
             settings.Appearance.IsShowQuickPanel = true;
             settings.Appearance.EnableHotkeysInMouseMode = false;
@@ -184,14 +184,33 @@ namespace Ink_Canvas.Windows
             settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint = true;
             settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint = true;
             settings.PowerPointSettings.EnablePPTTimeCapsule = true;
+            settings.PowerPointSettings.PPTTimeCapsulePosition = 1;
+            settings.PowerPointSettings.PPTTimeCapsuleOpacity = 1.0;
+            settings.PowerPointSettings.PPTTimeCapsuleScale = 1.0;
+            settings.PowerPointSettings.PPTLinkMode = PPTLinkMode.Agent;
+            settings.PowerPointSettings.ShowPPTButton = true;
+            settings.PowerPointSettings.PPTButtonsDisplayOption = 2222;
+            settings.PowerPointSettings.EnablePPTButtonPageClickable = true;
+            settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn = true;
+            settings.PowerPointSettings.ShowPPTSidebarByDefault = false;
+            settings.PowerPointSettings.ShowPPTModePrompt = false;
+            settings.PowerPointSettings.IsShowCanvasAtNewSlideShow = false;
+            settings.PowerPointSettings.IsNoClearStrokeOnSelectWhenInPowerPoint = true;
+            settings.PowerPointSettings.IsShowStrokeOnSelectInPowerPoint = false;
+            settings.PowerPointSettings.IsNotifyPreviousPage = true;
+            settings.PowerPointSettings.IsNotifyHiddenPage = false;
+            settings.PowerPointSettings.IsNotifyAutoPlayPresentation = true;
+            settings.PowerPointSettings.EnableWppProcessKill = true;
+            settings.PowerPointSettings.EnablePowerPointEnhancement = false;
+            settings.PowerPointSettings.SkipAnimationsWhenGoNext = false;
 
             // 自动化
             settings.Automation.IsAutoFoldInPPTSlideShow = false;
             settings.Automation.IsEnableAutoSaveStrokes = true;
-            settings.Automation.IsAutoSaveScreenshotAtClear = true;
-            settings.Automation.IsSaveScreenshotsInDateFolders = true;
+            settings.Automation.IsAutoSaveScreenshotAtClear = false;
+            settings.Automation.IsSaveScreenshotsInDateFolders = false;
             if (settings.Automation.FloatingWindowInterceptor != null)
-                settings.Automation.FloatingWindowInterceptor.IsEnabled = true;
+                settings.Automation.FloatingWindowInterceptor.IsEnabled = false;
 
             // 随机点名
             settings.RandSettings.ShowRandomAndSingleDraw = true;
