@@ -11,26 +11,37 @@ namespace Ink_Canvas
     {
         [JsonProperty("advanced")]
         public Advanced Advanced { get; set; } = new Advanced();
+
         [JsonProperty("appearance")]
         public Appearance Appearance { get; set; } = new Appearance();
+
         [JsonProperty("automation")]
         public Automation Automation { get; set; } = new Automation();
+
         [JsonProperty("behavior")]
         public PowerPointSettings PowerPointSettings { get; set; } = new PowerPointSettings();
+
         [JsonProperty("canvas")]
         public Canvas Canvas { get; set; } = new Canvas();
+
         [JsonProperty("gesture")]
         public Gesture Gesture { get; set; } = new Gesture();
+
         [JsonProperty("inkToShape")]
         public InkToShape InkToShape { get; set; } = new InkToShape();
+
         [JsonProperty("startup")]
         public Startup Startup { get; set; } = new Startup();
+
         [JsonProperty("randSettings")]
         public RandSettings RandSettings { get; set; } = new RandSettings();
+
         [JsonProperty("modeSettings")]
         public ModeSettings ModeSettings { get; set; } = new ModeSettings();
+
         [JsonProperty("camera")]
         public CameraSettings Camera { get; set; } = new CameraSettings();
+
         [JsonProperty("dlass")]
         public DlassSettings Dlass { get; set; } = new DlassSettings();
 
@@ -225,14 +236,19 @@ namespace Ink_Canvas
     {
         [JsonProperty("inkWidth")]
         public double InkWidth { get; set; } = 2.5;
+
         [JsonProperty("highlighterWidth")]
         public double HighlighterWidth { get; set; } = 20;
+
         [JsonProperty("highlighterOverlapEnabled")]
         public bool HighlighterOverlapEnabled { get; set; } = false;
+
         [JsonProperty("inkAlpha")]
         public double InkAlpha { get; set; } = 255;
+
         [JsonProperty("highlighterAlpha")]
         public double HighlighterAlpha { get; set; } = 255;
+
         [JsonProperty("isShowCursor")]
         public bool IsShowCursor { get; set; }
         /// <summary>画笔光标类型：0 系统光标，1 软件内置光标（默认），2 用户自定义光标。</summary>
@@ -553,19 +569,30 @@ namespace Ink_Canvas
         [JsonProperty("windowBackdrop")]
         public string WindowBackdrop { get; set; } = "Mica";
 
-        // 浮动栏按钮显示控制
         [JsonProperty("useLegacyFloatingBarUI")]
         public bool UseLegacyFloatingBarUI { get; set; } = false;
+
+        [JsonProperty("compactFloatingBar")]
+        public bool CompactFloatingBar { get; set; } = false;
+
+        [JsonProperty("hideFloatingBarBorder")]
+        public bool HideFloatingBarBorder { get; set; } = false;
+
         [JsonProperty("eraserDisplayOption")]
         public int EraserDisplayOption { get; set; }
+
         [JsonProperty("isShowQuickColorPalette")]
         public bool IsShowQuickColorPalette { get; set; }
+
         [JsonProperty("quickColorPaletteDisplayMode")]
         public int QuickColorPaletteDisplayMode { get; set; } = 1;
+
         [JsonProperty("enableHotkeysInMouseMode")]
         public bool EnableHotkeysInMouseMode { get; set; } = false;
+
         [JsonProperty("language")]
         public string Language { get; set; } = "";
+
         [JsonProperty("use24HourTimeFormat")]
         public bool Use24HourTimeFormat { get; set; } = false;
 
@@ -610,7 +637,6 @@ namespace Ink_Canvas
 
         [JsonProperty("disableToolbarAnimation")]
         public bool DisableToolbarAnimation { get; set; } = false;
-
     }
 
     public enum PPTLinkMode

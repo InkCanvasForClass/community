@@ -94,6 +94,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // 加载在浮动栏图标上显示笔色设置
             if (CardShowPenColorOnFloatingBarIcon != null)
                 CardShowPenColorOnFloatingBarIcon.IsOn = settings.Appearance.ShowPenColorOnFloatingBarIcon;
+
+            // 加载紧凑浮动栏模式设置
+            if (ToggleSwitchCompactFloatingBar != null)
+                ToggleSwitchCompactFloatingBar.IsOn = settings.Appearance.CompactFloatingBar;
+
+            // 加载隐藏浮动栏边框设置
+            if (ToggleSwitchHideFloatingBarBorder != null)
+                ToggleSwitchHideFloatingBarBorder.IsOn = settings.Appearance.HideFloatingBarBorder;
         }
 
         private void UpdateAllSliderTexts()
@@ -240,6 +248,22 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // Refresh the pen icon color on the floating bar
             if (Application.Current.MainWindow is MainWindow mainWindow)
                 mainWindow.UpdatePenIconColor();
+        }
+
+        private void ToggleSwitchCompactFloatingBar_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.CompactFloatingBar = ToggleSwitchCompactFloatingBar.IsOn;
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnCompactFloatingBarChanged(ToggleSwitchCompactFloatingBar.IsOn);
+        }
+
+        private void ToggleSwitchHideFloatingBarBorder_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.HideFloatingBarBorder = ToggleSwitchHideFloatingBarBorder.IsOn;
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnHideFloatingBarBorderChanged(ToggleSwitchHideFloatingBarBorder.IsOn);
         }
 
         private void FloatingBarMenuOpacitySlider_ValueChanged(object sender, RoutedEventArgs e)

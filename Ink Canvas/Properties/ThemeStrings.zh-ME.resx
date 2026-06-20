@@ -285,6 +285,18 @@
   <data name="Theme_ShowPenColorOnFloatingBarIcon" xml:space="preserve">
     <value>批注图标显示当前画笔颜色</value>
   </data>
+  <data name="Theme_CompactFloatingBar" xml:space="preserve">
+    <value>装备栏省空间模式</value>
+  </data>
+  <data name="Theme_CompactFloatingBarHint" xml:space="preserve">
+    <value>打开后装备栏按钮下边的小字就不见了，图标会撑满整个按钮。</value>
+  </data>
+  <data name="Theme_HideFloatingBarBorder" xml:space="preserve">
+    <value>装备栏去白边</value>
+  </data>
+  <data name="Theme_HideFloatingBarBorderHint" xml:space="preserve">
+    <value>打开后把装备栏边框厚度调成 0，白边就没了。</value>
+  </data>
   <data name="Theme_WindowBackdrop" xml:space="preserve">
     <value>窗口背景样式</value>
   </data>

@@ -311,6 +311,8 @@ namespace Ink_Canvas
 
                 // 根据位置设置拖动图标的位置
                 SetToolbarHeadPosition(position);
+
+                ApplyHideFloatingBarBorder(Settings.Appearance.HideFloatingBarBorder);
             }
             catch (Exception ex)
             {
@@ -427,6 +429,8 @@ namespace Ink_Canvas
                 RefreshFloatingBarButtonColors();
                 RefreshGestureButtonIcon();
                 SetFloatingBarHighlightPosition(_currentToolMode);
+                ApplyCompactFloatingBarMode(Settings.Appearance.CompactFloatingBar);
+                ApplyHideFloatingBarBorder(Settings.Appearance.HideFloatingBarBorder);
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     UpdateQuickColorPaletteIndicator(inkCanvas.DefaultDrawingAttributes.Color);
@@ -436,6 +440,77 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"MW_Toolbar: RebuildToolbar 异常: {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 紧凑模式浮动栏整体缩放倍率（相对用户设置的倍率再缩小至此比例，保持纵横比）。
+        /// </summary>
+        public const double CompactFloatingBarScaleFactor = 0.85;
+
+        /// <summary>
+        /// 应用紧凑浮动栏模式：遍历浮动栏中的所有 ToolbarImageButton，
+        /// 开启时隐藏常驻文字标签并让图标按纵横比拉伸填满，同时整体等比缩小，关闭时恢复默认外观。
+        /// </summary>
+        internal void ApplyCompactFloatingBarMode(bool compact)
+        {
+            if (StackPanelFloatingBarRoot == null) return;
+            foreach (var btn in FindVisualChildren<Controls.ToolbarImageButton>(StackPanelFloatingBarRoot))
+            {
+                btn.ApplyCompactMode(compact);
+            }
+
+            // 浮动栏整体等比缩小（保持纵横比）
+            double baseScale = Settings.Appearance.ViewboxFloatingBarScaleTransformValue;
+            if (Math.Abs(baseScale) < 0.01) baseScale = 1.0;
+            double effectiveScale = compact ? baseScale * CompactFloatingBarScaleFactor : baseScale;
+            ApplyRawFloatingBarScale(effectiveScale);
+        }
+
+        /// <summary>
+        /// 直接设置浮动栏 ScaleTransform 的绝对值，不经过 Settings 保存。
+        /// </summary>
+        private void ApplyRawFloatingBarScale(double scale)
+        {
+            if (ViewboxFloatingBarScaleTransform == null) return;
+            _userHasDraggedFloatingBar = false;
+            pointDesktop = new Point(-1, -1);
+            pointPPT = new Point(-1, -1);
+            ViewboxFloatingBarScaleTransform.ScaleX = scale;
+            ViewboxFloatingBarScaleTransform.ScaleY = scale;
+            if (IsInPPTPresentationMode)
+                ViewboxFloatingBarMarginAnimation(60);
+            else
+                ViewboxFloatingBarMarginAnimation(100, true);
+        }
+
+        /// <summary>
+        /// 缓存浮动栏各 Border 的原始边框厚度，用于关闭无白边后恢复。
+        /// </summary>
+        private readonly System.Collections.Generic.Dictionary<System.Windows.Controls.Border, System.Windows.Thickness> _floatingBarBorderThicknessCache
+            = new System.Collections.Generic.Dictionary<System.Windows.Controls.Border, System.Windows.Thickness>();
+
+        /// <summary>
+        /// 应用隐藏浮动栏边框：开启时只隐藏浮动栏外层容器边框（实现无白边），
+        /// 关闭时从缓存恢复各容器 Border 原始厚度。
+        /// </summary>
+        internal void ApplyHideFloatingBarBorder(bool hide)
+        {
+            if (StackPanelFloatingBarRoot == null) return;
+            foreach (var border in FindVisualChildren<System.Windows.Controls.Border>(StackPanelFloatingBarRoot))
+            {
+                if (border.Tag as string != Controls.Toolbar.FloatingToolbar.ToolbarRegistry.ContentBorderTag && border != BorderFloatingBarMoveControls) continue;
+
+                if (hide)
+                {
+                    if (!_floatingBarBorderThicknessCache.ContainsKey(border))
+                        _floatingBarBorderThicknessCache[border] = border.BorderThickness;
+                    border.BorderThickness = new System.Windows.Thickness(0);
+                }
+                else if (_floatingBarBorderThicknessCache.TryGetValue(border, out var original))
+                {
+                    border.BorderThickness = original;
+                }
             }
         }
 

@@ -107,6 +107,33 @@ namespace Ink_Canvas.Controls
             }
         }
 
+        /// <summary>
+        /// 应用紧凑浮动栏模式：开启后隐藏常驻文字标签，并让图标在保持纵横比的前提下拉伸填满空出的区域。
+        /// </summary>
+        public void ApplyCompactMode(bool compact)
+        {
+            if (compact)
+            {
+                LabelTextBlock.Visibility = Visibility.Collapsed;
+                ButtonImage.HorizontalAlignment = HorizontalAlignment.Stretch;
+                ButtonImage.VerticalAlignment = VerticalAlignment.Stretch;
+                ButtonImage.Stretch = Stretch.Uniform;
+                ButtonImage.Width = double.NaN;
+                ButtonImage.Height = double.NaN;
+                ButtonImage.Margin = new Thickness(2);
+            }
+            else
+            {
+                LabelTextBlock.Visibility = Visibility.Visible;
+                ButtonImage.HorizontalAlignment = HorizontalAlignment.Center;
+                ButtonImage.VerticalAlignment = VerticalAlignment.Top;
+                ButtonImage.Stretch = Stretch.Uniform;
+                ButtonImage.Width = 24;
+                ButtonImage.Height = 24;
+                ButtonImage.Margin = new Thickness(0, 1, 0, 0);
+            }
+        }
+
         public void SetSelectedVisualOffset(bool isSelected)
         {
             if (ButtonContent == null) return;

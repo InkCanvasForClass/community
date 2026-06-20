@@ -12,13 +12,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
     public partial class StoragePage : Page
     {
         // 已知子目录定义。其余顶层文件归入“核心文件”或“其他”。
-        private static readonly string[] LogDirs = { "Logs", "Crashs" };
+        private static readonly string[] LogDirs = { "Logs", "Crashes" };
         private static readonly string[] InkDirs = { "Saves" };
         private static readonly string[] BackupDirs = { "Backups" };
         private static readonly string[] CustomDirs = { "icons", "backgrounds" };
-        private static readonly string[] PluginDirs = { "plugins", "Plugins" };
+        private static readonly string[] PluginDirs = { "Plugins", "PluginPackages", "PluginConfigs" };
         private static readonly string[] UpdateDirs = { "AutoUpdate" };
-        private static readonly string[] ConfigDirs = { "Configs" };
+        // 视为核心文件的目录（配置 / ppt-agent 联动组件 / 自动化工作流 / .NET 运行时等）
+        private static readonly string[] ConfigDirs = { "Configs", "ppt-agent", "Automations", "runtimes" };
 
         // 视为核心文件的扩展名(位于应用根目录下)
         private static readonly string[] CoreFileExtensions =
