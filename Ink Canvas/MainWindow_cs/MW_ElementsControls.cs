@@ -1297,6 +1297,7 @@ namespace Ink_Canvas
                 bool compress = isLoaded && Settings.Canvas.IsCompressPicturesUploaded;
                 var view = new PdfEmbeddedView();
                 await view.InitializeAsync(newFilePath, pageCount, compress);
+                WirePdfStrokePersistence(view);
                 view.Tag = filePath;
                 return view;
             }
@@ -1330,6 +1331,7 @@ namespace Ink_Canvas
                     Name = "pdf_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff")
                 };
                 await view.InitializeAsync(info.SourcePath, pageCount, compress, initial);
+                WirePdfStrokePersistence(view);
 
                 if (info.Width > 0) view.Width = info.Width;
                 if (info.Height > 0) view.Height = info.Height;
@@ -1347,6 +1349,44 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"从 .elements.json 恢复 PDF 失败: {ex.Message}", LogHelper.LogType.Error);
             }
+        }
+
+        /// <summary>为 PdfEmbeddedView 注入墨迹持久化回调，使墨迹跟随 PDF 翻页。</summary>
+        private void WirePdfStrokePersistence(PdfEmbeddedView view)
+        {
+            if (view == null) return;
+
+            view.EnableStrokesPersistence = true;
+            view.CaptureStrokes = () =>
+            {
+                if (inkCanvas?.Strokes == null || inkCanvas.Strokes.Count == 0)
+                    return null;
+                var ms = new MemoryStream();
+                inkCanvas.Strokes.Save(ms);
+                ms.Position = 0;
+                byte[] data = ms.ToArray();
+                ms.Dispose();
+                return data;
+            };
+            view.ApplyStrokes = (data) =>
+            {
+                if (data == null || data.Length <= 8) return;
+                try
+                {
+                    var sc = new StrokeCollection(new MemoryStream(data));
+                    if (sc.Count > 0)
+                        inkCanvas.Strokes.Add(sc);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"恢复 PDF 页墨迹失败: {ex.Message}", LogHelper.LogType.Warning);
+                }
+            };
+            view.ClearAllStrokes = () =>
+            {
+                ClearStrokes(true);
+                timeMachine.ClearStrokeHistory();
+            };
         }
 
         #endregion

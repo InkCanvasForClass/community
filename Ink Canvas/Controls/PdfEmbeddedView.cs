@@ -1,5 +1,6 @@
 using Ink_Canvas.Helpers;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,6 +11,7 @@ namespace Ink_Canvas.Controls
 {
     /// <summary>
     /// 画布上的多页 PDF：仅显示当前页；翻页与页码由主窗口 PDF 侧栏控制（无 XAML 文件）。
+    /// 支持墨迹跟随 PDF 翻页——每页的墨迹独立存储/恢复。
     /// </summary>
     public class PdfEmbeddedView : UserControl
     {
@@ -21,6 +23,21 @@ namespace Ink_Canvas.Controls
         private bool _compressLargePictures;
         private bool _isPagingBusy;
         private bool _layoutSizeCommitted;
+
+        /// <summary>是否在翻页时保存/恢复墨迹（由调用方在初始化后设置，默认 true）。</summary>
+        public bool EnableStrokesPersistence { get; set; } = true;
+
+        /// <summary>按页索引存储的已序列化墨迹数据。</summary>
+        private readonly Dictionary<uint, byte[]> _pageStrokes = new Dictionary<uint, byte[]>();
+
+        /// <summary>捕获当前 inkCanvas 墨迹为字节数组（由主窗口注入）。</summary>
+        public Func<byte[]> CaptureStrokes { get; set; }
+
+        /// <summary>将字节数组墨迹恢复到 inkCanvas（由主窗口注入）。</summary>
+        public Action<byte[]> ApplyStrokes { get; set; }
+
+        /// <summary>清除 inkCanvas 上所有墨迹（由主窗口注入，含 timeMachine 清理）。</summary>
+        public Action ClearAllStrokes { get; set; }
 
         /// <summary>页码或可翻页状态变化（用于更新侧栏）。</summary>
         public event EventHandler PageNavigationStateChanged;
@@ -92,8 +109,31 @@ namespace Ink_Canvas.Controls
             int next = (int)_currentIndex + delta;
             if (next < 0 || next >= _pageCount)
                 return;
+
+            // 翻页前保存当前页墨迹
+            if (EnableStrokesPersistence && CaptureStrokes != null)
+            {
+                byte[] strokes = CaptureStrokes();
+                _pageStrokes[_currentIndex] = strokes;
+            }
+
+            // 清除所有墨迹
+            if (EnableStrokesPersistence && ClearAllStrokes != null)
+            {
+                ClearAllStrokes();
+            }
+
             _currentIndex = (uint)next;
             await ShowPageAsync(_currentIndex);
+
+            // 翻页后恢复目标页墨迹
+            if (EnableStrokesPersistence && ApplyStrokes != null)
+            {
+                if (_pageStrokes.TryGetValue(_currentIndex, out byte[] savedStrokes) && savedStrokes != null && savedStrokes.Length > 8)
+                {
+                    ApplyStrokes(savedStrokes);
+                }
+            }
         }
 
         private async Task ShowPageAsync(uint pageIndex)
