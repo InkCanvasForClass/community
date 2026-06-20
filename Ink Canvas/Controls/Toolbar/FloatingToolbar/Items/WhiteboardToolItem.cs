@@ -10,6 +10,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public override string LocalizationKey => "FloatingBar_Whiteboard";
         public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public override string Description => FloatingBarStrings.FloatingBar_Whiteboard;
+        public override string IconGeometry => XamlGraphicsIconGeometries.WhiteboardFloatingBarBtnIcon;
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
         {

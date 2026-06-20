@@ -9,6 +9,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public override string LocalizationKey => "FloatingBar_Geometry";
         public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AnnotationOnly().WithHideOnCollapsed();
         public override string Description => GeometryStrings.Title;
+        public override string IconGeometry => XamlGraphicsIconGeometries.ShapesIcon;
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.ImageDrawShape_MouseUp(sender, e);

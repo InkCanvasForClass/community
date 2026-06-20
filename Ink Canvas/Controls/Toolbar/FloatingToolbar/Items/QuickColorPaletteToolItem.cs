@@ -9,7 +9,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public string Id => "builtin.quickColorPalette";
         public string DisplayName => FloatingBarStrings.FloatingBar_QuickPaletteMode;
         public string Description => FloatingBarStrings.ToolbarItem_Desc_QuickColorPalette;
-        public string IconGeometry => null;
+        public string IconGeometry => XamlGraphicsIconGeometries.ColorPaletteIconGeometry;
         public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AnnotationOnly().WithHideOnCollapsed();
         public bool DefaultShowSeparateBorder => false;
         public bool DefaultPreventHideOnDragClick => false;

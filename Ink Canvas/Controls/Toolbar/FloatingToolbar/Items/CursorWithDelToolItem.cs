@@ -9,6 +9,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public override string LocalizationKey => "FloatingBar_ClearAndMouse";
         public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AnnotationOnly().WithHideOnCollapsed();
         public override string Description => FloatingBarStrings.ToolbarItem_Desc_CursorWithDel;
+        public override string IconGeometry => XamlGraphicsIconGeometries.CursorWithDelFloatingBarBtnIcon;
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.CursorWithDelIcon_Click(sender, e);

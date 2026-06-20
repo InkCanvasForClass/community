@@ -9,6 +9,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public override string LocalizationKey => "Board_Undo";
         public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AnnotationOnly().WithHideOnCollapsed();
         public override string Description => FloatingBarStrings.Board_Undo;
+        public override string IconGeometry => XamlGraphicsIconGeometries.UndoIcon;
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.SymbolIconUndo_MouseUp(sender, e);

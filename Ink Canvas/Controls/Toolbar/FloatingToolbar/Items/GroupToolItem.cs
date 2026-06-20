@@ -9,7 +9,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public string Id => "builtin.group";
         public string DisplayName => FloatingBarStrings.ToolbarPage_GroupChildren;
         public string Description => FloatingBarStrings.ToolbarItem_Desc_Group;
-        public string IconGeometry => null;
+        public string IconGeometry => XamlGraphicsIconGeometries.GroupIconGeometry;
         public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public bool DefaultShowSeparateBorder => false;
         public bool DefaultPreventHideOnDragClick => false;

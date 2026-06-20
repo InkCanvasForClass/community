@@ -9,6 +9,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public override string LocalizationKey => "Board_Redo";
         public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AnnotationOnly().WithHideOnCollapsed();
         public override string Description => FloatingBarStrings.Board_Redo;
+        public override string IconGeometry => XamlGraphicsIconGeometries.RedoIcon;
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.SymbolIconRedo_MouseUp(sender, e);

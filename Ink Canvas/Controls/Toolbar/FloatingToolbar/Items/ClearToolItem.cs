@@ -12,6 +12,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
 
         protected override string IconBrushResourceKey => "RedBrush";
         protected override string LabelBrushResourceKey => "RedBrush";
+        public override string IconGeometry => XamlGraphicsIconGeometries.ClearInkIconGeometry;
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.SymbolIconDelete_MouseUp(sender, e);

@@ -9,6 +9,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public override string LocalizationKey => "FloatingBar_Freeze";
         public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public override string Description => FloatingBarStrings.ToolbarItem_Desc_InkFreeze;
+        public override string IconGeometry => XamlGraphicsIconGeometries.FreezeIconGeometry;
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.ToggleInkFreeze_MouseUp(sender, e);
