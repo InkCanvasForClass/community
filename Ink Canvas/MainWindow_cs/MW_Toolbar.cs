@@ -488,14 +488,16 @@ namespace Ink_Canvas
             = new System.Collections.Generic.Dictionary<System.Windows.Controls.Border, System.Windows.Thickness>();
 
         /// <summary>
-        /// 应用隐藏浮动栏边框：开启时把浮动栏内所有 Border 的边框厚度设为 0（实现无白边），
-        /// 关闭时从缓存恢复各 Border 原始厚度。
+        /// 应用隐藏浮动栏边框：开启时只隐藏浮动栏外层容器边框（实现无白边），
+        /// 关闭时从缓存恢复各容器 Border 原始厚度。
         /// </summary>
         internal void ApplyHideFloatingBarBorder(bool hide)
         {
             if (StackPanelFloatingBarRoot == null) return;
             foreach (var border in FindVisualChildren<System.Windows.Controls.Border>(StackPanelFloatingBarRoot))
             {
+                if (border.Tag as string != Controls.Toolbar.FloatingToolbar.ToolbarRegistry.ContentBorderTag && border != BorderFloatingBarMoveControls) continue;
+
                 if (hide)
                 {
                     if (!_floatingBarBorderThicknessCache.ContainsKey(border))
