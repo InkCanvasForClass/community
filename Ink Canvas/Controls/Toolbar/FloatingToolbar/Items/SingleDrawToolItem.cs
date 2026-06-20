@@ -9,7 +9,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public override string LocalizationKey => "QuickPanel_SingleDraw";
         public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public override string Description => FloatingBarStrings.QuickPanel_SingleDraw;
-        protected override string IconGeometry => XamlGraphicsIconGeometries.SingleDrawIconGeometry;
+        public override string IconGeometry => XamlGraphicsIconGeometries.SingleDrawIconGeometry;
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.SymbolIconRandOne_MouseUp(sender, e);

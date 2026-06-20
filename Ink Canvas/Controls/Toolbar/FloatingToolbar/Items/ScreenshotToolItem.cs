@@ -9,7 +9,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public override string LocalizationKey => "Tools_Screenshot";
         public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public override string Description => FloatingBarStrings.Tools_Screenshot;
-        protected override string IconGeometry => XamlGraphicsIconGeometries.ScreenshotIconGeometry;
+        public override string IconGeometry => XamlGraphicsIconGeometries.ScreenshotIconGeometry;
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.SymbolIconScreenshot_MouseUp(sender, e);

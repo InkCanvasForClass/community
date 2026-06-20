@@ -19,6 +19,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
     public partial class BoardToolbarPage : Page
     {
+        private void ListViewItem_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Control control)
+            {
+                control.ApplyTemplate();
+                if (control.Template.FindName("PressedBackground", control) is FrameworkElement indicator)
+                {
+                    indicator.Width = 3;
+                }
+            }
+        }
+
         private static readonly string LogTag = "BoardToolbarPage";
         private bool _isLoaded;
         private bool _suppressConfigChange;
@@ -66,14 +78,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             Loaded += OnPageLoaded;
         }
 
-        private void NestedScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
-        {
-            if (PageScrollViewer == null) return;
-
-            PageScrollViewer.ScrollToVerticalOffset(PageScrollViewer.VerticalOffset - e.Delta);
-            e.Handled = true;
-        }
-
         private void OnPageLoaded(object sender, RoutedEventArgs e)
         {
             try
@@ -89,7 +93,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 LogHelper.WriteLogToFile($"{LogTag}: OnPageLoaded 异常: {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}", LogHelper.LogType.Error);
             }
             _isLoaded = true;
-            Dispatcher.BeginInvoke(() => PageScrollViewer?.ScrollToTop(), System.Windows.Threading.DispatcherPriority.ContextIdle);
         }
 
         #region Config file management

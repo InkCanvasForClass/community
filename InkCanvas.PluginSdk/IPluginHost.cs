@@ -22,6 +22,7 @@ namespace Ink_Canvas.Plugins
         public string Id { get; set; }
         public string DisplayName { get; set; }
         public string Description { get; set; }
+        public string IconGeometry { get; set; }
         public Func<FrameworkElement> ViewFactory { get; set; }
         public Action<FrameworkElement, Orientation> ApplyOrientation { get; set; }
         public Action<FrameworkElement, Dictionary<string, object>> ApplySettings { get; set; }

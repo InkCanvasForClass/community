@@ -9,7 +9,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public override string LocalizationKey => "QuickPanel_Timer";
         public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public override string Description => FloatingBarStrings.QuickPanel_Timer;
-        protected override string IconGeometry => XamlGraphicsIconGeometries.TimerIconGeometry;
+        public override string IconGeometry => XamlGraphicsIconGeometries.TimerIconGeometry;
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.ImageCountdownTimer_MouseUp(sender, e);

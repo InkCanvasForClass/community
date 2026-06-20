@@ -11,7 +11,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public override bool DefaultShowSeparateBorder => true;
         public override bool DefaultPreventHideOnDragClick => true;
         public override string Description => FloatingBarStrings.ToolbarItem_Desc_Gesture;
-        protected override string IconGeometry => XamlGraphicsIconGeometries.DisabledGestureIcon;
+        public override string IconGeometry => XamlGraphicsIconGeometries.DisabledGestureIcon;
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.TwoFingerGestureBorder_MouseUp(sender, e);

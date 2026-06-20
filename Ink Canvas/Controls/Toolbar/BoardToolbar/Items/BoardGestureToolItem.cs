@@ -9,7 +9,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar.Items
         public override string Description => "手势";
         public override ButtonPosition DefaultPosition => ButtonPosition.First;
 
-        protected override string IconGeometry => XamlGraphicsIconGeometries.DisabledGestureIcon;
+        public override string IconGeometry => XamlGraphicsIconGeometries.DisabledGestureIcon;
 
         protected override void OnClick(IBoardToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.ToggleGesture();

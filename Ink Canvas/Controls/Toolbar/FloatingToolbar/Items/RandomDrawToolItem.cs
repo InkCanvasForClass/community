@@ -9,7 +9,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public override string LocalizationKey => "Tools_RandomDraw";
         public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public override string Description => FloatingBarStrings.Tools_RandomDraw;
-        protected override string IconGeometry => XamlGraphicsIconGeometries.RandomDrawIconGeometry;
+        public override string IconGeometry => XamlGraphicsIconGeometries.RandomDrawIconGeometry;
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.SymbolIconRand_MouseUp(sender, e);

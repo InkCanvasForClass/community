@@ -13,7 +13,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
 
         public string DisplayName => Strings.GetString(LocalizationKey) ?? LocalizationKey;
 
-        protected virtual string IconGeometry => null;
+        public virtual string IconGeometry => null;
 
         protected abstract void OnClick(IBoardToolbarHost host, object sender, MouseButtonEventArgs e);
 

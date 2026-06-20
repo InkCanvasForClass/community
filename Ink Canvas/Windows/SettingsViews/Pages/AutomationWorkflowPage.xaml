@@ -11,6 +11,7 @@
          xmlns:props="clr-namespace:Ink_Canvas.Properties"
          xmlns:sys="clr-namespace:System;assembly=mscorlib"
          xmlns:dd="urn:gong-wpf-dragdrop"
+         xmlns:touch="clr-namespace:Ink_Canvas.Helpers"
          mc:Ignorable="d"
          d:DesignHeight="800"
          d:DesignWidth="1200"
@@ -71,7 +72,8 @@
                          SelectionChanged="NavigationListBox_SelectionChanged"
                          HorizontalContentAlignment="Stretch"
                          dd:DragDrop.IsDragSource="True"
-                         dd:DragDrop.IsDropTarget="True">
+                         dd:DragDrop.IsDropTarget="True"
+                         touch:TouchAwareDragDropHelper.IsEnabled="True">
                     <!-- 预设自动化固定项 -->
                     <ListBoxItem x:Name="NavPresetItem" Padding="8">
                         <StackPanel Orientation="Horizontal">
@@ -89,8 +91,12 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
-                                <ui:FontIcon Grid.Column="0" Icon="{x:Static ui:SegoeFluentIcons.Rename}" Width="16" Height="16"
-                                             Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                <Border Grid.Column="0" touch:TouchAwareDragDropHelper.IsGripHandle="True"
+                                        Background="Transparent" Padding="2,4" Margin="0,0,4,0"
+                                        Cursor="SizeAll">
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Rename}" Width="16" Height="16"
+                                                 VerticalAlignment="Center"/>
+                                </Border>
                                 <TextBlock Grid.Column="1" Text="{Binding ActionSet.Name}"
                                            VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
@@ -547,7 +553,8 @@
 
                             <!-- 触发器列表 -->
                             <ItemsControl x:Name="TriggersItemsControl" Margin="0,0,0,8"
-                                          dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True">
+                                          dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True"
+                                          touch:TouchAwareDragDropHelper.IsEnabled="True">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Border Background="{DynamicResource ControlFillColorDefaultBrush}"
@@ -555,16 +562,25 @@
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
 
+                                                <!-- 拖动按钮 -->
+                                                <Border Grid.Column="0" touch:TouchAwareDragDropHelper.IsGripHandle="True"
+                                                        Background="Transparent" Padding="2,4" Margin="0,0,4,0"
+                                                        Cursor="SizeAll">
+                                                    <TextBlock Text="&#xE76F;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                                                               VerticalAlignment="Center" Opacity="0.45"/>
+                                                </Border>
+
                                                 <!-- 删除按钮 -->
-                                                <Button Grid.Column="0" Content="✕" Padding="4,0"
+                                                <Button Grid.Column="1" Content="✕" Padding="4,0"
                                                         Margin="0,0,8,0" Click="BtnRemoveTrigger_Click"
                                                         Tag="{Binding}" ToolTip="删除"/>
 
                                                 <!-- 触发器类型选择 -->
-                                                <ComboBox Grid.Column="1"
+                                                <ComboBox Grid.Column="2"
                                                           ItemsSource="{x:Static local:AutomationWorkflowPage.RegisteredTriggersList}"
                                                           DisplayMemberPath="Name" SelectedValuePath="Id"
                                                           SelectedValue="{Binding Id, Mode=TwoWay}"
@@ -620,13 +636,29 @@
                                 </WrapPanel>
 
                                 <!-- 条件组列表 -->
-                                <ItemsControl x:Name="RuleGroupsItemsControl">
+                                <ItemsControl x:Name="RuleGroupsItemsControl"
+                                              dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True"
+                                              touch:TouchAwareDragDropHelper.IsEnabled="True">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Border BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
                                                     BorderThickness="1" CornerRadius="6" Padding="8"
                                                     Margin="0,4" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}">
-                                                <StackPanel>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <!-- 拖动按钮 -->
+                                                    <Border Grid.Column="0" touch:TouchAwareDragDropHelper.IsGripHandle="True"
+                                                            Background="Transparent" Padding="2,4" Margin="0,0,4,0"
+                                                            Cursor="SizeAll">
+                                                        <TextBlock Text="&#xE76F;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                                                                   VerticalAlignment="Center" Opacity="0.45"/>
+                                                    </Border>
+
+                                                    <StackPanel Grid.Column="1">
                                                     <!-- 条件组头部 -->
                                                     <WrapPanel Orientation="Horizontal" Margin="0,0,0,6">
                                                         <ComboBox Padding="8,6" Margin="0,0,8,0"
@@ -697,7 +729,8 @@
                                                             </DataTemplate>
                                                         </ItemsControl.ItemTemplate>
                                                     </ItemsControl>
-                                                </StackPanel>
+                                                    </StackPanel>
+                                                </Grid>
                                             </Border>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
@@ -718,7 +751,8 @@
 
                             <!-- 行动列表 -->
                             <ItemsControl x:Name="ActionsItemsControl" Margin="0,0,0,8"
-                                          dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True">
+                                          dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True"
+                                          touch:TouchAwareDragDropHelper.IsEnabled="True">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Border Background="{DynamicResource ControlFillColorDefaultBrush}"
@@ -726,24 +760,33 @@
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
                                                     <ColumnDefinition Width="220"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
 
+                                                <!-- 拖动按钮 -->
+                                                <Border Grid.Column="0" touch:TouchAwareDragDropHelper.IsGripHandle="True"
+                                                        Background="Transparent" Padding="2,4" Margin="0,0,4,0"
+                                                        Cursor="SizeAll">
+                                                    <TextBlock Text="&#xE76F;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                                                               VerticalAlignment="Center" Opacity="0.45"/>
+                                                </Border>
+
                                                 <!-- 删除按钮 -->
-                                                <Button Grid.Column="0" Content="✕" Padding="4,0"
+                                                <Button Grid.Column="1" Content="✕" Padding="4,0"
                                                         Margin="0,0,8,0" Click="BtnRemoveAction_Click"
                                                         Tag="{Binding}" ToolTip="删除"/>
 
                                                 <!-- 行动类型选择 -->
-                                                <ComboBox Grid.Column="1"
+                                                <ComboBox Grid.Column="2"
                                                           ItemsSource="{x:Static local:AutomationWorkflowPage.RegisteredActionsList}"
                                                           DisplayMemberPath="Name" SelectedValuePath="Id"
                                                           SelectedValue="{Binding Id, Mode=TwoWay}"
                                                           SelectionChanged="ComboBoxActionType_SelectionChanged"
                                                           Tag="{Binding}" Padding="8,6" MinWidth="150"
                                                           VerticalAlignment="Center"/>
-                                                <local:AutomationSettingsPresenter Grid.Column="2"
+                                                <local:AutomationSettingsPresenter Grid.Column="3"
                                                                                    Margin="8,0,0,0"
                                                                                    VerticalAlignment="Center"
                                                                                    Item="{Binding}"

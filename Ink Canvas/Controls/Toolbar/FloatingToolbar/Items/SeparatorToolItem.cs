@@ -10,6 +10,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public string Id => "builtin.separator";
         public string DisplayName => FloatingBarStrings.ToolbarItem_Desc_Separator;
         public string Description => FloatingBarStrings.ToolbarItem_Desc_Separator;
+        public string IconGeometry => null;
         public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public bool DefaultShowSeparateBorder => false;
         public bool DefaultPreventHideOnDragClick => false;

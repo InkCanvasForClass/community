@@ -19,7 +19,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
 
         protected virtual string IconBrushResourceKey => null;
         protected virtual string LabelBrushResourceKey => null;
-        protected virtual string IconGeometry => null;
+        public virtual string IconGeometry => null;
 
         protected abstract void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e);
 

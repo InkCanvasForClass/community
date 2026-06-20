@@ -10,6 +10,8 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
 
         string Description { get; }
 
+        string IconGeometry { get; }
+
         ButtonPosition DefaultPosition { get; }
 
         FrameworkElement BuildView(IBoardToolbarHost host);

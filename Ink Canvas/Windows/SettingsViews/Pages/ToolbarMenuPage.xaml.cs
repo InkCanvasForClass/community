@@ -13,6 +13,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
     public partial class ToolbarMenuPage : Page, IDropTarget
     {
+        private void ListViewItem_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Control control)
+            {
+                control.ApplyTemplate();
+                if (control.Template.FindName("PressedBackground", control) is FrameworkElement indicator)
+                {
+                    indicator.Width = 3;
+                }
+            }
+        }
+
         private bool _suppressSave;
 
         public ObservableCollection<string> AddedItems { get; } = new ObservableCollection<string>();

@@ -11,6 +11,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
         string Description { get; }
 
+        string IconGeometry { get; }
+
         ToolbarRuleset DefaultHidingRuleset { get; }
 
         bool DefaultShowSeparateBorder { get; }

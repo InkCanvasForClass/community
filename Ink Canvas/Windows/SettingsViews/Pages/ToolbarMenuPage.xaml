@@ -8,22 +8,27 @@
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:dd="urn:gong-wpf-dragdrop"
       xmlns:toolbar="clr-namespace:Ink_Canvas.Controls.Toolbar"
+      xmlns:touch="clr-namespace:Ink_Canvas.Helpers"
       mc:Ignorable="d"
       Title="{x:Static props:NavStrings.Nav_ToolbarMenu}">
 
     <Page.Resources>
         <local:MenuItemIdToNameConverter x:Key="IdToNameConverter"/>
+        <local:StringToGeometryConverter x:Key="StringToGeometryConverter"/>
+        <Thickness x:Key="ListViewItemCompactSelectedBorderThemeThickness">1.5</Thickness>
 
         <DataTemplate x:Key="AddedItemTemplate" DataType="{x:Type sys:String}"
                       xmlns:sys="clr-namespace:System;assembly=mscorlib">
-            <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                    BorderThickness="1"
-                    CornerRadius="6" Padding="10,6" Margin="2"
+            <Border BorderThickness="0"
+                    CornerRadius="6" Padding="10,6"
                     Cursor="Hand">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="&#xE76F;" FontFamily="Segoe MDL2 Assets" FontSize="11"
-                               VerticalAlignment="Center" Margin="0,0,6,0" Opacity="0.45"/>
+                    <Border touch:TouchAwareDragDropHelper.IsGripHandle="True"
+                            Background="Transparent" Padding="4,4" Margin="-2,0,2,0"
+                            Cursor="SizeAll">
+                        <TextBlock Text="&#xE76F;" FontFamily="Segoe MDL2 Assets" FontSize="11"
+                                   VerticalAlignment="Center" Margin="0,0,0,0" Opacity="0.45"/>
+                    </Border>
                     <TextBlock Text="{Binding Converter={StaticResource IdToNameConverter}}"
                                VerticalAlignment="Center" FontSize="13"/>
                     <Button Content="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="10"
@@ -36,20 +41,22 @@
         </DataTemplate>
 
         <DataTemplate x:Key="LibraryItemTemplate">
-            <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                    BorderThickness="1"
-                    CornerRadius="6" Padding="10,8" Margin="3" Width="200"
+            <Border BorderThickness="0"
+                    CornerRadius="6" Padding="10,8" Width="200"
                     Cursor="Hand">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="{Binding DisplayName}" FontWeight="Medium" FontSize="13"/>
-                        <TextBlock Text="{Binding Description}" Opacity="0.65" FontSize="12"
-                                   TextWrapping="Wrap" Margin="0,2,0,0"/>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <Path Data="{Binding IconGeometry, Converter={StaticResource StringToGeometryConverter}}" Width="20" Height="20" Stretch="Uniform"
+                              Fill="{DynamicResource PrimaryTextFillColorBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <StackPanel>
+                            <TextBlock Text="{Binding DisplayName}" FontWeight="Medium" FontSize="13"/>
+                            <TextBlock Text="{Binding Description}" Opacity="0.65" FontSize="12"
+                                       TextWrapping="Wrap" Margin="0,2,0,0"/>
+                        </StackPanel>
                     </StackPanel>
                     <Button Grid.Column="1" Content="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                             Click="AddLibraryItem_Click"
@@ -60,7 +67,7 @@
             </Border>
         </DataTemplate>
 
-        <Style x:Key="DragDropListBoxStyle" TargetType="ListBox">
+        <Style x:Key="DragDropListViewStyle" TargetType="ListView">
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="dd:DragDrop.IsDragSource" Value="True"/>
             <Setter Property="dd:DragDrop.IsDropTarget" Value="True"/>
@@ -73,48 +80,86 @@
         </Style>
     </Page.Resources>
 
-    <ScrollViewer x:Name="PageScrollViewer" PanningMode="VerticalFirst">
-        <ikw:SimpleStackPanel Spacing="4" Margin="24,0,24,0">
+    <Grid Margin="24,0,24,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" MinHeight="58"/>
+            <RowDefinition Height="6"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-            <TextBlock Text="{x:Static props:NavStrings.Nav_ToolbarMenu}" FontSize="14" FontWeight="SemiBold" Margin="0,20,0,6"/>
+        <!-- ===== Section 1: 标题 + 提示 ===== -->
+        <StackPanel Grid.Row="0" Margin="0,36,0,6">
+            <TextBlock Text="{x:Static props:NavStrings.Nav_ToolbarMenu}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,6"/>
             <TextBlock Text="配置浮动栏工具菜单中显示的项目和顺序，最多 9 个（3×3 布局）。"
-                       Opacity="0.65" FontSize="13" Margin="0,0,0,12" TextWrapping="Wrap"/>
+                       Opacity="0.65" FontSize="13" TextWrapping="Wrap"/>
+        </StackPanel>
 
-            <TextBlock Text="已添加的菜单项" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,6"/>
-            <Border BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="8" Padding="6"
-                    Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}"
-                    MinHeight="64">
-                <ListBox x:Name="AddedList"
+        <!-- ===== Section 2: 已添加的菜单项 ===== -->
+        <DockPanel Grid.Row="1" LastChildFill="True" ClipToBounds="True">
+            <TextBlock Text="已添加的菜单项" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,6"
+                       DockPanel.Dock="Top"/>
+            <Border CornerRadius="8" Padding="6" MinHeight="58">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="BorderBrush" Value="Transparent"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#15000000"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <ListView x:Name="AddedList"
                          ItemTemplate="{StaticResource AddedItemTemplate}"
-                         Style="{StaticResource DragDropListBoxStyle}"
+                         Style="{StaticResource DragDropListViewStyle}"
                          dd:DragDrop.DropHandler="{Binding}"
+                         touch:TouchAwareDragDropHelper.IsEnabled="True"
                          MinHeight="48">
-                    <ListBox.ItemsPanel>
+                    <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
                             <WrapPanel Orientation="Horizontal"/>
                         </ItemsPanelTemplate>
-                    </ListBox.ItemsPanel>
-                </ListBox>
+                    </ListView.ItemsPanel>
+                </ListView>
             </Border>
+        </DockPanel>
 
-            <TextBlock Text="可添加的菜单项" FontSize="14" FontWeight="SemiBold" Margin="0,12,0,6"/>
-            <ListBox x:Name="LibraryList"
+        <!-- ===== GridSplitter ===== -->
+        <GridSplitter Grid.Row="2" Height="6" HorizontalAlignment="Stretch"
+                      Background="{DynamicResource ControlStrokeColorDefaultBrush}"
+                      ResizeDirection="Rows" ResizeBehavior="PreviousAndNext"
+                      Cursor="SizeNS" Margin="0,1,0,1"/>
+
+        <!-- ===== Section 3: 可添加的菜单项 ===== -->
+        <DockPanel Grid.Row="3" LastChildFill="True">
+            <TextBlock Text="可添加的菜单项" FontSize="14" FontWeight="SemiBold" Margin="0,4,0,6"
+                       DockPanel.Dock="Top"/>
+            <ui:ListView x:Name="LibraryList"
                      ItemTemplate="{StaticResource LibraryItemTemplate}"
                      Background="Transparent" BorderThickness="0"
                      SelectionMode="Single">
-                <ListBox.ItemsPanel>
+                <ui:ListView.ItemContainerStyle>
+                    <Style TargetType="ui:ListViewItem">
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="MinHeight" Value="0"/>
+                        <Setter Property="Margin" Value="1.5"/>
+                        <EventSetter Event="Loaded" Handler="ListViewItem_Loaded"/>
+                    </Style>
+                </ui:ListView.ItemContainerStyle>
+                <ui:ListView.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel Orientation="Horizontal"/>
                     </ItemsPanelTemplate>
-                </ListBox.ItemsPanel>
-            </ListBox>
+                </ui:ListView.ItemsPanel>
+            </ui:ListView>
+        </DockPanel>
 
-            <Button Content="恢复默认布局" Click="ButtonReset_Click"
-                    Padding="20,10" HorizontalAlignment="Left" Margin="0,16,0,20"/>
-
-            <Rectangle Height="48" />
-
-        </ikw:SimpleStackPanel>
-    </ScrollViewer>
+        <!-- ===== Section 4: 恢复默认布局 ===== -->
+        <Button Grid.Row="4" Content="恢复默认布局" Click="ButtonReset_Click"
+                Padding="20,10" HorizontalAlignment="Left" Margin="0,12,0,16"/>
+    </Grid>
 </ui:Page>

@@ -9,6 +9,7 @@
           xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
           xmlns:dd="urn:gong-wpf-dragdrop"
           xmlns:board="clr-namespace:Ink_Canvas.Controls.Toolbar.BoardToolbar"
+          xmlns:touch="clr-namespace:Ink_Canvas.Helpers"
           mc:Ignorable="d"
           Title="{x:Static props:FloatingBarStrings.BoardToolbarPage_Title}">
 
@@ -18,16 +19,20 @@
         <local:BoardAreaNameConverter x:Key="AreaNameConverter"/>
         <local:BoardGroupNameConverter x:Key="GroupNameConverter"/>
         <local:BoardPositionNameConverter x:Key="PositionNameConverter"/>
+        <local:StringToGeometryConverter x:Key="StringToGeometryConverter"/>
+        <Thickness x:Key="ListViewItemCompactSelectedBorderThemeThickness">1.5</Thickness>
 
         <DataTemplate x:Key="GroupChildItemTemplate" DataType="{x:Type board:BoardToolbarComponentEntry}">
-            <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                    BorderThickness="1"
-                    CornerRadius="6" Padding="8,4" Margin="2"
+            <Border BorderThickness="0"
+                    CornerRadius="6" Padding="8,4"
                     Cursor="Hand">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="&#xE76F;" FontFamily="Segoe MDL2 Assets" FontSize="10"
-                               VerticalAlignment="Center" Margin="0,0,4,0" Opacity="0.45"/>
+                    <Border touch:TouchAwareDragDropHelper.IsGripHandle="True"
+                            Background="Transparent" Padding="3,3" Margin="-1,0,1,0"
+                            Cursor="SizeAll">
+                        <TextBlock Text="&#xE76F;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                                   VerticalAlignment="Center" Margin="0,0,0,0" Opacity="0.45"/>
+                    </Border>
                     <TextBlock Text="{Binding Id, Converter={StaticResource IdToNameConverter}}"
                                VerticalAlignment="Center" FontSize="12"/>
                     <Button Content="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="9"
@@ -40,20 +45,22 @@
         </DataTemplate>
 
         <DataTemplate x:Key="LibraryItemTemplate">
-            <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                    BorderThickness="1"
-                    CornerRadius="6" Padding="10,8" Margin="3" Width="200"
+            <Border BorderThickness="0"
+                    CornerRadius="6" Padding="10,8" Width="200"
                     Cursor="Hand">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="{Binding DisplayName}" FontWeight="Medium" FontSize="13"/>
-                        <TextBlock Text="{Binding Description}" Opacity="0.65" FontSize="12"
-                                   TextWrapping="Wrap" Margin="0,2,0,0"/>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <Path Data="{Binding IconGeometry, Converter={StaticResource StringToGeometryConverter}}" Width="20" Height="20" Stretch="Uniform"
+                              Fill="{DynamicResource PrimaryTextFillColorBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <StackPanel>
+                            <TextBlock Text="{Binding DisplayName}" FontWeight="Medium" FontSize="13"/>
+                            <TextBlock Text="{Binding Description}" Opacity="0.65" FontSize="12"
+                                       TextWrapping="Wrap" Margin="0,2,0,0"/>
+                        </StackPanel>
                     </StackPanel>
                     <Button Grid.Column="1" Content="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                             Click="AddLibraryItem_Click"
@@ -98,24 +105,25 @@
                                     Cursor="Hand"/>
                         </StackPanel>
                     </DockPanel>
-                    <ListBox ItemsSource="{Binding Components}"
+                    <ListView ItemsSource="{Binding Components}"
                              ItemTemplate="{StaticResource GroupChildItemTemplate}"
                              dd:DragDrop.IsDragSource="True"
                              dd:DragDrop.IsDropTarget="True"
                              dd:DragDrop.DropHandler="{Binding DataContext.GroupDropHandler, RelativeSource={RelativeSource AncestorType=ui:Page}}"
+                             touch:TouchAwareDragDropHelper.IsEnabled="True"
                              Background="Transparent" BorderThickness="0"
                              MinHeight="32">
-                        <ListBox.ItemsPanel>
+                        <ListView.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapPanel Orientation="Horizontal"/>
                             </ItemsPanelTemplate>
-                        </ListBox.ItemsPanel>
-                    </ListBox>
+                        </ListView.ItemsPanel>
+                    </ListView>
                 </StackPanel>
             </Border>
         </DataTemplate>
 
-        <Style x:Key="DragDropListBoxStyle" TargetType="ListBox">
+        <Style x:Key="DragDropListViewStyle" TargetType="ListView">
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="dd:DragDrop.IsDragSource" Value="True"/>
             <Setter Property="dd:DragDrop.IsDropTarget" Value="True"/>
@@ -128,11 +136,19 @@
         </Style>
     </Page.Resources>
 
-    <ScrollViewer x:Name="PageScrollViewer" PanningMode="VerticalFirst">
-        <ikw:SimpleStackPanel Spacing="4" Margin="24,0,24,0">
+    <Grid Margin="24,0,24,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" MinHeight="58"/>
+            <RowDefinition Height="6"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
+        <!-- ===== Section 1: 配置文件 + 区域选择 ===== -->
+        <StackPanel Grid.Row="0" Margin="0,36,0,6">
             <TextBlock Text="{x:Static props:FloatingBarStrings.BoardToolbarPage_ConfigProfiles}"
-                       FontSize="14" FontWeight="SemiBold" Margin="0,20,0,6"/>
+                       FontSize="14" FontWeight="SemiBold" Margin="0,0,0,6"/>
             <DockPanel Margin="0,0,0,4">
                 <ComboBox x:Name="ComboBoxConfigFile" SelectionChanged="ComboBoxConfigFile_SelectionChanged"
                           DockPanel.Dock="Left" VerticalAlignment="Center"/>
@@ -146,7 +162,7 @@
             <!-- 区域选择 -->
             <TextBlock Text="{x:Static props:FloatingBarStrings.BoardToolbarPage_Areas}"
                        FontSize="14" FontWeight="SemiBold" Margin="0,12,0,6"/>
-            <WrapPanel Orientation="Horizontal" Margin="0,0,0,8">
+            <WrapPanel Orientation="Horizontal" Margin="0,0,0,4">
                 <RadioButton x:Name="RadioAreaLeft" Content="{x:Static props:FloatingBarStrings.BoardToolbarPage_LeftArea}"
                              Checked="AreaRadioButton_Changed" Margin="0,0,16,0" FontSize="13" FontWeight="Medium"/>
                 <RadioButton x:Name="RadioAreaCenter" Content="{x:Static props:FloatingBarStrings.BoardToolbarPage_CenterArea}"
@@ -154,135 +170,152 @@
                 <RadioButton x:Name="RadioAreaRight" Content="{x:Static props:FloatingBarStrings.BoardToolbarPage_RightArea}"
                              Checked="AreaRadioButton_Changed" FontSize="13" FontWeight="Medium"/>
             </WrapPanel>
+        </StackPanel>
 
-            <!-- 当前区域的分组 -->
+        <!-- ===== Section 2: 当前区域的分组 ===== -->
+        <DockPanel Grid.Row="1" LastChildFill="True" ClipToBounds="True">
             <TextBlock Text="{x:Static props:FloatingBarStrings.BoardToolbarPage_AreaGroups}"
-                       FontSize="14" FontWeight="SemiBold" Margin="0,8,0,4"/>
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                       FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4"
+                       DockPanel.Dock="Top"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6" DockPanel.Dock="Top">
                 <Button Content="{x:Static props:FloatingBarStrings.BoardToolbarPage_AddGroup2}"
                         Click="ButtonAddGroup_Click" Padding="10,5" FontSize="12"/>
             </StackPanel>
-            <ItemsControl x:Name="AreaGroupsControl"
-                          ItemTemplate="{StaticResource GroupEntryTemplate}"/>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" PanningMode="VerticalFirst">
+                <ItemsControl x:Name="AreaGroupsControl"
+                              ItemTemplate="{StaticResource GroupEntryTemplate}"/>
+            </ScrollViewer>
+        </DockPanel>
 
-            <!-- TabControl: 组件库 / 组件设置 -->
-            <TabControl x:Name="SettingsTabControl" Margin="0,12,0,0"
-                        Style="{StaticResource {x:Static ui:ThemeKeys.TabControlPivotStyleKey}}"
-                        SelectedIndex="{Binding SettingsTabIndex}">
+        <!-- ===== GridSplitter ===== -->
+        <GridSplitter Grid.Row="2" Height="6" HorizontalAlignment="Stretch"
+                      Background="{DynamicResource ControlStrokeColorDefaultBrush}"
+                      ResizeDirection="Rows" ResizeBehavior="PreviousAndNext"
+                      Cursor="SizeNS" Margin="0,1,0,1"/>
 
-                <!-- Tab 1: 组件库 -->
-                <TabItem Header="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentLibrary}">
-                    <ScrollViewer PanningMode="VerticalFirst" VerticalScrollBarVisibility="Disabled" PreviewMouseWheel="NestedScrollViewer_PreviewMouseWheel">
-                        <ikw:SimpleStackPanel Spacing="4" Margin="0,8,0,0">
-                            <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentLibraryHint}"
-                                       Opacity="0.65" FontSize="12" Margin="0,0,0,8"/>
-                            <ListBox ItemsSource="{Binding AvailableItems}"
-                                     ItemTemplate="{StaticResource LibraryItemTemplate}"
-                                     dd:DragDrop.IsDragSource="True"
-                                     Background="Transparent" BorderThickness="0"
-                                     SelectionMode="Single">
-                                <ListBox.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <WrapPanel Orientation="Horizontal"/>
-                                    </ItemsPanelTemplate>
-                                </ListBox.ItemsPanel>
-                            </ListBox>
-                        </ikw:SimpleStackPanel>
-                    </ScrollViewer>
-                </TabItem>
+        <!-- ===== Section 3: 组件库 / 组件设置 ===== -->
+        <TabControl Grid.Row="3" x:Name="SettingsTabControl" Margin="0,4,0,0"
+                    Style="{StaticResource {x:Static ui:ThemeKeys.TabControlPivotStyleKey}}"
+                    SelectedIndex="{Binding SettingsTabIndex}">
 
-                <!-- Tab 2: 组件设置 -->
-                <TabItem Header="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentSettings}">
-                    <TabItem.Visibility>
-                        <Binding Path="SelectedEntry" Converter="{StaticResource NullToVisibilityConverter}"/>
-                    </TabItem.Visibility>
-                    <ScrollViewer PanningMode="VerticalFirst" VerticalScrollBarVisibility="Disabled" PreviewMouseWheel="NestedScrollViewer_PreviewMouseWheel">
-                        <ikw:SimpleStackPanel Spacing="4" Margin="0,8,0,0">
+            <!-- Tab 1: 组件库 -->
+            <TabItem Header="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentLibrary}">
+                <ScrollViewer PanningMode="VerticalFirst" VerticalScrollBarVisibility="Auto">
+                    <ikw:SimpleStackPanel Spacing="4" Margin="0,8,0,0">
+                        <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentLibraryHint}"
+                                   Opacity="0.65" FontSize="12" Margin="0,0,0,8"/>
+                        <ui:ListView ItemsSource="{Binding AvailableItems}"
+                                 ItemTemplate="{StaticResource LibraryItemTemplate}"
+                                 dd:DragDrop.IsDragSource="True"
+                                 Background="Transparent" BorderThickness="0"
+                                 SelectionMode="Single">
+                            <ui:ListView.ItemContainerStyle>
+                                <Style TargetType="ui:ListViewItem">
+                                    <Setter Property="Padding" Value="0"/>
+                                    <Setter Property="MinHeight" Value="0"/>
+                                    <Setter Property="Margin" Value="1.5"/>
+                                    <EventSetter Event="Loaded" Handler="ListViewItem_Loaded"/>
+                                </Style>
+                            </ui:ListView.ItemContainerStyle>
+                            <ui:ListView.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ui:ListView.ItemsPanel>
+                        </ui:ListView>
+                    </ikw:SimpleStackPanel>
+                </ScrollViewer>
+            </TabItem>
 
-                            <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentProperties}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+            <!-- Tab 2: 组件设置 -->
+            <TabItem Header="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentSettings}">
+                <TabItem.Visibility>
+                    <Binding Path="SelectedEntry" Converter="{StaticResource NullToVisibilityConverter}"/>
+                </TabItem.Visibility>
+                <ScrollViewer PanningMode="VerticalFirst" VerticalScrollBarVisibility="Auto">
+                    <ikw:SimpleStackPanel Spacing="4" Margin="0,8,0,0">
 
-                            <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_Size}" FontSize="14" FontWeight="SemiBold" Margin="0,12,0,4"/>
-                            <Grid Margin="0,0,0,4">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,4,4">
-                                    <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_FixedWidth}" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
-                                    <TextBox x:Name="TextBoxFixedWidth" Width="80" HorizontalAlignment="Left"
-                                             TextChanged="ComponentSetting_TextChanged"/>
-                                </StackPanel>
-                                <StackPanel Grid.Row="0" Grid.Column="1" Margin="4,0,0,4">
-                                    <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_FixedHeight}" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
-                                    <TextBox x:Name="TextBoxFixedHeight" Width="80" HorizontalAlignment="Left"
-                                             TextChanged="ComponentSetting_TextChanged"/>
-                                </StackPanel>
-                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,4,0">
-                                    <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_MinWidth}" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
-                                    <TextBox x:Name="TextBoxMinWidth" Width="80" HorizontalAlignment="Left"
-                                             TextChanged="ComponentSetting_TextChanged"/>
-                                </StackPanel>
-                                <StackPanel Grid.Row="1" Grid.Column="1" Margin="4,0,0,0">
-                                    <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_MinHeight}" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
-                                    <TextBox x:Name="TextBoxMinHeight" Width="80" HorizontalAlignment="Left"
-                                             TextChanged="ComponentSetting_TextChanged"/>
-                                </StackPanel>
-                            </Grid>
+                        <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentProperties}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
 
-                            <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_Appearance}" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,4"/>
-                            <Grid Margin="0,0,0,4">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0" Margin="0,0,4,0">
-                                    <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_FontSize}" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
-                                    <TextBox x:Name="TextBoxFontSize" Width="60" HorizontalAlignment="Left"
-                                             TextChanged="ComponentSetting_TextChanged"/>
-                                </StackPanel>
-                                <StackPanel Grid.Column="1" Margin="4,0,0,0">
-                                    <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_Opacity}" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
-                                    <TextBox x:Name="TextBoxOpacity" Width="60" HorizontalAlignment="Left"
-                                             TextChanged="ComponentSetting_TextChanged"/>
-                                </StackPanel>
-                            </Grid>
-
-                            <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_Margin}" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,4"/>
-                            <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_MarginHint}" FontSize="12" Opacity="0.65" Margin="0,0,0,4"/>
-                            <Grid Margin="0,0,0,4">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBox x:Name="TextBoxMarginLeft" Grid.Column="0" Margin="0,0,2,0"
+                        <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_Size}" FontSize="14" FontWeight="SemiBold" Margin="0,12,0,4"/>
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,4,4">
+                                <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_FixedWidth}" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                <TextBox x:Name="TextBoxFixedWidth" Width="80" HorizontalAlignment="Left"
                                          TextChanged="ComponentSetting_TextChanged"/>
-                                <TextBox x:Name="TextBoxMarginTop" Grid.Column="1" Margin="2,0,2,0"
+                            </StackPanel>
+                            <StackPanel Grid.Row="0" Grid.Column="1" Margin="4,0,0,4">
+                                <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_FixedHeight}" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                <TextBox x:Name="TextBoxFixedHeight" Width="80" HorizontalAlignment="Left"
                                          TextChanged="ComponentSetting_TextChanged"/>
-                                <TextBox x:Name="TextBoxMarginRight" Grid.Column="2" Margin="2,0,2,0"
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,4,0">
+                                <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_MinWidth}" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                <TextBox x:Name="TextBoxMinWidth" Width="80" HorizontalAlignment="Left"
                                          TextChanged="ComponentSetting_TextChanged"/>
-                                <TextBox x:Name="TextBoxMarginBottom" Grid.Column="3" Margin="2,0,0,0"
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="4,0,0,0">
+                                <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_MinHeight}" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                <TextBox x:Name="TextBoxMinHeight" Width="80" HorizontalAlignment="Left"
                                          TextChanged="ComponentSetting_TextChanged"/>
-                            </Grid>
+                            </StackPanel>
+                        </Grid>
 
-                            <Button Content="{x:Static props:FloatingBarStrings.ToolbarPage_ResetComponentSettings}" Click="ButtonResetComponentSettings_Click"
-                                    Padding="12,6" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+                        <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_Appearance}" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,4,0">
+                                <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_FontSize}" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                <TextBox x:Name="TextBoxFontSize" Width="60" HorizontalAlignment="Left"
+                                         TextChanged="ComponentSetting_TextChanged"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="4,0,0,0">
+                                <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_Opacity}" FontSize="12" Opacity="0.7" Margin="0,0,0,2"/>
+                                <TextBox x:Name="TextBoxOpacity" Width="60" HorizontalAlignment="Left"
+                                         TextChanged="ComponentSetting_TextChanged"/>
+                            </StackPanel>
+                        </Grid>
 
-                        </ikw:SimpleStackPanel>
-                    </ScrollViewer>
-                </TabItem>
-            </TabControl>
+                        <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_Margin}" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                        <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_MarginHint}" FontSize="12" Opacity="0.65" Margin="0,0,0,4"/>
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="TextBoxMarginLeft" Grid.Column="0" Margin="0,0,2,0"
+                                     TextChanged="ComponentSetting_TextChanged"/>
+                            <TextBox x:Name="TextBoxMarginTop" Grid.Column="1" Margin="2,0,2,0"
+                                     TextChanged="ComponentSetting_TextChanged"/>
+                            <TextBox x:Name="TextBoxMarginRight" Grid.Column="2" Margin="2,0,2,0"
+                                     TextChanged="ComponentSetting_TextChanged"/>
+                            <TextBox x:Name="TextBoxMarginBottom" Grid.Column="3" Margin="2,0,0,0"
+                                     TextChanged="ComponentSetting_TextChanged"/>
+                        </Grid>
 
-            <Button Content="{x:Static props:FloatingBarStrings.BoardToolbarPage_ResetDefault}" Click="ButtonReset_Click"
-                    Padding="20,10" HorizontalAlignment="Left" Margin="0,16,0,20"/>
+                        <Button Content="{x:Static props:FloatingBarStrings.ToolbarPage_ResetComponentSettings}" Click="ButtonResetComponentSettings_Click"
+                                Padding="12,6" HorizontalAlignment="Left" Margin="0,8,0,0"/>
 
-            <Rectangle Height="48"/>
+                    </ikw:SimpleStackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
 
-        </ikw:SimpleStackPanel>
-    </ScrollViewer>
+        <!-- ===== Section 4: 恢复默认布局 ===== -->
+        <Button Grid.Row="4" Content="{x:Static props:FloatingBarStrings.BoardToolbarPage_ResetDefault}" Click="ButtonReset_Click"
+                Padding="20,10" HorizontalAlignment="Left" Margin="0,12,0,16"/>
+    </Grid>
 </ui:Page>

@@ -1067,6 +1067,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         public string Id => _info.Id;
         public string DisplayName => _info.DisplayName;
         public string Description => _info.Description;
+        public string IconGeometry => _info.IconGeometry;
         public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public bool DefaultShowSeparateBorder => false;
         public bool DefaultPreventHideOnDragClick => false;

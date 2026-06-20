@@ -20,6 +20,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
     public partial class ToolbarPage : Page, IDropTarget
     {
+        private void ListViewItem_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Control control)
+            {
+                control.ApplyTemplate();
+                if (control.Template.FindName("PressedBackground", control) is FrameworkElement indicator)
+                {
+                    indicator.Width = 3;
+                }
+            }
+        }
+
         private static readonly string LogTag = "ToolbarPage";
         private bool _isLoaded;
         private bool _suppressConfigChange;
@@ -166,14 +178,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             InitializeComponent();
             DataContext = this;
             Loaded += OnPageLoaded;
-        }
-
-        private void NestedScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
-        {
-            if (PageScrollViewer == null) return;
-
-            PageScrollViewer.ScrollToVerticalOffset(PageScrollViewer.VerticalOffset - e.Delta);
-            e.Handled = true;
         }
 
         private void OnPageLoaded(object sender, RoutedEventArgs e)
@@ -1035,6 +1039,23 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return value == null ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class StringToGeometryConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is string s && !string.IsNullOrWhiteSpace(s))
+            {
+                return Geometry.Parse(s);
+            }
+            return null;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
