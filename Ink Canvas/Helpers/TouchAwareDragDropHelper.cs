@@ -106,8 +106,9 @@ namespace Ink_Canvas.Helpers
             {
                 element.PreviewStylusDown += GripHandle_PreviewStylusDown;
                 element.PreviewStylusUp += GripHandle_PreviewStylusUp;
-                // 默认鼠标模式，不参与 hit testing（鼠标事件穿透到 ListBoxItem，gong-wpf-dragdrop 正常处理）
+                // 默认鼠标模式，不参与 hit testing 且隐藏（鼠标事件穿透到 ListBoxItem，gong-wpf-dragdrop 正常处理）
                 element.IsHitTestVisible = false;
+                element.Visibility = Visibility.Collapsed;
                 element.Loaded += GripHandle_Loaded;
             }
             else
@@ -216,6 +217,7 @@ namespace Ink_Canvas.Helpers
             if (GetIsTouchMode(itemsControl))
             {
                 GongDragDrop.SetIsDragSource(itemsControl, false);
+                RestoreScrollViewerManipulation(itemsControl);
             }
         }
 
@@ -231,6 +233,7 @@ namespace Ink_Canvas.Helpers
                 UpdateGripHandleVisualState(itemsControl, false);
                 var original = GetOriginalIsDragSource(itemsControl);
                 GongDragDrop.SetIsDragSource(itemsControl, original ?? true);
+                RestoreScrollViewerManipulation(itemsControl);
             }
         }
 
@@ -278,26 +281,12 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 触屏模式下给 grip handle 添加半透明背景，让用户看到拖动按钮。
-        /// 对应 ClassIsland 2.0 TouchDragThumb 在触屏模式下 Opacity=1。
+        /// 触屏模式下显示 grip handle（Visibility=Visible），鼠标模式下隐藏（Visibility=Collapsed）。
+        /// 对应 ClassIsland 2.0 TouchDragThumb 在触屏模式下 Opacity=1，鼠标模式下 Opacity=0。
         /// </summary>
         private static void UpdateGripHandleElementVisualState(UIElement element, bool isTouchMode)
         {
-            if (element is Border border)
-            {
-                if (isTouchMode)
-                {
-                    border.Background = new SolidColorBrush(Color.FromArgb(0x33, 0x25, 0x63, 0xEB));
-                    border.BorderBrush = new SolidColorBrush(Color.FromArgb(0x66, 0x25, 0x63, 0xEB));
-                    border.BorderThickness = new Thickness(1);
-                }
-                else
-                {
-                    border.Background = Brushes.Transparent;
-                    border.BorderBrush = Brushes.Transparent;
-                    border.BorderThickness = new Thickness(0);
-                }
-            }
+            element.Visibility = isTouchMode ? Visibility.Visible : Visibility.Collapsed;
         }
 
         #endregion
@@ -307,8 +296,8 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 按住 grip handle 时：
         /// 1. 临时启用 IsDragSource，让即将提升的 MouseDown 触发 gong-wpf-dragdrop 拖动
-        /// 2. 禁用父级 ScrollViewer 的 IsManipulationEnabled，防止触屏移动被处理为 panning
-        /// 对应 ClassIsland 2.0 中 TouchDragThumb（继承自 Thumb）按下时捕获指针的行为。
+        /// 2. 禁用所有父级 ScrollViewer 的 IsManipulationEnabled，防止触屏移动被处理为 panning
+        /// 不捕获 Stylus，让触笔事件自然提升为鼠标事件，gong-wpf-dragdrop 才能正常启动拖拽。
         /// </summary>
         private static void GripHandle_PreviewStylusDown(object sender, StylusEventArgs e)
         {
@@ -321,46 +310,94 @@ namespace Ink_Canvas.Helpers
                 GongDragDrop.SetIsDragSource(itemsControl, original);
             }
 
-            var scrollViewer = FindParent<ScrollViewer>(gripHandle);
-            if (scrollViewer != null)
+            // 禁用所有父级 ScrollViewer（包括 ListView 内部的和外层包裹的）
+            var parent = VisualTreeHelper.GetParent(gripHandle);
+            while (parent != null)
             {
-                SetOriginalIsManipulationEnabled(scrollViewer, scrollViewer.IsManipulationEnabled);
-                scrollViewer.IsManipulationEnabled = false;
+                if (parent is ScrollViewer sv)
+                {
+                    SetOriginalIsManipulationEnabled(sv, sv.IsManipulationEnabled);
+                    sv.IsManipulationEnabled = false;
+                }
+                parent = VisualTreeHelper.GetParent(parent);
             }
-
-            gripHandle.CaptureStylus();
         }
 
         /// <summary>
-        /// 释放 grip handle 时恢复状态。
+        /// 释放 grip handle 时恢复所有父级 ScrollViewer 状态。
         /// </summary>
         private static void GripHandle_PreviewStylusUp(object sender, StylusEventArgs e)
         {
             if (!(sender is FrameworkElement gripHandle)) return;
 
-            var scrollViewer = FindParent<ScrollViewer>(gripHandle);
-            if (scrollViewer != null)
+            var parent = VisualTreeHelper.GetParent(gripHandle);
+            while (parent != null)
             {
-                var original = GetOriginalIsManipulationEnabled(scrollViewer);
-                if (original.HasValue)
+                if (parent is ScrollViewer sv)
                 {
-                    scrollViewer.IsManipulationEnabled = original.Value;
-                    SetOriginalIsManipulationEnabled(scrollViewer, null);
+                    var original = GetOriginalIsManipulationEnabled(sv);
+                    if (original.HasValue)
+                    {
+                        sv.IsManipulationEnabled = original.Value;
+                        SetOriginalIsManipulationEnabled(sv, null);
+                    }
                 }
+                parent = VisualTreeHelper.GetParent(parent);
             }
-
-            var itemsControl = FindParent<ItemsControl>(gripHandle);
-            if (itemsControl != null && GetIsTouchMode(itemsControl))
-            {
-                GongDragDrop.SetIsDragSource(itemsControl, false);
-            }
-
-            gripHandle.ReleaseStylusCapture();
         }
 
         #endregion
 
         #region 辅助方法
+
+        /// <summary>
+        /// 恢复 ItemsControl 及其父级中所有被禁用的 ScrollViewer 的 IsManipulationEnabled。
+        /// 在没有 Stylus capture 的情况下，GripHandle_PreviewStylusUp 可能不会触发，
+        /// 所以在 ItemsControl_PreviewStylusUp 中统一恢复。
+        /// </summary>
+        private static void RestoreScrollViewerManipulation(ItemsControl itemsControl)
+        {
+            // 检查 ItemsControl 的父级 ScrollViewer（外层 ScrollViewer）
+            var parent = VisualTreeHelper.GetParent(itemsControl);
+            while (parent != null)
+            {
+                if (parent is ScrollViewer sv)
+                {
+                    var original = GetOriginalIsManipulationEnabled(sv);
+                    if (original.HasValue)
+                    {
+                        sv.IsManipulationEnabled = original.Value;
+                        SetOriginalIsManipulationEnabled(sv, null);
+                    }
+                }
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+
+            // 检查 ItemsControl 内部的 ScrollViewer（ListView 模板内的）
+            var queue = new Queue<DependencyObject>();
+            queue.Enqueue(itemsControl);
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+                if (current is ScrollViewer sv2)
+                {
+                    var original = GetOriginalIsManipulationEnabled(sv2);
+                    if (original.HasValue)
+                    {
+                        sv2.IsManipulationEnabled = original.Value;
+                        SetOriginalIsManipulationEnabled(sv2, null);
+                    }
+                }
+                if (current is Visual)
+                {
+                    int childCount = VisualTreeHelper.GetChildrenCount(current);
+                    for (int i = 0; i < childCount; i++)
+                    {
+                        queue.Enqueue(VisualTreeHelper.GetChild(current, i));
+                    }
+                }
+            }
+        }
 
         private static T FindParent<T>(DependencyObject child) where T : DependencyObject
         {

@@ -34,12 +34,14 @@
         <DataTemplate x:Key="AddedItemTemplate" DataType="{x:Type toolbar:ToolbarComponentEntry}">
             <Border Cursor="Hand">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border touch:TouchAwareDragDropHelper.IsGripHandle="True"
-                            Background="Transparent" Padding="4,4" Margin="-2,0,2,0"
-                            Cursor="SizeAll">
-                        <Path Data="{Binding Id, Converter={StaticResource IdToIconGeometryConverter}, ConverterParameter={x:Null}}" Width="16" Height="16" Stretch="Uniform"
-                              Fill="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" VerticalAlignment="Center" Opacity="0.85"/>
-                    </Border>
+                    <ui:FontIcon touch:TouchAwareDragDropHelper.IsGripHandle="True"
+                                 Icon="{x:Static ui:FluentSystemIcons.ReOrder_20_Regular}" FontSize="14"
+                                 Cursor="SizeAll" Margin="-2,0,2,0" VerticalAlignment="Center"
+                                 RenderTransformOrigin="0.5,0.5">
+                        <ui:FontIcon.RenderTransform>
+                            <RotateTransform Angle="90"/>
+                        </ui:FontIcon.RenderTransform>
+                    </ui:FontIcon>
                     <TextBlock Text="{Binding Id, Converter={StaticResource IdToNameConverter}}"
                                VerticalAlignment="Center" FontSize="13"/>
                     <Button Content="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="10"
@@ -56,12 +58,14 @@
                     CornerRadius="6" Padding="8,4"
                     Cursor="Hand">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border touch:TouchAwareDragDropHelper.IsGripHandle="True"
-                            Background="Transparent" Padding="3,3" Margin="-1,0,1,0"
-                            Cursor="SizeAll">
-                        <Path Data="{Binding Id, Converter={StaticResource IdToIconGeometryConverter}}" Width="14" Height="14" Stretch="Uniform"
-                              Fill="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" VerticalAlignment="Center" Opacity="0.85"/>
-                    </Border>
+                    <ui:FontIcon touch:TouchAwareDragDropHelper.IsGripHandle="True"
+                                 Icon="{x:Static ui:FluentSystemIcons.ReOrder_20_Regular}" FontSize="14"
+                                 Cursor="SizeAll" Margin="-1,0,1,0" VerticalAlignment="Center"
+                                 RenderTransformOrigin="0.5,0.5">
+                        <ui:FontIcon.RenderTransform>
+                            <RotateTransform Angle="90"/>
+                        </ui:FontIcon.RenderTransform>
+                    </ui:FontIcon>
                     <TextBlock Text="{Binding Id, Converter={StaticResource IdToNameConverter}}"
                                VerticalAlignment="Center" FontSize="12"/>
                     <Button Content="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="9"
@@ -81,17 +85,21 @@
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <Path Grid.Column="0" Data="{Binding IconGeometry, Converter={StaticResource StringToGeometryConverter}}" Width="20" Height="20" Stretch="Uniform"
+                    <ui:FontIcon Grid.Column="0" touch:TouchAwareDragDropHelper.IsGripHandle="True"
+                                 Icon="{x:Static ui:FluentSystemIcons.ReOrderDotsVertical_24_Filled}" FontSize="16"
+                                 Cursor="SizeAll" Margin="-1,0,2,0" VerticalAlignment="Center"/>
+                    <Path Grid.Column="1" Data="{Binding IconGeometry, Converter={StaticResource StringToGeometryConverter}}" Width="20" Height="20" Stretch="Uniform"
                           Fill="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <StackPanel Grid.Column="1">
+                    <StackPanel Grid.Column="2">
                         <TextBlock Text="{Binding DisplayName}" FontWeight="Medium" FontSize="13"/>
                         <TextBlock Text="{Binding Description}" Opacity="0.65" FontSize="12"
                                    TextWrapping="Wrap" Margin="0,2,0,0"/>
                     </StackPanel>
-                    <Button Grid.Column="2" Content="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                    <Button Grid.Column="3" Content="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                             Click="AddLibraryItem_Click"
                             Background="Transparent" BorderThickness="0"
                             Padding="6,4" VerticalAlignment="Center"
@@ -253,6 +261,7 @@
                         <ui:ListView ItemsSource="{Binding AvailableItems}"
                                  ItemTemplate="{StaticResource LibraryItemTemplate}"
                                  dd:DragDrop.IsDragSource="True"
+                                 touch:TouchAwareDragDropHelper.IsEnabled="True"
                                  Background="Transparent" BorderThickness="0"
                                  SelectionMode="Single">
                             <ui:ListView.ItemContainerStyle>
