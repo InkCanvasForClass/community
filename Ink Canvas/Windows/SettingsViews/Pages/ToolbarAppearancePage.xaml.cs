@@ -86,6 +86,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 CardDisableToolbarAnimation.IsOn = settings.Appearance.DisableToolbarAnimation;
             }
+
+            // 加载旧版浮动栏 UI 设置
+            if (CardUseLegacyFloatingBarUI != null)
+                CardUseLegacyFloatingBarUI.IsOn = settings.Appearance.UseLegacyFloatingBarUI;
+
+            // 加载在浮动栏图标上显示笔色设置
+            if (CardShowPenColorOnFloatingBarIcon != null)
+                CardShowPenColorOnFloatingBarIcon.IsOn = settings.Appearance.ShowPenColorOnFloatingBarIcon;
         }
 
         private void UpdateAllSliderTexts()
@@ -214,6 +222,24 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             SettingsManager.Settings.Appearance.DisableToolbarAnimation = CardDisableToolbarAnimation.IsOn;
             SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchUseLegacyFloatingBarUI_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.UseLegacyFloatingBarUI = CardUseLegacyFloatingBarUI.IsOn;
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnUseLegacyFloatingBarUIChanged();
+        }
+
+        private void ToggleSwitchShowPenColorOnFloatingBarIcon_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.ShowPenColorOnFloatingBarIcon = CardShowPenColorOnFloatingBarIcon.IsOn;
+            SettingsManager.SaveSettingsToFile();
+            // Refresh the pen icon color on the floating bar
+            if (Application.Current.MainWindow is MainWindow mainWindow)
+                mainWindow.UpdatePenIconColor();
         }
 
         private void FloatingBarMenuOpacitySlider_ValueChanged(object sender, RoutedEventArgs e)
