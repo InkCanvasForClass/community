@@ -1,3 +1,4 @@
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using Ink_Canvas.Properties;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,7 +13,8 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar.Items
         public string LocalizationKey => "Board_Page";
         public string DisplayName => Strings.GetString(LocalizationKey) ?? "页码";
         public string Description => "页码";
-        public string IconGeometry => null;
+        public string IconGeometry => XamlGraphicsIconGeometries.PageInfoIconGeometry;
+        public FontIconData? IconKey => null;
         public ButtonPosition DefaultPosition => ButtonPosition.Middle;
 
         public FrameworkElement BuildView(IBoardToolbarHost host)

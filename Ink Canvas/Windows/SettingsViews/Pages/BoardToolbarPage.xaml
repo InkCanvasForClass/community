@@ -17,6 +17,8 @@
     <Page.Resources>
         <local:BoardIdToDisplayNameConverter x:Key="IdToNameConverter"/>
         <local:BoardIdToIconGeometryConverter x:Key="IdToIconGeometryConverter"/>
+        <local:BoardIdToIconKeyConverter x:Key="IdToIconKeyConverter"/>
+        <local:BoardIdToIconVisibilityConverter x:Key="IdToIconVisibilityConverter"/>
         <local:BoardNullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
         <local:BoardAreaNameConverter x:Key="AreaNameConverter"/>
         <local:BoardGroupNameConverter x:Key="GroupNameConverter"/>
@@ -39,8 +41,13 @@
                     <Border touch:TouchAwareDragDropHelper.IsGripHandle="True"
                             Background="Transparent" Padding="3,3" Margin="-1,0,1,0"
                             Cursor="SizeAll">
-                        <Path Data="{Binding Id, Converter={StaticResource IdToIconGeometryConverter}}" Width="14" Height="14" Stretch="Uniform"
-                              Fill="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" VerticalAlignment="Center" Opacity="0.85"/>
+                        <Grid Width="14" Height="14" VerticalAlignment="Center">
+                            <Path Data="{Binding Id, Converter={StaticResource IdToIconGeometryConverter}}" Width="14" Height="14" Stretch="Uniform"
+                                  Fill="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" Opacity="0.85"
+                                  Visibility="{Binding Id, Converter={StaticResource IdToIconVisibilityConverter}}"/>
+                            <ui:FontIcon Icon="{Binding Id, Converter={StaticResource IdToIconKeyConverter}}" FontSize="14"
+                                         Visibility="{Binding Id, Converter={StaticResource IdToIconVisibilityConverter}, ConverterParameter=fontIcon}"/>
+                        </Grid>
                     </Border>
                     <TextBlock Text="{Binding Id, Converter={StaticResource IdToNameConverter}}"
                                VerticalAlignment="Center" FontSize="12"/>
@@ -64,8 +71,13 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <Path Grid.Column="0" Data="{Binding IconGeometry, Converter={StaticResource StringToGeometryConverter}}" Width="20" Height="20" Stretch="Uniform"
-                          Fill="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <Grid Grid.Column="0" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center">
+                        <Path Data="{Binding Id, Converter={StaticResource IdToIconGeometryConverter}}" Width="20" Height="20" Stretch="Uniform"
+                              Fill="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}"
+                              Visibility="{Binding Id, Converter={StaticResource IdToIconVisibilityConverter}}"/>
+                        <ui:FontIcon Icon="{Binding Id, Converter={StaticResource IdToIconKeyConverter}}" FontSize="20"
+                                     Visibility="{Binding Id, Converter={StaticResource IdToIconVisibilityConverter}, ConverterParameter=fontIcon}"/>
+                    </Grid>
                     <StackPanel Grid.Column="1">
                         <TextBlock Text="{Binding DisplayName}" FontWeight="Medium" FontSize="13"/>
                         <TextBlock Text="{Binding Description}" Opacity="0.65" FontSize="12"

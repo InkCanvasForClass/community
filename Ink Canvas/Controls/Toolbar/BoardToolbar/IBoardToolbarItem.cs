@@ -1,3 +1,4 @@
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using System.Windows;
 
 namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
@@ -11,6 +12,8 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
         string Description { get; }
 
         string IconGeometry { get; }
+
+        FontIconData? IconKey { get; }
 
         ButtonPosition DefaultPosition { get; }
 

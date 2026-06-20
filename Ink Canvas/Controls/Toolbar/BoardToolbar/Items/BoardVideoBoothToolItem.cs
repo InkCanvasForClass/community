@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using FluentSystemIcons = iNKORE.UI.WPF.Modern.Common.IconKeys.FluentSystemIcons;
 using FontIcon = iNKORE.UI.WPF.Modern.Controls.FontIcon;
 
@@ -11,6 +12,8 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar.Items
         public override string Id => "board.videoBooth";
         public override string LocalizationKey => "Board_VideoBooth";
         public override string Description => "视频展台";
+        public override string IconGeometry => null;
+        public override FontIconData? IconKey => FluentSystemIcons.Video_24_Regular;
         public override ButtonPosition DefaultPosition => ButtonPosition.Single;
 
         protected override void OnClick(IBoardToolbarHost host, object sender, MouseButtonEventArgs e)

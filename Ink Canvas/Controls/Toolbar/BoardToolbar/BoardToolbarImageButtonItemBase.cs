@@ -1,3 +1,4 @@
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using Ink_Canvas.Properties;
 using System.Windows;
 using System.Windows.Input;
@@ -14,6 +15,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
         public string DisplayName => Strings.GetString(LocalizationKey) ?? LocalizationKey;
 
         public virtual string IconGeometry => null;
+        public virtual FontIconData? IconKey => null;
 
         protected abstract void OnClick(IBoardToolbarHost host, object sender, MouseButtonEventArgs e);
 

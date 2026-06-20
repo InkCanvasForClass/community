@@ -652,6 +652,43 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             => throw new NotImplementedException();
     }
 
+    public class BoardIdToIconKeyConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is string id)
+            {
+                var items = BoardToolbarRegistry.Discover();
+                var item = items.FirstOrDefault(i => i.Id == id);
+                return item?.IconKey;
+            }
+            return null;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new NotImplementedException();
+    }
+
+    public class BoardIdToIconVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is string id)
+            {
+                var items = BoardToolbarRegistry.Discover();
+                var item = items.FirstOrDefault(i => i.Id == id);
+                var mode = parameter?.ToString();
+                if (mode == "fontIcon")
+                    return item?.IconKey != null ? Visibility.Visible : Visibility.Collapsed;
+                return !string.IsNullOrEmpty(item?.IconGeometry) ? Visibility.Visible : Visibility.Collapsed;
+            }
+            return Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new NotImplementedException();
+    }
+
     public class BoardAreaNameConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
