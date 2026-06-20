@@ -75,7 +75,7 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Orientation="Horizontal">
                         <Path Data="{Binding IconGeometry, Converter={StaticResource StringToGeometryConverter}}" Width="20" Height="20" Stretch="Uniform"
-                              Fill="{DynamicResource PrimaryTextFillColorBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                              Fill="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
                         <StackPanel>
                             <TextBlock Text="{Binding DisplayName}" FontWeight="Medium" FontSize="13"/>
                             <TextBlock Text="{Binding Description}" Opacity="0.65" FontSize="12"
