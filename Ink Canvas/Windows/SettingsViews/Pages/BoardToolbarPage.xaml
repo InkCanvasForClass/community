@@ -15,6 +15,7 @@
 
     <Page.Resources>
         <local:BoardIdToDisplayNameConverter x:Key="IdToNameConverter"/>
+        <local:BoardIdToIconGeometryConverter x:Key="IdToIconGeometryConverter"/>
         <local:BoardNullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
         <local:BoardAreaNameConverter x:Key="AreaNameConverter"/>
         <local:BoardGroupNameConverter x:Key="GroupNameConverter"/>
@@ -30,8 +31,8 @@
                     <Border touch:TouchAwareDragDropHelper.IsGripHandle="True"
                             Background="Transparent" Padding="3,3" Margin="-1,0,1,0"
                             Cursor="SizeAll">
-                        <TextBlock Text="&#xE76F;" FontFamily="Segoe MDL2 Assets" FontSize="10"
-                                   VerticalAlignment="Center" Margin="0,0,0,0" Opacity="0.45"/>
+                        <Path Data="{Binding Id, Converter={StaticResource IdToIconGeometryConverter}}" Width="14" Height="14" Stretch="Uniform"
+                              Fill="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" VerticalAlignment="Center" Opacity="0.85"/>
                     </Border>
                     <TextBlock Text="{Binding Id, Converter={StaticResource IdToNameConverter}}"
                                VerticalAlignment="Center" FontSize="12"/>

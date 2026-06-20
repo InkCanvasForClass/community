@@ -977,6 +977,25 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         }
     }
 
+    public class IdToIconGeometryConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is string id)
+            {
+                var items = ToolbarRegistry.Discover();
+                var item = items.FirstOrDefault(i => i.Id == id);
+                return item?.IconGeometry;
+            }
+            return null;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class ConditionIdToNameConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
