@@ -311,6 +311,8 @@ namespace Ink_Canvas
 
                 // 根据位置设置拖动图标的位置
                 SetToolbarHeadPosition(position);
+
+                ApplyHideFloatingBarBorder(Settings.Appearance.HideFloatingBarBorder);
             }
             catch (Exception ex)
             {
@@ -428,6 +430,7 @@ namespace Ink_Canvas
                 RefreshGestureButtonIcon();
                 SetFloatingBarHighlightPosition(_currentToolMode);
                 ApplyCompactFloatingBarMode(Settings.Appearance.CompactFloatingBar);
+                ApplyHideFloatingBarBorder(Settings.Appearance.HideFloatingBarBorder);
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     UpdateQuickColorPaletteIndicator(inkCanvas.DefaultDrawingAttributes.Color);
