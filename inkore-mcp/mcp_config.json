@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "inkore-ui-wpf-modern": {
+      "command": "python",
+      "args": [
+        "C:\\Users\\PrefacedCorg\\Documents\\GitHub\\community\\inkore-mcp\\server.py"
+      ]
+    }
+  }
+}

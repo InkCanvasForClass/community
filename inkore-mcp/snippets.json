@@ -1,0 +1,528 @@
+{
+  "info": {
+    "name": "iNKORE.UI.WPF.Modern",
+    "description": "Modern (Fluent 2) styles and controls for WPF applications",
+    "version": "from local source",
+    "source_repo": "C:\\Users\\PrefacedCorg\\Documents\\GitHub\\UI.WPF.Modern"
+  },
+  "namespaces": {
+    "ui": "xmlns:ui=\"http://schemas.inkore.net/lib/ui/wpf/modern\"",
+    "ikw": "xmlns:ikw=\"http://schemas.inkore.net/lib/ui/wpf\""
+  },
+  "setup": {
+    "nuget_install": "Install-Package iNKORE.UI.WPF.Modern",
+    "app_xaml_minimal": "<Application.Resources>\n    <ResourceDictionary>\n        <ResourceDictionary.MergedDictionaries>\n            <ui:ThemeResources />\n            <ui:XamlControlsResources />\n        </ResourceDictionary.MergedDictionaries>\n    </ResourceDictionary>\n</Application.Resources>",
+    "app_xaml_full": "<Application.Resources>\n    <ResourceDictionary>\n        <ResourceDictionary.MergedDictionaries>\n            <ui:ThemeResources>\n                <ui:ThemeResources.ThemeDictionaries>\n                    <ResourceDictionary x:Key=\"Light\" ui:ThemeDictionary.Key=\"Light\">\n                        <ResourceDictionary.MergedDictionaries>\n                            <presets:ColorPresetResources TargetTheme=\"Light\" />\n                            <presets:ShapePresetResources />\n                        </ResourceDictionary.MergedDictionaries>\n                    </ResourceDictionary>\n                    <ResourceDictionary x:Key=\"Dark\" ui:ThemeDictionary.Key=\"Dark\">\n                        <ResourceDictionary.MergedDictionaries>\n                            <presets:ColorPresetResources TargetTheme=\"Dark\" />\n                            <presets:ShapePresetResources />\n                        </ResourceDictionary.MergedDictionaries>\n                    </ResourceDictionary>\n                    <ResourceDictionary x:Key=\"HighContrast\" ui:ThemeDictionary.Key=\"HighContrast\">\n                        <ResourceDictionary.MergedDictionaries>\n                            <ResourceDictionary Source=\"/Themes/HighContrast.xaml\" />\n                        </ResourceDictionary.MergedDictionaries>\n                    </ResourceDictionary>\n                </ui:ThemeResources.ThemeDictionaries>\n            </ui:ThemeResources>\n            <ui:XamlControlsResources />\n        </ResourceDictionary.MergedDictionaries>\n    </ResourceDictionary>\n</Application.Resources>",
+    "window_modern_style": "ui:WindowHelper.UseModernWindowStyle=\"True\" ui:WindowHelper.SystemBackdropType=\"Mica\""
+  },
+  "controls": {
+    "SimpleStackPanel": {
+      "namespace": "ikw:",
+      "description": "增强版 StackPanel，支持 Spacing 属性控制子元素间距。来自 iNKORE.UI.WPF 库。",
+      "properties": {
+        "Spacing": "子元素之间的间距 (double)",
+        "Orientation": "排列方向: Vertical (默认) 或 Horizontal"
+      },
+      "snippets": [
+        {
+          "title": "基础用法",
+          "code": "<ikw:SimpleStackPanel VerticalAlignment=\"Center\" Spacing=\"5\">\n    <TextBlock Text=\"Fluent Design is beautiful.\" FontSize=\"24\" FontWeight=\"Bold\" TextAlignment=\"Center\"/>\n    <TextBlock Text=\"But hey, we deserve it :-)\" FontSize=\"20\" TextAlignment=\"Center\"/>\n    <Button Content=\"Hello world!\" HorizontalAlignment=\"Center\" Margin=\"0,20,0,0\"/>\n</ikw:SimpleStackPanel>",
+          "source": "samples/StarterKit/MainWindow.xaml"
+        },
+        {
+          "title": "带 Orientation 和 Spacing",
+          "code": "<ikw:SimpleStackPanel x:Name=\"Control1\" Spacing=\"8\"\n    VerticalAlignment=\"Top\" Orientation=\"Vertical\" HorizontalAlignment=\"Left\">\n    <ikw:SimpleStackPanel.Resources>\n        <Style TargetType=\"Rectangle\">\n            <Setter Property=\"Height\" Value=\"40\" />\n            <Setter Property=\"Width\" Value=\"40\" />\n        </Style>\n    </ikw:SimpleStackPanel.Resources>\n    <Rectangle Fill=\"Red\" />\n    <Rectangle Fill=\"Blue\" />\n    <Rectangle Fill=\"Green\" />\n    <Rectangle Fill=\"Yellow\" />\n</ikw:SimpleStackPanel>",
+          "source": "Gallery/Pages/Controls/Windows/StackPanelPage.xaml"
+        },
+        {
+          "title": "作为页面内容容器 (带样式)",
+          "code": "<ikw:SimpleStackPanel Style=\"{StaticResource ControlPageContentPanelStyle}\">\n    <!-- 页面内容 -->\n</ikw:SimpleStackPanel>",
+          "source": "Gallery App.xaml 中定义的 ControlPageContentPanelStyle"
+        }
+      ]
+    },
+    "Button": {
+      "namespace": "(原生 WPF, 自动应用 Modern 样式)",
+      "description": "按钮控件，自动应用 Fluent 2 样式。支持 AccentButtonStyleKey 来设置强调色按钮。",
+      "snippets": [
+        {
+          "title": "简单按钮",
+          "code": "<Button Content=\"Standard XAML button\" Click=\"Button_Click\" />",
+          "source": "Gallery/Pages/Controls/Windows/ButtonPage.xaml"
+        },
+        {
+          "title": "带图片内容的按钮",
+          "code": "<Button Width=\"50\" Height=\"50\" AutomationProperties.Name=\"Pie\" Click=\"Button_Click\">\n    <Image AutomationProperties.Name=\"Slice\" Source=\"/Assets/Slices.png\" />\n</Button>",
+          "source": "Gallery/Pages/Controls/Windows/ButtonPage.xaml"
+        },
+        {
+          "title": "强调色按钮 (Accent Style)",
+          "code": "<Button Content=\"Accent style button\" Style=\"{DynamicResource {x:Static ui:ThemeKeys.AccentButtonStyleKey}}\" />",
+          "source": "Gallery/Pages/Controls/Windows/ButtonPage.xaml"
+        },
+        {
+          "title": "自动换行的按钮",
+          "code": "<Button MaxWidth=\"240\" Margin=\"0,0,8,0\">\n    <TextBlock Text=\"This is some text that is too long and will get cut off\" TextWrapping=\"Wrap\" />\n</Button>",
+          "source": "Gallery/Pages/Controls/Windows/ButtonPage.xaml"
+        }
+      ]
+    },
+    "TextBox": {
+      "namespace": "(原生 WPF, 自动应用 Modern 样式)",
+      "description": "文本框控件，通过 ui:ControlHelper 附加属性设置 Header 和 PlaceholderText。",
+      "snippets": [
+        {
+          "title": "简单文本框",
+          "code": "<TextBox AutomationProperties.Name=\"simple TextBox\" />",
+          "source": "Gallery/Pages/Controls/Windows/TextBoxPage.xaml"
+        },
+        {
+          "title": "带标题和占位符的文本框",
+          "code": "<TextBox ui:ControlHelper.Header=\"Enter your name:\" ui:ControlHelper.PlaceholderText=\"Name\" />",
+          "source": "Gallery/Pages/Controls/Windows/TextBoxPage.xaml"
+        },
+        {
+          "title": "只读多行文本框 (带拼写检查)",
+          "code": "<TextBox AcceptsReturn=\"True\"\n    AutomationProperties.Name=\"multi-line TextBox\"\n    SelectionBrush=\"Green\"\n    SpellCheck.IsEnabled=\"True\"\n    TextWrapping=\"Wrap\" />",
+          "source": "Gallery/Pages/Controls/Windows/TextBoxPage.xaml"
+        },
+        {
+          "title": "自定义样式的只读文本框",
+          "code": "<TextBox AutomationProperties.Name=\"customized TextBox\"\n    FontFamily=\"Arial\" FontSize=\"24\"\n    FontStyle=\"Italic\" IsReadOnly=\"True\"\n    Foreground=\"CornflowerBlue\"\n    Text=\"I am super excited to be here!\" />",
+          "source": "Gallery/Pages/Controls/Windows/TextBoxPage.xaml"
+        }
+      ]
+    },
+    "CheckBox": {
+      "namespace": "(原生 WPF, 自动应用 Modern 样式)",
+      "description": "复选框控件，支持两态和三态模式。",
+      "snippets": [
+        {
+          "title": "两态复选框",
+          "code": "<CheckBox Content=\"Two-state CheckBox\"\n    Checked=\"Control1_Checked\"\n    Unchecked=\"Control1_Unchecked\" />",
+          "source": "Gallery/Pages/Controls/Windows/CheckBoxPage.xaml"
+        },
+        {
+          "title": "三态复选框",
+          "code": "<CheckBox Content=\"Three-state CheckBox\"\n    IsThreeState=\"True\"\n    Checked=\"Control2_Checked\"\n    Indeterminate=\"Control2_Indeterminate\"\n    Unchecked=\"Control2_Unchecked\" />",
+          "source": "Gallery/Pages/Controls/Windows/CheckBoxPage.xaml"
+        },
+        {
+          "title": "全选复选框 (三态联动)",
+          "code": "<CheckBox x:Name=\"OptionsAllCheckBox\"\n    Content=\"Select all\"\n    IsThreeState=\"True\"\n    Checked=\"SelectAll_Checked\"\n    Indeterminate=\"SelectAll_Indeterminate\"\n    Unchecked=\"SelectAll_Unchecked\" />\n<CheckBox x:Name=\"Option1CheckBox\"\n    Margin=\"24,0,0,0\"\n    Content=\"Option 1\"\n    Checked=\"Option_Checked\"\n    Unchecked=\"Option_Unchecked\" />",
+          "source": "Gallery/Pages/Controls/Windows/CheckBoxPage.xaml"
+        }
+      ]
+    },
+    "ComboBox": {
+      "namespace": "(原生 WPF, 自动应用 Modern 样式)",
+      "description": "下拉框控件，通过 ui:ControlHelper 设置 Header 和 PlaceholderText。",
+      "snippets": [
+        {
+          "title": "内联项 ComboBox",
+          "code": "<ComboBox x:Name=\"Combo1\" Width=\"200\"\n    ui:ControlHelper.Header=\"Colors\"\n    ui:ControlHelper.PlaceholderText=\"Pick a color\"\n    SelectionChanged=\"ColorComboBox_SelectionChanged\">\n    <sys:String>Blue</sys:String>\n    <sys:String>Green</sys:String>\n    <sys:String>Red</sys:String>\n    <sys:String>Yellow</sys:String>\n</ComboBox>",
+          "source": "Gallery/Pages/Controls/Windows/ComboBoxPage.xaml"
+        },
+        {
+          "title": "可编辑 ComboBox",
+          "code": "<ComboBox x:Name=\"Combo3\" Width=\"200\"\n    ui:ControlHelper.Header=\"Font Size\"\n    IsEditable=\"True\"\n    ItemsSource=\"{Binding FontSizes}\"\n    Loaded=\"Combo3_Loaded\" />",
+          "source": "Gallery/Pages/Controls/Windows/ComboBoxPage.xaml"
+        }
+      ]
+    },
+    "RadioButtons": {
+      "namespace": "ui:",
+      "description": "单选按钮组控件，比原生 RadioButton 更方便管理分组。",
+      "snippets": [
+        {
+          "title": "单选按钮组",
+          "code": "<ui:RadioButtons Header=\"Options:\">\n    <RadioButton Content=\"Option 1\" Checked=\"RadioButton_Checked\" />\n    <RadioButton Content=\"Option 2\" Checked=\"RadioButton_Checked\" />\n    <RadioButton Content=\"Option 3\" Checked=\"RadioButton_Checked\" />\n</ui:RadioButtons>",
+          "source": "Gallery/Pages/Controls/Windows/RadioButtonPage.xaml"
+        },
+        {
+          "title": "绑定枚举的单选按钮组",
+          "code": "<ui:RadioButtons Header=\"Orientation\"\n    ItemsSource=\"{Binding Source={x:Type Orientation}, Converter={StaticResource EnumValuesConverter}}\"\n    SelectedItem=\"{Binding ElementName=slider, Path=Orientation}\" \n    SelectionChanged=\"RadioButtons_SelectionChanged\"/>",
+          "source": "Gallery/Pages/Controls/Windows/SliderPage.xaml"
+        }
+      ]
+    },
+    "Slider": {
+      "namespace": "(原生 WPF, 自动应用 Modern 样式)",
+      "description": "滑块控件，自动应用 Fluent 2 样式。",
+      "snippets": [
+        {
+          "title": "简单滑块",
+          "code": "<Slider x:Name=\"Slider1\" Width=\"200\" AutomationProperties.Name=\"simple slider\" />",
+          "source": "Gallery/Pages/Controls/Windows/SliderPage.xaml"
+        },
+        {
+          "title": "带范围和步进的滑块",
+          "code": "<Slider x:Name=\"Slider2\" Width=\"200\"\n    ui:ControlHelper.Header=\"Control header\"\n    Maximum=\"1000\" Minimum=\"500\"\n    SmallChange=\"10\" TickFrequency=\"10\"\n    Value=\"800\" />",
+          "source": "Gallery/Pages/Controls/Windows/SliderPage.xaml"
+        },
+        {
+          "title": "带刻度标记的滑块",
+          "code": "<Slider x:Name=\"Slider3\" Width=\"290\"\n    AutomationProperties.Name=\"Slider with ticks\"\n    TickFrequency=\"20\" TickPlacement=\"Both\" />",
+          "source": "Gallery/Pages/Controls/Windows/SliderPage.xaml"
+        },
+        {
+          "title": "垂直滑块",
+          "code": "<Slider x:Name=\"Slider4\" Width=\"100\" Height=\"100\"\n    AutomationProperties.Name=\"vertical slider\"\n    Maximum=\"50\" Minimum=\"-50\"\n    Orientation=\"Vertical\"\n    TickFrequency=\"10\" TickPlacement=\"Both\" />",
+          "source": "Gallery/Pages/Controls/Windows/SliderPage.xaml"
+        }
+      ]
+    },
+    "ProgressBar": {
+      "namespace": "ui:",
+      "description": "进度条控件，支持确定和不确定模式，以及错误/暂停状态。",
+      "snippets": [
+        {
+          "title": "不确定进度条",
+          "code": "<ui:ProgressBar x:Name=\"ProgressBar1\" Width=\"130\"\n    IsIndeterminate=\"True\"\n    ShowError=\"{Binding IsChecked, ElementName=ErrorRB}\"\n    ShowPaused=\"{Binding IsChecked, ElementName=PausedRB}\" />",
+          "source": "Gallery/Pages/Controls/Windows/ProgressBarPage.xaml"
+        },
+        {
+          "title": "确定进度条",
+          "code": "<ProgressBar x:Name=\"ProgressBar2\" Width=\"130\"\n    Value=\"{Binding ElementName=ProgressValue, Path=Value, Mode=OneWay}\" />",
+          "source": "Gallery/Pages/Controls/Windows/ProgressBarPage.xaml"
+        }
+      ]
+    },
+    "ProgressRing": {
+      "namespace": "ui:",
+      "description": "环形进度指示器。",
+      "snippets": [
+        {
+          "title": "进度环",
+          "code": "<ui:ProgressRing x:Name=\"ProgressRing1\" Width=\"60\" Height=\"60\"\n    IsActive=\"{Binding IsOn, ElementName=ProgressToggle}\" />",
+          "source": "Gallery/Pages/Controls/Windows/ProgressBarPage.xaml"
+        }
+      ]
+    },
+    "ToggleSwitch": {
+      "namespace": "ui:",
+      "description": "切换开关控件，支持自定义 Header、OnContent、OffContent。",
+      "snippets": [
+        {
+          "title": "简单切换开关",
+          "code": "<ui:ToggleSwitch AutomationProperties.Name=\"simple ToggleSwitch\" />",
+          "source": "Gallery/Pages/Controls/Windows/ToggleSwitchPage.xaml"
+        },
+        {
+          "title": "带自定义内容的切换开关",
+          "code": "<ui:ToggleSwitch x:Name=\"toggleSwitch\"\n    Header=\"Toggle work\" IsOn=\"True\"\n    OffContent=\"Do work\" OnContent=\"Working\"\n    VerticalAlignment=\"Top\" />",
+          "source": "Gallery/Pages/Controls/Windows/ToggleSwitchPage.xaml"
+        },
+        {
+          "title": "与 ProgressRing 联动",
+          "code": "<StackPanel VerticalAlignment=\"Top\" Orientation=\"Horizontal\">\n    <ui:ToggleSwitch x:Name=\"toggleSwitch\"\n        Header=\"Toggle work\" IsOn=\"True\"\n        OffContent=\"Do work\" OnContent=\"Working\" VerticalAlignment=\"Top\" />\n    <ui:ProgressRing Width=\"32\" IsActive=\"{Binding IsOn, ElementName=toggleSwitch}\" />\n</StackPanel>",
+          "source": "Gallery/Pages/Controls/Windows/ToggleSwitchPage.xaml"
+        }
+      ]
+    },
+    "Expander": {
+      "namespace": "(原生 WPF, 自动应用 Modern 样式)",
+      "description": "展开折叠控件，支持 Card 样式和自定义内容对齐。",
+      "snippets": [
+        {
+          "title": "基本展开器",
+          "code": "<Expander x:Name=\"Expander1\" VerticalAlignment=\"Top\"\n    Content=\"This is in the content\"\n    ExpandDirection=\"Down\" IsExpanded=\"False\">\n    <Expander.Header>\n        <TextBlock Text=\"This text is in the header\" FontWeight=\"Bold\" />\n    </Expander.Header>\n</Expander>",
+          "source": "Gallery/Pages/Controls/Windows/ExpanderPage.xaml"
+        },
+        {
+          "title": "Card 样式展开器",
+          "code": "<Expander x:Name=\"Expander4\" VerticalAlignment=\"Top\"\n    Content=\"This is in the content\"\n    Style=\"{StaticResource {x:Static ui:ThemeKeys.ExpanderCardStyleKey}}\"\n    ExpandDirection=\"Down\" IsExpanded=\"False\">\n    <Expander.Header>\n        <TextBlock Text=\"This text is in the header\" FontWeight=\"Bold\" />\n    </Expander.Header>\n</Expander>",
+          "source": "Gallery/Pages/Controls/Windows/ExpanderPage.xaml"
+        },
+        {
+          "title": "带自定义控件的展开器",
+          "code": "<Expander x:Name=\"Expander2\">\n    <Expander.Header>\n        <ToggleButton Content=\"This is a ToggleButton in the header\" />\n    </Expander.Header>\n    <Expander.Content>\n        <Grid>\n            <Button Margin=\"15\" Content=\"This is a Button in the content\" />\n        </Grid>\n    </Expander.Content>\n</Expander>",
+          "source": "Gallery/Pages/Controls/Windows/ExpanderPage.xaml"
+        }
+      ]
+    },
+    "InfoBar": {
+      "namespace": "ui:",
+      "description": "信息栏控件，支持多种严重级别 (Informational/Success/Warning/Error)，可关闭，可带图标和操作按钮。",
+      "snippets": [
+        {
+          "title": "基本信息栏",
+          "code": "<ui:InfoBar x:Name=\"TestInfoBar1\"\n    Title=\"Title\"\n    IsOpen=\"True\"\n    Message=\"Essential app message for your users to be informed of, acknowledge, or take action on.\"\n    Severity=\"Informational\" \n    Closed=\"InfoBar_Closed\"/>",
+          "source": "Gallery/Pages/Controls/Windows/InfoBarPage.xaml"
+        },
+        {
+          "title": "带图标和关闭按钮的信息栏",
+          "code": "<ui:InfoBar x:Name=\"TestInfoBar3\"\n    Title=\"Title\"\n    IsClosable=\"True\"\n    IsIconVisible=\"True\"\n    IsOpen=\"True\"\n    Message=\"Essential app message for your users to be informed of, acknowledge, or take action on.\" />",
+          "source": "Gallery/Pages/Controls/Windows/InfoBarPage.xaml"
+        }
+      ]
+    },
+    "NumberBox": {
+      "namespace": "ui:",
+      "description": "数字输入框控件，支持表达式计算、微调按钮、格式化等。",
+      "snippets": [
+        {
+          "title": "支持表达式的 NumberBox",
+          "code": "<ui:NumberBox\n    AcceptsExpression=\"True\"\n    Header=\"Enter an expression:\"\n    PlaceholderText=\"1 + 2^2\"\n    Value=\"NaN\" />",
+          "source": "Gallery/Pages/Controls/Windows/NumberBoxPage.xaml"
+        },
+        {
+          "title": "带微调按钮的 NumberBox",
+          "code": "<ui:NumberBox\n    x:Name=\"NumberBoxSpinButtonPlacementExample\"\n    Header=\"Enter an integer:\"\n    LargeChange=\"100\"\n    SmallChange=\"10\"\n    SpinButtonPlacementMode=\"Compact\"\n    Value=\"10\" />",
+          "source": "Gallery/Pages/Controls/Windows/NumberBoxPage.xaml"
+        },
+        {
+          "title": "带范围的 NumberBox",
+          "code": "<ui:NumberBox\n    x:Name=\"NumberBox1\"\n    Width=\"200\"\n    Header=\"Control header\"\n    Maximum=\"100\"\n    Minimum=\"0\"\n    PlaceholderText=\"A + B\"\n    SpinButtonPlacementMode=\"Compact\" />",
+          "source": "Gallery/Pages/Controls/Windows/NumberBoxPage.xaml"
+        }
+      ]
+    },
+    "TabControl": {
+      "namespace": "(原生 WPF, 自动应用 Modern 样式; 使用 ui:TabControlHelper 附加属性)",
+      "description": "标签控件，通过 ui:TabControlHelper 提供关闭按钮、TabStripHeader/Footer 等功能。使用 ui:TabItemHelper 设置图标和可关闭性。",
+      "snippets": [
+        {
+          "title": "基本 TabControl (带关闭按钮)",
+          "code": "<TabControl x:Name=\"tabControl\" \n    ui:TabControlHelper.TabCloseRequested=\"tabControl_TabCloseRequested\">\n    <ui:TabControlHelper.TabStripHeader>\n        <Button Content=\"Header\" />\n    </ui:TabControlHelper.TabStripHeader>\n    <ui:TabControlHelper.TabStripFooter>\n        <Button Content=\"Footer\" />\n    </ui:TabControlHelper.TabStripFooter>\n</TabControl>",
+          "source": "Gallery/Pages/Controls/Windows/TabViewPage.xaml"
+        },
+        {
+          "title": "带图标的 TabItem",
+          "code": "<TabControl x:Name=\"TabView4\" MinWidth=\"490\" SelectedIndex=\"0\"\n    ui:TabControlHelper.IsAddTabButtonVisible=\"False\"\n    ui:TabControlHelper.TabCloseRequested=\"tabControl_TabCloseRequested\">\n    <TabControl.Items>\n        <TabItem Header=\"CMD Prompt\">\n            <ui:TabItemHelper.Icon>\n                <ui:BitmapIcon ShowAsMonochrome=\"False\" UriSource=\"/Assets/TabViewIcons/cmd.png\" />\n            </ui:TabItemHelper.Icon>\n        </TabItem>\n        <TabItem Header=\"Powershell\">\n            <ui:TabItemHelper.Icon>\n                <ui:BitmapIcon ShowAsMonochrome=\"False\" UriSource=\"/Assets/TabViewIcons/powershell.png\" />\n            </ui:TabItemHelper.Icon>\n        </TabItem>\n    </TabControl.Items>\n</TabControl>",
+          "source": "Gallery/Pages/Controls/Windows/TabViewPage.xaml"
+        },
+        {
+          "title": "带自定义 TabStrip 背景色的 TabControl",
+          "code": "<TabControl x:Name=\"tabControl3\" \n    ui:ThemeManager.HasThemeResources=\"True\"\n    ui:TabControlHelper.TabCloseRequested=\"tabControl_TabCloseRequested\">\n    <TabControl.Resources>\n        <ui:ResourceDictionaryEx>\n            <ui:ResourceDictionaryEx.ThemeDictionaries>\n                <ResourceDictionary x:Key=\"Light\">\n                    <SolidColorBrush x:Key=\"TabViewBackground\" Color=\"{DynamicResource SystemAccentColorLight2}\" />\n                </ResourceDictionary>\n                <ResourceDictionary x:Key=\"Dark\">\n                    <SolidColorBrush x:Key=\"TabViewBackground\" Color=\"{DynamicResource SystemAccentColorDark2}\" />\n                </ResourceDictionary>\n            </ui:ResourceDictionaryEx.ThemeDictionaries>\n        </ui:ResourceDictionaryEx>\n    </TabControl.Resources>\n</TabControl>",
+          "source": "Gallery/Pages/Controls/Windows/TabViewPage.xaml"
+        },
+        {
+          "title": "自定义 TabItem 样式",
+          "code": "<TabControl x:Name=\"tabControl2\"\n    ui:TabControlHelper.TabCloseRequested=\"tabControl_TabCloseRequested\">\n    <TabControl.Resources>\n        <sys:Double x:Key=\"TabViewItemHeaderFontSize\">24</sys:Double>\n        <sys:Double x:Key=\"TabViewItemHeaderIconSize\">32</sys:Double>\n    </TabControl.Resources>\n    <TabControl.ItemContainerStyle>\n        <Style BasedOn=\"{StaticResource DefaultTabItemStyle}\" TargetType=\"TabItem\">\n            <Setter Property=\"FontFamily\" Value=\"Courier New\" />\n        </Style>\n    </TabControl.ItemContainerStyle>\n</TabControl>",
+          "source": "Gallery/Pages/Controls/Windows/TabViewPage.xaml"
+        },
+        {
+          "title": "不可关闭的 TabItem",
+          "code": "<TabItem Header=\"Unclosable\" ui:TabItemHelper.IsClosable=\"False\">\n    <TextBlock Text=\"This tab cannot be closed.\" />\n</TabItem>",
+          "source": "Gallery/Pages/Controls/Windows/TabViewPage.xaml"
+        }
+      ]
+    },
+    "Pivot": {
+      "namespace": "(使用 TabControl + Pivot 样式)",
+      "description": "Pivot 控件实际上是通过 TabControl 应用 TabControlPivotStyle 样式实现的，使用 ui:PivotHelper 设置标题。",
+      "snippets": [
+        {
+          "title": "基本 Pivot",
+          "code": "<TabControl MinHeight=\"400\"\n    ui:PivotHelper.Title=\"EMAIL\"\n    Style=\"{StaticResource TabControlPivotStyle}\">\n    <TabItem Header=\"All\">\n        <TextBlock Text=\"all emails go here.\" />\n    </TabItem>\n    <TabItem Header=\"Unread\">\n        <TextBlock Text=\"unread emails go here.\" />\n    </TabItem>\n    <TabItem Header=\"Flagged\">\n        <TextBlock Text=\"flagged emails go here.\" />\n    </TabItem>\n</TabControl>",
+          "source": "Gallery/Pages/Controls/Windows/PivotPage.xaml"
+        }
+      ]
+    },
+    "NavigationView": {
+      "namespace": "ui:",
+      "description": "导航视图控件，提供侧边栏导航菜单，支持折叠/展开、图标、Frame 内容区域。",
+      "snippets": [
+        {
+          "title": "基本 NavigationView",
+          "code": "<ui:NavigationView x:Name=\"NavigationView_Root\" IsPaneOpen=\"False\"\n    SelectionChanged=\"NavigationView_SelectionChanged\">\n    <ui:NavigationView.MenuItems>\n        <ui:NavigationViewItem x:Name=\"NavigationViewItem_Home\" Content=\"Home\">\n            <ui:NavigationViewItem.Icon>\n                <ui:FontIcon Icon=\"{x:Static ui:SegoeFluentIcons.Home}\"/>\n            </ui:NavigationViewItem.Icon>\n        </ui:NavigationViewItem>\n        <ui:NavigationViewItem x:Name=\"NavigationViewItem_Apps\" Content=\"Apps\">\n            <ui:NavigationViewItem.Icon>\n                <ui:FontIcon Icon=\"{x:Static ui:SegoeFluentIcons.OEM}\"/>\n            </ui:NavigationViewItem.Icon>\n        </ui:NavigationViewItem>\n        <ui:NavigationViewItem x:Name=\"NavigationViewItem_Games\" Content=\"Games\">\n            <ui:NavigationViewItem.Icon>\n                <ui:FontIcon Icon=\"{x:Static ui:SegoeFluentIcons.Game}\"/>\n            </ui:NavigationViewItem.Icon>\n        </ui:NavigationViewItem>\n    </ui:NavigationView.MenuItems>\n    <ui:Frame x:Name=\"Frame_Main\"/>\n</ui:NavigationView>",
+          "source": "samples/NavigationViewExample/MainWindow.xaml"
+        }
+      ]
+    },
+    "TreeView": {
+      "namespace": "(原生 WPF, 自动应用 Modern 样式)",
+      "description": "树形视图控件，支持数据绑定和模板选择器。",
+      "snippets": [
+        {
+          "title": "基本 TreeView (内联项)",
+          "code": "<TreeView x:Name=\"sampleTreeView\" MinWidth=\"345\" MaxHeight=\"400\"\n    HorizontalAlignment=\"Center\" VerticalAlignment=\"Top\">\n    <TreeViewItem Header=\"Work Documents\" IsExpanded=\"True\">\n        <TreeViewItem Header=\"XYZ Functional Spec\" />\n        <TreeViewItem Header=\"Feature Schedule\" />\n    </TreeViewItem>\n    <TreeViewItem Header=\"Personal Documents\" IsExpanded=\"True\">\n        <TreeViewItem Header=\"Home Remodel\" IsExpanded=\"True\">\n            <TreeViewItem Header=\"Contractor Contact Info\" />\n            <TreeViewItem Header=\"Paint Color Scheme\" />\n        </TreeViewItem>\n    </TreeViewItem>\n</TreeView>",
+          "source": "Gallery/Pages/Controls/Windows/TreeViewPage.xaml"
+        },
+        {
+          "title": "数据绑定 TreeView",
+          "code": "<TreeView x:Name=\"TreeView1\" MinWidth=\"345\" MaxHeight=\"400\"\n    ItemsSource=\"{Binding}\">\n    <TreeView.ItemContainerStyle>\n        <Style BasedOn=\"{StaticResource {x:Static ui:ThemeKeys.DefaultTreeViewItemStyleKey}}\" TargetType=\"TreeViewItem\">\n            <Setter Property=\"IsExpanded\" Value=\"True\" />\n        </Style>\n    </TreeView.ItemContainerStyle>\n    <TreeView.ItemTemplate>\n        <HierarchicalDataTemplate ItemsSource=\"{Binding Children}\">\n            <TextBlock Text=\"{Binding Name}\" />\n        </HierarchicalDataTemplate>\n    </TreeView.ItemTemplate>\n</TreeView>",
+          "source": "Gallery/Pages/Controls/Windows/TreeViewPage.xaml"
+        },
+        {
+          "title": "带 FontIcon 的 TreeView 模板",
+          "code": "<DataTemplate x:Key=\"FileTemplate\">\n    <StackPanel Orientation=\"Horizontal\">\n        <ui:FontIcon Icon=\"{x:Static ui:SegoeFluentIcons.Document}\" FontSize=\"20\"/>\n        <TextBlock Margin=\"0,0,10,0\" />\n        <TextBlock Text=\"{Binding Name}\" />\n    </StackPanel>\n</DataTemplate>",
+          "source": "Gallery/Pages/Controls/Windows/TreeViewPage.xaml"
+        }
+      ]
+    },
+    "ListView": {
+      "namespace": "(原生 WPF, 自动应用 Modern 样式)",
+      "description": "列表视图控件，支持数据绑定、分组、选择模式等。",
+      "snippets": [
+        {
+          "title": "基本 ListView",
+          "code": "<ListView x:Name=\"listView1\"\n    ItemsSource=\"{Binding}\"\n    SelectionMode=\"Single\"\n    VirtualizingPanel.VirtualizationMode=\"Recycling\" />",
+          "source": "Gallery/Pages/Controls/Windows/ListViewPage.xaml"
+        },
+        {
+          "title": "带数据模板的 ListView",
+          "code": "<DataTemplate x:Key=\"ContactListViewTemplate\">\n    <Grid>\n        <Grid.RowDefinitions>\n            <RowDefinition Height=\"*\" />\n            <RowDefinition Height=\"*\" />\n        </Grid.RowDefinitions>\n        <Grid.ColumnDefinitions>\n            <ColumnDefinition Width=\"Auto\" />\n            <ColumnDefinition Width=\"*\" />\n        </Grid.ColumnDefinitions>\n        <Ellipse Grid.RowSpan=\"2\" Width=\"32\" Height=\"32\" Margin=\"6\"\n            HorizontalAlignment=\"Center\" VerticalAlignment=\"Center\" Fill=\"Gray\" />\n        <TextBlock Grid.Column=\"1\" Margin=\"12,6,0,0\"\n            Style=\"{StaticResource BaseTextBlockStyle}\"\n            Text=\"{Binding Name, Mode=OneTime}\" />\n        <TextBlock Grid.Row=\"1\" Grid.Column=\"1\" Margin=\"12,0,0,6\"\n            Style=\"{StaticResource BodyTextBlockStyle}\"\n            Text=\"{Binding Company, Mode=OneTime}\" />\n    </Grid>\n</DataTemplate>",
+          "source": "Gallery/Pages/Controls/Windows/ListViewPage.xaml"
+        }
+      ]
+    },
+    "SettingsCard": {
+      "namespace": "ui:",
+      "description": "设置卡片控件，用于创建 Windows 11 风格的设置页面。支持 Header、Description、HeaderIcon、Content 和点击功能。",
+      "snippets": [
+        {
+          "title": "基本 SettingsCard",
+          "code": "<ui:SettingsCard x:Name=\"settingsCard\"\n    Description=\"This is a default card, with the Header, HeaderIcon, Description and Content set.\"\n    Header=\"This is the Header\">\n    <ui:SettingsCard.HeaderIcon>\n        <ui:FontIcon Glyph=\"&#xE799;\"/>\n    </ui:SettingsCard.HeaderIcon>\n    <ComboBox SelectedIndex=\"0\">\n        <ComboBoxItem>Option 1</ComboBoxItem>\n        <ComboBoxItem>Option 2</ComboBoxItem>\n        <ComboBoxItem>Option 3</ComboBoxItem>\n    </ComboBox>\n</ui:SettingsCard>",
+          "source": "Gallery/Pages/Controls/Community/SettingsCardPage.xaml"
+        },
+        {
+          "title": "带图片图标的 SettingsCard",
+          "code": "<ui:SettingsCard Description=\"You can use a FontIcon, SymbolIcon or BitmapIcon to set the cards HeaderIcon.\"\n    Header=\"Icon options\">\n    <ui:SettingsCard.HeaderIcon>\n        <Image Width=\"20\" Height=\"20\" Source=\"/Assets/WpfLibrary_256w.png\"\n               RenderOptions.BitmapScalingMode=\"HighQuality\"/>\n    </ui:SettingsCard.HeaderIcon>\n    <ui:ToggleSwitch />\n</ui:SettingsCard>",
+          "source": "Gallery/Pages/Controls/Community/SettingsCardPage.xaml"
+        },
+        {
+          "title": "可点击的 SettingsCard",
+          "code": "<ui:SettingsCard Click=\"OnCardClicked\"\n    Description=\"A SettingsCard can be made clickable and you can leverage the Command property or Click event.\"\n    Header=\"A clickable SettingsCard\" IsClickEnabled=\"True\">\n    <ui:SettingsCard.HeaderIcon>\n        <ui:FontIcon Glyph=\"&#xE799;\"/>\n    </ui:SettingsCard.HeaderIcon>\n    <ui:SettingsCard.ActionIcon>\n        <ui:FontIcon Glyph=\"&#xE8A7;\"/>\n    </ui:SettingsCard.ActionIcon>\n</ui:SettingsCard>",
+          "source": "Gallery/Pages/Controls/Community/SettingsCardPage.xaml"
+        },
+        {
+          "title": "隐藏操作图标的 SettingsCard",
+          "code": "<ui:SettingsCard Click=\"OnCardClicked\"\n    IsActionIconVisible=\"False\" IsClickEnabled=\"True\"\n    Header=\"Hiding the ActionIcon\">\n    <ui:SettingsCard.HeaderIcon>\n        <ui:FontIcon Glyph=\"&#xE72E;\"/>\n    </ui:SettingsCard.HeaderIcon>\n</ui:SettingsCard>",
+          "source": "Gallery/Pages/Controls/Community/SettingsCardPage.xaml"
+        }
+      ]
+    },
+    "SettingsExpander": {
+      "namespace": "ui:",
+      "description": "设置展开器控件，可包含多个 SettingsCard 作为子项。支持 ItemsSource 数据绑定。",
+      "snippets": [
+        {
+          "title": "基本 SettingsExpander",
+          "code": "<ui:SettingsExpander x:Name=\"settingsCard\"\n    VerticalAlignment=\"Top\"\n    Description=\"The SettingsExpander has the same properties as a Card.\"\n    Header=\"SettingsExpander\"\n    IsExpanded=\"True\">\n    <ui:SettingsExpander.HeaderIcon>\n        <ui:FontIcon Glyph=\"&#xE91B;\"/>\n    </ui:SettingsExpander.HeaderIcon>\n    <ComboBox SelectedIndex=\"0\">\n        <ComboBoxItem>Option 1</ComboBoxItem>\n        <ComboBoxItem>Option 2</ComboBoxItem>\n    </ComboBox>\n    <ui:SettingsExpander.Items>\n        <ui:SettingsCard Header=\"A basic SettingsCard within an SettingsExpander\">\n            <Button Content=\"Button\" />\n        </ui:SettingsCard>\n        <ui:SettingsCard Description=\"SettingsCard within an Expander can be made clickable too!\"\n            Header=\"This item can be clicked\"\n            IsClickEnabled=\"True\" />\n        <ui:SettingsCard ContentAlignment=\"Left\">\n            <CheckBox Content=\"Here the ContentAlignment is set to Left.\" />\n        </ui:SettingsCard>\n    </ui:SettingsExpander.Items>\n</ui:SettingsExpander>",
+          "source": "Gallery/Pages/Controls/Community/SettingsExpanderPage.xaml"
+        },
+        {
+          "title": "带 ItemsSource 的 SettingsExpander",
+          "code": "<ui:SettingsExpander Description=\"The SettingsExpander can use ItemsSource to define its Items.\"\n    Header=\"Settings Expander with ItemsSource\"\n    ItemsSource=\"{Binding MyDataSet}\">\n    <ui:SettingsExpander.HeaderIcon>\n        <ui:FontIcon Glyph=\"&#xEA37;\"/>\n    </ui:SettingsExpander.HeaderIcon>\n    <ui:SettingsExpander.ItemTemplate>\n        <DataTemplate>\n            <ui:SettingsCard Description=\"{Binding Info}\"\n                Header=\"{Binding Name}\">\n                <ui:HyperlinkButton Content=\"{Binding LinkDescription}\"\n                    NavigateUri=\"{Binding Url}\" />\n            </ui:SettingsCard>\n        </DataTemplate>\n    </ui:SettingsExpander.ItemTemplate>\n</ui:SettingsExpander>",
+          "source": "Gallery/Pages/Controls/Community/SettingsExpanderPage.xaml"
+        },
+        {
+          "title": "完整设置页面布局",
+          "code": "<ScrollViewer Padding=\"20,0\">\n    <FrameworkElement.Resources>\n        <sys:Double x:Key=\"SettingsCardSpacing\">4</sys:Double>\n        <Style x:Key=\"SettingsSectionHeaderTextBlockStyle\"\n            BasedOn=\"{StaticResource BodyStrongTextBlockStyle}\"\n            TargetType=\"TextBlock\">\n            <Style.Setters>\n                <Setter Property=\"Margin\" Value=\"1,30,0,6\" />\n            </Style.Setters>\n        </Style>\n    </FrameworkElement.Resources>\n    <Grid>\n        <ikw:SimpleStackPanel MaxWidth=\"1000\" HorizontalAlignment=\"Stretch\"\n            Spacing=\"{StaticResource SettingsCardSpacing}\">\n            <TextBlock Style=\"{StaticResource SettingsSectionHeaderTextBlockStyle}\" Text=\"Section 1\" />\n            <ui:SettingsCard Description=\"This is a default card\"\n                Header=\"This is the Header\">\n                <ui:SettingsCard.HeaderIcon>\n                    <ui:FontIcon Glyph=\"&#xE799;\" />\n                </ui:SettingsCard.HeaderIcon>\n                <ui:ToggleSwitch IsOn=\"True\" />\n            </ui:SettingsCard>\n            <ui:SettingsExpander Description=\"The SettingsExpander\"\n                Header=\"SettingsExpander\">\n                <ui:SettingsExpander.HeaderIcon>\n                    <ui:FontIcon Glyph=\"&#xE91B;\" />\n                </ui:SettingsExpander.HeaderIcon>\n                <Button Content=\"Content\" Style=\"{StaticResource AccentButtonStyle}\" />\n                <ui:SettingsExpander.Items>\n                    <ui:SettingsCard Header=\"A basic SettingsCard\">\n                        <Button Content=\"Button\" />\n                    </ui:SettingsCard>\n                </ui:SettingsExpander.Items>\n            </ui:SettingsExpander>\n        </ikw:SimpleStackPanel>\n    </Grid>\n</ScrollViewer>",
+          "source": "Gallery/Pages/Controls/Community/SettingsExpanderPage.xaml"
+        }
+      ]
+    },
+    "FontIcon": {
+      "namespace": "ui:",
+      "description": "字体图标控件，使用 SegoeFluentIcons 枚举来引用图标。",
+      "snippets": [
+        {
+          "title": "使用 SegoeFluentIcons 枚举",
+          "code": "<ui:FontIcon Icon=\"{x:Static ui:SegoeFluentIcons.Home}\"/>",
+          "source": "samples/NavigationViewExample/MainWindow.xaml"
+        },
+        {
+          "title": "使用 Glyph 直接指定",
+          "code": "<ui:FontIcon Glyph=\"&#xE799;\"/>",
+          "source": "Gallery/Pages/Controls/Community/SettingsCardPage.xaml"
+        },
+        {
+          "title": "带字体大小的 FontIcon",
+          "code": "<ui:FontIcon Icon=\"{x:Static ui:SegoeFluentIcons.Document}\" FontSize=\"20\"/>",
+          "source": "Gallery/Pages/Controls/Windows/TreeViewPage.xaml"
+        }
+      ]
+    },
+    "Window": {
+      "namespace": "ui:WindowHelper",
+      "description": "通过附加属性启用现代窗口样式和背景效果 (Mica/Acrylic)。",
+      "snippets": [
+        {
+          "title": "现代窗口样式 (Mica 背景)",
+          "code": "<Window xmlns:ui=\"http://schemas.inkore.net/lib/ui/wpf/modern\"\n    ui:WindowHelper.UseModernWindowStyle=\"True\"\n    ui:WindowHelper.SystemBackdropType=\"Mica\"\n    Title=\"Welcome!\" Height=\"450\" Width=\"800\">\n    <!-- 窗口内容 -->\n</Window>",
+          "source": "samples/StarterKit/MainWindow.xaml"
+        },
+        {
+          "title": "带 TitleBar 的现代窗口",
+          "code": "<Window xmlns:ui=\"http://schemas.inkore.net/lib/ui/wpf/modern\"\n    xmlns:ikw=\"http://schemas.inkore.net/lib/ui/wpf\"\n    ui:WindowHelper.UseModernWindowStyle=\"True\"\n    ui:WindowHelper.SystemBackdropType=\"Mica\"\n    ui:TitleBar.Height=\"36\"\n    Title=\"Welcome!\" Height=\"450\" Width=\"800\">\n    <ikw:SimpleStackPanel VerticalAlignment=\"Center\" Spacing=\"5\">\n        <!-- 内容 -->\n    </ikw:SimpleStackPanel>\n</Window>",
+          "source": "samples/StarterKit/MainWindow.xaml"
+        }
+      ]
+    },
+    "DropDownButton": {
+      "namespace": "ui:",
+      "description": "下拉按钮控件，点击后显示下拉菜单。",
+      "snippets": [
+        {
+          "title": "带 MenuFlyout 的 DropDownButton",
+          "code": "<ui:DropDownButton Content=\"Resize window\">\n    <ui:DropDownButton.Flyout>\n        <ui:MenuFlyout Placement=\"BottomEdgeAlignedLeft\">\n            <MenuItem Click=\"ResizeWindow\" Header=\"914 × 686\" />\n            <MenuItem Click=\"ResizeWindow\" Header=\"1000 × 750\" />\n        </ui:MenuFlyout>\n    </ui:DropDownButton.Flyout>\n</ui:DropDownButton>",
+          "source": "Gallery/Pages/Controls/Windows/WindowPage.xaml"
+        }
+      ]
+    },
+    "HyperlinkButton": {
+      "namespace": "ui:",
+      "description": "超链接按钮控件，支持 NavigateUri。",
+      "snippets": [
+        {
+          "title": "超链接按钮",
+          "code": "<ui:HyperlinkButton Content=\"Learn more about Inkways\" />",
+          "source": "Gallery/Pages/Controls/Community/SettingsCardPage.xaml"
+        },
+        {
+          "title": "带导航 URI 的超链接按钮",
+          "code": "<ui:HyperlinkButton Content=\"{Binding LinkDescription}\"\n    NavigateUri=\"{Binding Url}\" />",
+          "source": "Gallery/Pages/Controls/Community/SettingsExpanderPage.xaml"
+        }
+      ]
+    },
+    "ContentDialog": {
+      "namespace": "ui:",
+      "description": "内容对话框控件，用于显示模态对话框。",
+      "snippets": [
+        {
+          "title": "ContentDialog (在 XAML 中定义)",
+          "code": "<local:TestContentDialog x:Name=\"ParentedDialog\" PrimaryButtonText=\"Toggle theme\" />",
+          "source": "Gallery/Pages/Controls/Windows/ContentDialogTestContent.xaml",
+          "note": "ContentDialog 通常在代码中通过 ShowAsync/Show 方法显示"
+        }
+      ]
+    },
+    "MessageBox": {
+      "namespace": "ui:",
+      "description": "消息框控件，是 WPF 原生 MessageBox 的增强版本，支持图标、声音、背景效果等。在代码中调用。",
+      "snippets": [
+        {
+          "title": "简单消息框 (C# 代码)",
+          "code": "// 简单消息框\nui:MessageBox.Show(\"Message text\");\n\n// 带标题和图标\nui:MessageBox.Show(\"Message text\", \"Title\", MessageBoxButton.OK, MessageBoxImage.Information);",
+          "source": "Gallery/Pages/Controls/Extended/MessageBoxPage.xaml.cs",
+          "note": "这是 C# 代码，不是 XAML"
+        }
+      ]
+    },
+    "ThemeResources": {
+      "namespace": "ui:",
+      "description": "主题资源控件，用于在 App.xaml 中配置主题系统，支持 Light/Dark/HighContrast 主题字典。",
+      "snippets": [
+        {
+          "title": "基本主题资源配置",
+          "code": "<ui:ThemeResources>\n    <ui:ThemeResources.ThemeDictionaries>\n        <ResourceDictionary x:Key=\"Light\" ui:ThemeDictionary.Key=\"Light\">\n            <!-- 浅色主题资源 -->\n        </ResourceDictionary>\n        <ResourceDictionary x:Key=\"Dark\" ui:ThemeDictionary.Key=\"Dark\">\n            <!-- 深色主题资源 -->\n        </ResourceDictionary>\n        <ResourceDictionary x:Key=\"HighContrast\" ui:ThemeDictionary.Key=\"HighContrast\">\n            <ResourceDictionary.MergedDictionaries>\n                <ResourceDictionary Source=\"/Themes/HighContrast.xaml\" />\n            </ResourceDictionary.MergedDictionaries>\n        </ResourceDictionary>\n    </ui:ThemeResources.ThemeDictionaries>\n</ui:ThemeResources>",
+          "source": "Gallery/App.xaml"
+        },
+        {
+          "title": "使用 ThemeKeys 引用主题资源",
+          "code": "<Button Content=\"Accent button\" Style=\"{DynamicResource {x:Static ui:ThemeKeys.AccentButtonStyleKey}}\" />\n\n<!-- 引用主题画刷 -->\n<SolidColorBrush x:Key=\"MyBrush\" Color=\"{DynamicResource {x:Static ui:ThemeKeys.SystemAccentColorKey}}\" />",
+          "source": "Gallery 多处引用"
+        },
+        {
+          "title": "使用 HasThemeResources 创建主题相关资源",
+          "code": "<TabControl ui:ThemeManager.HasThemeResources=\"True\">\n    <TabControl.Resources>\n        <ui:ResourceDictionaryEx>\n            <ui:ResourceDictionaryEx.ThemeDictionaries>\n                <ResourceDictionary x:Key=\"Light\">\n                    <SolidColorBrush x:Key=\"TabViewBackground\" Color=\"{DynamicResource SystemAccentColorLight2}\" />\n                </ResourceDictionary>\n                <ResourceDictionary x:Key=\"Dark\">\n                    <SolidColorBrush x:Key=\"TabViewBackground\" Color=\"{DynamicResource SystemAccentColorDark2}\" />\n                </ResourceDictionary>\n            </ui:ResourceDictionaryEx.ThemeDictionaries>\n        </ui:ResourceDictionaryEx>\n    </TabControl.Resources>\n</TabControl>",
+          "source": "Gallery/Pages/Controls/Windows/TabViewPage.xaml"
+        }
+      ]
+    }
+  }
+}
