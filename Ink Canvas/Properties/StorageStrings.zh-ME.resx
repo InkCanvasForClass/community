@@ -155,7 +155,7 @@
     <value>清理确认</value>
   </data>
   <data name="Storage_Core_Desc" xml:space="preserve">
-    <value>包含 .json 配置文件、.enc 使用统计、.exe 主程序、.dll 文件、.dat 数据文件等</value>
+    <value>包含 .json 配置文件、.enc 使用统计、.exe 主程序、.dll 文件、.dat 数据文件、ppt-agent 联动组件、Automations 自动化工作流及 runtimes 运行时等</value>
   </data>
   <data name="Storage_Core_NotCleanable" xml:space="preserve">
     <value>核心文件不能删！删了软件就寄了！</value>
@@ -200,7 +200,7 @@
     <value>插件</value>
   </data>
   <data name="Storage_Logs_Desc" xml:space="preserve">
-    <value>位于 Logs / Crashs 目录下的 .txt 日志与崩溃报告，可以清理</value>
+    <value>位于 Logs / Crashes 目录下的 .txt 日志与崩溃报告，可以清理</value>
   </data>
   <data name="Storage_Logs_Header" xml:space="preserve">
     <value>日志（案发现场）</value>
@@ -221,7 +221,7 @@
     <value>浏览</value>
   </data>
   <data name="Storage_Plugins_Desc" xml:space="preserve">
-    <value>位于 plugins 目录的 .iccpp 插件包</value>
+    <value>位于 Plugins / PluginPackages / PluginConfigs 目录的 .icpx 插件包</value>
   </data>
   <data name="Storage_Plugins_Header" xml:space="preserve">
     <value>插件</value>

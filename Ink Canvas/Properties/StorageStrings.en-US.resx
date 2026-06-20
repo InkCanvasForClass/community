@@ -154,7 +154,7 @@
     <value>Confirm cleanup</value>
   </data>
   <data name="Storage_Core_Desc" xml:space="preserve">
-    <value>Includes .json configs, .enc usage stats, .exe / .dll executables and .dat data files.</value>
+    <value>Includes .json configs, .enc usage stats, .exe / .dll executables, .dat data files, ppt-agent components, Automations workflows and runtimes.</value>
   </data>
   <data name="Storage_Core_NotCleanable" xml:space="preserve">
     <value>Core files cannot be cleaned to keep the application functional.</value>
@@ -220,7 +220,7 @@
     <value>Browse</value>
   </data>
   <data name="Storage_Plugins_Desc" xml:space="preserve">
-    <value>.iccpp plugin packages under the plugins directory.</value>
+    <value>.icpx plugin packages under Plugins / PluginPackages / PluginConfigs directories.</value>
   </data>
   <data name="Storage_Plugins_Header" xml:space="preserve">
     <value>Plugins</value>
