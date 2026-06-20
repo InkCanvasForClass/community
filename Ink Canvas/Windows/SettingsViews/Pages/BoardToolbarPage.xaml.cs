@@ -210,6 +210,25 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             RebuildMainWindowBoardToolbar();
         }
 
+        private void ButtonRefreshConfig_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshConfigFileList();
+            LoadSettings();
+            RebuildMainWindowBoardToolbar();
+        }
+
+        private void ButtonOpenConfigFolder_Click(object sender, RoutedEventArgs e)
+        {
+            var dir = BoardToolbarRegistry.GetConfigDirectory();
+            if (!System.IO.Directory.Exists(dir))
+                System.IO.Directory.CreateDirectory(dir);
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = dir,
+                UseShellExecute = true
+            });
+        }
+
         #endregion
 
         #region Settings load/save

@@ -231,6 +231,12 @@
   <data name="ToolbarPage_DeleteProfile" xml:space="preserve">
     <value>送走</value>
   </data>
+  <data name="ToolbarPage_RefreshProfile" xml:space="preserve">
+    <value>刷新</value>
+  </data>
+  <data name="ToolbarPage_OpenConfigFolder" xml:space="preserve">
+    <value>打开配置文件夹</value>
+  </data>
   <data name="ToolbarPage_AddedComponentsHint" xml:space="preserve">
     <value>以下组件会出现在装备栏上，从组件库拖过来就能添加。</value>
   </data>

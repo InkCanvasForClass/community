@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
+      xmlns:helpers="clr-namespace:Ink_Canvas.Windows.SettingsViews.Helpers"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:dd="urn:gong-wpf-dragdrop"
@@ -43,23 +44,23 @@
 
         <DataTemplate x:Key="LibraryItemTemplate">
             <Border BorderThickness="0"
-                    CornerRadius="6" Padding="10,8" Width="200"
+                    CornerRadius="6" Padding="10,8"
+                    HorizontalAlignment="Stretch"
                     Cursor="Hand">
                 <Grid>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Orientation="Horizontal">
-                        <Path Data="{Binding IconGeometry, Converter={StaticResource StringToGeometryConverter}}" Width="20" Height="20" Stretch="Uniform"
-                              Fill="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <StackPanel>
-                            <TextBlock Text="{Binding DisplayName}" FontWeight="Medium" FontSize="13"/>
-                            <TextBlock Text="{Binding Description}" Opacity="0.65" FontSize="12"
-                                       TextWrapping="Wrap" Margin="0,2,0,0"/>
-                        </StackPanel>
+                    <Path Grid.Column="0" Data="{Binding IconGeometry, Converter={StaticResource StringToGeometryConverter}}" Width="20" Height="20" Stretch="Uniform"
+                          Fill="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="{Binding DisplayName}" FontWeight="Medium" FontSize="13"/>
+                        <TextBlock Text="{Binding Description}" Opacity="0.65" FontSize="12"
+                                   TextWrapping="Wrap" Margin="0,2,0,0"/>
                     </StackPanel>
-                    <Button Grid.Column="1" Content="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                    <Button Grid.Column="2" Content="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                             Click="AddLibraryItem_Click"
                             Background="Transparent" BorderThickness="0"
                             Padding="6,4" VerticalAlignment="Center"
@@ -153,7 +154,8 @@
                 </ui:ListView.ItemContainerStyle>
                 <ui:ListView.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <WrapPanel Orientation="Horizontal"/>
+                        <WrapPanel Orientation="Horizontal"
+                                   helpers:WrapPanelAutoResize.TargetWidth="225"/>
                     </ItemsPanelTemplate>
                 </ui:ListView.ItemsPanel>
             </ui:ListView>

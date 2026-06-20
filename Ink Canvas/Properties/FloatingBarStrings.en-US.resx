@@ -231,6 +231,12 @@
   <data name="ToolbarPage_DeleteProfile" xml:space="preserve">
     <value>Delete</value>
   </data>
+  <data name="ToolbarPage_RefreshProfile" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="ToolbarPage_OpenConfigFolder" xml:space="preserve">
+    <value>Open config folder</value>
+  </data>
   <data name="ToolbarPage_AddedComponentsHint" xml:space="preserve">
     <value>Components below will be shown on the floating toolbar. Drag from the library to add.</value>
   </data>

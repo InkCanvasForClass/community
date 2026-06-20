@@ -242,6 +242,10 @@ namespace Ink_Canvas.Properties
 
         public static string ToolbarPage_DuplicateConfigExists => ResourceManager.GetString(nameof(ToolbarPage_DuplicateConfigExists), _resourceCulture);
 
+        public static string ToolbarPage_OpenConfigFolder => ResourceManager.GetString(nameof(ToolbarPage_OpenConfigFolder), _resourceCulture);
+
+        public static string ToolbarPage_RefreshProfile => ResourceManager.GetString(nameof(ToolbarPage_RefreshProfile), _resourceCulture);
+
         public static string ToolbarPage_DuplicateProfile => ResourceManager.GetString(nameof(ToolbarPage_DuplicateProfile), _resourceCulture);
 
         public static string ToolbarPage_EnableConditionGroup => ResourceManager.GetString(nameof(ToolbarPage_EnableConditionGroup), _resourceCulture);

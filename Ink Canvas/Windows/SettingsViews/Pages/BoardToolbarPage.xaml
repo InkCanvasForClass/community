@@ -5,6 +5,7 @@
           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
           xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
+          xmlns:helpers="clr-namespace:Ink_Canvas.Windows.SettingsViews.Helpers"
           xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
           xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
           xmlns:dd="urn:gong-wpf-dragdrop"
@@ -22,6 +23,13 @@
         <local:BoardPositionNameConverter x:Key="PositionNameConverter"/>
         <local:StringToGeometryConverter x:Key="StringToGeometryConverter"/>
         <Thickness x:Key="ListViewItemCompactSelectedBorderThemeThickness">1.5</Thickness>
+
+        <Style x:Key="BorderlessIconButtonStyle" TargetType="Button"
+               BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
 
         <DataTemplate x:Key="GroupChildItemTemplate" DataType="{x:Type board:BoardToolbarComponentEntry}">
             <Border BorderThickness="0"
@@ -47,23 +55,23 @@
 
         <DataTemplate x:Key="LibraryItemTemplate">
             <Border BorderThickness="0"
-                    CornerRadius="6" Padding="10,8" Width="200"
+                    CornerRadius="6" Padding="10,8"
+                    HorizontalAlignment="Stretch"
                     Cursor="Hand">
                 <Grid>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Orientation="Horizontal">
-                        <Path Data="{Binding IconGeometry, Converter={StaticResource StringToGeometryConverter}}" Width="20" Height="20" Stretch="Uniform"
-                              Fill="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <StackPanel>
-                            <TextBlock Text="{Binding DisplayName}" FontWeight="Medium" FontSize="13"/>
-                            <TextBlock Text="{Binding Description}" Opacity="0.65" FontSize="12"
-                                       TextWrapping="Wrap" Margin="0,2,0,0"/>
-                        </StackPanel>
+                    <Path Grid.Column="0" Data="{Binding IconGeometry, Converter={StaticResource StringToGeometryConverter}}" Width="20" Height="20" Stretch="Uniform"
+                          Fill="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="{Binding DisplayName}" FontWeight="Medium" FontSize="13"/>
+                        <TextBlock Text="{Binding Description}" Opacity="0.65" FontSize="12"
+                                   TextWrapping="Wrap" Margin="0,2,0,0"/>
                     </StackPanel>
-                    <Button Grid.Column="1" Content="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                    <Button Grid.Column="2" Content="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                             Click="AddLibraryItem_Click"
                             Background="Transparent" BorderThickness="0"
                             Padding="6,4" VerticalAlignment="Center"
@@ -154,9 +162,26 @@
                 <ComboBox x:Name="ComboBoxConfigFile" SelectionChanged="ComboBoxConfigFile_SelectionChanged"
                           DockPanel.Dock="Left" VerticalAlignment="Center"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
-                    <Button Content="{x:Static props:FloatingBarStrings.ToolbarPage_NewProfile}" Click="ButtonNewConfig_Click" Padding="12,6" Margin="0,0,8,0"/>
-                    <Button Content="{x:Static props:FloatingBarStrings.ToolbarPage_DuplicateProfile}" Click="ButtonDuplicateConfig_Click" Padding="12,6" Margin="0,0,8,0"/>
-                    <Button Content="{x:Static props:FloatingBarStrings.ToolbarPage_DeleteProfile}" Click="ButtonDeleteConfig_Click" Padding="12,6"/>
+                    <Button Click="ButtonRefreshConfig_Click" Style="{StaticResource BorderlessIconButtonStyle}" Padding="8,6" Margin="0,0,4,0"
+                            ToolTip="{x:Static props:FloatingBarStrings.ToolbarPage_RefreshProfile}">
+                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.ArrowSync_16_Regular}"/>
+                    </Button>
+                    <Button Click="ButtonNewConfig_Click" Style="{StaticResource BorderlessIconButtonStyle}" Padding="8,6" Margin="0,0,4,0"
+                            ToolTip="{x:Static props:FloatingBarStrings.ToolbarPage_NewProfile}">
+                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Add_16_Regular}"/>
+                    </Button>
+                    <Button Click="ButtonDuplicateConfig_Click" Style="{StaticResource BorderlessIconButtonStyle}" Padding="8,6" Margin="0,0,4,0"
+                            ToolTip="{x:Static props:FloatingBarStrings.ToolbarPage_DuplicateProfile}">
+                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Copy_16_Regular}"/>
+                    </Button>
+                    <Button Click="ButtonDeleteConfig_Click" Style="{StaticResource BorderlessIconButtonStyle}" Padding="8,6" Margin="0,0,4,0"
+                            ToolTip="{x:Static props:FloatingBarStrings.ToolbarPage_DeleteProfile}">
+                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Delete_16_Regular}"/>
+                    </Button>
+                    <Button Click="ButtonOpenConfigFolder_Click" Style="{StaticResource BorderlessIconButtonStyle}" Padding="8,6"
+                            ToolTip="{x:Static props:FloatingBarStrings.ToolbarPage_OpenConfigFolder}">
+                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.FolderOpen_16_Regular}"/>
+                    </Button>
                 </StackPanel>
             </DockPanel>
 
@@ -220,7 +245,8 @@
                             </ui:ListView.ItemContainerStyle>
                             <ui:ListView.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <WrapPanel Orientation="Horizontal"/>
+                                    <WrapPanel Orientation="Horizontal"
+                                               helpers:WrapPanelAutoResize.TargetWidth="225"/>
                                 </ItemsPanelTemplate>
                             </ui:ListView.ItemsPanel>
                         </ui:ListView>
