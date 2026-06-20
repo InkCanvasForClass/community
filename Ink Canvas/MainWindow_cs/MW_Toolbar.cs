@@ -427,6 +427,7 @@ namespace Ink_Canvas
                 RefreshFloatingBarButtonColors();
                 RefreshGestureButtonIcon();
                 SetFloatingBarHighlightPosition(_currentToolMode);
+                ApplyCompactFloatingBarMode(Settings.Appearance.CompactFloatingBar);
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     UpdateQuickColorPaletteIndicator(inkCanvas.DefaultDrawingAttributes.Color);
@@ -437,6 +438,47 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"MW_Toolbar: RebuildToolbar 异常: {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}", LogHelper.LogType.Error);
             }
+        }
+
+        /// <summary>
+        /// 紧凑模式浮动栏整体缩放倍率（相对用户设置的倍率再缩小至此比例，保持纵横比）。
+        /// </summary>
+        public const double CompactFloatingBarScaleFactor = 0.85;
+
+        /// <summary>
+        /// 应用紧凑浮动栏模式：遍历浮动栏中的所有 ToolbarImageButton，
+        /// 开启时隐藏常驻文字标签并让图标按纵横比拉伸填满，同时整体等比缩小，关闭时恢复默认外观。
+        /// </summary>
+        internal void ApplyCompactFloatingBarMode(bool compact)
+        {
+            if (StackPanelFloatingBarRoot == null) return;
+            foreach (var btn in FindVisualChildren<Controls.ToolbarImageButton>(StackPanelFloatingBarRoot))
+            {
+                btn.ApplyCompactMode(compact);
+            }
+
+            // 浮动栏整体等比缩小（保持纵横比）
+            double baseScale = Settings.Appearance.ViewboxFloatingBarScaleTransformValue;
+            if (Math.Abs(baseScale) < 0.01) baseScale = 1.0;
+            double effectiveScale = compact ? baseScale * CompactFloatingBarScaleFactor : baseScale;
+            ApplyRawFloatingBarScale(effectiveScale);
+        }
+
+        /// <summary>
+        /// 直接设置浮动栏 ScaleTransform 的绝对值，不经过 Settings 保存。
+        /// </summary>
+        private void ApplyRawFloatingBarScale(double scale)
+        {
+            if (ViewboxFloatingBarScaleTransform == null) return;
+            _userHasDraggedFloatingBar = false;
+            pointDesktop = new Point(-1, -1);
+            pointPPT = new Point(-1, -1);
+            ViewboxFloatingBarScaleTransform.ScaleX = scale;
+            ViewboxFloatingBarScaleTransform.ScaleY = scale;
+            if (IsInPPTPresentationMode)
+                ViewboxFloatingBarMarginAnimation(60);
+            else
+                ViewboxFloatingBarMarginAnimation(100, true);
         }
 
         internal bool IsAnnotating => _currentToolMode != "cursor";

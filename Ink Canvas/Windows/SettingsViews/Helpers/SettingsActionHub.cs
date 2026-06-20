@@ -288,8 +288,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 mw._userHasDraggedFloatingBar = false;
                 mw.pointDesktop = new Point(-1, -1);
                 mw.pointPPT = new Point(-1, -1);
-                mw.ViewboxFloatingBarScaleTransform.ScaleX = actualScale;
-                mw.ViewboxFloatingBarScaleTransform.ScaleY = actualScale;
+                // 紧凑模式叠加缩放因子
+                double effectiveScale = actualScale;
+                if (SettingsManager.Settings.Appearance.CompactFloatingBar)
+                    effectiveScale = actualScale * MainWindow.CompactFloatingBarScaleFactor;
+                mw.ViewboxFloatingBarScaleTransform.ScaleX = effectiveScale;
+                mw.ViewboxFloatingBarScaleTransform.ScaleY = effectiveScale;
                 if (mw.IsInPPTPresentationMode)
                     mw.ViewboxFloatingBarMarginAnimation(60);
                 else
@@ -320,6 +324,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         {
             var mw = GetMainWindow();
             if (mw != null) mw.UpdateToolbarPosition();
+        }
+
+        public static void OnCompactFloatingBarChanged(bool isOn)
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.ApplyCompactFloatingBarMode(isOn);
         }
 
         #endregion

@@ -553,9 +553,11 @@ namespace Ink_Canvas
         [JsonProperty("windowBackdrop")]
         public string WindowBackdrop { get; set; } = "Mica";
 
-        // 浮动栏按钮显示控制
         [JsonProperty("useLegacyFloatingBarUI")]
         public bool UseLegacyFloatingBarUI { get; set; } = false;
+    
+        [JsonProperty("compactFloatingBar")]
+        public bool CompactFloatingBar { get; set; } = false;
         [JsonProperty("eraserDisplayOption")]
         public int EraserDisplayOption { get; set; }
         [JsonProperty("isShowQuickColorPalette")]

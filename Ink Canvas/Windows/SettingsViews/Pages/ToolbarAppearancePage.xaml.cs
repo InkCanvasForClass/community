@@ -94,6 +94,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // 加载在浮动栏图标上显示笔色设置
             if (CardShowPenColorOnFloatingBarIcon != null)
                 CardShowPenColorOnFloatingBarIcon.IsOn = settings.Appearance.ShowPenColorOnFloatingBarIcon;
+
+            // 加载紧凑浮动栏模式设置
+            if (CardCompactFloatingBar != null)
+                CardCompactFloatingBar.IsOn = settings.Appearance.CompactFloatingBar;
         }
 
         private void UpdateAllSliderTexts()
@@ -240,6 +244,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // Refresh the pen icon color on the floating bar
             if (Application.Current.MainWindow is MainWindow mainWindow)
                 mainWindow.UpdatePenIconColor();
+        }
+
+        private void ToggleSwitchCompactFloatingBar_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.CompactFloatingBar = CardCompactFloatingBar.IsOn;
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnCompactFloatingBarChanged(CardCompactFloatingBar.IsOn);
         }
 
         private void FloatingBarMenuOpacitySlider_ValueChanged(object sender, RoutedEventArgs e)

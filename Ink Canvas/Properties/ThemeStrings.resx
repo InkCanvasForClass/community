@@ -285,6 +285,12 @@
   <data name="Theme_ShowPenColorOnFloatingBarIcon" xml:space="preserve">
     <value>批注图标显示当前画笔颜色</value>
   </data>
+  <data name="Theme_CompactFloatingBar" xml:space="preserve">
+    <value>紧凑浮动栏模式</value>
+  </data>
+  <data name="Theme_CompactFloatingBarHint" xml:space="preserve">
+    <value>开启后隐藏浮动栏按钮的常驻文字标签，图标将按纵横比拉伸填满按钮空间。</value>
+  </data>
   <data name="Theme_WindowBackdrop" xml:space="preserve">
     <value>窗口背景样式</value>
   </data>

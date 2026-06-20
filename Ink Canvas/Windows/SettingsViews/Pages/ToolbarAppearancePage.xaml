@@ -42,6 +42,13 @@
                             SwitchName="ToggleSwitchShowPenColorOnFloatingBarIcon"
                             Toggled="ToggleSwitchShowPenColorOnFloatingBarIcon_Toggled" />
 
+                    <controls:LabeledSettingsCard x:Name="CardCompactFloatingBar"
+                            Header="{x:Static props:ThemeStrings.Theme_CompactFloatingBar}"
+                            Description="{x:Static props:ThemeStrings.Theme_CompactFloatingBarHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.FitPage}"
+                            SwitchName="ToggleSwitchCompactFloatingBar"
+                            Toggled="ToggleSwitchCompactFloatingBar_Toggled" />
+
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:ThemeStrings.Theme_FloatingBarIcon}" />
 
