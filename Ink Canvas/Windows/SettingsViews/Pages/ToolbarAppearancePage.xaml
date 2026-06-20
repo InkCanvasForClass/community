@@ -42,12 +42,24 @@
                             SwitchName="ToggleSwitchShowPenColorOnFloatingBarIcon"
                             Toggled="ToggleSwitchShowPenColorOnFloatingBarIcon_Toggled" />
 
-                    <controls:LabeledSettingsCard x:Name="CardCompactFloatingBar"
+                    <ui:SettingsExpander x:Name="ExpanderCompactFloatingBar"
                             Header="{x:Static props:ThemeStrings.Theme_CompactFloatingBar}"
                             Description="{x:Static props:ThemeStrings.Theme_CompactFloatingBarHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.FitPage}"
-                            SwitchName="ToggleSwitchCompactFloatingBar"
-                            Toggled="ToggleSwitchCompactFloatingBar_Toggled" />
+                            IsExpanded="False">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FitPage}" />
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchCompactFloatingBar"
+                                Toggled="ToggleSwitchCompactFloatingBar_Toggled" />
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard x:Name="CardHideFloatingBarBorder"
+                                    Header="{x:Static props:ThemeStrings.Theme_HideFloatingBarBorder}"
+                                    Description="{x:Static props:ThemeStrings.Theme_HideFloatingBarBorderHint}">
+                                <ui:ToggleSwitch x:Name="ToggleSwitchHideFloatingBarBorder"
+                                        Toggled="ToggleSwitchHideFloatingBarBorder_Toggled" />
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:ThemeStrings.Theme_FloatingBarIcon}" />

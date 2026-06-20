@@ -291,6 +291,12 @@
   <data name="Theme_CompactFloatingBarHint" xml:space="preserve">
     <value>Hides button text labels on the floating bar. Icons will stretch proportionally to fill the button space.</value>
   </data>
+  <data name="Theme_HideFloatingBarBorder" xml:space="preserve">
+    <value>Hide floating bar border</value>
+  </data>
+  <data name="Theme_HideFloatingBarBorderHint" xml:space="preserve">
+    <value>Sets the floating bar border thickness to 0 for a borderless look.</value>
+  </data>
   <data name="Theme_WindowBackdrop" xml:space="preserve">
     <value>Window background style</value>
   </data>

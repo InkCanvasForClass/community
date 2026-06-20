@@ -481,6 +481,34 @@ namespace Ink_Canvas
                 ViewboxFloatingBarMarginAnimation(100, true);
         }
 
+        /// <summary>
+        /// 缓存浮动栏各 Border 的原始边框厚度，用于关闭无白边后恢复。
+        /// </summary>
+        private readonly System.Collections.Generic.Dictionary<System.Windows.Controls.Border, System.Windows.Thickness> _floatingBarBorderThicknessCache
+            = new System.Collections.Generic.Dictionary<System.Windows.Controls.Border, System.Windows.Thickness>();
+
+        /// <summary>
+        /// 应用隐藏浮动栏边框：开启时把浮动栏内所有 Border 的边框厚度设为 0（实现无白边），
+        /// 关闭时从缓存恢复各 Border 原始厚度。
+        /// </summary>
+        internal void ApplyHideFloatingBarBorder(bool hide)
+        {
+            if (StackPanelFloatingBarRoot == null) return;
+            foreach (var border in FindVisualChildren<System.Windows.Controls.Border>(StackPanelFloatingBarRoot))
+            {
+                if (hide)
+                {
+                    if (!_floatingBarBorderThicknessCache.ContainsKey(border))
+                        _floatingBarBorderThicknessCache[border] = border.BorderThickness;
+                    border.BorderThickness = new System.Windows.Thickness(0);
+                }
+                else if (_floatingBarBorderThicknessCache.TryGetValue(border, out var original))
+                {
+                    border.BorderThickness = original;
+                }
+            }
+        }
+
         internal bool IsAnnotating => _currentToolMode != "cursor";
 
         internal void UpdateToolbarComponentVisibility()

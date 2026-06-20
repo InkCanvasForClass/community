@@ -291,6 +291,12 @@
   <data name="Theme_CompactFloatingBarHint" xml:space="preserve">
     <value>开启后隐藏浮动栏按钮的常驻文字标签，图标将按纵横比拉伸填满按钮空间。</value>
   </data>
+  <data name="Theme_HideFloatingBarBorder" xml:space="preserve">
+    <value>隐藏浮动栏边框</value>
+  </data>
+  <data name="Theme_HideFloatingBarBorderHint" xml:space="preserve">
+    <value>开启后将浮动栏边框厚度设为 0，实现无白边效果。</value>
+  </data>
   <data name="Theme_WindowBackdrop" xml:space="preserve">
     <value>窗口背景样式</value>
   </data>

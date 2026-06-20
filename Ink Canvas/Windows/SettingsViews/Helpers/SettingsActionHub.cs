@@ -332,6 +332,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             if (mw != null) mw.ApplyCompactFloatingBarMode(isOn);
         }
 
+        public static void OnHideFloatingBarBorderChanged(bool isOn)
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.ApplyHideFloatingBarBorder(isOn);
+        }
+
         #endregion
 
         #region Advanced
