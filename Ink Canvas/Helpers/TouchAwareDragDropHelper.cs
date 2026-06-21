@@ -98,6 +98,33 @@ namespace Ink_Canvas.Helpers
         public static void SetIsGripHandle(DependencyObject obj, bool value)
             => obj.SetValue(IsGripHandleProperty, value);
 
+        /// <summary>
+        /// 是否强制始终显示 grip handle（不依赖触摸模式）。
+        /// 对应 ClassIsland 2.0 TouchDragThumb 的 IsExplicitVisible 属性。
+        /// </summary>
+        public static readonly DependencyProperty IsExplicitVisibleProperty =
+            DependencyProperty.RegisterAttached(
+                "IsExplicitVisible",
+                typeof(bool),
+                typeof(TouchAwareDragDropHelper),
+                new PropertyMetadata(false, OnIsExplicitVisibleChanged));
+
+        public static bool GetIsExplicitVisible(DependencyObject obj)
+            => (bool)obj.GetValue(IsExplicitVisibleProperty);
+
+        public static void SetIsExplicitVisible(DependencyObject obj, bool value)
+            => obj.SetValue(IsExplicitVisibleProperty, value);
+
+        private static void OnIsExplicitVisibleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (!(d is FrameworkElement element)) return;
+            if (!GetIsGripHandle(element)) return;
+            // 重新计算可见性
+            var itemsControl = FindParent<ItemsControl>(element);
+            bool isTouchMode = itemsControl != null && GetIsTouchMode(itemsControl);
+            UpdateGripHandleElementVisualState(element, isTouchMode);
+        }
+
         private static void OnIsGripHandleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (!(d is FrameworkElement element)) return;
@@ -106,9 +133,10 @@ namespace Ink_Canvas.Helpers
             {
                 element.PreviewStylusDown += GripHandle_PreviewStylusDown;
                 element.PreviewStylusUp += GripHandle_PreviewStylusUp;
-                // 默认鼠标模式，不参与 hit testing 且隐藏（鼠标事件穿透到 ListBoxItem，gong-wpf-dragdrop 正常处理）
-                element.IsHitTestVisible = false;
-                element.Visibility = Visibility.Collapsed;
+                // 默认鼠标模式：IsExplicitVisible=false 时不参与 hit testing 且隐藏
+                bool explicitVisible = GetIsExplicitVisible(element);
+                element.IsHitTestVisible = explicitVisible;
+                element.Visibility = explicitVisible ? Visibility.Visible : Visibility.Collapsed;
                 element.Loaded += GripHandle_Loaded;
             }
             else
@@ -127,7 +155,7 @@ namespace Ink_Canvas.Helpers
             if (itemsControl != null)
             {
                 bool isTouchMode = GetIsTouchMode(itemsControl);
-                element.IsHitTestVisible = isTouchMode;
+                element.IsHitTestVisible = isTouchMode || GetIsExplicitVisible(element);
                 UpdateGripHandleElementVisualState(element, isTouchMode);
             }
         }
@@ -265,7 +293,8 @@ namespace Ink_Canvas.Helpers
 
                 if (GetIsGripHandle(current) && current is UIElement element)
                 {
-                    element.IsHitTestVisible = isTouchMode;
+                    bool explicitVisible = GetIsExplicitVisible(element);
+                    element.IsHitTestVisible = isTouchMode || explicitVisible;
                     UpdateGripHandleElementVisualState(element, isTouchMode);
                 }
 
@@ -282,11 +311,12 @@ namespace Ink_Canvas.Helpers
 
         /// <summary>
         /// 触屏模式下显示 grip handle（Visibility=Visible），鼠标模式下隐藏（Visibility=Collapsed）。
-        /// 对应 ClassIsland 2.0 TouchDragThumb 在触屏模式下 Opacity=1，鼠标模式下 Opacity=0。
+        /// 但 IsExplicitVisible=True 时始终显示（对应 ClassIsland 2.0 TouchDragThumb 的 IsExplicitVisible）。
         /// </summary>
         private static void UpdateGripHandleElementVisualState(UIElement element, bool isTouchMode)
         {
-            element.Visibility = isTouchMode ? Visibility.Visible : Visibility.Collapsed;
+            bool explicitVisible = GetIsExplicitVisible(element);
+            element.Visibility = (isTouchMode || explicitVisible) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         #endregion
