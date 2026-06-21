@@ -106,35 +106,22 @@
                     BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
                     BorderThickness="1"
                     CornerRadius="8" Padding="8" Margin="0,4">
-                <StackPanel>
-                    <DockPanel Margin="0,0,0,4">
-                        <TextBlock Text="{Binding Id, Converter={StaticResource GroupNameConverter}}"
-                                   FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"
-                                   DockPanel.Dock="Left"/>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
-                            <Button Content="&#xE70E;" FontFamily="Segoe MDL2 Assets" FontSize="10"
-                                    Click="MoveGroupUp_Click" Padding="4,2" Margin="0,0,2,0"
-                                    Background="Transparent" BorderThickness="0"
-                                    ToolTip="{x:Static props:FloatingBarStrings.BoardToolbarPage_MoveUp}"
-                                    Cursor="Hand"/>
-                            <Button Content="&#xE70D;" FontFamily="Segoe MDL2 Assets" FontSize="10"
-                                    Click="MoveGroupDown_Click" Padding="4,2" Margin="0,0,4,0"
-                                    Background="Transparent" BorderThickness="0"
-                                    ToolTip="{x:Static props:FloatingBarStrings.BoardToolbarPage_MoveDown}"
-                                    Cursor="Hand"/>
-                            <Button Content="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="10"
-                                    Click="AddComponentToGroup_Click" Padding="4,2" Margin="0,0,4,0"
-                                    Background="Transparent" BorderThickness="0"
-                                    ToolTip="{x:Static props:FloatingBarStrings.BoardToolbarPage_AddComponent2}"
-                                    Cursor="Hand"/>
-                            <Button Content="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="10"
-                                    Click="RemoveGroup_Click" Padding="4,2"
-                                    Background="Transparent" BorderThickness="0"
-                                    ToolTip="{x:Static props:FloatingBarStrings.BoardToolbarPage_DeleteProfile}"
-                                    Cursor="Hand"/>
-                        </StackPanel>
-                    </DockPanel>
-                    <ListView ItemsSource="{Binding Components}"
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <ui:FontIcon Grid.Column="0" touch:TouchAwareDragDropHelper.IsGripHandle="True"
+                                 touch:TouchAwareDragDropHelper.IsExplicitVisible="True"
+                                 Icon="{x:Static ui:FluentSystemIcons.ReOrder_20_Regular}" FontSize="16"
+                                 Cursor="SizeAll" Margin="-2,0,4,0" VerticalAlignment="Stretch"
+                                 RenderTransformOrigin="0.5,0.5">
+                        <ui:FontIcon.RenderTransform>
+                            <RotateTransform Angle="90"/>
+                        </ui:FontIcon.RenderTransform>
+                    </ui:FontIcon>
+                    <ListView Grid.Column="1" ItemsSource="{Binding Components}"
                              ItemTemplate="{StaticResource GroupChildItemTemplate}"
                              dd:DragDrop.IsDragSource="True"
                              dd:DragDrop.IsDropTarget="True"
@@ -148,7 +135,25 @@
                             </ItemsPanelTemplate>
                         </ListView.ItemsPanel>
                     </ListView>
-                </StackPanel>
+                    <Border Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Right"
+                            Padding="4" Margin="4,0,0,0" CornerRadius="4"
+                            Background="{DynamicResource ControlFillColorDefaultBrush}">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Click="InsertGroupBelow_Click" Padding="4,2" Margin="0,0,2,0"
+                                    Background="Transparent" BorderThickness="0"
+                                    ToolTip="{x:Static props:FloatingBarStrings.BoardToolbarPage_AddGroup2}"
+                                    Cursor="Hand">
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Add_16_Regular}" FontSize="12"/>
+                            </Button>
+                            <Button Click="RemoveGroup_Click" Padding="4,2"
+                                    Background="Transparent" BorderThickness="0"
+                                    ToolTip="{x:Static props:FloatingBarStrings.BoardToolbarPage_DeleteProfile}"
+                                    Cursor="Hand">
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Delete_16_Regular}" FontSize="12"/>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </Grid>
             </Border>
         </DataTemplate>
 
@@ -228,8 +233,28 @@
                         Click="ButtonAddGroup_Click" Padding="10,5" FontSize="12"/>
             </StackPanel>
             <ScrollViewer VerticalScrollBarVisibility="Auto" PanningMode="VerticalFirst">
-                <ItemsControl x:Name="AreaGroupsControl"
-                              ItemTemplate="{StaticResource GroupEntryTemplate}"/>
+                <ui:ListView x:Name="AreaGroupsControl"
+                              ItemTemplate="{StaticResource GroupEntryTemplate}"
+                              dd:DragDrop.IsDragSource="True"
+                              dd:DragDrop.IsDropTarget="True"
+                              dd:DragDrop.DropHandler="{Binding DataContext.GroupListDropHandler, RelativeSource={RelativeSource AncestorType=ui:Page}}"
+                              touch:TouchAwareDragDropHelper.IsEnabled="True"
+                              Background="Transparent" BorderThickness="0"
+                              SelectionMode="Single">
+                    <ui:ListView.ItemContainerStyle>
+                        <Style TargetType="ui:ListViewItem">
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="MinHeight" Value="0"/>
+                            <Setter Property="Margin" Value="0"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        </Style>
+                    </ui:ListView.ItemContainerStyle>
+                    <ui:ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel/>
+                        </ItemsPanelTemplate>
+                    </ui:ListView.ItemsPanel>
+                </ui:ListView>
             </ScrollViewer>
         </DockPanel>
 
