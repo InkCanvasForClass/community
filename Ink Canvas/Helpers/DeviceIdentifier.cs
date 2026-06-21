@@ -21,17 +21,25 @@ namespace Ink_Canvas.Helpers
         private static readonly string UsageStatsFilePath = Path.Combine(App.RootPath, "usage_stats.enc");
         private static readonly string UsageStatsBackupPath = Path.Combine(App.RootPath, "Saves", "usage_stats_backup.enc");
 
-        private static readonly string DeviceId;
+        private static readonly Lazy<string> deviceIdLazy = new Lazy<string>(() =>
+        {
+            try
+            {
+                return GetOrCreateDeviceId();
+            }
+            catch
+            {
+                return GenerateFallbackDeviceId();
+            }
+        });
+        // 兼容旧代码对 DeviceId 字段的引用，提供同名只读属性（延迟获取）
+        private static string DeviceId => deviceIdLazy.Value;
         private static readonly object fileLock = new object();
         private static UsageStats usageStatsCache;
         private static DateTime usageStatsCacheTime;
         private static readonly TimeSpan UsageStatsCacheDuration = TimeSpan.FromMinutes(2);
 
-        static DeviceIdentifier()
-        {
-            // 在静态构造函数中初始化设备ID
-            DeviceId = GetOrCreateDeviceId();
-        }
+        // 延迟初始化，避免在类型加载/静态构造期间触发平台相关异常
 
         /// <summary>
         /// 获取或创建设备ID
@@ -39,7 +47,7 @@ namespace Ink_Canvas.Helpers
         /// <returns>25字符的唯一设备标识符</returns>
         public static string GetDeviceId()
         {
-            return DeviceId;
+            return deviceIdLazy.Value;
         }
 
         /// <summary>
@@ -165,16 +173,29 @@ namespace Ink_Canvas.Helpers
 
         private static string GetWmiProperty(string query, string propertyName)
         {
+            // 仅在 Windows 桌面环境尝试使用 WMI
             try
             {
-                var assembly = Assembly.Load("System.Management");
-                var searcherType = assembly?.GetType("System.Management.ManagementObjectSearcher");
+                if (!System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+                    return null;
+
+                // 尝试以非抛出方式解析类型，避免在不支持的宿主中触发构造函数抛出
+                var searcherType = Type.GetType("System.Management.ManagementObjectSearcher, System.Management", throwOnError: false);
                 if (searcherType == null)
                 {
                     return null;
                 }
 
-                var searcher = Activator.CreateInstance(searcherType, query);
+                object searcher = null;
+                try
+                {
+                    searcher = Activator.CreateInstance(searcherType, query);
+                }
+                catch (PlatformNotSupportedException)
+                {
+                    // 在某些运行时（例如非 Windows 或受限环境）System.Management 不受支持，返回 null 作为回退
+                    return null;
+                }
                 var getMethod = searcherType.GetMethod("Get");
                 var resultCollection = getMethod?.Invoke(searcher, null);
                 if (resultCollection == null)
@@ -201,6 +222,11 @@ namespace Ink_Canvas.Helpers
 
                 searcher?.GetType().GetMethod("Dispose")?.Invoke(searcher, null);
                 return result;
+            }
+            catch (PlatformNotSupportedException)
+            {
+                // 在某些运行时（例如非 Windows 或受限环境）System.Management 不受支持，返回 null 作为回退
+                return null;
             }
             catch
             {

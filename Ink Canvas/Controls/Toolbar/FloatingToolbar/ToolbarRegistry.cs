@@ -206,7 +206,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             var itemType = typeof(IToolbarItem);
             _items = Assembly.GetExecutingAssembly()
                 .GetTypes()
-                .Where(t => !t.IsAbstract && !t.IsInterface && itemType.IsAssignableFrom(t))
+                // 只选择可实例化且有公共无参构造函数的类型，避免 Activator.CreateInstance 抛出 MissingMethodException
+                .Where(t => !t.IsAbstract && !t.IsInterface && itemType.IsAssignableFrom(t)
+                            && t.GetConstructor(Type.EmptyTypes) != null)
                 .Select(t =>
                 {
                     try { return (IToolbarItem)Activator.CreateInstance(t); }

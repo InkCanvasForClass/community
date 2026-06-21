@@ -120,7 +120,7 @@
     <PackageReference Include="System.ComponentModel.Composition" Version="10.0.5" />
     <PackageReference Include="System.Composition.AttributedModel" Version="10.0.5" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-    <PackageReference Include="System.Management" Version="10.0.5" />
+    <PackageReference Include="System.Management" Version="6.0.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="NHotkey.Wpf" Version="4.0.0" />
     <PackageReference Include="OSVersionExt" Version="4.1.0" />

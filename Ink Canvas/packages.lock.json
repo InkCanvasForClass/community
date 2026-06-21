@@ -194,11 +194,11 @@
       },
       "System.Management": {
         "type": "Direct",
-        "requested": "[10.0.5, )",
-        "resolved": "10.0.5",
-        "contentHash": "JhBVxvWhUJ0KAquUK0dMnc3a1Ol4JyH8fMrMQZ9GgEUkrtvPy8DE57SDnGnuvOdI0maJOdguxw87N5bh2eL87A==",
+        "requested": "[6.0.2, )",
+        "resolved": "6.0.2",
+        "contentHash": "s6c9x2Kghd+ncEDnT6ApYVOacDXr/Y57oSUSx6wjegMOfKxhtrXn3PdASPNU59y3kB9OJ1yb3l5k6uKr3bhqew==",
         "dependencies": {
-          "System.CodeDom": "10.0.5"
+          "System.CodeDom": "6.0.0"
         }
       },
       "System.Private.Uri": {
@@ -289,8 +289,8 @@
       },
       "System.CodeDom": {
         "type": "Transitive",
-        "resolved": "10.0.5",
-        "contentHash": "hGZWDDJh1U6t7fy3iO4HlZYK1ur1fWE3sTqTNHkHk0Leh0JUcxYM//JtLBNG5g+6D2Lt0+aHH8rc7e5oIlNgCg=="
+        "resolved": "6.0.0",
+        "contentHash": "CPc6tWO1LAer3IzfZufDBRL+UZQcj5uS207NHALQzP84Vp/z6wF0Aa0YZImOQY8iStY0A2zI/e3ihKNPfUm8XA=="
       },
       "System.ComponentModel.Annotations": {
         "type": "Transitive",
@@ -349,6 +349,15 @@
       }
     },
     "net6.0-windows10.0.19041/win-arm64": {
+      "System.Management": {
+        "type": "Direct",
+        "requested": "[6.0.2, )",
+        "resolved": "6.0.2",
+        "contentHash": "s6c9x2Kghd+ncEDnT6ApYVOacDXr/Y57oSUSx6wjegMOfKxhtrXn3PdASPNU59y3kB9OJ1yb3l5k6uKr3bhqew==",
+        "dependencies": {
+          "System.CodeDom": "6.0.0"
+        }
+      },
       "Microsoft.Win32.Registry": {
         "type": "Transitive",
         "resolved": "5.0.0",
@@ -379,6 +388,15 @@
       }
     },
     "net6.0-windows10.0.19041/win-x64": {
+      "System.Management": {
+        "type": "Direct",
+        "requested": "[6.0.2, )",
+        "resolved": "6.0.2",
+        "contentHash": "s6c9x2Kghd+ncEDnT6ApYVOacDXr/Y57oSUSx6wjegMOfKxhtrXn3PdASPNU59y3kB9OJ1yb3l5k6uKr3bhqew==",
+        "dependencies": {
+          "System.CodeDom": "6.0.0"
+        }
+      },
       "Microsoft.Win32.Registry": {
         "type": "Transitive",
         "resolved": "5.0.0",
@@ -409,6 +427,15 @@
       }
     },
     "net6.0-windows10.0.19041/win-x86": {
+      "System.Management": {
+        "type": "Direct",
+        "requested": "[6.0.2, )",
+        "resolved": "6.0.2",
+        "contentHash": "s6c9x2Kghd+ncEDnT6ApYVOacDXr/Y57oSUSx6wjegMOfKxhtrXn3PdASPNU59y3kB9OJ1yb3l5k6uKr3bhqew==",
+        "dependencies": {
+          "System.CodeDom": "6.0.0"
+        }
+      },
       "Microsoft.Win32.Registry": {
         "type": "Transitive",
         "resolved": "5.0.0",

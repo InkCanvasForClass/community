@@ -1,4 +1,4 @@
-﻿using System.Windows.Automation;
+using System.Windows.Automation;
 
 namespace Ink_Canvas.Helpers
 {
@@ -44,39 +44,74 @@ namespace Ink_Canvas.Helpers
 
         public static bool IsWindowExisted(string windowName, bool matchFullName = true)
         {
-            // 获取Win+Tab预览中的窗口
-            AutomationElementCollection windows = AutomationElement.RootElement.FindAll(
-                TreeScope.Children, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Window));
-
-            foreach (AutomationElement window in windows)
+            try
             {
-                //LogHelper.WriteLogToFile("" + window.Current.Name);
+                // 获取Win+Tab预览中的窗口
+                
+                AutomationElementCollection windows = AutomationElement.RootElement.FindAll(
+                    TreeScope.Children, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Window));
 
-                string windowTitle = window.Current.Name;
-
-                // 如果窗口标题包含 windowName，则进行检查
-                if (!string.IsNullOrEmpty(windowTitle) && windowTitle.Contains(windowName))
+                foreach (AutomationElement window in windows)
                 {
-                    if (matchFullName)
+                    //LogHelper.WriteLogToFile("" + window.Current.Name);
+
+                    string windowTitle;
+                    try
                     {
-                        if (windowTitle.Length == windowName.Length)
+                        windowTitle = window.Current.Name;
+                    }
+                    catch (System.Windows.Automation.ElementNotAvailableException)
+                    {
+                        // 窗口在枚举过程中被销毁，跳过
+                        continue;
+                    }
+
+                    // 如果窗口标题包含 windowName，则进行检查
+                    if (!string.IsNullOrEmpty(windowTitle) && windowTitle.Contains(windowName))
+                    {
+                        if (matchFullName)
                         {
-                            WindowPattern windowPattern = window.GetCurrentPattern(WindowPattern.Pattern) as WindowPattern;
+                            if (windowTitle.Length == windowName.Length)
+                            {
+                                WindowPattern windowPattern;
+                                try
+                                {
+                                    windowPattern = window.GetCurrentPattern(WindowPattern.Pattern) as WindowPattern;
+                                }
+                                catch (System.Windows.Automation.ElementNotAvailableException)
+                                {
+                                    // 窗口在获取模式时被销毁，跳过
+                                    continue;
+                                }
+                                if (windowPattern != null)
+                                {
+                                    return true;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            WindowPattern windowPattern;
+                            try
+                            {
+                                windowPattern = window.GetCurrentPattern(WindowPattern.Pattern) as WindowPattern;
+                            }
+                            catch (System.Windows.Automation.ElementNotAvailableException)
+                            {
+                                // 窗口在获取模式时被销毁，跳过
+                                continue;
+                            }
                             if (windowPattern != null)
                             {
                                 return true;
                             }
                         }
                     }
-                    else
-                    {
-                        WindowPattern windowPattern = window.GetCurrentPattern(WindowPattern.Pattern) as WindowPattern;
-                        if (windowPattern != null)
-                        {
-                            return true;
-                        }
-                    }
                 }
+            }
+            catch (System.Windows.Automation.ElementNotAvailableException)
+            {
+                // 枚举过程中窗口被销毁，视为未找到
             }
             return false;
         }
