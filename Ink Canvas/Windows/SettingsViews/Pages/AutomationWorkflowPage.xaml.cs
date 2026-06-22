@@ -717,7 +717,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded || _isUpdatingEditor) return;
             if (sender is ComboBox cb && cb.Tag is Ink_Canvas.WorkflowAutomation.Models.Action action)
             {
-                action.Id = cb.SelectedValue as string ?? "";
+                var newId = cb.SelectedValue as string ?? "";
+                // ID 没有变化（例如 ComboBox 因绑定/页面切换重新加载触发 SelectionChanged），
+                // 不应重置 Settings，否则会把用户已保存的设置覆盖为默认值（issue #560）。
+                if (action.Id == newId) return;
+
+                action.Id = newId;
                 action.Settings = null;
 
                 if (FindVisualChild<AutomationSettingsPresenter>(cb.Parent) is { } presenter)
