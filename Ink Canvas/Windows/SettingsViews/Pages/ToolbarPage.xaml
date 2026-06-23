@@ -88,6 +88,9 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
                 <ui:FontIcon Grid.Column="0" touch:TouchAwareDragDropHelper.IsGripHandle="True"
                              Icon="{x:Static ui:FluentSystemIcons.ReOrderDotsVertical_20_Filled}" FontSize="24"
@@ -272,6 +275,7 @@
                                     <Setter Property="Padding" Value="0"/>
                                     <Setter Property="MinHeight" Value="0"/>
                                     <Setter Property="Margin" Value="1.5"/>
+                                    <Setter Property="VerticalContentAlignment" Value="Stretch"/>
                                     <EventSetter Event="Loaded" Handler="ListViewItem_Loaded"/>
                                 </Style>
                             </ui:ListView.ItemContainerStyle>
