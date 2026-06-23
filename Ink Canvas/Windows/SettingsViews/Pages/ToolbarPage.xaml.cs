@@ -511,6 +511,41 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         #region Item management
 
+        private void AddedList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateRemoveButtonVisibility(AddedList, "BtnRemoveItem");
+        }
+
+        private void GroupChildrenListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateRemoveButtonVisibility(GroupChildrenListBox, "BtnRemoveGroupChild");
+        }
+
+        private static void UpdateRemoveButtonVisibility(ListView listView, string buttonName)
+        {
+            foreach (var item in listView.Items)
+            {
+                if (listView.ItemContainerGenerator.ContainerFromItem(item) is ListViewItem container)
+                {
+                    var btn = FindVisualChild<Button>(container, buttonName);
+                    if (btn != null)
+                        btn.Visibility = container.IsSelected ? Visibility.Visible : Visibility.Collapsed;
+                }
+            }
+        }
+
+        private static T FindVisualChild<T>(DependencyObject parent, string name) where T : FrameworkElement
+        {
+            for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
+                if (child is T result && result.Name == name) return result;
+                var found = FindVisualChild<T>(child, name);
+                if (found != null) return found;
+            }
+            return null;
+        }
+
         private void RemoveItem_Click(object sender, RoutedEventArgs e)
         {
             if (sender is FrameworkElement fe && fe.DataContext is ToolbarComponentEntry entry)

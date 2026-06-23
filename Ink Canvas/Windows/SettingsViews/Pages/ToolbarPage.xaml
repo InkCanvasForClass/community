@@ -11,6 +11,7 @@
       xmlns:toolbar="clr-namespace:Ink_Canvas.Controls.Toolbar.FloatingToolbar"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       xmlns:touch="clr-namespace:Ink_Canvas.Helpers"
+      xmlns:sys="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d"
       Title="工具栏">
 
@@ -23,6 +24,8 @@
         <local:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
         <local:StringToGeometryConverter x:Key="StringToGeometryConverter"/>
         <Thickness x:Key="ListViewItemCompactSelectedBorderThemeThickness">1.5</Thickness>
+        <sys:Double x:Key="ListViewItemMinWidth">0</sys:Double>
+        <sys:Double x:Key="ListViewItemMinHeight">0</sys:Double>
 
         <Style x:Key="BorderlessIconButtonStyle" TargetType="Button"
                BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
@@ -45,10 +48,12 @@
                     <TextBlock Text="{Binding Id, Converter={StaticResource IdToNameConverter}}"
                                VerticalAlignment="Center" FontSize="13"/>
                     <Button Click="RemoveItem_Click"
-                            Background="Transparent" BorderThickness="0"
+                            x:Name="BtnRemoveItem"
+                            Style="{StaticResource BorderlessIconButtonStyle}"
                             VerticalAlignment="Center"
-                            Cursor="Hand">
-                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Delete_16_Regular}" Foreground="Red"/>
+                            Cursor="Hand"
+                            Visibility="Collapsed">
+                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Delete_16_Regular}" FontSize="16" Foreground="IndianRed"/>
                     </Button>
                 </StackPanel>
             </Border>
@@ -70,17 +75,19 @@
                     <TextBlock Text="{Binding Id, Converter={StaticResource IdToNameConverter}}"
                                VerticalAlignment="Center" FontSize="12"/>
                     <Button Click="RemoveGroupChildItem_Click"
-                            Background="Transparent" BorderThickness="0"
+                            x:Name="BtnRemoveGroupChild"
+                            Style="{StaticResource BorderlessIconButtonStyle}"
                             VerticalAlignment="Center"
-                            Cursor="Hand">
-                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Delete_16_Regular}" Foreground="Red"/>
+                            Cursor="Hand"
+                            Visibility="Collapsed">
+                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Delete_16_Regular}" FontSize="16" Foreground="IndianRed"/>
                     </Button>
                 </StackPanel>
             </Border>
         </DataTemplate>
 
         <DataTemplate x:Key="LibraryItemTemplate">
-            <Grid>
+            <Grid Margin="0,8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
@@ -96,14 +103,16 @@
                              Icon="{x:Static ui:FluentSystemIcons.ReOrderDotsVertical_20_Filled}" FontSize="24"
                              Cursor="SizeAll" Margin="-1,0,2,0" VerticalAlignment="Center"/>
                 <Path Grid.Column="1" Data="{Binding IconGeometry, Converter={StaticResource StringToGeometryConverter}}" 
-                      Width="28" Height="28" Stretch="Uniform"
+                      Width="32" Height="32" Stretch="Uniform"
                       Fill="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" 
-                      VerticalAlignment="Center" Margin="0,0,8,0"/>
+                      VerticalAlignment="Center" Margin="0,-4,4,0"/>
 
                 <!-- 两个文本作为整体置顶 -->
                 <StackPanel Grid.Column="2" VerticalAlignment="Top">
-                    <TextBlock Text="{Binding DisplayName}" FontWeight="Medium" FontSize="13" />
-                    <TextBlock Text="{Binding Description}" Opacity="0.65" FontSize="12" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding DisplayName}" FontWeight="Medium" FontSize="13" Margin="0,0,0,1"
+                               HorizontalAlignment="Left" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Text="{Binding Description}" Opacity="0.75" FontSize="12" TextWrapping="Wrap"
+                               TextTrimming="CharacterEllipsis"/>
                 </StackPanel>
 
                 <Button Grid.Column="3" Content="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="12"
@@ -208,6 +217,7 @@
                              Style="{StaticResource DragDropListViewStyle}"
                              dd:DragDrop.DropHandler="{Binding GroupDropHandler}"
                              touch:TouchAwareDragDropHelper.IsEnabled="True"
+                             SelectionChanged="GroupChildrenListBox_SelectionChanged"
                              MinHeight="32">
                         <ListView.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -237,6 +247,7 @@
                          Style="{StaticResource DragDropListViewStyle}"
                          dd:DragDrop.DropHandler="{Binding}"
                          touch:TouchAwareDragDropHelper.IsEnabled="True"
+                         SelectionChanged="AddedList_SelectionChanged"
                          MinHeight="48" d:ItemsSource="{d:SampleData ItemCount=5}">
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -272,7 +283,7 @@
                                  SelectionMode="Single">
                             <ui:ListView.ItemContainerStyle>
                                 <Style TargetType="ui:ListViewItem">
-                                    <Setter Property="Padding" Value="0"/>
+                                    <Setter Property="Padding" Value="8,0"/>
                                     <Setter Property="MinHeight" Value="0"/>
                                     <Setter Property="Margin" Value="1.5"/>
                                     <Setter Property="VerticalContentAlignment" Value="Stretch"/>
