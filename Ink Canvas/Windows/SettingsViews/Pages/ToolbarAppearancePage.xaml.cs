@@ -330,7 +330,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             };
             dialog.IsPrimaryButtonEnabled = content.CanSave();
 
-            dialog.PrimaryButtonClick += async (s, args) =>
+            dialog.PrimaryButtonClick += (s, args) =>
             {
                 var deferral = args.GetDeferral();
                 if (content.Save())
