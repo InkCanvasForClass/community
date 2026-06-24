@@ -138,6 +138,18 @@
   <data name="TopMostMode_UIA_RestartRequired" xml:space="preserve">
     <value>切换到 UIA 置顶模式需要弹出 UAC 授权并重启成普通用户 UIA 进程，现在继续吗？</value>
   </data>
+  <data name="UIAMode_Label" xml:space="preserve">
+    <value>UIA 方案</value>
+  </data>
+  <data name="UIAMode_UserToken" xml:space="preserve">
+    <value>基于用户令牌</value>
+  </data>
+  <data name="UIAMode_ProcessToken" xml:space="preserve">
+    <value>基于原进程令牌</value>
+  </data>
+  <data name="UIAMode_Description" xml:space="preserve">
+    <value>选择 UIA 置顶的令牌获取方案。基于用户令牌从 explorer.exe 获取令牌，基于原进程令牌从原始进程复制令牌。</value>
+  </data>
   <data name="UpdateChannel" xml:space="preserve">
     <value>更新通道</value>
   </data>

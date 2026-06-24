@@ -138,6 +138,18 @@
   <data name="TopMostMode_UIA_RestartRequired" xml:space="preserve">
     <value>Switching to UIA topmost mode requires UAC approval and will restart as a normal-user UIA process. Continue now?</value>
   </data>
+  <data name="UIAMode_Label" xml:space="preserve">
+    <value>UIA Scheme</value>
+  </data>
+  <data name="UIAMode_UserToken" xml:space="preserve">
+    <value>User Token</value>
+  </data>
+  <data name="UIAMode_ProcessToken" xml:space="preserve">
+    <value>Original Process Token</value>
+  </data>
+  <data name="UIAMode_Description" xml:space="preserve">
+    <value>Choose the token acquisition scheme for UIA topmost. User Token obtains the token from explorer.exe, while Original Process Token duplicates the token from the original process.</value>
+  </data>
   <data name="UpdateChannel" xml:space="preserve">
     <value>Update channel</value>
   </data>

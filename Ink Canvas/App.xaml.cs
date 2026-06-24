@@ -138,7 +138,26 @@ namespace Ink_Canvas
 
             if (args.Contains("--enable-uia-topmost-helper"))
             {
-                Environment.Exit(UIAccessHelper.LaunchNormalUserWithUIAccessFromElevatedHelper() ? 0 : 1);
+                // 检查是否为原进程令牌模式（通过 --uia-source-pid 参数判断）
+                uint sourcePid = 0;
+                for (int i = 0; i < args.Length - 1; i++)
+                {
+                    if (string.Equals(args[i], "--uia-source-pid", StringComparison.OrdinalIgnoreCase)
+                        && uint.TryParse(args[i + 1], out uint parsedPid))
+                    {
+                        sourcePid = parsedPid;
+                        break;
+                    }
+                }
+
+                if (sourcePid != 0)
+                {
+                    Environment.Exit(UIAccessHelper.LaunchNormalUserWithUIAccessFromElevatedHelper_ProcessToken(sourcePid) ? 0 : 1);
+                }
+                else
+                {
+                    Environment.Exit(UIAccessHelper.LaunchNormalUserWithUIAccessFromElevatedHelper() ? 0 : 1);
+                }
                 return;
             }
 

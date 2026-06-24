@@ -129,6 +129,19 @@
                         </ui:SettingsExpander.ItemTemplate>
                     </ui:SettingsExpander>
 
+                    <ui:SettingsCard x:Name="CardUIAMode"
+                            Header="{x:Static props:StartupStrings.UIAMode_Label}"
+                            Description="{x:Static props:StartupStrings.UIAMode_Description}"
+                            Visibility="Collapsed"
+                            Margin="0,-2,0,0">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Admin}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ComboBox x:Name="ComboBoxUIAMode"
+                                SelectionChanged="ComboBoxUIAMode_SelectionChanged"
+                                MinWidth="180" />
+                    </ui:SettingsCard>
+
                     <Rectangle Height="48" />
 
                 </ikw:SimpleStackPanel>

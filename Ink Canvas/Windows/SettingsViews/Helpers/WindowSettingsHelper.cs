@@ -1,5 +1,6 @@
 using Ink_Canvas.Helpers;
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Windows;
@@ -244,7 +245,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                             App.IsAppExitByUser = true;
                             (Application.Current as App)?.ReleaseMutexForRestart();
 
-                            bool started = UIAccessHelper.RestartAsNormalUserWithUIAccess();
+                            bool useProcessToken = SettingsManager.Settings.Advanced.UIAMode == UIAMode.ProcessToken;
+                            bool started;
+
+                            if (useProcessToken)
+                            {
+                                started = UIAccessHelper.RestartAsNormalUserWithUIAccess_ProcessToken(sourcePid: (uint)Process.GetCurrentProcess().Id);
+                            }
+                            else
+                            {
+                                started = UIAccessHelper.RestartAsNormalUserWithUIAccess();
+                            }
                             if (started)
                             {
                                 Application.Current.Shutdown();

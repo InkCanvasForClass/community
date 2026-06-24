@@ -104,6 +104,14 @@ namespace Ink_Canvas.Properties
 
         public static string TopMostMode_UIA_RestartRequired => ResourceManager.GetString(nameof(TopMostMode_UIA_RestartRequired), _resourceCulture);
 
+        public static string UIAMode_Label => ResourceManager.GetString(nameof(UIAMode_Label), _resourceCulture);
+
+        public static string UIAMode_UserToken => ResourceManager.GetString(nameof(UIAMode_UserToken), _resourceCulture);
+
+        public static string UIAMode_ProcessToken => ResourceManager.GetString(nameof(UIAMode_ProcessToken), _resourceCulture);
+
+        public static string UIAMode_Description => ResourceManager.GetString(nameof(UIAMode_Description), _resourceCulture);
+
         public static string UpdateChannel => ResourceManager.GetString(nameof(UpdateChannel), _resourceCulture);
 
         public static string UpdateChannelHint => ResourceManager.GetString(nameof(UpdateChannelHint), _resourceCulture);

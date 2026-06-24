@@ -90,20 +90,47 @@ namespace Ink_Canvas.Helpers
                 (Application.Current as App)?.ReleaseMutexForRestart();
 
                 bool started;
+                bool useProcessToken = SettingsManager.Settings.Advanced.UIAMode == UIAMode.ProcessToken;
+
                 if (IsRunningAsAdmin())
                 {
-                    started = UIAccessHelper.RestartAsNormalUserWithUIAccess();
+                    if (useProcessToken)
+                    {
+                        started = UIAccessHelper.RestartAsNormalUserWithUIAccess_ProcessToken(sourcePid: (uint)Process.GetCurrentProcess().Id);
+                    }
+                    else
+                    {
+                        started = UIAccessHelper.RestartAsNormalUserWithUIAccess();
+                    }
                 }
                 else
                 {
                     string exePath = Process.GetCurrentProcess().MainModule.FileName;
-                    var psi = new ProcessStartInfo(exePath)
+                    ProcessStartInfo psi;
+
+                    if (useProcessToken)
                     {
-                        Arguments = "--enable-uia-topmost-helper",
-                        UseShellExecute = true,
-                        Verb = "runas"
-                    };
-                    Process.Start(psi);
+                        int currentPid = Process.GetCurrentProcess().Id;
+                        psi = new ProcessStartInfo(exePath)
+                        {
+                            Arguments = $"--enable-uia-topmost-helper --uia-source-pid {currentPid}",
+                            UseShellExecute = true,
+                            Verb = "runas"
+                        };
+                        Process.Start(psi);
+                        // 保持原进程短暂存活，确保提升的 helper 可以复制当前进程令牌。
+                        System.Threading.Thread.Sleep(2000);
+                    }
+                    else
+                    {
+                        psi = new ProcessStartInfo(exePath)
+                        {
+                            Arguments = "--enable-uia-topmost-helper",
+                            UseShellExecute = true,
+                            Verb = "runas"
+                        };
+                        Process.Start(psi);
+                    }
                     started = true;
                 }
 

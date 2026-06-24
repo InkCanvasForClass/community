@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using Ink_Canvas;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -65,6 +66,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     _topMostModeItems.Add(btnItem);
 
                     ExpanderAlwaysOnTop.ItemsSource = _topMostModeItems;
+
+                    // 初始化 UIA 方案下拉框
+                    if (ComboBoxUIAMode != null)
+                    {
+                        ComboBoxUIAMode.Items.Clear();
+                        ComboBoxUIAMode.Items.Add(new ComboBoxItem { Content = StartupStrings.UIAMode_UserToken, Tag = UIAMode.UserToken });
+                        ComboBoxUIAMode.Items.Add(new ComboBoxItem { Content = StartupStrings.UIAMode_ProcessToken, Tag = UIAMode.ProcessToken });
+                        ComboBoxUIAMode.SelectedIndex = settings.Advanced.UIAMode == UIAMode.ProcessToken ? 1 : 0;
+                    }
+
+                    UpdateUIAModeVisibility();
                 }
             }
             catch (Exception ex)
@@ -90,7 +102,23 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             else
                 _radioNormal.IsChecked = true;
 
+            UpdateUIAModeVisibility();
+
             _isLoaded = wasLoaded;
+        }
+
+        private void UpdateUIAModeVisibility()
+        {
+            if (CardUIAMode == null) return;
+
+            bool isUIAEnabled = SettingsManager.Settings.Advanced.EnableUIAccessTopMost;
+            CardUIAMode.Visibility = isUIAEnabled ? Visibility.Visible : Visibility.Collapsed;
+
+            if (isUIAEnabled && ComboBoxUIAMode != null)
+            {
+                var currentMode = SettingsManager.Settings.Advanced.UIAMode;
+                ComboBoxUIAMode.SelectedIndex = currentMode == UIAMode.ProcessToken ? 1 : 0;
+            }
         }
 
         private void RadioTopMostNormal_Loaded(object sender, RoutedEventArgs e)
@@ -297,6 +325,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 App.IsUIAccessTopMostEnabled = false;
 
+                UpdateUIAModeVisibility();
+
                 var msg = StartupStrings.TopMostMode_Normal_RestartRequired;
                 var result = MessageBox.Show(msg, "Ink Canvas", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
@@ -327,6 +357,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 SettingsManager.SaveSettingsToFile();
 
+                UpdateUIAModeVisibility();
+
                 var msg = StartupStrings.TopMostMode_UIA_RestartRequired;
                 var result = MessageBox.Show(msg, "Ink Canvas", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
@@ -339,6 +371,35 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 Debug.WriteLine($"设置UIA置顶模式时出错: {ex.Message}");
+            }
+        }
+
+        private void ComboBoxUIAMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            if (ComboBoxUIAMode?.SelectedItem is not ComboBoxItem item) return;
+
+            try
+            {
+                var newMode = (UIAMode)item.Tag;
+                if (SettingsManager.Settings.Advanced.UIAMode == newMode) return;
+
+                SettingsManager.Settings.Advanced.UIAMode = newMode;
+                SettingsManager.SaveSettingsToFile();
+
+                // 切换方案需要重启才能生效
+                var msg = StartupStrings.TopMostMode_UIA_RestartRequired;
+                var result = MessageBox.Show(msg, "Ink Canvas", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    App.IsUIAccessTopMostEnabled = true;
+                    AppRestartHelper.SwitchToUIATopMostAndRestart();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"设置UIA方案时出错: {ex.Message}");
             }
         }
 

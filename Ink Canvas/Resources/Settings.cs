@@ -646,6 +646,12 @@ namespace Ink_Canvas
         Agent = 2
     }
 
+    public enum UIAMode
+    {
+        UserToken = 0,
+        ProcessToken = 1
+    }
+
     public class PowerPointSettings
     {
         [JsonProperty("showPPTButton")]
@@ -1062,6 +1068,9 @@ namespace Ink_Canvas
 
         [JsonProperty("enableUIAccessTopMost")]
         public bool EnableUIAccessTopMost { get; set; } = false;
+
+        [JsonProperty("uiaMode")]
+        public UIAMode UIAMode { get; set; } = UIAMode.UserToken;
 
         [JsonProperty("isEnableUriScheme")]
         public bool IsEnableUriScheme { get; set; } = false;
