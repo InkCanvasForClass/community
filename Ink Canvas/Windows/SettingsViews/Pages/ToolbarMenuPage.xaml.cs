@@ -1,12 +1,15 @@
 using GongSolutions.Wpf.DragDrop;
 using Ink_Canvas.Controls.Toolbar;
+using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Media;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
@@ -90,6 +93,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
         }
 
+        private void AddedList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            SettingsListItemHelper.UpdateRemoveButtonVisibility(AddedList, "BtnRemoveItem");
+        }
+
         private void ButtonReset_Click(object sender, RoutedEventArgs e)
         {
             var layout = ToolsMenuRegistry.CreateDefaultFloatingBarLayout();
@@ -164,21 +172,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         }
     }
 
-    public class MenuItemIdToIconGeometryConverter : IValueConverter
+    public class MenuItemIdToPathDataConverter : IdToPathDataConverterBase
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        protected override string ConvertIdToGeometryString(string id)
         {
-            if (value is string id)
-            {
-                var item = ToolsMenuRegistry.FindItem(id);
-                return item?.IconGeometry;
-            }
-            return null;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
+            var item = ToolsMenuRegistry.FindItem(id);
+            return item?.IconGeometry;
         }
     }
 }

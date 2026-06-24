@@ -14,32 +14,41 @@
       Title="{x:Static props:NavStrings.Nav_ToolbarMenu}">
 
     <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Helpers/SharedSettingsResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
         <local:MenuItemIdToNameConverter x:Key="IdToNameConverter"/>
-        <local:MenuItemIdToIconGeometryConverter x:Key="IdToIconGeometryConverter"/>
-        <local:StringToGeometryConverter x:Key="StringToGeometryConverter"/>
-        <Thickness x:Key="ListViewItemCompactSelectedBorderThemeThickness">1.5</Thickness>
+        <helpers:StringToGeometryConverter x:Key="StringToGeometryConverter"/>
+        <local:MenuItemIdToPathDataConverter x:Key="IdToPathDataConverter"/>
 
         <DataTemplate x:Key="AddedItemTemplate" DataType="{x:Type sys:String}"
                       xmlns:sys="clr-namespace:System;assembly=mscorlib">
-            <Border BorderThickness="0"
-                    CornerRadius="6" Padding="10,6"
-                    Cursor="Hand">
+            <Border Cursor="Hand">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <ui:FontIcon touch:TouchAwareDragDropHelper.IsGripHandle="True"
-                                 Icon="{x:Static ui:FluentSystemIcons.ReOrder_20_Regular}" FontSize="14"
-                                 Cursor="SizeAll" Margin="-2,0,2,0" VerticalAlignment="Center"
+                                 Icon="{x:Static ui:FluentSystemIcons.ReOrder_16_Regular}" FontSize="16"
+                                 Cursor="SizeAll" VerticalAlignment="Center" Margin="-6,0,0,0"
                                  RenderTransformOrigin="0.5,0.5">
                         <ui:FontIcon.RenderTransform>
                             <RotateTransform Angle="90"/>
                         </ui:FontIcon.RenderTransform>
                     </ui:FontIcon>
+                    <Path Data="{Binding Converter={StaticResource IdToPathDataConverter}}"
+                          Width="16" Height="16" Stretch="Uniform"
+                          Fill="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}"
+                          VerticalAlignment="Center" Margin="2,0,4,0"/>
                     <TextBlock Text="{Binding Converter={StaticResource IdToNameConverter}}"
                                VerticalAlignment="Center" FontSize="13"/>
-                    <Button Content="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="10"
-                            Click="RemoveItem_Click" Margin="8,0,0,0"
-                            Background="Transparent" BorderThickness="0"
-                            Padding="4,2" VerticalAlignment="Center"
-                            Cursor="Hand"/>
+                    <Button Click="RemoveItem_Click"
+                            x:Name="BtnRemoveItem"
+                            Style="{StaticResource BorderlessIconButtonStyle}"
+                            VerticalAlignment="Center"
+                            Cursor="Hand"
+                            Visibility="Collapsed">
+                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Delete_16_Regular}" FontSize="16" Foreground="IndianRed"/>
+                    </Button>
                 </StackPanel>
             </Border>
         </DataTemplate>
@@ -86,6 +95,7 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
         </Style>
+        </ResourceDictionary>
     </Page.Resources>
 
     <Grid Margin="24,0,24,0">
@@ -126,6 +136,7 @@
                          Style="{StaticResource DragDropListViewStyle}"
                          dd:DragDrop.DropHandler="{Binding}"
                          touch:TouchAwareDragDropHelper.IsEnabled="True"
+                         SelectionChanged="AddedList_SelectionChanged"
                          MinHeight="48">
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>

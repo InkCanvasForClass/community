@@ -16,24 +16,18 @@
       Title="工具栏">
 
     <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Helpers/SharedSettingsResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
         <local:IdToDisplayNameConverter x:Key="IdToNameConverter"/>
         <local:IdToIconGeometryConverter x:Key="IdToIconGeometryConverter"/>
         <local:ConditionIdToNameConverter x:Key="ConditionIdToNameConverter"/>
         <local:StateToBrushConverter x:Key="StateToBrushConverter"/>
         <local:LogicalModeToIntConverter x:Key="LogicalModeToIntConverter"/>
-        <local:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
-        <local:StringToGeometryConverter x:Key="StringToGeometryConverter"/>
+        <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+        <helpers:StringToGeometryConverter x:Key="StringToGeometryConverter"/>
         <local:IdToPathDataConverter x:Key="IdToPathDataConverter"/>
-        <Thickness x:Key="ListViewItemCompactSelectedBorderThemeThickness">1.5</Thickness>
-        <sys:Double x:Key="ListViewItemMinWidth">0</sys:Double>
-        <sys:Double x:Key="ListViewItemMinHeight">0</sys:Double>
-
-        <Style x:Key="BorderlessIconButtonStyle" TargetType="Button"
-               BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-        </Style>
 
         <DataTemplate x:Key="AddedItemTemplate" DataType="{x:Type toolbar:ToolbarComponentEntry}">
             <Border Cursor="Hand">
@@ -65,9 +59,7 @@
         </DataTemplate>
 
         <DataTemplate x:Key="GroupChildItemTemplate" DataType="{x:Type toolbar:ToolbarComponentEntry}">
-            <Border BorderThickness="0"
-                    CornerRadius="6"
-                    Cursor="Hand">
+            <Border Cursor="Hand">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <ui:FontIcon touch:TouchAwareDragDropHelper.IsGripHandle="True"
                                  Icon="{x:Static ui:FluentSystemIcons.ReOrder_16_Regular}" FontSize="16"
@@ -82,7 +74,7 @@
                           Fill="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}"
                           VerticalAlignment="Center" Margin="2,0,4,0"/>
                     <TextBlock Text="{Binding Id, Converter={StaticResource IdToNameConverter}}"
-                               VerticalAlignment="Center" FontSize="12"/>
+                               VerticalAlignment="Center" FontSize="13"/>
                     <Button Click="RemoveGroupChildItem_Click"
                             x:Name="BtnRemoveGroupChild"
                             Style="{StaticResource BorderlessIconButtonStyle}"
@@ -144,6 +136,7 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
         </Style>
+    </ResourceDictionary>
     </Page.Resources>
 
     <Grid Margin="24,0,24,0">

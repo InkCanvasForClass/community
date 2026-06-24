@@ -12,6 +12,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
 
@@ -364,6 +365,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
         }
 
+        private void GroupChildList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is ListView listView)
+            {
+                SettingsListItemHelper.UpdateRemoveButtonVisibility(listView, "BtnRemoveGroupChild");
+            }
+        }
+
         private void AddLibraryItem_Click(object sender, RoutedEventArgs e)
         {
             if (sender is FrameworkElement fe && fe.DataContext is IBoardToolbarItem item)
@@ -631,23 +640,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             => throw new NotImplementedException();
     }
 
-    public class BoardIdToIconGeometryConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value is string id)
-            {
-                var items = BoardToolbarRegistry.Discover();
-                var item = items.FirstOrDefault(i => i.Id == id);
-                return item?.IconGeometry;
-            }
-            return null;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-            => throw new NotImplementedException();
-    }
-
     public class BoardIdToIconKeyConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -739,16 +731,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             => throw new NotImplementedException();
     }
 
-    public class BoardNullToVisibilityConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return value == null ? Visibility.Collapsed : Visibility.Visible;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-            => throw new NotImplementedException();
-    }
-
     #endregion
+
+    /// <summary>
+    /// 将白板工具栏组件 Id 直接转换为 Path 可用的 Geometry 对象。
+    /// </summary>
+    public class BoardIdToPathDataConverter : IdToPathDataConverterBase
+    {
+        protected override string ConvertIdToGeometryString(string id)
+        {
+            var items = BoardToolbarRegistry.Discover();
+            var item = items.FirstOrDefault(i => i.Id == id);
+            return item?.IconGeometry;
+        }
+    }
 }

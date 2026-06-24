@@ -513,38 +513,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void AddedList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            UpdateRemoveButtonVisibility(AddedList, "BtnRemoveItem");
+            SettingsListItemHelper.UpdateRemoveButtonVisibility(AddedList, "BtnRemoveItem");
         }
 
         private void GroupChildrenListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            UpdateRemoveButtonVisibility(GroupChildrenListBox, "BtnRemoveGroupChild");
+            SettingsListItemHelper.UpdateRemoveButtonVisibility(GroupChildrenListBox, "BtnRemoveGroupChild");
         }
 
-        private static void UpdateRemoveButtonVisibility(ListView listView, string buttonName)
-        {
-            foreach (var item in listView.Items)
-            {
-                if (listView.ItemContainerGenerator.ContainerFromItem(item) is ListViewItem container)
-                {
-                    var btn = FindVisualChild<Button>(container, buttonName);
-                    if (btn != null)
-                        btn.Visibility = container.IsSelected ? Visibility.Visible : Visibility.Collapsed;
-                }
-            }
-        }
-
-        private static T FindVisualChild<T>(DependencyObject parent, string name) where T : FrameworkElement
-        {
-            for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent); i++)
-            {
-                var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
-                if (child is T result && result.Name == name) return result;
-                var found = FindVisualChild<T>(child, name);
-                if (found != null) return found;
-            }
-            return null;
-        }
 
         private void RemoveItem_Click(object sender, RoutedEventArgs e)
         {
@@ -1053,20 +1029,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
     /// <summary>
     /// 将组件 Id 直接转换为 Path 可用的 Geometry 对象（组合 IdToIconGeometry + StringToGeometry 两步）。
     /// </summary>
-    public class IdToPathDataConverter : IValueConverter
+    public class IdToPathDataConverter : IdToPathDataConverterBase
     {
-        private static readonly IdToIconGeometryConverter _idToGeo = new();
-        private static readonly StringToGeometryConverter _strToGeo = new();
-
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        protected override string ConvertIdToGeometryString(string id)
         {
-            var geoString = _idToGeo.Convert(value, targetType, parameter, culture) as string;
-            return _strToGeo.Convert(geoString, targetType, parameter, culture);
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
+            var items = ToolbarRegistry.Discover();
+            var item = items.FirstOrDefault(i => i.Id == id);
+            return item?.IconGeometry;
         }
     }
 
@@ -1127,35 +1096,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         }
     }
 
-    public class NullToVisibilityConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return value == null ? Visibility.Collapsed : Visibility.Visible;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class StringToGeometryConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value is string s && !string.IsNullOrWhiteSpace(s))
-            {
-                return Geometry.Parse(s);
-            }
-            return null;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
 
     public class InputDialog : Window
     {
