@@ -554,8 +554,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void LibraryList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (sender is ListView listView)
-                SettingsListItemHelper.UpdateButtonVisibility(listView, "BtnAddItem");
+            if (sender is ItemsControl itemsControl)
+                SettingsListItemHelper.UpdateButtonVisibility(itemsControl, "BtnAddItem");
         }
 
         private void CheckBoxShowSeparateBorder_Changed(object sender, RoutedEventArgs e)
