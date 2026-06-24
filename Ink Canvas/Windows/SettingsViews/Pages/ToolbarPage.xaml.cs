@@ -518,7 +518,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void GroupChildrenListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            SettingsListItemHelper.UpdateRemoveButtonVisibility(GroupChildrenListBox, "BtnRemoveGroupChild");
+            SettingsListItemHelper.UpdateRemoveButtonVisibility(GroupChildrenListBox, "BtnRemoveItem");
         }
 
 
@@ -529,6 +529,26 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 AddedComponents.Remove(entry);
                 if (SelectedEntry == entry) SelectedEntry = null;
                 SaveSettings();
+            }
+        }
+
+        private void ItemsList_ButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (e.OriginalSource is not Button btn) return;
+            if (btn.Tag?.ToString() == "RemoveItem")
+            {
+                RemoveItem_Click(btn, e);
+                e.Handled = true;
+            }
+        }
+
+        private void GroupChildrenList_ButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (e.OriginalSource is not Button btn) return;
+            if (btn.Tag?.ToString() == "RemoveItem")
+            {
+                RemoveGroupChildItem_Click(btn, e);
+                e.Handled = true;
             }
         }
 

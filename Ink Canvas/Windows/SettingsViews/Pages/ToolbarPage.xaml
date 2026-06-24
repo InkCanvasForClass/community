@@ -29,7 +29,7 @@
         <helpers:StringToGeometryConverter x:Key="StringToGeometryConverter"/>
         <local:IdToPathDataConverter x:Key="IdToPathDataConverter"/>
 
-        <DataTemplate x:Key="AddedItemTemplate" DataType="{x:Type toolbar:ToolbarComponentEntry}">
+        <DataTemplate x:Key="ToolbarItemTemplate" DataType="{x:Type toolbar:ToolbarComponentEntry}">
             <Border Cursor="Hand">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <ui:FontIcon touch:TouchAwareDragDropHelper.IsGripHandle="True"
@@ -46,37 +46,8 @@
                           VerticalAlignment="Center" Margin="2,0,4,0"/>
                     <TextBlock Text="{Binding Id, Converter={StaticResource IdToNameConverter}}"
                                VerticalAlignment="Center" FontSize="13"/>
-                    <Button Click="RemoveItem_Click"
+                    <Button Tag="RemoveItem"
                             x:Name="BtnRemoveItem"
-                            Style="{StaticResource BorderlessIconButtonStyle}"
-                            VerticalAlignment="Center"
-                            Cursor="Hand"
-                            Visibility="Collapsed">
-                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Delete_16_Regular}" FontSize="16" Foreground="IndianRed"/>
-                    </Button>
-                </StackPanel>
-            </Border>
-        </DataTemplate>
-
-        <DataTemplate x:Key="GroupChildItemTemplate" DataType="{x:Type toolbar:ToolbarComponentEntry}">
-            <Border Cursor="Hand">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <ui:FontIcon touch:TouchAwareDragDropHelper.IsGripHandle="True"
-                                 Icon="{x:Static ui:FluentSystemIcons.ReOrder_16_Regular}" FontSize="16"
-                                 Cursor="SizeAll" VerticalAlignment="Center" Margin="-6,0,0,0"
-                                 RenderTransformOrigin="0.5,0.5">
-                        <ui:FontIcon.RenderTransform>
-                            <RotateTransform Angle="90"/>
-                        </ui:FontIcon.RenderTransform>
-                    </ui:FontIcon>
-                    <Path Data="{Binding Id, Converter={StaticResource IdToPathDataConverter}}"
-                          Width="16" Height="16" Stretch="Uniform"
-                          Fill="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}"
-                          VerticalAlignment="Center" Margin="2,0,4,0"/>
-                    <TextBlock Text="{Binding Id, Converter={StaticResource IdToNameConverter}}"
-                               VerticalAlignment="Center" FontSize="13"/>
-                    <Button Click="RemoveGroupChildItem_Click"
-                            x:Name="BtnRemoveGroupChild"
                             Style="{StaticResource BorderlessIconButtonStyle}"
                             VerticalAlignment="Center"
                             Cursor="Hand"
@@ -124,18 +95,6 @@
                         Cursor="Hand"/>
             </Grid>
         </DataTemplate>
-
-        <Style x:Key="DragDropListViewStyle" TargetType="ListView">
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-            <Setter Property="dd:DragDrop.IsDragSource" Value="True"/>
-            <Setter Property="dd:DragDrop.IsDropTarget" Value="True"/>
-            <Setter Property="dd:DragDrop.UseDefaultEffectDataTemplate" Value="False"/>
-            <Setter Property="dd:DragDrop.DropTargetAdornerBrush" Value="#2563eb"/>
-            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
-            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-        </Style>
     </ResourceDictionary>
     </Page.Resources>
 
@@ -214,11 +173,12 @@
                         MinHeight="40">
                     <ListView x:Name="GroupChildrenListBox"
                              ItemsSource="{Binding GroupChildren}"
-                             ItemTemplate="{StaticResource GroupChildItemTemplate}"
+                             ItemTemplate="{StaticResource ToolbarItemTemplate}"
                              SelectedItem="{Binding SelectedGroupChild, Mode=TwoWay}"
                              Style="{StaticResource DragDropListViewStyle}"
                              dd:DragDrop.DropHandler="{Binding GroupDropHandler}"
                              touch:TouchAwareDragDropHelper.IsEnabled="True"
+                             Button.Click="GroupChildrenList_ButtonClick"
                              SelectionChanged="GroupChildrenListBox_SelectionChanged"
                              MinHeight="32">
                         <ListView.ItemsPanel>
@@ -244,11 +204,12 @@
                 </Border.Style>
                 <ListView x:Name="AddedList"
                          ItemsSource="{Binding AddedComponents}"
-                         ItemTemplate="{StaticResource AddedItemTemplate}"
+                         ItemTemplate="{StaticResource ToolbarItemTemplate}"
                          SelectedItem="{Binding SelectedEntry, Mode=TwoWay}"
                          Style="{StaticResource DragDropListViewStyle}"
                          dd:DragDrop.DropHandler="{Binding}"
                          touch:TouchAwareDragDropHelper.IsEnabled="True"
+                         Button.Click="ItemsList_ButtonClick"
                          SelectionChanged="AddedList_SelectionChanged"
                          MinHeight="48" d:ItemsSource="{d:SampleData ItemCount=5}">
                     <ListView.ItemsPanel>

@@ -22,8 +22,7 @@
             <helpers:StringToGeometryConverter x:Key="StringToGeometryConverter"/>
             <local:BoardMenuItemIdToPathDataConverter x:Key="IdToPathDataConverter"/>
 
-            <DataTemplate x:Key="AddedItemTemplate" DataType="{x:Type sys:String}"
-                          xmlns:sys="clr-namespace:System;assembly=mscorlib">
+            <DataTemplate x:Key="AddedItemTemplate">
                 <Border Cursor="Hand">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <ui:FontIcon touch:TouchAwareDragDropHelper.IsGripHandle="True"
@@ -74,26 +73,13 @@
                             <TextBlock Text="{Binding Description}" Opacity="0.65" FontSize="12"
                                        TextWrapping="Wrap" Margin="0,2,0,0"/>
                         </StackPanel>
-                        <Button Grid.Column="3" Content="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="12"
-                                Click="AddLibraryItem_Click"
+                        <Button Grid.Column="3" Click="AddLibraryItem_Click" Content="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                 Background="Transparent" BorderThickness="0"
                                 Padding="6,4" VerticalAlignment="Center"
                                 Cursor="Hand"/>
                     </Grid>
                 </Border>
             </DataTemplate>
-
-            <Style x:Key="DragDropListViewStyle" TargetType="ListView">
-                <Setter Property="HorizontalAlignment" Value="Stretch"/>
-                <Setter Property="dd:DragDrop.IsDragSource" Value="True"/>
-                <Setter Property="dd:DragDrop.IsDropTarget" Value="True"/>
-                <Setter Property="dd:DragDrop.UseDefaultEffectDataTemplate" Value="False"/>
-                <Setter Property="dd:DragDrop.DropTargetAdornerBrush" Value="#2563eb"/>
-                <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
-                <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
-                <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="BorderThickness" Value="0"/>
-            </Style>
         </ResourceDictionary>
     </Page.Resources>
 

@@ -154,18 +154,6 @@
                 </Grid>
             </Border>
         </DataTemplate>
-
-        <Style x:Key="DragDropListViewStyle" TargetType="ListView">
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-            <Setter Property="dd:DragDrop.IsDragSource" Value="True"/>
-            <Setter Property="dd:DragDrop.IsDropTarget" Value="True"/>
-            <Setter Property="dd:DragDrop.UseDefaultEffectDataTemplate" Value="False"/>
-            <Setter Property="dd:DragDrop.DropTargetAdornerBrush" Value="#2563eb"/>
-            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
-            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-        </Style>
         </ResourceDictionary>
     </Page.Resources>
 
