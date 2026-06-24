@@ -15,12 +15,18 @@ namespace Ink_Canvas.Helpers
     /// <para>- 窗口/控件级检测输入设备类型（鼠标/触屏）</para>
     /// <para>- 触屏模式下显示拖动按钮（grip handle），鼠标模式下隐藏</para>
     /// <para>- 触屏模式下只有从 grip handle 发起的按下才能触发拖动，否则事件交给 ScrollViewer 处理滑动</para>
+    /// <para>- 一旦检测到触屏输入，grip handle 将持续显示直到应用重启（不因鼠标输入而恢复隐藏）</para>
     /// <para>用法：</para>
     /// <para>1. 在 ItemsControl 上设置 touch:TouchAwareDragDropHelper.IsEnabled="True"</para>
     /// <para>2. 在 ItemTemplate 中的拖动图标上设置 touch:TouchAwareDragDropHelper.IsGripHandle="True"</para>
     /// </summary>
     public static class TouchAwareDragDropHelper
     {
+        // 全局触屏模式标记：一旦检测到触屏输入，所有注册的 ItemsControl 都进入触屏模式且不恢复
+        private static bool _globalTouchModeActivated;
+
+        // 跟踪所有已注册的 ItemsControl
+        private static readonly List<WeakReference<ItemsControl>> _registeredControls = new();
         #region IsEnabled 附加属性
 
         public static readonly DependencyProperty IsEnabledProperty =
@@ -54,7 +60,6 @@ namespace Ink_Canvas.Helpers
         {
             itemsControl.PreviewStylusDown += ItemsControl_PreviewStylusDown;
             itemsControl.PreviewStylusUp += ItemsControl_PreviewStylusUp;
-            itemsControl.PreviewMouseLeftButtonDown += ItemsControl_PreviewMouseLeftButtonDown;
             itemsControl.ItemContainerGenerator.StatusChanged += (s, args) =>
             {
                 if (itemsControl.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
@@ -63,14 +68,41 @@ namespace Ink_Canvas.Helpers
                 }
             };
             itemsControl.Unloaded += ItemsControl_Unloaded;
+
+            // 注册到全局列表
+            _registeredControls.Add(new WeakReference<ItemsControl>(itemsControl));
+
+            // 如果全局触屏模式已激活，立即显示 grip handle
+            if (_globalTouchModeActivated)
+            {
+                SetIsTouchMode(itemsControl, true);
+                UpdateGripHandleVisualState(itemsControl, true);
+            }
+
+            // 订阅窗口级 StylusDown 事件，实现"点击窗口任意位置即显示"
+            itemsControl.Loaded += ItemsControl_Loaded;
         }
 
         private static void UnsubscribeItemsControlEvents(ItemsControl itemsControl)
         {
             itemsControl.PreviewStylusDown -= ItemsControl_PreviewStylusDown;
             itemsControl.PreviewStylusUp -= ItemsControl_PreviewStylusUp;
-            itemsControl.PreviewMouseLeftButtonDown -= ItemsControl_PreviewMouseLeftButtonDown;
             itemsControl.Unloaded -= ItemsControl_Unloaded;
+            itemsControl.Loaded -= ItemsControl_Loaded;
+
+            // 从全局列表移除
+            _registeredControls.RemoveAll(wr => !wr.TryGetTarget(out var target) || target == itemsControl);
+        }
+
+        private static void ItemsControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is ItemsControl itemsControl)) return;
+            var window = Window.GetWindow(itemsControl);
+            if (window != null)
+            {
+                window.PreviewStylusDown -= Window_PreviewStylusDown;
+                window.PreviewStylusDown += Window_PreviewStylusDown;
+            }
         }
 
         private static void ItemsControl_Unloaded(object sender, RoutedEventArgs e)
@@ -78,6 +110,33 @@ namespace Ink_Canvas.Helpers
             if (sender is ItemsControl itemsControl)
             {
                 UnsubscribeItemsControlEvents(itemsControl);
+            }
+        }
+
+        /// <summary>
+        /// 窗口级触屏按下处理：一旦检测到触屏输入，激活所有已注册 ItemsControl 的触屏模式且不恢复。
+        /// </summary>
+        private static void Window_PreviewStylusDown(object sender, StylusEventArgs e)
+        {
+            if (_globalTouchModeActivated) return;
+
+            _globalTouchModeActivated = true;
+
+            // 激活所有已注册的 ItemsControl
+            foreach (var wr in _registeredControls)
+            {
+                if (wr.TryGetTarget(out var itemsControl) && itemsControl != null)
+                {
+                    if (!GetIsTouchMode(itemsControl))
+                    {
+                        if (!GetOriginalIsDragSource(itemsControl).HasValue)
+                        {
+                            SetOriginalIsDragSource(itemsControl, GongDragDrop.GetIsDragSource(itemsControl));
+                        }
+                        SetIsTouchMode(itemsControl, true);
+                        UpdateGripHandleVisualState(itemsControl, true);
+                    }
+                }
             }
         }
 
@@ -220,6 +279,7 @@ namespace Ink_Canvas.Helpers
         /// 触屏按下时：切换到触屏模式，禁用 IsDragSource（阻止非 grip handle 区域触发拖动）。
         /// 这对应 ClassIsland 2.0 AdvancedItemDragBehavior.PointerPressed 中的判定：
         /// 触屏模式下如果不是从 TouchDragThumb 发起则 return。
+        /// 一旦激活触屏模式，不会因鼠标输入而恢复（重启软件可恢复）。
         /// </summary>
         private static void ItemsControl_PreviewStylusDown(object sender, StylusEventArgs e)
         {
@@ -227,11 +287,11 @@ namespace Ink_Canvas.Helpers
 
             if (!GetIsTouchMode(itemsControl))
             {
-                SetIsTouchMode(itemsControl, true);
                 if (!GetOriginalIsDragSource(itemsControl).HasValue)
                 {
                     SetOriginalIsDragSource(itemsControl, GongDragDrop.GetIsDragSource(itemsControl));
                 }
+                SetIsTouchMode(itemsControl, true);
                 UpdateGripHandleVisualState(itemsControl, true);
             }
 
@@ -245,22 +305,6 @@ namespace Ink_Canvas.Helpers
             if (GetIsTouchMode(itemsControl))
             {
                 GongDragDrop.SetIsDragSource(itemsControl, false);
-                RestoreScrollViewerManipulation(itemsControl);
-            }
-        }
-
-        /// <summary>
-        /// 纯鼠标输入时：切换回鼠标模式，恢复 IsDragSource。
-        /// </summary>
-        private static void ItemsControl_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (!(sender is ItemsControl itemsControl)) return;
-            if (e.StylusDevice == null && GetIsTouchMode(itemsControl))
-            {
-                SetIsTouchMode(itemsControl, false);
-                UpdateGripHandleVisualState(itemsControl, false);
-                var original = GetOriginalIsDragSource(itemsControl);
-                GongDragDrop.SetIsDragSource(itemsControl, original ?? true);
                 RestoreScrollViewerManipulation(itemsControl);
             }
         }

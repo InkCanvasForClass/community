@@ -1050,6 +1050,26 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         }
     }
 
+    /// <summary>
+    /// 将组件 Id 直接转换为 Path 可用的 Geometry 对象（组合 IdToIconGeometry + StringToGeometry 两步）。
+    /// </summary>
+    public class IdToPathDataConverter : IValueConverter
+    {
+        private static readonly IdToIconGeometryConverter _idToGeo = new();
+        private static readonly StringToGeometryConverter _strToGeo = new();
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var geoString = _idToGeo.Convert(value, targetType, parameter, culture) as string;
+            return _strToGeo.Convert(geoString, targetType, parameter, culture);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class ConditionIdToNameConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
