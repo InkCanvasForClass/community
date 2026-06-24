@@ -2632,6 +2632,9 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (TryBlockInkInputOverFloatingBar(e.GetPosition(this), e))
+                return;
+
             if (e.ChangedButton == MouseButton.Left && ShouldUseRealtimeVelocityBrushTipForMouse() && drawingShapeMode == 0)
             {
                 _isMouseRealtimeInking = true;
