@@ -407,60 +407,17 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
             var layout = LoadConfigFile(configName);
             if (layout != null && layout.Components != null && layout.Components.Count > 0)
-            {
-                layout = MigrateMissingComponents(layout, configName);
                 return layout;
-            }
 
             var files = ListConfigFiles();
             if (files.Count > 0 && files[0] != configName)
             {
                 layout = LoadConfigFile(files[0]);
                 if (layout != null && layout.Components != null && layout.Components.Count > 0)
-                {
-                    layout = MigrateMissingComponents(layout, files[0]);
                     return layout;
-                }
             }
 
             return CreateDefaultLayout();
-        }
-
-        /// <summary>
-        /// 将默认布局中存在但用户配置中缺失的组件追加到用户配置末尾，
-        /// 并将更新后的配置写回文件。用于处理从旧版本升级时新增组件
-        /// （如 builtin.exit）未被包含的情况。
-        /// </summary>
-        private static ToolbarLayoutSettings MigrateMissingComponents(ToolbarLayoutSettings userLayout, string configName)
-        {
-            if (userLayout?.Components == null) return userLayout;
-
-            var defaultLayout = CreateDefaultLayout();
-            if (defaultLayout?.Components == null) return userLayout;
-
-            var existingIds = new HashSet<string>(
-                userLayout.Components.Select(c => c.Id),
-                StringComparer.OrdinalIgnoreCase);
-
-            bool changed = false;
-            foreach (var defaultEntry in defaultLayout.Components)
-            {
-                if (!existingIds.Contains(defaultEntry.Id))
-                {
-                    userLayout.Components.Add(defaultEntry);
-                    changed = true;
-                    LogHelper.WriteLogToFile(
-                        $"ToolbarRegistry: 迁移缺失组件 [{defaultEntry.Id}] 到配置 [{configName}]",
-                        LogHelper.LogType.Info);
-                }
-            }
-
-            if (changed)
-            {
-                SaveConfigFile(configName, userLayout);
-            }
-
-            return userLayout;
         }
 
         #endregion
