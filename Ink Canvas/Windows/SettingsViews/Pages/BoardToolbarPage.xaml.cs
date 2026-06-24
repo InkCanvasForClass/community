@@ -373,6 +373,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
         }
 
+        private void LibraryList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is ListView listView)
+                SettingsListItemHelper.UpdateButtonVisibility(listView, "BtnAddItem");
+        }
+
         private void AddLibraryItem_Click(object sender, RoutedEventArgs e)
         {
             if (sender is FrameworkElement fe && fe.DataContext is IBoardToolbarItem item)

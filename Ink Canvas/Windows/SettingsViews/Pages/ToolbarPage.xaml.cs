@@ -552,6 +552,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
         }
 
+        private void LibraryList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is ListView listView)
+                SettingsListItemHelper.UpdateButtonVisibility(listView, "BtnAddItem");
+        }
+
         private void CheckBoxShowSeparateBorder_Changed(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded || ActiveEntry == null) return;

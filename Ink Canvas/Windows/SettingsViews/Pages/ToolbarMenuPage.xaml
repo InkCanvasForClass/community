@@ -74,10 +74,10 @@
                         <TextBlock Text="{Binding Description}" Opacity="0.65" FontSize="12"
                                    TextWrapping="Wrap" Margin="0,2,0,0"/>
                     </StackPanel>
-                    <Button Grid.Column="3" Click="AddLibraryItem_Click" Content="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                    <Button Grid.Column="3" Click="AddLibraryItem_Click" x:Name="BtnAddItem" Content="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                             Background="Transparent" BorderThickness="0"
                             Padding="6,4" VerticalAlignment="Center"
-                            Cursor="Hand"/>
+                            Cursor="Hand" Visibility="Collapsed"/>
                 </Grid>
             </Border>
         </DataTemplate>
@@ -148,7 +148,8 @@
                      dd:DragDrop.IsDragSource="True"
                      touch:TouchAwareDragDropHelper.IsEnabled="True"
                      Background="Transparent" BorderThickness="0"
-                     SelectionMode="Single">
+                     SelectionMode="Single"
+                     SelectionChanged="LibraryList_SelectionChanged">
                 <ui:ListView.ItemContainerStyle>
                     <Style TargetType="ui:ListViewItem">
                         <Setter Property="Padding" Value="0"/>

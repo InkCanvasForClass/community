@@ -10,9 +10,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
     public static class SettingsListItemHelper
     {
         /// <summary>
-        /// 根据列表项选中状态更新删除按钮的可见性。
+        /// 根据列表项选中状态更新指定按钮的可见性。
         /// </summary>
-        public static void UpdateRemoveButtonVisibility(ListView listView, string buttonName)
+        public static void UpdateButtonVisibility(ListView listView, string buttonName)
         {
             foreach (var item in listView.Items)
             {
@@ -23,6 +23,29 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                         btn.Visibility = container.IsSelected ? Visibility.Visible : Visibility.Collapsed;
                 }
             }
+        }
+
+        public static void UpdateButtonVisibility(ItemsControl itemsControl, string buttonName)
+        {
+            foreach (var item in itemsControl.Items)
+            {
+                if (itemsControl.ItemContainerGenerator.ContainerFromItem(item) is FrameworkElement container)
+                {
+                    var isSelected = container is ListBoxItem lbi ? lbi.IsSelected :
+                                     container is ListViewItem lvi ? lvi.IsSelected : false;
+                    var btn = FindVisualChild<Button>(container, buttonName);
+                    if (btn != null)
+                        btn.Visibility = isSelected ? Visibility.Visible : Visibility.Collapsed;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 根据列表项选中状态更新删除按钮的可见性。
+        /// </summary>
+        public static void UpdateRemoveButtonVisibility(ListView listView, string buttonName)
+        {
+            UpdateButtonVisibility(listView, buttonName);
         }
 
         /// <summary>

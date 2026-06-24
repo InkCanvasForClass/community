@@ -98,6 +98,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsListItemHelper.UpdateRemoveButtonVisibility(AddedList, "BtnRemoveItem");
         }
 
+        private void LibraryList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            SettingsListItemHelper.UpdateButtonVisibility(LibraryList, "BtnAddItem");
+        }
+
         private void ButtonReset_Click(object sender, RoutedEventArgs e)
         {
             var layout = ToolsMenuRegistry.CreateDefaultBoardLayout();
