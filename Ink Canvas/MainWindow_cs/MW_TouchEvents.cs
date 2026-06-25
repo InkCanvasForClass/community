@@ -217,6 +217,8 @@ namespace Ink_Canvas
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
             }
+
+            SetDynamicRendererEnabled(inkCanvas, inkCanvas.EditingMode == InkCanvasEditingMode.Ink);
         }
 
         private void InitializeRealtimeBrushTipState(int stylusId, StylusDownEventArgs e)
@@ -904,15 +906,8 @@ namespace Ink_Canvas
 
             // 检查手写笔点击是否发生在浮动栏区域，如果是则允许事件传播到浮动栏按钮
             var stylusPoint = e.GetPosition(this);
-            var floatingBarBounds = ViewboxFloatingBar.TransformToAncestor(this).TransformBounds(
-                new Rect(0, 0, ViewboxFloatingBar.ActualWidth, ViewboxFloatingBar.ActualHeight));
-
-            // 如果手写笔点击发生在浮动栏区域，不阻止事件传播，让浮动栏按钮能够接收手写笔事件
-            if (floatingBarBounds.Contains(stylusPoint))
-            {
-                // 不设置 ViewboxFloatingBar.IsHitTestVisible = false，让浮动栏按钮能够接收手写笔事件
+            if (TryBlockInkInputOverFloatingBar(stylusPoint, e))
                 return;
-            }
 
             if (IsCurrentPageFrozen)
             {
@@ -1479,15 +1474,8 @@ namespace Ink_Canvas
         {
             // 检查触摸是否发生在浮动栏区域，如果是则允许事件传播到浮动栏按钮
             var touchPoint = e.GetTouchPoint(this);
-            var floatingBarBounds = ViewboxFloatingBar.TransformToAncestor(this).TransformBounds(
-                new Rect(0, 0, ViewboxFloatingBar.ActualWidth, ViewboxFloatingBar.ActualHeight));
-
-            // 如果触摸发生在浮动栏区域，不阻止事件传播，让浮动栏按钮能够接收触摸事件
-            if (floatingBarBounds.Contains(touchPoint.Position))
-            {
-                // 不设置 ViewboxFloatingBar.IsHitTestVisible = false，让浮动栏按钮能够接收触摸事件
+            if (TryBlockInkInputOverFloatingBar(touchPoint.Position, e))
                 return;
-            }
 
             if (IsCurrentPageFrozen)
             {
@@ -1573,10 +1561,9 @@ namespace Ink_Canvas
         private void InkCanvas_PreviewTouchDown(object sender, TouchEventArgs e)
         {
             var touchPointForBar = e.GetTouchPoint(this);
-            var floatingBarBounds = ViewboxFloatingBar.TransformToAncestor(this).TransformBounds(
-                new Rect(0, 0, ViewboxFloatingBar.ActualWidth, ViewboxFloatingBar.ActualHeight));
-            if (floatingBarBounds.Contains(touchPointForBar.Position))
+            if (TryBlockInkInputOverFloatingBar(touchPointForBar.Position, e))
                 return;
+            CaptureInkCanvasTouchIfNeeded(touchPointForBar.Position, e.TouchDevice);
 
             if (IsCurrentPageFrozen)
             {

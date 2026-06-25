@@ -685,6 +685,7 @@ namespace Ink_Canvas
 
             // 注册输入事件
             inkCanvas.PreviewMouseDown += inkCanvas_PreviewMouseDown;
+            inkCanvas.PreviewStylusDown += inkCanvas_PreviewStylusDown;
             inkCanvas.StylusDown += inkCanvas_StylusDown;
             inkCanvas.MouseRightButtonUp += InkCanvas_MouseRightButtonUp;
             // 注册橡皮擦操作结束事件
@@ -1263,6 +1264,9 @@ namespace Ink_Canvas
         {
             var inkCanvas1 = sender as InkCanvas;
             if (inkCanvas1 == null) return;
+
+            SetDynamicRendererEnabled(inkCanvas1, inkCanvas1.EditingMode == InkCanvasEditingMode.Ink);
+
             if (IsCurrentPageFrozen && IsFreezeMutatingMode(inkCanvas1.EditingMode))
             {
                 TryBlockFrozenPageMutation("修改冻结页面");
@@ -1312,6 +1316,108 @@ namespace Ink_Canvas
                     DisableEraserOverlay();
                     Trace.WriteLine("Eraser: Overlay disabled in non-eraser mode");
                 }
+            }
+        }
+
+        private void SetDynamicRendererEnabled(InkCanvas canvas, bool enabled)
+        {
+            if (canvas == null) return;
+            try
+            {
+                var prop = typeof(InkCanvas).GetProperty("DynamicRenderer",
+                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                if (prop != null)
+                {
+                    var renderer = prop.GetValue(canvas) as System.Windows.Input.StylusPlugIns.DynamicRenderer;
+                    if (renderer != null)
+                    {
+                        renderer.Enabled = enabled;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to set DynamicRenderer enabled to {enabled}: {ex}");
+            }
+        }
+
+        private bool IsPointInFloatingBar(Point point)
+        {
+            try
+            {
+                if (ViewboxFloatingBar == null || ViewboxFloatingBar.Visibility != Visibility.Visible)
+                    return false;
+
+                var floatingBarBounds = ViewboxFloatingBar.TransformToAncestor(this).TransformBounds(
+                    new Rect(0, 0, ViewboxFloatingBar.ActualWidth, ViewboxFloatingBar.ActualHeight));
+                return floatingBarBounds.Contains(point);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+                return false;
+            }
+        }
+
+        private bool ShouldCaptureInkCanvasInput(Point point)
+        {
+            if (IsPointInFloatingBar(point)) return false;
+            if (!IsAnnotating && drawingShapeMode == 0) return false;
+            return inkCanvas.EditingMode == InkCanvasEditingMode.Ink
+                   || inkCanvas.EditingMode == InkCanvasEditingMode.None
+                   || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
+                   || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke
+                   || drawingShapeMode != 0;
+        }
+
+        private bool TryBlockInkInputOverFloatingBar(Point point, RoutedEventArgs e)
+        {
+            if (!IsPointInFloatingBar(point)) return false;
+
+            try
+            {
+                inkCanvas.ReleaseMouseCapture();
+                inkCanvas.ReleaseStylusCapture();
+                inkCanvas.ReleaseAllTouchCaptures();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
+
+            ViewboxFloatingBar.IsHitTestVisible = true;
+            FloatingbarUIForInkReplay.IsHitTestVisible = true;
+            BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+            e.Handled = true;
+            return true;
+        }
+
+        private void CaptureInkCanvasInputIfNeeded(Point point)
+        {
+            if (!ShouldCaptureInkCanvasInput(point)) return;
+
+            try
+            {
+                inkCanvas.CaptureMouse();
+                inkCanvas.CaptureStylus();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
+        }
+
+        private void CaptureInkCanvasTouchIfNeeded(Point point, TouchDevice touchDevice)
+        {
+            if (!ShouldCaptureInkCanvasInput(point) || touchDevice == null) return;
+
+            try
+            {
+                inkCanvas.CaptureTouch(touchDevice);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
             }
         }
 
@@ -2233,6 +2339,11 @@ namespace Ink_Canvas
         // 鼠标输入
         private void inkCanvas_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
+            var point = e.GetPosition(this);
+            if (TryBlockInkInputOverFloatingBar(point, e))
+                return;
+            CaptureInkCanvasInputIfNeeded(point);
+
             if (IsCurrentPageFrozen && IsFreezeMutatingMode(inkCanvas.EditingMode))
             {
                 TryBlockFrozenPageMutation("修改冻结页面");
@@ -2274,6 +2385,14 @@ namespace Ink_Canvas
                 }
             }
 
+        }
+
+        private void inkCanvas_PreviewStylusDown(object sender, StylusDownEventArgs e)
+        {
+            var point = e.GetPosition(this);
+            if (TryBlockInkInputOverFloatingBar(point, e))
+                return;
+            CaptureInkCanvasInputIfNeeded(point);
         }
 
         // 手写笔输入
