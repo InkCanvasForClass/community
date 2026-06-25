@@ -1,5 +1,7 @@
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using Ink_Canvas.Properties;
+using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -38,7 +40,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
             if (IconKey != null)
             {
                 // FontIcon 模式：在 Loaded 后替换 Image 为 FontIcon
-                btn.Loaded += (s, e) => ReplaceImageWithFontIcon(btn);
+                btn.Loaded += (s, e) => btn.Dispatcher.BeginInvoke(new Action(() => ReplaceImageWithFontIcon(btn)));
             }
             else if (!string.IsNullOrEmpty(IconGeometry))
             {
@@ -65,7 +67,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
             var buttonContent = FindChildByName<Grid>(btn, "ButtonContent");
             if (buttonContent == null || buttonContent.Children.Count == 0) return;
 
-            var oldIcon = buttonContent.Children[0] as Image;
+            var oldIcon = buttonContent.Children.OfType<Image>().FirstOrDefault();
             if (oldIcon == null) return;
 
             var fontIcon = new iNKORE.UI.WPF.Modern.Controls.FontIcon
@@ -79,7 +81,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
                 Margin = new Thickness(0, -1, 0, 0)
             };
 
-            int index = 0;
+            int index = buttonContent.Children.IndexOf(oldIcon);
+            if (index < 0) return;
             buttonContent.Children.RemoveAt(index);
             buttonContent.Children.Insert(index, fontIcon);
         }
