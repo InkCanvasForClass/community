@@ -1265,7 +1265,7 @@ namespace Ink_Canvas
             var inkCanvas1 = sender as InkCanvas;
             if (inkCanvas1 == null) return;
 
-            SetDynamicRendererEnabled(inkCanvas1, inkCanvas1.EditingMode != InkCanvasEditingMode.None);
+            SetDynamicRendererEnabled(inkCanvas1, inkCanvas1.EditingMode == InkCanvasEditingMode.Ink);
 
             if (IsCurrentPageFrozen && IsFreezeMutatingMode(inkCanvas1.EditingMode))
             {
