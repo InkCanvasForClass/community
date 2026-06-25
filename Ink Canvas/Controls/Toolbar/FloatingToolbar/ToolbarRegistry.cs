@@ -285,6 +285,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     var bakResult = TryDeserializeConfig(bakPath, name);
                     if (bakResult != null)
                     {
+                        MigrateConditionIdCasing(bakResult, name);
                         SaveConfigFile(name, bakResult);
                         LogHelper.WriteLogToFile($"ToolbarRegistry: 从备份恢复配置 [{name}] 成功", LogHelper.LogType.Info);
                     }
@@ -294,7 +295,11 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 return null;
             }
             var result = TryDeserializeConfig(path, name);
-            if (result != null) return result;
+            if (result != null)
+            {
+                MigrateConditionIdCasing(result, name);
+                return result;
+            }
 
             var backupPath = GetBackupFilePath(name);
             if (File.Exists(backupPath))
@@ -303,6 +308,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 var bakResult = TryDeserializeConfig(backupPath, name);
                 if (bakResult != null)
                 {
+                    MigrateConditionIdCasing(bakResult, name);
                     SaveConfigFile(name, bakResult);
                     LogHelper.WriteLogToFile($"ToolbarRegistry: 从备份恢复配置 [{name}] 成功", LogHelper.LogType.Info);
                 }
@@ -418,6 +424,72 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             }
 
             return CreateDefaultLayout();
+        }
+
+        /// <summary>
+        /// 修正旧版配置文件中 ConditionId 大小写不一致的问题。
+        /// 例如旧版使用 "isPptMode"，新版代码使用 "isPPTMode"，
+        /// 导致条件匹配失败，退出按钮在 PPT 模式下不显示。
+        /// 修正后会自动将更新后的配置写回文件。
+        /// </summary>
+        private static readonly Dictionary<string, string> ConditionIdRenames = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["isPptMode"] = "isPPTMode",
+            ["isPptAnnotationOnly"] = "isPPTAnnotationOnly",
+            ["isAnnotatingOrPptGesture"] = "isAnnotatingOrPPTGesture"
+        };
+
+        private static void MigrateConditionIdCasing(ToolbarLayoutSettings layout, string configName)
+        {
+            if (layout?.Components == null) return;
+
+            bool changed = false;
+            foreach (var component in layout.Components)
+            {
+                changed |= MigrateEntryConditionIds(component);
+            }
+
+            if (changed)
+            {
+                SaveConfigFile(configName, layout);
+                LogHelper.WriteLogToFile(
+                    $"ToolbarRegistry: 已修正配置 [{configName}] 中 ConditionId 大小写",
+                    LogHelper.LogType.Info);
+            }
+        }
+
+        private static bool MigrateEntryConditionIds(ToolbarComponentEntry entry)
+        {
+            bool changed = false;
+
+            if (entry.HidingRuleset?.Groups != null)
+            {
+                foreach (var group in entry.HidingRuleset.Groups)
+                {
+                    if (group.Rules == null) continue;
+                    foreach (var rule in group.Rules)
+                    {
+                        if (rule.ConditionId != null && ConditionIdRenames.TryGetValue(rule.ConditionId, out var newName))
+                        {
+                            LogHelper.WriteLogToFile(
+                                $"ToolbarRegistry: 修正 ConditionId [{rule.ConditionId}] -> [{newName}]",
+                                LogHelper.LogType.Info);
+                            rule.ConditionId = newName;
+                            changed = true;
+                        }
+                    }
+                }
+            }
+
+            if (entry.Children != null)
+            {
+                foreach (var child in entry.Children)
+                {
+                    changed |= MigrateEntryConditionIds(child);
+                }
+            }
+
+            return changed;
         }
 
         #endregion
