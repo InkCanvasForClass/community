@@ -1,3 +1,4 @@
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Plugins;
 using Ink_Canvas.Properties;
@@ -1142,6 +1143,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         public string DisplayName => _info.DisplayName;
         public string Description => _info.Description;
         public string IconGeometry => _info.IconGeometry;
+        public FontIconData? IconKey => null;
         public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public bool DefaultShowSeparateBorder => false;
         public bool DefaultPreventHideOnDragClick => false;

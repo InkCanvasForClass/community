@@ -22,6 +22,8 @@
             </ResourceDictionary.MergedDictionaries>
         <local:IdToDisplayNameConverter x:Key="IdToNameConverter"/>
         <local:IdToIconGeometryConverter x:Key="IdToIconGeometryConverter"/>
+        <local:IdToIconKeyConverter x:Key="IdToIconKeyConverter"/>
+        <local:IdToIconVisibilityConverter x:Key="IdToIconVisibilityConverter"/>
         <local:ConditionIdToNameConverter x:Key="ConditionIdToNameConverter"/>
         <local:StateToBrushConverter x:Key="StateToBrushConverter"/>
         <local:LogicalModeToIntConverter x:Key="LogicalModeToIntConverter"/>
@@ -40,10 +42,14 @@
                             <RotateTransform Angle="90"/>
                         </ui:FontIcon.RenderTransform>
                     </ui:FontIcon>
-                    <Path Data="{Binding Id, Converter={StaticResource IdToPathDataConverter}}"
-                          Width="16" Height="16" Stretch="Uniform"
-                          Fill="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}"
-                          VerticalAlignment="Center" Margin="2,0,4,0"/>
+                    <Grid Width="16" Height="16" Margin="2,0,4,0" VerticalAlignment="Center">
+                        <Path Data="{Binding Id, Converter={StaticResource IdToPathDataConverter}}"
+                              Width="16" Height="16" Stretch="Uniform"
+                              Fill="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}"
+                              Visibility="{Binding Id, Converter={StaticResource IdToIconVisibilityConverter}}"/>
+                        <ui:FontIcon Icon="{Binding Id, Converter={StaticResource IdToIconKeyConverter}}" FontSize="16"
+                                     Visibility="{Binding Id, Converter={StaticResource IdToIconVisibilityConverter}, ConverterParameter=fontIcon}"/>
+                    </Grid>
                     <TextBlock Text="{Binding Id, Converter={StaticResource IdToNameConverter}}"
                                VerticalAlignment="Center" FontSize="13"/>
                     <Button Tag="RemoveItem"
@@ -74,10 +80,14 @@
                 <ui:FontIcon Grid.Column="0" touch:TouchAwareDragDropHelper.IsGripHandle="True"
                              Icon="{x:Static ui:FluentSystemIcons.ReOrderDotsVertical_20_Filled}" FontSize="24"
                              Cursor="SizeAll" Margin="-1,0,2,0" VerticalAlignment="Center"/>
-                <Path Grid.Column="1" Data="{Binding IconGeometry, Converter={StaticResource StringToGeometryConverter}}" 
-                      Width="32" Height="32" Stretch="Uniform"
-                      Fill="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" 
-                      VerticalAlignment="Center" Margin="0,-4,4,0"/>
+                <Grid Grid.Column="1" Width="32" Height="32" Margin="0,-4,4,0" VerticalAlignment="Center">
+                    <Path Data="{Binding IconGeometry, Converter={StaticResource StringToGeometryConverter}}"
+                          Width="32" Height="32" Stretch="Uniform"
+                          Fill="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}"
+                          Visibility="{Binding IconGeometry, Converter={StaticResource NullToVisibilityConverter}}"/>
+                    <ui:FontIcon Icon="{Binding IconKey}" FontSize="28"
+                                 Visibility="{Binding IconKey, Converter={StaticResource NullToVisibilityConverter}}"/>
+                </Grid>
 
                 <!-- 两个文本作为整体置顶 -->
                 <StackPanel Grid.Column="2" VerticalAlignment="Top">
