@@ -1,0 +1,70 @@
+<UserControl
+    x:Class="Ink_Canvas.Windows.FeedbackPages.FeedbackPage3"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+    xmlns:props="clr-namespace:Ink_Canvas.Properties"
+    mc:Ignorable="d"
+    d:DesignHeight="450" d:DesignWidth="600">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                  IsManipulationEnabled="True" PanningMode="VerticalOnly">
+        <ikw:SimpleStackPanel Spacing="12" Margin="0,0,0,20">
+            <TextBlock FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10"
+                       Text="{x:Static props:FeedbackStrings.Page3Title}"/>
+
+            <ui:SettingsExpander x:Name="ExpanderGitHubFeedback"
+                             Header="{x:Static props:FeedbackStrings.Page3_GitHub}"
+                             Description="{x:Static props:FeedbackStrings.Page3_GitHubDesc}">
+                <ui:SettingsExpander.HeaderIcon>
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Mail}"/>
+                </ui:SettingsExpander.HeaderIcon>
+                <Button x:Name="BtnOpenGitHubIssue"
+                        Content="{x:Static props:FeedbackStrings.Page3_OpenGitHub}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.AccentButtonStyleKey}}"/>
+                    </Button.Style>
+                </Button>
+                <ui:SettingsExpander.Items>
+                    <ui:SettingsCard x:Name="CardCopyIssueUrl"
+                                     Header="{x:Static props:FeedbackStrings.Page3_CopyIssueUrl}"
+                                     IsClickEnabled="True">
+                        <ui:SettingsCard.ActionIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Copy}"/>
+                        </ui:SettingsCard.ActionIcon>
+                    </ui:SettingsCard>
+                </ui:SettingsExpander.Items>
+            </ui:SettingsExpander>
+
+            <ui:SettingsExpander x:Name="ExpanderMarkdownTemplate"
+                             Header="{x:Static props:FeedbackStrings.Page3_Markdown}"
+                             Description="{x:Static props:FeedbackStrings.Page3_MarkdownDesc}">
+                <ui:SettingsExpander.HeaderIcon>
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Code}"/>
+                </ui:SettingsExpander.HeaderIcon>
+                <Button x:Name="BtnCopyMarkdown"
+                        Content="{x:Static props:FeedbackStrings.Page3_CopyMarkdown}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}"/>
+                    </Button.Style>
+                </Button>
+                <ui:SettingsExpander.Items>
+                    <ui:SettingsCard ContentAlignment="Left">
+                        <TextBox x:Name="TextBoxMarkdownTemplate"
+                                 MinHeight="200"
+                                 IsReadOnly="True"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 FontFamily="Consolas"
+                                 FontSize="12"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 VerticalScrollBarVisibility="Auto"/>
+                    </ui:SettingsCard>
+                </ui:SettingsExpander.Items>
+            </ui:SettingsExpander>
+        </ikw:SimpleStackPanel>
+    </ScrollViewer>
+</UserControl>

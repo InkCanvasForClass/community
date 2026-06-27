@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="WindowTitle" xml:space="preserve">
+    <value>反馈问题 - Ink Canvas For Class CE</value>
+  </data>
+  <data name="BtnCancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="BtnNext" xml:space="preserve">
+    <value>下一步</value>
+  </data>
+  <data name="BtnBack" xml:space="preserve">
+    <value>上一页</value>
+  </data>
+  <data name="BtnConfirm" xml:space="preserve">
+    <value>确认</value>
+  </data>
+  <data name="Page1Title" xml:space="preserve">
+    <value>挑一下要带上的信息</value>
+  </data>
+  <data name="Page1_SoftwareInfo" xml:space="preserve">
+    <value>软件情报</value>
+  </data>
+  <data name="Page1_SoftwareInfoDesc" xml:space="preserve">
+    <value>选选看要带上哪些版本情报</value>
+  </data>
+  <data name="Page1_AppVersion" xml:space="preserve">
+    <value>软件版本</value>
+  </data>
+  <data name="Page1_UpdateChannel" xml:space="preserve">
+    <value>更新通道</value>
+  </data>
+  <data name="Page1_SystemInfo" xml:space="preserve">
+    <value>系统情报</value>
+  </data>
+  <data name="Page1_SystemInfoDesc" xml:space="preserve">
+    <value>选选看要带上哪些系统环境情报</value>
+  </data>
+  <data name="Page1_OSVersion" xml:space="preserve">
+    <value>操作系统版本</value>
+  </data>
+  <data name="Page1_NetVersion" xml:space="preserve">
+    <value>.NET 版本</value>
+  </data>
+  <data name="Page1_DeviceInfo" xml:space="preserve">
+    <value>设备情报</value>
+  </data>
+  <data name="Page1_DeviceInfoDesc" xml:space="preserve">
+    <value>选选看要带上哪些设备标识情报</value>
+  </data>
+  <data name="Page1_DeviceId" xml:space="preserve">
+    <value>设备 ID</value>
+  </data>
+  <data name="Page1_Config" xml:space="preserve">
+    <value>软件配置</value>
+  </data>
+  <data name="Page1_ConfigDesc" xml:space="preserve">
+    <value>选选看要带上哪些软件配置情报</value>
+  </data>
+  <data name="Page1_PPTSettings" xml:space="preserve">
+    <value>PPT 联动设置</value>
+  </data>
+  <data name="Page1_InkRecognition" xml:space="preserve">
+    <value>墨迹识别设置</value>
+  </data>
+  <data name="Page2Title" xml:space="preserve">
+    <value>确认一下要发的情报</value>
+  </data>
+  <data name="Page2_SoftwareInfo" xml:space="preserve">
+    <value>软件情报</value>
+  </data>
+  <data name="Page2_SoftwareInfoDesc" xml:space="preserve">
+    <value>即将附带的软件版本情报</value>
+  </data>
+  <data name="Page2_SystemInfo" xml:space="preserve">
+    <value>系统情报</value>
+  </data>
+  <data name="Page2_SystemInfoDesc" xml:space="preserve">
+    <value>即将附带的系统环境情报</value>
+  </data>
+  <data name="Page2_DeviceInfo" xml:space="preserve">
+    <value>设备情报</value>
+  </data>
+  <data name="Page2_DeviceInfoDesc" xml:space="preserve">
+    <value>即将附带的设备标识情报</value>
+  </data>
+  <data name="Page2_Config" xml:space="preserve">
+    <value>软件配置</value>
+  </data>
+  <data name="Page2_ConfigDesc" xml:space="preserve">
+    <value>即将附带的软件配置情报</value>
+  </data>
+  <data name="Page2_Exclude" xml:space="preserve">
+    <value>（不带）</value>
+  </data>
+  <data name="Page3Title" xml:space="preserve">
+    <value>选个反馈姿势</value>
+  </data>
+  <data name="Page3_GitHub" xml:space="preserve">
+    <value>GitHub 问题反馈</value>
+  </data>
+  <data name="Page3_GitHubDesc" xml:space="preserve">
+    <value>去 GitHub 提交问题反馈</value>
+  </data>
+  <data name="Page3_OpenGitHub" xml:space="preserve">
+    <value>跳转到 GitHub 反馈</value>
+  </data>
+  <data name="Page3_CopyIssueUrl" xml:space="preserve">
+    <value>复制反馈链接</value>
+  </data>
+  <data name="Page3_Copied" xml:space="preserve">
+    <value>搞定 ✓</value>
+  </data>
+  <data name="Page3_Markdown" xml:space="preserve">
+    <value>反馈模板 (Markdown)</value>
+  </data>
+  <data name="Page3_MarkdownDesc" xml:space="preserve">
+    <value>复制下面的 Markdown 模板去反馈</value>
+  </data>
+  <data name="Page3_CopyMarkdown" xml:space="preserve">
+    <value>复制模板</value>
+  </data>
+  <data name="Page3_TemplatePlaceholder" xml:space="preserve">
+    <value># 问题描述&#x0a;请描述你遇到的问题...&#x0a;&#x0a;# 重现步骤&#x0a;1. &#x0a;2. &#x0a;3. &#x0a;&#x0a;# 预期行为&#x0a;你期望的效果...&#x0a;&#x0a;# 实际行为&#x0a;实际发生了啥...&#x0a;&#x0a;# 环境信息&#x0a;- 版本: &#x0a;- 系统: &#x0a;</value>
+  </data>
+  <data name="About_FeedbackButton" xml:space="preserve">
+    <value>提交反馈</value>
+  </data>
+  <data name="About_FeedbackSection" xml:space="preserve">
+    <value>反馈问题</value>
+  </data>
+</root>

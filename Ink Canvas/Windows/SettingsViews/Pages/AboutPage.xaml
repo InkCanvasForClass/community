@@ -63,6 +63,15 @@
                         <TextBlock x:Name="AppVersionTextBlock" Text="1.X.X.X" FontWeight="Bold" VerticalAlignment="Center" />
                     </ui:SettingsCard>
 
+                    <ui:SettingsCard Header="{x:Static props:FeedbackStrings.About_FeedbackSection}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Comment}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <Button x:Name="BtnReportIssue"
+                                Content="{x:Static props:FeedbackStrings.About_FeedbackButton}"
+                                Click="BtnReportIssue_Click" />
+                    </ui:SettingsCard>
+
                     <ui:SettingsExpander Header="{x:Static props:AboutStrings.DeviceInfo}"
                             IsExpanded="True"
                             d:Visibility="Visible" d:IsExpanded="True">

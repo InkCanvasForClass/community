@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="WindowTitle" xml:space="preserve">
+    <value>Feedback - Ink Canvas For Class CE</value>
+  </data>
+  <data name="BtnCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="BtnNext" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="BtnBack" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="BtnConfirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="Page1Title" xml:space="preserve">
+    <value>Select information to include</value>
+  </data>
+  <data name="Page1_SoftwareInfo" xml:space="preserve">
+    <value>Software Information</value>
+  </data>
+  <data name="Page1_SoftwareInfoDesc" xml:space="preserve">
+    <value>Select software version info to include in feedback</value>
+  </data>
+  <data name="Page1_AppVersion" xml:space="preserve">
+    <value>App version</value>
+  </data>
+  <data name="Page1_UpdateChannel" xml:space="preserve">
+    <value>Update channel</value>
+  </data>
+  <data name="Page1_SystemInfo" xml:space="preserve">
+    <value>System Information</value>
+  </data>
+  <data name="Page1_SystemInfoDesc" xml:space="preserve">
+    <value>Select system environment info to include in feedback</value>
+  </data>
+  <data name="Page1_OSVersion" xml:space="preserve">
+    <value>Operating system version</value>
+  </data>
+  <data name="Page1_NetVersion" xml:space="preserve">
+    <value>.NET version</value>
+  </data>
+  <data name="Page1_DeviceInfo" xml:space="preserve">
+    <value>Device Information</value>
+  </data>
+  <data name="Page1_DeviceInfoDesc" xml:space="preserve">
+    <value>Select device identity info to include in feedback</value>
+  </data>
+  <data name="Page1_DeviceId" xml:space="preserve">
+    <value>Device ID</value>
+  </data>
+  <data name="Page1_Config" xml:space="preserve">
+    <value>Software Configuration</value>
+  </data>
+  <data name="Page1_ConfigDesc" xml:space="preserve">
+    <value>Select software configuration info to include in feedback</value>
+  </data>
+  <data name="Page1_PPTSettings" xml:space="preserve">
+    <value>PPT Linkage Settings</value>
+  </data>
+  <data name="Page1_InkRecognition" xml:space="preserve">
+    <value>Ink Recognition Settings</value>
+  </data>
+  <data name="Page2Title" xml:space="preserve">
+    <value>Confirm information to send</value>
+  </data>
+  <data name="Page2_SoftwareInfo" xml:space="preserve">
+    <value>Software Information</value>
+  </data>
+  <data name="Page2_SoftwareInfoDesc" xml:space="preserve">
+    <value>Software version info to include in feedback</value>
+  </data>
+  <data name="Page2_SystemInfo" xml:space="preserve">
+    <value>System Information</value>
+  </data>
+  <data name="Page2_SystemInfoDesc" xml:space="preserve">
+    <value>System environment info to include in feedback</value>
+  </data>
+  <data name="Page2_DeviceInfo" xml:space="preserve">
+    <value>Device Information</value>
+  </data>
+  <data name="Page2_DeviceInfoDesc" xml:space="preserve">
+    <value>Device identity info to include in feedback</value>
+  </data>
+  <data name="Page2_Config" xml:space="preserve">
+    <value>Software Configuration</value>
+  </data>
+  <data name="Page2_ConfigDesc" xml:space="preserve">
+    <value>Software configuration info to include in feedback</value>
+  </data>
+  <data name="Page2_Exclude" xml:space="preserve">
+    <value>(excluded)</value>
+  </data>
+  <data name="Page3Title" xml:space="preserve">
+    <value>Choose feedback method</value>
+  </data>
+  <data name="Page3_GitHub" xml:space="preserve">
+    <value>GitHub Issue</value>
+  </data>
+  <data name="Page3_GitHubDesc" xml:space="preserve">
+    <value>Submit feedback on GitHub</value>
+  </data>
+  <data name="Page3_OpenGitHub" xml:space="preserve">
+    <value>Go to GitHub Feedback</value>
+  </data>
+  <data name="Page3_CopyIssueUrl" xml:space="preserve">
+    <value>Copy feedback link</value>
+  </data>
+  <data name="Page3_Copied" xml:space="preserve">
+    <value>Copied ✓</value>
+  </data>
+  <data name="Page3_Markdown" xml:space="preserve">
+    <value>Feedback Template (Markdown)</value>
+  </data>
+  <data name="Page3_MarkdownDesc" xml:space="preserve">
+    <value>Copy the following Markdown template for feedback</value>
+  </data>
+  <data name="Page3_CopyMarkdown" xml:space="preserve">
+    <value>Copy Template</value>
+  </data>
+  <data name="Page3_TemplatePlaceholder" xml:space="preserve">
+    <value># Description&#x0a;Describe your issue...&#x0a;&#x0a;# Steps to Reproduce&#x0a;1. &#x0a;2. &#x0a;3. &#x0a;&#x0a;# Expected Behavior&#x0a;What you expected...&#x0a;&#x0a;# Actual Behavior&#x0a;What actually happened...&#x0a;&#x0a;# Environment&#x0a;- Version: &#x0a;- System: &#x0a;</value>
+  </data>
+  <data name="About_FeedbackButton" xml:space="preserve">
+    <value>Submit Feedback</value>
+  </data>
+  <data name="About_FeedbackSection" xml:space="preserve">
+    <value>Feedback</value>
+  </data>
+</root>
