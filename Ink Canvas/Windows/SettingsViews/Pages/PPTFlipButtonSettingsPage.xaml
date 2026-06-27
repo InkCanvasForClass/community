@@ -1,0 +1,243 @@
+<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.PPTFlipButtonSettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+      xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+      xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+      xmlns:ppt="clr-namespace:Ink_Canvas.Controls"
+      xmlns:c="clr-namespace:Ink_Canvas.Converter"
+      xmlns:sys="clr-namespace:System;assembly=mscorlib"
+      xmlns:props="clr-namespace:Ink_Canvas.Properties"
+      mc:Ignorable="d"
+      Title="{x:Static props:PPTStrings.FlipButtonsTitle}"
+      SizeChanged="PPTFlipButtonSettingsPage_SizeChanged">
+
+    <Grid x:Name="RootGrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- ===== 左侧：16:9 预览区域（带背景图） ===== -->
+        <Border Grid.Column="0" Margin="12" CornerRadius="8" Background="Transparent"
+                x:Name="PreviewContainer">
+            <Viewbox Stretch="Uniform" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0">
+                <!-- 16:9 固定画布 -->
+                <Grid Width="1600" Height="900" x:Name="PreviewCanvas">
+                    <!-- 背景图 -->
+                    <Image Source="/Resources/PresentationExample/page.jpg" Stretch="UniformToFill"/>
+
+                    <!-- 左侧翻页按钮预览 -->
+                    <Border Background="Transparent" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6,0,0,0"
+                            MouseLeftButtonDown="PreviewLS_MouseLeftButtonDown" Cursor="Hand"
+                            x:Name="PreviewLSBorder">
+                        <ppt:PPTNavBar x:Name="PreviewLS" Direction="LeftSide"
+                                       CurrentSlide="3" TotalSlides="10" IsHitTestVisible="False"/>
+                    </Border>
+                    <!-- 右侧翻页按钮预览 -->
+                    <Border Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0"
+                            MouseLeftButtonDown="PreviewRS_MouseLeftButtonDown" Cursor="Hand"
+                            x:Name="PreviewRSBorder">
+                        <ppt:PPTNavBar x:Name="PreviewRS" Direction="RightSide"
+                                       CurrentSlide="3" TotalSlides="10" IsHitTestVisible="False"/>
+                    </Border>
+                    <!-- 左下翻页按钮预览 -->
+                    <Border Background="Transparent" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="6,0,0,6"
+                            MouseLeftButtonDown="PreviewLB_MouseLeftButtonDown" Cursor="Hand"
+                            x:Name="PreviewLBBorder">
+                        <ppt:PPTNavBar x:Name="PreviewLB" Direction="LeftBottom"
+                                       CurrentSlide="3" TotalSlides="10" IsHitTestVisible="False"/>
+                    </Border>
+                    <!-- 右下翻页按钮预览 -->
+                    <Border Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,6,6"
+                            MouseLeftButtonDown="PreviewRB_MouseLeftButtonDown" Cursor="Hand"
+                            x:Name="PreviewRBBorder">
+                        <ppt:PPTNavBar x:Name="PreviewRB" Direction="RightBottom"
+                                       CurrentSlide="3" TotalSlides="10" IsHitTestVisible="False"/>
+                    </Border>
+                </Grid>
+            </Viewbox>
+        </Border>
+
+        <!-- ===== 右侧：设置区域 ===== -->
+        <ScrollViewer Grid.Column="1" PanningMode="VerticalFirst" x:Name="RightScrollViewer">
+            <Grid Margin="24,0,24,0">
+                <FrameworkElement.Resources>
+                    <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
+                    <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+                    <Style x:Key="SettingsSectionHeaderTextBlockStyle"
+                        BasedOn="{StaticResource BodyStrongTextBlockStyle}"
+                        TargetType="TextBlock">
+                        <Style.Setters>
+                            <Setter Property="Margin" Value="1,30,0,6" />
+                        </Style.Setters>
+                    </Style>
+                </FrameworkElement.Resources>
+                <ikw:SimpleStackPanel MaxWidth="600"
+                    HorizontalAlignment="Stretch"
+                    Spacing="{StaticResource SettingsCardSpacing}">
+
+                    <!-- 返回按钮 -->
+                    <Button x:Name="BackButton"
+                            Margin="0,12,0,0"
+                            HorizontalAlignment="Left"
+                            Click="BackButton_Click">
+                        <Button.Content>
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Back}"/>
+                                <TextBlock Text="{x:Static props:NavStrings.Nav_PPT_Settings}"/>
+                            </ikw:SimpleStackPanel>
+                        </Button.Content>
+                    </Button>
+
+                    <TextBlock Text="{x:Static props:PPTStrings.FlipButtonsTitle}"
+                               FontSize="20" FontWeight="SemiBold" Margin="1,12,0,12"/>
+
+                    <controls:LabeledSettingsCard x:Name="CardShowPPTButton"
+                            Header="{x:Static props:PPTStrings.ShowFlipButtons}"
+                            Icon="{x:Static ui:SegoeFluentIcons.ShowResults}"
+                            Toggled="ToggleSwitchShowPPTButton_OnToggled"/>
+
+                    <!-- 各位置启用/禁用（复选框） -->
+                    <ui:SettingsCard x:Name="CardPositions"
+                                     Header="{x:Static props:PPTStrings.Positions}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.GridView}"/>
+                        </ui:SettingsCard.HeaderIcon>
+                        <WrapPanel Orientation="Horizontal"
+                                   Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <CheckBox x:Name="CheckboxPosLeft" Content="{x:Static props:PPTStrings.Position_Left}"
+                                      Margin="0,0,16,8"
+                                      Checked="CheckboxPosition_Changed" Unchecked="CheckboxPosition_Changed"
+                                      Tag="LeftSide"/>
+                            <CheckBox x:Name="CheckboxPosRight" Content="{x:Static props:PPTStrings.Position_Right}"
+                                      Margin="0,0,16,8"
+                                      Checked="CheckboxPosition_Changed" Unchecked="CheckboxPosition_Changed"
+                                      Tag="RightSide"/>
+                            <CheckBox x:Name="CheckboxPosLeftBottom" Content="{x:Static props:PPTStrings.Position_LeftBottom}"
+                                      Margin="0,0,16,8"
+                                      Checked="CheckboxPosition_Changed" Unchecked="CheckboxPosition_Changed"
+                                      Tag="LeftBottom"/>
+                            <CheckBox x:Name="CheckboxPosRightBottom" Content="{x:Static props:PPTStrings.Position_RightBottom}"
+                                      Margin="0,0,0,8"
+                                      Checked="CheckboxPosition_Changed" Unchecked="CheckboxPosition_Changed"
+                                      Tag="RightBottom"/>
+                        </WrapPanel>
+                    </ui:SettingsCard>
+
+                    <!-- 当前选中位置的设置面板 -->
+                    <TextBlock x:Name="SelectedPositionTitle"
+                               Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                               Text=""
+                               Visibility="Collapsed" />
+
+                    <!-- 启用该位置按钮 -->
+                    <controls:LabeledSettingsCard x:Name="CardEnablePositionButton"
+                            Header=""
+                            Icon="{x:Static ui:SegoeFluentIcons.ShowResults}"
+                            Visibility="Collapsed"
+                            Toggled="ToggleSwitchEnablePositionButton_Toggled"/>
+
+                    <!-- 偏移 -->
+                    <ui:SettingsCard x:Name="CardOffset" Header=""
+                                     Visibility="Collapsed">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Move}"/>
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock x:Name="OffsetText"
+                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="45"/>
+                            <Slider x:Name="OffsetSlider" Minimum="-500" Maximum="500" Width="180"
+                                    IsSnapToTickEnabled="True" TickFrequency="5"
+                                    ValueChanged="OffsetSlider_ValueChanged"/>
+                            <Button Content="{x:Static props:PPTStrings.TimeCapsuleResetPosition}"
+                                    Click="ButtonResetOffset_Click"
+                                    Style="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}"/>
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <!-- 透明度 -->
+                    <ui:SettingsCard x:Name="CardOpacity" Header=""
+                                     Visibility="Collapsed">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EaseOfAccess}"/>
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock x:Name="OpacityText"
+                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="45"/>
+                            <Slider x:Name="OpacitySlider" Minimum="0.1" Maximum="1.0" Width="180"
+                                    ValueChanged="OpacitySlider_ValueChanged"/>
+                            <Button Content="{x:Static props:PPTStrings.TimeCapsuleResetPosition}"
+                                    Click="ButtonResetOpacity_Click"
+                                    Style="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}"/>
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <!-- 页码显示 -->
+                    <ui:SettingsCard x:Name="CardShowPageNumber" Header="{x:Static props:PPTStrings.ShowPageNumber}"
+                                     Visibility="Collapsed">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Page}"/>
+                        </ui:SettingsCard.HeaderIcon>
+                        <CheckBox x:Name="CheckboxShowPageNumber"
+                                  Content="{x:Static props:PPTStrings.ShowPageNumber}"
+                                  Checked="CheckboxShowPageNumber_Changed"
+                                  Unchecked="CheckboxShowPageNumber_Changed"/>
+                    </ui:SettingsCard>
+
+                    <!-- 黑色背景 -->
+                    <ui:SettingsCard x:Name="CardBlackBackground" Header="{x:Static props:PPTStrings.BlackBackground}"
+                                     Visibility="Collapsed">
+                        <CheckBox x:Name="CheckboxBlackBackground"
+                                  Content="{x:Static props:PPTStrings.BlackBackground}"
+                                  Checked="CheckboxBlackBackground_Changed"
+                                  Unchecked="CheckboxBlackBackground_Changed"/>
+                    </ui:SettingsCard>
+
+                    <TextBlock Text="{x:Static props:PPTStrings.GlobalSettings}"
+                               Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
+
+                    <!-- 全局缩放 -->
+                    <ui:SettingsCard Header="{x:Static props:PPTStrings.FlipButtonsScale}"
+                            Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Zoom}"/>
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock x:Name="PPTNavBarScaleText"
+                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                            <Slider x:Name="PPTNavBarScaleValueSlider" Minimum="0.5"
+                                    Maximum="1.5" Width="200" IsSnapToTickEnabled="True"
+                                    TickFrequency="0.05" ValueChanged="PPTNavBarScaleValueSlider_ValueChanged"/>
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <controls:LabeledSettingsCard x:Name="CardEnablePPTButtonPageClickable"
+                            Header="{x:Static props:PPTStrings.PageButtonClickable}"
+                            Description="{x:Static props:PPTStrings.PageButtonClickableHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
+                            Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            Toggled="ToggleSwitchEnablePPTButtonPageClickable_OnToggled"/>
+
+                    <controls:LabeledSettingsCard x:Name="CardEnablePPTButtonEnhancedPreview"
+                            Header="{x:Static props:PPTStrings.EnhancedPreview}"
+                            Description="{x:Static props:PPTStrings.EnhancedPreviewHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
+                            Visibility="{Binding IsOn, ElementName=CardEnablePPTButtonPageClickable, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            Toggled="ToggleSwitchEnablePPTButtonEnhancedPreview_OnToggled"/>
+
+                    <controls:LabeledSettingsCard x:Name="CardEnablePPTButtonLongPressPageTurn"
+                            Header="{x:Static props:PPTStrings.LongPressPageTurn}"
+                            Description="{x:Static props:PPTStrings.LongPressPageTurnHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Touch}"
+                            Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            Toggled="ToggleSwitchEnablePPTButtonLongPressPageTurn_OnToggled"/>
+
+                    <Rectangle Height="48" />
+                </ikw:SimpleStackPanel>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</ui:Page>

@@ -84,6 +84,21 @@
   <data name="FlipButtonsScale" xml:space="preserve">
     <value>Page-turn button size</value>
   </data>
+  <data name="FlipButtonsSettingHint" xml:space="preserve">
+    <value>Configure the position, appearance, and behavior of page-turn buttons</value>
+  </data>
+  <data name="Configure" xml:space="preserve">
+    <value>Configure</value>
+  </data>
+  <data name="GlobalSettings" xml:space="preserve">
+    <value>Global settings</value>
+  </data>
+  <data name="Positions" xml:space="preserve">
+    <value>Display positions</value>
+  </data>
+  <data name="EnablePositionButton" xml:space="preserve">
+    <value>Enable {0} button</value>
+  </data>
   <data name="GoToFirstPageOnReenter" xml:space="preserve">
     <value>Go to first slide when starting a slideshow</value>
   </data>

@@ -84,6 +84,21 @@
   <data name="FlipButtonsScale" xml:space="preserve">
     <value>翻页按钮大小</value>
   </data>
+  <data name="FlipButtonsSettingHint" xml:space="preserve">
+    <value>配置翻页按钮的位置、外观与行为</value>
+  </data>
+  <data name="Configure" xml:space="preserve">
+    <value>配置</value>
+  </data>
+  <data name="GlobalSettings" xml:space="preserve">
+    <value>全局设置</value>
+  </data>
+  <data name="Positions" xml:space="preserve">
+    <value>显示位置</value>
+  </data>
+  <data name="EnablePositionButton" xml:space="preserve">
+    <value>启用{0}按钮</value>
+  </data>
   <data name="GoToFirstPageOnReenter" xml:space="preserve">
     <value>进入放映时回到首页</value>
   </data>
