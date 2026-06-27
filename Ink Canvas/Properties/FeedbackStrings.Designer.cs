@@ -125,5 +125,27 @@ namespace Ink_Canvas.Properties
         public static string About_FeedbackButton => ResourceManager.GetString(nameof(About_FeedbackButton), _resourceCulture);
 
         public static string About_FeedbackSection => ResourceManager.GetString(nameof(About_FeedbackSection), _resourceCulture);
+
+        public static string Page1_PastebinServer => ResourceManager.GetString(nameof(Page1_PastebinServer), _resourceCulture);
+
+        public static string Page1_PastebinServerDesc => ResourceManager.GetString(nameof(Page1_PastebinServerDesc), _resourceCulture);
+
+        public static string Page1_PastebinPlaceholder => ResourceManager.GetString(nameof(Page1_PastebinPlaceholder), _resourceCulture);
+
+        public static string Page3_PastebinUpload => ResourceManager.GetString(nameof(Page3_PastebinUpload), _resourceCulture);
+
+        public static string Page3_PastebinUploadDesc => ResourceManager.GetString(nameof(Page3_PastebinUploadDesc), _resourceCulture);
+
+        public static string Page3_UploadToPastebin => ResourceManager.GetString(nameof(Page3_UploadToPastebin), _resourceCulture);
+
+        public static string Page3_CopyPastebinUrl => ResourceManager.GetString(nameof(Page3_CopyPastebinUrl), _resourceCulture);
+
+        public static string Page3_UploadSuccess => ResourceManager.GetString(nameof(Page3_UploadSuccess), _resourceCulture);
+
+        public static string Page3_UploadFailed => ResourceManager.GetString(nameof(Page3_UploadFailed), _resourceCulture);
+
+        public static string Page3_Uploading => ResourceManager.GetString(nameof(Page3_Uploading), _resourceCulture);
+
+        public static string Page3_PastebinNotConfigured => ResourceManager.GetString(nameof(Page3_PastebinNotConfigured), _resourceCulture);
     }
 }

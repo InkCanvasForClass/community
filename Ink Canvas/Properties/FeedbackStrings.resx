@@ -171,4 +171,37 @@
   <data name="About_FeedbackSection" xml:space="preserve">
     <value>反馈问题</value>
   </data>
+  <data name="Page1_PastebinServer" xml:space="preserve">
+    <value>Pastebin 服务器</value>
+  </data>
+  <data name="Page1_PastebinServerDesc" xml:space="preserve">
+    <value>自部署的 MicroBin 服务地址（留空则不上传到 pastebin）</value>
+  </data>
+  <data name="Page1_PastebinPlaceholder" xml:space="preserve">
+    <value>https://microbin.example.com</value>
+  </data>
+  <data name="Page3_PastebinUpload" xml:space="preserve">
+    <value>上传到 Pastebin</value>
+  </data>
+  <data name="Page3_PastebinUploadDesc" xml:space="preserve">
+    <value>将脱敏后的 JSON 数据上传到 pastebin 服务</value>
+  </data>
+  <data name="Page3_UploadToPastebin" xml:space="preserve">
+    <value>上传数据</value>
+  </data>
+  <data name="Page3_CopyPastebinUrl" xml:space="preserve">
+    <value>复制 Pastebin 链接</value>
+  </data>
+  <data name="Page3_UploadSuccess" xml:space="preserve">
+    <value>上传成功 ✓</value>
+  </data>
+  <data name="Page3_UploadFailed" xml:space="preserve">
+    <value>上传失败</value>
+  </data>
+  <data name="Page3_Uploading" xml:space="preserve">
+    <value>正在上传...</value>
+  </data>
+  <data name="Page3_PastebinNotConfigured" xml:space="preserve">
+    <value>未配置 Pastebin 服务器</value>
+  </data>
 </root>

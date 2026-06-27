@@ -171,4 +171,37 @@
   <data name="About_FeedbackSection" xml:space="preserve">
     <value>Feedback</value>
   </data>
+  <data name="Page1_PastebinServer" xml:space="preserve">
+    <value>Pastebin Server</value>
+  </data>
+  <data name="Page1_PastebinServerDesc" xml:space="preserve">
+    <value>Self-hosted MicroBin server URL (leave empty to skip pastebin upload)</value>
+  </data>
+  <data name="Page1_PastebinPlaceholder" xml:space="preserve">
+    <value>https://microbin.example.com</value>
+  </data>
+  <data name="Page3_PastebinUpload" xml:space="preserve">
+    <value>Upload to Pastebin</value>
+  </data>
+  <data name="Page3_PastebinUploadDesc" xml:space="preserve">
+    <value>Upload sanitized JSON data to pastebin service</value>
+  </data>
+  <data name="Page3_UploadToPastebin" xml:space="preserve">
+    <value>Upload Data</value>
+  </data>
+  <data name="Page3_CopyPastebinUrl" xml:space="preserve">
+    <value>Copy Pastebin Link</value>
+  </data>
+  <data name="Page3_UploadSuccess" xml:space="preserve">
+    <value>Upload Successful ✓</value>
+  </data>
+  <data name="Page3_UploadFailed" xml:space="preserve">
+    <value>Upload Failed</value>
+  </data>
+  <data name="Page3_Uploading" xml:space="preserve">
+    <value>Uploading...</value>
+  </data>
+  <data name="Page3_PastebinNotConfigured" xml:space="preserve">
+    <value>Pastebin server not configured</value>
+  </data>
 </root>

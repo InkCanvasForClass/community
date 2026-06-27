@@ -81,6 +81,23 @@
                     </ui:SettingsCard>
                 </ui:SettingsExpander.Items>
             </ui:SettingsExpander>
+
+            <ui:SettingsExpander x:Name="ExpanderPastebin"
+                             Header="{x:Static props:FeedbackStrings.Page1_PastebinServer}"
+                             Description="{x:Static props:FeedbackStrings.Page1_PastebinServerDesc}">
+                <ui:SettingsExpander.HeaderIcon>
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}"/>
+                </ui:SettingsExpander.HeaderIcon>
+                <ui:SettingsExpander.Items>
+                    <ui:SettingsCard ContentAlignment="Left">
+                        <TextBox x:Name="TextBoxPastebinUrl"
+                                 MinWidth="280"
+                                 VerticalAlignment="Center"
+                                 FontFamily="Consolas"
+                                 FontSize="12"/>
+                    </ui:SettingsCard>
+                </ui:SettingsExpander.Items>
+            </ui:SettingsExpander>
         </ikw:SimpleStackPanel>
     </ScrollViewer>
 </UserControl>

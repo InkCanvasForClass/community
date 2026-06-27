@@ -13,6 +13,8 @@ namespace Ink_Canvas.Windows.FeedbackPages
         public event EventHandler<RoutedEventArgs> BtnOpenGitHubIssueClick;
         public event EventHandler<RoutedEventArgs> CardCopyIssueUrlClick;
         public event EventHandler<RoutedEventArgs> BtnCopyMarkdownClick;
+        public event EventHandler<RoutedEventArgs> BtnUploadPastebinClick;
+        public event EventHandler<RoutedEventArgs> CardCopyPastebinUrlClick;
 
         public string MarkdownTemplate => TextBoxMarkdownTemplate.Text;
 
@@ -22,6 +24,8 @@ namespace Ink_Canvas.Windows.FeedbackPages
             BtnOpenGitHubIssue.Click += (s, e) => BtnOpenGitHubIssueClick?.Invoke(this, e);
             CardCopyIssueUrl.Click += (s, e) => CardCopyIssueUrlClick?.Invoke(this, e);
             BtnCopyMarkdown.Click += (s, e) => BtnCopyMarkdownClick?.Invoke(this, e);
+            BtnUploadPastebin.Click += (s, e) => BtnUploadPastebinClick?.Invoke(this, e);
+            CardCopyPastebinUrl.Click += (s, e) => CardCopyPastebinUrlClick?.Invoke(this, e);
         }
     }
 }

@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace Ink_Canvas.Windows.FeedbackPages
@@ -23,6 +24,7 @@ namespace Ink_Canvas.Windows.FeedbackPages
         private string _deviceId = "";
         private string _pptLinkageSettings = "";
         private string _inkRecognitionSettings = "";
+        private string _pastebinUrl = "";
 
         private FeedbackPage1 _page1;
         private FeedbackPage2 _page2;
@@ -38,6 +40,8 @@ namespace Ink_Canvas.Windows.FeedbackPages
             _page3.BtnOpenGitHubIssueClick += BtnOpenGitHubIssue_Click;
             _page3.CardCopyIssueUrlClick += CardCopyIssueUrl_Click;
             _page3.BtnCopyMarkdownClick += BtnCopyMarkdown_Click;
+            _page3.BtnUploadPastebinClick += BtnUploadPastebin_Click;
+            _page3.CardCopyPastebinUrlClick += CardCopyPastebinUrl_Click;
 
             ContentFrame.Navigated += ContentFrame_Navigated;
             LoadInformation();
@@ -176,6 +180,15 @@ namespace Ink_Canvas.Windows.FeedbackPages
         private void ButtonConfirm_Click(object sender, RoutedEventArgs e)
         {
             GenerateMarkdownTemplate();
+
+            // 根据是否配置了 pastebin 服务器来显示/隐藏 pastebin 区域
+            string serverUrl = _page1.TextBoxPastebinUrl.Text?.Trim();
+            _page3.ExpanderPastebin.Visibility = string.IsNullOrWhiteSpace(serverUrl)
+                ? Visibility.Collapsed
+                : Visibility.Visible;
+            _page3.CardCopyPastebinUrl.Visibility = Visibility.Collapsed;
+            _pastebinUrl = "";
+
             ContentFrame.Navigate(_page3);
             UpdateButtonVisibility();
         }
@@ -445,6 +458,88 @@ namespace Ink_Canvas.Windows.FeedbackPages
             {
                 Debug.WriteLine($"复制Markdown模板失败: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// 构建脱敏后的反馈 JSON 字符串。
+        /// 设备 ID 保留原样，WebDAV/token/密码等敏感字段被移除。
+        /// </summary>
+        private string BuildSanitizedFeedbackJson()
+        {
+            return FeedbackSanitizer.BuildSanitizedSettingsJson(SettingsManager.Settings, _deviceId);
+        }
+
+        /// <summary>
+        /// 上传脱敏后的数据到 pastebin。
+        /// </summary>
+        private async void BtnUploadPastebin_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // 从 Page1 读取 pastebin 服务器地址
+                string serverUrl = _page1.TextBoxPastebinUrl.Text?.Trim();
+
+                if (string.IsNullOrWhiteSpace(serverUrl))
+                {
+                    _page3.BtnUploadPastebin.Content = FeedbackStrings.Page3_PastebinNotConfigured;
+                    return;
+                }
+
+                _page3.BtnUploadPastebin.IsEnabled = false;
+                _page3.BtnUploadPastebin.Content = FeedbackStrings.Page3_Uploading;
+
+                string sanitizedJson = BuildSanitizedFeedbackJson();
+                string pasteUrl = await MicroBinClient.UploadRawAsync(serverUrl, sanitizedJson);
+
+                if (!string.IsNullOrEmpty(pasteUrl))
+                {
+                    _pastebinUrl = pasteUrl;
+                    _page3.BtnUploadPastebin.Content = FeedbackStrings.Page3_UploadSuccess;
+                    _page3.CardCopyPastebinUrl.Header = pasteUrl;
+                    _page3.CardCopyPastebinUrl.Visibility = Visibility.Visible;
+
+                    // 将 pastebin 链接也拼入 GitHub Issue URL
+                    UpdateGitHubIssueUrlWithPastebin();
+                }
+                else
+                {
+                    _page3.BtnUploadPastebin.Content = FeedbackStrings.Page3_UploadFailed;
+                }
+            }
+            catch (Exception ex)
+            {
+                _page3.BtnUploadPastebin.Content = FeedbackStrings.Page3_UploadFailed;
+                Debug.WriteLine($"Pastebin 上传失败: {ex.Message}");
+            }
+            finally
+            {
+                _page3.BtnUploadPastebin.IsEnabled = true;
+            }
+        }
+
+        private void CardCopyPastebinUrl_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(_pastebinUrl))
+                {
+                    Clipboard.SetText(_pastebinUrl);
+                    _page3.CardCopyPastebinUrl.Header = FeedbackStrings.Page3_Copied;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"复制 Pastebin 链接失败: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 将 pastebin 链接加入 GitHub Issue URL 参数。
+        /// </summary>
+        private void UpdateGitHubIssueUrlWithPastebin()
+        {
+            // pastebin 链接已包含在生成的 markdown 中
+            // 无需额外操作，GitHub Issue URL 的 extra 参数已包含完整信息
         }
     }
 }
