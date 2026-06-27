@@ -1,0 +1,48 @@
+<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.SearchPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+      xmlns:props="clr-namespace:Ink_Canvas.Properties"
+      mc:Ignorable="d"
+      Title="Search">
+
+    <Grid Margin="59,0,59,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 搜索框居中偏上 -->
+        <ui:AutoSuggestBox
+            x:Name="SearchBox"
+            Grid.Row="0"
+            MaxWidth="600"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Top"
+            Margin="0,80,0,0"
+            FontSize="14"
+            CornerRadius="8"
+            PlaceholderText="{x:Static props:NavStrings.Nav_SearchSettings}"
+            QuerySubmitted="SearchBox_QuerySubmitted"
+            TextChanged="SearchBox_TextChanged"
+            GotFocus="SearchBox_GotFocus"
+            KeyDown="SearchBox_KeyDown">
+            <ui:AutoSuggestBox.QueryIcon>
+                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Search}" FontSize="14"/>
+            </ui:AutoSuggestBox.QueryIcon>
+        </ui:AutoSuggestBox>
+
+        <!-- 搜索提示 -->
+        <TextBlock
+            x:Name="HintText"
+            Grid.Row="1"
+            Text="{x:Static props:NavStrings.Nav_SearchSettings}"
+            FontSize="13"
+            Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Top"
+            Margin="0,24,0,0"/>
+    </Grid>
+</ui:Page>

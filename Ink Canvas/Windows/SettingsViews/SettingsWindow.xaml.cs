@@ -51,7 +51,8 @@ namespace Ink_Canvas.Windows.SettingsViews
             { "AboutPage", typeof(AboutPage) },
             { "Settings", typeof(SettingsPage) },
             { "PluginPage", typeof(PluginPage) },
-            { "PluginSettingsPage", typeof(PluginSettingsPage) }
+            { "PluginSettingsPage", typeof(PluginSettingsPage) },
+            { "SearchPage", typeof(SearchPage) }
         };
         private Dictionary<string, Type> _pageTypes;
         private readonly Dictionary<string, object> _pages = new Dictionary<string, object>();
@@ -112,7 +113,8 @@ namespace Ink_Canvas.Windows.SettingsViews
                 { "AboutPage", typeof(AboutPage) },
                 { "Settings", typeof(SettingsPage) },
                 { "PluginPage", typeof(PluginPage) },
-                { "PluginSettingsPage", typeof(PluginSettingsPage) }
+                { "PluginSettingsPage", typeof(PluginSettingsPage) },
+                { "SearchPage", typeof(SearchPage) }
             };
 
             // 默认选中首页
@@ -150,10 +152,12 @@ namespace Ink_Canvas.Windows.SettingsViews
             };
 
             AnnouncementService.UnreadCountChanged += UpdateAnnouncementUnreadBadge;
+            SearchPage.ResultSelected += OnSearchPageResultSelected;
 
             this.Closed += (sender, e) =>
             {
                 AnnouncementService.UnreadCountChanged -= UpdateAnnouncementUnreadBadge;
+                SearchPage.ResultSelected -= OnSearchPageResultSelected;
                 UnregisterDpiChangedListener();
                 _pages.Clear();
                 _pageTypes.Clear();
@@ -735,6 +739,31 @@ namespace Ink_Canvas.Windows.SettingsViews
                 .ToList();
 
             sender.ItemsSource = suggestions;
+        }
+
+        private void OnControlsSearchBoxGotFocus(object sender, RoutedEventArgs e)
+        {
+            // 构建搜索索引并传给 SearchPage
+            EnsureSearchIndexBuilt();
+            SearchPage.SearchData = _searchIndex
+                .Select(se => (se.Text, se.PageTag))
+                .ToList();
+            NavigateToPage("SearchPage");
+            NavigationViewControl.Header = NavStrings.Nav_SearchSettings;
+            // 取消侧边栏选中状态
+            NavigationViewControl.SelectedItem = null;
+        }
+
+        private void OnSearchPageResultSelected(object sender, string pageTag)
+        {
+            if (pageTag == "__back__")
+            {
+                // 返回上一页
+                if (rootFrame.CanGoBack) rootFrame.GoBack();
+                return;
+            }
+
+            NavigateToSearchEntry(_searchIndex?.FirstOrDefault(e => e.PageTag == pageTag));
         }
 
         // 统一获取所有导航项（主菜单+子菜单+底部菜单）

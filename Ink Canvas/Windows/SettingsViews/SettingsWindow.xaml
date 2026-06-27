@@ -107,7 +107,8 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                     x:FieldModifier="public"
                     PlaceholderText="{x:Static props:NavStrings.Nav_SearchSettings}"
                     QuerySubmitted="OnControlsSearchBoxQuerySubmitted"
-                    TextChanged="OnControlsSearchBoxTextChanged">
+                    TextChanged="OnControlsSearchBoxTextChanged"
+                    GotFocus="OnControlsSearchBoxGotFocus">
                     <ui:AutoSuggestBox.QueryIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Search}" FontSize="12"/>
                     </ui:AutoSuggestBox.QueryIcon>
