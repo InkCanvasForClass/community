@@ -478,7 +478,7 @@ namespace Ink_Canvas.Windows.FeedbackPages
                 _page3.BtnUploadPastebin.Content = FeedbackStrings.Page3_Uploading;
 
                 string sanitizedJson = BuildSanitizedFeedbackJson();
-                string pasteUrl = await MicroBinClient.UploadRawAsync(serverUrl, sanitizedJson);
+                var (pasteUrl, error) = await MicroBinClient.UploadRawAsync(serverUrl, sanitizedJson);
 
                 if (!string.IsNullOrEmpty(pasteUrl))
                 {
@@ -489,12 +489,13 @@ namespace Ink_Canvas.Windows.FeedbackPages
                 else
                 {
                     _page3.BtnUploadPastebin.Content = FeedbackStrings.Page3_UploadFailed;
+                    LogHelper.WriteLogToFile($"Pastebin 上传失败: {error}", LogHelper.LogType.Error);
                 }
             }
             catch (Exception ex)
             {
                 _page3.BtnUploadPastebin.Content = FeedbackStrings.Page3_UploadFailed;
-                Debug.WriteLine($"Pastebin 上传失败: {ex.Message}");
+                LogHelper.WriteLogToFile($"Pastebin 上传异常: {ex}", LogHelper.LogType.Error);
             }
             finally
             {
