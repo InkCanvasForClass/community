@@ -1,6 +1,7 @@
 using Ink_Canvas.Helpers;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
@@ -16,6 +17,14 @@ namespace Ink_Canvas
     /// </summary>
     public partial class MainWindow
     {
+        // 防止同一命令在短时间内重复执行
+        private static readonly HashSet<string> _uriNonRepeatableCommands = new HashSet<string>
+        {
+            "restart", "restart/admin", "restart/normal", "exit", "quit"
+        };
+        private static readonly Dictionary<string, DateTime> _uriCommandLastExecuted = new Dictionary<string, DateTime>();
+        private static readonly TimeSpan _uriCommandDebounceWindow = TimeSpan.FromSeconds(3);
+
         public void HandleUriCommand(string uri)
         {
             try
@@ -35,6 +44,18 @@ namespace Ink_Canvas
 
                 string path = command;
                 string pathLower = path.ToLowerInvariant();
+
+                // 防止危险命令（restart/exit等）在短时间内重复执行
+                if (_uriNonRepeatableCommands.Contains(pathLower))
+                {
+                    if (_uriCommandLastExecuted.TryGetValue(pathLower, out DateTime lastTime)
+                        && DateTime.Now - lastTime < _uriCommandDebounceWindow)
+                    {
+                        LogHelper.WriteLogToFile($"URI 命令被去重过滤（{DateTime.Now - lastTime} 内重复）: {pathLower}", LogHelper.LogType.Warning);
+                        return;
+                    }
+                    _uriCommandLastExecuted[pathLower] = DateTime.Now;
+                }
 
                 switch (pathLower)
                 {

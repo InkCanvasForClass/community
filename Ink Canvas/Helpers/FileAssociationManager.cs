@@ -415,6 +415,34 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
+        /// 清理可能残留的旧 IPC 文件，防止重启后重复执行上次未处理的命令
+        /// </summary>
+        private static void CleanupStaleIpcFiles()
+        {
+            try
+            {
+                string tempDir = Path.GetTempPath();
+                string[] prefixes = { IpcFilePrefix, IpcBoardModePrefix, IpcShowModePrefix, IpcUriCommandPrefix };
+                int cleaned = 0;
+                foreach (string prefix in prefixes)
+                {
+                    string[] files = Directory.GetFiles(tempDir, prefix + "*.tmp");
+                    foreach (string file in files)
+                    {
+                        try { File.Delete(file); cleaned++; }
+                        catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+                    }
+                }
+                if (cleaned > 0)
+                    LogHelper.WriteLogToFile($"IPC 启动清理：删除了 {cleaned} 个残留 IPC 文件", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"IPC 启动清理失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        /// <summary>
         /// 启动IPC监听器，等待其他实例发送文件路径
         /// </summary>
         public static void StartIpcListener()
@@ -427,8 +455,14 @@ namespace Ink_Canvas.Helpers
                     {
                         LogHelper.WriteLogToFile("启动IPC监听器", LogHelper.LogType.Event);
 
+                        // 启动前清理旧的 IPC 文件，防止重启后重复执行上次的命令
+                        CleanupStaleIpcFiles();
+
                         using (EventWaitHandle ipcEvent = new EventWaitHandle(false, EventResetMode.ManualReset, IpcEventName))
                         {
+                            // 重置事件，清除可能残留的信号
+                            ipcEvent.Reset();
+
                             while (true)
                             {
                                 // 等待IPC事件
