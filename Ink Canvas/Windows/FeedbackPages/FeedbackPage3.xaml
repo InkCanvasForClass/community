@@ -15,10 +15,10 @@
             <TextBlock FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10"
                        Text="{x:Static props:FeedbackStrings.Page3Title}"/>
 
+            <!-- Pastebin 上传：POST 脱敏 JSON 到 pastebin 端 -->
             <ui:SettingsExpander x:Name="ExpanderPastebin"
                              Header="{x:Static props:FeedbackStrings.Page3_PastebinUpload}"
-                             Description="{x:Static props:FeedbackStrings.Page3_PastebinUploadDesc}"
-                             Visibility="Collapsed">
+                             Description="{x:Static props:FeedbackStrings.Page3_PastebinUploadDesc}">
                 <ui:SettingsExpander.HeaderIcon>
                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}"/>
                 </ui:SettingsExpander.HeaderIcon>
@@ -29,17 +29,34 @@
                     </Button.Style>
                 </Button>
                 <ui:SettingsExpander.Items>
-                    <ui:SettingsCard x:Name="CardCopyPastebinUrl"
-                                     Header="{x:Static props:FeedbackStrings.Page3_CopyPastebinUrl}"
-                                     IsClickEnabled="True"
+                    <ui:SettingsCard ContentAlignment="Left">
+                        <ikw:SimpleStackPanel Spacing="8" MinWidth="280">
+                            <TextBlock Text="{x:Static props:FeedbackStrings.Page1_PastebinServer}"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                            <TextBox x:Name="TextBoxPastebinUrl"
+                                     VerticalAlignment="Center"
+                                     FontFamily="Consolas"
+                                     FontSize="12"/>
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+                    <ui:SettingsCard x:Name="CardPasteResult"
+                                     Header=""
                                      Visibility="Collapsed">
-                        <ui:SettingsCard.ActionIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Copy}"/>
-                        </ui:SettingsCard.ActionIcon>
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}"/>
+                        </ui:SettingsCard.HeaderIcon>
+                        <Button x:Name="BtnCopyPasteUrl"
+                                Content="{x:Static props:FeedbackStrings.Page3_CopyPastebinUrl}">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}"/>
+                            </Button.Style>
+                        </Button>
                     </ui:SettingsCard>
                 </ui:SettingsExpander.Items>
             </ui:SettingsExpander>
 
+            <!-- GitHub 反馈 -->
             <ui:SettingsExpander x:Name="ExpanderGitHubFeedback"
                              Header="{x:Static props:FeedbackStrings.Page3_GitHub}"
                              Description="{x:Static props:FeedbackStrings.Page3_GitHubDesc}">
@@ -63,6 +80,7 @@
                 </ui:SettingsExpander.Items>
             </ui:SettingsExpander>
 
+            <!-- Markdown 模板 -->
             <ui:SettingsExpander x:Name="ExpanderMarkdownTemplate"
                              Header="{x:Static props:FeedbackStrings.Page3_Markdown}"
                              Description="{x:Static props:FeedbackStrings.Page3_MarkdownDesc}">

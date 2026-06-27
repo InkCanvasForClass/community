@@ -24,7 +24,6 @@ namespace Ink_Canvas.Windows.FeedbackPages
         private string _deviceId = "";
         private string _pptLinkageSettings = "";
         private string _inkRecognitionSettings = "";
-        private string _pastebinUrl = "";
 
         private FeedbackPage1 _page1;
         private FeedbackPage2 _page2;
@@ -41,7 +40,7 @@ namespace Ink_Canvas.Windows.FeedbackPages
             _page3.CardCopyIssueUrlClick += CardCopyIssueUrl_Click;
             _page3.BtnCopyMarkdownClick += BtnCopyMarkdown_Click;
             _page3.BtnUploadPastebinClick += BtnUploadPastebin_Click;
-            _page3.CardCopyPastebinUrlClick += CardCopyPastebinUrl_Click;
+            _page3.BtnCopyPasteUrlClick += BtnCopyPasteUrl_Click;
 
             ContentFrame.Navigated += ContentFrame_Navigated;
             LoadInformation();
@@ -180,15 +179,6 @@ namespace Ink_Canvas.Windows.FeedbackPages
         private void ButtonConfirm_Click(object sender, RoutedEventArgs e)
         {
             GenerateMarkdownTemplate();
-
-            // 根据是否配置了 pastebin 服务器来显示/隐藏 pastebin 区域
-            string serverUrl = _page1.TextBoxPastebinUrl.Text?.Trim();
-            _page3.ExpanderPastebin.Visibility = string.IsNullOrWhiteSpace(serverUrl)
-                ? Visibility.Collapsed
-                : Visibility.Visible;
-            _page3.CardCopyPastebinUrl.Visibility = Visibility.Collapsed;
-            _pastebinUrl = "";
-
             ContentFrame.Navigate(_page3);
             UpdateButtonVisibility();
         }
@@ -470,14 +460,13 @@ namespace Ink_Canvas.Windows.FeedbackPages
         }
 
         /// <summary>
-        /// 上传脱敏后的数据到 pastebin。
+        /// 上传脱敏后的数据到 pastebin。从 Page3 读取服务器地址，直接 POST JSON。
         /// </summary>
         private async void BtnUploadPastebin_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                // 从 Page1 读取 pastebin 服务器地址
-                string serverUrl = _page1.TextBoxPastebinUrl.Text?.Trim();
+                string serverUrl = _page3.PastebinUrl;
 
                 if (string.IsNullOrWhiteSpace(serverUrl))
                 {
@@ -493,13 +482,9 @@ namespace Ink_Canvas.Windows.FeedbackPages
 
                 if (!string.IsNullOrEmpty(pasteUrl))
                 {
-                    _pastebinUrl = pasteUrl;
                     _page3.BtnUploadPastebin.Content = FeedbackStrings.Page3_UploadSuccess;
-                    _page3.CardCopyPastebinUrl.Header = pasteUrl;
-                    _page3.CardCopyPastebinUrl.Visibility = Visibility.Visible;
-
-                    // 将 pastebin 链接也拼入 GitHub Issue URL
-                    UpdateGitHubIssueUrlWithPastebin();
+                    _page3.CardPasteResult.Header = pasteUrl;
+                    _page3.CardPasteResult.Visibility = Visibility.Visible;
                 }
                 else
                 {
@@ -517,29 +502,21 @@ namespace Ink_Canvas.Windows.FeedbackPages
             }
         }
 
-        private void CardCopyPastebinUrl_Click(object sender, RoutedEventArgs e)
+        private void BtnCopyPasteUrl_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                if (!string.IsNullOrEmpty(_pastebinUrl))
+                string url = _page3.CardPasteResult.Header?.ToString();
+                if (!string.IsNullOrEmpty(url))
                 {
-                    Clipboard.SetText(_pastebinUrl);
-                    _page3.CardCopyPastebinUrl.Header = FeedbackStrings.Page3_Copied;
+                    Clipboard.SetText(url);
+                    _page3.BtnCopyPasteUrl.Content = FeedbackStrings.Page3_Copied;
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"复制 Pastebin 链接失败: {ex.Message}");
             }
-        }
-
-        /// <summary>
-        /// 将 pastebin 链接加入 GitHub Issue URL 参数。
-        /// </summary>
-        private void UpdateGitHubIssueUrlWithPastebin()
-        {
-            // pastebin 链接已包含在生成的 markdown 中
-            // 无需额外操作，GitHub Issue URL 的 extra 参数已包含完整信息
         }
     }
 }
