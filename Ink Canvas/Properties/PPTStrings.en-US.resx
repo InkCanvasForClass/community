@@ -288,4 +288,10 @@
   <data name="PPT_SlidesNotFound" xml:space="preserve">
     <value>Slides not found</value>
   </data>
+  <data name="MediaPassthrough" xml:space="preserve">
+    <value>PPT media control smart passthrough</value>
+  </data>
+  <data name="MediaPassthroughHint" xml:space="preserve">
+    <value>Auto-detect video/audio controls in PPT slides and pass through clicks to operate them directly (Agent mode only)</value>
+  </data>
 </root>
