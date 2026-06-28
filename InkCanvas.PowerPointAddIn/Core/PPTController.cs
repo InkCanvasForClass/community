@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using InkCanvasPPTAgent.Contracts;
 using Newtonsoft.Json;
@@ -8,6 +10,20 @@ namespace InkCanvas.PowerPointAddIn.Core
 {
     public sealed class PPTController
     {
+        [DllImport("user32.dll")]
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+        [DllImport("user32.dll")]
+        private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+        [DllImport("user32.dll")]
+        private static extern uint GetDpiForWindow(IntPtr hWnd);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RECT
+        {
+            public int Left, Top, Right, Bottom;
+        }
         private readonly Microsoft.Office.Interop.PowerPoint.Application _application;
         private SynchronizationContext _syncContext;
 
@@ -140,6 +156,111 @@ namespace InkCanvas.PowerPointAddIn.Core
             });
         }
 
+        public MediaRegionsResponse GetMediaRegions()
+        {
+            return Run(() =>
+            {
+                var response = new MediaRegionsResponse();
+
+                if (_application.SlideShowWindows.Count <= 0)
+                    return response;
+
+                var ssw = _application.SlideShowWindows[1];
+                var view = ssw.View;
+                if (view == null) return response;
+
+                response.SlideIndex = view.CurrentShowPosition;
+
+                var slide = view.Slide;
+                if (slide == null) return response;
+
+                // 通过 Win32 API 获取放映窗口的物理像素坐标和 DPI
+                IntPtr hwnd = FindWindow("screenClass", null);
+                response.SlideShowWindowHandle = hwnd.ToInt64();
+
+                double winLeft, winTop, winWidth, winHeight;
+                uint dpi = 96;
+                if (hwnd != IntPtr.Zero && GetWindowRect(hwnd, out RECT rect))
+                {
+                    winLeft = rect.Left;
+                    winTop = rect.Top;
+                    winWidth = rect.Right - rect.Left;
+                    winHeight = rect.Bottom - rect.Top;
+                    try { dpi = GetDpiForWindow(hwnd); } catch { dpi = 96; }
+                }
+                else
+                {
+                    // 回退：使用 COM 属性（单位为磅，需要 DPI 转换）
+                    double dpiFactor = 96.0 / 72.0; // 默认假设 100% DPI
+                    winLeft = ssw.Left * dpiFactor;
+                    winTop = ssw.Top * dpiFactor;
+                    winWidth = ssw.Width * dpiFactor;
+                    winHeight = ssw.Height * dpiFactor;
+                }
+
+                var pres = ssw.Presentation;
+                float slideWidth = pres.PageSetup.SlideWidth;   // 磅
+                float slideHeight = pres.PageSetup.SlideHeight; // 磅
+                response.SlideWidth = slideWidth;
+                response.SlideHeight = slideHeight;
+
+                // 直接返回 shape 的原始磅坐标，由主应用端做屏幕像素转换
+                foreach (Microsoft.Office.Interop.PowerPoint.Shape shape in slide.Shapes)
+                {
+                    if (!IsMediaShape(shape)) continue;
+
+                    try
+                    {
+                        var region = new MediaRegion
+                        {
+                            ScreenX = shape.Left,
+                            ScreenY = shape.Top,
+                            ScreenWidth = shape.Width,
+                            ScreenHeight = shape.Height,
+                            ShapeName = shape.Name,
+                            MediaType = (int)shape.MediaType
+                        };
+                        response.Regions.Add(region);
+                    }
+                    catch
+                    {
+                        // 部分 Shape 的属性可能不可访问，跳过
+                    }
+                }
+
+                return response;
+            }) ?? new MediaRegionsResponse();
+        }
+
+        private static bool IsMediaShape(Microsoft.Office.Interop.PowerPoint.Shape shape)
+        {
+            try
+            {
+                // msoMedia = 16
+                if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoMedia)
+                    return true;
+
+                // OLE 控件（ActiveX 媒体播放器等）
+                if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoOLEControlObject)
+                    return true;
+
+                // 嵌入式视频（旧版格式）
+                if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoEmbeddedOLEObject)
+                {
+                    try
+                    {
+                        if (shape.MediaType == Microsoft.Office.Interop.PowerPoint.PpMediaType.ppMediaTypeMovie ||
+                            shape.MediaType == Microsoft.Office.Interop.PowerPoint.PpMediaType.ppMediaTypeSound)
+                            return true;
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+
+            return false;
+        }
+
         private void CaptureSyncContext()
         {
             if (SynchronizationContext.Current != null)
@@ -151,6 +272,23 @@ namespace InkCanvas.PowerPointAddIn.Core
             if (_syncContext != null)
             {
                 bool result = false;
+                Exception captured = null;
+                _syncContext.Send(_ =>
+                {
+                    try { result = action(); }
+                    catch (Exception ex) { captured = ex; }
+                }, null);
+                if (captured != null) throw captured;
+                return result;
+            }
+            return action.Invoke();
+        }
+
+        private T Run<T>(Func<T> action)
+        {
+            if (_syncContext != null)
+            {
+                T result = default;
                 Exception captured = null;
                 _syncContext.Send(_ =>
                 {

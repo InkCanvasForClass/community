@@ -30,6 +30,9 @@ namespace Ink_Canvas
     {
         #region Win32 API Declarations
         [DllImport("user32.dll")]
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+        [DllImport("user32.dll")]
         private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
         [DllImport("user32.dll")]
@@ -195,6 +198,21 @@ namespace Ink_Canvas
         /// PowerPoint 全屏放映顶层窗口类名（与编辑态 PPTFrameClass 区分）。
         /// </summary>
         private const string PowerPointSlideShowWindowClassName = "screenClass";
+
+        // 媒体穿透区域
+        /// <summary>
+        /// 当前幻灯片中的媒体控件屏幕区域列表，用于点击穿透判断。
+        /// </summary>
+        private List<MediaRegion> _mediaPassthroughRegions;
+
+        /// <summary>
+        /// 当前缓存的媒体区域对应的幻灯片页码，避免重复查询。
+        /// </summary>
+        private int _mediaRegionsSlideIndex = -1;
+
+        /// <summary>VSTO 返回的幻灯片尺寸（磅）和放映窗口句柄，用于主应用端坐标转换。</summary>
+        private float _mediaSlideWidth, _mediaSlideHeight;
+        private IntPtr _mediaSlideShowHwnd;
 
         #endregion
 
@@ -1367,6 +1385,17 @@ namespace Ink_Canvas
                     CheckMainWindowVisibility();
                 });
 
+                // 刷新媒体穿透区域
+                if (Settings.PowerPointSettings.EnableMediaPassthrough)
+                {
+                    System.Diagnostics.Debug.WriteLine("[MediaPassthrough] SlideShowBegin, refreshing regions...");
+                    RefreshMediaPassthroughRegions();
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("[MediaPassthrough] Feature disabled (EnableMediaPassthrough=false)");
+                }
+
                 if (!isFloatingBarFolded)
                 {
                     new Thread(() =>
@@ -1503,13 +1532,160 @@ namespace Ink_Canvas
                 });
                 _previousSlideID = currentSlide;
 
+                // 刷新媒体穿透区域（切片时媒体控件可能变化）
+                if (Settings.PowerPointSettings.EnableMediaPassthrough)
+                    RefreshMediaPassthroughRegions();
+
                 // 转发PPT翻页事件到小白板（如果已打开且启用了联动）
                 _miniWhiteboardWindow?.OnPPTSlideChangedExternal(currentSlide - 1);
+
+                // 刷新媒体穿透区域
+                Application.Current.Dispatcher.InvokeAsync(() => RefreshMediaPassthroughRegions());
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"处理幻灯片切换事件失败: {ex}", LogHelper.LogType.Error);
             }
+        }
+
+        /// <summary>
+        /// 从 PPT Agent 获取当前幻灯片的媒体控件区域，缓存后用于点击穿透判断。
+        /// </summary>
+        private void RefreshMediaPassthroughRegions()
+        {
+            try
+            {
+                if (!Settings.PowerPointSettings.EnableMediaPassthrough)
+                {
+                    _mediaPassthroughRegions = null;
+                    _mediaRegionsSlideIndex = -1;
+                    LogHelper.WriteLogToFile("[MediaPassthrough] 功能未开启", LogHelper.LogType.Info);
+                    return;
+                }
+
+                LogHelper.WriteLogToFile($"[MediaPassthrough] 开始刷新, PPTLinkMode={Settings.PowerPointSettings.PPTLinkMode}, Manager={_pptManager?.GetType().Name}", LogHelper.LogType.Info);
+
+                if (_pptManager is PPTAgentLinkManager agentManager)
+                {
+                    var response = agentManager.GetMediaRegions();
+                    if (response?.Regions != null && response.Regions.Count > 0)
+                    {
+                        _mediaPassthroughRegions = response.Regions;
+                        _mediaRegionsSlideIndex = response.SlideIndex;
+                        _mediaSlideWidth = response.SlideWidth;
+                        _mediaSlideHeight = response.SlideHeight;
+                        _mediaSlideShowHwnd = new IntPtr(response.SlideShowWindowHandle);
+                        LogHelper.WriteLogToFile($"[MediaPassthrough] 加载了 {_mediaPassthroughRegions.Count} 个区域, 第 {_mediaRegionsSlideIndex} 页, Slide={_mediaSlideWidth}x{_mediaSlideHeight}磅, Hwnd=0x{_mediaSlideShowHwnd.ToInt64():X}", LogHelper.LogType.Info);
+                        for (int i = 0; i < _mediaPassthroughRegions.Count; i++)
+                        {
+                            var r = _mediaPassthroughRegions[i];
+                            LogHelper.WriteLogToFile($"  区域[{i}]: ({r.ScreenX:F1},{r.ScreenY:F1}) {r.ScreenWidth:F1}x{r.ScreenHeight:F1}磅 Shape={r.ShapeName}", LogHelper.LogType.Info);
+                        }
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile("[MediaPassthrough] VSTO 返回空区域列表", LogHelper.LogType.Info);
+                        _mediaPassthroughRegions = null;
+                    }
+                }
+                else
+                {
+                    // COM/ROT 模式：尝试直接通过 COM interop 获取媒体区域
+                    LogHelper.WriteLogToFile("[MediaPassthrough] 非 Agent 模式，尝试 COM 直接获取", LogHelper.LogType.Info);
+                    _mediaPassthroughRegions = GetMediaRegionsViaCom();
+                    _mediaRegionsSlideIndex = _currentSlideShowPosition;
+                    if (_mediaPassthroughRegions != null)
+                        LogHelper.WriteLogToFile($"[MediaPassthrough] COM 获取到 {_mediaPassthroughRegions.Count} 个区域", LogHelper.LogType.Info);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[MediaPassthrough] 刷新失败: {ex}", LogHelper.LogType.Warning);
+                _mediaPassthroughRegions = null;
+            }
+
+            // 将屏幕坐标转换为 WPF 窗口坐标（必须在 UI 线程执行）
+            Application.Current.Dispatcher.Invoke(() => BuildMediaPassthroughRects());
+        }
+
+        /// <summary>
+        /// 通过 COM interop 直接从 PowerPoint 获取媒体控件区域（适用于 COM/ROT 模式）。
+        /// </summary>
+        private List<MediaRegion> GetMediaRegionsViaCom()
+        {
+            try
+            {
+                var app = pptApplication;
+                if (app == null) return null;
+
+                Presentation pres = null;
+                try { pres = app.ActivePresentation; } catch { return null; }
+                if (pres == null) return null;
+
+                SlideShowWindow ssw = null;
+                try { ssw = pres.SlideShowWindow; } catch { return null; }
+                if (ssw == null) return null;
+
+                var view = ssw.View;
+                if (view == null) return null;
+
+                var slide = view.Slide;
+                if (slide == null) return null;
+
+                float slideWidth = pres.PageSetup.SlideWidth;
+                float slideHeight = pres.PageSetup.SlideHeight;
+
+                // 返回原始磅值，由 BuildMediaPassthroughRects 做屏幕像素转换
+                _mediaSlideWidth = slideWidth;
+                _mediaSlideHeight = slideHeight;
+                _mediaSlideShowHwnd = FindWindow(PowerPointSlideShowWindowClassName, null);
+
+                var regions = new List<MediaRegion>();
+                foreach (Microsoft.Office.Interop.PowerPoint.Shape shape in slide.Shapes)
+                {
+                    if (!IsMediaShape(shape)) continue;
+                    try
+                    {
+                        regions.Add(new MediaRegion
+                        {
+                            ScreenX = shape.Left,
+                            ScreenY = shape.Top,
+                            ScreenWidth = shape.Width,
+                            ScreenHeight = shape.Height,
+                            ShapeName = shape.Name,
+                            MediaType = (int)shape.MediaType
+                        });
+                    }
+                    catch { }
+                }
+                return regions;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[MediaPassthrough] COM 获取失败: {ex.Message}", LogHelper.LogType.Warning);
+                return null;
+            }
+        }
+
+        private static bool IsMediaShape(Microsoft.Office.Interop.PowerPoint.Shape shape)
+        {
+            try
+            {
+                if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoMedia) return true;
+                if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoOLEControlObject) return true;
+                if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoEmbeddedOLEObject)
+                {
+                    try
+                    {
+                        if (shape.MediaType == Microsoft.Office.Interop.PowerPoint.PpMediaType.ppMediaTypeMovie ||
+                            shape.MediaType == Microsoft.Office.Interop.PowerPoint.PpMediaType.ppMediaTypeSound)
+                            return true;
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+            return false;
         }
 
         /// <summary>
@@ -1531,6 +1707,10 @@ namespace Ink_Canvas
 
                 if (isEnteredSlideShowEndEvent) return;
                 isEnteredSlideShowEndEvent = true;
+
+                // 清除媒体穿透区域
+                _mediaPassthroughRegions = null;
+                _mediaRegionsSlideIndex = -1;
 
                 // 获取当前播放页码，优先使用跟踪的页码，否则尝试从PPT管理器获取
                 int currentPage = _currentSlideShowPosition;

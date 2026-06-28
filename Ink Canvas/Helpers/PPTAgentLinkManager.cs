@@ -104,6 +104,12 @@ namespace Ink_Canvas.Helpers
                 .ToList();
         }
 
+        public MediaRegionsResponse GetMediaRegions()
+        {
+            return _client?.SendRequest<MediaRegionsResponse>(PPTCommands.GetMediaRegions)
+                   ?? new MediaRegionsResponse();
+        }
+
         private bool Send(string command, object data = null)
         {
             var result = _client?.SendCommand(command, data) == true;

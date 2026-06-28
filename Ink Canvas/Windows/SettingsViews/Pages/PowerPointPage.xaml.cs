@@ -45,6 +45,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdatePPTArchitectureDependentCards();
 
             CardShowCanvasAtNewSlideShow.IsOn = ppt.IsShowCanvasAtNewSlideShow;
+            CardEnableMediaPassthrough.IsOn = ppt.EnableMediaPassthrough;
 
             CardEnableTwoFingerGestureInPresentationMode.IsOn = ppt.IsEnableTwoFingerGestureInPresentationMode;
             CardEnableFingerGestureSlideShowControl.IsOn = ppt.IsEnableFingerGestureSlideShowControl;
@@ -81,10 +82,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void UpdatePPTArchitectureDependentCards()
         {
             bool isComArchitecture = SettingsManager.Settings.PowerPointSettings.PPTLinkMode == PPTLinkMode.Com;
+            bool isAgentArchitecture = SettingsManager.Settings.PowerPointSettings.PPTLinkMode == PPTLinkMode.Agent;
             var visibility = isComArchitecture ? Visibility.Visible : Visibility.Collapsed;
             CardPowerPointEnhancement.Visibility = visibility;
             CardSupportWPS.Visibility = visibility;
             CardEnableWppProcessKill.Visibility = visibility;
+            CardEnableMediaPassthrough.Visibility = isAgentArchitecture ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void ToggleSwitchSupportPowerPoint_Toggled(object sender, RoutedEventArgs e)
@@ -184,6 +187,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.PowerPointSettings.IsShowCanvasAtNewSlideShow = CardShowCanvasAtNewSlideShow.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchEnableMediaPassthrough_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.PowerPointSettings.EnableMediaPassthrough = CardEnableMediaPassthrough.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 

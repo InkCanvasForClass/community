@@ -303,4 +303,10 @@
   <data name="PPT_SlidesNotFound" xml:space="preserve">
     <value>幻灯片呢？找不到啊！</value>
   </data>
+  <data name="MediaPassthrough" xml:space="preserve">
+    <value>PPT 媒体控件智慧穿透</value>
+  </data>
+  <data name="MediaPassthroughHint" xml:space="preserve">
+    <value>自动检测 PPT 中的视频/音频控件区域，点击时穿透画布直接操作媒体控件（仅 Agent 模式可用）</value>
+  </data>
 </root>
