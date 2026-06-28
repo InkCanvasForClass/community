@@ -110,7 +110,7 @@ jobs:
             if ("${{ github.event_name }}" -eq "workflow_dispatch") {
               exit 1
             }
-          fi
+          }
 
       - name: Create Package (if build succeeded)
         id: create-archive
