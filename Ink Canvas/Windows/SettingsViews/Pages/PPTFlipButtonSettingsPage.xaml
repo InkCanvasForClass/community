@@ -96,10 +96,25 @@
                     <TextBlock Text="{x:Static props:PPTStrings.FlipButtonsTitle}"
                                FontSize="20" FontWeight="SemiBold" Margin="1,12,0,12"/>
 
-                    <controls:LabeledSettingsCard x:Name="CardShowPPTButton"
+                    <controls:LabeledSettingsCard x:Name="CardShowPPTButton" d:IsOn="True"
                             Header="{x:Static props:PPTStrings.ShowFlipButtons}"
                             Icon="{x:Static ui:SegoeFluentIcons.ShowResults}"
                             Toggled="ToggleSwitchShowPPTButton_OnToggled"/>
+
+                    <!-- 位置选择 ComboBox -->
+                    <ui:SettingsCard x:Name="CardSelectPosition"
+                            Header="{x:Static props:PPTStrings.Positions}"
+                            Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.GridView}"/>
+                        </ui:SettingsCard.HeaderIcon>
+                        <ComboBox x:Name="ComboBoxPosition" SelectionChanged="ComboBoxPosition_SelectionChanged" MinWidth="120">
+                            <ComboBoxItem Content="{x:Static props:PPTStrings.Position_Left}" Tag="LeftSide"/>
+                            <ComboBoxItem Content="{x:Static props:PPTStrings.Position_Right}" Tag="RightSide"/>
+                            <ComboBoxItem Content="{x:Static props:PPTStrings.Position_LeftBottom}" Tag="LeftBottom"/>
+                            <ComboBoxItem Content="{x:Static props:PPTStrings.Position_RightBottom}" Tag="RightBottom"/>
+                        </ComboBox>
+                    </ui:SettingsCard>
 
                     <!-- 当前选中位置的设置面板 -->
                     <TextBlock x:Name="SelectedPositionTitle"

@@ -12,6 +12,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
     public partial class PPTFlipButtonSettingsPage : Page
     {
         private bool _isLoaded = false;
+        private bool _isSyncingPosition = false;
         private DelayAction _sliderDelayAction = new DelayAction();
         private PPTNavBar.NavDirection _selectedDirection = PPTNavBar.NavDirection.LeftSide;
         private iNKORE.UI.WPF.Modern.Controls.NavigationView _cachedNavigationView;
@@ -159,6 +160,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             _selectedDirection = direction;
 
+            // 同步 ComboBox 选中项
+            _isSyncingPosition = true;
+            ComboBoxPosition.SelectedIndex = direction switch
+            {
+                PPTNavBar.NavDirection.LeftSide => 0,
+                PPTNavBar.NavDirection.RightSide => 1,
+                PPTNavBar.NavDirection.LeftBottom => 2,
+                PPTNavBar.NavDirection.RightBottom => 3,
+                _ => 0
+            };
+            _isSyncingPosition = false;
+
             string title = direction switch
             {
                 PPTNavBar.NavDirection.LeftSide => Properties.PPTStrings.Position_Left,
@@ -278,6 +291,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void PreviewRB_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             SelectPosition(PPTNavBar.NavDirection.RightBottom);
+        }
+
+        private void ComboBoxPosition_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded || _isSyncingPosition) return;
+            var item = ComboBoxPosition.SelectedItem as ComboBoxItem;
+            if (item?.Tag == null) return;
+            if (Enum.TryParse<PPTNavBar.NavDirection>(item.Tag.ToString(), out var dir))
+            {
+                SelectPosition(dir);
+            }
         }
 
         #endregion
