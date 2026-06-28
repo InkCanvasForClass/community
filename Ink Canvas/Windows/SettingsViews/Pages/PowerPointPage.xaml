@@ -79,19 +79,12 @@
 
                 <!-- 翻页按钮入口：点击跳转到翻页按钮设置子页面 -->
                 <ui:SettingsCard Header="{x:Static props:PPTStrings.FlipButtonsTitle}"
-                                 Description="{x:Static props:PPTStrings.FlipButtonsSettingHint}">
+                                 Description="{x:Static props:PPTStrings.FlipButtonsSettingHint}"
+                                 IsClickEnabled="True"
+                                 Click="GoToFlipButtonSettingsButton_Click">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"/>
                     </ui:SettingsCard.HeaderIcon>
-                    <Button x:Name="GoToFlipButtonSettingsButton"
-                            Click="GoToFlipButtonSettingsButton_Click">
-                        <Button.Content>
-                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Text="{x:Static props:PPTStrings.Configure}"/>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronRight}"/>
-                            </ikw:SimpleStackPanel>
-                        </Button.Content>
-                    </Button>
                 </ui:SettingsCard>
 
                 <TextBlock Text="{x:Static props:PPTStrings.EnterAnnotationOnShow}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
