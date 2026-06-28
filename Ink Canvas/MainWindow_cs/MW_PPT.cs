@@ -314,6 +314,7 @@ namespace Ink_Canvas
 
                 // 初始化UI管理器
                 _pptUIManager = new PPTUIManager(this);
+                Settings.PowerPointSettings.MigrateLegacyButtonOptions();
                 _pptUIManager.ShowPPTButton = Settings.PowerPointSettings.ShowPPTButton;
                 _pptUIManager.PPTButtonsDisplayOption = Settings.PowerPointSettings.PPTButtonsDisplayOption;
                 _pptUIManager.PPTSButtonsOption = Settings.PowerPointSettings.PPTSButtonsOption;
@@ -324,6 +325,19 @@ namespace Ink_Canvas
                 _pptUIManager.PPTRBButtonPosition = Settings.PowerPointSettings.PPTRBButtonPosition;
                 _pptUIManager.EnablePPTButtonPageClickable = Settings.PowerPointSettings.EnablePPTButtonPageClickable;
                 _pptUIManager.EnablePPTButtonLongPressPageTurn = Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn;
+                _pptUIManager.PPTLSButtonOpacity = Settings.PowerPointSettings.PPTLSButtonOpacity;
+                _pptUIManager.PPTRSButtonOpacity = Settings.PowerPointSettings.PPTRSButtonOpacity;
+                _pptUIManager.PPTLBButtonOpacity = Settings.PowerPointSettings.PPTLBButtonOpacity;
+                _pptUIManager.PPTRBButtonOpacity = Settings.PowerPointSettings.PPTRBButtonOpacity;
+                _pptUIManager.PPTLSButtonShowPageNumber = Settings.PowerPointSettings.PPTLSButtonShowPageNumber;
+                _pptUIManager.PPTRSButtonShowPageNumber = Settings.PowerPointSettings.PPTRSButtonShowPageNumber;
+                _pptUIManager.PPTLBButtonShowPageNumber = Settings.PowerPointSettings.PPTLBButtonShowPageNumber;
+                _pptUIManager.PPTRBButtonShowPageNumber = Settings.PowerPointSettings.PPTRBButtonShowPageNumber;
+                _pptUIManager.PPTLSButtonBlackBackground = Settings.PowerPointSettings.PPTLSButtonBlackBackground;
+                _pptUIManager.PPTRSButtonBlackBackground = Settings.PowerPointSettings.PPTRSButtonBlackBackground;
+                _pptUIManager.PPTLBButtonBlackBackground = Settings.PowerPointSettings.PPTLBButtonBlackBackground;
+                _pptUIManager.PPTRBButtonBlackBackground = Settings.PowerPointSettings.PPTRBButtonBlackBackground;
+                _pptUIManager.PPTNavBarScale = Settings.PowerPointSettings.PPTNavBarScale;
 
                 LogHelper.WriteLogToFile("PPT管理器初始化完成", LogHelper.LogType.Event);
             }

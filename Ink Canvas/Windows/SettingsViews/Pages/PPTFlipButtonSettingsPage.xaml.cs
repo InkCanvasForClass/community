@@ -29,10 +29,23 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void PPTFlipButtonSettingsPage_Loaded(object sender, RoutedEventArgs e)
         {
             LoadSettings();
+
+            // 先同步 ComboBox 选中项（不触发 SelectionChanged），再显示设置面板
+            _isSyncingPosition = true;
+            ComboBoxPosition.SelectedIndex = _selectedDirection switch
+            {
+                PPTNavBar.NavDirection.LeftSide => 0,
+                PPTNavBar.NavDirection.RightSide => 1,
+                PPTNavBar.NavDirection.LeftBottom => 2,
+                PPTNavBar.NavDirection.RightBottom => 3,
+                _ => 0
+            };
+            _isSyncingPosition = false;
+            SelectPosition(_selectedDirection);
+
             _isLoaded = true;
             UpdateAllSliderTexts();
             UpdatePreview();
-            SelectPosition(_selectedDirection);
             SliderTouchHelper.AddTouchSupportToAllSliders(this);
 
             // 进入本页时把导航栏切到 LeftMinimal，给预览更多空间
@@ -87,6 +100,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardEnablePPTButtonLongPressPageTurn.IsOn = ppt.EnablePPTButtonLongPressPageTurn;
 
             _isLoaded = true;
+
+            UpdatePreview();
         }
 
         private void UpdateAllSliderTexts()
@@ -107,15 +122,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         public void UpdatePreview()
         {
             var ppt = SettingsManager.Settings.PowerPointSettings;
-            var displayOpt = ppt.PPTButtonsDisplayOption.ToString();
+            var displayOpt = ppt.GetPPTButtonsDisplayOptionString();
 
-            UpdatePreviewNavBar(PreviewLS, PreviewLSBorder, displayOpt, 2, ppt.PPTLSButtonPosition, ppt.PPTLSButtonOpacity, ppt.PPTSButtonsOption.ToString());
-            UpdatePreviewNavBar(PreviewRS, PreviewRSBorder, displayOpt, 3, ppt.PPTRSButtonPosition, ppt.PPTRSButtonOpacity, ppt.PPTSButtonsOption.ToString());
-            UpdatePreviewNavBar(PreviewLB, PreviewLBBorder, displayOpt, 0, ppt.PPTLBButtonPosition, ppt.PPTLBButtonOpacity, ppt.PPTBButtonsOption.ToString());
-            UpdatePreviewNavBar(PreviewRB, PreviewRBBorder, displayOpt, 1, ppt.PPTRBButtonPosition, ppt.PPTRBButtonOpacity, ppt.PPTBButtonsOption.ToString());
+            UpdatePreviewNavBar(PreviewLS, PreviewLSBorder, displayOpt, 2, ppt.PPTLSButtonPosition, ppt.PPTLSButtonOpacity, ppt.PPTLSButtonShowPageNumber, ppt.PPTLSButtonBlackBackground);
+            UpdatePreviewNavBar(PreviewRS, PreviewRSBorder, displayOpt, 3, ppt.PPTRSButtonPosition, ppt.PPTRSButtonOpacity, ppt.PPTRSButtonShowPageNumber, ppt.PPTRSButtonBlackBackground);
+            UpdatePreviewNavBar(PreviewLB, PreviewLBBorder, displayOpt, 0, ppt.PPTLBButtonPosition, ppt.PPTLBButtonOpacity, ppt.PPTLBButtonShowPageNumber, ppt.PPTLBButtonBlackBackground);
+            UpdatePreviewNavBar(PreviewRB, PreviewRBBorder, displayOpt, 1, ppt.PPTRBButtonPosition, ppt.PPTRBButtonOpacity, ppt.PPTRBButtonShowPageNumber, ppt.PPTRBButtonBlackBackground);
         }
 
-        private void UpdatePreviewNavBar(PPTNavBar navBar, Border border, string displayOpt, int index, int offset, double opacity, string groupOpt)
+        private void UpdatePreviewNavBar(PPTNavBar navBar, Border border, string displayOpt, int index, int offset, double opacity, bool showPageNumber, bool blackBackground)
         {
             bool isEnabled = displayOpt.Length > index && displayOpt[index] == '2';
             bool showTotal = CardShowPPTButton.IsOn && isEnabled;
@@ -128,7 +143,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             navBar.SetBarOpacity(opacity);
 
-            // 按 16:9 容器实际尺寸缩放 Margin（位置跟随 Image 缩放，但 Border 大小保持不变）
             double viewScale = (PreviewCanvas != null && PreviewCanvas.ActualWidth > 0) ? PreviewCanvas.ActualWidth / 1600.0 : 1.0;
 
             var direction = navBar.Direction;
@@ -149,28 +163,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 border.Margin = new Thickness(0, 0, (6 + offset) * viewScale, 6 * viewScale);
             }
 
-            bool showPage = groupOpt.Length > 0 && groupOpt[0] == '2';
-            navBar.PageButtonBorder.Visibility = showPage ? Visibility.Visible : Visibility.Collapsed;
-
-            bool isDark = groupOpt.Length > 2 && groupOpt[2] == '2';
-            navBar.ApplyTheme(isDark);
+            navBar.PageButtonBorder.Visibility = showPageNumber ? Visibility.Visible : Visibility.Collapsed;
+            navBar.ApplyTheme(blackBackground);
         }
 
         private void SelectPosition(PPTNavBar.NavDirection direction)
         {
             _selectedDirection = direction;
-
-            // 同步 ComboBox 选中项
-            _isSyncingPosition = true;
-            ComboBoxPosition.SelectedIndex = direction switch
-            {
-                PPTNavBar.NavDirection.LeftSide => 0,
-                PPTNavBar.NavDirection.RightSide => 1,
-                PPTNavBar.NavDirection.LeftBottom => 2,
-                PPTNavBar.NavDirection.RightBottom => 3,
-                _ => 0
-            };
-            _isSyncingPosition = false;
 
             string title = direction switch
             {
@@ -221,7 +220,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // Load current values
             _isLoaded = false;
             var ppt = SettingsManager.Settings.PowerPointSettings;
-            var displayOpt = ppt.PPTButtonsDisplayOption.ToString();
+            var displayOpt = ppt.GetPPTButtonsDisplayOptionString();
             int idx = GetDisplayOptionIndex(direction);
             CardEnablePositionButton.IsOn = displayOpt.Length > idx && displayOpt[idx] == '2';
 
@@ -243,14 +242,23 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 _ => 0.5
             };
 
-            string groupOpt;
-            if (IsSideButton(direction))
-                groupOpt = ppt.PPTSButtonsOption.ToString();
-            else
-                groupOpt = ppt.PPTBButtonsOption.ToString();
+            CheckboxShowPageNumber.IsChecked = direction switch
+            {
+                PPTNavBar.NavDirection.LeftSide => ppt.PPTLSButtonShowPageNumber,
+                PPTNavBar.NavDirection.RightSide => ppt.PPTRSButtonShowPageNumber,
+                PPTNavBar.NavDirection.LeftBottom => ppt.PPTLBButtonShowPageNumber,
+                PPTNavBar.NavDirection.RightBottom => ppt.PPTRBButtonShowPageNumber,
+                _ => false
+            };
 
-            CheckboxShowPageNumber.IsChecked = groupOpt.Length > 0 && groupOpt[0] == '2';
-            CheckboxBlackBackground.IsChecked = groupOpt.Length > 2 && groupOpt[2] == '2';
+            CheckboxBlackBackground.IsChecked = direction switch
+            {
+                PPTNavBar.NavDirection.LeftSide => ppt.PPTLSButtonBlackBackground,
+                PPTNavBar.NavDirection.RightSide => ppt.PPTRSButtonBlackBackground,
+                PPTNavBar.NavDirection.LeftBottom => ppt.PPTLBButtonBlackBackground,
+                PPTNavBar.NavDirection.RightBottom => ppt.PPTRBButtonBlackBackground,
+                _ => false
+            };
 
             UpdateAllSliderTexts();
             _isLoaded = true;
@@ -383,7 +391,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             var ppt = SettingsManager.Settings.PowerPointSettings;
-            var str = ppt.PPTButtonsDisplayOption.ToString();
+            var str = ppt.GetPPTButtonsDisplayOptionString();
             char[] c = str.ToCharArray();
             int idx = GetDisplayOptionIndex(_selectedDirection);
             if (idx < c.Length)
@@ -400,24 +408,24 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             var ppt = SettingsManager.Settings.PowerPointSettings;
-            if (IsSideButton(_selectedDirection))
+            bool val = CheckboxShowPageNumber.IsChecked == true;
+            string key = _selectedDirection switch
             {
-                var str = ppt.PPTSButtonsOption.ToString();
-                char[] c = str.ToCharArray();
-                c[0] = CheckboxShowPageNumber.IsChecked == true ? '2' : '1';
-                ppt.PPTSButtonsOption = int.Parse(new string(c));
-                SettingsManager.SaveSettingsToFile();
-                SettingsActionHub.OnPPTSButtonsOptionChanged();
-            }
-            else
+                PPTNavBar.NavDirection.LeftSide => "LS",
+                PPTNavBar.NavDirection.RightSide => "RS",
+                PPTNavBar.NavDirection.LeftBottom => "LB",
+                PPTNavBar.NavDirection.RightBottom => "RB",
+                _ => "LS"
+            };
+            switch (_selectedDirection)
             {
-                var str = ppt.PPTBButtonsOption.ToString();
-                char[] c = str.ToCharArray();
-                c[0] = CheckboxShowPageNumber.IsChecked == true ? '2' : '1';
-                ppt.PPTBButtonsOption = int.Parse(new string(c));
-                SettingsManager.SaveSettingsToFile();
-                SettingsActionHub.OnPPTBButtonsOptionChanged();
+                case PPTNavBar.NavDirection.LeftSide: ppt.PPTLSButtonShowPageNumber = val; break;
+                case PPTNavBar.NavDirection.RightSide: ppt.PPTRSButtonShowPageNumber = val; break;
+                case PPTNavBar.NavDirection.LeftBottom: ppt.PPTLBButtonShowPageNumber = val; break;
+                case PPTNavBar.NavDirection.RightBottom: ppt.PPTRBButtonShowPageNumber = val; break;
             }
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnPPTButtonShowPageNumberChanged(key, val);
             UpdatePreview();
         }
 
@@ -425,24 +433,24 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             var ppt = SettingsManager.Settings.PowerPointSettings;
-            if (IsSideButton(_selectedDirection))
+            bool val = CheckboxBlackBackground.IsChecked == true;
+            string key = _selectedDirection switch
             {
-                var str = ppt.PPTSButtonsOption.ToString();
-                char[] c = str.ToCharArray();
-                c[2] = CheckboxBlackBackground.IsChecked == true ? '2' : '1';
-                ppt.PPTSButtonsOption = int.Parse(new string(c));
-                SettingsManager.SaveSettingsToFile();
-                SettingsActionHub.OnPPTSButtonsOptionChanged();
-            }
-            else
+                PPTNavBar.NavDirection.LeftSide => "LS",
+                PPTNavBar.NavDirection.RightSide => "RS",
+                PPTNavBar.NavDirection.LeftBottom => "LB",
+                PPTNavBar.NavDirection.RightBottom => "RB",
+                _ => "LS"
+            };
+            switch (_selectedDirection)
             {
-                var str = ppt.PPTBButtonsOption.ToString();
-                char[] c = str.ToCharArray();
-                c[2] = CheckboxBlackBackground.IsChecked == true ? '2' : '1';
-                ppt.PPTBButtonsOption = int.Parse(new string(c));
-                SettingsManager.SaveSettingsToFile();
-                SettingsActionHub.OnPPTBButtonsOptionChanged();
+                case PPTNavBar.NavDirection.LeftSide: ppt.PPTLSButtonBlackBackground = val; break;
+                case PPTNavBar.NavDirection.RightSide: ppt.PPTRSButtonBlackBackground = val; break;
+                case PPTNavBar.NavDirection.LeftBottom: ppt.PPTLBButtonBlackBackground = val; break;
+                case PPTNavBar.NavDirection.RightBottom: ppt.PPTRBButtonBlackBackground = val; break;
             }
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnPPTButtonBlackBackgroundChanged(key, val);
             UpdatePreview();
         }
 

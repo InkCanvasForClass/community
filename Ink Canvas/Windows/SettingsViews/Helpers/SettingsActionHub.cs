@@ -635,6 +635,46 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             mw?.UpdatePPTBtnPreview();
         }
 
+        public static void OnPPTButtonShowPageNumberChanged(string buttonKey, bool value)
+        {
+            var mw = GetMainWindow();
+            if (mw?.PPTUIManager != null)
+            {
+                switch (buttonKey)
+                {
+                    case "LS": mw.PPTUIManager.PPTLSButtonShowPageNumber = value; break;
+                    case "RS": mw.PPTUIManager.PPTRSButtonShowPageNumber = value; break;
+                    case "LB": mw.PPTUIManager.PPTLBButtonShowPageNumber = value; break;
+                    case "RB": mw.PPTUIManager.PPTRBButtonShowPageNumber = value; break;
+                }
+                if (mw.IsInPPTPresentationMode)
+                {
+                    mw.PPTUIManager.UpdateNavigationButtonStyles();
+                }
+            }
+            mw?.UpdatePPTBtnPreview();
+        }
+
+        public static void OnPPTButtonBlackBackgroundChanged(string buttonKey, bool value)
+        {
+            var mw = GetMainWindow();
+            if (mw?.PPTUIManager != null)
+            {
+                switch (buttonKey)
+                {
+                    case "LS": mw.PPTUIManager.PPTLSButtonBlackBackground = value; break;
+                    case "RS": mw.PPTUIManager.PPTRSButtonBlackBackground = value; break;
+                    case "LB": mw.PPTUIManager.PPTLBButtonBlackBackground = value; break;
+                    case "RB": mw.PPTUIManager.PPTRBButtonBlackBackground = value; break;
+                }
+                if (mw.IsInPPTPresentationMode)
+                {
+                    mw.PPTUIManager.UpdateNavigationButtonStyles();
+                }
+            }
+            mw?.UpdatePPTBtnPreview();
+        }
+
         public static void OnPPTBButtonsOptionWithOpacityChanged()
         {
             var mw = GetMainWindow();

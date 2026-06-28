@@ -683,6 +683,30 @@ namespace Ink_Canvas
         [JsonProperty("pptBButtonsOption")]
         public int PPTBButtonsOption { get; set; } = 121;
 
+        [JsonProperty("pptLSButtonShowPageNumber")]
+        public bool PPTLSButtonShowPageNumber { get; set; } = true;
+
+        [JsonProperty("pptRSButtonShowPageNumber")]
+        public bool PPTRSButtonShowPageNumber { get; set; } = true;
+
+        [JsonProperty("pptLBButtonShowPageNumber")]
+        public bool PPTLBButtonShowPageNumber { get; set; } = false;
+
+        [JsonProperty("pptRBButtonShowPageNumber")]
+        public bool PPTRBButtonShowPageNumber { get; set; } = false;
+
+        [JsonProperty("pptLSButtonBlackBackground")]
+        public bool PPTLSButtonBlackBackground { get; set; } = false;
+
+        [JsonProperty("pptRSButtonBlackBackground")]
+        public bool PPTRSButtonBlackBackground { get; set; } = false;
+
+        [JsonProperty("pptLBButtonBlackBackground")]
+        public bool PPTLBButtonBlackBackground { get; set; } = false;
+
+        [JsonProperty("pptRBButtonBlackBackground")]
+        public bool PPTRBButtonBlackBackground { get; set; } = false;
+
         [JsonProperty("enablePPTButtonPageClickable")]
         public bool EnablePPTButtonPageClickable { get; set; } = true;
 
@@ -706,6 +730,86 @@ namespace Ink_Canvas
 
         [JsonProperty("pptNavBarScale")]
         public double PPTNavBarScale { get; set; } = 1.0;
+
+        private bool _hasMigratedButtonOptions = false;
+
+        public string GetPPTButtonsDisplayOptionString()
+        {
+            return PPTButtonsDisplayOption.ToString().PadLeft(4, '1');
+        }
+
+        public void MigrateLegacyButtonOptions()
+        {
+            if (_hasMigratedButtonOptions) return;
+            _hasMigratedButtonOptions = true;
+
+            bool changed = false;
+
+            var dispOpt = PPTButtonsDisplayOption.ToString();
+            if (dispOpt.Length < 4)
+            {
+                PPTButtonsDisplayOption = int.Parse(dispOpt.PadLeft(4, '1'));
+                changed = true;
+                dispOpt = PPTButtonsDisplayOption.ToString();
+            }
+
+            if (dispOpt.Length >= 4)
+            {
+                bool hasAnyEnabled = dispOpt[0] == '2' || dispOpt[1] == '2' || dispOpt[2] == '2' || dispOpt[3] == '2';
+                if (!hasAnyEnabled)
+                {
+                    PPTButtonsDisplayOption = 2222;
+                    changed = true;
+                }
+            }
+
+            var sideOpt = PPTSButtonsOption.ToString();
+            if (sideOpt.Length >= 3)
+            {
+                bool sideShowPage = sideOpt[0] == '2';
+                bool sideBlackBg = sideOpt[2] == '2';
+                if (PPTLSButtonShowPageNumber == true && PPTRSButtonShowPageNumber == true)
+                {
+                    PPTLSButtonShowPageNumber = sideShowPage;
+                    PPTRSButtonShowPageNumber = sideShowPage;
+                    changed = true;
+                }
+                if (PPTLSButtonBlackBackground == false && PPTRSButtonBlackBackground == false)
+                {
+                    PPTLSButtonBlackBackground = sideBlackBg;
+                    PPTRSButtonBlackBackground = sideBlackBg;
+                    changed = true;
+                }
+            }
+
+            var bottomOpt = PPTBButtonsOption.ToString();
+            if (bottomOpt.Length >= 3)
+            {
+                bool bottomShowPage = bottomOpt[0] == '2';
+                bool bottomBlackBg = bottomOpt[2] == '2';
+                if (PPTLBButtonShowPageNumber == false && PPTRBButtonShowPageNumber == false)
+                {
+                    PPTLBButtonShowPageNumber = bottomShowPage;
+                    PPTRBButtonShowPageNumber = bottomShowPage;
+                    changed = true;
+                }
+                if (PPTLBButtonBlackBackground == false && PPTRBButtonBlackBackground == false)
+                {
+                    PPTLBButtonBlackBackground = bottomBlackBg;
+                    PPTRBButtonBlackBackground = bottomBlackBg;
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                try
+                {
+                    Windows.SettingsViews.Helpers.SettingsManager.SaveSettingsToFile();
+                }
+                catch { }
+            }
+        }
 
         // -- new --
 

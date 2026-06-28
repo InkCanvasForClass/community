@@ -500,6 +500,7 @@ namespace Ink_Canvas
         {
             if (_pptUIManager != null && IsInPPTPresentationMode)
             {
+                Settings.PowerPointSettings.MigrateLegacyButtonOptions();
                 _pptUIManager.PPTButtonsDisplayOption = Settings.PowerPointSettings.PPTButtonsDisplayOption;
                 _pptUIManager.PPTSButtonsOption = Settings.PowerPointSettings.PPTSButtonsOption;
                 _pptUIManager.PPTBButtonsOption = Settings.PowerPointSettings.PPTBButtonsOption;
@@ -513,6 +514,14 @@ namespace Ink_Canvas
                 _pptUIManager.PPTRSButtonOpacity = Settings.PowerPointSettings.PPTRSButtonOpacity;
                 _pptUIManager.PPTLBButtonOpacity = Settings.PowerPointSettings.PPTLBButtonOpacity;
                 _pptUIManager.PPTRBButtonOpacity = Settings.PowerPointSettings.PPTRBButtonOpacity;
+                _pptUIManager.PPTLSButtonShowPageNumber = Settings.PowerPointSettings.PPTLSButtonShowPageNumber;
+                _pptUIManager.PPTRSButtonShowPageNumber = Settings.PowerPointSettings.PPTRSButtonShowPageNumber;
+                _pptUIManager.PPTLBButtonShowPageNumber = Settings.PowerPointSettings.PPTLBButtonShowPageNumber;
+                _pptUIManager.PPTRBButtonShowPageNumber = Settings.PowerPointSettings.PPTRBButtonShowPageNumber;
+                _pptUIManager.PPTLSButtonBlackBackground = Settings.PowerPointSettings.PPTLSButtonBlackBackground;
+                _pptUIManager.PPTRSButtonBlackBackground = Settings.PowerPointSettings.PPTRSButtonBlackBackground;
+                _pptUIManager.PPTLBButtonBlackBackground = Settings.PowerPointSettings.PPTLBButtonBlackBackground;
+                _pptUIManager.PPTRBButtonBlackBackground = Settings.PowerPointSettings.PPTRBButtonBlackBackground;
                 _pptUIManager.PPTNavBarScale = Settings.PowerPointSettings.PPTNavBarScale;
                 _pptUIManager.UpdateNavigationPanelsVisibility();
                 _pptUIManager.UpdateNavigationButtonStyles();
