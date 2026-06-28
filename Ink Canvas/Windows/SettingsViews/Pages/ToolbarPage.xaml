@@ -133,28 +133,28 @@
                            FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4"/>
                 <ComboBox x:Name="ComboBoxConfigFile" SelectionChanged="ComboBoxConfigFile_SelectionChanged"/>
             </StackPanel>
-            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                <Button Click="ButtonRefreshConfig_Click" Style="{StaticResource BorderlessIconButtonStyle}" Padding="8,6" Margin="0,0,4,0"
+            <ikw:SimpleStackPanel Grid.Column="2" Orientation="Horizontal" Spacing="3">
+                <Button Click="ButtonRefreshConfig_Click" Style="{StaticResource BorderlessIconButtonStyle}"
                         ToolTip="{x:Static props:FloatingBarStrings.ToolbarPage_RefreshProfile}">
                     <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.ArrowSync_16_Regular}"/>
                 </Button>
-                <Button Click="ButtonNewConfig_Click" Style="{StaticResource BorderlessIconButtonStyle}" Padding="8,6" Margin="0,0,4,0"
+                <Button Click="ButtonNewConfig_Click" Style="{StaticResource BorderlessIconButtonStyle}"
                         ToolTip="{x:Static props:FloatingBarStrings.ToolbarPage_NewProfile}">
                     <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Add_16_Regular}"/>
                 </Button>
-                <Button Click="ButtonDuplicateConfig_Click" Style="{StaticResource BorderlessIconButtonStyle}" Padding="8,6" Margin="0,0,4,0"
+                <Button Click="ButtonDuplicateConfig_Click" Style="{StaticResource BorderlessIconButtonStyle}"
                         ToolTip="{x:Static props:FloatingBarStrings.ToolbarPage_DuplicateProfile}">
                     <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Copy_16_Regular}"/>
                 </Button>
-                <Button Click="ButtonDeleteConfig_Click" Style="{StaticResource BorderlessIconButtonStyle}" Padding="8,6" Margin="0,0,4,0"
+                <Button Click="ButtonDeleteConfig_Click" Style="{StaticResource BorderlessIconButtonStyle}"
                         ToolTip="{x:Static props:FloatingBarStrings.ToolbarPage_DeleteProfile}">
                     <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Delete_16_Regular}"/>
                 </Button>
-                <Button Click="ButtonOpenConfigFolder_Click" Style="{StaticResource BorderlessIconButtonStyle}" Padding="8,6"
+                <Button Click="ButtonOpenConfigFolder_Click" Style="{StaticResource BorderlessIconButtonStyle}"
                         ToolTip="{x:Static props:FloatingBarStrings.ToolbarPage_OpenConfigFolder}">
                     <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.FolderOpen_16_Regular}"/>
                 </Button>
-            </StackPanel>
+            </ikw:SimpleStackPanel>
         </Grid>
 
         <!-- ===== Section 2: 已添加组件 ===== -->
@@ -548,6 +548,6 @@
 
         <!-- ===== Section 4: 恢复默认布局 ===== -->
         <Button Grid.Row="4" Content="{x:Static props:FloatingBarStrings.ToolbarPage_ResetLayout}" Click="ButtonReset_Click"
-                Padding="20,10" HorizontalAlignment="Left" Margin="0,12,0,16"/>
+                HorizontalAlignment="Left" Margin="0,12,0,16"/>
     </Grid>
 </ui:Page>

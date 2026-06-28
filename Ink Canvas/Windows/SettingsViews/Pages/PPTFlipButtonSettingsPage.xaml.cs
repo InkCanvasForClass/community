@@ -14,6 +14,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private bool _isLoaded = false;
         private DelayAction _sliderDelayAction = new DelayAction();
         private PPTNavBar.NavDirection _selectedDirection = PPTNavBar.NavDirection.LeftSide;
+        private iNKORE.UI.WPF.Modern.Controls.NavigationView _cachedNavigationView;
+        private iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode _previousPaneDisplayMode
+            = iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode.Auto;
 
         public PPTFlipButtonSettingsPage()
         {
@@ -30,11 +33,32 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdatePreview();
             SelectPosition(_selectedDirection);
             SliderTouchHelper.AddTouchSupportToAllSliders(this);
+
+            // 进入本页时把导航栏切到 LeftMinimal，给预览更多空间
+            var settingsWindow = Window.GetWindow(this) as SettingsViews.SettingsWindow;
+            var navView = settingsWindow?.NavigationViewControl;
+            if (navView != null)
+            {
+                _cachedNavigationView = navView;
+                // 仅在当前不是 LeftMinimal 时记录原模式，避免重复进入时覆盖
+                if (navView.PaneDisplayMode != iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode.LeftMinimal)
+                {
+                    _previousPaneDisplayMode = navView.PaneDisplayMode;
+                }
+                navView.PaneDisplayMode = iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode.LeftMinimal;
+            }
         }
 
         private void PPTFlipButtonSettingsPage_Unloaded(object sender, RoutedEventArgs e)
         {
             _isLoaded = false;
+
+            // 离开本页时恢复原 PaneDisplayMode（使用缓存引用，不依赖 Window.GetWindow）
+            if (_cachedNavigationView != null)
+            {
+                _cachedNavigationView.PaneDisplayMode = _previousPaneDisplayMode;
+                _cachedNavigationView = null;
+            }
         }
 
         private void PPTFlipButtonSettingsPage_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -61,21 +85,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardEnablePPTButtonEnhancedPreview.IsOn = ppt.EnablePPTButtonEnhancedPreview;
             CardEnablePPTButtonLongPressPageTurn.IsOn = ppt.EnablePPTButtonLongPressPageTurn;
 
-            UpdatePositionCheckboxesFromSettings();
-
             _isLoaded = true;
-        }
-
-        private void UpdatePositionCheckboxesFromSettings()
-        {
-            var ppt = SettingsManager.Settings.PowerPointSettings;
-            var displayOpt = ppt.PPTButtonsDisplayOption.ToString();
-            if (displayOpt.Length < 4) return;
-
-            CheckboxPosLeftBottom.IsChecked = displayOpt[0] == '2';
-            CheckboxPosRightBottom.IsChecked = displayOpt[1] == '2';
-            CheckboxPosLeft.IsChecked = displayOpt[2] == '2';
-            CheckboxPosRight.IsChecked = displayOpt[3] == '2';
         }
 
         private void UpdateAllSliderTexts()
@@ -270,12 +280,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SelectPosition(PPTNavBar.NavDirection.RightBottom);
         }
 
-        private void BackButton_Click(object sender, RoutedEventArgs e)
-        {
-            var settingsWindow = Window.GetWindow(this) as SettingsViews.SettingsWindow;
-            settingsWindow?.NavigateToPage("PowerPointPage");
-        }
-
         #endregion
 
         #region Position & Opacity Sliders
@@ -364,37 +368,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ppt.PPTButtonsDisplayOption = int.Parse(new string(c));
                 SettingsManager.SaveSettingsToFile();
                 SettingsActionHub.OnPPTButtonsDisplayOptionChanged();
-                UpdatePositionCheckboxesFromSettings();
-                UpdatePreview();
-            }
-        }
-
-        private void CheckboxPosition_Changed(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            var checkbox = sender as CheckBox;
-            if (checkbox?.Tag == null) return;
-
-            PPTNavBar.NavDirection dir;
-            if (!Enum.TryParse<PPTNavBar.NavDirection>(checkbox.Tag.ToString(), out dir)) return;
-
-            var ppt = SettingsManager.Settings.PowerPointSettings;
-            var str = ppt.PPTButtonsDisplayOption.ToString();
-            char[] c = str.ToCharArray();
-            int idx = GetDisplayOptionIndex(dir);
-            if (idx < c.Length)
-            {
-                c[idx] = checkbox.IsChecked == true ? '2' : '1';
-                ppt.PPTButtonsDisplayOption = int.Parse(new string(c));
-                SettingsManager.SaveSettingsToFile();
-                SettingsActionHub.OnPPTButtonsDisplayOptionChanged();
-
-                if (_selectedDirection == dir)
-                {
-                    _isLoaded = false;
-                    CardEnablePositionButton.IsOn = checkbox.IsChecked == true;
-                    _isLoaded = true;
-                }
                 UpdatePreview();
             }
         }

@@ -168,6 +168,6 @@
 
         <!-- ===== Section 4: 恢复默认布局 ===== -->
         <Button Grid.Row="4" Content="恢复默认布局" Click="ButtonReset_Click"
-                Padding="20,10" HorizontalAlignment="Left" Margin="0,12,0,16"/>
+                HorizontalAlignment="Left" Margin="0,12,0,16"/>
     </Grid>
 </ui:Page>

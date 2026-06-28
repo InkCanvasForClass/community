@@ -12,7 +12,8 @@
           xmlns:board="clr-namespace:Ink_Canvas.Controls.Toolbar.BoardToolbar"
           xmlns:touch="clr-namespace:Ink_Canvas.Helpers"
           mc:Ignorable="d"
-          Title="{x:Static props:FloatingBarStrings.BoardToolbarPage_Title}">
+          Title="{x:Static props:FloatingBarStrings.BoardToolbarPage_Title}"
+          d:Height="1080" d:Width="1920">
 
     <Page.Resources>
         <ResourceDictionary>
@@ -173,28 +174,28 @@
             <DockPanel Margin="0,0,0,4">
                 <ComboBox x:Name="ComboBoxConfigFile" SelectionChanged="ComboBoxConfigFile_SelectionChanged"
                           DockPanel.Dock="Left" VerticalAlignment="Center"/>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
-                    <Button Click="ButtonRefreshConfig_Click" Style="{StaticResource BorderlessIconButtonStyle}" Padding="8,6" Margin="0,0,4,0"
+                <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right" Spacing="3">
+                    <Button Click="ButtonRefreshConfig_Click" Style="{StaticResource BorderlessIconButtonStyle}"
                             ToolTip="{x:Static props:FloatingBarStrings.ToolbarPage_RefreshProfile}">
                         <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.ArrowSync_16_Regular}"/>
                     </Button>
-                    <Button Click="ButtonNewConfig_Click" Style="{StaticResource BorderlessIconButtonStyle}" Padding="8,6" Margin="0,0,4,0"
+                    <Button Click="ButtonNewConfig_Click" Style="{StaticResource BorderlessIconButtonStyle}"
                             ToolTip="{x:Static props:FloatingBarStrings.ToolbarPage_NewProfile}">
                         <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Add_16_Regular}"/>
                     </Button>
-                    <Button Click="ButtonDuplicateConfig_Click" Style="{StaticResource BorderlessIconButtonStyle}" Padding="8,6" Margin="0,0,4,0"
+                    <Button Click="ButtonDuplicateConfig_Click" Style="{StaticResource BorderlessIconButtonStyle}"
                             ToolTip="{x:Static props:FloatingBarStrings.ToolbarPage_DuplicateProfile}">
                         <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Copy_16_Regular}"/>
                     </Button>
-                    <Button Click="ButtonDeleteConfig_Click" Style="{StaticResource BorderlessIconButtonStyle}" Padding="8,6" Margin="0,0,4,0"
+                    <Button Click="ButtonDeleteConfig_Click" Style="{StaticResource BorderlessIconButtonStyle}"
                             ToolTip="{x:Static props:FloatingBarStrings.ToolbarPage_DeleteProfile}">
                         <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Delete_16_Regular}"/>
                     </Button>
-                    <Button Click="ButtonOpenConfigFolder_Click" Style="{StaticResource BorderlessIconButtonStyle}" Padding="8,6"
+                    <Button Click="ButtonOpenConfigFolder_Click" Style="{StaticResource BorderlessIconButtonStyle}"
                             ToolTip="{x:Static props:FloatingBarStrings.ToolbarPage_OpenConfigFolder}">
                         <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.FolderOpen_16_Regular}"/>
                     </Button>
-                </StackPanel>
+                </ikw:SimpleStackPanel>
             </DockPanel>
 
             <!-- 区域选择 -->
@@ -368,7 +369,7 @@
                         </Grid>
 
                         <Button Content="{x:Static props:FloatingBarStrings.ToolbarPage_ResetComponentSettings}" Click="ButtonResetComponentSettings_Click"
-                                Padding="12,6" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+                                HorizontalAlignment="Left"/>
 
                     </ikw:SimpleStackPanel>
                 </ScrollViewer>
@@ -377,6 +378,6 @@
 
         <!-- ===== Section 4: 恢复默认布局 ===== -->
         <Button Grid.Row="4" Content="{x:Static props:FloatingBarStrings.BoardToolbarPage_ResetDefault}" Click="ButtonReset_Click"
-                Padding="20,10" HorizontalAlignment="Left" Margin="0,12,0,16"/>
+                HorizontalAlignment="Left" Margin="0,12,0,16"/>
     </Grid>
 </ui:Page>

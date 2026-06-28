@@ -16,51 +16,66 @@
       d:Height="1080" d:Width="1920">
     <Grid x:Name="RootGrid">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*" />
-            <ColumnDefinition Width="3*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <!-- ===== 左侧：16:9 预览区域（带背景图） ===== -->
-        <Border Grid.Column="0" Margin="12 0 0 0" CornerRadius="8" Background="Transparent"
-                x:Name="PreviewContainer" MaxWidth="600">
-            <!-- 16:9 固定宽高比容器：内部全部原生布局，无任何缩放变换 -->
-            <ppt:FixedAspectRatioPanel>
-                <Grid x:Name="PreviewCanvas" SizeChanged="PreviewCanvas_SizeChanged">
-                    <!-- 背景图 -->
-                    <Image Source="/Resources/PresentationExample/page.jpg" Stretch="UniformToFill"/>
+        <!-- ===== 左侧：提示 + 16:9 预览区域（带背景图） ===== -->
+        <Grid Grid.Column="0" Margin="12 0 0 4">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Border CornerRadius="8" Background="Transparent" Grid.Row="1"
+                    x:Name="PreviewContainer">
+                <!-- 16:9 固定宽高比容器：内部全部原生布局，无任何缩放变换 -->
+                <ppt:FixedAspectRatioPanel>
+                    <Grid x:Name="PreviewCanvas" SizeChanged="PreviewCanvas_SizeChanged">
+                        <!-- 背景图 -->
+                        <Image Source="/Resources/PresentationExample/page.jpg" Stretch="UniformToFill"/>
 
-                    <!-- 左侧翻页按钮预览 -->
-                    <Border Background="Transparent" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6,0,0,0"
-                            MouseLeftButtonDown="PreviewLS_MouseLeftButtonDown" Cursor="Hand"
-                            x:Name="PreviewLSBorder">
-                        <ppt:PPTNavBar x:Name="PreviewLS" Direction="LeftSide"
-                                       CurrentSlide="3" TotalSlides="10" IsHitTestVisible="False"/>
-                    </Border>
-                    <!-- 右侧翻页按钮预览 -->
-                    <Border Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0"
-                            MouseLeftButtonDown="PreviewRS_MouseLeftButtonDown" Cursor="Hand"
-                            x:Name="PreviewRSBorder">
-                        <ppt:PPTNavBar x:Name="PreviewRS" Direction="RightSide"
-                                       CurrentSlide="3" TotalSlides="10" IsHitTestVisible="False"/>
-                    </Border>
-                    <!-- 左下翻页按钮预览 -->
-                    <Border Background="Transparent" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="6,0,0,6"
-                            MouseLeftButtonDown="PreviewLB_MouseLeftButtonDown" Cursor="Hand"
-                            x:Name="PreviewLBBorder">
-                        <ppt:PPTNavBar x:Name="PreviewLB" Direction="LeftBottom"
-                                       CurrentSlide="3" TotalSlides="10" IsHitTestVisible="False"/>
-                    </Border>
-                    <!-- 右下翻页按钮预览 -->
-                    <Border Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,6,6"
-                            MouseLeftButtonDown="PreviewRB_MouseLeftButtonDown" Cursor="Hand"
-                            x:Name="PreviewRBBorder">
-                        <ppt:PPTNavBar x:Name="PreviewRB" Direction="RightBottom"
-                                       CurrentSlide="3" TotalSlides="10" IsHitTestVisible="False"/>
-                    </Border>
-                </Grid>
-            </ppt:FixedAspectRatioPanel>
-        </Border>
-
+                        <!-- 左侧翻页按钮预览 -->
+                        <Border Background="Transparent" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6,0,0,0"
+                                MouseLeftButtonDown="PreviewLS_MouseLeftButtonDown" Cursor="Hand"
+                                x:Name="PreviewLSBorder">
+                            <ppt:PPTNavBar x:Name="PreviewLS" Direction="LeftSide"
+                                           CurrentSlide="3" TotalSlides="10" IsHitTestVisible="False"/>
+                        </Border>
+                        <!-- 右侧翻页按钮预览 -->
+                        <Border Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0"
+                                MouseLeftButtonDown="PreviewRS_MouseLeftButtonDown" Cursor="Hand"
+                                x:Name="PreviewRSBorder">
+                            <ppt:PPTNavBar x:Name="PreviewRS" Direction="RightSide"
+                                           CurrentSlide="3" TotalSlides="10" IsHitTestVisible="False"/>
+                        </Border>
+                        <!-- 左下翻页按钮预览 -->
+                        <Border Background="Transparent" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="6,0,0,6"
+                                MouseLeftButtonDown="PreviewLB_MouseLeftButtonDown" Cursor="Hand"
+                                x:Name="PreviewLBBorder">
+                            <ppt:PPTNavBar x:Name="PreviewLB" Direction="LeftBottom"
+                                           CurrentSlide="3" TotalSlides="10" IsHitTestVisible="False"/>
+                        </Border>
+                        <!-- 右下翻页按钮预览 -->
+                        <Border Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,6,6"
+                                MouseLeftButtonDown="PreviewRB_MouseLeftButtonDown" Cursor="Hand"
+                                x:Name="PreviewRBBorder">
+                            <ppt:PPTNavBar x:Name="PreviewRB" Direction="RightBottom"
+                                           CurrentSlide="3" TotalSlides="10" IsHitTestVisible="False"/>
+                        </Border>
+                    </Grid>
+                </ppt:FixedAspectRatioPanel>
+            </Border>
+            <ikw:SimpleStackPanel Spacing="8" Margin="0,0,0,8" Grid.Row="0">
+                <ui:InfoBar Title="注意"
+                            Message="点击窗口左上角的返回图标可返回上一个页面"
+                            IsClosable="False" IsIconVisible="True" IsOpen="True"
+                            Severity="Warning"/>
+                <ui:InfoBar Message="点击预览中对应的翻页按钮可设置对应的属性"
+                            IsClosable="False" IsIconVisible="True" IsOpen="True"
+                            Severity="Success"/>
+            </ikw:SimpleStackPanel>
+        </Grid>
+        
         <!-- ===== 右侧：设置区域 ===== -->
         <ScrollViewer Grid.Column="1" PanningMode="VerticalFirst" x:Name="RightScrollViewer">
             <Grid Margin="12,0">
@@ -78,19 +93,6 @@
                 <ikw:SimpleStackPanel HorizontalAlignment="Stretch"
                                       Spacing="{StaticResource SettingsCardSpacing}">
 
-                    <!-- 返回按钮 -->
-                    <Button x:Name="BackButton"
-                            Margin="0,12,0,0"
-                            HorizontalAlignment="Left"
-                            Click="BackButton_Click">
-                        <Button.Content>
-                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Back}"/>
-                                <TextBlock Text="{x:Static props:NavStrings.Nav_PPT_Settings}"/>
-                            </ikw:SimpleStackPanel>
-                        </Button.Content>
-                    </Button>
-
                     <TextBlock Text="{x:Static props:PPTStrings.FlipButtonsTitle}"
                                FontSize="20" FontWeight="SemiBold" Margin="1,12,0,12"/>
 
@@ -98,33 +100,6 @@
                             Header="{x:Static props:PPTStrings.ShowFlipButtons}"
                             Icon="{x:Static ui:SegoeFluentIcons.ShowResults}"
                             Toggled="ToggleSwitchShowPPTButton_OnToggled"/>
-
-                    <!-- 各位置启用/禁用（复选框） -->
-                    <ui:SettingsCard x:Name="CardPositions"
-                                     Header="{x:Static props:PPTStrings.Positions}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.GridView}"/>
-                        </ui:SettingsCard.HeaderIcon>
-                        <WrapPanel Orientation="Horizontal"
-                                   Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <CheckBox x:Name="CheckboxPosLeft" Content="{x:Static props:PPTStrings.Position_Left}"
-                                      Margin="0,0,16,8"
-                                      Checked="CheckboxPosition_Changed" Unchecked="CheckboxPosition_Changed"
-                                      Tag="LeftSide"/>
-                            <CheckBox x:Name="CheckboxPosRight" Content="{x:Static props:PPTStrings.Position_Right}"
-                                      Margin="0,0,16,8"
-                                      Checked="CheckboxPosition_Changed" Unchecked="CheckboxPosition_Changed"
-                                      Tag="RightSide"/>
-                            <CheckBox x:Name="CheckboxPosLeftBottom" Content="{x:Static props:PPTStrings.Position_LeftBottom}"
-                                      Margin="0,0,16,8"
-                                      Checked="CheckboxPosition_Changed" Unchecked="CheckboxPosition_Changed"
-                                      Tag="LeftBottom"/>
-                            <CheckBox x:Name="CheckboxPosRightBottom" Content="{x:Static props:PPTStrings.Position_RightBottom}"
-                                      Margin="0,0,0,8"
-                                      Checked="CheckboxPosition_Changed" Unchecked="CheckboxPosition_Changed"
-                                      Tag="RightBottom"/>
-                        </WrapPanel>
-                    </ui:SettingsCard>
 
                     <!-- 当前选中位置的设置面板 -->
                     <TextBlock x:Name="SelectedPositionTitle"
