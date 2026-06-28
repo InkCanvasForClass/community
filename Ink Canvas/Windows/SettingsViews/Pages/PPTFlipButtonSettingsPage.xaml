@@ -12,20 +12,20 @@
       xmlns:props="clr-namespace:Ink_Canvas.Properties"
       mc:Ignorable="d"
       Title="{x:Static props:PPTStrings.FlipButtonsTitle}"
-      SizeChanged="PPTFlipButtonSettingsPage_SizeChanged">
-
+      SizeChanged="PPTFlipButtonSettingsPage_SizeChanged"
+      d:Height="1080" d:Width="1920">
     <Grid x:Name="RootGrid">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="3*" />
         </Grid.ColumnDefinitions>
 
         <!-- ===== 左侧：16:9 预览区域（带背景图） ===== -->
-        <Border Grid.Column="0" Margin="12" CornerRadius="8" Background="Transparent"
-                x:Name="PreviewContainer">
-            <Viewbox Stretch="Uniform" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0">
-                <!-- 16:9 固定画布 -->
-                <Grid Width="1600" Height="900" x:Name="PreviewCanvas">
+        <Border Grid.Column="0" Margin="12 0 0 0" CornerRadius="8" Background="Transparent"
+                x:Name="PreviewContainer" MaxWidth="600">
+            <!-- 16:9 固定宽高比容器：内部全部原生布局，无任何缩放变换 -->
+            <ppt:FixedAspectRatioPanel>
+                <Grid x:Name="PreviewCanvas" SizeChanged="PreviewCanvas_SizeChanged">
                     <!-- 背景图 -->
                     <Image Source="/Resources/PresentationExample/page.jpg" Stretch="UniformToFill"/>
 
@@ -58,12 +58,12 @@
                                        CurrentSlide="3" TotalSlides="10" IsHitTestVisible="False"/>
                     </Border>
                 </Grid>
-            </Viewbox>
+            </ppt:FixedAspectRatioPanel>
         </Border>
 
         <!-- ===== 右侧：设置区域 ===== -->
         <ScrollViewer Grid.Column="1" PanningMode="VerticalFirst" x:Name="RightScrollViewer">
-            <Grid Margin="24,0,24,0">
+            <Grid Margin="12,0">
                 <FrameworkElement.Resources>
                     <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
                     <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
@@ -75,9 +75,8 @@
                         </Style.Setters>
                     </Style>
                 </FrameworkElement.Resources>
-                <ikw:SimpleStackPanel MaxWidth="600"
-                    HorizontalAlignment="Stretch"
-                    Spacing="{StaticResource SettingsCardSpacing}">
+                <ikw:SimpleStackPanel HorizontalAlignment="Stretch"
+                                      Spacing="{StaticResource SettingsCardSpacing}">
 
                     <!-- 返回按钮 -->
                     <Button x:Name="BackButton"

@@ -39,6 +39,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void PPTFlipButtonSettingsPage_SizeChanged(object sender, SizeChangedEventArgs e)
         {
+            UpdatePreview();
+        }
+
+        /// <summary>
+        /// PreviewCanvas 尺寸变化（FixedAspectRatioPanel 完成排列）后重算 4 个 Border 的 Margin。
+        /// </summary>
+        private void PreviewCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdatePreview();
         }
 
         private void LoadSettings()
@@ -108,22 +117,25 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             navBar.SetBarOpacity(opacity);
 
+            // 按 16:9 容器实际尺寸缩放 Margin（位置跟随 Image 缩放，但 Border 大小保持不变）
+            double viewScale = (PreviewCanvas != null && PreviewCanvas.ActualWidth > 0) ? PreviewCanvas.ActualWidth / 1600.0 : 1.0;
+
             var direction = navBar.Direction;
             if (direction == PPTNavBar.NavDirection.LeftSide)
             {
-                border.Margin = new Thickness(6, 0, 0, offset * 2);
+                border.Margin = new Thickness(6 * viewScale, 0, 0, offset * 2 * viewScale);
             }
             else if (direction == PPTNavBar.NavDirection.RightSide)
             {
-                border.Margin = new Thickness(0, 0, 6, offset * 2);
+                border.Margin = new Thickness(0, 0, 6 * viewScale, offset * 2 * viewScale);
             }
             else if (direction == PPTNavBar.NavDirection.LeftBottom)
             {
-                border.Margin = new Thickness(6 + offset, 0, 0, 6);
+                border.Margin = new Thickness((6 + offset) * viewScale, 0, 0, 6 * viewScale);
             }
             else if (direction == PPTNavBar.NavDirection.RightBottom)
             {
-                border.Margin = new Thickness(0, 0, 6 + offset, 6);
+                border.Margin = new Thickness(0, 0, (6 + offset) * viewScale, 6 * viewScale);
             }
 
             bool showPage = groupOpt.Length > 0 && groupOpt[0] == '2';
