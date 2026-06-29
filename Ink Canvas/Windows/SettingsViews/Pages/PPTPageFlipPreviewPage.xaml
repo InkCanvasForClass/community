@@ -31,60 +31,21 @@
                     Spacing="{StaticResource SettingsCardSpacing}">
 
                     <!-- Title -->
-                    <TextBlock Text="PPT翻页按钮预览与设置" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
+                    <TextBlock Text="翻页按钮的外观与位置" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
-                    <!-- ComboBox Card to Select Position -->
-                    <ui:SettingsCard Header="选择按钮位置"
-                                     Description="请选择需要配置的翻页按钮位置，对应的配置将在下方显示">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AlignLeft}"/>
-                        </ui:SettingsCard.HeaderIcon>
-                        <ComboBox x:Name="ComboBoxPositionSelect" Width="200" SelectionChanged="ComboBoxPositionSelect_SelectionChanged">
-                            <ComboBoxItem Content="左侧"/>
-                            <ComboBoxItem Content="右侧"/>
-                            <ComboBoxItem Content="左下"/>
-                            <ComboBoxItem Content="右下"/>
-                        </ComboBox>
-                    </ui:SettingsCard>
+                    <!-- TabControl (Pivot) to Select Position -->
+                    <TabControl x:Name="TabControlPositionSelect"
+                                Style="{StaticResource TabControlPivotStyle}"
+                                SelectionChanged="TabControlPositionSelect_SelectionChanged">
+                        <TabItem Header="左侧" />
+                        <TabItem Header="右侧" />
+                        <TabItem Header="左下" />
+                        <TabItem Header="右下" />
+                    </TabControl>
 
-                    <!-- Position specific settings group header -->
-                    <TextBlock x:Name="TextBlockPositionSectionTitle" Text="按钮配置" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
+                    <ui:Frame x:Name="contentFramePositionSelect" NavigationUIVisibility="Hidden" Margin="0,12,0,0" />
 
-                    <!-- Enable ToggleSwitch (title right side) -->
-                    <ui:SettingsCard x:Name="CardPositionEnabled" Header="启用当前位置按钮"
-                                     Description="控制该位置的翻页按钮是否显示在屏幕上">
-                        <ui:ToggleSwitch x:Name="ToggleSwitchPositionEnabled" Toggled="ToggleSwitchPositionEnabled_Toggled"/>
-                    </ui:SettingsCard>
 
-                    <!-- Show Page Number ToggleSwitch -->
-                    <ui:SettingsCard x:Name="CardShowPageNumber" Header="显示页码"
-                                     Description="在翻页条中显示当前页码和总页数">
-                        <ui:ToggleSwitch x:Name="ToggleSwitchShowPageNumber" Toggled="ToggleSwitchShowPageNumber_Toggled"/>
-                    </ui:SettingsCard>
-
-                    <!-- Black Background ToggleSwitch -->
-                    <ui:SettingsCard x:Name="CardBlackBackground" Header="黑色背景"
-                                     Description="使用黑色半透明背景代替默认的主题透明背景">
-                        <ui:ToggleSwitch x:Name="ToggleSwitchBlackBackground" Toggled="ToggleSwitchBlackBackground_Toggled"/>
-                    </ui:SettingsCard>
-
-                    <!-- Offset Slider with Reset Button -->
-                    <ui:SettingsCard x:Name="CardOffset" Header="偏移">
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock x:Name="TextBlockOffsetValue" VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="40"/>
-                            <Slider x:Name="SliderOffset" Minimum="-500" Maximum="500" Width="200" IsSnapToTickEnabled="True" TickFrequency="5" ValueChanged="SliderOffset_ValueChanged"/>
-                            <Button Content="重置" Click="ButtonResetOffset_Click"/>
-                        </ikw:SimpleStackPanel>
-                    </ui:SettingsCard>
-
-                    <!-- Opacity Slider with Reset Button -->
-                    <ui:SettingsCard x:Name="CardOpacity" Header="透明度">
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock x:Name="TextBlockOpacityValue" VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="40"/>
-                            <Slider x:Name="SliderOpacity" Minimum="0.1" Maximum="1.0" Width="200" ValueChanged="SliderOpacity_ValueChanged"/>
-                            <Button Content="重置" Click="ButtonResetOpacity_Click"/>
-                        </ikw:SimpleStackPanel>
-                    </ui:SettingsCard>
 
                     <!-- Global settings group header -->
                     <TextBlock Text="全局设置" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
