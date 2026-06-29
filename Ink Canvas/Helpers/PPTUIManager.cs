@@ -26,6 +26,10 @@ namespace Ink_Canvas.Helpers
         public double PPTLBButtonOpacity { get; set; } = 0.5;
         public double PPTRBButtonOpacity { get; set; } = 0.5;
         public double PPTNavBarScale { get; set; } = 1.0;
+        public double PPTLSButtonScale { get; set; } = 1.0;
+        public double PPTRSButtonScale { get; set; } = 1.0;
+        public double PPTLBButtonScale { get; set; } = 1.0;
+        public double PPTRBButtonScale { get; set; } = 1.0;
         #endregion
 
         #region Private Fields
@@ -448,10 +452,10 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                _mainWindow.LeftBottomPanelForPPTNavigation.SetBarScale(PPTNavBarScale);
-                _mainWindow.RightBottomPanelForPPTNavigation.SetBarScale(PPTNavBarScale);
-                _mainWindow.LeftSidePanelForPPTNavigation.SetBarScale(PPTNavBarScale);
-                _mainWindow.RightSidePanelForPPTNavigation.SetBarScale(PPTNavBarScale);
+                _mainWindow.LeftBottomPanelForPPTNavigation.SetBarScale(PPTLBButtonScale);
+                _mainWindow.RightBottomPanelForPPTNavigation.SetBarScale(PPTRBButtonScale);
+                _mainWindow.LeftSidePanelForPPTNavigation.SetBarScale(PPTLSButtonScale);
+                _mainWindow.RightSidePanelForPPTNavigation.SetBarScale(PPTRSButtonScale);
             }
             catch (Exception ex)
             {

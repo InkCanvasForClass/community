@@ -707,6 +707,51 @@ namespace Ink_Canvas
         [JsonProperty("pptNavBarScale")]
         public double PPTNavBarScale { get; set; } = 1.0;
 
+        // 全局默认设置（各位置"使用全局设置"开启时引用这些值）
+        [JsonProperty("pptGlobalButtonEnabled")]
+        public bool PPTGlobalButtonEnabled { get; set; } = true;
+
+        [JsonProperty("pptGlobalShowPageNumber")]
+        public bool PPTGlobalShowPageNumber { get; set; } = true;
+
+        [JsonProperty("pptGlobalBlackBackground")]
+        public bool PPTGlobalBlackBackground { get; set; } = false;
+
+        [JsonProperty("pptGlobalSideButtonPosition")]
+        public int PPTGlobalSideButtonPosition { get; set; } = 0;
+
+        [JsonProperty("pptGlobalBottomButtonPosition")]
+        public int PPTGlobalBottomButtonPosition { get; set; } = 0;
+
+        [JsonProperty("pptGlobalButtonOpacity")]
+        public double PPTGlobalButtonOpacity { get; set; } = 0.5;
+
+        // 每位置"使用全局设置"开关（默认开启，开启时该位置外观跟随全局）
+        [JsonProperty("pptLSUseGlobalSettings")]
+        public bool PPTLSUseGlobalSettings { get; set; } = true;
+
+        [JsonProperty("pptRSUseGlobalSettings")]
+        public bool PPTRSUseGlobalSettings { get; set; } = true;
+
+        [JsonProperty("pptLBUseGlobalSettings")]
+        public bool PPTLBUseGlobalSettings { get; set; } = true;
+
+        [JsonProperty("pptRBUseGlobalSettings")]
+        public bool PPTRBUseGlobalSettings { get; set; } = true;
+
+        // 每位置独立缩放（"使用全局设置"关闭时可独立设置；开启时跟随 PPTNavBarScale）
+        [JsonProperty("pptLSButtonScale")]
+        public double PPTLSButtonScale { get; set; } = 1.0;
+
+        [JsonProperty("pptRSButtonScale")]
+        public double PPTRSButtonScale { get; set; } = 1.0;
+
+        [JsonProperty("pptLBButtonScale")]
+        public double PPTLBButtonScale { get; set; } = 1.0;
+
+        [JsonProperty("pptRBButtonScale")]
+        public double PPTRBButtonScale { get; set; } = 1.0;
+
         private bool? _pptLSShowPageNumber;
         [JsonProperty("pptLSShowPageNumber")]
         public bool PPTLSShowPageNumber

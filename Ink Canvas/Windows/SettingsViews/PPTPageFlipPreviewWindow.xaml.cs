@@ -65,48 +65,76 @@ namespace Ink_Canvas.Windows.SettingsViews
         public void UpdatePreview()
         {
             var ppt = SettingsManager.Settings.PowerPointSettings;
-            
+
+            // 有效值：位置 i 若 UseGlobalSettings=true，则采用全局字段值，否则采用位置自身字段值
+            double lsScale = ppt.PPTLSUseGlobalSettings ? ppt.PPTNavBarScale : ppt.PPTLSButtonScale;
+            double rsScale = ppt.PPTRSUseGlobalSettings ? ppt.PPTNavBarScale : ppt.PPTRSButtonScale;
+            double lbScale = ppt.PPTLBUseGlobalSettings ? ppt.PPTNavBarScale : ppt.PPTLBButtonScale;
+            double rbScale = ppt.PPTRBUseGlobalSettings ? ppt.PPTNavBarScale : ppt.PPTRBButtonScale;
+
+            int lsOffset = ppt.PPTLSUseGlobalSettings ? ppt.PPTGlobalSideButtonPosition : ppt.PPTLSButtonPosition;
+            int rsOffset = ppt.PPTRSUseGlobalSettings ? ppt.PPTGlobalSideButtonPosition : ppt.PPTRSButtonPosition;
+            int lbOffset = ppt.PPTLBUseGlobalSettings ? ppt.PPTGlobalBottomButtonPosition : ppt.PPTLBButtonPosition;
+            int rbOffset = ppt.PPTRBUseGlobalSettings ? ppt.PPTGlobalBottomButtonPosition : ppt.PPTRBButtonPosition;
+
+            double lsOpacity = ppt.PPTLSUseGlobalSettings ? ppt.PPTGlobalButtonOpacity : ppt.PPTLSButtonOpacity;
+            double rsOpacity = ppt.PPTRSUseGlobalSettings ? ppt.PPTGlobalButtonOpacity : ppt.PPTRSButtonOpacity;
+            double lbOpacity = ppt.PPTLBUseGlobalSettings ? ppt.PPTGlobalButtonOpacity : ppt.PPTLBButtonOpacity;
+            double rbOpacity = ppt.PPTRBUseGlobalSettings ? ppt.PPTGlobalButtonOpacity : ppt.PPTRBButtonOpacity;
+
+            bool lsShowPage = ppt.PPTLSUseGlobalSettings ? ppt.PPTGlobalShowPageNumber : ppt.PPTLSShowPageNumber;
+            bool rsShowPage = ppt.PPTRSUseGlobalSettings ? ppt.PPTGlobalShowPageNumber : ppt.PPTRSShowPageNumber;
+            bool lbShowPage = ppt.PPTLBUseGlobalSettings ? ppt.PPTGlobalShowPageNumber : ppt.PPTLBShowPageNumber;
+            bool rbShowPage = ppt.PPTRBUseGlobalSettings ? ppt.PPTGlobalShowPageNumber : ppt.PPTRBShowPageNumber;
+
+            bool lsBlackBg = ppt.PPTLSUseGlobalSettings ? ppt.PPTGlobalBlackBackground : ppt.PPTLSBlackBackground;
+            bool rsBlackBg = ppt.PPTRSUseGlobalSettings ? ppt.PPTGlobalBlackBackground : ppt.PPTRSBlackBackground;
+            bool lbBlackBg = ppt.PPTLBUseGlobalSettings ? ppt.PPTGlobalBlackBackground : ppt.PPTLBBlackBackground;
+            bool rbBlackBg = ppt.PPTRBUseGlobalSettings ? ppt.PPTGlobalBlackBackground : ppt.PPTRBBlackBackground;
+
             // 1. Update scale for all 4 bars
-            double scale = ppt.PPTNavBarScale;
-            LeftSidePanelForPPTNavigation.SetBarScale(scale);
-            RightSidePanelForPPTNavigation.SetBarScale(scale);
-            LeftBottomPanelForPPTNavigation.SetBarScale(scale);
-            RightBottomPanelForPPTNavigation.SetBarScale(scale);
+            LeftSidePanelForPPTNavigation.SetBarScale(lsScale);
+            RightSidePanelForPPTNavigation.SetBarScale(rsScale);
+            LeftBottomPanelForPPTNavigation.SetBarScale(lbScale);
+            RightBottomPanelForPPTNavigation.SetBarScale(rbScale);
 
             // 2. Set margins (offsets)
-            LeftSidePanelForPPTNavigation.Margin = new Thickness(6, 0, 0, ppt.PPTLSButtonPosition * 2);
-            RightSidePanelForPPTNavigation.Margin = new Thickness(0, 0, 6, ppt.PPTRSButtonPosition * 2);
-            LeftBottomPanelForPPTNavigation.Margin = new Thickness(6 + ppt.PPTLBButtonPosition, 0, 0, 6);
-            RightBottomPanelForPPTNavigation.Margin = new Thickness(0, 0, 6 + ppt.PPTRBButtonPosition, 6);
+            LeftSidePanelForPPTNavigation.Margin = new Thickness(6, 0, 0, lsOffset * 2);
+            RightSidePanelForPPTNavigation.Margin = new Thickness(0, 0, 6, rsOffset * 2);
+            LeftBottomPanelForPPTNavigation.Margin = new Thickness(6 + lbOffset, 0, 0, 6);
+            RightBottomPanelForPPTNavigation.Margin = new Thickness(0, 0, 6 + rbOffset, 6);
 
-            // 3. Set enabled/disabled visibility
+            // 3. Set enabled/disabled visibility (UseGlobalSettings 的位由 PPTGlobalButtonEnabled 决定)
             string displayOption = ppt.PPTButtonsDisplayOption.ToString("D4");
-            if (displayOption.Length >= 4)
-            {
-                // LeftBottom = [0], RightBottom = [1], LeftSide = [2], RightSide = [3]
-                LeftBottomPanelForPPTNavigation.Visibility = displayOption[0] == '2' ? Visibility.Visible : Visibility.Collapsed;
-                RightBottomPanelForPPTNavigation.Visibility = displayOption[1] == '2' ? Visibility.Visible : Visibility.Collapsed;
-                LeftSidePanelForPPTNavigation.Visibility = displayOption[2] == '2' ? Visibility.Visible : Visibility.Collapsed;
-                RightSidePanelForPPTNavigation.Visibility = displayOption[3] == '2' ? Visibility.Visible : Visibility.Collapsed;
-            }
+            if (displayOption.Length < 4) displayOption = "2222";
+            char[] c = displayOption.ToCharArray();
+            // LeftBottom = [0], RightBottom = [1], LeftSide = [2], RightSide = [3]
+            if (ppt.PPTLBUseGlobalSettings) c[0] = ppt.PPTGlobalButtonEnabled ? '2' : '1';
+            if (ppt.PPTRBUseGlobalSettings) c[1] = ppt.PPTGlobalButtonEnabled ? '2' : '1';
+            if (ppt.PPTLSUseGlobalSettings) c[2] = ppt.PPTGlobalButtonEnabled ? '2' : '1';
+            if (ppt.PPTRSUseGlobalSettings) c[3] = ppt.PPTGlobalButtonEnabled ? '2' : '1';
+            LeftBottomPanelForPPTNavigation.Visibility = c[0] == '2' ? Visibility.Visible : Visibility.Collapsed;
+            RightBottomPanelForPPTNavigation.Visibility = c[1] == '2' ? Visibility.Visible : Visibility.Collapsed;
+            LeftSidePanelForPPTNavigation.Visibility = c[2] == '2' ? Visibility.Visible : Visibility.Collapsed;
+            RightSidePanelForPPTNavigation.Visibility = c[3] == '2' ? Visibility.Visible : Visibility.Collapsed;
 
             // 4. Set page button visibility (Show Page Number)
-            LeftSidePanelForPPTNavigation.SetPageButtonVisibility(ppt.PPTLSShowPageNumber ? Visibility.Visible : Visibility.Collapsed);
-            RightSidePanelForPPTNavigation.SetPageButtonVisibility(ppt.PPTRSShowPageNumber ? Visibility.Visible : Visibility.Collapsed);
-            LeftBottomPanelForPPTNavigation.SetPageButtonVisibility(ppt.PPTLBShowPageNumber ? Visibility.Visible : Visibility.Collapsed);
-            RightBottomPanelForPPTNavigation.SetPageButtonVisibility(ppt.PPTRBShowPageNumber ? Visibility.Visible : Visibility.Collapsed);
+            LeftSidePanelForPPTNavigation.SetPageButtonVisibility(lsShowPage ? Visibility.Visible : Visibility.Collapsed);
+            RightSidePanelForPPTNavigation.SetPageButtonVisibility(rsShowPage ? Visibility.Visible : Visibility.Collapsed);
+            LeftBottomPanelForPPTNavigation.SetPageButtonVisibility(lbShowPage ? Visibility.Visible : Visibility.Collapsed);
+            RightBottomPanelForPPTNavigation.SetPageButtonVisibility(rbShowPage ? Visibility.Visible : Visibility.Collapsed);
 
             // 5. Set opacity
-            LeftSidePanelForPPTNavigation.SetBarOpacity(ppt.PPTLSButtonOpacity);
-            RightSidePanelForPPTNavigation.SetBarOpacity(ppt.PPTRSButtonOpacity);
-            LeftBottomPanelForPPTNavigation.SetBarOpacity(ppt.PPTLBButtonOpacity);
-            RightBottomPanelForPPTNavigation.SetBarOpacity(ppt.PPTRBButtonOpacity);
+            LeftSidePanelForPPTNavigation.SetBarOpacity(lsOpacity);
+            RightSidePanelForPPTNavigation.SetBarOpacity(rsOpacity);
+            LeftBottomPanelForPPTNavigation.SetBarOpacity(lbOpacity);
+            RightBottomPanelForPPTNavigation.SetBarOpacity(rbOpacity);
 
             // 6. Set theme (Black Background)
-            LeftSidePanelForPPTNavigation.ApplyTheme(ppt.PPTLSBlackBackground);
-            RightSidePanelForPPTNavigation.ApplyTheme(ppt.PPTRSBlackBackground);
-            LeftBottomPanelForPPTNavigation.ApplyTheme(ppt.PPTLBBlackBackground);
-            RightBottomPanelForPPTNavigation.ApplyTheme(ppt.PPTRBBlackBackground);
+            LeftSidePanelForPPTNavigation.ApplyTheme(lsBlackBg);
+            RightSidePanelForPPTNavigation.ApplyTheme(rsBlackBg);
+            LeftBottomPanelForPPTNavigation.ApplyTheme(lbBlackBg);
+            RightBottomPanelForPPTNavigation.ApplyTheme(rbBlackBg);
         }
     }
 }

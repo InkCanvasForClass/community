@@ -84,11 +84,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             settingsWindow?.Activate();
 
             _isLoaded = false;
-            TabControlPositionSelect.SelectedIndex = 0; // Trigger load for Left Side (LS)
-            
-            var ppt = SettingsManager.Settings.PowerPointSettings;
-            SliderScale.Value = ppt.PPTNavBarScale;
-            UpdateSliderText(SliderScale, TextBlockScaleValue, "{0:F2}");
+            TabControlPositionSelect.SelectedIndex = 0; // Trigger load for Global tab
 
             _isLoaded = true;
             
@@ -174,9 +170,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private int GetSelectedPositionIndex()
         {
-            if (TabControlPositionSelect == null) return 0;
-            return TabControlPositionSelect.SelectedIndex;
+            if (TabControlPositionSelect == null) return -1;
+            return TabControlPositionSelect.SelectedIndex - 1; // 0=全局, 1-4=位置(0-3)
         }
+
+        private bool IsGlobalTabSelected => TabControlPositionSelect?.SelectedIndex == 0;
 
         private void LoadSelectedPositionSettings()
         {
@@ -191,37 +189,79 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void LoadPositionSettings()
         {
             var ppt = SettingsManager.Settings.PowerPointSettings;
-            int selectedIndex = GetSelectedPositionIndex();
-            string posName = GetPositionName(selectedIndex);
+            bool isGlobal = IsGlobalTabSelected;
+            int selectedIndex = GetSelectedPositionIndex(); // -1 for global, 0-3 for position
+
+            // CardUseGlobalSettings: only visible on position tabs
+            CardUseGlobalSettings.Visibility = isGlobal ? Visibility.Collapsed : Visibility.Visible;
+
+            bool useGlobal = false;
+            if (!isGlobal)
+            {
+                useGlobal = GetUseGlobalSettings(selectedIndex, ppt);
+                ToggleSwitchUseGlobalSettings.IsOn = useGlobal;
+            }
+
+            // PositionSettingsPanel: enabled when global tab, or position tab with UseGlobalSettings off
+            PositionSettingsPanel.IsEnabled = isGlobal || !useGlobal;
+
+            // Header
+            string posName = isGlobal ? "全局" : GetPositionName(selectedIndex);
             CardPositionEnabled.Header = "启用" + posName + "按钮";
 
             // 1. Position enabled ToggleSwitch
-            string displayOptionStr = ppt.PPTButtonsDisplayOption.ToString("D4");
-            if (displayOptionStr.Length < 4) displayOptionStr = "2222";
-            int displayIndex = MapComboIndexToDisplayOptionIndex(selectedIndex);
-            ToggleSwitchPositionEnabled.IsOn = displayOptionStr[displayIndex] == '2';
+            if (isGlobal)
+            {
+                ToggleSwitchPositionEnabled.IsOn = ppt.PPTGlobalButtonEnabled;
+            }
+            else
+            {
+                bool effectiveEnabled = useGlobal ? ppt.PPTGlobalButtonEnabled : IsPositionDisplayEnabled(selectedIndex, ppt);
+                ToggleSwitchPositionEnabled.IsOn = effectiveEnabled;
+            }
 
             // 2. Show Page Number ToggleSwitch
-            ToggleSwitchShowPageNumber.IsOn = GetPositionShowPageNumber(selectedIndex, ppt);
+            ToggleSwitchShowPageNumber.IsOn = isGlobal ? ppt.PPTGlobalShowPageNumber
+                : (useGlobal ? ppt.PPTGlobalShowPageNumber : GetPositionShowPageNumber(selectedIndex, ppt));
 
             // 3. Black Background ToggleSwitch
-            ToggleSwitchBlackBackground.IsOn = GetPositionBlackBackground(selectedIndex, ppt);
+            ToggleSwitchBlackBackground.IsOn = isGlobal ? ppt.PPTGlobalBlackBackground
+                : (useGlobal ? ppt.PPTGlobalBlackBackground : GetPositionBlackBackground(selectedIndex, ppt));
 
-            // 4. Offset Slider (Adjust range dynamically: Side = -500 to 500, Bottom = -100 to 500)
-            if (selectedIndex == 0 || selectedIndex == 1) // Side (左侧 / 右侧)
-            {
-                SliderOffset.Minimum = -500;
-            }
-            else // Bottom (左下 / 右下)
-            {
-                SliderOffset.Minimum = -100;
-            }
-            SliderOffset.Value = GetPositionOffset(selectedIndex, ppt);
+            // 4. Offset Sliders (Side + Bottom)
+            //    全局 tab: 两个都显示；侧边位置: 仅 CardOffset；底部位置: 仅 CardOffsetBottom
+            bool isSideContext = isGlobal || selectedIndex == 0 || selectedIndex == 1;
+            bool isBottomContext = isGlobal || selectedIndex == 2 || selectedIndex == 3;
+
+            CardOffset.Visibility = isSideContext ? Visibility.Visible : Visibility.Collapsed;
+            CardOffsetBottom.Visibility = isBottomContext ? Visibility.Visible : Visibility.Collapsed;
+
+            CardOffset.Header = isGlobal ? "偏移（侧边）" : "偏移";
+            CardOffsetBottom.Header = isGlobal ? "偏移（底部）" : "偏移";
+
+            SliderOffset.Minimum = -500;
+            int sideOffset = isGlobal ? ppt.PPTGlobalSideButtonPosition
+                : (useGlobal ? ppt.PPTGlobalSideButtonPosition : GetPositionOffset(selectedIndex, ppt));
+            SliderOffset.Value = sideOffset;
             UpdateSliderText(SliderOffset, TextBlockOffsetValue, "{0:F0}");
 
+            SliderOffsetBottom.Minimum = -100;
+            int bottomOffset = isGlobal ? ppt.PPTGlobalBottomButtonPosition
+                : (useGlobal ? ppt.PPTGlobalBottomButtonPosition : GetPositionOffset(selectedIndex, ppt));
+            SliderOffsetBottom.Value = bottomOffset;
+            UpdateSliderText(SliderOffsetBottom, TextBlockOffsetBottomValue, "{0:F0}");
+
             // 5. Opacity Slider
-            SliderOpacity.Value = GetPositionOpacity(selectedIndex, ppt);
+            double effectiveOpacity = isGlobal ? ppt.PPTGlobalButtonOpacity
+                : (useGlobal ? ppt.PPTGlobalButtonOpacity : GetPositionOpacity(selectedIndex, ppt));
+            SliderOpacity.Value = effectiveOpacity;
             UpdateSliderText(SliderOpacity, TextBlockOpacityValue, "{0:P0}");
+
+            // 6. Scale Slider
+            double effectiveScale = isGlobal ? ppt.PPTNavBarScale
+                : (useGlobal ? ppt.PPTNavBarScale : GetPositionScale(selectedIndex, ppt));
+            SliderScale.Value = effectiveScale;
+            UpdateSliderText(SliderScale, TextBlockScaleValue, "{0:F2}");
         }
 
         private string GetPositionName(int index)
@@ -340,11 +380,75 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
         }
 
+        private bool GetUseGlobalSettings(int index, PowerPointSettings ppt)
+        {
+            switch (index)
+            {
+                case 0: return ppt.PPTLSUseGlobalSettings;
+                case 1: return ppt.PPTRSUseGlobalSettings;
+                case 2: return ppt.PPTLBUseGlobalSettings;
+                case 3: return ppt.PPTRBUseGlobalSettings;
+                default: return true;
+            }
+        }
+
+        private void SetUseGlobalSettings(int index, PowerPointSettings ppt, bool val)
+        {
+            switch (index)
+            {
+                case 0: ppt.PPTLSUseGlobalSettings = val; break;
+                case 1: ppt.PPTRSUseGlobalSettings = val; break;
+                case 2: ppt.PPTLBUseGlobalSettings = val; break;
+                case 3: ppt.PPTRBUseGlobalSettings = val; break;
+            }
+        }
+
+        private bool IsPositionDisplayEnabled(int index, PowerPointSettings ppt)
+        {
+            string str = ppt.PPTButtonsDisplayOption.ToString("D4");
+            if (str.Length < 4) str = "2222";
+            int displayIndex = MapComboIndexToDisplayOptionIndex(index);
+            return str[displayIndex] == '2';
+        }
+
+        private double GetPositionScale(int index, PowerPointSettings ppt)
+        {
+            switch (index)
+            {
+                case 0: return ppt.PPTLSButtonScale;
+                case 1: return ppt.PPTRSButtonScale;
+                case 2: return ppt.PPTLBButtonScale;
+                case 3: return ppt.PPTRBButtonScale;
+                default: return 1.0;
+            }
+        }
+
+        private void SetPositionScale(int index, PowerPointSettings ppt, double val)
+        {
+            switch (index)
+            {
+                case 0: ppt.PPTLSButtonScale = val; break;
+                case 1: ppt.PPTRSButtonScale = val; break;
+                case 2: ppt.PPTLBButtonScale = val; break;
+                case 3: ppt.PPTRBButtonScale = val; break;
+            }
+        }
+
         private void ToggleSwitchPositionEnabled_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
 
             var ppt = SettingsManager.Settings.PowerPointSettings;
+
+            if (IsGlobalTabSelected)
+            {
+                ppt.PPTGlobalButtonEnabled = ToggleSwitchPositionEnabled.IsOn;
+                SettingsManager.SaveSettingsToFile();
+                SettingsActionHub.OnPPTGlobalSettingsChanged();
+                PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+                return;
+            }
+
             int selectedIndex = GetSelectedPositionIndex();
             int displayIndex = MapComboIndexToDisplayOptionIndex(selectedIndex);
 
@@ -365,6 +469,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
 
             var ppt = SettingsManager.Settings.PowerPointSettings;
+
+            if (IsGlobalTabSelected)
+            {
+                ppt.PPTGlobalShowPageNumber = ToggleSwitchShowPageNumber.IsOn;
+                SettingsManager.SaveSettingsToFile();
+                SettingsActionHub.OnPPTGlobalSettingsChanged();
+                PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+                return;
+            }
+
             int selectedIndex = GetSelectedPositionIndex();
             bool isOn = ToggleSwitchShowPageNumber.IsOn;
 
@@ -381,6 +495,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
 
             var ppt = SettingsManager.Settings.PowerPointSettings;
+
+            if (IsGlobalTabSelected)
+            {
+                ppt.PPTGlobalBlackBackground = ToggleSwitchBlackBackground.IsOn;
+                SettingsManager.SaveSettingsToFile();
+                SettingsActionHub.OnPPTGlobalSettingsChanged();
+                PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+                return;
+            }
+
             int selectedIndex = GetSelectedPositionIndex();
             bool isOn = ToggleSwitchBlackBackground.IsOn;
 
@@ -392,15 +516,45 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
         }
 
+        private void ToggleSwitchUseGlobalSettings_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+
+            var ppt = SettingsManager.Settings.PowerPointSettings;
+            int selectedIndex = GetSelectedPositionIndex();
+
+            SetUseGlobalSettings(selectedIndex, ppt, ToggleSwitchUseGlobalSettings.IsOn);
+            SettingsManager.SaveSettingsToFile();
+
+            // Reload UI to apply IsEnabled state and effective values
+            bool wasLoaded = _isLoaded;
+            _isLoaded = false;
+            LoadPositionSettings();
+            _isLoaded = wasLoaded;
+
+            // Notify runtime + preview (effective values may have changed)
+            SettingsActionHub.OnPPTGlobalSettingsChanged();
+            PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+        }
+
         private void SliderOffset_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             UpdateSliderText(SliderOffset, TextBlockOffsetValue, "{0:F0}");
             if (!_isLoaded) return;
 
             var ppt = SettingsManager.Settings.PowerPointSettings;
-            int selectedIndex = GetSelectedPositionIndex();
             int offsetVal = (int)SliderOffset.Value;
 
+            if (IsGlobalTabSelected)
+            {
+                ppt.PPTGlobalSideButtonPosition = offsetVal;
+                SettingsActionHub.OnPPTGlobalSettingsChanged();
+                PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+                _sliderDelayAction.DebounceAction(2000, null, () => SettingsManager.SaveSettingsToFile());
+                return;
+            }
+
+            int selectedIndex = GetSelectedPositionIndex();
             SetPositionOffset(selectedIndex, ppt, offsetVal);
             SettingsActionHub.OnPPTButtonPositionChanged();
             PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
@@ -413,19 +567,58 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SliderOffset.Value = 0;
         }
 
+        private void SliderOffsetBottom_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            UpdateSliderText(SliderOffsetBottom, TextBlockOffsetBottomValue, "{0:F0}");
+            if (!_isLoaded) return;
+
+            var ppt = SettingsManager.Settings.PowerPointSettings;
+            int offsetVal = (int)SliderOffsetBottom.Value;
+
+            if (IsGlobalTabSelected)
+            {
+                ppt.PPTGlobalBottomButtonPosition = offsetVal;
+                SettingsActionHub.OnPPTGlobalSettingsChanged();
+                PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+                _sliderDelayAction.DebounceAction(2000, null, () => SettingsManager.SaveSettingsToFile());
+                return;
+            }
+
+            int selectedIndex = GetSelectedPositionIndex();
+            SetPositionOffset(selectedIndex, ppt, offsetVal);
+            SettingsActionHub.OnPPTButtonPositionChanged();
+            PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+
+            _sliderDelayAction.DebounceAction(2000, null, () => SettingsManager.SaveSettingsToFile());
+        }
+
+        private void ButtonResetOffsetBottom_Click(object sender, RoutedEventArgs e)
+        {
+            SliderOffsetBottom.Value = 0;
+        }
+
         private void SliderOpacity_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             UpdateSliderText(SliderOpacity, TextBlockOpacityValue, "{0:P0}");
             if (!_isLoaded) return;
 
             var ppt = SettingsManager.Settings.PowerPointSettings;
-            int selectedIndex = GetSelectedPositionIndex();
             double roundedValue = Math.Round(SliderOpacity.Value, 1);
 
             SliderOpacity.ValueChanged -= SliderOpacity_ValueChanged;
             SliderOpacity.Value = roundedValue;
             SliderOpacity.ValueChanged += SliderOpacity_ValueChanged;
 
+            if (IsGlobalTabSelected)
+            {
+                ppt.PPTGlobalButtonOpacity = roundedValue;
+                SettingsManager.SaveSettingsToFile();
+                SettingsActionHub.OnPPTGlobalSettingsChanged();
+                PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+                return;
+            }
+
+            int selectedIndex = GetSelectedPositionIndex();
             SetPositionOpacity(selectedIndex, ppt, roundedValue);
 
             string buttonKey = "";
@@ -460,15 +653,24 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             var ppt = SettingsManager.Settings.PowerPointSettings;
             double roundedValue = Math.Round(SliderScale.Value, 2);
-            
+
             SliderScale.ValueChanged -= SliderScale_ValueChanged;
             SliderScale.Value = roundedValue;
             SliderScale.ValueChanged += SliderScale_ValueChanged;
-            
-            ppt.PPTNavBarScale = roundedValue;
+
+            if (IsGlobalTabSelected)
+            {
+                ppt.PPTNavBarScale = roundedValue;
+                SettingsManager.SaveSettingsToFile();
+                SettingsActionHub.OnPPTNavBarScaleChanged(roundedValue);
+                PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+                return;
+            }
+
+            int selectedIndex = GetSelectedPositionIndex();
+            SetPositionScale(selectedIndex, ppt, roundedValue);
             SettingsManager.SaveSettingsToFile();
-            
-            SettingsActionHub.OnPPTNavBarScaleChanged(roundedValue);
+            SettingsActionHub.OnPPTGlobalSettingsChanged();
             PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
         }
     }
