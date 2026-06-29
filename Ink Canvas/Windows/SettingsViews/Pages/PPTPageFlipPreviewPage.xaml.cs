@@ -15,7 +15,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private NavigationViewPaneDisplayMode _originalPaneDisplayMode;
         private bool _originalIsInPPTPresentationMode;
         private ToolbarPosition _originalToolbarPosition;
-        private bool _originalAvoidFullScreen;
         private DelayAction _sliderDelayAction = new DelayAction();
         private int _originalMainWindowExStyle;
         private bool _originalSettingsWindowTopmost;
@@ -45,10 +44,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 _originalIsInPPTPresentationMode = mw.IsInPPTPresentationMode;
                 _originalToolbarPosition = SettingsManager.Settings.Appearance.ToolbarPosition;
-                _originalAvoidFullScreen = SettingsManager.Settings.Advanced.IsEnableAvoidFullScreenHelper;
 
-                // Disable AvoidFullScreenHelper
-                SettingsManager.Settings.Advanced.IsEnableAvoidFullScreenHelper = false;
+                // Disable AvoidFullScreenHelper hook temporarily without overriding settings
                 AvoidFullScreenHelper.SetBoardMode(true);
                 AvoidFullScreenHelper.StopAvoidFullScreen(mw);
 
@@ -117,10 +114,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 mw.IsInPPTPresentationMode = _originalIsInPPTPresentationMode;
                 SettingsManager.Settings.Appearance.ToolbarPosition = _originalToolbarPosition;
 
-                // Restore AvoidFullScreenHelper
-                SettingsManager.Settings.Advanced.IsEnableAvoidFullScreenHelper = _originalAvoidFullScreen;
+                // Restore AvoidFullScreenHelper based directly on the user's active setting
                 AvoidFullScreenHelper.SetBoardMode(false);
-                if (_originalAvoidFullScreen)
+                if (SettingsManager.Settings.Advanced.IsEnableAvoidFullScreenHelper)
                 {
                     AvoidFullScreenHelper.StartAvoidFullScreen(mw);
                 }

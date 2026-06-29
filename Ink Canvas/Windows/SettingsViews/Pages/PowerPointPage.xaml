@@ -82,12 +82,12 @@
                     <ui:SettingsCard x:Name="CardPPTPageFlipPreviewEntry"
                             Header="翻页按钮的外观与位置"
                             Description="自定义各翻页按钮的开启状态、显示页码、黑色背景、偏移与透明度并实时预览"
+                            IsClickEnabled="True"
                             Click="OnCardClicked"
                             IsEnabled="True">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.PreviewLink}"/>
                         </ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronRight}" FontSize="12" Opacity="0.6"/>
                     </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardEnablePPTButtonPageClickable"
