@@ -16,7 +16,7 @@ namespace Ink_Canvas.Windows.SettingsViews
 {
     public partial class SettingsWindow : Window
     {
-        private static readonly Dictionary<string, Type> _staticPageTypes = new Dictionary<string, Type>
+        private readonly Dictionary<string, Type> _pageTypes = new Dictionary<string, Type>
         {
             { "HomePage", typeof(HomePage) },
             { "StartupPage", typeof(StartupPage) },
@@ -51,9 +51,9 @@ namespace Ink_Canvas.Windows.SettingsViews
             { "AboutPage", typeof(AboutPage) },
             { "Settings", typeof(SettingsPage) },
             { "PluginPage", typeof(PluginPage) },
-            { "PluginSettingsPage", typeof(PluginSettingsPage) }
+            { "PluginSettingsPage", typeof(PluginSettingsPage) },
+            { "PPTPageFlipPreviewPage", typeof(PPTPageFlipPreviewPage) }
         };
-        private Dictionary<string, Type> _pageTypes;
         private readonly Dictionary<string, object> _pages = new Dictionary<string, object>();
         private readonly Dictionary<string, Ink_Canvas.Plugins.PluginInfo> _pluginPages = new Dictionary<string, Ink_Canvas.Plugins.PluginInfo>();
 
@@ -75,46 +75,6 @@ namespace Ink_Canvas.Windows.SettingsViews
 
             ApplyCurrentTheme();
             global::Ink_Canvas.Helpers.WindowBackdropHelper.Apply(this, Helpers.SettingsManager.Settings);
-
-            // 初始化内置页面映射
-            _pageTypes = new Dictionary<string, Type>
-            {
-                { "HomePage", typeof(HomePage) },
-                { "StartupPage", typeof(StartupPage) },
-                { "ClockPage", typeof(ClockPage) },
-                { "PrivacyPage", typeof(PrivacyPage) },
-                { "SecurityPage", typeof(SecurityPage) },
-                { "WindowPage", typeof(WindowPage) },
-                { "AppearancePage", typeof(AppearancePage) },
-                { "HotkeyPage", typeof(HotkeyPage) },
-                { "ToolbarPage", typeof(ToolbarPage) },
-                { "ToolbarAppearancePage", typeof(ToolbarAppearancePage) },
-                { "ToolbarMenuPage", typeof(ToolbarMenuPage) },
-                { "BoardToolbarPage", typeof(BoardToolbarPage) },
-                { "BoardAppearancePage", typeof(BoardAppearancePage) },
-                { "BoardMenuPage", typeof(BoardMenuPage) },
-                { "UpdatePage", typeof(UpdatePage) },
-                { "NotificationPage", typeof(NotificationPage) },
-                { "AnnouncementCenterPage", typeof(AnnouncementCenterPage) },
-                { "ExperimentalPage", typeof(ExperimentalPage) },
-                { "AdvancedPage", typeof(AdvancedPage) },
-                { "StoragePage", typeof(StoragePage) },
-                { "BackupPage", typeof(BackupPage) },
-                { "CloudStoragePage", typeof(CloudStoragePage) },
-                { "AutomationWorkflowPage", typeof(AutomationWorkflowPage) },
-                { "PowerPointPage", typeof(PowerPointPage) },
-                { "RandomDrawPage", typeof(RandomDrawPage) },
-                { "CanvasPage", typeof(CanvasPage) },
-                { "InkRecognitionPage", typeof(InkRecognitionPage) },
-                { "PerformancePage", typeof(PerformancePage) },
-                { "DebugPage", typeof(DebugPage) },
-                { "FriendlyLinksPage", typeof(FriendlyLinksPage) },
-                { "AboutPage", typeof(AboutPage) },
-                { "Settings", typeof(SettingsPage) },
-                { "PluginPage", typeof(PluginPage) },
-                { "PluginSettingsPage", typeof(PluginSettingsPage) },
-                { "PPTPageFlipPreviewPage", typeof(PPTPageFlipPreviewPage) }
-            };
 
             // 默认选中首页
             if (NavigationViewControl.MenuItems.Count > 0)
