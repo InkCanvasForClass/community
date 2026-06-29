@@ -112,7 +112,8 @@ namespace Ink_Canvas.Windows.SettingsViews
                 { "AboutPage", typeof(AboutPage) },
                 { "Settings", typeof(SettingsPage) },
                 { "PluginPage", typeof(PluginPage) },
-                { "PluginSettingsPage", typeof(PluginSettingsPage) }
+                { "PluginSettingsPage", typeof(PluginSettingsPage) },
+                { "PPTPageFlipPreviewPage", typeof(PPTPageFlipPreviewPage) }
             };
 
             // 默认选中首页
@@ -401,6 +402,8 @@ namespace Ink_Canvas.Windows.SettingsViews
                     pluginSettingsPage.CurrentPlugin = pluginInfo;
                 }
 
+
+
                 rootFrame.NavigationUIVisibility = NavigationUIVisibility.Hidden;
                 rootFrame.RemoveBackEntry();
                 rootFrame.Navigate(cachedPage);
@@ -427,15 +430,22 @@ namespace Ink_Canvas.Windows.SettingsViews
         {
             if (rootFrame.CanGoBack) rootFrame.GoBack();
         }
-
         private void OnRootFrameNavigated(object sender, NavigationEventArgs e)
         {
+            Type currentPageType = rootFrame.SourcePageType;
+            if (currentPageType == typeof(PPTPageFlipPreviewPage))
+            {
+                NavigationViewControl.PaneDisplayMode = iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode.LeftMinimal;
+            }
+            else
+            {
+                NavigationViewControl.PaneDisplayMode = iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode.Auto;
+            }
+
             if (_isNavigating)
             {
                 return;
             }
-
-            Type currentPageType = rootFrame.SourcePageType;
 
             // 处理设置项的选中状态
             if (currentPageType == typeof(SettingsPage))

@@ -707,6 +707,134 @@ namespace Ink_Canvas
         [JsonProperty("pptNavBarScale")]
         public double PPTNavBarScale { get; set; } = 1.0;
 
+        private bool? _pptLSShowPageNumber;
+        [JsonProperty("pptLSShowPageNumber")]
+        public bool PPTLSShowPageNumber
+        {
+            get
+            {
+                if (_pptLSShowPageNumber == null)
+                {
+                    string sOpt = PPTSButtonsOption.ToString();
+                    _pptLSShowPageNumber = sOpt.Length > 0 && sOpt[0] == '2';
+                }
+                return _pptLSShowPageNumber.Value;
+            }
+            set => _pptLSShowPageNumber = value;
+        }
+
+        private bool? _pptRSShowPageNumber;
+        [JsonProperty("pptRSShowPageNumber")]
+        public bool PPTRSShowPageNumber
+        {
+            get
+            {
+                if (_pptRSShowPageNumber == null)
+                {
+                    string sOpt = PPTSButtonsOption.ToString();
+                    _pptRSShowPageNumber = sOpt.Length > 0 && sOpt[0] == '2';
+                }
+                return _pptRSShowPageNumber.Value;
+            }
+            set => _pptRSShowPageNumber = value;
+        }
+
+        private bool? _pptLBShowPageNumber;
+        [JsonProperty("pptLBShowPageNumber")]
+        public bool PPTLBShowPageNumber
+        {
+            get
+            {
+                if (_pptLBShowPageNumber == null)
+                {
+                    string bOpt = PPTBButtonsOption.ToString();
+                    _pptLBShowPageNumber = bOpt.Length > 0 && bOpt[0] == '2';
+                }
+                return _pptLBShowPageNumber.Value;
+            }
+            set => _pptLBShowPageNumber = value;
+        }
+
+        private bool? _pptRBShowPageNumber;
+        [JsonProperty("pptRBShowPageNumber")]
+        public bool PPTRBShowPageNumber
+        {
+            get
+            {
+                if (_pptRBShowPageNumber == null)
+                {
+                    string bOpt = PPTBButtonsOption.ToString();
+                    _pptRBShowPageNumber = bOpt.Length > 0 && bOpt[0] == '2';
+                }
+                return _pptRBShowPageNumber.Value;
+            }
+            set => _pptRBShowPageNumber = value;
+        }
+
+        private bool? _pptLSBlackBackground;
+        [JsonProperty("pptLSBlackBackground")]
+        public bool PPTLSBlackBackground
+        {
+            get
+            {
+                if (_pptLSBlackBackground == null)
+                {
+                    string sOpt = PPTSButtonsOption.ToString();
+                    _pptLSBlackBackground = sOpt.Length > 2 && sOpt[2] == '2';
+                }
+                return _pptLSBlackBackground.Value;
+            }
+            set => _pptLSBlackBackground = value;
+        }
+
+        private bool? _pptRSBlackBackground;
+        [JsonProperty("pptRSBlackBackground")]
+        public bool PPTRSBlackBackground
+        {
+            get
+            {
+                if (_pptRSBlackBackground == null)
+                {
+                    string sOpt = PPTSButtonsOption.ToString();
+                    _pptRSBlackBackground = sOpt.Length > 2 && sOpt[2] == '2';
+                }
+                return _pptRSBlackBackground.Value;
+            }
+            set => _pptRSBlackBackground = value;
+        }
+
+        private bool? _pptLBBlackBackground;
+        [JsonProperty("pptLBBlackBackground")]
+        public bool PPTLBBlackBackground
+        {
+            get
+            {
+                if (_pptLBBlackBackground == null)
+                {
+                    string bOpt = PPTBButtonsOption.ToString();
+                    _pptLBBlackBackground = bOpt.Length > 2 && bOpt[2] == '2';
+                }
+                return _pptLBBlackBackground.Value;
+            }
+            set => _pptLBBlackBackground = value;
+        }
+
+        private bool? _pptRBBlackBackground;
+        [JsonProperty("pptRBBlackBackground")]
+        public bool PPTRBBlackBackground
+        {
+            get
+            {
+                if (_pptRBBlackBackground == null)
+                {
+                    string bOpt = PPTBButtonsOption.ToString();
+                    _pptRBBlackBackground = bOpt.Length > 2 && bOpt[2] == '2';
+                }
+                return _pptRBBlackBackground.Value;
+            }
+            set => _pptRBBlackBackground = value;
+        }
+
         // -- new --
 
         [JsonProperty("powerPointSupport")]
