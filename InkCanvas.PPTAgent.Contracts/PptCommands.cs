@@ -14,7 +14,6 @@ namespace InkCanvasPPTAgent.Contracts
         public const string ExportSlideThumbnails = "exportSlideThumbnails";
         public const string DisableAutoPlayTimings = "disableAutoPlayTimings";
         public const string UnhideHiddenSlides = "unhideHiddenSlides";
-        public const string GetMediaRegions = "getMediaRegions";
     }
 
     public static class PPTEvents

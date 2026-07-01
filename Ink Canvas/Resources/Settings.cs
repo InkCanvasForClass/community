@@ -761,9 +761,6 @@ namespace Ink_Canvas
 
         [JsonProperty("showPPTModePrompt")]
         public bool ShowPPTModePrompt { get; set; } = false;
-
-        [JsonProperty("enableMediaPassthrough")]
-        public bool EnableMediaPassthrough { get; set; } = true;
     }
 
     public class Automation
