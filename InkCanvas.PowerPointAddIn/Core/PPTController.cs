@@ -281,7 +281,7 @@ namespace InkCanvas.PowerPointAddIn.Core
                 {
                     try
                     {
-                        if (shape.MediaType == Microsoft.Office.Interop.PowerPoint.PpMediaType.ppMediaTypeVideo)
+                        if ((int)(object)shape.MediaType == 13)  // ppMediaTypeVideo
                             return true;
                     }
                     catch { }
