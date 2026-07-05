@@ -1678,6 +1678,21 @@ namespace Ink_Canvas
                     }
                     catch { }
                 }
+
+                // OLE 控件（ActiveX 媒体播放器等）
+                if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoOLEControlObject)
+                    return true;
+
+                // 嵌入式视频（旧版格式）
+                if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoEmbeddedOLEObject)
+                {
+                    try
+                    {
+                        if ((int)(object)shape.MediaType == 14)  // ppMediaTypeMovie
+                            return true;
+                    }
+                    catch { }
+                }
             }
             catch { }
             return false;
