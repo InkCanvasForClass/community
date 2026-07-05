@@ -288,4 +288,10 @@
   <data name="PPT_SlidesNotFound" xml:space="preserve">
     <value>未找到幻灯片</value>
   </data>
+  <data name="SmartMode" xml:space="preserve">
+    <value>PPT 智慧模式</value>
+  </data>
+  <data name="SmartModeHint" xml:space="preserve">
+    <value>自动检测 PPT 中的视频控件区域，鼠标进入时切换为指针模式，离开后恢复批注模式</value>
+  </data>
 </root>

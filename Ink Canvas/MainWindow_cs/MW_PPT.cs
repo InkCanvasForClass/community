@@ -30,6 +30,21 @@ namespace Ink_Canvas
     {
         #region Win32 API Declarations
         [DllImport("user32.dll")]
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+        [DllImport("user32.dll")]
+        private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+        [DllImport("user32.dll")]
+        private static extern uint GetDpiForWindow(IntPtr hWnd);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RECT
+        {
+            public int Left, Top, Right, Bottom;
+        }
+
+        [DllImport("user32.dll")]
         private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
         [DllImport("user32.dll")]
@@ -195,6 +210,15 @@ namespace Ink_Canvas
         /// PowerPoint 全屏放映顶层窗口类名（与编辑态 PPTFrameClass 区分）。
         /// </summary>
         private const string PowerPointSlideShowWindowClassName = "screenClass";
+
+        // 智慧模式：视频控件穿透区域
+        /// <summary>当前幻灯片的视频控件原始区域列表（磅值），用于鼠标进入/离开判断。</summary>
+        private List<SmartRegion> _smartModeRegions;
+        /// <summary>缓存的视频区域对应的幻灯片页码，避免重复查询。</summary>
+        private int _smartModeSlideIndex = -1;
+        /// <summary>VSTO/COM 返回的幻灯片尺寸（磅）和放映窗口句柄，用于主应用端坐标转换。</summary>
+        private float _smartModeSlideWidth, _smartModeSlideHeight;
+        private IntPtr _smartModeSlideShowHwnd;
 
         #endregion
 
@@ -1365,6 +1389,13 @@ namespace Ink_Canvas
 
                     // 仅PPT模式：放映开始立即同步主窗口可见性（勿仅依赖 SlideShowStateChanged 定时器）
                     CheckMainWindowVisibility();
+
+                    // 刷新智慧模式区域
+                    if (Settings.PowerPointSettings.EnableSmartMode)
+                    {
+                        System.Diagnostics.Debug.WriteLine("[SmartMode] SlideShowBegin, refreshing regions...");
+                        RefreshSmartModeRegions();
+                    }
                 });
 
                 if (!isFloatingBarFolded)
@@ -1503,6 +1534,10 @@ namespace Ink_Canvas
                 });
                 _previousSlideID = currentSlide;
 
+                // 刷新智慧模式区域（翻页时视频控件可能变化）
+                if (Settings.PowerPointSettings.EnableSmartMode)
+                    Application.Current.Dispatcher.InvokeAsync(() => RefreshSmartModeRegions());
+
                 // 转发PPT翻页事件到小白板（如果已打开且启用了联动）
                 _miniWhiteboardWindow?.OnPPTSlideChangedExternal(currentSlide - 1);
             }
@@ -1511,6 +1546,144 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"处理幻灯片切换事件失败: {ex}", LogHelper.LogType.Error);
             }
         }
+
+        #region 智慧模式：视频控件区域刷新与坐标转换
+
+        /// <summary>
+        /// 从 PPT Agent / COM 获取当前幻灯片的视频控件区域，缓存后用于鼠标进入/离开判断。
+        /// </summary>
+        private void RefreshSmartModeRegions()
+        {
+            try
+            {
+                if (!Settings.PowerPointSettings.EnableSmartMode)
+                {
+                    _smartModeRegions = null;
+                    _smartModeSlideIndex = -1;
+                    LogHelper.WriteLogToFile("[SmartMode] 功能未开启", LogHelper.LogType.Info);
+                    return;
+                }
+
+                LogHelper.WriteLogToFile($"[SmartMode] 开始刷新, PPTLinkMode={Settings.PowerPointSettings.PPTLinkMode}, Manager={_pptManager?.GetType().Name}", LogHelper.LogType.Info);
+
+                if (_pptManager is PPTAgentLinkManager agentManager)
+                {
+                    var response = agentManager.GetSmartRegions();
+                    if (response?.Regions != null && response.Regions.Count > 0)
+                    {
+                        _smartModeRegions = response.Regions;
+                        _smartModeSlideIndex = response.SlideIndex;
+                        _smartModeSlideWidth = response.SlideWidth;
+                        _smartModeSlideHeight = response.SlideHeight;
+                        _smartModeSlideShowHwnd = new IntPtr(response.SlideShowWindowHandle);
+                        LogHelper.WriteLogToFile($"[SmartMode] Agent 加载了 {_smartModeRegions.Count} 个区域, 第 {_smartModeSlideIndex} 页, Slide={_smartModeSlideWidth}x{_smartModeSlideHeight}磅", LogHelper.LogType.Info);
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile("[SmartMode] Agent 返回空区域列表", LogHelper.LogType.Info);
+                        _smartModeRegions = null;
+                    }
+                }
+                else
+                {
+                    // COM/ROT 模式：尝试直接通过 COM interop 获取视频区域
+                    LogHelper.WriteLogToFile("[SmartMode] 非 Agent 模式，尝试 COM 直接获取", LogHelper.LogType.Info);
+                    _smartModeRegions = GetVideoRegionsViaCom();
+                    _smartModeSlideIndex = _currentSlideShowPosition;
+                    if (_smartModeRegions != null)
+                        LogHelper.WriteLogToFile($"[SmartMode] COM 获取到 {_smartModeRegions.Count} 个区域", LogHelper.LogType.Info);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[SmartMode] 刷新失败: {ex}", LogHelper.LogType.Warning);
+                _smartModeRegions = null;
+            }
+
+            // 将磅值坐标转换为 WPF 窗口坐标（必须在 UI 线程执行）
+            Application.Current.Dispatcher.Invoke(() => BuildSmartModeRects());
+        }
+
+        /// <summary>
+        /// 通过 COM interop 直接从 PowerPoint 获取当前幻灯片的视频控件区域（适用于 COM/ROT 模式）。
+        /// </summary>
+        private List<SmartRegion> GetVideoRegionsViaCom()
+        {
+            try
+            {
+                var app = pptApplication;
+                if (app == null) return null;
+
+                Presentation pres = null;
+                try { pres = app.ActivePresentation; } catch { return null; }
+                if (pres == null) return null;
+
+                SlideShowWindow ssw = null;
+                try { ssw = pres.SlideShowWindow; } catch { return null; }
+                if (ssw == null) return null;
+
+                var view = ssw.View;
+                if (view == null) return null;
+
+                var slide = view.Slide;
+                if (slide == null) return null;
+
+                float slideWidth = pres.PageSetup.SlideWidth;
+                float slideHeight = pres.PageSetup.SlideHeight;
+
+                _smartModeSlideWidth = slideWidth;
+                _smartModeSlideHeight = slideHeight;
+                _smartModeSlideShowHwnd = FindWindow(PowerPointSlideShowWindowClassName, null);
+
+                var regions = new List<SmartRegion>();
+                foreach (Microsoft.Office.Interop.PowerPoint.Shape shape in slide.Shapes)
+                {
+                    if (!IsVideoShape(shape)) continue;
+                    try
+                    {
+                        regions.Add(new SmartRegion
+                        {
+                            X = shape.Left,
+                            Y = shape.Top,
+                            Width = shape.Width,
+                            Height = shape.Height,
+                            ShapeName = shape.Name,
+                            MediaType = (int)shape.MediaType
+                        });
+                    }
+                    catch { }
+                }
+                return regions;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[SmartMode] COM 获取失败: {ex.Message}", LogHelper.LogType.Warning);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 判断一个 Shape 是否为视频控件（仅 ppMediaTypeVideo）。
+        /// </summary>
+        private static bool IsVideoShape(Microsoft.Office.Interop.PowerPoint.Shape shape)
+        {
+            try
+            {
+                if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoMedia)
+                {
+                    try
+                    {
+                        if ((int)(object)shape.MediaType == 13)  // ppMediaTypeVideo
+                            return true;
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+            return false;
+        }
+
+        #endregion
 
         /// <summary>
         /// 处理 PowerPoint 幻灯片放映结束时的清理与界面恢复，包括保存当前幻灯片墨迹、重置墨迹管理器状态、恢复主题与工具栏显示，并根据配置折叠或展示浮动工具栏等 UI 调整。
@@ -1531,6 +1704,10 @@ namespace Ink_Canvas
 
                 if (isEnteredSlideShowEndEvent) return;
                 isEnteredSlideShowEndEvent = true;
+
+                // 清除智慧模式区域
+                _smartModeRegions = null;
+                _smartModeSlideIndex = -1;
 
                 // 获取当前播放页码，优先使用跟踪的页码，否则尝试从PPT管理器获取
                 int currentPage = _currentSlideShowPosition;

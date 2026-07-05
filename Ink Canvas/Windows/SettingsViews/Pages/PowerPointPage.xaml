@@ -60,6 +60,12 @@
                             Icon="{x:Static ui:SegoeFluentIcons.FastForward}"
                             Toggled="ToggleSwitchSkipAnimationsWhenGoNext_Toggled"/>
 
+                    <controls:LabeledSettingsCard x:Name="CardEnableSmartMode"
+                            Header="{x:Static props:PPTStrings.SmartMode}"
+                            Description="{x:Static props:PPTStrings.SmartModeHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
+                            Toggled="ToggleSwitchEnableSmartMode_Toggled"/>
+
                     <controls:LabeledSettingsCard x:Name="CardSupportWPS"
                             Header="{x:Static props:PPTStrings.SupportWPS}"
                             Icon="{x:Static ui:SegoeFluentIcons.Document}"

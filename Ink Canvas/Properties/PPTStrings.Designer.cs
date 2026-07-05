@@ -203,5 +203,9 @@ namespace Ink_Canvas.Properties
         public static string PPT_ModePrompt_Title => ResourceManager.GetString(nameof(PPT_ModePrompt_Title), _resourceCulture);
 
         public static string PPT_SlidesNotFound => ResourceManager.GetString(nameof(PPT_SlidesNotFound), _resourceCulture);
+
+        public static string SmartMode => ResourceManager.GetString(nameof(SmartMode), _resourceCulture);
+
+        public static string SmartModeHint => ResourceManager.GetString(nameof(SmartModeHint), _resourceCulture);
     }
 }

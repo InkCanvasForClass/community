@@ -104,6 +104,12 @@ namespace Ink_Canvas.Helpers
                 .ToList();
         }
 
+        public SmartRegionsResponse GetSmartRegions()
+        {
+            return _client?.SendRequest<SmartRegionsResponse>(PPTCommands.GetSmartRegions)
+                   ?? new SmartRegionsResponse();
+        }
+
         private bool Send(string command, object data = null)
         {
             var result = _client?.SendCommand(command, data) == true;

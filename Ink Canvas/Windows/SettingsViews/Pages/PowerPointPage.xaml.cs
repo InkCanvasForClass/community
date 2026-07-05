@@ -99,6 +99,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardEnablePPTButtonLongPressPageTurn.IsOn = ppt.EnablePPTButtonLongPressPageTurn;
 
             CardShowCanvasAtNewSlideShow.IsOn = ppt.IsShowCanvasAtNewSlideShow;
+            CardEnableSmartMode.IsOn = ppt.EnableSmartMode;
 
             CardEnableTwoFingerGestureInPresentationMode.IsOn = ppt.IsEnableTwoFingerGestureInPresentationMode;
             CardEnableFingerGestureSlideShowControl.IsOn = ppt.IsEnableFingerGestureSlideShowControl;
@@ -520,6 +521,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         #endregion
 
         #region PPT SlideShow Entry & Gesture
+
+        private void ToggleSwitchEnableSmartMode_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.PowerPointSettings.EnableSmartMode = CardEnableSmartMode.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
 
         private void ToggleSwitchShowCanvasAtNewSlideShow_Toggled(object sender, RoutedEventArgs e)
         {

@@ -288,4 +288,10 @@
   <data name="PPT_SlidesNotFound" xml:space="preserve">
     <value>Slides not found</value>
   </data>
+  <data name="SmartMode" xml:space="preserve">
+    <value>PPT smart mode</value>
+  </data>
+  <data name="SmartModeHint" xml:space="preserve">
+    <value>Auto-detect video controls in PPT slides; switch to pointer mode when the cursor enters a video region, and restore annotation mode when it leaves</value>
+  </data>
 </root>

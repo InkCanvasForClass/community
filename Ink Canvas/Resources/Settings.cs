@@ -755,12 +755,12 @@ namespace Ink_Canvas
         public double PPTTimeCapsuleOffsetY { get; set; } = 0;
         [JsonProperty("pptLinkMode")]
         public PPTLinkMode PPTLinkMode { get; set; } = PPTLinkMode.Com;
-
         [JsonProperty("showPPTSidebarByDefault")]
         public bool ShowPPTSidebarByDefault { get; set; } = false;
-
         [JsonProperty("showPPTModePrompt")]
         public bool ShowPPTModePrompt { get; set; } = false;
+        [JsonProperty("enableSmartMode")]
+        public bool EnableSmartMode { get; set; } = true;
     }
 
     public class Automation
