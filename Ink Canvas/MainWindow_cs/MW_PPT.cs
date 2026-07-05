@@ -1669,14 +1669,18 @@ namespace Ink_Canvas
         {
             try
             {
+                // msoMedia = 16：所有媒体形状
                 if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoMedia)
                 {
                     try
                     {
-                        if ((int)(object)shape.MediaType == 13)  // ppMediaTypeVideo
+                        var mediaType = (int)(object)shape.MediaType;
+                        if (mediaType == 13 || mediaType == 14)  // ppMediaTypeVideo / ppMediaTypeMovie
                             return true;
                     }
                     catch { }
+                    // 读不到 MediaType 也当作视频控件（避免漏掉）
+                    return true;
                 }
 
                 // OLE 控件（ActiveX 媒体播放器等）
