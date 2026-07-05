@@ -276,20 +276,9 @@ namespace InkCanvas.PowerPointAddIn.Core
         {
             try
             {
-                // msoMedia = 16：所有媒体形状（视频/电影/音频）
+                // msoMedia = 16
                 if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoMedia)
-                {
-                    try
-                    {
-                        var mediaType = (int)(object)shape.MediaType;
-                        // ppMediaTypeVideo = 13, ppMediaTypeMovie = 14（均视为视频控件）
-                        if (mediaType == 13 || mediaType == 14)
-                            return true;
-                    }
-                    catch { }
-                    // 如果读不到 MediaType，也当作视频控件（保守策略，避免漏掉）
                     return true;
-                }
 
                 // OLE 控件（ActiveX 媒体播放器等）
                 if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoOLEControlObject)

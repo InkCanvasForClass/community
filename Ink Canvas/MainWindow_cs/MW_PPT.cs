@@ -1663,25 +1663,15 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 判断一个 Shape 是否为视频控件（仅 ppMediaTypeVideo）。
+        /// 判断一个 Shape 是否为视频控件。
         /// </summary>
         private static bool IsVideoShape(Microsoft.Office.Interop.PowerPoint.Shape shape)
         {
             try
             {
-                // msoMedia = 16：所有媒体形状
+                // msoMedia = 16
                 if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoMedia)
-                {
-                    try
-                    {
-                        var mediaType = (int)(object)shape.MediaType;
-                        if (mediaType == 13 || mediaType == 14)  // ppMediaTypeVideo / ppMediaTypeMovie
-                            return true;
-                    }
-                    catch { }
-                    // 读不到 MediaType 也当作视频控件（避免漏掉）
                     return true;
-                }
 
                 // OLE 控件（ActiveX 媒体播放器等）
                 if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoOLEControlObject)
