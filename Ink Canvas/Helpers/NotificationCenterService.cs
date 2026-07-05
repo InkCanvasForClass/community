@@ -11,13 +11,33 @@ namespace Ink_Canvas.Helpers
         private static readonly List<NotificationMessage> Queue = new List<NotificationMessage>();
         private static readonly List<NotificationMessage> History = new List<NotificationMessage>();
         private static bool isShowing;
-        private struct JudgeRepeatMessageStruct
+        private const short DeduplicationWindowSeconds = 2;
+        private class LastMessageInfo
         {
             public string Title { get; set; }
             public DateTime Time { get; set; }
             public string Source { get; set; }
+            public string Summary { get; set; }
         }
-        private static JudgeRepeatMessageStruct JudgeRepeatMessage = new JudgeRepeatMessageStruct();
+        private static LastMessageInfo _lastMessage = new LastMessageInfo();
+        private static bool IsDuplicate(NotificationMessage message)
+        {
+            ///<summary>
+            ///在一定时间内和前条标题相同，内容相同，来源相同的消息返回true
+            ///</summary>
+            if (string.IsNullOrEmpty(_lastMessage.Title) || string.IsNullOrEmpty(message.Title)) return false;
+            
+            TimeSpan interval = message.CreatedAt - _lastMessage.Time;
+            double totalSeconds = interval.TotalSeconds;
+            if (_lastMessage.Title == message.Title && totalSeconds <= DeduplicationWindowSeconds && message.Source == _lastMessage.Source && message.Summary == _lastMessage.Summary)
+            {
+                _lastMessage.Time = message.CreatedAt;
+                Console.WriteLine("[info]标题" + message.Title + "已被自动去重" + "发送方" + message.Source);
+                return true;
+            }
+            
+            return false;
+        }
 
         public static event Action<NotificationMessage> NotificationRequested;
 
@@ -46,26 +66,15 @@ namespace Ink_Canvas.Helpers
 
             lock (SyncRoot)
             {
-                ///<summary>
-                ///在一定时间内和前一条相同且来源一样就不重复显示
-                ///场景：教学课堂环境，插件可能因异常（如死循环、网络重连）高频推送相同通知。
-                ///策略：采用滑动窗口去重（2秒内）。若同一来源的相同标题持续出现，每次出现都刷新窗口起点，使通知彻底沉默，直到插件停止刷屏 2 秒以上。
-                ///效果：杜绝课堂被反复弹窗干扰，同时不影响正常间隔（> 2秒）的有效通知。
-                ///</summary>
-                if (!string.IsNullOrEmpty(message.Title) && JudgeRepeatMessage.Title!=null)
+                if (IsDuplicate(message)) return;
+                if (!string.IsNullOrEmpty(message.Title))
                 {
-                    TimeSpan interval = message.CreatedAt - JudgeRepeatMessage.Time;
-                    double TotalSeconds = interval.TotalSeconds;
-                    if(JudgeRepeatMessage.Title == message.Title && TotalSeconds<=2 && message.Source==JudgeRepeatMessage.Source)
-                    {
-                        JudgeRepeatMessage.Time = message.CreatedAt;
-                        return;
-                    }
-                    
+                    //只有非空消息才做去重
+                    _lastMessage.Title = message.Title;
+                    _lastMessage.Time = message.CreatedAt;
+                    _lastMessage.Source = message.Source;
+                    _lastMessage.Summary = message.Summary;
                 }
-                JudgeRepeatMessage.Title = message.Title;
-                JudgeRepeatMessage.Time = message.CreatedAt;
-                JudgeRepeatMessage.Source = message.Source;
                 Queue.Add(message);
                 History.Insert(0, message);
                 if (History.Count > 100) History.RemoveRange(100, History.Count - 100);
