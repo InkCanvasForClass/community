@@ -1718,6 +1718,11 @@ namespace Ink_Canvas
                 _smartModeRegions = null;
                 _smartModeSlideIndex = -1;
 
+                // 清除WPF坐标映射和定时器
+                _mediaPassthroughRects?.Clear();
+                StopMediaPassthroughTimer();
+                _isMediaRegionMouseMode = false;
+
                 // 获取当前播放页码，优先使用跟踪的页码，否则尝试从PPT管理器获取
                 int currentPage = _currentSlideShowPosition;
                 if (currentPage <= 0)
