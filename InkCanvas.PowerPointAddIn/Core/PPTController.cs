@@ -196,11 +196,11 @@ namespace InkCanvas.PowerPointAddIn.Core
             return action.Invoke();
         }
 
-        public MediaRegionsResponse GetSmartRegions()
+        public SmartRegionsResponse GetSmartRegions()
         {
             return Run(() =>
             {
-                var response = new MediaRegionsResponse();
+                var response = new SmartRegionsResponse();
 
                 if (_application.SlideShowWindows.Count <= 0)
                     return response;
