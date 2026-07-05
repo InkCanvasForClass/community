@@ -269,7 +269,7 @@ namespace InkCanvas.PowerPointAddIn.Core
                 }
 
                 return response;
-            }) ?? new MediaRegionsResponse();
+            }) ?? new SmartRegionsResponse();
         }
 
         private static bool IsVideoShape(Microsoft.Office.Interop.PowerPoint.Shape shape)
