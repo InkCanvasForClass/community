@@ -11,6 +11,7 @@ namespace Ink_Canvas.Helpers
         private static readonly List<NotificationMessage> Queue = new List<NotificationMessage>();
         private static readonly List<NotificationMessage> History = new List<NotificationMessage>();
         private static bool isShowing;
+        private static ushort DedupMessageIndex { get; set; }
         private const short DeduplicationWindowSeconds = 2;
         private class LastMessageInfo
         {
@@ -32,7 +33,9 @@ namespace Ink_Canvas.Helpers
             if (_lastMessage.Title == message.Title && totalSeconds <= DeduplicationWindowSeconds && message.Source == _lastMessage.Source && message.Summary == _lastMessage.Summary)
             {
                 _lastMessage.Time = message.CreatedAt;
-                Console.WriteLine("[info]标题" + message.Title + "已被自动去重" + "发送方" + message.Source);
+                if (DedupMessageIndex == 0) LogHelper.WriteLogToFile($"{message.Source}发送的标题为{message.Title}的消息已被消息去重拦截",LogHelper.LogType.Info);
+                if (DedupMessageIndex >= 65000) DedupMessageIndex = 1;
+                ++DedupMessageIndex;
                 return true;
             }
             
@@ -70,6 +73,7 @@ namespace Ink_Canvas.Helpers
                 if (!string.IsNullOrEmpty(message.Title))
                 {
                     //只有非空消息才做去重
+                    DedupMessageIndex = 0;
                     _lastMessage.Title = message.Title;
                     _lastMessage.Time = message.CreatedAt;
                     _lastMessage.Source = message.Source;
