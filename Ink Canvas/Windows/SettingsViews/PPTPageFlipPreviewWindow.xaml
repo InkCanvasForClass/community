@@ -9,37 +9,12 @@
         WindowState="Normal"
         Background="Black"
         ShowInTaskbar="False"
-        Topmost="False"
+        Topmost="True"
         AllowsTransparency="True"
         WindowStartupLocation="Manual">
-    
+
     <Grid x:Name="RootGrid" Background="Black">
         <!-- PPT Slideshow Background (Uniform centered, black filled outer space) -->
         <Image Source="/Resources/PresentationExample/page.jpg" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
-        <!-- Left side bar -->
-        <localControls:PPTNavBar x:Name="LeftSidePanelForPPTNavigation"
-                                 Direction="LeftSide"
-                                 Margin="6,0,0,0"
-                                 HorizontalAlignment="Left" VerticalAlignment="Center"/>
-        
-        <!-- Right side bar -->
-        <localControls:PPTNavBar x:Name="RightSidePanelForPPTNavigation"
-                                 Direction="RightSide"
-                                 Margin="0,0,6,0"
-                                 HorizontalAlignment="Right" VerticalAlignment="Center"/>
-
-        <!-- Left bottom bar -->
-        <localControls:PPTNavBar x:Name="LeftBottomPanelForPPTNavigation"
-                                 Direction="LeftBottom"
-                                 Margin="6,0,0,6"
-                                 HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
-
-        <!-- Right bottom bar -->
-        <localControls:PPTNavBar x:Name="RightBottomPanelForPPTNavigation"
-                                 Direction="RightBottom"
-                                 Margin="0,0,6,6"
-                                 HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
-
     </Grid>
 </Window>

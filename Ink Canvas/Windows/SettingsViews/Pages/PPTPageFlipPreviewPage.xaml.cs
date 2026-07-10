@@ -82,9 +82,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 mw.PreviewStylusDown += BlockPreviewInput;
             }
 
-            // Create and show fullscreen preview window
+            // Create and show fullscreen preview windows:
+            // 1) 背景窗口（位于 SettingsWindow 之下、MainWindow 之上）
+            //    注册到 WindowTopmostManager：WS_EX_NOACTIVATE 保证不被激活，ZOrder 固定在
+            //    MainWindow 之上、SettingsWindow（激活后 ZOrder 增大）之下。
+            // 2) 顶层 Overlay 窗口（承载 4 个翻页按钮，浮在 SettingsWindow 之上）
+            //    不注册 manager（SettingsWindow 激活会超越其 ZOrder），自行维持 Z 序。
             var previewWin = new PPTPageFlipPreviewWindow();
             previewWin.Show();
+            WindowTopmostManager.RegisterWindow(previewWin);
+
+            var overlayWin = new PPTPageFlipPreviewOverlayWindow(settingsWindow);
+            overlayWin.Show();
 
             // Re-activate settings window so it remains in front
             settingsWindow?.Activate();
@@ -158,10 +167,19 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void ClosePreviewWindow()
         {
+            if (PPTPageFlipPreviewOverlayWindow.ActiveInstance != null)
+            {
+                try
+                {
+                    PPTPageFlipPreviewOverlayWindow.ActiveInstance.Close();
+                }
+                catch { }
+            }
             if (PPTPageFlipPreviewWindow.ActiveInstance != null)
             {
                 try
                 {
+                    WindowTopmostManager.UnregisterWindow(PPTPageFlipPreviewWindow.ActiveInstance);
                     PPTPageFlipPreviewWindow.ActiveInstance.Close();
                 }
                 catch { }
