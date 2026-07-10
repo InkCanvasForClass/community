@@ -1197,6 +1197,9 @@ namespace Ink_Canvas
         [JsonProperty("isPPTComDebugProbeEnabled")]
         public bool IsPPTComDebugProbeEnabled { get; set; } = false;
 
+        [JsonProperty("isPPTPageFlipPreviewVisible")]
+        public bool IsPPTPageFlipPreviewVisible { get; set; } = false;
+
         [JsonProperty("isEnableFullScreenHelper")]
         public bool IsEnableFullScreenHelper { get; set; }
 

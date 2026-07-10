@@ -20,6 +20,9 @@ namespace Ink_Canvas.Windows.SettingsViews
         [DllImport("user32.dll")]
         private static extern int SetWindowLong(IntPtr hwnd, int index, int newStyle);
 
+        [DllImport("user32.dll")]
+        private static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+
         public PPTPageFlipPreviewWindow()
         {
             InitializeComponent();
@@ -41,12 +44,20 @@ namespace Ink_Canvas.Windows.SettingsViews
         protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
-            
+
             try
             {
                 var hwnd = new WindowInteropHelper(this).Handle;
                 int extendedStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
                 SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle | WS_EX_TRANSPARENT | WS_EX_NOACTIVATE);
+
+                // 精确定位到主屏幕整个边界（与 MainWindow 一致，避免 Maximized 导致的几像素溢出）
+                var screen = System.Windows.Forms.Screen.PrimaryScreen;
+                Left = screen.Bounds.X;
+                Top = screen.Bounds.Y;
+                Width = screen.Bounds.Width;
+                Height = screen.Bounds.Height;
+                MoveWindow(hwnd, screen.Bounds.X, screen.Bounds.Y, screen.Bounds.Width, screen.Bounds.Height, true);
             }
             catch (Exception ex)
             {

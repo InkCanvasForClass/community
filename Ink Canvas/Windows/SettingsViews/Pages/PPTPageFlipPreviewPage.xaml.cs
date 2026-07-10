@@ -1,3 +1,4 @@
+using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
@@ -6,11 +7,6 @@ using System.Windows.Controls;
 using System.Windows.Interop;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
 using NavigationViewPaneDisplayMode = iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode;
-using NavigationView = iNKORE.UI.WPF.Modern.Controls.NavigationView;
-using NavigationViewItem = iNKORE.UI.WPF.Modern.Controls.NavigationViewItem;
-using NavigationViewSelectionChangedEventArgs = iNKORE.UI.WPF.Modern.Controls.NavigationViewSelectionChangedEventArgs;
-using SlideNavigationTransitionInfo = iNKORE.UI.WPF.Modern.Media.Animation.SlideNavigationTransitionInfo;
-using SlideNavigationTransitionEffect = iNKORE.UI.WPF.Modern.Media.Animation.SlideNavigationTransitionEffect;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -31,6 +27,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
+            // 根据 Debug 设置决定是否显示左侧内嵌预览，并同步调整设置区左边距
+            bool showPreview = SettingsManager.Settings.Advanced.IsPPTPageFlipPreviewVisible;
+            PreviewPanel.Visibility = showPreview ? Visibility.Visible : Visibility.Collapsed;
+            // 显示预览时左右两列等宽各占一半；隐藏预览时左列收缩不占位
+            PreviewColumn.Width = showPreview ? new GridLength(1, GridUnitType.Star) : GridLength.Auto;
+            // 显示预览时顶部提示与设置区左右边距收窄为 12；隐藏时保持 59 与其他页面一致
+            double sideMargin = showPreview ? 12 : 59;
+            TopInfoPanel.Margin = new Thickness(sideMargin, 12, 0, 12);
+            SettingsContentGrid.Margin = new Thickness(sideMargin, 0, sideMargin, 0);
+
             var settingsWindow = Window.GetWindow(this) as SettingsWindow;
             if (settingsWindow != null)
             {
@@ -56,7 +62,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 mw.IsInPPTPresentationMode = true;
                 SettingsManager.Settings.Appearance.ToolbarPosition = ToolbarPosition.Right; // Bottom center layout in PPT mode
-                
+
                 mw.UpdateToolbarComponentVisibility();
                 mw.UpdateToolbarPosition();
 
@@ -76,10 +82,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 mw.PreviewStylusDown += BlockPreviewInput;
             }
 
-            // Create and show preview window
+            // Create and show fullscreen preview window
             var previewWin = new PPTPageFlipPreviewWindow();
             previewWin.Show();
-            
+
             // Re-activate settings window so it remains in front
             settingsWindow?.Activate();
 
@@ -87,10 +93,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             TabControlPositionSelect.SelectedIndex = 0; // Trigger load for Global tab
 
             _isLoaded = true;
-            
+
             LoadSelectedPositionSettings();
+            UpdateInlinePreview();
             previewWin.UpdatePreview();
-            
+
             SliderTouchHelper.AddTouchSupportToAllSliders(this);
         }
 
@@ -161,11 +168,34 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
         }
 
+        private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdateInlinePreview();
+        }
+
+        /// <summary>
+        /// PreviewCanvas 尺寸变化（FixedAspectRatioPanel 完成排列）后重算 4 个 Border 的 Margin。
+        /// </summary>
+        private void PreviewCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdateInlinePreview();
+        }
+
+        /// <summary>
+        /// 同时刷新左侧内嵌预览与全屏预览窗口。
+        /// </summary>
+        private void UpdatePreviews()
+        {
+            UpdateInlinePreview();
+            PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+        }
+
         private void TabControlPositionSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (e.OriginalSource != TabControlPositionSelect) return;
             if (!_isLoaded) return;
             LoadSelectedPositionSettings();
+            UpdateInlinePreview();
         }
 
         private int GetSelectedPositionIndex()
@@ -434,6 +464,107 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
         }
 
+        #region Inline Preview
+
+        /// <summary>
+        /// 更新左侧 16:9 预览中 4 个翻页按钮的状态（可见性、缩放、偏移、透明度、页码、主题）。
+        /// </summary>
+        private void UpdateInlinePreview()
+        {
+            if (PreviewCanvas == null || PreviewLS == null) return;
+
+            var ppt = SettingsManager.Settings.PowerPointSettings;
+
+            // 有效值：位置 i 若 UseGlobalSettings=true，则采用全局字段值，否则采用位置自身字段值
+            double lsScale = ppt.PPTLSUseGlobalSettings ? ppt.PPTNavBarScale : ppt.PPTLSButtonScale;
+            double rsScale = ppt.PPTRSUseGlobalSettings ? ppt.PPTNavBarScale : ppt.PPTRSButtonScale;
+            double lbScale = ppt.PPTLBUseGlobalSettings ? ppt.PPTNavBarScale : ppt.PPTLBButtonScale;
+            double rbScale = ppt.PPTRBUseGlobalSettings ? ppt.PPTNavBarScale : ppt.PPTRBButtonScale;
+
+            double lsOpacity = ppt.PPTLSUseGlobalSettings ? ppt.PPTGlobalButtonOpacity : ppt.PPTLSButtonOpacity;
+            double rsOpacity = ppt.PPTRSUseGlobalSettings ? ppt.PPTGlobalButtonOpacity : ppt.PPTRSButtonOpacity;
+            double lbOpacity = ppt.PPTLBUseGlobalSettings ? ppt.PPTGlobalButtonOpacity : ppt.PPTLBButtonOpacity;
+            double rbOpacity = ppt.PPTRBUseGlobalSettings ? ppt.PPTGlobalButtonOpacity : ppt.PPTRBButtonOpacity;
+
+            bool lsShowPage = ppt.PPTLSUseGlobalSettings ? ppt.PPTGlobalShowPageNumber : ppt.PPTLSShowPageNumber;
+            bool rsShowPage = ppt.PPTRSUseGlobalSettings ? ppt.PPTGlobalShowPageNumber : ppt.PPTRSShowPageNumber;
+            bool lbShowPage = ppt.PPTLBUseGlobalSettings ? ppt.PPTGlobalShowPageNumber : ppt.PPTLBShowPageNumber;
+            bool rbShowPage = ppt.PPTRBUseGlobalSettings ? ppt.PPTGlobalShowPageNumber : ppt.PPTRBShowPageNumber;
+
+            bool lsBlackBg = ppt.PPTLSUseGlobalSettings ? ppt.PPTGlobalBlackBackground : ppt.PPTLSBlackBackground;
+            bool rsBlackBg = ppt.PPTRSUseGlobalSettings ? ppt.PPTGlobalBlackBackground : ppt.PPTRSBlackBackground;
+            bool lbBlackBg = ppt.PPTLBUseGlobalSettings ? ppt.PPTGlobalBlackBackground : ppt.PPTLBBlackBackground;
+            bool rbBlackBg = ppt.PPTRBUseGlobalSettings ? ppt.PPTGlobalBlackBackground : ppt.PPTRBBlackBackground;
+
+            // 1. Set scale for all 4 bars
+            PreviewLS.SetBarScale(lsScale);
+            PreviewRS.SetBarScale(rsScale);
+            PreviewLB.SetBarScale(lbScale);
+            PreviewRB.SetBarScale(rbScale);
+
+            // 2. Set margins — 内嵌预览不应用位置偏移，仅使用基础边距（按预览宽度比例缩放）
+            double viewScale = (PreviewCanvas.ActualWidth > 0) ? PreviewCanvas.ActualWidth / 1600.0 : 1.0;
+
+            PreviewLSBorder.Margin = new Thickness(6 * viewScale, 0, 0, 0);
+            PreviewRSBorder.Margin = new Thickness(0, 0, 6 * viewScale, 0);
+            PreviewLBBorder.Margin = new Thickness(6 * viewScale, 0, 0, 6 * viewScale);
+            PreviewRBBorder.Margin = new Thickness(0, 0, 6 * viewScale, 6 * viewScale);
+
+            // 3. Set enabled/disabled visibility (UseGlobalSettings 的位由 PPTGlobalButtonEnabled 决定)
+            string displayOption = ppt.PPTButtonsDisplayOption.ToString("D4");
+            if (displayOption.Length < 4) displayOption = "2222";
+            char[] c = displayOption.ToCharArray();
+            // LeftBottom = [0], RightBottom = [1], LeftSide = [2], RightSide = [3]
+            if (ppt.PPTLBUseGlobalSettings) c[0] = ppt.PPTGlobalButtonEnabled ? '2' : '1';
+            if (ppt.PPTRBUseGlobalSettings) c[1] = ppt.PPTGlobalButtonEnabled ? '2' : '1';
+            if (ppt.PPTLSUseGlobalSettings) c[2] = ppt.PPTGlobalButtonEnabled ? '2' : '1';
+            if (ppt.PPTRSUseGlobalSettings) c[3] = ppt.PPTGlobalButtonEnabled ? '2' : '1';
+            PreviewLBBorder.Visibility = c[0] == '2' ? Visibility.Visible : Visibility.Collapsed;
+            PreviewRBBorder.Visibility = c[1] == '2' ? Visibility.Visible : Visibility.Collapsed;
+            PreviewLSBorder.Visibility = c[2] == '2' ? Visibility.Visible : Visibility.Collapsed;
+            PreviewRSBorder.Visibility = c[3] == '2' ? Visibility.Visible : Visibility.Collapsed;
+
+            // 4. Set page button visibility (Show Page Number)
+            PreviewLS.SetPageButtonVisibility(lsShowPage ? Visibility.Visible : Visibility.Collapsed);
+            PreviewRS.SetPageButtonVisibility(rsShowPage ? Visibility.Visible : Visibility.Collapsed);
+            PreviewLB.SetPageButtonVisibility(lbShowPage ? Visibility.Visible : Visibility.Collapsed);
+            PreviewRB.SetPageButtonVisibility(rbShowPage ? Visibility.Visible : Visibility.Collapsed);
+
+            // 5. Set opacity
+            PreviewLS.SetBarOpacity(lsOpacity);
+            PreviewRS.SetBarOpacity(rsOpacity);
+            PreviewLB.SetBarOpacity(lbOpacity);
+            PreviewRB.SetBarOpacity(rbOpacity);
+
+            // 6. Set theme (Black Background)
+            PreviewLS.ApplyTheme(lsBlackBg);
+            PreviewRS.ApplyTheme(rsBlackBg);
+            PreviewLB.ApplyTheme(lbBlackBg);
+            PreviewRB.ApplyTheme(rbBlackBg);
+        }
+
+        private void PreviewLS_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            TabControlPositionSelect.SelectedIndex = 1; // 左侧
+        }
+
+        private void PreviewRS_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            TabControlPositionSelect.SelectedIndex = 2; // 右侧
+        }
+
+        private void PreviewLB_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            TabControlPositionSelect.SelectedIndex = 3; // 左下
+        }
+
+        private void PreviewRB_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            TabControlPositionSelect.SelectedIndex = 4; // 右下
+        }
+
+        #endregion
+
         private void ToggleSwitchPositionEnabled_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
@@ -445,7 +576,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ppt.PPTGlobalButtonEnabled = ToggleSwitchPositionEnabled.IsOn;
                 SettingsManager.SaveSettingsToFile();
                 SettingsActionHub.OnPPTGlobalSettingsChanged();
-                PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+                UpdatePreviews();
                 return;
             }
 
@@ -459,9 +590,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ppt.PPTButtonsDisplayOption = int.Parse(new string(c));
             SettingsManager.SaveSettingsToFile();
 
-            // Notify other managers and preview window
+            // Notify other managers and preview
             SettingsActionHub.OnPPTButtonsDisplayOptionChanged();
-            PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+            UpdatePreviews();
         }
 
         private void ToggleSwitchShowPageNumber_Toggled(object sender, RoutedEventArgs e)
@@ -475,7 +606,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ppt.PPTGlobalShowPageNumber = ToggleSwitchShowPageNumber.IsOn;
                 SettingsManager.SaveSettingsToFile();
                 SettingsActionHub.OnPPTGlobalSettingsChanged();
-                PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+                UpdatePreviews();
                 return;
             }
 
@@ -487,7 +618,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             // Trigger UI and preview refresh
             SettingsActionHub.OnPPTButtonPositionChanged();
-            PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+            UpdatePreviews();
         }
 
         private void ToggleSwitchBlackBackground_Toggled(object sender, RoutedEventArgs e)
@@ -501,7 +632,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ppt.PPTGlobalBlackBackground = ToggleSwitchBlackBackground.IsOn;
                 SettingsManager.SaveSettingsToFile();
                 SettingsActionHub.OnPPTGlobalSettingsChanged();
-                PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+                UpdatePreviews();
                 return;
             }
 
@@ -513,7 +644,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             // Trigger UI and preview refresh
             SettingsActionHub.OnPPTButtonPositionChanged();
-            PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+            UpdatePreviews();
         }
 
         private void ToggleSwitchUseGlobalSettings_Toggled(object sender, RoutedEventArgs e)
@@ -534,7 +665,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             // Notify runtime + preview (effective values may have changed)
             SettingsActionHub.OnPPTGlobalSettingsChanged();
-            PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+            UpdatePreviews();
         }
 
         private void SliderOffset_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -549,7 +680,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 ppt.PPTGlobalSideButtonPosition = offsetVal;
                 SettingsActionHub.OnPPTGlobalSettingsChanged();
-                PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+                UpdatePreviews();
                 _sliderDelayAction.DebounceAction(2000, null, () => SettingsManager.SaveSettingsToFile());
                 return;
             }
@@ -557,7 +688,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             int selectedIndex = GetSelectedPositionIndex();
             SetPositionOffset(selectedIndex, ppt, offsetVal);
             SettingsActionHub.OnPPTButtonPositionChanged();
-            PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+            UpdatePreviews();
 
             _sliderDelayAction.DebounceAction(2000, null, () => SettingsManager.SaveSettingsToFile());
         }
@@ -579,7 +710,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 ppt.PPTGlobalBottomButtonPosition = offsetVal;
                 SettingsActionHub.OnPPTGlobalSettingsChanged();
-                PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+                UpdatePreviews();
                 _sliderDelayAction.DebounceAction(2000, null, () => SettingsManager.SaveSettingsToFile());
                 return;
             }
@@ -587,7 +718,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             int selectedIndex = GetSelectedPositionIndex();
             SetPositionOffset(selectedIndex, ppt, offsetVal);
             SettingsActionHub.OnPPTButtonPositionChanged();
-            PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+            UpdatePreviews();
 
             _sliderDelayAction.DebounceAction(2000, null, () => SettingsManager.SaveSettingsToFile());
         }
@@ -614,7 +745,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ppt.PPTGlobalButtonOpacity = roundedValue;
                 SettingsManager.SaveSettingsToFile();
                 SettingsActionHub.OnPPTGlobalSettingsChanged();
-                PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+                UpdatePreviews();
                 return;
             }
 
@@ -632,7 +763,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             SettingsManager.SaveSettingsToFile();
             SettingsActionHub.OnPPTButtonOpacityChanged(buttonKey, roundedValue);
-            PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+            UpdatePreviews();
         }
 
         private void ButtonResetOpacity_Click(object sender, RoutedEventArgs e)
@@ -663,7 +794,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ppt.PPTNavBarScale = roundedValue;
                 SettingsManager.SaveSettingsToFile();
                 SettingsActionHub.OnPPTNavBarScaleChanged(roundedValue);
-                PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+                UpdatePreviews();
                 return;
             }
 
@@ -671,7 +802,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SetPositionScale(selectedIndex, ppt, roundedValue);
             SettingsManager.SaveSettingsToFile();
             SettingsActionHub.OnPPTGlobalSettingsChanged();
-            PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+            UpdatePreviews();
         }
     }
 }
