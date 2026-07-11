@@ -689,6 +689,9 @@ namespace Ink_Canvas
         [JsonProperty("enablePPTButtonEnhancedPreview")]
         public bool EnablePPTButtonEnhancedPreview { get; set; } = false;
 
+        [JsonProperty("showPPTEnhancedPreviewLoadingAnimation")]
+        public bool ShowPPTEnhancedPreviewLoadingAnimation { get; set; } = true;
+
         [JsonProperty("enablePPTButtonLongPressPageTurn")]
         public bool EnablePPTButtonLongPressPageTurn { get; set; } = true;
 

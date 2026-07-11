@@ -99,7 +99,7 @@ namespace Ink_Canvas.Helpers
 
         public object GetCurrentActivePresentation() => _inner.GetCurrentActivePresentation();
 
-        public List<PPTSlideThumbnail> ExportSlideThumbnails(int width, int height) => _inner.ExportSlideThumbnails(width, height);
+        public List<PPTSlideThumbnail> ExportSlideThumbnails(int width, int height, IProgress<double> progress = null) => _inner.ExportSlideThumbnails(width, height, progress);
         #endregion
 
         #region IDisposable

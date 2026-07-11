@@ -1030,6 +1030,7 @@ namespace Ink_Canvas
             Settings.PowerPointSettings.IsEnableFingerGestureSlideShowControl = false;
             Settings.PowerPointSettings.IsSupportWPS = false;
             Settings.PowerPointSettings.EnablePPTButtonEnhancedPreview = false;
+            Settings.PowerPointSettings.ShowPPTEnhancedPreviewLoadingAnimation = true;
 
             Settings.Canvas.InkWidth = 2.5;
             Settings.Canvas.IsShowCursor = false;

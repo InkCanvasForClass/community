@@ -16,6 +16,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Application = System.Windows.Application;
@@ -2717,9 +2718,11 @@ namespace Ink_Canvas
                     else
                     {
                         var slides = await GetOrBuildPPTEnhancedPreviewItemsAsync(EnsurePPTEnhancedPreviewCacheToken());
+
                         if (slides == null || slides.Count == 0)
                         {
                             LogHelper.WriteLogToFile("PPT增强预览未生成可用缩略图，改用默认导航", LogHelper.LogType.Warning);
+                            targetBar.IsPreviewExpanded = false;
                             _pptManager.TryShowSlideNavigation();
                         }
                         else
@@ -2805,6 +2808,61 @@ namespace Ink_Canvas
                 if (c != null && c.Visibility == Visibility.Visible) return c;
             }
             return null;
+        }
+
+        private double _pptLoadingProgress;
+        private DispatcherTimer _pptLoadingTimer;
+
+        /// <summary>直接同步回调的 IProgress 实现，不走 SynchronizationContext。</summary>
+        private sealed class DirectProgress : IProgress<double>
+        {
+            private readonly Action<double> _handler;
+            public DirectProgress(Action<double> handler) => _handler = handler;
+            public void Report(double value) => _handler(value);
+        }
+
+        private void UpdatePPTLoadingRing()
+        {
+            if (PPTLoadingRing == null) return;
+            double progress = Math.Max(0, Math.Min(1, _pptLoadingProgress));
+
+            // 像素坐标：Path Stretch="None"，Grid 64×64，StrokeThickness=4
+            const double cx = 32, cy = 32, r = 30;
+            const double startAngle = -Math.PI / 2; // 从 12 点方向开始
+
+            if (progress <= 0.001)
+            {
+                PPTLoadingRing.Data = Geometry.Empty;
+                return;
+            }
+
+            double sweepAngle = progress * 2 * Math.PI;
+            double sx = cx + r * Math.Cos(startAngle);
+            double sy = cy + r * Math.Sin(startAngle);
+
+            var figure = new PathFigure { StartPoint = new System.Windows.Point(sx, sy) };
+
+            if (sweepAngle >= 2 * Math.PI - 0.01)
+            {
+                // 满环：两段 180° 弧
+                figure.Segments.Add(new ArcSegment(
+                    new System.Windows.Point(cx, cy + r),
+                    new Size(r, r), 0, false, SweepDirection.Clockwise, true));
+                figure.Segments.Add(new ArcSegment(
+                    new System.Windows.Point(sx, sy),
+                    new Size(r, r), 0, false, SweepDirection.Clockwise, true));
+            }
+            else
+            {
+                double endAngle = startAngle + sweepAngle;
+                figure.Segments.Add(new ArcSegment(
+                    new System.Windows.Point(cx + r * Math.Cos(endAngle), cy + r * Math.Sin(endAngle)),
+                    new Size(r, r), 0, sweepAngle > Math.PI, SweepDirection.Clockwise, true));
+            }
+
+            var geom = new PathGeometry();
+            geom.Figures.Add(figure);
+            PPTLoadingRing.Data = geom;
         }
 
         private sealed class PPTEnhancedPreviewItem : IDisposable
@@ -3016,7 +3074,32 @@ namespace Ink_Canvas
                 if (_pptManager?.IsConnected != true) return;
                 if (!Settings.PowerPointSettings.EnablePPTButtonEnhancedPreview) return;
 
-                var slides = await GetOrBuildPPTEnhancedPreviewItemsAsync(cancellationToken);
+                if (Settings.PowerPointSettings.ShowPPTEnhancedPreviewLoadingAnimation)
+                {
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        _pptLoadingProgress = 0;
+                        PPTLoadingRing.Data = Geometry.Empty;
+                        PPTLoadingArcRotate.Angle = 0;
+                        PPTEnhancedPreviewLoadingOverlay.Visibility = Visibility.Visible;
+                        _pptLoadingTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(16) };
+                        _pptLoadingTimer.Tick += (_, _) =>
+                        {
+                            PPTLoadingArcRotate.Angle = (PPTLoadingArcRotate.Angle + 8) % 360;
+                            UpdatePPTLoadingRing();
+                        };
+                        _pptLoadingTimer.Start();
+                    });
+                }
+
+                // 不用 Progress<double>（会走 SynchronizationContext 合并），直接同步调用
+                var dispatcher = Application.Current.Dispatcher;
+                IProgress<double> progress = new DirectProgress(v =>
+                {
+                    _pptLoadingProgress = v;
+                    dispatcher.Invoke((Action)(() => UpdatePPTLoadingRing()));
+                });
+                var slides = await GetOrBuildPPTEnhancedPreviewItemsAsync(cancellationToken, progress);
                 if (!cancellationToken.IsCancellationRequested && slides != null && slides.Count > 0)
                 {
                     LogHelper.WriteLogToFile($"PPT enhanced preview preloaded {slides.Count} thumbnails.", LogHelper.LogType.Trace);
@@ -3029,9 +3112,18 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"PPT enhanced preview preload failed: {ex}", LogHelper.LogType.Warning);
             }
+            finally
+            {
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    _pptLoadingTimer?.Stop();
+                    _pptLoadingTimer = null;
+                    PPTEnhancedPreviewLoadingOverlay.Visibility = Visibility.Collapsed;
+                });
+            }
         }
 
-        private Task<List<PPTEnhancedPreviewItem>> GetOrBuildPPTEnhancedPreviewItemsAsync(CancellationToken cancellationToken)
+        private Task<List<PPTEnhancedPreviewItem>> GetOrBuildPPTEnhancedPreviewItemsAsync(CancellationToken cancellationToken, IProgress<double> progress = null)
         {
             lock (_pptEnhancedPreviewCacheLock)
             {
@@ -3042,7 +3134,7 @@ namespace Ink_Canvas
                     return _pptEnhancedPreviewBuildTask;
 
                 int generation = _pptEnhancedPreviewCacheGeneration;
-                var task = RunOnStaAsync(() => BuildPPTPreviewItems(cancellationToken), cancellationToken);
+                var task = RunOnStaAsync(() => BuildPPTPreviewItems(cancellationToken, progress), cancellationToken);
                 _pptEnhancedPreviewBuildTask = task;
 
                 task.ContinueWith(
@@ -3129,25 +3221,33 @@ namespace Ink_Canvas
             return tcs.Task;
         }
 
-        private List<PPTEnhancedPreviewItem> BuildPPTPreviewItems(CancellationToken cancellationToken)
+        private List<PPTEnhancedPreviewItem> BuildPPTPreviewItems(CancellationToken cancellationToken, IProgress<double> progress = null)
         {
             var result = new List<PPTEnhancedPreviewItem>();
 
             try
             {
-                var thumbnails = _pptManager?.ExportSlideThumbnails(480, 270);
+                // 阶段1：COM导出缩略图 → 进度 0~70%
+                var exportProgress = progress != null
+                    ? new Progress<double>(p => progress.Report(p * 0.7))
+                    : null;
+                var thumbnails = _pptManager?.ExportSlideThumbnails(480, 270, exportProgress);
                 if (thumbnails == null || thumbnails.Count == 0) return result;
 
+                // 阶段2：转换为 BitmapImage → 进度 70~100%
+                int total = thumbnails.Count;
+                int converted = 0;
                 foreach (var thumbnail in thumbnails)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    if (thumbnail?.PngBytes == null || thumbnail.PngBytes.Length == 0) continue;
+                    if (thumbnail?.PngBytes == null || thumbnail.PngBytes.Length == 0) { converted++; continue; }
 
                     var thumbnailStream = new MemoryStream(thumbnail.PngBytes, false);
                     var image = LoadBitmapImage(thumbnailStream);
                     if (image == null)
                     {
                         thumbnailStream.Dispose();
+                        converted++;
                         continue;
                     }
 
@@ -3158,6 +3258,8 @@ namespace Ink_Canvas
                         ThumbnailStream = thumbnailStream,
                         Thumbnail = image
                     });
+                    converted++;
+                    progress?.Report(0.7 + 0.3 * converted / total);
                 }
             }
             catch (OperationCanceledException)
