@@ -161,8 +161,8 @@ namespace Ink_Canvas
                 return;
             }
 
-            // 启动时优先同步设置，确保CrashAction为最新
-            SyncCrashActionFromSettings();
+            // CrashAction 的值将在 App_Startup 中通过缓存的 Settings.json 同步，
+            // 构造函数中先用默认值（ShowCrashWindow），LoadSettings 运行后会被覆盖。
 
             Startup += App_Startup;
             SessionEnding += App_SessionEnding;
@@ -792,6 +792,17 @@ namespace Ink_Canvas
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
+        private static void SyncCrashActionFromParsed(dynamic parsedSettings)
+        {
+            try
+            {
+                int crashAction = 2;
+                try { crashAction = (int)(parsedSettings?["startup"]?["crashAction"] ?? 2); } catch { }
+                CrashAction = (CrashActionType)crashAction;
+            }
+            catch { }
+        }
+
         private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             if (e.Exception is System.Runtime.InteropServices.COMException comEx)
@@ -901,6 +912,9 @@ namespace Ink_Canvas
 
             // 一次性读取并解析 Settings.json，避免重复 I/O + dynamic 反序列化
             dynamic parsedSettings = ReadSettingsJsonOnce();
+
+            // 从缓存设置同步 CrashAction（替代原构造函数中的 SyncCrashActionFromSettings）
+            SyncCrashActionFromParsed(parsedSettings);
 
             TryApplyPreferredLanguageFromParsedSettings(parsedSettings);
 
