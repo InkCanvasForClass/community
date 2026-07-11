@@ -562,6 +562,14 @@ namespace Ink_Canvas
         public string ChickenSoupPosition { get; set; } = "TopRight";
         [JsonProperty("hitokotoCategories", NullValueHandling = NullValueHandling.Ignore)]
         public List<string> HitokotoCategories { get; set; }
+        [JsonProperty("enableChickenSoupAutoRotation")]
+        public bool EnableChickenSoupAutoRotation { get; set; } = false;
+        [JsonProperty("chickenSoupAutoRotationInterval")]
+        public int ChickenSoupAutoRotationInterval { get; set; } = 60;
+        [JsonProperty("customTipsSchemes", NullValueHandling = NullValueHandling.Ignore)]
+        public List<TipsScheme> CustomTipsSchemes { get; set; }
+        [JsonProperty("enabledPresetTipsSources", NullValueHandling = NullValueHandling.Ignore)]
+        public List<string> EnabledPresetTipsSources { get; set; }
         [JsonProperty("isShowModeFingerToggleSwitch")]
         public bool IsShowModeFingerToggleSwitch { get; set; } = true;
         [JsonProperty("theme")]

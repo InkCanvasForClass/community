@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Ink_Canvas
 {
     public static class ChickenSoup
@@ -304,5 +306,39 @@ namespace Ink_Canvas
             "Tip: ♪别忘记今天好好享受毋庸置疑，明天是明天仍留有期待心情~",
             "Tip: 《5年课题，3年单曲》"
         };
+
+        public static List<TipsScheme> GetPresetSchemes()
+        {
+            return new List<TipsScheme>
+            {
+                new TipsScheme { PresetId = "osu", Name = "osu!玩家语录", IsPreset = true, IsEnabled = false },
+                new TipsScheme { PresetId = "mottos", Name = "励志名言警句", IsPreset = true, IsEnabled = false },
+                new TipsScheme { PresetId = "gaokao", Name = "高考祝福语", IsPreset = true, IsEnabled = false },
+                new TipsScheme { PresetId = "hitokoto", Name = "一言 (Hitokoto API)", IsPreset = true, IsEnabled = false },
+                new TipsScheme { PresetId = "phigros", Name = "Phigros Tips", IsPreset = true, IsEnabled = false }
+            };
+        }
+
+        public static string[] GetTipsFromPreset(string presetId)
+        {
+            switch (presetId)
+            {
+                case "osu": return OSUPlayerYuLu;
+                case "mottos": return MingYanJingJu;
+                case "gaokao": return GaoKaoPhrases;
+                case "phigros": return PhigrosTips;
+                case "hitokoto": return null;
+                default: return null;
+            }
+        }
+    }
+
+    public class TipsScheme
+    {
+        public string Name { get; set; }
+        public string Content { get; set; }
+        public bool IsPreset { get; set; }
+        public bool IsEnabled { get; set; }
+        public string PresetId { get; set; }
     }
 }

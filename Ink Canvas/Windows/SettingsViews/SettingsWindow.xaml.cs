@@ -33,6 +33,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             { "BoardToolbarPage", typeof(BoardToolbarPage) },
             { "BoardAppearancePage", typeof(BoardAppearancePage) },
             { "BoardMenuPage", typeof(BoardMenuPage) },
+            { "WhiteboardTipsPage", typeof(WhiteboardTipsPage) },
             { "UpdatePage", typeof(UpdatePage) },
             { "NotificationPage", typeof(NotificationPage) },
             { "AnnouncementCenterPage", typeof(AnnouncementCenterPage) },
@@ -95,6 +96,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 { "BoardToolbarPage", typeof(BoardToolbarPage) },
                 { "BoardAppearancePage", typeof(BoardAppearancePage) },
                 { "BoardMenuPage", typeof(BoardMenuPage) },
+                { "WhiteboardTipsPage", typeof(WhiteboardTipsPage) },
                 { "UpdatePage", typeof(UpdatePage) },
                 { "NotificationPage", typeof(NotificationPage) },
                 { "AnnouncementCenterPage", typeof(AnnouncementCenterPage) },
@@ -427,7 +429,8 @@ namespace Ink_Canvas.Windows.SettingsViews
             }
         }
 
-        private void OnNavigationViewBackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
+
+                private void OnNavigationViewBackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
         {
             if (rootFrame.CanGoBack) rootFrame.GoBack();
         }

@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OSVersionExtension;
@@ -147,6 +148,9 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
             }
+
+            // Migrate legacy chicken soup source setting to new multi-source format
+            SettingsManager.MigrateChickenSoupSettings();
 
             try
             {
