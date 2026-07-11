@@ -43,24 +43,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (settings?.Appearance == null) return;
 
             CardEnableTimeDisplayInWhiteboardMode.IsOn = settings.Appearance.EnableTimeDisplayInWhiteboardMode;
-            CardEnableChickenSoupInWhiteboardMode.IsOn = settings.Appearance.EnableChickenSoupInWhiteboardMode;
-
-            SelectComboBoxItemByTag(ComboBoxChickenSoupPosition, settings.Appearance.ChickenSoupPosition);
-
-            _suppressChickenSoupSourceSelectionChanged = true;
-            try
-            {
-                ComboBoxChickenSoupSource.SelectedIndex = settings.Appearance.ChickenSoupSource;
-            }
-            finally
-            {
-                Dispatcher.BeginInvoke(
-                    () => { _suppressChickenSoupSourceSelectionChanged = false; },
-                    DispatcherPriority.ContextIdle);
-            }
-
-            if (BtnHitokotoCustomize != null)
-                BtnHitokotoCustomize.Visibility = settings.Appearance.ChickenSoupSource == 3 ? Visibility.Visible : Visibility.Collapsed;
 
             BoardToolbarLeftOpacitySlider.Value = settings.Appearance.BoardToolbarLeftOpacity;
             BoardToolbarCenterOpacitySlider.Value = settings.Appearance.BoardToolbarCenterOpacity;
