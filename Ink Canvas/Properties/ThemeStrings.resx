@@ -94,7 +94,7 @@
     <value>深色主题</value>
   </data>
   <data name="Theme_EnableQuickPanel" xml:space="preserve">
-    <value>在收纳模式下启用快速面板</value>
+    <value>点击展开按钮后显示侧边栏</value>
   </data>
   <data name="Theme_EnableSplash" xml:space="preserve">
     <value>启用启动动画</value>
@@ -156,6 +156,9 @@
   <data name="Theme_GroupTitle" xml:space="preserve">
     <value>个性化</value>
   </data>
+  <data name="Theme_SidebarGroupTitle" xml:space="preserve">
+    <value>侧边栏</value>
+  </data>
   <data name="Theme_Label" xml:space="preserve">
     <value>主题</value>
   </data>
@@ -187,7 +190,10 @@
     <value>单行显示（6 种颜色）</value>
   </data>
   <data name="Theme_QuickPanelBottomOffset" xml:space="preserve">
-    <value>快捷面板垂直偏移</value>
+    <value>展开按钮与侧边栏的位置偏移</value>
+  </data>
+  <data name="Theme_QuickPanelBottomOffset_Description" xml:space="preserve">
+    <value>调整侧边栏在垂直方向上的偏移，右上左下</value>
   </data>
   <data name="Theme_QuoteSource" xml:space="preserve">
     <value>信仰の源出自 Where？</value>
@@ -259,7 +265,7 @@
     <value>跟随系统</value>
   </data>
   <data name="Theme_UnfoldButtonIcon" xml:space="preserve">
-    <value>取消收纳按钮图标</value>
+    <value>展开按钮图标</value>
   </data>
   <data name="Theme_UnfoldIcon_Arrow" xml:space="preserve">
     <value>箭头</value>
@@ -274,7 +280,7 @@
     <value>条形</value>
   </data>
   <data name="Theme_AllowDragSidePanel" xml:space="preserve">
-    <value>允许通过拖动调整侧边栏位置</value>
+    <value>允许拖动展开按钮调整偏移</value>
   </data>
   <data name="Theme_Upload" xml:space="preserve">
     <value>上传</value>

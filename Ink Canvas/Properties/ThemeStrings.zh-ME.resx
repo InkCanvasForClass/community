@@ -94,7 +94,7 @@
     <value>暗黑模式</value>
   </data>
   <data name="Theme_EnableQuickPanel" xml:space="preserve">
-    <value>收纳模式下开快速面板</value>
+    <value>点开展开钮就跳出侧边栏</value>
   </data>
   <data name="Theme_EnableSplash" xml:space="preserve">
     <value>开启动画整活</value>
@@ -156,6 +156,9 @@
   <data name="Theme_GroupTitle" xml:space="preserve">
     <value>个性化</value>
   </data>
+  <data name="Theme_SidebarGroupTitle" xml:space="preserve">
+    <value>侧边栏</value>
+  </data>
   <data name="Theme_Label" xml:space="preserve">
     <value>皮肤</value>
   </data>
@@ -187,7 +190,10 @@
     <value>单行显示（6 种颜色）</value>
   </data>
   <data name="Theme_QuickPanelBottomOffset" xml:space="preserve">
-    <value>快捷面板垂直偏移</value>
+    <value>展开钮跟侧边栏的位置差</value>
+  </data>
+  <data name="Theme_QuickPanelBottomOffset_Description" xml:space="preserve">
+    <value>调教侧边栏上下偏移，右上左下</value>
   </data>
   <data name="Theme_QuoteSource" xml:space="preserve">
     <value>信仰の源出自 Where？</value>
@@ -274,7 +280,7 @@
     <value>条形</value>
   </data>
   <data name="Theme_AllowDragSidePanel" xml:space="preserve">
-    <value>允许拽住手柄拖动侧边栏位置</value>
+    <value>允许拽住展开钮拖动偏移</value>
   </data>
   <data name="Theme_Upload" xml:space="preserve">
     <value>上传</value>

@@ -64,9 +64,13 @@
                          "Group":  "FloatingBarStrings"
                      },
     "Theme_GroupTitle":  {
-                             "NewKey":  "Theme_GroupTitle",
-                             "Group":  "ThemeStrings"
-                         },
+                            "NewKey":  "Theme_GroupTitle",
+                            "Group":  "ThemeStrings"
+                        },
+    "Theme_SidebarGroupTitle":  {
+                            "NewKey":  "Theme_SidebarGroupTitle",
+                            "Group":  "ThemeStrings"
+                        },
     "PPT_SkipAnimations":  {
                                "NewKey":  "SkipAnimations",
                                "Group":  "PPTStrings"
@@ -2361,6 +2365,10 @@
                                 },
     "Theme_QuickPanelBottomOffset":  {
                                          "NewKey":  "Theme_QuickPanelBottomOffset",
+                                         "Group":  "ThemeStrings"
+                                     },
+    "Theme_QuickPanelBottomOffset_Description":  {
+                                         "NewKey":  "Theme_QuickPanelBottomOffset_Description",
                                          "Group":  "ThemeStrings"
                                      },
     "About_LicenseTitle":  {

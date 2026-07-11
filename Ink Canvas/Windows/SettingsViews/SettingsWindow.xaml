@@ -221,6 +221,15 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
+                            x:Name="SidebarPageItem"
+                            Content="{x:Static props:NavStrings.Nav_Sidebar}"
+                            Tag="SidebarPage"
+                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Sidebar_Tooltip}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronRight}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
                             x:Name="HotkeyPageItem"
                             Content="{x:Static props:NavStrings.Nav_Shortcuts}"
                             Tag="HotkeyPage"
