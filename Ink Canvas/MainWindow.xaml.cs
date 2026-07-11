@@ -52,6 +52,7 @@ namespace Ink_Canvas
 
         // 全局快捷键管理器
         private GlobalHotkeyManager _globalHotkeyManager;
+        internal GlobalHotkeyManager GlobalHotkeyManagerInstance => _globalHotkeyManager;
 
         // 墨迹渐隐管理器
         private InkFadeManager _inkFadeManager;

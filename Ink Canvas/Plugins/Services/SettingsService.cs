@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Text.Json;
@@ -29,7 +30,7 @@ namespace Ink_Canvas.Plugins
                 var settings = SettingsManager.Settings;
                 if (settings == null) return;
                 SetByReflection(settings, key, value);
-                SettingsManager.SaveSettings();
+                SettingsManager.SaveSettingsToFile();
                 SettingChanged?.Invoke(key, value);
             }
             catch (Exception ex)

@@ -597,6 +597,15 @@ namespace Ink_Canvas.Plugins
         }
 
         /// <summary>
+        /// 非泛型注册服务，支持 Type 参数批量注册。
+        /// </summary>
+        public void RegisterService(Type serviceType, object service)
+        {
+            _services[serviceType] = service;
+            _serviceCollection.AddSingleton(serviceType, service);
+        }
+
+        /// <summary>
         /// 构建 DI 服务提供者。在所有插件 Initialize 完成后调用。
         /// </summary>
         internal void BuildServiceProvider()

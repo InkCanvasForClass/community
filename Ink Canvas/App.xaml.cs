@@ -185,6 +185,38 @@ namespace Ink_Canvas
             Exit += App_Exit; // 注册退出事件
         }
 
+        /// <summary>
+        /// 统一注册所有插件服务到 PluginManager。
+        /// </summary>
+        private void RegisterPluginServices(MainWindow mainWindow)
+        {
+            var host = Plugins.PluginManager.Instance;
+            var services = new (Type iface, object impl)[]
+            {
+                (typeof(Plugins.IInkCanvasService),       new Plugins.InkCanvasService(mainWindow)),
+                (typeof(Plugins.IAppRestartService),      new Plugins.AppRestartService()),
+                (typeof(Plugins.IWindowService),          new Plugins.WindowService(mainWindow)),
+                (typeof(Plugins.IPowerPointService),      new Plugins.PowerPointService(mainWindow)),
+                (typeof(Plugins.IEventService),           new Plugins.EventService(mainWindow)),
+                (typeof(Plugins.ISettingsService),        new Plugins.SettingsService()),
+                (typeof(Plugins.IHotkeyService),          new Plugins.HotkeyService(mainWindow.GlobalHotkeyManagerInstance)),
+                (typeof(Plugins.INotificationService),    new Plugins.NotificationService(mainWindow)),
+                (typeof(Plugins.IFileAssociationService), new Plugins.FileAssociationService()),
+            };
+
+            foreach (var (iface, impl) in services)
+            {
+                try
+                {
+                    host.RegisterService(iface, impl);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"Failed to register plugin service {iface.Name}: {ex.Message}", LogHelper.LogType.Error);
+                }
+            }
+        }
+
         // 配置TLS协议以支持Windows 7
         private void ConfigureTlsForWindows7()
         {
@@ -1254,26 +1286,8 @@ namespace Ink_Canvas
             var mainWindow = new MainWindow();
             MainWindow = mainWindow;
 
-            // 注册 InkCanvas 服务供插件使用
-            try
-            {
-                var inkCanvasService = new Plugins.InkCanvasService(mainWindow);
-                Plugins.PluginManager.Instance.RegisterService<Plugins.IInkCanvasService>(inkCanvasService);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"Failed to register InkCanvasService: {ex.Message}", LogHelper.LogType.Error);
-            }
-
-            try
-            {
-                var appRestartService = new Plugins.AppRestartService();
-                Plugins.PluginManager.Instance.RegisterService<Plugins.IAppRestartService>(appRestartService);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"Failed to register AppRestartService: {ex.Message}", LogHelper.LogType.Error);
-            }
+            // 注册插件服务
+            RegisterPluginServices(mainWindow);
 
             // 主窗口加载完成后关闭启动画面
             mainWindow.Loaded += (s, args) =>
