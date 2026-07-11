@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -386,5 +386,74 @@
   </data>
   <data name="Theme_BoardMenuOpacity" xml:space="preserve">
     <value>白板菜单透明度</value>
+  </data>
+  <data name="Theme_Tips_GlobalSettings" xml:space="preserve">
+    <value>全局设置</value>
+  </data>
+  <data name="Theme_Tips_GlobalSettingsHint" xml:space="preserve">
+    <value>管理信仰の源的显示、来源与自动轮换</value>
+  </data>
+  <data name="Theme_Tips_AutoRotation" xml:space="preserve">
+    <value>自动轮换 Tips</value>
+  </data>
+  <data name="Theme_Tips_AutoRotationHint" xml:space="preserve">
+    <value>启用后，白板中的 Tips 将按设定间隔自动切换</value>
+  </data>
+  <data name="Theme_Tips_RotationInterval" xml:space="preserve">
+    <value>轮换间隔（秒）</value>
+  </data>
+  <data name="Theme_Tips_RotationIntervalHint" xml:space="preserve">
+    <value>必须输入>=5的正整数哦</value>
+  </data>
+  <data name="Theme_Tips_Import" xml:space="preserve">
+    <value>导入</value>
+  </data>
+  <data name="Theme_Tips_Create" xml:space="preserve">
+    <value>新建</value>
+  </data>
+  <data name="Theme_Tips_Edit" xml:space="preserve">
+    <value>编辑</value>
+  </data>
+  <data name="Theme_Tips_Export" xml:space="preserve">
+    <value>导出</value>
+  </data>
+  <data name="Theme_Tips_SelectTxtFile" xml:space="preserve">
+    <value>+ 选择一个 txt 文件</value>
+  </data>
+  <data name="Theme_Tips_SchemeName" xml:space="preserve">
+    <value>名称</value>
+  </data>
+  <data name="Theme_Tips_SchemeContent" xml:space="preserve">
+    <value>内容</value>
+  </data>
+  <data name="Theme_Tips_CancelConfirm" xml:space="preserve">
+    <value>取消之后不可恢复，确定吗？</value>
+  </data>
+  <data name="Theme_Tips_Abandon" xml:space="preserve">
+    <value>放弃</value>
+  </data>
+  <data name="Theme_Tips_SelectSchemeFirst" xml:space="preserve">
+    <value>请先在列表中选择一个方案</value>
+  </data>
+  <data name="Theme_Tips_PresetLocked" xml:space="preserve">
+    <value>预设方案不可修改</value>
+  </data>
+  <data name="Theme_Tips_NewDialogTitle" xml:space="preserve">
+    <value>新建方案</value>
+  </data>
+  <data name="Theme_Tips_ImportDialogTitle" xml:space="preserve">
+    <value>导入方案</value>
+  </data>
+  <data name="Theme_Tips_EditDialogTitle" xml:space="preserve">
+    <value>编辑方案</value>
+  </data>
+  <data name="Theme_Tips_NameRequired" xml:space="preserve">
+    <value>请输入方案名称</value>
+  </data>
+  <data name="Theme_Tips_ContentRequired" xml:space="preserve">
+    <value>请输入方案内容</value>
+  </data>
+  <data name="Theme_Tips_NameExists" xml:space="preserve">
+    <value>已存在同名方案，请更换名称</value>
   </data>
 </root>

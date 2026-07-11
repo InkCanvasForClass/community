@@ -953,6 +953,7 @@ namespace Ink_Canvas
                         }
                     }
                 }, TaskScheduler.FromCurrentSynchronizationContext());
+                StartChickenSoupAutoRotation();
 
                 if (Settings.Canvas.UsingWhiteboard)
                 {
@@ -1016,6 +1017,7 @@ namespace Ink_Canvas
 
                 if (GetSelectionBGLeft() != 28) PenIcon_Click(null, null);
 
+                StopChickenSoupAutoRotation();
                 WaterMarkTime.Visibility = Visibility.Collapsed;
                 WaterMarkDate.Visibility = Visibility.Collapsed;
                 BlackBoardWaterMark.Visibility = Visibility.Collapsed;

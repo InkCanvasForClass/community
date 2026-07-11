@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -386,5 +386,77 @@
   </data>
   <data name="Theme_BoardMenuOpacity" xml:space="preserve">
     <value>Whiteboard menu opacity</value>
+  </data>
+  <data name="Theme_Tips_GlobalSettings" xml:space="preserve">
+    <value>Global Settings</value>
+  </data>
+  <data name="Theme_Tips_GlobalSettingsHint" xml:space="preserve">
+    <value>Manage faith source display, sources and auto-rotation</value>
+  </data>
+  <data name="Theme_Tips_AutoRotation" xml:space="preserve">
+    <value>Auto-rotate Tips</value>
+  </data>
+  <data name="Theme_Tips_AutoRotationHint" xml:space="preserve">
+    <value>When enabled, tips in the whiteboard will automatically rotate at the set interval</value>
+  </data>
+  <data name="Theme_Tips_RotationInterval" xml:space="preserve">
+    <value>Rotation interval (seconds)</value>
+  </data>
+  <data name="Theme_Tips_RotationIntervalHint" xml:space="preserve">
+    <value>Must enter a positive integer >= 5</value>
+  </data>
+  <data name="Theme_Tips_Import" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="Theme_Tips_Create" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="Theme_Tips_Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Theme_Tips_Export" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="Theme_Tips_SelectTxtFile" xml:space="preserve">
+    <value>+ Select a txt file</value>
+  </data>
+  <data name="Theme_Tips_SchemeName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Theme_Tips_SchemeContent" xml:space="preserve">
+    <value>Content</value>
+  </data>
+  <data name="Theme_Tips_CancelConfirm" xml:space="preserve">
+    <value>This cannot be undone after cancellation. Are you sure?</value>
+  </data>
+  <data name="Theme_Tips_Abandon" xml:space="preserve">
+    <value>Discard</value>
+  </data>
+  <data name="Theme_Tips_SelectSchemeFirst" xml:space="preserve">
+    <value>Please select a scheme from the list first</value>
+  </data>
+  <data name="Theme_Tips_PresetLocked" xml:space="preserve">
+    <value>Preset schemes cannot be modified</value>
+  </data>
+  <data name="Theme_Tips_NewDialogTitle" xml:space="preserve">
+    <value>New Scheme</value>
+  </data>
+  <data name="Theme_Tips_ImportDialogTitle" xml:space="preserve">
+    <value>Import Scheme</value>
+  </data>
+  <data name="Theme_Tips_EditDialogTitle" xml:space="preserve">
+    <value>Edit Scheme</value>
+  </data>
+  <data name="Theme_Tips_NameRequired" xml:space="preserve">
+    <value>Please enter a scheme name</value>
+  </data>
+  <data name="Theme_Tips_ContentRequired" xml:space="preserve">
+    <value>Please enter scheme content</value>
+  </data>
+  <data name="Theme_Tips_NameExists" xml:space="preserve">
+    <value>A scheme with this name already exists. Please use a different name.</value>
+  </data>
+  <data name="Theme_Tips_Title" xml:space="preserve">
+    <value>Tips</value>
   </data>
 </root>

@@ -92,6 +92,8 @@ namespace Ink_Canvas
 
         private static readonly Lazy<object> HitokotoHttpClient = new Lazy<object>(CreateHitokotoClient, System.Threading.LazyThreadSafetyMode.ExecutionAndPublication);
 
+        private DispatcherTimer _chickenSoupAutoRotationTimer;
+
         /// <summary>
         /// 创建用于获取一言（Hitokoto）数据的HttpClient
         /// </summary>
@@ -136,8 +138,11 @@ namespace Ink_Canvas
         /// 根据当前外观设置更新白板水印的名言文本。
         /// </summary>
         /// <remarks>
-        /// 当配置为内置来源时（0：OSUPlayer、1：名言警句、2：高考俗语）从对应数组中随机选择一条并设置为水印文本；
-        /// 当配置为一言（3）时会异步请求 Hitokoto API 并在请求中显示占位提示，成功时将返回文本设为水印，失败时记录警告日志并设置可读的失败提示文本。此方法会修改 BlackBoardWaterMark.Text，并在发生异常时记录日志且设置合适的回退文本。
+        /// 汇总所有启用的来源（预设来源 + 自定义方案），从中随机选取一个：
+        /// 若选中预设为 osu/mottos/gaokao/phigros，从对应数组中随机选择一条；
+        /// 若选中预设为 hitokoto，则异步请求 Hitokoto API，并在请求中显示占位提示，成功时将返回文本设为水印，失败时记录警告日志并设置可读的失败提示文本；
+        /// 若选中的是自定义方案，则按行拆分其 Content 并随机选取一行。
+        /// 当启用列表为空时直接返回，不修改当前文本。
         /// </remarks>
         internal async Task UpdateChickenSoupTextAsync()
         {
@@ -148,22 +153,40 @@ namespace Ink_Canvas
                     return;
                 }
 
-                if (Settings.Appearance.ChickenSoupSource == 0)
+                // 汇总所有启用的方案
+                var enabledSchemes = new List<TipsScheme>();
+
+                var enabledPresets = Settings.Appearance.EnabledPresetTipsSources;
+                foreach (var preset in ChickenSoup.GetPresetSchemes())
                 {
-                    int randChickenSoupIndex = new Random().Next(ChickenSoup.OSUPlayerYuLu.Length);
-                    BlackBoardWaterMark.Text = ChickenSoup.OSUPlayerYuLu[randChickenSoupIndex];
+                    if (enabledPresets != null && enabledPresets.Contains(preset.PresetId))
+                    {
+                        enabledSchemes.Add(preset);
+                    }
                 }
-                else if (Settings.Appearance.ChickenSoupSource == 1)
+
+                var customSchemes = Settings.Appearance.CustomTipsSchemes;
+                if (customSchemes != null)
                 {
-                    int randChickenSoupIndex = new Random().Next(ChickenSoup.MingYanJingJu.Length);
-                    BlackBoardWaterMark.Text = ChickenSoup.MingYanJingJu[randChickenSoupIndex];
+                    foreach (var custom in customSchemes)
+                    {
+                        if (custom != null && custom.IsEnabled)
+                        {
+                            enabledSchemes.Add(custom);
+                        }
+                    }
                 }
-                else if (Settings.Appearance.ChickenSoupSource == 2)
+
+                if (enabledSchemes.Count == 0)
                 {
-                    int randChickenSoupIndex = new Random().Next(ChickenSoup.GaoKaoPhrases.Length);
-                    BlackBoardWaterMark.Text = ChickenSoup.GaoKaoPhrases[randChickenSoupIndex];
+                    return;
                 }
-                else if (Settings.Appearance.ChickenSoupSource == 3)
+
+                var rnd = new Random();
+                var selected = enabledSchemes[rnd.Next(enabledSchemes.Count)];
+
+                // Hitokoto 预设走 HTTP API
+                if (selected.IsPreset && selected.PresetId == "hitokoto")
                 {
                     BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_Loading;
 
@@ -215,17 +238,39 @@ namespace Ink_Canvas
                         LogHelper.WriteLogToFile($"一言 API 请求失败: {ex.Message}", LogHelper.LogType.Warning);
                         BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_Unavailable;
                     }
+                    return;
                 }
-                else if (Settings.Appearance.ChickenSoupSource == 4)
+
+                // 其它预设来源
+                if (selected.IsPreset && !string.IsNullOrEmpty(selected.PresetId))
                 {
-                    int randChickenSoupIndex = new Random().Next(ChickenSoup.PhigrosTips.Length);
-                    BlackBoardWaterMark.Text = ChickenSoup.PhigrosTips[randChickenSoupIndex];
+                    var tips = ChickenSoup.GetTipsFromPreset(selected.PresetId);
+                    if (tips != null && tips.Length > 0)
+                    {
+                        BlackBoardWaterMark.Text = tips[rnd.Next(tips.Length)];
+                    }
+                    return;
+                }
+
+                // 自定义方案
+                if (!selected.IsPreset)
+                {
+                    if (string.IsNullOrWhiteSpace(selected.Content))
+                    {
+                        return;
+                    }
+                    var lines = selected.Content.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    if (lines.Length == 0)
+                    {
+                        return;
+                    }
+                    BlackBoardWaterMark.Text = lines[rnd.Next(lines.Length)];
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"更新白板名言时出错: {ex.Message}", LogHelper.LogType.Warning);
-                if (Settings.Appearance.ChickenSoupSource == 3 && BlackBoardWaterMark != null)
+                if (BlackBoardWaterMark != null)
                 {
                     try { BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_Unavailable; } catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
                 }
@@ -397,6 +442,44 @@ namespace Ink_Canvas
             image.EndInit();
             image.Freeze();
             return image;
+        }
+
+        /// <summary>
+        /// 启动白板名言自动轮换计时器。
+        /// </summary>
+        internal void StartChickenSoupAutoRotation()
+        {
+            if (!Settings.Appearance.EnableChickenSoupInWhiteboardMode) return;
+            if (!Settings.Appearance.EnableChickenSoupAutoRotation) return;
+
+            if (_chickenSoupAutoRotationTimer == null)
+            {
+                _chickenSoupAutoRotationTimer = new DispatcherTimer();
+                _chickenSoupAutoRotationTimer.Tick += async (s, e) => await UpdateChickenSoupTextAsync();
+            }
+
+            _chickenSoupAutoRotationTimer.Interval = TimeSpan.FromSeconds(Settings.Appearance.ChickenSoupAutoRotationInterval);
+            _chickenSoupAutoRotationTimer.Start();
+        }
+
+        /// <summary>
+        /// 停止白板名言自动轮换计时器。
+        /// </summary>
+        internal void StopChickenSoupAutoRotation()
+        {
+            if (_chickenSoupAutoRotationTimer != null)
+            {
+                _chickenSoupAutoRotationTimer.Stop();
+            }
+        }
+
+        /// <summary>
+        /// 重启白板名言自动轮换计时器。
+        /// </summary>
+        internal void RestartChickenSoupAutoRotation()
+        {
+            StopChickenSoupAutoRotation();
+            StartChickenSoupAutoRotation();
         }
 
         /// <summary>

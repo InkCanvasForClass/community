@@ -213,12 +213,39 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             {
                 mw.BlackBoardWaterMark.Visibility = isOn ? Visibility.Visible : Visibility.Collapsed;
             }
+
+            // Start/stop auto-rotation based on master toggle
+            if (mw != null)
+            {
+                if (isOn)
+                {
+                    mw.StartChickenSoupAutoRotation();
+                }
+                else
+                {
+                    mw.StopChickenSoupAutoRotation();
+                }
+            }
+        }
+
+        public static void OnChickenSoupSchemesChanged()
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.UpdateChickenSoupTextAsync().ConfigureAwait(false);
+        }
+
+        public static void OnChickenSoupAutoRotationChanged()
+        {
+            var mw = GetMainWindow();
+            if (mw != null)
+            {
+                mw.RestartChickenSoupAutoRotation();
+            }
         }
 
         public static void OnChickenSoupSourceChanged()
         {
-            var mw = GetMainWindow();
-            if (mw != null) mw.UpdateChickenSoupTextAsync().ConfigureAwait(false);
+            OnChickenSoupSchemesChanged();
         }
 
         public static void OnChickenSoupPositionChanged()

@@ -181,5 +181,9 @@ namespace Ink_Canvas.Properties
         public static string Nav_Performance => ResourceManager.GetString(nameof(Nav_Performance), _resourceCulture);
 
         public static string Nav_Performance_Tooltip => ResourceManager.GetString(nameof(Nav_Performance_Tooltip), _resourceCulture);
+
+        public static string Nav_WhiteboardTips => ResourceManager.GetString(nameof(Nav_WhiteboardTips), _resourceCulture);
+
+        public static string Nav_WhiteboardTips_Tooltip => ResourceManager.GetString(nameof(Nav_WhiteboardTips_Tooltip), _resourceCulture);
     }
 }
