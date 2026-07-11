@@ -35,7 +35,7 @@ namespace Ink_Canvas.Helpers
             public long ZOrder { get; set; }
         }
 
-        public static void Initialize(Window mainWindow)
+        public static void Initialize(Window mainWindow, bool skipScan = false)
         {
             if (mainWindow == null || Application.Current == null) return;
 
@@ -49,7 +49,10 @@ namespace Ink_Canvas.Helpers
                 }
 
                 RegisterWindow(mainWindow, true);
-                ScanOpenWindows();
+                if (!skipScan)
+                {
+                    ScanOpenWindows();
+                }
                 StartTimer();
             });
         }

@@ -116,6 +116,8 @@ namespace Ink_Canvas.Properties
 
         public static string Theme_GroupTitle => ResourceManager.GetString(nameof(Theme_GroupTitle), _resourceCulture);
 
+        public static string Theme_SidebarGroupTitle => ResourceManager.GetString(nameof(Theme_SidebarGroupTitle), _resourceCulture);
+
         public static string Theme_Label => ResourceManager.GetString(nameof(Theme_Label), _resourceCulture);
 
         public static string Theme_Language_ChineseSimplified => ResourceManager.GetString(nameof(Theme_Language_ChineseSimplified), _resourceCulture);
@@ -137,6 +139,8 @@ namespace Ink_Canvas.Properties
         public static string Theme_QuickPalette_SingleRow => ResourceManager.GetString(nameof(Theme_QuickPalette_SingleRow), _resourceCulture);
 
         public static string Theme_QuickPanelBottomOffset => ResourceManager.GetString(nameof(Theme_QuickPanelBottomOffset), _resourceCulture);
+
+        public static string Theme_QuickPanelBottomOffset_Description => ResourceManager.GetString(nameof(Theme_QuickPanelBottomOffset_Description), _resourceCulture);
 
         public static string Theme_QuoteSource => ResourceManager.GetString(nameof(Theme_QuoteSource), _resourceCulture);
 

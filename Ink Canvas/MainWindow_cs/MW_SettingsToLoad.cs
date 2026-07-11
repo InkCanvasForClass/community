@@ -44,7 +44,7 @@ namespace Ink_Canvas
         }
 
         /// <param name="skipAutoUpdateCheck">指示是否跳过自动更新检查；为 true 时不会在加载设置后执行自动更新检测。</param>
-        private void LoadSettings(bool isStartup = false, bool skipAutoUpdateCheck = false)
+        private void LoadSettings(bool isStartup = false, bool skipAutoUpdateCheck = false, bool startupPhase = false)
         {
             try
             {
@@ -52,7 +52,7 @@ namespace Ink_Canvas
                 {
                     try
                     {
-                        string text = File.ReadAllText(App.RootPath + settingsFileName);
+                        string text = App.CachedSettingsJson ?? File.ReadAllText(App.RootPath + settingsFileName);
                         Settings = JsonConvert.DeserializeObject<Settings>(text);
 
                         if (Settings != null)
@@ -538,6 +538,13 @@ namespace Ink_Canvas
             else
             {
                 Settings.Canvas = new Canvas();
+            }
+
+            // 启动阶段第一遍：只加载影响首帧的核心设置（反序列化+语言+崩溃模式+画笔+画布），
+            // 外观/PPT/手势/高级等 UI 属性在第二遍（startupPhase=false）时再应用。
+            if (startupPhase)
+            {
+                return;
             }
 
             // Advanced - UI initialization (settings loading moved to AdvancedPage)

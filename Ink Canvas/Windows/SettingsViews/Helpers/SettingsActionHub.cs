@@ -1,5 +1,4 @@
 using Ink_Canvas.Helpers;
-using InkCanvasPPTAgent.Contracts;
 using System;
 using System.Windows;
 
@@ -722,6 +721,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 mw.PPTUIManager.UpdateNavigationButtonStyles();
             }
             mw?.UpdatePPTBtnPreview();
+        }
+
+        /// <summary>
+        /// 全局默认设置或某位置"使用全局设置"开关变更时，全量同步有效值到运行时与预览。
+        /// 有效值规则：位置 i 若 UseGlobalSettings=true，则采用全局字段值，否则采用位置自身字段值。
+        /// </summary>
+        public static void OnPPTGlobalSettingsChanged()
+        {
+            var mw = GetMainWindow();
+            mw?.UpdatePPTUIManagerSettings();
+            mw?.UpdatePPTBtnPreview();
+            PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
         }
 
         #endregion

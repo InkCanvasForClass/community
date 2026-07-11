@@ -7,7 +7,6 @@
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
-      xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       mc:Ignorable="d"
       Title="{x:Static props:ThemeStrings.Theme_GroupTitle}">
 
@@ -73,83 +72,6 @@
                             <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Language_English}" />
                             <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Language_MemeChinese}" />
                         </ComboBox>
-                    </ui:SettingsCard>
-
-                    <controls:LabeledSettingsCard x:Name="CardEnableQuickPanel"
-                            Header="{x:Static props:ThemeStrings.Theme_EnableQuickPanel}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Pinned}"
-                            SwitchName="ToggleSwitchEnableQuickPanel"
-                            Toggled="ToggleSwitchEnableQuickPanel_Toggled" />
-
-                    <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_QuickPanelBottomOffset}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronDown}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock x:Name="QuickPanelBottomOffsetText"
-                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                            <Slider x:Name="QuickPanelBottomOffsetSlider" Minimum="-600"
-                                    Maximum="600" Width="200"
-                                    IsSnapToTickEnabled="True" Value="-150" TickFrequency="10"
-                                    TickPlacement="None" AutoToolTipPlacement="None"
-                                    ValueChanged="QuickPanelBottomOffsetSlider_ValueChanged" />
-                        </ikw:SimpleStackPanel>
-                    </ui:SettingsCard>
-
-                    <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_UnfoldButtonIcon}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronRight}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ComboBox x:Name="ComboBoxUnFoldBtnImg"
-                                  SelectedIndex="0"
-                                  SelectionChanged="ComboBoxUnFoldBtnImg_SelectionChanged">
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_UnfoldIcon_ClassicArrow}" />
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_UnfoldIcon_ClassicPen}" />
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_UnfoldIcon_Stripe}" />
-                        </ComboBox>
-                    </ui:SettingsCard>
-
-                    <controls:LabeledSettingsCard x:Name="CardAllowDragSidePanel"
-                            Header="{x:Static props:ThemeStrings.Theme_AllowDragSidePanel}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Touch}"
-                            SwitchName="ToggleSwitchAllowDragSidePanel"
-                            Toggled="ToggleSwitchAllowDragSidePanel_Toggled" />
-
-                    <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_QuickPanelOpacity}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.View}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock x:Name="QuickPanelOpacityText"
-                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                            <Slider x:Name="QuickPanelOpacitySlider" Minimum="0.1"
-                                    Maximum="1.0" Width="200"
-                                    IsSnapToTickEnabled="True" Value="1.0" TickFrequency="0.1"
-                                    TickPlacement="None" AutoToolTipPlacement="None"
-                                    ValueChanged="QuickPanelOpacitySlider_ValueChanged" />
-                        </ikw:SimpleStackPanel>
-                    </ui:SettingsCard>
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoCollapseQuickPanel"
-                            Header="{x:Static props:ThemeStrings.Theme_AutoCollapseQuickPanel}"
-                            Icon="{x:Static ui:SegoeFluentIcons.ChevronDown}"
-                            SwitchName="ToggleSwitchAutoCollapseQuickPanel"
-                            Toggled="ToggleSwitchAutoCollapseQuickPanel_Toggled" />
-
-                    <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_AutoCollapseQuickPanelDelay}"
-                            IsEnabled="{Binding ElementName=ToggleSwitchAutoCollapseQuickPanel, Path=IsOn}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.History}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock x:Name="AutoCollapseDelayText"
-                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                            <Slider x:Name="AutoCollapseDelaySlider" Minimum="1"
-                                    Maximum="10" Width="200"
-                                    IsSnapToTickEnabled="True" Value="3.0" TickFrequency="1"
-                                    TickPlacement="None" AutoToolTipPlacement="None"
-                                    ValueChanged="AutoCollapseDelaySlider_ValueChanged" />
-                        </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
                     <Rectangle Height="48" />

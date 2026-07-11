@@ -66,6 +66,15 @@
   <data name="EnhancedPreviewHint" xml:space="preserve">
     <value>Manually enable this option to show a thumbnail page list when clicking the page button (supports both WPS and PowerPoint), then click a thumbnail to jump.</value>
   </data>
+  <data name="EnhancedPreviewLoadingAnimation" xml:space="preserve">
+    <value>Show loading animation</value>
+  </data>
+  <data name="EnhancedPreviewLoadingAnimationHint" xml:space="preserve">
+    <value>Shows a circular loading animation while enhanced preview thumbnails are loading.</value>
+  </data>
+  <data name="LoadingPPT" xml:space="preserve">
+    <value>Loading PPT...</value>
+  </data>
   <data name="Enhancement" xml:space="preserve">
     <value>PowerPoint enhancement</value>
   </data>

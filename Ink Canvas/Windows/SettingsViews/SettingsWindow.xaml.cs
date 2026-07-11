@@ -16,7 +16,7 @@ namespace Ink_Canvas.Windows.SettingsViews
 {
     public partial class SettingsWindow : Window
     {
-        private static readonly Dictionary<string, Type> _staticPageTypes = new Dictionary<string, Type>
+        private readonly Dictionary<string, Type> _pageTypes = new Dictionary<string, Type>
         {
             { "HomePage", typeof(HomePage) },
             { "StartupPage", typeof(StartupPage) },
@@ -25,6 +25,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             { "SecurityPage", typeof(SecurityPage) },
             { "WindowPage", typeof(WindowPage) },
             { "AppearancePage", typeof(AppearancePage) },
+            { "SidebarPage", typeof(SidebarPage) },
             { "HotkeyPage", typeof(HotkeyPage) },
             { "ToolbarPage", typeof(ToolbarPage) },
             { "ToolbarAppearancePage", typeof(ToolbarAppearancePage) },
@@ -52,9 +53,9 @@ namespace Ink_Canvas.Windows.SettingsViews
             { "AboutPage", typeof(AboutPage) },
             { "Settings", typeof(SettingsPage) },
             { "PluginPage", typeof(PluginPage) },
-            { "PluginSettingsPage", typeof(PluginSettingsPage) }
+            { "PluginSettingsPage", typeof(PluginSettingsPage) },
+            { "PPTPageFlipPreviewPage", typeof(PPTPageFlipPreviewPage) }
         };
-        private Dictionary<string, Type> _pageTypes;
         private readonly Dictionary<string, object> _pages = new Dictionary<string, object>();
         private readonly Dictionary<string, Ink_Canvas.Plugins.PluginInfo> _pluginPages = new Dictionary<string, Ink_Canvas.Plugins.PluginInfo>();
 
@@ -87,6 +88,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 { "SecurityPage", typeof(SecurityPage) },
                 { "WindowPage", typeof(WindowPage) },
                 { "AppearancePage", typeof(AppearancePage) },
+                { "SidebarPage", typeof(SidebarPage) },
                 { "HotkeyPage", typeof(HotkeyPage) },
                 { "ToolbarPage", typeof(ToolbarPage) },
                 { "ToolbarAppearancePage", typeof(ToolbarAppearancePage) },
@@ -403,6 +405,8 @@ namespace Ink_Canvas.Windows.SettingsViews
                     pluginSettingsPage.CurrentPlugin = pluginInfo;
                 }
 
+
+
                 rootFrame.NavigationUIVisibility = NavigationUIVisibility.Hidden;
                 rootFrame.RemoveBackEntry();
                 rootFrame.Navigate(cachedPage);
@@ -430,15 +434,22 @@ namespace Ink_Canvas.Windows.SettingsViews
         {
             if (rootFrame.CanGoBack) rootFrame.GoBack();
         }
-
         private void OnRootFrameNavigated(object sender, NavigationEventArgs e)
         {
+            Type currentPageType = rootFrame.SourcePageType;
+            if (currentPageType == typeof(PPTPageFlipPreviewPage))
+            {
+                NavigationViewControl.PaneDisplayMode = iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode.LeftMinimal;
+            }
+            else
+            {
+                NavigationViewControl.PaneDisplayMode = iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode.Auto;
+            }
+
             if (_isNavigating)
             {
                 return;
             }
-
-            Type currentPageType = rootFrame.SourcePageType;
 
             // 处理设置项的选中状态
             if (currentPageType == typeof(SettingsPage))

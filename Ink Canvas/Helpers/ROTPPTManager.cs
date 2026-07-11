@@ -1808,7 +1808,7 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        public List<PPTSlideThumbnail> ExportSlideThumbnails(int width, int height)
+        public List<PPTSlideThumbnail> ExportSlideThumbnails(int width, int height, IProgress<double> progress = null)
         {
             var result = new List<PPTSlideThumbnail>();
             string tempDir = null;
@@ -1853,6 +1853,8 @@ namespace Ink_Canvas.Helpers
                     {
                         SafeReleaseComObject(slide);
                     }
+
+                    progress?.Report((double)i / count);
                 }
             }
             catch (Exception ex)

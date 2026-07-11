@@ -286,8 +286,12 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             }
         }
 
+        private static volatile bool _defaultConfigEnsured;
+
         public static void EnsureDefaultConfigExists()
         {
+            if (_defaultConfigEnsured) return;
+
             var dir = GetConfigDirectory();
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
@@ -298,6 +302,8 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                 SaveConfigFile("default", BoardToolbarLayoutSettings.CreateDefault());
                 LogHelper.WriteLogToFile("BoardToolbarRegistry: 首次启动，创建 default.json", LogHelper.LogType.Info);
             }
+
+            _defaultConfigEnsured = true;
         }
 
         public static BoardToolbarLayoutSettings LoadActiveConfig()

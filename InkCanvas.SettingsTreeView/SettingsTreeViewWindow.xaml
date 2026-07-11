@@ -135,13 +135,23 @@
                             <TreeViewItem Header="LabeledSettingsCard: 画板模式显示时间 → ToggleSwitch" />
                             <TreeViewItem Header="LabeledSettingsCard: 画板模式显示鸡汤 → ToggleSwitch" />
                             <TreeViewItem Header="SettingsCard: 鸡汤来源 → ComboBox + Button" />
-                            <TreeViewItem Header="LabeledSettingsCard: 启用快捷面板 → ToggleSwitch" />
-                            <TreeViewItem Header="SettingsCard: 快捷面板底部偏移 → Slider" />
-                            <TreeViewItem Header="SettingsCard: 展开按钮图标 → ComboBox" />
                         </TreeViewItem>
                         <TreeViewItem Header='TextBlock "浮动栏按钮"'>
                             <TreeViewItem Header="LabeledSettingsCard: 使用旧版浮动栏 UI → ToggleSwitch" />
                             <TreeViewItem Header="SettingsCard: 浮动栏按钮 → Clickable" />
+                        </TreeViewItem>
+                    </TreeViewItem>
+                    <TreeViewItem Header="侧边栏" IsExpanded="True">
+                        <TreeViewItem Header='TextBlock "侧边栏"' IsExpanded="True">
+                            <TreeViewItem Header="SettingsExpander: 点击展开按钮后显示侧边栏 → ToggleSwitch（开则展开）" IsExpanded="True">
+                                <TreeViewItem Header="SettingsCard: 展开按钮与侧边栏的位置偏移 → Slider" />
+                                <TreeViewItem Header="SettingsCard: 允许拖动展开按钮调整偏移 → ToggleSwitch" />
+                                <TreeViewItem Header="SettingsCard: 展开按钮图标 → ComboBox" />
+                                <TreeViewItem Header="SettingsCard: 侧边栏透明度 → Slider" />
+                            </TreeViewItem>
+                            <TreeViewItem Header="SettingsExpander: 打开侧边栏后自动收起 → ToggleSwitch（开则展开）" IsExpanded="True">
+                                <TreeViewItem Header="SettingsCard: 自动收起前的等待时间 → Slider" />
+                            </TreeViewItem>
                         </TreeViewItem>
                     </TreeViewItem>
                     <TreeViewItem Header="快捷键">

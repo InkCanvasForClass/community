@@ -998,17 +998,17 @@ namespace Ink_Canvas
                     if (penType == 0)
                     {
                         Settings.Canvas.InkWidth = width;
-                        Settings.Canvas.InkAlpha = (int)color.A;
+                        Settings.Canvas.InkAlpha = color.A;
                     }
                     else if (penType == 1)
                     {
                         Settings.Canvas.HighlighterWidth = width;
-                        Settings.Canvas.HighlighterAlpha = (int)color.A;
+                        Settings.Canvas.HighlighterAlpha = color.A;
                     }
                     else if (penType == 2)
                     {
                         Settings.Canvas.LaserPenWidth = width;
-                        Settings.Canvas.LaserPenAlpha = (int)color.A;
+                        Settings.Canvas.LaserPenAlpha = color.A;
                     }
                 }
 
@@ -1472,8 +1472,8 @@ namespace Ink_Canvas
             InitializeToolbarPlugins();
             // 初始化 Popup 管理器（置顶 + 拖动跟随）
             InitializePopupManager();
-            //加载设置
-            LoadSettings(true);
+            // 加载设置（启动阶段仅加载影响首帧的核心设置，其余延迟到 RunDeferredStartupPhaseB）
+            LoadSettings(true, startupPhase: true);
             // 启动性能监测（如果已启用）
             PerformanceMonitorHelper.StartIfEnabled();
             // 根据ToolbarPosition设置更新工具栏结构和位置
@@ -1484,10 +1484,6 @@ namespace Ink_Canvas
                 if (IsInPPTPresentationMode) ViewboxFloatingBarMarginAnimation(60, skipAnimation: true);
                 else ViewboxFloatingBarMarginAnimation(100, true, skipAnimation: true);
             }
-            ApplyLanguageFromSettings();
-            Helpers.LocalizationHelper.SyncCommonResources();
-            InitializeNotificationProviders();
-            AutomationBootstrap.Initialize();
 
             // 启动时根据设置恢复调试控制台显示状态
             if (Settings?.Advanced != null && Settings.Advanced.IsDebugConsoleEnabled)
@@ -1527,31 +1523,6 @@ namespace Ink_Canvas
             LogHelper.WriteLogToFile("Ink Canvas Loaded", LogHelper.LogType.Event);
 
             isLoaded = true;
-            EnsureRealtimeStylusPipelineBinding();
-            var leftPageListView = FindView("board.pageList.left") as System.Windows.Controls.ListView;
-            var rightPageListView = FindView("board.pageList.right") as System.Windows.Controls.ListView;
-            if (leftPageListView != null) leftPageListView.ItemsSource = blackBoardSidePageListViewObservableCollection;
-            if (rightPageListView != null) rightPageListView.ItemsSource = blackBoardSidePageListViewObservableCollection;
-
-            InitializeBoardToolbar();
-
-            var boardInkFreezeBtn = FindView("board.inkFreeze") as BoardToolbarButton;
-            if (boardInkFreezeBtn != null) AttachBoardInkFreezeBtn(boardInkFreezeBtn);
-
-            var leftPreviousBtn = FindView("board.previousPage.left") as BoardToolbarButton;
-            var rightPreviousBtn = FindView("board.previousPage.right") as BoardToolbarButton;
-            if (leftPreviousBtn != null)
-            {
-                leftPreviousBtn.IconGeometryDrawing.Brush =
-                    new SolidColorBrush(Color.FromArgb(127, 24, 24, 27));
-                leftPreviousBtn.LabelTextBlockControl.Opacity = 0.5;
-            }
-            if (rightPreviousBtn != null)
-            {
-                rightPreviousBtn.IconGeometryDrawing.Brush =
-                    new SolidColorBrush(Color.FromArgb(127, 24, 24, 27));
-                rightPreviousBtn.LabelTextBlockControl.Opacity = 0.5;
-            }
 
             // 应用颜色主题，这将考虑自定义背景色
             CheckColorTheme(true);
@@ -2592,6 +2563,75 @@ namespace Ink_Canvas
             _deferredPhaseBCompleted = true;
 
             await Task.Delay(600);
+
+            try
+            {
+                InitializeNotificationProviders();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[MainWindow] 初始化通知提供商时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            try
+            {
+                AutomationBootstrap.Initialize();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[MainWindow] 初始化自动化系统时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            // 启动阶段第二遍设置：应用外观/PPT/手势/高级等 UI 属性
+            try
+            {
+                LoadSettings(true, startupPhase: false);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[MainWindow] 延迟加载设置时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            // 后移的非首屏初始化
+            try
+            {
+                EnsureRealtimeStylusPipelineBinding();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[MainWindow] RealtimeStylus 管线绑定出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            try
+            {
+                var leftPageListView = FindView("board.pageList.left") as System.Windows.Controls.ListView;
+                var rightPageListView = FindView("board.pageList.right") as System.Windows.Controls.ListView;
+                if (leftPageListView != null) leftPageListView.ItemsSource = blackBoardSidePageListViewObservableCollection;
+                if (rightPageListView != null) rightPageListView.ItemsSource = blackBoardSidePageListViewObservableCollection;
+                InitializeBoardToolbar();
+
+                var boardInkFreezeBtn = FindView("board.inkFreeze") as BoardToolbarButton;
+                if (boardInkFreezeBtn != null) AttachBoardInkFreezeBtn(boardInkFreezeBtn);
+
+                var leftPreviousBtn = FindView("board.previousPage.left") as BoardToolbarButton;
+                var rightPreviousBtn = FindView("board.previousPage.right") as BoardToolbarButton;
+                if (leftPreviousBtn != null)
+                {
+                    leftPreviousBtn.IconGeometryDrawing.Brush =
+                        new SolidColorBrush(Color.FromArgb(127, 24, 24, 27));
+                    leftPreviousBtn.LabelTextBlockControl.Opacity = 0.5;
+                }
+                if (rightPreviousBtn != null)
+                {
+                    rightPreviousBtn.IconGeometryDrawing.Brush =
+                        new SolidColorBrush(Color.FromArgb(127, 24, 24, 27));
+                    rightPreviousBtn.LabelTextBlockControl.Opacity = 0.5;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[MainWindow] 黑板工具栏初始化出错: {ex.Message}", LogHelper.LogType.Error);
+            }
 
             try
             {

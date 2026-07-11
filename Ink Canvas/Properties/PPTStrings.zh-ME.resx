@@ -66,6 +66,15 @@
   <data name="EnhancedPreviewHint" xml:space="preserve">
     <value>手动开启后，点页码按钮就能看缩略图列表（WPS 和 PowerPoint 都支持），点击跳转，好家伙太方便了~</value>
   </data>
+  <data name="EnhancedPreviewLoadingAnimation" xml:space="preserve">
+    <value>显示动画</value>
+  </data>
+  <data name="EnhancedPreviewLoadingAnimationHint" xml:space="preserve">
+    <value>加载 PPT 增强预览缩略图时显示圆形旋转动画。</value>
+  </data>
+  <data name="LoadingPPT" xml:space="preserve">
+    <value>正在加载PPT...</value>
+  </data>
   <data name="Enhancement" xml:space="preserve">
     <value>PowerPoint 联动增强</value>
   </data>

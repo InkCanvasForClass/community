@@ -172,7 +172,7 @@ namespace Ink_Canvas.Windows
             settings.Gesture.IsEnableTwoFingerTranslate = true;
 
             // 个性化
-            settings.Appearance.Theme = 2; 
+            settings.Appearance.Theme = 2;
             settings.Appearance.WindowBackdrop = "Acrylic";
             settings.Appearance.EnableSplashScreen = true;
             settings.Appearance.EnableTrayIcon = true;

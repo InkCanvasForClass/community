@@ -94,7 +94,7 @@
     <value>Dark</value>
   </data>
   <data name="Theme_EnableQuickPanel" xml:space="preserve">
-    <value>Enable quick panel in docked mode</value>
+    <value>Show sidebar after clicking unfold button</value>
   </data>
   <data name="Theme_EnableSplash" xml:space="preserve">
     <value>Enable startup animation</value>
@@ -156,6 +156,9 @@
   <data name="Theme_GroupTitle" xml:space="preserve">
     <value>Personalization</value>
   </data>
+  <data name="Theme_SidebarGroupTitle" xml:space="preserve">
+    <value>Sidebar</value>
+  </data>
   <data name="Theme_Label" xml:space="preserve">
     <value>Theme</value>
   </data>
@@ -187,7 +190,10 @@
     <value>Single row (6 colors)</value>
   </data>
   <data name="Theme_QuickPanelBottomOffset" xml:space="preserve">
-    <value>Quick panel vertical offset</value>
+    <value>Offset between unfold button and sidebar</value>
+  </data>
+  <data name="Theme_QuickPanelBottomOffset_Description" xml:space="preserve">
+    <value>Adjust the vertical offset of the sidebar (right-top, left-bottom)</value>
   </data>
   <data name="Theme_QuoteSource" xml:space="preserve">
     <value>Where is the quote from?</value>
@@ -259,7 +265,7 @@
     <value>Follow system</value>
   </data>
   <data name="Theme_UnfoldButtonIcon" xml:space="preserve">
-    <value>Un-dock button icon</value>
+    <value>Unfold button icon</value>
   </data>
   <data name="Theme_UnfoldIcon_Arrow" xml:space="preserve">
     <value>Arrow</value>
@@ -274,7 +280,7 @@
     <value>Stripe</value>
   </data>
   <data name="Theme_AllowDragSidePanel" xml:space="preserve">
-    <value>Allow adjusting side panel position by dragging</value>
+    <value>Allow dragging unfold button to adjust offset</value>
   </data>
   <data name="Theme_Upload" xml:space="preserve">
     <value>Upload</value>
@@ -373,10 +379,10 @@
     <value>Sidebar opacity</value>
   </data>
   <data name="Theme_AutoCollapseQuickPanel" xml:space="preserve">
-    <value>Auto-collapse sidebar when clicking elsewhere</value>
+    <value>Auto-collapse sidebar after opening</value>
   </data>
   <data name="Theme_AutoCollapseQuickPanelDelay" xml:space="preserve">
-    <value>Auto-collapse delay</value>
+    <value>Wait time before auto-collapse</value>
   </data>
   <data name="Theme_FloatingBarMenuOpacity" xml:space="preserve">
     <value>Floating bar menu opacity</value>

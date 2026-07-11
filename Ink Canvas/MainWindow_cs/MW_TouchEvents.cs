@@ -1209,7 +1209,7 @@ namespace Ink_Canvas
                         var p = e.GetPosition(inkCanvas);
                         var sv = GetStrokeVisual(stylusId);
                         if (TryAppendRealtimeVelocityBrushTipInterpolatedPoints(sv, stylusId, p))
-                            sv.ForceRedraw();
+                            sv.Redraw();
                         ResetPauseStraightenTimer(stylusId);
                         e.Handled = true;
                     }
@@ -1246,10 +1246,7 @@ namespace Ink_Canvas
 
                 ResetPauseStraightenTimer(e.StylusDevice.Id);
 
-                if (isHandledByRealtime)
-                    strokeVisual.ForceRedraw();
-                else
-                    strokeVisual.Redraw();
+                strokeVisual.Redraw();
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }

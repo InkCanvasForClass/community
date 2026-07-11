@@ -1,7 +1,7 @@
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using FluentSystemIcons = iNKORE.UI.WPF.Modern.Common.IconKeys.FluentSystemIcons;
 using FontIcon = iNKORE.UI.WPF.Modern.Controls.FontIcon;
 
@@ -20,7 +20,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar.Items
         {
             host.Window.Dispatcher.Invoke(() =>
             {
-                var mw = host.Window as MainWindow;
+                var mw = host.Window;
                 mw?.ToggleVideoPresenterSidebarPublic();
             });
         }

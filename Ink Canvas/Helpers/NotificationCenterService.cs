@@ -52,16 +52,16 @@ namespace Ink_Canvas.Helpers
                 ///策略：采用滑动窗口去重（2秒内）。若同一来源的相同标题持续出现，每次出现都刷新窗口起点，使通知彻底沉默，直到插件停止刷屏 2 秒以上。
                 ///效果：杜绝课堂被反复弹窗干扰，同时不影响正常间隔（> 2秒）的有效通知。
                 ///</summary>
-                if (!string.IsNullOrEmpty(message.Title) && JudgeRepeatMessage.Title!=null)
+                if (!string.IsNullOrEmpty(message.Title) && JudgeRepeatMessage.Title != null)
                 {
                     TimeSpan interval = message.CreatedAt - JudgeRepeatMessage.Time;
                     double TotalSeconds = interval.TotalSeconds;
-                    if(JudgeRepeatMessage.Title == message.Title && TotalSeconds<=2 && message.Source==JudgeRepeatMessage.Source)
+                    if (JudgeRepeatMessage.Title == message.Title && TotalSeconds <= 2 && message.Source == JudgeRepeatMessage.Source)
                     {
                         JudgeRepeatMessage.Time = message.CreatedAt;
                         return;
                     }
-                    
+
                 }
                 JudgeRepeatMessage.Title = message.Title;
                 JudgeRepeatMessage.Time = message.CreatedAt;

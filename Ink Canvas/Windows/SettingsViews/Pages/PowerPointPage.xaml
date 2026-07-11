@@ -79,170 +79,42 @@
 
                     <TextBlock Text="{x:Static props:PPTStrings.FlipButtonsTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
-                    <controls:LabeledSettingsCard x:Name="CardShowPPTButton"
-                            Header="{x:Static props:PPTStrings.ShowFlipButtons}"
-                            Icon="{x:Static ui:SegoeFluentIcons.ShowResults}"
-                            Toggled="ToggleSwitchShowPPTButton_OnToggled"/>
-
-                    <ui:SettingsExpander Header="{x:Static props:PPTStrings.Position_Left}" d:Visibility="Visible" d:IsExpanded="True"
-                            Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            IsExpanded="{Binding IsOn, ElementName=CardShowPPTButton, Mode=OneWay}">
-                        <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.CaretSolidLeft}"/>
-                        </ui:SettingsExpander.HeaderIcon>
-                        <ui:SettingsExpander.Content>
-                            <CheckBox x:Name="CheckboxEnableLSPPTButton" Checked="CheckboxEnableLSPPTButton_IsCheckChanged" Unchecked="CheckboxEnableLSPPTButton_IsCheckChanged"/>
-                        </ui:SettingsExpander.Content>
-                        <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{x:Static props:PPTStrings.LeftOffset}">
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock x:Name="PPTButtonLeftPositionText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                                    <Slider x:Name="PPTButtonLeftPositionValueSlider" Minimum="-500" Maximum="500" Width="200" IsSnapToTickEnabled="True" TickFrequency="5" ValueChanged="PPTButtonLeftPositionValueSlider_ValueChanged"/>
-                                </ikw:SimpleStackPanel>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="{x:Static props:PPTStrings.LeftOpacity}" Visibility="{Binding IsChecked, ElementName=CheckboxSPPTHalfOpacity, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock x:Name="PPTLSButtonOpacityText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                                    <Slider x:Name="PPTLSButtonOpacityValueSlider" Minimum="0.1" Maximum="1.0" Width="200" ValueChanged="PPTLSButtonOpacityValueSlider_ValueChanged"/>
-                                </ikw:SimpleStackPanel>
-                            </ui:SettingsCard>
-                        </ui:SettingsExpander.Items>
-                    </ui:SettingsExpander>
-
-                    <ui:SettingsExpander Header="{x:Static props:PPTStrings.Position_Right}"
-                            Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            IsExpanded="{Binding IsOn, ElementName=CardShowPPTButton, Mode=OneWay}">
-                        <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.CaretSolidRight}"/>
-                        </ui:SettingsExpander.HeaderIcon>
-                        <ui:SettingsExpander.Content>
-                            <CheckBox x:Name="CheckboxEnableRSPPTButton" Checked="CheckboxEnableRSPPTButton_IsCheckChanged" Unchecked="CheckboxEnableRSPPTButton_IsCheckChanged"/>
-                        </ui:SettingsExpander.Content>
-                        <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{x:Static props:PPTStrings.RightOffset}">
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock x:Name="PPTButtonRightPositionText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                                    <Slider x:Name="PPTButtonRightPositionValueSlider" Minimum="-500" Maximum="500" Width="200" IsSnapToTickEnabled="True" TickFrequency="5" ValueChanged="PPTButtonRightPositionValueSlider_ValueChanged"/>
-                                </ikw:SimpleStackPanel>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="{x:Static props:PPTStrings.RightOpacity}" Visibility="{Binding IsChecked, ElementName=CheckboxSPPTHalfOpacity, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock x:Name="PPTRSButtonOpacityText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                                    <Slider x:Name="PPTRSButtonOpacityValueSlider" Minimum="0.1" Maximum="1.0" Width="200" ValueChanged="PPTRSButtonOpacityValueSlider_ValueChanged"/>
-                                </ikw:SimpleStackPanel>
-                            </ui:SettingsCard>
-                        </ui:SettingsExpander.Items>
-                    </ui:SettingsExpander>
-
-                    <ui:SettingsExpander Header="{x:Static props:PPTStrings.Position_LeftBottom}"
-                            Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            IsExpanded="{Binding IsOn, ElementName=CardShowPPTButton, Mode=OneWay}">
-                        <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.CaretSolidDown}"/>
-                        </ui:SettingsExpander.HeaderIcon>
-                        <ui:SettingsExpander.Content>
-                            <CheckBox x:Name="CheckboxEnableLBPPTButton" Checked="CheckboxEnableLBPPTButton_IsCheckChanged" Unchecked="CheckboxEnableLBPPTButton_IsCheckChanged"/>
-                        </ui:SettingsExpander.Content>
-                        <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{x:Static props:PPTStrings.LeftBottomOffset}">
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock x:Name="PPTButtonLBPositionText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                                    <Slider x:Name="PPTButtonLBPositionValueSlider" Minimum="-100" Maximum="500" Width="200" IsSnapToTickEnabled="True" TickFrequency="5" ValueChanged="PPTButtonLBPositionValueSlider_ValueChanged"/>
-                                </ikw:SimpleStackPanel>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="{x:Static props:PPTStrings.LeftBottomOpacity}" Visibility="{Binding IsChecked, ElementName=CheckboxBPPTHalfOpacity, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock x:Name="PPTLBButtonOpacityText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                                    <Slider x:Name="PPTLBButtonOpacityValueSlider" Minimum="0.1" Maximum="1.0" Width="200" ValueChanged="PPTLBButtonOpacityValueSlider_ValueChanged"/>
-                                </ikw:SimpleStackPanel>
-                            </ui:SettingsCard>
-                        </ui:SettingsExpander.Items>
-                    </ui:SettingsExpander>
-
-                    <ui:SettingsExpander Header="{x:Static props:PPTStrings.Position_RightBottom}"
-                            Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            IsExpanded="{Binding IsOn, ElementName=CardShowPPTButton, Mode=OneWay}">
-                        <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.CaretSolidDown}"/>
-                        </ui:SettingsExpander.HeaderIcon>
-                        <ui:SettingsExpander.Content>
-                            <CheckBox x:Name="CheckboxEnableRBPPTButton" Checked="CheckboxEnableRBPPTButton_IsCheckChanged" Unchecked="CheckboxEnableRBPPTButton_IsCheckChanged"/>
-                        </ui:SettingsExpander.Content>
-                        <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{x:Static props:PPTStrings.RightBottomOffset}">
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock x:Name="PPTButtonRBPositionText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                                    <Slider x:Name="PPTButtonRBPositionValueSlider" Minimum="-100" Maximum="500" Width="200" IsSnapToTickEnabled="True" TickFrequency="5" ValueChanged="PPTButtonRBPositionValueSlider_ValueChanged"/>
-                                </ikw:SimpleStackPanel>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="{x:Static props:PPTStrings.RightBottomOpacity}" Visibility="{Binding IsChecked, ElementName=CheckboxBPPTHalfOpacity, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock x:Name="PPTRBButtonOpacityText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                                    <Slider x:Name="PPTRBButtonOpacityValueSlider" Minimum="0.1" Maximum="1.0" Width="200" ValueChanged="PPTRBButtonOpacityValueSlider_ValueChanged"/>
-                                </ikw:SimpleStackPanel>
-                            </ui:SettingsCard>
-                        </ui:SettingsExpander.Items>
-                    </ui:SettingsExpander>
-
-                    <ui:SettingsCard Header="{x:Static props:PPTStrings.SideGroupTitle}"
-                            Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <ui:SettingsCard x:Name="CardPPTPageFlipPreviewEntry"
+                            Header="翻页按钮的外观与位置"
+                            Description="自定义各翻页按钮的开启状态、显示页码、黑色背景、偏移与透明度并实时预览"
+                            IsClickEnabled="True"
+                            Click="OnCardClicked"
+                            IsEnabled="True">
                         <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DockLeft}"/>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.PreviewLink}"/>
                         </ui:SettingsCard.HeaderIcon>
-                        <ikw:SimpleStackPanel Orientation="Vertical" Spacing="6">
-                            <CheckBox x:Name="CheckboxSPPTDisplayPage" Content="{x:Static props:PPTStrings.ShowPageNumber}" Checked="CheckboxSPPTDisplayPage_IsCheckChange" Unchecked="CheckboxSPPTDisplayPage_IsCheckChange"/>
-                            <CheckBox x:Name="CheckboxSPPTHalfOpacity" Content="{x:Static props:PPTStrings.HalfOpacity}" Checked="CheckboxSPPTHalfOpacity_IsCheckChange" Unchecked="CheckboxSPPTHalfOpacity_IsCheckChange"/>
-                            <CheckBox x:Name="CheckboxSPPTBlackBackground" Content="{x:Static props:PPTStrings.BlackBackground}" Checked="CheckboxSPPTBlackBackground_IsCheckChange" Unchecked="CheckboxSPPTBlackBackground_IsCheckChange"/>
-                        </ikw:SimpleStackPanel>
-                    </ui:SettingsCard>
-
-                    <ui:SettingsCard Header="{x:Static props:PPTStrings.BottomGroupTitle}"
-                            Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DockBottom}"/>
-                        </ui:SettingsCard.HeaderIcon>
-                        <ikw:SimpleStackPanel Orientation="Vertical" Spacing="6">
-                            <CheckBox x:Name="CheckboxBPPTDisplayPage" Content="{x:Static props:PPTStrings.ShowPageNumber}" Checked="CheckboxBPPTDisplayPage_IsCheckChange" Unchecked="CheckboxBPPTDisplayPage_IsCheckChange"/>
-                            <CheckBox x:Name="CheckboxBPPTHalfOpacity" Content="{x:Static props:PPTStrings.HalfOpacity}" Checked="CheckboxBPPTHalfOpacity_IsCheckChange" Unchecked="CheckboxBPPTHalfOpacity_IsCheckChange"/>
-                            <CheckBox x:Name="CheckboxBPPTBlackBackground" Content="{x:Static props:PPTStrings.BlackBackground}" Checked="CheckboxBPPTBlackBackground_IsCheckChange" Unchecked="CheckboxBPPTBlackBackground_IsCheckChange"/>
-                        </ikw:SimpleStackPanel>
-                    </ui:SettingsCard>
-
-                    <ui:SettingsCard Header="{x:Static props:PPTStrings.FlipButtonsScale}"
-                            Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Zoom}"/>
-                        </ui:SettingsCard.HeaderIcon>
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock x:Name="PPTNavBarScaleText"
-                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                            <Slider x:Name="PPTNavBarScaleValueSlider" Minimum="0.5"
-                                    Maximum="1.5" Width="200" IsSnapToTickEnabled="True"
-                                    TickFrequency="0.05" ValueChanged="PPTNavBarScaleValueSlider_ValueChanged"/>
-                        </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardEnablePPTButtonPageClickable"
                             Header="{x:Static props:PPTStrings.PageButtonClickable}"
                             Description="{x:Static props:PPTStrings.PageButtonClickableHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
-                            Visibility="{Binding IsOn, ElementName=CardShowPPTButton, Converter={StaticResource BooleanToVisibilityConverter}}"
                             Toggled="ToggleSwitchEnablePPTButtonPageClickable_OnToggled"/>
 
-                    <controls:LabeledSettingsCard x:Name="CardEnablePPTButtonEnhancedPreview"
+                    <ui:SettingsExpander x:Name="ExpanderEnablePPTButtonEnhancedPreview"
                             Header="{x:Static props:PPTStrings.EnhancedPreview}"
                             Description="{x:Static props:PPTStrings.EnhancedPreviewHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
                             Visibility="{Binding IsOn, ElementName=CardEnablePPTButtonPageClickable, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            Toggled="ToggleSwitchEnablePPTButtonEnhancedPreview_OnToggled"/>
+                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchEnablePPTButtonEnhancedPreview, Mode=OneWay}">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"/>
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchEnablePPTButtonEnhancedPreview"
+                                d:IsOn="True"
+                                Toggled="ToggleSwitchEnablePPTButtonEnhancedPreview_OnToggled"/>
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="{x:Static props:PPTStrings.EnhancedPreviewLoadingAnimation}"
+                                    Description="{x:Static props:PPTStrings.EnhancedPreviewLoadingAnimationHint}">
+                                <ui:ToggleSwitch x:Name="ToggleSwitchPPTEnhancedPreviewLoadingAnimation"
+                                        Toggled="ToggleSwitchPPTEnhancedPreviewLoadingAnimation_OnToggled"/>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
 
                     <controls:LabeledSettingsCard x:Name="CardEnablePPTButtonLongPressPageTurn"
                             Header="{x:Static props:PPTStrings.LongPressPageTurn}"
