@@ -130,27 +130,30 @@
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
-                    <controls:LabeledSettingsCard x:Name="CardAutoCollapseQuickPanel"
-                            Header="{x:Static props:ThemeStrings.Theme_AutoCollapseQuickPanel}"
-                            Icon="{x:Static ui:SegoeFluentIcons.ChevronDown}"
-                            SwitchName="ToggleSwitchAutoCollapseQuickPanel"
-                            Toggled="ToggleSwitchAutoCollapseQuickPanel_Toggled" />
-
-                    <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_AutoCollapseQuickPanelDelay}"
-                            IsEnabled="{Binding ElementName=ToggleSwitchAutoCollapseQuickPanel, Path=IsOn}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.History}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock x:Name="AutoCollapseDelayText"
-                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                            <Slider x:Name="AutoCollapseDelaySlider" Minimum="1"
-                                    Maximum="10" Width="200"
-                                    IsSnapToTickEnabled="True" Value="3.0" TickFrequency="1"
-                                    TickPlacement="None" AutoToolTipPlacement="None"
-                                    ValueChanged="AutoCollapseDelaySlider_ValueChanged" />
-                        </ikw:SimpleStackPanel>
-                    </ui:SettingsCard>
+                    <ui:SettingsExpander Header="{x:Static props:ThemeStrings.Theme_AutoCollapseQuickPanel}"
+                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchAutoCollapseQuickPanel, Mode=OneWay}">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronDown}" />
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchAutoCollapseQuickPanel" d:IsOn="True"
+                                        Toggled="ToggleSwitchAutoCollapseQuickPanel_Toggled" />
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_AutoCollapseQuickPanelDelay}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.History}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock x:Name="AutoCollapseDelayText"
+                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                    <Slider x:Name="AutoCollapseDelaySlider" Minimum="1"
+                                            Maximum="10" Width="200"
+                                            IsSnapToTickEnabled="True" Value="3.0" TickFrequency="1"
+                                            TickPlacement="None" AutoToolTipPlacement="None"
+                                            ValueChanged="AutoCollapseDelaySlider_ValueChanged" />
+                                </ikw:SimpleStackPanel>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
 
                     <Rectangle Height="48" />
                 </ikw:SimpleStackPanel>

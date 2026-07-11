@@ -94,7 +94,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ComboBoxUnFoldBtnImg.SelectedIndex = settings.Appearance.UnFoldButtonImageType;
             CardAllowDragSidePanel.IsOn = settings.Appearance.AllowDragSidePanel;
             QuickPanelOpacitySlider.Value = settings.Appearance.QuickPanelOpacity;
-            CardAutoCollapseQuickPanel.IsOn = settings.Appearance.IsAutoCollapseQuickPanel;
+            ToggleSwitchAutoCollapseQuickPanel.IsOn = settings.Appearance.IsAutoCollapseQuickPanel;
             AutoCollapseDelaySlider.Value = settings.Appearance.AutoCollapseQuickPanelDelay;
         }
 
@@ -196,7 +196,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchAutoCollapseQuickPanel_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.IsAutoCollapseQuickPanel = CardAutoCollapseQuickPanel.IsOn;
+            SettingsManager.Settings.Appearance.IsAutoCollapseQuickPanel = ToggleSwitchAutoCollapseQuickPanel.IsOn;
             SettingsManager.SaveSettingsToFile();
             SettingsActionHub.OnAutoCollapseQuickPanelChanged();
         }
