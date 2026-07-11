@@ -391,8 +391,12 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             }
         }
 
+        private static volatile bool _defaultConfigEnsured;
+
         public static void EnsureDefaultConfigExists()
         {
+            if (_defaultConfigEnsured) return;
+
             var dir = GetConfigDirectory();
             if (!Directory.Exists(dir))
                 ProcessProtectionManager.WithWriteAccess(dir, () => Directory.CreateDirectory(dir));
@@ -404,6 +408,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 SaveConfigFile("default", layout);
                 LogHelper.WriteLogToFile("ToolbarRegistry: 首次启动，创建 default.json", LogHelper.LogType.Info);
             }
+
+            _defaultConfigEnsured = true;
         }
 
         public static ToolbarLayoutSettings LoadActiveConfig()
@@ -470,7 +476,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     if (group.Rules == null) continue;
                     foreach (var rule in group.Rules)
                     {
-                        if (rule.ConditionId != null && ConditionIdRenames.TryGetValue(rule.ConditionId, out var newName))
+                        if (rule.ConditionId != null && ConditionIdRenames.TryGetValue(rule.ConditionId, out var newName)
+                            && !string.Equals(rule.ConditionId, newName, StringComparison.Ordinal))
                         {
                             LogHelper.WriteLogToFile(
                                 $"ToolbarRegistry: 修正 ConditionId [{rule.ConditionId}] -> [{newName}]",

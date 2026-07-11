@@ -713,32 +713,6 @@ namespace Ink_Canvas
             }
         }
 
-        private static bool ShouldShowSplashScreen()
-        {
-            try
-            {
-                // 检查设置文件中的启动动画开关
-                var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs", "Settings.json");
-                if (File.Exists(settingsPath))
-                {
-                    var json = File.ReadAllText(settingsPath);
-                    dynamic obj = JsonConvert.DeserializeObject(json);
-                    if (obj?["appearance"]?["enableSplashScreen"] != null)
-                    {
-                        return (bool)obj["appearance"]["enableSplashScreen"];
-                    }
-                }
-
-                // 如果设置文件不存在或没有该设置，返回默认值false
-                return false;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"检查启动动画设置失败: {ex.Message}", LogHelper.LogType.Warning);
-                return false;
-            }
-        }
-
         private static bool IsLaunchByFileOrUri(string[] args)
         {
             if (args == null || args.Length == 0) return false;
@@ -922,14 +896,19 @@ namespace Ink_Canvas
             appStartupStartTime = DateTime.Now;
             startupStopwatch.Restart();
 
-            TryApplyPreferredLanguageFromSettings();
+            // 启动阶段跳过昂贵的 StackTrace 采集
+            LogHelper.SuppressCallerInfo = true;
 
-            // 同步 Common_On/Common_Off 等本地化资源到 Application.Resources
-            Helpers.LocalizationHelper.SyncCommonResources();
+            // 一次性读取并解析 Settings.json，避免重复 I/O + dynamic 反序列化
+            dynamic parsedSettings = ReadSettingsJsonOnce();
 
-            // 根据设置决定是否显示启动画面
-            if (ShouldShowSplashScreen() && !IsLaunchByFileOrUri(e.Args))
+            TryApplyPreferredLanguageFromParsedSettings(parsedSettings);
+
+            // 根据设置决定是否显示启动画面（复用已解析的设置对象）
+            if (ShouldShowSplashScreenFromParsed(parsedSettings) && !IsLaunchByFileOrUri(e.Args))
             {
+                // 注入缓存 JSON 给 SplashScreen，避免其构造期间重复读取 + 解析 Settings.json
+                SplashScreen.CachedSettingsJson = CachedSettingsJson;
                 ShowSplashScreen();
                 SetSplashMessage("正在启动 Ink Canvas...");
                 SetSplashProgress(25);
@@ -937,8 +916,6 @@ namespace Ink_Canvas
                 // 强制刷新UI，确保启动画面显示
                 Application.Current.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
             }
-
-            await Task.Delay(100);
             RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
             var version = Assembly.GetExecutingAssembly().GetName().Version;
@@ -986,7 +963,6 @@ namespace Ink_Canvas
             {
                 SetSplashMessage("正在加载配置...");
                 SetSplashProgress(50);
-                await Task.Delay(100);
             }
 
             // 处理更新模式启动
@@ -1247,7 +1223,7 @@ namespace Ink_Canvas
                 mutex = new Mutex(true, mutexName, out bool tempRet);
 
                 // 额外等待一小段时间确保更新进程完全退出
-                await Task.Delay(1000);
+                await Task.Delay(100);
                 LogHelper.WriteLogToFile("App | 特殊模式等待完成，继续启动");
             }
 
@@ -1291,6 +1267,9 @@ namespace Ink_Canvas
                 isStartupComplete = true;
                 startupCompleteHeartbeat = DateTime.Now;
 
+                // 启动完成，恢复日志调用栈采集
+                LogHelper.SuppressCallerInfo = false;
+
                 // 启动成功，重置崩溃重启计数器
                 StartupCount.Reset();
 
@@ -1323,7 +1302,7 @@ namespace Ink_Canvas
             };
 
             mainWindow.Show();
-            WindowTopmostManager.Initialize(mainWindow);
+            WindowTopmostManager.Initialize(mainWindow, skipScan: true);
             _ = Task.Run(async () =>
             {
                 Dispatcher.Invoke(() => _taskbar?.ForceCreate());
@@ -1441,24 +1420,67 @@ namespace Ink_Canvas
             }
         }
 
-        private void TryApplyPreferredLanguageFromSettings()
+        private static dynamic _cachedParsedSettings;
+        /// <summary>
+        /// 缓存 Settings.json 原始文本，供 LoadSettings 复用，避免启动阶段重复磁盘 I/O。
+        /// </summary>
+        internal static string CachedSettingsJson { get; private set; }
+
+        /// <summary>
+        /// 一次性读取并缓存 Settings.json 的解析结果，避免启动阶段重复 I/O + dynamic 反序列化。
+        /// 同时缓存原始 JSON 文本供 LoadSettings 使用。
+        /// </summary>
+        private static dynamic ReadSettingsJsonOnce()
         {
+            if (_cachedParsedSettings != null) return _cachedParsedSettings;
             try
             {
                 var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs", "Settings.json");
-                if (!File.Exists(settingsPath)) return;
+                if (File.Exists(settingsPath))
+                {
+                    var json = File.ReadAllText(settingsPath);
+                    CachedSettingsJson = json;
+                    _cachedParsedSettings = JsonConvert.DeserializeObject(json);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"读取 Settings.json 失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+            return _cachedParsedSettings;
+        }
 
-                var json = File.ReadAllText(settingsPath);
-                dynamic obj = JsonConvert.DeserializeObject(json);
-                string preferredLanguage = obj?["appearance"]?["language"]?.ToString();
+        private void TryApplyPreferredLanguageFromParsedSettings(dynamic parsedSettings)
+        {
+            try
+            {
+                string preferredLanguage = parsedSettings?["appearance"]?["language"]?.ToString();
                 if (!string.IsNullOrWhiteSpace(preferredLanguage))
                 {
                     LocalizationHelper.TrySetCulture(preferredLanguage);
+                    // TrySetCulture → CurrentCulture setter 内部已调用 SyncCommonResources()，无需重复调用
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"启动时预加载语言失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private static bool ShouldShowSplashScreenFromParsed(dynamic parsedSettings)
+        {
+            try
+            {
+                if (parsedSettings?["appearance"]?["enableSplashScreen"] != null)
+                {
+                    return (bool)parsedSettings["appearance"]["enableSplashScreen"];
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"检查启动动画设置失败: {ex.Message}", LogHelper.LogType.Warning);
+                return false;
             }
         }
 
