@@ -373,10 +373,10 @@
     <value>Sidebar opacity</value>
   </data>
   <data name="Theme_AutoCollapseQuickPanel" xml:space="preserve">
-    <value>Auto-collapse sidebar when clicking elsewhere</value>
+    <value>Auto-collapse sidebar after opening</value>
   </data>
   <data name="Theme_AutoCollapseQuickPanelDelay" xml:space="preserve">
-    <value>Auto-collapse delay</value>
+    <value>Wait time before auto-collapse</value>
   </data>
   <data name="Theme_FloatingBarMenuOpacity" xml:space="preserve">
     <value>Floating bar menu opacity</value>
