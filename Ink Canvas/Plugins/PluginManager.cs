@@ -207,6 +207,8 @@ namespace Ink_Canvas.Plugins
                     var targetPath = Path.Combine(_pluginsDirectory, manifest.Id);
                     if (Directory.Exists(targetPath))
                     {
+                        // 释放门控锁后删除旧版本
+                        ProcessProtectionManager.ReleaseLocksForPath(targetPath);
                         Directory.Delete(targetPath, true);
                     }
                     Directory.CreateDirectory(targetPath);

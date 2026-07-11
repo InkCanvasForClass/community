@@ -399,16 +399,22 @@ namespace Ink_Canvas.Plugins
                 task.Progress = 100;
                 merged.RestartRequired = true;
 
-                // 立即安装插件包
-                try
+                // 检查是否为全新安装（当前未加载的插件）
+                var isAlreadyLoaded = PluginManager.Instance.Plugins.Any(p => p.Id == id);
+                if (!isAlreadyLoaded)
                 {
-                    PluginManager.Instance.InstallPendingPackages();
-                    merged.RestartRequired = false;
+                    // 全新安装：尝试立即加载
+                    try
+                    {
+                        PluginManager.Instance.InstallPendingPackages();
+                        merged.RestartRequired = false;
+                    }
+                    catch
+                    {
+                        // 加载失败，保留 RestartRequired
+                    }
                 }
-                catch (Exception installEx)
-                {
-                    LogHelper.WriteLogToFile($"PluginMarket | 安装插件包失败，需重启: {installEx.Message}", LogHelper.LogType.Warning);
-                }
+                // 已加载插件的更新：仅下载到 PluginPackages/，下次启动时 ProcessPluginPackages 自动覆盖
 
                 LogHelper.WriteLogToFile($"PluginMarket | 插件下载完成: {id}");
 

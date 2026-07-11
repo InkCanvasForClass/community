@@ -266,6 +266,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             await _market.RequestDownloadPluginAsync(id);
             _allPlugins = _market.MergedPlugins ?? new List<MergedPluginInfo>();
             RefreshList();
+
+            // 更新已安装插件后提示重启
+            var updated = _allPlugins.FirstOrDefault(p => p.Id == id);
+            if (updated != null && updated.RestartRequired)
+            {
+                AskRestart();
+            }
         }
 
         private async void RefreshButton_Click(object sender, RoutedEventArgs e)
@@ -308,5 +315,30 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         }
 
         #endregion
+
+        private void AskRestart()
+        {
+            var result = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                PluginStrings.Market_RestartMessage,
+                PluginStrings.Market_RestartTitle,
+                MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                try
+                {
+                    var exePath = Process.GetCurrentProcess().MainModule.FileName;
+                    Process.Start(exePath);
+                    Application.Current.Shutdown();
+                }
+                catch (Exception ex)
+                {
+                    iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                        string.Format(PluginStrings.Market_RestartFailed, ex.Message),
+                        PluginStrings.Market_RestartTitle,
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
     }
 }
