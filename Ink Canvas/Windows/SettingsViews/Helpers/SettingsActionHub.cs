@@ -1,5 +1,4 @@
 using Ink_Canvas.Helpers;
-using InkCanvasPPTAgent.Contracts;
 using System;
 using System.Windows;
 

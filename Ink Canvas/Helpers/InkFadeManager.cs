@@ -824,7 +824,7 @@ namespace Ink_Canvas.Helpers
 
             for (int i = 0; i < segmentCount; i++)
             {
-                curve[i] = (int)(i * delayBetweenSegments);
+                curve[i] = i * delayBetweenSegments;
             }
 
             return curve;

@@ -229,7 +229,7 @@ namespace Ink_Canvas
                     {
                         Mode = currentMode == 0 ? "Annotation" : "BlackBoard",
                         Type = saveByUser ? "User" : "Auto",
-                        Page = currentMode != 0 ? CurrentWhiteboardIndex : (int?)null,
+                        Page = currentMode != 0 ? CurrentWhiteboardIndex : null,
                         Count = inkCanvas.Strokes.Count
                     };
                     var fname = SaveFileNameHelper.Render(Settings.Automation.CustomSaveFileNameTemplate, ctx);
@@ -881,70 +881,70 @@ namespace Ink_Canvas
                 Screen.PrimaryScreen.Bounds.Height))
             {
 
-            using (var g = Graphics.FromImage(bitmap))
-            {
-                // 创建黑色或透明背景
-                Color bgColor = Settings.Canvas.UsingWhiteboard
-                    ? Color.White
-                    : Color.FromArgb(22, 41, 36); // 黑板背景色
-                g.Clear(bgColor);
-
-                // 将InkCanvas墨迹渲染到Visual
-                var visual = new DrawingVisual();
-                using (var dc = visual.RenderOpen())
+                using (var g = Graphics.FromImage(bitmap))
                 {
-                    // 创建一个VisualBrush，使用inkCanvas作为源
-                    var visualBrush = new VisualBrush(inkCanvas);
-                    // 绘制矩形并填充为inkCanvas的内容
-                    dc.DrawRectangle(visualBrush, null, new Rect(0, 0, inkCanvas.ActualWidth, inkCanvas.ActualHeight));
-                }
+                    // 创建黑色或透明背景
+                    Color bgColor = Settings.Canvas.UsingWhiteboard
+                        ? Color.White
+                        : Color.FromArgb(22, 41, 36); // 黑板背景色
+                    g.Clear(bgColor);
 
-                // 创建适合墨迹画布尺寸的渲染位图
-                var rtb = new RenderTargetBitmap(
-                    (int)inkCanvas.ActualWidth, (int)inkCanvas.ActualHeight,
-                    96, 96,
-                    PixelFormats.Pbgra32);
-                rtb.Render(visual);
-
-                // 转换为GDI+ Bitmap并保存
-                var encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(rtb));
-
-                using (var ms = new MemoryStream())
-                {
-                    encoder.Save(ms);
-                    ms.Seek(0, SeekOrigin.Begin);
-                    using (var imgBitmap = new Bitmap(ms))
+                    // 将InkCanvas墨迹渲染到Visual
+                    var visual = new DrawingVisual();
+                    using (var dc = visual.RenderOpen())
                     {
+                        // 创建一个VisualBrush，使用inkCanvas作为源
+                        var visualBrush = new VisualBrush(inkCanvas);
+                        // 绘制矩形并填充为inkCanvas的内容
+                        dc.DrawRectangle(visualBrush, null, new Rect(0, 0, inkCanvas.ActualWidth, inkCanvas.ActualHeight));
+                    }
 
-                    // 将生成的墨迹图像绘制到屏幕截图上
-                    // 居中绘制，确保墨迹位于屏幕中央
-                    int x = (bitmap.Width - imgBitmap.Width) / 2;
-                    int y = (bitmap.Height - imgBitmap.Height) / 2;
-                    g.DrawImage(imgBitmap, x, y);
+                    // 创建适合墨迹画布尺寸的渲染位图
+                    var rtb = new RenderTargetBitmap(
+                        (int)inkCanvas.ActualWidth, (int)inkCanvas.ActualHeight,
+                        96, 96,
+                        PixelFormats.Pbgra32);
+                    rtb.Render(visual);
 
-                    // 保存为PNG
-                    string imagePathWithName = Path.ChangeExtension(savePathWithName, "png");
-                    bitmap.Save(imagePathWithName, ImageFormat.Png);
+                    // 转换为GDI+ Bitmap并保存
+                    var encoder = new PngBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(rtb));
 
-                    // 仍然保存墨迹文件以兼容旧版本
-                    var fs = new FileStream(savePathWithName, FileMode.Create);
-                    inkCanvas.Strokes.Save(fs);
-                    fs.Close();
-
-                    _ = Task.Run(async () =>
+                    using (var ms = new MemoryStream())
                     {
-                        try
+                        encoder.Save(ms);
+                        ms.Seek(0, SeekOrigin.Begin);
+                        using (var imgBitmap = new Bitmap(ms))
                         {
-                            await Helpers.UploadHelper.UploadFileAsync(imagePathWithName);
-                        }
-                        catch (Exception)
-                        {
-                        }
-                    });
-                    } // using imgBitmap
-                }
-            } // using g
+
+                            // 将生成的墨迹图像绘制到屏幕截图上
+                            // 居中绘制，确保墨迹位于屏幕中央
+                            int x = (bitmap.Width - imgBitmap.Width) / 2;
+                            int y = (bitmap.Height - imgBitmap.Height) / 2;
+                            g.DrawImage(imgBitmap, x, y);
+
+                            // 保存为PNG
+                            string imagePathWithName = Path.ChangeExtension(savePathWithName, "png");
+                            bitmap.Save(imagePathWithName, ImageFormat.Png);
+
+                            // 仍然保存墨迹文件以兼容旧版本
+                            var fs = new FileStream(savePathWithName, FileMode.Create);
+                            inkCanvas.Strokes.Save(fs);
+                            fs.Close();
+
+                            _ = Task.Run(async () =>
+                            {
+                                try
+                                {
+                                    await Helpers.UploadHelper.UploadFileAsync(imagePathWithName);
+                                }
+                                catch (Exception)
+                                {
+                                }
+                            });
+                        } // using imgBitmap
+                    }
+                } // using g
             } // using bitmap
 
             // 显示提示

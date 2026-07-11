@@ -998,17 +998,17 @@ namespace Ink_Canvas
                     if (penType == 0)
                     {
                         Settings.Canvas.InkWidth = width;
-                        Settings.Canvas.InkAlpha = (int)color.A;
+                        Settings.Canvas.InkAlpha = color.A;
                     }
                     else if (penType == 1)
                     {
                         Settings.Canvas.HighlighterWidth = width;
-                        Settings.Canvas.HighlighterAlpha = (int)color.A;
+                        Settings.Canvas.HighlighterAlpha = color.A;
                     }
                     else if (penType == 2)
                     {
                         Settings.Canvas.LaserPenWidth = width;
-                        Settings.Canvas.LaserPenAlpha = (int)color.A;
+                        Settings.Canvas.LaserPenAlpha = color.A;
                     }
                 }
 

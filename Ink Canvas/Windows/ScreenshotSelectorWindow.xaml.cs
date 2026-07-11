@@ -1551,7 +1551,7 @@ namespace Ink_Canvas
                 }
                 else if (!Dispatcher.HasShutdownStarted && !Dispatcher.HasShutdownFinished)
                 {
-                    Dispatcher.Invoke((Action)CleanupResources, DispatcherPriority.Send);
+                    Dispatcher.Invoke(CleanupResources, DispatcherPriority.Send);
                 }
             }
             catch (Exception ex)

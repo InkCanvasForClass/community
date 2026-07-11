@@ -16,7 +16,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Application = System.Windows.Application;
@@ -3097,7 +3096,7 @@ namespace Ink_Canvas
                 IProgress<double> progress = new DirectProgress(v =>
                 {
                     _pptLoadingProgress = v;
-                    dispatcher.Invoke((Action)(() => UpdatePPTLoadingRing()));
+                    dispatcher.Invoke(() => UpdatePPTLoadingRing());
                 });
                 var slides = await GetOrBuildPPTEnhancedPreviewItemsAsync(cancellationToken, progress);
                 if (!cancellationToken.IsCancellationRequested && slides != null && slides.Count > 0)

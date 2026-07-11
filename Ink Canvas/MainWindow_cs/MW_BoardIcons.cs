@@ -2,7 +2,6 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;

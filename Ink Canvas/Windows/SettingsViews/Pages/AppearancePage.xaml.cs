@@ -1,6 +1,5 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Diagnostics;
 using System.Linq;

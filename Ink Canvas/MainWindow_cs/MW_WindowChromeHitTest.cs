@@ -1,11 +1,8 @@
+using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
-using Ink_Canvas.Helpers;
-using InkCanvasPPTAgent.Contracts;
-using Cursor = System.Windows.Forms.Cursor;
 
 namespace Ink_Canvas
 {
