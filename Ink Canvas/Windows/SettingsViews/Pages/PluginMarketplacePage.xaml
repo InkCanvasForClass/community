@@ -12,51 +12,176 @@
     Loaded="Page_Loaded"
     Unloaded="Page_Unloaded">
 
-    <DockPanel x:Name="RootPanel" Margin="24,8,24,8">
-        <!-- 搜索 + 按钮 -->
-        <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBox x:Name="SearchBox" Grid.Column="0"
-                TextChanged="SearchBox_TextChanged"
-                KeyDown="SearchBox_KeyDown"
-                Margin="0,0,8,0" Padding="8,6"/>
-            <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Button ToolTip="{x:Static props:PluginStrings.Market_Refresh}"
-                    Click="RefreshButton_Click" Padding="8,6" Margin="0,0,6,0">
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" FontSize="14"/>
-                </Button>
-                <Button ToolTip="{x:Static props:PluginStrings.Market_OpenPluginsFolder}"
-                    Click="OpenFolderButton_Click" Padding="8,6" Margin="0,0,6,0">
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FolderOpen}" FontSize="14"/>
-                </Button>
-                <Button ToolTip="{x:Static props:PluginStrings.Market_InstallFromLocal}"
-                    Click="InstallLocalButton_Click" Padding="8,6">
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" FontSize="14"/>
-                </Button>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="2*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- 左侧：搜索 + 标签 + 插件列表 -->
+        <DockPanel Grid.Column="0" Margin="16,8,0,8">
+            <!-- 搜索框 + 操作按钮 -->
+            <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="SearchBox" Grid.Column="0"
+                    TextChanged="SearchBox_TextChanged"
+                    KeyDown="SearchBox_KeyDown"
+                    Margin="0,0,8,0" Padding="8,6"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button ToolTip="{x:Static props:PluginStrings.Market_Refresh}"
+                        Click="RefreshButton_Click" Padding="8,6" Margin="0,0,4,0">
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" FontSize="14"/>
+                    </Button>
+                    <Button ToolTip="{x:Static props:PluginStrings.Market_OpenPluginsFolder}"
+                        Click="OpenFolderButton_Click" Padding="8,6" Margin="0,0,4,0">
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FolderOpen}" FontSize="14"/>
+                    </Button>
+                    <Button ToolTip="{x:Static props:PluginStrings.Market_InstallFromLocal}"
+                        Click="InstallLocalButton_Click" Padding="8,6">
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" FontSize="14"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- 分类标签 -->
+            <ikw:SimpleStackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="6" Margin="0,0,0,8">
+                <RadioButton x:Name="TabMarket" Content="{x:Static props:PluginStrings.Market_TabMarket}"
+                    IsChecked="True" Checked="Tab_Checked" Padding="14,6"/>
+                <RadioButton x:Name="TabInstalled" Content="{x:Static props:PluginStrings.Market_TabInstalled}"
+                    Checked="Tab_Checked" Padding="14,6"/>
+            </ikw:SimpleStackPanel>
+
+            <!-- 加载条 -->
+            <ProgressBar x:Name="LoadingBar" DockPanel.Dock="Top"
+                IsIndeterminate="False" Visibility="Collapsed"
+                Margin="0,0,0,4" Height="2"/>
+
+            <!-- 插件列表（代码填充） -->
+            <ListBox x:Name="PluginListBox"
+                SelectionChanged="PluginListBox_SelectionChanged"
+                HorizontalContentAlignment="Stretch"
+                VirtualizingPanel.ScrollUnit="Pixel"
+                ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
+        </DockPanel>
+
+        <!-- 分隔线 -->
+        <Rectangle Grid.Column="1" Width="1"
+            Fill="{DynamicResource DividerStrokeColorDefaultBrush}" Margin="0,16,0,16"/>
+
+        <!-- 右侧：插件详情 -->
+        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" Margin="16,8,16,8">
+            <StackPanel>
+                <!-- 空状态 -->
+                <StackPanel x:Name="EmptyStatePanel"
+                    VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,80,0,0">
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Puzzle}" FontSize="48"
+                        Margin="0,0,0,8" Opacity="0.4" HorizontalAlignment="Center"/>
+                    <TextBlock Text="{x:Static props:PluginStrings.Market_SelectPluginHint}"
+                        FontSize="14" Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                        HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- 详情内容 -->
+                <StackPanel x:Name="DetailPanel" Visibility="Collapsed">
+                    <!-- 头部：图标 + 名称 + 版本 + 作者 -->
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Width="64" Height="64" CornerRadius="10"
+                            Background="{DynamicResource ControlFillColorDefaultBrush}" Margin="0,0,16,0">
+                            <ui:FontIcon x:Name="DetailIcon" Icon="{x:Static ui:SegoeFluentIcons.Puzzle}"
+                                FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Opacity="0.6"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock x:Name="DetailName" FontSize="22" FontWeight="SemiBold"
+                                TextTrimming="CharacterEllipsis"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,4,0,4">
+                                <TextBlock x:Name="DetailVersion" FontSize="13"
+                                    Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,8,0"/>
+                                <TextBlock x:Name="DetailAuthor" FontSize="13"
+                                    Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,8,0"/>
+                                <ui:HyperlinkButton x:Name="DetailUrl"
+                                    Content="{x:Static props:PluginStrings.Market_ProjectHomepage}"/>
+                            </StackPanel>
+                            <TextBlock x:Name="DetailDescription" FontSize="13" TextWrapping="Wrap"
+                                Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- 操作按钮 -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <Button x:Name="DetailInstallBtn" Click="DetailInstall_Click" Padding="14,8" Margin="0,0,8,0">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Download}" FontSize="14" Margin="0,0,6,0"/>
+                                <TextBlock Text="{x:Static props:PluginStrings.Market_Install}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="DetailUpdateBtn" Click="DetailInstall_Click" Padding="14,8" Margin="0,0,8,0">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Upload}" FontSize="14" Margin="0,0,6,0"/>
+                                <TextBlock Text="{x:Static props:PluginStrings.Market_Update}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="DetailRestartBtn" Click="DetailRestart_Click" Padding="14,8" Margin="0,0,8,0">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" FontSize="14" Margin="0,0,6,0"/>
+                                <TextBlock Text="{x:Static props:PluginStrings.Market_RestartToApply}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <ProgressBar x:Name="DetailProgress" Width="120" Height="4" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- 统计信息 -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Download}" FontSize="14"
+                                Margin="0,0,4,0" Opacity="0.6"/>
+                            <TextBlock x:Name="DetailDownloadCount" FontSize="12"
+                                Foreground="{DynamicResource TextFillColorTertiaryBrush}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FavoriteStar}" FontSize="14"
+                                Margin="0,0,4,0" Opacity="0.6"/>
+                            <TextBlock x:Name="DetailStarsCount" FontSize="12"
+                                Foreground="{DynamicResource TextFillColorTertiaryBrush}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- 依赖列表 -->
+                    <TextBlock x:Name="DetailDepsHeader" Text="{x:Static props:PluginStrings.Market_TabDependencies}"
+                        FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" Visibility="Collapsed"/>
+                    <ItemsControl x:Name="DetailDependencies" Margin="0,0,0,16">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Puzzle}" FontSize="12" Margin="0,0,6,0"/>
+                                    <TextBlock Text="{Binding Id}" FontSize="12" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <TextBlock FontSize="11" VerticalAlignment="Center"
+                                        Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                                        Text="{Binding Version, Mode=OneWay}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- 说明文档 -->
+                    <TextBlock x:Name="DetailReadmeHeader" Text="{x:Static props:PluginStrings.Market_TabOverview}"
+                        FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                    <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                        CornerRadius="8" Padding="12">
+                        <TextBlock x:Name="DetailReadme" TextWrapping="Wrap" FontSize="13"
+                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                            Text="{x:Static props:PluginStrings.Market_NoReadme}"/>
+                    </Border>
+                </StackPanel>
             </StackPanel>
-        </Grid>
-
-        <!-- 分类标签 -->
-        <ikw:SimpleStackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="6" Margin="0,0,0,8">
-            <RadioButton x:Name="TabMarket" Content="{x:Static props:PluginStrings.Market_TabMarket}"
-                IsChecked="True" Checked="Tab_Checked" Padding="14,6"/>
-            <RadioButton x:Name="TabInstalled" Content="{x:Static props:PluginStrings.Market_TabInstalled}"
-                Checked="Tab_Checked" Padding="14,6"/>
-        </ikw:SimpleStackPanel>
-
-        <!-- 加载条 -->
-        <ProgressBar x:Name="LoadingBar" DockPanel.Dock="Top"
-            IsIndeterminate="False" Visibility="Collapsed"
-            Margin="0,0,0,4" Height="2"/>
-
-        <!-- 插件列表（代码填充） -->
-        <ListBox x:Name="PluginListBox"
-            SelectionChanged="PluginListBox_SelectionChanged"
-            HorizontalContentAlignment="Stretch"
-            VirtualizingPanel.ScrollUnit="Pixel"
-            ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
-    </DockPanel>
+        </ScrollViewer>
+    </Grid>
 </ui:Page>

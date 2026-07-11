@@ -142,7 +142,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             // 检查是否有更新
             MergedPluginInfo marketInfo = null;
-            if (_market.MergedPlugins != null)
+            var pendingPackage = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PluginPackages", pluginInfo.Id + ".icpx");
+            var hasPendingUpdate = File.Exists(pendingPackage);
+
+            if (!hasPendingUpdate && _market.MergedPlugins != null)
             {
                 marketInfo = _market.MergedPlugins.FirstOrDefault(m => m.Id == pluginInfo.Id && m.IsUpdateAvailable);
             }
@@ -194,9 +197,25 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             };
             actionPanel.Children.Add(folderBtn);
 
-            // 更新按钮
-            if (marketInfo != null)
+            // 更新/重启按钮
+            if (hasPendingUpdate)
             {
+                // 已下载，需要重启
+                var restartBtn = new Button
+                {
+                    Padding = new Thickness(6), Margin = new Thickness(0, 0, 4, 0),
+                    ToolTip = PluginStrings.Market_RestartToApply
+                };
+                restartBtn.Click += (s, ev) => AskRestart();
+                restartBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+                {
+                    Icon = SegoeFluentIcons.Refresh, FontSize = 14
+                };
+                actionPanel.Children.Add(restartBtn);
+            }
+            else if (marketInfo != null)
+            {
+                // 有新版本可更新
                 var updateBtn = new Button
                 {
                     Padding = new Thickness(6), Margin = new Thickness(0, 0, 4, 0),

@@ -19,6 +19,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private bool _showMarketOnly = true;
         private string _searchText = "";
         private List<MergedPluginInfo> _allPlugins = new List<MergedPluginInfo>();
+        private MergedPluginInfo _selectedPlugin;
 
         public PluginMarketplacePage()
         {
@@ -28,21 +29,28 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            var lastRefresh = _market.GetLastRefreshTime();
-            if (lastRefresh == null || (DateTime.Now - lastRefresh.Value).TotalDays >= 7)
+            try
             {
-                LoadingBar.Visibility = Visibility.Visible;
-                LoadingBar.IsIndeterminate = true;
-                await _market.RefreshIndexAsync();
-                LoadingBar.Visibility = Visibility.Collapsed;
-                LoadingBar.IsIndeterminate = false;
+                var lastRefresh = _market.GetLastRefreshTime();
+                if (lastRefresh == null || (DateTime.Now - lastRefresh.Value).TotalDays >= 7)
+                {
+                    LoadingBar.Visibility = Visibility.Visible;
+                    LoadingBar.IsIndeterminate = true;
+                    await _market.RefreshIndexAsync();
+                    LoadingBar.Visibility = Visibility.Collapsed;
+                    LoadingBar.IsIndeterminate = false;
+                }
+                else
+                {
+                    _market.LoadFromCache();
+                }
+                _allPlugins = _market.MergedPlugins ?? new List<MergedPluginInfo>();
+                RefreshList();
             }
-            else
+            catch (Exception ex)
             {
-                _market.LoadFromCache();
+                System.Diagnostics.Debug.WriteLine($"PluginMarketplacePage | Page_Loaded: {ex}");
             }
-            _allPlugins = _market.MergedPlugins ?? new List<MergedPluginInfo>();
-            RefreshList();
         }
 
         private void Page_Unloaded(object sender, RoutedEventArgs e)
@@ -81,11 +89,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }).ToList();
 
             PluginListBox.Items.Clear();
-
             foreach (var p in filtered)
             {
-                var item = CreatePluginListItem(p);
-                PluginListBox.Items.Add(item);
+                PluginListBox.Items.Add(CreatePluginListItem(p));
+            }
+
+            // 如果当前选中的插件不在列表中，清空详情
+            if (_selectedPlugin != null && !filtered.Contains(_selectedPlugin))
+            {
+                ShowEmptyState();
             }
         }
 
@@ -125,21 +137,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             // 名称 + 描述
             var infoPanel = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
-
             var titleRow = new StackPanel { Orientation = Orientation.Horizontal };
             var nameText = new TextBlock
             {
-                Text = p.Name,
-                FontSize = 14,
-                FontWeight = FontWeights.SemiBold,
-                VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(0, 0, 6, 0)
+                Text = p.Name, FontSize = 14, FontWeight = FontWeights.SemiBold,
+                VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 6, 0)
             };
             var versionText = new TextBlock
             {
-                Text = p.VersionText,
-                FontSize = 11,
-                VerticalAlignment = VerticalAlignment.Center
+                Text = p.VersionText, FontSize = 11, VerticalAlignment = VerticalAlignment.Center
             };
             versionText.SetResourceReference(TextBlock.ForegroundProperty, "TextFillColorTertiaryBrush");
             titleRow.Children.Add(nameText);
@@ -147,9 +153,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             var descText = new TextBlock
             {
-                Text = p.Description,
-                FontSize = 11,
-                TextTrimming = TextTrimming.CharacterEllipsis
+                Text = p.Description, FontSize = 11, TextTrimming = TextTrimming.CharacterEllipsis
             };
             descText.SetResourceReference(TextBlock.ForegroundProperty, "TextFillColorSecondaryBrush");
 
@@ -158,55 +162,48 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             Grid.SetColumn(infoPanel, 1);
             grid.Children.Add(infoPanel);
 
-            // 操作按钮
+            // 右侧状态
             var actionPanel = new StackPanel
             {
-                Orientation = Orientation.Horizontal,
-                VerticalAlignment = VerticalAlignment.Center
+                Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center
             };
 
             if (p.IsOnMarket && !p.IsLocal && !p.RestartRequired)
             {
-                var installBtn = new Button { Padding = new Thickness(4), Tag = p.Id, ToolTip = PluginStrings.Market_Install };
-                installBtn.Click += InstallButton_Click;
-                installBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+                var btn = new Button { Padding = new Thickness(4), Tag = p.Id, ToolTip = PluginStrings.Market_Install };
+                btn.Click += InstallButton_Click;
+                btn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
                 {
                     Icon = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons.Download, FontSize = 14
                 };
-                actionPanel.Children.Add(installBtn);
+                actionPanel.Children.Add(btn);
             }
-
             if (p.IsUpdateAvailable)
             {
-                var updateBtn = new Button { Padding = new Thickness(4), Tag = p.Id, ToolTip = PluginStrings.Market_Update, Margin = new Thickness(4, 0, 0, 0) };
-                updateBtn.Click += InstallButton_Click;
-                updateBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+                var btn = new Button { Padding = new Thickness(4), Tag = p.Id, ToolTip = PluginStrings.Market_Update, Margin = new Thickness(4, 0, 0, 0) };
+                btn.Click += InstallButton_Click;
+                btn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
                 {
                     Icon = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons.Upload, FontSize = 14
                 };
-                actionPanel.Children.Add(updateBtn);
+                actionPanel.Children.Add(btn);
             }
-
-            if (p.IsLocal && !p.IsOnMarket)
+            if (p.IsLocal)
             {
                 var checkIcon = new iNKORE.UI.WPF.Modern.Controls.FontIcon
                 {
                     Icon = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons.Completed,
-                    FontSize = 14,
-                    Margin = new Thickness(4, 0, 0, 0),
+                    FontSize = 14, Margin = new Thickness(4, 0, 0, 0),
                     Foreground = new SolidColorBrush((Color)Application.Current.FindResource("SystemAccentColor"))
                 };
                 actionPanel.Children.Add(checkIcon);
             }
-
             if (!string.IsNullOrEmpty(p.DownloadCountText))
             {
                 var countText = new TextBlock
                 {
-                    Text = p.DownloadCountText,
-                    FontSize = 11,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    Margin = new Thickness(6, 0, 0, 0)
+                    Text = p.DownloadCountText, FontSize = 11,
+                    VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(6, 0, 0, 0)
                 };
                 countText.SetResourceReference(TextBlock.ForegroundProperty, "TextFillColorTertiaryBrush");
                 actionPanel.Children.Add(countText);
@@ -214,9 +211,79 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             Grid.SetColumn(actionPanel, 2);
             grid.Children.Add(actionPanel);
-
             item.Content = grid;
             return item;
+        }
+
+        #endregion
+
+        #region 详情面板
+
+        private void ShowEmptyState()
+        {
+            _selectedPlugin = null;
+            EmptyStatePanel.Visibility = Visibility.Visible;
+            DetailPanel.Visibility = Visibility.Collapsed;
+        }
+
+        private void ShowDetail(MergedPluginInfo p)
+        {
+            _selectedPlugin = p;
+            EmptyStatePanel.Visibility = Visibility.Collapsed;
+            DetailPanel.Visibility = Visibility.Visible;
+
+            DetailName.Text = p.Name;
+            DetailVersion.Text = $"v{p.Version}";
+            DetailAuthor.Text = $"by {p.Author}";
+            DetailDescription.Text = p.Description;
+            DetailDownloadCount.Text = p.DownloadCount > 0 ? p.DownloadCount.ToString("N0") : "-";
+            DetailStarsCount.Text = p.StarsCount > 0 ? p.StarsCount.ToString("N0") : "-";
+
+            // 按钮状态
+            var canInstall = p.IsOnMarket && !p.IsLocal && !p.RestartRequired;
+            var canUpdate = p.IsUpdateAvailable && !p.RestartRequired;
+            DetailInstallBtn.Visibility = canInstall ? Visibility.Visible : Visibility.Collapsed;
+            DetailUpdateBtn.Visibility = canUpdate ? Visibility.Visible : Visibility.Collapsed;
+            DetailRestartBtn.Visibility = p.RestartRequired ? Visibility.Visible : Visibility.Collapsed;
+            DetailProgress.Value = p.DownloadTask?.Progress ?? 0;
+            DetailProgress.Visibility = p.IsDownloading ? Visibility.Visible : Visibility.Collapsed;
+
+            // 依赖
+            var deps = p.MarketEntry?.Manifest?.Dependencies;
+            if (deps != null && deps.Count > 0)
+            {
+                DetailDepsHeader.Visibility = Visibility.Visible;
+                DetailDependencies.ItemsSource = deps;
+            }
+            else
+            {
+                DetailDepsHeader.Visibility = Visibility.Collapsed;
+                DetailDependencies.ItemsSource = null;
+            }
+
+            // 说明文档
+            DetailReadme.Text = PluginStrings.Market_NoReadme;
+            if (!string.IsNullOrEmpty(p.ReadmeUrl))
+            {
+                DetailReadme.Text = PluginStrings.Market_ReadmeLoading;
+                _ = LoadReadmeAsync(p.ReadmeUrl);
+            }
+        }
+
+        private async System.Threading.Tasks.Task LoadReadmeAsync(string url)
+        {
+            try
+            {
+                using (var http = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(10) })
+                {
+                    var text = await http.GetStringAsync(url);
+                    Dispatcher.Invoke(() => DetailReadme.Text = text);
+                }
+            }
+            catch
+            {
+                Dispatcher.Invoke(() => DetailReadme.Text = PluginStrings.Market_ReadmeLoadFailed);
+            }
         }
 
         #endregion
@@ -238,13 +305,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void SearchBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            if (e.Key == System.Windows.Input.Key.Enter)
-                RefreshList();
+            if (e.Key == System.Windows.Input.Key.Enter) RefreshList();
         }
 
         private void PluginListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // 详情面板暂不实现
+            var selectedItem = PluginListBox.SelectedItem as ListBoxItem;
+            var plugin = selectedItem?.Tag as MergedPluginInfo;
+            if (plugin != null)
+                ShowDetail(plugin);
+            else
+                ShowEmptyState();
         }
 
         private async void InstallButton_Click(object sender, RoutedEventArgs e)
@@ -252,7 +323,22 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var btn = sender as FrameworkElement;
             var id = btn?.Tag as string;
             if (string.IsNullOrEmpty(id)) return;
+            await InstallPluginAsync(id);
+        }
 
+        private async void DetailInstall_Click(object sender, RoutedEventArgs e)
+        {
+            if (_selectedPlugin == null) return;
+            await InstallPluginAsync(_selectedPlugin.Id);
+        }
+
+        private void DetailRestart_Click(object sender, RoutedEventArgs e)
+        {
+            AskRestart();
+        }
+
+        private async System.Threading.Tasks.Task InstallPluginAsync(string id)
+        {
             var deps = _market.ResolveDependencies(id);
             if (deps.Count > 0)
             {
@@ -267,12 +353,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _allPlugins = _market.MergedPlugins ?? new List<MergedPluginInfo>();
             RefreshList();
 
-            // 更新已安装插件后提示重启
             var updated = _allPlugins.FirstOrDefault(p => p.Id == id);
             if (updated != null && updated.RestartRequired)
-            {
                 AskRestart();
-            }
         }
 
         private async void RefreshButton_Click(object sender, RoutedEventArgs e)
@@ -302,8 +385,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 var packagesDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PluginPackages");
                 if (!Directory.Exists(packagesDir)) Directory.CreateDirectory(packagesDir);
                 File.Copy(dialog.FileName, Path.Combine(packagesDir, Path.GetFileName(dialog.FileName)), true);
-
-                // 热加载
                 PluginManager.Instance.InstallPendingPackages();
                 _allPlugins = _market.MergedPlugins ?? new List<MergedPluginInfo>();
                 RefreshList();
@@ -319,24 +400,20 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void AskRestart()
         {
             var result = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
-                PluginStrings.Market_RestartMessage,
-                PluginStrings.Market_RestartTitle,
+                PluginStrings.Market_RestartMessage, PluginStrings.Market_RestartTitle,
                 MessageBoxButton.YesNo, MessageBoxImage.Question);
-
             if (result == MessageBoxResult.Yes)
             {
                 try
                 {
-                    var exePath = Process.GetCurrentProcess().MainModule.FileName;
-                    Process.Start(exePath);
+                    Process.Start(Process.GetCurrentProcess().MainModule.FileName);
                     Application.Current.Shutdown();
                 }
                 catch (Exception ex)
                 {
                     iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
                         string.Format(PluginStrings.Market_RestartFailed, ex.Message),
-                        PluginStrings.Market_RestartTitle,
-                        MessageBoxButton.OK, MessageBoxImage.Error);
+                        PluginStrings.Market_RestartTitle, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
