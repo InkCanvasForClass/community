@@ -484,7 +484,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                         var releases = await apiTask;
                         var latest = releases?
                             .OrderByDescending(r => ParseVersionForSort(r.version))
-                            .Select(r => (Tuple<string, string, string>)Tuple.Create(r.version, r.downloadUrl, r.releaseNotes))
+                            .Select(r => Tuple.Create(r.version, r.downloadUrl, r.releaseNotes))
                             .FirstOrDefault();
                         if (latest != null && !string.IsNullOrWhiteSpace(latest.Item3))
                         {

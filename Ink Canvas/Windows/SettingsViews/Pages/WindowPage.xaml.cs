@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
-using Ink_Canvas;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {

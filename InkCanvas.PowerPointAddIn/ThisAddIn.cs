@@ -91,6 +91,9 @@ namespace InkCanvas.PowerPointAddIn
                         // Agent 模式下暂不支持缩略图导出，返回空列表
                         return _publisher.SendResponse(command, new ExportSlideThumbnailsResponse(), envelope.RequestId);
 
+                    case PPTCommands.GetSmartRegions:
+                        return _publisher.SendResponse(command, _controller.GetSmartRegions(), envelope.RequestId);
+
                     default:
                         return _publisher.SendError(envelope.RequestId, $"Unknown command: {command}");
                 }

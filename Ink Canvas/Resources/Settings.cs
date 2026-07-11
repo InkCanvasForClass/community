@@ -689,6 +689,9 @@ namespace Ink_Canvas
         [JsonProperty("enablePPTButtonEnhancedPreview")]
         public bool EnablePPTButtonEnhancedPreview { get; set; } = false;
 
+        [JsonProperty("showPPTEnhancedPreviewLoadingAnimation")]
+        public bool ShowPPTEnhancedPreviewLoadingAnimation { get; set; } = true;
+
         [JsonProperty("enablePPTButtonLongPressPageTurn")]
         public bool EnablePPTButtonLongPressPageTurn { get; set; } = true;
 
@@ -928,12 +931,12 @@ namespace Ink_Canvas
         public double PPTTimeCapsuleOffsetY { get; set; } = 0;
         [JsonProperty("pptLinkMode")]
         public PPTLinkMode PPTLinkMode { get; set; } = PPTLinkMode.Com;
-
         [JsonProperty("showPPTSidebarByDefault")]
         public bool ShowPPTSidebarByDefault { get; set; } = false;
-
         [JsonProperty("showPPTModePrompt")]
         public bool ShowPPTModePrompt { get; set; } = false;
+        [JsonProperty("enableSmartMode")]
+        public bool EnableSmartMode { get; set; } = false;
     }
 
     public class Automation

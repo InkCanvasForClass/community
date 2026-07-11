@@ -1346,6 +1346,34 @@
                 Panel.ZIndex="1100"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Top" />
+        <!-- PPT 增强预览全屏加载动画 -->
+        <Grid x:Name="PPTEnhancedPreviewLoadingOverlay"
+                Panel.ZIndex="1200"
+                Visibility="Collapsed" d:Visibility="Visible"
+                Background="#B0000000">
+            <ikw:SimpleStackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Orientation="Vertical" Spacing="16">
+                <!-- 自定义圆环进度指示器 -->
+                <Grid Width="64" Height="64">
+                    <!-- 轨道 -->
+                    <Ellipse Stroke="#33FFFFFF" StrokeThickness="4"
+                             HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                    <!-- 进度弧 -->
+                    <Path x:Name="PPTLoadingRing"
+                            Stroke="White" StrokeThickness="4" Fill="Transparent"
+                            Stretch="None"
+                            RenderTransformOrigin="0.5,0.5">
+                        <Path.RenderTransform>
+                            <RotateTransform x:Name="PPTLoadingArcRotate"/>
+                        </Path.RenderTransform>
+                    </Path>
+                </Grid>
+                <TextBlock x:Name="PPTLoadingProgressText"
+                        Foreground="White" FontSize="14"
+                        HorizontalAlignment="Center"
+                        Text="{x:Static props:PPTStrings.LoadingPPT}"/>
+            </ikw:SimpleStackPanel>
+        </Grid>
         <!-- 内联对话框根容器 -->
         <Grid x:Name="InlineDialogRoot"
                 Panel.ZIndex="9999"

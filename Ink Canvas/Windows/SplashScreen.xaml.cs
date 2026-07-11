@@ -16,6 +16,28 @@ namespace Ink_Canvas.Windows
     {
         private int _actualSplashStyle = 1;
 
+        /// <summary>
+        /// 由 App 启动时注入的缓存 JSON，避免 SplashScreen 构造期间重复读取 + 解析 Settings.json。
+        /// </summary>
+        internal static string CachedSettingsJson { get; set; }
+
+        /// <summary>
+        /// 从缓存 JSON 中解析指定路径的值，返回 dynamic 对象；缓存未命中时回退到磁盘读取。
+        /// </summary>
+        private static dynamic GetParsedSettings()
+        {
+            if (!string.IsNullOrEmpty(CachedSettingsJson))
+                return JsonConvert.DeserializeObject(CachedSettingsJson);
+
+            var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs", "Settings.json");
+            if (File.Exists(settingsPath))
+            {
+                var json = File.ReadAllText(settingsPath);
+                return JsonConvert.DeserializeObject(json);
+            }
+            return null;
+        }
+
         public SplashScreen()
         {
             InitializeComponent();
@@ -72,15 +94,10 @@ namespace Ink_Canvas.Windows
         {
             try
             {
-                var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs", "Settings.json");
-                if (File.Exists(settingsPath))
+                dynamic obj = GetParsedSettings();
+                if (obj?["appearance"]?["customSplashTextPosition"] != null)
                 {
-                    var json = File.ReadAllText(settingsPath);
-                    dynamic obj = JsonConvert.DeserializeObject(json);
-                    if (obj?["appearance"]?["customSplashTextPosition"] != null)
-                    {
-                        return (int)obj["appearance"]["customSplashTextPosition"];
-                    }
+                    return (int)obj["appearance"]["customSplashTextPosition"];
                 }
                 return 1; // 默认中下
             }
@@ -228,15 +245,10 @@ namespace Ink_Canvas.Windows
         {
             try
             {
-                var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs", "Settings.json");
-                if (File.Exists(settingsPath))
+                dynamic obj = GetParsedSettings();
+                if (obj?["appearance"]?["splashScreenStyle"] != null)
                 {
-                    var json = File.ReadAllText(settingsPath);
-                    dynamic obj = JsonConvert.DeserializeObject(json);
-                    if (obj?["appearance"]?["splashScreenStyle"] != null)
-                    {
-                        return (int)obj["appearance"]["splashScreenStyle"];
-                    }
+                    return (int)obj["appearance"]["splashScreenStyle"];
                 }
                 return 1; // 默认跟随四季
             }
@@ -332,18 +344,12 @@ namespace Ink_Canvas.Windows
         {
             try
             {
-                // 读取设置
-                var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs", "Settings.json");
+                // 从缓存读取设置
+                dynamic obj = GetParsedSettings();
                 int splashStyle = 1; // 默认跟随四季
-
-                if (File.Exists(settingsPath))
+                if (obj?["appearance"]?["splashScreenStyle"] != null)
                 {
-                    var json = File.ReadAllText(settingsPath);
-                    dynamic obj = JsonConvert.DeserializeObject(json);
-                    if (obj?["appearance"]?["splashScreenStyle"] != null)
-                    {
-                        splashStyle = (int)obj["appearance"]["splashScreenStyle"];
-                    }
+                    splashStyle = (int)obj["appearance"]["splashScreenStyle"];
                 }
 
                 // 根据样式选择图片
@@ -366,22 +372,18 @@ namespace Ink_Canvas.Windows
         {
             try
             {
-                var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs", "Settings.json");
+                // 从缓存读取设置
+                dynamic obj = GetParsedSettings();
                 int splashStyle = 1;
                 string customImagePath = string.Empty;
 
-                if (File.Exists(settingsPath))
+                if (obj?["appearance"]?["splashScreenStyle"] != null)
                 {
-                    var json = File.ReadAllText(settingsPath);
-                    dynamic obj = JsonConvert.DeserializeObject(json);
-                    if (obj?["appearance"]?["splashScreenStyle"] != null)
-                    {
-                        splashStyle = (int)obj["appearance"]["splashScreenStyle"];
-                    }
-                    if (obj?["appearance"]?["customSplashImagePath"] != null)
-                    {
-                        customImagePath = (string)obj["appearance"]["customSplashImagePath"];
-                    }
+                    splashStyle = (int)obj["appearance"]["splashScreenStyle"];
+                }
+                if (obj?["appearance"]?["customSplashImagePath"] != null)
+                {
+                    customImagePath = (string)obj["appearance"]["customSplashImagePath"];
                 }
 
                 if (splashStyle == 7 && !string.IsNullOrEmpty(customImagePath) && File.Exists(customImagePath))

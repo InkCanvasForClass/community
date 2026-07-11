@@ -60,6 +60,12 @@
                             Icon="{x:Static ui:SegoeFluentIcons.FastForward}"
                             Toggled="ToggleSwitchSkipAnimationsWhenGoNext_Toggled"/>
 
+                    <controls:LabeledSettingsCard x:Name="CardEnableSmartMode"
+                            Header="{x:Static props:PPTStrings.SmartMode}"
+                            Description="{x:Static props:PPTStrings.SmartModeHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
+                            Toggled="ToggleSwitchEnableSmartMode_Toggled"/>
+
                     <controls:LabeledSettingsCard x:Name="CardSupportWPS"
                             Header="{x:Static props:PPTStrings.SupportWPS}"
                             Icon="{x:Static ui:SegoeFluentIcons.Document}"
@@ -90,12 +96,25 @@
                             Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
                             Toggled="ToggleSwitchEnablePPTButtonPageClickable_OnToggled"/>
 
-                    <controls:LabeledSettingsCard x:Name="CardEnablePPTButtonEnhancedPreview"
+                    <ui:SettingsExpander x:Name="ExpanderEnablePPTButtonEnhancedPreview"
                             Header="{x:Static props:PPTStrings.EnhancedPreview}"
                             Description="{x:Static props:PPTStrings.EnhancedPreviewHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
                             Visibility="{Binding IsOn, ElementName=CardEnablePPTButtonPageClickable, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            Toggled="ToggleSwitchEnablePPTButtonEnhancedPreview_OnToggled"/>
+                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchEnablePPTButtonEnhancedPreview, Mode=OneWay}">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"/>
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchEnablePPTButtonEnhancedPreview"
+                                d:IsOn="True"
+                                Toggled="ToggleSwitchEnablePPTButtonEnhancedPreview_OnToggled"/>
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="{x:Static props:PPTStrings.EnhancedPreviewLoadingAnimation}"
+                                    Description="{x:Static props:PPTStrings.EnhancedPreviewLoadingAnimationHint}">
+                                <ui:ToggleSwitch x:Name="ToggleSwitchPPTEnhancedPreviewLoadingAnimation"
+                                        Toggled="ToggleSwitchPPTEnhancedPreviewLoadingAnimation_OnToggled"/>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
 
                     <controls:LabeledSettingsCard x:Name="CardEnablePPTButtonLongPressPageTurn"
                             Header="{x:Static props:PPTStrings.LongPressPageTurn}"

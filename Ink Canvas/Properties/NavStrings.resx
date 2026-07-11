@@ -159,6 +159,12 @@
   <data name="Nav_Window_Tooltip" xml:space="preserve">
     <value>窗口设置</value>
   </data>
+  <data name="Nav_Sidebar" xml:space="preserve">
+    <value>侧边栏</value>
+  </data>
+  <data name="Nav_Sidebar_Tooltip" xml:space="preserve">
+    <value>侧边栏设置</value>
+  </data>
   <data name="Nav_Toolbar" xml:space="preserve">
     <value>工具栏</value>
   </data>

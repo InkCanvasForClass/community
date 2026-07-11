@@ -13,6 +13,12 @@ namespace Ink_Canvas.Helpers
         private static readonly long MaxLogsFolderSizeBytes = 5 * 1024 * 1024; // 5MB
         private static int _isWritingLog = 0;
 
+        /// <summary>
+        /// 启动阶段设为 true 可跳过昂贵的 StackTrace 采集，减少启动耗时。
+        /// 启动完成后应设回 false。
+        /// </summary>
+        internal static volatile bool SuppressCallerInfo;
+
         public static void NewLog(string str)
         {
             WriteLogToFile(str);
@@ -89,15 +95,18 @@ namespace Ink_Canvas.Helpers
                 }
 
                 var threadId = Thread.CurrentThread.ManagedThreadId;
-                var callingMethod = new StackTrace(2, true).GetFrame(0);
-                string callerInfo = "<unknown>";
-                if (callingMethod != null)
+                string callerInfo = "<startup>";
+                if (!SuppressCallerInfo)
                 {
-                    var method = callingMethod.GetMethod();
-                    if (method != null)
+                    var callingMethod = new StackTrace(2, true).GetFrame(0);
+                    if (callingMethod != null)
                     {
-                        var className = method.DeclaringType != null ? method.DeclaringType.FullName : "<no class>";
-                        callerInfo = $"{className}.{method.Name}";
+                        var method = callingMethod.GetMethod();
+                        if (method != null)
+                        {
+                            var className = method.DeclaringType != null ? method.DeclaringType.FullName : "<no class>";
+                            callerInfo = $"{className}.{method.Name}";
+                        }
                     }
                 }
                 string logLine = string.Format("{0} [T{1}] [{2}] [{3}] {4}", DateTime.Now.ToString("O"), threadId, strLogType, callerInfo, str);

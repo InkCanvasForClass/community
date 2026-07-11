@@ -1,6 +1,5 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
-using InkCanvasPPTAgent.Contracts;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -59,10 +58,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
 
             CardEnablePPTButtonPageClickable.IsOn = ppt.EnablePPTButtonPageClickable;
-            CardEnablePPTButtonEnhancedPreview.IsOn = ppt.EnablePPTButtonEnhancedPreview;
+            ToggleSwitchEnablePPTButtonEnhancedPreview.IsOn = ppt.EnablePPTButtonEnhancedPreview;
+            ToggleSwitchPPTEnhancedPreviewLoadingAnimation.IsOn = ppt.ShowPPTEnhancedPreviewLoadingAnimation;
             CardEnablePPTButtonLongPressPageTurn.IsOn = ppt.EnablePPTButtonLongPressPageTurn;
 
             CardShowCanvasAtNewSlideShow.IsOn = ppt.IsShowCanvasAtNewSlideShow;
+            CardEnableSmartMode.IsOn = ppt.EnableSmartMode;
 
             CardEnableTwoFingerGestureInPresentationMode.IsOn = ppt.IsEnableTwoFingerGestureInPresentationMode;
             CardEnableFingerGestureSlideShowControl.IsOn = ppt.IsEnableFingerGestureSlideShowControl;
@@ -219,7 +220,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnablePPTButtonEnhancedPreview_OnToggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.EnablePPTButtonEnhancedPreview = CardEnablePPTButtonEnhancedPreview.IsOn;
+            SettingsManager.Settings.PowerPointSettings.EnablePPTButtonEnhancedPreview = ToggleSwitchEnablePPTButtonEnhancedPreview.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchPPTEnhancedPreviewLoadingAnimation_OnToggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.PowerPointSettings.ShowPPTEnhancedPreviewLoadingAnimation = ToggleSwitchPPTEnhancedPreviewLoadingAnimation.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -235,6 +243,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
 
         #region PPT SlideShow Entry & Gesture
+
+        private void ToggleSwitchEnableSmartMode_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.PowerPointSettings.EnableSmartMode = CardEnableSmartMode.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
 
         private void ToggleSwitchShowCanvasAtNewSlideShow_Toggled(object sender, RoutedEventArgs e)
         {

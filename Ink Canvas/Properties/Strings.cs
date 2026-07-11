@@ -729,6 +729,9 @@ namespace Ink_Canvas.Properties
             dict["PPT_ConflictWithAutoFold"] = ("PPTStrings", "ConflictWithAutoFold");
             dict["PPT_EnhancedPreview"] = ("PPTStrings", "EnhancedPreview");
             dict["PPT_EnhancedPreviewHint"] = ("PPTStrings", "EnhancedPreviewHint");
+            dict["PPT_EnhancedPreviewLoadingAnimation"] = ("PPTStrings", "EnhancedPreviewLoadingAnimation");
+            dict["PPT_EnhancedPreviewLoadingAnimationHint"] = ("PPTStrings", "EnhancedPreviewLoadingAnimationHint");
+            dict["PPT_LoadingPPT"] = ("PPTStrings", "LoadingPPT");
             dict["PPT_Enhancement"] = ("PPTStrings", "Enhancement");
             dict["PPT_EnterAnnotationOnShow"] = ("PPTStrings", "EnterAnnotationOnShow");
             dict["PPT_FingerGestureSlide"] = ("PPTStrings", "FingerGestureSlide");
@@ -885,6 +888,8 @@ namespace Ink_Canvas.Properties
             dict["Nav_MainInterface_Tooltip"] = ("NavStrings", "Nav_MainInterface_Tooltip");
             dict["Nav_Window"] = ("NavStrings", "Nav_Window");
             dict["Nav_Window_Tooltip"] = ("NavStrings", "Nav_Window_Tooltip");
+            dict["Nav_Sidebar"] = ("NavStrings", "Nav_Sidebar");
+            dict["Nav_Sidebar_Tooltip"] = ("NavStrings", "Nav_Sidebar_Tooltip");
             dict["Nav_Toolbar"] = ("NavStrings", "Nav_Toolbar");
             dict["Nav_Toolbar_Tooltip"] = ("NavStrings", "Nav_Toolbar_Tooltip");
             dict["Nav_CanvasAndInk_Tooltip"] = ("NavStrings", "Nav_CanvasAndInk_Tooltip");
@@ -1037,6 +1042,7 @@ namespace Ink_Canvas.Properties
             dict["Theme_FloatingIcon_IccWhiteTransparent"] = ("ThemeStrings", "Theme_FloatingIcon_IccWhiteTransparent");
             dict["Theme_FloatingIcon_TiebaEmoji"] = ("ThemeStrings", "Theme_FloatingIcon_TiebaEmoji");
             dict["Theme_GroupTitle"] = ("ThemeStrings", "Theme_GroupTitle");
+            dict["Theme_SidebarGroupTitle"] = ("ThemeStrings", "Theme_SidebarGroupTitle");
             dict["Theme_Label"] = ("ThemeStrings", "Theme_Label");
             dict["Theme_Language_ChineseSimplified"] = ("ThemeStrings", "Theme_Language_ChineseSimplified");
             dict["Theme_Language_English"] = ("ThemeStrings", "Theme_Language_English");
@@ -1048,6 +1054,7 @@ namespace Ink_Canvas.Properties
             dict["Theme_QuickPalette_DoubleRow"] = ("ThemeStrings", "Theme_QuickPalette_DoubleRow");
             dict["Theme_QuickPalette_SingleRow"] = ("ThemeStrings", "Theme_QuickPalette_SingleRow");
             dict["Theme_QuickPanelBottomOffset"] = ("ThemeStrings", "Theme_QuickPanelBottomOffset");
+            dict["Theme_QuickPanelBottomOffset_Description"] = ("ThemeStrings", "Theme_QuickPanelBottomOffset_Description");
             dict["Theme_QuoteSource"] = ("ThemeStrings", "Theme_QuoteSource");
             dict["Theme_QuoteSource_GaokaoBless"] = ("ThemeStrings", "Theme_QuoteSource_GaokaoBless");
             dict["Theme_QuoteSource_Hitokoto"] = ("ThemeStrings", "Theme_QuoteSource_Hitokoto");

@@ -30,6 +30,21 @@ namespace Ink_Canvas
     {
         #region Win32 API Declarations
         [DllImport("user32.dll")]
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+        [DllImport("user32.dll")]
+        private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+        [DllImport("user32.dll")]
+        private static extern uint GetDpiForWindow(IntPtr hWnd);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RECT
+        {
+            public int Left, Top, Right, Bottom;
+        }
+
+        [DllImport("user32.dll")]
         private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
         [DllImport("user32.dll")]
@@ -195,6 +210,15 @@ namespace Ink_Canvas
         /// PowerPoint 全屏放映顶层窗口类名（与编辑态 PPTFrameClass 区分）。
         /// </summary>
         private const string PowerPointSlideShowWindowClassName = "screenClass";
+
+        // 智慧模式：视频控件穿透区域
+        /// <summary>当前幻灯片的视频控件原始区域列表（磅值），用于鼠标进入/离开判断。</summary>
+        private List<SmartRegion> _smartModeRegions;
+        /// <summary>缓存的视频区域对应的幻灯片页码，避免重复查询。</summary>
+        private int _smartModeSlideIndex = -1;
+        /// <summary>VSTO/COM 返回的幻灯片尺寸（磅）和放映窗口句柄，用于主应用端坐标转换。</summary>
+        private float _smartModeSlideWidth, _smartModeSlideHeight;
+        private IntPtr _smartModeSlideShowHwnd;
 
         #endregion
 
@@ -1365,6 +1389,13 @@ namespace Ink_Canvas
 
                     // 仅PPT模式：放映开始立即同步主窗口可见性（勿仅依赖 SlideShowStateChanged 定时器）
                     CheckMainWindowVisibility();
+
+                    // 刷新智慧模式区域
+                    if (Settings.PowerPointSettings.EnableSmartMode)
+                    {
+                        System.Diagnostics.Debug.WriteLine("[SmartMode] SlideShowBegin, refreshing regions...");
+                        RefreshSmartModeRegions();
+                    }
                 });
 
                 if (!isFloatingBarFolded)
@@ -1503,6 +1534,10 @@ namespace Ink_Canvas
                 });
                 _previousSlideID = currentSlide;
 
+                // 刷新智慧模式区域（翻页时视频控件可能变化）
+                if (Settings.PowerPointSettings.EnableSmartMode)
+                    Application.Current.Dispatcher.InvokeAsync(() => RefreshSmartModeRegions());
+
                 // 转发PPT翻页事件到小白板（如果已打开且启用了联动）
                 _miniWhiteboardWindow?.OnPPTSlideChangedExternal(currentSlide - 1);
             }
@@ -1511,6 +1546,153 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"处理幻灯片切换事件失败: {ex}", LogHelper.LogType.Error);
             }
         }
+
+        #region 智慧模式：视频控件区域刷新与坐标转换
+
+        /// <summary>
+        /// 从 PPT Agent / COM 获取当前幻灯片的视频控件区域，缓存后用于鼠标进入/离开判断。
+        /// </summary>
+        private void RefreshSmartModeRegions()
+        {
+            try
+            {
+                if (!Settings.PowerPointSettings.EnableSmartMode)
+                {
+                    _smartModeRegions = null;
+                    _smartModeSlideIndex = -1;
+                    LogHelper.WriteLogToFile("[SmartMode] 功能未开启", LogHelper.LogType.Info);
+                    return;
+                }
+
+                LogHelper.WriteLogToFile($"[SmartMode] 开始刷新, PPTLinkMode={Settings.PowerPointSettings.PPTLinkMode}, Manager={_pptManager?.GetType().Name}", LogHelper.LogType.Info);
+
+                if (_pptManager is PPTAgentLinkManager agentManager)
+                {
+                    var response = agentManager.GetSmartRegions();
+                    if (response?.Regions != null && response.Regions.Count > 0)
+                    {
+                        _smartModeRegions = response.Regions;
+                        _smartModeSlideIndex = response.SlideIndex;
+                        _smartModeSlideWidth = response.SlideWidth;
+                        _smartModeSlideHeight = response.SlideHeight;
+                        _smartModeSlideShowHwnd = new IntPtr(response.SlideShowWindowHandle);
+                        LogHelper.WriteLogToFile($"[SmartMode] Agent 加载了 {_smartModeRegions.Count} 个区域, 第 {_smartModeSlideIndex} 页, Slide={_smartModeSlideWidth}x{_smartModeSlideHeight}磅", LogHelper.LogType.Info);
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile("[SmartMode] Agent 返回空区域列表", LogHelper.LogType.Info);
+                        _smartModeRegions = null;
+                    }
+                }
+                else
+                {
+                    // COM/ROT 模式：尝试直接通过 COM interop 获取视频区域
+                    LogHelper.WriteLogToFile("[SmartMode] 非 Agent 模式，尝试 COM 直接获取", LogHelper.LogType.Info);
+                    _smartModeRegions = GetVideoRegionsViaCom();
+                    _smartModeSlideIndex = _currentSlideShowPosition;
+                    if (_smartModeRegions != null)
+                        LogHelper.WriteLogToFile($"[SmartMode] COM 获取到 {_smartModeRegions.Count} 个区域", LogHelper.LogType.Info);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[SmartMode] 刷新失败: {ex}", LogHelper.LogType.Warning);
+                _smartModeRegions = null;
+            }
+
+            // 将磅值坐标转换为 WPF 窗口坐标（必须在 UI 线程执行）
+            Application.Current.Dispatcher.Invoke(() => BuildSmartModeRects());
+        }
+
+        /// <summary>
+        /// 通过 COM interop 直接从 PowerPoint 获取当前幻灯片的视频控件区域（适用于 COM/ROT 模式）。
+        /// </summary>
+        private List<SmartRegion> GetVideoRegionsViaCom()
+        {
+            try
+            {
+                var app = pptApplication;
+                if (app == null) return null;
+
+                Presentation pres = null;
+                try { pres = app.ActivePresentation; } catch { return null; }
+                if (pres == null) return null;
+
+                SlideShowWindow ssw = null;
+                try { ssw = pres.SlideShowWindow; } catch { return null; }
+                if (ssw == null) return null;
+
+                var view = ssw.View;
+                if (view == null) return null;
+
+                var slide = view.Slide;
+                if (slide == null) return null;
+
+                float slideWidth = pres.PageSetup.SlideWidth;
+                float slideHeight = pres.PageSetup.SlideHeight;
+
+                _smartModeSlideWidth = slideWidth;
+                _smartModeSlideHeight = slideHeight;
+                _smartModeSlideShowHwnd = FindWindow(PowerPointSlideShowWindowClassName, null);
+
+                var regions = new List<SmartRegion>();
+                foreach (Microsoft.Office.Interop.PowerPoint.Shape shape in slide.Shapes)
+                {
+                    if (!IsVideoShape(shape)) continue;
+                    try
+                    {
+                        regions.Add(new SmartRegion
+                        {
+                            X = shape.Left,
+                            Y = shape.Top,
+                            Width = shape.Width,
+                            Height = shape.Height,
+                            ShapeName = shape.Name,
+                            MediaType = (int)shape.MediaType
+                        });
+                    }
+                    catch { }
+                }
+                return regions;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[SmartMode] COM 获取失败: {ex.Message}", LogHelper.LogType.Warning);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 判断一个 Shape 是否为视频控件。
+        /// </summary>
+        private static bool IsVideoShape(Microsoft.Office.Interop.PowerPoint.Shape shape)
+        {
+            try
+            {
+                // msoMedia = 16
+                if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoMedia)
+                    return true;
+
+                // OLE 控件（ActiveX 媒体播放器等）
+                if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoOLEControlObject)
+                    return true;
+
+                // 嵌入式视频（旧版格式）
+                if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoEmbeddedOLEObject)
+                {
+                    try
+                    {
+                        if ((int)(object)shape.MediaType == 14)  // ppMediaTypeMovie
+                            return true;
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+            return false;
+        }
+
+        #endregion
 
         /// <summary>
         /// 处理 PowerPoint 幻灯片放映结束时的清理与界面恢复，包括保存当前幻灯片墨迹、重置墨迹管理器状态、恢复主题与工具栏显示，并根据配置折叠或展示浮动工具栏等 UI 调整。
@@ -1531,6 +1713,15 @@ namespace Ink_Canvas
 
                 if (isEnteredSlideShowEndEvent) return;
                 isEnteredSlideShowEndEvent = true;
+
+                // 清除智慧模式区域
+                _smartModeRegions = null;
+                _smartModeSlideIndex = -1;
+
+                // 清除WPF坐标映射和定时器
+                _mediaPassthroughRects?.Clear();
+                StopMediaPassthroughTimer();
+                _isMediaRegionMouseMode = false;
 
                 // 获取当前播放页码，优先使用跟踪的页码，否则尝试从PPT管理器获取
                 int currentPage = _currentSlideShowPosition;
@@ -2526,9 +2717,11 @@ namespace Ink_Canvas
                     else
                     {
                         var slides = await GetOrBuildPPTEnhancedPreviewItemsAsync(EnsurePPTEnhancedPreviewCacheToken());
+
                         if (slides == null || slides.Count == 0)
                         {
                             LogHelper.WriteLogToFile("PPT增强预览未生成可用缩略图，改用默认导航", LogHelper.LogType.Warning);
+                            targetBar.IsPreviewExpanded = false;
                             _pptManager.TryShowSlideNavigation();
                         }
                         else
@@ -2614,6 +2807,61 @@ namespace Ink_Canvas
                 if (c != null && c.Visibility == Visibility.Visible) return c;
             }
             return null;
+        }
+
+        private double _pptLoadingProgress;
+        private DispatcherTimer _pptLoadingTimer;
+
+        /// <summary>直接同步回调的 IProgress 实现，不走 SynchronizationContext。</summary>
+        private sealed class DirectProgress : IProgress<double>
+        {
+            private readonly Action<double> _handler;
+            public DirectProgress(Action<double> handler) => _handler = handler;
+            public void Report(double value) => _handler(value);
+        }
+
+        private void UpdatePPTLoadingRing()
+        {
+            if (PPTLoadingRing == null) return;
+            double progress = Math.Max(0, Math.Min(1, _pptLoadingProgress));
+
+            // 像素坐标：Path Stretch="None"，Grid 64×64，StrokeThickness=4
+            const double cx = 32, cy = 32, r = 30;
+            const double startAngle = -Math.PI / 2; // 从 12 点方向开始
+
+            if (progress <= 0.001)
+            {
+                PPTLoadingRing.Data = Geometry.Empty;
+                return;
+            }
+
+            double sweepAngle = progress * 2 * Math.PI;
+            double sx = cx + r * Math.Cos(startAngle);
+            double sy = cy + r * Math.Sin(startAngle);
+
+            var figure = new PathFigure { StartPoint = new System.Windows.Point(sx, sy) };
+
+            if (sweepAngle >= 2 * Math.PI - 0.01)
+            {
+                // 满环：两段 180° 弧
+                figure.Segments.Add(new ArcSegment(
+                    new System.Windows.Point(cx, cy + r),
+                    new Size(r, r), 0, false, SweepDirection.Clockwise, true));
+                figure.Segments.Add(new ArcSegment(
+                    new System.Windows.Point(sx, sy),
+                    new Size(r, r), 0, false, SweepDirection.Clockwise, true));
+            }
+            else
+            {
+                double endAngle = startAngle + sweepAngle;
+                figure.Segments.Add(new ArcSegment(
+                    new System.Windows.Point(cx + r * Math.Cos(endAngle), cy + r * Math.Sin(endAngle)),
+                    new Size(r, r), 0, sweepAngle > Math.PI, SweepDirection.Clockwise, true));
+            }
+
+            var geom = new PathGeometry();
+            geom.Figures.Add(figure);
+            PPTLoadingRing.Data = geom;
         }
 
         private sealed class PPTEnhancedPreviewItem : IDisposable
@@ -2825,7 +3073,32 @@ namespace Ink_Canvas
                 if (_pptManager?.IsConnected != true) return;
                 if (!Settings.PowerPointSettings.EnablePPTButtonEnhancedPreview) return;
 
-                var slides = await GetOrBuildPPTEnhancedPreviewItemsAsync(cancellationToken);
+                if (Settings.PowerPointSettings.ShowPPTEnhancedPreviewLoadingAnimation)
+                {
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        _pptLoadingProgress = 0;
+                        PPTLoadingRing.Data = Geometry.Empty;
+                        PPTLoadingArcRotate.Angle = 0;
+                        PPTEnhancedPreviewLoadingOverlay.Visibility = Visibility.Visible;
+                        _pptLoadingTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(16) };
+                        _pptLoadingTimer.Tick += (_, _) =>
+                        {
+                            PPTLoadingArcRotate.Angle = (PPTLoadingArcRotate.Angle + 8) % 360;
+                            UpdatePPTLoadingRing();
+                        };
+                        _pptLoadingTimer.Start();
+                    });
+                }
+
+                // 不用 Progress<double>（会走 SynchronizationContext 合并），直接同步调用
+                var dispatcher = Application.Current.Dispatcher;
+                IProgress<double> progress = new DirectProgress(v =>
+                {
+                    _pptLoadingProgress = v;
+                    dispatcher.Invoke(() => UpdatePPTLoadingRing());
+                });
+                var slides = await GetOrBuildPPTEnhancedPreviewItemsAsync(cancellationToken, progress);
                 if (!cancellationToken.IsCancellationRequested && slides != null && slides.Count > 0)
                 {
                     LogHelper.WriteLogToFile($"PPT enhanced preview preloaded {slides.Count} thumbnails.", LogHelper.LogType.Trace);
@@ -2838,9 +3111,18 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"PPT enhanced preview preload failed: {ex}", LogHelper.LogType.Warning);
             }
+            finally
+            {
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    _pptLoadingTimer?.Stop();
+                    _pptLoadingTimer = null;
+                    PPTEnhancedPreviewLoadingOverlay.Visibility = Visibility.Collapsed;
+                });
+            }
         }
 
-        private Task<List<PPTEnhancedPreviewItem>> GetOrBuildPPTEnhancedPreviewItemsAsync(CancellationToken cancellationToken)
+        private Task<List<PPTEnhancedPreviewItem>> GetOrBuildPPTEnhancedPreviewItemsAsync(CancellationToken cancellationToken, IProgress<double> progress = null)
         {
             lock (_pptEnhancedPreviewCacheLock)
             {
@@ -2851,7 +3133,7 @@ namespace Ink_Canvas
                     return _pptEnhancedPreviewBuildTask;
 
                 int generation = _pptEnhancedPreviewCacheGeneration;
-                var task = RunOnStaAsync(() => BuildPPTPreviewItems(cancellationToken), cancellationToken);
+                var task = RunOnStaAsync(() => BuildPPTPreviewItems(cancellationToken, progress), cancellationToken);
                 _pptEnhancedPreviewBuildTask = task;
 
                 task.ContinueWith(
@@ -2938,25 +3220,33 @@ namespace Ink_Canvas
             return tcs.Task;
         }
 
-        private List<PPTEnhancedPreviewItem> BuildPPTPreviewItems(CancellationToken cancellationToken)
+        private List<PPTEnhancedPreviewItem> BuildPPTPreviewItems(CancellationToken cancellationToken, IProgress<double> progress = null)
         {
             var result = new List<PPTEnhancedPreviewItem>();
 
             try
             {
-                var thumbnails = _pptManager?.ExportSlideThumbnails(480, 270);
+                // 阶段1：COM导出缩略图 → 进度 0~70%
+                var exportProgress = progress != null
+                    ? new Progress<double>(p => progress.Report(p * 0.7))
+                    : null;
+                var thumbnails = _pptManager?.ExportSlideThumbnails(480, 270, exportProgress);
                 if (thumbnails == null || thumbnails.Count == 0) return result;
 
+                // 阶段2：转换为 BitmapImage → 进度 70~100%
+                int total = thumbnails.Count;
+                int converted = 0;
                 foreach (var thumbnail in thumbnails)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    if (thumbnail?.PngBytes == null || thumbnail.PngBytes.Length == 0) continue;
+                    if (thumbnail?.PngBytes == null || thumbnail.PngBytes.Length == 0) { converted++; continue; }
 
                     var thumbnailStream = new MemoryStream(thumbnail.PngBytes, false);
                     var image = LoadBitmapImage(thumbnailStream);
                     if (image == null)
                     {
                         thumbnailStream.Dispose();
+                        converted++;
                         continue;
                     }
 
@@ -2967,6 +3257,8 @@ namespace Ink_Canvas
                         ThumbnailStream = thumbnailStream,
                         Thumbnail = image
                     });
+                    converted++;
+                    progress?.Report(0.7 + 0.3 * converted / total);
                 }
             }
             catch (OperationCanceledException)

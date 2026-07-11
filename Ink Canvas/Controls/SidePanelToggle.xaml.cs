@@ -106,7 +106,7 @@ namespace Ink_Canvas.Controls
             MainWindow.Settings.Appearance.QuickPanelBottomOffset = newOffset;
             var mw = Application.Current.MainWindow as MainWindow;
             mw?.ApplyQuickPanelBottomOffset(newOffset);
-            Ink_Canvas.Windows.SettingsViews.Pages.AppearancePage.NotifyBottomOffsetChanged(newOffset);
+            Ink_Canvas.Windows.SettingsViews.Pages.SidebarPage.NotifyBottomOffsetChanged(newOffset);
         }
 
         protected override void OnPreviewMouseUp(MouseButtonEventArgs e)

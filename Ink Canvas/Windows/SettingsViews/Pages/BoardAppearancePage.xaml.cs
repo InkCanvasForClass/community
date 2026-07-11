@@ -3,7 +3,6 @@ using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -56,7 +55,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             finally
             {
                 Dispatcher.BeginInvoke(
-                    (Action)(() => { _suppressChickenSoupSourceSelectionChanged = false; }),
+                    () => { _suppressChickenSoupSourceSelectionChanged = false; },
                     DispatcherPriority.ContextIdle);
             }
 
