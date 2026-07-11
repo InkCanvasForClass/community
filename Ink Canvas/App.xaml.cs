@@ -1326,7 +1326,7 @@ namespace Ink_Canvas
             WindowTopmostManager.Initialize(mainWindow);
             _ = Task.Run(async () =>
             {
-                await Task.Delay(600);
+                await Task.Delay(100);
                 Dispatcher.Invoke(() => _taskbar?.ForceCreate());
             });
 
