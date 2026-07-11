@@ -503,11 +503,31 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                 <ui:NavigationViewItem
                     x:Name="PluginItem"
                     Content="{x:Static props:NavStrings.Nav_Plugins}"
-                    Tag="PluginPage"
+                    SelectsOnInvoked="False"
                     ToolTipService.ToolTip="{x:Static props:NavStrings.Settings_Plugins}">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Puzzle}"/>
                     </ui:NavigationViewItem.Icon>
+                    <ui:NavigationViewItem.MenuItems>
+                        <ui:NavigationViewItem
+                            x:Name="PluginInstalledItem"
+                            Content="{x:Static props:PluginStrings.Market_TabInstalled}"
+                            Tag="PluginPage"
+                            ToolTipService.ToolTip="{x:Static props:NavStrings.Settings_Plugins}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.CheckMark}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="PluginMarketplaceItem"
+                            Content="{x:Static props:PluginStrings.Market_Title}"
+                            Tag="PluginMarketplacePage"
+                            ToolTipService.ToolTip="{x:Static props:PluginStrings.Market_Title}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Globe}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                    </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
             </ui:NavigationView.MenuItems>
 

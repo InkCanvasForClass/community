@@ -53,5 +53,67 @@ namespace Ink_Canvas.Properties
         public static string Plugin_Author => ResourceManager.GetString(nameof(Plugin_Author), _resourceCulture);
 
         public static string Plugin_Settings => ResourceManager.GetString(nameof(Plugin_Settings), _resourceCulture);
+
+        public static string Market_Title => ResourceManager.GetString(nameof(Market_Title), _resourceCulture);
+
+        public static string Market_SearchPlaceholder => ResourceManager.GetString(nameof(Market_SearchPlaceholder), _resourceCulture);
+
+        public static string Market_TabMarket => ResourceManager.GetString(nameof(Market_TabMarket), _resourceCulture);
+
+        public static string Market_TabInstalled => ResourceManager.GetString(nameof(Market_TabInstalled), _resourceCulture);
+
+        public static string Market_Refresh => ResourceManager.GetString(nameof(Market_Refresh), _resourceCulture);
+
+        public static string Market_OpenPluginsFolder => ResourceManager.GetString(nameof(Market_OpenPluginsFolder), _resourceCulture);
+
+        public static string Market_InstallFromLocal => ResourceManager.GetString(nameof(Market_InstallFromLocal), _resourceCulture);
+
+        public static string Market_Install => ResourceManager.GetString(nameof(Market_Install), _resourceCulture);
+
+        public static string Market_Update => ResourceManager.GetString(nameof(Market_Update), _resourceCulture);
+
+        public static string Market_UpdateAvailable => ResourceManager.GetString(nameof(Market_UpdateAvailable), _resourceCulture);
+
+        public static string Market_RestartRequired => ResourceManager.GetString(nameof(Market_RestartRequired), _resourceCulture);
+
+        public static string Market_RestartToApply => ResourceManager.GetString(nameof(Market_RestartToApply), _resourceCulture);
+
+        public static string Market_SelectPluginHint => ResourceManager.GetString(nameof(Market_SelectPluginHint), _resourceCulture);
+
+        public static string Market_ProjectHomepage => ResourceManager.GetString(nameof(Market_ProjectHomepage), _resourceCulture);
+
+        public static string Market_TabOverview => ResourceManager.GetString(nameof(Market_TabOverview), _resourceCulture);
+
+        public static string Market_TabDependencies => ResourceManager.GetString(nameof(Market_TabDependencies), _resourceCulture);
+
+        public static string Market_ReadmeLoading => ResourceManager.GetString(nameof(Market_ReadmeLoading), _resourceCulture);
+
+        public static string Market_ReadmeLoadFailed => ResourceManager.GetString(nameof(Market_ReadmeLoadFailed), _resourceCulture);
+
+        public static string Market_NoReadme => ResourceManager.GetString(nameof(Market_NoReadme), _resourceCulture);
+
+        public static string Market_DependencyWarning => ResourceManager.GetString(nameof(Market_DependencyWarning), _resourceCulture);
+
+        public static string Market_DependencyTitle => ResourceManager.GetString(nameof(Market_DependencyTitle), _resourceCulture);
+
+        public static string Market_InstallLocalSuccess => ResourceManager.GetString(nameof(Market_InstallLocalSuccess), _resourceCulture);
+
+        public static string Market_InstallLocalFailed => ResourceManager.GetString(nameof(Market_InstallLocalFailed), _resourceCulture);
+
+        public static string Market_RestartMessage => ResourceManager.GetString(nameof(Market_RestartMessage), _resourceCulture);
+
+        public static string Market_RestartTitle => ResourceManager.GetString(nameof(Market_RestartTitle), _resourceCulture);
+
+        public static string Market_RestartFailed => ResourceManager.GetString(nameof(Market_RestartFailed), _resourceCulture);
+
+        public static string Plugin_Update => ResourceManager.GetString(nameof(Plugin_Update), _resourceCulture);
+
+        public static string Plugin_Delete => ResourceManager.GetString(nameof(Plugin_Delete), _resourceCulture);
+
+        public static string Plugin_DeleteConfirm => ResourceManager.GetString(nameof(Plugin_DeleteConfirm), _resourceCulture);
+
+        public static string Plugin_DeleteTitle => ResourceManager.GetString(nameof(Plugin_DeleteTitle), _resourceCulture);
+
+        public static string Plugin_UpdateAvailable => ResourceManager.GetString(nameof(Plugin_UpdateAvailable), _resourceCulture);
     }
 }

@@ -54,6 +54,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             { "Settings", typeof(SettingsPage) },
             { "PluginPage", typeof(PluginPage) },
             { "PluginSettingsPage", typeof(PluginSettingsPage) },
+            { "PluginMarketplacePage", typeof(PluginMarketplacePage) },
             { "PPTPageFlipPreviewPage", typeof(PPTPageFlipPreviewPage) }
         };
         private readonly Dictionary<string, object> _pages = new Dictionary<string, object>();
@@ -117,6 +118,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 { "Settings", typeof(SettingsPage) },
                 { "PluginPage", typeof(PluginPage) },
                 { "PluginSettingsPage", typeof(PluginSettingsPage) },
+                { "PluginMarketplacePage", typeof(PluginMarketplacePage) },
                 { "PPTPageFlipPreviewPage", typeof(PPTPageFlipPreviewPage) }
             };
 

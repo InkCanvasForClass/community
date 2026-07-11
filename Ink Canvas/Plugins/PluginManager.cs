@@ -1,9 +1,12 @@
+using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -68,6 +71,9 @@ namespace Ink_Canvas.Plugins
         {
             try
             {
+                // 0. 清理标记为卸载的插件目录
+                CleanupUninstalledPlugins();
+
                 // 1. 处理待安装的 .icpx 插件包
                 ProcessPluginPackages();
 
@@ -104,6 +110,59 @@ namespace Ink_Canvas.Plugins
             }
 
             await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// 安装 PluginPackages 中待安装的插件包并立即加载。可在运行时调用。
+        /// </summary>
+        public void InstallPendingPackages()
+        {
+            ProcessPluginPackages();
+            DiscoverPlugins();
+            var loadOrder = ResolveLoadOrder();
+            foreach (var pluginId in loadOrder)
+            {
+                var info = _plugins.FirstOrDefault(p => p.Id == pluginId && p.LoadStatus == PluginLoadStatus.NotLoaded);
+                if (info == null) continue;
+                try { LoadPlugin(info); }
+                catch (Exception ex)
+                {
+                    info.LoadStatus = PluginLoadStatus.Error;
+                    info.Exception = ex;
+                    LogError(string.Format("Failed to load plugin {0}", info.Name), ex);
+                }
+            }
+            _plugins.Sort((a, b) => a.Order.CompareTo(b.Order));
+        }
+
+        /// <summary>
+        /// 清理标记为 .uninstall 的插件目录（上次卸载时 DLL 被锁定，本次启动时清理）。
+        /// </summary>
+        private void CleanupUninstalledPlugins()
+        {
+            if (!Directory.Exists(_pluginsDirectory)) return;
+
+            foreach (var subDir in Directory.GetDirectories(_pluginsDirectory))
+            {
+                var marker = Path.Combine(subDir, ".uninstall");
+                if (!File.Exists(marker)) continue;
+
+                try
+                {
+                    // 释放门控锁后删除
+                    ProcessProtectionManager.ReleaseLocksForPath(subDir);
+                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
+                    GC.WaitForPendingFinalizers();
+
+                    Directory.Delete(subDir, true);
+
+                    Log(string.Format("Cleaned up uninstalled plugin: {0}", Path.GetFileName(subDir)));
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"PluginManager | CleanupUninstalled: {Path.GetFileName(subDir)} - 删除失败: {ex.Message}", LogHelper.LogType.Error);
+                }
+            }
         }
 
         #region Plugin Package Installation
@@ -177,6 +236,10 @@ namespace Ink_Canvas.Plugins
             // 1. 扫描带 manifest.json 的插件目录
             foreach (var subDir in Directory.GetDirectories(_pluginsDirectory))
             {
+                // 跳过标记为待卸载的插件
+                if (File.Exists(Path.Combine(subDir, ".uninstall")))
+                    continue;
+
                 var manifestPath = Path.Combine(subDir, ManifestFileName);
                 if (!File.Exists(manifestPath)) continue;
 

@@ -1,0 +1,62 @@
+<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.PluginMarketplacePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+    xmlns:props="clr-namespace:Ink_Canvas.Properties"
+    mc:Ignorable="d"
+    d:DesignHeight="600" d:DesignWidth="900"
+    Title="{x:Static props:PluginStrings.Market_Title}"
+    Loaded="Page_Loaded"
+    Unloaded="Page_Unloaded">
+
+    <DockPanel x:Name="RootPanel" Margin="24,8,24,8">
+        <!-- 搜索 + 按钮 -->
+        <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="SearchBox" Grid.Column="0"
+                TextChanged="SearchBox_TextChanged"
+                KeyDown="SearchBox_KeyDown"
+                Margin="0,0,8,0" Padding="8,6"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button ToolTip="{x:Static props:PluginStrings.Market_Refresh}"
+                    Click="RefreshButton_Click" Padding="8,6" Margin="0,0,6,0">
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" FontSize="14"/>
+                </Button>
+                <Button ToolTip="{x:Static props:PluginStrings.Market_OpenPluginsFolder}"
+                    Click="OpenFolderButton_Click" Padding="8,6" Margin="0,0,6,0">
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FolderOpen}" FontSize="14"/>
+                </Button>
+                <Button ToolTip="{x:Static props:PluginStrings.Market_InstallFromLocal}"
+                    Click="InstallLocalButton_Click" Padding="8,6">
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" FontSize="14"/>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- 分类标签 -->
+        <ikw:SimpleStackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="6" Margin="0,0,0,8">
+            <RadioButton x:Name="TabMarket" Content="{x:Static props:PluginStrings.Market_TabMarket}"
+                IsChecked="True" Checked="Tab_Checked" Padding="14,6"/>
+            <RadioButton x:Name="TabInstalled" Content="{x:Static props:PluginStrings.Market_TabInstalled}"
+                Checked="Tab_Checked" Padding="14,6"/>
+        </ikw:SimpleStackPanel>
+
+        <!-- 加载条 -->
+        <ProgressBar x:Name="LoadingBar" DockPanel.Dock="Top"
+            IsIndeterminate="False" Visibility="Collapsed"
+            Margin="0,0,0,4" Height="2"/>
+
+        <!-- 插件列表（代码填充） -->
+        <ListBox x:Name="PluginListBox"
+            SelectionChanged="PluginListBox_SelectionChanged"
+            HorizontalContentAlignment="Stretch"
+            VirtualizingPanel.ScrollUnit="Pixel"
+            ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
+    </DockPanel>
+</ui:Page>
