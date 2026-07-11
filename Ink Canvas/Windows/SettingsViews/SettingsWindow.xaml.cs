@@ -118,6 +118,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 { "PluginPage", typeof(PluginPage) },
                 { "PluginSettingsPage", typeof(PluginSettingsPage) }
                 { "PPTPageFlipPreviewPage", typeof(PPTPageFlipPreviewPage) }
+                { "PPTPageFlipPreviewPage", typeof(PPTPageFlipPreviewPage) },
             };
 
             // 默认选中首页
