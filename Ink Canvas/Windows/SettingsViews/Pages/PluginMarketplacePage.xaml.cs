@@ -16,7 +16,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
     public partial class PluginMarketplacePage : iNKORE.UI.WPF.Modern.Controls.Page
     {
         private readonly PluginMarketService _market = PluginMarketService.Instance;
-        private bool _showMarketOnly = true;
         private string _searchText = "";
         private List<MergedPluginInfo> _allPlugins = new List<MergedPluginInfo>();
         private MergedPluginInfo _selectedPlugin;
@@ -76,8 +75,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             var filtered = _allPlugins.Where(p =>
             {
-                if (_showMarketOnly && !p.IsOnMarket) return false;
-                if (!_showMarketOnly && !p.IsLocal) return false;
+                // 只显示市场插件
+                if (!p.IsOnMarket) return false;
                 if (!string.IsNullOrWhiteSpace(_searchText))
                 {
                     var q = _searchText;
@@ -289,13 +288,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         #endregion
 
         #region 事件处理
-
-        private void Tab_Checked(object sender, RoutedEventArgs e)
-        {
-            if (!IsLoaded) return;
-            _showMarketOnly = (sender == TabMarket);
-            RefreshList();
-        }
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {

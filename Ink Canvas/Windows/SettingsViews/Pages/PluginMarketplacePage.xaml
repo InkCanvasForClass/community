@@ -47,14 +47,6 @@
                 </StackPanel>
             </Grid>
 
-            <!-- 分类标签 -->
-            <ikw:SimpleStackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="6" Margin="0,0,0,8">
-                <RadioButton x:Name="TabMarket" Content="{x:Static props:PluginStrings.Market_TabMarket}"
-                    IsChecked="True" Checked="Tab_Checked" Padding="14,6"/>
-                <RadioButton x:Name="TabInstalled" Content="{x:Static props:PluginStrings.Market_TabInstalled}"
-                    Checked="Tab_Checked" Padding="14,6"/>
-            </ikw:SimpleStackPanel>
-
             <!-- 加载条 -->
             <ProgressBar x:Name="LoadingBar" DockPanel.Dock="Top"
                 IsIndeterminate="False" Visibility="Collapsed"
