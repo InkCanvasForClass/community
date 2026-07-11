@@ -500,20 +500,53 @@ namespace Ink_Canvas
         {
             if (_pptUIManager != null && IsInPPTPresentationMode)
             {
-                _pptUIManager.PPTButtonsDisplayOption = Settings.PowerPointSettings.PPTButtonsDisplayOption;
-                _pptUIManager.PPTSButtonsOption = Settings.PowerPointSettings.PPTSButtonsOption;
-                _pptUIManager.PPTBButtonsOption = Settings.PowerPointSettings.PPTBButtonsOption;
-                _pptUIManager.PPTLSButtonPosition = Settings.PowerPointSettings.PPTLSButtonPosition;
-                _pptUIManager.PPTRSButtonPosition = Settings.PowerPointSettings.PPTRSButtonPosition;
-                _pptUIManager.PPTLBButtonPosition = Settings.PowerPointSettings.PPTLBButtonPosition;
-                _pptUIManager.PPTRBButtonPosition = Settings.PowerPointSettings.PPTRBButtonPosition;
-                _pptUIManager.EnablePPTButtonPageClickable = Settings.PowerPointSettings.EnablePPTButtonPageClickable;
-                _pptUIManager.EnablePPTButtonLongPressPageTurn = Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn;
-                _pptUIManager.PPTLSButtonOpacity = Settings.PowerPointSettings.PPTLSButtonOpacity;
-                _pptUIManager.PPTRSButtonOpacity = Settings.PowerPointSettings.PPTRSButtonOpacity;
-                _pptUIManager.PPTLBButtonOpacity = Settings.PowerPointSettings.PPTLBButtonOpacity;
-                _pptUIManager.PPTRBButtonOpacity = Settings.PowerPointSettings.PPTRBButtonOpacity;
-                _pptUIManager.PPTNavBarScale = Settings.PowerPointSettings.PPTNavBarScale;
+                var ppt = Settings.PowerPointSettings;
+
+                // 计算有效值：位置 i 若 UseGlobalSettings=true，则采用全局字段值，否则采用位置自身字段值
+                // 偏移按位置类型区分：侧边(左侧/右侧)用全局侧边偏移，底部(左下/右下)用全局底部偏移
+                _pptUIManager.PPTLSButtonPosition = ppt.PPTLSUseGlobalSettings ? ppt.PPTGlobalSideButtonPosition : ppt.PPTLSButtonPosition;
+                _pptUIManager.PPTRSButtonPosition = ppt.PPTRSUseGlobalSettings ? ppt.PPTGlobalSideButtonPosition : ppt.PPTRSButtonPosition;
+                _pptUIManager.PPTLBButtonPosition = ppt.PPTLBUseGlobalSettings ? ppt.PPTGlobalBottomButtonPosition : ppt.PPTLBButtonPosition;
+                _pptUIManager.PPTRBButtonPosition = ppt.PPTRBUseGlobalSettings ? ppt.PPTGlobalBottomButtonPosition : ppt.PPTRBButtonPosition;
+
+                _pptUIManager.PPTLSButtonOpacity = ppt.PPTLSUseGlobalSettings ? ppt.PPTGlobalButtonOpacity : ppt.PPTLSButtonOpacity;
+                _pptUIManager.PPTRSButtonOpacity = ppt.PPTRSUseGlobalSettings ? ppt.PPTGlobalButtonOpacity : ppt.PPTRSButtonOpacity;
+                _pptUIManager.PPTLBButtonOpacity = ppt.PPTLBUseGlobalSettings ? ppt.PPTGlobalButtonOpacity : ppt.PPTLBButtonOpacity;
+                _pptUIManager.PPTRBButtonOpacity = ppt.PPTRBUseGlobalSettings ? ppt.PPTGlobalButtonOpacity : ppt.PPTRBButtonOpacity;
+
+                _pptUIManager.PPTLSButtonScale = ppt.PPTLSUseGlobalSettings ? ppt.PPTNavBarScale : ppt.PPTLSButtonScale;
+                _pptUIManager.PPTRSButtonScale = ppt.PPTRSUseGlobalSettings ? ppt.PPTNavBarScale : ppt.PPTRSButtonScale;
+                _pptUIManager.PPTLBButtonScale = ppt.PPTLBUseGlobalSettings ? ppt.PPTNavBarScale : ppt.PPTLBButtonScale;
+                _pptUIManager.PPTRBButtonScale = ppt.PPTRBUseGlobalSettings ? ppt.PPTNavBarScale : ppt.PPTRBButtonScale;
+
+                // 计算有效的 PPTButtonsDisplayOption：UseGlobalSettings 的位由 PPTGlobalButtonEnabled 决定
+                string str = ppt.PPTButtonsDisplayOption.ToString("D4");
+                if (str.Length < 4) str = "2222";
+                char[] c = str.ToCharArray();
+                // display option index: 0=LB, 1=RB, 2=LS, 3=RS
+                if (ppt.PPTLBUseGlobalSettings) c[0] = ppt.PPTGlobalButtonEnabled ? '2' : '1';
+                if (ppt.PPTRBUseGlobalSettings) c[1] = ppt.PPTGlobalButtonEnabled ? '2' : '1';
+                if (ppt.PPTLSUseGlobalSettings) c[2] = ppt.PPTGlobalButtonEnabled ? '2' : '1';
+                if (ppt.PPTRSUseGlobalSettings) c[3] = ppt.PPTGlobalButtonEnabled ? '2' : '1';
+                _pptUIManager.PPTButtonsDisplayOption = int.Parse(new string(c));
+
+                _pptUIManager.PPTSButtonsOption = ppt.PPTSButtonsOption;
+                _pptUIManager.PPTBButtonsOption = ppt.PPTBButtonsOption;
+                _pptUIManager.EnablePPTButtonPageClickable = ppt.EnablePPTButtonPageClickable;
+                _pptUIManager.EnablePPTButtonLongPressPageTurn = ppt.EnablePPTButtonLongPressPageTurn;
+                _pptUIManager.PPTNavBarScale = ppt.PPTNavBarScale;
+
+                // 有效的显示页码 / 黑色背景通过 PPTSButtonsOption / PPTBButtonsOption 间接传递（原有机制）
+                // 这里同步各位置的 ShowPageNumber / BlackBackground 字段（UseGlobalSettings 时用全局值覆盖位置字段，保证下游读取一致）
+                if (ppt.PPTLSUseGlobalSettings) ppt.PPTLSShowPageNumber = ppt.PPTGlobalShowPageNumber;
+                if (ppt.PPTRSUseGlobalSettings) ppt.PPTRSShowPageNumber = ppt.PPTGlobalShowPageNumber;
+                if (ppt.PPTLBUseGlobalSettings) ppt.PPTLBShowPageNumber = ppt.PPTGlobalShowPageNumber;
+                if (ppt.PPTRBUseGlobalSettings) ppt.PPTRBShowPageNumber = ppt.PPTGlobalShowPageNumber;
+                if (ppt.PPTLSUseGlobalSettings) ppt.PPTLSBlackBackground = ppt.PPTGlobalBlackBackground;
+                if (ppt.PPTRSUseGlobalSettings) ppt.PPTRSBlackBackground = ppt.PPTGlobalBlackBackground;
+                if (ppt.PPTLBUseGlobalSettings) ppt.PPTLBBlackBackground = ppt.PPTGlobalBlackBackground;
+                if (ppt.PPTRBUseGlobalSettings) ppt.PPTRBBlackBackground = ppt.PPTGlobalBlackBackground;
+
                 _pptUIManager.UpdateNavigationPanelsVisibility();
                 _pptUIManager.UpdateNavigationButtonStyles();
             }

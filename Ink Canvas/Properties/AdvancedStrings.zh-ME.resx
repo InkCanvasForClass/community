@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -137,6 +137,12 @@
   </data>
   <data name="Debug_PPTComProbe_Header" xml:space="preserve">
     <value>启用PPT COM探针（日志轰炸机）</value>
+  </data>
+  <data name="Debug_PPTPreviewVisible_Desc" xml:space="preserve">
+    <value>开了之后PPT翻页按钮设置页面左边会冒出一个内嵌预览（默认是藏起来的）。</value>
+  </data>
+  <data name="Debug_PPTPreviewVisible_Header" xml:space="preserve">
+    <value>显示PPT翻页按钮预览</value>
   </data>
   <data name="Debug_IconSettings" xml:space="preserve">
     <value>图标设置</value>

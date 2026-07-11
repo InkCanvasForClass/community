@@ -26,6 +26,10 @@ namespace Ink_Canvas.Helpers
         public double PPTLBButtonOpacity { get; set; } = 0.5;
         public double PPTRBButtonOpacity { get; set; } = 0.5;
         public double PPTNavBarScale { get; set; } = 1.0;
+        public double PPTLSButtonScale { get; set; } = 1.0;
+        public double PPTRSButtonScale { get; set; } = 1.0;
+        public double PPTLBButtonScale { get; set; } = 1.0;
+        public double PPTRBButtonScale { get; set; } = 1.0;
         #endregion
 
         #region Private Fields
@@ -400,24 +404,19 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                var sideOption = PPTSButtonsOption.ToString();
-                if (sideOption.Length < 3) return;
+                var ppt = MainWindow.Settings.PowerPointSettings;
 
-                var options = sideOption.ToCharArray();
+                // 左侧
+                var leftPageButtonVisibility = ppt.PPTLSShowPageNumber ? Visibility.Visible : Visibility.Collapsed;
+                _mainWindow.LeftSidePanelForPPTNavigation.SetPageButtonVisibility(leftPageButtonVisibility);
+                _mainWindow.LeftSidePanelForPPTNavigation.SetBarOpacity(ppt.PPTLSButtonOpacity);
+                _mainWindow.LeftSidePanelForPPTNavigation.ApplyTheme(ppt.PPTLSBlackBackground);
 
-                // 页码按钮显示
-                var pageButtonVisibility = options[0] == '2' ? Visibility.Visible : Visibility.Collapsed;
-                _mainWindow.LeftSidePanelForPPTNavigation.SetPageButtonVisibility(pageButtonVisibility);
-                _mainWindow.RightSidePanelForPPTNavigation.SetPageButtonVisibility(pageButtonVisibility);
-
-                // 透明度
-                _mainWindow.LeftSidePanelForPPTNavigation.SetBarOpacity(PPTLSButtonOpacity);
-                _mainWindow.RightSidePanelForPPTNavigation.SetBarOpacity(PPTRSButtonOpacity);
-
-                // 颜色主题
-                bool isDarkTheme = options[2] == '2';
-                _mainWindow.LeftSidePanelForPPTNavigation.ApplyTheme(isDarkTheme);
-                _mainWindow.RightSidePanelForPPTNavigation.ApplyTheme(isDarkTheme);
+                // 右侧
+                var rightPageButtonVisibility = ppt.PPTRSShowPageNumber ? Visibility.Visible : Visibility.Collapsed;
+                _mainWindow.RightSidePanelForPPTNavigation.SetPageButtonVisibility(rightPageButtonVisibility);
+                _mainWindow.RightSidePanelForPPTNavigation.SetBarOpacity(ppt.PPTRSButtonOpacity);
+                _mainWindow.RightSidePanelForPPTNavigation.ApplyTheme(ppt.PPTRSBlackBackground);
             }
             catch (Exception ex)
             {
@@ -429,24 +428,19 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                var bottomOption = PPTBButtonsOption.ToString();
-                if (bottomOption.Length < 3) return;
+                var ppt = MainWindow.Settings.PowerPointSettings;
 
-                var options = bottomOption.ToCharArray();
+                // 左下
+                var leftBottomPageButtonVisibility = ppt.PPTLBShowPageNumber ? Visibility.Visible : Visibility.Collapsed;
+                _mainWindow.LeftBottomPanelForPPTNavigation.SetPageButtonVisibility(leftBottomPageButtonVisibility);
+                _mainWindow.LeftBottomPanelForPPTNavigation.SetBarOpacity(ppt.PPTLBButtonOpacity);
+                _mainWindow.LeftBottomPanelForPPTNavigation.ApplyTheme(ppt.PPTLBBlackBackground);
 
-                // 页码按钮显示
-                var pageButtonVisibility = options[0] == '2' ? Visibility.Visible : Visibility.Collapsed;
-                _mainWindow.LeftBottomPanelForPPTNavigation.SetPageButtonVisibility(pageButtonVisibility);
-                _mainWindow.RightBottomPanelForPPTNavigation.SetPageButtonVisibility(pageButtonVisibility);
-
-                // 透明度
-                _mainWindow.LeftBottomPanelForPPTNavigation.SetBarOpacity(PPTLBButtonOpacity);
-                _mainWindow.RightBottomPanelForPPTNavigation.SetBarOpacity(PPTRBButtonOpacity);
-
-                // 颜色主题
-                bool isDarkTheme = options[2] == '2';
-                _mainWindow.LeftBottomPanelForPPTNavigation.ApplyTheme(isDarkTheme);
-                _mainWindow.RightBottomPanelForPPTNavigation.ApplyTheme(isDarkTheme);
+                // 右下
+                var rightBottomPageButtonVisibility = ppt.PPTRBShowPageNumber ? Visibility.Visible : Visibility.Collapsed;
+                _mainWindow.RightBottomPanelForPPTNavigation.SetPageButtonVisibility(rightBottomPageButtonVisibility);
+                _mainWindow.RightBottomPanelForPPTNavigation.SetBarOpacity(ppt.PPTRBButtonOpacity);
+                _mainWindow.RightBottomPanelForPPTNavigation.ApplyTheme(ppt.PPTRBBlackBackground);
             }
             catch (Exception ex)
             {
@@ -458,10 +452,10 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                _mainWindow.LeftBottomPanelForPPTNavigation.SetBarScale(PPTNavBarScale);
-                _mainWindow.RightBottomPanelForPPTNavigation.SetBarScale(PPTNavBarScale);
-                _mainWindow.LeftSidePanelForPPTNavigation.SetBarScale(PPTNavBarScale);
-                _mainWindow.RightSidePanelForPPTNavigation.SetBarScale(PPTNavBarScale);
+                _mainWindow.LeftBottomPanelForPPTNavigation.SetBarScale(PPTLBButtonScale);
+                _mainWindow.RightBottomPanelForPPTNavigation.SetBarScale(PPTRBButtonScale);
+                _mainWindow.LeftSidePanelForPPTNavigation.SetBarScale(PPTLSButtonScale);
+                _mainWindow.RightSidePanelForPPTNavigation.SetBarScale(PPTRSButtonScale);
             }
             catch (Exception ex)
             {

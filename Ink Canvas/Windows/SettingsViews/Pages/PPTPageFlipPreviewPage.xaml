@@ -1,0 +1,192 @@
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.PPTPageFlipPreviewPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
+      xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+      xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+      xmlns:sys="clr-namespace:System;assembly=mscorlib"
+      xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+      xmlns:ppt="clr-namespace:Ink_Canvas.Controls"
+      mc:Ignorable="d"
+      Title="PPTPageFlipPreviewPage"
+      Loaded="Page_Loaded"
+      Unloaded="Page_Unloaded"
+      SizeChanged="Page_SizeChanged">
+
+    <Grid x:Name="RootGrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" x:Name="PreviewColumn"/>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ===== 顶部提示：整个页面左上角（上下排列，避免与下方设置重叠） ===== -->
+        <ikw:SimpleStackPanel Spacing="8" Margin="59,12,0,12"
+                              HorizontalAlignment="Left" VerticalAlignment="Top"
+                              Grid.Row="0" Grid.ColumnSpan="2"
+                              x:Name="TopInfoPanel">
+            <ui:InfoBar Title="注意"
+                        Message="点击窗口左上角的返回图标可返回上一个页面"
+                        IsClosable="True" IsIconVisible="True" IsOpen="True"
+                        Severity="Warning"/>
+            <ui:InfoBar Message="点击预览中对应的翻页按钮可切换到对应位置的设置"
+                        IsClosable="True" IsIconVisible="True" IsOpen="True"
+                        Severity="Success"/>
+        </ikw:SimpleStackPanel>
+
+        <!-- ===== 左侧：16:9 预览区域（默认隐藏，可通过 Debug 开关显示） ===== -->
+        <Grid Grid.Row="1" Grid.Column="0" Margin="12,0,0,4" Visibility="Collapsed"
+              x:Name="PreviewPanel">
+            <Border CornerRadius="8" Background="Transparent"
+                    x:Name="PreviewContainer">
+                <!-- 16:9 固定宽高比容器：内部全部原生布局，无任何缩放变换 -->
+                <ppt:FixedAspectRatioPanel>
+                    <Grid x:Name="PreviewCanvas" SizeChanged="PreviewCanvas_SizeChanged">
+                        <!-- 背景图 -->
+                        <Image Source="/Resources/PresentationExample/page.jpg" Stretch="UniformToFill"/>
+
+                        <!-- 左侧翻页按钮预览 -->
+                        <Border Background="Transparent" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6,0,0,0"
+                                MouseLeftButtonDown="PreviewLS_MouseLeftButtonDown" Cursor="Hand"
+                                x:Name="PreviewLSBorder">
+                            <ppt:PPTNavBar x:Name="PreviewLS" Direction="LeftSide"
+                                           CurrentSlide="3" TotalSlides="10" IsHitTestVisible="False"/>
+                        </Border>
+                        <!-- 右侧翻页按钮预览 -->
+                        <Border Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0"
+                                MouseLeftButtonDown="PreviewRS_MouseLeftButtonDown" Cursor="Hand"
+                                x:Name="PreviewRSBorder">
+                            <ppt:PPTNavBar x:Name="PreviewRS" Direction="RightSide"
+                                           CurrentSlide="3" TotalSlides="10" IsHitTestVisible="False"/>
+                        </Border>
+                        <!-- 左下翻页按钮预览 -->
+                        <Border Background="Transparent" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="6,0,0,6"
+                                MouseLeftButtonDown="PreviewLB_MouseLeftButtonDown" Cursor="Hand"
+                                x:Name="PreviewLBBorder">
+                            <ppt:PPTNavBar x:Name="PreviewLB" Direction="LeftBottom"
+                                           CurrentSlide="3" TotalSlides="10" IsHitTestVisible="False"/>
+                        </Border>
+                        <!-- 右下翻页按钮预览 -->
+                        <Border Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,6,6"
+                                MouseLeftButtonDown="PreviewRB_MouseLeftButtonDown" Cursor="Hand"
+                                x:Name="PreviewRBBorder">
+                            <ppt:PPTNavBar x:Name="PreviewRB" Direction="RightBottom"
+                                           CurrentSlide="3" TotalSlides="10" IsHitTestVisible="False"/>
+                        </Border>
+                    </Grid>
+                </ppt:FixedAspectRatioPanel>
+            </Border>
+        </Grid>
+
+        <!-- ===== 右侧：设置区域 ===== -->
+        <ScrollViewer Grid.Row="1" Grid.Column="1" PanningMode="VerticalFirst">
+            <Grid Margin="12,0,59,0" x:Name="SettingsContentGrid">
+                <FrameworkElement.Resources>
+                    <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
+                    <Style x:Key="SettingsSectionHeaderTextBlockStyle"
+                        BasedOn="{StaticResource BodyStrongTextBlockStyle}"
+                        TargetType="TextBlock">
+                        <Style.Setters>
+                            <Setter Property="Margin" Value="1,0,0,6" />
+                        </Style.Setters>
+                    </Style>
+                </FrameworkElement.Resources>
+                <Grid>
+                    <ikw:SimpleStackPanel MaxWidth="1000"
+                        HorizontalAlignment="Stretch"
+                        Spacing="{StaticResource SettingsCardSpacing}">
+
+                        <!-- Title -->
+                        <TextBlock Text="翻页按钮的外观与位置" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
+
+                        <!-- TabControl (Pivot) to Select Position -->
+                        <TabControl x:Name="TabControlPositionSelect"
+                                    Style="{StaticResource TabControlPivotStyle}"
+                                    SelectionChanged="TabControlPositionSelect_SelectionChanged">
+                            <TabItem Header="全局" />
+                            <TabItem Header="左侧" />
+                            <TabItem Header="右侧" />
+                            <TabItem Header="左下" />
+                            <TabItem Header="右下" />
+                        </TabControl>
+
+                        <!-- Position-specific settings -->
+                        <ikw:SimpleStackPanel Spacing="{StaticResource SettingsCardSpacing}" Margin="0,12,0,0">
+                            <!-- Use Global Settings ToggleSwitch (only visible on position tabs) -->
+                            <ui:SettingsCard x:Name="CardUseGlobalSettings" Header="使用全局设置"
+                                             Description="开启时该位置外观跟随全局默认值，关闭后可独立设置">
+                                <ui:ToggleSwitch x:Name="ToggleSwitchUseGlobalSettings" Toggled="ToggleSwitchUseGlobalSettings_Toggled"/>
+                            </ui:SettingsCard>
+
+                            <!-- Position settings panel (IsEnabled bound to UseGlobalSettings state) -->
+                            <ikw:SimpleStackPanel x:Name="PositionSettingsPanel" Spacing="{StaticResource SettingsCardSpacing}">
+                                <!-- Enable ToggleSwitch (title right side) -->
+                                <ui:SettingsCard x:Name="CardPositionEnabled" Header="启用当前位置按钮"
+                                                 Description="控制该位置的翻页按钮是否显示在屏幕上">
+                                    <ui:ToggleSwitch x:Name="ToggleSwitchPositionEnabled" Toggled="ToggleSwitchPositionEnabled_Toggled"/>
+                                </ui:SettingsCard>
+
+                                <!-- Show Page Number ToggleSwitch -->
+                                <ui:SettingsCard x:Name="CardShowPageNumber" Header="显示页码"
+                                                 Description="在翻页条中显示当前页码和总页数">
+                                    <ui:ToggleSwitch x:Name="ToggleSwitchShowPageNumber" Toggled="ToggleSwitchShowPageNumber_Toggled"/>
+                                </ui:SettingsCard>
+
+                                <!-- Black Background ToggleSwitch -->
+                                <ui:SettingsCard x:Name="CardBlackBackground" Header="黑色背景"
+                                                 Description="使用黑色半透明背景代替默认的主题透明背景">
+                                    <ui:ToggleSwitch x:Name="ToggleSwitchBlackBackground" Toggled="ToggleSwitchBlackBackground_Toggled"/>
+                                </ui:SettingsCard>
+
+                                <!-- Offset Slider with Reset Button (Side: 左侧/右侧) -->
+                                <ui:SettingsCard x:Name="CardOffset" Header="偏移">
+                                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock x:Name="TextBlockOffsetValue" VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="40"/>
+                                        <Slider x:Name="SliderOffset" Minimum="-500" Maximum="500" Width="200" IsSnapToTickEnabled="True" TickFrequency="5" ValueChanged="SliderOffset_ValueChanged"/>
+                                        <Button Content="重置" Click="ButtonResetOffset_Click"/>
+                                    </ikw:SimpleStackPanel>
+                                </ui:SettingsCard>
+
+                                <!-- Offset Slider with Reset Button (Bottom: 左下/右下) -->
+                                <ui:SettingsCard x:Name="CardOffsetBottom" Header="偏移">
+                                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock x:Name="TextBlockOffsetBottomValue" VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="40"/>
+                                        <Slider x:Name="SliderOffsetBottom" Minimum="-100" Maximum="500" Width="200" IsSnapToTickEnabled="True" TickFrequency="5" ValueChanged="SliderOffsetBottom_ValueChanged"/>
+                                        <Button Content="重置" Click="ButtonResetOffsetBottom_Click"/>
+                                    </ikw:SimpleStackPanel>
+                                </ui:SettingsCard>
+
+                                <!-- Opacity Slider with Reset Button -->
+                                <ui:SettingsCard x:Name="CardOpacity" Header="透明度">
+                                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock x:Name="TextBlockOpacityValue" VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="40"/>
+                                        <Slider x:Name="SliderOpacity" Minimum="0.1" Maximum="1.0" Width="200" ValueChanged="SliderOpacity_ValueChanged"/>
+                                        <Button Content="重置" Click="ButtonResetOpacity_Click"/>
+                                    </ikw:SimpleStackPanel>
+                                </ui:SettingsCard>
+
+                                <!-- Scale Slider -->
+                                <ui:SettingsCard x:Name="CardScale" Header="缩放大小"
+                                                 Description="调整该位置翻页按钮的大小缩放">
+                                    <ui:SettingsCard.HeaderIcon>
+                                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Zoom}"/>
+                                    </ui:SettingsCard.HeaderIcon>
+                                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock x:Name="TextBlockScaleValue" VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="40"/>
+                                        <Slider x:Name="SliderScale" Minimum="0.5" Maximum="1.5" Width="200" IsSnapToTickEnabled="True" TickFrequency="0.05" ValueChanged="SliderScale_ValueChanged"/>
+                                    </ikw:SimpleStackPanel>
+                                </ui:SettingsCard>
+                            </ikw:SimpleStackPanel>
+                        </ikw:SimpleStackPanel>
+
+                    </ikw:SimpleStackPanel>
+                </Grid>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</ui:Page>
