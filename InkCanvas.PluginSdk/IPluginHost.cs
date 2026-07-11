@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -9,8 +10,30 @@ namespace Ink_Canvas.Plugins
     {
         void Log(string message);
         void LogError(string message, Exception ex = null);
+
+        /// <summary>
+        /// 依赖注入服务集合。插件可在 Initialize 阶段向此集合注册自己的服务。
+        /// </summary>
+        IServiceCollection Services { get; }
+
+        /// <summary>
+        /// 依赖注入服务提供者。在所有插件 Initialize 完成后可用。
+        /// </summary>
+        IServiceProvider ServiceProvider { get; }
+
+        /// <summary>
+        /// 从 DI 容器获取服务（兼容旧接口）。
+        /// </summary>
         T GetService<T>() where T : class;
+
+        /// <summary>
+        /// 向 DI 容器注册服务（兼容旧接口，仅在 Initialize 阶段有效）。
+        /// </summary>
         void RegisterService<T>(T service) where T : class;
+
+        /// <summary>
+        /// 向工具栏注册插件组件。
+        /// </summary>
         void RegisterToolbarItem(PluginToolbarItemInfo itemInfo);
     }
 

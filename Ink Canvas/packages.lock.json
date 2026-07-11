@@ -342,7 +342,10 @@
         }
       },
       "inkcanvas.pluginsdk": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection": "[6.0.0, )"
+        }
       },
       "inkcanvas.pptagent.contracts": {
         "type": "Project"

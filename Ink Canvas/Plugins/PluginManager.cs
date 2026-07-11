@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -29,6 +30,8 @@ namespace Ink_Canvas.Plugins
         }
 
         private readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();
+        private readonly ServiceCollection _serviceCollection = new ServiceCollection();
+        private ServiceProvider _serviceProvider;
         private readonly string _pluginsDirectory;
         private readonly string _pluginPackagesDirectory;
         private readonly string _pluginConfigsDirectory;
@@ -102,6 +105,7 @@ namespace Ink_Canvas.Plugins
                 }
 
                 _plugins.Sort((a, b) => a.Order.CompareTo(b.Order));
+                BuildServiceProvider();
                 Log(string.Format("Plugin loading complete. Loaded {0} plugins", _plugins.Count(p => p.LoadStatus == PluginLoadStatus.Loaded)));
             }
             catch (Exception ex)
@@ -547,6 +551,10 @@ namespace Ink_Canvas.Plugins
 
         #region IPluginHost Implementation
 
+        public IServiceCollection Services => _serviceCollection;
+
+        public IServiceProvider ServiceProvider => _serviceProvider;
+
         public void Log(string message)
         {
             OnLogMessage(message);
@@ -566,9 +574,16 @@ namespace Ink_Canvas.Plugins
 
         public T GetService<T>() where T : class
         {
-            if (_services.TryGetValue(typeof(T), out var service))
+            // 优先从 DI 容器解析
+            if (_serviceProvider != null)
             {
-                return service as T;
+                var service = _serviceProvider.GetService<T>();
+                if (service != null) return service;
+            }
+            // 回退到旧字典
+            if (_services.TryGetValue(typeof(T), out var legacyService))
+            {
+                return legacyService as T;
             }
             return null;
         }
@@ -576,6 +591,16 @@ namespace Ink_Canvas.Plugins
         public void RegisterService<T>(T service) where T : class
         {
             _services[typeof(T)] = service;
+            _serviceCollection.AddSingleton(typeof(T), service);
+        }
+
+        /// <summary>
+        /// 构建 DI 服务提供者。在所有插件 Initialize 完成后调用。
+        /// </summary>
+        internal void BuildServiceProvider()
+        {
+            _serviceProvider?.Dispose();
+            _serviceProvider = _serviceCollection.BuildServiceProvider();
         }
 
         public void RegisterToolbarItem(PluginToolbarItemInfo itemInfo)
