@@ -2754,7 +2754,7 @@ namespace Ink_Canvas
 
             try
             {
-                _windowOverviewModel = new WindowOverviewModel();
+                _windowOverviewModel ??= new WindowOverviewModel();
                 LogHelper.WriteLogToFile("窗口概览模型已初始化", LogHelper.LogType.Event);
             }
             catch (Exception ex)
