@@ -15,14 +15,14 @@ using System.Threading.Tasks;
 namespace Ink_Canvas.Plugins
 {
     /// <summary>
-    /// 插件市场服务，负责索引获取、插件下载安装、本地/远程插件合并。
+    /// 插件市场服务，负责索引获取、插件下载安装、本地/远程插件合并、镜像管理。
     /// </summary>
     public class PluginMarketService : INotifyPropertyChanged
     {
         private static readonly Lazy<PluginMarketService> _lazy = new Lazy<PluginMarketService>(() => new PluginMarketService());
         public static PluginMarketService Instance => _lazy.Value;
 
-        // 官方索引地址（支持 ZIP 或 JSON 格式）
+        // 备用官方索引地址
         private const string OfficialIndexUrl = "https://github.com/InkCanvasForClass/PluginIndex/releases/download/latest/index.json";
 
         private static readonly string MarketCachePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PluginMarketCache");
@@ -32,6 +32,7 @@ namespace Ink_Canvas.Plugins
         private readonly HttpClient _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
         private PluginMarketIndex _marketIndex;
         private readonly Dictionary<string, string> _resolvedIcons = new Dictionary<string, string>();
+        private PluginMarketSourcesService _sources;
 
         #region 绑定属性
 
@@ -63,6 +64,32 @@ namespace Ink_Canvas.Plugins
             set { _mergedPlugins = value; OnPropertyChanged(); }
         }
 
+        private PluginMarketSourceInfo _activeSource;
+        /// <summary>
+        /// 当前激活的源（用于 UI 展示）。
+        /// </summary>
+        public PluginMarketSourceInfo ActiveSource
+        {
+            get => _activeSource ?? PluginMarketSourcesService.OfficialSource;
+            private set { _activeSource = value; OnPropertyChanged(); }
+        }
+
+        /// <summary>
+        /// 源管理服务。注意初始化时若 basePath 不同则会在第一次 RefreshIndexAsync 之前注入。
+        /// </summary>
+        public PluginMarketSourcesService Sources
+        {
+            get
+            {
+                if (_sources == null)
+                {
+                    _sources = new PluginMarketSourcesService(AppDomain.CurrentDomain.BaseDirectory);
+                    ActiveSource = _sources.GetActiveSource();
+                }
+                return _sources;
+            }
+        }
+
         private readonly Dictionary<string, DownloadTaskInfo> _downloadTasks = new Dictionary<string, DownloadTaskInfo>();
 
         #endregion
@@ -91,12 +118,15 @@ namespace Ink_Canvas.Plugins
                     Directory.CreateDirectory(MarketCachePath);
 
                 PluginMarketIndex index = null;
+                var active = Sources.GetActiveSource();
+                ActiveSource = active;
+                var indexUrl = string.IsNullOrEmpty(active.Url) ? OfficialIndexUrl : active.Url;
 
                 // 尝试从网络获取
                 try
                 {
                     LoadProgress = 10;
-                    var response = await _httpClient.GetAsync(OfficialIndexUrl);
+                    var response = await _httpClient.GetAsync(indexUrl);
                     response.EnsureSuccessStatusCode();
 
                     var data = await response.Content.ReadAsByteArrayAsync();
@@ -122,7 +152,8 @@ namespace Ink_Canvas.Plugins
                         File.WriteAllText(IndexMetaPath, JsonConvert.SerializeObject(new
                         {
                             lastRefresh = DateTime.Now.ToString("o"),
-                            source = OfficialIndexUrl
+                            source = active.Id,
+                            sourceUrl = indexUrl
                         }));
                     }
                 }
@@ -207,12 +238,21 @@ namespace Ink_Canvas.Plugins
         private void MergePlugins()
         {
             var merged = new Dictionary<string, MergedPluginInfo>();
-            var selectedMirror = "";
+            // 决定镜像：根据当前源自定义选择；若为空则用第一个可用镜像；都没有则用空串。
+            string selectedMirror = "";
+            string activeSourceId = Sources.GetActiveSource()?.Id ?? PluginMarketSourcesService.OfficialSource.Id;
 
-            // 确定镜像根
             if (_marketIndex.DownloadMirrors != null && _marketIndex.DownloadMirrors.Count > 0)
             {
-                selectedMirror = _marketIndex.DownloadMirrors.Values.First();
+                var srcMirror = Sources.GetActiveSource()?.SelectedMirror;
+                if (!string.IsNullOrEmpty(srcMirror) && _marketIndex.DownloadMirrors.ContainsKey(srcMirror))
+                {
+                    selectedMirror = _marketIndex.DownloadMirrors[srcMirror];
+                }
+                else
+                {
+                    selectedMirror = _marketIndex.DownloadMirrors.Values.First();
+                }
             }
 
             // 1. 加入本地已安装的插件
@@ -306,6 +346,41 @@ namespace Ink_Canvas.Plugins
         /// 获取当前下载任务字典。
         /// </summary>
         public IReadOnlyDictionary<string, DownloadTaskInfo> DownloadTasks => _downloadTasks;
+
+        /// <summary>
+        /// 当前索引中声明的可选镜像字典（key → root URL）。
+        /// </summary>
+        public IReadOnlyDictionary<string, string> AvailableMirrors
+        {
+            get
+            {
+                if (_marketIndex?.DownloadMirrors == null) return new Dictionary<string, string>();
+                return _marketIndex.DownloadMirrors;
+            }
+        }
+
+        /// <summary>
+        /// 切换当前激活的源并刷新索引。
+        /// </summary>
+        public async Task SwitchSourceAsync(string sourceId)
+        {
+            if (string.IsNullOrEmpty(sourceId)) return;
+            Sources.ActiveSourceId = sourceId;
+            ActiveSource = Sources.GetActiveSource();
+            await RefreshIndexAsync();
+        }
+
+        /// <summary>
+        /// 在当前激活源上选择镜像。传入空串表示使用默认。
+        /// </summary>
+        public async Task SelectMirrorAsync(string mirrorKey)
+        {
+            var src = Sources.GetActiveSource();
+            if (src == null) return;
+            Sources.SelectMirror(src.Id, mirrorKey ?? "");
+            MergePlugins();
+            await Task.CompletedTask;
+        }
 
         /// <summary>
         /// 请求下载安装/更新指定插件。

@@ -158,4 +158,106 @@
   <data name="Plugin_UpdateAvailable" xml:space="preserve">
     <value>有新版本: v{0}</value>
   </data>
+  <data name="Plugin_ErrorTitle" xml:space="preserve">
+    <value>插件错误</value>
+  </data>
+  <data name="Plugin_ErrorAutoDisabled" xml:space="preserve">
+    <value>插件已自动禁用：在 {0} 分钟内连续 {1} 次加载失败。请手动重置后再启用。</value>
+  </data>
+  <data name="Plugin_ErrorReset" xml:space="preserve">
+    <value>重置错误并重新加载</value>
+  </data>
+  <data name="Plugin_ExportConfig" xml:space="preserve">
+    <value>导出配置</value>
+  </data>
+  <data name="Plugin_ImportConfig" xml:space="preserve">
+    <value>导入配置</value>
+  </data>
+  <data name="Plugin_ExportTitle" xml:space="preserve">
+    <value>导出插件配置</value>
+  </data>
+  <data name="Plugin_ExportSuccess" xml:space="preserve">
+    <value>插件配置已导出到：{0}</value>
+  </data>
+  <data name="Plugin_ExportFailed" xml:space="preserve">
+    <value>导出失败：{0}</value>
+  </data>
+  <data name="Plugin_ImportTitle" xml:space="preserve">
+    <value>导入插件配置</value>
+  </data>
+  <data name="Plugin_ImportSuccess" xml:space="preserve">
+    <value>导入成功，覆盖了 {0} 个文件。</value>
+  </data>
+  <data name="Plugin_ImportFailed" xml:space="preserve">
+    <value>导入失败：{0}</value>
+  </data>
+  <data name="Market_SecurityWarning" xml:space="preserve">
+    <value>此插件来源未经验证，继续安装存在风险。请确认你信任该来源。</value>
+  </data>
+  <data name="Market_SecurityTitle" xml:space="preserve">
+    <value>安全提示</value>
+  </data>
+  <data name="Market_OpenLogsFolder" xml:space="preserve">
+    <value>打开日志目录</value>
+  </data>
+  <data name="Market_LoadErrorOnInstall" xml:space="preserve">
+    <value>此插件检测到以下问题，建议继续安装前确认：</value>
+  </data>
+  <data name="Market_ManageSources" xml:space="preserve">
+    <value>插件源</value>
+  </data>
+  <data name="Market_ActiveSource" xml:space="preserve">
+    <value>当前源</value>
+  </data>
+  <data name="Market_AddSource" xml:space="preserve">
+    <value>添加源</value>
+  </data>
+  <data name="Market_EditSource" xml:space="preserve">
+    <value>编辑源</value>
+  </data>
+  <data name="Market_RemoveSource" xml:space="preserve">
+    <value>删除源</value>
+  </data>
+  <data name="Market_SourceIdLabel" xml:space="preserve">
+    <value>源名称</value>
+  </data>
+  <data name="Market_SourceUrlLabel" xml:space="preserve">
+    <value>索引 URL</value>
+  </data>
+  <data name="Market_SourceOfficial" xml:space="preserve">
+    <value>官方源（不可编辑）</value>
+  </data>
+  <data name="Market_MirrorGroup" xml:space="preserve">
+    <value>下载镜像</value>
+  </data>
+  <data name="Market_NoMirrors" xml:space="preserve">
+    <value>该索引未提供下载镜像</value>
+  </data>
+  <data name="Market_MirrorAuto" xml:space="preserve">
+    <value>自动（默认）</value>
+  </data>
+  <data name="Market_SaveSource" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="Market_CancelSource" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="Market_SourceInvalidUrl" xml:space="preserve">
+    <value>URL 必须以 http:// 或 https:// 开头</value>
+  </data>
+  <data name="Market_SourceDuplicate" xml:space="preserve">
+    <value>已存在同名源</value>
+  </data>
+  <data name="Market_SourceRemoved" xml:space="preserve">
+    <value>源已删除</value>
+  </data>
+  <data name="Market_SourceSaved" xml:space="preserve">
+    <value>源已保存</value>
+  </data>
+  <data name="Market_SourceNameRequired" xml:space="preserve">
+    <value>请输入源名称</value>
+  </data>
+  <data name="Market_RemoveSourceConfirmation" xml:space="preserve">
+    <value>确定要删除源“{0}”吗？</value>
+  </data>
 </root>

@@ -79,5 +79,19 @@ namespace Ink_Canvas.Plugins
         /// 选择的镜像名
         /// </summary>
         public string SelectedMirror { get; set; } = "";
+
+        /// <summary>
+        /// 持久化时不写入，只用于 XAML 绑定显示。
+        /// </summary>
+        [System.Text.Json.Serialization.JsonIgnore]
+        public string Display
+        {
+            get
+            {
+                if (string.Equals(Id, PluginMarketSourcesService.OfficialSource.Id, System.StringComparison.OrdinalIgnoreCase))
+                    return "官方源";
+                return Id;
+            }
+        }
     }
 }

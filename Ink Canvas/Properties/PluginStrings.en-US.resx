@@ -158,4 +158,106 @@ Continue?</value>
   <data name="Plugin_UpdateAvailable" xml:space="preserve">
     <value>Update available: v{0}</value>
   </data>
+  <data name="Plugin_ErrorTitle" xml:space="preserve">
+    <value>Plugin Error</value>
+  </data>
+  <data name="Plugin_ErrorAutoDisabled" xml:space="preserve">
+    <value>Plugin auto-disabled: {1} failures within {0} minutes. Reset manually to re-enable.</value>
+  </data>
+  <data name="Plugin_ErrorReset" xml:space="preserve">
+    <value>Reset &#38; reload</value>
+  </data>
+  <data name="Plugin_ExportConfig" xml:space="preserve">
+    <value>Export Config</value>
+  </data>
+  <data name="Plugin_ImportConfig" xml:space="preserve">
+    <value>Import Config</value>
+  </data>
+  <data name="Plugin_ExportTitle" xml:space="preserve">
+    <value>Export plugin configuration</value>
+  </data>
+  <data name="Plugin_ExportSuccess" xml:space="preserve">
+    <value>Plugin configuration exported to: {0}</value>
+  </data>
+  <data name="Plugin_ExportFailed" xml:space="preserve">
+    <value>Export failed: {0}</value>
+  </data>
+  <data name="Plugin_ImportTitle" xml:space="preserve">
+    <value>Import plugin configuration</value>
+  </data>
+  <data name="Plugin_ImportSuccess" xml:space="preserve">
+    <value>Import succeeded, overwrote {0} files.</value>
+  </data>
+  <data name="Plugin_ImportFailed" xml:space="preserve">
+    <value>Import failed: {0}</value>
+  </data>
+  <data name="Market_SecurityWarning" xml:space="preserve">
+    <value>This plugin comes from an unknown source. Continuing may be risky. Please confirm you trust the source.</value>
+  </data>
+  <data name="Market_SecurityTitle" xml:space="preserve">
+    <value>Security Notice</value>
+  </data>
+  <data name="Market_OpenLogsFolder" xml:space="preserve">
+    <value>Open plugin logs folder</value>
+  </data>
+  <data name="Market_LoadErrorOnInstall" xml:space="preserve">
+    <value>The following issues were detected with this plugin. Please review before installing:</value>
+  </data>
+  <data name="Market_ManageSources" xml:space="preserve">
+    <value>Plugin Sources</value>
+  </data>
+  <data name="Market_ActiveSource" xml:space="preserve">
+    <value>Active source</value>
+  </data>
+  <data name="Market_AddSource" xml:space="preserve">
+    <value>Add source</value>
+  </data>
+  <data name="Market_EditSource" xml:space="preserve">
+    <value>Edit source</value>
+  </data>
+  <data name="Market_RemoveSource" xml:space="preserve">
+    <value>Remove source</value>
+  </data>
+  <data name="Market_SourceIdLabel" xml:space="preserve">
+    <value>Source name</value>
+  </data>
+  <data name="Market_SourceUrlLabel" xml:space="preserve">
+    <value>Index URL</value>
+  </data>
+  <data name="Market_SourceOfficial" xml:space="preserve">
+    <value>Official source (read-only)</value>
+  </data>
+  <data name="Market_MirrorGroup" xml:space="preserve">
+    <value>Download mirror</value>
+  </data>
+  <data name="Market_NoMirrors" xml:space="preserve">
+    <value>This index does not provide download mirrors</value>
+  </data>
+  <data name="Market_MirrorAuto" xml:space="preserve">
+    <value>Auto (default)</value>
+  </data>
+  <data name="Market_SaveSource" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Market_CancelSource" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Market_SourceInvalidUrl" xml:space="preserve">
+    <value>URL must start with http:// or https://</value>
+  </data>
+  <data name="Market_SourceDuplicate" xml:space="preserve">
+    <value>A source with this id already exists</value>
+  </data>
+  <data name="Market_SourceRemoved" xml:space="preserve">
+    <value>Source removed</value>
+  </data>
+  <data name="Market_SourceSaved" xml:space="preserve">
+    <value>Source saved</value>
+  </data>
+  <data name="Market_SourceNameRequired" xml:space="preserve">
+    <value>Please enter a source name</value>
+  </data>
+  <data name="Market_RemoveSourceConfirmation" xml:space="preserve">
+    <value>Remove source “{0}”?</value>
+  </data>
 </root>

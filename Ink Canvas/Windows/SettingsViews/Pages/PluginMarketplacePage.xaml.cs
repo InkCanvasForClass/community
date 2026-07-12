@@ -30,6 +30,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             try
             {
+                InitSourceMirrorSelectors();
+
                 var lastRefresh = _market.GetLastRefreshTime();
                 if (lastRefresh == null || (DateTime.Now - lastRefresh.Value).TotalDays >= 7)
                 {
@@ -45,12 +47,143 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 }
                 _allPlugins = _market.MergedPlugins ?? new List<MergedPluginInfo>();
                 RefreshList();
+                RefreshMirrorSelector();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"PluginMarketplacePage | Page_Loaded: {ex}");
             }
         }
+
+        #region 源/镜像管理
+
+        private void InitSourceMirrorSelectors()
+        {
+            SourceCombo.Items.Clear();
+            var active = _market.Sources.GetActiveSource();
+            int idx = 0, selected = 0;
+            foreach (var src in _market.Sources.Sources)
+            {
+                SourceCombo.Items.Add(PluginMarketSourcesService.DisplayNameOf(src));
+                if (src.Id == active.Id) selected = idx;
+                idx++;
+            }
+            // 官方源始终可见在最前
+            SourceCombo.Items.Insert(0, PluginMarketSourcesService.DisplayNameOf(PluginMarketSourcesService.OfficialSource));
+            if (string.Equals(active.Id, PluginMarketSourcesService.OfficialSource.Id, StringComparison.OrdinalIgnoreCase))
+                selected = 0;
+            SourceCombo.SelectedIndex = selected;
+        }
+
+        private void RefreshMirrorSelector()
+        {
+            MirrorCombo.Items.Clear();
+            var mirrors = _market.AvailableMirrors;
+            if (mirrors == null || mirrors.Count == 0)
+            {
+                MirrorCombo.IsEnabled = false;
+                MirrorCombo.Items.Add(PluginStrings.Market_NoMirrors);
+                MirrorCombo.SelectedIndex = 0;
+                return;
+            }
+
+            MirrorCombo.IsEnabled = true;
+            MirrorCombo.Items.Add(PluginStrings.Market_MirrorAuto);
+            int selected = 0;
+            var activeMirror = _market.Sources.GetActiveSource()?.SelectedMirror ?? "";
+            int i = 1;
+            foreach (var kv in mirrors)
+            {
+                MirrorCombo.Items.Add(kv.Key);
+                if (string.Equals(kv.Key, activeMirror, StringComparison.OrdinalIgnoreCase))
+                    selected = i;
+                i++;
+            }
+            MirrorCombo.SelectedIndex = selected;
+        }
+
+        private async void SourceCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (SourceCombo.SelectedIndex < 0) return;
+            try
+            {
+                var sources = _market.Sources.Sources;
+                // 索引 0 是官方源
+                string id = SourceCombo.SelectedIndex == 0
+                    ? PluginMarketSourcesService.OfficialSource.Id
+                    : sources[SourceCombo.SelectedIndex - 1].Id;
+                var current = _market.Sources.GetActiveSource();
+                if (string.Equals(current.Id, id, StringComparison.OrdinalIgnoreCase)) return;
+
+                LoadingBar.Visibility = Visibility.Visible;
+                LoadingBar.IsIndeterminate = true;
+                await _market.SwitchSourceAsync(id);
+                LoadingBar.Visibility = Visibility.Collapsed;
+                LoadingBar.IsIndeterminate = false;
+
+                _allPlugins = _market.MergedPlugins ?? new List<MergedPluginInfo>();
+                RefreshList();
+                RefreshMirrorSelector();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Switch source error: {ex.Message}");
+            }
+        }
+
+        private async void MirrorCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (MirrorCombo.SelectedIndex < 0 || !MirrorCombo.IsEnabled) return;
+            try
+            {
+                string key = null;
+                if (MirrorCombo.SelectedIndex > 0)
+                {
+                    key = MirrorCombo.SelectedItem as string;
+                }
+                await _market.SelectMirrorAsync(key ?? "");
+                _allPlugins = _market.MergedPlugins ?? new List<MergedPluginInfo>();
+                RefreshList();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Mirror select error: {ex.Message}");
+            }
+        }
+
+        private async void ManageSourcesButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var content = new PluginMarketSourcesWindow(_market.Sources);
+                var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+                {
+                    Title = PluginStrings.Market_ManageSources,
+                    Content = content,
+                    CloseButtonText = Properties.NotificationStrings.AnimationOff,
+                    Owner = Window.GetWindow(this) ?? Application.Current?.MainWindow,
+                    DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Close,
+                    Resources =
+                    {
+                        ["ContentDialogMaxWidth"] = 860d,
+                        ["ContentDialogMaxHeight"] = 620d
+                    }
+                };
+                await dialog.ShowAsync();
+
+                if (content.HasChanges)
+                {
+                    InitSourceMirrorSelectors();
+                    RefreshMirrorSelector();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ManageSourcesButton_Click: {ex.Message}");
+            }
+        }
+
+        #endregion
 
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
@@ -261,11 +394,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
 
             // 说明文档
-            DetailReadme.Text = PluginStrings.Market_NoReadme;
+            DetailReadmeFallback.Visibility = Visibility.Collapsed;
+            DetailReadmeViewer.Document = null;
             if (!string.IsNullOrEmpty(p.ReadmeUrl))
             {
-                DetailReadme.Text = PluginStrings.Market_ReadmeLoading;
+                DetailReadmeViewer.Document = new System.Windows.Documents.FlowDocument
+                {
+                    Background = System.Windows.Media.Brushes.Transparent
+                };
+                DetailReadmeViewer.Document.Blocks.Add(new System.Windows.Documents.Paragraph(
+                    new System.Windows.Documents.Run(PluginStrings.Market_ReadmeLoading)));
                 _ = LoadReadmeAsync(p.ReadmeUrl);
+            }
+            else
+            {
+                DetailReadmeFallback.Visibility = Visibility.Visible;
             }
         }
 
@@ -273,15 +416,27 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             try
             {
+                string text;
                 using (var http = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(10) })
                 {
-                    var text = await http.GetStringAsync(url);
-                    Dispatcher.Invoke(() => DetailReadme.Text = text);
+                    text = await http.GetStringAsync(url);
                 }
+
+                Dispatcher.Invoke(() =>
+                {
+                    var renderer = new Ink_Canvas.Plugins.PluginReadmeRenderer();
+                    var doc = renderer.Render(text);
+                    DetailReadmeViewer.Document = doc;
+                });
             }
             catch
             {
-                Dispatcher.Invoke(() => DetailReadme.Text = PluginStrings.Market_ReadmeLoadFailed);
+                Dispatcher.Invoke(() =>
+                {
+                    DetailReadmeFallback.Text = PluginStrings.Market_ReadmeLoadFailed;
+                    DetailReadmeFallback.Visibility = Visibility.Visible;
+                    DetailReadmeViewer.Document = null;
+                });
             }
         }
 
@@ -331,6 +486,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private async System.Threading.Tasks.Task InstallPluginAsync(string id)
         {
+            var merged = _market.MergedPlugins.FirstOrDefault(p => p.Id == id);
+            if (merged == null) return;
+
             var deps = _market.ResolveDependencies(id);
             if (deps.Count > 0)
             {
@@ -339,6 +497,25 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (result != MessageBoxResult.Yes) return;
                 foreach (var dep in deps)
                     await _market.RequestDownloadPluginAsync(dep);
+            }
+
+            // 安全检查：在写入下载前评估。对于已经位于市场索引（理论上已被评估过）的条目仍然把它跑一次以防镜像替换。
+            try
+            {
+                var verdict = PluginManager.Instance.EvaluateTrust(null, merged.MarketEntry?.DownloadSha256, id);
+                if (verdict.TrustLevel == PluginTrustLevel.Unknown && verdict.Reasons.Count > 0)
+                {
+                    var confirmMsg = PluginStrings.Market_SecurityWarning + Environment.NewLine + string.Join(Environment.NewLine, verdict.Reasons);
+                    var securityResult = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(confirmMsg,
+                        PluginStrings.Market_SecurityTitle,
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Warning);
+                    if (securityResult != MessageBoxResult.Yes) return;
+                }
+            }
+            catch
+            {
+                // 安全检查失败时继续（不应阻断正常流程）
             }
 
             await _market.RequestDownloadPluginAsync(id);

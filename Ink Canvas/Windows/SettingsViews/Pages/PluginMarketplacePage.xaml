@@ -40,6 +40,10 @@
                         Click="OpenFolderButton_Click" Padding="8,6" Margin="0,0,4,0">
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FolderOpen}" FontSize="14"/>
                     </Button>
+                    <Button ToolTip="{x:Static props:PluginStrings.Market_ManageSources}"
+                        Click="ManageSourcesButton_Click" Padding="8,6" Margin="0,0,4,0">
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Globe}" FontSize="14"/>
+                    </Button>
                     <Button ToolTip="{x:Static props:PluginStrings.Market_InstallFromLocal}"
                         Click="InstallLocalButton_Click" Padding="8,6">
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" FontSize="14"/>
@@ -51,6 +55,22 @@
             <ProgressBar x:Name="LoadingBar" DockPanel.Dock="Top"
                 IsIndeterminate="False" Visibility="Collapsed"
                 Margin="0,0,0,4" Height="2"/>
+
+            <!-- 当前源 + 镜像选择 -->
+            <Grid DockPanel.Dock="Top" Margin="0,0,0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <ComboBox x:Name="SourceCombo" Grid.Column="0"
+                    SelectionChanged="SourceCombo_SelectionChanged"
+                    Padding="8,6"/>
+                <ComboBox x:Name="MirrorCombo" Grid.Column="1" Margin="6,0,0,0"
+                    MinWidth="120"
+                    SelectionChanged="MirrorCombo_SelectionChanged"
+                    ToolTip="{x:Static props:PluginStrings.Market_MirrorGroup}"
+                    Padding="8,6"/>
+            </Grid>
 
             <!-- 插件列表（代码填充） -->
             <ListBox x:Name="PluginListBox"
@@ -167,10 +187,18 @@
                     <TextBlock x:Name="DetailReadmeHeader" Text="{x:Static props:PluginStrings.Market_TabOverview}"
                         FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
                     <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
-                        CornerRadius="8" Padding="12">
-                        <TextBlock x:Name="DetailReadme" TextWrapping="Wrap" FontSize="13"
-                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                            Text="{x:Static props:PluginStrings.Market_NoReadme}"/>
+                        CornerRadius="8" Padding="0">
+                        <Grid>
+                            <FlowDocumentScrollViewer x:Name="DetailReadmeViewer"
+                                Background="Transparent"
+                                VerticalScrollBarVisibility="Disabled"
+                                HorizontalScrollBarVisibility="Disabled"
+                                Padding="12" MinHeight="120" />
+                            <TextBlock x:Name="DetailReadmeFallback" Visibility="Collapsed"
+                                TextWrapping="Wrap" FontSize="13" Padding="12"
+                                Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                Text="{x:Static props:PluginStrings.Market_NoReadme}"/>
+                        </Grid>
                     </Border>
                 </StackPanel>
             </StackPanel>

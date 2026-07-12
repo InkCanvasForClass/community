@@ -760,6 +760,7 @@ namespace Ink_Canvas
                     string cleanedJson = userConfigObj.ToString(Formatting.Indented);
                     Settings = JsonConvert.DeserializeObject<Settings>(cleanedJson);
                     SaveSettingsToFile();
+                    App.UpdateCachedSettingsJson(cleanedJson);
                     LogHelper.WriteLogToFile("已清理过期配置项", LogHelper.LogType.Event);
                 }
             }

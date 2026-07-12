@@ -72,9 +72,9 @@ namespace Ink_Canvas.Plugins
         {
             try
             {
-                _mainWindow?.Dispatcher.Invoke(() =>
+                _mainWindow?.Dispatcher.Invoke(async () =>
                 {
-                    _mainWindow.UnFoldFloatingBar(null);
+                    await _mainWindow.UnFoldFloatingBar(null);
                     IsCollapsed = false;
                     CollapseChanged?.Invoke(false);
                 });

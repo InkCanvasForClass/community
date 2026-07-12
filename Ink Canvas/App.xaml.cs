@@ -1420,7 +1420,17 @@ namespace Ink_Canvas
                 try
                 {
                     LogHelper.WriteLogToFile("开始加载插件");
+                    PluginManager.Instance.InitializeAdvancedServices(PluginMarketService.Instance);
                     await PluginManager.Instance.LoadAllAsync();
+                    try
+                    {
+                        PluginManager.Instance.StartIpc();
+                        LogHelper.WriteLogToFile("插件 IPC 总线已启动");
+                    }
+                    catch (Exception ipcEx)
+                    {
+                        LogHelper.WriteLogToFile($"启动插件 IPC 总线失败: {ipcEx.Message}", LogHelper.LogType.Warning);
+                    }
                     LogHelper.WriteLogToFile(string.Format("插件加载完成，共加载 {0} 个插件", PluginManager.Instance.Plugins.Count));
                 }
                 catch (Exception ex)
@@ -1455,6 +1465,15 @@ namespace Ink_Canvas
         internal static string CachedSettingsJson { get; private set; }
 
         /// <summary>
+        /// 使用已规范化的设置内容更新启动缓存，确保同一启动流程中的后续设置加载不会再次使用旧配置。
+        /// </summary>
+        internal static void UpdateCachedSettingsJson(string json)
+        {
+            CachedSettingsJson = json;
+            _cachedParsedSettings = JsonConvert.DeserializeObject(json);
+        }
+
+        /// <summary>
         /// 一次性读取并缓存 Settings.json 的解析结果，避免启动阶段重复 I/O + dynamic 反序列化。
         /// 同时缓存原始 JSON 文本供 LoadSettings 使用。
         /// </summary>
@@ -1467,8 +1486,7 @@ namespace Ink_Canvas
                 if (File.Exists(settingsPath))
                 {
                     var json = File.ReadAllText(settingsPath);
-                    CachedSettingsJson = json;
-                    _cachedParsedSettings = JsonConvert.DeserializeObject(json);
+                    UpdateCachedSettingsJson(json);
                 }
             }
             catch (Exception ex)

@@ -53,6 +53,37 @@ namespace Ink_Canvas.Plugins
         public string Url { get; set; } = "";
 
         /// <summary>
+        /// 最低宿主版本要求，例如 "1.7.18"。低于此版本的宿主不允许加载插件。
+        /// </summary>
+        public string MinHostVersion { get; set; } = "";
+
+        /// <summary>
+        /// 插件版本兼容范围，例如 "^1.0.0"、">=1.0.0,<2.0.0"。留空时只比较主版本号与 API 版本。
+        /// </summary>
+        public string VersionRange { get; set; } = "";
+
+        /// <summary>
+        /// 插件申请的权限列表，例如 "Settings", "Hotkeys", "Network", "FileSystem"。
+        /// 主机在加载插件时可向用户提示。
+        /// </summary>
+        public List<string> Permissions { get; set; } = new List<string>();
+
+        /// <summary>
+        /// 许可协议，例如 "MIT"、"Apache-2.0"。
+        /// </summary>
+        public string License { get; set; } = "";
+
+        /// <summary>
+        /// 标签列表。
+        /// </summary>
+        public List<string> Tags { get; set; } = new List<string>();
+
+        /// <summary>
+        /// 源码仓库 URL。
+        /// </summary>
+        public string SourceUrl { get; set; } = "";
+
+        /// <summary>
         /// 插件依赖列表
         /// </summary>
         public List<PluginDependency> Dependencies { get; set; } = new List<PluginDependency>();

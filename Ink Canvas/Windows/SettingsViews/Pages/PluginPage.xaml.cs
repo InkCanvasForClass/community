@@ -2,6 +2,7 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Plugins;
 using Ink_Canvas.Properties;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using Microsoft.Win32;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -242,6 +243,49 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             };
             actionPanel.Children.Add(deleteBtn);
 
+            // 导出配置
+            var exportBtn = new Button
+            {
+                Padding = new Thickness(6), Margin = new Thickness(0, 0, 4, 0),
+                ToolTip = PluginStrings.Plugin_ExportConfig, Tag = pluginInfo
+            };
+            exportBtn.Click += ExportConfig_Click;
+            exportBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+            {
+                Icon = SegoeFluentIcons.Save, FontSize = 14
+            };
+            actionPanel.Children.Add(exportBtn);
+
+            // 导入配置
+            var importBtn = new Button
+            {
+                Padding = new Thickness(6), Margin = new Thickness(0, 0, 4, 0),
+                ToolTip = PluginStrings.Plugin_ImportConfig, Tag = pluginInfo
+            };
+            importBtn.Click += ImportConfig_Click;
+            importBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+            {
+                Icon = SegoeFluentIcons.OpenFile, FontSize = 14
+            };
+            actionPanel.Children.Add(importBtn);
+
+            // 仅当记录存在错误或自动禁用时显示"重置错误"按钮
+            var errorRecord = PluginManager.Instance.GetPluginError(pluginInfo.Id);
+            if (errorRecord != null && (errorRecord.AutoDisabled || errorRecord.LastFailureAt > DateTime.UtcNow.AddDays(-7)))
+            {
+                var resetBtn = new Button
+                {
+                    Padding = new Thickness(6), Margin = new Thickness(0, 0, 4, 0),
+                    ToolTip = PluginStrings.Plugin_ErrorReset, Tag = pluginInfo
+                };
+                resetBtn.Click += ResetError_Click;
+                resetBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+                {
+                    Icon = SegoeFluentIcons.Refresh, FontSize = 14, Foreground = new SolidColorBrush(Colors.OrangeRed)
+                };
+                actionPanel.Children.Add(resetBtn);
+            }
+
             Grid.SetColumn(actionPanel, 2);
             mainGrid.Children.Add(actionPanel);
 
@@ -351,6 +395,98 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                         MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+        }
+
+        private void ExportConfig_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = sender as FrameworkElement;
+            var info = btn?.Tag as PluginInfo;
+            if (info == null) return;
+
+            var dialog = new SaveFileDialog
+            {
+                Title = PluginStrings.Plugin_ExportTitle,
+                Filter = "Plugin Config (*.plugincfg)|*.plugincfg",
+                FileName = $"ICC-CE-{SanitizeId(info.Id)}-{DateTime.Now:yyyyMMddHHmmss}.plugincfg"
+            };
+            if (dialog.ShowDialog() != true) return;
+            try
+            {
+                PluginManager.Instance.ConfigIo.Export(info, dialog.FileName);
+                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                    string.Format(PluginStrings.Plugin_ExportSuccess, dialog.FileName),
+                    PluginStrings.Plugin_ExportTitle, MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                    string.Format(PluginStrings.Plugin_ExportFailed, ex.Message),
+                    PluginStrings.Plugin_ExportTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void ImportConfig_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = sender as FrameworkElement;
+            var info = btn?.Tag as PluginInfo;
+            if (info == null || string.IsNullOrEmpty(info.PluginConfigFolder)) return;
+
+            var dialog = new OpenFileDialog
+            {
+                Title = PluginStrings.Plugin_ImportTitle,
+                Filter = "Plugin Config (*.plugincfg)|*.plugincfg"
+            };
+            if (dialog.ShowDialog() != true) return;
+            try
+            {
+                var written = PluginManager.Instance.ConfigIo.Import(dialog.FileName, info.PluginConfigFolder, overwrite: true);
+                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                    string.Format(PluginStrings.Plugin_ImportSuccess, written),
+                    PluginStrings.Plugin_ImportTitle, MessageBoxButton.OK, MessageBoxImage.Information);
+                LoadPlugins();
+            }
+            catch (Exception ex)
+            {
+                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                    string.Format(PluginStrings.Plugin_ImportFailed, ex.Message),
+                    PluginStrings.Plugin_ImportTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void ResetError_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = sender as FrameworkElement;
+            var info = btn?.Tag as PluginInfo;
+            if (info == null) return;
+
+            var record = PluginManager.Instance.GetPluginError(info.Id);
+            if (record == null) return;
+
+            var msg = record.AutoDisabled
+                ? string.Format(PluginStrings.Plugin_ErrorAutoDisabled,
+                    PluginErrorRecoveryService.FailureWindowMinutes,
+                    PluginErrorRecoveryService.FailureThreshold)
+                : PluginStrings.Market_RestartMessage;
+
+            var result = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                msg, PluginStrings.Plugin_ErrorTitle,
+                MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result != MessageBoxResult.Yes) return;
+
+            PluginManager.Instance.ResetPluginFailure(info.Id);
+            AskRestart();
+        }
+
+        private static string SanitizeId(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return "unknown";
+            var invalid = Path.GetInvalidFileNameChars();
+            var chars = id.ToCharArray();
+            for (var i = 0; i < chars.Length; i++)
+            {
+                if (Array.IndexOf(invalid, chars[i]) >= 0) chars[i] = '_';
+            }
+            return new string(chars);
         }
 
         #endregion
