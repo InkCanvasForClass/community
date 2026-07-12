@@ -23,7 +23,6 @@
         <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
         <sys:Double x:Key="SettingsCardHeaderIconMaxSize">24</sys:Double>
 
-        <!-- 状态指示器样式（与 ClassIsland RulesetControl 一致） -->
         <Style TargetType="Ellipse" x:Key="StateIndicatorStyle">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding State, Mode=OneWay}" Value="2">
@@ -60,7 +59,7 @@
             <Button Grid.Row="0" x:Name="BtnAddWorkflow"
                     Content="添加自动化"
                     Click="BtnAddWorkflow_Click"
-                    Padding="12,6" Margin="0,0,0,8" HorizontalAlignment="Right"/>
+                    Padding="12,6" Margin="0,0,0,8" HorizontalAlignment="Left"/>
 
             <!-- 导航列表 -->
             <ui:ListView Grid.Row="1"
@@ -146,7 +145,7 @@
 
             <!-- ========== 预设自动化面板 ========== -->
             <ScrollViewer x:Name="PresetPanel" PanningMode="VerticalFirst">
-                <Grid Margin="59,0,59,0">
+                <Grid Margin="20,0,20,0">
                     <FrameworkElement.Resources>
                         <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
                         <sys:Double x:Key="SettingsCardHeaderIconMaxSize">24</sys:Double>
