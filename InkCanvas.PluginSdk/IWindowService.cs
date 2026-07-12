@@ -16,6 +16,9 @@ namespace Ink_Canvas.Plugins
         /// <summary>窗口是否处于收纳（隐藏）状态</summary>
         bool IsCollapsed { get; }
 
+        /// <summary>当前是否处于白板模式</summary>
+        bool IsWhiteboardMode { get; }
+
         /// <summary>
         /// 设置窗口置顶状态。
         /// </summary>

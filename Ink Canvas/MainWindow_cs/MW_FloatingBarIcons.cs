@@ -4517,8 +4517,6 @@ namespace Ink_Canvas
         }
 
 
-        internal int currentMode;
-
         // 退出批注模式时的全屏还原处理
         private void RestoreFullScreenOnExitAnnotationMode()
         {

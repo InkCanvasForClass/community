@@ -33,6 +33,15 @@ namespace Ink_Canvas.Plugins
 
         public bool IsCollapsed { get; private set; }
 
+        public bool IsWhiteboardMode
+        {
+            get
+            {
+                try { return _mainWindow?.IsWhiteboardMode ?? false; }
+                catch { return false; }
+            }
+        }
+
         public event Action<bool> TopMostChanged;
         public event Action<bool> CollapseChanged;
 

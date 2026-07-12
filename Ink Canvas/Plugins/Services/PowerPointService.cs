@@ -10,6 +10,17 @@ namespace Ink_Canvas.Plugins
         public PowerPointService(MainWindow mainWindow)
         {
             _mainWindow = mainWindow;
+            if (_mainWindow != null)
+            {
+                _mainWindow.PluginSlideChanged += OnSlideChanged;
+                _mainWindow.PluginSlideShowStateChanged += OnSlideShowStateChanged;
+            }
+        }
+
+        private void OnSlideShowStateChanged(bool isActive)
+        {
+            if (isActive) OnSlideshowStarted();
+            else OnSlideshowEnded();
         }
 
         public bool IsSlideshowActive

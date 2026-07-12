@@ -1267,6 +1267,7 @@ namespace Ink_Canvas
             if (inkCanvas1 == null) return;
 
             SetDynamicRendererEnabled(inkCanvas1, inkCanvas1.EditingMode == InkCanvasEditingMode.Ink);
+            NotifyPluginPenModeChanged(inkCanvas1.EditingMode);
 
             if (IsCurrentPageFrozen && IsFreezeMutatingMode(inkCanvas1.EditingMode))
             {

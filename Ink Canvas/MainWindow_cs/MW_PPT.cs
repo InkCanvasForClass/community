@@ -1123,6 +1123,7 @@ namespace Ink_Canvas
                 {
                     // 通知UI管理器放映状态变化
                     _pptUIManager?.OnSlideShowStateChanged(isInSlideShow);
+                    NotifyPluginSlideShowStateChanged(isInSlideShow);
 
                     if (!isInSlideShow)
                     {
@@ -1246,6 +1247,7 @@ namespace Ink_Canvas
 
                 _currentSlideShowPosition = currentSlide;
                 _previousSlideID = currentSlide;
+                NotifyPluginSlideShowStateChanged(true);
 
                 lock (_memoryStreams)
                 {
@@ -1533,6 +1535,7 @@ namespace Ink_Canvas
                     }
                 });
                 _previousSlideID = currentSlide;
+                NotifyPluginSlideChanged(currentSlide);
 
                 // 刷新智慧模式区域（翻页时视频控件可能变化）
                 if (Settings.PowerPointSettings.EnableSmartMode)
@@ -1713,6 +1716,7 @@ namespace Ink_Canvas
 
                 if (isEnteredSlideShowEndEvent) return;
                 isEnteredSlideShowEndEvent = true;
+                NotifyPluginSlideShowStateChanged(false);
 
                 // 清除智慧模式区域
                 _smartModeRegions = null;

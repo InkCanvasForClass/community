@@ -18,6 +18,19 @@ namespace Ink_Canvas.Plugins
         public EventService(MainWindow mainWindow)
         {
             _mainWindow = mainWindow;
+            if (_mainWindow != null)
+            {
+                _mainWindow.PluginWhiteboardModeChanged += OnWhiteboardModeChanged;
+                _mainWindow.PluginPenModeChanged += OnPenModeChanged;
+                _mainWindow.PluginSlideChanged += OnSlideChanged;
+                _mainWindow.PluginSlideShowStateChanged += OnSlideShowStateChanged;
+            }
+        }
+
+        private void OnSlideShowStateChanged(bool isActive)
+        {
+            if (isActive) OnSlideShowStarted();
+            else OnSlideShowEnded();
         }
 
         internal void OnWhiteboardModeChanged(bool isBoard) => WhiteboardModeChanged?.Invoke(isBoard);
