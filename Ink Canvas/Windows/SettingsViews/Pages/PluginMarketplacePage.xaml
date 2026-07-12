@@ -120,6 +120,7 @@
                                 <TextBlock x:Name="DetailAuthor" FontSize="13"
                                     Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,8,0"/>
                                 <ui:HyperlinkButton x:Name="DetailUrl"
+                                    Click="DetailUrl_Click"
                                     Content="{x:Static props:PluginStrings.Market_ProjectHomepage}"/>
                             </StackPanel>
                             <TextBlock x:Name="DetailDescription" FontSize="13" TextWrapping="Wrap"

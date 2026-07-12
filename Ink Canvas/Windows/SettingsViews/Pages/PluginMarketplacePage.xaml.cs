@@ -371,6 +371,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             DetailDownloadCount.Text = p.DownloadCount > 0 ? p.DownloadCount.ToString("N0") : "-";
             DetailStarsCount.Text = p.StarsCount > 0 ? p.StarsCount.ToString("N0") : "-";
 
+            var projectUrl = p.MarketEntry?.Manifest?.Url;
+            if (string.IsNullOrWhiteSpace(projectUrl))
+                projectUrl = p.LocalInfo?.Manifest?.Url;
+            DetailUrl.Tag = TryGetWebUri(projectUrl, out var homepage) ? homepage : null;
+            DetailUrl.Visibility = DetailUrl.Tag != null ? Visibility.Visible : Visibility.Collapsed;
+
             // 按钮状态
             var canInstall = p.IsOnMarket && !p.IsLocal && !p.RestartRequired;
             var canUpdate = p.IsUpdateAvailable && !p.RestartRequired;
@@ -463,6 +469,36 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ShowDetail(plugin);
             else
                 ShowEmptyState();
+        }
+
+        private void DetailUrl_Click(object sender, RoutedEventArgs e)
+        {
+            if (DetailUrl.Tag is not Uri homepage) return;
+
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = homepage.AbsoluteUri,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"PluginMarketplacePage | Open homepage: {ex}");
+            }
+        }
+
+        private static bool TryGetWebUri(string value, out Uri uri)
+        {
+            if (Uri.TryCreate(value, UriKind.Absolute, out uri) &&
+                (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp))
+            {
+                return true;
+            }
+
+            uri = null;
+            return false;
         }
 
         private async void InstallButton_Click(object sender, RoutedEventArgs e)
