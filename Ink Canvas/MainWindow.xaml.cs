@@ -64,6 +64,7 @@ namespace Ink_Canvas
 
         // 窗口概览模型
         private WindowOverviewModel _windowOverviewModel;
+        public WindowOverviewModel WindowOverviewModel => _windowOverviewModel ??= new WindowOverviewModel();
 
         // 设置面板相关状态
         // _isApplyingLanguageFromSettings migrated to AppearancePage

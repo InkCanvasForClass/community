@@ -202,7 +202,9 @@ namespace Ink_Canvas
                 (typeof(Plugins.ISettingsService),        new Plugins.SettingsService()),
                 (typeof(Plugins.IHotkeyService),          new Plugins.HotkeyService(mainWindow.GlobalHotkeyManagerInstance)),
                 (typeof(Plugins.INotificationService),    new Plugins.NotificationService(mainWindow)),
-                (typeof(Plugins.IFileAssociationService), new Plugins.FileAssociationService()),
+                (typeof(Plugins.IFileAssociationService),      new Plugins.FileAssociationService()),
+                (typeof(Plugins.IWindowOverviewService),        new Plugins.WindowOverviewService(mainWindow.WindowOverviewModel)),
+                (typeof(Plugins.IWindowOverviewService),         new Plugins.WindowOverviewService(mainWindow.WindowOverviewModel)),
             };
 
             foreach (var (iface, impl) in services)
