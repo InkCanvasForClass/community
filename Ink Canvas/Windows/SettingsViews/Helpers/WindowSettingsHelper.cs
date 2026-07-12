@@ -10,59 +10,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
 {
     public static class WindowSettingsHelper
     {
-        #region Keyboard Hook
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool UnhookWindowsHookEx(IntPtr hhk);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr GetModuleHandle(string lpModuleName);
-
-        private const int WH_KEYBOARD_LL = 13;
-
-        private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
-
-        private static LowLevelKeyboardProc _keyboardProc;
-        private static IntPtr _keyboardHookId = IntPtr.Zero;
-
-        private static IntPtr KeyboardHookProc(int nCode, IntPtr wParam, IntPtr lParam)
-        {
-            return CallNextHookEx(_keyboardHookId, nCode, wParam, lParam);
-        }
-
-        public static void InstallKeyboardHook()
-        {
-            if (_keyboardHookId == IntPtr.Zero)
-            {
-                _keyboardProc = KeyboardHookProc;
-                _keyboardHookId = SetWindowsHookEx(WH_KEYBOARD_LL, _keyboardProc,
-                    GetModuleHandle(null), 0);
-                if (_keyboardHookId == IntPtr.Zero)
-                {
-                    LogHelper.WriteLogToFile("安装低级键盘钩子失败", LogHelper.LogType.Error);
-                }
-            }
-        }
-
-        public static void UninstallKeyboardHook()
-        {
-            if (_keyboardHookId != IntPtr.Zero)
-            {
-                UnhookWindowsHookEx(_keyboardHookId);
-                _keyboardHookId = IntPtr.Zero;
-                _keyboardProc = null;
-            }
-        }
-
-        #endregion
-
         #region Timer Callbacks
 
         public static Action OnStopKillProcessTimer { get; set; }
@@ -164,12 +111,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             if (shouldBeNoFocus)
             {
                 NativeWindowHelper.SetWindowLong(hwnd, NativeWindowHelper.GWL_EXSTYLE, exStyle | NativeWindowHelper.WS_EX_NOACTIVATE);
-                InstallKeyboardHook();
             }
             else
             {
                 NativeWindowHelper.SetWindowLong(hwnd, NativeWindowHelper.GWL_EXSTYLE, exStyle & ~NativeWindowHelper.WS_EX_NOACTIVATE);
-                UninstallKeyboardHook();
             }
         }
 

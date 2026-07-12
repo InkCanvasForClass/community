@@ -1955,8 +1955,6 @@ namespace Ink_Canvas
             // 停止置顶维护定时器
             StopTopmostMaintenance();
 
-            UninstallKeyboardHook();
-
             // 清理统一窗口置顶管理器
             WindowTopmostManager.Shutdown();
 
@@ -2508,16 +2506,6 @@ namespace Ink_Canvas
         }
 
         private DispatcherTimer autoSaveStrokesTimer;
-
-        private void InstallKeyboardHook()
-        {
-            WindowSettingsHelper.InstallKeyboardHook();
-        }
-
-        private void UninstallKeyboardHook()
-        {
-            WindowSettingsHelper.UninstallKeyboardHook();
-        }
 
         public void ApplyNoFocusMode()
         {
