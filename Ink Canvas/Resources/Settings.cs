@@ -455,6 +455,8 @@ namespace Ink_Canvas
         public bool IsEnableNibMode { get; set; }
         [JsonProperty("isFoldAtStartup")]
         public bool IsFoldAtStartup { get; set; }
+        [JsonProperty("enableFastStartup")]
+        public bool EnableFastStartup { get; set; }
         [JsonProperty("crashAction")]
         public int CrashAction { get; set; } = 2;
         [JsonProperty("telemetryUploadLevel")]

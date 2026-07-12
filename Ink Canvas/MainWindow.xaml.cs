@@ -1471,12 +1471,18 @@ namespace Ink_Canvas
             // 工具栏插件化按钮先注入到容器，确保 LoadSettings 内部对 Cursor_Icon / Pen_Icon 等的访问非空。
             // Settings.Toolbar 此时尚为默认值（全部可见），与旧 XAML 行为一致。
             InitializeToolbarPlugins();
-            // 初始化 Popup 管理器（置顶 + 拖动跟随）
-            InitializePopupManager();
+            // 初始化 Popup 管理器（置顶 + 拖动跟随）。快速启动模式下延迟到首帧之后。
+            if (!App.IsFastStartupEnabled)
+            {
+                InitializePopupManager();
+            }
             // 加载设置（启动阶段仅加载影响首帧的核心设置，其余延迟到 RunDeferredStartupPhaseB）
             LoadSettings(true, startupPhase: true);
-            // 启动性能监测（如果已启用）
-            PerformanceMonitorHelper.StartIfEnabled();
+            // 启动性能监测（如果已启用）。快速启动模式下延迟到首帧之后。
+            if (!App.IsFastStartupEnabled)
+            {
+                PerformanceMonitorHelper.StartIfEnabled();
+            }
             // 根据ToolbarPosition设置更新工具栏结构和位置
             UpdateToolbarPosition();
             // 启动时直接设置浮动栏位置，跳过动画
@@ -1532,7 +1538,8 @@ namespace Ink_Canvas
             BorderInkReplayToolBox.Visibility = Visibility.Collapsed;
 
             // 识别后端预热改为后台低优先级执行，避免启动主线程被 WinRT 初始化拖慢。
-            if (ShapeRecognitionRouter.ShouldRunShapeRecognition(
+            // 快速启动模式下由第二阶段统一延迟。
+            if (!App.IsFastStartupEnabled && ShapeRecognitionRouter.ShouldRunShapeRecognition(
                     Settings.InkToShape.IsInkToShapeEnabled,
                     ShapeRecognitionRouter.FromSettingsInt(Settings.InkToShape.ShapeRecognitionEngine)))
             {
@@ -2563,7 +2570,21 @@ namespace Ink_Canvas
             if (_deferredPhaseBCompleted) return;
             _deferredPhaseBCompleted = true;
 
-            await Task.Delay(600);
+            await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ContextIdle);
+            await Task.Delay(App.IsFastStartupEnabled ? 1000 : 600);
+
+            if (App.IsFastStartupEnabled)
+            {
+                try
+                {
+                    InitializePopupManager();
+                    PerformanceMonitorHelper.StartIfEnabled();
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[MainWindow] 快速启动延迟基础服务初始化出错: {ex.Message}", LogHelper.LogType.Error);
+                }
+            }
 
             try
             {
@@ -2594,6 +2615,15 @@ namespace Ink_Canvas
             }
 
             // 后移的非首屏初始化
+            if (App.IsFastStartupEnabled &&
+                ShapeRecognitionRouter.ShouldRunShapeRecognition(
+                    Settings.InkToShape.IsInkToShapeEnabled,
+                    ShapeRecognitionRouter.FromSettingsInt(Settings.InkToShape.ShapeRecognitionEngine)))
+            {
+                _ = Task.Run(() => InkRecognizeHelper.WarmupShapeRecognition(
+                    ShapeRecognitionRouter.FromSettingsInt(Settings.InkToShape.ShapeRecognitionEngine)));
+            }
+
             try
             {
                 EnsureRealtimeStylusPipelineBinding();

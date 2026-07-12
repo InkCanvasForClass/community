@@ -1191,6 +1191,7 @@ namespace Ink_Canvas
             Settings.Startup.AutoUpdateWithSilenceStartTime = "06:00";
             Settings.Startup.AutoUpdateWithSilenceEndTime = "22:00";
             Settings.Startup.IsFoldAtStartup = false;
+            Settings.Startup.EnableFastStartup = false;
         }
 
         /// <summary>

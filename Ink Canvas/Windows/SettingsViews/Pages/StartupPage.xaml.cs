@@ -46,6 +46,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     ComboBoxCrashAction.SelectedIndex = crashAction;
 
                     ToggleSwitchFoldAtStartup.IsOn = settings.Startup.IsFoldAtStartup;
+                    ToggleSwitchFastStartup.IsOn = settings.Startup.EnableFastStartup;
                 }
 
                 ToggleSwitchEnableTrayIcon.IsOn = settings.Appearance.EnableTrayIcon;
@@ -117,6 +118,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 Debug.WriteLine($"设置启动时收纳出错: {ex.Message}");
+            }
+        }
+
+        private void ToggleSwitchFastStartup_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+
+            try
+            {
+                SettingsManager.Settings.Startup.EnableFastStartup = ToggleSwitchFastStartup.IsOn;
+                SettingsManager.SaveSettingsToFile();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"设置快速启动模式时出错: {ex.Message}");
             }
         }
 

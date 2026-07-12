@@ -60,6 +60,12 @@
   <data name="ExternalProtocolHint" xml:space="preserve">
     <value>通过 icc:// 协议从外部召唤控制软件</value>
   </data>
+  <data name="FastStartup" xml:space="preserve">
+    <value>快速启动模式（先起飞再装货）</value>
+  </data>
+  <data name="FastStartupHint" xml:space="preserve">
+    <value>先把主界面尽快端上来，插件、PPT、通知、自动化和监控等非首屏功能等启动后再慢慢加载。下次启动生效。</value>
+  </data>
   <data name="FixVersionHint" xml:space="preserve">
     <value>版本修复会根据当前通道下载最新版本并安装，软件装坏了可以用这个抢救</value>
   </data>

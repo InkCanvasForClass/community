@@ -60,6 +60,12 @@
   <data name="ExternalProtocolHint" xml:space="preserve">
     <value>Control via icc:// protocol</value>
   </data>
+  <data name="FastStartup" xml:space="preserve">
+    <value>Fast startup mode</value>
+  </data>
+  <data name="FastStartupHint" xml:space="preserve">
+    <value>Show the main interface sooner and load non-essential features such as plugins, PowerPoint integration, notifications, automation, and monitoring after startup. Takes effect on next launch.</value>
+  </data>
   <data name="FixVersionHint" xml:space="preserve">
     <value>Downloads and reinstalls the latest build from the selected channel to fix broken installations.</value>
   </data>
