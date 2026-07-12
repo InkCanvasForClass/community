@@ -2,7 +2,6 @@ using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 
 namespace Ink_Canvas.Plugins
 {

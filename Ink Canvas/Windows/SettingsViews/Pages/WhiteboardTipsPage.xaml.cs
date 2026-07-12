@@ -1,17 +1,16 @@
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using iNKORE.UI.WPF.Modern.Controls;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using ContentDialog = iNKORE.UI.WPF.Modern.Controls.ContentDialog;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
-using Microsoft.Win32;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {

@@ -1,4 +1,3 @@
-using Ink_Canvas.Helpers;
 using System;
 
 namespace Ink_Canvas.Plugins

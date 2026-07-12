@@ -105,13 +105,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // 图标
             var iconBorder = new Border
             {
-                Width = 40, Height = 40,
+                Width = 40,
+                Height = 40,
                 CornerRadius = new CornerRadius(6),
                 Margin = new Thickness(0, 0, 12, 0),
                 VerticalAlignment = VerticalAlignment.Center,
                 Child = new iNKORE.UI.WPF.Modern.Controls.FontIcon
                 {
-                    Icon = SegoeFluentIcons.Puzzle, FontSize = 20,
+                    Icon = SegoeFluentIcons.Puzzle,
+                    FontSize = 20,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center
                 }
@@ -126,14 +128,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var titlePanel = new StackPanel { Orientation = Orientation.Horizontal };
             var nameText = new TextBlock
             {
-                Text = pluginInfo.Name, FontSize = 15, FontWeight = FontWeights.SemiBold,
+                Text = pluginInfo.Name,
+                FontSize = 15,
+                FontWeight = FontWeights.SemiBold,
                 Margin = new Thickness(0, 0, 8, 0)
             };
             nameText.SetResourceReference(TextBlock.ForegroundProperty, "TextFillColorPrimaryBrush");
 
             var versionText = new TextBlock
             {
-                Text = string.Format("v{0}", pluginInfo.Version), FontSize = 12,
+                Text = string.Format("v{0}", pluginInfo.Version),
+                FontSize = 12,
                 VerticalAlignment = VerticalAlignment.Center
             };
             versionText.SetResourceReference(TextBlock.ForegroundProperty, "TextFillColorTertiaryBrush");
@@ -155,7 +160,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 var updateTag = new TextBlock
                 {
                     Text = string.Format(PluginStrings.Plugin_UpdateAvailable, marketInfo.MarketVersion),
-                    FontSize = 11, VerticalAlignment = VerticalAlignment.Center,
+                    FontSize = 11,
+                    VerticalAlignment = VerticalAlignment.Center,
                     Margin = new Thickness(8, 0, 0, 0),
                     Foreground = new SolidColorBrush((Color)Application.Current.FindResource("SystemAccentColor"))
                 };
@@ -164,8 +170,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             var descriptionText = new TextBlock
             {
-                Text = pluginInfo.Description, FontSize = 12,
-                TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 2, 0, 2)
+                Text = pluginInfo.Description,
+                FontSize = 12,
+                TextWrapping = TextWrapping.Wrap,
+                Margin = new Thickness(0, 2, 0, 2)
             };
             descriptionText.SetResourceReference(TextBlock.ForegroundProperty, "TextFillColorSecondaryBrush");
 
@@ -188,13 +196,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // 打开文件夹按钮
             var folderBtn = new Button
             {
-                Padding = new Thickness(6), Margin = new Thickness(0, 0, 4, 0),
-                ToolTip = PluginStrings.Market_OpenPluginsFolder, Tag = pluginInfo
+                Padding = new Thickness(6),
+                Margin = new Thickness(0, 0, 4, 0),
+                ToolTip = PluginStrings.Market_OpenPluginsFolder,
+                Tag = pluginInfo
             };
             folderBtn.Click += OpenFolder_Click;
             folderBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
             {
-                Icon = SegoeFluentIcons.FolderOpen, FontSize = 14
+                Icon = SegoeFluentIcons.FolderOpen,
+                FontSize = 14
             };
             actionPanel.Children.Add(folderBtn);
 
@@ -204,13 +215,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 // 已下载，需要重启
                 var restartBtn = new Button
                 {
-                    Padding = new Thickness(6), Margin = new Thickness(0, 0, 4, 0),
+                    Padding = new Thickness(6),
+                    Margin = new Thickness(0, 0, 4, 0),
                     ToolTip = PluginStrings.Market_RestartToApply
                 };
                 restartBtn.Click += (s, ev) => AskRestart();
                 restartBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
                 {
-                    Icon = SegoeFluentIcons.Refresh, FontSize = 14
+                    Icon = SegoeFluentIcons.Refresh,
+                    FontSize = 14
                 };
                 actionPanel.Children.Add(restartBtn);
             }
@@ -219,13 +232,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 // 有新版本可更新
                 var updateBtn = new Button
                 {
-                    Padding = new Thickness(6), Margin = new Thickness(0, 0, 4, 0),
-                    ToolTip = PluginStrings.Plugin_Update, Tag = marketInfo
+                    Padding = new Thickness(6),
+                    Margin = new Thickness(0, 0, 4, 0),
+                    ToolTip = PluginStrings.Plugin_Update,
+                    Tag = marketInfo
                 };
                 updateBtn.Click += UpdatePlugin_Click;
                 updateBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
                 {
-                    Icon = SegoeFluentIcons.Upload, FontSize = 14
+                    Icon = SegoeFluentIcons.Upload,
+                    FontSize = 14
                 };
                 actionPanel.Children.Add(updateBtn);
             }
@@ -233,39 +249,48 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // 删除按钮
             var deleteBtn = new Button
             {
-                Padding = new Thickness(6), Margin = new Thickness(0, 0, 4, 0),
-                ToolTip = PluginStrings.Plugin_Delete, Tag = pluginInfo
+                Padding = new Thickness(6),
+                Margin = new Thickness(0, 0, 4, 0),
+                ToolTip = PluginStrings.Plugin_Delete,
+                Tag = pluginInfo
             };
             deleteBtn.Click += DeletePlugin_Click;
             deleteBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
             {
-                Icon = SegoeFluentIcons.Delete, FontSize = 14
+                Icon = SegoeFluentIcons.Delete,
+                FontSize = 14
             };
             actionPanel.Children.Add(deleteBtn);
 
             // 导出配置
             var exportBtn = new Button
             {
-                Padding = new Thickness(6), Margin = new Thickness(0, 0, 4, 0),
-                ToolTip = PluginStrings.Plugin_ExportConfig, Tag = pluginInfo
+                Padding = new Thickness(6),
+                Margin = new Thickness(0, 0, 4, 0),
+                ToolTip = PluginStrings.Plugin_ExportConfig,
+                Tag = pluginInfo
             };
             exportBtn.Click += ExportConfig_Click;
             exportBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
             {
-                Icon = SegoeFluentIcons.Save, FontSize = 14
+                Icon = SegoeFluentIcons.Save,
+                FontSize = 14
             };
             actionPanel.Children.Add(exportBtn);
 
             // 导入配置
             var importBtn = new Button
             {
-                Padding = new Thickness(6), Margin = new Thickness(0, 0, 4, 0),
-                ToolTip = PluginStrings.Plugin_ImportConfig, Tag = pluginInfo
+                Padding = new Thickness(6),
+                Margin = new Thickness(0, 0, 4, 0),
+                ToolTip = PluginStrings.Plugin_ImportConfig,
+                Tag = pluginInfo
             };
             importBtn.Click += ImportConfig_Click;
             importBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
             {
-                Icon = SegoeFluentIcons.OpenFile, FontSize = 14
+                Icon = SegoeFluentIcons.OpenFile,
+                FontSize = 14
             };
             actionPanel.Children.Add(importBtn);
 
@@ -275,13 +300,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 var resetBtn = new Button
                 {
-                    Padding = new Thickness(6), Margin = new Thickness(0, 0, 4, 0),
-                    ToolTip = PluginStrings.Plugin_ErrorReset, Tag = pluginInfo
+                    Padding = new Thickness(6),
+                    Margin = new Thickness(0, 0, 4, 0),
+                    ToolTip = PluginStrings.Plugin_ErrorReset,
+                    Tag = pluginInfo
                 };
                 resetBtn.Click += ResetError_Click;
                 resetBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
                 {
-                    Icon = SegoeFluentIcons.Refresh, FontSize = 14, Foreground = new SolidColorBrush(Colors.OrangeRed)
+                    Icon = SegoeFluentIcons.Refresh,
+                    FontSize = 14,
+                    Foreground = new SolidColorBrush(Colors.OrangeRed)
                 };
                 actionPanel.Children.Add(resetBtn);
             }

@@ -1,12 +1,11 @@
-using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
 using NavigationViewPaneDisplayMode = iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode;
+using Page = iNKORE.UI.WPF.Modern.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {

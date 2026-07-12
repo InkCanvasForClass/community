@@ -1,7 +1,6 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
-using System.Text.Json;
 
 namespace Ink_Canvas.Plugins
 {

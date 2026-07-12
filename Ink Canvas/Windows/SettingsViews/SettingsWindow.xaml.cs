@@ -433,7 +433,7 @@ namespace Ink_Canvas.Windows.SettingsViews
         }
 
 
-                private void OnNavigationViewBackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
+        private void OnNavigationViewBackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
         {
             if (rootFrame.CanGoBack) rootFrame.GoBack();
         }

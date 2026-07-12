@@ -251,7 +251,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // 图标
             var iconBorder = new Border
             {
-                Width = 36, Height = 36,
+                Width = 36,
+                Height = 36,
                 CornerRadius = new CornerRadius(6),
                 Margin = new Thickness(0, 0, 10, 0),
                 VerticalAlignment = VerticalAlignment.Center,
@@ -272,12 +273,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var titleRow = new StackPanel { Orientation = Orientation.Horizontal };
             var nameText = new TextBlock
             {
-                Text = p.Name, FontSize = 14, FontWeight = FontWeights.SemiBold,
-                VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 6, 0)
+                Text = p.Name,
+                FontSize = 14,
+                FontWeight = FontWeights.SemiBold,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(0, 0, 6, 0)
             };
             var versionText = new TextBlock
             {
-                Text = p.VersionText, FontSize = 11, VerticalAlignment = VerticalAlignment.Center
+                Text = p.VersionText,
+                FontSize = 11,
+                VerticalAlignment = VerticalAlignment.Center
             };
             versionText.SetResourceReference(TextBlock.ForegroundProperty, "TextFillColorTertiaryBrush");
             titleRow.Children.Add(nameText);
@@ -285,7 +291,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             var descText = new TextBlock
             {
-                Text = p.Description, FontSize = 11, TextTrimming = TextTrimming.CharacterEllipsis
+                Text = p.Description,
+                FontSize = 11,
+                TextTrimming = TextTrimming.CharacterEllipsis
             };
             descText.SetResourceReference(TextBlock.ForegroundProperty, "TextFillColorSecondaryBrush");
 
@@ -297,7 +305,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // 右侧状态
             var actionPanel = new StackPanel
             {
-                Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center
+                Orientation = Orientation.Horizontal,
+                VerticalAlignment = VerticalAlignment.Center
             };
 
             if (p.IsOnMarket && !p.IsLocal && !p.RestartRequired)
@@ -306,7 +315,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 btn.Click += InstallButton_Click;
                 btn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
                 {
-                    Icon = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons.Download, FontSize = 14
+                    Icon = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons.Download,
+                    FontSize = 14
                 };
                 actionPanel.Children.Add(btn);
             }
@@ -316,7 +326,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 btn.Click += InstallButton_Click;
                 btn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
                 {
-                    Icon = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons.Upload, FontSize = 14
+                    Icon = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons.Upload,
+                    FontSize = 14
                 };
                 actionPanel.Children.Add(btn);
             }
@@ -325,7 +336,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 var checkIcon = new iNKORE.UI.WPF.Modern.Controls.FontIcon
                 {
                     Icon = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons.Completed,
-                    FontSize = 14, Margin = new Thickness(4, 0, 0, 0),
+                    FontSize = 14,
+                    Margin = new Thickness(4, 0, 0, 0),
                     Foreground = new SolidColorBrush((Color)Application.Current.FindResource("SystemAccentColor"))
                 };
                 actionPanel.Children.Add(checkIcon);
@@ -334,8 +346,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 var countText = new TextBlock
                 {
-                    Text = p.DownloadCountText, FontSize = 11,
-                    VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(6, 0, 0, 0)
+                    Text = p.DownloadCountText,
+                    FontSize = 11,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(6, 0, 0, 0)
                 };
                 countText.SetResourceReference(TextBlock.ForegroundProperty, "TextFillColorTertiaryBrush");
                 actionPanel.Children.Add(countText);
