@@ -374,8 +374,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var projectUrl = p.MarketEntry?.Manifest?.Url;
             if (string.IsNullOrWhiteSpace(projectUrl))
                 projectUrl = p.LocalInfo?.Manifest?.Url;
-            DetailUrl.Tag = TryGetWebUri(projectUrl, out var homepage) ? homepage : null;
-            DetailUrl.Visibility = DetailUrl.Tag != null ? Visibility.Visible : Visibility.Collapsed;
+            DetailUrl.NavigateUri = TryGetWebUri(projectUrl, out var homepage) ? homepage : null;
+            DetailUrl.Visibility = DetailUrl.NavigateUri != null ? Visibility.Visible : Visibility.Collapsed;
 
             // 按钮状态
             var canInstall = p.IsOnMarket && !p.IsLocal && !p.RestartRequired;
@@ -469,24 +469,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ShowDetail(plugin);
             else
                 ShowEmptyState();
-        }
-
-        private void DetailUrl_Click(object sender, RoutedEventArgs e)
-        {
-            if (DetailUrl.Tag is not Uri homepage) return;
-
-            try
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = homepage.AbsoluteUri,
-                    UseShellExecute = true
-                });
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"PluginMarketplacePage | Open homepage: {ex}");
-            }
         }
 
         private static bool TryGetWebUri(string value, out Uri uri)
