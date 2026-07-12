@@ -781,6 +781,7 @@ namespace Ink_Canvas.Plugins
 
         public void Log(string message)
         {
+            _logger?.Info("PluginManager", message);
             OnLogMessage(message);
             System.Diagnostics.Debug.WriteLine(string.Format("[Plugin] {0}", message));
         }
@@ -788,6 +789,7 @@ namespace Ink_Canvas.Plugins
         public void LogError(string message, Exception ex = null)
         {
             var fullMessage = ex != null ? string.Format("{0}: {1}", message, ex.Message) : message;
+            _logger?.Error("PluginManager", message, ex);
             OnLogMessage(string.Format("ERROR: {0}", fullMessage));
             System.Diagnostics.Debug.WriteLine(string.Format("[Plugin ERROR] {0}", fullMessage));
             if (ex != null)
