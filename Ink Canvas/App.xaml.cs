@@ -195,7 +195,6 @@ namespace Ink_Canvas
             var host = Plugins.PluginManager.Instance;
             var services = new (Type iface, object impl)[]
             {
-                (typeof(Plugins.IInkCanvasService),       new Plugins.InkCanvasService(mainWindow)),
                 (typeof(Plugins.IAppRestartService),      new Plugins.AppRestartService()),
                 (typeof(Plugins.IWindowService),          new Plugins.WindowService(mainWindow)),
                 (typeof(Plugins.IPowerPointService),      new Plugins.PowerPointService(mainWindow)),
