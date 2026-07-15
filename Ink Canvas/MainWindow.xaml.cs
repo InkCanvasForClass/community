@@ -1478,8 +1478,8 @@ namespace Ink_Canvas
             {
                 InitializePopupManager();
             }
-            // 加载设置（启动阶段仅加载影响首帧的核心设置，其余延迟到 RunDeferredStartupPhaseB）
-            LoadSettings(true, startupPhase: true);
+            // 加载设置
+            LoadSettings(true);
             // 启动性能监测（如果已启用）。快速启动模式下延迟到首帧之后。
             if (!App.IsFastStartupEnabled)
             {
@@ -2592,16 +2592,6 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"[MainWindow] 初始化自动化系统时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-
-            // 启动阶段第二遍设置：应用外观/PPT/手势/高级等 UI 属性
-            try
-            {
-                LoadSettings(true, startupPhase: false);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[MainWindow] 延迟加载设置时出错: {ex.Message}", LogHelper.LogType.Error);
             }
 
             // 后移的非首屏初始化

@@ -23,7 +23,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             Loaded += PluginPage_Loaded;
         }
 
-        private async void PluginPage_Loaded(object sender, RoutedEventArgs e)
+        private void PluginPage_Loaded(object sender, RoutedEventArgs e)
         {
             // 确保市场索引已加载（用于检查更新）
             if (_market.MergedPlugins == null || _market.MergedPlugins.Count == 0)
