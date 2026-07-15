@@ -708,29 +708,43 @@ namespace Ink_Canvas
                 if (!Settings.Startup.IsFoldAtStartup || App.StartWithBoardMode || App.StartWithShowMode)
                     return;
 
-                await WaitForStartupFoldSettledAsync(TimeSpan.FromSeconds(30)).ConfigureAwait(false);
-                await Task.Delay(3000).ConfigureAwait(false);
+                // 第一次校验：等待初始收纳稳定后，确认折叠状态是否真正落到不可见
+                await RunStartupFoldVerificationPassAsync();
 
-                bool needRetry = await Dispatcher.InvokeAsync(() =>
-                {
-                    if (!isFloatingBarFolded) return false;
-                    if (currentMode != 0) return false;
-                    return !IsFloatingBarUiAbsentFromScreens();
-                });
-
-                if (!needRetry) return;
-
-                LogHelper.WriteLogToFile("启动收纳校验：检测到浮动栏仍在屏幕上，将展开后等待 0.2s 再次收纳", LogHelper.LogType.Event);
-
-                await UnFoldFloatingBar(null);
-                await WaitUntilFloatingBarHideModeIdleAsync(TimeSpan.FromSeconds(15)).ConfigureAwait(false);
-                await Task.Delay(200).ConfigureAwait(false);
-                await FoldFloatingBar(new object()).ConfigureAwait(false);
+                // 第二次校验：15s 后再跑一遍，覆盖启动阶段后续可能出现的浮动栏异常重排/泄漏
+                await Task.Delay(15000).ConfigureAwait(false);
+                await RunStartupFoldVerificationPassAsync();
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"启动收纳校验失败: {ex.Message}", LogHelper.LogType.Error);
             }
+        }
+
+        /// <summary>
+        /// 执行单次启动收纳校验：等待浮动栏折叠稳定 3s 后检查是否真的不可见，
+        /// 若仍可见则展开并重新收纳一次。
+        /// </summary>
+        private async Task RunStartupFoldVerificationPassAsync()
+        {
+            await WaitForStartupFoldSettledAsync(TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+            await Task.Delay(3000).ConfigureAwait(false);
+
+            bool needRetry = await Dispatcher.InvokeAsync(() =>
+            {
+                if (!isFloatingBarFolded) return false;
+                if (currentMode != 0) return false;
+                return !IsFloatingBarUiAbsentFromScreens();
+            });
+
+            if (!needRetry) return;
+
+            LogHelper.WriteLogToFile("启动收纳校验：检测到浮动栏仍在屏幕上，将展开后等待 0.2s 再次收纳", LogHelper.LogType.Event);
+
+            await UnFoldFloatingBar(null);
+            await WaitUntilFloatingBarHideModeIdleAsync(TimeSpan.FromSeconds(15)).ConfigureAwait(false);
+            await Task.Delay(200).ConfigureAwait(false);
+            await FoldFloatingBar(new object()).ConfigureAwait(false);
         }
 
         private void ScheduleStartupFoldAbsenceVerification()
