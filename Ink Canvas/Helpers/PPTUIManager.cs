@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
@@ -102,7 +103,11 @@ namespace Ink_Canvas.Helpers
                         _mainWindow.UpdatePPTQuickPanelVisibility();
                         if (!wasInSlideShow)
                         {
-                            _mainWindow.ShowPPTModePromptNotification();
+                            _dispatcher.BeginInvoke(new Action(async () =>
+                            {
+                                await Task.Delay(1000);
+                                _mainWindow.ShowPPTModePromptNotification();
+                            }), DispatcherPriority.ContextIdle);
                         }
                         if (MainWindow.Settings.Advanced.IsEnableAvoidFullScreenHelper)
                         {
