@@ -3,9 +3,9 @@ name: Lint
 
 on:
   push:
-    branches: [net6]
+    branches: [net8]
   pull_request:
-    branches: [net6]
+    branches: [net8]
 
 permissions: {}
 

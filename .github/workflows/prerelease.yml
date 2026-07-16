@@ -261,7 +261,7 @@ jobs:
             msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
 
             New-Item -ItemType Directory -Path $publishDir -Force
-            Copy-Item "Ink Canvas\bin\Release\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\*" $publishDir -Recurse -Force
+            Copy-Item "Ink Canvas\bin\Release\${{ matrix.architecture }}\net8.0-windows10.0.19041.0\*" $publishDir -Recurse -Force
           }
 
       - name: Install VSTO Runtime
@@ -841,5 +841,5 @@ jobs:
             /repos/InkCanvasForClass/community/contents/AutomaticUpdateVersionControl.txt \
             -f message="Update AutomaticUpdateVersionControl.txt" \
             -f content="$CONTENT" \
-            -f branch="net6" \
+            -f branch="net8" \
             ${SHA:+-f sha="$SHA"}
