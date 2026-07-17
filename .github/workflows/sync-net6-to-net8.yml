@@ -17,6 +17,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: sync-net6-to-net8
@@ -222,6 +223,7 @@ jobs:
           Write-Host "::notice::升级后编译通过"
 
       - name: Commit and push
+        id: push
         shell: pwsh
         run: |
           # 先提交工作区残留变更（如 TFM 修复、lock 文件等）
@@ -241,9 +243,35 @@ jobs:
             Write-Host "=== 推送到 net8 ==="
             git push origin net8
             Write-Host "::notice::同步完成，已推送到 net8"
+            echo "pushed=true" >> $env:GITHUB_OUTPUT
           } else {
             Write-Host "::notice::无变更需要推送（本地与 origin/net8 一致）"
+            echo "pushed=false" >> $env:GITHUB_OUTPUT
           }
+
+      - name: Trigger .NET Build & Package workflow
+        if: steps.push.outputs.pushed == 'true'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            // GITHUB_TOKEN 推送的 commit 不会自动触发其他 workflow，
+            // 所以这里用 workflow_dispatch 主动触发 dotnet-desktop 构建
+            const workflowId = 'dotnet-desktop.yml';
+            const ref = 'net8';
+            core.info(`触发 ${workflowId} 在 ${ref} 分支上运行...`);
+            try {
+              const resp = await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: workflowId,
+                ref: ref,
+              });
+              core.info(`已触发，HTTP ${resp.status}`);
+              core.notice(`已触发 .NET Build & Package workflow 在 net8 分支上运行`);
+            } catch (err) {
+              core.error(`触发失败: ${err.message}`);
+              core.setFailed(`无法触发 build workflow: ${err.message}`);
+            }
 
       - name: Create summary
         if: always()
