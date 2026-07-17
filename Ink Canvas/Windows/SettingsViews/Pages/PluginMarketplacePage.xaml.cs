@@ -233,9 +233,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
         }
 
-        private ListBoxItem CreatePluginListItem(MergedPluginInfo p)
+        private iNKORE.UI.WPF.Modern.Controls.ListViewItem CreatePluginListItem(MergedPluginInfo p)
         {
-            var item = new ListBoxItem
+            var item = new iNKORE.UI.WPF.Modern.Controls.ListViewItem
             {
                 Padding = new Thickness(10),
                 Margin = new Thickness(0),
@@ -477,7 +477,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void PluginListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var selectedItem = PluginListBox.SelectedItem as ListBoxItem;
+            var selectedItem = PluginListBox.SelectedItem as iNKORE.UI.WPF.Modern.Controls.ListViewItem;
             var plugin = selectedItem?.Tag as MergedPluginInfo;
             if (plugin != null)
                 ShowDetail(plugin);
