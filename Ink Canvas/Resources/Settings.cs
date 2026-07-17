@@ -588,6 +588,12 @@ namespace Ink_Canvas
         [JsonProperty("hideFloatingBarBorder")]
         public bool HideFloatingBarBorder { get; set; } = false;
 
+        [JsonProperty("floatingBarBorderColor")]
+        public string FloatingBarBorderColor { get; set; } = "";
+
+        [JsonProperty("floatingBarBorderColorMode")]
+        public int FloatingBarBorderColorMode { get; set; } = 0;
+
         [JsonProperty("eraserDisplayOption")]
         public int EraserDisplayOption { get; set; }
 

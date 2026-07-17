@@ -4,6 +4,7 @@ using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
@@ -101,6 +102,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // 加载隐藏浮动栏边框设置
             if (ToggleSwitchHideFloatingBarBorder != null)
                 ToggleSwitchHideFloatingBarBorder.IsOn = settings.Appearance.HideFloatingBarBorder;
+
+            // 加载浮动栏边框颜色设置
+            int mode = settings.Appearance.FloatingBarBorderColorMode;
+            if (mode < 0 || mode > 2) mode = 0;
+            ComboBoxFloatingBarBorderColorMode.SelectedIndex = mode;
+            UpdateFloatingBarBorderColorSwatch();
         }
 
         private void UpdateAllSliderTexts()
@@ -263,6 +270,98 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.Settings.Appearance.HideFloatingBarBorder = ToggleSwitchHideFloatingBarBorder.IsOn;
             SettingsManager.SaveSettingsToFile();
             SettingsActionHub.OnHideFloatingBarBorderChanged(ToggleSwitchHideFloatingBarBorder.IsOn);
+        }
+
+        /// <summary>
+        /// 边框颜色模式：0=默认（主题色），1=跟随背景颜色，2=自定义。
+        /// </summary>
+        private const int BorderColorMode_Default = 0;
+        private const int BorderColorMode_FollowBackground = 1;
+        private const int BorderColorMode_Custom = 2;
+
+        /// <summary>
+        /// 根据当前模式刷新色块按钮显示：仅自定义模式显示色块，色块颜色为已保存的自定义色或回退到主题默认色。
+        /// </summary>
+        private void UpdateFloatingBarBorderColorSwatch()
+        {
+            if (ButtonFloatingBarBorderColor == null) return;
+            int mode = ComboBoxFloatingBarBorderColorMode?.SelectedIndex ?? BorderColorMode_Default;
+            bool isCustom = mode == BorderColorMode_Custom;
+            ButtonFloatingBarBorderColor.Visibility = isCustom ? Visibility.Visible : Visibility.Collapsed;
+            if (!isCustom) return;
+
+            var color = TryGetFloatingBarBorderColor(out var c) ? c : GetThemeDefaultBorderColor();
+            ButtonFloatingBarBorderColor.Background = new SolidColorBrush(color);
+        }
+
+        /// <summary>
+        /// 解析设置中保存的自定义边框颜色（hex 字符串），失败返回 false。
+        /// </summary>
+        private static bool TryGetFloatingBarBorderColor(out Color color)
+        {
+            var saved = SettingsManager.Settings?.Appearance?.FloatingBarBorderColor;
+            if (string.IsNullOrWhiteSpace(saved))
+            {
+                color = Colors.Transparent;
+                return false;
+            }
+            try
+            {
+                var text = saved.Trim();
+                if (text.StartsWith("#")) text = text.Substring(1);
+                if (text.Length == 6)
+                    text = "FF" + text;
+                color = (Color)ColorConverter.ConvertFromString("#" + text);
+                return true;
+            }
+            catch
+            {
+                color = Colors.Transparent;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 从应用资源中读取当前主题的浮动栏默认边框色。
+        /// </summary>
+        private static Color GetThemeDefaultBorderColor()
+        {
+            if (Application.Current.TryFindResource("FloatBarBorderBrush") is SolidColorBrush brush)
+                return brush.Color;
+            return Colors.Black;
+        }
+
+        private void ComboBoxFloatingBarBorderColorMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // 始终刷新色块显示，避免初始化阶段被 _isLoaded 拦截时控件状态仍正确
+            UpdateFloatingBarBorderColorSwatch();
+            if (!_isLoaded) return;
+            if (ComboBoxFloatingBarBorderColorMode.SelectedItem is not ComboBoxItem selectedItem) return;
+
+            int mode = ComboBoxFloatingBarBorderColorMode.SelectedIndex;
+            SettingsManager.Settings.Appearance.FloatingBarBorderColorMode = mode;
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnFloatingBarBorderColorChanged();
+        }
+
+        private void ButtonFloatingBarBorderColor_Click(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            var current = TryGetFloatingBarBorderColor(out var c) ? c : GetThemeDefaultBorderColor();
+            using (var dialog = new System.Windows.Forms.ColorDialog
+            {
+                FullOpen = true,
+                Color = System.Drawing.Color.FromArgb(current.A, current.R, current.G, current.B)
+            })
+            {
+                if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK) return;
+                var picked = dialog.Color;
+                var hex = $"#{picked.A:X2}{picked.R:X2}{picked.G:X2}{picked.B:X2}";
+                SettingsManager.Settings.Appearance.FloatingBarBorderColor = hex;
+                SettingsManager.SaveSettingsToFile();
+                UpdateFloatingBarBorderColorSwatch();
+                SettingsActionHub.OnFloatingBarBorderColorChanged();
+            }
         }
 
         private void FloatingBarMenuOpacitySlider_ValueChanged(object sender, RoutedEventArgs e)
