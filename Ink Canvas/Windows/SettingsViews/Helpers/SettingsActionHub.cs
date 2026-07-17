@@ -364,6 +364,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             if (mw != null) mw.ApplyHideFloatingBarBorder(isOn);
         }
 
+        public static void OnFloatingBarBorderColorChanged()
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.ApplyFloatingBarBorderColor();
+        }
+
         #endregion
 
         #region Advanced

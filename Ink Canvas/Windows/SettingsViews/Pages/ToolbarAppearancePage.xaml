@@ -61,6 +61,53 @@
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
+                    <ui:SettingsCard x:Name="CardFloatingBarBorderColor"
+                            Header="{x:Static props:ThemeStrings.Theme_FloatingBarBorderColor}"
+                            Description="{x:Static props:ThemeStrings.Theme_FloatingBarBorderColorHint}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <ComboBox x:Name="ComboBoxFloatingBarBorderColorMode"
+                                      Width="160"
+                                      SelectedIndex="0"
+                                      SelectionChanged="ComboBoxFloatingBarBorderColorMode_SelectionChanged">
+                                <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_FloatingBarBorderColor_Default}" />
+                                <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_FloatingBarBorderColor_FollowBackground}" />
+                                <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_FloatingBarBorderColor_Custom}" />
+                            </ComboBox>
+                            <Button x:Name="ButtonFloatingBarBorderColor"
+                                    Width="40" Height="28"
+                                    Padding="0"
+                                    Visibility="Collapsed"
+                                    Click="ButtonFloatingBarBorderColor_Click"
+                                    ToolTip="{x:Static props:ThemeStrings.Theme_FloatingBarBorderColor_Custom}">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Grid>
+                                            <Border Background="{TemplateBinding Background}"
+                                                    BorderBrush="#888888"
+                                                    BorderThickness="1"
+                                                    CornerRadius="3"/>
+                                            <Border x:Name="HoverOverlay"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    CornerRadius="3"/>
+                                        </Grid>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="HoverOverlay" Property="Background" Value="#22000000"/>
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter TargetName="HoverOverlay" Property="Background" Value="#44000000"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:ThemeStrings.Theme_FloatingBarIcon}" />
 

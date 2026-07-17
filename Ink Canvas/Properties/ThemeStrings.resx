@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -302,6 +302,24 @@
   </data>
   <data name="Theme_HideFloatingBarBorderHint" xml:space="preserve">
     <value>开启后将浮动栏边框厚度设为 0，实现无白边效果。</value>
+  </data>
+  <data name="Theme_FloatingBarBorderColor" xml:space="preserve">
+    <value>浮动栏边框颜色</value>
+  </data>
+  <data name="Theme_FloatingBarBorderColorHint" xml:space="preserve">
+    <value>设置浮动工具栏的边框颜色。默认使用主题色，跟随背景颜色可与背景融为一体，自定义可指定任意颜色。</value>
+  </data>
+  <data name="Theme_FloatingBarBorderColorReset" xml:space="preserve">
+    <value>重置</value>
+  </data>
+  <data name="Theme_FloatingBarBorderColor_Default" xml:space="preserve">
+    <value>默认</value>
+  </data>
+  <data name="Theme_FloatingBarBorderColor_FollowBackground" xml:space="preserve">
+    <value>跟随背景颜色</value>
+  </data>
+  <data name="Theme_FloatingBarBorderColor_Custom" xml:space="preserve">
+    <value>自定义</value>
   </data>
   <data name="Theme_WindowBackdrop" xml:space="preserve">
     <value>窗口背景样式</value>
