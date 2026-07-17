@@ -197,6 +197,9 @@
   <data name="Random_RollCall_Stop" xml:space="preserve">
     <value>停停停！</value>
   </data>
+  <data name="Random_RollCall_Reset" xml:space="preserve">
+    <value>重置一下</value>
+  </data>
   <data name="Random_RollCall_ReadyToDraw" xml:space="preserve">
     <value>准备开奖...</value>
   </data>
