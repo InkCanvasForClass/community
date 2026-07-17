@@ -224,14 +224,25 @@ jobs:
       - name: Commit and push
         shell: pwsh
         run: |
+          # 先提交工作区残留变更（如 TFM 修复、lock 文件等）
           git add -A
-          $hasChanges = git status --porcelain
-          if ($hasChanges) {
-            git commit -m "chore(sync): auto-merge from net6 + upgrade NuGet packages for net8 [skip ci]"
+          $workdirChanges = git status --porcelain
+          if ($workdirChanges) {
+            git commit -m "chore(sync): apply net8 adjustments after merge from net6 [skip ci]"
+          }
+
+          # 关键：检测本地 HEAD 是否领先于 origin/net8（merge commit 可能已自动提交）
+          # 用 rev-list 计算未推送的提交数
+          $unpushed = git rev-list --count origin/net8..HEAD
+          Write-Host "未推送的提交数: $unpushed"
+          if ([int]$unpushed -gt 0) {
+            Write-Host "=== 未推送的提交 ==="
+            git log origin/net8..HEAD --oneline
+            Write-Host "=== 推送到 net8 ==="
             git push origin net8
             Write-Host "::notice::同步完成，已推送到 net8"
           } else {
-            Write-Host "::notice::无变更需要推送"
+            Write-Host "::notice::无变更需要推送（本地与 origin/net8 一致）"
           }
 
       - name: Create summary
