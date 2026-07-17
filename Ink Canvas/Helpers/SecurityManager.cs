@@ -97,8 +97,21 @@ namespace Ink_Canvas.Helpers
                 var salt = Convert.FromBase64String(settings.Security.PasswordSalt);
                 var expected = Convert.FromBase64String(settings.Security.PasswordHash);
 
+                // 优先用 SHA256 验证（新 hash）
                 var actual = DeriveKey(password, salt, expected.Length);
-                return FixedTimeEquals(actual, expected);
+                if (FixedTimeEquals(actual, expected)) return true;
+
+                // 兼容旧版 HMACSHA1 hash：匹配后自动升级为 SHA256
+                var legacyActual = DeriveKeyLegacy(password, salt, expected.Length);
+                if (FixedTimeEquals(legacyActual, expected))
+                {
+                    // 自动迁移：用 SHA256 重新派生并更新存储
+                    var upgradedHash = DeriveKey(password, salt, expected.Length);
+                    settings.Security.PasswordHash = Convert.ToBase64String(upgradedHash);
+                    return true;
+                }
+
+                return false;
             }
             catch
             {
@@ -613,6 +626,17 @@ namespace Ink_Canvas.Helpers
         private static byte[] DeriveKey(string password, byte[] salt, int keyBytes)
         {
             using (var kdf = new Rfc2898DeriveBytes(password, salt, Pbkdf2Iterations, HashAlgorithmName.SHA256))
+            {
+                return kdf.GetBytes(keyBytes);
+            }
+        }
+
+        /// <summary>
+        /// 使用旧版 PBKDF2（HMACSHA1）派生密钥，仅用于验证历史遗留的密码哈希。
+        /// </summary>
+        private static byte[] DeriveKeyLegacy(string password, byte[] salt, int keyBytes)
+        {
+            using (var kdf = new Rfc2898DeriveBytes(password, salt, Pbkdf2Iterations, HashAlgorithmName.SHA1))
             {
                 return kdf.GetBytes(keyBytes);
             }
