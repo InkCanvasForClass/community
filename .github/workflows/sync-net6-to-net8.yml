@@ -1,0 +1,218 @@
+name: Sync net6 to net8
+
+# 当 net6 分支有提交时，自动合并到 net8 分支并升级 NuGet 包到支持 net8 的最新稳定版
+# 设计要点：
+#   1. csproj 冲突：取 net6 版本（含新增包引用），但把 TFM 替换回 net8.0-windows
+#   2. NuGet 包升级：用 dotnet add package 重新解析每个包，自动取最新稳定版
+#   3. packages.lock.json：删除后由 restore 重新生成
+#   4. 编译验证：合并+升级后必须 build 通过才推送，否则中止报警
+
+on:
+  push:
+    branches: [net6]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-net6-to-net8
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Merge net6 → net8 + Upgrade Packages
+    runs-on: windows-latest
+    steps:
+      - name: Checkout net8 branch
+        uses: actions/checkout@v6
+        with:
+          ref: net8
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Fetch net6 and merge
+        shell: pwsh
+        run: |
+          git fetch origin net6
+          $mergeOutput = git merge origin/net6 --no-edit 2>&1
+          Write-Host $mergeOutput
+          $mergeExit = $LASTEXITCODE
+
+          if ($mergeExit -ne 0) {
+            Write-Host "合并存在冲突，开始自动解决..."
+            $status = git status --porcelain
+            $conflicted = $status | Where-Object { $_ -match "^(UU|AA|DU|UD|AU|UA)" }
+
+            if (-not $conflicted) {
+              Write-Error "::error::合并失败但未检测到冲突文件，可能存在其他问题"
+              git merge --abort
+              exit 1
+            }
+
+            Write-Host "冲突文件列表:"
+            $conflicted | ForEach-Object { Write-Host "  $_" }
+
+            # 1) csproj 冲突：取 net6 版本（ theirs ），然后把 TFM 改回 net8
+            $csprojConflicts = $conflicted | Where-Object { $_ -match "\.csproj\s*$" }
+            foreach ($line in $csprojConflicts) {
+              $path = ($line -replace "^.{2}\s+", "").Trim()
+              Write-Host "解决 csproj 冲突（取 net6 + 改 TFM）: $path"
+              git checkout --theirs $path
+              (Get-Content $path -Raw) -replace 'net6\.0-windows10\.0\.19041\.0', 'net8.0-windows10.0.19041.0' | Set-Content $path -NoNewline
+              git add $path
+            }
+
+            # 2) packages.lock.json 冲突：直接删除，后续 restore 会重新生成
+            $lockConflicts = $conflicted | Where-Object { $_ -match "packages\.lock\.json\s*$" }
+            foreach ($line in $lockConflicts) {
+              $path = ($line -replace "^.{2}\s+", "").Trim()
+              Write-Host "删除冲突的 lock 文件（稍后重新生成）: $path"
+              git rm -f $path 2>$null
+              if (Test-Path $path) { Remove-Item $path -Force }
+            }
+
+            # 3) 其他文件冲突：优先取 net6 版本（ theirs ），保证新功能/修复能同步过来
+            $otherConflicts = $conflicted | Where-Object { $_ -notmatch "\.csproj\s*$" -and $_ -notmatch "packages\.lock\.json\s*$" }
+            foreach ($line in $otherConflicts) {
+              $path = ($line -replace "^.{2}\s+", "").Trim()
+              Write-Host "解决其他冲突（取 net6 版本）: $path"
+              git checkout --theirs $path 2>$null
+              if ($LASTEXITCODE -eq 0) {
+                git add $path
+              } else {
+                # 如果 theirs 也不存在（删除/修改冲突），用 ours
+                git checkout --ours $path 2>$null
+                git add $path 2>$null
+              }
+            }
+
+            # 提交合并结果
+            git commit --no-edit 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "::error::自动解决冲突后仍无法提交，需要人工介入"
+              git merge --abort
+              exit 1
+            }
+            Write-Host "冲突解决完成，合并已提交"
+          } else {
+            Write-Host "合并无冲突"
+            # 即使无冲突，也要检查 TFM 是否被 net6 带回（净合并也可能改 csproj）
+            $csprojs = Get-ChildItem -Recurse -Filter "*.csproj" | Where-Object { $_.FullName -notmatch "PowerPointAddIn|IACoreHelper" }
+            $tfmChanged = $false
+            foreach ($csproj in $csprojs) {
+              $content = Get-Content $csproj.FullName -Raw
+              if ($content -match 'net6\.0-windows10\.0\.19041\.0') {
+                Write-Host "检测到 $($csproj.Name) 的 TFM 被带回 net6，正在修复..."
+                $content -replace 'net6\.0-windows10\.0\.19041\.0', 'net8.0-windows10.0.19041.0' | Set-Content $csproj.FullName -NoNewline
+                $tfmChanged = $true
+              }
+            }
+            if ($tfmChanged) {
+              git add -A
+              git commit -m "fix: restore net8.0 TFM after clean merge from net6 [skip ci]"
+            }
+          }
+
+      - name: Delete stale packages.lock.json
+        shell: pwsh
+        run: |
+          $lockFiles = Get-ChildItem -Recurse -Filter "packages.lock.json" -ErrorAction SilentlyContinue
+          foreach ($lf in $lockFiles) {
+            Write-Host "删除旧 lock 文件: $($lf.FullName)"
+            Remove-Item $lf.FullName -Force
+          }
+
+      - name: Upgrade NuGet packages to latest stable for net8
+        shell: pwsh
+        run: |
+          # 用 dotnet add package 重新解析每个 PackageReference，自动取最新稳定版
+          # 这能保证 net6 新加的包被升级到支持 net8 的最新版本
+          $csprojs = Get-ChildItem -Recurse -Filter "*.csproj" | Where-Object { $_.FullName -notmatch "PowerPointAddIn|IACoreHelper" }
+
+          foreach ($csproj in $csprojs) {
+            Write-Host "=== 处理 $($csproj.Name) ==="
+            $content = Get-Content $csproj.FullName -Raw
+            $packageMatches = [regex]::Matches($content, '<PackageReference\s+Include="([^"]+)"')
+            $packages = $packageMatches | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique
+
+            foreach ($pkg in $packages) {
+              Write-Host "  升级 $pkg 到最新稳定版..."
+              $result = dotnet add $csproj.FullName package $pkg 2>&1
+              if ($LASTEXITCODE -eq 0) {
+                $newVer = ($result | Select-String "PackageReference for package '([^']+)' version '([^']+)' added").Matches.Groups[2].Value
+                Write-Host "    -> $newVer"
+              } else {
+                Write-Host "    跳过（可能已是最新或解析失败）: $($result | Select-Object -Last 1)"
+              }
+            }
+          }
+
+      - name: Restore packages (regenerate lock file)
+        shell: pwsh
+        run: |
+          dotnet restore "Ink Canvas.sln" --verbosity minimal
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "::error::restore 失败，NuGet 包可能不兼容 net8"
+            exit 1
+          }
+
+      - name: Build verification
+        shell: pwsh
+        run: |
+          dotnet build "Ink Canvas.sln" -c Release -p:Platform=x64 --no-restore --verbosity minimal
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "::error::合并并升级后 .NET 8 编译失败，需要人工介入解决兼容性问题"
+            exit 1
+          }
+          Write-Host "编译通过，准备推送"
+
+      - name: Commit and push
+        shell: pwsh
+        run: |
+          git add -A
+          $hasChanges = git status --porcelain
+          if ($hasChanges) {
+            git commit -m "chore(sync): auto-merge from net6 + upgrade NuGet packages for net8 [skip ci]"
+            git push origin net8
+            Write-Host "同步完成，已推送到 net8"
+          } else {
+            Write-Host "无变更需要推送"
+          }
+
+      - name: Create summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "# Sync net6 → net8 Summary"
+            echo ""
+            if [ "${{ job.status }}" = "success" ]; then
+              echo "## ✅ Sync Successful"
+              echo ""
+              echo "**Trigger commit:** \`${{ github.sha }}\`"
+              echo "**Run:** #${{ github.run_number }}"
+              echo ""
+              echo "net6 的提交已自动合并到 net8，NuGet 包已升级到最新稳定版，编译验证通过。"
+            else
+              echo "## ❌ Sync Failed"
+              echo ""
+              echo "**Trigger commit:** \`${{ github.sha }}\`"
+              echo "**Run:** #${{ github.run_number }}"
+              echo ""
+              echo "自动同步失败，请检查日志处理冲突或兼容性问题："
+              echo "- csproj 冲突：检查是否需要手动调整 TFM 或包引用"
+              echo "- NuGet 包不兼容：检查 net6 新增的包是否支持 net8"
+              echo "- 编译失败：检查代码兼容性"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
