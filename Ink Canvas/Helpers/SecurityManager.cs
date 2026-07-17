@@ -608,16 +608,11 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 使用 PBKDF2（Rfc2898）从给定的密码和盐派生指定长度的密钥字节。
+        /// 使用 PBKDF2（Rfc2898）从给定的密码和盐派生指定长度的密钥字节（SHA256）。
         /// </summary>
-        /// <param name="password">用于派生的密码字符串。</param>
-        /// <param name="salt">用于派生的盐字节数组（不可为 null）。</param>
-        /// <param name="keyBytes">要返回的密钥字节长度（以字节为单位）。</param>
-        /// <returns>派生出的密钥字节数组，长度等于 <paramref name="keyBytes"/>。</returns>
         private static byte[] DeriveKey(string password, byte[] salt, int keyBytes)
         {
-            // 注意：Rfc2898DeriveBytes 在 net472 默认 HMACSHA1
-            using (var kdf = new Rfc2898DeriveBytes(password, salt, Pbkdf2Iterations))
+            using (var kdf = new Rfc2898DeriveBytes(password, salt, Pbkdf2Iterations, HashAlgorithmName.SHA256))
             {
                 return kdf.GetBytes(keyBytes);
             }
@@ -647,7 +642,7 @@ namespace Ink_Canvas.Helpers
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(counter);
 
-            using (var hmac = new HMACSHA1(secret))
+            using (var hmac = new HMACSHA256(secret))
             {
                 var hash = hmac.ComputeHash(counter);
                 int offset = hash[hash.Length - 1] & 0x0f;
