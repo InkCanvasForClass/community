@@ -552,96 +552,107 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             PanelPluginCustomSettings.Visibility = Visibility.Collapsed;
             PanelPluginCustomSettings.Children.Clear();
 
+            bool hasCustomSettings = false;
+
             // 优先检查内置项是否提供 CustomSettingsPanelFactory（完全自定义 UI，如小白板的全局设置）
             var builtinItem = AvailableItems.FirstOrDefault(i => i.Id == entry.Id);
             if (builtinItem?.CustomSettingsPanelFactory != null)
             {
                 PanelPluginCustomSettings.Visibility = Visibility.Visible;
                 PanelPluginCustomSettings.Children.Add(builtinItem.CustomSettingsPanelFactory());
-                return;
+                hasCustomSettings = true;
             }
-
-            // 否则通过 CustomSettings 声明式生成（插件项或内置项均可）
-            var pluginItems = ToolbarRegistry.GetPluginItems();
-            var pluginItem = pluginItems.FirstOrDefault(p => p.Id == entry.Id);
-            IReadOnlyList<PluginToolbarSettingInfo> customSettings = pluginItem?.CustomSettings;
-            if (customSettings == null || customSettings.Count == 0)
+            else
             {
-                customSettings = builtinItem?.CustomSettings;
-            }
-            if (customSettings == null || customSettings.Count == 0) return;
-
-            PanelPluginCustomSettings.Visibility = Visibility.Visible;
-
-            foreach (var setting in customSettings)
-            {
-                var card = new iNKORE.UI.WPF.Modern.Controls.SettingsCard
+                // 否则通过 CustomSettings 声明式生成（插件项或内置项均可）
+                var pluginItems = ToolbarRegistry.GetPluginItems();
+                var pluginItem = pluginItems.FirstOrDefault(p => p.Id == entry.Id);
+                IReadOnlyList<PluginToolbarSettingInfo> customSettings = pluginItem?.CustomSettings;
+                if (customSettings == null || customSettings.Count == 0)
                 {
-                    Header = setting.DisplayName,
-                    Description = setting.Description
-                };
-
-                switch (setting.Type)
-                {
-                    case PluginToolbarSettingType.ComboBox:
-                        var comboBox = new ComboBox { Tag = setting.Key };
-                        // 若 OptionValues 数量与 Options 一致，则 Options 用作显示文本、OptionValues 用作保存值
-                        bool hasOptionValues = setting.OptionValues != null
-                            && setting.OptionValues.Count == setting.Options.Count
-                            && setting.OptionValues.Count > 0;
-                        for (int i = 0; i < setting.Options.Count; i++)
-                        {
-                            var display = setting.Options[i];
-                            var value = hasOptionValues ? setting.OptionValues[i] : display;
-                            comboBox.Items.Add(new ComboBoxItem { Content = display, Tag = value });
-                        }
-                        // 恢复已保存的值
-                        var savedValue = entry.GetSettingString(setting.Key) ?? setting.DefaultValue;
-                        for (int i = 0; i < comboBox.Items.Count; i++)
-                        {
-                            if ((comboBox.Items[i] as ComboBoxItem)?.Tag?.ToString() == savedValue)
-                            {
-                                comboBox.SelectedIndex = i;
-                                break;
-                            }
-                        }
-                        comboBox.SelectionChanged += PluginCustomSetting_ComboBox_SelectionChanged;
-                        card.Content = comboBox;
-                        break;
-
-                    case PluginToolbarSettingType.Toggle:
-                        var toggle = new iNKORE.UI.WPF.Modern.Controls.ToggleSwitch
-                        {
-                            Tag = setting.Key,
-                            MinWidth = 0,
-                            OnContent = "",
-                            OffContent = ""
-                        };
-                        var boolValue = entry.GetSettingBool(setting.Key);
-                        if (setting.DefaultValue == "true") toggle.IsOn = boolValue || !entry.Settings.ContainsKey(setting.Key);
-                        else toggle.IsOn = boolValue;
-                        toggle.Toggled += PluginCustomSetting_Toggle_Toggled;
-                        card.Content = toggle;
-                        break;
-
-                    case PluginToolbarSettingType.Slider:
-                        var slider = new Slider
-                        {
-                            Tag = setting.Key,
-                            Width = 150,
-                            Minimum = 0,
-                            Maximum = 100,
-                            VerticalAlignment = VerticalAlignment.Center
-                        };
-                        var numValue = entry.GetSettingDouble(setting.Key);
-                        if (numValue.HasValue) slider.Value = numValue.Value;
-                        else if (double.TryParse(setting.DefaultValue, out var dv)) slider.Value = dv;
-                        slider.ValueChanged += PluginCustomSetting_Slider_ValueChanged;
-                        card.Content = slider;
-                        break;
+                    customSettings = builtinItem?.CustomSettings;
                 }
+                if (customSettings != null && customSettings.Count > 0)
+                {
+                    PanelPluginCustomSettings.Visibility = Visibility.Visible;
+                    hasCustomSettings = true;
 
-                PanelPluginCustomSettings.Children.Add(card);
+                    foreach (var setting in customSettings)
+                    {
+                        var card = new iNKORE.UI.WPF.Modern.Controls.SettingsCard
+                        {
+                            Header = setting.DisplayName,
+                            Description = setting.Description
+                        };
+
+                        switch (setting.Type)
+                        {
+                            case PluginToolbarSettingType.ComboBox:
+                                var comboBox = new ComboBox { Tag = setting.Key };
+                                bool hasOptionValues = setting.OptionValues != null
+                                    && setting.OptionValues.Count == setting.Options.Count
+                                    && setting.OptionValues.Count > 0;
+                                for (int i = 0; i < setting.Options.Count; i++)
+                                {
+                                    var display = setting.Options[i];
+                                    var value = hasOptionValues ? setting.OptionValues[i] : display;
+                                    comboBox.Items.Add(new ComboBoxItem { Content = display, Tag = value });
+                                }
+                                var savedValue = entry.GetSettingString(setting.Key) ?? setting.DefaultValue;
+                                for (int i = 0; i < comboBox.Items.Count; i++)
+                                {
+                                    if ((comboBox.Items[i] as ComboBoxItem)?.Tag?.ToString() == savedValue)
+                                    {
+                                        comboBox.SelectedIndex = i;
+                                        break;
+                                    }
+                                }
+                                comboBox.SelectionChanged += PluginCustomSetting_ComboBox_SelectionChanged;
+                                card.Content = comboBox;
+                                break;
+
+                            case PluginToolbarSettingType.Toggle:
+                                var toggle = new iNKORE.UI.WPF.Modern.Controls.ToggleSwitch
+                                {
+                                    Tag = setting.Key,
+                                    MinWidth = 0,
+                                    OnContent = "",
+                                    OffContent = ""
+                                };
+                                var boolValue = entry.GetSettingBool(setting.Key);
+                                if (setting.DefaultValue == "true") toggle.IsOn = boolValue || !entry.Settings.ContainsKey(setting.Key);
+                                else toggle.IsOn = boolValue;
+                                toggle.Toggled += PluginCustomSetting_Toggle_Toggled;
+                                card.Content = toggle;
+                                break;
+
+                            case PluginToolbarSettingType.Slider:
+                                var slider = new Slider
+                                {
+                                    Tag = setting.Key,
+                                    Width = 150,
+                                    Minimum = 0,
+                                    Maximum = 100,
+                                    VerticalAlignment = VerticalAlignment.Center
+                                };
+                                var numValue = entry.GetSettingDouble(setting.Key);
+                                if (numValue.HasValue) slider.Value = numValue.Value;
+                                else if (double.TryParse(setting.DefaultValue, out var dv)) slider.Value = dv;
+                                slider.ValueChanged += PluginCustomSetting_Slider_ValueChanged;
+                                card.Content = slider;
+                                break;
+                        }
+
+                        PanelPluginCustomSettings.Children.Add(card);
+                    }
+                }
+            }
+
+            // 无自定义设置的组件隐藏"组件设置"TabItem；若当前正选中该 Tab，切换到"高级设置"Tab
+            ComponentSettingsTab.Visibility = hasCustomSettings ? Visibility.Visible : Visibility.Collapsed;
+            if (!hasCustomSettings && SettingsTabControl.SelectedIndex == 1)
+            {
+                SettingsTabControl.SelectedIndex = 2;
             }
         }
 

@@ -1,10 +1,8 @@
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 
 namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
@@ -38,43 +36,45 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         {
             var settings = SettingsManager.Settings.MiniWhiteboard ??= new MiniWhiteboardSettings();
 
-            var panel = new StackPanel();
-
-            // 启用开关
-            var enableCard = new Ink_Canvas.Controls.LabeledSettingsCard
+            // 通过 Pack URI 直接加载资源词典（自包含，不依赖 Page.Resources 合并）
+            var dict = new ResourceDictionary
             {
-                Header = FloatingBarStrings.MiniWhiteboard_Settings_Enable,
-                Icon = SegoeFluentIcons.Edit,
-                IsOn = settings.IsEnabled
+                Source = new Uri("pack://application:,,,/InkCanvasForClass;component/Controls/Toolbar/FloatingToolbar/Items/MiniWhiteboardSettingsPanel.xaml", UriKind.Absolute)
             };
+            var template = dict["MiniWhiteboardSettingsPanelTemplate"] as DataTemplate;
+            if (template == null) return new StackPanel();
+            var panel = (StackPanel)template.LoadContent();
+
+            // 通过名称查找各控件
+            var enableCard = (Ink_Canvas.Controls.LabeledSettingsCard)panel.FindName("EnableCard");
+            var syncPptCard = (Ink_Canvas.Controls.LabeledSettingsCard)panel.FindName("SyncPptCard");
+            var sizeText = (TextBlock)panel.FindName("SizeText");
+            var widthSlider = (Slider)panel.FindName("WidthSlider");
+            var heightSlider = (Slider)panel.FindName("HeightSlider");
+            var opacityText = (TextBlock)panel.FindName("OpacityText");
+            var opacitySlider = (Slider)panel.FindName("OpacitySlider");
+
+            // 初始化控件状态
+            enableCard.IsOn = settings.IsEnabled;
+            syncPptCard.IsOn = settings.SyncWithPPTPages;
+            widthSlider.Value = settings.DefaultWidth;
+            heightSlider.Value = settings.DefaultHeight;
+            opacitySlider.Value = settings.DefaultOpacity;
+
+            UpdateSizeText();
+            UpdateOpacityText();
+
+            // 绑定事件
             enableCard.Toggled += (s, e) =>
             {
                 SettingsManager.Settings.MiniWhiteboard.IsEnabled = enableCard.IsOn;
                 SettingsManager.SaveSettingsToFile();
-            };
-            panel.Children.Add(enableCard);
-
-            // 同步 PPT 开关
-            var syncPptCard = new Ink_Canvas.Controls.LabeledSettingsCard
-            {
-                Header = FloatingBarStrings.MiniWhiteboard_Settings_SyncPPT,
-                Icon = SegoeFluentIcons.Slideshow,
-                IsOn = settings.SyncWithPPTPages
             };
             syncPptCard.Toggled += (s, e) =>
             {
                 SettingsManager.Settings.MiniWhiteboard.SyncWithPPTPages = syncPptCard.IsOn;
                 SettingsManager.SaveSettingsToFile();
             };
-            panel.Children.Add(syncPptCard);
-
-            // 默认尺寸
-            var sizeText = new TextBlock { VerticalAlignment = VerticalAlignment.Center, FontFamily = new System.Windows.Media.FontFamily("Consolas") };
-            var widthSlider = new Slider { Minimum = 200, Maximum = 1200, Width = 200, IsSnapToTickEnabled = true, TickFrequency = 10, TickPlacement = TickPlacement.None, Value = settings.DefaultWidth };
-            var heightSlider = new Slider { Minimum = 150, Maximum = 900, Width = 200, IsSnapToTickEnabled = true, TickFrequency = 10, TickPlacement = TickPlacement.None, Value = settings.DefaultHeight };
-
-            UpdateSizeText();
-
             widthSlider.ValueChanged += (s, e) =>
             {
                 UpdateSizeText();
@@ -87,48 +87,12 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
                 SettingsManager.Settings.MiniWhiteboard.DefaultHeight = heightSlider.Value;
                 SettingsManager.SaveSettingsToFile();
             };
-
-            var sizeContent = new StackPanel();
-            sizeContent.Children.Add(sizeText);
-            var widthRow = new StackPanel { Orientation = Orientation.Horizontal };
-            widthRow.Children.Add(new TextBlock { Text = "W", Width = 16, VerticalAlignment = VerticalAlignment.Center });
-            widthRow.Children.Add(widthSlider);
-            sizeContent.Children.Add(widthRow);
-            var heightRow = new StackPanel { Orientation = Orientation.Horizontal };
-            heightRow.Children.Add(new TextBlock { Text = "H", Width = 16, VerticalAlignment = VerticalAlignment.Center });
-            heightRow.Children.Add(heightSlider);
-            sizeContent.Children.Add(heightRow);
-
-            var sizeCard = new iNKORE.UI.WPF.Modern.Controls.SettingsCard
-            {
-                Header = FloatingBarStrings.MiniWhiteboard_Settings_DefaultSize,
-                Content = sizeContent
-            };
-            panel.Children.Add(sizeCard);
-
-            // 透明度
-            var opacityText = new TextBlock { VerticalAlignment = VerticalAlignment.Center, FontFamily = new System.Windows.Media.FontFamily("Consolas"), TextAlignment = TextAlignment.Right };
-            var opacitySlider = new Slider { Minimum = 0.3, Maximum = 1, Width = 200, IsSnapToTickEnabled = true, TickFrequency = 0.05, TickPlacement = TickPlacement.None, Value = settings.DefaultOpacity };
-
-            UpdateOpacityText();
-
             opacitySlider.ValueChanged += (s, e) =>
             {
                 UpdateOpacityText();
                 SettingsManager.Settings.MiniWhiteboard.DefaultOpacity = opacitySlider.Value;
                 SettingsManager.SaveSettingsToFile();
             };
-
-            var opacityRow = new StackPanel { Orientation = Orientation.Horizontal };
-            opacityRow.Children.Add(opacityText);
-            opacityRow.Children.Add(opacitySlider);
-
-            var opacityCard = new iNKORE.UI.WPF.Modern.Controls.SettingsCard
-            {
-                Header = FloatingBarStrings.MiniWhiteboard_Settings_Opacity,
-                Content = opacityRow
-            };
-            panel.Children.Add(opacityCard);
 
             return panel;
 
