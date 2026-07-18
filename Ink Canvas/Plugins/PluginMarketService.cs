@@ -29,6 +29,9 @@ namespace Ink_Canvas.Plugins
         private static readonly string IndexCachePath = Path.Combine(MarketCachePath, "index.json");
         private static readonly string IndexMetaPath = Path.Combine(MarketCachePath, "meta.json");
 
+        // 缓存有效期：超过 3 天视为过期，需重新获取
+        private static readonly TimeSpan IndexCacheTtl = TimeSpan.FromDays(3);
+
         private readonly HttpClient _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
         private PluginMarketIndex _marketIndex;
         private readonly Dictionary<string, string> _resolvedIcons = new Dictionary<string, string>();
@@ -161,18 +164,28 @@ namespace Ink_Canvas.Plugins
                 {
                     LogHelper.WriteLogToFile($"PluginMarket | 网络获取索引失败: {ex.Message}", LogHelper.LogType.Warning);
 
-                    // 尝试从缓存加载
+                    // 尝试从缓存加载（仅在未过期时）
                     if (File.Exists(IndexCachePath))
                     {
-                        try
+                        var lastRefresh = GetLastRefreshTime();
+                        if (lastRefresh.HasValue && (DateTime.Now - lastRefresh.Value) > IndexCacheTtl)
                         {
-                            var cached = File.ReadAllText(IndexCachePath);
-                            index = JsonConvert.DeserializeObject<PluginMarketIndex>(cached);
-                            LogHelper.WriteLogToFile("PluginMarket | 使用缓存索引");
+                            LogHelper.WriteLogToFile(
+                                $"PluginMarket | 缓存索引已过期（{lastRefresh.Value:yyyy-MM-dd HH:mm}，TTL={IndexCacheTtl.TotalDays:F0}天），忽略",
+                                LogHelper.LogType.Warning);
                         }
-                        catch
+                        else
                         {
-                            // 缓存也损坏了
+                            try
+                            {
+                                var cached = File.ReadAllText(IndexCachePath);
+                                index = JsonConvert.DeserializeObject<PluginMarketIndex>(cached);
+                                LogHelper.WriteLogToFile("PluginMarket | 使用缓存索引");
+                            }
+                            catch
+                            {
+                                // 缓存也损坏了
+                            }
                         }
                     }
                 }
@@ -211,6 +224,20 @@ namespace Ink_Canvas.Plugins
             {
                 if (!File.Exists(IndexCachePath))
                 {
+                    _marketIndex = new PluginMarketIndex();
+                    MergePlugins();
+                    return;
+                }
+
+                // 检查缓存是否过期：超过 TTL 则视为无效
+                var lastRefresh = GetLastRefreshTime();
+                if (!lastRefresh.HasValue || (DateTime.Now - lastRefresh.Value) > IndexCacheTtl)
+                {
+                    LogHelper.WriteLogToFile(
+                        lastRefresh.HasValue
+                            ? $"PluginMarket | 缓存索引已过期（{lastRefresh.Value:yyyy-MM-dd HH:mm}，TTL={IndexCacheTtl.TotalDays:F0}天），跳过"
+                            : "PluginMarket | 缓存索引缺少刷新时间，跳过",
+                        LogHelper.LogType.Warning);
                     _marketIndex = new PluginMarketIndex();
                     MergePlugins();
                     return;
