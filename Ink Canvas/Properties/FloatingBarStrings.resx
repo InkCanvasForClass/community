@@ -249,6 +249,9 @@
   <data name="ToolbarPage_GroupChildrenHint" xml:space="preserve">
     <value>拖动组件库中的组件到此处添加，或拖动已有组件排序。</value>
   </data>
+  <data name="ToolbarPage_CloseGroupChildren" xml:space="preserve">
+    <value>收起分组内组件</value>
+  </data>
   <data name="ToolbarPage_ComponentLibrary" xml:space="preserve">
     <value>组件库</value>
   </data>

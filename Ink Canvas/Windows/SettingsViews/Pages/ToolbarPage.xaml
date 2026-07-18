@@ -172,13 +172,20 @@
                     <Style TargetType="StackPanel">
                         <Setter Property="Visibility" Value="Collapsed"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding SelectedEntry.IsGroup}" Value="True">
+                            <DataTrigger Binding="{Binding IsGroupChildrenVisible}" Value="True">
                                 <Setter Property="Visibility" Value="Visible"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </StackPanel.Style>
-                <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_GroupChildren}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                <DockPanel LastChildFill="True">
+                    <Button Click="ButtonCloseGroupChildren_Click" Style="{StaticResource BorderlessIconButtonStyle}" Padding="6,4" Margin="0,0,4,0"
+                            ToolTip="{x:Static props:FloatingBarStrings.ToolbarPage_CloseGroupChildren}"
+                            DockPanel.Dock="Right" VerticalAlignment="Center">
+                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Dismiss_16_Regular}"/>
+                    </Button>
+                    <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_GroupChildren}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4" VerticalAlignment="Center"/>
+                </DockPanel>
                 <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_GroupChildrenHint}"
                            Opacity="0.65" FontSize="12" Margin="0,0,0,6"/>
                 <Border BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"

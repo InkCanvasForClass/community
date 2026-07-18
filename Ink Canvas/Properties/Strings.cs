@@ -1231,6 +1231,7 @@ namespace Ink_Canvas.Properties
             dict["ToolbarPage_AddedComponents"] = ("FloatingBarStrings", "ToolbarPage_AddedComponents");
             dict["ToolbarPage_GroupChildren"] = ("FloatingBarStrings", "ToolbarPage_GroupChildren");
             dict["ToolbarPage_GroupChildrenHint"] = ("FloatingBarStrings", "ToolbarPage_GroupChildrenHint");
+            dict["ToolbarPage_CloseGroupChildren"] = ("FloatingBarStrings", "ToolbarPage_CloseGroupChildren");
             dict["ToolbarPage_ComponentLibrary"] = ("FloatingBarStrings", "ToolbarPage_ComponentLibrary");
             dict["ToolbarPage_ComponentLibraryHint"] = ("FloatingBarStrings", "ToolbarPage_ComponentLibraryHint");
             dict["ToolbarPage_ComponentSettings"] = ("FloatingBarStrings", "ToolbarPage_ComponentSettings");
