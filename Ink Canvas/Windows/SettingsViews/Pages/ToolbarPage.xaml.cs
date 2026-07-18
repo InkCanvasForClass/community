@@ -35,6 +35,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private bool _isLoaded;
         private bool _suppressConfigChange;
         private bool _suppressSave;
+        private bool _suppressSelectedEntrySync;
 
         public ObservableCollection<ToolbarComponentEntry> AddedComponents { get; } = new();
         public ObservableCollection<ToolbarComponentEntry> GroupChildren { get; } = new();
@@ -55,9 +56,25 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private static void OnSelectedEntryChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var page = (ToolbarPage)d;
+            if (page._suppressSelectedEntrySync) return;
             page.SelectedGroupChild = null;
+            // 选中分组时自动展开"分组内组件"面板；选中非分组时不自动收起（由关闭按钮控制）
+            if (page.SelectedEntry?.IsGroup == true)
+            {
+                page.IsGroupChildrenVisible = true;
+            }
             page.UpdatePropertiesPanel();
             page.RefreshGroupChildren();
+        }
+
+        public static readonly DependencyProperty IsGroupChildrenVisibleProperty =
+            DependencyProperty.Register(nameof(IsGroupChildrenVisible), typeof(bool), typeof(ToolbarPage),
+                new PropertyMetadata(false));
+
+        public bool IsGroupChildrenVisible
+        {
+            get => (bool)GetValue(IsGroupChildrenVisibleProperty);
+            set => SetValue(IsGroupChildrenVisibleProperty, value);
         }
 
         public static readonly DependencyProperty SelectedGroupChildProperty =
@@ -73,6 +90,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private static void OnSelectedGroupChildChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var page = (ToolbarPage)d;
+            // 选中分组内组件时，取消"已添加组件"列表的选中，避免两处同时高亮
+            if (page.SelectedGroupChild != null && page.SelectedEntry != null)
+            {
+                page._suppressSelectedEntrySync = true;
+                page.AddedList.SelectedItem = null;
+                page._suppressSelectedEntrySync = false;
+            }
             page.UpdatePropertiesPanel();
         }
 
@@ -522,6 +546,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 RemoveGroupChildItem_Click(btn, e);
                 e.Handled = true;
             }
+        }
+
+        private void ButtonCloseGroupChildren_Click(object sender, RoutedEventArgs e)
+        {
+            IsGroupChildrenVisible = false;
+            SelectedGroupChild = null;
         }
 
         private void LibraryList_SelectionChanged(object sender, SelectionChangedEventArgs e)
