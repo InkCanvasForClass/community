@@ -94,36 +94,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (entry == null) return;
             _suppressSave = true;
             CheckBoxShowSeparateBorder.IsChecked = entry.ShowSeparateBorder;
-
-            TextBoxFixedWidth.Text = entry.GetSettingDouble(ComponentSettingKeys.FixedWidth)?.ToString() ?? "";
-            TextBoxFixedHeight.Text = entry.GetSettingDouble(ComponentSettingKeys.FixedHeight)?.ToString() ?? "";
-            TextBoxMinWidth.Text = entry.GetSettingDouble(ComponentSettingKeys.MinWidth)?.ToString() ?? "";
-            TextBoxMaxWidth.Text = entry.GetSettingDouble(ComponentSettingKeys.MaxWidth)?.ToString() ?? "";
-            TextBoxMinHeight.Text = entry.GetSettingDouble(ComponentSettingKeys.MinHeight)?.ToString() ?? "";
-            TextBoxMaxHeight.Text = entry.GetSettingDouble(ComponentSettingKeys.MaxHeight)?.ToString() ?? "";
-            TextBoxFontSize.Text = entry.GetSettingDouble(ComponentSettingKeys.FontSize)?.ToString() ?? "";
-            TextBoxIconSize.Text = entry.GetSettingDouble(ComponentSettingKeys.IconSize)?.ToString() ?? "";
-            TextBoxOpacity.Text = entry.GetSettingDouble(ComponentSettingKeys.Opacity)?.ToString() ?? "";
-            TextBoxMarginLeft.Text = entry.GetSettingDouble(ComponentSettingKeys.MarginLeft)?.ToString() ?? "";
-            TextBoxMarginTop.Text = entry.GetSettingDouble(ComponentSettingKeys.MarginTop)?.ToString() ?? "";
-            TextBoxMarginRight.Text = entry.GetSettingDouble(ComponentSettingKeys.MarginRight)?.ToString() ?? "";
-            TextBoxMarginBottom.Text = entry.GetSettingDouble(ComponentSettingKeys.MarginBottom)?.ToString() ?? "";
             CheckBoxUseRedStyle.IsChecked = entry.GetSettingBool(ComponentSettingKeys.UseRedStyle);
 
-            var hAlign = entry.GetSettingString(ComponentSettingKeys.HorizontalAlignment) ?? "";
-            ComboBoxHAlign.SelectedIndex = hAlign switch { "Left" => 1, "Center" => 2, "Right" => 3, "Stretch" => 4, _ => 0 };
-            var vAlign = entry.GetSettingString(ComponentSettingKeys.VerticalAlignment) ?? "";
-            ComboBoxVAlign.SelectedIndex = vAlign switch { "Top" => 1, "Center" => 2, "Bottom" => 3, "Stretch" => 4, _ => 0 };
-
-            var isQuickColorPalette = entry.Id == "builtin.quickColorPalette";
-            PanelQuickColorPaletteDisplayMode.Visibility = isQuickColorPalette ? Visibility.Visible : Visibility.Collapsed;
-            if (isQuickColorPalette)
-            {
-                var displayMode = entry.GetSettingString(ComponentSettingKeys.DisplayMode) ?? "1";
-                ComboBoxDisplayMode.SelectedIndex = displayMode == "0" ? 1 : 0;
-            }
-
-            // 插件自定义设置：动态生成设置面板
+            // 组件自定义设置：动态生成设置面板（内置组件和插件组件共用）
             UpdatePluginCustomSettingsPanel(entry);
 
             var ruleset = ToolbarRegistry.GetEffectiveRuleset(entry);
@@ -574,107 +547,112 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SaveSettings();
         }
 
-        private void ComponentSetting_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (!_isLoaded || ActiveEntry == null || _suppressSave) return;
-            WriteComponentSettingsFromUI(ActiveEntry);
-            SaveSettings();
-        }
-
-        private void ComponentAlignment_Changed(object sender, SelectionChangedEventArgs e)
-        {
-            if (!_isLoaded || ActiveEntry == null || _suppressSave) return;
-            WriteComponentSettingsFromUI(ActiveEntry);
-            SaveSettings();
-        }
-
-        private void ComboBoxDisplayMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!_isLoaded || ActiveEntry == null || _suppressSave) return;
-            var tag = (ComboBoxDisplayMode.SelectedItem as ComboBoxItem)?.Tag?.ToString();
-            if (!string.IsNullOrEmpty(tag))
-            {
-                ActiveEntry.SetSetting(ComponentSettingKeys.DisplayMode, tag);
-                if (int.TryParse(tag, out var mode))
-                    SettingsManager.Settings.Appearance.QuickColorPaletteDisplayMode = mode;
-            }
-            SaveSettings();
-        }
-
         private void UpdatePluginCustomSettingsPanel(ToolbarComponentEntry entry)
         {
             PanelPluginCustomSettings.Visibility = Visibility.Collapsed;
             PanelPluginCustomSettings.Children.Clear();
 
-            var pluginItems = ToolbarRegistry.GetPluginItems();
-            var pluginItem = pluginItems.FirstOrDefault(p => p.Id == entry.Id);
-            if (pluginItem?.CustomSettings == null || pluginItem.CustomSettings.Count == 0) return;
+            bool hasCustomSettings = false;
 
-            PanelPluginCustomSettings.Visibility = Visibility.Visible;
-
-            foreach (var setting in pluginItem.CustomSettings)
+            // 优先检查内置项是否提供 CustomSettingsPanelFactory（完全自定义 UI，如小白板的全局设置）
+            var builtinItem = AvailableItems.FirstOrDefault(i => i.Id == entry.Id);
+            if (builtinItem?.CustomSettingsPanelFactory != null)
             {
-                var card = new iNKORE.UI.WPF.Modern.Controls.SettingsCard
+                PanelPluginCustomSettings.Visibility = Visibility.Visible;
+                PanelPluginCustomSettings.Children.Add(builtinItem.CustomSettingsPanelFactory());
+                hasCustomSettings = true;
+            }
+            else
+            {
+                // 否则通过 CustomSettings 声明式生成（插件项或内置项均可）
+                var pluginItems = ToolbarRegistry.GetPluginItems();
+                var pluginItem = pluginItems.FirstOrDefault(p => p.Id == entry.Id);
+                IReadOnlyList<PluginToolbarSettingInfo> customSettings = pluginItem?.CustomSettings;
+                if (customSettings == null || customSettings.Count == 0)
                 {
-                    Header = setting.DisplayName,
-                    Description = setting.Description
-                };
-
-                switch (setting.Type)
-                {
-                    case PluginToolbarSettingType.ComboBox:
-                        var comboBox = new ComboBox { Tag = setting.Key };
-                        foreach (var option in setting.Options)
-                        {
-                            comboBox.Items.Add(new ComboBoxItem { Content = option, Tag = option });
-                        }
-                        // 恢复已保存的值
-                        var savedValue = entry.GetSettingString(setting.Key) ?? setting.DefaultValue;
-                        for (int i = 0; i < comboBox.Items.Count; i++)
-                        {
-                            if ((comboBox.Items[i] as ComboBoxItem)?.Tag?.ToString() == savedValue)
-                            {
-                                comboBox.SelectedIndex = i;
-                                break;
-                            }
-                        }
-                        comboBox.SelectionChanged += PluginCustomSetting_ComboBox_SelectionChanged;
-                        card.Content = comboBox;
-                        break;
-
-                    case PluginToolbarSettingType.Toggle:
-                        var toggle = new iNKORE.UI.WPF.Modern.Controls.ToggleSwitch
-                        {
-                            Tag = setting.Key,
-                            MinWidth = 0,
-                            OnContent = "",
-                            OffContent = ""
-                        };
-                        var boolValue = entry.GetSettingBool(setting.Key);
-                        if (setting.DefaultValue == "true") toggle.IsOn = boolValue || !entry.Settings.ContainsKey(setting.Key);
-                        else toggle.IsOn = boolValue;
-                        toggle.Toggled += PluginCustomSetting_Toggle_Toggled;
-                        card.Content = toggle;
-                        break;
-
-                    case PluginToolbarSettingType.Slider:
-                        var slider = new Slider
-                        {
-                            Tag = setting.Key,
-                            Width = 150,
-                            Minimum = 0,
-                            Maximum = 100,
-                            VerticalAlignment = VerticalAlignment.Center
-                        };
-                        var numValue = entry.GetSettingDouble(setting.Key);
-                        if (numValue.HasValue) slider.Value = numValue.Value;
-                        else if (double.TryParse(setting.DefaultValue, out var dv)) slider.Value = dv;
-                        slider.ValueChanged += PluginCustomSetting_Slider_ValueChanged;
-                        card.Content = slider;
-                        break;
+                    customSettings = builtinItem?.CustomSettings;
                 }
+                if (customSettings != null && customSettings.Count > 0)
+                {
+                    PanelPluginCustomSettings.Visibility = Visibility.Visible;
+                    hasCustomSettings = true;
 
-                PanelPluginCustomSettings.Children.Add(card);
+                    foreach (var setting in customSettings)
+                    {
+                        var card = new iNKORE.UI.WPF.Modern.Controls.SettingsCard
+                        {
+                            Header = setting.DisplayName,
+                            Description = setting.Description
+                        };
+
+                        switch (setting.Type)
+                        {
+                            case PluginToolbarSettingType.ComboBox:
+                                var comboBox = new ComboBox { Tag = setting.Key };
+                                bool hasOptionValues = setting.OptionValues != null
+                                    && setting.OptionValues.Count == setting.Options.Count
+                                    && setting.OptionValues.Count > 0;
+                                for (int i = 0; i < setting.Options.Count; i++)
+                                {
+                                    var display = setting.Options[i];
+                                    var value = hasOptionValues ? setting.OptionValues[i] : display;
+                                    comboBox.Items.Add(new ComboBoxItem { Content = display, Tag = value });
+                                }
+                                var savedValue = entry.GetSettingString(setting.Key) ?? setting.DefaultValue;
+                                for (int i = 0; i < comboBox.Items.Count; i++)
+                                {
+                                    if ((comboBox.Items[i] as ComboBoxItem)?.Tag?.ToString() == savedValue)
+                                    {
+                                        comboBox.SelectedIndex = i;
+                                        break;
+                                    }
+                                }
+                                comboBox.SelectionChanged += PluginCustomSetting_ComboBox_SelectionChanged;
+                                card.Content = comboBox;
+                                break;
+
+                            case PluginToolbarSettingType.Toggle:
+                                var toggle = new iNKORE.UI.WPF.Modern.Controls.ToggleSwitch
+                                {
+                                    Tag = setting.Key,
+                                    MinWidth = 0,
+                                    OnContent = "",
+                                    OffContent = ""
+                                };
+                                var boolValue = entry.GetSettingBool(setting.Key);
+                                if (setting.DefaultValue == "true") toggle.IsOn = boolValue || !entry.Settings.ContainsKey(setting.Key);
+                                else toggle.IsOn = boolValue;
+                                toggle.Toggled += PluginCustomSetting_Toggle_Toggled;
+                                card.Content = toggle;
+                                break;
+
+                            case PluginToolbarSettingType.Slider:
+                                var slider = new Slider
+                                {
+                                    Tag = setting.Key,
+                                    Width = 150,
+                                    Minimum = 0,
+                                    Maximum = 100,
+                                    VerticalAlignment = VerticalAlignment.Center
+                                };
+                                var numValue = entry.GetSettingDouble(setting.Key);
+                                if (numValue.HasValue) slider.Value = numValue.Value;
+                                else if (double.TryParse(setting.DefaultValue, out var dv)) slider.Value = dv;
+                                slider.ValueChanged += PluginCustomSetting_Slider_ValueChanged;
+                                card.Content = slider;
+                                break;
+                        }
+
+                        PanelPluginCustomSettings.Children.Add(card);
+                    }
+                }
+            }
+
+            // 无自定义设置的组件隐藏"组件设置"TabItem；若当前正选中该 Tab，切换到"高级设置"Tab
+            ComponentSettingsTab.Visibility = hasCustomSettings ? Visibility.Visible : Visibility.Collapsed;
+            if (!hasCustomSettings && SettingsTabControl.SelectedIndex == 1)
+            {
+                SettingsTabControl.SelectedIndex = 2;
             }
         }
 
@@ -712,50 +690,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 ActiveEntry.SetSetting(key, slider.Value);
             }
-            SaveSettings();
-        }
-
-        private void WriteComponentSettingsFromUI(ToolbarComponentEntry entry)
-        {
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.FixedWidth, TextBoxFixedWidth.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.FixedHeight, TextBoxFixedHeight.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MinWidth, TextBoxMinWidth.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MaxWidth, TextBoxMaxWidth.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MinHeight, TextBoxMinHeight.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MaxHeight, TextBoxMaxHeight.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.FontSize, TextBoxFontSize.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.IconSize, TextBoxIconSize.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.Opacity, TextBoxOpacity.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MarginLeft, TextBoxMarginLeft.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MarginTop, TextBoxMarginTop.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MarginRight, TextBoxMarginRight.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MarginBottom, TextBoxMarginBottom.Text);
-
-            var hAlignTag = (ComboBoxHAlign.SelectedItem as ComboBoxItem)?.Tag?.ToString();
-            if (!string.IsNullOrEmpty(hAlignTag)) entry.SetSetting(ComponentSettingKeys.HorizontalAlignment, hAlignTag);
-            else entry.Settings?.Remove(ComponentSettingKeys.HorizontalAlignment);
-
-            var vAlignTag = (ComboBoxVAlign.SelectedItem as ComboBoxItem)?.Tag?.ToString();
-            if (!string.IsNullOrEmpty(vAlignTag)) entry.SetSetting(ComponentSettingKeys.VerticalAlignment, vAlignTag);
-            else entry.Settings?.Remove(ComponentSettingKeys.VerticalAlignment);
-        }
-
-        private static void WriteDoubleIfNotEmpty(ToolbarComponentEntry entry, string key, string text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                entry.Settings?.Remove(key);
-                return;
-            }
-            if (double.TryParse(text, out var val))
-                entry.SetSetting(key, val);
-        }
-
-        private void ButtonResetComponentSettings_Click(object sender, RoutedEventArgs e)
-        {
-            if (ActiveEntry == null) return;
-            ActiveEntry.Settings?.Clear();
-            UpdatePropertiesPanel();
             SaveSettings();
         }
 
