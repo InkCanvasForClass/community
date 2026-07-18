@@ -94,26 +94,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (entry == null) return;
             _suppressSave = true;
             CheckBoxShowSeparateBorder.IsChecked = entry.ShowSeparateBorder;
-
-            TextBoxFixedWidth.Text = entry.GetSettingDouble(ComponentSettingKeys.FixedWidth)?.ToString() ?? "";
-            TextBoxFixedHeight.Text = entry.GetSettingDouble(ComponentSettingKeys.FixedHeight)?.ToString() ?? "";
-            TextBoxMinWidth.Text = entry.GetSettingDouble(ComponentSettingKeys.MinWidth)?.ToString() ?? "";
-            TextBoxMaxWidth.Text = entry.GetSettingDouble(ComponentSettingKeys.MaxWidth)?.ToString() ?? "";
-            TextBoxMinHeight.Text = entry.GetSettingDouble(ComponentSettingKeys.MinHeight)?.ToString() ?? "";
-            TextBoxMaxHeight.Text = entry.GetSettingDouble(ComponentSettingKeys.MaxHeight)?.ToString() ?? "";
-            TextBoxFontSize.Text = entry.GetSettingDouble(ComponentSettingKeys.FontSize)?.ToString() ?? "";
-            TextBoxIconSize.Text = entry.GetSettingDouble(ComponentSettingKeys.IconSize)?.ToString() ?? "";
-            TextBoxOpacity.Text = entry.GetSettingDouble(ComponentSettingKeys.Opacity)?.ToString() ?? "";
-            TextBoxMarginLeft.Text = entry.GetSettingDouble(ComponentSettingKeys.MarginLeft)?.ToString() ?? "";
-            TextBoxMarginTop.Text = entry.GetSettingDouble(ComponentSettingKeys.MarginTop)?.ToString() ?? "";
-            TextBoxMarginRight.Text = entry.GetSettingDouble(ComponentSettingKeys.MarginRight)?.ToString() ?? "";
-            TextBoxMarginBottom.Text = entry.GetSettingDouble(ComponentSettingKeys.MarginBottom)?.ToString() ?? "";
             CheckBoxUseRedStyle.IsChecked = entry.GetSettingBool(ComponentSettingKeys.UseRedStyle);
-
-            var hAlign = entry.GetSettingString(ComponentSettingKeys.HorizontalAlignment) ?? "";
-            ComboBoxHAlign.SelectedIndex = hAlign switch { "Left" => 1, "Center" => 2, "Right" => 3, "Stretch" => 4, _ => 0 };
-            var vAlign = entry.GetSettingString(ComponentSettingKeys.VerticalAlignment) ?? "";
-            ComboBoxVAlign.SelectedIndex = vAlign switch { "Top" => 1, "Center" => 2, "Bottom" => 3, "Stretch" => 4, _ => 0 };
 
             var isQuickColorPalette = entry.Id == "builtin.quickColorPalette";
             PanelQuickColorPaletteDisplayMode.Visibility = isQuickColorPalette ? Visibility.Visible : Visibility.Collapsed;
@@ -574,20 +555,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SaveSettings();
         }
 
-        private void ComponentSetting_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (!_isLoaded || ActiveEntry == null || _suppressSave) return;
-            WriteComponentSettingsFromUI(ActiveEntry);
-            SaveSettings();
-        }
-
-        private void ComponentAlignment_Changed(object sender, SelectionChangedEventArgs e)
-        {
-            if (!_isLoaded || ActiveEntry == null || _suppressSave) return;
-            WriteComponentSettingsFromUI(ActiveEntry);
-            SaveSettings();
-        }
-
         private void ComboBoxDisplayMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!_isLoaded || ActiveEntry == null || _suppressSave) return;
@@ -712,50 +679,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 ActiveEntry.SetSetting(key, slider.Value);
             }
-            SaveSettings();
-        }
-
-        private void WriteComponentSettingsFromUI(ToolbarComponentEntry entry)
-        {
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.FixedWidth, TextBoxFixedWidth.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.FixedHeight, TextBoxFixedHeight.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MinWidth, TextBoxMinWidth.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MaxWidth, TextBoxMaxWidth.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MinHeight, TextBoxMinHeight.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MaxHeight, TextBoxMaxHeight.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.FontSize, TextBoxFontSize.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.IconSize, TextBoxIconSize.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.Opacity, TextBoxOpacity.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MarginLeft, TextBoxMarginLeft.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MarginTop, TextBoxMarginTop.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MarginRight, TextBoxMarginRight.Text);
-            WriteDoubleIfNotEmpty(entry, ComponentSettingKeys.MarginBottom, TextBoxMarginBottom.Text);
-
-            var hAlignTag = (ComboBoxHAlign.SelectedItem as ComboBoxItem)?.Tag?.ToString();
-            if (!string.IsNullOrEmpty(hAlignTag)) entry.SetSetting(ComponentSettingKeys.HorizontalAlignment, hAlignTag);
-            else entry.Settings?.Remove(ComponentSettingKeys.HorizontalAlignment);
-
-            var vAlignTag = (ComboBoxVAlign.SelectedItem as ComboBoxItem)?.Tag?.ToString();
-            if (!string.IsNullOrEmpty(vAlignTag)) entry.SetSetting(ComponentSettingKeys.VerticalAlignment, vAlignTag);
-            else entry.Settings?.Remove(ComponentSettingKeys.VerticalAlignment);
-        }
-
-        private static void WriteDoubleIfNotEmpty(ToolbarComponentEntry entry, string key, string text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                entry.Settings?.Remove(key);
-                return;
-            }
-            if (double.TryParse(text, out var val))
-                entry.SetSetting(key, val);
-        }
-
-        private void ButtonResetComponentSettings_Click(object sender, RoutedEventArgs e)
-        {
-            if (ActiveEntry == null) return;
-            ActiveEntry.Settings?.Clear();
-            UpdatePropertiesPanel();
             SaveSettings();
         }
 
