@@ -31,6 +31,10 @@
         <helpers:StringToGeometryConverter x:Key="StringToGeometryConverter"/>
         <local:IdToPathDataConverter x:Key="IdToPathDataConverter"/>
 
+        <Style x:Key="CompactTabItemPivotStyle" TargetType="TabItem" BasedOn="{StaticResource {x:Static ui:ThemeKeys.TabItemPivotStyleKey}}">
+            <Setter Property="Height" Value="32"/>
+        </Style>
+
         <DataTemplate x:Key="ToolbarItemTemplate" DataType="{x:Type toolbar:ToolbarComponentEntry}">
             <Border Cursor="Hand">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -240,7 +244,11 @@
         <!-- ===== Section 3: 组件库 / 组件设置 / 高级设置 ===== -->
         <TabControl Grid.Row="3" x:Name="SettingsTabControl" Margin="0,4,0,0"
                     Style="{StaticResource {x:Static ui:ThemeKeys.TabControlPivotStyleKey}}"
+                    ItemContainerStyle="{StaticResource CompactTabItemPivotStyle}"
                     SelectedIndex="{Binding SettingsTabIndex}">
+            <TabControl.Resources>
+                <sys:Double x:Key="PivotHeaderItemFontSize">16</sys:Double>
+            </TabControl.Resources>
 
             <!-- ===== Tab 1: 组件库 ===== -->
             <TabItem Header="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentLibrary}">
@@ -284,19 +292,8 @@
                     <ikw:SimpleStackPanel Spacing="4" Margin="0,8,0,0">
 
                         <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentProperties}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
-                        <ui:SettingsCard Header="{x:Static props:FloatingBarStrings.ToolbarPage_SeparateBorder}" Description="{x:Static props:FloatingBarStrings.ToolbarPage_SeparateBorderDesc}">
-                            <CheckBox x:Name="CheckBoxShowSeparateBorder"
-                                      Checked="CheckBoxShowSeparateBorder_Changed"
-                                      Unchecked="CheckBoxShowSeparateBorder_Changed"/>
-                        </ui:SettingsCard>
 
-                        <ui:SettingsCard Header="{x:Static props:FloatingBarStrings.ToolbarPage_RedStyle}" Description="{x:Static props:FloatingBarStrings.ToolbarPage_RedStyleDesc}">
-                            <CheckBox x:Name="CheckBoxUseRedStyle"
-                                      Checked="CheckBoxUseRedStyle_Changed"
-                                      Unchecked="CheckBoxUseRedStyle_Changed"/>
-                        </ui:SettingsCard>
-
-                        <StackPanel x:Name="PanelQuickColorPaletteDisplayMode" Visibility="Collapsed">
+                        <StackPanel x:Name="PanelQuickColorPaletteDisplayMode" Visibility="Collapsed" d:Visibility="Visible">
                             <ui:SettingsCard Header="{x:Static props:FloatingBarStrings.ToolbarPage_DisplayMode}" Description="{x:Static props:FloatingBarStrings.ToolbarPage_QuickPaletteDisplayModeDesc}">
                                 <ComboBox x:Name="ComboBoxDisplayMode"
                                           SelectionChanged="ComboBoxDisplayMode_SelectionChanged">
@@ -316,6 +313,32 @@
 
             <!-- ===== Tab 3: 高级设置 ===== -->
             <TabItem Header="{x:Static props:NavStrings.Nav_Advanced_Settings}">
+                <TabItem.Visibility>
+                    <Binding Path="SelectedEntry" Converter="{StaticResource NullToVisibilityConverter}"/>
+                </TabItem.Visibility>
+                <ScrollViewer PanningMode="VerticalFirst" VerticalScrollBarVisibility="Auto">
+                    <ikw:SimpleStackPanel Spacing="4" Margin="0,8,0,0">
+
+                        <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentProperties}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+
+                        <ui:SettingsCard Header="{x:Static props:FloatingBarStrings.ToolbarPage_SeparateBorder}" Description="{x:Static props:FloatingBarStrings.ToolbarPage_SeparateBorderDesc}">
+                            <CheckBox x:Name="CheckBoxShowSeparateBorder"
+                                      Checked="CheckBoxShowSeparateBorder_Changed"
+                                      Unchecked="CheckBoxShowSeparateBorder_Changed"/>
+                        </ui:SettingsCard>
+
+                        <ui:SettingsCard Header="{x:Static props:FloatingBarStrings.ToolbarPage_RedStyle}" Description="{x:Static props:FloatingBarStrings.ToolbarPage_RedStyleDesc}">
+                            <CheckBox x:Name="CheckBoxUseRedStyle"
+                                      Checked="CheckBoxUseRedStyle_Changed"
+                                      Unchecked="CheckBoxUseRedStyle_Changed"/>
+                        </ui:SettingsCard>
+
+                    </ikw:SimpleStackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ===== Tab 4: 按规则隐藏 ===== -->
+            <TabItem Header="{x:Static props:FloatingBarStrings.ToolbarPage_HideByRules}">
                 <TabItem.Visibility>
                     <Binding Path="SelectedEntry" Converter="{StaticResource NullToVisibilityConverter}"/>
                 </TabItem.Visibility>
