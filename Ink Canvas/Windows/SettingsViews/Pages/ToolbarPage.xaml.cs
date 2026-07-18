@@ -96,15 +96,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CheckBoxShowSeparateBorder.IsChecked = entry.ShowSeparateBorder;
             CheckBoxUseRedStyle.IsChecked = entry.GetSettingBool(ComponentSettingKeys.UseRedStyle);
 
-            var isQuickColorPalette = entry.Id == "builtin.quickColorPalette";
-            PanelQuickColorPaletteDisplayMode.Visibility = isQuickColorPalette ? Visibility.Visible : Visibility.Collapsed;
-            if (isQuickColorPalette)
-            {
-                var displayMode = entry.GetSettingString(ComponentSettingKeys.DisplayMode) ?? "1";
-                ComboBoxDisplayMode.SelectedIndex = displayMode == "0" ? 1 : 0;
-            }
-
-            // 插件自定义设置：动态生成设置面板
+            // 组件自定义设置：动态生成设置面板（内置组件和插件组件共用）
             UpdatePluginCustomSettingsPanel(entry);
 
             var ruleset = ToolbarRegistry.GetEffectiveRuleset(entry);
@@ -555,31 +547,33 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SaveSettings();
         }
 
-        private void ComboBoxDisplayMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!_isLoaded || ActiveEntry == null || _suppressSave) return;
-            var tag = (ComboBoxDisplayMode.SelectedItem as ComboBoxItem)?.Tag?.ToString();
-            if (!string.IsNullOrEmpty(tag))
-            {
-                ActiveEntry.SetSetting(ComponentSettingKeys.DisplayMode, tag);
-                if (int.TryParse(tag, out var mode))
-                    SettingsManager.Settings.Appearance.QuickColorPaletteDisplayMode = mode;
-            }
-            SaveSettings();
-        }
-
         private void UpdatePluginCustomSettingsPanel(ToolbarComponentEntry entry)
         {
             PanelPluginCustomSettings.Visibility = Visibility.Collapsed;
             PanelPluginCustomSettings.Children.Clear();
 
+            // 优先检查内置项是否提供 CustomSettingsPanelFactory（完全自定义 UI，如小白板的全局设置）
+            var builtinItem = AvailableItems.FirstOrDefault(i => i.Id == entry.Id);
+            if (builtinItem?.CustomSettingsPanelFactory != null)
+            {
+                PanelPluginCustomSettings.Visibility = Visibility.Visible;
+                PanelPluginCustomSettings.Children.Add(builtinItem.CustomSettingsPanelFactory());
+                return;
+            }
+
+            // 否则通过 CustomSettings 声明式生成（插件项或内置项均可）
             var pluginItems = ToolbarRegistry.GetPluginItems();
             var pluginItem = pluginItems.FirstOrDefault(p => p.Id == entry.Id);
-            if (pluginItem?.CustomSettings == null || pluginItem.CustomSettings.Count == 0) return;
+            IReadOnlyList<PluginToolbarSettingInfo> customSettings = pluginItem?.CustomSettings;
+            if (customSettings == null || customSettings.Count == 0)
+            {
+                customSettings = builtinItem?.CustomSettings;
+            }
+            if (customSettings == null || customSettings.Count == 0) return;
 
             PanelPluginCustomSettings.Visibility = Visibility.Visible;
 
-            foreach (var setting in pluginItem.CustomSettings)
+            foreach (var setting in customSettings)
             {
                 var card = new iNKORE.UI.WPF.Modern.Controls.SettingsCard
                 {
@@ -591,9 +585,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 {
                     case PluginToolbarSettingType.ComboBox:
                         var comboBox = new ComboBox { Tag = setting.Key };
-                        foreach (var option in setting.Options)
+                        // 若 OptionValues 数量与 Options 一致，则 Options 用作显示文本、OptionValues 用作保存值
+                        bool hasOptionValues = setting.OptionValues != null
+                            && setting.OptionValues.Count == setting.Options.Count
+                            && setting.OptionValues.Count > 0;
+                        for (int i = 0; i < setting.Options.Count; i++)
                         {
-                            comboBox.Items.Add(new ComboBoxItem { Content = option, Tag = option });
+                            var display = setting.Options[i];
+                            var value = hasOptionValues ? setting.OptionValues[i] : display;
+                            comboBox.Items.Add(new ComboBoxItem { Content = display, Tag = value });
                         }
                         // 恢复已保存的值
                         var savedValue = entry.GetSettingString(setting.Key) ?? setting.DefaultValue;

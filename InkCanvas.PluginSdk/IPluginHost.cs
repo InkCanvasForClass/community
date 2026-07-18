@@ -110,6 +110,11 @@ namespace Ink_Canvas.Plugins
         public string Description { get; set; }
         public PluginToolbarSettingType Type { get; set; }
         public List<string> Options { get; set; } = new List<string>();
+        /// <summary>
+        /// ComboBox 选项的保存值。若数量与 Options 一致，则 Options 用作显示文本、OptionValues 用作保存值；
+        /// 否则 Options 同时用作显示文本和保存值。
+        /// </summary>
+        public List<string> OptionValues { get; set; } = new List<string>();
         public string DefaultValue { get; set; }
     }
 

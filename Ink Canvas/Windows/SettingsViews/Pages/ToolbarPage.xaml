@@ -293,17 +293,7 @@
 
                         <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentProperties}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
 
-                        <StackPanel x:Name="PanelQuickColorPaletteDisplayMode" Visibility="Collapsed" d:Visibility="Visible">
-                            <ui:SettingsCard Header="{x:Static props:FloatingBarStrings.ToolbarPage_DisplayMode}" Description="{x:Static props:FloatingBarStrings.ToolbarPage_QuickPaletteDisplayModeDesc}">
-                                <ComboBox x:Name="ComboBoxDisplayMode"
-                                          SelectionChanged="ComboBoxDisplayMode_SelectionChanged">
-                                    <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuickPalette_DoubleRow}" Tag="1"/>
-                                    <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuickPalette_SingleRow}" Tag="0"/>
-                                </ComboBox>
-                            </ui:SettingsCard>
-                        </StackPanel>
-
-                        <!-- 插件自定义设置面板（动态生成） -->
+                        <!-- 组件自定义设置面板（动态生成，内置组件和插件组件共用） -->
                         <StackPanel x:Name="PanelPluginCustomSettings" Visibility="Collapsed">
                         </StackPanel>
 

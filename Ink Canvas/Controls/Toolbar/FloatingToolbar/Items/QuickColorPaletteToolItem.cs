@@ -1,5 +1,7 @@
+using Ink_Canvas.Plugins;
 using Ink_Canvas.Properties;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -15,6 +17,24 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AnnotationOnly().WithHideOnCollapsed();
         public bool DefaultShowSeparateBorder => false;
         public bool DefaultPreventHideOnDragClick => false;
+
+        public IReadOnlyList<PluginToolbarSettingInfo> CustomSettings { get; } = new List<PluginToolbarSettingInfo>
+        {
+            new PluginToolbarSettingInfo
+            {
+                Key = ComponentSettingKeys.DisplayMode,
+                DisplayName = FloatingBarStrings.ToolbarPage_DisplayMode,
+                Description = FloatingBarStrings.ToolbarPage_QuickPaletteDisplayModeDesc,
+                Type = PluginToolbarSettingType.ComboBox,
+                Options = new List<string>
+                {
+                    ThemeStrings.Theme_QuickPalette_DoubleRow,
+                    ThemeStrings.Theme_QuickPalette_SingleRow
+                },
+                OptionValues = new List<string> { "1", "0" },
+                DefaultValue = "1"
+            }
+        };
 
         public FrameworkElement BuildView(IToolbarHost host)
         {
