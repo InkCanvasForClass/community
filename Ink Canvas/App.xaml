@@ -265,6 +265,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ui:ThemeResources/>
                 <ui:XamlControlsResources />
+                <ResourceDictionary Source="Resources/FloatingBarThemeFallback.xaml" />
                 <ResourceDictionary Source="Resources/SeewoImageDictionary.xaml"/>
                 <ResourceDictionary Source="Resources/DrawShapeImageDictionary.xaml"/>
                 <ResourceDictionary Source="Resources/IconImageDictionary.xaml"/>

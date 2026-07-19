@@ -17,7 +17,7 @@ mc:Ignorable="d">
                            Height="24" Width="24" />
                     <Label x:Name="MultiTouchLabel"
                            Content="{x:Static props:FloatingBarStrings.FloatingBar_Gesture_MultiTouchWriting}"
-                           Foreground="{DynamicResource FloatBarForeground}"
+                           Foreground="{DynamicResource FloatingBarForegroundBrush}"
                            VerticalAlignment="Center"/>
                     <ui:ToggleSwitch x:Name="ToggleSwitchEnableMultiTouchMode"
                                      MinWidth="0" OnContent="" OffContent=""
@@ -30,7 +30,7 @@ mc:Ignorable="d">
                            Height="24" Width="24" />
                     <Label x:Name="TwoFingerMoveLabel"
                            Content="{x:Static props:FloatingBarStrings.Board_TwoFingerMove}"
-                           Foreground="{DynamicResource FloatBarForeground}"
+                           Foreground="{DynamicResource FloatingBarForegroundBrush}"
                            VerticalAlignment="Center"/>
                     <ui:ToggleSwitch x:Name="ToggleSwitchEnableTwoFingerTranslate"
                                      MinWidth="0" OnContent="" OffContent=""
@@ -43,7 +43,7 @@ mc:Ignorable="d">
                            Height="24" Width="24" />
                     <Label x:Name="TwoFingerZoomLabel"
                            Content="{x:Static props:FloatingBarStrings.FloatingBar_Gesture_TwoFingerZoom}"
-                           Foreground="{DynamicResource FloatBarForeground}"
+                           Foreground="{DynamicResource FloatingBarForegroundBrush}"
                            VerticalAlignment="Center"/>
                     <ui:ToggleSwitch x:Name="ToggleSwitchEnableTwoFingerZoom"
                                      MinWidth="0" OnContent="" OffContent=""
@@ -56,7 +56,7 @@ mc:Ignorable="d">
                            Height="24" Width="24" />
                     <Label x:Name="TwoFingerRotateLabel"
                            Content="{x:Static props:FloatingBarStrings.FloatingBar_Gesture_TwoFingerRotate}"
-                           Foreground="{DynamicResource FloatBarForeground}"
+                           Foreground="{DynamicResource FloatingBarForegroundBrush}"
                            VerticalAlignment="Center"/>
                     <ui:ToggleSwitch x:Name="ToggleSwitchEnableTwoFingerRotation"
                                      MinWidth="0" OnContent="" OffContent="" 

@@ -995,6 +995,10 @@ namespace Ink_Canvas.Properties
             dict["Storage_Legend_Ink"] = ("StorageStrings", "Storage_Legend_Ink");
             dict["Storage_Legend_Other"] = ("StorageStrings", "Storage_Legend_Other");
             dict["Storage_Legend_Update"] = ("StorageStrings", "Storage_Legend_Update");
+            dict["Storage_Legend_Theme"] = ("StorageStrings", "Storage_Legend_Theme");
+            dict["Storage_Theme_Desc"] = ("StorageStrings", "Storage_Theme_Desc");
+            dict["Storage_Theme_Header"] = ("StorageStrings", "Storage_Theme_Header");
+            dict["Storage_Theme_Hint"] = ("StorageStrings", "Storage_Theme_Hint");
             dict["Storage_Logs_Desc"] = ("StorageStrings", "Storage_Logs_Desc");
             dict["Storage_Logs_Header"] = ("StorageStrings", "Storage_Logs_Header");
             dict["Storage_NavTooltip"] = ("StorageStrings", "Storage_NavTooltip");

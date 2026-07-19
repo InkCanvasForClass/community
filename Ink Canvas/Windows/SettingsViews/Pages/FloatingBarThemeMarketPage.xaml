@@ -1,0 +1,38 @@
+<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.FloatingBarThemeMarketPage"
+         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+         xmlns:props="clr-namespace:Ink_Canvas.Properties"
+         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+         Loaded="Page_Loaded">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+            <Button Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemeMarketRefresh}"
+                    Click="RefreshButton_Click" Padding="12,6" />
+            <Button Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemesOpenFolder}"
+                    Click="OpenFolderButton_Click" Padding="12,6" Margin="8,0,0,0" />
+            <ProgressBar x:Name="LoadingBar" Width="140" Height="4" Margin="12,0,0,0"
+                         VerticalAlignment="Center" Visibility="Collapsed" IsIndeterminate="True" />
+        </StackPanel>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <ItemsControl x:Name="ThemeList">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <ui:SettingsCard Header="{Binding Manifest.Name}"
+                                         Description="{Binding Manifest.Description}"
+                                         Margin="0,0,0,8">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Manifest.Author}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                                <Button Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemeMarketInstall}"
+                                        Tag="{Binding}" Click="InstallButton_Click" />
+                            </StackPanel>
+                        </ui:SettingsCard>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</ui:Page>
