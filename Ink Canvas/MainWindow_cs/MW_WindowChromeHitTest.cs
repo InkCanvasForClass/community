@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Input;
+using System.Text;
 
 namespace Ink_Canvas
 {
@@ -87,8 +88,28 @@ namespace Ink_Canvas
 
             if (_smartModeSlideShowHwnd == IntPtr.Zero)
             {
-                _smartModeSlideShowHwnd = FindWindow(PowerPointSlideShowWindowClassName, null);
-                LogHelper.WriteLogToFile($"[SmartMode] FindWindow 回退获取 Hwnd=0x{_smartModeSlideShowHwnd.ToInt64():X}", LogHelper.LogType.Info);
+                // 优先通过 _pptManager 获取放映窗口 HWND（适用于 COM/ROT 模式，静态字段 pptApplication 可能为 null）
+                try
+                {
+                    var appObj = _pptManager?.PPTApplication;
+                    if (appObj != null)
+                    {
+                        dynamic app = appObj;
+                        dynamic ssw = null;
+                        try { ssw = app.ActivePresentation?.SlideShowWindow; } catch { }
+                        if (ssw != null)
+                        {
+                            try { _smartModeSlideShowHwnd = new IntPtr(ssw.HWND); } catch { }
+                        }
+                    }
+                }
+                catch { }
+
+                if (_smartModeSlideShowHwnd == IntPtr.Zero)
+                {
+                    _smartModeSlideShowHwnd = FindActiveScreenClassWindow();
+                    LogHelper.WriteLogToFile($"[SmartMode] FindActiveScreenClassWindow 回退获取 Hwnd=0x{_smartModeSlideShowHwnd.ToInt64():X}", LogHelper.LogType.Info);
+                }
             }
 
             if (_smartModeSlideShowHwnd == IntPtr.Zero || _smartModeSlideWidth <= 0 || _smartModeSlideHeight <= 0)
