@@ -180,6 +180,14 @@ namespace Ink_Canvas.Properties
 
         public static string Storage_Update_Header => ResourceManager.GetString(nameof(Storage_Update_Header), _resourceCulture);
 
+        public static string Storage_Legend_Theme => ResourceManager.GetString(nameof(Storage_Legend_Theme), _resourceCulture);
+
+        public static string Storage_Theme_Desc => ResourceManager.GetString(nameof(Storage_Theme_Desc), _resourceCulture);
+
+        public static string Storage_Theme_Header => ResourceManager.GetString(nameof(Storage_Theme_Header), _resourceCulture);
+
+        public static string Storage_Theme_Hint => ResourceManager.GetString(nameof(Storage_Theme_Hint), _resourceCulture);
+
         public static string Backup_SuccessTitle => ResourceManager.GetString(nameof(Backup_SuccessTitle), _resourceCulture);
 
         public static string Backup_SuccessMsg => ResourceManager.GetString(nameof(Backup_SuccessMsg), _resourceCulture);

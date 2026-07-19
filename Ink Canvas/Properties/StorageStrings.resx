@@ -196,8 +196,20 @@
   <data name="Storage_Legend_Update" xml:space="preserve">
     <value>自动更新</value>
   </data>
+  <data name="Storage_Legend_Theme" xml:space="preserve">
+    <value>主题</value>
+  </data>
   <data name="Storage_Legend_Plugins" xml:space="preserve">
     <value>插件</value>
+  </data>
+  <data name="Storage_Theme_Desc" xml:space="preserve">
+    <value>位于 FloatingBarThemes 目录下的主题包，可清理</value>
+  </data>
+  <data name="Storage_Theme_Header" xml:space="preserve">
+    <value>主题</value>
+  </data>
+  <data name="Storage_Theme_Hint" xml:space="preserve">
+    <value>主题请前往浮动栏主题页面进行卸载。</value>
   </data>
   <data name="Storage_Logs_Desc" xml:space="preserve">
     <value>位于 Logs / Crashes 目录下的 .txt 日志与崩溃报告，可清理</value>
