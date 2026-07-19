@@ -1,5 +1,6 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
+using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Pages;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
@@ -477,6 +478,9 @@ namespace Ink_Canvas.Windows.SettingsViews
                 }
             }
 
+            // 重置当前页面的选中设置项（页面可在 Loaded 中再设置）
+            CurrentSettingKey = null;
+
             ApplySmoothScrollingToPage(e.Content as FrameworkElement);
         }
 
@@ -584,6 +588,7 @@ namespace Ink_Canvas.Windows.SettingsViews
         {
             public string Text;
             public string PageTag;
+            public string SettingKey;
             public WeakReference<FrameworkElement> Target;
         }
 
@@ -669,10 +674,12 @@ namespace Ink_Canvas.Windows.SettingsViews
 
                 if (!string.IsNullOrWhiteSpace(header) && target != null)
                 {
+                    var key = SettingsNavigator.GetSettingsKey(target);
                     _searchIndex.Add(new SearchEntry
                     {
                         Text = header.Trim(),
                         PageTag = pageTag,
+                        SettingKey = string.IsNullOrEmpty(key) ? null : key,
                         Target = new WeakReference<FrameworkElement>(target)
                     });
                 }
@@ -825,6 +832,153 @@ namespace Ink_Canvas.Windows.SettingsViews
         public NavigationView GetNavigationView()
         {
             return NavigationViewControl;
+        }
+
+        /// <summary>
+        /// 构造当前页面（或指定页面）的设置导航 URL。
+        /// </summary>
+        public string BuildSettingsUri(string pageTag = null, string settingKey = null)
+        {
+            pageTag = string.IsNullOrEmpty(pageTag) ? GetCurrentPageTag() : pageTag;
+            if (string.IsNullOrEmpty(pageTag)) pageTag = "HomePage";
+
+            string url = "icc://settings/" + Uri.EscapeDataString(pageTag);
+            if (!string.IsNullOrEmpty(settingKey))
+            {
+                url += "?key=" + Uri.EscapeDataString(settingKey);
+            }
+            return url;
+        }
+
+        /// <summary>
+        /// 获取当前 Frame 显示的页面 tag（与 _pageTypes 一致）。
+        /// </summary>
+        private string GetCurrentPageTag()
+        {
+            var t = rootFrame?.SourcePageType;
+            if (t == null) return null;
+            foreach (var kv in _pageTypes)
+            {
+                if (kv.Value == t) return kv.Key;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 滚动到目标设置项并临时高亮。设置项需通过 SettingsNavigator.SettingsKey 附加属性标记 JSON 键。
+        /// </summary>
+        public void HighlightSetting(string settingKey)
+        {
+            if (string.IsNullOrEmpty(settingKey) || rootFrame?.Content is not FrameworkElement root)
+                return;
+
+            try
+            {
+                EnsureSearchIndexBuilt();
+
+                var entry = _searchIndex?.FirstOrDefault(e =>
+                    string.Equals(e.PageTag, GetCurrentPageTag(), StringComparison.OrdinalIgnoreCase)
+                    && e.SettingKey == settingKey);
+
+                if (entry != null && entry.Target != null && entry.Target.TryGetTarget(out var fe))
+                {
+                    FlashHighlight(fe);
+                    return;
+                }
+
+                // 退路：手动遍历当前页面逻辑树，按 SettingsKey 匹配
+                FrameworkElement match = null;
+                foreach (var node in EnumerateLogicalDescendants(root))
+                {
+                    if (node is FrameworkElement fe2)
+                    {
+                        var key = SettingsNavigator.GetSettingsKey(fe2);
+                        if (string.Equals(key, settingKey, StringComparison.OrdinalIgnoreCase))
+                        {
+                            match = fe2;
+                            break;
+                        }
+                    }
+                }
+
+                if (match != null)
+                {
+                    FlashHighlight(match);
+                }
+                else
+                {
+                    LogHelper.WriteLogToFile($"HighlightSetting: 未在当前页找到设置项 [{settingKey}]", LogHelper.LogType.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"HighlightSetting 异常: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        private void FlashHighlight(FrameworkElement target)
+        {
+            try { target.BringIntoView(); } catch { }
+
+            // 给目标元素加一个临时高亮描边，2 秒后撤销
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    if (target is System.Windows.Controls.Border border)
+                    {
+                        var original = border.BorderBrush;
+                        var originalThickness = border.BorderThickness;
+                        border.BorderBrush = System.Windows.Media.Brushes.OrangeRed;
+                        border.BorderThickness = new Thickness(2);
+
+                        var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+                        timer.Tick += (s, e) =>
+                        {
+                            timer.Stop();
+                            try { border.BorderBrush = original; border.BorderThickness = originalThickness; } catch { }
+                        };
+                        timer.Start();
+                    }
+                    else if (target is System.Windows.Controls.Panel panel)
+                    {
+                        // SettingsCard / LabeledSettingsCard 等没有直接的 Border，加一层覆盖 Border
+                        var originalBackground = panel.Background;
+                        panel.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(64, 255, 69, 0));
+
+                        var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+                        timer.Tick += (s, e) =>
+                        {
+                            timer.Stop();
+                            try { panel.Background = originalBackground; } catch { }
+                        };
+                        timer.Start();
+                    }
+                }
+                catch { }
+            }), System.Windows.Threading.DispatcherPriority.Background);
+        }
+
+        /// <summary>
+        /// 当前选中的设置项 JSON 键（用于生成深链接 URL，可由页面在 Loaded 时赋值）。
+        /// </summary>
+        public string CurrentSettingKey { get; set; }
+
+        private void CopySettingsUriButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string uri = BuildSettingsUri(null, string.IsNullOrEmpty(CurrentSettingKey) ? null : CurrentSettingKey);
+                if (CopySettingsUriButton != null)
+                {
+                    CopySettingsUriButton.Text = uri;
+                }
+                Clipboard.SetText(uri);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"复制设置导航 URL 失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
         }
 
         private async System.Threading.Tasks.Task PreloadAllPagesAsync()
