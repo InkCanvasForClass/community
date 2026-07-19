@@ -415,13 +415,36 @@ namespace Ink_Canvas
                 if (window == null)
                 {
                     window = new Windows.SettingsViews.SettingsWindow();
+                    // 跳过 Loaded 中默认导航到 HomePage 的行为，由本方法指定目标页
+                    window.SuppressInitialNavigation = true;
                     window.Show();
+                    // 强制窗口处于正常可见状态（避免新窗口被意外最小化）
+                    if (window.WindowState == WindowState.Minimized)
+                        window.WindowState = WindowState.Normal;
+                    window.Activate();
+                    // 同步到 BtnSettings_Click 使用的静态字段，避免软件按钮再开一个新窗口
+                    _settingsWindow = window;
+                    window.Closed += (s, args) =>
+                    {
+                        if (ReferenceEquals(_settingsWindow, window))
+                            _settingsWindow = null;
+                    };
                 }
                 else
                 {
                     if (window.WindowState == WindowState.Minimized)
                         window.WindowState = WindowState.Normal;
                     window.Activate();
+                    // 同步静态引用，确保软件按钮也能复用此窗口
+                    if (_settingsWindow == null)
+                    {
+                        _settingsWindow = window;
+                        window.Closed += (s, args) =>
+                        {
+                            if (ReferenceEquals(_settingsWindow, window))
+                                _settingsWindow = null;
+                        };
+                    }
                 }
 
                 window.NavigateToPage(pageTag);
@@ -470,8 +493,8 @@ namespace Ink_Canvas
 
                 if (!string.IsNullOrEmpty(settingKey))
                 {
-                    Dispatcher.BeginInvoke(new Action(() => window.HighlightSetting(settingKey)),
-                        System.Windows.Threading.DispatcherPriority.Background);
+                    // 设置挂起的高亮 key，等页面 Loaded 后再触发，避免可视树尚未构建导致高亮失效
+                    window.SetPendingHighlightKey(settingKey);
                 }
             }
             catch (Exception ex)
