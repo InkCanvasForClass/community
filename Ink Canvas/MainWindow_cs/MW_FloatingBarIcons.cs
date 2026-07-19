@@ -1392,10 +1392,10 @@ namespace Ink_Canvas
             // 根据设置决定使用哪个点名窗口
             if (Settings.RandSettings.UseNewRollCallUI)
             {
-                // 使用新点名UI - 随机抽模式
+                // 使用新点名UI - 随机抽模式（非模态，可与主窗口同时操作）
                 var rollCallWindow = new NewStyleRollCallWindow(Settings, false);
                 rollCallWindow.Owner = this;
-                rollCallWindow.ShowDialog();
+                rollCallWindow.Show();
             }
             else
             {
@@ -1468,9 +1468,9 @@ namespace Ink_Canvas
                     // 调用失败时回退到相应的点名窗口
                     if (Settings.RandSettings.UseNewRollCallUI)
                     {
-                        var rollCallWindow = new NewStyleRollCallWindow(Settings, true); // 单次抽模式
+                        var rollCallWindow = new NewStyleRollCallWindow(Settings, true); // 单次抽模式（非模态）
                         rollCallWindow.Owner = this;
-                        rollCallWindow.ShowDialog();
+                        rollCallWindow.Show();
                     }
                     else
                     {
@@ -1485,10 +1485,10 @@ namespace Ink_Canvas
                 // 根据设置决定使用哪个点名窗口
                 if (Settings.RandSettings.UseNewRollCallUI)
                 {
-                    // 使用新点名UI - 单次抽模式
+                    // 使用新点名UI - 单次抽模式（非模态，可与主窗口同时操作）
                     var rollCallWindow = new NewStyleRollCallWindow(Settings, true);
                     rollCallWindow.Owner = this;
-                    rollCallWindow.ShowDialog();
+                    rollCallWindow.Show();
                 }
                 else
                 {
