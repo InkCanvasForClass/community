@@ -239,6 +239,10 @@ namespace Ink_Canvas.Properties
         public static string Theme_SelectCustomSplashImage => ResourceManager.GetString(nameof(Theme_SelectCustomSplashImage), _resourceCulture);
 
         public static string Theme_FloatingBarThemesTitle => ResourceManager.GetString(nameof(Theme_FloatingBarThemesTitle), _resourceCulture);
+        public static string Theme_FloatingBarThemeMarketTitle => ResourceManager.GetString(nameof(Theme_FloatingBarThemeMarketTitle), _resourceCulture);
+        public static string Theme_FloatingBarThemeMarketRefresh => ResourceManager.GetString(nameof(Theme_FloatingBarThemeMarketRefresh), _resourceCulture);
+        public static string Theme_FloatingBarThemeMarketInstall => ResourceManager.GetString(nameof(Theme_FloatingBarThemeMarketInstall), _resourceCulture);
+
         public static string Theme_FloatingBarThemesDescription => ResourceManager.GetString(nameof(Theme_FloatingBarThemesDescription), _resourceCulture);
         public static string Theme_FloatingBarThemesFolder => ResourceManager.GetString(nameof(Theme_FloatingBarThemesFolder), _resourceCulture);
         public static string Theme_FloatingBarThemesOpenFolder => ResourceManager.GetString(nameof(Theme_FloatingBarThemesOpenFolder), _resourceCulture);

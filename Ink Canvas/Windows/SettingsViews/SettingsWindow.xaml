@@ -420,15 +420,6 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Personalize}"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
-                        <ui:NavigationViewItem
-                            x:Name="FloatingBarThemePageItem"
-                            Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemesTitle}"
-                            Tag="FloatingBarThemePage"
-                            ToolTipService.ToolTip="{x:Static props:ThemeStrings.Theme_FloatingBarThemesDescription}">
-                            <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Color}"/>
-                            </ui:NavigationViewItem.Icon>
-                        </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
 
@@ -503,6 +494,35 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}"/>
                     </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
+                <ui:NavigationViewItemHeader Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemesTitle}"/>
+                <ui:NavigationViewItem
+                    x:Name="FloatingBarThemeItem"
+                    Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemesTitle}"
+                    SelectsOnInvoked="False"
+                    ToolTipService.ToolTip="{x:Static props:ThemeStrings.Theme_FloatingBarThemesDescription}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Color}"/>
+                    </ui:NavigationViewItem.Icon>
+                    <ui:NavigationViewItem.MenuItems>
+                        <ui:NavigationViewItem
+                            x:Name="FloatingBarThemePageItem"
+                            Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemesTitle}"
+                            Tag="FloatingBarThemePage">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Color}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="FloatingBarThemeMarketPageItem"
+                            Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemeMarketTitle}"
+                            Tag="FloatingBarThemeMarketPage">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Shop}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                    </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
 
                 <ui:NavigationViewItemHeader Content="{x:Static props:NavStrings.Nav_PluginSettings}"/>

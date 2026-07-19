@@ -321,6 +321,10 @@
   <data name="Theme_FloatingBarBorderColor_Custom" xml:space="preserve">
     <value>Custom</value>
   </data>
+  <data name="Theme_FloatingBarThemeMarketTitle" xml:space="preserve"><value>Floating Bar Theme Market</value></data>
+  <data name="Theme_FloatingBarThemeMarketRefresh" xml:space="preserve"><value>Refresh market</value></data>
+  <data name="Theme_FloatingBarThemeMarketInstall" xml:space="preserve"><value>Install theme</value></data>
+
   <data name="Theme_FloatingBarThemesTitle" xml:space="preserve">
     <value>Floating Bar Themes</value>
   </data>

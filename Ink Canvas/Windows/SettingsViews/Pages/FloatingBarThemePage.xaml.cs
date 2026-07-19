@@ -36,13 +36,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
                     ThemeStrings.Theme_FloatingBarThemesApplyFailed,
-                    ThemeStrings.Theme_FloatingBarThemesTitle);
+                    ThemeStrings.Theme_FloatingBarThemeMarketTitle);
             }
-        }
-
-        private void ButtonReloadThemes_Click(object sender, RoutedEventArgs e)
-        {
-            RefreshThemes();
         }
 
         private void ButtonOpenThemeFolder_Click(object sender, RoutedEventArgs e)

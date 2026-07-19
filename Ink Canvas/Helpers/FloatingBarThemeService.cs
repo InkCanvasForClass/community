@@ -28,9 +28,7 @@ namespace Ink_Canvas.Helpers
             public string DisplayName => string.IsNullOrWhiteSpace(Name) ? Id : Name;
         }
 
-        private const string DefaultThemeId = "luotianyi";
-        private const string LegacyDefaultThemeId = "default";
-        private const string BuiltInThemeUri = "/InkCanvasForClass;component/Resources/FloatingBarThemes/LuoTianyi/Theme.xaml";
+        private const string DefaultThemeId = "default";
         private readonly MainWindow _mainWindow;
         private ResourceDictionary _themeDictionary;
 
@@ -47,8 +45,8 @@ namespace Ink_Canvas.Helpers
             Themes.Add(new ThemeInfo
             {
                 Id = DefaultThemeId,
-                Name = "洛天依 · 苍青音律",
-                Description = "以洛天依的苍青、青绿色与粉色为灵感的浮动栏主题",
+                Name = ThemeStrings.Theme_FloatingBarBorderColor_Default,
+                Description = ThemeStrings.Theme_FloatingBarBorderColorHint,
                 IsBuiltIn = true
             });
 
@@ -87,21 +85,17 @@ namespace Ink_Canvas.Helpers
         private ResourceDictionary CreateBuiltInThemeDictionary()
         {
             var dictionary = new ResourceDictionary();
-            dictionary["FloatingBarBackgroundBrush"] = new LinearGradientBrush(
-                Color.FromArgb(0xF2, 0x0C, 0x52, 0x66),
-                Color.FromArgb(0xF2, 0x3B, 0x61, 0x7D), 45);
-            dictionary["FloatingBarForegroundBrush"] = new SolidColorBrush(Color.FromRgb(0xF3, 0xFF, 0xFF));
-            dictionary["FloatingBarBorderBrush"] = new SolidColorBrush(Color.FromArgb(0xB3, 0xA6, 0xF4, 0xF2));
-            dictionary["FloatingBarAccentBrush"] = new SolidColorBrush(Color.FromRgb(0x73, 0xE0, 0xD4));
-            dictionary["FloatingBarButtonHoverBrush"] = new SolidColorBrush(Color.FromArgb(0x3D, 0x73, 0xE0, 0xD4));
-            dictionary["FloatingBarButtonPressedBrush"] = new SolidColorBrush(Color.FromArgb(0x70, 0x73, 0xE0, 0xD4));
-            dictionary["FloatingBarPopupBackgroundBrush"] = new SolidColorBrush(Color.FromArgb(0xF2, 0x0B, 0x3D, 0x4A));
-            dictionary["FloatingBarPopupInnerBackgroundBrush"] = new SolidColorBrush(Color.FromArgb(0xF2, 0x1C, 0x59, 0x66));
-            dictionary["FloatingBarPopupInnerBorderBrush"] = new SolidColorBrush(Color.FromArgb(0xB3, 0x73, 0xE0, 0xD4));
-            dictionary["FloatingBarPopupTitleForegroundBrush"] = new SolidColorBrush(Color.FromArgb(0xFF, 0xBF, 0xFF, 0xF8));
-            dictionary["FloatingBarPopupCloseBrush"] = new SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0x78, 0x91));
-            dictionary["FloatingBarPopupHoverBrush"] = new SolidColorBrush(Color.FromArgb(0x44, 0x73, 0xE0, 0xD4));
-            dictionary["FloatingBarTitleBackgroundBrush"] = new SolidColorBrush(Color.FromArgb(0xCC, 0x2B, 0x9A, 0xA0));
+            dictionary["FloatingBarBackgroundBrush"] = Application.Current.TryFindResource("FloatBarBackground") ?? new SolidColorBrush(Color.FromArgb(0xF2, 0x1A, 0x1C, 0x1E));
+            dictionary["FloatingBarForegroundBrush"] = Application.Current.TryFindResource("FloatBarForeground") ?? Brushes.White;
+            dictionary["FloatingBarBorderBrush"] = Application.Current.TryFindResource("FloatBarBorderBrush") ?? Brushes.White;
+            dictionary["FloatingBarAccentBrush"] = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+            dictionary["FloatingBarButtonHoverBrush"] = new SolidColorBrush(Color.FromArgb(0x22, 0x25, 0x63, 0xEB));
+            dictionary["FloatingBarButtonPressedBrush"] = new SolidColorBrush(Color.FromArgb(0x44, 0x25, 0x63, 0xEB));
+            dictionary["FloatingBarPopupBackgroundBrush"] = Application.Current.TryFindResource("ToolsPopupBackground") ?? dictionary["FloatingBarBackgroundBrush"];
+            dictionary["FloatingBarPopupInnerBackgroundBrush"] = Application.Current.TryFindResource("ToolsPopupInnerBackground") ?? dictionary["FloatingBarBackgroundBrush"];
+            dictionary["FloatingBarPopupInnerBorderBrush"] = Application.Current.TryFindResource("ToolsPopupInnerBorderBrush") ?? dictionary["FloatingBarBorderBrush"];
+            dictionary["FloatingBarPopupTitleForegroundBrush"] = Application.Current.TryFindResource("ToolsPopupTitleForeground") ?? dictionary["FloatingBarForegroundBrush"];
+            dictionary["FloatingBarPopupCloseBrush"] = new SolidColorBrush(Color.FromRgb(220, 38, 38));
             return dictionary;
         }
 
@@ -121,9 +115,9 @@ namespace Ink_Canvas.Helpers
                     };
 
                 var resources = Application.Current.Resources;
-                if (_themeDictionary != null) resources.MergedDictionaries.Remove(_themeDictionary);
-                _themeDictionary = dictionary;
-                resources.MergedDictionaries.Add(dictionary);
+            if (_themeDictionary != null) resources.MergedDictionaries.Remove(_themeDictionary);
+            _themeDictionary = dictionary;
+            resources.MergedDictionaries.Add(dictionary);
 
                 MainWindow.Settings.Appearance.FloatingBarThemeId = theme.Id;
                 SettingsManager.SaveSettingsToFile();
