@@ -11,8 +11,6 @@
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="32,0,32,32">
             <ikw:SimpleStackPanel MaxWidth="900" Spacing="8">
-                <TextBlock Text="{x:Static props:ThemeStrings.Theme_FloatingBarThemesTitle}"
-                           Style="{DynamicResource TitleTextBlockStyle}" Margin="0,0,0,4" />
                 <TextBlock Text="{x:Static props:ThemeStrings.Theme_FloatingBarThemesDescription}"
                            Style="{DynamicResource BodyTextBlockStyle}" Margin="0,0,0,16" />
 

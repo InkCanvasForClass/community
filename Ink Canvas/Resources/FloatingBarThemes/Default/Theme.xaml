@@ -6,5 +6,11 @@
     <SolidColorBrush x:Key="FloatingBarBorderBrush" Color="Black" />
     <SolidColorBrush x:Key="FloatingBarAccentBrush" Color="#FF2563EB" />
     <SolidColorBrush x:Key="FloatingBarButtonHoverBrush" Color="#222563EB" />
-    <SolidColorBrush x:Key="FloatingBarButtonPressedBrush" Color="#442563EB" />
+    <SolidColorBrush x:Key="FloatingBarPopupBackgroundBrush" Color="#F21F3640" />
+    <SolidColorBrush x:Key="FloatingBarPopupInnerBackgroundBrush" Color="#F22A4854" />
+    <SolidColorBrush x:Key="FloatingBarPopupInnerBorderBrush" Color="#8899E6E4" />
+    <SolidColorBrush x:Key="FloatingBarPopupTitleForegroundBrush" Color="#FFB9FFFA" />
+    <SolidColorBrush x:Key="FloatingBarPopupCloseBrush" Color="#FFFF6F83" />
+    <SolidColorBrush x:Key="FloatingBarPopupHoverBrush" Color="#3373E0D4" />
+
 </ResourceDictionary>

@@ -14,7 +14,7 @@
             <Setter Property="Padding" Value="0" />
             <Setter Property="HorizontalContentAlignment" Value="Center" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="Foreground" Value="{DynamicResource FloatBarForeground}" />
+            <Setter Property="Foreground" Value="{DynamicResource FloatingBarForegroundBrush}" />
             <Setter Property="helpers:AutoFontSizeHelper.IsEnabled" Value="True" />
             <Setter Property="helpers:AutoFontSizeHelper.MinFontSize" Value="3.5" />
             <Setter Property="helpers:AutoFontSizeHelper.MaxFontSize" Value="20" />

@@ -67,6 +67,8 @@ namespace Ink_Canvas.Helpers
                     if (manifest == null || string.IsNullOrWhiteSpace(manifest.Id)) continue;
                     manifest.Path = directory;
                     manifest.IsBuiltIn = false;
+                    if (Themes.Any(x => string.Equals(x.Id, manifest.Id, StringComparison.OrdinalIgnoreCase)))
+                        continue;
                     Themes.Add(manifest);
                 }
                 catch (Exception ex)

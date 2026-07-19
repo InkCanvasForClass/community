@@ -19,7 +19,7 @@
                 Padding="4" MinWidth="28" MinHeight="28"
                 Background="Transparent" BorderThickness="0">
             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChromeCloseContrast}"
-                         Foreground="#DC2626" FontSize="16" />
+                         Foreground="{DynamicResource FloatingBarPopupTitleForegroundBrush}" FontSize="16" />
             <Button.Template>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="RootBorder" Background="{TemplateBinding Background}"
