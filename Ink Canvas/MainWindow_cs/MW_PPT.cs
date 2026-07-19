@@ -1583,8 +1583,11 @@ namespace Ink_Canvas
                     }
                     else
                     {
-                        LogHelper.WriteLogToFile("[SmartMode] Agent 返回空区域列表", LogHelper.LogType.Info);
-                        _smartModeRegions = null;
+                        LogHelper.WriteLogToFile("[SmartMode] Agent 返回空区域列表，回退 COM 直接获取（VSTO 未加载/无加载项）", LogHelper.LogType.Info);
+                        _smartModeRegions = GetVideoRegionsViaCom();
+                        _smartModeSlideIndex = _currentSlideShowPosition;
+                        if (_smartModeRegions != null)
+                            LogHelper.WriteLogToFile($"[SmartMode] COM 回退获取到 {_smartModeRegions.Count} 个区域", LogHelper.LogType.Info);
                     }
                 }
                 else
@@ -1610,25 +1613,38 @@ namespace Ink_Canvas
         /// <summary>
         /// 通过 COM interop 直接从 PowerPoint 获取当前幻灯片的视频控件区域（适用于 COM/ROT 模式）。
         /// </summary>
+        /// <remarks>
+        /// 优先通过 _pptManager.PPTApplication 获取应用实例（ROT 模式下静态字段 pptApplication 为 null），
+        /// 再通过活动演示文稿的 SlideShowWindow 定位当前幻灯片，避免依赖静态状态。
+        /// </remarks>
         private List<SmartRegion> GetVideoRegionsViaCom()
         {
             try
             {
-                var app = pptApplication;
-                if (app == null) return null;
+                // 优先使用管理器持有的 COM 实例（ROT 模式下静态字段 pptApplication 为 null）。
+                object appObj = _pptManager?.PPTApplication ?? (object)pptApplication;
+                if (appObj == null)
+                {
+                    LogHelper.WriteLogToFile("[SmartMode] COM 获取失败: 未找到 PowerPoint 应用程序实例", LogHelper.LogType.Warning);
+                    return null;
+                }
 
-                Presentation pres = null;
-                try { pres = app.ActivePresentation; } catch { return null; }
+                dynamic app = appObj;
+
+                Microsoft.Office.Interop.PowerPoint.Presentation pres = null;
+                try { pres = app.ActivePresentation as Microsoft.Office.Interop.PowerPoint.Presentation; } catch { return null; }
                 if (pres == null) return null;
 
-                SlideShowWindow ssw = null;
-                try { ssw = pres.SlideShowWindow; } catch { return null; }
+                Microsoft.Office.Interop.PowerPoint.SlideShowWindow ssw = null;
+                try { ssw = pres.SlideShowWindow as Microsoft.Office.Interop.PowerPoint.SlideShowWindow; } catch { return null; }
                 if (ssw == null) return null;
 
-                var view = ssw.View;
+                dynamic view = null;
+                try { view = ssw.View; } catch { return null; }
                 if (view == null) return null;
 
-                var slide = view.Slide;
+                Microsoft.Office.Interop.PowerPoint.Slide slide = null;
+                try { slide = view.Slide as Microsoft.Office.Interop.PowerPoint.Slide; } catch { return null; }
                 if (slide == null) return null;
 
                 float slideWidth = pres.PageSetup.SlideWidth;
@@ -1636,7 +1652,12 @@ namespace Ink_Canvas
 
                 _smartModeSlideWidth = slideWidth;
                 _smartModeSlideHeight = slideHeight;
-                _smartModeSlideShowHwnd = FindWindow(PowerPointSlideShowWindowClassName, null);
+                // 优先使用放映窗口自身的 HWND，避免 FindWindow 命中陈旧窗口
+                try { _smartModeSlideShowHwnd = new IntPtr(ssw.HWND); } catch { _smartModeSlideShowHwnd = IntPtr.Zero; }
+                if (_smartModeSlideShowHwnd == IntPtr.Zero)
+                {
+                    _smartModeSlideShowHwnd = FindActiveScreenClassWindow();
+                }
 
                 var regions = new List<SmartRegion>();
                 foreach (Microsoft.Office.Interop.PowerPoint.Shape shape in slide.Shapes)
@@ -1663,6 +1684,39 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"[SmartMode] COM 获取失败: {ex.Message}", LogHelper.LogType.Warning);
                 return null;
             }
+        }
+
+        /// <summary>
+        /// 枚举顶层 screenClass 窗口，返回当前可见且非最小化的放映窗口句柄。
+        /// </summary>
+        /// <remarks>
+        /// FindWindow("screenClass", null) 会返回 Z 序最前的窗口，可能命中陈旧或已结束的放映；
+        /// 此处枚举所有顶层窗口并校验可见性，挑选最合适的放映窗口。
+        /// </remarks>
+        private IntPtr FindActiveScreenClassWindow()
+        {
+            IntPtr best = IntPtr.Zero;
+            try
+            {
+                EnumWindows((hWnd, lParam) =>
+                {
+                    if (hWnd == IntPtr.Zero) return true;
+                    if (!IsWindowVisible(hWnd)) return true;
+                    if (IsIconic(hWnd)) return true;
+
+                    var sb = new StringBuilder(64);
+                    if (GetClassName(hWnd, sb, sb.Capacity) == 0) return true;
+                    if (!string.Equals(sb.ToString(), PowerPointSlideShowWindowClassName, StringComparison.Ordinal)) return true;
+
+                    best = hWnd;
+                    return false; // 停止枚举
+                }, IntPtr.Zero);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[SmartMode] 枚举放映窗口失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+            return best;
         }
 
         /// <summary>

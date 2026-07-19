@@ -102,6 +102,9 @@
   <data name="Nav_Home" xml:space="preserve">
     <value>大本营</value>
   </data>
+  <data name="Nav_CopySettingsUri_Tooltip" xml:space="preserve">
+    <value>复制这页设置的导航链接</value>
+  </data>
   <data name="Nav_Home_Tooltip" xml:space="preserve">
     <value>快速传送</value>
   </data>

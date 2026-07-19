@@ -105,6 +105,9 @@
   <data name="Nav_Home_Tooltip" xml:space="preserve">
     <value>Quick navigation</value>
   </data>
+  <data name="Nav_CopySettingsUri_Tooltip" xml:space="preserve">
+    <value>Copy a link to this settings page</value>
+  </data>
   <data name="Nav_ICCSettings" xml:space="preserve">
     <value>ICC CE Settings</value>
   </data>

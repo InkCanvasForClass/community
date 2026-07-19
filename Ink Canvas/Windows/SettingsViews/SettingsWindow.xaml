@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
     xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+    xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
 Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
     Width="1138" Height="750"
     MinWidth="270" MinHeight="220"
@@ -63,6 +64,11 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                     <TextBlock x:Name="AppTitleText"
                         VerticalAlignment="Center"
                         Text="{x:Static props:NavStrings.Nav_AppSettings}" TextWrapping="NoWrap"/>
+                    <controls:CopyButton x:Name="CopySettingsUriButton"
+                        Width="32" Height="32" Opacity="0.7"
+                        WindowChrome.IsHitTestVisibleInChrome="True"
+                        ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_CopySettingsUri_Tooltip}"
+                        Click="CopySettingsUriButton_Click"/>
                 </ikw:SimpleStackPanel>
             </Grid>
         </Border>
