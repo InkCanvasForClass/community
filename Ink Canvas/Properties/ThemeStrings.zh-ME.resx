@@ -321,6 +321,28 @@
   <data name="Theme_FloatingBarBorderColor_Custom" xml:space="preserve">
     <value>自定义</value>
   </data>
+  <data name="Theme_FloatingBarThemesTitle" xml:space="preserve">
+    <value>浮動工具列主題</value>
+  </data>
+  <data name="Theme_FloatingBarThemesDescription" xml:space="preserve">
+    <value>管理浮動工具列的主題套件、背景、色彩與視覺樣式。</value>
+  </data>
+  <data name="Theme_FloatingBarThemesFolder" xml:space="preserve">
+    <value>主題管理</value>
+  </data>
+  <data name="Theme_FloatingBarThemesOpenFolder" xml:space="preserve">
+    <value>開啟主題資料夾</value>
+  </data>
+  <data name="Theme_FloatingBarThemesReload" xml:space="preserve">
+    <value>重新載入主題</value>
+  </data>
+  <data name="Theme_FloatingBarThemesApply" xml:space="preserve">
+    <value>套用主題</value>
+  </data>
+  <data name="Theme_FloatingBarThemesApplyFailed" xml:space="preserve">
+    <value>主題套用失敗，請檢查主題檔案。</value>
+  </data>
+
   <data name="Theme_WindowBackdrop" xml:space="preserve">
     <value>窗口背景样式</value>
   </data>

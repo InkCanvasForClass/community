@@ -421,12 +421,12 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
-                            x:Name="ToolbarMenuPageItem"
-                            Content="{x:Static props:NavStrings.Nav_ToolbarMenu}"
-                            Tag="ToolbarMenuPage"
-                            ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_ToolbarMenu_Tooltip}">
+                            x:Name="FloatingBarThemePageItem"
+                            Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemesTitle}"
+                            Tag="FloatingBarThemePage"
+                            ToolTipService.ToolTip="{x:Static props:ThemeStrings.Theme_FloatingBarThemesDescription}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BulletedList}"/>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Color}"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>

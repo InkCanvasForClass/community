@@ -238,7 +238,14 @@ namespace Ink_Canvas.Properties
 
         public static string Theme_SelectCustomSplashImage => ResourceManager.GetString(nameof(Theme_SelectCustomSplashImage), _resourceCulture);
 
-        public static string Theme_HitokotoCategory_Animation => ResourceManager.GetString(nameof(Theme_HitokotoCategory_Animation), _resourceCulture);
+        public static string Theme_FloatingBarThemesTitle => ResourceManager.GetString(nameof(Theme_FloatingBarThemesTitle), _resourceCulture);
+        public static string Theme_FloatingBarThemesDescription => ResourceManager.GetString(nameof(Theme_FloatingBarThemesDescription), _resourceCulture);
+        public static string Theme_FloatingBarThemesFolder => ResourceManager.GetString(nameof(Theme_FloatingBarThemesFolder), _resourceCulture);
+        public static string Theme_FloatingBarThemesOpenFolder => ResourceManager.GetString(nameof(Theme_FloatingBarThemesOpenFolder), _resourceCulture);
+        public static string Theme_FloatingBarThemesReload => ResourceManager.GetString(nameof(Theme_FloatingBarThemesReload), _resourceCulture);
+        public static string Theme_FloatingBarThemesApply => ResourceManager.GetString(nameof(Theme_FloatingBarThemesApply), _resourceCulture);
+        public static string Theme_FloatingBarThemesApplyFailed => ResourceManager.GetString(nameof(Theme_FloatingBarThemesApplyFailed), _resourceCulture);
+
 
         public static string Theme_HitokotoCategory_Manga => ResourceManager.GetString(nameof(Theme_HitokotoCategory_Manga), _resourceCulture);
 

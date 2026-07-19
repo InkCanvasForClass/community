@@ -1,0 +1,47 @@
+<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties"
+         x:Class="Ink_Canvas.Windows.SettingsViews.Pages.FloatingBarThemePage"
+         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+         xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+         mc:Ignorable="d"
+         Title="FloatingBarThemePage">
+    <ScrollViewer PanningMode="VerticalFirst">
+        <Grid Margin="32,0,32,32">
+            <ikw:SimpleStackPanel MaxWidth="900" Spacing="8">
+                <TextBlock Text="{x:Static props:ThemeStrings.Theme_FloatingBarThemesTitle}"
+                           Style="{DynamicResource TitleTextBlockStyle}" Margin="0,0,0,4" />
+                <TextBlock Text="{x:Static props:ThemeStrings.Theme_FloatingBarThemesDescription}"
+                           Style="{DynamicResource BodyTextBlockStyle}" Margin="0,0,0,16" />
+
+                <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_FloatingBarThemesFolder}">
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                        <Button x:Name="ButtonOpenThemeFolder"
+                                Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemesOpenFolder}"
+                                Click="ButtonOpenThemeFolder_Click" />
+                        <Button x:Name="ButtonReloadThemes"
+                                Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemesReload}"
+                                Click="ButtonReloadThemes_Click" />
+                    </ikw:SimpleStackPanel>
+                </ui:SettingsCard>
+
+                <ItemsControl x:Name="ThemeItemsControl" Margin="0,8,0,0">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <ui:SettingsCard Header="{Binding DisplayName}"
+                                             Description="{Binding Description}"
+                                             Margin="0,0,0,8">
+                                <Button Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemesApply}"
+                                        Tag="{Binding Id}"
+                                        Click="ButtonApplyTheme_Click"
+                                        HorizontalAlignment="Right" />
+                            </ui:SettingsCard>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ikw:SimpleStackPanel>
+        </Grid>
+    </ScrollViewer>
+</ui:Page>

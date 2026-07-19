@@ -321,6 +321,28 @@
   <data name="Theme_FloatingBarBorderColor_Custom" xml:space="preserve">
     <value>Custom</value>
   </data>
+  <data name="Theme_FloatingBarThemesTitle" xml:space="preserve">
+    <value>Floating Bar Themes</value>
+  </data>
+  <data name="Theme_FloatingBarThemesDescription" xml:space="preserve">
+    <value>Manage floating bar theme packages, backgrounds, colors, and visual styles.</value>
+  </data>
+  <data name="Theme_FloatingBarThemesFolder" xml:space="preserve">
+    <value>Theme management</value>
+  </data>
+  <data name="Theme_FloatingBarThemesOpenFolder" xml:space="preserve">
+    <value>Open theme folder</value>
+  </data>
+  <data name="Theme_FloatingBarThemesReload" xml:space="preserve">
+    <value>Reload themes</value>
+  </data>
+  <data name="Theme_FloatingBarThemesApply" xml:space="preserve">
+    <value>Apply theme</value>
+  </data>
+  <data name="Theme_FloatingBarThemesApplyFailed" xml:space="preserve">
+    <value>Failed to apply the theme. Please check the theme files.</value>
+  </data>
+
   <data name="Theme_WindowBackdrop" xml:space="preserve">
     <value>Window background style</value>
   </data>
