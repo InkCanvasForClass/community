@@ -223,7 +223,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void BtnCleanTheme_Click(object sender, RoutedEventArgs e)
         {
-            CleanWithConfirm(StorageStrings.Storage_Theme_Header, ThemeDirs, keepRoot: true);
+            CleanWithConfirm(LocalizationHelper.GetString("Storage_Theme_Header"), ThemeDirs, keepRoot: true);
         }
 
         private async void CleanWithConfirm(string displayName, string[] subDirs, bool keepRoot)
