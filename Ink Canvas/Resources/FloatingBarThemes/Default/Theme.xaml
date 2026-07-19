@@ -1,0 +1,10 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- ClassIsland-style floating bar theme contract. Custom themes can override these resources. -->
+    <SolidColorBrush x:Key="FloatingBarBackgroundBrush" Color="White" />
+    <SolidColorBrush x:Key="FloatingBarForegroundBrush" Color="Black" />
+    <SolidColorBrush x:Key="FloatingBarBorderBrush" Color="Black" />
+    <SolidColorBrush x:Key="FloatingBarAccentBrush" Color="#FF2563EB" />
+    <SolidColorBrush x:Key="FloatingBarButtonHoverBrush" Color="#222563EB" />
+    <SolidColorBrush x:Key="FloatingBarButtonPressedBrush" Color="#442563EB" />
+</ResourceDictionary>

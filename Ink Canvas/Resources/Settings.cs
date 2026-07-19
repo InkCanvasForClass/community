@@ -591,6 +591,9 @@ namespace Ink_Canvas
         [JsonProperty("floatingBarBorderColor")]
         public string FloatingBarBorderColor { get; set; } = "";
 
+        [JsonProperty("floatingBarThemeId")]
+        public string FloatingBarThemeId { get; set; } = "default";
+
         [JsonProperty("floatingBarBorderColorMode")]
         public int FloatingBarBorderColorMode { get; set; } = 0;
 

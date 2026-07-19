@@ -787,8 +787,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 Child = contentPanel,
                 Tag = ContentBorderTag
             };
-            border.SetResourceReference(Border.BackgroundProperty, "FloatBarBackground");
-            border.SetResourceReference(Border.BorderBrushProperty, "FloatBarBorderBrush");
+            border.SetResourceReference(Border.BackgroundProperty, "FloatingBarBackgroundBrush");
+            border.SetResourceReference(Border.BorderBrushProperty, "FloatingBarBorderBrush");
 
             return border;
         }
@@ -824,8 +824,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     Child = contentPanel,
                     Tag = ContentBorderTag
                 };
-                wrapper.SetResourceReference(Border.BackgroundProperty, "FloatBarBackground");
-                wrapper.SetResourceReference(Border.BorderBrushProperty, "FloatBarBorderBrush");
+                wrapper.SetResourceReference(Border.BackgroundProperty, "FloatingBarBackgroundBrush");
+                wrapper.SetResourceReference(Border.BorderBrushProperty, "FloatingBarBorderBrush");
 
                 view.HorizontalAlignment = HorizontalAlignment.Center;
                 view.VerticalAlignment = VerticalAlignment.Center;
@@ -856,8 +856,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     Child = contentPanel,
                     Tag = ContentBorderTag
                 };
-                wrapper.SetResourceReference(Border.BackgroundProperty, "FloatBarBackground");
-                wrapper.SetResourceReference(Border.BorderBrushProperty, "FloatBarBorderBrush");
+                wrapper.SetResourceReference(Border.BackgroundProperty, "FloatingBarBackgroundBrush");
+                wrapper.SetResourceReference(Border.BorderBrushProperty, "FloatingBarBorderBrush");
 
                 view.HorizontalAlignment = HorizontalAlignment.Center;
                 view.VerticalAlignment = VerticalAlignment.Center;

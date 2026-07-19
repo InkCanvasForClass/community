@@ -557,7 +557,7 @@ namespace Ink_Canvas
                 {
                     case BorderColorMode_FollowBackground:
                         border.SetResourceReference(
-                            System.Windows.Controls.Border.BorderBrushProperty, "FloatBarBackground");
+                            System.Windows.Controls.Border.BorderBrushProperty, "FloatingBarBackgroundBrush");
                         break;
                     case BorderColorMode_Custom:
                         var customColor = TryParseFloatingBarBorderColor(Settings.Appearance.FloatingBarBorderColor);
@@ -565,11 +565,11 @@ namespace Ink_Canvas
                             border.BorderBrush = new System.Windows.Media.SolidColorBrush(customColor.Value);
                         else
                             border.SetResourceReference(
-                                System.Windows.Controls.Border.BorderBrushProperty, "FloatBarBorderBrush");
+                                System.Windows.Controls.Border.BorderBrushProperty, "FloatingBarBorderBrush");
                         break;
                     default:
                         border.SetResourceReference(
-                            System.Windows.Controls.Border.BorderBrushProperty, "FloatBarBorderBrush");
+                            System.Windows.Controls.Border.BorderBrushProperty, "FloatingBarBorderBrush");
                         break;
                 }
             }

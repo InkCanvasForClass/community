@@ -1430,6 +1430,14 @@ namespace Ink_Canvas
 
         public static Settings Settings { get => SettingsManager.Settings; set => SettingsManager.Settings = value; }
         public static string settingsFileName => SettingsManager.SettingsFileName;
+        internal FloatingBarThemeService FloatingBarThemeService { get; private set; }
+
+        internal void ApplyFloatingBarTheme()
+        {
+            FloatingBarThemeService ??= new FloatingBarThemeService(this);
+            FloatingBarThemeService.LoadThemes();
+            FloatingBarThemeService.ApplySavedTheme();
+        }
 
         public void UpdateInkSmoothingConfig()
         {
@@ -1535,6 +1543,7 @@ namespace Ink_Canvas
 
             // 应用颜色主题，这将考虑自定义背景色
             CheckColorTheme(true);
+            ApplyFloatingBarTheme();
 
             BtnWhiteBoardSwitchPrevious.IsEnabled = CurrentWhiteboardIndex != 1;
             BorderInkReplayToolBox.Visibility = Visibility.Collapsed;
