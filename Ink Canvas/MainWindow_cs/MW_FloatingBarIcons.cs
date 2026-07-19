@@ -4365,7 +4365,9 @@ namespace Ink_Canvas
         {
             _forceCloseFromExitOrRestartButton = true;
             App.IsAppExitByUser = true;
-            Close();
+            // 直接调用 Application.Shutdown：可绕过 H.NotifyIcon.TaskbarIcon 隐藏消息窗口
+            // 滞留导致 WPF 默认 OnLastWindowClose 下无法退出的问题。
+            Application.Current.Shutdown();
         }
 
         /// <summary>
