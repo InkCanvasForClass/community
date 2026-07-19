@@ -95,6 +95,13 @@ namespace Ink_Canvas.Helpers
             dictionary["FloatingBarAccentBrush"] = new SolidColorBrush(Color.FromRgb(0x73, 0xE0, 0xD4));
             dictionary["FloatingBarButtonHoverBrush"] = new SolidColorBrush(Color.FromArgb(0x3D, 0x73, 0xE0, 0xD4));
             dictionary["FloatingBarButtonPressedBrush"] = new SolidColorBrush(Color.FromArgb(0x70, 0x73, 0xE0, 0xD4));
+            dictionary["FloatingBarPopupBackgroundBrush"] = new SolidColorBrush(Color.FromArgb(0xF2, 0x0B, 0x3D, 0x4A));
+            dictionary["FloatingBarPopupInnerBackgroundBrush"] = new SolidColorBrush(Color.FromArgb(0xF2, 0x1C, 0x59, 0x66));
+            dictionary["FloatingBarPopupInnerBorderBrush"] = new SolidColorBrush(Color.FromArgb(0xB3, 0x73, 0xE0, 0xD4));
+            dictionary["FloatingBarPopupTitleForegroundBrush"] = new SolidColorBrush(Color.FromArgb(0xFF, 0xBF, 0xFF, 0xF8));
+            dictionary["FloatingBarPopupCloseBrush"] = new SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0x78, 0x91));
+            dictionary["FloatingBarPopupHoverBrush"] = new SolidColorBrush(Color.FromArgb(0x44, 0x73, 0xE0, 0xD4));
+            dictionary["FloatingBarTitleBackgroundBrush"] = new SolidColorBrush(Color.FromArgb(0xCC, 0x2B, 0x9A, 0xA0));
             return dictionary;
         }
 
@@ -113,7 +120,7 @@ namespace Ink_Canvas.Helpers
                         Source = new Uri(Path.Combine(theme.Path, "Theme.xaml"), UriKind.Absolute)
                     };
 
-                var resources = _mainWindow.Resources;
+                var resources = Application.Current.Resources;
                 if (_themeDictionary != null) resources.MergedDictionaries.Remove(_themeDictionary);
                 _themeDictionary = dictionary;
                 resources.MergedDictionaries.Add(dictionary);

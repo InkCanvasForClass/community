@@ -6,7 +6,7 @@
              xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
              xmlns:controls="clr-namespace:Ink_Canvas.Controls"
              mc:Ignorable="d">
-    <Border CornerRadius="8" Background="{DynamicResource FloatingBarPopupBackgroundBrush}"
+    <Border CornerRadius="8" Background="{DynamicResource FloatingBarBackgroundBrush}"
             BorderBrush="{DynamicResource FloatingBarAccentBrush}" BorderThickness="3">
         <ikw:SimpleStackPanel Margin="-1">
             <controls:PopupTabTitleBar x:Name="TabTitleBar" />
