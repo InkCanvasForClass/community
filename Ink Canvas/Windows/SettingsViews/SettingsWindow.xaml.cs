@@ -157,14 +157,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 { "PPTPageFlipPreviewPage", typeof(PPTPageFlipPreviewPage) }
             };
 
-            // 默认选中首页
-            if (NavigationViewControl.MenuItems.Count > 0)
-            {
-                NavigateToPage("HomePage");
-                NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems[0];
-                NavigationViewControl.Header = NavStrings.Nav_Home;
-            }
-
+            // 初始页面统一在 Loaded 阶段导航，避免构造阶段与深链接导航互相覆盖。
             UpdateAppTitleBarMargin();
 
             this.Loaded += (sender, e) =>
