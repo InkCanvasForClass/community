@@ -491,6 +491,10 @@
                       "NewKey":  "Board_Pen",
                       "Group":  "FloatingBarStrings"
                   },
+    "Board_Roaming":  {
+                          "NewKey":  "Board_Roaming",
+                          "Group":  "FloatingBarStrings"
+                      },
     "Startup_TopMost":  {
                             "NewKey":  "TopMost",
                             "Group":  "StartupStrings"

@@ -90,6 +90,9 @@
   <data name="Board_Pen" xml:space="preserve">
     <value>神笔</value>
   </data>
+  <data name="Board_Roaming" xml:space="preserve">
+    <value>乾坤大挪移</value>
+  </data>
   <data name="Board_PreviousPage" xml:space="preserve">
     <value>倒带</value>
   </data>

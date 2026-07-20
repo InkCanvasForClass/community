@@ -595,6 +595,7 @@ namespace Ink_Canvas
             var boardEraser = FindView("board.eraser") as BoardToolbarButton;
             var boardStrokeEraser = FindView("board.strokeEraser") as BoardToolbarButton;
             var boardSelect = FindView("board.select") as BoardToolbarButton;
+            var boardRoaming = FindView("board.roaming") as BoardToolbarButton;
             var boardThemeBackground = Application.Current.TryFindResource("FloatingBarBackgroundBrush") as Brush
                 ?? Application.Current.TryFindResource("BoardFloatBarBackground") as Brush
                 ?? Brushes.Transparent;
@@ -638,6 +639,7 @@ namespace Ink_Canvas
                     {
                         if (boardPen != null) { boardPen.Background = Brushes.Transparent; boardPen.IconGeometryDrawing.Brush = boardThemeForeground; boardPen.Foreground = boardThemeForeground; }
                         if (boardSelect != null) { boardSelect.Background = Brushes.Transparent; boardSelect.IconGeometryDrawing.Brush = boardThemeForeground; boardSelect.Foreground = boardThemeForeground; }
+                        if (boardRoaming != null) { boardRoaming.Background = Brushes.Transparent; boardRoaming.IconGeometryDrawing.Brush = boardThemeForeground; boardRoaming.Foreground = boardThemeForeground; }
                         if (boardEraser != null) { boardEraser.Background = Brushes.Transparent; boardEraser.IconGeometryDrawing.Brush = boardThemeForeground; boardEraser.Foreground = boardThemeForeground; }
                         if (boardStrokeEraser != null) { boardStrokeEraser.Background = Brushes.Transparent; boardStrokeEraser.IconGeometryDrawing.Brush = boardThemeForeground; boardStrokeEraser.Foreground = boardThemeForeground; }
                     }
@@ -645,6 +647,7 @@ namespace Ink_Canvas
                     {
                         if (boardPen != null) { boardPen.Background = Brushes.Transparent; boardPen.IconGeometryDrawing.Brush = boardThemeForeground; boardPen.Foreground = boardThemeForeground; }
                         if (boardSelect != null) { boardSelect.Background = Brushes.Transparent; boardSelect.IconGeometryDrawing.Brush = boardThemeForeground; boardSelect.Foreground = boardThemeForeground; }
+                        if (boardRoaming != null) { boardRoaming.Background = Brushes.Transparent; boardRoaming.IconGeometryDrawing.Brush = boardThemeForeground; boardRoaming.Foreground = boardThemeForeground; }
                         if (boardEraser != null) { boardEraser.Background = Brushes.Transparent; boardEraser.IconGeometryDrawing.Brush = boardThemeForeground; boardEraser.Foreground = boardThemeForeground; }
                         if (boardStrokeEraser != null) { boardStrokeEraser.Background = Brushes.Transparent; boardStrokeEraser.IconGeometryDrawing.Brush = boardThemeForeground; boardStrokeEraser.Foreground = boardThemeForeground; }
                     }
@@ -747,6 +750,18 @@ namespace Ink_Canvas
                             SetFloatingBarHighlightPosition("select");
                             break;
                         }
+                    case "roaming":
+                        {
+                            if (boardRoaming != null)
+                            {
+                                boardRoaming.Background = boardThemeAccent;
+                                boardRoaming.IconGeometryDrawing.Brush = Brushes.White;
+                                boardRoaming.Foreground = Brushes.White;
+                            }
+
+                            SetFloatingBarHighlightPosition("roaming");
+                            break;
+                        }
                     case "cursor":
                         {
                             if (Cursor_Icon != null && Cursor_Icon.Icon != null)
@@ -764,6 +779,7 @@ namespace Ink_Canvas
                                 if (boardEraser != null) { boardEraser.Background = Brushes.Transparent; boardEraser.IconGeometryDrawing.Brush = boardThemeForeground; boardEraser.Foreground = boardThemeForeground; }
                                 if (boardStrokeEraser != null) { boardStrokeEraser.Background = Brushes.Transparent; boardStrokeEraser.IconGeometryDrawing.Brush = boardThemeForeground; boardStrokeEraser.Foreground = boardThemeForeground; }
                                 if (boardSelect != null) { boardSelect.Background = Brushes.Transparent; boardSelect.IconGeometryDrawing.Brush = boardThemeForeground; boardSelect.Foreground = boardThemeForeground; }
+                        if (boardRoaming != null) { boardRoaming.Background = Brushes.Transparent; boardRoaming.IconGeometryDrawing.Brush = boardThemeForeground; boardRoaming.Foreground = boardThemeForeground; }
 
                                 if (BoardInkFreezeBtn != null)
                                 {
@@ -778,6 +794,7 @@ namespace Ink_Canvas
                                 if (boardEraser != null) { boardEraser.Background = Brushes.Transparent; boardEraser.IconGeometryDrawing.Brush = boardThemeForeground; boardEraser.Foreground = boardThemeForeground; }
                                 if (boardStrokeEraser != null) { boardStrokeEraser.Background = Brushes.Transparent; boardStrokeEraser.IconGeometryDrawing.Brush = boardThemeForeground; boardStrokeEraser.Foreground = boardThemeForeground; }
                                 if (boardSelect != null) { boardSelect.Background = Brushes.Transparent; boardSelect.IconGeometryDrawing.Brush = boardThemeForeground; boardSelect.Foreground = boardThemeForeground; }
+                        if (boardRoaming != null) { boardRoaming.Background = Brushes.Transparent; boardRoaming.IconGeometryDrawing.Brush = boardThemeForeground; boardRoaming.Foreground = boardThemeForeground; }
 
                                 if (BoardInkFreezeBtn != null)
                                 {
@@ -3492,6 +3509,8 @@ namespace Ink_Canvas
         {
             if (TryBlockFrozenPageMutation("切换到画笔")) return;
 
+            EndBoardRoaming();
+
             if (lastBorderMouseDownObject is Panel panel)
                 panel.Background = new SolidColorBrush(Colors.Transparent);
 
@@ -4322,16 +4341,7 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         public void ToggleFingerDragMode(object sender, RoutedEventArgs e)
         {
-            if (isSingleFingerDragMode)
-            {
-                isSingleFingerDragMode = false;
-                { /* Old UI removed */ }
-            }
-            else
-            {
-                isSingleFingerDragMode = true;
-                { /* Old UI removed */ }
-            }
+            isSingleFingerDragMode = !isSingleFingerDragMode;
         }
 
         /// <summary>
@@ -6056,6 +6066,7 @@ namespace Ink_Canvas
         private void UpdateCurrentToolMode(string mode)
         {
             _currentToolMode = NormalizeToolModeForFreeze(mode);
+            UpdateBoardRoamingButtonState();
 
             // 动态切换 EnablePointerSupport：仅在画笔批注模式下启用 WM_POINTER 触摸栈，
             // 其他模式下禁用以避免 DragMove/DoDragDrop 在模拟触摸屏下假死。

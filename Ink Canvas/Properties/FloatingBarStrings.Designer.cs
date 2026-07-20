@@ -72,6 +72,8 @@ namespace Ink_Canvas.Properties
 
         public static string Board_Pen => ResourceManager.GetString(nameof(Board_Pen), _resourceCulture);
 
+        public static string Board_Roaming => ResourceManager.GetString(nameof(Board_Roaming), _resourceCulture);
+
         public static string Board_PreviousPage => ResourceManager.GetString(nameof(Board_PreviousPage), _resourceCulture);
 
         public static string Board_Redo => ResourceManager.GetString(nameof(Board_Redo), _resourceCulture);

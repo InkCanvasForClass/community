@@ -24,6 +24,8 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
 
         void SelectTool();
 
+        void SelectRoaming();
+
         void SelectPen();
 
         void SelectEraser();

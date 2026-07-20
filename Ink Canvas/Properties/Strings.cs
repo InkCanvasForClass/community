@@ -214,6 +214,7 @@ namespace Ink_Canvas.Properties
             dict["Board_NextPage"] = ("FloatingBarStrings", "Board_NextPage");
             dict["Board_Page"] = ("FloatingBarStrings", "Board_Page");
             dict["Board_Pen"] = ("FloatingBarStrings", "Board_Pen");
+            dict["Board_Roaming"] = ("FloatingBarStrings", "Board_Roaming");
             dict["Board_PreviousPage"] = ("FloatingBarStrings", "Board_PreviousPage");
             dict["Board_Redo"] = ("FloatingBarStrings", "Board_Redo");
             dict["Board_Screenshot"] = ("FloatingBarStrings", "Board_Screenshot");

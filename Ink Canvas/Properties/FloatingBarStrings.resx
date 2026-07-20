@@ -90,6 +90,9 @@
   <data name="Board_Pen" xml:space="preserve">
     <value>笔</value>
   </data>
+  <data name="Board_Roaming" xml:space="preserve">
+    <value>漫游</value>
+  </data>
   <data name="Board_PreviousPage" xml:space="preserve">
     <value>上一页</value>
   </data>

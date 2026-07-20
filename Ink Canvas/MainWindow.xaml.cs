@@ -689,6 +689,7 @@ namespace Ink_Canvas
             inkCanvas.PreviewMouseDown += inkCanvas_PreviewMouseDown;
             inkCanvas.PreviewStylusDown += inkCanvas_PreviewStylusDown;
             inkCanvas.StylusDown += inkCanvas_StylusDown;
+            inkCanvas.StylusMove += inkCanvas_StylusMove;
             inkCanvas.MouseRightButtonUp += InkCanvas_MouseRightButtonUp;
             // 注册橡皮擦操作结束事件
             inkCanvas.StylusUp += inkCanvas_StylusUp;
@@ -2206,6 +2207,15 @@ namespace Ink_Canvas
                 return;
             }
 
+            if (canvas == inkCanvas && IsBoardRoamingMode)
+            {
+                canvas.UseCustomCursor = true;
+                canvas.ForceCursor = true;
+                canvas.Cursor = _isBoardRoamingPointerDown ? Cursors.Hand : Cursors.Arrow;
+                System.Windows.Forms.Cursor.Show();
+                return;
+            }
+
             // 其他模式按照用户设置处理
             if (Settings.Canvas.IsShowCursor)
             {
@@ -2376,6 +2386,16 @@ namespace Ink_Canvas
         {
             _stylusDownTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
+            if (IsBoardRoamingMode)
+            {
+                inkCanvas.CaptureStylus();
+                ViewboxFloatingBar.IsHitTestVisible = false;
+                BlackboardUIGridForInkReplay.IsHitTestVisible = false;
+                BeginBoardRoaming(e.GetPosition(inkCanvas));
+                e.Handled = true;
+                return;
+            }
+
             if (IsCurrentPageFrozen && IsFreezeMutatingMode(inkCanvas.EditingMode))
             {
                 TryBlockFrozenPageMutation("修改冻结页面");
@@ -2387,9 +2407,27 @@ namespace Ink_Canvas
             SetCursorBasedOnEditingMode(sender as InkCanvas);
         }
 
+        private void inkCanvas_StylusMove(object sender, StylusEventArgs e)
+        {
+            if (!_isBoardRoamingPointerDown) return;
+
+            MoveBoardRoaming(e.GetPosition(inkCanvas));
+            e.Handled = true;
+        }
+
         // 手写笔抬起事件（用于橡皮擦自动切换）
         private void inkCanvas_StylusUp(object sender, StylusEventArgs e)
         {
+            if (_isBoardRoamingPointerDown)
+            {
+                EndBoardRoaming();
+                inkCanvas.ReleaseStylusCapture();
+                ViewboxFloatingBar.IsHitTestVisible = true;
+                BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+                e.Handled = true;
+                return;
+            }
+
             HandleEraserOperationEnded();
         }
 

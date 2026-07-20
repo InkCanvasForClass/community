@@ -89,6 +89,11 @@ namespace Ink_Canvas
             BoardLassoIcon_Click(null, null);
         }
 
+        public void SelectRoaming()
+        {
+            ActivateBoardRoamingMode();
+        }
+
         public void SelectPen()
         {
             PenIcon_Click(null, null);
@@ -204,6 +209,7 @@ namespace Ink_Canvas
                 RefreshBlackBoardSidePageListView();
 
                 UpdateBoardToolbarState();
+                UpdateBoardRoamingButtonState();
                 CheckEnableTwoFingerGestureBtnColorPrompt();
             }
             catch (Exception ex)
@@ -224,6 +230,7 @@ namespace Ink_Canvas
                 BindPopupPlacementTargets();
                 BindPageInfoClickHandler();
                 UpdateBoardToolbarState();
+                UpdateBoardRoamingButtonState();
                 CheckEnableTwoFingerGestureBtnColorPrompt();
             }
             catch (Exception ex)

@@ -90,6 +90,9 @@
   <data name="Board_Pen" xml:space="preserve">
     <value>Pen</value>
   </data>
+  <data name="Board_Roaming" xml:space="preserve">
+    <value>Pan</value>
+  </data>
   <data name="Board_PreviousPage" xml:space="preserve">
     <value>Previous</value>
   </data>

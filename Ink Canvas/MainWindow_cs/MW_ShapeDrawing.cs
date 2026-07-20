@@ -2635,6 +2635,16 @@ namespace Ink_Canvas
             if (TryBlockInkInputOverFloatingBar(e.GetPosition(this), e))
                 return;
 
+            if (IsBoardRoamingMode && e.ChangedButton == MouseButton.Left)
+            {
+                inkCanvas.CaptureMouse();
+                ViewboxFloatingBar.IsHitTestVisible = false;
+                BlackboardUIGridForInkReplay.IsHitTestVisible = false;
+                BeginBoardRoaming(e.GetPosition(inkCanvas));
+                e.Handled = true;
+                return;
+            }
+
             if (e.ChangedButton == MouseButton.Left && ShouldUseRealtimeVelocityBrushTipForMouse() && drawingShapeMode == 0)
             {
                 _isMouseRealtimeInking = true;
@@ -2667,6 +2677,13 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_MouseMove(object sender, MouseEventArgs e)
         {
+            if (_isBoardRoamingPointerDown)
+            {
+                MoveBoardRoaming(e.GetPosition(inkCanvas));
+                e.Handled = true;
+                return;
+            }
+
             if (_isMouseRealtimeInking && isMouseDown)
             {
                 var sv = GetStrokeVisual(MouseRealtimeStrokeId);
@@ -2712,6 +2729,16 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (_isBoardRoamingPointerDown)
+            {
+                EndBoardRoaming();
+                inkCanvas.ReleaseMouseCapture();
+                ViewboxFloatingBar.IsHitTestVisible = true;
+                BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+                e.Handled = true;
+                return;
+            }
+
             if (_isMouseRealtimeInking)
             {
                 try
