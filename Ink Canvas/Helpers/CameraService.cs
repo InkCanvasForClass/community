@@ -91,7 +91,7 @@ namespace Ink_Canvas.Helpers
         public CameraService()
         {
             _dispatcher = Dispatcher.CurrentDispatcher;
-            RefreshCameraListAsync().GetAwaiter().GetResult();
+            RefreshCameraListCore();
         }
 
         public CameraService(int rotationAngle, int resolutionWidth, int resolutionHeight)
@@ -100,11 +100,17 @@ namespace Ink_Canvas.Helpers
             _rotationAngle = rotationAngle;
             _resolutionWidth = resolutionWidth;
             _resolutionHeight = resolutionHeight;
-            RefreshCameraListAsync().GetAwaiter().GetResult();
+            RefreshCameraListCore();
         }
 
         /// <summary>刷新可用摄像头列表（AForge 同步完成）。</summary>
         public Task RefreshCameraListAsync()
+        {
+            RefreshCameraListCore();
+            return Task.CompletedTask;
+        }
+
+        private void RefreshCameraListCore()
         {
             try
             {
@@ -130,7 +136,6 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"[AForge] 刷新摄像头列表失败: {ex.Message}", LogHelper.LogType.Error);
                 ErrorOccurred?.Invoke(this, $"刷新摄像头列表失败: {ex.Message}");
             }
-            return Task.CompletedTask;
         }
 
         /// <summary>启动摄像头预览（AForge 同步实现，返回 Task.FromResult）。</summary>
@@ -146,7 +151,7 @@ namespace Ink_Canvas.Helpers
                 var cameras = AvailableCameras.ToList();
                 if (cameras.Count == 0)
                 {
-                    RefreshCameraListAsync().GetAwaiter().GetResult();
+                    RefreshCameraListCore();
                     cameras = AvailableCameras.ToList();
                     if (cameras.Count == 0)
                     {
@@ -427,7 +432,7 @@ namespace Ink_Canvas.Helpers
         {
             if (AvailableCameras.Count == 0)
             {
-                RefreshCameraListAsync().GetAwaiter().GetResult();
+                RefreshCameraListCore();
             }
             return AvailableCameras.Count > 0;
         }

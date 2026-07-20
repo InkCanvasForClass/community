@@ -132,63 +132,74 @@ namespace Ink_Canvas.Windows
         /// <param name="progress">进度百分比</param>
         public void SetProgress(int progress)
         {
-            Dispatcher.Invoke(() =>
+            // 启动阶段 UI 线程同步调用时，Dispatcher.Invoke 会自锁。
+            // 通过 CheckAccess 守卫，UI 线程直接执行，避免等待自身调度。
+            if (Dispatcher.CheckAccess())
             {
-                // 设置进度条颜色
-                SetProgressBarColor();
+                ApplyProgress(progress);
+            }
+            else
+            {
+                Dispatcher.Invoke(() => ApplyProgress(progress));
+            }
+        }
 
-                // 获取进度条容器的实际宽度
-                double containerWidth = ProgressBarBackground.ActualWidth;
-                if (containerWidth <= 0)
+        private void ApplyProgress(int progress)
+        {
+            // 设置进度条颜色
+            SetProgressBarColor();
+
+            // 获取进度条容器的实际宽度
+            double containerWidth = ProgressBarBackground.ActualWidth;
+            if (containerWidth <= 0)
+            {
+                // 如果ActualWidth为0，使用设计时宽度
+                containerWidth = 530;
+            }
+
+            // 计算目标宽度
+            double targetWidth = containerWidth * (progress / 100.0);
+
+            // 创建Storyboard动画
+            var storyboard = new Storyboard();
+
+            // 创建宽度动画
+            var widthAnimation = new DoubleAnimation
+            {
+                From = ProgressBarFill.Width,
+                To = targetWidth,
+                Duration = TimeSpan.FromMilliseconds(300),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+
+            // 设置动画目标
+            Storyboard.SetTarget(widthAnimation, ProgressBarFill);
+            Storyboard.SetTargetProperty(widthAnimation, new PropertyPath(Border.WidthProperty));
+
+            // 添加动画到Storyboard
+            storyboard.Children.Add(widthAnimation);
+
+            // 添加动画完成事件
+            storyboard.Completed += (s, e) =>
+            {
+                // 确保最终值正确设置
+                ProgressBarFill.Width = targetWidth;
+
+                // 根据进度调整圆角
+                if (progress >= 100)
                 {
-                    // 如果ActualWidth为0，使用设计时宽度
-                    containerWidth = 530;
+                    // 进度100%时，底部角都是圆角
+                    ProgressBarFill.CornerRadius = new CornerRadius(0, 0, 7, 7);
                 }
-
-                // 计算目标宽度
-                double targetWidth = containerWidth * (progress / 100.0);
-
-                // 创建Storyboard动画
-                var storyboard = new Storyboard();
-
-                // 创建宽度动画
-                var widthAnimation = new DoubleAnimation
+                else
                 {
-                    From = ProgressBarFill.Width,
-                    To = targetWidth,
-                    Duration = TimeSpan.FromMilliseconds(300),
-                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
-                };
+                    // 进度未满时，只有左侧是圆角
+                    ProgressBarFill.CornerRadius = new CornerRadius(0, 0, 0, 7);
+                }
+            };
 
-                // 设置动画目标
-                Storyboard.SetTarget(widthAnimation, ProgressBarFill);
-                Storyboard.SetTargetProperty(widthAnimation, new PropertyPath(Border.WidthProperty));
-
-                // 添加动画到Storyboard
-                storyboard.Children.Add(widthAnimation);
-
-                // 添加动画完成事件
-                storyboard.Completed += (s, e) =>
-                {
-                    // 确保最终值正确设置
-                    ProgressBarFill.Width = targetWidth;
-
-                    // 根据进度调整圆角
-                    if (progress >= 100)
-                    {
-                        // 进度100%时，底部角都是圆角
-                        ProgressBarFill.CornerRadius = new CornerRadius(0, 0, 7, 7);
-                    }
-                    else
-                    {
-                        // 进度未满时，只有左侧是圆角
-                        ProgressBarFill.CornerRadius = new CornerRadius(0, 0, 0, 7);
-                    }
-                };
-
-                // 开始动画
-                storyboard.Begin();
-            });
+            // 开始动画
+            storyboard.Begin();
         }
 
         /// <summary>
@@ -203,9 +214,21 @@ namespace Ink_Canvas.Windows
 
         public void SetLoadingMessage(string message, int actualSplashStyle)
         {
-            Dispatcher.Invoke(() =>
+            // 启动阶段 UI 线程同步调用时，Dispatcher.Invoke 会自锁。
+            // 通过 CheckAccess 守卫，UI 线程直接执行更新，避免等待自身调度。
+            if (Dispatcher.CheckAccess())
             {
-                LoadingText.Text = message;
+                ApplyLoadingMessage(message, actualSplashStyle);
+            }
+            else
+            {
+                Dispatcher.Invoke(() => ApplyLoadingMessage(message, actualSplashStyle));
+            }
+        }
+
+        private void ApplyLoadingMessage(string message, int actualSplashStyle)
+        {
+            LoadingText.Text = message;
 
                 // 根据实际启动动画样式调整加载文本样式
                 if (actualSplashStyle == 6) // 马年限定
@@ -234,7 +257,6 @@ namespace Ink_Canvas.Windows
                     LoadingText.HorizontalAlignment = HorizontalAlignment.Center;
                     LoadingText.Margin = new Thickness(0, 200, 0, 0);
                 }
-            });
         }
 
         /// <summary>

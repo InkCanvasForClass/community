@@ -1254,8 +1254,21 @@ namespace Ink_Canvas.Windows
         /// </summary>
         public void ResetTimerState()
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            // 可能从任意线程被调用：UI 线程同步调用时 Dispatcher.Invoke 会自锁。
+            // 通过 CheckAccess 守卫，UI 线程直接执行，其他线程才走 Invoke。
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher != null && dispatcher.CheckAccess())
             {
+                ApplyResetTimerState();
+            }
+            else
+            {
+                dispatcher?.Invoke(() => ApplyResetTimerState());
+            }
+        }
+
+        private void ApplyResetTimerState()
+        {
                 // 停止计时器
                 if (isTimerRunning)
                 {
@@ -1293,7 +1306,6 @@ namespace Ink_Canvas.Windows
                 {
                     FullscreenBtn.IsEnabled = false;
                 }
-            });
         }
 
         private NewStyleMinimizedTimerWindow _minimizedWindow;
