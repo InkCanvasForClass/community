@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -43,55 +43,55 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="ActionsTitle" xml:space="preserve">
-    <value>操作</value>
+    <value>整活</value>
   </data>
   <data name="AnimationMode" xml:space="preserve">
-    <value>动画效果</value>
+    <value>整活特效</value>
   </data>
   <data name="AnimationModeHint" xml:space="preserve">
-    <value>控制灵动通知进出场和展开时的动画强度，整活程度你说了算~</value>
+    <value>控制灵动通知进出场和展开时的特效强度，整活程度你说了算~</value>
   </data>
   <data name="AnimationOff" xml:space="preserve">
-    <value>关闭</value>
+    <value>关</value>
   </data>
   <data name="AnimationSimple" xml:space="preserve">
-    <value>简洁</value>
+    <value>性冷淡风</value>
   </data>
   <data name="AnimationStandard" xml:space="preserve">
     <value>标准</value>
   </data>
   <data name="BehaviorTitle" xml:space="preserve">
-    <value>展示行为</value>
+    <value>表演姿势</value>
   </data>
   <data name="Close" xml:space="preserve">
-    <value>关闭</value>
+    <value>关</value>
   </data>
   <data name="DefaultTitle" xml:space="preserve">
     <value>通知</value>
   </data>
   <data name="DictationDoNotDisturb" xml:space="preserve">
-    <value>弹窗免打扰</value>
+    <value>社恐模式</value>
   </data>
   <data name="DictationDoNotDisturbHint" xml:space="preserve">
-    <value>指定场景下屏蔽弹窗和系统通知，但消息还在历史里，不会真消失~</value>
+    <value>指定场景屏蔽弹窗和系统通知，消息还在历史里，没真消失~</value>
   </data>
   <data name="DictationDoNotDisturbPPT" xml:space="preserve">
-    <value>PPT 放映时别来烦我</value>
+    <value>PPT 放映时别烦我</value>
   </data>
   <data name="DictationDoNotDisturbPPTHint" xml:space="preserve">
-    <value>进入 PPT 放映后，不弹灵动通知、旧通知或 Windows Toast，让我安静讲课~</value>
+    <value>进入 PPT 放映后，灵动通知/旧通知/Windows Toast 全闭嘴，让我安静讲课~</value>
   </data>
   <data name="DictationDoNotDisturbWhiteboard" xml:space="preserve">
-    <value>白板模式时别来烦我</value>
+    <value>白板模式时别烦我</value>
   </data>
   <data name="DictationDoNotDisturbWhiteboardHint" xml:space="preserve">
-    <value>进入白板或黑板模式后，不弹灵动通知、旧通知或 Windows Toast，让我安静写字~</value>
+    <value>进入白板/黑板模式后，灵动通知/旧通知/Windows Toast 全闭嘴，让我安静写字~</value>
   </data>
   <data name="EnableAnnouncements" xml:space="preserve">
-    <value>启用公告系统</value>
+    <value>启用吃瓜系统</value>
   </data>
   <data name="EnableAnnouncementsHint" xml:space="preserve">
-    <value>启动后拉取公告，还能接收实时公告推送，消息不漏~</value>
+    <value>启动后拉取公告，还能收实时推送，吃瓜不漏~</value>
   </data>
   <data name="EnableDynamic" xml:space="preserve">
     <value>启用灵动通知</value>
@@ -103,19 +103,19 @@
     <value>启用重要公告强提醒</value>
   </data>
   <data name="EnableForcePopupHint" xml:space="preserve">
-    <value>重要公告允许默认展开显示，但还是可以关掉的，别慌~</value>
+    <value>重要公告默认展开显示，但还是可以关掉的，别慌~</value>
   </data>
   <data name="EnableWindowsToast" xml:space="preserve">
     <value>启用 Windows 系统通知</value>
   </data>
   <data name="EnableWindowsToastHint" xml:space="preserve">
-    <value>重要通知和更新可以同步显示为系统 Toast，双管齐下~</value>
+    <value>重要通知和更新同步显示为系统 Toast，双管齐下~</value>
   </data>
   <data name="GroupTitle" xml:space="preserve">
-    <value>通知管理</value>
+    <value>通知管理大权</value>
   </data>
   <data name="ImportantDuration" xml:space="preserve">
-    <value>重要通知展示时长</value>
+    <value>重要通知停留时长</value>
   </data>
   <data name="ImportantDurationHint" xml:space="preserve">
     <value>重要消息自动关闭前停留的秒数，看够了再走~</value>
@@ -127,16 +127,16 @@
     <value>发现新版本：{0}，快更新冲鸭！</value>
   </data>
   <data name="OtherDuration" xml:space="preserve">
-    <value>其他通知展示时长</value>
+    <value>其他通知停留时长</value>
   </data>
   <data name="OtherDurationHint" xml:space="preserve">
     <value>其他消息自动关闭前停留的秒数。</value>
   </data>
   <data name="Placement" xml:space="preserve">
-    <value>灵动通知位置</value>
+    <value>灵动通知住址</value>
   </data>
   <data name="PlacementHint" xml:space="preserve">
-    <value>选择灵动通知在主窗口中的默认展示位置，住哪你说了算~</value>
+    <value>选灵动通知在主窗口的默认位置，住哪你说了算~</value>
   </data>
   <data name="PlacementTopCenter" xml:space="preserve">
     <value>顶部居中</value>
@@ -154,13 +154,13 @@
     <value>公告提供商</value>
   </data>
   <data name="Provider_AnnouncementDesc" xml:space="preserve">
-    <value>拉取远端公告并接收实时推送，消息第一手~</value>
+    <value>拉取远端公告并接收实时推送，吃瓜第一手~</value>
   </data>
   <data name="Provider_Disabled" xml:space="preserve">
     <value>已禁用</value>
   </data>
   <data name="Provider_HttpOnly" xml:space="preserve">
-    <value>HTTP 拉取能用，实时推送不行</value>
+    <value>HTTP 拉取能用，实时推送寄了</value>
   </data>
   <data name="Provider_Local" xml:space="preserve">
     <value>本地消息提供商</value>
@@ -193,7 +193,7 @@
     <value>把消息同步显示为系统 Toast 或托盘气泡，双通道~</value>
   </data>
   <data name="ProviderManagement" xml:space="preserve">
-    <value>提醒提供商管理</value>
+    <value>提醒提供商管理大权</value>
   </data>
   <data name="ProviderManagementHint" xml:space="preserve">
     <value>查看公告、本地消息和系统通知提供商的启用与运行状态，一目了然~</value>
@@ -205,7 +205,7 @@
     <value>提醒提供商</value>
   </data>
   <data name="ReminderDuration" xml:space="preserve">
-    <value>提醒通知展示时长</value>
+    <value>提醒通知停留时长</value>
   </data>
   <data name="ReminderDurationHint" xml:space="preserve">
     <value>提醒类消息自动关闭前停留的秒数。</value>
@@ -214,10 +214,10 @@
     <value>通知设置</value>
   </data>
   <data name="Test" xml:space="preserve">
-    <value>测试通知</value>
+    <value>试个通知</value>
   </data>
   <data name="TestButton" xml:space="preserve">
-    <value>发个测试通知试试</value>
+    <value>发个测试通知试试水</value>
   </data>
   <data name="TestHint" xml:space="preserve">
     <value>立即向消息队列发一条测试通知，试试水~</value>
@@ -244,10 +244,10 @@
     <value>更新</value>
   </data>
   <data name="Type_Urgent" xml:space="preserve">
-    <value>紧急</value>
+    <value>急急急</value>
   </data>
   <data name="UpdateDuration" xml:space="preserve">
-    <value>更新通知展示时长</value>
+    <value>更新通知停留时长</value>
   </data>
   <data name="UpdateDurationHint" xml:space="preserve">
     <value>更新类消息自动关闭前停留的秒数。</value>
@@ -256,15 +256,15 @@
     <value>发现新版本</value>
   </data>
   <data name="UrgentDuration" xml:space="preserve">
-    <value>紧急通知展示时长</value>
+    <value>紧急通知停留时长</value>
   </data>
   <data name="UrgentDurationHint" xml:space="preserve">
     <value>紧急消息自动关闭前停留的秒数，急急急~</value>
   </data>
   <data name="ViewDetails" xml:space="preserve">
-    <value>查看详情</value>
+    <value>吃瓜详情</value>
   </data>
   <data name="ViewHistory" xml:space="preserve">
-    <value>查看历史</value>
+    <value>翻历史</value>
   </data>
 </root>

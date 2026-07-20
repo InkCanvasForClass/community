@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -43,100 +43,100 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="AutoSaveStrokes" xml:space="preserve">
-    <value>自动保存幻灯片墨迹</value>
+    <value>墨迹自动存档</value>
   </data>
   <data name="AutoSaveStrokesHint" xml:space="preserve">
-    <value>开启后，结束放映时自动保存墨迹，下次打开自动加载（文件名和页数要对上号），再也不怕丢墨迹了~</value>
+    <value>开启后，结束放映自动给墨迹存档，下次打开自动加载（文件名和页数要对上号），妈妈再也不怕我丢墨迹了</value>
   </data>
   <data name="AutoScreenshot" xml:space="preserve">
-    <value>自动幻灯片截屏</value>
+    <value>自动咔嚓留证据</value>
   </data>
   <data name="AutoScreenshotHint" xml:space="preserve">
-    <value>开启后，幻灯片有墨迹时翻页就自动截屏，咔嚓~</value>
+    <value>开启后，幻灯片有墨迹时翻页就自动咔嚓，证据 +1</value>
   </data>
   <data name="BlackBackground" xml:space="preserve">
-    <value>黑底模式</value>
+    <value>黑化模式</value>
   </data>
   <data name="BottomGroupTitle" xml:space="preserve">
-    <value>左下右下</value>
+    <value>装备栏左下右下</value>
   </data>
   <data name="EnhancedPreview" xml:space="preserve">
-    <value>PPT 页码按钮增强预览</value>
+    <value>PPT 页码按钮 BUFF 加成</value>
   </data>
   <data name="EnhancedPreviewHint" xml:space="preserve">
-    <value>手动开启后，点页码按钮就能看缩略图列表（WPS 和 PowerPoint 都支持），点击跳转，好家伙太方便了~</value>
+    <value>手动开启后，戳页码按钮就能看缩略图列表（WPS 和 PowerPoint 都吃），点击跳转，好家伙这 BUFF 拉满</value>
   </data>
   <data name="EnhancedPreviewLoadingAnimation" xml:space="preserve">
-    <value>显示动画</value>
+    <value>转圈圈仪式</value>
   </data>
   <data name="EnhancedPreviewLoadingAnimationHint" xml:space="preserve">
-    <value>加载 PPT 增强预览缩略图时显示圆形旋转动画。</value>
+    <value>加载 PPT 增强预览缩略图时来个圆形转圈圈，仪式感拉满</value>
   </data>
   <data name="LoadingPPT" xml:space="preserve">
-    <value>正在加载PPT...</value>
+    <value>PPT 装载中...</value>
   </data>
   <data name="Enhancement" xml:space="preserve">
-    <value>PowerPoint 联动增强</value>
+    <value>PowerPoint 联动 BUFF 包</value>
   </data>
   <data name="EnterAnnotationOnShow" xml:space="preserve">
-    <value>进 PPT 放映自动进批注模式</value>
+    <value>进 PPT 放映自动切批注形态</value>
   </data>
   <data name="FingerGestureSlide" xml:space="preserve">
-    <value>允许手指手势翻页</value>
+    <value>解锁手指滑页技能</value>
   </data>
   <data name="FingerGestureSlideHint" xml:space="preserve">
     <value>开启画板后用手指手势翻页（启用后，幻灯片放映模式下，画板没墨迹时，手指左右滑动就能翻页，冲鸭~）</value>
   </data>
   <data name="FlipButtonsTitle" xml:space="preserve">
-    <value>PPT 翻页按钮</value>
+    <value>PPT 翻页神器</value>
   </data>
   <data name="FlipButtonsScale" xml:space="preserve">
-    <value>翻页按钮大小</value>
+    <value>翻页神器体型</value>
   </data>
   <data name="GoToFirstPageOnReenter" xml:space="preserve">
-    <value>进放映时回到首页</value>
+    <value>进放映时光速回老家</value>
   </data>
   <data name="GroupTitle" xml:space="preserve">
-    <value>PPT联动</value>
+    <value>PPT 联动 BUFF 区</value>
   </data>
   <data name="HalfOpacity" xml:space="preserve">
-    <value>半透明</value>
+    <value>半隐身术</value>
   </data>
   <data name="KillWppHint" xml:space="preserve">
-    <value>关闭后不会自动干掉 WPP 残留进程，可能导致 WPP 关闭时卡成狗或退不干净。</value>
+    <value>关闭后不会自动超度 WPP 残留进程，可能导致 WPP 关闭时卡成狗或退不干净</value>
   </data>
   <data name="KillWppProcess" xml:space="preserve">
-    <value>WPP 进程猎杀（防止 WPP 赖着不走）</value>
+    <value>WPP 超度现场（防 WPP 钉子户赖着不走）</value>
   </data>
   <data name="LeftBottomOffset" xml:space="preserve">
-    <value>左下偏移</value>
+    <value>左下身高差</value>
   </data>
   <data name="LeftBottomOpacity" xml:space="preserve">
-    <value>左下透明度</value>
+    <value>左下隐身值</value>
   </data>
   <data name="LeftOffset" xml:space="preserve">
-    <value>左侧偏移</value>
+    <value>左侧身高差</value>
   </data>
   <data name="LeftOpacity" xml:space="preserve">
-    <value>左侧透明度</value>
+    <value>左侧隐身值</value>
   </data>
   <data name="LongPressPageTurn" xml:space="preserve">
-    <value>PPT 翻页按钮长按连翻</value>
+    <value>PPT 翻页神器长按连冲</value>
   </data>
   <data name="LongPressPageTurnHint" xml:space="preserve">
-    <value>开启后，长按翻页按钮可以连续翻页，翻页效率拉满，奥利给~</value>
+    <value>开启后，长按翻页按钮可以连续翻页，效率拉满，奥利给~</value>
   </data>
   <data name="NotifyAutoPlay" xml:space="preserve">
-    <value>提示是否开了自动播放</value>
+    <value>防自动播放偷袭提醒</value>
   </data>
   <data name="NotifyHiddenPage" xml:space="preserve">
-    <value>提示隐藏幻灯片</value>
+    <value>揪出隐藏幻灯片</value>
   </data>
   <data name="PageButtonClickable" xml:space="preserve">
-    <value>PPT 页码按钮可点击</value>
+    <value>PPT 页码按钮可戳</value>
   </data>
   <data name="PageButtonClickableHint" xml:space="preserve">
-    <value>开启后，点页码按钮唤起页码导航。默认用 PowerPoint 网格缩略图（WPS 不行）；可以在下面手动开启增强预览来支持 WPS~</value>
+    <value>开启后，戳页码按钮唤起页码导航。默认用 PowerPoint 网格缩略图（WPS 不行）；可以在下面手动开启增强预览奶一口 WPS~</value>
   </data>
   <data name="Position_Left" xml:space="preserve">
     <value>左侧</value>
@@ -151,46 +151,46 @@
     <value>右下</value>
   </data>
   <data name="RememberLastPage" xml:space="preserve">
-    <value>记住上次看到哪页</value>
+    <value>记性不错</value>
   </data>
   <data name="RememberLastPageHint" xml:space="preserve">
-    <value>开启后会记住上次看到哪页，点&quot;是&quot;自动跳过去，贴心~</value>
+    <value>开启后会记住上次看到哪页，点&quot;是&quot;自动飞过去，贴心小棉袄~</value>
   </data>
   <data name="RightBottomOffset" xml:space="preserve">
-    <value>右下偏移</value>
+    <value>右下身高差</value>
   </data>
   <data name="RightBottomOpacity" xml:space="preserve">
-    <value>右下透明度</value>
+    <value>右下隐身值</value>
   </data>
   <data name="RightOffset" xml:space="preserve">
-    <value>右侧偏移</value>
+    <value>右侧身高差</value>
   </data>
   <data name="RightOpacity" xml:space="preserve">
-    <value>右侧透明度</value>
+    <value>右侧隐身值</value>
   </data>
   <data name="ShowFlipButtons" xml:space="preserve">
-    <value>PPT 模式下显示翻页按钮</value>
+    <value>PPT 模式下亮出翻页神器</value>
   </data>
   <data name="ShowPageNumber" xml:space="preserve">
-    <value>显示页码</value>
+    <value>露个页码</value>
   </data>
   <data name="ShowQuickPanelInShow" xml:space="preserve">
-    <value>PPT 放映时显示快速面板</value>
+    <value>PPT 放映时召唤快速面板</value>
   </data>
   <data name="ShowQuickPanelInShowHint" xml:space="preserve">
-    <value>关闭后 PPT 放映时不显示快速面板，清净~</value>
+    <value>关闭后 PPT 放映时不显示快速面板，眼不见心不烦~</value>
   </data>
   <data name="SideGroupTitle" xml:space="preserve">
-    <value>两侧</value>
+    <value>装备栏两侧</value>
   </data>
   <data name="SkipAnimations" xml:space="preserve">
-    <value>抢占焦点放映（跳过 PPT 动画，直接冲！）</value>
+    <value>抢占焦点放映（PPT 动画？跳过，直接冲！）</value>
   </data>
   <data name="SupportPowerPoint" xml:space="preserve">
-    <value>PPT联动总开关</value>
+    <value>PPT 联动总闸</value>
   </data>
   <data name="PPTArchitecture" xml:space="preserve">
-    <value>PPT 架构切换</value>
+    <value>PPT 架构换装</value>
   </data>
   <data name="PPTComArchitecture" xml:space="preserve">
     <value>PPT COM 架构</value>
@@ -202,25 +202,25 @@
     <value>VSTO Agent 架构</value>
   </data>
   <data name="PPTAgentArchitectureHint" xml:space="preserve">
-    <value>让 PowerPoint 里面的小插件接管 PPT，ICC 只走 NamedPipe 发号施令，不碰 COM/ROT。</value>
+    <value>让 PowerPoint 里面的小插件夺权，ICC 只走 NamedPipe 发号施令，不碰 COM/ROT</value>
   </data>
   <data name="PPTAgentNotConnected" xml:space="preserve">
-    <value>PPT Agent 还没连上</value>
+    <value>PPT Agent 还在摸鱼</value>
   </data>
   <data name="PPTAgentInstallHint" xml:space="preserve">
-    <value>先打开 PowerPoint，并确认 ICC PowerPoint Agent 插件已经加载啦。</value>
+    <value>先打开 PowerPoint，并确认 ICC PowerPoint Agent 插件已经上线营业</value>
   </data>
   <data name="SupportWPS" xml:space="preserve">
-    <value>WPS 支持</value>
+    <value>WPS 也算人</value>
   </data>
   <data name="TimeCapsule" xml:space="preserve">
-    <value>PPT 时间胶囊</value>
+    <value>PPT 时光胶囊</value>
   </data>
   <data name="TimeCapsuleHint" xml:space="preserve">
-    <value>开启后在 PPT 放映时显示时间胶囊，替代最小化计时器窗口，时间管理大师~</value>
+    <value>开启后在 PPT 放映时显示时光胶囊，替代最小化计时器窗口，时间管理大师就是你~</value>
   </data>
   <data name="TimeCapsuleOpacity" xml:space="preserve">
-    <value>时间胶囊透明度</value>
+    <value>时光胶囊隐身值</value>
   </data>
   <data name="TimeCapsulePos_Center" xml:space="preserve">
     <value>顶部居中</value>
@@ -232,34 +232,34 @@
     <value>右上角</value>
   </data>
   <data name="TimeCapsulePosition" xml:space="preserve">
-    <value>时间胶囊住哪</value>
+    <value>时光胶囊驻扎地</value>
   </data>
   <data name="TimeCapsuleResetPosition" xml:space="preserve">
-    <value>重置位置</value>
+    <value>v50 位置</value>
   </data>
   <data name="TimeCapsuleResetPositionHint" xml:space="preserve">
-    <value>把时间胶囊送回默认位置</value>
+    <value>把时光胶囊遣返老家</value>
   </data>
   <data name="TimeCapsuleScale" xml:space="preserve">
-    <value>时间胶囊大小</value>
+    <value>时光胶囊体型</value>
   </data>
   <data name="TwoFingerGesture" xml:space="preserve">
-    <value>允许幻灯片模式下的双指手势</value>
+    <value>解锁幻灯片模式双指技能</value>
   </data>
   <data name="PPTQuickPanel_CloseMagnifier" xml:space="preserve">
     <value>收了神通吧</value>
   </data>
   <data name="PPTQuickPanel_FocusMagnifier" xml:space="preserve">
-    <value>火眼金睛放大镜</value>
+    <value>火眼金睛</value>
   </data>
   <data name="PPTQuickPanel_Insert" xml:space="preserve">
     <value>塞图进来</value>
   </data>
   <data name="PPTQuickPanel_MagnifierHint" xml:space="preserve">
-    <value>拖框框移动，拖角角缩放，按 ESC 收工~</value>
+    <value>拖框框移动，拖角角缩放，按 ESC 收工</value>
   </data>
   <data name="PPTQuickPanel_OpenMagnifier" xml:space="preserve">
-    <value>打开火眼金睛</value>
+    <value>召唤火眼金睛</value>
   </data>
   <data name="PPTQuickPanel_ScreenshotInsert" xml:space="preserve">
     <value>咔嚓截图塞进来</value>
@@ -271,36 +271,36 @@
     <value>放大缩小</value>
   </data>
   <data name="UseRot" xml:space="preserve">
-    <value>使用 ROT 联动</value>
+    <value>走 ROT 联动路线</value>
   </data>
   <data name="PPT_RememberLastPage_Prompt" xml:space="preserve">
     <value>上次看到第 {0} 页了，要不要一键飞过去？</value>
   </data>
   <data name="PPT_HiddenSlides_Detected" xml:space="preserve">
-    <value>发现藏起来的幻灯片了，要不要把它们拉出来示众？</value>
+    <value>揪出藏起来的幻灯片了，要不要拉出来示众？</value>
   </data>
   <data name="PPT_AutoPlay_Detected" xml:space="preserve">
-    <value>检测到自动播放或排练计时开着，幻灯片可能会自己跑，要不要封印它？</value>
+    <value>检测到自动播放或排练计时开着，幻灯片可能会自己跑路，要不要封印它？</value>
   </data>
   <data name="PPT_ModePrompt_Message" xml:space="preserve">
-    <value>点击批注栏图标就能折叠/展开批注栏，拖动图标可移动位置，点击页数可快捷翻页。</value>
+    <value>戳批注栏图标就能折叠/展开批注栏，拖动图标可挪窝，戳页数可快捷翻页</value>
   </data>
   <data name="PPT_ModePrompt_Setting" xml:space="preserve">
-    <value>进入 PPT 模式时提示批注栏用法</value>
+    <value>进入 PPT 模式时唠叨批注栏用法</value>
   </data>
   <data name="PPT_ModePrompt_SettingHint" xml:space="preserve">
-    <value>开启后，每次进入 PPT 放映/联动模式都会提示批注栏的基本操作。</value>
+    <value>开启后，每次进入 PPT 放映/联动模式都会念叨批注栏的基本操作</value>
   </data>
   <data name="PPT_ModePrompt_Title" xml:space="preserve">
-    <value>已进入 PPT 模式</value>
+    <value>PPT 模式已上线</value>
   </data>
   <data name="PPT_SlidesNotFound" xml:space="preserve">
-    <value>幻灯片呢？找不到啊！</value>
+    <value>幻灯片呢？离家出走了？</value>
   </data>
   <data name="SmartMode" xml:space="preserve">
-    <value>PPT 智慧模式</value>
+    <value>PPT 智者模式</value>
   </data>
   <data name="SmartModeHint" xml:space="preserve">
-    <value>自动检测 PPT 中的视频控件区域，鼠标进入时切换为指针模式，离开后恢复批注模式（所有联动架构可用）</value>
+    <value>自动检测 PPT 中的视频控件区域，鼠标进入时切指针形态，离开后恢复批注形态（所有联动架构都能用）</value>
   </data>
 </root>

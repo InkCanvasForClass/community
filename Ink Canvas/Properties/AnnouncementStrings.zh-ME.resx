@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -52,19 +52,19 @@
     <value>看看收到的远端公告和实时推送内容，吃瓜第一线~</value>
   </data>
   <data name="CenterTitle" xml:space="preserve">
-    <value>公告中心</value>
+    <value>吃瓜中心</value>
   </data>
   <data name="ClearHistory" xml:space="preserve">
-    <value>清空历史</value>
+    <value>删库跑路</value>
   </data>
   <data name="ConnectionHint" xml:space="preserve">
     <value>配置公告 HTTP API、WebSocket 实时推送地址和访问 Token，连线必备~</value>
   </data>
   <data name="ConnectionTitle" xml:space="preserve">
-    <value>连接配置</value>
+    <value>连线配置</value>
   </data>
   <data name="ItemCount" xml:space="preserve">
-    <value>共 {0} 条公告，点左边看详情，冲鸭~</value>
+    <value>共 {0} 条公告，戳左边看详情，冲鸭~</value>
   </data>
   <data name="MarkAllAsRead" xml:space="preserve">
     <value>全部已读</value>
@@ -97,6 +97,6 @@
     <value>你有 {0} 条未读通知，快去看看吧~</value>
   </data>
   <data name="StartupUnreadAction" xml:space="preserve">
-    <value>查看详情</value>
+    <value>吃瓜详情</value>
   </data>
 </root>

@@ -46,13 +46,13 @@
     <value>摸鱼性能</value>
   </data>
   <data name="EnableMonitoring" xml:space="preserve">
-    <value>开启性能监控（看看电脑累不累）</value>
+    <value>偷窥电脑摸鱼状态</value>
   </data>
   <data name="EnableMonitoringHint" xml:space="preserve">
-    <value>每隔一段时间看看 CPU 和内存在干嘛，记下最近 30 次的摸鱼数据。关了就全清空咯。</value>
+    <value>每隔一段时间偷瞄 CPU 和内存在干嘛，记下最近 30 次摸鱼数据。关了就全清空咯。</value>
   </data>
   <data name="CurrentSession" xml:space="preserve">
-    <value>本次摸鱼状态</value>
+    <value>本次摸鱼实况</value>
   </data>
   <data name="CpuUsage" xml:space="preserve">
     <value>CPU 在摸鱼吗</value>
@@ -70,7 +70,7 @@
     <value>正在偷看中...</value>
   </data>
   <data name="HistorySection" xml:space="preserve">
-    <value>摸鱼历史档案</value>
+    <value>摸鱼黑历史</value>
   </data>
   <data name="HistoryHint" xml:space="preserve">
     <value>最近 30 次运行的 CPU 和内存平均摸鱼指数</value>
@@ -94,7 +94,7 @@
     <value>最高内存</value>
   </data>
   <data name="ClearHistory" xml:space="preserve">
-    <value>清空摸鱼记录</value>
+    <value>销毁摸鱼证据</value>
   </data>
   <data name="ClearHistoryConfirm" xml:space="preserve">
     <value>确定要销毁所有摸鱼证据吗？删了就真没了！</value>
@@ -142,7 +142,7 @@
     <value>体检中，请稍候...</value>
   </data>
   <data name="InkSmoothingSection" xml:space="preserve">
-    <value>笔迹整形耗时</value>
+    <value>笔迹整容耗时</value>
   </data>
   <data name="InkSmoothingHint" xml:space="preserve">
     <value>最近 100 次笔画整容手术的耗时记录</value>

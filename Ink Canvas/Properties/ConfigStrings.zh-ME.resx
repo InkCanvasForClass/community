@@ -43,7 +43,7 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="Delete" xml:space="preserve">
-    <value>删掉这个方案</value>
+    <value>删库跑路</value>
   </data>
   <data name="Desc" xml:space="preserve">
     <value>选配置文件就切换并热重载；另存为可以把当前配置存成新方案</value>
@@ -55,7 +55,7 @@
     <value>另存为新方案</value>
   </data>
   <data name="Title" xml:space="preserve">
-    <value>配置方案切换与热重载（一键换装）</value>
+    <value>一键换装台</value>
   </data>
   <data name="ProfileNameLabel" xml:space="preserve">
     <value>方案名称</value>
@@ -79,7 +79,7 @@
     <value>先选一个要删的配置方案啊！</value>
   </data>
   <data name="Delete_ConfirmTitle" xml:space="preserve">
-    <value>确认删除（别冲动）</value>
+    <value>确认删除别冲动</value>
   </data>
   <data name="Delete_ConfirmMsg" xml:space="preserve">
     <value>确定要删掉方案「{0}」吗？删了就没了！</value>

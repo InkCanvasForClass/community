@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -54,16 +54,16 @@
     <value>终于等到你 · InkCanvasForClass CE</value>
   </data>
   <data name="Oobe_WelcomeDesc" xml:space="preserve">
-    <value>专为课堂而生的批注白板神器。下面这个向导带你一键配好，配错了也别慌，去「设置」里随时改。</value>
+    <value>专为课堂而生的批注白板神器。下面这个向导带你一键配好，配错了也别慌，去「设置」里随时 v50。</value>
   </data>
   <data name="Oobe_StepCount" xml:space="preserve">
     <value>就 8 步 · 1 分钟搞定</value>
   </data>
   <data name="Oobe_StartStepByStep" xml:space="preserve">
-    <value>来，一步步配</value>
+    <value>来，手把手教</value>
   </data>
   <data name="Oobe_UsePreset" xml:space="preserve">
-    <value>直接用预设（懒人福音）</value>
+    <value>懒人福音一键预设</value>
   </data>
   <data name="Oobe_NavWelcome" xml:space="preserve">
     <value>欢迎入坑</value>
@@ -72,7 +72,7 @@
     <value>隐私那些事</value>
   </data>
   <data name="Oobe_NavCanvas" xml:space="preserve">
-    <value>画板与墨迹</value>
+    <value>画板与灵魂墨迹</value>
   </data>
   <data name="Oobe_NavGestures" xml:space="preserve">
     <value>搓手手势</value>
@@ -81,10 +81,10 @@
     <value>PPT 联动</value>
   </data>
   <data name="Oobe_NavAutomation" xml:space="preserve">
-    <value>自动化与截图</value>
+    <value>全自动打工</value>
   </data>
   <data name="Oobe_NavAdvanced" xml:space="preserve">
-    <value>高级选项（大佬专区）</value>
+    <value>大佬专区</value>
   </data>
   <data name="Oobe_NavFinish" xml:space="preserve">
     <value>搞定收工</value>
@@ -93,205 +93,205 @@
     <value>隐私那些事</value>
   </data>
   <data name="Oobe_Step1Subtitle" xml:space="preserve">
-    <value>遥测、隐私协议、自动更新、崩了怎么办。</value>
+    <value>遥测、隐私协议、自动更新、崩了怎么复活</value>
   </data>
   <data name="Oobe_PrivacyTitle" xml:space="preserve">
-    <value>匿名数据与隐私（放心，不偷窥）</value>
+    <value>匿名数据与隐私，真的不偷窥</value>
   </data>
   <data name="Oobe_PrivacyDesc" xml:space="preserve">
-    <value>完全匿名的使用统计，纯粹为了修 bug 和提速，绝对不偷看你的课堂内容。</value>
+    <value>完全匿名的使用统计，纯粹为了修 bug 和提速，绝对不偷看你的课堂剧本</value>
   </data>
   <data name="Oobe_AgreePrivacy" xml:space="preserve">
     <value>我已阅读并同意</value>
   </data>
   <data name="Oobe_PrivacyPolicy" xml:space="preserve">
-    <value>《隐私协议（真的不偷看版）》</value>
+    <value>《真的不偷看版隐私协议》</value>
   </data>
   <data name="Oobe_TelemetryLevel" xml:space="preserve">
-    <value>遥测级别（你说了算）</value>
+    <value>遥测级别你说了算</value>
   </data>
   <data name="Oobe_TelemetryLevelDesc" xml:space="preserve">
-    <value>本软件绝不收集课堂内容、学生个人信息或能认出你的墨迹。详情看 privacy.txt，白纸黑字不骗人。</value>
+    <value>本软件绝不收集课堂内容、学生个人信息或能认出你的墨迹。详情看 privacy.txt，白纸黑字不画饼</value>
   </data>
   <data name="Oobe_TelemetryNone" xml:space="preserve">
-    <value>什么都不上传（社恐模式）</value>
+    <value>社恐模式啥也不传</value>
   </data>
   <data name="Oobe_TelemetryBasic" xml:space="preserve">
-    <value>基础（崩了告诉我一声就行）</value>
+    <value>崩了告诉我一声就行</value>
   </data>
   <data name="Oobe_TelemetryOptional" xml:space="preserve">
-    <value>可选（功能使用频率之类的，随你）</value>
+    <value>功能使用频率之类的随你</value>
   </data>
   <data name="Oobe_StartupCrashTitle" xml:space="preserve">
-    <value>启动与崩溃处理（崩了别慌）</value>
+    <value>启动与崩溃处理，崩了别慌</value>
   </data>
   <data name="Oobe_FoldAtStartup" xml:space="preserve">
-    <value>启动时自动缩到屏幕边缘（低调行事）</value>
+    <value>启动时低调缩边</value>
   </data>
   <data name="Oobe_FoldAtStartupDesc" xml:space="preserve">
-    <value>启动后浮动工具栏自动藏到屏幕边缘，不碍事。</value>
+    <value>启动后浮动工具栏自动藏到屏幕边缘，社恐式低调</value>
   </data>
   <data name="Oobe_AutoUpdate" xml:space="preserve">
-    <value>允许后台偷偷检查更新并下载新版本。</value>
+    <value>允许后台偷偷摸鱼检查更新并下载新版本</value>
   </data>
   <data name="Oobe_CrashAction" xml:space="preserve">
     <value>崩了怎么办</value>
   </data>
   <data name="Oobe_CrashActionDesc" xml:space="preserve">
-    <value>之后可以在 设置 → 启动 里改。</value>
+    <value>之后可以在 设置 → 启动 里随时 v50</value>
   </data>
   <data name="Oobe_CrashSilentRestart" xml:space="preserve">
-    <value>静默重启（推荐，崩了无感复活）</value>
+    <value>静默无感复活推荐</value>
   </data>
   <data name="Oobe_CrashNoAction" xml:space="preserve">
-    <value>啥也不干（就记个日志，躺平）</value>
+    <value>啥也不干就记个日志躺平</value>
   </data>
   <data name="Oobe_CrashShowDialog" xml:space="preserve">
-    <value>弹出崩溃详情窗口（不重启，看看怎么挂的）</value>
+    <value>弹窗看看怎么挂的不重启</value>
   </data>
   <data name="Oobe_Step2Title" xml:space="preserve">
-    <value>画板与墨迹（灵魂画手专区）</value>
+    <value>灵魂画手专区</value>
   </data>
   <data name="Oobe_ShowPenCursorDesc" xml:space="preserve">
-    <value>画的时候显示光标位置，知道笔在哪。</value>
+    <value>画的时候显示光标位置，笔在哪儿心里有数</value>
   </data>
   <data name="Oobe_IgnorePressureDesc" xml:space="preserve">
-    <value>所有笔画统一粗细，不管你按多用力，佛系画线。</value>
+    <value>所有笔画统一粗细，按多用力都佛系画线</value>
   </data>
   <data name="Oobe_HideInkOnExit" xml:space="preserve">
-    <value>退出画板模式时隐藏墨迹（眼不见为净）</value>
+    <value>退出画板时眼不见为净</value>
   </data>
   <data name="Oobe_HideInkOnExitDesc" xml:space="preserve">
-    <value>进入 PPT 非批注模式时不显示墨迹。</value>
+    <value>进入 PPT 非批注模式时墨迹自动隐身</value>
   </data>
   <data name="Oobe_InkRecogDesc" xml:space="preserve">
-    <value>手绘图形自动变成标准形状，灵魂画手也能画圆了。</value>
+    <value>手绘图形自动变成标准形状，灵魂画手也能画圆</value>
   </data>
   <data name="Oobe_Step3Title" xml:space="preserve">
     <value>搓手手势</value>
   </data>
   <data name="Oobe_EnableTwoFingerZoom" xml:space="preserve">
-    <value>启用双指缩放（捏一捏）</value>
+    <value>捏一捏双指缩放</value>
   </data>
   <data name="Oobe_EnableTwoFingerPan" xml:space="preserve">
-    <value>启用双指平移（拖一拖）</value>
+    <value>拖一拖双指平移</value>
   </data>
   <data name="Oobe_PalmEraserDesc" xml:space="preserve">
-    <value>多触点且面积大时自动变橡皮，手掌一抹就擦，黑科技。</value>
+    <value>多触点大面积自动变橡皮，手掌一抹就擦，黑科技</value>
   </data>
   <data name="Oobe_AppTheme" xml:space="preserve">
-    <value>应用主题（换个皮肤）</value>
+    <value>换个皮肤</value>
   </data>
   <data name="Oobe_AppThemeDesc" xml:space="preserve">
-    <value>随时在 设置 → 个性化 里换装。</value>
+    <value>随时在 设置 → 个性化 里换装</value>
   </data>
   <data name="Oobe_ThemeLight" xml:space="preserve">
-    <value>浅色（白嫖日光）</value>
+    <value>白嫖日光浅色</value>
   </data>
   <data name="Oobe_ShowSplashScreenDesc" xml:space="preserve">
-    <value>首次启动时显示全屏欢迎页，仪式感拉满。</value>
+    <value>首次启动显示全屏欢迎页，仪式感拉满</value>
   </data>
   <data name="Oobe_TrayAndQuickPanel" xml:space="preserve">
     <value>托盘与快速面板</value>
   </data>
   <data name="Oobe_EnableTrayIcon" xml:space="preserve">
-    <value>在系统托盘挂个小图标</value>
+    <value>托盘挂个小图标</value>
   </data>
   <data name="Oobe_EnableTrayIconDesc" xml:space="preserve">
-    <value>方便后台快速唤出，随叫随到。</value>
+    <value>方便后台快速唤出，随叫随到</value>
   </data>
   <data name="Oobe_EnableQuickPanel" xml:space="preserve">
     <value>启用快速面板</value>
   </data>
   <data name="Oobe_EnableQuickPanelDesc" xml:space="preserve">
-    <value>计时器、点名等常用工具的快速入口，效率起飞。</value>
+    <value>计时器、点名等常用工具快速入口，效率起飞</value>
   </data>
   <data name="Oobe_EnableGlobalHotkeys" xml:space="preserve">
     <value>鼠标模式下启用全局快捷键</value>
   </data>
   <data name="Oobe_EnableGlobalHotkeysDesc" xml:space="preserve">
-    <value>具体快捷键去 设置 → 个性化 里调，想怎么按怎么按。</value>
+    <value>具体快捷键去 设置 → 个性化 里调，想怎么按就怎么按</value>
   </data>
   <data name="Oobe_Step5Title" xml:space="preserve">
-    <value>PPT 联动（强强联手）</value>
+    <value>PPT 强强联手</value>
   </data>
   <data name="Oobe_EnablePPTLink" xml:space="preserve">
     <value>启用与 PowerPoint / WPS 的联动</value>
   </data>
   <data name="Oobe_EnablePPTLinkDesc" xml:space="preserve">
-    <value>在幻灯片里一键呼出画板，丝滑得很。</value>
+    <value>幻灯片里一键呼出画板，丝滑得很</value>
   </data>
   <data name="Oobe_AutoSaveStrokes" xml:space="preserve">
-    <value>放映中自动保存墨迹（防手滑）</value>
+    <value>放映中防手滑自动存墨迹</value>
   </data>
   <data name="Oobe_AutoSaveStrokesDesc" xml:space="preserve">
-    <value>避免误关丢失板书，血泪教训。</value>
+    <value>避免误关丢失板书，血泪教训</value>
   </data>
   <data name="Oobe_AutoScreenshot" xml:space="preserve">
     <value>放映中自动保存截屏</value>
   </data>
   <data name="Oobe_AutoScreenshotDesc" xml:space="preserve">
-    <value>用于事后回看课堂内容，回忆杀。</value>
+    <value>事后回看课堂内容，回忆杀</value>
   </data>
   <data name="Oobe_EnableTimeCapsule" xml:space="preserve">
     <value>启用 PPT 时间胶囊</value>
   </data>
   <data name="Oobe_EnableTimeCapsuleDesc" xml:space="preserve">
-    <value>放映时显示时间提醒，下课不超时。</value>
+    <value>放映时显示时间提醒，下课不超时防拖堂</value>
   </data>
   <data name="Oobe_Step6Title" xml:space="preserve">
-    <value>自动化行为（让软件自己干活）</value>
+    <value>让软件自己打工</value>
   </data>
   <data name="Oobe_AutoFoldInPPT" xml:space="preserve">
-    <value>进入 PPT 放映时自动收纳（识趣地让路）</value>
+    <value>进 PPT 放映时识趣让路</value>
   </data>
   <data name="Oobe_AutoSaveInk" xml:space="preserve">
     <value>启用墨迹自动保存</value>
   </data>
   <data name="Oobe_AutoSaveInkDesc" xml:space="preserve">
-    <value>定时把墨迹存到本地，再也不怕丢。</value>
+    <value>定时把墨迹存到本地，再也不怕寄</value>
   </data>
   <data name="Oobe_FloatingInterceptorDesc" xml:space="preserve">
-    <value>拦截希沃、鸿合等课堂软件的悬浮窗，别挡我画板！</value>
+    <value>拦截希沃、鸿合等课堂软件悬浮窗，别挡我画板！</value>
   </data>
   <data name="Oobe_ScreenshotTitle" xml:space="preserve">
     <value>截图与屏幕捕捉</value>
   </data>
   <data name="Oobe_AutoSaveScreenshot" xml:space="preserve">
-    <value>清屏时自动保存截图（留个纪念）</value>
+    <value>清屏时留个纪念自动存截图</value>
   </data>
   <data name="Oobe_SaveByDate" xml:space="preserve">
-    <value>按日期分文件夹保存截图（整整齐齐）</value>
+    <value>按日期分文件夹整整齐齐存截图</value>
   </data>
   <data name="Oobe_ShowRollCallButtons" xml:space="preserve">
-    <value>显示随机抽和单次抽按钮（天选之子）</value>
+    <value>天选之子抽抽乐按钮</value>
   </data>
   <data name="Oobe_Step8Title" xml:space="preserve">
-    <value>高级选项（大佬请进）</value>
+    <value>大佬请进</value>
   </data>
   <data name="Oobe_EnableLog" xml:space="preserve">
-    <value>启用日志（记小本本）</value>
+    <value>启用日志记小本本</value>
   </data>
   <data name="Oobe_EnableLogDesc" xml:space="preserve">
-    <value>方便排查问题和反馈，出了 bug 有据可查。</value>
+    <value>方便排查问题和反馈，出了 bug 有据可查</value>
   </data>
   <data name="Oobe_FinishTitle" xml:space="preserve">
     <value>搞定收工！</value>
   </data>
   <data name="Oobe_FinishDesc" xml:space="preserve">
-    <value>确认下面的关键配置就可以开冲了。所有设置之后都能在「设置」里改，放心大胆地选。</value>
+    <value>确认下面的关键配置就可以开冲了。所有设置之后都能在「设置」里 v50，放心大胆地选</value>
   </data>
   <data name="Oobe_SummaryTrayIcon" xml:space="preserve">
     <value>系统托盘图标</value>
   </data>
   <data name="Oobe_BoolEnabled" xml:space="preserve">
-    <value>已开启（冲了）</value>
+    <value>已冲</value>
   </data>
   <data name="Oobe_BoolDisabled" xml:space="preserve">
-    <value>已关闭（算了）</value>
+    <value>算了</value>
   </data>
   <data name="Oobe_Previous" xml:space="preserve">
-    <value>上一步（我反悔了）</value>
+    <value>我反悔了</value>
   </data>
   <data name="Oobe_Next" xml:space="preserve">
     <value>下一步</value>
@@ -306,22 +306,22 @@
     <value>{0} / {1} · 搞定</value>
   </data>
   <data name="Oobe_PresetTitle" xml:space="preserve">
-    <value>选个预设（懒人一键配）</value>
+    <value>懒人一键预设</value>
   </data>
   <data name="Oobe_PresetSubtitle" xml:space="preserve">
-    <value>开发者调校好的推荐配置，一键搞定。所有选项之后在「设置」里随时改。</value>
+    <value>开发者调校好的推荐配置一键搞定。所有选项之后在「设置」里随时 v50</value>
   </data>
   <data name="Oobe_PresetStandard" xml:space="preserve">
-    <value>课堂标准配置（万金油）</value>
+    <value>课堂万金油配置</value>
   </data>
   <data name="Oobe_PresetStandardDesc" xml:space="preserve">
-    <value>开 PPT 联动、自动保存墨迹、托盘图标、双指手势，大多数课堂场景一把梭。</value>
+    <value>开 PPT 联动、自动保存墨迹、托盘图标、双指手势，大多数课堂场景一把梭</value>
   </data>
   <data name="Oobe_PresetLite" xml:space="preserve">
-    <value>简洁轻量配置（极简主义）</value>
+    <value>极简主义轻量配置</value>
   </data>
   <data name="Oobe_PresetLiteDesc" xml:space="preserve">
-    <value>关掉大部分自动化和联动，保持最小后台行为，适合只想简单批注的同学。</value>
+    <value>关掉大部分自动化和联动，保持最小后台行为，适合只想简单批注的同学</value>
   </data>
   <data name="Oobe_PresetTagPPTLink" xml:space="preserve">
     <value>PPT 联动</value>
@@ -333,40 +333,40 @@
     <value>托盘图标</value>
   </data>
   <data name="Oobe_PresetNote" xml:space="preserve">
-    <value>选了预设就直接完成初始设置，不用一步步配了，省事！</value>
+    <value>选了预设直接完成初始设置省大事！</value>
   </data>
   <data name="Oobe_PresetBack" xml:space="preserve">
-    <value>返回（我再想想）</value>
+    <value>我再想想</value>
   </data>
   <data name="Oobe_PresetApply" xml:space="preserve">
     <value>应用，开冲！</value>
   </data>
   <data name="Oobe_Step2Subtitle" xml:space="preserve">
-    <value>光标、压感、墨迹显示与墨迹纠正，灵魂画手必修课。</value>
+    <value>光标、压感、墨迹显示与纠正，灵魂画手必修课</value>
   </data>
   <data name="Oobe_Step3Subtitle" xml:space="preserve">
-    <value>双指缩放/平移、手掌擦等，搓手党狂喜。</value>
+    <value>双指缩放/平移、手掌擦等，搓手党狂喜</value>
   </data>
   <data name="Oobe_Step4Subtitle" xml:space="preserve">
-    <value>主题、启动动画、托盘、快速面板与快捷键，颜值即正义。</value>
+    <value>主题、启动动画、托盘、快速面板与快捷键，颜值即正义</value>
   </data>
   <data name="Oobe_Step5Subtitle" xml:space="preserve">
-    <value>放映联动、墨迹与截屏自动保存、时间胶囊，PPT 党福音。</value>
+    <value>放映联动、墨迹与截屏自动保存、时间胶囊，PPT 党福音</value>
   </data>
   <data name="Oobe_Step6Subtitle" xml:space="preserve">
-    <value>自动收纳、墨迹自动保存、悬浮窗拦截与截图保存，全自动打工。</value>
+    <value>自动收纳、墨迹自动保存、悬浮窗拦截与截图保存，全自动打工</value>
   </data>
   <data name="Oobe_Step7Subtitle" xml:space="preserve">
-    <value>点名窗口选项，天选之子诞生地。</value>
+    <value>点名窗口选项，天选之子诞生地</value>
   </data>
   <data name="Oobe_Step8Subtitle" xml:space="preserve">
-    <value>日志等高级配置，大佬请进。</value>
+    <value>日志等高级配置，大佬请进</value>
   </data>
   <data name="Oobe_SummaryTelemetryLevel" xml:space="preserve">
     <value>遥测级别</value>
   </data>
   <data name="Oobe_SummaryAppTheme" xml:space="preserve">
-    <value>应用主题（换皮）</value>
+    <value>换皮主题</value>
   </data>
   <data name="Oobe_SummaryPPTLink" xml:space="preserve">
     <value>PPT / WPS 联动</value>
@@ -375,6 +375,6 @@
     <value>双指缩放 / 平移</value>
   </data>
   <data name="Oobe_SummaryLogEnabled" xml:space="preserve">
-    <value>启用日志（记小本本）</value>
+    <value>启用日志记小本本</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -54,10 +54,10 @@
     <value>背景选择：</value>
   </data>
   <data name="Random_BackgroundSettingsTitle" xml:space="preserve">
-    <value>点名窗口背景设置（仅老版点名UI有效）</value>
+    <value>点名窗口背景设置（仅老版点名 UI 有效）</value>
   </data>
   <data name="Random_EnableButtons" xml:space="preserve">
-    <value>启用随机抽和单次抽按钮</value>
+    <value>启用随机抽和单抽按钮</value>
   </data>
   <data name="Random_EnableQuickButton" xml:space="preserve">
     <value>启用快抽悬浮按钮</value>
@@ -72,19 +72,19 @@
     <value>SecRandom 点名</value>
   </data>
   <data name="Random_ExternalTypeLabel" xml:space="preserve">
-    <value>点名类型</value>
+    <value>点名姿势</value>
   </data>
   <data name="Random_ML_AvoidRepeat" xml:space="preserve">
-    <value>启用 AI 避免重复点名</value>
+    <value>启用 AI 防重复点名</value>
   </data>
   <data name="Random_ML_Hint" xml:space="preserve">
     <value>AI 会分析最近的点名历史，智能避免重复选到同一个人，绝绝子~</value>
   </data>
   <data name="Random_ML_HistoryCount" xml:space="preserve">
-    <value>避免重复历史记录数量</value>
+    <value>防重复历史记录数量</value>
   </data>
   <data name="Random_ML_Weight" xml:space="preserve">
-    <value>避免重复权重</value>
+    <value>防重复权重</value>
   </data>
   <data name="Random_NewUI_Enable" xml:space="preserve">
     <value>启用新点名 UI</value>
@@ -93,13 +93,13 @@
     <value>新点名 UI 设置</value>
   </data>
   <data name="Random_OnceCloseDelay" xml:space="preserve">
-    <value>单次抽人窗口关闭延迟</value>
+    <value>单抽窗口关闭延迟</value>
   </data>
   <data name="Random_OnceMaxStudents" xml:space="preserve">
     <value>单次随机点名人数上限</value>
   </data>
   <data name="Random_ShowEditNamesButton" xml:space="preserve">
-    <value>显示修改点名名单的按钮</value>
+    <value>显示改名单按钮</value>
   </data>
   <data name="Random_Title" xml:space="preserve">
     <value>点名与计时器</value>
@@ -126,7 +126,7 @@
     <value>重置成功！</value>
   </data>
   <data name="Random_SelectProgressiveAlarm" xml:space="preserve">
-    <value>选择渐进提醒音频文件</value>
+    <value>选个渐进提醒音频文件</value>
   </data>
   <data name="Random_Error" xml:space="preserve">
     <value>翻车了</value>
@@ -204,7 +204,7 @@
     <value>准备开奖...</value>
   </data>
   <data name="Random_RollCall_SingleDrawMode" xml:space="preserve">
-    <value>单抽模式 - 60个号码球</value>
+    <value>单抽模式 - 60 个号码球</value>
   </data>
   <data name="Random_RollCall_NameListCountFormat" xml:space="preserve">
     <value>名单上有 {0} 号人</value>

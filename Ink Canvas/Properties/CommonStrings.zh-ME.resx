@@ -43,7 +43,7 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="Color" xml:space="preserve">
-    <value>颜色</value>
+    <value>调色盘</value>
   </data>
   <data name="Common_Cancel" xml:space="preserve">
     <value>溜了溜了</value>
@@ -64,10 +64,10 @@
     <value>小一点</value>
   </data>
   <data name="Time_End" xml:space="preserve">
-    <value>截止时间</value>
+    <value>DDL</value>
   </data>
   <data name="Time_Start" xml:space="preserve">
-    <value>开始时间</value>
+    <value>开干时间</value>
   </data>
   <data name="Yes" xml:space="preserve">
     <value>没问题！</value>

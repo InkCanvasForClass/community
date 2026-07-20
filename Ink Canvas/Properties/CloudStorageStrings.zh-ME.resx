@@ -64,7 +64,7 @@
     <value>打工人花名册</value>
   </data>
   <data name="CloudStorage_ProviderListDesc" xml:space="preserve">
-    <value>关掉某个打工人后，ta就再也不用搬砖了，自动保存文件不会再找ta~</value>
+    <value>关掉某个打工人后，ta 就再也不用搬砖了，自动保存文件不会再找 ta~</value>
   </data>
   <data name="CloudStorage_Dlass" xml:space="preserve">
     <value>Dlass</value>
@@ -79,7 +79,7 @@
     <value>还没领证呢</value>
   </data>
   <data name="CloudStorage_SavedTokens" xml:space="preserve">
-    <value>已收藏的通行证</value>
+    <value>通行证收藏夹</value>
   </data>
   <data name="CloudStorage_SavedTokensDesc" xml:space="preserve">
     <value>从本地通行证收藏夹里挑一个用~</value>
@@ -154,7 +154,7 @@
     <value>可以不填；填了文件就会住进这个目录~</value>
   </data>
   <data name="CloudStorage_WebDavActions" xml:space="preserve">
-    <value>WebDav 操作</value>
+    <value>WebDav 操作台</value>
   </data>
   <data name="CloudStorage_SaveWebDavSettings" xml:space="preserve">
     <value>保存 WebDav 调教</value>
