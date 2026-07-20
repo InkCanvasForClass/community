@@ -214,8 +214,8 @@ namespace InkCanvas.PowerPointAddIn.Core
                 var slide = view.Slide;
                 if (slide == null) return response;
 
-                // 通过 Win32 API 获取放映窗口的物理像素坐标和 DPI
-                IntPtr hwnd = FindWindow("screenClass", null);
+                // 使用当前放映窗口自身的 HWND，避免 FindWindow 命中其他屏幕或陈旧的放映窗口。
+                IntPtr hwnd = new IntPtr(ssw.HWND);
                 response.SlideShowWindowHandle = hwnd.ToInt64();
 
                 double winLeft, winTop, winWidth, winHeight;
