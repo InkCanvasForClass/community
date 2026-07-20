@@ -4395,11 +4395,12 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         public void ExitApplication(object sender, RoutedEventArgs e)
         {
-            _forceCloseFromExitOrRestartButton = true;
             App.IsAppExitByUser = true;
-            // 直接调用 Application.Shutdown：可绕过 H.NotifyIcon.TaskbarIcon 隐藏消息窗口
-            // 滞留导致 WPF 默认 OnLastWindowClose 下无法退出的问题。
-            Application.Current.Shutdown();
+            _exitApplicationRequested = true;
+            _forceCloseFromExitOrRestartButton = false;
+            // 通过主窗口 Close 进入统一的 Closing 验证流程。
+            // Window_Closed 中再显式关闭 Application，确保托盘和隐藏窗口一并退出。
+            Close();
         }
 
         /// <summary>
