@@ -1028,9 +1028,6 @@ namespace Ink_Canvas
             string updateMarkerFile = Path.Combine(RootPath, "update_in_progress.tmp");
             bool isUpdateInProgress = false;
 
-            // 检查是否以更新模式启动
-            isUpdateMode = e.Args.Contains("--update-mode");
-
             // 如果是最终应用启动，立即清理更新标记文件
             if (isFinalApp)
             {

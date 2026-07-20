@@ -204,6 +204,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
             _market.PropertyChanged -= Market_PropertyChanged;
+            _marketSubscribed = false;
         }
 
         private void Market_PropertyChanged(object sender, PropertyChangedEventArgs e)
