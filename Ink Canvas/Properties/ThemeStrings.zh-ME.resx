@@ -289,7 +289,10 @@
     <value>复古才是真香</value>
   </data>
   <data name="Theme_ShowPenColorOnFloatingBarIcon" xml:space="preserve">
-    <value>彩虹屁预备</value>
+    <value>批注图标显示当前画笔颜色</value>
+  </data>
+  <data name="Theme_ShowPenColorOnBoardToolbarIcon" xml:space="preserve">
+    <value>白板画笔图标显示当前画笔颜色</value>
   </data>
   <data name="Theme_CompactFloatingBar" xml:space="preserve">
     <value>极简主义</value>

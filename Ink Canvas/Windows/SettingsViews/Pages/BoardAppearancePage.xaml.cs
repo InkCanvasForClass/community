@@ -37,6 +37,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (settings?.Appearance == null) return;
 
             CardEnableTimeDisplayInWhiteboardMode.IsOn = settings.Appearance.EnableTimeDisplayInWhiteboardMode;
+            CardShowPenColorOnBoardToolbarIcon.IsOn = settings.Appearance.ShowPenColorOnBoardToolbarIcon;
 
             BoardToolbarLeftOpacitySlider.Value = settings.Appearance.BoardToolbarLeftOpacity;
             BoardToolbarCenterOpacitySlider.Value = settings.Appearance.BoardToolbarCenterOpacity;
@@ -73,6 +74,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.Settings.Appearance.EnableTimeDisplayInWhiteboardMode = CardEnableTimeDisplayInWhiteboardMode.IsOn;
             SettingsManager.SaveSettingsToFile();
             SettingsActionHub.OnTimeDisplayInWhiteboardChanged(CardEnableTimeDisplayInWhiteboardMode.IsOn);
+        }
+
+        private void ToggleSwitchShowPenColorOnBoardToolbarIcon_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.ShowPenColorOnBoardToolbarIcon = CardShowPenColorOnBoardToolbarIcon.IsOn;
+            SettingsManager.SaveSettingsToFile();
+            if (Application.Current.MainWindow is MainWindow mainWindow)
+                mainWindow.UpdateBoardPenIconColor();
         }
 
         private void QuickNavCard_Click(object sender, RoutedEventArgs e)

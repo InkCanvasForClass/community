@@ -291,6 +291,9 @@
   <data name="Theme_ShowPenColorOnFloatingBarIcon" xml:space="preserve">
     <value>Pen icon shows current ink color</value>
   </data>
+  <data name="Theme_ShowPenColorOnBoardToolbarIcon" xml:space="preserve">
+    <value>Whiteboard pen icon shows current ink color</value>
+  </data>
   <data name="Theme_CompactFloatingBar" xml:space="preserve">
     <value>Compact floating bar</value>
   </data>

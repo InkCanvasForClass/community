@@ -630,6 +630,9 @@ namespace Ink_Canvas
         [JsonProperty("showPenColorOnFloatingBarIcon")]
         public bool ShowPenColorOnFloatingBarIcon { get; set; } = false;
 
+        [JsonProperty("showPenColorOnBoardToolbarIcon")]
+        public bool ShowPenColorOnBoardToolbarIcon { get; set; } = false;
+
         [JsonProperty("allowDragSidePanel")]
         public bool AllowDragSidePanel { get; set; } = true;
 
