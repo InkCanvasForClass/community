@@ -34,7 +34,7 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource BoardFloatBarButtonBackgroundPointerOverKey}"/>
+                    <Setter Property="Background" Value="{DynamicResource FloatingBarButtonHoverBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -65,8 +65,8 @@
         <Border x:Name="MiniToolbar"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Bottom"
-                Background="{DynamicResource BoardFloatBarBackground}"
-                BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
+                Background="{DynamicResource FloatingBarBackgroundBrush}"
+                BorderBrush="{DynamicResource FloatingBarBorderBrush}"
                 BorderThickness="1"
                 CornerRadius="6"
                 Margin="0,0,0,14"
@@ -98,7 +98,7 @@
                 </Border>
 
                 <!-- 分隔线 -->
-                <Border Width="1" Height="16" Background="{DynamicResource BoardFloatBarBorderBrush}" Margin="3,0" VerticalAlignment="Center"/>
+                <Border Width="1" Height="16" Background="{DynamicResource FloatingBarBorderBrush}" Margin="3,0" VerticalAlignment="Center"/>
 
                 <!-- 撤销 -->
                 <Border x:Name="UndoBtn" Style="{StaticResource MiniToolBtn}"
@@ -117,7 +117,7 @@
                 </Border>
 
                 <!-- 分隔线 -->
-                <Border Width="1" Height="16" Background="{DynamicResource BoardFloatBarBorderBrush}" Margin="3,0" VerticalAlignment="Center"/>
+                <Border Width="1" Height="16" Background="{DynamicResource FloatingBarBorderBrush}" Margin="3,0" VerticalAlignment="Center"/>
 
                 <!-- 上一页 -->
                 <Border Style="{StaticResource MiniToolBtn}"
@@ -150,7 +150,7 @@
                 </Border>
 
                 <!-- 分隔线 -->
-                <Border Width="1" Height="16" Background="{DynamicResource BoardFloatBarBorderBrush}" Margin="3,0" VerticalAlignment="Center"/>
+                <Border Width="1" Height="16" Background="{DynamicResource FloatingBarBorderBrush}" Margin="3,0" VerticalAlignment="Center"/>
 
                 <!-- 收起 -->
                 <Border Style="{StaticResource MiniToolBtn}"
@@ -167,8 +167,8 @@
         <Popup x:Name="ColorPalettePopup" PlacementTarget="{Binding ElementName=ColorBtn}"
                Placement="Top" StaysOpen="False" AllowsTransparency="True"
                HorizontalOffset="-30" VerticalOffset="-4">
-            <Border Background="{DynamicResource BoardFloatBarBackground}"
-                    BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
+            <Border Background="{DynamicResource FloatingBarBackgroundBrush}"
+                    BorderBrush="{DynamicResource FloatingBarBorderBrush}"
                     BorderThickness="1" CornerRadius="6" Padding="6,4">
                 <Grid>
                     <Grid.RowDefinitions>

@@ -41,7 +41,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar.Items
             var pageLabel = new TextBlock
             {
                 Text = FloatingBarStrings.Board_Page,
-                Foreground = (Brush)Application.Current.TryFindResource("FloatBarForeground"),
+                Foreground = (Brush)Application.Current.TryFindResource("FloatingBarForegroundBrush"),
                 VerticalAlignment = VerticalAlignment.Bottom,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 FontSize = 12
@@ -56,7 +56,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar.Items
                 Width = 75,
                 Height = 50,
                 BorderThickness = new Thickness(0),
-                Background = (Brush)Application.Current.TryFindResource("BoardFloatBarBackground"),
+                Background = Brushes.Transparent,
                 Opacity = 1,
                 Child = grid,
                 Cursor = Cursors.Hand

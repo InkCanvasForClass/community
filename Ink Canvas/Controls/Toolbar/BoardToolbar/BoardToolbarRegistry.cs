@@ -172,7 +172,8 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             var border = new Border
             {
                 CornerRadius = new CornerRadius(5, 5, 5, 5),
-                Background = (Brush)Application.Current.TryFindResource("BoardFloatBarBackground"),
+                Background = (Brush)Application.Current.TryFindResource("FloatingBarBackgroundBrush")
+                    ?? (Brush)Application.Current.TryFindResource("BoardFloatBarBackground"),
                 Margin = new Thickness(0),
                 Child = panel
             };

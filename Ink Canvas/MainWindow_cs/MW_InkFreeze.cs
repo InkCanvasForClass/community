@@ -222,25 +222,25 @@ namespace Ink_Canvas
                         ? XamlGraphicsIconGeometries.UnfreezeIconGeometry
                         : XamlGraphicsIconGeometries.FreezeIconGeometry;
 
+                    var accent = Application.Current.TryFindResource("FloatingBarAccentBrush") as Brush
+                        ?? new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                    var normalBackground = Application.Current.TryFindResource("FloatingBarBackgroundBrush") as Brush
+                        ?? Application.Current.TryFindResource("BoardFloatBarBackground") as Brush
+                        ?? new SolidColorBrush(Color.FromRgb(42, 42, 42));
+                    var normalForeground = Application.Current.TryFindResource("FloatingBarForegroundBrush") as Brush
+                        ?? new SolidColorBrush(FloatBarForegroundColor);
+
                     if (isFrozen)
                     {
-                        BoardInkFreezeBtn.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                        BoardInkFreezeBtn.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                        BoardInkFreezeBtn.IconBrush = new SolidColorBrush(Colors.GhostWhite);
-                        BoardInkFreezeBtn.Foreground = new SolidColorBrush(Colors.GhostWhite);
+                        BoardInkFreezeBtn.Background = accent;
+                        BoardInkFreezeBtn.IconBrush = Brushes.White;
+                        BoardInkFreezeBtn.Foreground = Brushes.White;
                     }
                     else
                     {
-                        bool isDark = Settings.Appearance.Theme == 1 ||
-                            (Settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
-                        BoardInkFreezeBtn.Background = new SolidColorBrush(isDark
-                            ? Color.FromRgb(42, 42, 42)
-                            : Color.FromRgb(244, 244, 245));
-                        BoardInkFreezeBtn.BorderBrush = new SolidColorBrush(isDark
-                            ? Color.FromRgb(85, 85, 85)
-                            : Color.FromRgb(161, 161, 170));
-                        BoardInkFreezeBtn.IconBrush = new SolidColorBrush(FloatBarForegroundColor);
-                        BoardInkFreezeBtn.Foreground = new SolidColorBrush(FloatBarForegroundColor);
+                        BoardInkFreezeBtn.Background = Brushes.Transparent;
+                        BoardInkFreezeBtn.IconBrush = normalForeground;
+                        BoardInkFreezeBtn.Foreground = normalForeground;
                     }
                 }
             }
