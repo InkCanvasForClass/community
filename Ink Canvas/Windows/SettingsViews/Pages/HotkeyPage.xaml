@@ -47,6 +47,13 @@
                             SwitchName="ToggleSwitchEnableHotkeysInMouseMode"
                             Toggled="ToggleSwitchEnableHotkeysInMouseMode_Toggled" />
 
+                    <controls:LabeledSettingsCard x:Name="CardPassThroughMouseWheelInDrawingMode"
+                            Header="{x:Static props:HotkeyStrings.Hotkey_PassThroughMouseWheelInDrawingMode}"
+                            Description="{x:Static props:HotkeyStrings.Hotkey_PassThroughMouseWheelInDrawingModeHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Mouse}"
+                            SwitchName="ToggleSwitchPassThroughMouseWheelInDrawingMode"
+                            Toggled="ToggleSwitchPassThroughMouseWheelInDrawingMode_Toggled" />
+
                     <!-- 基本操作 -->
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                                Text="{x:Static props:HotkeyStrings.Hotkey_BasicOperations}" />

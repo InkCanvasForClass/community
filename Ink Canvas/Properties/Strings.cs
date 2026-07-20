@@ -536,6 +536,8 @@ namespace Ink_Canvas.Properties
             dict["Hotkey_MouseMode"] = ("HotkeyStrings", "Hotkey_MouseMode");
             dict["Hotkey_EnableHotkeysInMouseMode"] = ("HotkeyStrings", "Hotkey_EnableHotkeysInMouseMode");
             dict["Hotkey_EnableHotkeysInMouseModeHint"] = ("HotkeyStrings", "Hotkey_EnableHotkeysInMouseModeHint");
+            dict["Hotkey_PassThroughMouseWheelInDrawingMode"] = ("HotkeyStrings", "Hotkey_PassThroughMouseWheelInDrawingMode");
+            dict["Hotkey_PassThroughMouseWheelInDrawingModeHint"] = ("HotkeyStrings", "Hotkey_PassThroughMouseWheelInDrawingModeHint");
             dict["Hotkey_BasicOperations"] = ("HotkeyStrings", "Hotkey_BasicOperations");
             dict["Hotkey_UndoDesc"] = ("HotkeyStrings", "Hotkey_UndoDesc");
             dict["Hotkey_RedoDesc"] = ("HotkeyStrings", "Hotkey_RedoDesc");

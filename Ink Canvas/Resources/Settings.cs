@@ -609,6 +609,9 @@ namespace Ink_Canvas
         [JsonProperty("enableHotkeysInMouseMode")]
         public bool EnableHotkeysInMouseMode { get; set; } = false;
 
+        [JsonProperty("passThroughMouseWheelInDrawingMode")]
+        public bool PassThroughMouseWheelInDrawingMode { get; set; } = false;
+
         [JsonProperty("language")]
         public string Language { get; set; } = "";
 

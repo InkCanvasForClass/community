@@ -57,6 +57,12 @@
   <data name="Hotkey_EnableHotkeysInMouseModeHint" xml:space="preserve">
     <value>开启后，鼠标形态下快捷键照样生效，不放过任何一个骚操作</value>
   </data>
+  <data name="Hotkey_PassThroughMouseWheelInDrawingMode" xml:space="preserve">
+    <value>画画时让鼠标滚轮穿透下去</value>
+  </data>
+  <data name="Hotkey_PassThroughMouseWheelInDrawingModeHint" xml:space="preserve">
+    <value>开了之后，在白板/批注形态下滚滚轮，下面的 PPT/Word 也会跟着滚，不用切到鼠标形态啦</value>
+  </data>
   <data name="Hotkey_BasicOperations" xml:space="preserve">
     <value>基础招式</value>
   </data>
