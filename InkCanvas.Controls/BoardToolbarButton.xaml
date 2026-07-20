@@ -10,7 +10,7 @@
             Width="60" Height="50"
             MouseDown="ButtonBorder_MouseDown"
             MouseUp="ButtonBorder_MouseUp"
-            Background="{DynamicResource BoardFloatBarBackground}" d:Background="Green"
+            Background="Transparent"
             Opacity="1"
             BorderThickness="0"
             BorderBrush="Transparent">
@@ -24,16 +24,16 @@
                         <DrawingImage.Drawing>
                             <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
                                 <GeometryDrawing x:Name="IconGeometryInternal"
-                                                 Brush="{DynamicResource IconForeground}" />
+                                                 Brush="{DynamicResource FloatingBarForegroundBrush}" />
                                 <GeometryDrawing x:Name="IconGeometryInternal2"
-                                                 Brush="{DynamicResource IconForeground}" />
+                                                 Brush="{DynamicResource FloatingBarForegroundBrush}" />
                             </DrawingGroup>
                         </DrawingImage.Drawing>
                     </DrawingImage>
                 </Image.Source>
             </Image>
             <TextBlock x:Name="LabelTextBlock" d:Text="田田田田"
-                       Foreground="{DynamicResource FloatBarForeground}"
+                       Foreground="{DynamicResource FloatingBarForegroundBrush}"
                        VerticalAlignment="Bottom"
                        HorizontalAlignment="Center"
                        FontSize="12" />

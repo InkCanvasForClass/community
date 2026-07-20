@@ -460,9 +460,10 @@ namespace Ink_Canvas
                 ClipToBounds = true,
                 Margin = new Thickness(marginLeft, marginTop, marginRight, marginBottom),
                 CornerRadius = new CornerRadius(8),
-                Background = (Brush)Application.Current.TryFindResource("FloatBarBackground"),
+                Background = (Brush)Application.Current.TryFindResource("FloatingBarBackgroundBrush")
+                    ?? (Brush)Application.Current.TryFindResource("FloatBarBackground"),
                 Opacity = 1,
-                BorderBrush = (Brush)Application.Current.TryFindResource("BoardFloatBarBorderBrush"),
+                BorderBrush = (Brush)Application.Current.TryFindResource("FloatingBarBorderBrush"),
                 BorderThickness = new Thickness(1),
                 Child = scrollViewer,
                 Visibility = Visibility.Collapsed
@@ -497,7 +498,8 @@ namespace Ink_Canvas
             var itemBorderFactory = new FrameworkElementFactory(typeof(Border));
             itemBorderFactory.SetValue(Border.MarginProperty, new Thickness(0, 4, 0, 0));
             itemBorderFactory.SetValue(Border.WidthProperty, 160.0);
-            itemBorderFactory.SetBinding(Border.BorderBrushProperty, new System.Windows.Data.Binding { Source = this, Path = new PropertyPath("BoardFloatBarBorderBrush") });
+            itemBorderFactory.SetResourceReference(Border.BackgroundProperty, "FloatingBarBackgroundBrush");
+            itemBorderFactory.SetResourceReference(Border.BorderBrushProperty, "FloatingBarBorderBrush");
             itemBorderFactory.SetValue(Border.BorderThicknessProperty, new Thickness(1));
 
             var gridFactory = new FrameworkElementFactory(typeof(Grid));

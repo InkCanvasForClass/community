@@ -200,7 +200,7 @@ namespace Ink_Canvas
             bool isInkMode = MiniInkCanvas.EditingMode == InkCanvasEditingMode.Ink;
 
             var iconFg = FindResource("IconForeground") as Brush ?? Brushes.White;
-            var selected = FindResource("BoardFloatBarSelectedBackground") as Brush ?? SelectedBrush;
+            var selected = FindResource("FloatingBarAccentBrush") as Brush ?? SelectedBrush;
 
             // Update pen button visual
             if (PenBtn != null)
