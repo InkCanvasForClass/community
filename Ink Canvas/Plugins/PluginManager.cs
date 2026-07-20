@@ -38,6 +38,7 @@ namespace Ink_Canvas.Plugins
         private readonly HashSet<string> _disabledPlugins = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private readonly string _disabledPluginsFile;
         private readonly string _pluginLogsDirectory;
+        private readonly PluginAuthorizationService _authorization;
 
         // 子服务
         private readonly PluginErrorRecoveryService _errorRecovery;
@@ -82,6 +83,7 @@ namespace Ink_Canvas.Plugins
             _errorRecovery = new PluginErrorRecoveryService(basePath);
             _configIo = new PluginConfigIo();
             _logger = new PluginLogger(_pluginLogsDirectory, "host");
+            _authorization = new PluginAuthorizationService(basePath);
         }
 
         /// <summary>
@@ -597,7 +599,7 @@ namespace Ink_Canvas.Plugins
                 return;
             }
 
-            var loadContext = new PluginLoadContext(assemblyPath, info, _assemblyContexts);
+            var loadContext = new PluginLoadContext(assemblyPath, info, _assemblyContexts, _authorization);
 
             try
             {
@@ -951,13 +953,15 @@ namespace Ink_Canvas.Plugins
             private readonly AssemblyDependencyResolver _resolver;
             private readonly PluginInfo _info;
             private readonly Dictionary<string, PluginLoadContext> _allContexts;
+            private readonly PluginAuthorizationService _authorization;
 
-            public PluginLoadContext(string pluginPath, PluginInfo info, Dictionary<string, PluginLoadContext> allContexts = null)
+            public PluginLoadContext(string pluginPath, PluginInfo info, Dictionary<string, PluginLoadContext> allContexts = null, PluginAuthorizationService authorization = null)
                 : base(string.Format("PluginContext_{0}", info?.Id ?? Path.GetFileNameWithoutExtension(pluginPath)), isCollectible: true)
             {
                 _resolver = new AssemblyDependencyResolver(pluginPath);
                 _info = info;
                 _allContexts = allContexts;
+                _authorization = authorization;
             }
 
             protected override Assembly Load(AssemblyName assemblyName)
@@ -980,13 +984,22 @@ namespace Ink_Canvas.Plugins
                 }
 
                 // 2. 尝试从默认上下文（主程序）加载，共享主程序集
-                var defaultAssembly = Default.LoadFromAssemblyName(assemblyName);
-                if (defaultAssembly != null) return defaultAssembly;
+                try
+                {
+                    var defaultAssembly = Default.LoadFromAssemblyName(assemblyName);
+                    if (defaultAssembly != null) return defaultAssembly;
+                }
+                catch (FileNotFoundException)
+                {
+                    // 默认上下文没有该程序集，继续从插件目录解析外部依赖。
+                }
 
                 // 3. 从插件目录解析依赖
                 var assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
                 if (assemblyPath != null)
                 {
+                    if (_info != null && _authorization != null && !_authorization.RequestExternalAuthorization(_info, assemblyPath))
+                        return null;
                     return LoadFromAssemblyPath(assemblyPath);
                 }
 
@@ -998,6 +1011,8 @@ namespace Ink_Canvas.Plugins
                 var libraryPath = _resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
                 if (libraryPath != null)
                 {
+                    if (_info != null && _authorization != null && !_authorization.RequestExternalAuthorization(_info, libraryPath))
+                        return IntPtr.Zero;
                     return LoadUnmanagedDllFromPath(libraryPath);
                 }
                 return IntPtr.Zero;
