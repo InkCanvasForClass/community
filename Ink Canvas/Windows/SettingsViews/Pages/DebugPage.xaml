@@ -84,6 +84,31 @@ mc:Ignorable="d"
                 </ui:SettingsCard>
 
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                    Text="{x:Static props:AdvancedStrings.Debug_MemoryBreakdownSection}" />
+
+                <ui:SettingsCard Header="{x:Static props:AdvancedStrings.Debug_MemoryBreakdownDump_Header}"
+                    Description="{x:Static props:AdvancedStrings.Debug_MemoryBreakdownDump_Desc}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Save}"/>
+                    </ui:SettingsCard.HeaderIcon>
+                    <Button x:Name="BtnDumpMemory"
+                        Content="{x:Static props:AdvancedStrings.Debug_MemoryBreakdownDump_Button}"
+                        Click="BtnDumpMemory_Click"
+                        Padding="14,6"/>
+                </ui:SettingsCard>
+
+                <ui:SettingsCard Header="{x:Static props:AdvancedStrings.Debug_MemoryBreakdownForceGC_Header}"
+                    Description="{x:Static props:AdvancedStrings.Debug_MemoryBreakdownForceGC_Desc}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Broom}"/>
+                    </ui:SettingsCard.HeaderIcon>
+                    <Button x:Name="BtnForceGC"
+                        Content="{x:Static props:AdvancedStrings.Debug_MemoryBreakdownForceGC_Button}"
+                        Click="BtnForceGC_Click"
+                        Padding="14,6"/>
+                </ui:SettingsCard>
+
+                <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                     Text="{x:Static props:AdvancedStrings.Debug_IconSettings}" />
 
                 <ui:SettingsExpander Header="{x:Static props:AdvancedStrings.Debug_SettingsExpanderExample}" IsEnabled="True"

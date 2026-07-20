@@ -192,4 +192,25 @@
   <data name="Debug_SettingsExpanderExample_Desc" xml:space="preserve">
     <value>You can override the Left indention of a SettingsCard by overriding the SettingsCardLeftIndention</value>
   </data>
+  <data name="Debug_MemoryBreakdownSection" xml:space="preserve">
+    <value>Memory Breakdown (Diagnostic)</value>
+  </data>
+  <data name="Debug_MemoryBreakdownDump_Header" xml:space="preserve">
+    <value>Dump detailed memory snapshot of current process to log</value>
+  </data>
+  <data name="Debug_MemoryBreakdownDump_Desc" xml:space="preserve">
+    <value>Writes process memory / GC heap / WPF visuals / caches / assemblies to the Logs directory for investigation.</value>
+  </data>
+  <data name="Debug_MemoryBreakdownDump_Button" xml:space="preserve">
+    <value>Dump Memory Snapshot</value>
+  </data>
+  <data name="Debug_MemoryBreakdownForceGC_Header" xml:space="preserve">
+    <value>Force GC</value>
+  </data>
+  <data name="Debug_MemoryBreakdownForceGC_Desc" xml:space="preserve">
+    <value>Calls GC.Collect + WaitForPendingFinalizers + GC.Collect to reclaim eligible objects. Use only for diagnostics.</value>
+  </data>
+  <data name="Debug_MemoryBreakdownForceGC_Button" xml:space="preserve">
+    <value>Force GC</value>
+  </data>
 </root>

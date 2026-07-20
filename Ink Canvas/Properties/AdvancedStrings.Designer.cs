@@ -144,5 +144,19 @@ namespace Ink_Canvas.Properties
         public static string Debug_SettingsExpanderExample_Header => ResourceManager.GetString(nameof(Debug_SettingsExpanderExample_Header), _resourceCulture);
 
         public static string Debug_SettingsExpanderExample_Desc => ResourceManager.GetString(nameof(Debug_SettingsExpanderExample_Desc), _resourceCulture);
+
+        public static string Debug_MemoryBreakdownSection => ResourceManager.GetString(nameof(Debug_MemoryBreakdownSection), _resourceCulture);
+
+        public static string Debug_MemoryBreakdownDump_Header => ResourceManager.GetString(nameof(Debug_MemoryBreakdownDump_Header), _resourceCulture);
+
+        public static string Debug_MemoryBreakdownDump_Desc => ResourceManager.GetString(nameof(Debug_MemoryBreakdownDump_Desc), _resourceCulture);
+
+        public static string Debug_MemoryBreakdownDump_Button => ResourceManager.GetString(nameof(Debug_MemoryBreakdownDump_Button), _resourceCulture);
+
+        public static string Debug_MemoryBreakdownForceGC_Header => ResourceManager.GetString(nameof(Debug_MemoryBreakdownForceGC_Header), _resourceCulture);
+
+        public static string Debug_MemoryBreakdownForceGC_Desc => ResourceManager.GetString(nameof(Debug_MemoryBreakdownForceGC_Desc), _resourceCulture);
+
+        public static string Debug_MemoryBreakdownForceGC_Button => ResourceManager.GetString(nameof(Debug_MemoryBreakdownForceGC_Button), _resourceCulture);
     }
 }
