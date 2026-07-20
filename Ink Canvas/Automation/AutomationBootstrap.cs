@@ -61,10 +61,16 @@ namespace Ink_Canvas.WorkflowAutomation
         public static void Initialize()
         {
             if (_isInitialized) return;
-            _isInitialized = true;
 
-            // 1. 创建 DI 容器
-            var services = new ServiceCollection();
+            try
+            {
+                // 0. 清空全局 Registry 中残留的 Handler / Rule，避免重新初始化时累加
+                // Registry 是进程级单例字典，DI Handler 是 Transient 每次 Resolve 产生新 lambda 引用，
+                // 单纯靠 delegate 引用判等无法在 lambda 场景下命中幂等检查；直接重置是最简单可靠的做法。
+                ClearGlobalRegistryHandlers();
+
+                // 1. 创建 DI 容器
+                var services = new ServiceCollection();
 
             // 2. 注册核心服务
             services.AddSingleton<SystemEventMonitor>();
@@ -143,6 +149,15 @@ namespace Ink_Canvas.WorkflowAutomation
             // 11. 加载配置
             Service.RefreshConfigs();
             Service.LoadConfig();
+
+            _isInitialized = true;
+            }
+            catch
+            {
+                // 任意步骤失败时整体回滚到未初始化状态，避免后续 AutomationBootstrap 调用走错误路径
+                try { Shutdown(); } catch { }
+                throw;
+            }
         }
 
         /// <summary>
@@ -161,18 +176,39 @@ namespace Ink_Canvas.WorkflowAutomation
         }
 
         /// <summary>
+        /// 清空全局 Action/Rule Registry 中的已注册 Handler。
+        /// 在 Bootstrap 重新初始化时调用，避免累加重复触发。
+        /// </summary>
+        private static void ClearGlobalRegistryHandlers()
+        {
+            foreach (var info in Ink_Canvas.WorkflowAutomation.Abstractions.IActionService.Actions.Values)
+            {
+                info.Handle = null;
+                info.RevertHandle = null;
+            }
+            foreach (var info in Ink_Canvas.WorkflowAutomation.Abstractions.IRulesetService.Rules.Values)
+            {
+                info.Handle = null;
+            }
+        }
+
+        /// <summary>
         /// 关闭自动化系统
         /// </summary>
         public static void Shutdown()
         {
             // 卸载所有工作流
-            foreach (var workflow in Service.Workflows.ToList())
+            if (Service?.Workflows != null)
             {
-                Service.UnloadWorkflow(workflow);
+                foreach (var workflow in Service.Workflows.ToList())
+                {
+                    Service.UnloadWorkflow(workflow);
+                }
             }
 
             // 释放规则集服务
             (_rulesetService as IDisposable)?.Dispose();
+            _rulesetService = null;
 
             // 释放系统事件监控器
             _monitor?.Dispose();
@@ -181,6 +217,9 @@ namespace Ink_Canvas.WorkflowAutomation
             // 释放 DI 容器
             (_serviceProvider as IDisposable)?.Dispose();
             _serviceProvider = null;
+
+            // 重置单例状态，允许重新初始化
+            _isInitialized = false;
         }
     }
 }

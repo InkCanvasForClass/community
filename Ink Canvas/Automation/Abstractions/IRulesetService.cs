@@ -26,9 +26,15 @@ namespace Ink_Canvas.WorkflowAutomation.Abstractions
         bool IsRulesetSatisfied(Ruleset ruleset);
 
         /// <summary>
-        /// 注册规则处理程序
+        /// 注册规则处理程序。
+        /// 同一 handler 注册多次将自动去重。
         /// </summary>
         void RegisterRuleHandler(string id, RuleRegistryInfo.HandleDelegate handler);
+
+        /// <summary>
+        /// 取消注册规则处理程序。
+        /// </summary>
+        void UnregisterRuleHandler(string id, RuleRegistryInfo.HandleDelegate handler);
 
         /// <summary>
         /// 手动通知规则状态已更新

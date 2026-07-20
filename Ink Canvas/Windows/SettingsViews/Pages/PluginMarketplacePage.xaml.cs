@@ -624,11 +624,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 try
                 {
+                    App.IsAppExitByUser = true;
                     Process.Start(Process.GetCurrentProcess().MainModule.FileName);
                     Application.Current.Shutdown();
                 }
                 catch (Exception ex)
                 {
+                    App.IsAppExitByUser = false;
                     iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
                         string.Format(PluginStrings.Market_RestartFailed, ex.Message),
                         PluginStrings.Market_RestartTitle, MessageBoxButton.OK, MessageBoxImage.Error);

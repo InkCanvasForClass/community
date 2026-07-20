@@ -181,4 +181,16 @@
   <data name="Debug_ResetStartupCount_Button" xml:space="preserve">
     <value>重置计数</value>
   </data>
+  <data name="Debug_PageTitle" xml:space="preserve">
+    <value>Debug</value>
+  </data>
+  <data name="Debug_PageHeader" xml:space="preserve">
+    <value>Debug</value>
+  </data>
+  <data name="Debug_SettingsExpanderExample_Header" xml:space="preserve">
+    <value>Customization</value>
+  </data>
+  <data name="Debug_SettingsExpanderExample_Desc" xml:space="preserve">
+    <value>You can override the Left indention of a SettingsCard by overriding the SettingsCardLeftIndention</value>
+  </data>
 </root>
