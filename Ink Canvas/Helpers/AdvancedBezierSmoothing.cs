@@ -60,9 +60,12 @@ namespace Ink_Canvas.Helpers
             var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             _processingTasks[originalStroke] = cts;
 
+            bool semaphoreAcquired = false;
+
             try
             {
                 await _processingSemaphore.WaitAsync(cts.Token);
+                semaphoreAcquired = true;
 
                 var smoothedStroke = await Task.Run(() =>
                     ProcessStrokeInternal(originalStroke, cts.Token), cts.Token);
@@ -81,7 +84,11 @@ namespace Ink_Canvas.Helpers
             }
             finally
             {
-                _processingSemaphore.Release();
+                if (semaphoreAcquired)
+                {
+                    _processingSemaphore.Release();
+                }
+
                 _processingTasks.TryRemove(originalStroke, out _);
                 cts.Dispose();
             }
@@ -107,20 +114,30 @@ namespace Ink_Canvas.Helpers
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            // 重采样为等距点，保证笔画均匀
+            // 重采样为等距点，保证笔画均匀，同时限制输出点数
             var resampleWatch = System.Diagnostics.Stopwatch.StartNew();
-            smoothedPoints = ResampleEquidistantOptimized(smoothedPoints, ResampleInterval);
+            int maxOutputPoints = Math.Max(originalPoints.Length + 1, originalPoints.Length * 3);
+            smoothedPoints = ResampleEquidistantOptimized(
+                smoothedPoints,
+                ResampleInterval,
+                maxOutputPoints);
             resampleWatch.Stop();
             PerformanceMonitor?.RecordResampleTime(resampleWatch.Elapsed);
 
             // 记录输入/输出点数
             PerformanceMonitor?.RecordPointCounts(originalPoints.Length, smoothedPoints.Length);
 
-            // 最终点数安全检查
-            if (smoothedPoints.Length > originalPoints.Length * 3.0)
+            System.Diagnostics.Debug.WriteLine(
+                $"AsyncAdvancedBezierSmoothing: 重采样后点数={smoothedPoints.Length}, " +
+                $"最大允许点数={maxOutputPoints}");
+
+            // 只有异常结果才回退，正常的长笔画不再因为点数超限而丢弃平滑结果
+            if (smoothedPoints.Length < 2 || smoothedPoints.Any(p =>
+                double.IsNaN(p.X) || double.IsNaN(p.Y) ||
+                double.IsInfinity(p.X) || double.IsInfinity(p.Y)))
             {
-                System.Diagnostics.Debug.WriteLine($"AsyncAdvancedBezierSmoothing: 重采样后点数仍然过多，返回原始笔画");
-                // 如果仍然太多点，使用原始笔画
+                System.Diagnostics.Debug.WriteLine(
+                    "AsyncAdvancedBezierSmoothing: 重采样结果无效，返回原始笔画");
                 return stroke;
             }
 
@@ -559,39 +576,118 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 优化的等距重采样
         /// </summary>
-        private StylusPoint[] ResampleEquidistantOptimized(StylusPoint[] points, double interval)
+        private StylusPoint[] ResampleEquidistantOptimized(
+            StylusPoint[] points,
+            double interval,
+            int maxPoints)
         {
             if (points.Length == 0) return points;
+            if (points.Length == 1) return points;
 
+            interval = Math.Max(interval, 0.01);
+            maxPoints = Math.Max(2, maxPoints);
+
+            // 如果初始间隔产生过多点，逐步放大间隔而不是放弃平滑结果。
+            for (int attempt = 0; attempt < 8; attempt++)
+            {
+                var result = ResampleEquidistantOnce(points, interval);
+                if (result.Length <= maxPoints)
+                {
+                    return result;
+                }
+
+                interval *= 1.5;
+            }
+
+            // 极端情况下按目标点数进行弦长采样，确保不会超过安全上限。
+            return ResampleByPointCount(points, maxPoints);
+        }
+
+        private StylusPoint[] ResampleEquidistantOnce(StylusPoint[] points, double interval)
+        {
             var result = new List<StylusPoint>(points.Length) { points[0] };
             double accumulated = 0;
 
             for (int i = 1; i < points.Length; i++)
             {
-                var prev = result[result.Count - 1];
-                var curr = points[i];
-                double dx = curr.X - prev.X;
-                double dy = curr.Y - prev.Y;
-                double dist = Math.Sqrt(dx * dx + dy * dy);
+                var segmentStart = points[i - 1];
+                var current = points[i];
+                double dx = current.X - segmentStart.X;
+                double dy = current.Y - segmentStart.Y;
+                double distance = Math.Sqrt(dx * dx + dy * dy);
 
-                if (dist + accumulated >= interval)
+                if (distance < 1e-6)
                 {
-                    double t = (interval - accumulated) / dist;
-                    double x = prev.X + t * dx;
-                    double y = prev.Y + t * dy;
-                    float pressure = (float)(prev.PressureFactor * (1 - t) + curr.PressureFactor * t);
-                    pressure = Math.Max(pressure, 0.1f);
+                    continue;
+                }
 
-                    result.Add(new StylusPoint(x, y, pressure));
+                double remaining = distance;
+                double startX = segmentStart.X;
+                double startY = segmentStart.Y;
+                float startPressure = segmentStart.PressureFactor;
+
+                while (accumulated + remaining >= interval)
+                {
+                    double ratio = (interval - accumulated) / remaining;
+                    var point = new StylusPoint(
+                        startX + ratio * (current.X - startX),
+                        startY + ratio * (current.Y - startY),
+                        Math.Max((float)(startPressure * (1 - ratio) + current.PressureFactor * ratio), 0.1f));
+                    result.Add(point);
+
+                    startX = point.X;
+                    startY = point.Y;
+                    startPressure = point.PressureFactor;
+                    remaining = Math.Sqrt(
+                        (current.X - startX) * (current.X - startX) +
+                        (current.Y - startY) * (current.Y - startY));
                     accumulated = 0;
-                    i--; // 重新处理当前点
+
+                    if (remaining < 1e-6)
+                    {
+                        break;
+                    }
                 }
-                else
-                {
-                    accumulated += dist;
-                }
+
+                accumulated += remaining;
             }
+
+            var last = points[points.Length - 1];
+            var lastResult = result[result.Count - 1];
+            if (Math.Abs(lastResult.X - last.X) > 1e-6 ||
+                Math.Abs(lastResult.Y - last.Y) > 1e-6)
+            {
+                result.Add(last);
+            }
+
             return result.ToArray();
+        }
+
+        private StylusPoint[] ResampleByPointCount(StylusPoint[] points, int targetCount)
+        {
+            if (points.Length <= targetCount)
+            {
+                return points;
+            }
+
+            var result = new StylusPoint[targetCount];
+            for (int i = 0; i < targetCount; i++)
+            {
+                double position = (double)i * (points.Length - 1) / (targetCount - 1);
+                int left = (int)position;
+                int right = Math.Min(left + 1, points.Length - 1);
+                double ratio = position - left;
+                var a = points[left];
+                var b = points[right];
+
+                result[i] = new StylusPoint(
+                    a.X + (b.X - a.X) * ratio,
+                    a.Y + (b.Y - a.Y) * ratio,
+                    Math.Max((float)(a.PressureFactor +
+                        (b.PressureFactor - a.PressureFactor) * ratio), 0.1f));
+            }
+
+            return result;
         }
 
         /// <summary>
