@@ -191,6 +191,12 @@ Continue?</value>
   <data name="Plugin_ImportFailed" xml:space="preserve">
     <value>Import failed: {0}</value>
   </data>
+  <data name="Plugin_ExternalDllAuthorizationTitle" xml:space="preserve">
+    <value>External DLL authorization</value>
+  </data>
+  <data name="Plugin_ExternalDllAuthorizationMessage" xml:space="preserve">
+    <value>Plugin "{0}" (author: {1}) requests loading external assembly "{2}". A DLL can execute arbitrary code; only allow it if you trust this plugin. Authorize loading?</value>
+  </data>
   <data name="Market_SecurityWarning" xml:space="preserve">
     <value>This plugin comes from an unknown source. Continuing may be risky. Please confirm you trust the source.</value>
   </data>

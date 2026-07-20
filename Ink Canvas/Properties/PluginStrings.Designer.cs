@@ -138,6 +138,10 @@ namespace Ink_Canvas.Properties
 
         public static string Plugin_ImportFailed => ResourceManager.GetString(nameof(Plugin_ImportFailed), _resourceCulture);
 
+        public static string Plugin_ExternalDllAuthorizationTitle => ResourceManager.GetString(nameof(Plugin_ExternalDllAuthorizationTitle), _resourceCulture);
+
+        public static string Plugin_ExternalDllAuthorizationMessage => ResourceManager.GetString(nameof(Plugin_ExternalDllAuthorizationMessage), _resourceCulture);
+
         public static string Market_SecurityWarning => ResourceManager.GetString(nameof(Market_SecurityWarning), _resourceCulture);
 
         public static string Market_SecurityTitle => ResourceManager.GetString(nameof(Market_SecurityTitle), _resourceCulture);
