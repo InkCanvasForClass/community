@@ -3592,6 +3592,8 @@ namespace Ink_Canvas
 
                 SetFloatingBarHighlightPosition("pen");
 
+                UpdateBoardPenIconColor();
+
                 forceEraser = false;
                 forcePointEraser = false;
                 drawingShapeMode = 0;
@@ -3722,6 +3724,8 @@ namespace Ink_Canvas
 
                     // 更新模式缓存
                     UpdateCurrentToolMode("pen");
+
+                    UpdateBoardPenIconColor();
 
                     forceEraser = false;
                     forcePointEraser = false;

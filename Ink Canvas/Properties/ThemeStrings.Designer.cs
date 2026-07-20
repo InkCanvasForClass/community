@@ -196,6 +196,8 @@ namespace Ink_Canvas.Properties
 
         public static string Theme_ShowPenColorOnFloatingBarIcon => ResourceManager.GetString(nameof(Theme_ShowPenColorOnFloatingBarIcon), _resourceCulture);
 
+        public static string Theme_ShowPenColorOnBoardToolbarIcon => ResourceManager.GetString(nameof(Theme_ShowPenColorOnBoardToolbarIcon), _resourceCulture);
+
         public static string Theme_CompactFloatingBar => ResourceManager.GetString(nameof(Theme_CompactFloatingBar), _resourceCulture);
 
         public static string Theme_CompactFloatingBarHint => ResourceManager.GetString(nameof(Theme_CompactFloatingBarHint), _resourceCulture);

@@ -23,11 +23,35 @@ namespace Ink_Canvas
         public void RegisterView(string id, FrameworkElement view)
         {
             _boardToolbarViews[id] = view;
+            if (id == "board.pen")
+                UpdateBoardPenIconColor();
         }
 
         public FrameworkElement FindView(string id)
         {
             return _boardToolbarViews.TryGetValue(id, out var view) ? view : null;
+        }
+
+        /// <summary>
+        /// 更新白板工具栏画笔图标颜色，使其反映当前画笔颜色。
+        /// </summary>
+        internal void UpdateBoardPenIconColor()
+        {
+            if (FindView("board.pen") is not BoardToolbarButton penButton) return;
+
+            var brush = Settings.Appearance.ShowPenColorOnBoardToolbarIcon
+                ? new SolidColorBrush(inkCanvas.DefaultDrawingAttributes.Color)
+                : Application.Current.TryFindResource("FloatingBarForegroundBrush") as Brush;
+            penButton.IconBrush = brush;
+
+            // 工具栏在模式切换时可能会异步重建，确保重建后的视图也应用颜色。
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (FindView("board.pen") is BoardToolbarButton currentPenButton)
+                    currentPenButton.IconBrush = Settings.Appearance.ShowPenColorOnBoardToolbarIcon
+                        ? new SolidColorBrush(inkCanvas.DefaultDrawingAttributes.Color)
+                        : Application.Current.TryFindResource("FloatingBarForegroundBrush") as Brush;
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
         }
 
         public void SwitchToPreviousPage()

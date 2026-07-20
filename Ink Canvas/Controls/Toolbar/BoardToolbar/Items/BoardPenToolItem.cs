@@ -14,6 +14,9 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar.Items
             => host.SelectPen();
 
         protected override void AfterBuild(IBoardToolbarHost host, BoardToolbarButton view)
-            => host.RegisterView(Id, view);
+        {
+            host.RegisterView(Id, view);
+            host.Window.UpdateBoardPenIconColor();
+        }
     }
 }

@@ -291,6 +291,9 @@
   <data name="Theme_ShowPenColorOnFloatingBarIcon" xml:space="preserve">
     <value>批注图标显示当前画笔颜色</value>
   </data>
+  <data name="Theme_ShowPenColorOnBoardToolbarIcon" xml:space="preserve">
+    <value>白板画笔图标显示当前画笔颜色</value>
+  </data>
   <data name="Theme_CompactFloatingBar" xml:space="preserve">
     <value>紧凑浮动栏模式</value>
   </data>

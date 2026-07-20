@@ -37,6 +37,12 @@
                             SwitchName="ToggleSwitchEnableTimeDisplayInWhiteboardMode"
                             Toggled="ToggleSwitchEnableTimeDisplayInWhiteboardMode_Toggled" />
 
+                    <controls:LabeledSettingsCard x:Name="CardShowPenColorOnBoardToolbarIcon"
+                            Header="{x:Static props:ThemeStrings.Theme_ShowPenColorOnBoardToolbarIcon}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Draw}"
+                            SwitchName="ToggleSwitchShowPenColorOnBoardToolbarIcon"
+                            Toggled="ToggleSwitchShowPenColorOnBoardToolbarIcon_Toggled" />
+
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:ThemeStrings.Theme_Tips_Title}" />
 
