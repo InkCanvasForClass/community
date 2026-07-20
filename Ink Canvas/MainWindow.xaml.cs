@@ -1718,6 +1718,7 @@ namespace Ink_Canvas
         private bool _allowCloseAfterExitVerification;
         private bool _isExitVerificationInProgress;
         private bool _forceCloseFromExitOrRestartButton;
+        private bool _exitApplicationRequested;
 
         /// <summary>
         /// 处理主窗口的关闭流程：记录关闭事件，按需进行退出密码验证或多次确认并据此取消或允许关闭。
@@ -1737,39 +1738,21 @@ namespace Ink_Canvas
                 if (_isReloadingForLanguageChange)
                     return;
 
-                LogHelper.WriteLogToFile("Ink Canvas closing", LogHelper.LogType.Event);
-
-                if (_allowCloseAfterExitVerification)
+                if (_forceCloseFromExitOrRestartButton)
                 {
-                    e.Cancel = true;
-                    if (_isExitVerificationInProgress) return;
-
-                    _isExitVerificationInProgress = true;
-                    await Dispatcher.BeginInvoke(new Action(async () =>
-                    {
-                        try
-                        {
-                            bool ok = await SecurityManager.PromptAndVerifyPasswordOrTotpAsync(Settings, this, Properties.MainWindowStrings.Main_ExitVerify, Properties.MainWindowStrings.Main_ExitVerifyWithTotp);
-                            if (!ok)
-                            {
-                                _forceCloseFromExitOrRestartButton = false;
-                                LogHelper.WriteLogToFile("Ink Canvas closing cancelled by security password", LogHelper.LogType.Event);
-                                return;
-                            }
-
-                            _allowCloseAfterExitVerification = true;
-                            Close();
-                        }
-                        catch
-                        {
-                        }
-                        finally
-                        {
-                            _isExitVerificationInProgress = false;
-                        }
-                    }), DispatcherPriority.Normal);
+                    _forceCloseFromExitOrRestartButton = false;
+                    _allowCloseAfterExitVerification = false;
                     return;
                 }
+
+                // 验证成功后只允许紧接着的这一次 Closing 事件通过。
+                if (_allowCloseAfterExitVerification)
+                {
+                    _allowCloseAfterExitVerification = false;
+                    return;
+                }
+
+                LogHelper.WriteLogToFile("Ink Canvas closing", LogHelper.LogType.Event);
 
                 if (!_forceCloseFromExitOrRestartButton &&
                     IsInPPTPresentationMode)
@@ -1797,7 +1780,7 @@ namespace Ink_Canvas
 
                 try
                 {
-                    if (!App.IsUpdateInstalling && SecurityManager.IsPasswordRequiredForExit(Settings))
+                    if (SecurityManager.IsPasswordRequiredForExit(Settings))
                     {
                         e.Cancel = true;
                         if (_isExitVerificationInProgress) return;
@@ -1807,7 +1790,7 @@ namespace Ink_Canvas
                         {
                             try
                             {
-                                bool ok = await SecurityManager.PromptAndVerifyAsync(Settings, this, Properties.MainWindowStrings.Main_ExitVerify, Properties.MainWindowStrings.Main_ExitVerifyPasswordOnly);
+                                bool ok = await SecurityManager.PromptAndVerifyPasswordOrTotpAsync(Settings, this, Properties.MainWindowStrings.Main_ExitVerify, Properties.MainWindowStrings.Main_ExitVerifyPasswordOnly);
                                 if (!ok)
                                 {
                                     _forceCloseFromExitOrRestartButton = false;
@@ -1971,6 +1954,11 @@ namespace Ink_Canvas
 
             // 检查是否有待安装的更新
             CheckPendingUpdates();
+
+            if (_exitApplicationRequested && Application.Current != null)
+            {
+                Application.Current.Shutdown();
+            }
         }
 
         private void CheckPendingUpdates()

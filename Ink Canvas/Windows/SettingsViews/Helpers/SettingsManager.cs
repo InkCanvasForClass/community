@@ -42,7 +42,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                     ProcessProtectionManager.WithWriteAccess(configsDir, () => Directory.CreateDirectory(configsDir));
                 }
 
-                var path = App.RootPath + SettingsFileName;
+                var path = Path.Combine(App.RootPath, SettingsFileName);
                 ProcessProtectionManager.WithWriteAccess(path, () => File.WriteAllText(path, text));
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }

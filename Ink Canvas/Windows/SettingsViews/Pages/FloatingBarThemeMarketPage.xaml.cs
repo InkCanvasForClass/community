@@ -23,20 +23,40 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private async System.Threading.Tasks.Task RefreshAsync()
         {
             LoadingBar.Visibility = Visibility.Visible;
-            if (await _market.RefreshAsync()) ThemeList.ItemsSource = _market.Entries;
-            LoadingBar.Visibility = Visibility.Collapsed;
+            try
+            {
+                if (await _market.RefreshAsync()) ThemeList.ItemsSource = _market.Entries;
+            }
+            catch (System.Exception ex)
+            {
+                Debug.WriteLine($"FloatingBarThemeMarketPage | Refresh failed: {ex}");
+            }
+            finally
+            {
+                LoadingBar.Visibility = Visibility.Collapsed;
+            }
         }
 
         private async void InstallButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button button || button.Tag is not ThemeMarketEntry entry) return;
             button.IsEnabled = false;
-            var installed = await _market.InstallAsync(entry);
-            button.IsEnabled = true;
-            if (installed)
+            try
             {
-                var mainWindow = Application.Current.MainWindow as MainWindow;
-                mainWindow?.FloatingBarThemeService?.LoadThemes();
+                var installed = await _market.InstallAsync(entry);
+                if (installed)
+                {
+                    var mainWindow = Application.Current.MainWindow as MainWindow;
+                    mainWindow?.FloatingBarThemeService?.LoadThemes();
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.WriteLine($"FloatingBarThemeMarketPage | Install failed: {ex}");
+            }
+            finally
+            {
+                button.IsEnabled = true;
             }
         }
 
