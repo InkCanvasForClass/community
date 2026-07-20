@@ -87,26 +87,40 @@ namespace Ink_Canvas.Plugins
         {
             if (string.IsNullOrEmpty(method)) throw new ArgumentException("method required");
 
+            var requestTimeout = timeout ?? TimeSpan.FromSeconds(5);
+            if (requestTimeout <= TimeSpan.Zero)
+                throw new ArgumentOutOfRangeException(nameof(timeout), "Timeout must be positive.");
+
+            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token);
+            timeoutCts.CancelAfter(requestTimeout);
+            var requestToken = timeoutCts.Token;
             using var client = new NamedPipeClientStream(".", _pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
-            var connectMs = (int)(timeout ?? TimeSpan.FromSeconds(5)).TotalMilliseconds;
-            await client.ConnectAsync(connectMs).ConfigureAwait(false);
 
-            var request = new IpcMessage
+            try
             {
-                Method = method,
-                Params = args,
-                From = "host"
-            };
-            var reqBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(request, IpcJsonOptions));
-            await WriteFramedAsync(client, reqBytes, _cts.Token).ConfigureAwait(false);
+                await client.ConnectAsync(requestToken).ConfigureAwait(false);
 
-            var respData = await ReadFramedAsync(client, _cts.Token).ConfigureAwait(false);
-            if (respData == null || respData.Length == 0) return null;
-            var resp = JsonSerializer.Deserialize<IpcMessage>(Encoding.UTF8.GetString(respData), IpcJsonOptions);
-            if (resp == null) return null;
-            if (resp.Error != null)
-                throw new InvalidOperationException($"IPC error ({resp.Error.Code}): {resp.Error.Message}");
-            return resp.Result;
+                var request = new IpcMessage
+                {
+                    Method = method,
+                    Params = args,
+                    From = "host"
+                };
+                var reqBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(request, IpcJsonOptions));
+                await WriteFramedAsync(client, reqBytes, requestToken).ConfigureAwait(false);
+
+                var respData = await ReadFramedAsync(client, requestToken).ConfigureAwait(false);
+                if (respData == null || respData.Length == 0) return null;
+                var resp = JsonSerializer.Deserialize<IpcMessage>(Encoding.UTF8.GetString(respData), IpcJsonOptions);
+                if (resp == null) return null;
+                if (resp.Error != null)
+                    throw new InvalidOperationException($"IPC error ({resp.Error.Code}): {resp.Error.Message}");
+                return resp.Result;
+            }
+            catch (OperationCanceledException) when (!_cts.IsCancellationRequested)
+            {
+                throw new TimeoutException($"IPC request timed out: {method}");
+            }
         }
 
         #endregion
