@@ -43,19 +43,19 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="AutoSave_Title" xml:space="preserve">
-    <value>自动保存（防手滑神器）</value>
+    <value>防手滑神器</value>
   </data>
   <data name="Backup_AutoBeforeUpdate" xml:space="preserve">
-    <value>更新前自动备份（留条后路）</value>
+    <value>更新前留条后路</value>
   </data>
   <data name="Backup_AutoPeriodic" xml:space="preserve">
-    <value>定期自动备份（稳如老狗）</value>
+    <value>稳如老狗定期备份</value>
   </data>
   <data name="Backup_Desc" xml:space="preserve">
-    <value>手动备份当前设置或还原之前的备份，自动更新前也会自动备份，绝不翻车</value>
+    <value>手动备份当前设置或回档到之前的状态，更新前也会自动备份，绝不翻车</value>
   </data>
   <data name="Backup_Interval" xml:space="preserve">
-    <value>备份间隔</value>
+    <value>备份 CD</value>
   </data>
   <data name="Backup_Interval_14Days" xml:space="preserve">
     <value>14 天</value>
@@ -76,25 +76,25 @@
     <value>（默认 7 天）</value>
   </data>
   <data name="Backup_Manual" xml:space="preserve">
-    <value>手动备份（我来！）</value>
+    <value>我来手动备份</value>
   </data>
   <data name="Backup_Restore" xml:space="preserve">
-    <value>还原备份（时光倒流）</value>
+    <value>时光倒流</value>
   </data>
   <data name="Backup_Title" xml:space="preserve">
-    <value>备份与还原（后悔药）</value>
+    <value>后悔药铺子</value>
   </data>
   <data name="Storage_AutoDeleteTitle" xml:space="preserve">
-    <value>定期自动清理过期的墨迹和截图文件（断舍离）</value>
+    <value>墨迹和截图定期断舍离</value>
   </data>
   <data name="Storage_AutoSaveInk" xml:space="preserve">
-    <value>定时自动保存墨迹</value>
+    <value>佛系自动保存墨迹</value>
   </data>
   <data name="Storage_AutoSaveInkOnScreenshot" xml:space="preserve">
-    <value>截图时自动保存墨迹</value>
+    <value>截图顺手保存墨迹</value>
   </data>
   <data name="Storage_AutoSaveInterval" xml:space="preserve">
-    <value>保存间隔</value>
+    <value>保存 CD</value>
   </data>
   <data name="Storage_AutoSaveInterval_10Min" xml:space="preserve">
     <value>10 分钟</value>
@@ -118,13 +118,13 @@
     <value>60 分钟</value>
   </data>
   <data name="Storage_AutoScreenshotOnClear" xml:space="preserve">
-    <value>清屏时自动截图（留个遗照）</value>
+    <value>清屏前留个遗照</value>
   </data>
   <data name="Storage_Backups_Desc" xml:space="preserve">
     <value>位于 Backups 目录的设置/配置备份（.json / .zip）</value>
   </data>
   <data name="Storage_Backups_Header" xml:space="preserve">
-    <value>备份</value>
+    <value>后悔药</value>
   </data>
   <data name="Storage_CalculateFailed" xml:space="preserve">
     <value>算不出来，破防了</value>
@@ -133,13 +133,13 @@
     <value>算力全开中…</value>
   </data>
   <data name="Storage_CategoryDetails" xml:space="preserve">
-    <value>分类详情</value>
+    <value>摸底明细</value>
   </data>
   <data name="Storage_Clean" xml:space="preserve">
-    <value>清理（大扫除）</value>
+    <value>大扫除</value>
   </data>
   <data name="Storage_CleanFailed" xml:space="preserve">
-    <value>清理翻车了：{0}</value>
+    <value>大扫除翻车了：{0}</value>
   </data>
   <data name="Storage_Confirm_Body" xml:space="preserve">
     <value>将永久删除「{0}」分类下的所有文件，删了就没了！
@@ -149,10 +149,10 @@
     <value>再确认一次：真的要删「{0}」吗？删了可就没了！</value>
   </data>
   <data name="Storage_Confirm_Second_Title" xml:space="preserve">
-    <value>二次确认（别冲动）</value>
+    <value>二次确认别冲动</value>
   </data>
   <data name="Storage_Confirm_Title" xml:space="preserve">
-    <value>清理确认</value>
+    <value>删库跑路确认</value>
   </data>
   <data name="Storage_Core_Desc" xml:space="preserve">
     <value>包含 .json 配置文件、.enc 使用统计、.exe 主程序、.dll 文件、.dat 数据文件、ppt-agent 联动组件、Automations 自动化工作流及 runtimes 运行时等</value>
@@ -164,13 +164,13 @@
     <value>自定义图标与点名背景图（icons / backgrounds 等 .png）</value>
   </data>
   <data name="Storage_Custom_Header" xml:space="preserve">
-    <value>自定义文件</value>
+    <value>私货</value>
   </data>
   <data name="Storage_Custom_Hint" xml:space="preserve">
-    <value>自定义文件是你自己加的，不会自动清理，想删去对应管理界面手动操作。</value>
+    <value>私货是你自己塞进来的，不会自动清理，想删去对应管理界面手动操作。</value>
   </data>
   <data name="Storage_DiskPercent" xml:space="preserve">
-    <value>占磁盘比例</value>
+    <value>占地比例</value>
   </data>
   <data name="Storage_Ink_Desc" xml:space="preserve">
     <value>位于 Saves 目录下的 .icstk / .xml / 截图 .png 等墨迹文件</value>
@@ -179,25 +179,25 @@
     <value>墨迹</value>
   </data>
   <data name="Storage_Legend_Backups" xml:space="preserve">
-    <value>备份</value>
+    <value>后悔药</value>
   </data>
   <data name="Storage_Legend_Core" xml:space="preserve">
     <value>核心文件</value>
   </data>
   <data name="Storage_Legend_Custom" xml:space="preserve">
-    <value>自定义</value>
+    <value>私货</value>
   </data>
   <data name="Storage_Legend_Ink" xml:space="preserve">
     <value>墨迹</value>
   </data>
   <data name="Storage_Legend_Other" xml:space="preserve">
-    <value>其他</value>
+    <value>杂鱼</value>
   </data>
   <data name="Storage_Legend_Update" xml:space="preserve">
     <value>自动更新</value>
   </data>
   <data name="Storage_Legend_Theme" xml:space="preserve">
-    <value>主题</value>
+    <value>换装</value>
   </data>
   <data name="Storage_Legend_Plugins" xml:space="preserve">
     <value>插件</value>
@@ -206,31 +206,31 @@
     <value>位于 FloatingBarThemes 目录下的主题包，可以清理</value>
   </data>
   <data name="Storage_Theme_Header" xml:space="preserve">
-    <value>主题</value>
+    <value>换装</value>
   </data>
   <data name="Storage_Theme_Hint" xml:space="preserve">
-    <value>主题请前往浮动工具列主题页面进行卸载。</value>
+    <value>换装请前往浮动工具列主题页面进行卸载。</value>
   </data>
   <data name="Storage_Logs_Desc" xml:space="preserve">
     <value>位于 Logs / Crashes 目录下的 .txt 日志与崩溃报告，可以清理</value>
   </data>
   <data name="Storage_Logs_Header" xml:space="preserve">
-    <value>日志（案发现场）</value>
+    <value>案发现场</value>
   </data>
   <data name="Storage_NavTitle" xml:space="preserve">
-    <value>存储</value>
+    <value>仓库</value>
   </data>
   <data name="Storage_NavTooltip" xml:space="preserve">
-    <value>查看与清理 ICC CE 占用的存储空间（看看吃了多少硬盘）</value>
+    <value>看看 ICC CE 吃了多少硬盘</value>
   </data>
   <data name="Storage_OpenAppFolder" xml:space="preserve">
-    <value>打开应用目录（老巢）</value>
+    <value>直捣老巢</value>
   </data>
   <data name="Storage_Other_Desc" xml:space="preserve">
-    <value>没归到上面那些的其他文件</value>
+    <value>没归到上面那些的杂鱼文件</value>
   </data>
   <data name="Storage_PathBrowse" xml:space="preserve">
-    <value>浏览</value>
+    <value>翻翻看</value>
   </data>
   <data name="Storage_Plugins_Desc" xml:space="preserve">
     <value>位于 Plugins / PluginPackages / PluginConfigs 目录的 .icpx 插件包</value>
@@ -242,22 +242,22 @@
     <value>插件请去插件管理页面卸载，这里删不了。</value>
   </data>
   <data name="Storage_Refresh" xml:space="preserve">
-    <value>刷新</value>
+    <value>F5 一下</value>
   </data>
   <data name="Storage_SaveAsXml" xml:space="preserve">
-    <value>保存为 XML 格式</value>
+    <value>存成 XML 格式</value>
   </data>
   <data name="Storage_SaveFullPageStrokes" xml:space="preserve">
-    <value>墨迹全页面保存（打包带走）</value>
+    <value>全页面打包带走</value>
   </data>
   <data name="Storage_ScreenshotsByDateFolder" xml:space="preserve">
-    <value>截图按日期分文件夹保存</value>
+    <value>截图按日期分箱子装</value>
   </data>
   <data name="Storage_Title" xml:space="preserve">
-    <value>存储管理（硬盘管家）</value>
+    <value>硬盘管家</value>
   </data>
   <data name="Storage_TotalUsage" xml:space="preserve">
-    <value>ICC CE 总占用</value>
+    <value>ICC CE 总吃货量</value>
   </data>
   <data name="Storage_Update_Desc" xml:space="preserve">
     <value>AutoUpdate 目录中的安装包与下载缓存，更新完会自动清理</value>
@@ -266,7 +266,7 @@
     <value>自动更新</value>
   </data>
   <data name="Backup_SuccessTitle" xml:space="preserve">
-    <value>备份到手，稳如老狗</value>
+    <value>备份到手稳如老狗</value>
   </data>
   <data name="Backup_SuccessMsg" xml:space="preserve">
     <value>设置已成功备份到:
@@ -291,16 +291,16 @@
     <value>所有 JSON 文件</value>
   </data>
   <data name="Restore_SelectFileTitle" xml:space="preserve">
-    <value>选一个备份文件来还原</value>
+    <value>选一个备份来回档</value>
   </data>
   <data name="Restore_ConfirmTitle" xml:space="preserve">
-    <value>确认还原（时光倒流）</value>
+    <value>时光倒流确认</value>
   </data>
   <data name="Restore_ConfirmMsg" xml:space="preserve">
-    <value>确定要还原这个备份吗？当前设置会被覆盖，回不来了哦！</value>
+    <value>确定要回档吗？当前设置会被覆盖，回不来了哦！</value>
   </data>
   <data name="Restore_SuccessTitle" xml:space="preserve">
-    <value>还原成功，满血复活！</value>
+    <value>满血复活！</value>
   </data>
   <data name="Restore_SuccessMsg" xml:space="preserve">
     <value>设置已成功还原，部分设置可能需要重启软件才生效。</value>
@@ -309,6 +309,6 @@
     <value>备份文件解析失败，文件可能已经损坏了，栓Q</value>
   </data>
   <data name="Restore_FailedMsg" xml:space="preserve">
-    <value>还原备份翻车了: {0}</value>
+    <value>回档翻车了: {0}</value>
   </data>
 </root>

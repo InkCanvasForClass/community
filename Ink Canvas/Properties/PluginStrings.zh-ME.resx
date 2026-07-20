@@ -43,34 +43,34 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="Plugin_Title" xml:space="preserve">
-    <value>插件管理</value>
+    <value>插件装备栏</value>
   </data>
   <data name="Plugin_Loading" xml:space="preserve">
-    <value>插件加载中，稍等~</value>
+    <value>插件装载中，搓手手等~</value>
   </data>
   <data name="Plugin_LoadedCount" xml:space="preserve">
-    <value>已加载 {0} 个插件，整活就靠它们了~</value>
+    <value>已装载 {0} 个插件，整活 Buff 叠满~</value>
   </data>
   <data name="Plugin_NoPlugins" xml:space="preserve">
-    <value>一个插件都没找到，请把插件文件放到 Plugins 目录里~</value>
+    <value>一个插件都没找到，请把插件扔到 Plugins 目录里~</value>
   </data>
   <data name="Plugin_LoadError" xml:space="preserve">
-    <value>加载插件翻车了：{0}</value>
+    <value>装载插件翻车了：{0}</value>
   </data>
   <data name="Plugin_Author" xml:space="preserve">
-    <value>作者：{0}</value>
+    <value>大佬：{0}</value>
   </data>
   <data name="Plugin_Settings" xml:space="preserve">
-    <value>插件设置</value>
+    <value>插件调教</value>
   </data>
   <data name="Market_Title" xml:space="preserve">
-    <value>插件大卖场</value>
+    <value>插件抽卡池</value>
   </data>
   <data name="Market_SearchPlaceholder" xml:space="preserve">
     <value>翻翻有没有好东西...</value>
   </data>
   <data name="Market_TabMarket" xml:space="preserve">
-    <value>大卖场</value>
+    <value>抽卡池</value>
   </data>
   <data name="Market_TabInstalled" xml:space="preserve">
     <value>已入手</value>
@@ -109,63 +109,63 @@
     <value>简介</value>
   </data>
   <data name="Market_TabDependencies" xml:space="preserve">
-    <value>依赖</value>
+    <value>依赖小伙伴</value>
   </data>
   <data name="Market_ReadmeLoading" xml:space="preserve">
-    <value>说明文档加载中...</value>
+    <value>说明书加载中...</value>
   </data>
   <data name="Market_ReadmeLoadFailed" xml:space="preserve">
-    <value>说明文档加载失败了~</value>
+    <value>说明书加载失败了~</value>
   </data>
   <data name="Market_NoReadme" xml:space="preserve">
-    <value>这个插件没有写说明文档~</value>
+    <value>这个插件没写说明书，盲盒体验~</value>
   </data>
   <data name="Market_DependencyWarning" xml:space="preserve">
-    <value>这个插件需要下面这些小伙伴，会一并安装：{0}
+    <value>这个插件需要下面这些小伙伴，会一并打包带走：{0}
 
 继续吗？</value>
   </data>
   <data name="Market_DependencyTitle" xml:space="preserve">
-    <value>安装依赖</value>
+    <value>召集依赖小伙伴</value>
   </data>
   <data name="Market_InstallLocalSuccess" xml:space="preserve">
-    <value>插件已加入安装队列，重启后生效~</value>
+    <value>插件已加入装载队列，重启后生效~</value>
   </data>
   <data name="Market_InstallLocalFailed" xml:space="preserve">
-    <value>安装翻车了：{0}</value>
+    <value>装载翻车了：{0}</value>
   </data>
   <data name="Market_RestartMessage" xml:space="preserve">
-    <value>需要重启应用才能完成插件安装/更新，现在重启吗？</value>
+    <value>需要重启应用才能完成插件装载/升级，现在重启吗？</value>
   </data>
   <data name="Market_RestartTitle" xml:space="preserve">
     <value>重启确认</value>
   </data>
   <data name="Market_RestartFailed" xml:space="preserve">
-    <value>重启失败了：{0}</value>
+    <value>重启翻车了：{0}</value>
   </data>
   <data name="Plugin_Update" xml:space="preserve">
     <value>升级</value>
   </data>
   <data name="Plugin_Delete" xml:space="preserve">
-    <value>卸载</value>
+    <value>删库跑路</value>
   </data>
   <data name="Plugin_DeleteConfirm" xml:space="preserve">
-    <value>确定要卸载「{0}」吗？卸载后需要重启生效哦~</value>
+    <value>确定要删库「{0}」吗？删了得重启生效哦~</value>
   </data>
   <data name="Plugin_DeleteTitle" xml:space="preserve">
-    <value>卸载插件</value>
+    <value>删库跑路</value>
   </data>
   <data name="Plugin_UpdateAvailable" xml:space="preserve">
     <value>有新版: v{0}</value>
   </data>
   <data name="Plugin_ErrorTitle" xml:space="preserve">
-    <value>插件错误</value>
+    <value>插件寄了</value>
   </data>
   <data name="Plugin_ErrorAutoDisabled" xml:space="preserve">
-    <value>插件已自动禁用：在 {0} 分钟内连续 {1} 次加载失败。请手动复位后再启用。</value>
+    <value>插件已被强制下线：在 {0} 分钟内连续 {1} 次装载翻车。请手动复位后再启用。</value>
   </data>
   <data name="Plugin_ErrorReset" xml:space="preserve">
-    <value>复位错误并重新载入</value>
+    <value>复位并重新召唤</value>
   </data>
   <data name="Plugin_ExportConfig" xml:space="preserve">
     <value>导出配置</value>
@@ -177,10 +177,10 @@
     <value>导出插件配置</value>
   </data>
   <data name="Plugin_ExportSuccess" xml:space="preserve">
-    <value>插件配置已导出到：{0}</value>
+    <value>插件配置已打包到：{0}</value>
   </data>
   <data name="Plugin_ExportFailed" xml:space="preserve">
-    <value>导出失败：{0}</value>
+    <value>导出翻车了：{0}</value>
   </data>
   <data name="Plugin_ImportTitle" xml:space="preserve">
     <value>导入插件配置</value>
@@ -189,49 +189,49 @@
     <value>导入成功，覆盖了 {0} 个文件。</value>
   </data>
   <data name="Plugin_ImportFailed" xml:space="preserve">
-    <value>导入失败：{0}</value>
+    <value>导入翻车了：{0}</value>
   </data>
   <data name="Market_SecurityWarning" xml:space="preserve">
-    <value>此插件嚟源未经确认，装落去可能有风险。请确认你信任呢个来源。</value>
+    <value>这个插件来历不明，装上去可能翻车。请确认你信任这个来源。</value>
   </data>
   <data name="Market_SecurityTitle" xml:space="preserve">
-    <value>安全提示</value>
+    <value>安全警告</value>
   </data>
   <data name="Market_OpenLogsFolder" xml:space="preserve">
-    <value>打开日志目录</value>
+    <value>打开案发现场</value>
   </data>
   <data name="Market_LoadErrorOnInstall" xml:space="preserve">
-    <value>侦测到呢个插件有以下问题，喺安装之前请先检视：</value>
+    <value>侦测到这个插件有以下问题，装之前请先检视：</value>
   </data>
   <data name="Market_ManageSources" xml:space="preserve">
-    <value>插件源</value>
+    <value>插件货源</value>
   </data>
   <data name="Market_ActiveSource" xml:space="preserve">
-    <value>现用源</value>
+    <value>现役货源</value>
   </data>
   <data name="Market_AddSource" xml:space="preserve">
-    <value>新增源</value>
+    <value>新增货源</value>
   </data>
   <data name="Market_EditSource" xml:space="preserve">
-    <value>编辑源</value>
+    <value>改货源</value>
   </data>
   <data name="Market_RemoveSource" xml:space="preserve">
-    <value>删除源</value>
+    <value>删货源</value>
   </data>
   <data name="Market_SourceIdLabel" xml:space="preserve">
-    <value>源名称</value>
+    <value>货源名称</value>
   </data>
   <data name="Market_SourceUrlLabel" xml:space="preserve">
     <value>索引 URL</value>
   </data>
   <data name="Market_SourceOfficial" xml:space="preserve">
-    <value>官方源（唔可以改）</value>
+    <value>官方货源（动不了）</value>
   </data>
   <data name="Market_MirrorGroup" xml:space="preserve">
     <value>下载镜像</value>
   </data>
   <data name="Market_NoMirrors" xml:space="preserve">
-    <value>呢个索引并未提供下载镜像</value>
+    <value>这个索引没提供下载镜像</value>
   </data>
   <data name="Market_MirrorAuto" xml:space="preserve">
     <value>自动（默认）</value>
@@ -243,21 +243,21 @@
     <value>取消</value>
   </data>
   <data name="Market_SourceInvalidUrl" xml:space="preserve">
-    <value>URL 一定要以 http:// 或 https:// 开头</value>
+    <value>URL 必须以 http:// 或 https:// 开头</value>
   </data>
   <data name="Market_SourceDuplicate" xml:space="preserve">
-    <value>已经有同 ID 嘅源</value>
+    <value>已经有同 ID 的货源了</value>
   </data>
   <data name="Market_SourceRemoved" xml:space="preserve">
-    <value>源已删除</value>
+    <value>货源已删</value>
   </data>
   <data name="Market_SourceSaved" xml:space="preserve">
-    <value>源已保存</value>
+    <value>货源已保存</value>
   </data>
   <data name="Market_SourceNameRequired" xml:space="preserve">
-    <value>请输入源名称</value>
+    <value>请输入货源名称</value>
   </data>
   <data name="Market_RemoveSourceConfirmation" xml:space="preserve">
-    <value>确定要删除源“{0}”吗？</value>
+    <value>确定要删除货源“{0}”吗？</value>
   </data>
 </root>

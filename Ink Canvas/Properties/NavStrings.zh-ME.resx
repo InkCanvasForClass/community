@@ -43,34 +43,34 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="Nav_Advanced" xml:space="preserve">
-    <value>高阶玩法</value>
+    <value>硬核模式</value>
   </data>
   <data name="Nav_Advanced_Settings" xml:space="preserve">
-    <value>高阶调教</value>
+    <value>硬核调教</value>
   </data>
   <data name="Nav_Automation_Settings" xml:space="preserve">
-    <value>自动化调教</value>
+    <value>自动化代练</value>
   </data>
   <data name="Nav_FriendlyLinks" xml:space="preserve">
-    <value>赞助及友链</value>
+    <value>氪金与友军</value>
   </data>
   <data name="Nav_Plugins" xml:space="preserve">
     <value>外挂</value>
   </data>
   <data name="Nav_PPT_Settings" xml:space="preserve">
-    <value>PPT调教</value>
+    <value>PPT 调教</value>
   </data>
   <data name="Nav_Shortcuts" xml:space="preserve">
     <value>快捷键</value>
   </data>
   <data name="Nav_Startup" xml:space="preserve">
-    <value>基本</value>
+    <value>新手村</value>
   </data>
   <data name="Nav_Theme_Settings" xml:space="preserve">
     <value>个性化调教</value>
   </data>
   <data name="Settings_ModeDesc" xml:space="preserve">
-    <value>选个运行模式。纯 PPT 模式下软件会隐身，只在 PPT 放映时冒出来。（实验性功能，可能翻车）</value>
+    <value>选个运行模式。纯 PPT 模式下软件隐身值拉满，只在 PPT 放映时破隐冒头。（实验性功能，可能翻车）</value>
   </data>
   <data name="Settings_ModeDesc_1" xml:space="preserve">
     <value>运行模式</value>
@@ -82,13 +82,13 @@
     <value>安全</value>
   </data>
   <data name="Settings_Nav_Security_Tooltip" xml:space="preserve">
-    <value>密码保护与防入侵</value>
+    <value>密码保护与防开挂</value>
   </data>
   <data name="Settings_Plugins" xml:space="preserve">
     <value>外挂管理</value>
   </data>
   <data name="Settings_Title" xml:space="preserve">
-    <value>调教</value>
+    <value>调教中心</value>
   </data>
   <data name="Nav_SettingsWindow_Title" xml:space="preserve">
     <value>InkCanvasForClass 调教中心</value>
@@ -103,10 +103,10 @@
     <value>大本营</value>
   </data>
   <data name="Nav_CopySettingsUri_Tooltip" xml:space="preserve">
-    <value>复制这页设置的导航链接</value>
+    <value>复制这页设置的传送门</value>
   </data>
   <data name="Nav_CopySettingsUri_Copied" xml:space="preserve">
-    <value>设置项链接已复制</value>
+    <value>传送门已复制到剪贴板</value>
   </data>
   <data name="Nav_Home_Tooltip" xml:space="preserve">
     <value>快速传送</value>
@@ -115,7 +115,7 @@
     <value>ICC CE 调教</value>
   </data>
   <data name="Nav_Basic" xml:space="preserve">
-    <value>基础操作</value>
+    <value>新手村操作</value>
   </data>
   <data name="Nav_General" xml:space="preserve">
     <value>通用</value>
@@ -136,16 +136,16 @@
     <value>组件</value>
   </data>
   <data name="Nav_ToolbarComponents_Tooltip" xml:space="preserve">
-    <value>工具栏按钮排序与可见性</value>
+    <value>装备栏按钮排序与显隐</value>
   </data>
   <data name="Nav_ToolbarAppearance" xml:space="preserve">
     <value>外观</value>
   </data>
   <data name="Nav_ToolbarAppearance_Tooltip" xml:space="preserve">
-    <value>工具栏外观调教</value>
+    <value>装备栏外观调教</value>
   </data>
   <data name="Nav_Basic_Tooltip" xml:space="preserve">
-    <value>基础调教</value>
+    <value>新手村调教</value>
   </data>
   <data name="Nav_Privacy" xml:space="preserve">
     <value>小秘密</value>
@@ -178,28 +178,28 @@
     <value>装备栏按钮排序与显隐</value>
   </data>
   <data name="Nav_BoardToolbar" xml:space="preserve">
-    <value>白板工具栏</value>
+    <value>白板装备栏</value>
   </data>
   <data name="Nav_BoardToolbar_Tooltip" xml:space="preserve">
-    <value>白板工具栏组件配置</value>
+    <value>白板装备栏组件配置</value>
   </data>
   <data name="Nav_Board" xml:space="preserve">
     <value>白板</value>
   </data>
   <data name="Nav_Board_Tooltip" xml:space="preserve">
-    <value>白板工具栏与外观调教</value>
+    <value>白板装备栏与外观调教</value>
   </data>
   <data name="Nav_BoardComponents" xml:space="preserve">
     <value>组件</value>
   </data>
   <data name="Nav_BoardComponents_Tooltip" xml:space="preserve">
-    <value>白板工具栏组件配置</value>
+    <value>白板装备栏组件配置</value>
   </data>
   <data name="Nav_BoardAppearance" xml:space="preserve">
     <value>外观</value>
   </data>
   <data name="Nav_BoardAppearance_Tooltip" xml:space="preserve">
-    <value>白板工具栏外观调教</value>
+    <value>白板装备栏外观调教</value>
   </data>
   <data name="Nav_CanvasAndInk_Tooltip" xml:space="preserve">
     <value>画板与墨迹调教</value>
@@ -211,7 +211,7 @@
     <value>墨迹纠正调教</value>
   </data>
   <data name="Nav_PPT_Tooltip" xml:space="preserve">
-    <value>PPT联动调教</value>
+    <value>PPT 联动调教</value>
   </data>
   <data name="Nav_Update_Tooltip" xml:space="preserve">
     <value>更新调教</value>
@@ -226,25 +226,25 @@
     <value>关于 InkCanvasForClass</value>
   </data>
   <data name="Nav_NavigateError" xml:space="preserve">
-    <value>导航翻车了: {0}</value>
+    <value>导航寄了：{0}</value>
   </data>
   <data name="Nav_Error" xml:space="preserve">
-    <value>翻车了</value>
+    <value>寄了</value>
   </data>
   <data name="Nav_PluginSettingsFormat" xml:space="preserve">
     <value>{0} 调教</value>
   </data>
   <data name="Nav_IndexBuildFailed" xml:space="preserve">
-    <value>给页面 {0} 建索引翻车了: {1}</value>
+    <value>给页面 {0} 建索引寄了：{1}</value>
   </data>
   <data name="Nav_LoadPluginSettingsFailed" xml:space="preserve">
-    <value>加载外挂设置翻车了: {0}</value>
+    <value>加载外挂设置寄了：{0}</value>
   </data>
   <data name="Nav_PreloadPageFailed" xml:space="preserve">
-    <value>预加载设置页面 {0} 翻车了: {1}</value>
+    <value>预加载设置页面 {0} 寄了：{1}</value>
   </data>
   <data name="Nav_PreloadPagesFailed" xml:space="preserve">
-    <value>异步预加载设置页面翻车了: {0}</value>
+    <value>异步预加载设置页面寄了：{0}</value>
   </data>
   <data name="Settings_Description" xml:space="preserve">
     <value>这里是调教中心</value>
@@ -253,6 +253,6 @@
     <value>体检</value>
   </data>
   <data name="Nav_Performance_Tooltip" xml:space="preserve">
-    <value>给电脑做体检，看看它行不行</value>
+    <value>给电脑体检，看看它 pp 行不行</value>
   </data>
 </root>

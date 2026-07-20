@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -43,12 +43,12 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="Exit" xml:space="preserve">
-    <value>溜了溜了</value>
+    <value>删库跑路</value>
   </data>
   <data name="Restart" xml:space="preserve">
-    <value>复活</value>
+    <value>原地复活</value>
   </data>
   <data name="VersionFix" xml:space="preserve">
-    <value>版本修复</value>
+    <value>版本回血</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -88,61 +88,61 @@
     <value>艺云展台</value>
   </data>
   <data name="AutoFold_Mode" xml:space="preserve">
-    <value>收纳模式</value>
+    <value>收纳术</value>
   </data>
   <data name="AutoFold_OldZyBoard" xml:space="preserve">
     <value>中原旧白板</value>
   </data>
   <data name="AutoKill_EasiNote5" xml:space="preserve">
-    <value>自动干掉 希沃白板 5</value>
+    <value>自动超度 希沃白板 5</value>
   </data>
   <data name="AutoKill_HiteAfterKillEnterAnnotation" xml:space="preserve">
-    <value>干掉鸿合屏幕书写后自动切到批注模式</value>
+    <value>超度鸿合屏幕书写后自动切批注形态</value>
   </data>
   <data name="AutoKill_HiteAnnotation" xml:space="preserve">
-    <value>自动干掉 鸿合屏幕书写</value>
+    <value>自动超度 鸿合屏幕书写</value>
   </data>
   <data name="AutoKill_ICA" xml:space="preserve">
-    <value>自动干掉 ICA（新版旧版通杀，yyds）</value>
+    <value>自动超度 ICA（新版旧版通杀，yyds）</value>
   </data>
   <data name="AutoKill_InkCanvasIC" xml:space="preserve">
-    <value>自动干掉 Ink Canvas 和 IC+</value>
+    <value>自动超度 Ink Canvas 和 IC+</value>
   </data>
   <data name="AutoKill_Inkeys" xml:space="preserve">
-    <value>自动干掉 智绘教 Inkeys（仅限新版）</value>
+    <value>自动超度 智绘教 Inkeys（仅限新版）</value>
   </data>
   <data name="AutoKill_PPTTools" xml:space="preserve">
-    <value>自动干掉 希沃 PPT 小工具</value>
+    <value>自动超度 希沃 PPT 小工具</value>
   </data>
   <data name="AutoKill_PPTToolsHint" xml:space="preserve">
-    <value>注意啦！干掉 PPT 小工具会导致希沃课堂授课助手没法用。直接去希沃课堂授课助手安装目录删掉 Office.dll 文件，这样进 PPT 放映时就不会启动希沃的 PPT 工具栏了，整活成功~</value>
+    <value>注意啦！超度 PPT 小工具会导致希沃课堂授课助手没法用。直接去希沃课堂授课助手安装目录删掉 Office.dll 文件，这样进 PPT 放映时就不会启动希沃的 PPT 工具栏了，整活成功~</value>
   </data>
   <data name="AutoKill_SeewoDesktop2Anno" xml:space="preserve">
-    <value>自动干掉 希沃桌面 2.0 桌面批注</value>
+    <value>自动超度 希沃桌面 2.0 桌面批注</value>
   </data>
   <data name="AutoKill_SeewoDesktop2AnnoHint" xml:space="preserve">
     <value>希沃桌面 2.0 的桌面批注是 64 位程序，icc 是 32 位的够不着，所以暂时只能按进程名 DesktopAnnotation 匹配，后面会考虑搞一套更牛的方案。如果碰到同名进程的软件就别开这个选项了，见谅~</value>
   </data>
   <data name="AutoKill_Title" xml:space="preserve">
-    <value>自动猎杀</value>
+    <value>自动超度</value>
   </data>
   <data name="AutoKill_YouJiao" xml:space="preserve">
-    <value>自动干掉 优教授课端</value>
+    <value>自动超度 优教授课端</value>
   </data>
   <data name="Automation_AutoFoldInPPT" xml:space="preserve">
-    <value>放 PPT 时自动收纳，省心~</value>
+    <value>放 PPT 时自动收纳，躺平~</value>
   </data>
   <data name="Automation_AutoFoldTitle" xml:space="preserve">
-    <value>自动收纳</value>
+    <value>自动收纳术</value>
   </data>
   <data name="Automation_KeepFoldAfterExit" xml:space="preserve">
-    <value>软件退出后继续收纳</value>
+    <value>软件退了也别想跑</value>
   </data>
   <data name="Automation_KeepFoldAfterExitHint" xml:space="preserve">
-    <value>开启后，被收纳的软件即使退出了也保持收纳状态，卷到底~</value>
+    <value>开启后，被收纳的软件即使退出了也别想翻身，卷到底~</value>
   </data>
   <data name="Automation_SaveFileName_Custom" xml:space="preserve">
-    <value>自定义...</value>
+    <value>想怎么起就怎么起...</value>
   </data>
   <data name="Automation_SaveFileName_CustomTemplate_Desc" xml:space="preserve">
     <value>可用占位符：{date} {time} {datetime} {mode} {page} {count} {type}</value>
@@ -172,13 +172,13 @@
     <value>文件名格式</value>
   </data>
   <data name="Automation_Title" xml:space="preserve">
-    <value>自动化</value>
+    <value>自动化魔法</value>
   </data>
   <data name="Automation_UseCustomSaveFileName_Desc" xml:space="preserve">
-    <value>开启后可以自己定文件名怎么起，整活~</value>
+    <value>开启后文件名想怎么起就怎么起，整活~</value>
   </data>
   <data name="Automation_UseCustomSaveFileName_Header" xml:space="preserve">
-    <value>使用自定义保存文件名</value>
+    <value>文件名自定义大权</value>
   </data>
   <data name="FloatingInterceptor_App_ChangYanClass" xml:space="preserve">
     <value>畅言智慧课堂</value>
@@ -211,28 +211,28 @@
     <value>希沃 PPT 小工具</value>
   </data>
   <data name="FloatingInterceptor_Enable" xml:space="preserve">
-    <value>启用悬浮窗拦截</value>
+    <value>拦截悬浮窗偷袭</value>
   </data>
   <data name="FloatingInterceptor_Title" xml:space="preserve">
-    <value>悬浮窗拦截</value>
+    <value>悬浮窗拦截现场</value>
   </data>
   <data name="FoldMode_AutoFoldAfterPPT" xml:space="preserve">
-    <value>退出 PPT 放映后自动收纳浮动栏</value>
+    <value>退出 PPT 放映后浮动栏自动消失术</value>
   </data>
   <data name="FoldMode_AutoFoldAfterPPTHint" xml:space="preserve">
     <value>开启后，退出 PPT 放映就自动把浮动栏收起来，眼不见心不烦~</value>
   </data>
   <data name="FoldMode_AutoFoldAfterWhiteboard" xml:space="preserve">
-    <value>退出白板时自动收纳</value>
+    <value>退出白板时自动消失术</value>
   </data>
   <data name="FoldMode_AutoFoldAfterWhiteboardHint" xml:space="preserve">
-    <value>开启后，退出白板模式就自动收到侧边栏，利索~</value>
+    <value>开启后，退出白板模式就自动收到侧边栏，干净利落~</value>
   </data>
   <data name="FoldMode_ExitToAnnotation" xml:space="preserve">
-    <value>退出收纳模式时自动切到批注</value>
+    <value>退出收纳模式时自动切批注形态</value>
   </data>
   <data name="FoldMode_ExitToAnnotationHint" xml:space="preserve">
-    <value>开启后，退出收纳模式自动切到批注模式，随时开整~</value>
+    <value>开启后，退出收纳模式自动切到批注形态，随时开整~</value>
   </data>
   <data name="AutoFold_Group_Seewo" xml:space="preserve">
     <value>希沃</value>
@@ -247,19 +247,19 @@
     <value>希沃</value>
   </data>
   <data name="FileAssoc_CheckDesc" xml:space="preserve">
-    <value>看看 .icstk 文件有没有跟 Ink Canvas 绑定</value>
+    <value>看看 .icstk 文件有没有跟 Ink Canvas 锁死</value>
   </data>
   <data name="FileAssoc_RegisterHeader" xml:space="preserve">
-    <value>注册文件关联</value>
+    <value>绑定文件关系</value>
   </data>
   <data name="FileAssoc_RegisterDesc" xml:space="preserve">
     <value>把 .icstk 文件绑定到 Ink Canvas，锁死~</value>
   </data>
   <data name="FileAssoc_UnregisterDesc" xml:space="preserve">
-    <value>解除 .icstk 文件和 Ink Canvas 的绑定</value>
+    <value>解除 .icstk 文件和 Ink Canvas 的姻缘</value>
   </data>
   <data name="FileAssoc_NotChecked" xml:space="preserve">
-    <value>还没检查</value>
+    <value>还没查岗</value>
   </data>
   <data name="FileAssoc_RegisterSuccess" xml:space="preserve">
     <value>文件关联注册成功，奥利给！</value>
@@ -268,10 +268,10 @@
     <value>文件关联注册失败，破防了</value>
   </data>
   <data name="FileAssoc_UnregisterSuccess" xml:space="preserve">
-    <value>文件关联已取消，自由了~</value>
+    <value>文件关联已解除，自由了~</value>
   </data>
   <data name="FileAssoc_UnregisterFailed" xml:space="preserve">
-    <value>取消文件关联失败，栓Q</value>
+    <value>解除文件关联失败，栓Q</value>
   </data>
   <data name="FileAssoc_Registered" xml:space="preserve">
     <value>✓ .icstk 文件已绑定，稳~</value>
@@ -280,13 +280,13 @@
     <value>✗ .icstk 文件还没绑定</value>
   </data>
   <data name="FileAssoc_CheckError" xml:space="preserve">
-    <value>✗ 检查文件关联状态时翻车了</value>
+    <value>✗ 查岗时翻车了</value>
   </data>
   <data name="Storage_AutoDeleteDaysThreshold" xml:space="preserve">
-    <value>自动清理天数阈值</value>
+    <value>自动清理保质期</value>
   </data>
   <data name="Storage_MinAutomationStrokes" xml:space="preserve">
-    <value>自动化最少笔画数</value>
+    <value>自动化最低笔画 KPI</value>
   </data>
   <data name="FileAssoc_LoadedStrokesFile" xml:space="preserve">
     <value>墨迹文件加载好啦: {0}</value>
@@ -295,6 +295,6 @@
     <value>切到白板模式了</value>
   </data>
   <data name="FileAssoc_ExitedFoldMode" xml:space="preserve">
-    <value>收纳模式已退出，浮动栏回来啦</value>
+    <value>收纳模式已退出，浮动栏回归啦</value>
   </data>
 </root>

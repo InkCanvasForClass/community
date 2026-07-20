@@ -43,27 +43,27 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="CameraDevices" xml:space="preserve">
-    <value>摄像头设备</value>
+    <value>天眼装备栏</value>
   </data>
   <data name="Capture" xml:space="preserve">
-    <value>咔嚓</value>
+    <value>咔嚓留念</value>
   </data>
   <data name="CapturedPhotos" xml:space="preserve">
-    <value>拍的照片</value>
+    <value>作案现场存档</value>
   </data>
   <data name="Correction" xml:space="preserve">
-    <value>矫正</value>
+    <value>魔法扶正术</value>
   </data>
   <data name="Present" xml:space="preserve">
-    <value>上屏</value>
+    <value>上墙公示</value>
   </data>
   <data name="Resolution_Tooltip" xml:space="preserve">
-    <value>展台/截图分辨率</value>
+    <value>高清 Buff 加成</value>
   </data>
   <data name="Rotate" xml:space="preserve">
-    <value>转转</value>
+    <value>原地转生</value>
   </data>
   <data name="Title" xml:space="preserve">
-    <value>视频展台</value>
+    <value>现场直播</value>
   </data>
 </root>

@@ -43,124 +43,124 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="AppearancePanel_24HourTimeFormat" xml:space="preserve">
-    <value>用24小时制看时间</value>
+    <value>拒绝 AM/PM 精神内耗</value>
   </data>
   <data name="Theme_BlackboardScale80" xml:space="preserve">
-    <value>白板 UI 缩放倍数</value>
+    <value>按不住就调大点</value>
   </data>
   <data name="Theme_BoardToolbarOpacity" xml:space="preserve">
-    <value>白板工具栏透明度</value>
+    <value>白板工具栏隐身值</value>
   </data>
   <data name="Theme_BoardToolbarOpacityLeft" xml:space="preserve">
-    <value>左下角透明度</value>
+    <value>左下角隐身值</value>
   </data>
   <data name="Theme_BoardToolbarOpacityCenter" xml:space="preserve">
-    <value>中间透明度</value>
+    <value>中间隐身值</value>
   </data>
   <data name="Theme_BoardToolbarOpacityRight" xml:space="preserve">
-    <value>右下角透明度</value>
+    <value>右下角隐身值</value>
   </data>
   <data name="Theme_BoardScaleLeft" xml:space="preserve">
-    <value>左下角缩放倍数</value>
+    <value>左下角缩放倍率</value>
   </data>
   <data name="Theme_BoardScaleCenter" xml:space="preserve">
-    <value>中间缩放倍数</value>
+    <value>中间缩放倍率</value>
   </data>
   <data name="Theme_BoardScaleRight" xml:space="preserve">
-    <value>右下角缩放倍数</value>
+    <value>右下角缩放倍率</value>
   </data>
   <data name="Theme_Clear" xml:space="preserve">
-    <value>一键清空</value>
+    <value>删库跑路</value>
   </data>
   <data name="Theme_CustomFloatingIconLabel" xml:space="preserve">
-    <value>自定义装备栏图标</value>
+    <value>自定义装备栏贴纸</value>
   </data>
   <data name="Theme_CustomSplash_NotSelected" xml:space="preserve">
-    <value>还没选图片呢</value>
+    <value>薛定谔的启动图？</value>
   </data>
   <data name="Theme_CustomSplashImage" xml:space="preserve">
-    <value>自定义启动图</value>
+    <value>舰长你定义</value>
   </data>
   <data name="Theme_CustomSplashImage_Desc" xml:space="preserve">
-    <value>选张图当启动动画背景（JPG、PNG、BMP 都行）</value>
+    <value>挑张老婆/老公图当启动动画背景，JPG PNG BMP 都吃 webp 滚粗</value>
   </data>
   <data name="Theme_CustomSplashTextPosition" xml:space="preserve">
-    <value>文字显示位置</value>
+    <value>文字落地坐标</value>
   </data>
   <data name="Theme_CustomSplashTextPosition_Desc" xml:space="preserve">
-    <value>设置启动时文字和进度条放哪</value>
+    <value>决定启动时字幕和进度条的出生点</value>
   </data>
   <data name="Theme_Dark" xml:space="preserve">
-    <value>暗黑模式</value>
+    <value>中二之魂觉醒</value>
   </data>
   <data name="Theme_EnableQuickPanel" xml:space="preserve">
-    <value>点开展开钮就跳出侧边栏</value>
+    <value>一按展开钮侧边栏就 pop 出来</value>
   </data>
   <data name="Theme_EnableSplash" xml:space="preserve">
-    <value>开启动画整活</value>
+    <value>启动动画整活开关</value>
   </data>
   <data name="Theme_FloatingBarButtonsTitle" xml:space="preserve">
-    <value>装备栏按钮显示</value>
+    <value>装备栏按钮可见性</value>
   </data>
   <data name="Theme_FloatingBarIcon" xml:space="preserve">
-    <value>装备栏图标</value>
+    <value>装备栏徽章</value>
   </data>
   <data name="Theme_FloatingBarOpacity" xml:space="preserve">
-    <value>装备栏透明度</value>
+    <value>装备栏隐身值</value>
   </data>
   <data name="Theme_FloatingBarOpacityInPPT" xml:space="preserve">
-    <value>PPT 下装备栏透明度</value>
+    <value>PPT 里装备栏隐身值</value>
   </data>
   <data name="Theme_FloatingBarOpacityInPPTHint" xml:space="preserve">
-    <value>重新进 PPT 放映后生效</value>
+    <value>重进 PPT 放映才生效寄</value>
   </data>
   <data name="Theme_FloatingBarScale" xml:space="preserve">
-    <value>装备栏缩放倍数</value>
+    <value>装备栏缩放倍率</value>
   </data>
   <data name="Theme_FloatingIcon_CoolapkAbused" xml:space="preserve">
-    <value>酷安受虐滑稽</value>
+    <value>M 属性大爆发</value>
   </data>
   <data name="Theme_FloatingIcon_CoolapkCrossEye" xml:space="preserve">
-    <value>酷安斗鸡眼滑稽</value>
+    <value>晕了晕了</value>
   </data>
   <data name="Theme_FloatingIcon_CoolapkGreenHatDoge" xml:space="preserve">
-    <value>酷安绿帽Doge</value>
+    <value>爱是一道光</value>
   </data>
   <data name="Theme_FloatingIcon_CoolapkSmile" xml:space="preserve">
-    <value>酷安呲牙笑</value>
+    <value>笑不活了</value>
   </data>
   <data name="Theme_FloatingIcon_CoolapkUnderwear" xml:space="preserve">
-    <value>酷安头戴内裤滑稽</value>
+    <value>变态不变态</value>
   </data>
   <data name="Theme_FloatingIcon_IccBlackTransparent" xml:space="preserve">
-    <value>「ICC-CE」黑色透明版</value>
+    <value>暗影仆从</value>
   </data>
   <data name="Theme_FloatingIcon_IccDark" xml:space="preserve">
-    <value>「ICC-CE」深色</value>
+    <value>夜行衣</value>
   </data>
   <data name="Theme_FloatingIcon_IccDarkBreath" xml:space="preserve">
-    <value>「ICC-CE」深色呼吸版</value>
+    <value>还会喘气</value>
   </data>
   <data name="Theme_FloatingIcon_IccDefault" xml:space="preserve">
-    <value>「ICC-CE」默认</value>
+    <value>原味</value>
   </data>
   <data name="Theme_FloatingIcon_IccNoShadow" xml:space="preserve">
-    <value>「ICC-CE」无阴影</value>
+    <value>影分身失效</value>
   </data>
   <data name="Theme_FloatingIcon_IccWhiteTransparent" xml:space="preserve">
-    <value>「ICC-CE」白色透明版</value>
+    <value>幽灵模式</value>
   </data>
   <data name="Theme_FloatingIcon_TiebaEmoji" xml:space="preserve">
-    <value>贴吧滑稽</value>
+    <value>经典永流传</value>
   </data>
   <data name="Theme_GroupTitle" xml:space="preserve">
-    <value>个性化</value>
+    <value>皮肤氪金处</value>
   </data>
   <data name="Theme_SidebarGroupTitle" xml:space="preserve">
     <value>侧边栏</value>
   </data>
   <data name="Theme_Label" xml:space="preserve">
-    <value>皮肤</value>
+    <value>氪金看脸</value>
   </data>
   <data name="Theme_Language_ChineseSimplified" xml:space="preserve">
     <value>简体中文</value>
@@ -169,55 +169,55 @@
     <value>English</value>
   </data>
   <data name="Theme_Language_MemeChinese" xml:space="preserve">
-    <value>梗体中文</value>
+    <value>你正在使用</value>
   </data>
   <data name="Theme_Language_RestartHint" xml:space="preserve">
-    <value>换了语言得重启才能完全生效哦~</value>
+    <value>多喝热水</value>
   </data>
   <data name="Theme_LanguageLabel" xml:space="preserve">
-    <value>界面语言</value>
+    <value>UI 母语</value>
   </data>
   <data name="Theme_Light" xml:space="preserve">
-    <value>亮亮模式</value>
+    <value>刺眼但精神</value>
   </data>
   <data name="Theme_Manage" xml:space="preserve">
-    <value>管理</value>
+    <value>仓库整理</value>
   </data>
   <data name="Theme_QuickPalette_DoubleRow" xml:space="preserve">
-    <value>双行显示（8 种颜色）</value>
+    <value>8 色 buffet</value>
   </data>
   <data name="Theme_QuickPalette_SingleRow" xml:space="preserve">
-    <value>单行显示（6 种颜色）</value>
+    <value>6 色简餐</value>
   </data>
   <data name="Theme_QuickPanelBottomOffset" xml:space="preserve">
-    <value>展开钮跟侧边栏的位置差</value>
+    <value>展开钮跟侧边栏的身高差</value>
   </data>
   <data name="Theme_QuickPanelBottomOffset_Description" xml:space="preserve">
-    <value>调教侧边栏上下偏移，右上左下</value>
+    <value>S 属性大爆发</value>
   </data>
   <data name="Theme_QuoteSource" xml:space="preserve">
     <value>信仰の源出自 Where？</value>
   </data>
   <data name="Theme_QuoteSource_GaokaoBless" xml:space="preserve">
-    <value>高考祝福语</value>
+    <value>金榜题名</value>
   </data>
   <data name="Theme_QuoteSource_Hitokoto" xml:space="preserve">
-    <value>一言（Hitokoto API）</value>
+    <value>一言 Hitokoto API</value>
   </data>
   <data name="Theme_QuoteSource_Mottos" xml:space="preserve">
-    <value>励志立志的名言警句</value>
+    <value>鸡汤投喂</value>
   </data>
   <data name="Theme_QuoteSource_OsuQuotes" xml:space="preserve">
-    <value>osu!玩家语录</value>
+    <value>pp 警告</value>
   </data>
   <data name="Theme_QuoteSource_PhigrosTips" xml:space="preserve">
-    <value>Phigros Tips</value>
+    <value>r 神降临</value>
   </data>
   <data name="Theme_ShowQuoteInWhiteboard" xml:space="preserve">
-    <value>在白板中显示信仰の源 1（好喝的/毒的鸡汤）</value>
+    <value>鸡汤/毒鸡汤随机投放</value>
   </data>
   <data name="Theme_QuotePosition" xml:space="preserve">
-    <value>信仰の源在白板中的位置</value>
+    <value>信仰の源在白板的出生点</value>
   </data>
   <data name="Theme_QuotePosition_TopLeft" xml:space="preserve">
     <value>左上角</value>
@@ -232,153 +232,153 @@
     <value>右下角</value>
   </data>
   <data name="Theme_ShowTimeInWhiteboard" xml:space="preserve">
-    <value>在白板中显示当前时间和日期</value>
+    <value>防迟到神器</value>
   </data>
   <data name="Theme_Splash_Autumn" xml:space="preserve">
-    <value>秋天</value>
+    <value>枫叶红</value>
   </data>
   <data name="Theme_Splash_Custom" xml:space="preserve">
     <value>自定义</value>
   </data>
   <data name="Theme_Splash_Horse" xml:space="preserve">
-    <value>马年限定</value>
+    <value>绝版收藏</value>
   </data>
   <data name="Theme_Splash_Random" xml:space="preserve">
-    <value>随缘</value>
+    <value>佛系启动</value>
   </data>
   <data name="Theme_Splash_Seasonal" xml:space="preserve">
-    <value>跟着四季走</value>
+    <value>节气大师</value>
   </data>
   <data name="Theme_Splash_Spring" xml:space="preserve">
-    <value>春天</value>
+    <value>樱花飞舞</value>
   </data>
   <data name="Theme_Splash_Summer" xml:space="preserve">
-    <value>夏天</value>
+    <value>空调续命</value>
   </data>
   <data name="Theme_Splash_Winter" xml:space="preserve">
-    <value>冬天</value>
+    <value>被窝封印</value>
   </data>
   <data name="Theme_SplashStyle" xml:space="preserve">
-    <value>启动动画样式</value>
+    <value>启动动画 skin</value>
   </data>
   <data name="Theme_System" xml:space="preserve">
-    <value>跟着系统走</value>
+    <value>保姆级体验</value>
   </data>
   <data name="Theme_UnfoldButtonIcon" xml:space="preserve">
-    <value>展开按钮图标</value>
+    <value>展开钮图标</value>
   </data>
   <data name="Theme_UnfoldIcon_Arrow" xml:space="preserve">
     <value>箭头</value>
   </data>
   <data name="Theme_UnfoldIcon_ClassicArrow" xml:space="preserve">
-    <value>半圆形（箭头）</value>
+    <value>半圆形箭头</value>
   </data>
   <data name="Theme_UnfoldIcon_ClassicPen" xml:space="preserve">
-    <value>半圆形（画笔）</value>
+    <value>半圆形画笔</value>
   </data>
   <data name="Theme_UnfoldIcon_Stripe" xml:space="preserve">
     <value>条形</value>
   </data>
   <data name="Theme_AllowDragSidePanel" xml:space="preserve">
-    <value>允许拽住展开钮拖动偏移</value>
+    <value>手柄玩家狂喜</value>
   </data>
   <data name="Theme_Upload" xml:space="preserve">
-    <value>上传</value>
+    <value>投递</value>
   </data>
   <data name="Theme_UseLegacyFloatingBarUI" xml:space="preserve">
-    <value>用老版装备栏 UI</value>
+    <value>复古才是真香</value>
   </data>
   <data name="Theme_ShowPenColorOnFloatingBarIcon" xml:space="preserve">
-    <value>批注图标显示当前画笔颜色</value>
+    <value>彩虹屁预备</value>
   </data>
   <data name="Theme_CompactFloatingBar" xml:space="preserve">
-    <value>装备栏省空间模式</value>
+    <value>极简主义</value>
   </data>
   <data name="Theme_CompactFloatingBarHint" xml:space="preserve">
-    <value>打开后装备栏按钮下边的小字就不见了，图标会撑满整个按钮。</value>
+    <value>极简风启动</value>
   </data>
   <data name="Theme_HideFloatingBarBorder" xml:space="preserve">
-    <value>装备栏去白边</value>
+    <value>无边界感</value>
   </data>
   <data name="Theme_HideFloatingBarBorderHint" xml:space="preserve">
-    <value>打开后把装备栏边框厚度调成 0，白边就没了。</value>
+    <value>物理超度</value>
   </data>
   <data name="Theme_FloatingBarBorderColor" xml:space="preserve">
     <value>装备栏边框颜色</value>
   </data>
   <data name="Theme_FloatingBarBorderColorHint" xml:space="preserve">
-    <value>设装备栏边框的颜色。默认就是主题色，跟随背景颜色就跟背景融为一体，自定义能自己挑颜色。</value>
+    <value>隐身术 皮肤自由</value>
   </data>
   <data name="Theme_FloatingBarBorderColorReset" xml:space="preserve">
-    <value>重置</value>
+    <value>v50</value>
   </data>
   <data name="Theme_FloatingBarBorderColor_Default" xml:space="preserve">
     <value>默认</value>
   </data>
   <data name="Theme_FloatingBarBorderColor_FollowBackground" xml:space="preserve">
-    <value>跟随背景颜色</value>
+    <value>隐身术</value>
   </data>
   <data name="Theme_FloatingBarBorderColor_Custom" xml:space="preserve">
     <value>自定义</value>
   </data>
-  <data name="Theme_FloatingBarThemeMarketTitle" xml:space="preserve"><value>浮動工具列主題市集</value></data>
-  <data name="Theme_FloatingBarThemeMarketRefresh" xml:space="preserve"><value>重新整理市集</value></data>
-  <data name="Theme_FloatingBarThemeMarketInstall" xml:space="preserve"><value>安裝主題</value></data>
+  <data name="Theme_FloatingBarThemeMarketTitle" xml:space="preserve"><value>氪金点</value></data>
+  <data name="Theme_FloatingBarThemeMarketRefresh" xml:space="preserve"><value>蹲新皮</value></data>
+  <data name="Theme_FloatingBarThemeMarketInstall" xml:space="preserve"><value>装备皮肤</value></data>
 
   <data name="Theme_FloatingBarThemesTitle" xml:space="preserve">
-    <value>浮動工具列主題</value>
+    <value>装备栏皮肤库</value>
   </data>
   <data name="Theme_FloatingBarThemesDescription" xml:space="preserve">
-    <value>管理浮動工具列的主題套件、背景、色彩與視覺樣式。</value>
+    <value>皮肤管理大师</value>
   </data>
   <data name="Theme_FloatingBarThemesFolder" xml:space="preserve">
-    <value>主題管理</value>
+    <value>皮肤管理</value>
   </data>
   <data name="Theme_FloatingBarThemesOpenFolder" xml:space="preserve">
-    <value>開啟主題資料夾</value>
+    <value>打开皮肤文件夹</value>
   </data>
   <data name="Theme_FloatingBarThemesReload" xml:space="preserve">
-    <value>重新載入主題</value>
+    <value>F5 玩家狂喜</value>
   </data>
   <data name="Theme_FloatingBarThemesApply" xml:space="preserve">
-    <value>套用主題</value>
+    <value>装备皮肤</value>
   </data>
   <data name="Theme_FloatingBarThemesApplyFailed" xml:space="preserve">
-    <value>主題套用失敗，請檢查主題檔案。</value>
+    <value>皮肤文件是不是开挂了</value>
   </data>
 
   <data name="Theme_WindowBackdrop" xml:space="preserve">
-    <value>窗口背景样式</value>
+    <value>贴膜师傅上线</value>
   </data>
   <data name="Theme_WindowBackdrop_Acrylic" xml:space="preserve">
-    <value>亚克力</value>
+    <value>半透磨砂</value>
   </data>
   <data name="Theme_WindowBackdrop_Acrylic10" xml:space="preserve">
-    <value>亚克力 10</value>
+    <value>Win10 味</value>
   </data>
   <data name="Theme_WindowBackdrop_Acrylic11" xml:space="preserve">
-    <value>亚克力 11</value>
+    <value>Win11 味</value>
   </data>
   <data name="Theme_WindowBackdrop_Description" xml:space="preserve">
-    <value>控制设置、OOBE 等现代窗口的云母、亚克力等背景效果。</value>
+    <value>贴膜师傅上线</value>
   </data>
   <data name="Theme_WindowBackdrop_Mica" xml:space="preserve">
-    <value>云母</value>
+    <value>高级感拉满</value>
   </data>
   <data name="Theme_WindowBackdrop_None" xml:space="preserve">
-    <value>无背景效果</value>
+    <value>裸奔模式</value>
   </data>
   <data name="Theme_WindowBackdrop_Tabbed" xml:space="preserve">
-    <value>Tabbed</value>
+    <value>标签式</value>
   </data>
   <data name="Theme_WindowBackdrop_Transient" xml:space="preserve">
-    <value>Transient</value>
+    <value>短暂出没</value>
   </data>
   <data name="Theme_FloatingBarButtonsDescription" xml:space="preserve">
-    <value>去「装备栏」设置页面管理装备栏的组件显示与排序吧。</value>
+    <value>别摆烂</value>
   </data>
   <data name="Theme_SelectCustomSplashImage" xml:space="preserve">
-    <value>选张自定义启动图</value>
+    <value>开屏即老婆</value>
   </data>
   <data name="Theme_HitokotoCategory_Animation" xml:space="preserve">
     <value>动画</value>
@@ -405,70 +405,70 @@
     <value>诗词</value>
   </data>
   <data name="Theme_HitokotoCategory_NeteaseCloud" xml:space="preserve">
-    <value>网易云</value>
+    <value>网抑云时间到</value>
   </data>
   <data name="Theme_HitokotoCategory_Philosophy" xml:space="preserve">
-    <value>哲学</value>
+    <value>师兄你好</value>
   </data>
   <data name="Theme_HitokotoCategory_Humor" xml:space="preserve">
     <value>抖机灵</value>
   </data>
   <data name="Theme_Hitokoto_SelectAll" xml:space="preserve">
-    <value>全都要！</value>
+    <value>我全都要.jpg</value>
   </data>
   <data name="Theme_Hitokoto_CustomizeTitle" xml:space="preserve">
-    <value>自定义一言分类</value>
+    <value>自助 buffet</value>
   </data>
   <data name="Theme_QuickPanelOpacity" xml:space="preserve">
-    <value>侧边栏透明度</value>
+    <value>侧边栏隐身值</value>
   </data>
   <data name="Theme_AutoCollapseQuickPanel" xml:space="preserve">
-    <value>打开侧边栏后自动收起</value>
+    <value>社恐模式</value>
   </data>
   <data name="Theme_AutoCollapseQuickPanelDelay" xml:space="preserve">
-    <value>自动收起前的等待时间</value>
+    <value>自动收起前的犹豫时间</value>
   </data>
   <data name="Theme_FloatingBarMenuOpacity" xml:space="preserve">
-    <value>浮动栏菜单透明度</value>
+    <value>装备栏菜单隐身值</value>
   </data>
   <data name="Theme_FloatingBarMenuOpacityInPPT" xml:space="preserve">
-    <value>浮栏菜单在 PPT 下透明度</value>
+    <value>装备栏菜单在 PPT 下隐身值</value>
   </data>
   <data name="Theme_BoardMenuOpacity" xml:space="preserve">
-    <value>白板菜单透明度</value>
+    <value>白板菜单隐身值</value>
   </data>
   <data name="Theme_Tips_GlobalSettings" xml:space="preserve">
     <value>全局设置</value>
   </data>
   <data name="Theme_Tips_GlobalSettingsHint" xml:space="preserve">
-    <value>管理信仰の源的显示、来源与自动轮换</value>
+    <value>投喂机制</value>
   </data>
   <data name="Theme_Tips_AutoRotation" xml:space="preserve">
-    <value>自动轮换 Tips</value>
+    <value>Gacha 抽卡体验</value>
   </data>
   <data name="Theme_Tips_AutoRotationHint" xml:space="preserve">
-    <value>启用后，白板中的 Tips 将按设定间隔自动切换</value>
+    <value>赛博投喂</value>
   </data>
   <data name="Theme_Tips_RotationInterval" xml:space="preserve">
     <value>轮换间隔（秒）</value>
   </data>
   <data name="Theme_Tips_RotationIntervalHint" xml:space="preserve">
-    <value>必须输入>=5的正整数哦</value>
+    <value>拒绝负翁</value>
   </data>
   <data name="Theme_Tips_Import" xml:space="preserve">
-    <value>导入</value>
+    <value>进货</value>
   </data>
   <data name="Theme_Tips_Create" xml:space="preserve">
-    <value>新建</value>
+    <value>捏一个</value>
   </data>
   <data name="Theme_Tips_Edit" xml:space="preserve">
-    <value>编辑</value>
+    <value>魔改</value>
   </data>
   <data name="Theme_Tips_Export" xml:space="preserve">
-    <value>导出</value>
+    <value>出货</value>
   </data>
   <data name="Theme_Tips_SelectTxtFile" xml:space="preserve">
-    <value>+ 选择一个 txt 文件</value>
+    <value>+ 纯文本爱好者</value>
   </data>
   <data name="Theme_Tips_SchemeName" xml:space="preserve">
     <value>名称</value>
@@ -477,33 +477,36 @@
     <value>内容</value>
   </data>
   <data name="Theme_Tips_CancelConfirm" xml:space="preserve">
-    <value>取消之后不可恢复，确定吗？</value>
+    <value>确定要寄吗？</value>
   </data>
   <data name="Theme_Tips_Abandon" xml:space="preserve">
-    <value>放弃</value>
+    <value>光速滑跪</value>
   </data>
   <data name="Theme_Tips_SelectSchemeFirst" xml:space="preserve">
-    <value>请先在列表中选择一个方案</value>
+    <value>别空手来</value>
   </data>
   <data name="Theme_Tips_PresetLocked" xml:space="preserve">
-    <value>预设方案不可修改</value>
+    <value>已封印不可修改</value>
   </data>
   <data name="Theme_Tips_NewDialogTitle" xml:space="preserve">
-    <value>新建方案</value>
+    <value>捏个新方案</value>
   </data>
   <data name="Theme_Tips_ImportDialogTitle" xml:space="preserve">
-    <value>导入方案</value>
+    <value>进货方案</value>
   </data>
   <data name="Theme_Tips_EditDialogTitle" xml:space="preserve">
-    <value>编辑方案</value>
+    <value>魔改方案</value>
   </data>
   <data name="Theme_Tips_NameRequired" xml:space="preserve">
-    <value>请输入方案名称</value>
+    <value>麻烦给方案起个名</value>
   </data>
   <data name="Theme_Tips_ContentRequired" xml:space="preserve">
-    <value>请输入方案内容</value>
+    <value>方案内容不能空着啊</value>
   </data>
   <data name="Theme_Tips_NameExists" xml:space="preserve">
-    <value>已存在同名方案，请更换名称</value>
+    <value>换个马甲再来</value>
+  </data>
+  <data name="Theme_Tips_Title" xml:space="preserve">
+    <value>信仰の源</value>
   </data>
 </root>

@@ -43,100 +43,100 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="Board_Background" xml:space="preserve">
-    <value>背景</value>
+    <value>贴膜背景板</value>
   </data>
   <data name="Board_ClearInk" xml:space="preserve">
-    <value>一键清空墨迹</value>
+    <value>删库跑路</value>
   </data>
   <data name="Board_ClearInkAndHistory" xml:space="preserve">
-    <value>一键清空墨迹和历史</value>
+    <value>删库跑路还烧档案</value>
   </data>
   <data name="Board_DeleteThisPage" xml:space="preserve">
-    <value>送走这页</value>
+    <value>物理超度这页</value>
   </data>
   <data name="Board_Eraser" xml:space="preserve">
-    <value>橡皮</value>
+    <value>抹除法器</value>
   </data>
   <data name="Board_EraserOptions" xml:space="preserve">
-    <value>橡皮选项</value>
+    <value>法器调教</value>
   </data>
   <data name="Board_EraserShape_Blackboard" xml:space="preserve">
-    <value>黑板擦</value>
+    <value>黑板清道夫</value>
   </data>
   <data name="Board_EraserShape_Circle" xml:space="preserve">
-    <value>圆形擦</value>
+    <value>圆形结界</value>
   </data>
   <data name="Board_Gesture" xml:space="preserve">
     <value>结印施法</value>
   </data>
   <data name="Board_Highlighter" xml:space="preserve">
-    <value>荧光笔</value>
+    <value>高光 Buff 笔</value>
   </data>
   <data name="Board_InsertImage" xml:space="preserve">
-    <value>插入文件</value>
+    <value>召唤图库</value>
   </data>
   <data name="Board_LaserPen" xml:space="preserve">
-    <value>激光笔</value>
+    <value>走位激光炮</value>
   </data>
   <data name="Board_NewPage" xml:space="preserve">
-    <value>新开一页</value>
+    <value>开张新一页</value>
   </data>
   <data name="Board_NextPage" xml:space="preserve">
-    <value>下一页</value>
+    <value>翻篇儿</value>
   </data>
   <data name="Board_Page" xml:space="preserve">
-    <value>页面</value>
+    <value>这张图</value>
   </data>
   <data name="Board_Pen" xml:space="preserve">
-    <value>笔</value>
+    <value>神笔</value>
   </data>
   <data name="Board_PreviousPage" xml:space="preserve">
-    <value>上一页</value>
+    <value>倒带</value>
   </data>
   <data name="Board_Redo" xml:space="preserve">
-    <value>重做</value>
+    <value>重开一局</value>
   </data>
   <data name="Board_Screenshot" xml:space="preserve">
-    <value>截图</value>
+    <value>截图留证</value>
   </data>
   <data name="Board_Select" xml:space="preserve">
-    <value>选择</value>
+    <value>套马杆</value>
   </data>
   <data name="Board_SelectImage" xml:space="preserve">
-    <value>插入文件</value>
+    <value>召唤图库</value>
   </data>
   <data name="Board_Shape" xml:space="preserve">
-    <value>图形</value>
+    <value>几何招式</value>
   </data>
   <data name="Board_Size" xml:space="preserve">
-    <value>大小</value>
+    <value>装备尺寸</value>
   </data>
   <data name="Board_StrokeEraser" xml:space="preserve">
-    <value>线擦</value>
+    <value>笔画斩</value>
   </data>
   <data name="Board_Tools" xml:space="preserve">
-    <value>工具</value>
+    <value>装备库</value>
   </data>
   <data name="Board_TwoFingerMove" xml:space="preserve">
-    <value>双指平移</value>
+    <value>双指平移术</value>
   </data>
   <data name="Board_Undo" xml:space="preserve">
-    <value>撤销</value>
+    <value>时间回溯</value>
   </data>
   <data name="Board_VideoBooth" xml:space="preserve">
-    <value>视频展台</value>
+    <value>投影法阵</value>
   </data>
   <data name="FloatingBar_Annotate" xml:space="preserve">
-    <value>批注</value>
+    <value>指点江山</value>
   </data>
   <data name="FloatingBar_AreaEraser" xml:space="preserve">
-    <value>面积擦</value>
+    <value>大范围抹除</value>
   </data>
   <data name="FloatingBar_Clear" xml:space="preserve">
-    <value>一键清空</value>
+    <value>删库跑路</value>
   </data>
   <data name="FloatingBar_ClearAndMouse" xml:space="preserve">
-    <value>清并鼠</value>
+    <value>清完就溜</value>
   </data>
   <data name="FloatingBar_ExitButton" xml:space="preserve">
     <value>溜了</value>
@@ -145,16 +145,16 @@
     <value>墨迹封印术</value>
   </data>
   <data name="FloatingBar_Geometry" xml:space="preserve">
-    <value>几何</value>
+    <value>几何招式</value>
   </data>
   <data name="FloatingBar_Gesture_MultiTouchWriting" xml:space="preserve">
-    <value>多指齐写</value>
+    <value>千手观音</value>
   </data>
   <data name="FloatingBar_Gesture_TwoFingerRotate" xml:space="preserve">
-    <value>双指旋转</value>
+    <value>双指拧麻花</value>
   </data>
   <data name="FloatingBar_Gesture_TwoFingerZoom" xml:space="preserve">
-    <value>双指缩放</value>
+    <value>双指捏拿</value>
   </data>
   <data name="FloatingBar_GestureButton" xml:space="preserve">
     <value>结印施法</value>
@@ -166,145 +166,145 @@
     <value>套马杆</value>
   </data>
   <data name="FloatingBar_Mouse" xml:space="preserve">
-    <value>鼠标</value>
+    <value>鼠标准星</value>
   </data>
   <data name="FloatingBar_StrokeEraser" xml:space="preserve">
-    <value>线擦</value>
+    <value>笔画斩</value>
   </data>
   <data name="FloatingBar_Unfreeze" xml:space="preserve">
-    <value>解封</value>
+    <value>破封而出</value>
   </data>
   <data name="FloatingBar_Whiteboard" xml:space="preserve">
-    <value>白板</value>
+    <value>白嫖板</value>
   </data>
   <data name="OldUI_Dark" xml:space="preserve">
-    <value>深色</value>
+    <value>中二之魂觉醒</value>
   </data>
   <data name="OldUI_Exit" xml:space="preserve">
     <value>溜了</value>
   </data>
   <data name="OldUI_Thickness" xml:space="preserve">
-    <value>粗细</value>
+    <value>装备粗细</value>
   </data>
   <data name="QuickPanel_ExitShow" xml:space="preserve">
-    <value>退出放映</value>
+    <value>溜出放映</value>
   </data>
   <data name="QuickPanel_Show" xml:space="preserve">
-    <value>批注栏</value>
+    <value>批斗栏</value>
   </data>
   <data name="QuickPanel_SingleDraw" xml:space="preserve">
-    <value>单次抽</value>
+    <value>单抽沉船</value>
   </data>
   <data name="QuickPanel_Timer" xml:space="preserve">
-    <value>计时器</value>
+    <value>防迟到神器</value>
   </data>
   <data name="Tools_Manual" xml:space="preserve">
-    <value>说明书</value>
+    <value>功法秘籍</value>
   </data>
   <data name="Tools_MoreFeaturesTitle" xml:space="preserve">
     <value>更多花活</value>
   </data>
   <data name="Tools_Open" xml:space="preserve">
-    <value>打开...</value>
+    <value>开箱...</value>
   </data>
   <data name="Tools_RandomDraw" xml:space="preserve">
-    <value>随机抽</value>
+    <value>佛系抽卡</value>
   </data>
   <data name="Tools_Replay" xml:space="preserve">
-    <value>重播</value>
+    <value>二刷</value>
   </data>
   <data name="Tools_Save" xml:space="preserve">
-    <value>存好了</value>
+    <value>已存档</value>
   </data>
   <data name="Tools_Screenshot" xml:space="preserve">
-    <value>截屏</value>
+    <value>截图留证</value>
   </data>
   <data name="ToolbarPage_ConfigProfiles" xml:space="preserve">
-    <value>配置方案</value>
+    <value>装备方案</value>
   </data>
   <data name="ToolbarPage_NewProfile" xml:space="preserve">
-    <value>新建</value>
+    <value>新建号</value>
   </data>
   <data name="ToolbarPage_DuplicateProfile" xml:space="preserve">
-    <value>复制</value>
+    <value>影分身</value>
   </data>
   <data name="ToolbarPage_DeleteProfile" xml:space="preserve">
     <value>送走</value>
   </data>
   <data name="ToolbarPage_RefreshProfile" xml:space="preserve">
-    <value>刷新</value>
+    <value>F5 玩家狂喜</value>
   </data>
   <data name="ToolbarPage_OpenConfigFolder" xml:space="preserve">
-    <value>打开配置文件夹</value>
+    <value>翻装备仓库</value>
   </data>
   <data name="ToolbarPage_AddedComponentsHint" xml:space="preserve">
-    <value>以下组件会出现在装备栏上，从组件库拖过来就能添加。</value>
+    <value>以下装备会出现在装备栏，从装备库拖过来就能上身。</value>
   </data>
   <data name="ToolbarPage_AddedComponents" xml:space="preserve">
-    <value>已装备组件</value>
+    <value>已上身装备</value>
   </data>
   <data name="ToolbarPage_GroupChildren" xml:space="preserve">
-    <value>分组内组件</value>
+    <value>同组套装</value>
   </data>
   <data name="ToolbarPage_GroupChildrenHint" xml:space="preserve">
-    <value>把组件库里的组件拖过来添加，或者拖动已有组件排序。</value>
+    <value>把装备库的家伙拖过来穿上，或者拖动调整穿戴顺序。</value>
   </data>
   <data name="ToolbarPage_CloseGroupChildren" xml:space="preserve">
-    <value>收起分组内组件</value>
+    <value>收纳套装</value>
   </data>
   <data name="ToolbarPage_ComponentLibrary" xml:space="preserve">
-    <value>组件库</value>
+    <value>装备库</value>
   </data>
   <data name="ToolbarPage_ComponentLibraryHint" xml:space="preserve">
-    <value>把组件拖到上面的已装备列表或分组内就能添加到装备栏。</value>
+    <value>把装备拖到上面的已上身列表或套装里就能穿到装备栏。</value>
   </data>
   <data name="ToolbarPage_ComponentSettings" xml:space="preserve">
-    <value>组件调教</value>
+    <value>装备调教</value>
   </data>
   <data name="ToolbarPage_ComponentProperties" xml:space="preserve">
-    <value>组件属性</value>
+    <value>装备属性</value>
   </data>
   <data name="ToolbarPage_SeparateBorder" xml:space="preserve">
-    <value>独立边框</value>
+    <value>独立光效</value>
   </data>
   <data name="ToolbarPage_SeparateBorderDesc" xml:space="preserve">
-    <value>给这个组件套个独立边框</value>
+    <value>给这件装备套个独立光效</value>
   </data>
   <data name="ToolbarPage_DisplayMode" xml:space="preserve">
-    <value>显示模式</value>
+    <value>显形模式</value>
   </data>
   <data name="ToolbarPage_QuickPaletteDisplayModeDesc" xml:space="preserve">
-    <value>选调色盘的颜色数量</value>
+    <value>选调色盘的 Buff 数量</value>
   </data>
   <data name="ToolbarPage_Size" xml:space="preserve">
-    <value>尺寸</value>
+    <value>体型</value>
   </data>
   <data name="ToolbarPage_FixedWidth" xml:space="preserve">
-    <value>固定宽度</value>
+    <value>锁死宽度</value>
   </data>
   <data name="ToolbarPage_FixedHeight" xml:space="preserve">
-    <value>固定高度</value>
+    <value>锁死高度</value>
   </data>
   <data name="ToolbarPage_MinWidth" xml:space="preserve">
-    <value>最小宽度</value>
+    <value>极限窄</value>
   </data>
   <data name="ToolbarPage_MaxWidth" xml:space="preserve">
-    <value>最大宽度</value>
+    <value>极限宽</value>
   </data>
   <data name="ToolbarPage_MinHeight" xml:space="preserve">
-    <value>最小高度</value>
+    <value>极限矮</value>
   </data>
   <data name="ToolbarPage_MaxHeight" xml:space="preserve">
-    <value>最大高度</value>
+    <value>极限高</value>
   </data>
   <data name="ToolbarPage_Alignment" xml:space="preserve">
-    <value>对齐</value>
+    <value>站队</value>
   </data>
   <data name="ToolbarPage_HorizontalAlignment" xml:space="preserve">
-    <value>水平对齐</value>
+    <value>水平站队</value>
   </data>
   <data name="ToolbarPage_VerticalAlignment" xml:space="preserve">
-    <value>垂直对齐</value>
+    <value>垂直站队</value>
   </data>
   <data name="ToolbarPage_Left" xml:space="preserve">
     <value>左</value>
@@ -322,97 +322,97 @@
     <value>下</value>
   </data>
   <data name="ToolbarPage_Stretch" xml:space="preserve">
-    <value>拉伸</value>
+    <value>拉伸成精</value>
   </data>
   <data name="ToolbarPage_Appearance" xml:space="preserve">
-    <value>外观</value>
+    <value>颜值</value>
   </data>
   <data name="ToolbarPage_FontSize" xml:space="preserve">
-    <value>字体大小</value>
+    <value>字号体型</value>
   </data>
   <data name="ToolbarPage_IconSize" xml:space="preserve">
-    <value>图标大小</value>
+    <value>图标体型</value>
   </data>
   <data name="ToolbarPage_Opacity" xml:space="preserve">
-    <value>不透明度</value>
+    <value>隐身值</value>
   </data>
   <data name="ToolbarPage_RedStyle" xml:space="preserve">
-    <value>红色强调</value>
+    <value>血槽满</value>
   </data>
   <data name="ToolbarPage_RedStyleDesc" xml:space="preserve">
-    <value>将该组件的图标和文字显示为红色</value>
+    <value>让这件装备的图标和字红得发慌</value>
   </data>
   <data name="ToolbarPage_Margin" xml:space="preserve">
-    <value>边距</value>
+    <value>安全距离</value>
   </data>
   <data name="ToolbarPage_MarginHint" xml:space="preserve">
     <value>左, 上, 右, 下</value>
   </data>
   <data name="ToolbarPage_ResetComponentSettings" xml:space="preserve">
-    <value>重置组件调教</value>
+    <value>v50 装备调教</value>
   </data>
   <data name="ToolbarPage_HideByRules" xml:space="preserve">
-    <value>按规则隐身</value>
+    <value>按规则隐身术</value>
   </data>
   <data name="ToolbarPage_HideByRulesDesc" xml:space="preserve">
-    <value>当规则满足时这个组件就隐身。</value>
+    <value>规则达成时这件装备自动隐身。</value>
   </data>
   <data name="ToolbarPage_AnyConditionGroupMet" xml:space="preserve">
-    <value>当以下任意条件组满足时</value>
+    <value>任一条件组达成时</value>
   </data>
   <data name="ToolbarPage_AllConditionGroupsMet" xml:space="preserve">
-    <value>当以下所有条件组满足时</value>
+    <value>全部条件组达成时</value>
   </data>
   <data name="ToolbarPage_Reverse" xml:space="preserve">
-    <value>反转</value>
+    <value>反向操作</value>
   </data>
   <data name="ToolbarPage_AddGroup" xml:space="preserve">
-    <value>加个组</value>
+    <value>拉个帮</value>
   </data>
   <data name="ToolbarPage_AnyConditionMet" xml:space="preserve">
-    <value>当以下任意条件满足时</value>
+    <value>任一条件达成时</value>
   </data>
   <data name="ToolbarPage_AllConditionsMet" xml:space="preserve">
-    <value>当以下所有条件满足时</value>
+    <value>全部条件达成时</value>
   </data>
   <data name="ToolbarPage_Rule" xml:space="preserve">
-    <value>规则</value>
+    <value>玩法</value>
   </data>
   <data name="ToolbarPage_EnableConditionGroup" xml:space="preserve">
-    <value>启用条件组</value>
+    <value>激活条件组</value>
   </data>
   <data name="ToolbarPage_ResetLayout" xml:space="preserve">
-    <value>恢复默认布局</value>
+    <value>v50 默认布局</value>
   </data>
   <data name="ToolbarPage_AddToAdded" xml:space="preserve">
-    <value>添加到已装备组件</value>
+    <value>上身到已装备</value>
   </data>
   <data name="ToolbarPage_Duplicate" xml:space="preserve">
-    <value>复制</value>
+    <value>影分身</value>
   </data>
   <data name="ToolbarPage_NewConfig" xml:space="preserve">
-    <value>新建配置</value>
+    <value>新建号</value>
   </data>
   <data name="ToolbarPage_CopyConfig" xml:space="preserve">
-    <value>复制配置</value>
+    <value>影分身配置</value>
   </data>
   <data name="ToolbarPage_EnterConfigName" xml:space="preserve">
-    <value>给配置起个名：</value>
+    <value>给号起个名：</value>
   </data>
   <data name="ToolbarPage_EnterNewConfigName" xml:space="preserve">
-    <value>给新配置起个名：</value>
+    <value>给新号起个名：</value>
   </data>
   <data name="ToolbarPage_DuplicateConfigExists" xml:space="preserve">
-    <value>同名配置已经有了！</value>
+    <value>同名号已经被抢注了！</value>
   </data>
   <data name="ToolbarPage_Hint" xml:space="preserve">
-    <value>友情提示</value>
+    <value>防坑提示</value>
   </data>
   <data name="ToolbarPage_AtLeastOneConfig" xml:space="preserve">
-    <value>至少得留一个配置方案！</value>
+    <value>至少留一个号！别删库跑路</value>
   </data>
   <data name="ToolbarPage_ConfirmDeleteConfig" xml:space="preserve">
-    <value>确定要送走配置</value>
+    <value>真的要送走号</value>
   </data>
   <data name="ToolbarPage_ConfirmDelete" xml:space="preserve">
     <value>确认送走</value>
@@ -430,7 +430,7 @@
     <value>神笔马良</value>
   </data>
   <data name="ToolbarItem_Desc_Clear" xml:space="preserve">
-    <value>一键清空</value>
+    <value>删库跑路</value>
   </data>
   <data name="ToolbarItem_Desc_InkFreeze" xml:space="preserve">
     <value>墨迹封印术</value>
@@ -445,7 +445,7 @@
     <value>套马杆</value>
   </data>
   <data name="ToolbarItem_Desc_CursorWithDel" xml:space="preserve">
-    <value>清空并切光标</value>
+    <value>删库换准星</value>
   </data>
   <data name="ToolbarItem_Desc_Fold" xml:space="preserve">
     <value>收起装备栏</value>
@@ -457,174 +457,174 @@
     <value>溜了溜了</value>
   </data>
   <data name="ToolbarItem_Desc_QuickColorPalette" xml:space="preserve">
-    <value>快速选色面板</value>
+    <value>佛系选色面板</value>
   </data>
   <data name="ToolbarItem_Desc_Group" xml:space="preserve">
-    <value>把多个工具打包在一起</value>
+    <value>工具打包成团</value>
   </data>
   <data name="ToolbarItem_Desc_Separator" xml:space="preserve">
     <value>楚河汉界</value>
   </data>
   <data name="FloatingBar_QuickPaletteMode" xml:space="preserve">
-    <value>快捷调色盘</value>
+    <value>快捷 Buff 盘</value>
   </data>
   <data name="ToolbarCondition_Annotating" xml:space="preserve">
-    <value>批注模式</value>
+    <value>批斗模式</value>
   </data>
   <data name="ToolbarCondition_PPTMode" xml:space="preserve">
-    <value>PPT模式</value>
+    <value>PPT 模式</value>
   </data>
   <data name="ToolbarCondition_Collapsed" xml:space="preserve">
     <value>装备栏已收纳</value>
   </data>
   <data name="FloatingBar_PenTipStyle" xml:space="preserve">
-    <value>笔锋</value>
+    <value>笔锋奥义</value>
   </data>
   <data name="FloatingBar_PenStyle_RealTime" xml:space="preserve">
-    <value>实时笔锋</value>
+    <value>实时奥义</value>
   </data>
   <data name="FloatingBar_PenStyle_PointSet" xml:space="preserve">
-    <value>基于点集</value>
+    <value>点流派</value>
   </data>
   <data name="FloatingBar_PenStyle_Velocity" xml:space="preserve">
-    <value>基于速率</value>
+    <value>速流派</value>
   </data>
   <data name="FloatingBar_PenStyle_Off" xml:space="preserve">
-    <value>关闭笔锋</value>
+    <value>封印笔锋</value>
   </data>
   <data name="FloatingBar_HighlighterOverlap" xml:space="preserve">
-    <value>重叠加深</value>
+    <value>反复涂 Buff</value>
   </data>
   <data name="FloatingBar_Opacity" xml:space="preserve">
-    <value>透明</value>
+    <value>隐身值</value>
   </data>
   <data name="FloatingBar_FadeDelay" xml:space="preserve">
-    <value>延迟</value>
+    <value>摸鱼延迟</value>
   </data>
   <data name="FloatingBar_FadeSpeed" xml:space="preserve">
-    <value>倍速</value>
+    <value>神速</value>
   </data>
   <data name="FloatingBar_ColorThemeLight" xml:space="preserve">
-    <value>亮系</value>
+    <value>阳光系</value>
   </data>
   <data name="BoardToolbarPage_ConfigProfiles" xml:space="preserve">
-    <value>配置方案</value>
+    <value>装备方案</value>
   </data>
   <data name="BoardToolbarPage_NewProfile" xml:space="preserve">
-    <value>新建配置</value>
+    <value>新建号</value>
   </data>
   <data name="BoardToolbarPage_DuplicateProfile" xml:space="preserve">
-    <value>复制配置</value>
+    <value>影分身配置</value>
   </data>
   <data name="BoardToolbarPage_DeleteProfile" xml:space="preserve">
-    <value>删除配置</value>
+    <value>送走配置</value>
   </data>
   <data name="BoardToolbarPage_Areas" xml:space="preserve">
-    <value>区域配置</value>
+    <value>地盘划分</value>
   </data>
   <data name="BoardToolbarPage_LeftArea" xml:space="preserve">
-    <value>左侧区域</value>
+    <value>左翼地盘</value>
   </data>
   <data name="BoardToolbarPage_CenterArea" xml:space="preserve">
-    <value>中间区域</value>
+    <value>中路地盘</value>
   </data>
   <data name="BoardToolbarPage_RightArea" xml:space="preserve">
-    <value>右侧区域</value>
+    <value>右翼地盘</value>
   </data>
   <data name="BoardToolbarPage_ComponentLibrary" xml:space="preserve">
-    <value>组件库</value>
+    <value>装备库</value>
   </data>
   <data name="BoardToolbarPage_AddGroup" xml:space="preserve">
-    <value>+ 新建分组</value>
+    <value>+ 拉个帮</value>
   </data>
   <data name="BoardToolbarPage_AddGroup2" xml:space="preserve">
-    <value>新建分组</value>
+    <value>拉个帮</value>
   </data>
   <data name="BoardToolbarPage_AddComponent2" xml:space="preserve">
-    <value>添加组件</value>
+    <value>上身装备</value>
   </data>
   <data name="BoardToolbarPage_NewGroupName" xml:space="preserve">
-    <value>请输入新分组名称</value>
+    <value>给新帮起个名</value>
   </data>
   <data name="BoardToolbarPage_ResetDefault" xml:space="preserve">
-    <value>恢复默认布局</value>
+    <value>v50 默认布局</value>
   </data>
   <data name="BoardToolbarPage_AtLeastOneConfig" xml:space="preserve">
-    <value>至少保留一个配置文件。</value>
+    <value>至少留一个号，拒绝空仓。</value>
   </data>
   <data name="BoardToolbarPage_ConfirmDeleteConfig" xml:space="preserve">
-    <value>确定要删除此配置吗？</value>
+    <value>真的要送走这个号吗？</value>
   </data>
   <data name="BoardToolbarPage_EnterNewConfigName" xml:space="preserve">
-    <value>请输入新配置名称：</value>
+    <value>给新号起个名：</value>
   </data>
   <data name="BoardToolbarPage_ResetConfirm" xml:space="preserve">
-    <value>确定要恢复为默认布局吗？当前布局将被覆盖。</value>
+    <value>真要 v50 默认布局吗？当前布局直接寄。</value>
   </data>
   <data name="BoardToolbarPage_AreaComponents" xml:space="preserve">
-    <value>区域独立组件</value>
+    <value>地盘独狼装备</value>
   </data>
   <data name="BoardToolbarPage_AreaComponentsHint" xml:space="preserve">
-    <value>不属于任何分组的组件将独立显示在此区域中。可从组件库拖拽添加。</value>
+    <value>不入帮的独狼装备会单独蹲在这块地盘，从装备库拖过来即可。</value>
   </data>
   <data name="BoardToolbarPage_AreaGroups" xml:space="preserve">
-    <value>区域分组</value>
+    <value>地盘帮派</value>
   </data>
   <data name="BoardToolbarPage_Position" xml:space="preserve">
-    <value>按钮位置</value>
+    <value>占位</value>
   </data>
   <data name="BoardToolbarPage_PositionDesc" xml:space="preserve">
-    <value>控制按钮在分组中的位置样式</value>
+    <value>控制按钮在帮派里的站位</value>
   </data>
   <data name="BoardToolbarPage_PositionFirst" xml:space="preserve">
-    <value>首个</value>
+    <value>C 位</value>
   </data>
   <data name="BoardToolbarPage_PositionMiddle" xml:space="preserve">
-    <value>中间</value>
+    <value>中路</value>
   </data>
   <data name="BoardToolbarPage_PositionLast" xml:space="preserve">
-    <value>末个</value>
+    <value>末尾吃灰</value>
   </data>
   <data name="BoardToolbarPage_PositionSingle" xml:space="preserve">
-    <value>独立</value>
+    <value>独狼</value>
   </data>
   <data name="BoardToolbarPage_MoveUp" xml:space="preserve">
-    <value>上移</value>
+    <value>升序</value>
   </data>
   <data name="BoardToolbarPage_MoveDown" xml:space="preserve">
-    <value>下移</value>
+    <value>降序</value>
   </data>
   <data name="BoardToolbarPage_GroupNavigation" xml:space="preserve">
-    <value>页面导航</value>
+    <value>翻页导航</value>
   </data>
   <data name="BoardToolbarPage_GroupVideoBooth" xml:space="preserve">
-    <value>视频展台</value>
+    <value>投影法阵</value>
   </data>
   <data name="BoardToolbarPage_GroupGesture" xml:space="preserve">
-    <value>手势与背景</value>
+    <value>结印与贴膜</value>
   </data>
   <data name="BoardToolbarPage_GroupTools" xml:space="preserve">
-    <value>批注工具</value>
+    <value>批斗装备</value>
   </data>
   <data name="BoardToolbarPage_GroupSystem" xml:space="preserve">
-    <value>系统</value>
+    <value>系统底层</value>
   </data>
   <data name="BoardToolbarPage_GroupAddPage" xml:space="preserve">
-    <value>新增页面</value>
+    <value>加张图</value>
   </data>
   <data name="BoardToolbarPage_Title" xml:space="preserve">
-    <value>白板工具栏</value>
+    <value>白板装备栏</value>
   </data>
   <data name="MiniWhiteboard_Settings_Enable" xml:space="preserve">
-    <value>启用小白板</value>
+    <value>召唤小白板</value>
   </data>
   <data name="MiniWhiteboard_Settings_SyncPPT" xml:space="preserve">
-    <value>页面与PPT联动</value>
+    <value>与 PPT 锁死同步</value>
   </data>
   <data name="MiniWhiteboard_Settings_DefaultSize" xml:space="preserve">
-    <value>默认大小</value>
+    <value>默认体型</value>
   </data>
   <data name="MiniWhiteboard_Settings_Opacity" xml:space="preserve">
-    <value>不透明度</value>
+    <value>隐身值</value>
   </data>
 </root>

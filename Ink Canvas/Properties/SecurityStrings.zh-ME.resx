@@ -43,121 +43,121 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="FileAssoc_Check" xml:space="preserve">
-    <value>检查关联状态</value>
+    <value>查 CP 还在不在</value>
   </data>
   <data name="FileAssoc_Title" xml:space="preserve">
-    <value>文件关联管理（CP管理）</value>
+    <value>CP 管理大权</value>
   </data>
   <data name="FileAssoc_Unregister" xml:space="preserve">
-    <value>取消文件关联（解除CP）</value>
+    <value>解除 CP</value>
   </data>
   <data name="SecurityPanel__InkCanvasForClass_Hint" xml:space="preserve">
-    <value>关 InkCanvasForClass 时要输密码，防偷关</value>
+    <value>想偷偷关 InkCanvasForClass？先过密码这关</value>
   </data>
   <data name="SecurityPanel__Settingsjson_Hint" xml:space="preserve">
-    <value>重置 Settings.json 前要二次验证，防手滑</value>
+    <value>重置 Settings.json 前要二次验证，防帕金森手滑</value>
   </data>
   <data name="SecurityPanel_Hint" xml:space="preserve">
-    <value>开启后需要设置密码</value>
+    <value>开启后必须立密码</value>
   </data>
   <data name="SecurityPanel_Hint_1" xml:space="preserve">
-    <value>设置或修改防偷窥密码</value>
+    <value>立/改封印密码</value>
   </data>
   <data name="SecurityPanel_Hint_2" xml:space="preserve">
-    <value>打开设置面板/新设置窗口时要验证身份</value>
+    <value>想进设置面板？先验明正身</value>
   </data>
   <data name="SecurityPanel_Hint_4" xml:space="preserve">
-    <value>开启后关键文件会被只读锁定，谁也别想改</value>
+    <value>开启后关键文件只读封印，谁也别想动</value>
   </data>
   <data name="Security_SectionPassword" xml:space="preserve">
-    <value>防偷窥密码</value>
+    <value>封印密码</value>
   </data>
   <data name="Security_InfoBarTitle" xml:space="preserve">
-    <value>说明</value>
+    <value>科普一下</value>
   </data>
   <data name="Security_PasswordInfoBarMessage" xml:space="preserve">
-    <value>安全密码默认关闭。开启后退出软件、进设置、重置配置等操作都要二次验证，安全感拉满！</value>
+    <value>安全密码默认关闭。开启后退出软件、进设置、重置配置等操作都要二次验证，安全感 BUFF 叠满！</value>
   </data>
   <data name="Security_EnablePassword" xml:space="preserve">
-    <value>启用防偷窥密码</value>
+    <value>启用封印密码</value>
   </data>
   <data name="Security_PasswordManagement" xml:space="preserve">
-    <value>密码管理</value>
+    <value>封印管理大权</value>
   </data>
   <data name="Security_SetOrChangePassword" xml:space="preserve">
-    <value>设置/修改密码</value>
+    <value>立/改封印密码</value>
   </data>
   <data name="Security_EnableTotp" xml:space="preserve">
-    <value>启用 TOTP 动态验证码</value>
+    <value>启用 TOTP 动态令牌</value>
   </data>
   <data name="Security_EnableTotpHint" xml:space="preserve">
-    <value>可用于冻结笔迹解冻等二次验证，更安全</value>
+    <value>笔迹解冻等二次验证可用，安全感 +1</value>
   </data>
   <data name="Security_TotpSecretKey" xml:space="preserve">
-    <value>TOTP 密钥</value>
+    <value>TOTP 信仰の源</value>
   </data>
   <data name="Security_TotpSecretKeyHint" xml:space="preserve">
-    <value>在身份验证器中手动添加该密钥</value>
+    <value>在身份验证器里手动添加该密钥</value>
   </data>
   <data name="Security_GenerateOrResetKey" xml:space="preserve">
-    <value>生成/重置密钥</value>
+    <value>搓/重置密钥</value>
   </data>
   <data name="Security_RequirePasswordOnExit" xml:space="preserve">
-    <value>退出软件要验证（别想跑）</value>
+    <value>想跑？先验身</value>
   </data>
   <data name="Security_RequirePasswordOnEnterSettings" xml:space="preserve">
-    <value>进设置要验证（闲人免进）</value>
+    <value>闲人免进，验身才能进设置</value>
   </data>
   <data name="Security_RequirePasswordOnResetConfig" xml:space="preserve">
-    <value>重置配置要验证（别乱来）</value>
+    <value>想重置配置？先证明你是本人</value>
   </data>
   <data name="Security_RequirePasswordOnModifyOrClearNameList" xml:space="preserve">
-    <value>修改/清空点名名单要验证</value>
+    <value>动名单前先验身</value>
   </data>
   <data name="Security_RequirePasswordOnModifyOrClearNameList_Hint" xml:space="preserve">
-    <value>对点名名单动手动脚前要先验证身份</value>
+    <value>想对名单动手动脚？先验明正身</value>
   </data>
   <data name="Security_ProcessProtection" xml:space="preserve">
-    <value>进程保护（护体神功）</value>
+    <value>护体神功</value>
   </data>
   <data name="Security_ProcessProtectionInfoBarMessage" xml:space="preserve">
-    <value>进程保护默认开启：运行期间保护根目录下的程序文件（exe/dll/config）不被外部修改，谁也别想动！</value>
+    <value>护体神功默认开启：运行期间给 exe/dll/config 套上金钟罩，谁也别想动！</value>
   </data>
   <data name="Security_DisablePasswordTitle" xml:space="preserve">
-    <value>关闭防偷窥密码</value>
+    <value>解除封印密码</value>
   </data>
   <data name="Security_DisablePasswordMessage" xml:space="preserve">
-    <value>请输入安全密码或 TOTP 验证码来关闭安全密码功能。</value>
+    <value>想解除封印？先输安全密码或 TOTP 验证码</value>
   </data>
   <data name="Security_ResetTotpTitle" xml:space="preserve">
-    <value>重置 TOTP 密钥</value>
+    <value>重置 TOTP 信仰の源</value>
   </data>
   <data name="Security_ResetTotpMessage" xml:space="preserve">
-    <value>请输入安全密码或当前 TOTP 动态验证码来重置密钥。</value>
+    <value>想重置密钥？先输安全密码或当前 TOTP 动态验证码</value>
   </data>
   <data name="Security_UsbSectionHeader" xml:space="preserve">
-    <value>U盘防伪验证（维护特权）</value>
+    <value>维护特权 U 盘通关文牒</value>
   </data>
   <data name="Security_UsbInfoBarMessage" xml:space="preserve">
-    <value>开启U盘验证后，掏出已授权的维护神器（U盘）插上，就能瞬间免密遁入，省时省力！</value>
+    <value>开启后，掏出已授权的维护 U 盘一插，瞬间免密遁入，光速通关！</value>
   </data>
   <data name="Security_EnableUsbVerification" xml:space="preserve">
-    <value>开启U盘通关秘籍</value>
+    <value>启用 U 盘通关秘籍</value>
   </data>
   <data name="Security_EnableUsbVerification_Hint" xml:space="preserve">
-    <value>允许通过插拔已绑定身份的维护U盘来光速通过安全验证</value>
+    <value>插拔已绑定身份的维护 U 盘，光速滑跪过安检</value>
   </data>
   <data name="Security_UsbAuthorizedSns" xml:space="preserve">
-    <value>已绑定神格的U盘ID</value>
+    <value>已册封神格的 U 盘 ID</value>
   </data>
   <data name="Security_UsbAuthorizedSns_Hint" xml:space="preserve">
-    <value>已获准出入的U盘硬件ID列表（多个用英文逗号隔开）</value>
+    <value>已获准出入的 U 盘硬件 ID 列表（多个用英文逗号隔开）</value>
   </data>
   <data name="Security_UsbDetectAndAuthorize" xml:space="preserve">
-    <value>现场降服并册封新U盘</value>
+    <value>现场降服新 U 盘并册封</value>
   </data>
   <data name="Security_UsbDetectAndAuthorize_Hint" xml:space="preserve">
-    <value>探查当前插在身上的U盘，一键将其刻印到神圣授权录中</value>
+    <value>探查当前插着的 U 盘，一键刻印进神圣授权录</value>
   </data>
   <data name="Security_UsbRefreshDrives" xml:space="preserve">
     <value>雷达扫描</value>
@@ -166,29 +166,29 @@
     <value>赐予神格</value>
   </data>
   <data name="Security_UsbPromptNoValidSn" xml:space="preserve">
-    <value>选中的这个盘居然没有神圣ID（无效序列号）！</value>
+    <value>这盘居然没神圣 ID（无效序列号）！</value>
   </data>
   <data name="Security_UsbPromptAlreadyAuthorized" xml:space="preserve">
-    <value>莫慌，这根U盘ID早已录入在案！</value>
+    <value>莫慌，这 U 盘 ID 早就在册了</value>
   </data>
   <data name="Security_UsbPromptAuthorizeSuccess" xml:space="preserve">
-    <value>刻印成功！已将其序列号打入神圣授权列表！</value>
+    <value>刻印成功！序列号已打入神圣授权列表</value>
   </data>
   <data name="Security_UsbPromptSelectDrive" xml:space="preserve">
-    <value>你倒是先在下拉框里选个U盘啊！</value>
+    <value>倒是先选个 U 盘啊喂！</value>
   </data>
   <data name="Security_UsbPromptNoDriveDetected" xml:space="preserve">
-    <value>空空如也，没发现任何U盘</value>
+    <value>空空如也，连个 U 盘都没</value>
   </data>
   <data name="Security_UsbPromptLocalDisk" xml:space="preserve">
-    <value>凡人的本地磁盘</value>
+    <value>凡人本地磁盘</value>
   </data>
   <data name="Security_UsbBypassDialogHint" xml:space="preserve">
     <value>
-(已开后门，插上带有法力的维护U盘可直接通关)</value>
+(后门已开，插上带法力的维护 U 盘直接通关)</value>
   </data>
   <data name="Security_UsbBypassDialogHintShort" xml:space="preserve">
     <value>
-(秘籍已启用，直接插盘即过)</value>
+(秘籍已启用，插盘即过)</value>
   </data>
 </root>

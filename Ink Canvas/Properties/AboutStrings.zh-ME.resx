@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -46,85 +46,85 @@
     <value>© 2025-2026 CJK_mkp 版权所有</value>
   </data>
   <data name="DevelopersLabel" xml:space="preserve">
-    <value>大佬们：</value>
+    <value>野生大佬团：</value>
   </data>
   <data name="DeviceIdLabel" xml:space="preserve">
-    <value>设备 ID：</value>
+    <value>本机身份证号：</value>
   </data>
   <data name="DeviceInfo" xml:space="preserve">
-    <value>设备情报</value>
+    <value>设备情报局</value>
   </data>
   <data name="DeviceInfo_Loading" xml:space="preserve">
-    <value>正在打探中...</value>
+    <value>正在黑入系统...</value>
   </data>
   <data name="LaunchCountLabel" xml:space="preserve">
-    <value>启动次数：</value>
+    <value>开机次数：</value>
   </data>
   <data name="LicenseBody" xml:space="preserve">
-    <value>本强许可协议的许可条件是，在相同许可协议下，提供许可作品的完整源代码和修改，包括使用许可作品的大型作品。版权和许可声明必须保留。贡献者明确授予专利权。</value>
+    <value>本许可协议的规矩是：相同协议下必须把源代码和修改全交出来，连大型作品也得带源码。版权和许可声明必须留好。贡献者明明白白授予专利权。</value>
   </data>
   <data name="LicenseTitle" xml:space="preserve">
-    <value>本软件和 ICA，Ink Canvas 都是开源的 yyds！</value>
+    <value>本软件和 ICA、Ink Canvas 都是开源 yyds！</value>
   </data>
   <data name="OpenSourceSlogan" xml:space="preserve">
-    <value>开源 yyds！我们永远热爱！</value>
+    <value>开源 yyds！永远热爱！</value>
   </data>
   <data name="PhigrosCr" xml:space="preserve">
-    <value>部分内容偷师于 Phigros</value>
+    <value>部分内容偷师于 Phigros，师父领进门</value>
   </data>
   <data name="PrivacyAgreement" xml:space="preserve">
     <value>我已阅读并同意 privacy 中的小秘密说明</value>
   </data>
   <data name="PrivacyAndTelemetry" xml:space="preserve">
-    <value>小秘密与遥测</value>
+    <value>小秘密与监控探头</value>
   </data>
   <data name="RefreshDeviceInfo" xml:space="preserve">
-    <value>刷新设备情报</value>
+    <value>再探一次情报</value>
   </data>
   <data name="Telemetry_Basic" xml:space="preserve">
-    <value>上传基础数据</value>
+    <value>传点底裤数据</value>
   </data>
   <data name="Telemetry_Off" xml:space="preserve">
-    <value>关掉（啥也不传）</value>
+    <value>社恐模式啥也不传</value>
   </data>
   <data name="Telemetry_Optional" xml:space="preserve">
-    <value>上传基础 + 可选数据</value>
+    <value>底裤加自选数据全交</value>
   </data>
   <data name="TelemetryLabel" xml:space="preserve">
-    <value>匿名使用数据上传：</value>
+    <value>匿名数据上贡：</value>
   </data>
   <data name="ThanksContributors" xml:space="preserve">
-    <value>感谢下列大佬的贡献：</value>
+    <value>感谢以下大佬带飞：</value>
   </data>
   <data name="Title" xml:space="preserve">
-    <value>关于</value>
+    <value>关于本神器</value>
   </data>
   <data name="TotalUsageLabel" xml:space="preserve">
-    <value>肝了多久：</value>
+    <value>肝度：</value>
   </data>
   <data name="UpdatePriorityLabel" xml:space="preserve">
-    <value>更新优先级：</value>
+    <value>更新抽卡优先级：</value>
   </data>
   <data name="UsageFrequencyLabel" xml:space="preserve">
-    <value>使用频率：</value>
+    <value>出勤率：</value>
   </data>
   <data name="VersionLabel" xml:space="preserve">
-    <value>版本号：</value>
+    <value>版本印记：</value>
   </data>
   <data name="DeviceInfo_Failed" xml:space="preserve">
-    <value>打探失败</value>
+    <value>黑入失败</value>
   </data>
   <data name="Unknown" xml:space="preserve">
-    <value>未知</value>
+    <value>未解之谜</value>
   </data>
   <data name="UpdatePriority_High" xml:space="preserve">
-    <value>高优先级（抢先体验新版本）</value>
+    <value>F5 玩家狂喜抢先体验</value>
   </data>
   <data name="UpdatePriority_Low" xml:space="preserve">
-    <value>低优先级（慢慢来不着急）</value>
+    <value>佛系慢慢来不着急</value>
   </data>
   <data name="UpdatePriority_Medium" xml:space="preserve">
-    <value>中优先级（正常节奏更新）</value>
+    <value>正常人节奏更新</value>
   </data>
   <data name="UsageFrequency_High" xml:space="preserve">
     <value>肝帝</value>
@@ -136,31 +136,31 @@
     <value>普通玩家</value>
   </data>
   <data name="Privacy_ConfirmDisableTelemetry_Message" xml:space="preserve">
-    <value>关掉匿名数据上传后，就不能用预览/测试通道了，会被踢回正式通道（Release）。
+    <value>关掉匿名上贡后，预览/测试通道就不能用了，会被光速滑跪踢回正式通道（Release）。
 
 确定要关吗？</value>
   </data>
   <data name="Privacy_ConfirmDisableTelemetry_Title" xml:space="preserve">
-    <value>确认关闭遥测</value>
+    <value>确认关掉监控探头</value>
   </data>
   <data name="Privacy_PrivacyAgreementRequired_Message" xml:space="preserve">
-    <value>开匿名数据上传之前，先看看上面的小秘密说明打个勾呗。</value>
+    <value>开匿名上贡前，先看看上面的小秘密说明打个勾呗。</value>
   </data>
   <data name="Privacy_PrivacyAgreementRequired_Title" xml:space="preserve">
     <value>得先同意小秘密说明</value>
   </data>
   <data name="Privacy_PrivacyFileNotFound_Message" xml:space="preserve">
-    <value>小秘密说明文件（privacy / privacy.txt）找不到了，暂时开不了匿名数据上传。</value>
+    <value>小秘密说明文件（privacy / privacy.txt）离家出走了，暂时开不了匿名上贡。</value>
   </data>
   <data name="Privacy_PrivacyFileNotFound_Title" xml:space="preserve">
-    <value>小秘密说明丢了</value>
+    <value>小秘密说明离家出走</value>
   </data>
   <data name="Privacy_ConfirmRevokePrivacy_Message" xml:space="preserve">
-    <value>取消同意小秘密说明后，会关掉匿名数据上传，还会被踢回正式通道（Release）。
+    <value>取消同意小秘密说明后，匿名上贡会关掉，还会被光速滑跪踢回正式通道（Release）。
 
 确定要反悔吗？</value>
   </data>
   <data name="Privacy_ConfirmRevokePrivacy_Title" xml:space="preserve">
-    <value>确认取消小秘密同意</value>
+    <value>确认反悔</value>
   </data>
 </root>

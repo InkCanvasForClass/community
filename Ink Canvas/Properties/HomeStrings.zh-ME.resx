@@ -43,25 +43,25 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="Home_ExitApp" xml:space="preserve">
-    <value>溜了溜了</value>
+    <value>删库跑路</value>
   </data>
   <data name="Home_ResetSettings" xml:space="preserve">
-    <value>一键恢复出厂</value>
+    <value>v50 回出厂</value>
   </data>
   <data name="Home_RestartApp" xml:space="preserve">
-    <value>重启一下</value>
+    <value>原地复活</value>
   </data>
   <data name="Home_AboutApp" xml:space="preserve">
     <value>关于 InkCanvasForClass</value>
   </data>
   <data name="Home_Basic" xml:space="preserve">
-    <value>基础操作</value>
+    <value>新手村操作</value>
   </data>
   <data name="Home_CanvasSettings" xml:space="preserve">
     <value>画板调教</value>
   </data>
   <data name="Home_CloudStorageSettings" xml:space="preserve">
-    <value>Dlass 与 WebDav 上传调教</value>
+    <value>Dlass 与 WebDav 上云调教</value>
   </data>
   <data name="Home_InkRecognitionSettings" xml:space="preserve">
     <value>墨迹纠正调教</value>
@@ -73,7 +73,7 @@
     <value>外挂调教</value>
   </data>
   <data name="Home_PPTSettings" xml:space="preserve">
-    <value>PPT联动调教</value>
+    <value>PPT 联动调教</value>
   </data>
   <data name="Home_Privacy" xml:space="preserve">
     <value>小秘密</value>
@@ -82,7 +82,7 @@
     <value>小秘密与遥测调教</value>
   </data>
   <data name="Home_RandomAndTimer" xml:space="preserve">
-    <value>点名与计时器</value>
+    <value>天选之人与倒计时</value>
   </data>
   <data name="Home_Title" xml:space="preserve">
     <value>大本营</value>
@@ -106,18 +106,18 @@
     <value>小闹钟显示调教</value>
   </data>
   <data name="Home_PerformanceSettings" xml:space="preserve">
-    <value>性能监控与体检</value>
+    <value>性能监控与 pp 体检</value>
   </data>
   <data name="Home_BackupSettings" xml:space="preserve">
-    <value>设置与数据备份</value>
+    <value>设置与数据存档</value>
   </data>
   <data name="Home_BoardSettings" xml:space="preserve">
     <value>白板装备栏与外观调教</value>
   </data>
   <data name="Home_FriendlyLinks" xml:space="preserve">
-    <value>赞助及友链</value>
+    <value>氪金与友军</value>
   </data>
   <data name="Splash_Starting" xml:space="preserve">
-    <value>正在加载 Ink Canvas，稍等一下下...</value>
+    <value>正在召唤 Ink Canvas，请稍等一下下...</value>
   </data>
 </root>

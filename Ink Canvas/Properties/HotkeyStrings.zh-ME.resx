@@ -43,22 +43,22 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="Hotkey_InfoBarTitle" xml:space="preserve">
-    <value>说明</value>
+    <value>说明书</value>
   </data>
   <data name="Hotkey_InfoBarMessage" xml:space="preserve">
     <value>在这里可以自定义全局骚操作键。全局快捷键在任何情况下都能生效，就算软件不在焦点也照样触发，yyds！</value>
   </data>
   <data name="Hotkey_MouseMode" xml:space="preserve">
-    <value>鼠标模式</value>
+    <value>鼠标形态</value>
   </data>
   <data name="Hotkey_EnableHotkeysInMouseMode" xml:space="preserve">
-    <value>鼠标模式下也启用骚操作键</value>
+    <value>鼠标形态下也启用骚操作键</value>
   </data>
   <data name="Hotkey_EnableHotkeysInMouseModeHint" xml:space="preserve">
-    <value>开启后，鼠标模式下快捷键照样生效，不放过任何一个骚操作</value>
+    <value>开启后，鼠标形态下快捷键照样生效，不放过任何一个骚操作</value>
   </data>
   <data name="Hotkey_BasicOperations" xml:space="preserve">
-    <value>基本操作</value>
+    <value>基础招式</value>
   </data>
   <data name="Hotkey_UndoDesc" xml:space="preserve">
     <value>后悔药：撤销上一步</value>
@@ -67,7 +67,7 @@
     <value>再想想：重做上一步</value>
   </data>
   <data name="Hotkey_ClearDesc" xml:space="preserve">
-    <value>一键清空画板，从头来过</value>
+    <value>删库跑路一键清空画板</value>
   </data>
   <data name="Hotkey_Paste" xml:space="preserve">
     <value>粘贴</value>
@@ -166,45 +166,45 @@
     <value>退出当前模式或应用程序，溜了溜了</value>
   </data>
   <data name="Hotkey_ResetToDefault" xml:space="preserve">
-    <value>恢复出厂设置</value>
+    <value>v50 出厂设置</value>
   </data>
   <data name="Hotkey_SaveSettings" xml:space="preserve">
-    <value>保存设置</value>
+    <value>存档</value>
   </data>
   <data name="Hotkey_ManagerNotInit" xml:space="preserve">
-    <value>快捷键管理器还没醒，保存不了变更，栓Q</value>
+    <value>快捷键管理器还在摸鱼，保存不了变更，栓Q</value>
   </data>
   <data name="Hotkey_Error" xml:space="preserve">
-    <value>出错了</value>
+    <value>翻车了</value>
   </data>
   <data name="Hotkey_ConflictMessage" xml:space="preserve">
-    <value>快捷键 {0} 已经被别的功能占用了，换一个组合吧！</value>
+    <value>快捷键 {0} 已经被别的功能抢座了，换个组合吧！</value>
   </data>
   <data name="Hotkey_ConflictTitle" xml:space="preserve">
     <value>快捷键打架了</value>
   </data>
   <data name="Hotkey_ConfirmResetMessage" xml:space="preserve">
-    <value>确定要把所有快捷键恢复出厂设置吗？</value>
+    <value>确定要把所有快捷键 v50 回出厂设置吗？</value>
   </data>
   <data name="Hotkey_ConfirmResetTitle" xml:space="preserve">
-    <value>确认恢复出厂</value>
+    <value>确认 v50 出厂</value>
   </data>
   <data name="Hotkey_ResetCompleteMessage" xml:space="preserve">
-    <value>快捷键已恢复出厂设置，回到最初的美好～</value>
+    <value>快捷键已 v50 出厂设置，回到最初的美好～</value>
   </data>
   <data name="Hotkey_ResetCompleteTitle" xml:space="preserve">
-    <value>恢复出厂完成</value>
+    <value>v50 出厂完成</value>
   </data>
   <data name="Hotkey_ResetErrorMessage" xml:space="preserve">
-    <value>恢复出厂设置时翻车了: {0}</value>
+    <value>v50 出厂设置时翻车了: {0}</value>
   </data>
   <data name="Hotkey_SaveSuccessMessage" xml:space="preserve">
-    <value>快捷键设置已保存，稳了！</value>
+    <value>快捷键设置已存档，稳了！</value>
   </data>
   <data name="Hotkey_SaveSuccessTitle" xml:space="preserve">
-    <value>保存成功</value>
+    <value>存档成功</value>
   </data>
   <data name="Hotkey_SaveErrorMessage" xml:space="preserve">
-    <value>保存快捷键设置时翻车了: {0}</value>
+    <value>存档快捷键设置时翻车了: {0}</value>
   </data>
 </root>

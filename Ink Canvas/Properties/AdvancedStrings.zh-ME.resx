@@ -43,141 +43,141 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="AvoidFullScreenHelper" xml:space="preserve">
-    <value>开启 AvoidFullScreenHelper 防全屏术</value>
+    <value>开启 AvoidFullScreenHelper 防全屏结界</value>
   </data>
   <data name="AvoidFullScreenHelperHint" xml:space="preserve">
-    <value>阻止画布霸占全屏，任务栏终于能喘口气了！不过左侧或顶部有 AppBar（Dock栏软件）的话浮动工具栏会迷路跑偏，重启 icc 后才生效哦～</value>
+    <value>阻止画布霸占全屏，任务栏终于能喘口气！不过左侧或顶部有 AppBar（Dock 栏软件）的话浮动工具栏会迷路跑偏，重启 icc 后才生效哦～</value>
   </data>
   <data name="ConfirmExit" xml:space="preserve">
-    <value>关软件前再确认一下（防手滑）</value>
+    <value>关软件前再确认防手滑寄了</value>
   </data>
   <data name="DPIChangeDetection" xml:space="preserve">
     <value>开启 DPI 变化雷达</value>
   </data>
   <data name="DPIChangeDetectionHint" xml:space="preserve">
-    <value>系统 DPI 一变，立刻检测浮动工具栏是不是跑到屏幕外面浪了，如果跑出去了就拽回来（DPI调大才触发，调小的话它懒得动，你自己拖吧）</value>
+    <value>系统 DPI 一变，立刻检测浮动工具栏是不是跑到屏幕外面浪了，跑出去就拽回来。DPI 调大才触发，调小它懒得动，你自己拖吧</value>
   </data>
   <data name="EdgeGestureUtil" xml:space="preserve">
-    <value>开启 EdgeGestureUtil 边缘手势拦截</value>
+    <value>开启 EdgeGestureUtil 边缘手势封印术</value>
   </data>
   <data name="EdgeGestureUtilHint_Part1" xml:space="preserve">
-    <value>EdgeGestureUtil 是 icc 新整的活，可以暂时封印触摸时的边缘手势（Win10 左滑进任务视图、右滑弹通知中心；Win11 底部上滑开开始菜单），原理是用了 System.EdgeGesture.DisableTouchWhenFullscreen。翻车了就关掉，实时生效。（Win7 和 Win8 的小伙伴用不了这功能，栓Q）</value>
+    <value>EdgeGestureUtil 是 icc 新整的活，可以暂时封印触摸时的边缘手势：Win10 左滑进任务视图、右滑弹通知中心；Win11 底部上滑开开始菜单。原理是用了 System.EdgeGesture.DisableTouchWhenFullscreen。翻车了就关掉，实时生效。Win7 和 Win8 的小伙伴用不了这功能，栓Q</value>
   </data>
   <data name="EraserBindTouchHint" xml:space="preserve">
-    <value>BoundsWidth 参数当接触面积的分界线</value>
+    <value>BoundsWidth 参数当接触面积的判定线</value>
   </data>
   <data name="EraserBindTouchMultiplier" xml:space="preserve">
-    <value>橡皮擦绑定触摸大小倍数</value>
+    <value>橡皮擦 Buff 倍数</value>
   </data>
   <data name="Experimental" xml:space="preserve">
-    <value>🧪 实验性选项（小白鼠专区）</value>
+    <value>🧪 实验性选项小白鼠志愿区</value>
   </data>
   <data name="FingerModeBoundsWidthHeader" xml:space="preserve">
     <value>手指模式 BoundsWidth</value>
   </data>
   <data name="ForceFullScreen" xml:space="preserve">
-    <value>开启 ForceFullScreen 强制全屏</value>
+    <value>开启 ForceFullScreen 霸屏术</value>
   </data>
   <data name="ForceFullScreenHint" xml:space="preserve">
     <value>窗口大小一变就自动用 Win32 API 把窗口撑满主屏幕，不需要就关掉，实时生效～</value>
   </data>
   <data name="FullScreenHelper" xml:space="preserve">
-    <value>开启 FullScreenHelper 全屏助手</value>
+    <value>开启 FullScreenHelper 全屏外挂</value>
   </data>
   <data name="FullScreenHelperHint" xml:space="preserve">
     <value>感谢 lindexi 大佬 yyds 提供的 FullScreenHelper，任务栏弹出问题少多了，还支持多显示器自动全屏（虽然对 icc 来说没啥用就是了😂），遇到玄学问题就关掉，重启 icc 后生效。</value>
   </data>
   <data name="LogByDate" xml:space="preserve">
-    <value>日志按日期归档</value>
+    <value>日志按日期分档入柜</value>
   </data>
   <data name="Logging" xml:space="preserve">
-    <value>记录日志（留证据）</value>
+    <value>记小本本留证据</value>
   </data>
   <data name="LogRotateHint" xml:space="preserve">
-    <value>日志文件超过 512 KB 自动清理。开启日期保存后日志放 Logs 文件夹，文件夹超过 5MB 就全部清空，绝不留痕！</value>
+    <value>日志文件超过 512 KB 自动清理。开启日期保存后日志放 Logs 文件夹，文件夹超过 5MB 就全部删库跑路，绝不留痕！</value>
   </data>
   <data name="NibModeBoundsWidthHeader" xml:space="preserve">
     <value>笔尖模式 BoundsWidth</value>
   </data>
   <data name="QuadIRMode" xml:space="preserve">
-    <value>四边红外模式</value>
+    <value>四边红外阵法</value>
   </data>
   <data name="ResolutionChangeDetection" xml:space="preserve">
     <value>开启分辨率变化雷达</value>
   </data>
   <data name="ResolutionChangeDetectionHint" xml:space="preserve">
-    <value>系统分辨率一变，它就会看看 FloatingBar 还在不在屏幕可见范围里；要是已经跑出去了，就尽量把它拽回可见区域。一般在分辨率调低后更容易触发；要是本来就在屏幕里，它就不会自己乱挪位置。</value>
+    <value>系统分辨率一变，它就会看看 FloatingBar 还在不在屏幕可见范围里，跑出去了就尽量拽回可见区域。一般分辨率调低后更容易触发；本来就在屏幕里的话它不会自己乱挪窝</value>
   </data>
   <data name="SpecialScreenMode" xml:space="preserve">
-    <value>特殊屏幕模式</value>
+    <value>玄学屏幕模式</value>
   </data>
   <data name="Title" xml:space="preserve">
-    <value>高级设置（大佬专区）</value>
+    <value>大佬专区高级选项</value>
   </data>
   <data name="TouchMultiplier" xml:space="preserve">
-    <value>触摸倍数</value>
+    <value>触摸 Buff 倍数</value>
   </data>
   <data name="TouchMultiplierCalibrateHint" xml:space="preserve">
-    <value>在下方区域用笔尖戳一下来估算触摸大小倍数</value>
+    <value>在下方区域用笔尖戳一下估算触摸 Buff 倍数</value>
   </data>
   <data name="TouchMultiplierHint" xml:space="preserve">
     <value>手指摸画板时橡皮太小或手掌摸画板时橡皮大得离谱？调这个就对了</value>
   </data>
   <data name="TouchMultiplierValueHint" xml:space="preserve">
-    <value>数值仅供参考，别太当真～</value>
+    <value>数值仅供参考，认真的话你就输了～</value>
   </data>
   <data name="Debug_ShowConsole_Desc" xml:space="preserve">
-    <value>弹出一个控制台窗口实时输出日志（开了就生效；关了「记录日志」的话啥也不会输出）</value>
+    <value>弹出一个控制台窗口实时输出日志，开了就生效；关了「记录日志」的话啥也不会输出</value>
   </data>
   <data name="Debug_ShowConsole_Header" xml:space="preserve">
-    <value>显示调试窗口（开发者快乐屋）</value>
+    <value>开发者快乐屋调试窗口</value>
   </data>
   <data name="Debug_PPTComProbe_Desc" xml:space="preserve">
-    <value>打开后会在PPT连接、放映切换和定时轮询时疯狂输出COM对象、窗口、进程和状态探针信息。只建议排查PPT/WPS联动玄学问题时临时打开。</value>
+    <value>打开后会在 PPT 连接、放映切换和定时轮询时疯狂输出 COM 对象、窗口、进程和状态探针信息。只建议排查 PPT/WPS 联动玄学问题时临时打开。</value>
   </data>
   <data name="Debug_PPTComProbe_Header" xml:space="preserve">
-    <value>启用PPT COM探针（日志轰炸机）</value>
+    <value>启用 PPT COM 探针日志轰炸机</value>
   </data>
   <data name="Debug_PPTPreviewVisible_Desc" xml:space="preserve">
-    <value>开了之后PPT翻页按钮设置页面左边会冒出一个内嵌预览（默认是藏起来的）。</value>
+    <value>开了之后 PPT 翻页按钮设置页面左边会冒出一个内嵌预览，默认是藏起来的</value>
   </data>
   <data name="Debug_PPTPreviewVisible_Header" xml:space="preserve">
-    <value>显示PPT翻页按钮预览</value>
+    <value>显示 PPT 翻页按钮预览</value>
   </data>
   <data name="Debug_IconSettings" xml:space="preserve">
-    <value>图标设置</value>
+    <value>换装间</value>
   </data>
   <data name="Debug_SettingsExpanderExample" xml:space="preserve">
-    <value>SettingsExpander 示例</value>
+    <value>SettingsExpander 样板戏</value>
   </data>
   <data name="Debug_CrashTest_Section" xml:space="preserve">
-    <value>崩溃重启测试</value>
+    <value>自杀重启实验</value>
   </data>
   <data name="Debug_SimulateCrash_Header" xml:space="preserve">
-    <value>模拟崩溃（砰！）</value>
+    <value>模拟崩溃砰！</value>
   </data>
   <data name="Debug_SimulateCrash_Desc" xml:space="preserve">
-    <value>点一下直接炸一个未处理异常，用来验证崩溃重启熔断有没有乖乖干活。</value>
+    <value>点一下直接炸一个未处理异常，用来验证崩溃重启熔断有没有乖乖干活</value>
   </data>
   <data name="Debug_SimulateCrash_Button" xml:space="preserve">
-    <value>💥 炸一下</value>
+    <value>💥 自爆一下</value>
   </data>
   <data name="Debug_SimulateHeartbeatTimeout_Header" xml:space="preserve">
-    <value>假装心跳停了</value>
+    <value>假装心跳停了装死中</value>
   </data>
   <data name="Debug_SimulateHeartbeatTimeout_Desc" xml:space="preserve">
-    <value>点一下把心跳计时器干掉，下一轮守护检查发现没心跳就会触发重启。</value>
+    <value>点一下把心跳计时器干掉，下一轮守护检查发现没心跳就会触发重启</value>
   </data>
   <data name="Debug_SimulateHeartbeatTimeout_Button" xml:space="preserve">
-    <value>停止心跳</value>
+    <value>掐断心跳</value>
   </data>
   <data name="Debug_ResetStartupCount_Header" xml:space="preserve">
-    <value>重置熔断计数器</value>
+    <value>v50 熔断计数器</value>
   </data>
   <data name="Debug_ResetStartupCount_Desc" xml:space="preserve">
-    <value>清掉 startup-count 文件，解锁连环崩导致的熔断封锁。</value>
+    <value>清掉 startup-count 文件，解锁连环崩导致的熔断封印</value>
   </data>
   <data name="Debug_ResetStartupCount_Button" xml:space="preserve">
-    <value>重置计数</value>
+    <value>v50 计数</value>
   </data>
 </root>

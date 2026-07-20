@@ -43,10 +43,10 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="WindowTitle" xml:space="preserve">
-    <value>反馈问题 - Ink Canvas For Class CE</value>
+    <value>整活反馈 - Ink Canvas For Class CE</value>
   </data>
   <data name="BtnCancel" xml:space="preserve">
-    <value>取消</value>
+    <value>溜了</value>
   </data>
   <data name="BtnNext" xml:space="preserve">
     <value>下一步</value>
@@ -58,25 +58,25 @@
     <value>确认</value>
   </data>
   <data name="Page1Title" xml:space="preserve">
-    <value>挑一下要带上的信息</value>
+    <value>挑一下要带的情报</value>
   </data>
   <data name="Page1_SoftwareInfo" xml:space="preserve">
     <value>软件情报</value>
   </data>
   <data name="Page1_SoftwareInfoDesc" xml:space="preserve">
-    <value>选选看要带上哪些版本情报</value>
+    <value>挑挑要带哪些版本情报</value>
   </data>
   <data name="Page1_AppVersion" xml:space="preserve">
     <value>软件版本</value>
   </data>
   <data name="Page1_UpdateChannel" xml:space="preserve">
-    <value>更新通道</value>
+    <value>更新抽卡池</value>
   </data>
   <data name="Page1_SystemInfo" xml:space="preserve">
     <value>系统情报</value>
   </data>
   <data name="Page1_SystemInfoDesc" xml:space="preserve">
-    <value>选选看要带上哪些系统环境情报</value>
+    <value>挑挑要带哪些系统环境情报</value>
   </data>
   <data name="Page1_OSVersion" xml:space="preserve">
     <value>操作系统版本</value>
@@ -88,7 +88,7 @@
     <value>设备情报</value>
   </data>
   <data name="Page1_DeviceInfoDesc" xml:space="preserve">
-    <value>选选看要带上哪些设备标识情报</value>
+    <value>挑挑要带哪些设备标识情报</value>
   </data>
   <data name="Page1_DeviceId" xml:space="preserve">
     <value>设备 ID</value>
@@ -97,7 +97,7 @@
     <value>软件配置</value>
   </data>
   <data name="Page1_ConfigDesc" xml:space="preserve">
-    <value>选选看要带上哪些软件配置情报</value>
+    <value>挑挑要带哪些软件配置情报</value>
   </data>
   <data name="Page1_PPTSettings" xml:space="preserve">
     <value>PPT 联动设置</value>
@@ -139,16 +139,16 @@
     <value>选个反馈姿势</value>
   </data>
   <data name="Page3_GitHub" xml:space="preserve">
-    <value>GitHub 问题反馈</value>
+    <value>GitHub 提 issue</value>
   </data>
   <data name="Page3_GitHubDesc" xml:space="preserve">
-    <value>去 GitHub 提交问题反馈</value>
+    <value>去 GitHub 提个 issue</value>
   </data>
   <data name="Page3_OpenGitHub" xml:space="preserve">
-    <value>跳转到 GitHub 反馈</value>
+    <value>跳到 GitHub 提 issue</value>
   </data>
   <data name="Page3_CopyIssueUrl" xml:space="preserve">
-    <value>复制反馈链接</value>
+    <value>复制 issue 链接</value>
   </data>
   <data name="Page3_Copied" xml:space="preserve">
     <value>搞定 ✓</value>
@@ -163,19 +163,19 @@
     <value>复制模板</value>
   </data>
   <data name="Page3_TemplatePlaceholder" xml:space="preserve">
-    <value># 问题描述&#x0a;请描述你遇到的问题...&#x0a;&#x0a;# 重现步骤&#x0a;1. &#x0a;2. &#x0a;3. &#x0a;&#x0a;# 预期行为&#x0a;你期望的效果...&#x0a;&#x0a;# 实际行为&#x0a;实际发生了啥...&#x0a;&#x0a;# 环境信息&#x0a;- 版本: &#x0a;- 系统: &#x0a;</value>
+    <value># 问题描述&#x0a;描述一下你翻车的情况...&#x0a;&#x0a;# 重现步骤&#x0a;1. &#x0a;2. &#x0a;3. &#x0a;&#x0a;# 预期行为&#x0a;你期望的效果...&#x0a;&#x0a;# 实际行为&#x0a;实际发生了啥...&#x0a;&#x0a;# 环境信息&#x0a;- 版本: &#x0a;- 系统: &#x0a;</value>
   </data>
   <data name="About_FeedbackButton" xml:space="preserve">
     <value>提交反馈</value>
   </data>
   <data name="About_FeedbackSection" xml:space="preserve">
-    <value>反馈问题</value>
+    <value>整活反馈</value>
   </data>
   <data name="Page1_PastebinServer" xml:space="preserve">
     <value>Pastebin 服务器</value>
   </data>
   <data name="Page1_PastebinServerDesc" xml:space="preserve">
-    <value>自己搭的 MicroBin 地址（不填就不上传 pastebin）</value>
+    <value>自搭 MicroBin 地址（不填就不上传 pastebin）</value>
   </data>
   <data name="Page1_PastebinPlaceholder" xml:space="preserve">
     <value>https://microbin.example.com</value>

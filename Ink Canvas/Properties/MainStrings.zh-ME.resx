@@ -43,15 +43,15 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="Main_Tray_HideWindow" xml:space="preserve">
-    <value>藏起来 ICC-CE 主窗口</value>
+    <value>ICC-CE 主窗口隐身术</value>
   </data>
   <data name="Main_Tray_ShowWindow" xml:space="preserve">
-    <value>露个脸（2 分钟）</value>
+    <value>破隐现身（2 分钟）</value>
   </data>
   <data name="Main_Tray_DisableHotkeys" xml:space="preserve">
-    <value>禁用所有快捷键</value>
+    <value>快捷键全被窝封印</value>
   </data>
   <data name="Main_Tray_SwitchFoldMode" xml:space="preserve">
-    <value>切换为收纳模式</value>
+    <value>切换为收纳怪模式</value>
   </data>
 </root>

@@ -43,277 +43,277 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="Canvas_AdvancedSmoothing" xml:space="preserve">
-    <value>高级曲线平滑（推荐，丝滑体验）</value>
+    <value>丝滑度 MAX</value>
   </data>
   <data name="Canvas_AskEachTime" xml:space="preserve">
-    <value>每次都问我</value>
+    <value>选择困难症狂喜</value>
   </data>
   <data name="Canvas_AutoRestoreTimePoints" xml:space="preserve">
-    <value>自动恢复时间点 (HH:mm，可多个，用 ; 分隔)</value>
+    <value>自动回血时间点 (HH:mm，可多个，用 ; 分隔)</value>
   </data>
   <data name="Canvas_BrushAutoRestore" xml:space="preserve">
-    <value>启用画笔自动恢复（自动回血）</value>
+    <value>画笔自动回血</value>
   </data>
   <data name="Canvas_BrushAutoRestoreHint" xml:space="preserve">
-    <value>开启后，临时改了画笔设置会在指定时间点自动恢复到你配置的颜色/透明度/粗细，再也不怕忘记调回来了</value>
+    <value>开启后，临时魔改的画笔会在指定时间点自动回血到你配置的颜色/透明度/粗细，防失忆神器启动。</value>
   </data>
   <data name="Canvas_ClearCanvasAlsoClearImages" xml:space="preserve">
-    <value>清空画布时图片也一起清掉</value>
+    <value>删库跑路套餐</value>
   </data>
   <data name="Canvas_ClearInkAlsoClearHistory" xml:space="preserve">
-    <value>清空墨迹时历史记录也一起删（断舍离）</value>
+    <value>断舍离 Pro Max</value>
   </data>
   <data name="Canvas_Color_Black" xml:space="preserve">
-    <value>黑色</value>
+    <value>暗影系</value>
   </data>
   <data name="Canvas_Color_Blue" xml:space="preserve">
-    <value>蓝色</value>
+    <value>爱是一道光</value>
   </data>
   <data name="Canvas_Color_Default" xml:space="preserve">
-    <value>默认</value>
+    <value>原味</value>
   </data>
   <data name="Canvas_Color_Green" xml:space="preserve">
-    <value>绿色</value>
+    <value>原谅色</value>
   </data>
   <data name="Canvas_Color_Orange" xml:space="preserve">
-    <value>橙色</value>
+    <value>橘子味</value>
   </data>
   <data name="Canvas_Color_Purple" xml:space="preserve">
-    <value>紫色</value>
+    <value>中二之魂</value>
   </data>
   <data name="Canvas_Color_Red" xml:space="preserve">
-    <value>红色</value>
+    <value>血槽满</value>
   </data>
   <data name="Canvas_Color_White" xml:space="preserve">
-    <value>白色</value>
+    <value>白嫖</value>
   </data>
   <data name="Canvas_Color_Yellow" xml:space="preserve">
-    <value>黄色</value>
+    <value>阳光普照</value>
   </data>
   <data name="Canvas_CompressPicturesUploaded" xml:space="preserve">
-    <value>插入大图自动压缩（大于1920×1080）</value>
+    <value>大图自动瘦身 (大于 1920×1080)</value>
   </data>
   <data name="Canvas_CurveSmoothing_Off" xml:space="preserve">
-    <value>关闭（原生态手抖风）</value>
+    <value>原生态手抖风</value>
   </data>
   <data name="Canvas_CurveSmoothingMode" xml:space="preserve">
-    <value>曲线平滑模式</value>
+    <value>治手抖模式</value>
   </data>
   <data name="Canvas_DisableHardwareAcceleration" xml:space="preserve">
-    <value>关闭硬件加速（降速换兼容）</value>
+    <value>10 帧信仰模式</value>
   </data>
   <data name="Canvas_DisableHardwareAccelerationHint" xml:space="preserve">
-    <value>关闭后兼容性更好但可能变卡；部分效果可能需要重启程序才完全生效。</value>
+    <value>关掉后兼容性更好但可能变卡，10 帧玩家狂喜；部分效果需重启才完全生效，转生一下。</value>
   </data>
   <data name="Canvas_DisablePressureHint" xml:space="preserve">
-    <value>开启后忽略所有设备的压感信息，笔画粗细统一，跟压感触屏模式互斥。</value>
+    <value>开启后无视所有设备的压感，笔画粗细统一，强迫症福音，与压感触屏模式互斥。</value>
   </data>
   <data name="Canvas_EnablePressureTouch" xml:space="preserve">
-    <value>启用压感触屏模式</value>
+    <value>玄学压感模式</value>
   </data>
   <data name="Canvas_EnablePressureTouchHint" xml:space="preserve">
-    <value>开启后触屏设备也支持压感效果，适用于部分支持压感但系统不认的触屏。</value>
+    <value>开启后触屏设备也能压感，专治支持压感但系统装死的触屏，薛定谔的压感。</value>
   </data>
   <data name="Canvas_EraserSize" xml:space="preserve">
-    <value>橡皮大小</value>
+    <value>橡皮杀伤力</value>
   </data>
   <data name="Canvas_EraserSize_Large" xml:space="preserve">
-    <value>大号</value>
+    <value>粗管够</value>
   </data>
   <data name="Canvas_EraserSize_Medium" xml:space="preserve">
-    <value>中号</value>
+    <value>适中型</value>
   </data>
   <data name="Canvas_EraserSize_Small" xml:space="preserve">
-    <value>小号</value>
+    <value>精修型</value>
   </data>
   <data name="Canvas_EraserSize_VeryLarge" xml:space="preserve">
-    <value>巨无霸</value>
+    <value>一刀 999</value>
   </data>
   <data name="Canvas_EraserSize_VerySmall" xml:space="preserve">
-    <value>迷你</value>
+    <value>外科手术级</value>
   </data>
   <data name="Canvas_EraserSizeHint" xml:space="preserve">
-    <value>不是实时切换的，下次用面积擦的时候才生效。</value>
+    <value>不是实时切换的，下次用面积擦时才生效，技能 CD 中。</value>
   </data>
   <data name="Canvas_GroupTitle" xml:space="preserve">
-    <value>画板</value>
+    <value>赛博画布</value>
   </data>
   <data name="Canvas_HideInkOnExit" xml:space="preserve">
-    <value>退出画板模式后隐藏墨迹（眼不见为净）</value>
+    <value>眼不见为净</value>
   </data>
   <data name="Canvas_HideStrokeWhenSelectingHint" xml:space="preserve">
-    <value>开启后，进 PPT 模式但不在批注模式时不会显示墨迹。</value>
+    <value>开启后，进 PPT 模式但没批注时不显示墨迹，隐身术启动。</value>
   </data>
   <data name="Canvas_HyperbolaAsymptoteHint" xml:space="preserve">
-    <value>注意！不保留双曲线渐近线可能会遇到撤回 BUG 影响使用，别怪我没提醒。</value>
+    <value>注意！不保留双曲线渐近线可能撞撤回 BUG，别怪我没提醒，寄预警。</value>
   </data>
   <data name="Canvas_IgnorePressure" xml:space="preserve">
-    <value>屏蔽压感（统一粗细）</value>
+    <value>强迫症狂喜</value>
   </data>
   <data name="Canvas_KeepAsymptote" xml:space="preserve">
-    <value>保留双曲线渐近线</value>
+    <value>数学老师点赞</value>
   </data>
   <data name="Canvas_LaunchSeewoVideoShowcaseForWhiteboardBooth" xml:space="preserve">
-    <value>白板展台按钮启动希沃视频展台</value>
+    <value>呼叫希沃外援</value>
   </data>
   <data name="Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint" xml:space="preserve">
-    <value>开启后，点白板工具栏「展台」会打开希沃视频展台（需已安装）；关掉则用内置展台。</value>
+    <value>开启后点「展台」会呼叫希沃视频展台（需已安装）；关掉则用内置展台，自给自足。</value>
   </data>
   <data name="Canvas_MergeInkSmoothingWithUndo" xml:space="preserve">
-    <value>把墨迹平滑和撤销合并（少点一下）</value>
+    <value>懒人福音</value>
   </data>
   <data name="Canvas_MergeInkSmoothingWithUndoHint" xml:space="preserve">
-    <value>开启后，一笔字的原始墨迹和后续平滑替换会算作一次撤销，不用点两次；墨迹纠正不参与这波合并。</value>
+    <value>开启后原始墨迹和平滑替换算一次撤销，懒癌晚期不用点两次；墨迹纠正不参与这波合并。</value>
   </data>
   <data name="Canvas_No" xml:space="preserve">
-    <value>不</value>
+    <value>达咩</value>
   </data>
   <data name="Canvas_RestoreColor" xml:space="preserve">
-    <value>恢复目标颜色</value>
+    <value>找回初心</value>
   </data>
   <data name="Canvas_RestoreOpacity" xml:space="preserve">
-    <value>恢复透明度</value>
+    <value>隐身值回正</value>
   </data>
   <data name="Canvas_RestoreWidth" xml:space="preserve">
-    <value>恢复笔粗细</value>
+    <value>找回原本的粗度</value>
   </data>
   <data name="Canvas_ShowCircleCenter" xml:space="preserve">
-    <value>画圆时显示圆心位置（找圆心不求人）</value>
+    <value>开挂级找圆心</value>
   </data>
   <data name="Canvas_ShowCoordinateUnitMarks" xml:space="preserve">
-    <value>画坐标系时显示厘米刻度</value>
+    <value>数学老师狂喜</value>
   </data>
   <data name="Canvas_ShowCoordinateUnitMarksHint" xml:space="preserve">
-    <value>开启后，画坐标系会按 1 cm 间隔自动添加刻度，数学老师狂喜。</value>
+    <value>开启后画坐标系会按 1 cm 间隔自动加刻度，数学老师狂喜，送分题 +1。</value>
   </data>
   <data name="Canvas_ShowPenCursor" xml:space="preserve">
-    <value>显示画笔光标</value>
+    <value>位置感应</value>
   </data>
   <data name="Canvas_PenCursorType" xml:space="preserve">
-    <value>画笔光标类型</value>
+    <value>光标皮肤</value>
   </data>
   <data name="Canvas_PenCursorTypeHint" xml:space="preserve">
-    <value>选一个你喜欢的光标样式吧</value>
+    <value>皮肤自由</value>
   </data>
   <data name="Canvas_PenCursorType_System" xml:space="preserve">
-    <value>系统光标</value>
+    <value>原味系统光标</value>
   </data>
   <data name="Canvas_PenCursorType_BuiltIn" xml:space="preserve">
-    <value>软件自带光标</value>
+    <value>出厂默认</value>
   </data>
   <data name="Canvas_PenCursorType_Custom" xml:space="preserve">
-    <value>自己选光标</value>
+    <value>DIY 大师</value>
   </data>
   <data name="Canvas_CustomPenCursorPath" xml:space="preserve">
-    <value>自定义光标文件</value>
+    <value>仓库地址</value>
   </data>
   <data name="Canvas_CustomPenCursorPathHint" xml:space="preserve">
-    <value>没选文件就用软件自带的</value>
+    <value>没选文件就用软件自带的，兜底机制启动。</value>
   </data>
   <data name="Canvas_SelectCustomPenCursor" xml:space="preserve">
-    <value>挑个光标文件…</value>
+    <value>验货中…</value>
   </data>
   <data name="Canvas_CustomPenCursorFilter" xml:space="preserve">
-    <value>光标文件|*.cur;*.ani</value>
+    <value>光标皮肤文件|*.cur;*.ani</value>
   </data>
   <data name="Canvas_SwitchBackAfterEraser" xml:space="preserve">
-    <value>用完橡皮擦自动切回批注模式</value>
+    <value>一键归位</value>
   </data>
   <data name="Canvas_SwitchBackAfterEraserHint" xml:space="preserve">
-    <value>开启后，用橡皮擦擦完东西静置一会就自动切回批注模式</value>
+    <value>开启后用完橡皮擦发呆一会就自动切回批注模式，懒得自己点。</value>
   </data>
   <data name="Canvas_SwitchBackDelay" xml:space="preserve">
-    <value>自动切换延迟时间</value>
+    <value>犹豫时间</value>
   </data>
   <data name="Canvas_SwitchBackDelayHint" xml:space="preserve">
-    <value>如果在计时时间内又擦了一下，计时器会重新开始计时</value>
+    <value>计时内又擦一下，计时器重新计时，CD 重置。</value>
   </data>
   <data name="Canvas_WPFBezier" xml:space="preserve">
-    <value>使用 WPF 默认贝塞尔曲线平滑</value>
+    <value>玄学平滑</value>
   </data>
   <data name="Canvas_Yes" xml:space="preserve">
-    <value>好</value>
+    <value>冲冲冲</value>
   </data>
   <data name="CanvasAndInkPanel_1920×1080Hint" xml:space="preserve">
-    <value>插入的图片大于 1920×1080 时自动压缩，省内存不卡顿</value>
+    <value>大于 1920×1080 自动压缩，省内存不卡顿，瘦身大师上线。</value>
   </data>
   <data name="CanvasAndInkPanel_Hint_9" xml:space="preserve">
-    <value>开启后按设定时间间隔自动保存墨迹，只在画布可见且有墨迹时才保存</value>
+    <value>按设定间隔自动存档，只在画布可见且有墨迹时保存，防失忆存档点。</value>
   </data>
   <data name="InkRecog_AutoStraightLine" xml:space="preserve">
-    <value>直线自动拉直（手残党福音）</value>
+    <value>物理外挂</value>
   </data>
   <data name="InkRecog_BlockRectFakePressure" xml:space="preserve">
-    <value>阻止矫正后的矩形带模拟压感值</value>
+    <value>拒绝假数据</value>
   </data>
   <data name="InkRecog_BlockTriFakePressure" xml:space="preserve">
-    <value>阻止矫正后的三角形带模拟压感值</value>
+    <value>拒绝假数据</value>
   </data>
   <data name="InkRecog_EnableInkRecognition" xml:space="preserve">
-    <value>启用墨迹识别（AI助手上线）</value>
+    <value>AI 助手上线</value>
   </data>
   <data name="InkRecog_FixEllipse" xml:space="preserve">
-    <value>矫正手绘圆形与椭圆（圆规成精）</value>
+    <value>圆规成精</value>
   </data>
   <data name="InkRecog_FixRectangle" xml:space="preserve">
-    <value>矫正手绘矩形（方方正正）</value>
+    <value>强迫症狂喜</value>
   </data>
   <data name="InkRecog_FixTriangle" xml:space="preserve">
-    <value>矫正手绘三角形（三角达人）</value>
+    <value>几何之魂</value>
   </data>
   <data name="InkRecog_HandwritingBeautify" xml:space="preserve">
-    <value>WinRT识别转手写体字形（字丑救星）</value>
+    <value>字丑救星</value>
   </data>
   <data name="InkRecog_HandwritingBeautifyHint" xml:space="preserve">
-    <value>开启后，调用墨迹纠正 API 时：先用 WinRT 识别手写文字，再把识别成功的文字用手写风格字体转成字形轮廓墨迹替换原笔画。需 WinRT。</value>
+    <value>开启后调用墨迹纠正 API 时，先用 WinRT 识别手写文字，再用手写风格字体转成字形轮廓墨迹替换原笔画，AI 替你重写。需 WinRT。</value>
   </data>
   <data name="InkRecog_HandwritingFont" xml:space="preserve">
-    <value>手写体字形字体</value>
+    <value>皮肤自由</value>
   </data>
   <data name="InkRecog_HandwritingFontHint" xml:space="preserve">
-    <value>选择用于替换原笔画的手写风格字体。如果选的字体不存在，会按列表回退。</value>
+    <value>选用于替换原笔画的手写字体。若字体不存在会按列表回退，兜底机制启动。</value>
   </data>
   <data name="InkRecog_HighPrecisionHint" xml:space="preserve">
-    <value>开启后，画的直线超过设定长度阈值时自动调整为完美直线。灵敏度范围 0.05-2.0，越小越严格越弯的线越不容易被拉直；值越大越容易识别为直线。高精度模式下每隔 10 像素取一个计数点，判断更准确。</value>
+    <value>开启后直线超过长度阈值时自动调整为完美直线，完美主义。灵敏度范围 0.05-2.0，越小越严格，越弯的线越难被拉直；值越大越容易识别为直线，卷王之王。高精度模式每隔 10 像素取一个计数点，判断更准。</value>
   </data>
   <data name="InkRecog_HighPrecisionStraighten" xml:space="preserve">
-    <value>高精度直线拉直（强迫症福音）</value>
+    <value>几何之神</value>
   </data>
   <data name="InkRecog_LengthThreshold" xml:space="preserve">
-    <value>长度阈值</value>
+    <value>开挂临界值</value>
   </data>
   <data name="InkRecog_LineEndpointSnapping" xml:space="preserve">
-    <value>直线端点吸附（自动牵手）</value>
+    <value>天生一对</value>
   </data>
   <data name="InkRecog_LineEndpointSnappingHint" xml:space="preserve">
-    <value>开启后，画的直线端点靠近其他直线端点时会自动吸附连接，天生一对。</value>
+    <value>开启后直线端点靠近其他端点会自动吸附，CP 锁死。</value>
   </data>
   <data name="InkRecog_PauseStraightenDelay" xml:space="preserve">
-    <value>停顿触发延迟</value>
+    <value>发呆时间</value>
   </data>
   <data name="InkRecog_PauseStraightenHint" xml:space="preserve">
-    <value>写字时停顿一下，自动把当前笔画拉直为直线（需同时开启直线自动拉直）。</value>
+    <value>写字时停顿一下，自动把当前笔画拉直（需同时开启直线自动拉直），想好了再画。</value>
   </data>
   <data name="InkRecog_PauseStraightenLine" xml:space="preserve">
-    <value>停顿拉直（想好了再画）</value>
+    <value>三思而后行</value>
   </data>
   <data name="InkRecog_Sensitivity" xml:space="preserve">
-    <value>灵敏度</value>
+    <value>雷达精度</value>
   </data>
   <data name="InkRecog_ShapeEngine" xml:space="preserve">
-    <value>识别引擎</value>
+    <value>CPU 选哪个引擎</value>
   </data>
   <data name="InkRecog_ShapeEngineAuto" xml:space="preserve">
-    <value>自动（智能选择）</value>
+    <value>躺平模式</value>
   </data>
   <data name="InkRecog_ShapeEngineHint" xml:space="preserve">
-    <value>自动：Win10+ 用 WinRT，否则用 IACore。可强制指定 IACore 或 WinRT。IACore 通过 IPC 辅助进程运行，32/64 位主进程都能用。</value>
+    <value>自动：Win10+ 用 WinRT，否则用 IACore。可强制指定 IACore 或 WinRT，手动挡玩家狂喜。IACore 通过 IPC 辅助进程运行，32/64 位主进程都能用。</value>
   </data>
   <data name="InkRecog_SnappingDistance" xml:space="preserve">
-    <value>吸附距离</value>
+    <value>牵手范围</value>
   </data>
   <data name="InkRecog_Title" xml:space="preserve">
-    <value>墨迹纠正（手残救星）</value>
+    <value>手残救星</value>
   </data>
   <data name="InkRecog_Font_InkFreeKaiti" xml:space="preserve">
     <value>Ink Free / 楷体 / Segoe Script</value>
@@ -340,30 +340,30 @@
     <value>幼圆 (YouYuan)</value>
   </data>
   <data name="InkRecog_ShapeCorrection" xml:space="preserve">
-    <value>形状修正</value>
+    <value>魔法修正</value>
   </data>
   <data name="Canvas_SecondsFormat" xml:space="preserve">
-    <value>{0:0}秒</value>
+    <value>{0:0}秒 CD</value>
   </data>
   <data name="Canvas_BackgroundSettings" xml:space="preserve">
-    <value>背景设置</value>
+    <value>贴膜大师上线</value>
   </data>
   <data name="Canvas_WhiteboardMode" xml:space="preserve">
-    <value>白板模式</value>
+    <value>白嫖模式</value>
   </data>
   <data name="Canvas_Blackboard" xml:space="preserve">
-    <value>黑板</value>
+    <value>深夜模式</value>
   </data>
   <data name="Canvas_BackgroundColor" xml:space="preserve">
-    <value>背景颜色</value>
+    <value>漆工上线</value>
   </data>
   <data name="Canvas_ApplyColor" xml:space="preserve">
-    <value>应用颜色</value>
+    <value>一键涂装</value>
   </data>
   <data name="Canvas_DarkMode" xml:space="preserve">
-    <value>黑底</value>
+    <value>暗黑系</value>
   </data>
   <data name="Shape_RemoveAsymptote" xml:space="preserve">
-    <value>渐近线要不要删掉？</value>
+    <value>物理超度渐近线？</value>
   </data>
 </root>
