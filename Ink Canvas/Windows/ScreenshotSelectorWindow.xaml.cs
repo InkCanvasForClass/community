@@ -34,7 +34,8 @@ namespace Ink_Canvas
         private Polyline _freehandPolyline;
         private Rect _currentSelection;
         private ControlPointType _activeControlPoint = ControlPointType.None;
-        private CameraService _cameraService;
+        private ICameraService _cameraService;
+        private bool _isUpdatingResolutionComboBox;
         private Bitmap _capturedCameraImage = null;
         private DateTime _lastBlankClickTime = DateTime.MinValue;
         private WpfPoint _lastBlankClickPosition;
@@ -163,19 +164,17 @@ namespace Ink_Canvas
         {
             try
             {
-                // 从设置中加载摄像头配置
+                // 通过工厂创建：Win10+ 用 WinRT，Win7 用 AForge
                 var cameraSettings = MainWindow.Settings.Camera;
-                _cameraService = new CameraService(
-                    cameraSettings.RotationAngle,
-                    cameraSettings.ResolutionWidth,
-                    cameraSettings.ResolutionHeight);
+                _cameraService = CameraServiceFactory.Create();
+                _cameraService.RotationAngle = cameraSettings.RotationAngle;
                 _cameraService.FrameReceived += CameraService_FrameReceived;
                 _cameraService.ErrorOccurred += CameraService_ErrorOccurred;
 
                 // 初始化摄像头选择下拉框
                 RefreshCameraComboBox();
 
-                // 初始化旋转和分辨率显示
+                // 初始化旋转和分辨率显示（分辨率 ComboBox 在 StartPreview 后填充）
                 InitializeCameraControls();
             }
             catch (Exception ex)
@@ -191,37 +190,45 @@ namespace Ink_Canvas
                 // 更新旋转角度显示
                 UpdateRotationDisplay();
 
-                // 设置分辨率下拉框
-                var currentResolution = $"{_cameraService.ResolutionWidth}x{_cameraService.ResolutionHeight}";
-                foreach (ComboBoxItem item in ResolutionComboBox.Items)
+                // 分辨率 ComboBox 暂用占位文本，待 StartPreview 后用 native 列表填充
+                _isUpdatingResolutionComboBox = true;
+                try
                 {
-                    if (item.Tag?.ToString() == $"{_cameraService.ResolutionWidth},{_cameraService.ResolutionHeight}")
-                    {
-                        ResolutionComboBox.SelectedItem = item;
-                        break;
-                    }
+                    ResolutionComboBox.Items.Clear();
+                    ResolutionComboBox.Items.Add("加载中…");
+                    ResolutionComboBox.SelectedIndex = 0;
+                }
+                finally
+                {
+                    _isUpdatingResolutionComboBox = false;
                 }
             }
         }
 
-        private void RefreshCameraComboBox()
+        private async void RefreshCameraComboBox()
         {
             try
             {
                 CameraSelectionComboBox.Items.Clear();
+                CameraSelectionComboBox.Items.Add("正在检测摄像头…");
+                CameraSelectionComboBox.SelectedIndex = 0;
 
-                if (_cameraService.HasAvailableCameras())
+                // 等待异步枚举完成（AForge 同步返回，WinRT 异步）
+                if (_cameraService.AvailableCameras.Count == 0)
                 {
-                    var cameraNames = _cameraService.GetCameraNames();
-                    foreach (var name in cameraNames)
-                    {
-                        CameraSelectionComboBox.Items.Add(name);
-                    }
+                    await _cameraService.RefreshCameraListAsync();
+                }
 
-                    if (cameraNames.Count > 0)
+                CameraSelectionComboBox.Items.Clear();
+
+                var cameras = _cameraService.AvailableCameras;
+                if (cameras.Count > 0)
+                {
+                    foreach (var cam in cameras)
                     {
-                        CameraSelectionComboBox.SelectedIndex = 0;
+                        CameraSelectionComboBox.Items.Add(cam.Name);
                     }
+                    CameraSelectionComboBox.SelectedIndex = 0;
                 }
                 else
                 {
@@ -235,41 +242,19 @@ namespace Ink_Canvas
             }
         }
 
-        private void CameraService_FrameReceived(object sender, Bitmap frame)
+        private void CameraService_FrameReceived(object sender, FrameEventArgs e)
         {
             try
             {
+                var frame = e?.Frame;
+                if (frame == null) return;
+
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    if (_isCameraMode && CameraPreviewImage != null && frame != null)
+                    if (_isCameraMode && CameraPreviewImage != null)
                     {
-                        try
-                        {
-                            // 验证帧的有效性
-                            if (frame.Width <= 0 || frame.Height <= 0)
-                                return;
-
-                            // 创建新的位图，避免Clone的问题
-                            var clonedFrame = new Bitmap(frame.Width, frame.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-                            using (var graphics = Graphics.FromImage(clonedFrame))
-                            {
-                                graphics.DrawImage(frame, 0, 0);
-                            }
-
-                            var bitmapSource = ConvertBitmapToBitmapSource(clonedFrame);
-                            if (bitmapSource != null)
-                            {
-                                CameraPreviewImage.Source = bitmapSource;
-                                CameraStatusText.Text = Properties.MainWindowStrings.Main_Screenshot_CameraConnected;
-                            }
-
-                            // 释放临时位图
-                            clonedFrame.Dispose();
-                        }
-                        catch (Exception frameEx)
-                        {
-                            LogHelper.WriteLogToFile($"处理摄像头帧时出错: {frameEx.Message}", LogHelper.LogType.Error);
-                        }
+                        CameraPreviewImage.Source = frame;
+                        CameraStatusText.Text = Properties.MainWindowStrings.Main_Screenshot_CameraConnected;
                     }
                 }));
             }
@@ -291,66 +276,6 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"处理摄像头错误失败: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        private System.Windows.Media.Imaging.BitmapSource ConvertBitmapToBitmapSource(Bitmap bitmap)
-        {
-            try
-            {
-                // 验证位图有效性
-                if (bitmap == null || bitmap.Width <= 0 || bitmap.Height <= 0)
-                    return null;
-
-                // 使用更安全的方法转换位图
-                var bitmapData = bitmap.LockBits(
-                    new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                    System.Drawing.Imaging.ImageLockMode.ReadOnly,
-                    bitmap.PixelFormat);
-
-                try
-                {
-                    // 根据像素格式选择合适的WPF像素格式
-                    PixelFormat wpfPixelFormat;
-                    switch (bitmap.PixelFormat)
-                    {
-                        case System.Drawing.Imaging.PixelFormat.Format24bppRgb:
-                            wpfPixelFormat = PixelFormats.Bgr24;
-                            break;
-                        case System.Drawing.Imaging.PixelFormat.Format32bppArgb:
-                            wpfPixelFormat = PixelFormats.Bgra32;
-                            break;
-                        case System.Drawing.Imaging.PixelFormat.Format32bppRgb:
-                            wpfPixelFormat = PixelFormats.Bgr32;
-                            break;
-                        default:
-                            wpfPixelFormat = PixelFormats.Bgr24;
-                            break;
-                    }
-
-                    var bitmapSource = System.Windows.Media.Imaging.BitmapSource.Create(
-                        bitmapData.Width,
-                        bitmapData.Height,
-                        bitmap.HorizontalResolution,
-                        bitmap.VerticalResolution,
-                        wpfPixelFormat,
-                        null,
-                        bitmapData.Scan0,
-                        bitmapData.Stride * bitmapData.Height,
-                        bitmapData.Stride);
-
-                    bitmapSource.Freeze();
-                    return bitmapSource;
-                }
-                finally
-                {
-                    bitmap.UnlockBits(bitmapData);
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"转换位图失败: {ex.Message}", LogHelper.LogType.Error);
-                return null;
             }
         }
 
@@ -456,7 +381,7 @@ namespace Ink_Canvas
             PerformFullScreenCapture();
         }
 
-        private void CameraModeButton_Click(object sender, RoutedEventArgs e)
+        private async void CameraModeButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -476,12 +401,15 @@ namespace Ink_Canvas
                 IncludeInkCheckBox.IsChecked = false;
 
                 // 启动摄像头预览
-                if (_cameraService != null && _cameraService.HasAvailableCameras())
+                if (_cameraService != null && _cameraService.AvailableCameras.Count > 0)
                 {
                     var selectedIndex = CameraSelectionComboBox.SelectedIndex;
-                    if (selectedIndex >= 0 && selectedIndex < _cameraService.GetCameraNames().Count)
+                    if (selectedIndex >= 0 && selectedIndex < _cameraService.AvailableCameras.Count)
                     {
-                        _cameraService.StartPreview(selectedIndex);
+                        if (await _cameraService.StartPreviewAsync(selectedIndex))
+                        {
+                            RefreshResolutionComboBox();
+                        }
                     }
                 }
                 else
@@ -496,16 +424,20 @@ namespace Ink_Canvas
             }
         }
 
-        private void CameraSelectionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void CameraSelectionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             try
             {
                 if (_isCameraMode && _cameraService != null)
                 {
                     var selectedIndex = CameraSelectionComboBox.SelectedIndex;
-                    if (selectedIndex >= 0 && selectedIndex < _cameraService.GetCameraNames().Count)
+                    if (selectedIndex >= 0 && selectedIndex < _cameraService.AvailableCameras.Count)
                     {
-                        _cameraService.SwitchCamera(selectedIndex);
+                        // StartPreview 内部会先 StopPreview 再启动新设备，等价于 SwitchCamera
+                        if (await _cameraService.StartPreviewAsync(selectedIndex))
+                        {
+                            RefreshResolutionComboBox();
+                        }
                     }
                 }
             }
@@ -519,20 +451,55 @@ namespace Ink_Canvas
         {
             try
             {
-                if (_cameraService != null && _cameraService.HasAvailableCameras())
+                if (_cameraService != null && _cameraService.AvailableCameras.Count > 1)
                 {
-                    var cameraNames = _cameraService.GetCameraNames();
-                    if (cameraNames.Count > 1)
-                    {
-                        var currentIndex = CameraSelectionComboBox.SelectedIndex;
-                        var nextIndex = (currentIndex + 1) % cameraNames.Count;
-                        CameraSelectionComboBox.SelectedIndex = nextIndex;
-                    }
+                    var currentIndex = CameraSelectionComboBox.SelectedIndex;
+                    var nextIndex = (currentIndex + 1) % _cameraService.AvailableCameras.Count;
+                    CameraSelectionComboBox.SelectedIndex = nextIndex;
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"切换摄像头失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>把当前摄像头的 native 分辨率列表填充到 ResolutionComboBox，并选中当前生效的分辨率。</summary>
+        private void RefreshResolutionComboBox()
+        {
+            if (ResolutionComboBox == null || _cameraService == null) return;
+
+            try
+            {
+                _isUpdatingResolutionComboBox = true;
+                ResolutionComboBox.Items.Clear();
+
+                var resolutions = _cameraService.NativeResolutions;
+                if (resolutions == null || resolutions.Count == 0)
+                {
+                    ResolutionComboBox.Items.Add("加载中…");
+                    ResolutionComboBox.SelectedIndex = 0;
+                    return;
+                }
+
+                foreach (var r in resolutions)
+                {
+                    ResolutionComboBox.Items.Add(r);
+                }
+
+                int sel = _cameraService.SelectedResolutionIndex;
+                if (sel >= 0 && sel < resolutions.Count)
+                {
+                    ResolutionComboBox.SelectedIndex = sel;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"刷新分辨率列表失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+            finally
+            {
+                _isUpdatingResolutionComboBox = false;
             }
         }
 
@@ -1486,21 +1453,22 @@ namespace Ink_Canvas
 
         private void ResolutionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (_cameraService != null && ResolutionComboBox.SelectedItem is ComboBoxItem selectedItem)
+            if (_isUpdatingResolutionComboBox) return;
+            if (_cameraService == null) return;
+            if (ResolutionComboBox.SelectedItem is not ResolutionInfo) return;
+
+            int idx = ResolutionComboBox.SelectedIndex;
+            var resolutions = _cameraService.NativeResolutions;
+            if (idx < 0 || idx >= resolutions.Count) return;
+
+            try
             {
-                var resolution = selectedItem.Tag?.ToString();
-                if (!string.IsNullOrEmpty(resolution))
-                {
-                    var parts = resolution.Split(',');
-                    if (parts.Length == 2 &&
-                        int.TryParse(parts[0], out int width) &&
-                        int.TryParse(parts[1], out int height))
-                    {
-                        _cameraService.ResolutionWidth = width;
-                        _cameraService.ResolutionHeight = height;
-                        SaveCameraSettings();
-                    }
-                }
+                _cameraService.SelectedResolutionIndex = idx;
+                SaveCameraSettings();
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                // 接口实现不允许设置该索引时忽略（设备热插拔可能导致列表变动）
             }
         }
 
@@ -1518,8 +1486,16 @@ namespace Ink_Canvas
             if (_cameraService != null)
             {
                 MainWindow.Settings.Camera.RotationAngle = _cameraService.RotationAngle;
-                MainWindow.Settings.Camera.ResolutionWidth = _cameraService.ResolutionWidth;
-                MainWindow.Settings.Camera.ResolutionHeight = _cameraService.ResolutionHeight;
+
+                // 从当前选中的 native 分辨率回写到设置文件，供下次启动时作为偏好
+                int idx = _cameraService.SelectedResolutionIndex;
+                var resolutions = _cameraService.NativeResolutions;
+                if (idx >= 0 && idx < resolutions.Count)
+                {
+                    MainWindow.Settings.Camera.ResolutionWidth = resolutions[idx].Width;
+                    MainWindow.Settings.Camera.ResolutionHeight = resolutions[idx].Height;
+                }
+
                 MainWindow.SaveSettingsToFile();
             }
         }

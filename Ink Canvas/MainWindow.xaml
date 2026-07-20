@@ -1284,38 +1284,19 @@
                             <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatingBarForegroundBrush}" Text="{x:Static props:BoothStrings.Rotate}" />
                         </Button>
                     </StackPanel>
-                    <!-- 分辨率 Tab -->
+                    <!-- 摄像头原生分辨率选择 ComboBox -->
                     <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="10,6,10,4">
-                        <Border Background="{DynamicResource FloatingBarBackgroundBrush}" 
-                                CornerRadius="8" BorderThickness="1" BorderBrush="#616161"
-                                Width="282" Height="40" ToolTip="{x:Static props:BoothStrings.Resolution_Tooltip}">
-                            <Grid>
-                                <Border x:Name="BoothResolutionTabIndicator" 
-                                        Background="#66CCFF" 
-                                        CornerRadius="6" 
-                                        Width="70" Height="38" 
-                                        HorizontalAlignment="Left" VerticalAlignment="Center" 
-                                        Margin="0,0,0,0"/>
-                                <Grid>
-                                    <Button x:Name="BtnBoothResolution720" Width="70" Height="40" Background="Transparent" BorderThickness="0" 
-                                            Click="BoothResolutionTab_Click" Tag="1280,720" Cursor="Hand" HorizontalAlignment="Left">
-                                        <TextBlock Text="720p" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatingBarForegroundBrush}" Opacity="0.7"/>
-                                    </Button>
-                                    <Button x:Name="BtnBoothResolution1080" Width="70" Height="40" Background="Transparent" BorderThickness="0" 
-                                            Click="BoothResolutionTab_Click" Tag="1920,1080" Cursor="Hand" HorizontalAlignment="Left" Margin="70,0,0,0">
-                                        <TextBlock x:Name="TbBoothResolution1080" Text="1080p" FontSize="12" FontWeight="Bold" Foreground="White"/>
-                                    </Button>
-                                    <Button x:Name="BtnBoothResolution2K" Width="70" Height="40" Background="Transparent" BorderThickness="0" 
-                                            Click="BoothResolutionTab_Click" Tag="2560,1440" Cursor="Hand" HorizontalAlignment="Left" Margin="140,0,0,0">
-                                        <TextBlock Text="2K" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatingBarForegroundBrush}" Opacity="0.7"/>
-                                    </Button>
-                                    <Button x:Name="BtnBoothResolution4K" Width="70" Height="40" Background="Transparent" BorderThickness="0" 
-                                            Click="BoothResolutionTab_Click" Tag="3840,2160" Cursor="Hand" HorizontalAlignment="Left" Margin="210,0,0,0">
-                                        <TextBlock Text="4K" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatingBarForegroundBrush}" Opacity="0.7"/>
-                                    </Button>
-                                </Grid>
-                            </Grid>
-                        </Border>
+                        <ComboBox x:Name="BoothResolutionComboBox"
+                                  Width="282" Height="40"
+                                  Padding="10,0,12,0"
+                                  FontSize="12"
+                                  FontWeight="SemiBold"
+                                  Background="{DynamicResource FloatingBarBackgroundBrush}"
+                                  BorderBrush="#616161"
+                                  BorderThickness="1"
+                                  Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                                  ToolTip="{x:Static props:BoothStrings.Resolution_Tooltip}"
+                                  SelectionChanged="BoothResolutionComboBox_SelectionChanged" />
                     </Grid>
                 </Grid>
             </Grid>

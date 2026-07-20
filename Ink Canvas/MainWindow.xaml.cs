@@ -2829,59 +2829,31 @@ namespace Ink_Canvas
         #endregion
 
         #region 展台/白板分辨率切换
-        private const int BoothResolutionTabCount = 4;
-        private static readonly (int w, int h)[] BoothResolutionValues = { (1280, 720), (1920, 1080), (2560, 1440), (3840, 2160) };
 
-        private void BoothResolutionTab_Click(object sender, RoutedEventArgs e)
+        private void BoothResolutionComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (sender is Button btn && btn.Tag is string tag)
+            // 初始化期间（ComboBox 还在填充）不触发同步
+            if (_isBoothComboBoxUpdating) return;
+            if (BoothResolutionComboBox?.SelectedItem is not Ink_Canvas.Helpers.ResolutionInfo res) return;
+
+            try
             {
-                var parts = tag.Split(',');
-                if (parts.Length == 2 && int.TryParse(parts[0].Trim(), out int w) && int.TryParse(parts[1].Trim(), out int h) && w > 0 && h > 0)
+                if (_cameraService != null)
                 {
-                    _boothResolutionWidth = w;
-                    _boothResolutionHeight = h;
-                    UpdateBoothResolutionTabState();
-                    SyncBoothResolutionToCameraService();
+                    // 通过 SelectedResolutionIndex 触发底层实现切换
+                    _cameraService.SelectedResolutionIndex = BoothResolutionComboBox.SelectedIndex;
+                    _boothResolutionWidth = res.Width;
+                    _boothResolutionHeight = res.Height;
                 }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"切换 native 分辨率失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
-        private void UpdateBoothResolutionTabState()
-        {
-            int index = 0;
-            for (int i = 0; i < BoothResolutionValues.Length; i++)
-            {
-                if (BoothResolutionValues[i].w == _boothResolutionWidth && BoothResolutionValues[i].h == _boothResolutionHeight)
-                {
-                    index = i;
-                    break;
-                }
-            }
+        private bool _isBoothComboBoxUpdating;
 
-            if (BoothResolutionTabIndicator != null)
-            {
-                BoothResolutionTabIndicator.Margin = new Thickness(index * 70, 0, 0, 0);
-            }
-
-            var texts = new[] { BtnBoothResolution720?.Content as TextBlock, BtnBoothResolution1080?.Content as TextBlock, BtnBoothResolution2K?.Content as TextBlock, BtnBoothResolution4K?.Content as TextBlock };
-            for (int i = 0; i < texts.Length && i < 4; i++)
-            {
-                if (texts[i] == null) continue;
-                if (i == index)
-                {
-                    texts[i].FontWeight = FontWeights.Bold;
-                    texts[i].Foreground = new SolidColorBrush(Colors.White);
-                    texts[i].Opacity = 1.0;
-                }
-                else
-                {
-                    texts[i].FontWeight = FontWeights.SemiBold;
-                    texts[i].SetResourceReference(TextBlock.ForegroundProperty, "FloatBarForeground");
-                    texts[i].Opacity = 0.7;
-                }
-            }
-        }
         #endregion
 
 
